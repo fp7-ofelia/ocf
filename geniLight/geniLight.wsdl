@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:gl="http://yuba.stanford.edu/geniLight/" 
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+name="geniLight" 
+targetNamespace="http://yuba.stanford.edu/geniLight/">
+
+    <wsdl:types></wsdl:types>
+    <wsdl:message name="UserSliceInfo">
+  	<wsdl:part name="slice_name" type="xsd:string"></wsdl:part>
+  	<wsdl:part name="user_name" type="xsd:string"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GeniResult">
+    <wsdl:part name="code" type="xsd:int"></wsdl:part>
+    <wsdl:part name="error_msg" type="xsd:string"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GeniRecordEntry">
+  	<wsdl:part name="type" type="xsd:int"></wsdl:part>
+  	<wsdl:part name="name" type="xsd:string"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="SliceList">
+  	<wsdl:part name="slice_list" type="xsd:string"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ComponentList">
+  	<wsdl:part name="component_list" type="xsd:string"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="Dummy">
+  </wsdl:message>
+  <wsdl:portType name="geniLight">
+        <wsdl:operation name="start_slice">
+        	<wsdl:input message="gl:UserSliceInfo" name="start_slice_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="start_slice_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="stop_slice">
+        	<wsdl:input message="gl:UserSliceInfo" name="stop_slice_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="stop_slice_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="delete_slice">
+        	<wsdl:input message="gl:UserSliceInfo" name="delete_slice_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="delete_slice_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="create_slice">
+        	<wsdl:input message="gl:UserSliceInfo" name="create_slice_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="create_slice_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="list_components">
+            <wsdl:input message="gl:Dummy" name="list_components_request"></wsdl:input>
+            <wsdl:output message="gl:ComponentList" name="list_components_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="register">
+        	<wsdl:input message="gl:GeniRecordEntry" name="register_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="register_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="reboot_component">
+        	<wsdl:input message="gl:GeniRecordEntry" name="reboot_component_request"></wsdl:input>
+        	<wsdl:output message="gl:GeniResult" name="reboot_component_response"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="list_slices">
+            <wsdl:input message="gl:Dummy" name="list_slices_request"></wsdl:input>
+            <wsdl:output message="gl:SliceList" name="list_slices_response"></wsdl:output>
+        </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="geniLightSOAP" type="gl:geniLight">
+  	<soap:binding style="rpc"
+  		transport="http://schemas.xmlsoap.org/soap/http" />
+  	<wsdl:operation name="start_slice">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/start_slice" />
+  		<wsdl:input name="start_slice_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="start_slice_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="stop_slice">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/stop_slice" />
+  		<wsdl:input name="stop_slice_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="stop_slice_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="delete_slice">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/delete_slice" />
+  		<wsdl:input name="delete_slice_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="delete_slice_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="create_slice">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/create_slice" />
+  		<wsdl:input name="create_slice_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="create_slice_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="list_components">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/list_components" />
+  		<wsdl:input name="list_components_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="list_components_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="register">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/register" />
+  		<wsdl:input name="register_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="register_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="reboot_component">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/reboot_component" />
+  		<wsdl:input name="reboot_component_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="reboot_component_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  	<wsdl:operation name="list_slices">
+  		<soap:operation
+  			soapAction="http://yuba.stanford.edu/geniLight/list_slices" />
+  		<wsdl:input name="list_slices_request">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:input>
+  		<wsdl:output name="list_slices_response">
+  			<soap:body use="encoded"
+  				namespace="http://yuba.stanford.edu/geniLight/"
+  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="geniLight">
+    <wsdl:port binding="gl:geniLightSOAP" name="geniLightSOAP">
+      <soap:address location="http://yuba.stanford.edu/geniLight/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
