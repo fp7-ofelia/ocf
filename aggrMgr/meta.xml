@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components:components xmlns:components="http://www.noxrepo.org/components.xsd">
+  <component>
+    <name>aggrMgr</name>
+    <library>aggrMgr</library>
+	    <dependency><name>messenger</name></dependency>
+	    <dependency><name>topology</name></dependency>
+    </component>
+</components:components>
