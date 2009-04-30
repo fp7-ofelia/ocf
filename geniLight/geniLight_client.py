@@ -8,10 +8,10 @@
 
 import xmlrpclib
 
-from gid import *
-from credential import *
-from record import *
-from geniticket import *
+#from gid import *
+#from credential import *
+#from record import *
+#from geniticket import *
 from suds.client import Client
 from suds.xsd.sxbasic import Import
 
@@ -192,7 +192,7 @@ class GeniLightClient():
 
 if __name__ == '__main__' :
 
-	cred = Credential(subject='Alice')
+	cred = 'dummy'; #Credential(subject='Alice')
 	glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
 	#print glc.server
 	result = glc.start_slice(cred, 'alice@kicksass.org')

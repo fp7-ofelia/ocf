@@ -26,6 +26,8 @@
 #include <sstream>
 #include <vector>
 
+#include "linkInfo.hh"
+#include "port.hh"
 #include "component.hh"
 #include "event.hh"
 #include "flow.hh"
@@ -51,11 +53,7 @@ class AggrMgr
     : public container::Component {
 
 public:
-    struct Link {
-        datapathid dst;    // destination dp of link starting at current dp
-        uint16_t outport;  // outport of current dp link connected to
-        uint16_t inport;   // inport of destination dp link connected to
-    };
+    LinkInfoList links;
 
     AggrMgr(const container::Context*,
                    const xercesc::DOMNode*);
@@ -69,7 +67,9 @@ public:
     void install();
 
 private:
+    /* Not essential now
     Topology *topology;
+    */
 
     Disposition handle_link_change(const Event&);
     Disposition handle_CH_msg(const Event&);

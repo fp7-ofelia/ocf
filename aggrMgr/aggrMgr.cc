@@ -33,8 +33,7 @@ static Vlog_module lg("aggrMgr");
 
 AggrMgr::AggrMgr(const container::Context* c,
                                const xercesc::DOMNode* d)
-    : container::Component(c), topology(0), nat(0), len_flow_actions(0),
-      num_actions(0), ofm(0)
+    : container::Component(c)
 {
     max_output_action_len = get_max_action_len();
 }
@@ -52,10 +51,13 @@ AggrMgr::getInstance(const container::Context* ctxt,
 void
 AggrMgr::configure(const container::Configuration*)
 {
+    /* Commented for now. It seems possible to just use the
+     * link_event messages to maintain topology information
+     * 
     resolve(topology);
-    resolve(nat);
+     */
     register_handler<Link_event>
-        (boost::bind(&AggrMgr::handle_link_change, this, _1));
+        (boost::bind(&AggrMgr::handle_link_event, this, _1));
     register_handler<CH_msg_event>
         (boost::bind(&AggrMgr::handle_CH_msg, this, _1));
 }
@@ -65,29 +67,23 @@ AggrMgr::install()
 {}
 
 Disposition
-AggrMgr::handle_link_change(const Event& e)
+AggrMgr::handle_link_event(const Event& e)
 {
     const Link_event& le = assert_cast<const Link_event&>(e);
 
-    RouteQueue new_candidates;
-    RoutePtr route(new Route());
-    Link tmp = { le.dpdst, le.sport, le.dport };
-    route->id.src = le.dpsrc;
-    route->id.dst = le.dpdst;
-    route->path.push_back(tmp);
-    if (le.action == Link_event::REMOVE) {
-        cleanup(route, true);
-        fixup(new_candidates, true);
-    } else if (le.action == Link_event::ADD) {
-        RoutePtr left_subpath(new Route());
-        RoutePtr right_subpath(new Route());
-        left_subpath->id.src = left_subpath->id.dst = le.dpsrc;
-        right_subpath->id.src = right_subpath->id.dst = le.dpdst;
-        add(local_routes, route);
-        add(left_local, route, right_subpath);
-        add(right_local, route, left_subpath);
-        new_candidates.push(route);
-        fixup(new_candidates, false);
+    LIL_iterator itr;
+    LinkInfo li = {le.dpsrc, le.dpdst, le.sport;, le.dport};
+    for (itr = links.begin(); itr != links.end(); itr++) 
+        if ((*itr) == li)
+            break;
+
+    if (le.action == Link_event::ADD) {
+        if (itr == links.end())
+            li.insert(li);
+
+    } else if (le.action == Link_event::REMOVE) {
+        erase(itr);
+
     } else {
         VLOG_ERR(lg, "Unknown link event action %u", le.action);
     }
