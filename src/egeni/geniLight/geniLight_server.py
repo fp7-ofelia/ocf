@@ -4,6 +4,7 @@ from soaplib.service import soapmethod
 from geniLight_types import *
 import socket
 import struct
+import sys
 from ctypes import create_string_buffer
 
 AGGREGATE_MANAGER_PORT = 2603
@@ -158,5 +159,8 @@ if __name__=='__main__':
 
     gls = GeniLightServer()
     server = CherryPyWSGIServer(('localhost',7889),gls)
-    server.start()
 
+    try:
+        server.start()
+    except (KeyboardInterrupt):
+        sys.exit(0)
