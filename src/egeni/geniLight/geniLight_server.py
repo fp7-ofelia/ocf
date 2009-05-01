@@ -29,25 +29,29 @@ def extract(sock):
     msg = ""
 
     while (1):
-        chunk = sock.recv(1000)
+        chunk = sock.recv(100)
         if len(chunk) == 0:
             break
         msg += chunk
 
+    print 'done extracting response from aggrMgr'
     return msg
-
+   
+def connect(server, port):
+    '''Connect to the Aggregate Manager module'''
+    sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
+    sock.connect ( ( server, port) )
+    sock.settimeout(0.5)
+    print 'connected to aggregate manager module'
+    return sock
+    
 ##
 # The GeniServer class provides stubs for executing Geni operations at
 # the Aggregate Manager.
 
 class GeniLightServer(SimpleWSGISoapApp):
     def __init__(self):
-        '''Connect to the Aggregate Manager module'''
-        self.aggrMgr_sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
-        self.aggrMgr_sock.connect ( ( 'localhost', AGGREGATE_MANAGER_PORT ) )
-        self.aggrMgr_sock.settimeout(.1)
         self.__tns__ = "http://yuba.stanford.edu/geniLight/"
-        print 'connected to aggregate manager module'
 
     # implicitly no __init__()
     @soapmethod(UserSliceInfo,_returns=GeniResult)
@@ -57,7 +61,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         format = 'hB%ds' % len(slice_id)
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_START_SLICE, slice_id)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return GeniResult(1, 'Success')
 
@@ -68,7 +75,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         format = 'hB%ds' % len(slice_id)
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_STOP_SLICE, slice_id)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return GeniResult(1, 'Success')
 
@@ -79,7 +89,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         format = 'hB%ds%ds' % (len(slice_id), len(rspec_str))
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_CREATE_SLICE, slice_id, rspec_str)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return GeniResult(1, 'Success')
 
@@ -90,7 +103,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         format = 'hB%ds' % len(slice_id)
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_DELETE_SLICE, slice_id)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return GeniResult(1, 'Success')
 
@@ -99,7 +115,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         buf = create_string_buffer(2 + 1) 
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)),
                 SFA_LIST_SLICES)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return 'list of slices'
 
@@ -107,11 +126,14 @@ class GeniLightServer(SimpleWSGISoapApp):
     def list_components(self):
         buf = create_string_buffer(2 + 1) 
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)), SFA_LIST_COMPONENTS)
-        self.aggrMgr_sock.send(buf)
-        component_list = extract(self.aggrMgr_sock);
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        component_list = extract(aggrMgr_sock);
+        aggrMgr_sock.close()
 
         #return 'list of components'
-        return "\"" + component_list + "\""
+        return component_list 
 
     @soapmethod(GeniRecordEntry,_returns=GeniResult)
     def register(self, record):
@@ -123,15 +145,18 @@ class GeniLightServer(SimpleWSGISoapApp):
         buf = create_string_buffer(2 + 1 + len(name)) 
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_REBOOT_COMPONENT, name)
-        self.aggrMgr_sock.send(buf)
+
+        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock.send(buf)
+        aggrMgr_sock.close()
 
         return GeniResult(1, 'Success')
 
 if __name__=='__main__':
     try:from cherrypy.wsgiserver import CherryPyWSGIServer
     except:from cherrypy._cpwsgiserver import CherryPyWSGIServer
+
     gls = GeniLightServer()
     server = CherryPyWSGIServer(('localhost',7889),gls)
-    #gls.list_components()
     server.start()
 

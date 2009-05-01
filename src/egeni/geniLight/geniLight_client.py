@@ -196,7 +196,6 @@ class GeniLightClient():
 if __name__ == '__main__' :
 
     cred = Credential(subject='Alice')
-    print cred
 
     glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
     #print glc.server
