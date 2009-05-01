@@ -5,18 +5,14 @@
 #define MESSAGE_H
 
 enum geni_call {
-	LIST_COMPONENTS,
-	START_SLICE,
-    STOP_SLICE
-};
-
-struct CH_msg
-{
-	/* GENI call */
-	geni_call func;
-
-	char slice_name[20];
-	char rspec[1000];
+    SFA_START_SLICE = 101,
+    SFA_STOP_SLICE = 102,
+    SFA_CREATE_SLICE = 103,
+    SFA_DELETE_SLICE = 104,
+    SFA_LIST_SLICES = 105,
+    SFA_LIST_COMPONENTS = 106,
+    SFA_REGISTER = 107,
+    SFA_REBOOT_COMPONENT = 108,
 };
 
 #endif

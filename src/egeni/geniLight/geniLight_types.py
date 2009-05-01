@@ -3,6 +3,8 @@ class UserSliceInfo:
         self.user_name = user_name
         self.slice_name = slice_name
         return
+    def save_to_string(self):
+        return self.user_name + '_' + self.slice_name
 
 class GeniResult:
     def __init__(self, code, error_msg):
@@ -15,4 +17,3 @@ class GeniRecordEntry:
         self.type = type
         self.name = name
         return
-

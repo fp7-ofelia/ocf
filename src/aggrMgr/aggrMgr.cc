@@ -58,8 +58,8 @@ AggrMgr::configure(const container::Configuration*)
      */
     register_handler<Link_event>
         (boost::bind(&AggrMgr::handle_link_event, this, _1));
-    register_handler<CH_msg_event>
-        (boost::bind(&AggrMgr::handle_CH_msg, this, _1));
+    register_handler<Msg_event>
+        (boost::bind(&AggrMgr::handle_msg_event, this, _1));
 }
 
 void
@@ -92,10 +92,77 @@ AggrMgr::handle_link_event(const Event& e)
 }
 
 Disposition
-AggrMgr::handle_CH_msg(const Event& e)
+AggrMgr::handle_msg_event(const Event& e)
 {
-    const CH_event& smsg = assert_cast<const CH_event&>(e);
-    return STOP;
+    const Msg_event& me = assert_cast<const Msg_event&>(e);
+
+    switch (me.msg->type)
+    {
+        case SFA_START_SLICE:
+            char slice_name[ntohs(me.msg->length)-2];
+            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
+            slice_name[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Start_slice %s", slice_name);
+
+            return STOP;
+
+        case SFA_STOP_SLICE:
+            char slice_name[ntohs(me.msg->length)-2];
+            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
+            slice_name[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Stop_slice %s", slice_name);
+
+            return STOP;
+
+        case SFA_CREATE_SLICE:
+            char slice_name[ntohs(me.msg->length)-2];
+            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
+            slice_name[ntohs(me.msg->length)-3] = '\0';
+
+            /* After the first null, we have the RSpec string */
+            char *rspec_str = slice_name[strlen(slice_name)];
+            
+            VLOG_DBG(lg, "Create_slice %s with rspec_str %s", slice_name, rspec_str);
+
+            return STOP;
+
+        case SFA_DELETE_SLICE:
+            char slice_name[ntohs(me.msg->length)-2];
+            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
+            slice_name[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Delete_slice %s", slice_name);
+
+            return STOP;
+
+        case SFA_LIST_SLICES:
+            VLOG_DBG(lg, "List_slices");
+
+            return STOP;
+
+        case SFA_LIST_COMPONENTS:
+            VLOG_DBG(lg, "List_components");
+
+            return STOP;
+
+        case SFA_REGISTER:
+            char record_info[ntohs(me.msg->length)-2];
+            memcpy(record_info, me.msg->body, ntohs(me.msg->length)-3);
+            record_info[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Register_record %s", record_info);
+
+            return STOP;
+
+        case SFA_REBOOT_COMPONENT:
+            char component_name[ntohs(me.msg->length)-2];
+            memcpy(component_name, me.msg->body, ntohs(me.msg->length)-3);
+            component_name[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Reboot_component %s", component_name);
+
+            return STOP;
+
+    }
+
+    return CONTINUE;
 }
 
 }

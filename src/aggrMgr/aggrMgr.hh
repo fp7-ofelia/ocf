@@ -39,6 +39,7 @@
 #include "netinet++/ethernetaddr.hh"
 #include "openflow/openflow.h"
 #include "topology/topology.hh"
+#include "messenger/messenger.hh"
 
  /*
  * All integer values are stored in host byte order and should be passed in as
@@ -72,7 +73,7 @@ private:
     */
 
     Disposition handle_link_change(const Event&);
-    Disposition handle_CH_msg(const Event&);
+    Disposition handle_msg_event(const Event&);
 };
 
 }
