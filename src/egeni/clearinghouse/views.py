@@ -12,22 +12,41 @@ def delete(request, object_id):
     am.delete()
     return HttpResponseRedirect(reverse('index'))
 
-def call_func(request, object_id, func_name):
+def call_func(request, object_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=object_id)
     client = GeniLightClient(am.url, am.key_file, am.cert_file)    
-
-    # check if the function name is known
-    if(hasattr(client, func_name) and callable(getattr(client, func_name))):
-        result = getattr(client, func_name)()
-        return render_to_response('clearinghouse/aggregatemanager_func_call.html',
+    post = request.POST
+    try:
+        func_name = post['choice']
+    except(KeyError):
+        return render_to_response("clearinghouse/aggregatemanager_detail.html",
+                                  {'object': am,
+                                   'error_message': "You didn't select a choice",},)
+    else:
+        # check if the function name is known
+#        if(hasattr(client, func_name) and callable(getattr(client, func_name))):
+#            if(func_name == "list_nodes"):
+#                args = (None)
+#            else:
+#                args = ()
+            
+#            result = getattr(client, func_name)(args)
+        if(func_name == "list_nodes"):
+            result = client.list_nodes(None)
+        elif(func_name == "test_func_call"):
+            result = client.test_func_call()
+        else:
+            return render_to_response("clearinghouse/aggregatemanager_detail.html",
+                                      {'object': am,
+                                       'error_message': "Unknown Function: %s" % func_name,},)
+                
+        return render_to_response('clearinghouse/aggregatemanager_detail.html',
                                   {'object': am,
                                    'func_name': func_name,
                                    'result': result,
                                    })
-    else:
-        raise Http404
-    
+
 def create(request):
     error_msg = u"No POST data sent."
     if(request.method == "POST"):

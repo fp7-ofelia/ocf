@@ -1,19 +1,38 @@
-<h1>Details for Aggregate Manager {{ object.name }}</h1>
+<div class="details">
+    <h2>Details for Aggregate Manager {{ object.name }}</h2>
+    
+    url: {{ object.url }} <br />
+    key_file: {{ object.key_file }} <br />
+    cert_file: {{ object.cert_file }} <br />
+</div>
 
-url: {{ object.url }} <br />
-key_file: {{ object.key_file }} <br />
-cert_file: {{ object.cert_file }} <br />
+{% if error_message %}
+<div class="error">
+<p><strong>{{ error_message }}</strong></p>
+</div>
+{% endif %}
 
-<h2>Functions Calls </h2>
+<div class="functions">
+    <h2>Functions Calls </h2>
+    <form method="post" action="../call_func/">
+        <input type="radio" name="choice" id="test" value="test_func_call" />
+        <label for="test">test_func_call()</label><br/>
 
-<a href="test_func_call">test_func_call</a> <br />
-<a href="list_nodes">list_nodes</a> <br />
+        <input type="radio" name="choice" id="list_nodes" value="list_nodes" />
+        <label for="list_nodes">list_nodes(None)</label><br/>
+        
+        <input type="submit" value="Call Function" />
+    </form>
+</div>
 
-{% if result %}<h3> Function Call Result</h3>
-    <p><strong>Function: {{ func_name }}</strong></p>
-    <p>{{ result }}</p>
+{% if result %}
+<div class="results">
+    <h3> Function Call Result</h3>
+        <p><strong>Function: {{ func_name }}</strong></p>
+        <p>{{ result }}</p>
+</div>
 {% endif %}
 
 <br />
-<a href="delete">Delete Aggregate Manager</a> |
-<a href="../"> Back to list </a> <br />
+<a href="../delete">Delete Aggregate Manager</a> |
+<a href="../../"> Back to list </a> <br />
