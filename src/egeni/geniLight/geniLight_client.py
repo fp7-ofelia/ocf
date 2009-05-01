@@ -8,10 +8,10 @@
 
 import xmlrpclib
 
-#from gid import *
-#from credential import *
-#from record import *
-#from geniticket import *
+from geni.util.gid import *
+from geni.util.credential import *
+from geni.util.record import *
+from geni.util.geniticket import *
 from suds.client import Client
 from suds.xsd.sxbasic import Import
 
@@ -111,6 +111,9 @@ class GeniLightClient():
     # Aggregate Interface
     #-------------------------------------------------------------------------
     
+    def test_func_call(self):
+        return "Function call test succeeded."
+    
     ## list components
     #
     # 
@@ -192,7 +195,7 @@ class GeniLightClient():
 
 if __name__ == '__main__' :
 
-	cred = 'dummy'; #Credential(subject='Alice')
+	cred = Credential(subject='Alice')
 	glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
 	#print glc.server
 	result = glc.start_slice(cred, 'alice@kicksass.org')

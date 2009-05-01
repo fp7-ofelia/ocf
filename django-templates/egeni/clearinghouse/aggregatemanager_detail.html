@@ -1,0 +1,19 @@
+<h1>Details for Aggregate Manager {{ object.name }}</h1>
+
+url: {{ object.url }} <br />
+key_file: {{ object.key_file }} <br />
+cert_file: {{ object.cert_file }} <br />
+
+<h2>Functions Calls </h2>
+
+<a href="test_func_call">test_func_call</a> <br />
+<a href="list_nodes">list_nodes</a> <br />
+
+{% if result %}<h3> Function Call Result</h3>
+    <p><strong>Function: {{ func_name }}</strong></p>
+    <p>{{ result }}</p>
+{% endif %}
+
+<br />
+<a href="delete">Delete Aggregate Manager</a> |
+<a href="../"> Back to list </a> <br />
