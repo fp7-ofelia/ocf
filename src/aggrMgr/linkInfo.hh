@@ -4,6 +4,12 @@
 #include <sys/types.h> 
 #include <list>
 #include <map>
+#include "netinet++/datapathid.hh"
+
+using namespace std;
+using namespace vigil;
+
+namespace vigil {
 
 struct LowerId;
 
@@ -83,6 +89,8 @@ struct LowerId {
 };
 
 typedef list<LinkInfo> LinkInfoList;
-typedef list<LinkInfo>::iterator LIL_iterator;
+typedef list<LinkInfo>::iterator LinkInfoList_iterator;
+
+} // end namespace vigil
 
 #endif

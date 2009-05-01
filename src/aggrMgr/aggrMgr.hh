@@ -34,12 +34,10 @@
 #include "hash_map.hh"
 #include "hash_set.hh"
 #include "discovery/link-event.hh"
-#include "nat_enforcer.hh"
-#include "netinet++/datapathid.hh"
 #include "netinet++/ethernetaddr.hh"
 #include "openflow/openflow.h"
 #include "topology/topology.hh"
-#include "messenger/messenger.hh"
+#include "coreapps/messenger/messenger.hh"
 
  /*
  * All integer values are stored in host byte order and should be passed in as
@@ -72,7 +70,7 @@ private:
     Topology *topology;
     */
 
-    Disposition handle_link_change(const Event&);
+    Disposition handle_link_event(const Event&);
     Disposition handle_msg_event(const Event&);
 };
 

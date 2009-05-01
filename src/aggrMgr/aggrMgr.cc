@@ -16,6 +16,7 @@
  * along with NOX.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "aggrMgr.hh"
+#include "message.h"
 
 #include <boost/bind.hpp>
 #include <inttypes.h>
@@ -23,6 +24,8 @@
 #include "assert.hh"
 #include "openflow/nicira-ext.h"
 #include "vlog.hh"
+
+using namespace std;
 
 namespace vigil {
 namespace applications {
@@ -35,7 +38,6 @@ AggrMgr::AggrMgr(const container::Context* c,
                                const xercesc::DOMNode* d)
     : container::Component(c)
 {
-    max_output_action_len = get_max_action_len();
 }
 
 void
@@ -71,18 +73,18 @@ AggrMgr::handle_link_event(const Event& e)
 {
     const Link_event& le = assert_cast<const Link_event&>(e);
 
-    LIL_iterator itr;
-    LinkInfo li = {le.dpsrc, le.dpdst, le.sport;, le.dport};
+    LinkInfoList_iterator itr;
+    LinkInfo li = {le.dpsrc, le.dpdst, le.sport, le.dport};
     for (itr = links.begin(); itr != links.end(); itr++) 
         if ((*itr) == li)
             break;
 
     if (le.action == Link_event::ADD) {
         if (itr == links.end())
-            li.insert(li);
+            links.push_back(li);
 
     } else if (le.action == Link_event::REMOVE) {
-        erase(itr);
+        links.erase(itr);
 
     } else {
         VLOG_ERR(lg, "Unknown link event action %u", le.action);
@@ -95,43 +97,48 @@ Disposition
 AggrMgr::handle_msg_event(const Event& e)
 {
     const Msg_event& me = assert_cast<const Msg_event&>(e);
+    char *rspec_str = NULL, *slice_id = NULL;
 
     switch (me.msg->type)
     {
         case SFA_START_SLICE:
-            char slice_name[ntohs(me.msg->length)-2];
-            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
-            slice_name[ntohs(me.msg->length)-3] = '\0';
-            VLOG_DBG(lg, "Start_slice %s", slice_name);
+            slice_id = (char *)malloc(ntohs(me.msg->length)-2);
+            memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
+            slice_id[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Start_slice %s", slice_id);
 
+            free(slice_id);
             return STOP;
 
         case SFA_STOP_SLICE:
-            char slice_name[ntohs(me.msg->length)-2];
-            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
-            slice_name[ntohs(me.msg->length)-3] = '\0';
-            VLOG_DBG(lg, "Stop_slice %s", slice_name);
+            slice_id = (char *)malloc(ntohs(me.msg->length)-2);
+            memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
+            slice_id[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Stop_slice %s", slice_id);
 
+            free(slice_id);
             return STOP;
 
         case SFA_CREATE_SLICE:
-            char slice_name[ntohs(me.msg->length)-2];
-            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
-            slice_name[ntohs(me.msg->length)-3] = '\0';
+            slice_id = (char *)malloc(ntohs(me.msg->length)-2);
+            memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
+            slice_id[ntohs(me.msg->length)-3] = '\0';
 
             /* After the first null, we have the RSpec string */
-            char *rspec_str = slice_name[strlen(slice_name)];
+            rspec_str = slice_id + strlen(slice_id);
             
-            VLOG_DBG(lg, "Create_slice %s with rspec_str %s", slice_name, rspec_str);
+            VLOG_DBG(lg, "Create_slice %s with rspec_str %s", slice_id, rspec_str);
 
+            free(slice_id);
             return STOP;
 
         case SFA_DELETE_SLICE:
-            char slice_name[ntohs(me.msg->length)-2];
-            memcpy(slice_name, me.msg->body, ntohs(me.msg->length)-3);
-            slice_name[ntohs(me.msg->length)-3] = '\0';
-            VLOG_DBG(lg, "Delete_slice %s", slice_name);
+            slice_id = (char *)malloc(ntohs(me.msg->length)-2);
+            memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
+            slice_id[ntohs(me.msg->length)-3] = '\0';
+            VLOG_DBG(lg, "Delete_slice %s", slice_id);
 
+            free(slice_id);
             return STOP;
 
         case SFA_LIST_SLICES:
@@ -165,9 +172,9 @@ AggrMgr::handle_msg_event(const Event& e)
     return CONTINUE;
 }
 
-}
-}
-
 REGISTER_COMPONENT(vigil::container::Simple_component_factory
                    <vigil::applications::AggrMgr>,
                    vigil::applications::AggrMgr);
+
+} // applications
+} // vigil
