@@ -1,7 +1,5 @@
 from soaplib.wsgi_soap import SimpleWSGISoapApp
 from soaplib.service import soapmethod
-from soaplib.serializers.primitive import *
-from soaplib.serializers.clazz import *
 #import cElementTree as et
 from geniLight_types import *
 import socket
@@ -42,22 +40,14 @@ def extract(sock):
 # The GeniServer class provides stubs for executing Geni operations at
 # the Aggregate Manager.
 
-class GeniResult(ClassSerializer):
-    class types:
-        code = Integer
-        error_msg = String
-
-    def __init__(self, c, e):
-        self.code = c
-        self.error_msg = e
-
 class GeniLightServer(SimpleWSGISoapApp):
     def __init__(self):
-        '''Connect to the Resource Manager component'''
+        '''Connect to the Aggregate Manager module'''
         self.aggrMgr_sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
         self.aggrMgr_sock.connect ( ( 'localhost', AGGREGATE_MANAGER_PORT ) )
         self.aggrMgr_sock.settimeout(.1)
-        print 'connected to resource manager'
+        self.__tns__ = "http://yuba.stanford.edu/geniLight/"
+        print 'connected to aggregate manager module'
 
     # implicitly no __init__()
     @soapmethod(UserSliceInfo,_returns=GeniResult)
@@ -118,9 +108,10 @@ class GeniLightServer(SimpleWSGISoapApp):
         buf = create_string_buffer(2 + 1) 
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)), SFA_LIST_COMPONENTS)
         self.aggrMgr_sock.send(buf)
-        print extract(self.aggrMgr_sock);
+        component_list = extract(self.aggrMgr_sock);
 
-        return 'list of components'
+        #return 'list of components'
+        return "\"" + component_list + "\""
 
     @soapmethod(GeniRecordEntry,_returns=GeniResult)
     def register(self, record):
@@ -141,6 +132,6 @@ if __name__=='__main__':
     except:from cherrypy._cpwsgiserver import CherryPyWSGIServer
     gls = GeniLightServer()
     server = CherryPyWSGIServer(('localhost',7889),gls)
-    gls.list_components()
+    #gls.list_components()
     server.start()
 

@@ -37,16 +37,16 @@ class GeniLightClient():
     #      could be a GID certificate, or any x.509 cert.
 
     def __init__(self, url, key_file, cert_file):
-	ns = 'http://schemas.xmlsoap.org/soap/encoding/'
-	location = 'http://schemas.xmlsoap.org/soap/encoding/'
-	Import.bind(ns, location)
-	schema1 = 'http://schemas.xmlsoap.org/wsdl/soap/'
-	schema2 = 'http://schemas.xmlsoap.org/wsdl/'
-	schema3 = 'http://www.w3.org/2001/XMLSchema'
-	Import.bind(schema1,schema1)
-	Import.bind(schema2,schema2)
-	Import.bind(schema3,schema3)
-	self.server= Client(wsdl_file_location, location=url)
+        ns = 'http://schemas.xmlsoap.org/soap/encoding/'
+        location = 'http://schemas.xmlsoap.org/soap/encoding/'
+        Import.bind(ns, location)
+        schema1 = 'http://schemas.xmlsoap.org/wsdl/soap/'
+        schema2 = 'http://schemas.xmlsoap.org/wsdl/'
+        schema3 = 'http://www.w3.org/2001/XMLSchema'
+        Import.bind(schema1,schema1)
+        Import.bind(schema2,schema2)
+        Import.bind(schema3,schema3)
+        self.server= Client(wsdl_file_location, location=url)
 
     # -------------------------------------------------------------------------
     # Registry Interface
@@ -195,9 +195,12 @@ class GeniLightClient():
 
 if __name__ == '__main__' :
 
-	cred = Credential(subject='Alice')
-	glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
-	#print glc.server
-	result = glc.start_slice(cred, 'alice@kicksass.org')
-	print result.error_msg
-	
+    cred = Credential(subject='Alice')
+    print cred
+
+    glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
+    #print glc.server
+    #result = glc.start_slice(cred, 'alice@kicksass.org')
+    result = glc.list_nodes(cred)
+    print result
+    

@@ -1,3 +1,6 @@
+from soaplib.serializers.primitive import *
+from soaplib.serializers.clazz import *
+
 class UserSliceInfo:
     def __init__(self, user_name, slice_name):
         self.user_name = user_name
@@ -6,7 +9,11 @@ class UserSliceInfo:
     def save_to_string(self):
         return self.user_name + '_' + self.slice_name
 
-class GeniResult:
+class GeniResult(ClassSerializer):
+    class types:
+        code = Integer
+        error_msg = String
+
     def __init__(self, code, error_msg):
         self.code = code
         self.error_msg = error_msg
