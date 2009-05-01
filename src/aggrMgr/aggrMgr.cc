@@ -98,6 +98,7 @@ AggrMgr::handle_msg_event(const Event& e)
 {
     const Msg_event& me = assert_cast<const Msg_event&>(e);
     char *rspec_str = NULL, *slice_id = NULL;
+    Array_buffer buf(MESSENGER_BUFFER_SIZE);
 
     switch (me.msg->type)
     {
@@ -148,6 +149,20 @@ AggrMgr::handle_msg_event(const Event& e)
 
         case SFA_LIST_COMPONENTS:
             VLOG_DBG(lg, "List_components");
+
+            rspec_str = (char *) buf.data();
+            sprintf(rspec_str, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            sprintf(rspec_str+ strlen(rspec_str), "<RSpec>\n");
+
+            for (LinkInfoList_iterator itr = links.begin(); itr != links.end(); itr++) {
+                sprintf(rspec_str+ strlen(rspec_str), "<linkInfo>\n");
+		        sprintf(rspec_str+ strlen(rspec_str), "<srcPoint><dataPathId>%lx</dataPathId><port>%d</port></srcPoint>\n", (*itr).dpsrc.as_host(), (*itr).sport);
+		        sprintf(rspec_str+ strlen(rspec_str), "<dstPoint><dataPathId>%lx</dataPathId><port>%d</port></dstPoint>\n", (*itr).dpdst.as_host(), (*itr).dport);
+                sprintf(rspec_str+ strlen(rspec_str), "</linkInfo>\n");
+            }
+            sprintf(rspec_str+ strlen(rspec_str), "</RSpec>\n");
+
+            me.sock->write(buf, false);
 
             return STOP;
 

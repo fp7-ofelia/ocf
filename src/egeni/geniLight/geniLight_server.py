@@ -21,9 +21,22 @@ SFA_LIST_COMPONENTS = 106
 SFA_REGISTER = 107
 SFA_REBOOT_COMPONENT = 108
 
-def print_buffer(self, buf):
+def print_buffer(buf):
     for i in range(0,len(buf)):
         print('%x' % buf[i])
+
+def extract(sock):
+    # Shud we first obtain the message length?
+    # msg_len = socket.ntohs(sock.recv(2))
+    msg = ""
+
+    while (1):
+        chunk = sock.recv(1000)
+        if len(chunk) == 0:
+            break
+        msg += chunk
+
+    return msg
 
 ##
 # The GeniServer class provides stubs for executing Geni operations at
@@ -105,6 +118,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         buf = create_string_buffer(2 + 1) 
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)), SFA_LIST_COMPONENTS)
         self.aggrMgr_sock.send(buf)
+        print extract(self.aggrMgr_sock);
 
         return 'list of components'
 
