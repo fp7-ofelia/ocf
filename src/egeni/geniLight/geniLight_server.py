@@ -8,6 +8,8 @@ import sys
 from ctypes import create_string_buffer
 
 AGGREGATE_MANAGER_PORT = 2603
+#AGGREGATE_MANAGER_IP = 'mvm-10g2.stanford.edu'
+AGGREGATE_MANAGER_IP = 'localhost'
 
 # Message IDs for all the GENI light calls
 # This will be used by the aggrMgr controller
@@ -30,7 +32,14 @@ def extract(sock):
     msg = ""
 
     while (1):
-        chunk = sock.recv(100)
+        try:
+            chunk = sock.recv(1)
+        except socket.error, message:
+            if 'timed out' in message:
+                break
+            else:
+                sys.exit("Socket error: " + message)
+
         if len(chunk) == 0:
             break
         msg += chunk
@@ -42,10 +51,13 @@ def connect(server, port):
     '''Connect to the Aggregate Manager module'''
     sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
     sock.connect ( ( server, port) )
-    sock.settimeout(0.5)
+    sock.settimeout(1)
     print 'connected to aggregate manager module'
     return sock
     
+def connect_aggrMgr():
+    return connect(AGGREGATE_MANAGER_IP, AGGREGATE_MANAGER_PORT)
+
 ##
 # The GeniServer class provides stubs for executing Geni operations at
 # the Aggregate Manager.
@@ -63,7 +75,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_START_SLICE, slice_id)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
@@ -77,7 +89,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_STOP_SLICE, slice_id)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
@@ -91,7 +103,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_CREATE_SLICE, slice_id, rspec_str)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
@@ -105,7 +117,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_DELETE_SLICE, slice_id)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
@@ -117,7 +129,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)),
                 SFA_LIST_SLICES)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
@@ -128,7 +140,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         buf = create_string_buffer(2 + 1) 
         struct.pack_into('hB', buf, 0, socket.htons(len(buf)), SFA_LIST_COMPONENTS)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         component_list = extract(aggrMgr_sock);
         aggrMgr_sock.close()
@@ -147,7 +159,7 @@ class GeniLightServer(SimpleWSGISoapApp):
         struct.pack_into(format, buf, 0, socket.htons(len(buf)),
                 SFA_REBOOT_COMPONENT, name)
 
-        aggrMgr_sock = connect('localhost', AGGREGATE_MANAGER_PORT)
+        aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
 
