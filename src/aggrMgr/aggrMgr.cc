@@ -98,18 +98,18 @@ AggrMgr::handle_msg_event(const Event& e)
 {
     const Msg_event& me = assert_cast<const Msg_event&>(e);
     char *rspec_str = NULL, *slice_id = NULL;
-    Array_buffer *buf = NULL;
+    int count_written;
 
     switch (me.msg->type)
     {
-        case SFA_START_SLICE:
+        case SFA_START_SLICE: {
             slice_id = (char *)malloc(ntohs(me.msg->length)-2);
             memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
             slice_id[ntohs(me.msg->length)-3] = '\0';
             VLOG_DBG(lg, "Start_slice %s", slice_id);
 
             free(slice_id);
-            return STOP;
+            break;}
 
         case SFA_STOP_SLICE:
             slice_id = (char *)malloc(ntohs(me.msg->length)-2);
@@ -118,9 +118,9 @@ AggrMgr::handle_msg_event(const Event& e)
             VLOG_DBG(lg, "Stop_slice %s", slice_id);
 
             free(slice_id);
-            return STOP;
+            break;
 
-        case SFA_CREATE_SLICE:
+        case SFA_CREATE_SLICE:{
             slice_id = (char *)malloc(ntohs(me.msg->length)-2);
             memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
             slice_id[ntohs(me.msg->length)-3] = '\0';
@@ -131,27 +131,27 @@ AggrMgr::handle_msg_event(const Event& e)
             VLOG_DBG(lg, "Create_slice %s with rspec_str %s", slice_id, rspec_str);
 
             free(slice_id);
-            return STOP;
+            break;}
 
-        case SFA_DELETE_SLICE:
+        case SFA_DELETE_SLICE:{
             slice_id = (char *)malloc(ntohs(me.msg->length)-2);
             memcpy(slice_id, me.msg->body, ntohs(me.msg->length)-3);
             slice_id[ntohs(me.msg->length)-3] = '\0';
             VLOG_DBG(lg, "Delete_slice %s", slice_id);
 
             free(slice_id);
-            return STOP;
+            break;}
 
-        case SFA_LIST_SLICES:
+        case SFA_LIST_SLICES:{
             VLOG_DBG(lg, "List_slices");
 
-            return STOP;
+            break;}
 
-        case SFA_LIST_COMPONENTS:
+        case SFA_LIST_COMPONENTS:{
             VLOG_DBG(lg, "List_components");
 
-            rspec_str = (char *) malloc(MESSENGER_BUFFER_SIZE);
-            memset(rspec_str, 0, MESSENGER_BUFFER_SIZE);
+            rspec_str = (char *)malloc(1000);
+            memset(rspec_str, 0, 1000);
             strcat(rspec_str, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             strcat(rspec_str, "<RSpec>\n");
 
@@ -163,36 +163,37 @@ AggrMgr::handle_msg_event(const Event& e)
             }
             strcat(rspec_str, "</RSpec>\n");
             
-            buf = new Array_buffer((uint8_t*)rspec_str, strlen(rspec_str));
             printf("Writing buffer of size %d\n", strlen(rspec_str));
-            me.sock->write(*buf, false);
-            me.sock->write_wait();
+            Nonowning_buffer buf((uint8_t*)rspec_str, strlen(rspec_str));
+            count_written = me.sock->write(buf, 0);
+            printf("Bytes written = %d\n", count_written);
 
             free(rspec_str);
+            printf("Done freeing\n");
 
-            return STOP;
+            break;}
 
-        case SFA_REGISTER:
+        case SFA_REGISTER: {
             char record_info[ntohs(me.msg->length)-2];
             memcpy(record_info, me.msg->body, ntohs(me.msg->length)-3);
             record_info[ntohs(me.msg->length)-3] = '\0';
             VLOG_DBG(lg, "Register_record %s", record_info);
 
-            return STOP;
+            break;}
 
-        case SFA_REBOOT_COMPONENT:
+        case SFA_REBOOT_COMPONENT: {
             char component_name[ntohs(me.msg->length)-2];
             memcpy(component_name, me.msg->body, ntohs(me.msg->length)-3);
             component_name[ntohs(me.msg->length)-3] = '\0';
             VLOG_DBG(lg, "Reboot_component %s", component_name);
 
-            return STOP;
+            break;}
 
         default:
             return CONTINUE;
     }
 
-    return CONTINUE;
+    return STOP;
 }
 
 REGISTER_COMPONENT(vigil::container::Simple_component_factory
