@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/New-rspec" xmlns:tns="http://www.example.org/New-rspec" elementFormDefault="qualified">
+
+
+    <complexType name="linkInfo">
+    	<sequence>
+    		<element name="srcPoint" type="tns:interface" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="dstPoint" type="tns:interface" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="flowSpace" type="tns:flowSpaceEntry"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+
+    		<element name="controller" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="interface">
+    	<sequence>
+    		<element name="dataPathId" type="string"></element>
+    		<element name="port" type="int"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="flowSpaceEntry">
+    	<sequence>
+    		<element name="field" type="string"></element>
+    		<element name="value" type="string"></element>
+    	</sequence>
+    </complexType>
+
+
+    <element name="RSpec" type="tns:rspec"></element>
+    
+    <complexType name="rspec">
+    	<sequence>
+    		<element name="linkSpec" type="tns:linkInfo"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+</schema>
