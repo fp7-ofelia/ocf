@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/New-rspec" xmlns:tns="http://www.example.org/New-rspec" elementFormDefault="qualified">
+<schema targetNamespace="http://yuba.stanford.edu/geniLight/rspec" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yuba.stanford.edu/geniLight/rspec">
 
 
     <complexType name="linkInfo">
@@ -20,8 +20,9 @@
 
     <complexType name="interface">
     	<sequence>
-    		<element name="dataPathId" type="string"></element>
     		<element name="port" type="int"></element>
+    		<element name="remoteSwitchId" type="string"></element>
+    		<element name="remoteSwitchPort" type="int"></element>
     	</sequence>
     </complexType>
 
@@ -37,9 +38,40 @@
     
     <complexType name="rspec">
     	<sequence>
-    		<element name="linkSpec" type="tns:linkInfo"
+    		<element name="switchList" type="tns:switchInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
+    		<element name="hostList" type="tns:hostInfo"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="nodeInfo">
+    	<sequence>
+    		<element name="nodeId" type="string"></element>
+    		<element name="type" type="int"></element>
+    		<element name="interfaceList" type="tns:interface"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="flowSpace" type="tns:flowSpaceEntry"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="switchInfo">
+    	<sequence>
+    		<element name="node" type="tns:nodeInfo"></element>
+    		<element name="switchFeatures" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="hostInfo">
+    	<sequence>
+    		<element name="node" type="tns:nodeInfo"></element>
+    		<element name="cpuUtil" type="float"></element>
+    		<element name="memUtil" type="float"></element>
     	</sequence>
     </complexType>
 </schema>
