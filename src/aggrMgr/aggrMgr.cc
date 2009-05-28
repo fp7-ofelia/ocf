@@ -165,7 +165,7 @@ AggrMgr::handle_msg_event(const Event& e)
             
             printf("Writing buffer of size %d\n", strlen(rspec_str));
             Nonowning_buffer buf((uint8_t*)rspec_str, strlen(rspec_str));
-            count_written = me.sock->write(buf, 0);
+            count_written = me.sock->stream->write(buf, 0);
             printf("Bytes written = %d\n", count_written);
 
             free(rspec_str);
