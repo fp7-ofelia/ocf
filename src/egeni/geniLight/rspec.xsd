@@ -21,15 +21,15 @@
     <complexType name="interface">
     	<sequence>
     		<element name="port" type="int"></element>
-    		<element name="remoteSwitchId" type="string"></element>
-    		<element name="remoteSwitchPort" type="int"></element>
+            <element name="remoteSwitchId" type="string" maxOccurs="unbounded" minOccurs="1"></element>
+            <element name="remoteSwitchPort" type="int" maxOccurs="unbounded" minOccurs="1"></element>
     	</sequence>
     </complexType>
 
     <complexType name="flowSpaceEntry">
     	<sequence>
-    		<element name="field" type="string"></element>
-    		<element name="value" type="string"></element>
+    		<element name="field" type="string" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="value" type="string" maxOccurs="unbounded" minOccurs="1"></element>
     	</sequence>
     </complexType>
 
@@ -57,6 +57,7 @@
     		<element name="flowSpace" type="tns:flowSpaceEntry"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
+    		<element name="controllerUrl" type="string"></element>
     	</sequence>
     </complexType>
 
