@@ -80,15 +80,15 @@
     <complexType name="switchInfo">
     	<sequence>
     		<element name="node" type="tns:nodeInfo"></element>
-    		<element name="switchFeatures" type="string"></element>
+    		<element name="switchFeatures" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
     <complexType name="hostInfo">
     	<sequence>
     		<element name="node" type="tns:nodeInfo"></element>
-    		<element name="cpuUtil" type="float"></element>
-    		<element name="memUtil" type="float"></element>
+    		<element name="cpuUtil" type="float" maxOccurs="1" minOccurs="0"></element>
+    		<element name="memUtil" type="float" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
