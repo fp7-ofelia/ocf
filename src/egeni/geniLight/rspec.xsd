@@ -21,15 +21,31 @@
     <complexType name="interface">
     	<sequence>
     		<element name="port" type="int"></element>
-            <element name="remoteSwitchId" type="string" maxOccurs="unbounded" minOccurs="1"></element>
-            <element name="remoteSwitchPort" type="int" maxOccurs="unbounded" minOccurs="1"></element>
+    		<sequence maxOccurs="unbounded" minOccurs="1">
+    			<element name="remoteNodeId" type="string"></element>
+    			<element name="remotePort" type="int"></element>
+    		</sequence>
+   
     	</sequence>
     </complexType>
 
     <complexType name="flowSpaceEntry">
     	<sequence>
-    		<element name="field" type="string" maxOccurs="unbounded" minOccurs="1"></element>
-    		<element name="value" type="string" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="policy" type="int"></element>
+    		<element name="dl_src" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="dl_dst" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="dl_type" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="vlan_id" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_proto" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
@@ -75,4 +91,5 @@
     		<element name="memUtil" type="float"></element>
     	</sequence>
     </complexType>
+
 </schema>
