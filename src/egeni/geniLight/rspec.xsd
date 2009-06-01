@@ -2,21 +2,6 @@
 <schema targetNamespace="http://yuba.stanford.edu/geniLight/rspec" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yuba.stanford.edu/geniLight/rspec">
 
 
-    <complexType name="linkInfo">
-    	<sequence>
-    		<element name="srcPoint" type="tns:interface" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="dstPoint" type="tns:interface" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="flowSpace" type="tns:flowSpaceEntry"
-    			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-
-    		<element name="controller" type="string" maxOccurs="1" minOccurs="0"></element>
-    	</sequence>
-    </complexType>
 
     <complexType name="interface">
     	<sequence>
