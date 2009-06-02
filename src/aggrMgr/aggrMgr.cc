@@ -28,6 +28,7 @@
 #include <memory>   // std::auto_ptr
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "rspec.hxx" //CodeSynthesis generated
 #define RSPEC_XSD_CURRENT_VERSION  "1.0"
@@ -209,9 +210,10 @@ AggrMgr::handle_msg_event(const Event& e)
 int 
 AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
 {
-    ofstream outfile("rspec.xml");
-    outfile << rspec_str << endl;
-    outfile.close();
+    //Use following code if we need a dummy file
+    //ofstream outfile("rspec.xml");
+    //outfile << rspec_str << endl;
+    //outfile.close();
 
     char guestfilename[50];
     sprintf(guestfilename, "%s/slice_%s.guest", FLOWVISOR_CONFIG_DIRECTORY, slice_id);
@@ -219,8 +221,12 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
 
     try
     {
-        auto_ptr<rspec> root(RSpec ("rspec.xml"));
-        remove("rspec.xml"); //clean up
+        istringstream iss(string(rspec_str), istringstream::in);
+        auto_ptr<rspec> root(RSpec ((istream&) iss));
+
+        //Use following two lines if we use dummy file
+        //auto_ptr<rspec> root(RSpec ("rspec.xml"));
+        //remove("rspec.xml"); //clean up
 
         if (root->version() == RSPEC_XSD_CURRENT_VERSION) {
             VLOG_DBG(lg, "Mismatching RSpec version");
@@ -250,9 +256,9 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             guestfile << "dl_dst: " << f->dl_dst() << ": ";
             guestfile << "dl_type: " << f->dl_type() << ": ";
             guestfile << "vlan_id: " << f->vlan_id() << ": ";
-            guestfile << "nw_src: " << f->nw_src() << ": ";
-            guestfile << "nw_dst: " << f->nw_dst() << ": ";
-            guestfile << "nw_proto: " << f->nw_proto() << ": ";
+            guestfile << "ip_src: " << f->ip_src() << ": ";
+            guestfile << "ip_dst: " << f->ip_dst() << ": ";
+            guestfile << "ip_proto: " << f->ip_proto() << ": ";
             guestfile << "tp_src: " << f->tp_src() << ": ";
             guestfile << "tp_dst: " << f->tp_dst() << endl;
         }
