@@ -207,6 +207,12 @@ AggrMgr::handle_msg_event(const Event& e)
     return STOP;
 }
 
+struct membuf:streambuf {
+    membuf(char *begin, char *end) {
+        this->setg(begin, begin, end);
+    }
+};
+
 int 
 AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
 {
@@ -221,8 +227,10 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
 
     try
     {
-        istringstream iss(string(rspec_str), istringstream::in);
-        auto_ptr<rspec> root(RSpec ((istream&) iss));
+        // Using following class to avoid making copies of RSpec
+        membuf strbuf(rspec_str, rspec_str + strlen(rspec_str));
+        istream in(&strbuf);
+        auto_ptr<rspec> root(RSpec (in));
 
         //Use following two lines if we use dummy file
         //auto_ptr<rspec> root(RSpec ("rspec.xml"));
