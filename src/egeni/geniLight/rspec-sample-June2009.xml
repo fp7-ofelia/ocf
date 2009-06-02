@@ -16,11 +16,11 @@
         <tns:dl_dst>tns:dl_dst</tns:dl_dst>
         <tns:dl_type>tns:dl_type</tns:dl_type>
         <tns:vlan_id>tns:vlan_id</tns:vlan_id>
-        <tns:ip_src>tns:ip_src</tns:ip_src>
-        <tns:ip_dst>tns:ip_dst</tns:ip_dst>
-        <tns:ip_proto>tns:ip_proto</tns:ip_proto>
-        <tns:port_src>tns:port_src</tns:port_src>
-        <tns:port_dst>tns:port_dst</tns:port_dst>
+        <tns:nw_src>tns:nw_src</tns:nw_src>
+        <tns:nw_dst>tns:nw_dst</tns:nw_dst>
+        <tns:nw_proto>tns:nw_proto</tns:nw_proto>
+        <tns:tp_src>tns:tp_src</tns:tp_src>
+        <tns:tp_dst>tns:tp_dst</tns:tp_dst>
         <tns:port>tns:port</tns:port>
       </tns:flowSpace>
       <tns:controllerUrl>tns:controllerUrl</tns:controllerUrl>
@@ -42,11 +42,11 @@
         <tns:dl_dst>tns:dl_dst</tns:dl_dst>
         <tns:dl_type>tns:dl_type</tns:dl_type>
         <tns:vlan_id>tns:vlan_id</tns:vlan_id>
-        <tns:ip_src>tns:ip_src</tns:ip_src>
-        <tns:ip_dst>tns:ip_dst</tns:ip_dst>
-        <tns:ip_proto>tns:ip_proto</tns:ip_proto>
-        <tns:port_src>tns:port_src</tns:port_src>
-        <tns:port_dst>tns:port_dst</tns:port_dst>
+        <tns:nw_src>tns:nw_src</tns:nw_src>
+        <tns:nw_dst>tns:nw_dst</tns:nw_dst>
+        <tns:nw_proto>tns:nw_proto</tns:nw_proto>
+        <tns:tp_src>tns:tp_src</tns:tp_src>
+        <tns:tp_dst>tns:tp_dst</tns:tp_dst>
         <tns:port>tns:port</tns:port>
       </tns:flowSpace>
       <tns:controllerUrl>tns:controllerUrl</tns:controllerUrl>

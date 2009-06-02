@@ -25,11 +25,11 @@
     		</element>
     		<element name="dl_type" type="string" maxOccurs="1" minOccurs="0"></element>
     		<element name="vlan_id" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_src" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_dst" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_proto" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="port_src" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="port_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="nw_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="nw_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="nw_proto" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="tp_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="tp_dst" type="string" maxOccurs="1" minOccurs="0"></element>
     		<element name="port" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
