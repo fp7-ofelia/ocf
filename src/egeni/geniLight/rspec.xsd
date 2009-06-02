@@ -39,10 +39,11 @@
     
     <complexType name="rspec">
     	<sequence>
-    		<element name="switchList" type="tns:switchInfo"
+            <element name="version" type="string"></element>
+            <element name="switch" type="tns:switchInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="hostList" type="tns:hostInfo"
+    		<element name="host" type="tns:hostInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
