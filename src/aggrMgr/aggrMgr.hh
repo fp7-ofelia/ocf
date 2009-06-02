@@ -72,6 +72,7 @@ private:
 
     Disposition handle_link_event(const Event&);
     Disposition handle_msg_event(const Event&);
+    int convert_rspec_str_to_flowvisor_config(char *, char *);
 };
 
 }
