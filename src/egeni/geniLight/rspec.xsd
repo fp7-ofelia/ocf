@@ -2,34 +2,35 @@
 <schema targetNamespace="http://yuba.stanford.edu/geniLight/rspec" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yuba.stanford.edu/geniLight/rspec">
 
 
-    <complexType name="linkInfo">
-    	<sequence>
-    		<element name="srcPoint" type="tns:interface" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="dstPoint" type="tns:interface" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="flowSpace" type="tns:flowSpaceEntry"
-    			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-
-    		<element name="controller" type="string" maxOccurs="1" minOccurs="0"></element>
-    	</sequence>
-    </complexType>
 
     <complexType name="interface">
     	<sequence>
     		<element name="port" type="int"></element>
-    		<element name="remoteSwitchId" type="string"></element>
-    		<element name="remoteSwitchPort" type="int"></element>
+    		<sequence maxOccurs="unbounded" minOccurs="1">
+    			<element name="remoteNodeId" type="string"></element>
+    			<element name="remotePort" type="int"></element>
+    		</sequence>
+   
     	</sequence>
     </complexType>
 
     <complexType name="flowSpaceEntry">
     	<sequence>
-    		<element name="field" type="string"></element>
-    		<element name="value" type="string"></element>
+    		<element name="policy" type="int"></element>
+    		<element name="dl_src" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="dl_dst" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="dl_type" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="vlan_id" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_proto" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port_src" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="port" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
@@ -38,10 +39,11 @@
     
     <complexType name="rspec">
     	<sequence>
-    		<element name="switchList" type="tns:switchInfo"
+            <element name="version" type="string"></element>
+            <element name="switches" type="tns:switchInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="hostList" type="tns:hostInfo"
+    		<element name="hosts" type="tns:hostInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
@@ -57,21 +59,23 @@
     		<element name="flowSpace" type="tns:flowSpaceEntry"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
+    		<element name="controllerUrl" type="string"></element>
     	</sequence>
     </complexType>
 
     <complexType name="switchInfo">
     	<sequence>
     		<element name="node" type="tns:nodeInfo"></element>
-    		<element name="switchFeatures" type="string"></element>
+    		<element name="switchFeatures" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
     <complexType name="hostInfo">
     	<sequence>
     		<element name="node" type="tns:nodeInfo"></element>
-    		<element name="cpuUtil" type="float"></element>
-    		<element name="memUtil" type="float"></element>
+    		<element name="cpuUtil" type="float" maxOccurs="1" minOccurs="0"></element>
+    		<element name="memUtil" type="float" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
+
 </schema>
