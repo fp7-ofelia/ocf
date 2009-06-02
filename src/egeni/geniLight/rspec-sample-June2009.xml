@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd ">
   <tns:version>tns:version</tns:version>
-  <tns:switchList>
+  <tns:switches>
     <tns:node>
       <tns:nodeId>tns:nodeId</tns:nodeId>
       <tns:type>0</tns:type>
@@ -26,8 +26,8 @@
       <tns:controllerUrl>tns:controllerUrl</tns:controllerUrl>
     </tns:node>
     <tns:switchFeatures>tns:switchFeatures</tns:switchFeatures>
-  </tns:switchList>
-  <tns:hostList>
+  </tns:switches>
+  <tns:hosts>
     <tns:node>
       <tns:nodeId>tns:nodeId</tns:nodeId>
       <tns:type>0</tns:type>
@@ -53,5 +53,5 @@
     </tns:node>
     <tns:cpuUtil>0.0</tns:cpuUtil>
     <tns:memUtil>0.0</tns:memUtil>
-  </tns:hostList>
+  </tns:hosts>
 </tns:RSpec>
