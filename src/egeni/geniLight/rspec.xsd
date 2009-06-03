@@ -40,10 +40,10 @@
     <complexType name="rspec">
     	<sequence>
             <element name="version" type="string"></element>
-            <element name="switches" type="tns:switchInfo"
+            <element name="switchElement" type="tns:switchInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="hosts" type="tns:hostInfo"
+    		<element name="hostElement" type="tns:hostInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
