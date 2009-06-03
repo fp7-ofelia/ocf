@@ -8,8 +8,9 @@ import sys
 from ctypes import create_string_buffer
 
 AGGREGATE_MANAGER_PORT = 2603
+AGGREGATE_MANAGER_IP = '12.71.54.188'
 #AGGREGATE_MANAGER_IP = 'mvm-10g2.stanford.edu'
-AGGREGATE_MANAGER_IP = 'localhost'
+#AGGREGATE_MANAGER_IP = 'localhost'
 
 # Message IDs for all the GENI light calls
 # This will be used by the aggrMgr controller

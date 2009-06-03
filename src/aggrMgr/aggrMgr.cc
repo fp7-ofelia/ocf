@@ -74,6 +74,10 @@ AggrMgr::configure(const container::Configuration*)
      */
     register_handler<Link_event>
         (boost::bind(&AggrMgr::handle_link_event, this, _1));
+    register_handler<Datapath_join_event>
+        (boost::bind(&AggrMgr::handle_datapath_join, this, _1));
+    register_handler<Datapath_leave_event>
+        (boost::bind(&AggrMgr::handle_datapath_leave, this, _1));
     register_handler<Msg_event>
         (boost::bind(&AggrMgr::handle_msg_event, this, _1));
 }
@@ -81,6 +85,34 @@ AggrMgr::configure(const container::Configuration*)
 void
 AggrMgr::install()
 {}
+
+Disposition
+AggrMgr::handle_datapath_join(const Event& e)
+{
+    const Datapath_join_event& dj = assert_cast<const Datapath_join_event&>(e);
+    //uint64_t dpint = dj.datapath_id.as_host();
+
+    switches.push_back(dj.datapath_id);
+    list<uint16_t> ports;
+    for (std::vector<Port>::const_iterator iter = dj.ports.begin();
+            iter != dj.ports.end(); ++iter)
+    {
+        //Ignoring iter->name;
+        ports.push_back(iter->port_no);
+    }
+    switch_ports[dj.datapath_id] = ports;
+    return CONTINUE;
+}
+
+Disposition
+AggrMgr::handle_datapath_leave(const Event& e)
+{
+    const Datapath_leave_event& dl = assert_cast<const Datapath_leave_event&>(e);
+    switches.remove(dl.datapath_id);
+    switch_ports.erase(dl.datapath_id);
+
+    return CONTINUE;
+}
 
 Disposition
 AggrMgr::handle_link_event(const Event& e)
@@ -165,17 +197,16 @@ AggrMgr::handle_msg_event(const Event& e)
         case SFA_LIST_COMPONENTS:{
             VLOG_DBG(lg, "List_components");
 
-            rspec_str = (char *)malloc(1000);
-            memset(rspec_str, 0, 1000);
-            generate_rspec_of_components(rspec_str, 1000);
+            rspec_str = (char *)malloc(MESSENGER_BUFFER_SIZE);
+            memset(rspec_str, 0, MESSENGER_BUFFER_SIZE);
+            generate_rspec_of_components(rspec_str, MESSENGER_BUFFER_SIZE);
 
-            printf("Writing buffer of size %d\n", strlen(rspec_str));
+            //printf("Writing buffer of size %d\n", strlen(rspec_str));
             Nonowning_buffer buf((uint8_t*)rspec_str, strlen(rspec_str));
             count_written = me.sock->stream->write(buf, 0);
-            printf("Bytes written = %d\n", count_written);
+            VLOG_DBG(lg, "Done writing %d bytes", count_written);
 
             free(rspec_str);
-            printf("Done freeing\n");
 
             break;}
 
@@ -213,42 +244,30 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
 {
 
     auto_ptr<rspec> root(new rspec(RSPEC_XSD_CURRENT_VERSION));
+    rspec::switches_sequence switchList;
 
-    //root->version() = RSPEC_XSD_CURRENT_VERSION;
-    /*if (root->switches().size() != 1) {
-        VLOG_DBG(lg, "Incorrect size of switches");
-        return 0; //failure
-    }
-    //Currently FlowSpace is common for all switches. So extract
-    //only first value
-    switchInfo sw = root->switches().front();
-    string controller = sw.node().controllerUrl();
+    for (list<datapathid>::const_iterator itr1 = switches.begin(); itr1 != switches.end(); itr1++) {
+        // Insert individual switches to root->switches()
+        char switch_id[50];
+        sprintf(switch_id, "%lx", itr1->as_host());
+        nodeInfo node((xml_schema::string)string(switch_id));
+        nodeInfo::interfaceList_sequence interfaceList;
 
-    guestfile << "Id: " << slice_id << endl;
-    guestfile << "Host: " << controller << endl;
-
-    for (LinkInfoList_iterator itr = links.begin(); itr != links.end(); itr++) {
-        strcat(rspec_str, "<linkInfo>\n");
-        sprintf(rspec_str + strlen(rspec_str), "<srcPoint><dataPathId>%lx</dataPathId><port>%d</port></srcPoint>\n", (*itr).dpsrc.as_host(), (*itr).sport);
-        sprintf(rspec_str + strlen(rspec_str), "<dstPoint><dataPathId>%lx</dataPathId><port>%d</port></dstPoint>\n", (*itr).dpdst.as_host(), (*itr).dport);
-        strcat(rspec_str, "</linkInfo>\n");
-    }
-    strcat(rspec_str, "</RSpec>\n");
-        
-    for (rspec::switches_const_iterator sw (root->switches().begin ());
-            sw != root->switches ().end ();
-            ++sw) {
-        guestfile << "AllowedPorts: " << endl;
-        for (nodeInfo::interfaceList_const_iterator i (sw->node().interfaceList().begin ());
-                i != sw->node().interfaceList().end ();
-                ++i)
-        {
-            if (i!=sw->node().interfaceList().begin())
-                cout << ",";
-            cout << i->port();
+        list<uint16_t>& ports = switch_ports[*itr1];
+        for (list<uint16_t>::const_iterator itr2 = ports.begin(); itr2 != ports.end(); itr2++) {
+            interface i((*itr2));
+            interfaceList.push_back(i);
         }
-        cout << "\t" << sw->node().nodeId() <<endl;
-    }*/
+
+        //for (LinkInfoList_iterator itr2 = links.begin(); itr2 != links.end(); itr2++) {
+        //        i != sw->node().interfaceList().end ();
+        //    if ((*itr2).dpsrc == (*itr1))
+
+        node.interfaceList(interfaceList);
+        switchInfo sw(node);
+        switchList.push_back(sw);
+    }
+    root->switches(switchList);
 
     try
     {
@@ -261,7 +280,6 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
         membuf strbuf(rspec_str, rspec_str+length-1);
         ostream out(&strbuf);
         RSpec (out, *root, map);
-        RSpec (cout, *root, map);
     }
     catch (const xml_schema::exception& e) {
         cerr << e << endl;
@@ -306,7 +324,7 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
         //Currently FlowSpace is common for all switches. So extract
         //only first value
         switchInfo sw = root->switches().front();
-        string controller = sw.node().controllerUrl();
+        string controller = (string &)sw.node().controllerUrl();
 
         guestfile << "Id: " << slice_id << endl;
         guestfile << "Host: " << controller << endl;

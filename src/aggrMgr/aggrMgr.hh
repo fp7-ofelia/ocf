@@ -34,6 +34,8 @@
 #include "hash_map.hh"
 #include "hash_set.hh"
 #include "discovery/link-event.hh"
+#include "datapath-join.hh"
+#include "datapath-leave.hh"
 #include "netinet++/ethernetaddr.hh"
 #include "openflow/openflow.h"
 #include "topology/topology.hh"
@@ -53,6 +55,8 @@ class AggrMgr
 
 public:
     LinkInfoList links;
+    list<datapathid> switches;
+    map<datapathid, list<uint16_t> > switch_ports;
 
     AggrMgr(const container::Context*,
                    const xercesc::DOMNode*);
@@ -70,9 +74,12 @@ private:
     Topology *topology;
     */
 
+    Disposition handle_datapath_join(const Event&);
+    Disposition handle_datapath_leave(const Event&);
     Disposition handle_link_event(const Event&);
     Disposition handle_msg_event(const Event&);
     int convert_rspec_str_to_flowvisor_config(char *, char *);
+    int generate_rspec_of_components(char *, int);
 };
 
 }
