@@ -3,10 +3,10 @@
 
 
 
-    <complexType name="interface">
+    <complexType name="interfaceInfo">
     	<sequence>
     		<element name="port" type="int"></element>
-    		<sequence maxOccurs="unbounded" minOccurs="1">
+    		<sequence maxOccurs="unbounded" minOccurs="0">
     			<element name="remoteNodeId" type="string"></element>
     			<element name="remotePort" type="int"></element>
     		</sequence>
@@ -53,7 +53,7 @@
     	<sequence>
     		<element name="nodeId" type="string"></element>
     		<element name="type" type="int" maxOccurs="1" minOccurs="0"></element>
-    		<element name="interfaceList" type="tns:interface"
+    		<element name="interface" type="tns:interfaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="flowSpace" type="tns:flowSpaceEntry"
