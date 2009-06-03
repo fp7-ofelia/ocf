@@ -53,7 +53,7 @@
     	<sequence>
     		<element name="nodeId" type="string"></element>
     		<element name="type" type="int" maxOccurs="1" minOccurs="0"></element>
-    		<element name="interface" type="tns:interfaceInfo"
+    		<element name="interfaceEntry" type="tns:interfaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="flowSpace" type="tns:flowSpaceEntry"
