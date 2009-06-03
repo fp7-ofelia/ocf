@@ -244,30 +244,30 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
 {
 
     auto_ptr<rspec> root(new rspec(RSPEC_XSD_CURRENT_VERSION));
-    rspec::switches_sequence switchList;
+    rspec::switchElement_sequence switchList;
 
     for (list<datapathid>::const_iterator itr1 = switches.begin(); itr1 != switches.end(); itr1++) {
-        // Insert individual switches to root->switches()
+        // Insert individual switchElement to root->switchElement()
         char switch_id[50];
         sprintf(switch_id, "%lx", itr1->as_host());
         nodeInfo node((xml_schema::string)string(switch_id));
-        nodeInfo::interfaceList_sequence interfaceList;
+        nodeInfo::interfaceEntry_sequence interfaces;
 
         list<uint16_t>& ports = switch_ports[*itr1];
         for (list<uint16_t>::const_iterator itr2 = ports.begin(); itr2 != ports.end(); itr2++) {
-            interface i((*itr2));
-            interfaceList.push_back(i);
+            interfaceInfo i((*itr2));
+            interfaces.push_back(i);
         }
 
         //for (LinkInfoList_iterator itr2 = links.begin(); itr2 != links.end(); itr2++) {
-        //        i != sw->node().interfaceList().end ();
+        //        i != sw->node().interfaceEntry().end ();
         //    if ((*itr2).dpsrc == (*itr1))
 
-        node.interfaceList(interfaceList);
+        node.interfaceEntry(interfaces);
         switchInfo sw(node);
         switchList.push_back(sw);
     }
-    root->switches(switchList);
+    root->switchElement(switchList);
 
     try
     {
@@ -317,13 +317,13 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             VLOG_DBG(lg, "Mismatching RSpec version");
             return 0; //failure
         }
-        if (root->switches().size() != 1) {
-            VLOG_DBG(lg, "Incorrect size of switches");
+        if (root->switchElement().size() != 1) {
+            VLOG_DBG(lg, "Incorrect size of switchElement");
             return 0; //failure
         }
-        //Currently FlowSpace is common for all switches. So extract
+        //Currently FlowSpace is common for all switchElement. So extract
         //only first value
-        switchInfo sw = root->switches().front();
+        switchInfo sw = root->switchElement().front();
         string controller = (string &)sw.node().controllerUrl();
 
         guestfile << "Id: " << slice_id << endl;
@@ -348,15 +348,15 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             guestfile << "tp_dst: " << f->tp_dst() << endl;
         }
 
-        for (rspec::switches_const_iterator sw (root->switches().begin ());
-                sw != root->switches ().end ();
+        for (rspec::switchElement_const_iterator sw (root->switchElement().begin ());
+                sw != root->switchElement ().end ();
                 ++sw) {
             guestfile << "AllowedPorts: " << endl;
-            for (nodeInfo::interfaceList_const_iterator i (sw->node().interfaceList().begin ());
-                    i != sw->node().interfaceList().end ();
+            for (nodeInfo::interfaceEntry_const_iterator i (sw->node().interfaceEntry().begin ());
+                    i != sw->node().interfaceEntry().end ();
                     ++i)
             {
-                if (i!=sw->node().interfaceList().begin())
+                if (i!=sw->node().interfaceEntry().begin())
                     cout << ",";
                 cout << i->port();
             }

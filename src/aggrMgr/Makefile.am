@@ -17,7 +17,7 @@ aggrMgr_la_LDFLAGS = -module -export-dynamic
 NOX_RUNTIMEFILES = meta.xml	
 
 rspec.xsd: 
-	wget http://yuba.stanford.edu/geniLight/rspec.xsd
+	wget -N http://yuba.stanford.edu/geniLight/rspec.xsd
 
 rspec.cxx: rspec.xsd
 	xsd cxx-tree --generate-serialization rspec.xsd
