@@ -69,4 +69,55 @@
     </tns:node>
   </tns:switchEntry>
 
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>123456789ab</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>0</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>1</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>2</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>3</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>4</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>5</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>6</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>7</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>8</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>9</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>10</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>11</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>12</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>13</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>14</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
 </tns:RSpec>
