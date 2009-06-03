@@ -244,10 +244,10 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
 {
 
     auto_ptr<rspec> root(new rspec(RSPEC_XSD_CURRENT_VERSION));
-    rspec::switchElement_sequence switchList;
+    rspec::switchEntry_sequence switchList;
 
     for (list<datapathid>::const_iterator itr1 = switches.begin(); itr1 != switches.end(); itr1++) {
-        // Insert individual switchElement to root->switchElement()
+        // Insert individual switchEntry to root->switchEntry()
         char switch_id[50];
         sprintf(switch_id, "%lx", itr1->as_host());
         nodeInfo node((xml_schema::string)string(switch_id));
@@ -277,7 +277,7 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
         switchInfo sw(node);
         switchList.push_back(sw);
     }
-    root->switchElement(switchList);
+    root->switchEntry(switchList);
 
     try
     {
@@ -327,21 +327,21 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             VLOG_DBG(lg, "Mismatching RSpec version");
             return 0; //failure
         }
-        if (root->switchElement().size() != 1) {
-            VLOG_DBG(lg, "Incorrect size of switchElement");
+        if (root->switchEntry().size() != 1) {
+            VLOG_DBG(lg, "Incorrect size of switchEntry");
             return 0; //failure
         }
-        //Currently FlowSpace is common for all switchElement. So extract
+        //Currently FlowSpace is common for all switchEntry. So extract
         //only first value
-        switchInfo sw = root->switchElement().front();
+        switchInfo sw = root->switchEntry().front();
         string controller = (string &)sw.node().controllerUrl();
 
         guestfile << "Id: " << slice_id << endl;
         guestfile << "Host: " << controller << endl;
 
         //For each flowspace entry in the RSpec
-        for (nodeInfo::flowSpace_const_iterator f (sw.node().flowSpace().begin ());
-                f != sw.node().flowSpace().end ();
+        for (nodeInfo::flowSpaceEntry_const_iterator f (sw.node().flowSpaceEntry().begin ());
+                f != sw.node().flowSpaceEntry().end ();
                 ++f)
         {
             guestfile << "FlowSpace: ";
@@ -358,8 +358,8 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             guestfile << "tp_dst: " << f->tp_dst() << endl;
         }
 
-        for (rspec::switchElement_const_iterator sw (root->switchElement().begin ());
-                sw != root->switchElement ().end ();
+        for (rspec::switchEntry_const_iterator sw (root->switchEntry().begin ());
+                sw != root->switchEntry ().end ();
                 ++sw) {
             guestfile << "AllowedPorts: " << endl;
             for (nodeInfo::interfaceEntry_const_iterator i (sw->node().interfaceEntry().begin ());
