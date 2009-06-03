@@ -3,121 +3,70 @@
 
   <tns:version>1.0</tns:version>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>640021f7cae400</tns:nodeId>
-      <tns:interface>
+      <tns:interfaceEntry>
         <tns:port>26</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>28</tns:port>
-      </tns:interface>
+      </tns:interfaceEntry>
     </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>2580021f7cae400</tns:nodeId>
-      <tns:interface>
+      <tns:interfaceEntry>
         <tns:port>46</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>48</tns:port>
-      </tns:interface>
+      </tns:interfaceEntry>
     </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>1f40021f7cae400</tns:nodeId>
-      <tns:interface>
+      <tns:interfaceEntry>
         <tns:port>41</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>43</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>44</tns:port>
-      </tns:interface>
+      </tns:interfaceEntry>
     </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>1900021f7cae400</tns:nodeId>
     </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>12c0021f7cae400</tns:nodeId>
-      <tns:interface>
+      <tns:interfaceEntry>
         <tns:port>33</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>35</tns:port>
-      </tns:interface>
-      <tns:interface>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
         <tns:port>36</tns:port>
-      </tns:interface>
+      </tns:interfaceEntry>
     </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
-  <tns:switches>
+  <tns:switchElement>
     <tns:node>
       <tns:nodeId>c80021f7cae400</tns:nodeId>
     </tns:node>
-  </tns:switches>
-
-  <tns:switches>
-    <tns:node>
-      <tns:nodeId>123456789ab</tns:nodeId>
-      <tns:interface>
-        <tns:port>0</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>1</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>2</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>3</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>4</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>5</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>6</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>7</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>8</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>9</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>10</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>11</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>12</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>13</tns:port>
-      </tns:interface>
-      <tns:interface>
-        <tns:port>14</tns:port>
-      </tns:interface>
-    </tns:node>
-  </tns:switches>
+  </tns:switchElement>
 
 </tns:RSpec>
