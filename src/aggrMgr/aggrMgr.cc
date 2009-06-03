@@ -256,13 +256,23 @@ AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
         list<uint16_t>& ports = switch_ports[*itr1];
         for (list<uint16_t>::const_iterator itr2 = ports.begin(); itr2 != ports.end(); itr2++) {
             interfaceInfo i((*itr2));
+
+            interfaceInfo::remoteNodeId_sequence remoteNodeIdList;
+            interfaceInfo::remotePort_sequence remotePortList;
+
+            for (LinkInfoList_iterator itr3 = links.begin(); itr3 != links.end(); itr3++) {
+
+                if (((*itr3).dpsrc == (*itr1)) && ((*itr3).dport == (*itr2))) {
+                    sprintf(switch_id, "%lx", (*itr3).dpsrc.as_host());
+                    remoteNodeIdList.push_back((xml_schema::string)string(switch_id));
+                    remotePortList.push_back((*itr3).dport);
+                }
+            }
+            i.remoteNodeId((interfaceInfo::remoteNodeId_sequence &)remoteNodeIdList);
+            i.remotePort((interfaceInfo::remotePort_sequence &)remotePortList);
+
             interfaces.push_back(i);
         }
-
-        //for (LinkInfoList_iterator itr2 = links.begin(); itr2 != links.end(); itr2++) {
-        //        i != sw->node().interfaceEntry().end ();
-        //    if ((*itr2).dpsrc == (*itr1))
-
         node.interfaceEntry(interfaces);
         switchInfo sw(node);
         switchList.push_back(sw);
