@@ -52,14 +52,14 @@
     <complexType name="nodeInfo">
     	<sequence>
     		<element name="nodeId" type="string"></element>
-    		<element name="type" type="int"></element>
+    		<element name="type" type="int" maxOccurs="1" minOccurs="0"></element>
     		<element name="interfaceList" type="tns:interface"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="flowSpace" type="tns:flowSpaceEntry"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="controllerUrl" type="string"></element>
+    		<element name="controllerUrl" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
