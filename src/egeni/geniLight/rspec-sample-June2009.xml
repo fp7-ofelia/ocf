@@ -3,7 +3,7 @@
 
   <tns:version>1.0</tns:version>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>640021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
@@ -13,9 +13,9 @@
         <tns:port>28</tns:port>
       </tns:interfaceEntry>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>2580021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
@@ -25,9 +25,9 @@
         <tns:port>48</tns:port>
       </tns:interfaceEntry>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>1f40021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
@@ -40,15 +40,15 @@
         <tns:port>44</tns:port>
       </tns:interfaceEntry>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>1900021f7cae400</tns:nodeId>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>12c0021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
@@ -61,12 +61,12 @@
         <tns:port>36</tns:port>
       </tns:interfaceEntry>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
-  <tns:switchElement>
+  <tns:switchEntry>
     <tns:node>
       <tns:nodeId>c80021f7cae400</tns:nodeId>
     </tns:node>
-  </tns:switchElement>
+  </tns:switchEntry>
 
 </tns:RSpec>

@@ -14,7 +14,7 @@
     	</sequence>
     </complexType>
 
-    <complexType name="flowSpaceEntry">
+    <complexType name="flowSpaceInfo">
     	<sequence>
     		<element name="policy" type="int"></element>
             <element name="port" type="string" maxOccurs="1" minOccurs="0"></element>
@@ -40,10 +40,10 @@
     <complexType name="rspec">
     	<sequence>
             <element name="version" type="string"></element>
-            <element name="switchElement" type="tns:switchInfo"
+            <element name="switchEntry" type="tns:switchInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="hostElement" type="tns:hostInfo"
+    		<element name="hostEntry" type="tns:hostInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
@@ -56,7 +56,7 @@
     		<element name="interfaceEntry" type="tns:interfaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="flowSpace" type="tns:flowSpaceEntry"
+    		<element name="flowSpaceEntry" type="tns:flowSpaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="controllerUrl" type="string" maxOccurs="1" minOccurs="0"></element>
