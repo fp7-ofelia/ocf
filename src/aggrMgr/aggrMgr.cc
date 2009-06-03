@@ -32,13 +32,17 @@
 
 #include "rspec.hxx" //CodeSynthesis generated
 #define RSPEC_XSD_CURRENT_VERSION  "1.0"
+#define RSPEC_XSD_NAMESPACE "http://yuba.stanford.edu/geniLight/rspec";
+#define RSPEC_XSD_LOCATION "http://yuba.stanford.edu/geniLight/rspec.xsd";
 #define FLOWVISOR_CONFIG_DIRECTORY "/tmp"
 
-using namespace geniLight::rspec;
 using namespace std;
+using namespace ::geniLight::rspec;
 
 namespace vigil {
 namespace applications {
+
+using namespace ::geniLight::rspec;
 
 static Vlog_module lg("aggrMgr");
 
@@ -163,17 +167,8 @@ AggrMgr::handle_msg_event(const Event& e)
 
             rspec_str = (char *)malloc(1000);
             memset(rspec_str, 0, 1000);
-            strcat(rspec_str, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            strcat(rspec_str, "<RSpec>\n");
+            generate_rspec_of_components(rspec_str, 1000);
 
-            for (LinkInfoList_iterator itr = links.begin(); itr != links.end(); itr++) {
-                strcat(rspec_str, "<linkInfo>\n");
-		        sprintf(rspec_str + strlen(rspec_str), "<srcPoint><dataPathId>%lx</dataPathId><port>%d</port></srcPoint>\n", (*itr).dpsrc.as_host(), (*itr).sport);
-		        sprintf(rspec_str + strlen(rspec_str), "<dstPoint><dataPathId>%lx</dataPathId><port>%d</port></dstPoint>\n", (*itr).dpdst.as_host(), (*itr).dport);
-                strcat(rspec_str, "</linkInfo>\n");
-            }
-            strcat(rspec_str, "</RSpec>\n");
-            
             printf("Writing buffer of size %d\n", strlen(rspec_str));
             Nonowning_buffer buf((uint8_t*)rspec_str, strlen(rspec_str));
             count_written = me.sock->stream->write(buf, 0);
@@ -209,9 +204,73 @@ AggrMgr::handle_msg_event(const Event& e)
 
 struct membuf:streambuf {
     membuf(char *begin, char *end) {
-        this->setg(begin, begin, end);
+        this->setp(begin, end);
     }
 };
+
+int
+AggrMgr::generate_rspec_of_components(char *rspec_str, int length)
+{
+
+    auto_ptr<rspec> root(new rspec(RSPEC_XSD_CURRENT_VERSION));
+
+    //root->version() = RSPEC_XSD_CURRENT_VERSION;
+    /*if (root->switches().size() != 1) {
+        VLOG_DBG(lg, "Incorrect size of switches");
+        return 0; //failure
+    }
+    //Currently FlowSpace is common for all switches. So extract
+    //only first value
+    switchInfo sw = root->switches().front();
+    string controller = sw.node().controllerUrl();
+
+    guestfile << "Id: " << slice_id << endl;
+    guestfile << "Host: " << controller << endl;
+
+    for (LinkInfoList_iterator itr = links.begin(); itr != links.end(); itr++) {
+        strcat(rspec_str, "<linkInfo>\n");
+        sprintf(rspec_str + strlen(rspec_str), "<srcPoint><dataPathId>%lx</dataPathId><port>%d</port></srcPoint>\n", (*itr).dpsrc.as_host(), (*itr).sport);
+        sprintf(rspec_str + strlen(rspec_str), "<dstPoint><dataPathId>%lx</dataPathId><port>%d</port></dstPoint>\n", (*itr).dpdst.as_host(), (*itr).dport);
+        strcat(rspec_str, "</linkInfo>\n");
+    }
+    strcat(rspec_str, "</RSpec>\n");
+        
+    for (rspec::switches_const_iterator sw (root->switches().begin ());
+            sw != root->switches ().end ();
+            ++sw) {
+        guestfile << "AllowedPorts: " << endl;
+        for (nodeInfo::interfaceList_const_iterator i (sw->node().interfaceList().begin ());
+                i != sw->node().interfaceList().end ();
+                ++i)
+        {
+            if (i!=sw->node().interfaceList().begin())
+                cout << ",";
+            cout << i->port();
+        }
+        cout << "\t" << sw->node().nodeId() <<endl;
+    }*/
+
+    try
+    {
+        //Write RSpec to buffer
+        xml_schema::namespace_infomap map;
+        map["tns"].schema = RSPEC_XSD_LOCATION;
+        map["tns"].name = RSPEC_XSD_NAMESPACE;
+
+        // Using following class to write directly into buffer
+        membuf strbuf(rspec_str, rspec_str+length-1);
+        ostream out(&strbuf);
+        RSpec (out, *root, map);
+        RSpec (cout, *root, map);
+    }
+    catch (const xml_schema::exception& e) {
+        cerr << e << endl;
+        VLOG_DBG(lg, "XML Parsing expection");
+        return 0; //failure
+    }
+
+    return 1; //success
+}
 
 int 
 AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
