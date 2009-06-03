@@ -1,57 +1,123 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd ">
-  <tns:version>tns:version</tns:version>
-  <tns:switchElement>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+
+  <tns:version>1.0</tns:version>
+
+  <tns:switches>
     <tns:node>
-      <tns:nodeId>tns:nodeId</tns:nodeId>
-      <tns:type>0</tns:type>
+      <tns:nodeId>640021f7cae400</tns:nodeId>
+      <tns:interfaceList>
+        <tns:port>26</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>28</tns:port>
+      </tns:interfaceList>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>2580021f7cae400</tns:nodeId>
+      <tns:interfaceList>
+        <tns:port>46</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>48</tns:port>
+      </tns:interfaceList>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>1f40021f7cae400</tns:nodeId>
+      <tns:interfaceList>
+        <tns:port>41</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>43</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>44</tns:port>
+      </tns:interfaceList>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>1900021f7cae400</tns:nodeId>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>12c0021f7cae400</tns:nodeId>
+      <tns:interfaceList>
+        <tns:port>33</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>35</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>36</tns:port>
+      </tns:interfaceList>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>c80021f7cae400</tns:nodeId>
+    </tns:node>
+  </tns:switches>
+
+  <tns:switches>
+    <tns:node>
+      <tns:nodeId>123456789ab</tns:nodeId>
       <tns:interfaceList>
         <tns:port>0</tns:port>
-        <tns:remoteNodeId>tns:remoteNodeId</tns:remoteNodeId>
-        <tns:remotePort>0</tns:remotePort>
       </tns:interfaceList>
-      <tns:flowSpace>
-        <tns:policy>0</tns:policy>
-        <tns:port>tns:port</tns:port>
-        <tns:dl_src>tns:dl_src</tns:dl_src>
-        <tns:dl_dst>tns:dl_dst</tns:dl_dst>
-        <tns:dl_type>tns:dl_type</tns:dl_type>
-        <tns:vlan_id>tns:vlan_id</tns:vlan_id>
-        <tns:ip_src>tns:ip_src</tns:ip_src>
-        <tns:ip_dst>tns:ip_dst</tns:ip_dst>
-        <tns:ip_proto>tns:ip_proto</tns:ip_proto>
-        <tns:tp_src>tns:tp_src</tns:tp_src>
-        <tns:tp_dst>tns:tp_dst</tns:tp_dst>
-      </tns:flowSpace>
-      <tns:controllerUrl>tns:controllerUrl</tns:controllerUrl>
-    </tns:node>
-    <tns:switchFeatures>tns:switchFeatures</tns:switchFeatures>
-  </tns:switchElement>
-  <tns:hostElement>
-    <tns:node>
-      <tns:nodeId>tns:nodeId</tns:nodeId>
-      <tns:type>0</tns:type>
       <tns:interfaceList>
-        <tns:port>0</tns:port>
-        <tns:remoteNodeId>tns:remoteNodeId</tns:remoteNodeId>
-        <tns:remotePort>0</tns:remotePort>
+        <tns:port>1</tns:port>
       </tns:interfaceList>
-      <tns:flowSpace>
-        <tns:policy>0</tns:policy>
-        <tns:port>tns:port</tns:port>
-        <tns:dl_src>tns:dl_src</tns:dl_src>
-        <tns:dl_dst>tns:dl_dst</tns:dl_dst>
-        <tns:dl_type>tns:dl_type</tns:dl_type>
-        <tns:vlan_id>tns:vlan_id</tns:vlan_id>
-        <tns:ip_src>tns:ip_src</tns:ip_src>
-        <tns:ip_dst>tns:ip_dst</tns:ip_dst>
-        <tns:ip_proto>tns:ip_proto</tns:ip_proto>
-        <tns:tp_src>tns:tp_src</tns:tp_src>
-        <tns:tp_dst>tns:tp_dst</tns:tp_dst>
-      </tns:flowSpace>
-      <tns:controllerUrl>tns:controllerUrl</tns:controllerUrl>
+      <tns:interfaceList>
+        <tns:port>2</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>3</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>4</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>5</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>6</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>7</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>8</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>9</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>10</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>11</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>12</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>13</tns:port>
+      </tns:interfaceList>
+      <tns:interfaceList>
+        <tns:port>14</tns:port>
+      </tns:interfaceList>
     </tns:node>
-    <tns:cpuUtil>0.0</tns:cpuUtil>
-    <tns:memUtil>0.0</tns:memUtil>
-  </tns:hostElement>
+  </tns:switches>
+
 </tns:RSpec>
