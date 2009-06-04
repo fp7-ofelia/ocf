@@ -12,26 +12,21 @@
 </div>
 {% endif %}
 
-<div class="functions">
-    <h2>Functions Calls </h2>
-    <form method="post" action="../call_func/">
-        <input type="radio" name="choice" id="test" value="test_func_call" />
-        <label for="test">test_func_call()</label><br/>
-
-        <input type="radio" name="choice" id="list_nodes" value="list_nodes" />
-        <label for="list_nodes">list_nodes(None)</label><br/>
-        
-        <input type="submit" value="Call Function" />
-    </form>
+<div class="nodes">
+    <h2>Nodes</h2>
+    <ol id="switches">
+        {% for node_tuple in object.getSwitchesInfo %}
+        <li>Switch ID <a href="../switch/{{ node_tuple.0 }}/">{{ node_tuple.0 }}</a> 
+            {% if node_tuple.1 %} connected via {% endif %}
+            <ol id="{{ node_tuple }}_connections">
+                {% for cnxn_tuple in node_tuple.1 %}
+                <li>port {{ cnxn_tuple.0 }} to port {{ cnxn_tuple.2 }} of node <a href="../switch/{{ cnxn_tuple.1 }}/">{{ cnxn_tuple.1 }}</a></li>
+                {% endfor %}
+            </ol>
+        </li>
+        {% endfor %}
+    </ol>
 </div>
-
-{% if result %}
-<div class="results">
-    <h3> Function Call Result</h3>
-        <p><strong>Function: {{ func_name }}</strong></p>
-        <p>{{ result }}</p>
-</div>
-{% endif %}
 
 <br />
 <a href="../delete">Delete Aggregate Manager</a> |

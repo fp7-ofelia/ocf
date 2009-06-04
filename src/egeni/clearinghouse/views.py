@@ -6,6 +6,16 @@ from egeni.clearinghouse.models import AggregateManager
 from geniLight.geniLight_client import GeniLightClient
 from django.core.urlresolvers import reverse
 
+def node_detail(request, aggMgr_id, node_id):
+    '''Show the details for a node and show a form to reserve a slice'''
+    
+    # get the aggregate manager object
+    am = get_object_or_404(AggregateManager, pk=aggMgr_id)
+    
+    return render_to_response("clearinghouse/node_detail.html",
+                              {'aggMgr':am,
+                               'node_id':node_id})
+
 def delete(request, object_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=object_id)

@@ -6,6 +6,8 @@
 # TODO: Investigate ways to combine this with existing PLC API?
 ##
 
+from __future__ import with_statement
+
 import xmlrpclib
 
 from geni.util.gid import *
