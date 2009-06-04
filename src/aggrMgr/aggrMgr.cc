@@ -346,16 +346,26 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
         {
             guestfile << "FlowSpace: ";
             guestfile << f->policy() << ": ";
-            guestfile << "port: " << f->port() << ": ";
-            guestfile << "dl_src: " << f->dl_src() << ": ";
-            guestfile << "dl_dst: " << f->dl_dst() << ": ";
-            guestfile << "dl_type: " << f->dl_type() << ": ";
-            guestfile << "vlan_id: " << f->vlan_id() << ": ";
-            guestfile << "ip_src: " << f->ip_src() << ": ";
-            guestfile << "ip_dst: " << f->ip_dst() << ": ";
-            guestfile << "ip_proto: " << f->ip_proto() << ": ";
-            guestfile << "tp_src: " << f->tp_src() << ": ";
-            guestfile << "tp_dst: " << f->tp_dst() << endl;
+            if (f->port().present())
+                guestfile << "port: " << f->port().get() << ": ";
+            if (f->dl_src().present())
+                guestfile << "dl_src: " << f->dl_src().get().encode() << ": ";
+            if (f->dl_dst().present())
+                guestfile << "dl_dst: " << f->dl_dst().get().encode() << ": ";
+            if (f->dl_type().present())
+                guestfile << "dl_type: " << f->dl_type().get() << ": ";
+            if (f->vlan_id().present())
+                guestfile << "vlan_id: " << f->vlan_id().get() << ": ";
+            if (f->ip_src().present())
+                guestfile << "ip_src: " << f->ip_src().get().encode() << ": ";
+            if (f->ip_dst().present())
+                guestfile << "ip_dst: " << f->ip_dst().get().encode() << ": ";
+            if (f->ip_proto().present())
+                guestfile << "ip_proto: " << f->ip_proto().get() << ": ";
+            if (f->tp_src().present())
+                guestfile << "tp_src: " << f->tp_src().get() << ": ";
+            if (f->tp_dst().present())
+                guestfile << "tp_dst: " << f->tp_dst().get() << endl;
         }
 
         for (rspec::switchEntry_const_iterator sw (root->switchEntry().begin ());
