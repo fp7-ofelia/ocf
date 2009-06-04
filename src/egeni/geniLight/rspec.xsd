@@ -17,20 +17,40 @@
     <complexType name="flowSpaceInfo">
     	<sequence>
     		<element name="policy" type="int"></element>
-            <element name="port" type="string" maxOccurs="1" minOccurs="0"></element>
-            <element name="dl_src" type="string" maxOccurs="1"
-    			minOccurs="0">
+            <element name="port" type="int" maxOccurs="1" minOccurs="0"></element>
+            <element name="dl_src" maxOccurs="1" minOccurs="0">
+            	<simpleType>
+            		<restriction base="hexBinary">
+            			<length value="6"></length>
+            		</restriction>
+            	</simpleType>
+            </element>
+            <element name="dl_dst" maxOccurs="1" minOccurs="0">
+            	<simpleType>
+            		<restriction base="hexBinary">
+            			<length value="6"></length>
+            		</restriction>
+            	</simpleType>
+            </element>
+            <element name="dl_type" type="int" maxOccurs="1" minOccurs="0"></element>
+    		<element name="vlan_id" type="int" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_src" maxOccurs="1" minOccurs="0">
+    			<simpleType>
+    				<restriction base="hexBinary">
+    					<length value="4"></length>
+    				</restriction>
+    			</simpleType>
     		</element>
-    		<element name="dl_dst" type="string" maxOccurs="1"
-    			minOccurs="0">
+    		<element name="ip_dst" maxOccurs="1" minOccurs="0">
+    			<simpleType>
+    				<restriction base="hexBinary">
+    					<length value="4"></length>
+    				</restriction>
+    			</simpleType>
     		</element>
-    		<element name="dl_type" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="vlan_id" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_src" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_dst" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="ip_proto" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="tp_src" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="tp_dst" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ip_proto" type="int" maxOccurs="1" minOccurs="0"></element>
+    		<element name="tp_src" type="int" maxOccurs="1" minOccurs="0"></element>
+    		<element name="tp_dst" type="int" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
@@ -77,5 +97,6 @@
     		<element name="memUtil" type="float" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
+
 
 </schema>
