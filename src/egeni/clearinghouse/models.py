@@ -68,8 +68,8 @@ class AggregateManager(models.Model):
         print("<2>")
         
         # read the rspec and parse it
-        # TODO: rspec_xml = client.list_nodes(None)
-        rspec_xml = test_xml
+        #rspec_xml = test_xml
+        rspec_xml = client.list_nodes(None)
         
         print("Rspec read: "+rspec_xml)
         

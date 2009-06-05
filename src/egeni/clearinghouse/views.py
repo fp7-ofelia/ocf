@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import AggregateManager
 from geniLight.geniLight_client import GeniLightClient
 from django.core.urlresolvers import reverse
+import traceback
 
 def node_detail(request, aggMgr_id, node_id):
     '''Show the details for a node and show a form to reserve a slice'''
@@ -62,10 +63,23 @@ def create(request):
     if(request.method == "POST"):
         post = request.POST.copy()
         if(post.has_key('name') and post.has_key('url')):
+            # Get info
             name = post['name']
             url = post['url']
             key_file = post['key_file'] if post.has_key('key_file') else None
             cert_file = post['cert_file'] if post.has_key('cert_file') else None
+            
+            # Only check the agg mgr exists if the name doesn't start with test
+            if(name.startswith('test')):
+                client = GeniLightClient(am.url, am.key_file, am.cert_file)
+#                try:
+                client.list_nodes(None)
+#                except Exception, inst:
+#                    traceback.print_exc()
+#                    print inst
+#                    error_msg = u"Error doing list_nodes from aggregate manager at %s." % url
+#                    return HttpResponseServerError(error_msg)
+                    
             new_am = AggregateManager.objects.create(name=name,
                                                      url=url,
                                                      key_file=key_file,
