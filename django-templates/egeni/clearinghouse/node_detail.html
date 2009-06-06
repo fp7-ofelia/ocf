@@ -1,4 +1,84 @@
 <div class="details">
     <h2>Details for Node ID {{ node_id }} at Aggregate
-        Manager <a href="{{ aggMgr.get_absolute_url }}">{{ aggMgr.name }}</a></h2>
+        Manager <a href="{{ aggMgr.get_absolute_url }}">{{ aggMgr.name }}</a>
+    </h2>
 </div>
+
+<div class="interfaces">
+	<h3>Interfaces</h3>
+    <ol id="{{ node_id }}_connections">
+    	{% for cnxn_tuple in node_tuple.0 %}
+    	<li>port {{ cnxn_tuple.0 }} to
+    		{% if cnxn_tuple.1 %}
+    		<ol>
+    			{% for remote_pair in cnxn_tuple.1 %}
+    			<li> remote port {{ remote_pair.1 }} of node 
+    			     <a href="../{{ remote_pair.0 }}/">{{ remote_pair.0 }}</a>
+   			    </li>
+   			    {% endfor %}
+ 			</ol>
+ 			{% else %}
+ 			None
+ 			{% endif %}
+ 		</li>
+        {% endfor %}
+    </ol>
+</div>
+
+<div class="avail_flowspace">
+	<h3>Available Flowspace</h3>
+	<table border="1">
+		<tr>
+			<td><h4>Port</h4></td>
+			<td><h4>dl_src</h4></td>
+			<td><h4>dl_dst</h4></td>
+			<td><h4>dl_type</h4></td>
+			<td><h4>vlan_id</h4></td>
+			<td><h4>nw_src</h4></td>
+			<td><h4>nw_dst</h4></td>
+			<td><h4>nw_proto</h4></td>
+			<td><h4>tp_src</h4></td>
+			<td><h4>tp_dst</h4></td>
+		</tr>
+    	{% for fs_entry in node_tuple.1 %}
+    	<tr>
+    		{% for field in fs_entry %}
+    		<td>{{ field }}</td>
+    		{% endfor %}
+    	</tr>
+    	{% endfor %}
+	</table>
+</div>
+
+<div class="req_flowspace">
+	<h3>Reserve Flowspace</h3>
+    <form method="post" action="reserve/">
+        <label for="port">Port</label>
+        <input value="*" type="text" name="port" id="port"></input><br/>
+        <label for="dl_src">dl_src</label>
+        <input value="*" type="text" name="dl_src" id="dl_src"></input><br/>
+        <label for="dl_dst">dl_dst</label>
+        <input value="*" type="text" name="dl_dst" id="dl_dst"></input><br/>
+        <label for="dl_type">dl_type</label>
+        <input value="*" type="text" name="dl_type" id="dl_type"></input><br/>
+        <label for="vlan_id">vlan_id</label>
+        <input value="*" type="text" name="vlan_id" id="vlan_id"></input><br/>
+        <label for="nw_src">nw_src</label>
+        <input value="*" type="text" name="nw_src" id="nw_src"></input><br/>
+        <label for="nw_dst">nw_dst</label>
+        <input value="*" type="text" name="nw_dst" id="nw_dst"></input><br/>
+        <label for="nw_proto">nw_proto</label>
+        <input value="*" type="text" name="nw_proto" id="nw_proto"></input><br/>
+        <label for="tp_src">tp_src</label>
+        <input value="*" type="text" name="tp_src" id="tp_src"></input><br/>
+        <label for="tp_dst">tp_dst</label>
+        <input value="*" type="text" name="tp_dst" id="tp_dst"></input><br/>
+        <input type="submit" value="Request Reservation">
+    </form>
+</div>
+
+{% if message %}
+<div class="message">
+<p><strong>{{ message }}</strong></p>
+</div>
+{% endif %}

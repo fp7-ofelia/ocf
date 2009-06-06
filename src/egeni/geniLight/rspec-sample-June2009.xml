@@ -8,10 +8,26 @@
       <tns:nodeId>640021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
         <tns:port>26</tns:port>
+        <tns:remoteNodeId>213109</tns:remoteNodeId>
+        <tns:remotePort>38</tns:remotePort>
+        <tns:remoteNodeId>134a34</tns:remoteNodeId>
+        <tns:remotePort>2</tns:remotePort>
       </tns:interfaceEntry>
       <tns:interfaceEntry>
         <tns:port>28</tns:port>
       </tns:interfaceEntry>
+      <tns:flowSpaceEntry>
+      	<tns:policy>0</tns:policy>
+      	<tns:port>32</tns:port>
+      	<tns:dl_type>2</tns:dl_type>
+      	<tns:tp_dst>423</tns:tp_dst>
+      </tns:flowSpaceEntry>
+      <tns:flowSpaceEntry>
+      	<tns:policy>0</tns:policy>
+      	<tns:port>1232</tns:port>
+      	<tns:dl_dst>122</tns:dl_dst>
+      	<tns:tp_src>4233</tns:tp_src>
+      </tns:flowSpaceEntry>
     </tns:node>
   </tns:switchEntry>
 
