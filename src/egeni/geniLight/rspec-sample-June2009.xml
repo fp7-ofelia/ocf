@@ -8,6 +8,8 @@
       <tns:nodeId>640021f7cae400</tns:nodeId>
       <tns:interfaceEntry>
         <tns:port>26</tns:port>
+        <tns:remoteNodeId>929123</tns:remoteNodeId>
+        <tns:remotePort>3</tns:remotePort>
       </tns:interfaceEntry>
       <tns:interfaceEntry>
         <tns:port>28</tns:port>
