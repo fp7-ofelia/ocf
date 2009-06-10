@@ -1,0 +1,20 @@
+Here's what you need to do to run the clearinghouse:
+
+1- install django. On openSuSE do: 
+     
+	sudo /sbin/OCICLI http://software.opensuse.org/ymp/devel:languages:python/openSUSE_11.1/python-django.ymp
+	(Make sure you add the devel:languages:python repo)
+
+2- install missing python modules. On openSuSE do:
+    	
+	sudo zypper install python-openssl python-m2crypto python-suds
+
+3- get the geniwrapper code. Go to the directory where you want to put the wrapper code. Then do:
+  
+    	svn co http://svn.planet-lab.org/svn/geniwrapper/trunk geniwrapper
+	echo 'export PYTHONPATH=$PYTHONPATH:<path to geniwrapper>/geniwrapper' >> ~/.bashrc
+	source ~/.bashrc
+
+4- Run the server:
+	cd <path to egeni git clone>/src/egeni
+	python manage.py runserver 0.0.0.0:8000
