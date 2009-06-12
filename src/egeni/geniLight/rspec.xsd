@@ -11,13 +11,14 @@
     			<element name="remotePort" type="int"></element>
     		</sequence>
    
-    	</sequence>
+            <element name="flowSpaceEntry" type="tns:flowSpaceInfo" maxOccurs="unbounded" minOccurs="0">
+    		</element>
+        </sequence>
     </complexType>
 
     <complexType name="flowSpaceInfo">
     	<sequence>
     		<element name="policy" type="int"></element>
-            <element name="port" type="int" maxOccurs="1" minOccurs="0"></element>
             <element name="dl_src" maxOccurs="1" minOccurs="0">
             	<simpleType>
             		<restriction base="hexBinary">
@@ -74,9 +75,6 @@
     		<element name="nodeId" type="string"></element>
     		<element name="type" type="int" maxOccurs="1" minOccurs="0"></element>
     		<element name="interfaceEntry" type="tns:interfaceInfo"
-    			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-    		<element name="flowSpaceEntry" type="tns:flowSpaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="controllerUrl" type="string" maxOccurs="1" minOccurs="0"></element>
