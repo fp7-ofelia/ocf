@@ -334,7 +334,7 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
         //Currently FlowSpace is common for all switchEntry. So extract
         //controller info from only the first value
         switchInfo sw = root->switchEntry().front();
-        string controller = (string &)sw.node().controllerUrl();
+        string controller = (string &)sw.controllerUrl();
 
         guestfile << "Id: " << slice_id << endl;
         guestfile << "Host: " << controller << endl;
