@@ -24,10 +24,10 @@
     	<sequence>
     		<element name="policy">
     			<simpleType>
-    				<restriction base="int">
-    					<enumeration value="ACTION_READONLY"></enumeration>
-    					<enumeration value="ACTION_ALLOW"></enumeration>
-    					<enumeration value="ACTION_DENY"></enumeration>
+    				<restriction base="string">
+    					<enumeration value="readonly"></enumeration>
+    					<enumeration value="allow"></enumeration>
+    					<enumeration value="deny"></enumeration>
     				</restriction>
     			</simpleType>
     		</element>
