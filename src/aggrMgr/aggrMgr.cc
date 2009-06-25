@@ -332,41 +332,12 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
             return 0; //failure
         }
         //Currently FlowSpace is common for all switchEntry. So extract
-        //only first value
+        //controller info from only the first value
         switchInfo sw = root->switchEntry().front();
-        string controller = (string &)sw.node().controllerUrl();
+        string controller = (string &)sw.controllerUrl();
 
         guestfile << "Id: " << slice_id << endl;
         guestfile << "Host: " << controller << endl;
-
-        //For each flowspace entry in the RSpec
-        for (nodeInfo::flowSpaceEntry_const_iterator f (sw.node().flowSpaceEntry().begin ());
-                f != sw.node().flowSpaceEntry().end ();
-                ++f)
-        {
-            guestfile << "FlowSpace: ";
-            guestfile << f->policy() << ": ";
-            if (f->port().present())
-                guestfile << "port: " << f->port().get() << ": ";
-            if (f->dl_src().present())
-                guestfile << "dl_src: " << f->dl_src().get().encode() << ": ";
-            if (f->dl_dst().present())
-                guestfile << "dl_dst: " << f->dl_dst().get().encode() << ": ";
-            if (f->dl_type().present())
-                guestfile << "dl_type: " << f->dl_type().get() << ": ";
-            if (f->vlan_id().present())
-                guestfile << "vlan_id: " << f->vlan_id().get() << ": ";
-            if (f->ip_src().present())
-                guestfile << "ip_src: " << f->ip_src().get().encode() << ": ";
-            if (f->ip_dst().present())
-                guestfile << "ip_dst: " << f->ip_dst().get().encode() << ": ";
-            if (f->ip_proto().present())
-                guestfile << "ip_proto: " << f->ip_proto().get() << ": ";
-            if (f->tp_src().present())
-                guestfile << "tp_src: " << f->tp_src().get() << ": ";
-            if (f->tp_dst().present())
-                guestfile << "tp_dst: " << f->tp_dst().get() << endl;
-        }
 
         for (rspec::switchEntry_const_iterator sw (root->switchEntry().begin ());
                 sw != root->switchEntry ().end ();
@@ -381,6 +352,44 @@ AggrMgr::convert_rspec_str_to_flowvisor_config (char *slice_id, char *rspec_str)
                 cout << i->port();
             }
             cout << "\t" << sw->node().nodeId() <<endl;
+        }
+
+        for (rspec::switchEntry_const_iterator sw (root->switchEntry().begin ());
+                sw != root->switchEntry ().end ();
+                ++sw) {
+            for (nodeInfo::interfaceEntry_const_iterator i (sw->node().interfaceEntry().begin ());
+                    i != sw->node().interfaceEntry().end ();
+                    ++i)
+            {
+                //For each flowspace entry in the RSpec
+                for (interfaceInfo::flowSpaceEntry_const_iterator f (i->flowSpaceEntry().begin ());
+                        f != i->flowSpaceEntry().end ();
+                        ++f)
+                {
+                    guestfile << "FlowSpace: " << f->policy() << ": ";
+                    guestfile << "dpid: " << sw->node().nodeId() << ": ";
+                    guestfile << "port: " << i->port() << ": ";
+
+                    if (f->dl_src().present())
+                        guestfile << "dl_src: " << f->dl_src().get().encode() << ": ";
+                    if (f->dl_dst().present())
+                        guestfile << "dl_dst: " << f->dl_dst().get().encode() << ": ";
+                    if (f->dl_type().present())
+                        guestfile << "dl_type: " << f->dl_type().get() << ": ";
+                    if (f->vlan_id().present())
+                        guestfile << "vlan_id: " << f->vlan_id().get() << ": ";
+                    if (f->ip_src().present())
+                        guestfile << "ip_src: " << f->ip_src().get().encode() << ": ";
+                    if (f->ip_dst().present())
+                        guestfile << "ip_dst: " << f->ip_dst().get().encode() << ": ";
+                    if (f->ip_proto().present())
+                        guestfile << "ip_proto: " << f->ip_proto().get() << ": ";
+                    if (f->tp_src().present())
+                        guestfile << "tp_src: " << f->tp_src().get() << ": ";
+                    if (f->tp_dst().present())
+                        guestfile << "tp_dst: " << f->tp_dst().get() << endl;
+                }
+            }
         }
 
         guestfile.close();

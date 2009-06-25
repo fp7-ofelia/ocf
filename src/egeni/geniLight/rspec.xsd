@@ -10,16 +10,28 @@
     			<element name="remoteNodeId" type="string"></element>
     			<element name="remotePort" type="int"></element>
     		</sequence>
-   
-            <element name="flowSpaceEntry" type="tns:flowSpaceInfo" maxOccurs="unbounded" minOccurs="0">
+
+    		<element name="flowSpaceEntry" type="tns:flowSpaceInfo"
+    			maxOccurs="unbounded" minOccurs="0">
     		</element>
-        </sequence>
+    		<element name="bandwidth" type="float" maxOccurs="1" minOccurs="0"></element>
+    		<element name="latency" type="float" maxOccurs="1" minOccurs="0"></element>
+    		<element name="lossRate" type="float" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
     </complexType>
 
     <complexType name="flowSpaceInfo">
     	<sequence>
-    		<element name="policy" type="int"></element>
-            <element name="dl_src" maxOccurs="1" minOccurs="0">
+    		<element name="policy">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="readonly"></enumeration>
+    					<enumeration value="allow"></enumeration>
+    					<enumeration value="deny"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="dl_src" maxOccurs="1" minOccurs="0">
             	<simpleType>
             		<restriction base="hexBinary">
             			<length value="6"></length>
@@ -77,7 +89,6 @@
     		<element name="interfaceEntry" type="tns:interfaceInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="controllerUrl" type="string" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
 
@@ -85,7 +96,8 @@
     	<sequence>
     		<element name="node" type="tns:nodeInfo"></element>
     		<element name="switchFeatures" type="string" maxOccurs="1" minOccurs="0"></element>
-    	</sequence>
+            <element name="controllerUrl" type="string" maxOccurs="1" minOccurs="0"></element>
+        </sequence>
     </complexType>
 
     <complexType name="hostInfo">
