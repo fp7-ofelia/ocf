@@ -1,0 +1,76 @@
+{% extends "clearinghouse/base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<h1>Details for Slice {{ slice.name }}</h1>
+
+{% if error_message %}
+<div class="error">
+<p><strong>{{ error_message }}</strong></p>
+</div>
+{% endif %}
+
+<div class="details">
+    <form method="POST" action="">
+        {% for am in aggmgr_list %}
+        <h2>Nodes in Aggregate Manager {{ am.name }}</h2>
+        <ol id="switches">
+            {% for node in am.node_set.all %}
+            <li><input type="checkbox" name="am_{{ am.name }}" value="{{ node.id }}" 
+            node|is_in_set:slice.nodes.all />
+                Node ID <a name="{{ am.name }}_{{ node.id }}">{{ node.nodeId }}</a> 
+                <ol id="{{ nodeId }}_ifaces">
+                    {% for iface in node.interface_set.all %}
+                    <li>port {{ iface.portNum }}
+                        {% if iface.remoteIfaces.count %}
+                        connected to
+                        <ol>
+                            {% for remoteiface in iface.remoteIfaces.all %}
+                            <li>port remoteiface.portNum of node 
+                                <a href="#{{ am.name }}_{{ remoteiface.ownerNode.id }}">
+                                    {{ remoteiface.ownerNode.nodeId }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                        {% else %}
+                        unconnected.
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </li>
+            {% endfor %}
+        </ol>
+        {% endfor %}
+        
+        <h2>Flow Space Description</h2>
+        {{ fsformset.management_form }}
+        <table border="1">
+        	<tr>
+       			{% for field in fsformset.forms.0 %}
+       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+        				<td><strong>{{ field.label_tag }}</strong></td>
+        			{% endif %}
+	        	{% endfor %}
+        	</tr>
+       		{% for form in fsformset.forms %}
+       			<tr>
+       				{% for field in form %}
+	       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+			            	<td>{{ field.errors }} {{ field }}</td>
+	        			{% endif %}
+	    	    	{% endfor %}
+	    	    </tr>
+    			{% for field in form %}
+	       			{% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
+			           	{{ field }}
+	        		{% endif %}
+	    	    {% endfor %}
+			{% endfor %}
+        </table>
+        <!--  {{ fsformset }}-->
+        <p><strong>Ready?</strong> <input type="submit" value="Submit" /></p>
+    </form>
+</div>
+{% endblock %}

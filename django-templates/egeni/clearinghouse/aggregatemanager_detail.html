@@ -1,13 +1,10 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block content %}
 <div class="details">
-    <h2>Details for Aggregate Manager {{ object.name }}</h2>
+    <h2>Select node from Aggregate Manager {{ am.name }}</h2>
     
-    url: {{ object.url }} <br />
-    key_file: {{ object.key_file }} <br />
-    cert_file: {{ object.cert_file }} <br />
-    
-    <form method="post" action="update/">
-        <input type="submit" value="Update RSpec">
-    </form>
+    url: {{ am.url }} <br />
 </div>
 
 {% if error_message %}
@@ -18,20 +15,34 @@
 
 <div class="nodes">
     <h2>Nodes</h2>
-    <ol id="switches">
-        {% for node_tuple in nodes %}
-        <li>Switch ID <a href="../switch/{{ node_tuple.0 }}/">{{ node_tuple.0 }}</a> 
-            {% if node_tuple.1 %} connected via {% endif %}
-            <ol id="{{ node_tuple }}_connections">
-                {% for cnxn_tuple in node_tuple.1 %}
-                <li>port {{ cnxn_tuple.0 }} to port {{ cnxn_tuple.2 }} of node <a href="../switch/{{ cnxn_tuple.1 }}/">{{ cnxn_tuple.1 }}</a></li>
-                {% endfor %}
-            </ol>
-        </li>
-        {% endfor %}
-    </ol>
+    <form method="POST" action="">
+        <ol id="switches">
+            {% for node in am.node_set.all %}
+            <li><input type="checkbox" name={{ node.nodeId }} />Node ID <a name="{{ node.nodeId }}">{{ node.nodeId }}</a> 
+                <ol id="{{ nodeId }}_ifaces">
+                    {% for iface in node.interface_set.all %}
+                    <li>port {{ iface.portNum }}
+                        {% if iface.remoteIfaces.count %}
+                        connected to
+                        <ol>
+                            {% for remoteiface in iface.remoteIfaces.all %}
+                            <li>port remoteiface.portNum of node 
+                                <a href="#{{ remoteiface.ownerNode.nodeId }}">
+                                    {{ remoteiface.ownerNode.nodeId }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                        {% else %}
+                        unconnected.
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </li>
+            {% endfor %}
+        </ol>
+        <input type="submit" value="Use Selected Nodes" />
+    </form>
 </div>
-
-<br />
-<a href="../delete">Delete Aggregate Manager</a> |
-<a href="../../"> Back to list </a> <br />
+{% endblock %}

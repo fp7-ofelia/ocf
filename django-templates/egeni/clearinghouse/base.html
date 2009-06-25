@@ -1,0 +1,18 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <!-- link rel="stylesheet" href="style.css" /!-->
+        <title>{% block title %}Simple E-GENI Clearinghouse{% endblock %}</title>
+    </head>
+    
+    <body>
+        <div class="userctrl">
+            {% block userctrl %}
+            <a href="/accounts/logout/">logout</a>
+            {% endblock %}
+        </div>
+        
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

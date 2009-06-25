@@ -1,53 +1,60 @@
 <div class="details">
-    <h2>Details for Node ID {{ node_id }} at Aggregate
+    <h2>Details for Node ID {{ node.nodeId }} at Aggregate
         Manager <a href="{{ aggMgr.get_absolute_url }}">{{ aggMgr.name }}</a>
     </h2>
 </div>
 
 <div class="interfaces">
 	<h3>Interfaces</h3>
-    <ol id="{{ node_id }}_connections">
-    	{% for cnxn_tuple in node_tuple.0 %}
-    	<li>port {{ cnxn_tuple.0 }} to
-    		{% if cnxn_tuple.1 %}
-    		<ol>
-    			{% for remote_pair in cnxn_tuple.1 %}
-    			<li> remote port {{ remote_pair.1 }} of node 
-    			     <a href="../{{ remote_pair.0 }}/">{{ remote_pair.0 }}</a>
-   			    </li>
-   			    {% endfor %}
- 			</ol>
- 			{% else %}
- 			None
- 			{% endif %}
- 		</li>
+    <ol id="{{ node.nodeId }}_connections">
+        {% for iface in node.interface_set.all %}
+        <li>port <strong>{{ iface.portNum }}</strong>
+            {% if iface.remoteIfaces.count %}
+            connected to
+            <ol>
+                {% for remoteiface in iface.remoteIfaces.all %}
+                <li>port remoteiface.portNum of node 
+                    <a href={{ remoteiface.ownerNode.get_absolute_url }}>
+                        {{ remoteiface.ownerNode.nodeId }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            unconnected.<br/>
+            {% endif %}
+            <br/>
+            Available Flowspace:
+            <table border="1">
+                <tr>
+                    <td><h4>dl_src</h4></td>
+                    <td><h4>dl_dst</h4></td>
+                    <td><h4>dl_type</h4></td>
+                    <td><h4>vlan_id</h4></td>
+                    <td><h4>nw_src</h4></td>
+                    <td><h4>nw_dst</h4></td>
+                    <td><h4>nw_proto</h4></td>
+                    <td><h4>tp_src</h4></td>
+                    <td><h4>tp_dst</h4></td>
+                </tr>
+                {% for fs in iface.flowspace_set.all %}
+            	<tr>
+                    <td>{{ fs.dl_src }}</td>
+                    <td>{{ fs.dl_dst }}</td>
+                    <td>{{ fs.dl_type }}</td>
+                    <td>{{ fs.vlan_id }}</td>
+                    <td>{{ fs.nw_src }}</td>
+                    <td>{{ fs.nw_dst }}</td>
+                    <td>{{ fs.nw_proto }}</td>
+                    <td>{{ fs.tp_src }}</td>
+                    <td>{{ fs.tp_dst }}</td>
+            	</tr>
+        		{% endfor %}
+        	</table>
+            <br/>
+        </li>
         {% endfor %}
     </ol>
-</div>
-
-<div class="avail_flowspace">
-	<h3>Available Flowspace</h3>
-	<table border="1">
-		<tr>
-			<td><h4>Port</h4></td>
-			<td><h4>dl_src</h4></td>
-			<td><h4>dl_dst</h4></td>
-			<td><h4>dl_type</h4></td>
-			<td><h4>vlan_id</h4></td>
-			<td><h4>nw_src</h4></td>
-			<td><h4>nw_dst</h4></td>
-			<td><h4>nw_proto</h4></td>
-			<td><h4>tp_src</h4></td>
-			<td><h4>tp_dst</h4></td>
-		</tr>
-    	{% for fs_entry in node_tuple.1 %}
-    	<tr>
-    		{% for field in fs_entry %}
-    		<td>{{ field }}</td>
-    		{% endfor %}
-    	</tr>
-    	{% endfor %}
-	</table>
 </div>
 
 <div class="req_flowspace">

@@ -64,6 +64,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'egeni.sitelockdown.SiteLockDown',
 )
 
 ROOT_URLCONF = 'egeni.urls'
@@ -80,3 +81,5 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'egeni.clearinghouse'
 )
+
+LOGIN_REDIRECT_URL = '/clearinghouse/'

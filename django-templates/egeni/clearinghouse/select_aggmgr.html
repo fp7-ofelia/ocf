@@ -1,0 +1,12 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block content %}
+<h2>Select aggregate to add resources from:</h2>
+<div id="agg_list">
+    <ul>
+	    {% for am in aggmgr_list %}
+    	<li><a href="../{{ am.id }}/selectnodes">{{ am.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

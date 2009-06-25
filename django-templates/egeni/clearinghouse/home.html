@@ -1,0 +1,32 @@
+{% extends "clearinghouse/base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<div id="slices">
+    {% if reserved_slices %}
+    <h1>Fully Reserved Slices:</h1>
+    <ul>
+        {% for slice in reserved_slices %}
+        <li><a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if unreserved_slices %}
+    <h1>Partial or Unreserved Slices:</h1>
+    <ul>
+        {% for slice in unreserved_slices %}
+        <li><a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+
+<div id="new_slice">
+    <h1>Create new slice:</h1>
+    <form method="POST" action="">
+        {{ form.as_p }}
+        <input type="submit" value="Create">
+    </form>
+</div>
+{% endblock %}
