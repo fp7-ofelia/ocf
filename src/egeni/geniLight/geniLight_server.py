@@ -1,16 +1,15 @@
 from soaplib.wsgi_soap import SimpleWSGISoapApp
 from soaplib.service import soapmethod
-#import cElementTree as et
 from geniLight_types import *
 import socket
 import struct
 import sys
 from ctypes import create_string_buffer
 
+SOAP_INTERFACE_PORT = 7889
 AGGREGATE_MANAGER_PORT = 2603
-AGGREGATE_MANAGER_IP = '12.71.54.188'
-#AGGREGATE_MANAGER_IP = 'mvm-10g2.stanford.edu'
-#AGGREGATE_MANAGER_IP = 'localhost'
+AGGREGATE_MANAGER_IP = 'localhost'
+#AGGREGATE_MANAGER_IP = 'openflowvisor.stanford.edu'
 
 # Message IDs for all the GENI light calls
 # This will be used by the aggrMgr controller
@@ -146,32 +145,18 @@ class GeniLightServer(SimpleWSGISoapApp):
         component_list = extract(aggrMgr_sock);
         aggrMgr_sock.close()
 
-        #return 'list of components'
         return component_list 
-
-    @soapmethod(GeniRecordEntry,_returns=GeniResult)
-    def register(self, record):
-        # Unclear what this will be used for 
-        return GeniResult(1, 'Success')
-
-    @soapmethod(String,_returns=GeniResult)
-    def reboot_component(self,name):
-        buf = create_string_buffer(2 + 1 + len(name)) 
-        struct.pack_into(format, buf, 0, socket.htons(len(buf)),
-                SFA_REBOOT_COMPONENT, name)
-
-        aggrMgr_sock = connect_aggrMgr()
-        aggrMgr_sock.send(buf)
-        aggrMgr_sock.close()
-
-        return GeniResult(1, 'Success')
 
 if __name__=='__main__':
     try:from cherrypy.wsgiserver import CherryPyWSGIServer
     except:from cherrypy._cpwsgiserver import CherryPyWSGIServer
-
+    
+    if len(sys.argv) > 2:
+        AGGREGATE_MANAGER_IP = sys.argv[1]
+        AGGREGATE_MANAGER_PORT = int(sys.argv[2])
+        
     gls = GeniLightServer()
-    server = CherryPyWSGIServer(('localhost',7889),gls)
+    server = CherryPyWSGIServer(('localhost',SOAP_INTERFACE_PORT),gls)
 
     try:
         server.start()
