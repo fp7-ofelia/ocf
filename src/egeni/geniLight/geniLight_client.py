@@ -95,9 +95,6 @@ class GeniLightClient():
     # Aggregate Interface
     #-------------------------------------------------------------------------
     
-    def test_func_call(self):
-        return "Function call test succeeded."
-    
     ## list components
     #
     # 

@@ -3,7 +3,6 @@
 xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
 xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-xmlns:tns="http://yuba.stanford.edu/geniLight/"
 name="geniLight" 
 targetNamespace="http://yuba.stanford.edu/geniLight/">
 
@@ -15,10 +14,6 @@ targetNamespace="http://yuba.stanford.edu/geniLight/">
   <wsdl:message name="GeniResult">
     <wsdl:part name="code" type="xsd:int"></wsdl:part>
     <wsdl:part name="error_msg" type="xsd:string"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="GeniRecordEntry">
-  	<wsdl:part name="type" type="xsd:int"></wsdl:part>
-  	<wsdl:part name="name" type="xsd:string"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="SliceList">
   	<wsdl:part name="slice_list" type="xsd:string"></wsdl:part>
@@ -48,14 +43,6 @@ targetNamespace="http://yuba.stanford.edu/geniLight/">
         <wsdl:operation name="list_components">
             <wsdl:input message="gl:Dummy" name="list_components_request"></wsdl:input>
             <wsdl:output message="gl:ComponentList" name="list_components_response"></wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="register">
-        	<wsdl:input message="gl:GeniRecordEntry" name="register_request"></wsdl:input>
-        	<wsdl:output message="gl:GeniResult" name="register_response"></wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="reboot_component">
-        	<wsdl:input message="gl:GeniRecordEntry" name="reboot_component_request"></wsdl:input>
-        	<wsdl:output message="gl:GeniResult" name="reboot_component_response"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="list_slices">
             <wsdl:input message="gl:Dummy" name="list_slices_request"></wsdl:input>
@@ -130,34 +117,6 @@ targetNamespace="http://yuba.stanford.edu/geniLight/">
   				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
   		</wsdl:input>
   		<wsdl:output name="list_components_response">
-  			<soap:body use="encoded"
-  				namespace="http://yuba.stanford.edu/geniLight/"
-  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-  		</wsdl:output>
-  	</wsdl:operation>
-  	<wsdl:operation name="register">
-  		<soap:operation
-  			soapAction="http://yuba.stanford.edu/geniLight/register" />
-  		<wsdl:input name="register_request">
-  			<soap:body use="encoded"
-  				namespace="http://yuba.stanford.edu/geniLight/"
-  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-  		</wsdl:input>
-  		<wsdl:output name="register_response">
-  			<soap:body use="encoded"
-  				namespace="http://yuba.stanford.edu/geniLight/"
-  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-  		</wsdl:output>
-  	</wsdl:operation>
-  	<wsdl:operation name="reboot_component">
-  		<soap:operation
-  			soapAction="http://yuba.stanford.edu/geniLight/reboot_component" />
-  		<wsdl:input name="reboot_component_request">
-  			<soap:body use="encoded"
-  				namespace="http://yuba.stanford.edu/geniLight/"
-  				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
-  		</wsdl:input>
-  		<wsdl:output name="reboot_component_response">
   			<soap:body use="encoded"
   				namespace="http://yuba.stanford.edu/geniLight/"
   				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
