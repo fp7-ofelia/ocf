@@ -23,6 +23,8 @@ SFA_DELETE_SLICE = 105
 SFA_GET_SLICES = 106
 SFA_RESET_SLICES = 107
 
+DEBUG = 1
+
 def print_buffer(buf):
     for i in range(0,len(buf)):
         print('%x' % buf[i])
@@ -94,22 +96,27 @@ class GeniLightServer(SimpleWSGISoapApp):
     # implicitly no __init__()
     @soapmethod(String,String,_returns=Integer)
     def start_slice(self, cred, hrn):
+        if DEBUG: print "Received start_slice call"
         return msg_aggrMgr(SFA_START_SLICE)
 
     @soapmethod(String,String,_returns=Integer)
     def stop_slice(self, cred, hrn):
+        if DEBUG: print "Received stop_slice call"
         return msg_aggrMgr(SFA_STOP_SLICE)
 
     @soapmethod(String,String,_returns=Integer)
     def delete_slice(self, cred, hrn):
+        if DEBUG: print "Received delete_slice call"
         return msg_aggrMgr(SFA_DELETE_SLICE)
 
     @soapmethod(String,String,_returns=Integer)
     def reset_slices(self, cred, hrn):
+        if DEBUG: print "Received reset_slices call"
         return msg_aggrMgr(SFA_RESET_SLICES)
 
     @soapmethod(String,String,String,_returns=String)
     def create_slice(self, cred, hrn, rspec):
+        if DEBUG: print "Received create_slice call"
         slice_id = generate_slide_id(cred, hrn)
 
         msg = struct.pack('> B%ds%ds' % len(slice_id), SFA_CREATE_SLICE, slice_id, rspec)
@@ -128,6 +135,7 @@ class GeniLightServer(SimpleWSGISoapApp):
 
     @soapmethod(String,_returns=String)
     def get_slices(self, cred):
+        if DEBUG: print "Received get_slices call"
         msg = struct.pack('> B%ds%ds' % len(cred), SFA_GET_SLICES, cred)
         buf = struct.pack('> H', len(msg)+2) + msg
 
@@ -146,6 +154,7 @@ class GeniLightServer(SimpleWSGISoapApp):
 
     @soapmethod(String,String,_returns=Array(String))
     def get_resources(self, cred, hrn=None):
+        if DEBUG: print "Received get_resources call"
         slice_id = generate_slide_id(cred, hrn)
 
         msg = struct.pack('> B%ds' % len(slice_id), SFA_GET_RESOURCES, slice_id)
