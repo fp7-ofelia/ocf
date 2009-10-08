@@ -11,6 +11,19 @@ test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
   <tns:version>1.0</tns:version>
 
+  <tns:remoteEntry>
+    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
+    <tns:remoteType>PLNode</tns:remoteType>
+    <tns:node>
+      <tns:nodeId>9dsafj</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>0</tns:port>
+        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>46</tns:remotePort>
+      </tns:interfaceEntry>
+    </tns:node>
+  <tns:remoteEntry>
+
   <tns:switchEntry>
     <tns:node>
       <tns:nodeId>640021f7cae400</tns:nodeId>
@@ -106,24 +119,51 @@ test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 """
 
 class AggregateManager(models.Model):
-    '''A single aggregate manager'''
-    name = models.TextField(max_length=200, unique=True)
-    url = models.URLField('Aggregate Manager URL', unique=True, verify_exists=False)
-    key_file = models.TextField(max_length=200)
-    cert_file = models.TextField(max_length=200)
+    '''An Aggregate Manager'''
     
-    def __unicode__(self):
-        return 'AM ' + self.name + ' at ' + self.url
+    TYPE_OF = 'OF'
+    TYPE_PL = 'PL'
+    
+    AM_TYPE_CHOICES={TYPE_OF: 'E-GENI Aggregate Manager',
+                     TYPE_PL: 'PlanetLab Aggregate Manager',
+                     }
+
+    # @ivar name: The name of the aggregate manager. Must be unique 
+    name = models.TextField(max_length=200, unique=True)
+    
+    # @ivar url: Location where the aggregate manager can be reached
+    url = models.URLField('Aggregate Manager URL', unique=True, verify_exists=False)
+    
+    # @ivar type: Aggregate Type: OF or PL
     
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
 
+    def __unicode__(self):
+        return AggregateManager.AM_TYPE_CHOICES[self.type] + ' ' + self.name + ' at ' + self.url
+    
+    def get_local_nodes(self):
+        return self.node_set.filter(remoteURL__url=self.url)
+    
     def updateRSpec(self):
-        '''Read and parse the RSpec from the aggregate manager'''
+        if self.type == AggregateManager.TYPE_OF:
+            return self.updateOFRSpec()
+        else:
+            return self.updatePLRSpec()
         
-        # clear the old nodes
-        self.node_set.all().delete()
+    def updateOFRSpec(self):
+        '''
+        Read and parse the RSpec specifying all 
+        nodes from the aggregate manager using the E-GENI
+        RSpec
+        '''
+        
+        # list of node ids added
+        new_node_ids = []
+        
+        # list of interfaces added
+        new_iface_ids = []
         
         print("making client")
         # get a connector to the server
@@ -156,7 +196,7 @@ class AggregateManager(models.Model):
                                         processorNss={"tns": ns_uri})
         
         # Get all the nodes
-        nodes = xpath.Evaluate("tns:switchEntry/tns:node", context=context)
+        nodes = xpath.Evaluate("*/tns:node", context=context)
         
         # In the first iteration create all the nodes
         for node in nodes:
@@ -165,14 +205,55 @@ class AggregateManager(models.Model):
 
             # get the node ID string
             nodeId = xpath.Evaluate("string(tns:nodeId)", context=context)
-            node_type = xpath.Evaluate("string(tns:nodeId)", context=context)
-            self.node_set.create(aggMgr=self,
-                                 nodeId=nodeId,
-                                 type=node_type)
+            node_type = xpath.Evaluate("name(..)", context=context)
             
+            print "<x> %s" % node_type
+            
+            if(node_type == 'tns:remoteEntry'):
+                remoteType = xpath.Evaluate("string(../tns:remoteType)", context=context)
+                remoteURL = xpath.Evaluate("string(../tns:remoteURL)", context=context)
+                
+                # check if this clearinghouse knows about this AM
+                try:
+                    am = AggregateManager.objects.get(url=am_url)
+                
+                # Nope we don't know about the remote AM
+                except AggregateManager.DoesNotExist:
+                    node_obj = Node(nodeId=nodeId,
+                                    type=remoteType,
+                                    remoteURL=remoteURL,
+                                    aggMgr=self,
+                                    )
+                    self.node_set.add(node_obj)
+                    new_node_ids.append(nodeId)
+                
+                # We do know about the remote AM
+                else:
+                    node_obj = Node(nodeId=nodeId,
+                                    type=remoteType,
+                                    remoteURL=am.url,
+                                    aggMgr=am)
+            
+            # Entry controlled by this AM
+            else:
+                node_obj = Node(nodeId=nodeId,
+                                type=Node.TYPE_OF,
+                                aggMgr=self,
+                                remoteURL=self.url,
+                                )
+                self.node_set.add(node_obj)
+                new_node_ids.append(nodeId)
+                
+            # add/update node
+            node_obj.save()
+            
+        # delete all old nodes
+        self.node_set.exclude(id__in=new_node_ids).clear()
+                
         # In the second iteration create all the interfaces and flowspaces
         context.setNodePosSize((rspec, 1, 1))
         interfaces = xpath.Evaluate("//tns:interfaceEntry", context=context)
+        new_iface_ids = []
         for interface in interfaces:
             # move the context
             context.setNodePosSize((interface, 1, 1))
@@ -181,14 +262,24 @@ class AggregateManager(models.Model):
             
             portNum = int(xpath.Evaluate("number(tns:port)", context=context))
             print "<0> %s" % portNum
-            iface = node_obj.interface_set.create(portNum=portNum,
-                                                  ownerNode=node_obj)
             
+            # check if the iface exists
+            iface_obj, created = \
+                Interface.objects.get_or_create(portNum=portNum,
+                                                ownerNode__nodeId=nodeId,
+                                                defaults={'ownerNode': node_obj})
+            
+            new_iface_ids.append(iface_obj.id)
+            
+            if not created:
+                iface_obj.ownerNode = node_obj
+                
             # get the flowspace entries
             fs_entries = xpath.Evaluate("tns:flowSpaceEntry", context=context)
             print fs_entries
 
             # add all of them
+            iface.flowspace_set.all().clear()
             for fs in fs_entries:
                 context.setNodePosSize((fs, 1, 1))
                 # parse the flowspace
@@ -208,8 +299,12 @@ class AggregateManager(models.Model):
                                            tp_src=p("tp_src"),
                                            tp_dst=p("tp_dst"),
                                            interface=iface)
-
-            
+        
+        # delete extra ifaces: only those whom this AM created
+        Interface.objects.exclude(
+            id__in=new_iface_ids).filter(
+                ownerNode__aggMgr=self).clear()
+        
         # In the third iteration, add all the remote connections
         for interface in interfaces:
             # move the context
@@ -217,15 +312,18 @@ class AggregateManager(models.Model):
             nodeId = xpath.Evaluate("string(../tns:nodeId)", context=context)
             portNum = int(xpath.Evaluate("number(tns:port)", context=context))
             iface_obj = Interface.objects.get(portNum__exact=portNum,
-                                              ownerNode__nodeId__exact=nodeId)
+                                              ownerNode__nodeId=nodeId,
+                                              ownerNode__aggMgr__pk=self.pk,
+                                              )
             
             # get the remote ifaces
             other_nodeIDs = xpath.Evaluate("tns:remoteNodeId", context=context)
             other_ports = xpath.Evaluate("tns:remotePort", context=context)
-                
+
             print "<1> nodes:%s ports:%s" % (other_nodeIDs, other_ports)
                 
             other_ports.reverse()
+            remote_iface_ids = []
             for nodeID in other_nodeIDs:
                 # get the remote node object
                 context.setNodePosSize((nodeID, 1, 1))
@@ -235,15 +333,19 @@ class AggregateManager(models.Model):
                 context.setNodePosSize((other_ports.pop(), 1, 1))
                 num = int(xpath.Evaluate("number()", context=context))
                 print "<8> %s %s" % (num, id)
-                remote_iface_obj = Interface.objects.get(portNum__exact=num,
-                                                         ownerNode__nodeId__exact=id)
-                    
                 
-                # add the remote interface
+                remote_iface_obj = Interface.objects.get(portNum__exact=num,
+                                                         ownerNode__nodeId=id,
+                                                         )
+                
+                remote_iface_ids.append(remote_iface_obj.id)
                 iface_obj.remoteIfaces.add(remote_iface_obj)
-
+                
                 # add the connection
                 print "<3>"; print id; print num
+                
+            # remove old connections
+            iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).clear()
         
     def makeReservation(self, node_id, field_dict):
         '''Request a reservation and return a message on success or failure'''
@@ -255,10 +357,20 @@ class AggregateManager(models.Model):
         return "Slice Reserved!"
 
 class Node(models.Model):
-    '''Anything that has interfaces. Can be a switch or a host'''
-    aggMgr = models.ForeignKey(AggregateManager)
+    '''
+    Anything that has interfaces. Can be a switch or a host or a stub.
+    '''
+    
+    TYPE_OF = 'OF';
+
     nodeId = models.CharField(max_length=200, primary_key=True)
     type = models.CharField(max_length=200)
+    
+    # @ivar remoteURL: indicates URL of controller
+    remoteURL = models.URLField("Controller URL", verify_exists=False)
+    
+    # @ivar aggMgr: The AM that created the node or controls it
+    aggMgr = models.ForeignKey(AggregateManager)
     
     def __unicode__(self):
         return "Node %s" % self.nodeId
@@ -266,7 +378,7 @@ class Node(models.Model):
     def get_absolute_url(self):
         return('node_detail', [str(self.aggMgr.id), str(self.nodeId)])
     get_absolute_url = permalink(get_absolute_url)
-    
+
 
 class Interface(models.Model):
     '''Describes a port and its connection'''
@@ -276,7 +388,6 @@ class Interface(models.Model):
     
     def __unicode__(self):
         return "Interface "+portNum+" of node "+self.ownerNode.nodeId
-
 
 class Slice(models.Model):
     '''This is created by a user (the owner) and contains

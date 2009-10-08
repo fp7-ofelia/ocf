@@ -15,7 +15,7 @@
         {% for am in aggmgr_list %}
         <h2>Nodes in Aggregate Manager {{ am.name }}</h2>
         <ol id="switches">
-            {% for node in am.node_set.all %}
+            {% for node in am.get_local_nodes %}
             <li><input type="checkbox" name="am_{{ am.name }}" value="{{ node.id }}" 
             node|is_in_set:slice.nodes.all />
                 Node ID <a name="{{ am.name }}_{{ node.id }}">{{ node.nodeId }}</a> 
@@ -26,8 +26,8 @@
                         connected to
                         <ol>
                             {% for remoteiface in iface.remoteIfaces.all %}
-                            <li>port remoteiface.portNum of node 
-                                <a href="#{{ am.name }}_{{ remoteiface.ownerNode.id }}">
+                            <li>port {{ remoteiface.portNum }} of node 
+                                <a href="#{{ remoteiface.ownerNode.aggMgr.name }}_{{ remoteiface.ownerNode.id }}">
                                     {{ remoteiface.ownerNode.nodeId }}
                                 </a>
                             </li>
