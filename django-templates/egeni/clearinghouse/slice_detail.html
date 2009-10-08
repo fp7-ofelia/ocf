@@ -16,25 +16,30 @@
         <h2>Nodes in Aggregate Manager {{ am.name }}</h2>
         <ol id="switches">
             {% for node in am.get_local_nodes %}
-            <li><input type="checkbox" name="am_{{ am.name }}" value="{{ node.id }}" 
-            node|is_in_set:slice.nodes.all />
-                Node ID <a name="{{ am.name }}_{{ node.id }}">{{ node.nodeId }}</a> 
+            <li><input type="checkbox" name="am_{{ am.id }}" value="{{ node.nodeId }}" 
+            {{ node|is_in_set:slice.nodes.all }} />
+                Node ID <strong><a name="{{ am.id }}_{{ node.nodeId }}">{{ node.nodeId }}</a></strong> 
                 <ol id="{{ nodeId }}_ifaces">
                     {% for iface in node.interface_set.all %}
-                    <li>port {{ iface.portNum }}
+                    <li>port <strong>{{ iface.portNum }}</strong>
                         {% if iface.remoteIfaces.count %}
                         connected to
                         <ol>
                             {% for remoteiface in iface.remoteIfaces.all %}
-                            <li>port {{ remoteiface.portNum }} of node 
-                                <a href="#{{ remoteiface.ownerNode.aggMgr.name }}_{{ remoteiface.ownerNode.id }}">
+                            <li>port <strong>{{ remoteiface.portNum }}</strong> of node <strong>
+                            	{% if remoteiface.ownerNode.is_in_clearinghouse %}
+                                <a href="#{{ remoteiface.ownerNode.aggMgr.id }}_{{ remoteiface.ownerNode.nodeId }}">
                                     {{ remoteiface.ownerNode.nodeId }}
                                 </a>
+                                {% else %}
+	                            {{ remoteiface.ownerNode.nodeId }}
+                                {% endif %}
+                                .</strong>
                             </li>
                             {% endfor %}
                         </ol>
                         {% else %}
-                        unconnected.
+                        <strong>unconnected</strong>.
                         {% endif %}
                     </li>
                     {% endfor %}

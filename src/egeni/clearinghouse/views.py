@@ -38,35 +38,47 @@ def slice_detail(request, slice_id):
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, FlowSpace)
     
+    print "<xx>"
+    
     if request.method == "POST":
-        
+        print "<yy>"
         # get all the selected nodes
         for am in agg_list:
-            slice.nodes.remove(
-                slice.nodes.exclude(
-                    id__in=request.POST["am_%s" % am.name]))
-            slice.nodes.add(
-                Slice.nodes.filter(
-                    id__in=request.POST["am_%s" % am.name]).exclude(
-                        id__in=slice.nodes.values_list('id', flat=True)))
+            # remove from slice the nodes that are not in the post
+            nodes = slice.nodes.exclude(
+                nodeId__in=request.POST.getlist("am_%s" % am.id))
+            [slice.nodes.remove(n) for n in nodes]
+            
+            # add to slice nodes that are in post but not in slice
+            nodes = am.node_set.filter(
+                nodeId__in=request.POST.getlist("am_%s" % am.id))
+            nodes = nodes.exclude(
+                nodeId__in=slice.nodes.values_list('nodeId', flat=True))
+            print "nodes: %s" % nodes
+            [slice.nodes.add(n) for n in nodes]
             
         formset = FSFormSet(request.POST, request.FILES, instance=slice)
         if formset.is_valid():
             formset.save()
             
-            # TODO: Request/update slice from agg mgr
             slice.committed = True
             slice.save()
                         
             return HttpResponseRedirect(reverse('home'))
         
     else:
+        print "<zz>"
+        for am in agg_list:
+            print "<aa>"
+            am.updateRSpec()
         formset = FSFormSet(instance=slice)
-        print "Formset: "
-        print formset
-        print "forms: "
-        for form in formset.forms:
-            print form.as_table()
+        print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
+    
+#        print "Formset: "
+#        print formset
+#        print "forms: "
+#        for form in formset.forms:
+#            print form.as_table()
         
     return render_to_response("clearinghouse/slice_detail.html",
                               {'aggmgr_list': agg_list,

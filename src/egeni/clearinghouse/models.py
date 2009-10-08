@@ -19,10 +19,10 @@ test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
       <tns:interfaceEntry>
         <tns:port>0</tns:port>
         <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>46</tns:remotePort>
+        <tns:remotePort>1</tns:remotePort>
       </tns:interfaceEntry>
     </tns:node>
-  <tns:remoteEntry>
+  </tns:remoteEntry>
 
   <tns:switchEntry>
     <tns:node>
@@ -62,6 +62,11 @@ test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
       </tns:interfaceEntry>
       <tns:interfaceEntry>
         <tns:port>48</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>1</tns:port>
+        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
+        <tns:remotePort>0</tns:remotePort>
       </tns:interfaceEntry>
     </tns:node>
   </tns:switchEntry>
@@ -129,12 +134,13 @@ class AggregateManager(models.Model):
                      }
 
     # @ivar name: The name of the aggregate manager. Must be unique 
-    name = models.TextField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     
     # @ivar url: Location where the aggregate manager can be reached
     url = models.URLField('Aggregate Manager URL', unique=True, verify_exists=False)
     
     # @ivar type: Aggregate Type: OF or PL
+    type = models.CharField(max_length=20, choices=AM_TYPE_CHOICES.items())
     
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -144,9 +150,10 @@ class AggregateManager(models.Model):
         return AggregateManager.AM_TYPE_CHOICES[self.type] + ' ' + self.name + ' at ' + self.url
     
     def get_local_nodes(self):
-        return self.node_set.filter(remoteURL__url=self.url)
+        return self.node_set.filter(is_remote=False)
     
     def updateRSpec(self):
+        print "Update RSpec Type %s" % self.type
         if self.type == AggregateManager.TYPE_OF:
             return self.updateOFRSpec()
         else:
@@ -167,7 +174,7 @@ class AggregateManager(models.Model):
         
         print("making client")
         # get a connector to the server
-        client = GeniLightClient(self.url, self.key_file, self.cert_file)
+        #client = GeniLightClient(self.url, None, None)
         
         print("<2>")
         
@@ -215,7 +222,7 @@ class AggregateManager(models.Model):
                 
                 # check if this clearinghouse knows about this AM
                 try:
-                    am = AggregateManager.objects.get(url=am_url)
+                    am = AggregateManager.objects.get(url=remoteURL)
                 
                 # Nope we don't know about the remote AM
                 except AggregateManager.DoesNotExist:
@@ -223,16 +230,23 @@ class AggregateManager(models.Model):
                                     type=remoteType,
                                     remoteURL=remoteURL,
                                     aggMgr=self,
+                                    is_remote=True,
                                     )
+                    node_obj.save()
                     self.node_set.add(node_obj)
                     new_node_ids.append(nodeId)
                 
                 # We do know about the remote AM
                 else:
+                    if remoteURL == self.URL:
+                        raise Exception("Remote URL is my URL, but entry is remote.")
+                    
                     node_obj = Node(nodeId=nodeId,
                                     type=remoteType,
-                                    remoteURL=am.url,
-                                    aggMgr=am)
+                                    remoteURL=remoteURL,
+                                    aggMgr=am,
+                                    is_remote=True,
+                                    )
             
             # Entry controlled by this AM
             else:
@@ -240,15 +254,16 @@ class AggregateManager(models.Model):
                                 type=Node.TYPE_OF,
                                 aggMgr=self,
                                 remoteURL=self.url,
+                                is_remote=False,
                                 )
-                self.node_set.add(node_obj)
                 new_node_ids.append(nodeId)
+                node_obj.save()
+                self.node_set.add(node_obj)
                 
-            # add/update node
             node_obj.save()
             
         # delete all old nodes
-        self.node_set.exclude(id__in=new_node_ids).clear()
+        self.node_set.exclude(nodeId__in=new_node_ids).delete()
                 
         # In the second iteration create all the interfaces and flowspaces
         context.setNodePosSize((rspec, 1, 1))
@@ -274,36 +289,36 @@ class AggregateManager(models.Model):
             if not created:
                 iface_obj.ownerNode = node_obj
                 
-            # get the flowspace entries
-            fs_entries = xpath.Evaluate("tns:flowSpaceEntry", context=context)
-            print fs_entries
-
-            # add all of them
-            iface.flowspace_set.all().clear()
-            for fs in fs_entries:
-                context.setNodePosSize((fs, 1, 1))
-                # parse the flowspace
-                p1 = lambda name: xpath.Evaluate("string(tns:%s)" % name,
-                                                 context=context)
-                
-                p = lambda x: p1(x) if (p1(x)) else "*"
-                
-                iface.flowspace_set.create(policy=p("policy"),
-                                           dl_src=p("dl_src"),
-                                           dl_dst=p("dl_dst"),
-                                           dl_type=p("dl_type"),
-                                           vlan_id=p("vlan_id"),
-                                           nw_src=p("ip_src"),
-                                           nw_dst=p("ip_dst"),
-                                           nw_proto=p("ip_proto"),
-                                           tp_src=p("tp_src"),
-                                           tp_dst=p("tp_dst"),
-                                           interface=iface)
+#            # get the flowspace entries
+#            fs_entries = xpath.Evaluate("tns:flowSpaceEntry", context=context)
+#            print fs_entries
+#
+#            # add all of them
+#            interface.flowspace_set.all().delete()
+#            for fs in fs_entries:
+#                context.setNodePosSize((fs, 1, 1))
+#                # parse the flowspace
+#                p1 = lambda name: xpath.Evaluate("string(tns:%s)" % name,
+#                                                 context=context)
+#                
+#                p = lambda x: p1(x) if (p1(x)) else "*"
+#                
+#                interface.flowspace_set.create(policy=p("policy"),
+#                                               dl_src=p("dl_src"),
+#                                               dl_dst=p("dl_dst"),
+#                                               dl_type=p("dl_type"),
+#                                               vlan_id=p("vlan_id"),
+#                                               nw_src=p("ip_src"),
+#                                               nw_dst=p("ip_dst"),
+#                                               nw_proto=p("ip_proto"),
+#                                               tp_src=p("tp_src"),
+#                                               tp_dst=p("tp_dst"),
+#                                               interface=iface)
         
         # delete extra ifaces: only those whom this AM created
         Interface.objects.exclude(
             id__in=new_iface_ids).filter(
-                ownerNode__aggMgr=self).clear()
+                ownerNode__aggMgr=self).delete()
         
         # In the third iteration, add all the remote connections
         for interface in interfaces:
@@ -345,7 +360,7 @@ class AggregateManager(models.Model):
                 print "<3>"; print id; print num
                 
             # remove old connections
-            iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).clear()
+            iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).delete()
         
     def makeReservation(self, node_id, field_dict):
         '''Request a reservation and return a message on success or failure'''
@@ -362,9 +377,12 @@ class Node(models.Model):
     '''
     
     TYPE_OF = 'OF';
+    TYPE_PL = 'PL';
 
     nodeId = models.CharField(max_length=200, primary_key=True)
     type = models.CharField(max_length=200)
+    
+    is_remote = models.BooleanField()
     
     # @ivar remoteURL: indicates URL of controller
     remoteURL = models.URLField("Controller URL", verify_exists=False)
@@ -378,6 +396,9 @@ class Node(models.Model):
     def get_absolute_url(self):
         return('node_detail', [str(self.aggMgr.id), str(self.nodeId)])
     get_absolute_url = permalink(get_absolute_url)
+    
+    def is_in_clearinghouse(self):
+        return self.aggMgr.url == self.remoteURL
 
 
 class Interface(models.Model):
