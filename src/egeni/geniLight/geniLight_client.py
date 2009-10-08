@@ -69,26 +69,8 @@ class GeniLightClient():
     def list(self, cred, hrn):
         return []
 
-    ##
-    # Register an object with the registry. In addition to being stored in the
-    # Geni database, the appropriate records will also be created in the
-    # PLC databases.
-    #
-    # The geni_info and/or pl_info fields must in the record must be filled
-    # out correctly depending on the type of record that is being registered.
-    #
-    # TODO: The geni_info member of the record should be parsed and the pl_info
-    # adjusted as necessary (add/remove users from a slice, etc)
-    #
-    # @param cred credential object specifying rights of the caller
-    # @return record to register
-    #
-    # @return GID object for the newly-registered record
-
     def register(self, cred, record):
-        r = GeniRecordEntry(record.type, record.name)
-        result = self.server.service.register(r)
-        return result
+        return -1
 
     ##
     # Remove an object from the registry. If the object represents a PLC object,
@@ -112,9 +94,6 @@ class GeniLightClient():
     #-------------------------------------------------------------------------
     # Aggregate Interface
     #-------------------------------------------------------------------------
-    
-    def test_func_call(self):
-        return "Function call test succeeded."
     
     ## list components
     #
@@ -197,11 +176,15 @@ class GeniLightClient():
 
 if __name__ == '__main__' :
 
-    cred = Credential(subject='Alice')
+    AGGREGATE_MANAGER_SOAP_IP = 'localhost'
+    AGGREGATE_MANAGER_SOAP_IP = 7889
 
-    glc = GeniLightClient('http://localhost:7889','/dev/null','/dev/null')
-    #print glc.server
-    #result = glc.start_slice(cred, 'alice@kicksass.org')
+    glc = GeniLightClient('http://'+AGGREGATE_MANAGER_SOAP_IP + ':' + str(AGGREGATE_MANAGER_SOAP_PORT),'/dev/null','/dev/null')
+
+    cred = Credential(subject='Alice')
     result = glc.list_nodes(cred)
     print result
+
+    #result = glc.create_slice(cred, 'alice@testing.org')
+    #print result
     
