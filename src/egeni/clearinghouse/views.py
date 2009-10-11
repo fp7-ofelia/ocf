@@ -50,7 +50,7 @@ def slice_detail(request, slice_id):
             [slice.nodes.remove(n) for n in nodes]
             
             # add to slice nodes that are in post but not in slice
-            nodes = am.node_set.filter(
+            nodes = am.local_node_set.filter(
                 nodeId__in=request.POST.getlist("am_%s" % am.id))
             nodes = nodes.exclude(
                 nodeId__in=slice.nodes.values_list('nodeId', flat=True))
@@ -63,7 +63,9 @@ def slice_detail(request, slice_id):
             
             slice.committed = True
             slice.save()
-                        
+            
+            # TODO: Do reservation here
+            
             return HttpResponseRedirect(reverse('home'))
         
     else:
@@ -85,6 +87,15 @@ def slice_detail(request, slice_id):
                                'slice': slice,
                                'fsformset': formset,
                                })
+
+def get_topo_xml():
+
+
+
+
+
+
+
 
 def resv_sel_nodes(request, slice_id, am_id):
     '''Select nodes from the AM'''

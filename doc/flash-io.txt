@@ -1,0 +1,193 @@
+Summary:
+We need a plugin that can display a topology for a graph that
+is specified in XML, and allows the user to select and deselect
+nodes and links and click a submit button.
+
+----------------------------------------------------------------
+Details:
+When the Flash plugin starts, it is given a URL from which to
+read an XML input file. The XML plugin specifies some parameters
+to the Flash plugin including where to places nodes 
+(x,y coordinates) and links (endpoint node IDs) and
+what images to use for selected and unselected nodes. It also
+has URLs to which POST messages need to be sent for each user
+action.
+
+The Flash plugin should read and parse the XML file, then:
+1- Draw the nodes at the locations indicated by the x,y
+   coordinates of each nodes in the XML
+2- If the node has the <is_selected> flag "True", then:
+   a- if the <has_err> flag is "True", it should be drawn using
+      the image from the <err_img> URL.
+   b- Otherwise, it should be drawn using the image from the 
+      <sel_img> url.
+3- If the <is_selected> flag is "False", then the image should
+   be drawn using the image from the <unsel_img> URL.
+4- For each node, display the name next to it so that it is not
+   under any other object.
+5- For each <link> connect the node identified by the <node_id>
+   in one endpoint to the node in the other endpoint.
+6- If the <is_selected> flag of the <link> is "True", then:
+   a- If the <has_err> of <link> is "True" then it should be
+      drawn in Red.
+   b- If the <has_err> is "False" then it should be drawn in Blue.
+7- If the <is_selected> flag is "False", then the link should 
+   be drawn in Black.
+8- Draw the Submit button so that it does not cover any nodes or links.
+
+Below we show a commented example of the XML file.
+
+----------------------------------------------------------------
+Input XML format example:
+
+<!-- URL to send POST message to on submit button click -->
+<submit>
+  <url>http://alice.bob/sdkjl</url>
+</submit>
+
+<!-- Example of a node in the graph -->
+<node>
+  <!-- id used to identify the node -->
+  <id>12314xlska</id>
+
+  <!-- X and Y coordinates in pixels of node on graph -->
+  <x>135</x>
+  <y>200</y>
+
+  <!-- images used when selected, unselected, and has error -->
+  <sel_img>http://fubar.org/sel1.png</sel_img>
+  <unsel_img>http://fubar.org/unsel1.png</unsel_img>
+  <err_img>http://fubar.org/err.png</err_img>
+
+  <!-- String shown on the graph indicating name of the node -->
+  <name>node1</name>
+
+  <!-- Boolean indicating whther to draw 
+       node as selected or unselected -->
+  <is_selected>False</is_selected>
+
+  <!-- Flag indicating node has an error and should be
+       drawn with err_img. -->
+  <has_err>False</has_err>
+
+  <!-- URL to submit POST messages to 
+       on selection and deselection -->
+  <url>http://blabla.com/clearinghouse/2ks/</url>
+</node>
+
+<node>
+  <id>1asd29</id>
+  <x>15</x>
+  <y>10</y>
+  <sel_img>../f1.png</sel_img>
+  <unsel_img>../f2.png</unsel_img>
+  <err_img>../err.png</err_img>
+  <name>node2</name>
+  <is_selected>True</is_selected>
+  <has_err>False</has_err>
+  <url>http://jamaica.com/7sah2l/</url>
+</node>
+
+<node>
+  <id>xz98ch9o2</id>
+  <x>100</x>
+  <y>80</y>
+  <sel_img>./58.png</sel_img>
+  <unsel_img>http://fubar.org/unsel1.png</unsel_img>
+  <err_img>./err.png</err_img>
+  <name>node3</name>
+  <is_selected>False</is_selected>
+  <has_err>True</has_err>
+  <url>http://foo.bar/sakdj/</url>
+</node>
+
+<!-- Example of a description of a link between two nodes -->
+<link>
+  <!-- Each link must have exactly two endpoints -->
+  <endpoint>
+    <!-- ID of the node at one endpoint. ID must be of a
+         node described somewhere else in the XML -->
+    <node_id>12314xlska</node_id>
+
+    <!-- Additional information to send back in POST messages -->
+    <port>3</port>
+  </endpoint>
+
+  <endpoint>
+    <node_id>12314xlska</node_id>
+    <port>3</port>
+  </endpoint>
+
+  <!-- Boolean indicating whether or not link is selected -->
+  <is_selected>False</is_selected>
+
+  <!-- Boolean indicating whether or not link is selected -->
+  <has_err>False</has_err>
+
+  <!-- URL to send POST messages to on 
+       selection and deselection of link -->
+  <url>http://ksjdh.com/asdf/</url>
+</link>
+
+<link>
+  <endpoint>
+    <node_id>12314xlska</node_id>
+    <port>5</port>
+  </endpoint>
+  <endpoint>
+    <node_id>xz98ch9o2</node_id>
+    <port>6</port>
+  </endpoint>
+  <is_selected>False</is_selected>>
+  <has_err>False</has_err>
+  <url>../foo/</url>
+</link>
+
+---------------------------------------------------------------------
+Events:
+
+Below we describe what events can occur and what should happen.
+In the descriptions below, we use "xml/x/y" to mean the path in the
+input XML taken after truncating the first "xml" where "x" is a tag
+in the XML and "y" is its child, and the result is the text attribute
+under that child. In the input XML example, "xml/link/url" for the
+first link is "http://ksjdh.com/asdf/".
+
+1- Link Selection:
+   If Link has xml/link/has_err == "True" then set color to Red.
+   Otherwise, set color of link to BLUE
+   Send POST Message: Fields: selected = True
+                              node1 = first xml/link/endpoint/node_id
+                              port1 = first xml/link/endpoint/port
+                              node2 = second xml/link/endpoint/node_id
+                              port2 = second xml/link/endpoint/port
+                      Action URL: xml/link/url
+   
+2- Link Deselection
+   Set color of link to BLACK
+   Send POST Message: Fields: selected = True
+                              node1 = first xml/link/endpoint/node_id
+                              port1 = first xml/link/endpoint/port
+                              node2 = second xml/link/endpoint/node_id
+                              port2 = second xml/link/endpoint/port
+                      Action URL: xml/link/url
+
+3- Node Selection:
+   If node has xml/node/has_err == "True" the set node image to image at xml/node/err_img.
+   Otherwise, set image to image at xml/node/sel_img
+   Send POST message: Fields: selected = True
+                              node_id = xml/node/id of selected node
+                      Action URL: xml/node/url
+
+4- Node Deselection:
+   Set node image to image at xml/node/unsel_img
+   Send POST message: Fields: selected = False
+                              node_id = xml/node/id of unselected node  								
+                      Action URL: xml/node/url
+
+5- Submit button pressed:
+   Display Message: "Submitted Reservation" for 4 seconds
+   Send POST message: Fields: reserve = True
+                      Action URL: xml/submit/url
+   Pull the input XML again, and redisplay the topology as
+   described in the "Detail" section above.

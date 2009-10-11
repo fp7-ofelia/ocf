@@ -5,6 +5,7 @@ from xml import xpath
 from django.db.models import permalink
 from django.forms import ModelForm
 from django.contrib.auth.models import User
+from textwrap import dedent
 
 test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
@@ -142,6 +143,14 @@ class AggregateManager(models.Model):
     # @ivar type: Aggregate Type: OF or PL
     type = models.CharField(max_length=20, choices=AM_TYPE_CHOICES.items())
     
+    # @ivar remote_node_set: nodes that this AM connects to that are not under its control
+    remote_node_set = models.ManyToManyField(Node, related_name='remote_am_set')
+
+    # @ivar local_node_set: nodes that this AM connects to that are under its control
+    
+    # @ivar remote_node_set: nodes that this AM connects to that are or are not under its control
+    connected_node_set = models.ManyToManyField(Node, related_name='connected_am_set')
+
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
@@ -150,7 +159,7 @@ class AggregateManager(models.Model):
         return AggregateManager.AM_TYPE_CHOICES[self.type] + ' ' + self.name + ' at ' + self.url
     
     def get_local_nodes(self):
-        return self.node_set.filter(is_remote=False)
+        return self.local_node_set.all()
     
     def updateRSpec(self):
         print "Update RSpec Type %s" % self.type
@@ -166,11 +175,6 @@ class AggregateManager(models.Model):
         RSpec
         '''
         
-        # list of node ids added
-        new_node_ids = []
-        
-        # list of interfaces added
-        new_iface_ids = []
         
         print("making client")
         # get a connector to the server
@@ -205,6 +209,10 @@ class AggregateManager(models.Model):
         # Get all the nodes
         nodes = xpath.Evaluate("*/tns:node", context=context)
         
+        # list of node ids added
+        new_local_ids = []
+        new_remote_ids = []
+
         # In the first iteration create all the nodes
         for node in nodes:
             # move the context to the current node
@@ -229,12 +237,11 @@ class AggregateManager(models.Model):
                     node_obj = Node(nodeId=nodeId,
                                     type=remoteType,
                                     remoteURL=remoteURL,
-                                    aggMgr=self,
-                                    is_remote=True,
+                                    aggMgr=None,
                                     )
                     node_obj.save()
-                    self.node_set.add(node_obj)
-                    new_node_ids.append(nodeId)
+                    self.remote_node_set.add(node_obj)
+                    new_remote_ids.append(nodeId)
                 
                 # We do know about the remote AM
                 else:
@@ -245,8 +252,10 @@ class AggregateManager(models.Model):
                                     type=remoteType,
                                     remoteURL=remoteURL,
                                     aggMgr=am,
-                                    is_remote=True,
                                     )
+                    node_obj.save()
+                    self.remote_node_set.add(node_obj)
+                    new_remote_ids.append(nodeId)
             
             # Entry controlled by this AM
             else:
@@ -254,26 +263,40 @@ class AggregateManager(models.Model):
                                 type=Node.TYPE_OF,
                                 aggMgr=self,
                                 remoteURL=self.url,
-                                is_remote=False,
                                 )
-                new_node_ids.append(nodeId)
+                new_local_ids.append(nodeId)
                 node_obj.save()
-                self.node_set.add(node_obj)
-                
+            
+            self.connected_node_set.add(node_obj)
             node_obj.save()
             
-        # delete all old nodes
-        self.node_set.exclude(nodeId__in=new_node_ids).delete()
-                
+        # delete all old local nodes
+        self.local_node_set.exclude(nodeId__in=new_local_ids).delete()
+        self.local_node_set.filter(nodeId__in=new_remote_ids).delete()
+        
+        # Remove stale remote nodes
+        [self.remote_node_set.remove(n) for n in self.remote_node_set.exclude(nodeId__in=new_remote_ids)]
+        [self.remote_node_set.remove(n) for n in self.remote_node_set.filter(nodeId__in=new_local_ids)]
+        
+        # Remove Unconnected nodes
+        [self.connected_node_set.remove(n)
+            for n in self.connected_node_set.exclude(
+                        nodeId__in=new_local_ids).exclude(
+                            nodeId__in=new_remote_ids)]
+        
+        # Delete unconnected nodes that no AM is connected to
+        Node.objects.filter(connected_am_set__count==0).delete()
+        
         # In the second iteration create all the interfaces and flowspaces
         context.setNodePosSize((rspec, 1, 1))
         interfaces = xpath.Evaluate("//tns:interfaceEntry", context=context)
+        # list of interfaces added
         new_iface_ids = []
         for interface in interfaces:
             # move the context
             context.setNodePosSize((interface, 1, 1))
             nodeId = xpath.Evaluate("string(../tns:nodeId)", context=context)
-            node_obj = self.node_set.get(pk=nodeId)
+            node_obj = self.connected_node_set.get(pk=nodeId)
             
             portNum = int(xpath.Evaluate("number(tns:port)", context=context))
             print "<0> %s" % portNum
@@ -328,7 +351,6 @@ class AggregateManager(models.Model):
             portNum = int(xpath.Evaluate("number(tns:port)", context=context))
             iface_obj = Interface.objects.get(portNum__exact=portNum,
                                               ownerNode__nodeId=nodeId,
-                                              ownerNode__aggMgr__pk=self.pk,
                                               )
             
             # get the remote ifaces
@@ -336,7 +358,7 @@ class AggregateManager(models.Model):
             other_ports = xpath.Evaluate("tns:remotePort", context=context)
 
             print "<1> nodes:%s ports:%s" % (other_nodeIDs, other_ports)
-                
+
             other_ports.reverse()
             remote_iface_ids = []
             for nodeID in other_nodeIDs:
@@ -354,7 +376,11 @@ class AggregateManager(models.Model):
                                                          )
                 
                 remote_iface_ids.append(remote_iface_obj.id)
-                iface_obj.remoteIfaces.add(remote_iface_obj)
+                
+                # get the link or create one if it doesn't exist
+                link, created = Link.objects.get_or_create(
+                                    src=iface_obj, dst=remoteiface_obj)
+                link.save()
                 
                 # add the connection
                 print "<3>"; print id; print num
@@ -371,6 +397,61 @@ class AggregateManager(models.Model):
         # TODO: Fill this in
         return "Slice Reserved!"
 
+    def toTopoXML(self, slice):
+        '''
+        returns the topology as a simple XML of nodes and
+        links.
+        
+        @param slice: The slice wrt which the topo is turned into XML
+        '''
+        
+        xml = ""
+        
+        node_in_slice = slice.nodes.filter(nodeId=node.nodeId).count() > 0
+        
+        for node in self.local_node_set:
+            xml += dedent('''\
+                    <node>
+                      <id>%s</id>
+                      <x>%u</x>
+                      <y>%u</y>
+                      <sel_img>%s</sel_img>
+                      <unsel_img>%s</unsel_img>
+                      <err_img>%s</err_img>
+                      <name>%s</name>
+                      <is_selected>%s</is_selected>
+                      <has_err>%s</has_err>
+                      <url>%s</url>
+                    </node>
+                    ''' % (node.nodeId, node.x, node.y, node.sel_img,
+                           node.unsel_img, node.err_img, node.nodeId,
+                           node_in_slice, "False", node.get_absolute_url()))
+        
+        # For each unidirectional local link in the AM, add a link info
+        links = Link.objects.filter(src__ownerNode__aggMgr=self,
+# TODO: Do we need this:            dst__ownerNode__aggMgr=self,
+                                    )
+        for link in links:
+            link_in_slice = slice.links.filter(pk=link.pk).count() > 0
+            xml += dedent('''\
+                    <link>
+                      <endpoint>
+                        <node_id>%s</node_id>
+                        <port>%u</port>
+                      </endpoint>
+                      <endpoint>
+                        <node_id>%s</node_id>
+                        <port>%u</port>
+                      </endpoint>
+                      <is_selected>%s</is_selected>
+                      <has_err>%s</has_err>
+                      <url>%s</url>
+                    </link>
+                    ''' % (link.src.ownerNode.nodeId, link.src.portNum,
+                           link.dst.ownerNode.nodeId, link.dst.portNum,
+                           link_in_slice, "False", link.get_absolute_url()))
+        return xml
+    
 class Node(models.Model):
     '''
     Anything that has interfaces. Can be a switch or a host or a stub.
@@ -388,8 +469,23 @@ class Node(models.Model):
     remoteURL = models.URLField("Controller URL", verify_exists=False)
     
     # @ivar aggMgr: The AM that created the node or controls it
-    aggMgr = models.ForeignKey(AggregateManager)
+    aggMgr = models.ForeignKey(AggregateManager, related_name='local_node_set')
     
+    # @ivar x: horiz position of the node when drawn
+    x = models.IntegerField()
+
+    # @ivar y: vert position of the node when drawn
+    y = models.IntegerField()
+    
+    # @ivar sel_img_url: URL of the image used for when the node is drawn as selected
+    sel_img_url = models.URLField("sel_img", verify_exists=False)
+    
+    # @ivar unsel_img_url: URL of the image used for when the node is drawn as unselected
+    unsel_img_url = models.URLField("unsel_img", verify_exists=False)
+    
+    # @ivar err_img_url: URL of the image used for when the node is drawn with error
+    err_img_url = models.URLField("err_img", verify_exists=False)
+
     def __unicode__(self):
         return "Node %s" % self.nodeId
     
@@ -400,12 +496,28 @@ class Node(models.Model):
     def is_in_clearinghouse(self):
         return self.aggMgr.url == self.remoteURL
 
+class Link(models.Model):
+    '''
+    Stores information about the unidirectional connection between
+    two nodes.
+    '''
+    
+    src = models.ForeignKey(Interface)
+    dst = models.ForeignKey(Interface)
+    
+    def __unicode__(self):
+        return "Link from " + self.src.__unicode__() \
+                + " to " + self.dst.__unicode__()
+
+    def get_absolute_url(self):
+        return('link_detail', [str(self.id)])
+    get_absolute_url = permalink(get_absolute_url)
 
 class Interface(models.Model):
     '''Describes a port and its connection'''
     portNum = models.PositiveSmallIntegerField()
     ownerNode = models.ForeignKey(Node)
-    remoteIfaces = models.ManyToManyField('self')
+    remoteIfaces = models.ManyToManyField('self', symmetrical=False, through="Link")
     
     def __unicode__(self):
         return "Interface "+portNum+" of node "+self.ownerNode.nodeId
@@ -419,6 +531,7 @@ class Slice(models.Model):
     controller_url = models.URLField('Slice Controller URL', verify_exists=False)
     committed = models.BooleanField()
     nodes = models.ManyToManyField(Node)
+    links = models.ManyToManyField(Link)
     
     def get_absolute_url(self):
         return('slice_detail', [str(self.id)])
