@@ -1,0 +1,99 @@
+# HRN
+# Human readable name for the interfaces
+SFA_INTERFACE_HRN="plc"
+
+# RSpec Type
+SFA_AGGREGATE_RSPEC_TYPE="openflow"
+
+# OpenFlow Aggregate manager 
+OPENFLOW_AGGREGATE_MANAGER_IP="nfcm13.stanford.edu"
+OPENFLOW_AGGREGATE_MANAGER_PORT=7889
+
+# API Debug
+# Are we logging
+SFA_API_DEBUG=1
+
+# Registry Configuration
+#
+# Enabled
+# Enable the registry interface 
+SFA_REGISTRY_ENABLED=0
+
+# Root Auth
+# The hrn of the registry's root auth
+SFA_REGISTRY_ROOT_AUTH="plc"
+
+# Level1 Auth
+# The hrn of the registry's level1 auth
+# xxx could be determined from hrn above
+SFA_REGISTRY_LEVEL1_AUTH=""
+
+# Hostname
+# The fully qualified hostname of the registry server
+SFA_REGISTRY_HOST="localhost"
+
+# Port
+# Geni registry port
+SFA_REGISTRY_PORT=12345
+
+
+## Aggregate Configuration
+##
+## Enable aggregate inteface
+## Enable the aggregate inteface.
+SFA_AGGREGATE_ENABLED=1
+#
+## Hostname
+## The fully qualified hostname of the aggregate server
+SFA_AGGREGATE_HOST="localhost"
+#
+## Port
+## Geni aggregate server port
+SFA_AGGREGATE_PORT=12346
+
+# Slice Manager Configuration
+#
+# Enabled
+# Enable the slice manager  
+SFA_SM_ENABLED=0 
+
+# Host
+## The fully qualified hostname or IP address of the slice manager server
+SFA_SM_HOST="localhost"
+
+# Port
+# Geni slice manager server port  
+SFA_SM_PORT=12347
+
+# PLC Interface Access Configuration
+#
+# PLC user
+# sfa services will use this account for issuing plc requests - must have admin rights
+
+SFA_PLC_USER="root@localhost.localdomain"
+
+# Password
+# Password for user account
+SFA_PLC_PASSWORD="root"
+
+# Full URL of PLC interface
+SFA_PLC_URL='https://localhost:443/PLCAPI/'
+
+# PLC DB Name
+SFA_PLC_DB_NAME='planetlab5'
+
+# PLC DB Host
+SFA_PLC_DB_HOST="localhost"
+
+# PLC DB port
+SFA_PLC_DB_PORT=5432
+
+# PLC DB User
+SFA_PLC_DB_USER="pgsqluser"
+
+# PLC DB Password
+SFA_PLC_DB_PASSWORD=""
+
+# Directory internal data gets stored
+# using /etc/sfa until gec5 but /var/lib/sfa would be a more reasonable choice
+SFA_BASE_DIR="/etc/sfa"
