@@ -1,7 +1,8 @@
 Summary:
 We need a plugin that can display a topology for a graph that
 is specified in XML, and allows the user to select and deselect
-nodes and links and click a submit button.
+nodes and links and click a submit button. A reset button is 
+also there to revert selections to the original settings.
 
 ----------------------------------------------------------------
 Details:
@@ -34,7 +35,8 @@ The Flash plugin should read and parse the XML file, then:
 7- If the <is_selected> flag is "False", then the link should 
    be drawn in Black.
 8- Draw the Submit button so that it does not cover any nodes or links.
-
+9- Draw the Reset button next to the submit button such that nothing
+   else is covered.
 Below we show a commented example of the XML file.
 
 ----------------------------------------------------------------
@@ -103,20 +105,17 @@ Input XML format example:
 
 <!-- Example of a description of a link between two nodes -->
 <link>
+  <id>sdfasaf93</id>
   <!-- Each link must have exactly two endpoints -->
-  <endpoint>
+  <src>
     <!-- ID of the node at one endpoint. ID must be of a
          node described somewhere else in the XML -->
     <node_id>12314xlska</node_id>
+  </src>
 
-    <!-- Additional information to send back in POST messages -->
-    <port>3</port>
-  </endpoint>
-
-  <endpoint>
+  <dst>
     <node_id>12314xlska</node_id>
-    <port>3</port>
-  </endpoint>
+  </dst>
 
   <!-- Boolean indicating whether or not link is selected -->
   <is_selected>False</is_selected>
@@ -130,14 +129,13 @@ Input XML format example:
 </link>
 
 <link>
-  <endpoint>
+  <id>xyz</id>
+  <src>
     <node_id>12314xlska</node_id>
-    <port>5</port>
-  </endpoint>
-  <endpoint>
+  </src>
+  <dst>
     <node_id>xz98ch9o2</node_id>
-    <port>6</port>
-  </endpoint>
+  </dst>
   <is_selected>False</is_selected>>
   <has_err>False</has_err>
   <url>../foo/</url>
@@ -157,19 +155,13 @@ first link is "http://ksjdh.com/asdf/".
    If Link has xml/link/has_err == "True" then set color to Red.
    Otherwise, set color of link to BLUE
    Send POST Message: Fields: selected = True
-                              node1 = first xml/link/endpoint/node_id
-                              port1 = first xml/link/endpoint/port
-                              node2 = second xml/link/endpoint/node_id
-                              port2 = second xml/link/endpoint/port
+                              link_id = xml/link/id
                       Action URL: xml/link/url
    
 2- Link Deselection
    Set color of link to BLACK
-   Send POST Message: Fields: selected = True
-                              node1 = first xml/link/endpoint/node_id
-                              port1 = first xml/link/endpoint/port
-                              node2 = second xml/link/endpoint/node_id
-                              port2 = second xml/link/endpoint/port
+   Send POST Message: Fields: selected = False
+                              link_id = xml/link/id
                       Action URL: xml/link/url
 
 3- Node Selection:
@@ -188,6 +180,13 @@ first link is "http://ksjdh.com/asdf/".
 5- Submit button pressed:
    Display Message: "Submitted Reservation" for 4 seconds
    Send POST message: Fields: reserve = True
+                      Action URL: xml/submit/url
+   Pull the input XML again, and redisplay the topology as
+   described in the "Detail" section above.
+
+6- Reset button pressed:
+   Display Message: "Reset selections" for 4 seconds
+   Send POST message: Fields: reset = True
                       Action URL: xml/submit/url
    Pull the input XML again, and redisplay the topology as
    described in the "Detail" section above.

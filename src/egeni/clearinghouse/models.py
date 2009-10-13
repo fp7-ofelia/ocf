@@ -1,11 +1,10 @@
 from django.db import models
-from geniLight.geniLight_client import GeniLightClient
+from egeni.geniLight.geniLight_client import GeniLightClient
 from xml.dom import minidom
 from xml import xpath
 from django.db.models import permalink
 from django.forms import ModelForm
 from django.contrib.auth.models import User
-from textwrap import dedent
 
 test_xml = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
@@ -144,12 +143,12 @@ class AggregateManager(models.Model):
     type = models.CharField(max_length=20, choices=AM_TYPE_CHOICES.items())
     
     # @ivar remote_node_set: nodes that this AM connects to that are not under its control
-    remote_node_set = models.ManyToManyField(Node, related_name='remote_am_set')
+    remote_node_set = models.ManyToManyField("Node", related_name='remote_am_set')
 
     # @ivar local_node_set: nodes that this AM connects to that are under its control
     
     # @ivar remote_node_set: nodes that this AM connects to that are or are not under its control
-    connected_node_set = models.ManyToManyField(Node, related_name='connected_am_set')
+    connected_node_set = models.ManyToManyField("Node", related_name='connected_am_set')
 
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -379,7 +378,7 @@ class AggregateManager(models.Model):
                 
                 # get the link or create one if it doesn't exist
                 link, created = Link.objects.get_or_create(
-                                    src=iface_obj, dst=remoteiface_obj)
+                                    src=iface_obj, dst=remote_iface_obj)
                 link.save()
                 
                 # add the connection
@@ -397,61 +396,6 @@ class AggregateManager(models.Model):
         # TODO: Fill this in
         return "Slice Reserved!"
 
-    def toTopoXML(self, slice):
-        '''
-        returns the topology as a simple XML of nodes and
-        links.
-        
-        @param slice: The slice wrt which the topo is turned into XML
-        '''
-        
-        xml = ""
-        
-        node_in_slice = slice.nodes.filter(nodeId=node.nodeId).count() > 0
-        
-        for node in self.local_node_set:
-            xml += dedent('''\
-                    <node>
-                      <id>%s</id>
-                      <x>%u</x>
-                      <y>%u</y>
-                      <sel_img>%s</sel_img>
-                      <unsel_img>%s</unsel_img>
-                      <err_img>%s</err_img>
-                      <name>%s</name>
-                      <is_selected>%s</is_selected>
-                      <has_err>%s</has_err>
-                      <url>%s</url>
-                    </node>
-                    ''' % (node.nodeId, node.x, node.y, node.sel_img,
-                           node.unsel_img, node.err_img, node.nodeId,
-                           node_in_slice, "False", node.get_absolute_url()))
-        
-        # For each unidirectional local link in the AM, add a link info
-        links = Link.objects.filter(src__ownerNode__aggMgr=self,
-# TODO: Do we need this:            dst__ownerNode__aggMgr=self,
-                                    )
-        for link in links:
-            link_in_slice = slice.links.filter(pk=link.pk).count() > 0
-            xml += dedent('''\
-                    <link>
-                      <endpoint>
-                        <node_id>%s</node_id>
-                        <port>%u</port>
-                      </endpoint>
-                      <endpoint>
-                        <node_id>%s</node_id>
-                        <port>%u</port>
-                      </endpoint>
-                      <is_selected>%s</is_selected>
-                      <has_err>%s</has_err>
-                      <url>%s</url>
-                    </link>
-                    ''' % (link.src.ownerNode.nodeId, link.src.portNum,
-                           link.dst.ownerNode.nodeId, link.dst.portNum,
-                           link_in_slice, "False", link.get_absolute_url()))
-        return xml
-    
 class Node(models.Model):
     '''
     Anything that has interfaces. Can be a switch or a host or a stub.
@@ -496,6 +440,15 @@ class Node(models.Model):
     def is_in_clearinghouse(self):
         return self.aggMgr.url == self.remoteURL
 
+class Interface(models.Model):
+    '''Describes a port and its connection'''
+    portNum = models.PositiveSmallIntegerField()
+    ownerNode = models.ForeignKey(Node)
+    remoteIfaces = models.ManyToManyField('self', symmetrical=False, through="Link")
+    
+    def __unicode__(self):
+        return "Interface "+self.portNum+" of node "+self.ownerNode.nodeId
+
 class Link(models.Model):
     '''
     Stores information about the unidirectional connection between
@@ -512,15 +465,6 @@ class Link(models.Model):
     def get_absolute_url(self):
         return('link_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
-
-class Interface(models.Model):
-    '''Describes a port and its connection'''
-    portNum = models.PositiveSmallIntegerField()
-    ownerNode = models.ForeignKey(Node)
-    remoteIfaces = models.ManyToManyField('self', symmetrical=False, through="Link")
-    
-    def __unicode__(self):
-        return "Interface "+portNum+" of node "+self.ownerNode.nodeId
 
 class Slice(models.Model):
     '''This is created by a user (the owner) and contains
