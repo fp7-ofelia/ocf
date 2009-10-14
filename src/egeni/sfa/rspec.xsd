@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://yuba.stanford.edu/e-geni/rspec" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yuba.stanford.edu/e-geni/rspec">
+<schema targetNamespace="http://yuba.stanford.edu/egeni/rspec" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yuba.stanford.edu/egeni/rspec">
 
 
 
