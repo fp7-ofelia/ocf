@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import AggregateManager, Node
 from egeni.clearinghouse.models import Slice, SliceForm, FlowSpace, Link
 from django.forms.models import inlineformset_factory
-from textwrap import dedent
 
 def home(request):
     '''Show the list of slices, and form for creating new slice'''
@@ -99,18 +98,37 @@ def slice_flash_detail(request, slice_id):
     print "<xx>"
     
     if request.method == "POST":
-        # TODO: Submit reservation        
-        formset = FSFormSet(request.POST, request.FILES, instance=slice)
-        if formset.is_valid():
-            formset.save()
-            
-            slice.committed = True
-            slice.save()
-            
-            # TODO: Do reservation here
-            
-            return HttpResponseRedirect(reverse('home'))
         
+        try:
+            action = request.POST["action"]
+        
+            if action == "link" or action == "node":
+                if action == "link":
+                    model = Link
+                    model_field_name = "links"
+                    id_name = "link_id"
+                else:
+                    model = Node
+                    model_field_name = "nodes"
+                    id_name = "node_id"
+                slice_add_rsc(request, slice_id, model,
+                              model_field_name, id_name)
+                return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+            elif action == "reset":
+                # TODO: Reset to reserved
+                return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+            elif action == "reserve":
+                formset = FSFormSet(request.POST, request.FILES, instance=slice)
+                if formset.is_valid():
+                    formset.save()
+                    slice.committed = True
+                    slice.save()
+                    # TODO: Do reservation here
+                    return HttpResponseRedirect(reverse('home'))
+            else:
+                return HttpResponseServerError(u"Unknown action %s" % action)
+        except KeyError, e:
+            return HttpResponseServerError(u"Missing POST field %s" % e.message)
     else:
         print "<zz>"
         for am in agg_list:
@@ -119,84 +137,29 @@ def slice_flash_detail(request, slice_id):
         formset = FSFormSet(instance=slice)
         print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
         
-    return render_to_response("clearinghouse/slice_flash_detail.html",
+    # TODO: replace with slice_flash_detail.html
+    return render_to_response("clearinghouse/slice_detail.html",
                               {'aggmgr_list': agg_list,
                                'slice': slice,
                                'fsformset': formset,
                                })
 
-def get_topo(request, slice_id):
+def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
     
     if request.method == "GET":
-        xml = get_topo_xml(slice)
-        # TODO: Wrap XML inside a response and return it
-        
+        # get all the local nodes
+        nodes = Node.objects.all().filter(aggMgr__null=False)
+        # get all the local links
+        links = Link.objects.filter(src__ownerNode__aggMgr__null=False,
+                                    dst__ownerNode__aggMgr__null=False,
+                                    )
+        return render_to_response("clearinghouse/flash_xml.xml",
+                                  {'nodes': nodes,
+                                   'links': links,
+                                   })
     else:
         return HttpResponseServerError(u"Unknown method %s to this URL" % request.method)
-    
-def get_topo_xml(slice):
-    '''
-    Return a string describing the topology of all
-    aggregate managers in the clearinghouse.
-    
-    @param slice: The slice that the topology will be built wrt.
-    '''
-
-    xml = '''\
-          <submit>
-            <url>%s</url>
-          </submit>
-          ''' % reverse('slice_flash_detail', args=[slice.id])
-    
-    # Get all local nodes info
-    nodes = Node.objects.all().filter(aggMgr__null=False)
-    for node in nodes:
-        node_in_slice = slice.nodes.filter(nodeId=node.nodeId).count() > 0
-        xml += dedent('''\
-                <node>
-                  <id>%s</id>
-                  <x>%u</x>
-                  <y>%u</y>
-                  <sel_img>%s</sel_img>
-                  <unsel_img>%s</unsel_img>
-                  <err_img>%s</err_img>
-                  <name>%s</name>
-                  <is_selected>%s</is_selected>
-                  <has_err>%s</has_err>
-                  <url>%s</url>
-                </node>
-                ''' % (node.nodeId, node.x, node.y, node.sel_img,
-                       node.unsel_img, node.err_img, node.nodeId,
-                       node_in_slice, "False",
-                       reverse('slice_add_node', args=[slice.id])))
-        
-    # For each unidirectional local link in the AM, add a link info
-    links = Link.objects.filter(src__ownerNode__aggMgr__null=False,
-                                dst__ownerNode__aggMgr__null=False,
-                                )
-    for link in links:
-        link_in_slice = slice.links.filter(pk=link.pk).count() > 0
-        xml += dedent('''\
-                <link>
-                  <src>
-                    <node_id>%s</node_id>
-                    <port>%u</port>
-                  </src>
-                  <dst>
-                    <node_id>%s</node_id>
-                    <port>%u</port>
-                  </dst>
-                  <is_selected>%s</is_selected>
-                  <has_err>%s</has_err>
-                  <url>%s</url>
-                </link>
-                ''' % (link.src.ownerNode.nodeId, link.src.portNum,
-                       link.dst.ownerNode.nodeId, link.dst.portNum,
-                       link_in_slice, "False", 
-                       reverse('slice_add_link', args=[slice.id])))
-
-    return xml
     
 def slice_add_rsc(request, slice_id, model, 
                   model_field_name, id_name):
@@ -204,71 +167,31 @@ def slice_add_rsc(request, slice_id, model,
     
     slice = get_object_or_404(Slice, pk=slice_id)
     
-    if request.method == "POST":
-        if(request.POST.has_key("selected") and 
-           request.POST.has_key(id_name)):
-            selected = request.POST.get("selected")
-            obj_id = request.POST.get(id_name)
-            obj = get_object_or_404(model, pk=obj_id)
-            
-            slice.committed = False
-            if selected == "True":
-                slice.__getattr__(model_field_name).add(obj)
-            else:
-                slice.__getattr__(model_field_name).remove(obj)
-                
-            slice.save()
-            obj.save()
-        else:
-            return HttpResponseServerError(u"Insufficient data for POST.")
+    selected = request.POST.get("selected")
+    obj_id = request.POST.get(id_name)
+    obj = get_object_or_404(model, pk=obj_id)
+    
+    slice.committed = False
+    if selected == "True":
+        slice.__getattr__(model_field_name).add(obj)
     else:
-        return HttpResponseServerError(u"Cannot do a GET to this URL.")
-    
-def slice_add_node(request, slice_id):
-    '''Add/remove node from the slice'''
-    return slice_add_rsc(request, slice_id, Node, "nodes", "node_id")
-            
-def slice_add_link(request, slice_id):
-    '''Add/remove link from the slice'''
-    return slice_add_rsc(request, slice_id, Link, "links", "link_id")
-
-
-
-
-def resv_sel_nodes(request, slice_id, am_id):
-    '''Select nodes from the AM'''
-    
-    slice = get_object_or_404(Slice, pk=slice_id)
-    am = get_object_or_404(AggregateManager, pk=am_id)
-    
-    if request.method == 'POST':
-        # get all the node IDs
-        ids = request.POST.keys()
-        print "Selected nodes: ", ids
+        slice.__getattr__(model_field_name).remove(obj)
         
-        # remove all nodes from the slice and add the new ones
-        slice.node_set.all().delete()
-    try:
-        am.updateRSpec()
-    except Exception, e:
-        print "Update RSpec Exception"; print e
-        return render_to_response("clearinghouse/aggregatemanager_detail.html",
-                                  {'am':am,
-                                   'error_message':"Error Parsing/Updating the RSpec: %s" % e,
-                                   })
-    
-    return render_to_response("clearinghouse/aggregatemanager_detail.html",
-                              {'am':am,
-                               })
+    slice.save()
+    obj.save()
     
     
-def delete(request, object_id):
+    
+    
+    
+    
+def am_delete(request, object_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=object_id)
     am.delete()
     return HttpResponseRedirect(reverse('index'))
 
-def create(request):
+def am_create(request):
     error_msg = u"No POST data sent."
     if(request.method == "POST"):
         post = request.POST.copy()
@@ -288,7 +211,7 @@ def create(request):
             error_msg = u"Insufficient data. Need at least name and url"
     return HttpResponseServerError(error_msg)
 
-def aggmgr_detail(request, am_id):
+def am_detail(request, am_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=am_id)
     if(request.method == "GET"):
@@ -309,30 +232,4 @@ def aggmgr_detail(request, am_id):
             return HttpResponseRedirect(am.get_absolute_url())
     else:
         return HttpResponseServerError(u"Unknown method %s" % request.method)
-
-def node_reserve(request, aggMgr_id, node_id):
-    # get the aggregate manager object
-    am = get_object_or_404(AggregateManager, pk=aggMgr_id)
-    message = u"No POST data sent."
-    if(request.method == "POST"):
-        post = request.POST.copy()
-        if(post.has_key('port') 
-           and post.has_key('dl_src')
-           and post.has_key('dl_dst')
-           and post.has_key('dl_type')
-           and post.has_key('vlan_id')
-           and post.has_key('nw_src')
-           and post.has_key('nw_dst')
-           and post.has_key('nw_proto')
-           and post.has_key('tp_src')
-           and post.has_key('tp_dst')):
-            # Get info
-            message = am.makeReservation(node_id, post)
-        else:
-            message = u"Insufficient data. Need all fields."
-        
-        return HttpResponseRedirect()
-
-# TODO test the flowspace form and see what it looks like
-
 

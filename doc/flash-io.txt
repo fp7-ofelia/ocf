@@ -10,9 +10,8 @@ When the Flash plugin starts, it is given a URL from which to
 read an XML input file. The XML plugin specifies some parameters
 to the Flash plugin including where to places nodes 
 (x,y coordinates) and links (endpoint node IDs) and
-what images to use for selected and unselected nodes. It also
-has URLs to which POST messages need to be sent for each user
-action.
+what images to use for selected and unselected nodes. It also has
+the URL where POST messages should be sent.
 
 The Flash plugin should read and parse the XML file, then:
 1- Draw the nodes at the locations indicated by the x,y
@@ -71,10 +70,6 @@ Input XML format example:
   <!-- Flag indicating node has an error and should be
        drawn with err_img. -->
   <has_err>False</has_err>
-
-  <!-- URL to submit POST messages to 
-       on selection and deselection -->
-  <url>http://blabla.com/clearinghouse/2ks/</url>
 </node>
 
 <node>
@@ -87,7 +82,6 @@ Input XML format example:
   <name>node2</name>
   <is_selected>True</is_selected>
   <has_err>False</has_err>
-  <url>http://jamaica.com/7sah2l/</url>
 </node>
 
 <node>
@@ -100,7 +94,6 @@ Input XML format example:
   <name>node3</name>
   <is_selected>False</is_selected>
   <has_err>True</has_err>
-  <url>http://foo.bar/sakdj/</url>
 </node>
 
 <!-- Example of a description of a link between two nodes -->
@@ -122,10 +115,6 @@ Input XML format example:
 
   <!-- Boolean indicating whether or not link is selected -->
   <has_err>False</has_err>
-
-  <!-- URL to send POST messages to on 
-       selection and deselection of link -->
-  <url>http://ksjdh.com/asdf/</url>
 </link>
 
 <link>
@@ -138,7 +127,6 @@ Input XML format example:
   </dst>
   <is_selected>False</is_selected>>
   <has_err>False</has_err>
-  <url>../foo/</url>
 </link>
 
 ---------------------------------------------------------------------
@@ -148,45 +136,46 @@ Below we describe what events can occur and what should happen.
 In the descriptions below, we use "xml/x/y" to mean the path in the
 input XML taken after truncating the first "xml" where "x" is a tag
 in the XML and "y" is its child, and the result is the text attribute
-under that child. In the input XML example, "xml/link/url" for the
-first link is "http://ksjdh.com/asdf/".
+under that child. In the input XML example, "xml/link/has_err" for the
+first link is "False". All POST messages are sent to the same URL:
+xml/submit/url
 
 1- Link Selection:
    If Link has xml/link/has_err == "True" then set color to Red.
    Otherwise, set color of link to BLUE
-   Send POST Message: Fields: selected = True
+   Send POST Message: Fields: action = link
+                              selected = True
                               link_id = xml/link/id
-                      Action URL: xml/link/url
    
 2- Link Deselection
    Set color of link to BLACK
-   Send POST Message: Fields: selected = False
+   Send POST Message: Fields: action = link
+                              selected = False
                               link_id = xml/link/id
-                      Action URL: xml/link/url
 
 3- Node Selection:
    If node has xml/node/has_err == "True" the set node image to image at xml/node/err_img.
    Otherwise, set image to image at xml/node/sel_img
-   Send POST message: Fields: selected = True
+   Send POST message: Fields: action = node 
+                              selected = True
                               node_id = xml/node/id of selected node
-                      Action URL: xml/node/url
 
 4- Node Deselection:
    Set node image to image at xml/node/unsel_img
-   Send POST message: Fields: selected = False
+   Send POST message: Fields: action = node
+                              selected = False
                               node_id = xml/node/id of unselected node  								
-                      Action URL: xml/node/url
 
 5- Submit button pressed:
    Display Message: "Submitted Reservation" for 4 seconds
-   Send POST message: Fields: reserve = True
-                      Action URL: xml/submit/url
+   Send POST message: Fields: action = reserve
+
    Pull the input XML again, and redisplay the topology as
    described in the "Detail" section above.
 
 6- Reset button pressed:
    Display Message: "Reset selections" for 4 seconds
-   Send POST message: Fields: reset = True
-                      Action URL: xml/submit/url
+   Send POST message: Fields: action = reset
+
    Pull the input XML again, and redisplay the topology as
    described in the "Detail" section above.

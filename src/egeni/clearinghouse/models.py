@@ -284,7 +284,7 @@ class AggregateManager(models.Model):
                             nodeId__in=new_remote_ids)]
         
         # Delete unconnected nodes that no AM is connected to
-        Node.objects.filter(connected_am_set__count==0).delete()
+        Node.objects.filter(connected_am_set__count=0).delete()
         
         # In the second iteration create all the interfaces and flowspaces
         context.setNodePosSize((rspec, 1, 1))
@@ -480,7 +480,7 @@ class Slice(models.Model):
     def get_absolute_url(self):
         return('slice_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
-    
+
 class SliceForm(ModelForm):
     class Meta:
         model = Slice

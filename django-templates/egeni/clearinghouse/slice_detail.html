@@ -17,7 +17,7 @@
         <ol id="switches">
             {% for node in am.get_local_nodes %}
             <li><input type="checkbox" name="am_{{ am.id }}" value="{{ node.nodeId }}" 
-            {{ node|is_in_set:slice.nodes.all }} />
+            {{ node|check_in_set:slice.nodes.all }} />
                 Node ID <strong><a name="{{ am.id }}_{{ node.nodeId }}">{{ node.nodeId }}</a></strong> 
                 <ol id="{{ nodeId }}_ifaces">
                     {% for iface in node.interface_set.all %}
