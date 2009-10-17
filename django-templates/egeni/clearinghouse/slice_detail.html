@@ -27,7 +27,7 @@
                         <ol>
                             {% for remoteiface in iface.remoteIfaces.all %}
                             <li>port <strong>{{ remoteiface.portNum }}</strong> of node <strong>
-                            	{% if remoteiface.ownerNode.is_in_clearinghouse %}
+                            	{% if remoteiface.ownerNode.aggMgr %}
                                 <a href="#{{ remoteiface.ownerNode.aggMgr.id }}_{{ remoteiface.ownerNode.nodeId }}">
                                     {{ remoteiface.ownerNode.nodeId }}
                                 </a>

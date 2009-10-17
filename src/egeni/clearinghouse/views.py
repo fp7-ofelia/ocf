@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404, render_to_response
+from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponseServerError
 from django.core.urlresolvers import reverse
-from egeni.clearinghouse.models import AggregateManager, Node
-from egeni.clearinghouse.models import Slice, SliceForm, FlowSpace, Link
+from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
 
 def home(request):
@@ -103,30 +103,54 @@ def slice_flash_detail(request, slice_id):
             action = request.POST["action"]
         
             if action == "link" or action == "node":
+                
+                selected = request.POST.get("selected") == "True"
+                id = request.POST.get(action+"_id")
+                
                 if action == "link":
                     model = Link
-                    model_field_name = "links"
-                    id_name = "link_id"
+                    through_type = LinkSliceStatus
                 else:
                     model = Node
-                    model_field_name = "nodes"
-                    id_name = "node_id"
-                slice_add_rsc(request, slice_id, model,
-                              model_field_name, id_name)
-                return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+                    through_type = NodeSliceStatus
+                
+                obj = get_object_or_404(model, pk=id)
+
+                kwargs = {"slice": slice,
+                          action: obj,
+                          "defaults":{'reserved': False,
+                                      'removed': False}}
+                through, created = through_type.objects.get_or_create(**kwargs)
+
+                through.removed = not selected
+                through.save()
+                
             elif action == "reset":
-                # TODO: Reset to reserved
-                return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+                link_statuses = LinkSliceStatus.objects.exclude(
+                                    reserved=True, removed=False)
+                [l.delete for l in link_statuses]
+                
+                node_statuses = NodeSliceStatus.objects.exclude(
+                                    reserved=True, removed=False)
+                [n.delete for n in node_statuses]
+                
             elif action == "reserve":
+                # get the RSpec of the Slice
+                rspec = render_to_string("rspec/egeni-rspec.xml",
+                                         {"node_set": slice.nodes.all(),
+                                          "slice": slice})
+                
                 formset = FSFormSet(request.POST, request.FILES, instance=slice)
                 if formset.is_valid():
                     formset.save()
                     slice.committed = True
                     slice.save()
-                    # TODO: Do reservation here
-                    return HttpResponseRedirect(reverse('home'))
+                
             else:
                 return HttpResponseServerError(u"Unknown action %s" % action)
+            
+            return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+
         except KeyError, e:
             return HttpResponseServerError(u"Missing POST field %s" % e.message)
     else:
@@ -148,40 +172,20 @@ def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
     
     if request.method == "GET":
+        for am in AggregateManager.objects.all():
+            am.updateRSpec()
         # get all the local nodes
-        nodes = Node.objects.all().filter(aggMgr__null=False)
+        nodes = Node.objects.all().filter(aggMgr__isnull=False)
         # get all the local links
-        links = Link.objects.filter(src__ownerNode__aggMgr__null=False,
-                                    dst__ownerNode__aggMgr__null=False,
+        links = Link.objects.filter(src__ownerNode__aggMgr__isnull=False,
+                                    dst__ownerNode__aggMgr__isnull=False,
                                     )
         return render_to_response("clearinghouse/flash_xml.xml",
                                   {'nodes': nodes,
-                                   'links': links,
-                                   })
+                                   'links': links},
+                                   mimetype="application/xml")
     else:
         return HttpResponseServerError(u"Unknown method %s to this URL" % request.method)
-    
-def slice_add_rsc(request, slice_id, model, 
-                  model_field_name, id_name):
-    '''Add/remove a resource from the slice'''
-    
-    slice = get_object_or_404(Slice, pk=slice_id)
-    
-    selected = request.POST.get("selected")
-    obj_id = request.POST.get(id_name)
-    obj = get_object_or_404(model, pk=obj_id)
-    
-    slice.committed = False
-    if selected == "True":
-        slice.__getattr__(model_field_name).add(obj)
-    else:
-        slice.__getattr__(model_field_name).remove(obj)
-        
-    slice.save()
-    obj.save()
-    
-    
-    
     
     
     
