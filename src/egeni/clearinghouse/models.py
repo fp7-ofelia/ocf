@@ -1,6 +1,4 @@
 from django.db import models
-from xml.dom import minidom
-from xml import xpath
 from django.db.models import permalink
 from django.forms import ModelForm
 from django.contrib.auth.models import User
@@ -126,6 +124,28 @@ class Link(models.Model):
         return "Link from " + self.src.__unicode__() \
                 + " to " + self.dst.__unicode__()
 
+class Slice(models.Model):
+    '''This is created by a user (the owner) and contains
+    multiple reservations from across different aggregate managers'''
+    
+    owner = models.ForeignKey(User)
+    name = models.CharField(max_length=200, unique=True)
+    controller_url = models.URLField('Slice Controller URL', verify_exists=False)
+    nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
+    links = models.ManyToManyField(Link, through="LinkSliceStatus")
+    
+    def get_absolute_url(self):
+        return('slice_detail', [str(self.id)])
+    get_absolute_url = permalink(get_absolute_url)
+    
+    def has_interface(self, iface):
+        '''
+        return true if the interface is a src or dst in any link in
+        this slice
+        '''
+        return (self.links.filter(src=iface).count()
+                + self.links.filter(src=iface).count()) > 0
+
 class NodeSliceStatus(models.Model):
     '''
     Tracks information about the node in the slice.
@@ -149,27 +169,6 @@ class LinkSliceStatus(models.Model):
     reserved = models.BooleanField()
     removed = models.BooleanField()
     has_error = models.BooleanField()
-
-class Slice(models.Model):
-    '''This is created by a user (the owner) and contains
-    multiple reservations from across different aggregate managers'''
-    
-    owner = models.ForeignKey(User)
-    name = models.CharField(max_length=200, unique=True)
-    controller_url = models.URLField('Slice Controller URL', verify_exists=False)
-    nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
-    links = models.ManyToManyField(Link, through="LinkSliceStatus")
-    
-    def get_absolute_url(self):
-        return('slice_detail', [str(self.id)])
-    get_absolute_url = permalink(get_absolute_url)
-    
-    def has_interface(self, iface):
-        '''
-        return true if the interface is a src or dst in any link in
-        this slice
-        '''
-        return links.filter(src=iface).count() + links.filter(src=iface).count() > 0
 
 class SliceForm(ModelForm):
     class Meta:

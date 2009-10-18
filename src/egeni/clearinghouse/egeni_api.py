@@ -6,6 +6,10 @@ Contains egeni specific functions
 @author: jnaous
 '''
 
+from xml.dom import minidom
+from xml import xpath
+from models import *
+
 def reserve_slice(am_url, rspec, slice_id):
     '''
     Reserves the slice identified by slice_id or
