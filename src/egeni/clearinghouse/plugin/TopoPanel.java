@@ -248,27 +248,50 @@ public class TopoPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if(evt.getActionCommand().equals(RESERVE_ACTION)) {
-			HashMap<String, String> map = new HashMap<String, String>();
+			HashMap<String, Vector<String>> map = 
+				new HashMap<String, Vector<String>>();
+			
+			Vector<String> v = new Vector<String>();
+			for(String id: this.graphNodes.keySet()) {
+				v.add(id);
+			}
+			map.put("node_id", v);
+			
+			v = new Vector<String>();
+			for(GraphLink l: this.graphLinks) {
+				v.add(l.getId());
+			}
+			map.put("link_id", v);
+			
 			getOrPost(submit, map);
 		}
 	}
 	
+	/**
+	 * Does a GET to the given URL if params is null. Otherwise,
+	 * sends the params in a POST.
+	 * @param url: the URL to connect to
+	 * @param params: fields to send in POST. If null, then do a GET instead.
+	 */
 	private InputStream getOrPost(
 			final URL url,
-			final Map<String, String> params) 
+			final HashMap<String,Vector<String>> map) 
 	throws MalformedURLException, IOException {
-		Boolean doOutput = params != null;
+		Boolean doOutput = map != null;
 		StringBuffer paramsAsString = null;
 		if(doOutput) {
 			paramsAsString = new StringBuffer("");
-			for(String k: params.keySet()) {
-				if(paramsAsString.length()>0){
-					paramsAsString.append("&");
+			for(String k: map.keySet()) {
+				Vector<String> v = map.get(k);
+				if(v.size() > 0) {
+					if(paramsAsString.length()>0){
+						paramsAsString.append("&");
+					}
+					paramsAsString.append(k+"="+);
 				}
-				paramsAsString.append(k+"="+params.get(k));
 			}
 		}
-		//String outStr = URLEncoder.encode(paramsAsString.toString(), "UTF-8");
+//		String outStr = URLEncoder.encode(paramsAsString.toString(), "UTF-8");
 		
 		// send parameters to server
 		URLConnection con = url.openConnection();
