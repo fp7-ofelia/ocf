@@ -33,6 +33,7 @@ import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import org.w3c.dom.*;
@@ -263,7 +264,19 @@ public class TopoPanel extends JPanel implements ActionListener {
 			}
 			map.put("link_id", v);
 			
-			getOrPost(submit, map);
+			try {
+				getOrPost(submit, map);
+			} catch (MalformedURLException e) {
+				JOptionPane.showMessageDialog(
+						null,
+						"Submit URL is malformed. Error making reservation.",
+						"Malformed URL Error",
+                        JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -283,11 +296,11 @@ public class TopoPanel extends JPanel implements ActionListener {
 			paramsAsString = new StringBuffer("");
 			for(String k: map.keySet()) {
 				Vector<String> v = map.get(k);
-				if(v.size() > 0) {
+				for(String val: v) {
 					if(paramsAsString.length()>0){
 						paramsAsString.append("&");
 					}
-					paramsAsString.append(k+"="+);
+					paramsAsString.append(k+"="+val);
 				}
 			}
 		}
