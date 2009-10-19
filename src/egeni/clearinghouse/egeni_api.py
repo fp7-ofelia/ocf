@@ -8,7 +8,8 @@ Contains egeni specific functions
 
 from xml.dom import minidom
 from xml import xpath
-from models import *
+import models
+from django.db.models import Count
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -21,7 +22,7 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    
+
     return ""    
 
 def delete_slice(am_url, slice_id):
@@ -206,14 +207,27 @@ def update_rspec(self_am):
             
             # check if this clearinghouse knows about this AM
             try:
-                am = AggregateManager.objects.get(url=remoteURL)
+                am = models.AggregateManager.objects.get(url=remoteURL)
             
             # Nope we don't know about the remote AM
-            except AggregateManager.DoesNotExist:
-                node_obj = Node(nodeId=nodeId,
+            except models.AggregateManager.DoesNotExist:
+                remoteAM, created = models.AggregateManager.objects.get_or_create(
+                    name="RemoteAM",
+                    defaults={"url": "non.existant.org",
+                              "type": models.AggregateManager.TYPE_OF,
+                              },
+                    )
+                remoteAM.save()
+                node_obj = models.Node(nodeId=nodeId,
                                 type=remoteType,
                                 remoteURL=remoteURL,
-                                aggMgr=None,
+                                aggMgr=remoteAM,
+                                is_remote=True,
+                                x=0,
+                                y=0,
+                                sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
+                                unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
+                                err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
                                 )
                 node_obj.save()
                 self_am.remote_node_set.add(node_obj)
@@ -224,10 +238,16 @@ def update_rspec(self_am):
                 if remoteURL == self_am.URL:
                     raise Exception("Remote URL is my URL, but entry is remote.")
                 
-                node_obj = Node(nodeId=nodeId,
+                node_obj = models.Node(nodeId=nodeId,
                                 type=remoteType,
                                 remoteURL=remoteURL,
                                 aggMgr=am,
+                                is_remote=False,
+                                x=0,
+                                y=0,
+                                sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
+                                unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
+                                err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
                                 )
                 node_obj.save()
                 self_am.remote_node_set.add(node_obj)
@@ -235,10 +255,16 @@ def update_rspec(self_am):
         
         # Entry controlled by this AM
         else:
-            node_obj = Node(nodeId=nodeId,
-                            type=Node.TYPE_OF,
+            node_obj = models.Node(nodeId=nodeId,
+                            type=models.Node.TYPE_OF,
                             aggMgr=self_am,
                             remoteURL=self_am.url,
+                            is_remote=False,
+                            x=0,
+                            y=0,
+                            sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
+                            unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
+                            err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
                             )
             new_local_ids.append(nodeId)
             node_obj.save()
@@ -261,7 +287,9 @@ def update_rspec(self_am):
                         nodeId__in=new_remote_ids)]
     
     # Delete unconnected nodes that no AM is connected to
-    Node.objects.filter(connected_am_set__count=0).delete()
+    models.Node.objects.annotate(
+        num_cnxns=Count('connected_am_set')).filter(
+            num_cnxns=0).delete()
     
     # In the second iteration create all the interfaces and flowspaces
     context.setNodePosSize((rspec, 1, 1))
@@ -279,7 +307,7 @@ def update_rspec(self_am):
         
         # check if the iface exists
         iface_obj, created = \
-            Interface.objects.get_or_create(portNum=portNum,
+            models.Interface.objects.get_or_create(portNum=portNum,
                                             ownerNode__nodeId=nodeId,
                                             defaults={'ownerNode': node_obj})
         
@@ -315,7 +343,7 @@ def update_rspec(self_am):
 #                                               interface=iface)
     
     # delete extra ifaces: only those whom this AM created
-    Interface.objects.exclude(
+    models.Interface.objects.exclude(
         id__in=new_iface_ids).filter(
             ownerNode__aggMgr=self_am).delete()
     
@@ -325,9 +353,9 @@ def update_rspec(self_am):
         context.setNodePosSize((interface, 1, 1))
         nodeId = xpath.Evaluate("string(../tns:nodeId)", context=context)
         portNum = int(xpath.Evaluate("number(tns:port)", context=context))
-        iface_obj = Interface.objects.get(portNum__exact=portNum,
-                                          ownerNode__nodeId=nodeId,
-                                          )
+        iface_obj = models.Interface.objects.get(portNum__exact=portNum,
+                                                 ownerNode__nodeId=nodeId,
+                                                 )
         
         # get the remote ifaces
         other_nodeIDs = xpath.Evaluate("tns:remoteNodeId", context=context)
@@ -347,14 +375,14 @@ def update_rspec(self_am):
             num = int(xpath.Evaluate("number()", context=context))
             print "<8> %s %s" % (num, id)
             
-            remote_iface_obj = Interface.objects.get(portNum__exact=num,
-                                                     ownerNode__nodeId=id,
-                                                     )
+            remote_iface_obj = models.Interface.objects.get(portNum__exact=num,
+                                                            ownerNode__nodeId=id,
+                                                            )
             
             remote_iface_ids.append(remote_iface_obj.id)
             
             # get the link or create one if it doesn't exist
-            link, created = Link.objects.get_or_create(
+            link, created = models.Link.objects.get_or_create(
                                 src=iface_obj, dst=remote_iface_obj)
             link.save()
             

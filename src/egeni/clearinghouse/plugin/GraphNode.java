@@ -1,11 +1,17 @@
+package egeni.clearinghouse.plugin;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import javax.swing.Icon;
+import javax.swing.JLabel;
 
 /**
  * Implements a node to be drawn
  * @author jnaous
  *
  */
-public class GraphNode {
+public class GraphNode implements MouseListener {
 
 	private String id;
 	private int x;
@@ -16,6 +22,8 @@ public class GraphNode {
 	private String name;
 	private Boolean is_selected;
 	private Boolean has_error;
+	
+	private JLabel label;
 	
 	/**
 	 * @param id ID string of the node
@@ -40,6 +48,32 @@ public class GraphNode {
 		this.name = name;
 		is_selected = isSelected;
 		has_error = hasError;
+
+		this.label = new JLabel();
+		this.updateLabel();
+		this.label.addMouseListener(this);
+	}
+	
+	/**
+	 * update the text and image of the label
+	 */
+	private void updateLabel() {
+		Icon img;
+		if(this.isSelected()) {
+			if(this.hasError()) {
+				img = this.getErr_img();
+			} else {
+				img = this.getSel_img();
+			}
+		} else {
+			img = this.getUnsel_img();
+		}
+		this.label.setIcon(img);
+		this.label.setText(name);
+		this.label.setBounds(
+				this.getX(), this.getY(),
+				img.getIconWidth(), img.getIconHeight());
+		this.label.repaint();
 	}
 
 	public String getId() {
@@ -56,6 +90,7 @@ public class GraphNode {
 
 	public void setX(int x) {
 		this.x = x;
+		updateLabel();
 	}
 
 	public int getY() {
@@ -64,6 +99,7 @@ public class GraphNode {
 
 	public void setY(int y) {
 		this.y = y;
+		updateLabel();
 	}
 
 	public Icon getSel_img() {
@@ -72,6 +108,7 @@ public class GraphNode {
 
 	public void setSel_img(Icon selImg) {
 		sel_img = selImg;
+		updateLabel();
 	}
 
 	public Icon getUnsel_img() {
@@ -80,6 +117,7 @@ public class GraphNode {
 
 	public void setUnsel_img(Icon unselImg) {
 		unsel_img = unselImg;
+		updateLabel();
 	}
 
 	public Icon getErr_img() {
@@ -88,6 +126,7 @@ public class GraphNode {
 
 	public void setErr_img(Icon errImg) {
 		err_img = errImg;
+		updateLabel();
 	}
 
 	public String getName() {
@@ -96,23 +135,54 @@ public class GraphNode {
 
 	public void setName(String name) {
 		this.name = name;
+		updateLabel();
 	}
 
 	public Boolean isSelected() {
 		return is_selected;
 	}
 
-	public void setIsSelected(Boolean isSelected) {
+	public void setSelected(Boolean isSelected) {
 		is_selected = isSelected;
+		updateLabel();
 	}
 
 	public Boolean hasError() {
 		return has_error;
 	}
 
-	public void setHasError(Boolean hasError) {
+	public void setError(Boolean hasError) {
 		has_error = hasError;
+		updateLabel();
 	}
-	
-	
+
+	public JLabel getLabel() {
+		return label;
+	}
+
+	/**
+	 * Toggle the is_selected flag.
+	 * @param e
+	 */
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		this.setSelected(!is_selected);
+		updateLabel();
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
 }

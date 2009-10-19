@@ -13,6 +13,8 @@ class SiteLockDown(object):
     From: http://davyd.livejournal.com/262859.html
     """
     def process_request (self, request):
+        return None
+    
         try:
             request.django_root
         except AttributeError:

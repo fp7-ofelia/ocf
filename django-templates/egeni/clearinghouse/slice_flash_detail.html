@@ -1,0 +1,56 @@
+{% extends "clearinghouse/base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<h1>Details for Slice {{ slice.name }}</h1>
+
+{% if error_message %}
+<div class="error">
+<p><strong>{{ error_message }}</strong></p>
+</div>
+{% endif %}
+
+<div class="details">
+    <form method="POST" action="">
+        <h2>Flow Space Description</h2>
+        {{ fsformset.management_form }}
+        <table border="1">
+        	<tr>
+       			{% for field in fsformset.forms.0 %}
+       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+        				<td><strong>{{ field.label_tag }}</strong></td>
+        			{% endif %}
+	        	{% endfor %}
+        	</tr>
+       		{% for form in fsformset.forms %}
+       			<tr>
+       				{% for field in form %}
+	       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+			            	<td>{{ field.errors }} {{ field }}</td>
+	        			{% endif %}
+	    	    	{% endfor %}
+	    	    </tr>
+    			{% for field in form %}
+	       			{% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
+			           	{{ field }}
+	        		{% endif %}
+	    	    {% endfor %}
+			{% endfor %}
+        </table>
+        <!--  {{ fsformset }}-->
+        <p><strong>Ready?</strong> <input type="submit" value="Submit" /></p>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="http://www.java.com/js/deployJava.js"></script>
+    <script>
+        var attributes = {code:'egeni.clearinghouse.plugin.GUIApplet.class',
+            archive:'./plugin.jar',
+            width:800, height:600} ;
+        var parameters = {inputURL:'topo/'} ;
+        var version = '1.6' ;
+        deployJava.runApplet(attributes, parameters, version);
+	</script>
+{% endblock %}

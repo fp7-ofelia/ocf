@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
+import os
 
 def home(request):
     '''Show the list of slices, and form for creating new slice'''
@@ -22,7 +24,7 @@ def home(request):
         # get reserved and unreserved slices
         form = SliceForm()
         
-    reserved_slices = request.user.slice_set.filter(committed__exact=True)
+    reserved_slices = request.user.slice_set.filter(committed=True)
     reserved_ids = reserved_slices.values_list('id', flat=True)
     unreserved_slices = request.user.slice_set.exclude(id__in=reserved_ids)
     
@@ -157,30 +159,132 @@ def slice_flash_detail(request, slice_id):
         print "<zz>"
         for am in agg_list:
             print "<aa>"
-            am.updateRSpec()
+#            am.updateRSpec()
         formset = FSFormSet(instance=slice)
         print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
         
-    # TODO: replace with slice_flash_detail.html
-    return render_to_response("clearinghouse/slice_detail.html",
-                              {'aggmgr_list': agg_list,
-                               'slice': slice,
+    return render_to_response("clearinghouse/slice_flash_detail.html",
+                              {'slice': slice,
                                'fsformset': formset,
                                })
+
+def slice_get_img(request, slice_id, img_name):
+    image_data = open("../../img/%s" % img_name, "rb").read()
+    return HttpResponse(image_data, mimetype="image/png")
+
+def slice_get_plugin(request, slice_id):
+    jar = open("../../plugin.jar", "rb").read()
+    return HttpResponse(jar, mimetype="application/java-archive")
+
+def slice_get_xsd(request, slice_id):
+    xsd = open("../plugin.xsd", "rb").read()
+    return HttpResponse(xsd, mimetype="application/xml")    
 
 def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
     
+    return HttpResponse(
+"""<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!-- URL to send POST message to on submit button click -->
+<submit>
+  <url>http://alice.bob/sdkjl</url>
+</submit>
+
+<!-- Example of a node in the graph -->
+<node>
+  <!-- id used to identify the node -->
+  <id>12314xlska</id>
+
+  <!-- X and Y coordinates in pixels of node on graph -->
+  <x>135</x>
+  <y>200</y>
+
+  <!-- images used when selected, unselected, and has error -->
+  <sel_img>/img/white_circle.png</sel_img>
+  <unsel_img>/img/blue_circle.png</unsel_img>
+  <err_img>/img/red_circle.png</err_img>
+
+  <!-- String shown on the graph indicating name of the node -->
+  <name>node1</name>
+
+  <!-- Boolean indicating whther to draw 
+       node as selected or unselected -->
+  <is_selected>False</is_selected>
+
+  <!-- Flag indicating node has an error and should be
+       drawn with err_img. -->
+  <has_err>False</has_err>
+</node>
+
+<node>
+  <id>1asd29</id>
+  <x>15</x>
+  <y>10</y>
+  <sel_img>/img/white_circle.png</sel_img>
+  <unsel_img>/img/blue_circle.png</unsel_img>
+  <err_img>/img/red_circle.png</err_img>
+  <name>node2</name>
+  <is_selected>True</is_selected>
+  <has_err>False</has_err>
+</node>
+
+<node>
+  <id>xz98ch9o2</id>
+  <x>100</x>
+  <y>80</y>
+  <sel_img>/img/white_circle.png</sel_img>
+  <unsel_img>/img/blue_circle.png</unsel_img>
+  <err_img>/img/red_circle.png</err_img>
+  <name>node3</name>
+  <is_selected>False</is_selected>
+  <has_err>True</has_err>
+</node>
+
+<!-- Example of a description of a link between two nodes -->
+<link>
+  <id>sdfasaf93</id>
+  <!-- Each link must have exactly two endpoints -->
+  <src>12314xlska</src>
+
+  <dst>1asd29</dst>
+
+  <!-- Boolean indicating whether or not link is selected -->
+  <is_selected>False</is_selected>
+
+  <!-- Boolean indicating whether or not link is selected -->
+  <has_err>True</has_err>
+</link>
+
+<link>
+  <id>xyz</id>
+  <src>12314xlska</src>
+  <dst>xz98ch9o2</dst>
+  <is_selected>True</is_selected>>
+  <has_err>False</has_err>
+</link>
+<link>
+  <id>xyz</id>
+  <dst>12314xlska</dst>
+  <src>xz98ch9o2</src>
+  <is_selected>True</is_selected>>
+  <has_err>False</has_err>
+</link>
+</document>
+""", mimetype="text/xml"
+)
     if request.method == "GET":
         for am in AggregateManager.objects.all():
             am.updateRSpec()
         # get all the local nodes
-        nodes = Node.objects.all().filter(aggMgr__isnull=False)
+        nodes = Node.objects.all().exclude(is_remote=True)
+        
         # get all the local links
-        links = Link.objects.filter(src__ownerNode__aggMgr__isnull=False,
-                                    dst__ownerNode__aggMgr__isnull=False,
-                                    )
-        return render_to_response("clearinghouse/flash_xml.xml",
+        links = Link.objects.filter(
+                    src__ownerNode__is_remote=False,
+                    dst__ownerNode__is_remote=False)
+                    
+        return render_to_response("clearinghouse/flash-xml.xml",
                                   {'nodes': nodes,
                                    'links': links},
                                    mimetype="application/xml")

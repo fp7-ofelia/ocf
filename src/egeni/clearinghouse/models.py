@@ -25,12 +25,14 @@ class AggregateManager(models.Model):
     type = models.CharField(max_length=20, choices=AM_TYPE_CHOICES.items())
     
     # @ivar remote_node_set: nodes that this AM connects to that are not under its control
-    remote_node_set = models.ManyToManyField("Node", related_name='remote_am_set')
+    remote_node_set = models.ManyToManyField("Node", related_name='remote_am_set', blank=True)
 
     # @ivar local_node_set: nodes that this AM connects to that are under its control
     
     # @ivar remote_node_set: nodes that this AM connects to that are or are not under its control
-    connected_node_set = models.ManyToManyField("Node", related_name='connected_am_set')
+    connected_node_set = models.ManyToManyField("Node",
+                                                related_name='connected_am_set',
+                                                blank=True)
 
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -78,7 +80,9 @@ class Node(models.Model):
     remoteURL = models.URLField("Controller URL", verify_exists=False)
     
     # @ivar aggMgr: The AM that created the node or controls it
-    aggMgr = models.ForeignKey(AggregateManager, related_name='local_node_set')
+    aggMgr = models.ForeignKey(AggregateManager,
+                               related_name='local_node_set',
+                               )
     
     # @ivar x: horiz position of the node when drawn
     x = models.IntegerField()
@@ -133,6 +137,7 @@ class Slice(models.Model):
     controller_url = models.URLField('Slice Controller URL', verify_exists=False)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
+    committed = models.BooleanField();
     
     def get_absolute_url(self):
         return('slice_detail', [str(self.id)])

@@ -1,10 +1,18 @@
+package egeni.clearinghouse.plugin;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,13 +31,17 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.*;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 public class TopoPanel extends JPanel implements ActionListener {
 
@@ -37,28 +49,29 @@ public class TopoPanel extends JPanel implements ActionListener {
 
 	private static final String RESET_ACTION = "RESET";
 	private static final String RESERVE_ACTION = "RESERVE";
-	
 	private JPanel canvasPanel;
-	private JApplet applet;
 	private Map<String, GraphNode> graphNodes;
 	private Vector<GraphLink> graphLinks;
+	private URL submit;
+	private JApplet applet;
 	
 	public TopoPanel(JApplet applet, URL inputURL) {
 		super(new BorderLayout());
 		
+		this.applet = applet;
+		
 		this.graphNodes = new HashMap<String, GraphNode>();
 		this.graphLinks = new Vector<GraphLink>();
 		
-		this.applet = applet;
-		
-		canvasPanel = new JPanel();
+		canvasPanel = new TopoCanvasPanel(graphLinks);
 		canvasPanel.setBackground(Color.white);
 		JScrollPane sPane = new JScrollPane(canvasPanel);
 		this.add(sPane, BorderLayout.CENTER);
+		canvasPanel.setPreferredSize(new Dimension(400, 400));
 
 		parseInputXML(inputURL);
 		drawTopo();
-				
+		
 		JPanel bottomPanel = new JPanel();
 		
 		JButton reserveButton = new JButton("Reserve");
@@ -76,51 +89,50 @@ public class TopoPanel extends JPanel implements ActionListener {
 	}
 
 	/**
-	 * Draw the topology into the canvas
+	 * Add components of the topology into the canvas
 	 */
     private void drawTopo() {
 		this.canvasPanel.setLayout(null);
+		
+		/* Keep track of the max size of the canvas */
+		int maxX = 0;
+		int maxY = 0;
 
 		for(GraphNode n: this.graphNodes.values()) {
-			Icon img = 
-			if(n.isSelected()) {
-				if(n.hasError()) {
-					
-				}
-			}
-				
-		canvasPanel.add(l);		
-		Insets insets = canvasPanel.getInsets();
-		l.setBounds(20+insets.left,20+insets.top, i.getIconWidth(), i.getIconHeight());
-		
-		canvasPanel.setPreferredSize(new Dimension(300, 300));
+			JLabel l = n.getLabel();
+			canvasPanel.add(l);		
+			
+			int curX = n.getX()+n.getLabel().getWidth();
+			int curY = n.getY()+n.getLabel().getHeight();
+			
+			maxX = Math.max(curX, maxX);
+			maxY = Math.max(curY, maxY);
+		}
+
+		canvasPanel.setPreferredSize(new Dimension(maxX + 40, maxY + 40));
+		canvasPanel.repaint();
 	}
 
+    /**
+     * Read XML from the inputURL and parse it into a set of nodes and links
+     * @param inputURL
+     */
 	private void parseInputXML(URL inputURL) {
-    	/* Get the XML from the url in the parameters */
-    	InputStream in = null;
-    	try {
-			in = this.getOrPost(inputURL, null);
-		} catch (MalformedURLException e) {
-			JLabel err = new JLabel(
-					"ERROR: Malformed URL: "+inputURL.toString());
-			canvasPanel.add(err);
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			JLabel err = new JLabel("ERROR: Could not read from URL: "
-					+inputURL.toString());
-			canvasPanel.add(err);
-			e.printStackTrace();
-			return;
-		}
-    	
 		Document doc = null;
 		try {
+//			SchemaFactory sfactory = SchemaFactory.newInstance(
+//					XMLConstants.W3C_XML_SCHEMA_NS_URI);
+//			Schema schema = sfactory.newSchema(
+//					new URL(applet.getCodeBase().toString() 
+//							+ "plugin.xsd"));
+			
 			DocumentBuilderFactory factory = 
 				DocumentBuilderFactory.newInstance();
+//			factory.setValidating(true);
+//			factory.setSchema(schema);
+			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			doc = builder.parse(in);
+			doc = builder.parse(this.getOrPost(inputURL, null));
 		} catch (SAXException e) {
 			JLabel err = new JLabel("ERROR: Could not parse XML");
 			canvasPanel.add(err);
@@ -133,6 +145,17 @@ public class TopoPanel extends JPanel implements ActionListener {
 			return;
 		} catch (ParserConfigurationException e) {
 			JLabel err = new JLabel("ERROR: XML parse misconfigured");
+			canvasPanel.add(err);
+			e.printStackTrace();
+			return;
+		}
+		
+		try {
+			submit = new URL(applet.getCodeBase().toString()
+					+ doc.getElementsByTagName("submit").item(0));
+		} catch (MalformedURLException e) {
+			JLabel err = new JLabel(
+					"ERROR: Malformed URL: "+inputURL.toString());
 			canvasPanel.add(err);
 			e.printStackTrace();
 			return;
@@ -175,7 +198,7 @@ public class TopoPanel extends JPanel implements ActionListener {
 					"is_selected").item(0).getTextContent().equalsIgnoreCase("True");
 			
 			Boolean has_error = n.getElementsByTagName(
-					"has_error").item(0).getTextContent().equalsIgnoreCase("True");
+					"has_err").item(0).getTextContent().equalsIgnoreCase("True");
 			
 			graphNodes.put(id, new GraphNode(id, x, y, sel_img, unsel_img, 
 					err_img, name, is_selected, has_error));
@@ -189,16 +212,12 @@ public class TopoPanel extends JPanel implements ActionListener {
 				n.getElementsByTagName(
 						"id").item(0).getTextContent();
 			
-			Element srcElem = (Element) n.getElementsByTagName(
-					"src").item(0);
-			String src_id = srcElem.getElementsByTagName(
-					"node_id").item(0).getTextContent();
+			String src_id = n.getElementsByTagName(
+					"src").item(0).getTextContent();
 			GraphNode src = this.graphNodes.get(src_id);
 			
-			Element dstElem = (Element) n.getElementsByTagName(
-					"dst").item(0);
-			String dst_id = dstElem.getElementsByTagName(
-					"node_id").item(0).getTextContent();
+			String dst_id = n.getElementsByTagName(
+					"dst").item(0).getTextContent();
 			GraphNode dst = this.graphNodes.get(dst_id);
 			
 			Boolean is_selected = n.getElementsByTagName(
@@ -206,7 +225,7 @@ public class TopoPanel extends JPanel implements ActionListener {
 							).equalsIgnoreCase("True");
 			
 			Boolean has_error = n.getElementsByTagName(
-					"has_error").item(0).getTextContent(
+					"has_err").item(0).getTextContent(
 							).equalsIgnoreCase("True");
 			
 			graphLinks.add(new GraphLink(id, src, dst, 
@@ -217,7 +236,7 @@ public class TopoPanel extends JPanel implements ActionListener {
 	/** Returns an ImageIcon, or null if the path was invalid. */
     protected ImageIcon createImageIcon(String path,
     		String description) {
-        java.net.URL imgURL = getClass().getResource(path);
+        URL imgURL = getClass().getResource(path);
         if (imgURL != null) {
             return new ImageIcon(imgURL, description);
         } else {
@@ -229,7 +248,8 @@ public class TopoPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if(evt.getActionCommand().equals(RESERVE_ACTION)) {
-			
+			HashMap<String, String> map = new HashMap<String, String>();
+			getOrPost(submit, map);
 		}
 	}
 	
