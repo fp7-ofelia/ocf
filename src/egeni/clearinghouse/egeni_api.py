@@ -3,8 +3,11 @@ Created on Oct 16, 2009
 
 Contains egeni specific functions
 
-@author: jnaous
+@author: jnaous, srini
 '''
+
+from suds.client import Client
+from suds.xsd.sxbasic import Import
 
 from xml.dom import minidom
 from xml import xpath
@@ -14,6 +17,24 @@ import random
 
 MAX_X = 200
 MAX_Y = 200
+
+sfa_wsdl_url = 'http://yuba.stanford.edu/egeni/sfa.wsdl'
+server = {}
+
+def connect_to_soap_server(am_url):
+    global server
+
+    ns = 'http://schemas.xmlsoap.org/soap/encoding/'
+    location = 'http://schemas.xmlsoap.org/soap/encoding/'
+    Import.bind(ns, location)
+    schema1 = 'http://schemas.xmlsoap.org/wsdl/soap/'
+    schema2 = 'http://schemas.xmlsoap.org/wsdl/'
+    schema3 = 'http://www.w3.org/2001/XMLSchema'
+    Import.bind(schema1,schema1)
+    Import.bind(schema2,schema2)
+    Import.bind(schema3,schema3)
+    server[am_url]= Client(sfa_wsdl_url, location=am_url)
+
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -26,136 +47,36 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
+    global server
+    if am_url not in server:
+        connect_to_soap_server(am_url)
 
+    result = server.service.create_slice("cred", str(slice_id), str(rspec), caller_cred=None)
+    print result
+    
     return ""    
 
 def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
+    global server
+    if am_url not in server:
+        connect_to_soap_server(am_url)
+
+    result = server.service.delete_slice("cred", str(slice_id), caller_cred=None)
     pass
 
 def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
     '''
-    
-    return """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+    global server
+    if am_url not in server:
+        connect_to_soap_server(am_url)
 
-  <tns:version>1.0</tns:version>
-
-  <tns:remoteEntry>
-    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
-    <tns:remoteType>PLNode</tns:remoteType>
-    <tns:node>
-      <tns:nodeId>9dsafj</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>0</tns:port>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>1</tns:remotePort>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:remoteEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>640021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>26</tns:port>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>46</tns:remotePort>
-        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>43</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>28</tns:port>
-          <tns:flowSpaceEntry>
-              <tns:policy>0</tns:policy>
-              <tns:dl_type>2</tns:dl_type>
-              <tns:tp_dst>423</tns:tp_dst>
-          </tns:flowSpaceEntry>
-          <tns:flowSpaceEntry>
-              <tns:policy>0</tns:policy>
-              <tns:dl_type>2</tns:dl_type>
-              <tns:tp_dst>423</tns:tp_dst>
-          </tns:flowSpaceEntry>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>2580021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>46</tns:port>
-        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>26</tns:remotePort>
-        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>43</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>48</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>1</tns:port>
-        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
-        <tns:remotePort>0</tns:remotePort>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>1f40021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>41</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>43</tns:port>
-        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>26</tns:remotePort>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>46</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>44</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>12c0021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>33</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>35</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>36</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>c80021f7cae400</tns:nodeId>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>123456789ab</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>0</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-</tns:RSpec>
-"""
+    result = server[am_url].service.get_resources("cred", str(slice_id), caller_cred=None)
+    return result
 
 def update_rspec(self_am):
     '''
