@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 public class GUIApplet extends JApplet {
 
 	private static final long serialVersionUID = 1983426530164730695L;
+	private JGraphTopoPanel topoPanel;
 
     public void init() {
     	try {
@@ -25,17 +26,34 @@ public class GUIApplet extends JApplet {
     
     private void createGUI() {
     	String url = getParameter("inputURL");
-        TopoPanel newContentPane;
 		try {
-			newContentPane = new TopoPanel(
-					this, new URL(
-							this.getCodeBase().toString() + url));
-//							url));
-	        newContentPane.setOpaque(true); 
-	        setContentPane(newContentPane);
+			if(url.startsWith("http://")) {
+				topoPanel = new JGraphTopoPanel(
+						this.getCodeBase(), new URL(url));
+			} else {
+				topoPanel = new JGraphTopoPanel(
+						this.getCodeBase(), new URL(
+								this.getCodeBase().toString() + url));
+			}
+			topoPanel.setOpaque(true);
+	        setContentPane(topoPanel);
 		} catch (MalformedURLException e) {
 			// TODO: ????
 			e.printStackTrace();
 		}
+    }
+    
+    public String getTest() {
+    	return "Hello from java";
+    }
+    
+    public String[] getNodeIDs() {
+    	System.err.println("Called getNodes");
+    	String[] s = topoPanel.getNodeIDs();
+    	System.err.println("returning from getNodes with "+s);
+    	return s;
+    }
+    public String[] getLinkIDs() {
+    	return topoPanel.getLinkIDs();
     }
 }

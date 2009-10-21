@@ -10,8 +10,20 @@
 </div>
 {% endif %}
 
+<script>
+    var attributes = {
+    		id:'guiPlugin',
+    		code:'egeni.clearinghouse.plugin.GUIApplet.class',
+    		archive:'./plugin.jar',
+    		cache_option:'No',
+    		width:800, height:600} ;
+    var parameters = {inputURL:'topo/'} ;
+    var version = '1.6' ;
+    deployJava.runApplet(attributes, parameters, version);
+</script>
+
 <div class="details">
-    <form method="POST" action="">
+    <form onsubmit="return doSubmit(this)" id='sliceForm' method="POST" action="">
         <h2>Flow Space Description</h2>
         {{ fsformset.management_form }}
         <table border="1">
@@ -37,20 +49,11 @@
 	    	    {% endfor %}
 			{% endfor %}
         </table>
-        <!--  {{ fsformset }}-->
-        <p><strong>Ready?</strong> <input type="submit" value="Submit" /></p>
+        <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
     </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="http://www.java.com/js/deployJava.js"></script>
-    <script>
-        var attributes = {code:'egeni.clearinghouse.plugin.GUIApplet.class',
-            archive:'./plugin.jar',
-            width:800, height:600} ;
-        var parameters = {inputURL:'topo/'} ;
-        var version = '1.6' ;
-        deployJava.runApplet(attributes, parameters, version);
-	</script>
+{% include "clearinghouse/slice_flash_detail.js" %}
 {% endblock %}

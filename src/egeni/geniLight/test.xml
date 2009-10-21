@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+
+  <tns:version>1.0</tns:version>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>640021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>26</tns:port>
+        <tns:remoteNodeId>213109</tns:remoteNodeId>
+        <tns:remotePort>38</tns:remotePort>
+        <tns:remoteNodeId>134a34</tns:remoteNodeId>
+        <tns:remotePort>2</tns:remotePort>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>28</tns:port>
+          <tns:flowSpaceEntry>
+              <tns:policy>0</tns:policy>
+              <tns:dl_type>2</tns:dl_type>
+              <tns:tp_dst>423</tns:tp_dst>
+          </tns:flowSpaceEntry>
+          <tns:flowSpaceEntry>
+              <tns:policy>0</tns:policy>
+              <tns:dl_type>2</tns:dl_type>
+              <tns:tp_dst>423</tns:tp_dst>
+          </tns:flowSpaceEntry>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>2580021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>46</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>48</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>1f40021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>41</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>43</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>44</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>12c0021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>33</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>35</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>36</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>c80021f7cae400</tns:nodeId>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>123456789ab</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>0</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+</tns:RSpec>

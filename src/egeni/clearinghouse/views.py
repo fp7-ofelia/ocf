@@ -1,11 +1,15 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponseServerError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
 import os
+
+LINK_ID_FIELD = "link_id"
+NODE_ID_FIELD = "node_id"
 
 def home(request):
     '''Show the list of slices, and form for creating new slice'''
@@ -92,7 +96,6 @@ def slice_detail(request, slice_id):
 
 def slice_flash_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    agg_list = AggregateManager.objects.all()
     
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, FlowSpace)
@@ -100,73 +103,73 @@ def slice_flash_detail(request, slice_id):
     print "<xx>"
     
     if request.method == "POST":
+#        if NODE_ID_FIELD not in request.POST or LINK_ID_FIELD not in request.POST:
+#            return HttpResponseBadRequest("Missing fields %s or %s" 
+#                                          % (LINK_ID_FIELD, NODE_ID_FIELD))
         
-        try:
-            action = request.POST["action"]
+        formset = FSFormSet(request.POST, request.FILES, instance=slice)
+        if not formset.is_valid():
+            return HttpResponseBadRequest("Form is invalid")
         
-            if action == "link" or action == "node":
-                
-                selected = request.POST.get("selected") == "True"
-                id = request.POST.get(action+"_id")
-                
-                if action == "link":
-                    model = Link
-                    through_type = LinkSliceStatus
-                else:
-                    model = Node
-                    through_type = NodeSliceStatus
-                
-                obj = get_object_or_404(model, pk=id)
-
-                kwargs = {"slice": slice,
-                          action: obj,
-                          "defaults":{'reserved': False,
-                                      'removed': False}}
-                through, created = through_type.objects.get_or_create(**kwargs)
-
-                through.removed = not selected
-                through.save()
-                
-            elif action == "reset":
-                link_statuses = LinkSliceStatus.objects.exclude(
-                                    reserved=True, removed=False)
-                [l.delete for l in link_statuses]
-                
-                node_statuses = NodeSliceStatus.objects.exclude(
-                                    reserved=True, removed=False)
-                [n.delete for n in node_statuses]
-                
-            elif action == "reserve":
-                # get the RSpec of the Slice
-                rspec = render_to_string("rspec/egeni-rspec.xml",
-                                         {"node_set": slice.nodes.all(),
-                                          "slice": slice})
-                
-                formset = FSFormSet(request.POST, request.FILES, instance=slice)
-                if formset.is_valid():
-                    formset.save()
-                    slice.committed = True
-                    slice.save()
-                
-            else:
-                return HttpResponseServerError(u"Unknown action %s" % action)
+        link_ids = request.POST.getlist(LINK_ID_FIELD)
+        node_ids = request.POST.getlist(NODE_ID_FIELD)
+        
+        # delete old links and nodes
+        LinkSliceStatus.objects.filter(
+            slice=slice).exclude(link__pk__in=link_ids).delete()
+        NodeSliceStatus.objects.filter(
+            slice=slice).exclude(node__pk__in=node_ids).delete()
+        
+        # create new links and ids
+        for id in link_ids:
+            print "Link: %s" % id;
+            link = get_object_or_404(Link, pk=id)
+            through, created = LinkSliceStatus.objects.get_or_create(
+                                    slice=slice,
+                                    link=link,
+                                    defaults={'reserved': False,
+                                              'removed': False,
+                                              'has_error': False,
+                                              }
+                                    )
             
-            return HttpResponseRedirect(reverse('slice_flash_detail'), slice_id)
+        for id in node_ids:
+            print "Node: %s" % id;
+            node = get_object_or_404(Node, pk=id)
+            through, created = NodeSliceStatus.objects.get_or_create(
+                                    slice=slice,
+                                    node=node,
+                                    defaults={'reserved': False,
+                                              'removed': False,
+                                              'has_error': False,
+                                              }
+                                    )
 
-        except KeyError, e:
-            return HttpResponseServerError(u"Missing POST field %s" % e.message)
-    else:
-        print "<zz>"
-        for am in agg_list:
-            print "<aa>"
+        # get the RSpec of the Slice
+        rspec = render_to_string("rspec/egeni-rspec.xml",
+                                 {"node_set": slice.nodes.all(),
+                                  "slice": slice})
+            
+        formset.save()
+        slice.committed = False
+        slice.save()
+        
+        # TODO: Do actual reservation    
+        slice.committed = False
+        return HttpResponseRedirect(reverse('slice_flash_detail', args=[slice_id]))
+
+    elif request.method == "GET":
+#        for am in agg_list:
+#            print "<aa>"
 #            am.updateRSpec()
         formset = FSFormSet(instance=slice)
         print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
-        
-    return render_to_response("clearinghouse/slice_flash_detail.html",
-                              {'slice': slice,
-                               'fsformset': formset,
-                               })
+        return render_to_response("clearinghouse/slice_flash_detail.html",
+                                  {'slice': slice,
+                                   'fsformset': formset,
+                                   })
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
 
 def slice_get_img(request, slice_id, img_name):
     image_data = open("../../img/%s" % img_name, "rb").read()
@@ -182,100 +185,12 @@ def slice_get_xsd(request, slice_id):
 
 def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    print "Doing topo view"
     
-    return HttpResponse(
-"""<?xml version="1.0" encoding="UTF-8"?>
-<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<!-- URL to send POST message to on submit button click -->
-<submit>
-  <url>http://alice.bob/sdkjl</url>
-</submit>
-
-<!-- Example of a node in the graph -->
-<node>
-  <!-- id used to identify the node -->
-  <id>12314xlska</id>
-
-  <!-- X and Y coordinates in pixels of node on graph -->
-  <x>135</x>
-  <y>200</y>
-
-  <!-- images used when selected, unselected, and has error -->
-  <sel_img>/img/white_circle.png</sel_img>
-  <unsel_img>/img/blue_circle.png</unsel_img>
-  <err_img>/img/red_circle.png</err_img>
-
-  <!-- String shown on the graph indicating name of the node -->
-  <name>node1</name>
-
-  <!-- Boolean indicating whther to draw 
-       node as selected or unselected -->
-  <is_selected>False</is_selected>
-
-  <!-- Flag indicating node has an error and should be
-       drawn with err_img. -->
-  <has_err>False</has_err>
-</node>
-
-<node>
-  <id>1asd29</id>
-  <x>15</x>
-  <y>10</y>
-  <sel_img>/img/white_circle.png</sel_img>
-  <unsel_img>/img/blue_circle.png</unsel_img>
-  <err_img>/img/red_circle.png</err_img>
-  <name>node2</name>
-  <is_selected>True</is_selected>
-  <has_err>False</has_err>
-</node>
-
-<node>
-  <id>xz98ch9o2</id>
-  <x>100</x>
-  <y>80</y>
-  <sel_img>/img/white_circle.png</sel_img>
-  <unsel_img>/img/blue_circle.png</unsel_img>
-  <err_img>/img/red_circle.png</err_img>
-  <name>node3</name>
-  <is_selected>False</is_selected>
-  <has_err>True</has_err>
-</node>
-
-<!-- Example of a description of a link between two nodes -->
-<link>
-  <id>sdfasaf93</id>
-  <!-- Each link must have exactly two endpoints -->
-  <src>12314xlska</src>
-
-  <dst>1asd29</dst>
-
-  <!-- Boolean indicating whether or not link is selected -->
-  <is_selected>False</is_selected>
-
-  <!-- Boolean indicating whether or not link is selected -->
-  <has_err>True</has_err>
-</link>
-
-<link>
-  <id>xyz</id>
-  <src>12314xlska</src>
-  <dst>xz98ch9o2</dst>
-  <is_selected>True</is_selected>>
-  <has_err>False</has_err>
-</link>
-<link>
-  <id>xyz</id>
-  <dst>12314xlska</dst>
-  <src>xz98ch9o2</src>
-  <is_selected>True</is_selected>>
-  <has_err>False</has_err>
-</link>
-</document>
-""", mimetype="text/xml"
-)
     if request.method == "GET":
         for am in AggregateManager.objects.all():
             am.updateRSpec()
+        print "Done update"
         # get all the local nodes
         nodes = Node.objects.all().exclude(is_remote=True)
         
@@ -283,21 +198,20 @@ def slice_get_topo(request, slice_id):
         links = Link.objects.filter(
                     src__ownerNode__is_remote=False,
                     dst__ownerNode__is_remote=False)
-                    
-        return render_to_response("clearinghouse/flash-xml.xml",
-                                  {'nodes': nodes,
-                                   'links': links},
-                                   mimetype="application/xml")
+
+        print "rendering xml"
+
+        xml = render_to_string("plugin/flash-xml.xml",
+                               {'nodes': nodes,
+                                'links': links,
+                                'slice': slice})
+        print xml
+        return HttpResponse(xml, mimetype="text/xml")
     else:
-        return HttpResponseServerError(u"Unknown method %s to this URL" % request.method)
-    
-    
-    
-def am_delete(request, object_id):
-    # get the aggregate manager object
-    am = get_object_or_404(AggregateManager, pk=object_id)
-    am.delete()
-    return HttpResponseRedirect(reverse('index'))
+        return HttpResponseNotAllowed("GET")
+
+
+
 
 def am_create(request):
     error_msg = u"No POST data sent."
@@ -307,17 +221,16 @@ def am_create(request):
             # Get info
             name = post['name']
             url = post['url']
-            key_file = post['key_file'] if post.has_key('key_file') else None
-            cert_file = post['cert_file'] if post.has_key('cert_file') else None
             
             new_am = AggregateManager.objects.create(name=name,
                                                      url=url,
-                                                     key_file=key_file,
-                                                     cert_file=cert_file)
+                                                     )
             return HttpResponseRedirect(new_am.get_absolute_url())
         else:
             error_msg = u"Insufficient data. Need at least name and url"
-    return HttpResponseServerError(error_msg)
+            return HttpResponseBadRequest(error_msg)
+    else:
+        return HttpResponseNotAllowed("GET")
 
 def am_detail(request, am_id):
     # get the aggregate manager object
@@ -339,5 +252,5 @@ def am_detail(request, am_id):
             am.save()
             return HttpResponseRedirect(am.get_absolute_url())
     else:
-        return HttpResponseServerError(u"Unknown method %s" % request.method)
+        return HttpResponseNotAllowed("GET", "POST")
 

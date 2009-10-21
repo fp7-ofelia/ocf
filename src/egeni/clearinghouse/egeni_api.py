@@ -10,6 +10,10 @@ from xml.dom import minidom
 from xml import xpath
 import models
 from django.db.models import Count
+import random
+
+MAX_X = 200
+MAX_Y = 200
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -160,24 +164,16 @@ def update_rspec(self_am):
     RSpec
     '''
     
-    print("making client")
-    rspec = get_rspec(self_am.url)
+    if self_am.name == "RemoteAM":
+        return
     
-    print("Rspec read: "+rspec)
+    rspec = get_rspec(self_am.url)
     
     rspecdoc = minidom.parseString(rspec)
     
-    print("<3>")
-    print(rspecdoc)
-
-    print("Called get switches")
-    
     # create the context
     rspec=rspecdoc.childNodes[0]
-    print(rspec)
-    print("<4>")
     ns_uri = rspec.namespaceURI
-    print(ns_uri)
     
     # create a context
     context = xpath.Context.Context(rspec, 1, 1, 
@@ -189,7 +185,9 @@ def update_rspec(self_am):
     # list of node ids added
     new_local_ids = []
     new_remote_ids = []
-
+    
+    print "-----My AM id: %s" %  self_am.id
+    
     # In the first iteration create all the nodes
     for node in nodes:
         # move the context to the current node
@@ -199,8 +197,12 @@ def update_rspec(self_am):
         nodeId = xpath.Evaluate("string(tns:nodeId)", context=context)
         node_type = xpath.Evaluate("name(..)", context=context)
         
-        print "<x> %s" % node_type
-        
+        kwargs = {'nodeId':nodeId,
+                  'x':0,
+                  'y':0,
+                  'img_url':"/img/blue_circle.png",
+                  }
+
         if(node_type == 'tns:remoteEntry'):
             remoteType = xpath.Evaluate("string(../tns:remoteType)", context=context)
             remoteURL = xpath.Evaluate("string(../tns:remoteURL)", context=context)
@@ -217,18 +219,16 @@ def update_rspec(self_am):
                               "type": models.AggregateManager.TYPE_OF,
                               },
                     )
-                remoteAM.save()
-                node_obj = models.Node(nodeId=nodeId,
-                                type=remoteType,
-                                remoteURL=remoteURL,
-                                aggMgr=remoteAM,
-                                is_remote=True,
-                                x=0,
-                                y=0,
-                                sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
-                                unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
-                                err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
-                                )
+                
+                print "+++++ Adding remote out CH Node %s to AM %s" % (nodeId, remoteAM.id)
+                
+                mod = {'type':remoteType,
+                       'remoteURL':remoteURL,
+                       'aggMgr':remoteAM,
+                       'is_remote':True}
+                kwargs.update(**mod)
+                
+                node_obj = models.Node(**kwargs)
                 node_obj.save()
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
@@ -238,55 +238,93 @@ def update_rspec(self_am):
                 if remoteURL == self_am.URL:
                     raise Exception("Remote URL is my URL, but entry is remote.")
                 
-                node_obj = models.Node(nodeId=nodeId,
-                                type=remoteType,
-                                remoteURL=remoteURL,
-                                aggMgr=am,
-                                is_remote=False,
-                                x=0,
-                                y=0,
-                                sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
-                                unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
-                                err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
-                                )
+                print "+++++ Adding remote in CH Node %s" % nodeId
+
+                mod = {'type':remoteType,
+                       'remoteURL':remoteURL,
+                       'aggMgr':am,
+                       'is_remote':False}
+                kwargs.update(**mod)
+                
+                node_obj = models.Node(**kwargs)
                 node_obj.save()
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
         
         # Entry controlled by this AM
         else:
-            node_obj = models.Node(nodeId=nodeId,
-                            type=models.Node.TYPE_OF,
-                            aggMgr=self_am,
-                            remoteURL=self_am.url,
-                            is_remote=False,
-                            x=0,
-                            y=0,
-                            sel_img_url="localhost:8000/clearinghouse/img/sel_of_img.png",
-                            unsel_img_url="localhost:8000/clearinghouse/img/unsel_of_img.png",
-                            err_img_url="localhost:8000/clearinghouse/img/err_of_img.png",                                
-                            )
+            print "+++++ Adding local Node %s" % nodeId
+
+            mod = {'type':models.Node.TYPE_OF,
+                   'remoteURL':self_am.url,
+                   'aggMgr':self_am,
+                   'is_remote':False}
+            print "Doing random"
+            mod['x'] = random.randint(0, MAX_X-50)
+            mod['y'] = random.randint(0, MAX_Y-50)
+            print "Adding new node"
+            kwargs.update(**mod)
+            print "node added"
+            
+            node_obj = models.Node(**kwargs)
             new_local_ids.append(nodeId)
             node_obj.save()
+            print "node saved"
         
         self_am.connected_node_set.add(node_obj)
         node_obj.save()
-        
+    
+    print "*** All local nodes"
+    for n in self_am.local_node_set.filter():
+        print "    %s" % n.nodeId
+    
+    print "*** All old local nodes"
+    for n in self_am.local_node_set.exclude(nodeId__in=new_local_ids):
+        print "    %s" % n.nodeId
+
+    print "*** All old local moved nodes"
+    for n in self_am.local_node_set.filter(nodeId__in=new_remote_ids):
+        print "    %s" % n.nodeId
+
     # delete all old local nodes
     self_am.local_node_set.exclude(nodeId__in=new_local_ids).delete()
     self_am.local_node_set.filter(nodeId__in=new_remote_ids).delete()
     
+    print "*** All new nodes"
+    for n in self_am.local_node_set.filter():
+        print "    %s" % n.nodeId
+
     # Remove stale remote nodes
     [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.exclude(nodeId__in=new_remote_ids)]
     [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.filter(nodeId__in=new_local_ids)]
     
+    print "*** All connected nodes"
+    for n in self_am.connected_node_set.filter():
+        print "    %s" % n.nodeId
+    
+    print "*** All old connected nodes"
+    for n in self_am.connected_node_set.exclude(
+                nodeId__in=new_local_ids).exclude(
+                    nodeId__in=new_remote_ids):
+        print "    %s" % n.nodeId
+
     # Remove Unconnected nodes
     [self_am.connected_node_set.remove(n)
         for n in self_am.connected_node_set.exclude(
                     nodeId__in=new_local_ids).exclude(
                         nodeId__in=new_remote_ids)]
     
+    print "*** New connected nodes"
+    for n in self_am.connected_node_set.filter():
+        print "    %s" % n.nodeId
+
     # Delete unconnected nodes that no AM is connected to
+    print "*** Deleting nodes"
+    for n in models.Node.objects.annotate(
+        num_cnxns=Count('connected_am_set')).filter(
+            num_cnxns=0):
+        print "    %s" % n.nodeId
+    
     models.Node.objects.annotate(
         num_cnxns=Count('connected_am_set')).filter(
             num_cnxns=0).delete()
@@ -300,6 +338,7 @@ def update_rspec(self_am):
         # move the context
         context.setNodePosSize((interface, 1, 1))
         nodeId = xpath.Evaluate("string(../tns:nodeId)", context=context)
+        print "*** Getting connected node %s" % nodeId
         node_obj = self_am.connected_node_set.get(pk=nodeId)
         
         portNum = int(xpath.Evaluate("number(tns:port)", context=context))

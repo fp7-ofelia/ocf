@@ -21,6 +21,11 @@ def is_in_set(value, arg):
         return False
 
 @register.filter
+def has_interface(value, arg):
+    '''returns true if the slice has the interface'''
+    return value.has_interface(arg)
+
+@register.filter
 def contains(value, arg):
     '''returns result of arg in value'''
     

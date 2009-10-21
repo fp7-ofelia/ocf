@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+  <tns:version>1.0</tns:version>
+  
+  {% for node in node_set %}
+  {% include "rspec/egeni-switchentry.xml" %}
+  {% endfor %}
+  
+</tns:RSpec>

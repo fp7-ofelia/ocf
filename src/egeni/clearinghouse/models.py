@@ -90,14 +90,8 @@ class Node(models.Model):
     # @ivar y: vert position of the node when drawn
     y = models.IntegerField()
     
-    # @ivar sel_img_url: URL of the image used for when the node is drawn as selected
-    sel_img_url = models.URLField("sel_img", verify_exists=False)
-    
-    # @ivar unsel_img_url: URL of the image used for when the node is drawn as unselected
-    unsel_img_url = models.URLField("unsel_img", verify_exists=False)
-    
-    # @ivar err_img_url: URL of the image used for when the node is drawn with error
-    err_img_url = models.URLField("err_img", verify_exists=False)
+    # @ivar img_url: URL of the image used for when the node is drawn
+    img_url = models.CharField(max_length=200)
 
     def __unicode__(self):
         return "Node %s" % self.nodeId
@@ -140,7 +134,7 @@ class Slice(models.Model):
     committed = models.BooleanField();
     
     def get_absolute_url(self):
-        return('slice_detail', [str(self.id)])
+        return('slice_flash_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
     
     def has_interface(self, iface):
@@ -205,3 +199,4 @@ class FlowSpaceForm(ModelForm):
         model=FlowSpace
         exclude = ('slice')
         
+    

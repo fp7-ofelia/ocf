@@ -1,0 +1,6 @@
+<tns:interfaceEntry>
+  <tns:port>{{ iface.portNum }}</tns:port>
+  {% for remote_iface in iface.remoteIfaces.objects.all %}
+  {% include "rspec/egeni-remoteiface.xml" %}
+  {% endfor %}
+</tns:interfaceEntry>

@@ -1,20 +1,20 @@
 package egeni.clearinghouse.plugin;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.ComponentAdapter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
 
-import egeni.clearinghouse.plugin.graphics.Arrow;
+import javax.swing.JComponent;
+
 import egeni.clearinghouse.plugin.graphics.BlockArrow;
 
-public class GraphLink implements Shape {
+public class GraphLink extends ComponentAdapter implements Shape {
 	
 	private static final int OFFSET = 6;
 	
@@ -25,6 +25,8 @@ public class GraphLink implements Shape {
 	private Boolean has_error;
 	
 	private BlockArrow arrow;
+	
+	JComponent canvas;
 	
 	public String getId() {
 		return id;
@@ -84,10 +86,16 @@ public class GraphLink implements Shape {
 		is_selected = isSelected;
 		has_error = hasError;
 		
+		src.getLabel().addComponentListener(this);
+		dst.getLabel().addComponentListener(this);
+		
 		updateArrow();
 	}
 	
 	private void updateArrow() {
+		if(src == null || dst == null) {
+			return;
+		}
 		Rectangle r1 = new Rectangle(src.getLabel().getBounds());
 		Rectangle r2 = new Rectangle(dst.getLabel().getBounds());
 		
@@ -105,7 +113,9 @@ public class GraphLink implements Shape {
     	} else {
     		g.setColor(Color.BLACK);
     	}
-		arrow.draw(g);
+		if(arrow != null) {
+			arrow.draw(g);
+		}
     	g.setColor(c);
 	}
 

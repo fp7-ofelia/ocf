@@ -1,18 +1,17 @@
 package egeni.clearinghouse.plugin.graphics;
 
 import java.awt.BasicStroke;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Vector;
 
 /**
  * @author Jad Naous
@@ -125,6 +124,8 @@ public class BlockArrow implements Shape {
     public void draw(Graphics2D g) {
     	Stroke s = g.getStroke();
     	g.setStroke(new BasicStroke(THICKNESS));
+    	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+    	        RenderingHints.VALUE_ANTIALIAS_ON);
     	g.fill(arrow);
     	g.setStroke(s);
     }

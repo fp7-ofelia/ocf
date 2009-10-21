@@ -1,29 +1,28 @@
 package egeni.clearinghouse.plugin;
 
+import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.event.MouseInputAdapter;
 
 /**
  * Implements a node to be drawn
  * @author jnaous
  *
  */
-public class GraphNode implements MouseListener {
+public class GraphNode extends MouseInputAdapter {
 
 	private String id;
-	private int x;
-	private int y;
 	private Icon sel_img;
 	private Icon unsel_img;
 	private Icon err_img;
 	private String name;
 	private Boolean is_selected;
 	private Boolean has_error;
-	
 	private JLabel label;
+	private Point pe;
 	
 	/**
 	 * @param id ID string of the node
@@ -40,8 +39,6 @@ public class GraphNode implements MouseListener {
 			Icon errImg, String name, Boolean isSelected, Boolean hasError) {
 		super();
 		this.id = id;
-		this.x = x;
-		this.y = y;
 		sel_img = selImg;
 		unsel_img = unselImg;
 		err_img = errImg;
@@ -50,14 +47,17 @@ public class GraphNode implements MouseListener {
 		has_error = hasError;
 
 		this.label = new JLabel();
+		this.label.setLocation(x, y);
 		this.updateLabel();
 		this.label.addMouseListener(this);
+		this.label.addMouseMotionListener(this);
 	}
 	
 	/**
 	 * update the text and image of the label
 	 */
 	private void updateLabel() {
+		System.out.println("updating label");
 		Icon img;
 		if(this.isSelected()) {
 			if(this.hasError()) {
@@ -71,9 +71,9 @@ public class GraphNode implements MouseListener {
 		this.label.setIcon(img);
 		this.label.setText(name);
 		this.label.setBounds(
-				this.getX(), this.getY(),
+				this.label.getX(), this.label.getY(),
 				img.getIconWidth(), img.getIconHeight());
-		this.label.repaint();
+//		this.label.repaint();
 	}
 
 	public String getId() {
@@ -82,24 +82,6 @@ public class GraphNode implements MouseListener {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-		updateLabel();
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
-		updateLabel();
 	}
 
 	public Icon getSel_img() {
@@ -167,22 +149,20 @@ public class GraphNode implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		this.setSelected(!is_selected);
-		updateLabel();
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		System.out.println("Pressed");
+		pe = e.getPoint();
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
+	public void mouseDragged(MouseEvent e) {
+		Point pn = e.getPoint();
+		System.out.printf("Dragged0 to %d,%d\n", pn.x, pn.y);
+		label.setLocation(
+				Math.max(0, label.getX() + pn.x - pe.x),
+				Math.max(0, label.getY() + pn.y - pe.y));
 	}
 }

@@ -4,16 +4,26 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Vector;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
-public class TopoCanvasPanel extends JPanel implements MouseListener {
+public class TopoCanvasPanel 
+extends JPanel implements MouseListener {
 	
-	Vector<GraphLink> graphLinks;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Map<String, GraphLink> graphLinks;
+	@SuppressWarnings("unused")
+	private Map<String, GraphNode> graphNodes;
 	
-	public TopoCanvasPanel(Vector<GraphLink> graphLinks) {
+	public TopoCanvasPanel(
+			Map<String, GraphLink> graphLinks,
+			Map<String, GraphNode> graphNodes) {
 		this.graphLinks = graphLinks;
+		this.graphNodes = graphNodes;
 		
 		this.addMouseListener(this);
 	}
@@ -21,7 +31,7 @@ public class TopoCanvasPanel extends JPanel implements MouseListener {
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		for(GraphLink link: graphLinks) {
+		for(GraphLink link: graphLinks.values()) {
 			link.draw((Graphics2D)g);
 		}
 	}
@@ -31,7 +41,7 @@ public class TopoCanvasPanel extends JPanel implements MouseListener {
 		/* Check if any link was clicked and
 		 * toggle its selected flag.
 		 */
-		for(GraphLink link: graphLinks) {
+		for(GraphLink link: graphLinks.values()) {
 			if(link.contains(e.getX(), e.getY())) {
 				link.setSelected(!link.isSelected());
 				this.repaint();

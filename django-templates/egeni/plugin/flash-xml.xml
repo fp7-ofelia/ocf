@@ -1,0 +1,29 @@
+{% load ch_extras %}<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<submit>
+	  <url>{% url slice_flash_detail slice.id %}</url>
+	</submit>
+
+{% for node in nodes %}
+	<node>
+	  <id>{{ node.nodeId }}</id>
+	  <x>{{ node.x }}</x>
+	  <y>{{ node.y }}</y>
+	  <img>{{ node.img_url }}</img>
+	  <name>{{ node.nodeId }}</name>
+	  <is_selected>{{ node|is_in_set:slice.nodes.all }}</is_selected>
+	  <has_err>False</has_err>
+	</node>
+{% endfor %}
+
+{% for link in links %}
+	<link>
+	  <id>{{ link.id }}</id>
+	  <src>{{ link.src.ownerNode.nodeId }}</src>
+	  <dst>{{ link.dst.ownerNode.nodeId }}</dst>
+	  <is_selected>{{ link|is_in_set:slice.links.all }}</is_selected>
+	  <has_err>False</has_err>
+	</link>
+{% endfor %}
+</document>
