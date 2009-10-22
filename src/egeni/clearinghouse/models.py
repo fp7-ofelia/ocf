@@ -84,15 +84,9 @@ class Node(models.Model):
                                related_name='local_node_set',
                                )
     
-    # @ivar x: horiz position of the node when drawn
-    x = models.IntegerField()
-
-    # @ivar y: vert position of the node when drawn
-    y = models.IntegerField()
-    
     # @ivar img_url: URL of the image used for when the node is drawn
     img_url = models.CharField(max_length=200)
-
+    
     def __unicode__(self):
         return "Node %s" % self.nodeId
     
@@ -132,6 +126,10 @@ class Slice(models.Model):
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
     committed = models.BooleanField();
+
+    # nodes that this slice has seen. We use this to store a user's
+    # x,y settings and other per-slice per-node settings
+    gui_nodes = models.ManyToManyField(Node, through="NodeSliceGUI", related_name='gui_slice_set')
     
     def get_absolute_url(self):
         return('slice_flash_detail', [str(self.id)])
@@ -152,10 +150,22 @@ class NodeSliceStatus(models.Model):
     
     slice = models.ForeignKey(Slice)
     node = models.ForeignKey(Node)
-    
+
     reserved = models.BooleanField()
     removed = models.BooleanField()
     has_error = models.BooleanField()
+
+class NodeSliceGUI(models.Model):
+    '''
+    Tracks information about the nodes in the GUI when
+    shown for this slice.
+    '''
+    
+    slice = models.ForeignKey(Slice)
+    node = models.ForeignKey(Node)
+    
+    x = models.FloatField()
+    y = models.FloatField()
 
 class LinkSliceStatus(models.Model):
     '''
@@ -199,4 +209,11 @@ class FlowSpaceForm(ModelForm):
         model=FlowSpace
         exclude = ('slice')
         
-    
+
+# TODO: Set the image to be the correct image for switches...
+# TODO: Use the egeni_api functions
+# TODO: check the virtex filter stuf for layout in java
+# TODO: Add the plc post parsing in the views
+# TODO: Add the plc rspec parsing for update
+# TODO: Write first version of flowspace stuff
+# TODO: Use the policy manager for the flowspace

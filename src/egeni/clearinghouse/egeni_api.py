@@ -21,6 +21,12 @@ MAX_Y = 200
 sfa_wsdl_url = 'http://yuba.stanford.edu/egeni/sfa.wsdl'
 server = {}
 
+en_debug = 0;
+
+def debug(s):
+    if(en_debug):
+        print(s);
+
 def connect_to_soap_server(am_url):
     global server
 
@@ -52,7 +58,7 @@ def reserve_slice(am_url, rspec, slice_id):
         connect_to_soap_server(am_url)
 
     result = server.service.create_slice("cred", str(slice_id), str(rspec), caller_cred=None)
-    print result
+    debug(result)
     
     return ""    
 
@@ -71,6 +77,123 @@ def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
     '''
+    return '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+
+  <tns:version>1.0</tns:version>
+
+  <tns:remoteEntry>
+    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
+    <tns:remoteType>PLNode</tns:remoteType>
+    <tns:node>
+      <tns:nodeId>9dsafj</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>0</tns:port>
+        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>1</tns:remotePort>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:remoteEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>640021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>26</tns:port>
+        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>46</tns:remotePort>
+        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>43</tns:remotePort>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>28</tns:port>
+          <tns:flowSpaceEntry>
+              <tns:policy>0</tns:policy>
+              <tns:dl_type>2</tns:dl_type>
+              <tns:tp_dst>423</tns:tp_dst>
+          </tns:flowSpaceEntry>
+          <tns:flowSpaceEntry>
+              <tns:policy>0</tns:policy>
+              <tns:dl_type>2</tns:dl_type>
+              <tns:tp_dst>423</tns:tp_dst>
+          </tns:flowSpaceEntry>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>2580021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>46</tns:port>
+        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>26</tns:remotePort>
+        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>43</tns:remotePort>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>48</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>1</tns:port>
+        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
+        <tns:remotePort>0</tns:remotePort>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>1f40021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>41</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>43</tns:port>
+        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>26</tns:remotePort>
+        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+        <tns:remotePort>46</tns:remotePort>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>44</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>12c0021f7cae400</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>33</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>35</tns:port>
+      </tns:interfaceEntry>
+      <tns:interfaceEntry>
+        <tns:port>36</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>c80021f7cae400</tns:nodeId>
+    </tns:node>
+  </tns:switchEntry>
+
+  <tns:switchEntry>
+    <tns:node>
+      <tns:nodeId>123456789ab</tns:nodeId>
+      <tns:interfaceEntry>
+        <tns:port>0</tns:port>
+      </tns:interfaceEntry>
+    </tns:node>
+  </tns:switchEntry>
+
+</tns:RSpec>
+'''
+    
     global server
     if am_url not in server:
         connect_to_soap_server(am_url)
@@ -107,7 +230,7 @@ def update_rspec(self_am):
     new_local_ids = []
     new_remote_ids = []
     
-    print "-----My AM id: %s" %  self_am.id
+    debug("-----My AM id: %s" %  self_am.id)
     
     # In the first iteration create all the nodes
     for node in nodes:
@@ -118,10 +241,8 @@ def update_rspec(self_am):
         nodeId = xpath.Evaluate("string(tns:nodeId)", context=context)
         node_type = xpath.Evaluate("name(..)", context=context)
         
-        kwargs = {'nodeId':nodeId,
-                  'x':0,
-                  'y':0,
-                  'img_url':"/img/blue_circle.png",
+        kwargs = {'nodeId': nodeId,
+                  'img_url': '/img/blue_circle.png',
                   }
 
         if(node_type == 'tns:remoteEntry'):
@@ -141,7 +262,7 @@ def update_rspec(self_am):
                               },
                     )
                 
-                print "+++++ Adding remote out CH Node %s to AM %s" % (nodeId, remoteAM.id)
+                debug("+++++ Adding remote out CH Node %s to AM %s" % (nodeId, remoteAM.id))
                 
                 mod = {'type':remoteType,
                        'remoteURL':remoteURL,
@@ -159,7 +280,7 @@ def update_rspec(self_am):
                 if remoteURL == self_am.URL:
                     raise Exception("Remote URL is my URL, but entry is remote.")
                 
-                print "+++++ Adding remote in CH Node %s" % nodeId
+                debug("+++++ Adding remote in CH Node %s" % nodeId)
 
                 mod = {'type':remoteType,
                        'remoteURL':remoteURL,
@@ -174,60 +295,57 @@ def update_rspec(self_am):
         
         # Entry controlled by this AM
         else:
-            print "+++++ Adding local Node %s" % nodeId
+            debug("+++++ Adding local Node %s" % nodeId)
 
             mod = {'type':models.Node.TYPE_OF,
                    'remoteURL':self_am.url,
                    'aggMgr':self_am,
                    'is_remote':False}
-            print "Doing random"
-            mod['x'] = random.randint(0, MAX_X-50)
-            mod['y'] = random.randint(0, MAX_Y-50)
-            print "Adding new node"
+            debug("Adding new node")
             kwargs.update(**mod)
-            print "node added"
+            debug("node added")
             
             node_obj = models.Node(**kwargs)
             new_local_ids.append(nodeId)
             node_obj.save()
-            print "node saved"
+            debug("node saved")
         
         self_am.connected_node_set.add(node_obj)
         node_obj.save()
     
-    print "*** All local nodes"
+    debug("*** All local nodes")
     for n in self_am.local_node_set.filter():
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
     
-    print "*** All old local nodes"
+    debug("*** All old local nodes")
     for n in self_am.local_node_set.exclude(nodeId__in=new_local_ids):
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
 
-    print "*** All old local moved nodes"
+    debug("*** All old local moved nodes")
     for n in self_am.local_node_set.filter(nodeId__in=new_remote_ids):
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
 
     # delete all old local nodes
     self_am.local_node_set.exclude(nodeId__in=new_local_ids).delete()
     self_am.local_node_set.filter(nodeId__in=new_remote_ids).delete()
     
-    print "*** All new nodes"
+    debug("*** All new nodes")
     for n in self_am.local_node_set.filter():
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
 
     # Remove stale remote nodes
     [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.exclude(nodeId__in=new_remote_ids)]
     [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.filter(nodeId__in=new_local_ids)]
     
-    print "*** All connected nodes"
+    debug("*** All connected nodes")
     for n in self_am.connected_node_set.filter():
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
     
-    print "*** All old connected nodes"
+    debug("*** All old connected nodes")
     for n in self_am.connected_node_set.exclude(
                 nodeId__in=new_local_ids).exclude(
                     nodeId__in=new_remote_ids):
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
 
     # Remove Unconnected nodes
     [self_am.connected_node_set.remove(n)
@@ -235,16 +353,16 @@ def update_rspec(self_am):
                     nodeId__in=new_local_ids).exclude(
                         nodeId__in=new_remote_ids)]
     
-    print "*** New connected nodes"
+    debug("*** New connected nodes")
     for n in self_am.connected_node_set.filter():
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
 
     # Delete unconnected nodes that no AM is connected to
-    print "*** Deleting nodes"
+    debug("*** Deleting nodes")
     for n in models.Node.objects.annotate(
         num_cnxns=Count('connected_am_set')).filter(
             num_cnxns=0):
-        print "    %s" % n.nodeId
+        debug("    %s" % n.nodeId)
     
     models.Node.objects.annotate(
         num_cnxns=Count('connected_am_set')).filter(
@@ -259,11 +377,11 @@ def update_rspec(self_am):
         # move the context
         context.setNodePosSize((interface, 1, 1))
         nodeId = xpath.Evaluate("string(../tns:nodeId)", context=context)
-        print "*** Getting connected node %s" % nodeId
+        debug("*** Getting connected node %s" % nodeId)
         node_obj = self_am.connected_node_set.get(pk=nodeId)
         
         portNum = int(xpath.Evaluate("number(tns:port)", context=context))
-        print "<0> %s" % portNum
+        debug("<0> %s" % portNum)
         
         # check if the iface exists
         iface_obj, created = \
@@ -278,7 +396,7 @@ def update_rspec(self_am):
             
 #            # get the flowspace entries
 #            fs_entries = xpath.Evaluate("tns:flowSpaceEntry", context=context)
-#            print fs_entries
+#            debug(fs_entries)
 #
 #            # add all of them
 #            interface.flowspace_set.all().delete()
@@ -321,7 +439,7 @@ def update_rspec(self_am):
         other_nodeIDs = xpath.Evaluate("tns:remoteNodeId", context=context)
         other_ports = xpath.Evaluate("tns:remotePort", context=context)
 
-        print "<1> nodes:%s ports:%s" % (other_nodeIDs, other_ports)
+        debug("<1> nodes:%s ports:%s" % (other_nodeIDs, other_ports))
 
         other_ports.reverse()
         remote_iface_ids = []
@@ -333,7 +451,7 @@ def update_rspec(self_am):
             # get the remote interface at that remote node
             context.setNodePosSize((other_ports.pop(), 1, 1))
             num = int(xpath.Evaluate("number()", context=context))
-            print "<8> %s %s" % (num, id)
+            debug("<8> %s %s" % (num, id))
             
             remote_iface_obj = models.Interface.objects.get(portNum__exact=num,
                                                             ownerNode__nodeId=id,
@@ -347,7 +465,36 @@ def update_rspec(self_am):
             link.save()
             
             # add the connection
-            print "<3>"; print id; print num
+            debug("<3>"); debug(id); debug(num)
             
         # remove old connections
         iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).delete()
+
+    # parse the flowspace
+    context.setNodePosSize((rspec, 1, 1))    
+    fs_entries = xpath.Evaluate("tns:flowSpaceEntry", context=context)
+    debug(fs_entries)
+
+    # add all of them
+    for fs in fs_entries:
+        context.setNodePosSize((fs, 1, 1))
+        
+        # parse the flowspace
+        p1 = lambda name: xpath.Evaluate("string(tns:%s)" % name,
+                                         context=context)
+        
+        p = lambda x: p1(x) if (p1(x)) else "*"
+        
+        # TODO Finish up this stuff here
+        
+        models.FlowSpace.objects.get_or_create(
+                                policy=p("policy"),
+                                dl_src=p("dl_src"),
+                                dl_dst=p("dl_dst"),
+                                dl_type=p("dl_type"),
+                                vlan_id=p("vlan_id"),
+                                nw_src=p("ip_src"),
+                                nw_dst=p("ip_dst"),
+                                nw_proto=p("ip_proto"),
+                                tp_src=p("tp_src"),
+                                tp_dst=p("tp_dst"))
