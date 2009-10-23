@@ -51,6 +51,7 @@ def reserve_slice(am_url, rspec, slice_id):
     if am_url not in server:
         connect_to_soap_server(am_url)
 
+    # The second param is supposed to be HRN, but replaced with slice_id
     result = server.service.create_slice("cred", str(slice_id), str(rspec), caller_cred=None)
     print result
     
@@ -64,6 +65,7 @@ def delete_slice(am_url, slice_id):
     if am_url not in server:
         connect_to_soap_server(am_url)
 
+    # The second param is supposed to be HRN, but replaced with slice_id
     result = server.service.delete_slice("cred", str(slice_id), caller_cred=None)
     pass
 
@@ -75,7 +77,10 @@ def get_rspec(am_url):
     if am_url not in server:
         connect_to_soap_server(am_url)
 
-    result = server[am_url].service.get_resources("cred", str(slice_id), caller_cred=None)
+    # The HRN is used to identify the person issuing this call.
+    # Currently unused
+    hrn = "ClearingHouse"
+    result = server[am_url].service.get_resources("cred", str(hrn), caller_cred=None)
     return result
 
 def update_rspec(self_am):
