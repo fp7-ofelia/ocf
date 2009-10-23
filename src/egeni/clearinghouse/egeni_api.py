@@ -7,12 +7,13 @@ Contains egeni specific functions
 '''
 
 from suds.client import Client
-from suds.xsd.sxbasic import Import
+#from suds.xsd.sxbasic import Import
+from suds.xsd.doctor import ImportDoctor, Import
 
-from xml.dom import minidom
-from xml import xpath
-import models
-from django.db.models import Count
+#from xml.dom import minidom
+#from xml import xpath
+#import models
+#from django.db.models import Count
 import random
 
 MAX_X = 200
@@ -23,17 +24,12 @@ server = {}
 
 def connect_to_soap_server(am_url):
     global server
+    print "Connecting to", am_url
 
-    ns = 'http://schemas.xmlsoap.org/soap/encoding/'
-    location = 'http://schemas.xmlsoap.org/soap/encoding/'
-    Import.bind(ns, location)
-    schema1 = 'http://schemas.xmlsoap.org/wsdl/soap/'
-    schema2 = 'http://schemas.xmlsoap.org/wsdl/'
-    schema3 = 'http://www.w3.org/2001/XMLSchema'
-    Import.bind(schema1,schema1)
-    Import.bind(schema2,schema2)
-    Import.bind(schema3,schema3)
-    server[am_url]= Client(sfa_wsdl_url, location=am_url)
+    #Internet tells me to use the following to fix some array anomalies
+    imp = Import('http://schemas.xmlsoap.org/soap/encoding/')
+    d = ImportDoctor(imp)
+    server[am_url]= Client(sfa_wsdl_url, cache=None, location=am_url, doctor=d)
 
 
 def reserve_slice(am_url, rspec, slice_id):
@@ -356,3 +352,7 @@ def update_rspec(self_am):
             
         # remove old connections
         iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).delete()
+
+
+# Unit test
+# get_rspec("https://171.67.75.2:12346")
