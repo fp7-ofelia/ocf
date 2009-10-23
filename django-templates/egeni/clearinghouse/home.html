@@ -3,30 +3,41 @@
 
 {% block content %}
 <div id="slices">
-    {% if reserved_slices %}
-    <h1>Fully Reserved Slices:</h1>
-    <ul>
-        {% for slice in reserved_slices %}
-        <li><a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
-    {% if unreserved_slices %}
-    <h1>Partial or Unreserved Slices:</h1>
-    <ul>
-        {% for slice in unreserved_slices %}
-        <li><a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+	<form id="del_slice" method="POST" action="">
+		<input type="hidden" name="action" id="action" value="delete_slice"></input>
+	    {% if reserved_slices %}
+	    <h1>Fully Reserved Slices:</h1>
+	    <ul>
+	        {% for slice in reserved_slices %}
+	        <li><input type="checkbox" name="del_sel" 
+	        value="{{ slice.id }}"></input>
+            <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
+	        {% endfor %}
+	    </ul>
+	    {% endif %}
+	
+	    {% if unreserved_slices %}
+	    <h1>Partial or Unreserved Slices:</h1>
+	    <ul>
+	        {% for slice in unreserved_slices %}
+	        <li><input type="checkbox" name="del_sel" 
+	        value="{{ slice.id }}"></input>
+	        <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
+	        {% endfor %}
+	    </ul>
+	    {% endif %}
+		{% if do_del %}
+	    <input id="del_submit" type="submit" value="Delete" >
+		{% endif %}
+	</form>
 </div>
 
 <div id="new_slice">
     <h1>Create new slice:</h1>
-    <form method="POST" action="">
+    <form id="add_slice" method="POST" action="">
+		<input type="hidden" name="action" id="action" value="create_slice"></input>
         {{ form.as_p }}
-        <input type="submit" value="Create">
+        <input id="create_submit" type="submit" value="Create">
     </form>
 </div>
 {% endblock %}

@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect, HttpResponseServerError
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseRedirect, HttpResponseBadRequest,\
+    HttpRequest, HttpResponseForbidden
+from django.http import HttpResponse
+from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
-import os
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
@@ -17,30 +17,46 @@ def home(request):
     '''Show the list of slices, and form for creating new slice'''
 
     if request.method == 'POST':
-        slice = Slice(owner=request.user, committed=False)
-        form = SliceForm(request.POST, instance=slice)
-        print "<0>"
-        if form.is_valid():
-            print "<1>"
-            slice = form.save()
-            print "<2>"
-            return HttpResponseRedirect(slice.get_absolute_url())
-        print "<3>"
+        if not request.POST.has_key("action"):
+            return HttpResponseBadRequest("Missing field action")
+        
+        if request.POST["action"] == "delete_slice":
+            slice_ids = request.POST.getlist('del_sel')
+            slices = request.user.slice_set.filter(id__in=slice_ids)
+            for am in AggregateManager.objects.all():
+                for slice in slices:
+                    egeni_api.delete_slice(am.url, slice.id)
+            slices.delete()
+            return HttpResponseRedirect(reverse('home'))
+
+        elif request.POST["action"] == "create_slice":
+            slice = Slice(owner=request.user, committed=False)
+            form = SliceForm(request.POST, instance=slice)
+            if form.is_valid():
+                slice = form.save()
+                return HttpResponseRedirect(slice.get_absolute_url())
+        
+        else:
+            return HttpResponseBadRequest(
+                "Unknown action value: %s" % request.POST["action"])
     else:
         # get reserved and unreserved slices
         form = SliceForm()
         
-    reserved_slices = request.user.slice_set.filter(committed=True)
-    reserved_ids = reserved_slices.values_list('id', flat=True)
-    unreserved_slices = request.user.slice_set.exclude(id__in=reserved_ids)
-    
-    return render_to_response("clearinghouse/home.html",
-                              {'reserved_slices': reserved_slices,
-                               'unreserved_slices': unreserved_slices,
-                               'form': form})
+        reserved_slices = request.user.slice_set.filter(committed=True)
+        unreserved_slices = request.user.slice_set.filter(committed=False)
+        
+        do_del = request.user.slice_set.count() > 0
+        return render_to_response("clearinghouse/home.html",
+                                  {'do_del': do_del,
+                                   'reserved_slices': reserved_slices,
+                                   'unreserved_slices': unreserved_slices,
+                                   'form': form})            
 
 def slice_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     agg_list = AggregateManager.objects.all()
     
     # create a formset to handle all flowspaces
@@ -98,6 +114,8 @@ def slice_detail(request, slice_id):
 
 def slice_flash_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, FlowSpace)
@@ -199,12 +217,16 @@ def slice_flash_detail(request, slice_id):
         slice.committed = False
         slice.save()
         
-        # get the RSpec of the Slice
-        rspec = render_to_string("rspec/egeni-rspec.xml",
-                                 {"node_set": slice.nodes.all(),
-                                  "slice": slice})
+        # get the RSpec of the Slice for each am and reserve
+        for am in AggregateManager.objects.filter(
+                        type=AggregateManager.TYPE_OF):
+            rspec = render_to_string("rspec/egeni-rspec.xml",
+                                     {"node_set": slice.nodes.filter(aggMgr=am),
+                                      "am": am,
+                                      "slice": slice})
+            errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
         
-        # TODO: Do actual reservation    
+            # TODO: Parse errors here
         
         slice.committed = True
         slice.save()
@@ -238,6 +260,8 @@ def slice_get_xsd(request, slice_id):
 
 def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     print "Doing topo view"
     
     if request.method == "GET":

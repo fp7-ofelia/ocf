@@ -1,7 +1,9 @@
 from django.db import models
 from django.db.models import permalink
-from django.forms import ModelForm
+from django.forms import ModelForm, Form
+import django.forms as forms
 from django.contrib.auth.models import User
+from django.forms.fields import IntegerField
 import egeni_api
 import plc_api
 
@@ -29,7 +31,7 @@ class AggregateManager(models.Model):
 
     # @ivar local_node_set: nodes that this AM connects to that are under its control
     
-    # @ivar remote_node_set: nodes that this AM connects to that are or are not under its control
+    # @ivar connected_node_set: nodes that this AM connects to that are or are not under its control
     connected_node_set = models.ManyToManyField("Node",
                                                 related_name='connected_am_set',
                                                 blank=True)
@@ -73,6 +75,7 @@ class Node(models.Model):
 
     nodeId = models.CharField(max_length=200, primary_key=True)
     type = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     
     is_remote = models.BooleanField()
     
@@ -82,6 +85,8 @@ class Node(models.Model):
     # @ivar aggMgr: The AM that created the node or controls it
     aggMgr = models.ForeignKey(AggregateManager,
                                related_name='local_node_set',
+                               blank=True,
+                               null=True,
                                )
     
     # @ivar img_url: URL of the image used for when the node is drawn
@@ -93,7 +98,22 @@ class Node(models.Model):
     def get_absolute_url(self):
         return('node_detail', [str(self.aggMgr.id), str(self.nodeId)])
     get_absolute_url = permalink(get_absolute_url)
-    
+
+class PLNode(Node):
+    '''
+    Extends the plain node description to include PL specific
+    attributes
+    '''
+    init_params = models.TextField()
+    cpu_min = models.IntegerField()
+    cpu_share = models.IntegerField()   
+    cpu_pct = models.IntegerField()
+    disk_max =  models.IntegerField()
+    start_date = models.DateField("Start date")
+    start_time = models.TimeField("Start time")
+    end_date = models.DateField("End date")
+    end_time = models.TimeField("End time")
+
 class Interface(models.Model):
     '''Describes a port and its connection'''
     portNum = models.PositiveSmallIntegerField()
@@ -102,6 +122,16 @@ class Interface(models.Model):
     
     def __unicode__(self):
         return "Interface "+self.portNum+" of node "+self.ownerNode.nodeId
+    
+class PLInterface(models.Model):
+    max_kbyte = models.IntegerField()
+    name = models.CharField(max_length=200)
+    address = models.IPAddressField()
+    type = models.CharField(max_length=200)
+    init_params = models.TextField()
+    ip_spoof = models.BooleanField()
+    max_rate = models.IntegerField()
+    min_rate = models.IntegerField()
     
 class Link(models.Model):
     '''
@@ -116,6 +146,19 @@ class Link(models.Model):
         return "Link from " + self.src.__unicode__() \
                 + " to " + self.dst.__unicode__()
 
+class PLLink(Link):
+    '''
+    PlanetLab link
+    '''
+    bandwidth = models.IntegerField()
+    max_allocation = models.IntegerField()
+    start_date = models.DateField("Start date")
+    start_time = models.TimeField("Start time")
+    end_date = models.DateField("End date")
+    end_time = models.TimeField("End time")
+    init_params = models.TextField()
+    type = models.CharField(max_length=200)    
+
 class Slice(models.Model):
     '''This is created by a user (the owner) and contains
     multiple reservations from across different aggregate managers'''
@@ -125,7 +168,11 @@ class Slice(models.Model):
     controller_url = models.URLField('Slice Controller URL', verify_exists=False)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
-    committed = models.BooleanField();
+    committed = models.BooleanField()
+    start_date = models.DateField("Start date")
+    start_time = models.TimeField("Start time")
+    end_date = models.DateField("End date")
+    end_time = models.TimeField("End time")
 
     # nodes that this slice has seen. We use this to store a user's
     # x,y settings and other per-slice per-node settings
@@ -185,17 +232,17 @@ class SliceForm(ModelForm):
         fields = ('name', 'controller_url')
 
 class FlowSpace(models.Model):
-    policy = models.CharField(max_length=200)
-    dl_src = models.CharField(max_length=200)
-    dl_dst = models.CharField(max_length=200)
-    dl_type = models.CharField(max_length=200)
-    vlan_id = models.CharField(max_length=200)
-    nw_src = models.CharField(max_length=200)
-    nw_dst = models.CharField(max_length=200)
-    nw_proto = models.CharField(max_length=200)
-    tp_src = models.CharField(max_length=200)
-    tp_dst = models.CharField(max_length=200)
-    slice = models.ForeignKey(Slice)
+    policy = models.CharField(max_length=2)
+    dl_src = models.CharField(max_length=17)
+    dl_dst = models.CharField(max_length=17)
+    dl_type = models.CharField(max_length=5)
+    vlan_id = models.CharField(max_length=4)
+    nw_src = models.CharField(max_length=18)
+    nw_dst = models.CharField(max_length=18)
+    nw_proto = models.CharField(max_length=3)
+    tp_src = models.CharField(max_length=5)
+    tp_dst = models.CharField(max_length=5)
+    slice = models.ForeignKey(Slice, null=True, blank=True)
     
     def __unicode__(self):
         return("Port: "+self.interface.portNum+", dl_src: "+self.dl_src
@@ -208,12 +255,3 @@ class FlowSpaceForm(ModelForm):
     class Meta:
         model=FlowSpace
         exclude = ('slice')
-        
-
-# TODO: Set the image to be the correct image for switches...
-# TODO: Use the egeni_api functions
-# TODO: check the virtex filter stuf for layout in java
-# TODO: Add the plc post parsing in the views
-# TODO: Add the plc rspec parsing for update
-# TODO: Write first version of flowspace stuff
-# TODO: Use the policy manager for the flowspace

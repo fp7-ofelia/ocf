@@ -13,7 +13,6 @@ from xml.dom import minidom
 from xml import xpath
 import models
 from django.db.models import Count
-import random
 
 MAX_X = 200
 MAX_Y = 200
@@ -190,6 +189,19 @@ def get_rspec(am_url):
       </tns:interfaceEntry>
     </tns:node>
   </tns:switchEntry>
+  
+  <tns:flowSpaceEntry>
+    <tns:policy>1</tns:policy>
+    <tns:dl_src>*</tns:dl_src>
+    <tns:dl_dst>*</tns:dl_dst>
+    <tns:dl_type>2048</tns:dl_type>
+    <tns:vlan_id>*</tns:vlan_id>
+    <tns:ip_src>192.168.0.0/16</tns:ip_src>
+    <tns:ip_dst>192.168.0.0/16</tns:ip_dst>
+    <tns:ip_proto>*</tns:ip_proto>
+    <tns:tp_src>*</tns:tp_src>
+    <tns:tp_dst>*</tns:tp_dst>
+  </tns:flowSpaceEntry>
 
 </tns:RSpec>
 '''
@@ -207,9 +219,6 @@ def update_rspec(self_am):
     nodes from the aggregate manager using the E-GENI
     RSpec
     '''
-    
-    if self_am.name == "RemoteAM":
-        return
     
     rspec = get_rspec(self_am.url)
     
@@ -255,18 +264,11 @@ def update_rspec(self_am):
             
             # Nope we don't know about the remote AM
             except models.AggregateManager.DoesNotExist:
-                remoteAM, created = models.AggregateManager.objects.get_or_create(
-                    name="RemoteAM",
-                    defaults={"url": "non.existant.org",
-                              "type": models.AggregateManager.TYPE_OF,
-                              },
-                    )
                 
-                debug("+++++ Adding remote out CH Node %s to AM %s" % (nodeId, remoteAM.id))
+                debug("+++++ Adding remote out CH Node %s" % nodeId)
                 
                 mod = {'type':remoteType,
                        'remoteURL':remoteURL,
-                       'aggMgr':remoteAM,
                        'is_remote':True}
                 kwargs.update(**mod)
                 
