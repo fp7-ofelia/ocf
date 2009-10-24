@@ -20,16 +20,16 @@ import random
 MAX_X = 200
 MAX_Y = 200
 
-key_file = '/home/srini/.sfi/seethara.pkey'
-cert_file = '/home/srini/.sfi/seethara.cert'
-cred_file = '/home/srini/.sfi/seethara.cred'
+key_file = './geniclearinghouse.pkey'
+cert_file = './geniclearinghouse.cert'
+cred_file = './geniclearinghouse.cred'
+CH_hrn = 'plc.openflow.geniclearinghouse'
 key = Keypair(filename=key_file)
 server = {}
 
 def init():
-    global CH_cred, cred_file, CH_hrn
+    global CH_cred, cred_file
     CH_cred = file(cred_file).read()
-    CH_hrn = 'seethara'
 
 def connect_to_soap_server(am_url):
     global server, CH_hrn, key_file, cert_file
