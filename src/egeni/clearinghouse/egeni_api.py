@@ -6,9 +6,11 @@ Contains egeni specific functions
 @author: jnaous, srini
 '''
 
-from suds.client import Client
-#from suds.xsd.sxbasic import Import
-from suds.xsd.doctor import ImportDoctor, Import
+#from suds.client import Client
+#from suds.xsd.doctor import ImportDoctor, Import
+from httplib import HTTPConnection
+from sfa.util import xmlrpcprotocol
+from sfa.util import soapprotocol
 
 #from xml.dom import minidom
 #from xml import xpath
@@ -27,12 +29,13 @@ def connect_to_soap_server(am_url):
     print "Connecting to", am_url
 
     #Internet tells me to use the following to fix some array anomalies
-    imp = Import('http://schemas.xmlsoap.org/soap/encoding/')
-    d = ImportDoctor(imp)
-    server[am_url]= Client(sfa_wsdl_url, cache=None, location=am_url, doctor=d)
+    #imp = Import('http://schemas.xmlsoap.org/soap/encoding/')
+    #d = ImportDoctor(imp)
+    #server[am_url]= Client(sfa_wsdl_url, cache=None, location=am_url, doctor=d)
 
+    server[am_url]= soapprotocol.get_server(am_url, "/home/srini/.sfi/seethara.pkey", "/home/srini/.sfi/seethara.cert")
 
-def reserve_slice(am_url, rspec, slice_id):
+def reserve_slice(am_url, rspec, slice_id, caller_cred=None):
     '''
     Reserves the slice identified by slice_id or
     updates the slice if already reserved on the AM.
@@ -48,12 +51,12 @@ def reserve_slice(am_url, rspec, slice_id):
         connect_to_soap_server(am_url)
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    result = server.service.create_slice("cred", str(slice_id), str(rspec), caller_cred=None)
+    result = server[am_url].create_slice("cred", str(slice_id), str(rspec))
     print result
     
     return ""    
 
-def delete_slice(am_url, slice_id):
+def delete_slice(am_url, slice_id, caller_cred=None):
     '''
     Delete the slice.
     '''
@@ -62,10 +65,10 @@ def delete_slice(am_url, slice_id):
         connect_to_soap_server(am_url)
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    result = server.service.delete_slice("cred", str(slice_id), caller_cred=None)
+    result = server[am_url].delete_slice("cred", str(slice_id))
     pass
 
-def get_rspec(am_url):
+def get_rspec(am_url, caller_cred=None):
     '''
     Returns the RSpec of available resources.
     '''
@@ -75,8 +78,8 @@ def get_rspec(am_url):
 
     # The HRN is used to identify the person issuing this call.
     # Currently unused
-    hrn = "ClearingHouse"
-    result = server[am_url].service.get_resources("cred", str(hrn), caller_cred=None)
+    hrn = "seethara"
+    result = server[am_url].get_resources("cred", str(hrn))
     return result
 
 def update_rspec(self_am):
@@ -355,4 +358,4 @@ def update_rspec(self_am):
 
 
 # Unit test
-# get_rspec("https://171.67.75.2:12346")
+# get_rspec("http://171.67.75.2:12346")
