@@ -11,6 +11,7 @@ Contains egeni specific functions
 from httplib import HTTPConnection
 from sfa.util import xmlrpcprotocol
 from sfa.util import soapprotocol
+from sfa.trust.certificate import Keypair
 
 #from xml.dom import minidom
 #from xml import xpath
@@ -22,10 +23,19 @@ MAX_X = 200
 MAX_Y = 200
 
 sfa_wsdl_url = 'http://yuba.stanford.edu/egeni/sfa.wsdl'
+key_file = '/home/srini/.sfi/seethara.pkey'
+cert_file = '/home/srini/.sfi/seethara.cert'
+cred_file = '/home/srini/.sfi/seethara.cred'
+key = Keypair(filename=key_file)
 server = {}
 
+def init():
+    global CH_cred, cred_file, CH_hrn
+    CH_cred = file(cred_file).read()
+    CH_hrn = 'seethara'
+
 def connect_to_soap_server(am_url):
-    global server
+    global server, CH_hrn, key_file, cert_file
     print "Connecting to", am_url
 
     #Internet tells me to use the following to fix some array anomalies
@@ -33,9 +43,9 @@ def connect_to_soap_server(am_url):
     #d = ImportDoctor(imp)
     #server[am_url]= Client(sfa_wsdl_url, cache=None, location=am_url, doctor=d)
 
-    server[am_url]= soapprotocol.get_server(am_url, "/home/srini/.sfi/seethara.pkey", "/home/srini/.sfi/seethara.cert")
+    server[am_url]= soapprotocol.get_server(am_url, key_file, cert_file)
 
-def reserve_slice(am_url, rspec, slice_id, caller_cred=None):
+def reserve_slice(am_url, rspec, slice_id):
     '''
     Reserves the slice identified by slice_id or
     updates the slice if already reserved on the AM.
@@ -46,40 +56,43 @@ def reserve_slice(am_url, rspec, slice_id, caller_cred=None):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server
+    global server, CH_cred
     if am_url not in server:
         connect_to_soap_server(am_url)
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    result = server[am_url].create_slice("cred", str(slice_id), str(rspec))
+    request_hash = key.compute_hash([CH_cred, str(slice_id), str(rspec)])
+    result = server[am_url].create_slice(CH_cred, str(slice_id), str(rspec), request_hash)
     print result
     
     return ""    
 
-def delete_slice(am_url, slice_id, caller_cred=None):
+def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    global server
+    global server, CH_cred
     if am_url not in server:
         connect_to_soap_server(am_url)
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    result = server[am_url].delete_slice("cred", str(slice_id))
+    request_hash = key.compute_hash([CH_cred, str(slice_id)])
+    result = server[am_url].delete_slice(CH_cred, str(slice_id), request_hash)
     pass
 
-def get_rspec(am_url, caller_cred=None):
+def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
     '''
-    global server
+    global server, CH_cred, CH_hrn
     if am_url not in server:
         connect_to_soap_server(am_url)
 
     # The HRN is used to identify the person issuing this call.
     # Currently unused
-    hrn = "seethara"
-    result = server[am_url].get_resources("cred", str(hrn))
+    request_hash = key.compute_hash([CH_cred, CH_hrn])
+    result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
+    print result
     return result
 
 def update_rspec(self_am):
@@ -358,4 +371,5 @@ def update_rspec(self_am):
 
 
 # Unit test
+# init()
 # get_rspec("http://171.67.75.2:12346")
