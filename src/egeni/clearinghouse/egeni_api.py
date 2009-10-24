@@ -6,23 +6,20 @@ Contains egeni specific functions
 @author: jnaous, srini
 '''
 
-#from suds.client import Client
-#from suds.xsd.doctor import ImportDoctor, Import
 from httplib import HTTPConnection
 from sfa.util import xmlrpcprotocol
 from sfa.util import soapprotocol
 from sfa.trust.certificate import Keypair
 
-#from xml.dom import minidom
-#from xml import xpath
-#import models
-#from django.db.models import Count
+from xml.dom import minidom
+from xml import xpath
+import models
+from django.db.models import Count
 import random
 
 MAX_X = 200
 MAX_Y = 200
 
-sfa_wsdl_url = 'http://yuba.stanford.edu/egeni/sfa.wsdl'
 key_file = '/home/srini/.sfi/seethara.pkey'
 cert_file = '/home/srini/.sfi/seethara.cert'
 cred_file = '/home/srini/.sfi/seethara.cred'
@@ -371,5 +368,5 @@ def update_rspec(self_am):
 
 
 # Unit test
-# init()
-# get_rspec("http://171.67.75.2:12346")
+#init()
+#get_rspec("http://171.67.75.2:12346")
