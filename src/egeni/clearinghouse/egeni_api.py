@@ -6,8 +6,10 @@ Contains egeni specific functions
 @author: jnaous, srini
 '''
 
-from suds.client import Client
-from suds.xsd.sxbasic import Import
+from httplib import HTTPConnection
+from sfa.util import xmlrpcprotocol
+from sfa.util import soapprotocol
+from sfa.trust.certificate import Keypair
 
 from xml.dom import minidom
 from xml import xpath
@@ -17,7 +19,11 @@ from django.db.models import Count
 MAX_X = 200
 MAX_Y = 200
 
-sfa_wsdl_url = 'http://yuba.stanford.edu/egeni/sfa.wsdl'
+key_file = './geniclearinghouse.pkey'
+cert_file = './geniclearinghouse.cert'
+cred_file = './geniclearinghouse.cred'
+CH_hrn = 'plc.openflow.geniclearinghouse'
+key = Keypair(filename=key_file)
 server = {}
 
 en_debug = 0;
@@ -26,20 +32,20 @@ def debug(s):
     if(en_debug):
         print(s);
 
+def init():
+    global CH_cred, cred_file
+    CH_cred = file(cred_file).read()
+
 def connect_to_soap_server(am_url):
-    global server
+    global server, CH_hrn, key_file, cert_file
+    print "Connecting to", am_url
 
-    ns = 'http://schemas.xmlsoap.org/soap/encoding/'
-    location = 'http://schemas.xmlsoap.org/soap/encoding/'
-    Import.bind(ns, location)
-    schema1 = 'http://schemas.xmlsoap.org/wsdl/soap/'
-    schema2 = 'http://schemas.xmlsoap.org/wsdl/'
-    schema3 = 'http://www.w3.org/2001/XMLSchema'
-    Import.bind(schema1,schema1)
-    Import.bind(schema2,schema2)
-    Import.bind(schema3,schema3)
-    server[am_url]= Client(sfa_wsdl_url, location=am_url)
+    #Internet tells me to use the following to fix some array anomalies
+    #imp = Import('http://schemas.xmlsoap.org/soap/encoding/')
+    #d = ImportDoctor(imp)
+    #server[am_url]= Client(sfa_wsdl_url, cache=None, location=am_url, doctor=d)
 
+    server[am_url]= soapprotocol.get_server(am_url, key_file, cert_file)
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -52,11 +58,13 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server
+    global server, CH_cred
     if am_url not in server:
         connect_to_soap_server(am_url)
 
-    result = server.service.create_slice("cred", str(slice_id), str(rspec), caller_cred=None)
+    # The second param is supposed to be HRN, but replaced with slice_id
+    request_hash = key.compute_hash([CH_cred, str(slice_id), str(rspec)])
+    result = server[am_url].create_slice(CH_cred, str(slice_id), str(rspec), request_hash)
     debug(result)
     
     return ""    
@@ -65,17 +73,20 @@ def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    global server
+    global server, CH_cred
     if am_url not in server:
         connect_to_soap_server(am_url)
 
-    result = server.service.delete_slice("cred", str(slice_id), caller_cred=None)
+    # The second param is supposed to be HRN, but replaced with slice_id
+    request_hash = key.compute_hash([CH_cred, str(slice_id)])
+    result = server[am_url].delete_slice(CH_cred, str(slice_id), request_hash)
     pass
 
 def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
     '''
+
     return '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
 
@@ -206,11 +217,16 @@ def get_rspec(am_url):
 </tns:RSpec>
 '''
     
-    global server
+    global server, CH_cred, CH_hrn
+
     if am_url not in server:
         connect_to_soap_server(am_url)
 
-    result = server[am_url].service.get_resources("cred", str(slice_id), caller_cred=None)
+    # The HRN is used to identify the person issuing this call.
+    # Currently unused
+    request_hash = key.compute_hash([CH_cred, CH_hrn])
+    result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
+    print result
     return result
 
 def update_rspec(self_am):
@@ -500,3 +516,6 @@ def update_rspec(self_am):
                                 nw_proto=p("ip_proto"),
                                 tp_src=p("tp_src"),
                                 tp_dst=p("tp_dst"))
+# Unit test
+#init()
+#get_rspec("http://171.67.75.2:12346")

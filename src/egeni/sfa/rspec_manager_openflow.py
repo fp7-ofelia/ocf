@@ -2,10 +2,15 @@ from sfa.util.faults import *
 from sfa.util.misc import *
 from sfa.util.rspec import Rspec
 from sfa.server.registry import Registries
-from sfa.plc.nodes import *
 from sfa.util.config import Config
-
+from sfa.plc.nodes import *
 import sys
+
+#The following is not essential
+#from soaplib.wsgi_soap import SimpleWSGISoapApp
+#from soaplib.serializers.primitive import *
+#from soaplib.serializers.clazz import *
+
 import socket
 import struct
 
@@ -43,7 +48,7 @@ def extract(sock):
             break
         msg += chunk
 
-    print 'done extracting response from aggrMgr'
+    print 'Done extracting %d bytes of response from aggrMgr' % len(msg)
     return msg
    
 def connect(server, port):
@@ -51,12 +56,12 @@ def connect(server, port):
     sock = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
     sock.connect ( ( server, port) )
     sock.settimeout(1)
-    print 'connected to aggregate manager module'
+    if DEBUG: print 'Connected!'
     return sock
     
 def connect_aggrMgr():
     (aggr_mgr_ip, aggr_mgr_port) = Config().get_openflow_aggrMgr_info()
-    print """Connecting to port %d of %s""" % (aggr_mgr_port, aggr_mgr_ip)
+    if DEBUG: print """Connecting to port %d of %s""" % (aggr_mgr_port, aggr_mgr_ip)
     return connect(aggr_mgr_ip, aggr_mgr_port)
 
 def generate_slide_id(cred, hrn):
@@ -64,7 +69,7 @@ def generate_slide_id(cred, hrn):
         cred = ""
     if hrn == None:
         hrn = ""
-    #return str(cred) + '_' + str(hrn)
+    #return cred + '_' + hrn
     return str(hrn)
 
 def msg_aggrMgr(cred, hrn, msg_id):
@@ -78,7 +83,7 @@ def msg_aggrMgr(cred, hrn, msg_id):
         aggrMgr_sock.send(buf)
         aggrMgr_sock.close()
         return 1
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
@@ -110,10 +115,12 @@ def create_slice(cred, hrn, rspec):
     try:
         aggrMgr_sock = connect_aggrMgr()
         aggrMgr_sock.send(buf)
+        if DEBUG: print "Sent %d bytes and closing connection" % len(buf)
         aggrMgr_sock.close()
-        print "Sent %d bytes and closing connection" % len(buf)
+
+        if DEBUG: print "----------------"
         return 1
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
@@ -132,18 +139,22 @@ def get_rspec(cred, hrn=None):
         resource_list = extract(aggrMgr_sock);
         aggrMgr_sock.close()
 
+        if DEBUG: print "----------------"
         return resource_list 
-    except socketerror, message:
+    except socket.error, message:
         print "Socket error"
     except IOerror, message:
         print "IO error"
     return None
 
-#def main():
-#    r = Rspec()
-#    r.parseFile(sys.argv[1])
-#    rspec = r.toDict()
-#    create_slice(None,'plc',rspec)
+def fetch_context(slice_hrn, user_hrn, contexts):
+    return None
+
+def main():
+    r = Rspec()
+    r.parseFile(sys.argv[1])
+    rspec = r.toDict()
+    create_slice(None,'plc',rspec)
     
-#if __name__ == "__main__":
-#    main()
+if __name__ == "__main__":
+    main()
