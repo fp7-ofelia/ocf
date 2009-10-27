@@ -6,8 +6,10 @@ Created on Oct 17, 2009
 
 import elementtree.ElementTree as et
 from elementtree.ElementTree import ElementTree 
-import models
+from models import *
 from django.db.models import Count
+
+PLNODE_DEFAULT_IMG = "/img/plnode.png"
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -74,5 +76,68 @@ def update_rspec(self_am):
     
     xml_str = get_rspec(self_am.url)
     tree = ElementTree(et.fromstring(xml_str))
-    
-    
+
+    # keep track of created ids to delete old ones
+    node_ids = []
+    iface_ids = []
+    for netspec_elem in tree.getiterator("NetSpec"):
+        am, created = AggregateManager.get_or_create(
+                                    name=netspec_elem.get("name"),
+                                    url=netspec_elem.get("name"),
+                                    type=AggregateManager.TYPE_PL,
+                                    )
+        
+        for node_elem in netspec_elem.getiterator("nodes/NodeSpec"):
+            name = node_elem.get("name")
+            type = node_elem.get("name") or AggregateManager.TYPE_PL
+            node, created = Node.objects.get_or_create(
+                          nodeId=name,
+                          name=name,
+                          type=type,
+                          defaults={"is_remote": False,
+                                    "remoteURL": am.url,
+                                    "aggMgr": am,
+                                    "img_url": PLNODE_DEFAULT_IMG,
+                                    }
+                          )
+            
+            if not created:
+                node.remoteURL = am.url
+                node.aggMgr = am
+                node.save()
+                
+            node_ids.append(node.nodeId)
+            
+            # add all the interfaces
+            for i, iface_elem in enumerate(node_elem.getiterator("net_if/IfSpec")):
+                kwargs = {}
+                for attrib in ("name", "addr", "type", "init_params",
+                               "min_rate", "max_rate", "max_kbyte",
+                               "ip_spoof",
+                               ):
+                    kwargs[attrib] = iface_elem.get(attrib)
+                
+                # TODO: port nums
+                kwargs["portNum"] = i
+                
+                # TODO: How do they maintain a consistent mapping of iface
+                # to identifier e.g. when addresses change. Is name consistent?
+                iface, created = Interface.objects.get_or_create(
+                            name=kwargs["name"],
+                            ownerNode=node,
+                            defaults=kwargs,
+                            )
+                
+                if not created:
+                    for fld in kwargs:
+                        iface.__setattr__(fld, kwargs[fld])
+                    iface.save()
+            
+                iface_ids.append(iface.id)
+                
+    # delete all the old stuff
+    Node.objects.filter(type=Node.TYPE_PL).exclude(
+                        nodeId__in=node_ids).delete()
+    Interface.objects.filter(
+        ownerNode__type=Node.TYPE_PL).exclude(
+            id__in=iface_ids).delete()

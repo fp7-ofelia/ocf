@@ -1,3 +1,4 @@
+from django.forms.formsets import BaseFormSet
 from django.db import models
 from django.db.models import permalink
 from django.forms import ModelForm, Form
@@ -27,14 +28,15 @@ class AggregateManager(models.Model):
     type = models.CharField(max_length=20, choices=AM_TYPE_CHOICES.items())
     
     # @ivar remote_node_set: nodes that this AM connects to that are not under its control
-    remote_node_set = models.ManyToManyField("Node", related_name='remote_am_set', blank=True)
+    remote_node_set = models.ManyToManyField("Node", related_name='remote_am_set',
+                                             blank=True, null=True)
 
     # @ivar local_node_set: nodes that this AM connects to that are under its control
     
     # @ivar connected_node_set: nodes that this AM connects to that are or are not under its control
     connected_node_set = models.ManyToManyField("Node",
                                                 related_name='connected_am_set',
-                                                blank=True)
+                                                blank=True, null=True)
 
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -99,40 +101,25 @@ class Node(models.Model):
         return('node_detail', [str(self.aggMgr.id), str(self.nodeId)])
     get_absolute_url = permalink(get_absolute_url)
 
-class PLNode(Node):
-    '''
-    Extends the plain node description to include PL specific
-    attributes
-    '''
-    init_params = models.TextField()
-    cpu_min = models.IntegerField()
-    cpu_share = models.IntegerField()   
-    cpu_pct = models.IntegerField()
-    disk_max =  models.IntegerField()
-    start_date = models.DateField("Start date")
-    start_time = models.TimeField("Start time")
-    end_date = models.DateField("End date")
-    end_time = models.TimeField("End time")
-
 class Interface(models.Model):
     '''Describes a port and its connection'''
-    portNum = models.PositiveSmallIntegerField()
+    portNum = models.PositiveSmallIntegerField(blank=True, null=True)
     ownerNode = models.ForeignKey(Node)
     remoteIfaces = models.ManyToManyField('self', symmetrical=False, through="Link")
     
+    # PlanetLab additional things
+    max_kbyte = models.IntegerField(blank=True, null=True)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    address = models.IPAddressField(blank=True, null=True)
+    type = models.CharField(max_length=200, blank=True, null=True)
+    init_params = models.TextField(blank=True, null=True)
+    ip_spoof = models.BooleanField(blank=True, null=True)
+    max_rate = models.IntegerField(blank=True, null=True)
+    min_rate = models.IntegerField(blank=True, null=True)
+
     def __unicode__(self):
         return "Interface "+self.portNum+" of node "+self.ownerNode.nodeId
-    
-class PLInterface(models.Model):
-    max_kbyte = models.IntegerField()
-    name = models.CharField(max_length=200)
-    address = models.IPAddressField()
-    type = models.CharField(max_length=200)
-    init_params = models.TextField()
-    ip_spoof = models.BooleanField()
-    max_rate = models.IntegerField()
-    min_rate = models.IntegerField()
-    
+        
 class Link(models.Model):
     '''
     Stores information about the unidirectional connection between
@@ -142,22 +129,14 @@ class Link(models.Model):
     src = models.ForeignKey(Interface, related_name='src_link_set')
     dst = models.ForeignKey(Interface, related_name='dst_link_set')
     
+    # PlanetLab additional fields
+    bandwidth = models.IntegerField(blank=True, null=True)
+    max_allocation = models.IntegerField(blank=True, null=True)
+    type = models.CharField(max_length=200, blank=True, null=True)
+
     def __unicode__(self):
         return "Link from " + self.src.__unicode__() \
                 + " to " + self.dst.__unicode__()
-
-class PLLink(Link):
-    '''
-    PlanetLab link
-    '''
-    bandwidth = models.IntegerField()
-    max_allocation = models.IntegerField()
-    start_date = models.DateField("Start date")
-    start_time = models.TimeField("Start time")
-    end_date = models.DateField("End date")
-    end_time = models.TimeField("End time")
-    init_params = models.TextField()
-    type = models.CharField(max_length=200)    
 
 class Slice(models.Model):
     '''This is created by a user (the owner) and contains
@@ -169,15 +148,25 @@ class Slice(models.Model):
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
     committed = models.BooleanField()
-    start_date = models.DateField("Start date")
-    start_time = models.TimeField("Start time")
-    end_date = models.DateField("End date")
-    end_time = models.TimeField("End time")
 
     # nodes that this slice has seen. We use this to store a user's
     # x,y settings and other per-slice per-node settings
     gui_nodes = models.ManyToManyField(Node, through="NodeSliceGUI", related_name='gui_slice_set')
     
+    # PlanetLab additional fields
+    start_date = models.DateField("Start date", blank=True, null=True)
+    start_time = models.TimeField("Start time", blank=True, null=True)
+    end_date = models.DateField("End date", blank=True, null=True)
+    end_time = models.TimeField("End time", blank=True, null=True)
+    
+    def get_utc_start_time(self):
+        # TODO
+        return "xxxx"
+    
+    def get_utc_duration(self):
+        # TODO
+        return "yyyy"
+
     def get_absolute_url(self):
         return('slice_flash_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
@@ -189,7 +178,7 @@ class Slice(models.Model):
         '''
         return (self.links.filter(src=iface).count()
                 + self.links.filter(src=iface).count()) > 0
-
+    
 class NodeSliceStatus(models.Model):
     '''
     Tracks information about the node in the slice.
@@ -201,6 +190,25 @@ class NodeSliceStatus(models.Model):
     reserved = models.BooleanField()
     removed = models.BooleanField()
     has_error = models.BooleanField()
+    
+    # PlanetLab additional fields
+    init_params = models.TextField(blank=True, null=True)
+    cpu_min = models.IntegerField(blank=True, null=True)
+    cpu_share = models.IntegerField(blank=True, null=True)
+    cpu_pct = models.IntegerField(blank=True, null=True)
+    disk_max =  models.IntegerField(blank=True, null=True)
+    start_date = models.DateField("Start date", blank=True, null=True)
+    start_time = models.TimeField("Start time", blank=True, null=True)
+    end_date = models.DateField("End date", blank=True, null=True)
+    end_time = models.TimeField("End time", blank=True, null=True)
+
+    def get_utc_start_time(self):
+        # TODO
+        return "xxxx"
+    
+    def get_utc_duration(self):
+        # TODO
+        return "yyyy"
 
 class NodeSliceGUI(models.Model):
     '''
@@ -225,7 +233,22 @@ class LinkSliceStatus(models.Model):
     reserved = models.BooleanField()
     removed = models.BooleanField()
     has_error = models.BooleanField()
+    
+    # PlanetLab additional fields
+    start_date = models.DateField("Start date", blank=True, null=True)
+    start_time = models.TimeField("Start time", blank=True, null=True)
+    end_date = models.DateField("End date", blank=True, null=True)
+    end_time = models.TimeField("End time", blank=True, null=True)
+    init_params = models.TextField(blank=True, null=True)    
 
+    def get_utc_start_time(self):
+        # TODO
+        return "xxxx"
+    
+    def get_utc_duration(self):
+        # TODO
+        return "yyyy"
+    
 class SliceForm(ModelForm):
     class Meta:
         model = Slice
@@ -252,6 +275,7 @@ class FlowSpace(models.Model):
                +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
 
 class FlowSpaceForm(ModelForm):
+    # TODO: add validation using policy manager
     class Meta:
         model=FlowSpace
         exclude = ('slice')

@@ -7,6 +7,7 @@ from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
+import egeni_api, plc_api
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
@@ -196,7 +197,8 @@ def slice_flash_detail(request, slice_id):
                 print "Link ID: %s new in slice" % id
             else:
                 print "Link ID: %s already seen" % id
-                
+            
+        node_slice_set = []
         for id in node_ids:
             print "Node: %s" % id;
             node = get_object_or_404(Node, pk=id)
@@ -212,6 +214,8 @@ def slice_flash_detail(request, slice_id):
                 print "Node ID: %s new in slice" % id
             else:
                 print "Node ID: %s already seen" % id
+                
+            node_slice_set.append(through)
 
         formset.save()
         slice.committed = False
@@ -227,6 +231,12 @@ def slice_flash_detail(request, slice_id):
             errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
         
             # TODO: Parse errors here
+        
+        rspec = render_to_string("rspec/pl-rspec.xml",
+                                 {"node_slice_set": node_slice_set,
+                                  "slice": slice})
+        errors = plc_api.reserve_slice(rspec, slice_id)
+        # TODO: parse pl errors
         
         slice.committed = True
         slice.save()
@@ -302,8 +312,6 @@ def slice_get_topo(request, slice_id):
         return HttpResponse(xml, mimetype="text/xml")
     else:
         return HttpResponseNotAllowed("GET")
-
-
 
 
 def am_create(request):

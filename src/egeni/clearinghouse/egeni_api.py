@@ -7,7 +7,6 @@ Contains egeni specific functions
 '''
 
 from httplib import HTTPConnection
-from sfa.util import xmlrpcprotocol
 from sfa.util import soapprotocol
 from sfa.trust.certificate import Keypair
 
@@ -16,8 +15,7 @@ from xml import xpath
 import models
 from django.db.models import Count
 
-MAX_X = 200
-MAX_Y = 200
+OFSWITCH_DEFAULT_IMG = "/img/ofswitch.png"
 
 key_file = './geniclearinghouse.pkey'
 cert_file = './geniclearinghouse.cert'
@@ -25,19 +23,23 @@ cred_file = './geniclearinghouse.cred'
 CH_hrn = 'plc.openflow.geniclearinghouse'
 key = Keypair(filename=key_file)
 server = {}
+done_init = False
 
 en_debug = 0;
-
 def debug(s):
     if(en_debug):
         print(s);
 
 def init():
-    global CH_cred, cred_file
+    global CH_cred, cred_file, done_init
     CH_cred = file(cred_file).read()
+    done_init = True
 
 def connect_to_soap_server(am_url):
-    global server, CH_hrn, key_file, cert_file
+    global server, CH_hrn, key_file, cert_file, done_init
+    
+    if not done_init: init()
+        
     print "Connecting to", am_url
 
     #Internet tells me to use the following to fix some array anomalies
@@ -87,135 +89,135 @@ def get_rspec(am_url):
     Returns the RSpec of available resources.
     '''
 
-    return '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
-
-  <tns:version>1.0</tns:version>
-
-  <tns:remoteEntry>
-    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
-    <tns:remoteType>PLNode</tns:remoteType>
-    <tns:node>
-      <tns:nodeId>9dsafj</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>0</tns:port>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>1</tns:remotePort>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:remoteEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>640021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>26</tns:port>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>46</tns:remotePort>
-        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>43</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>28</tns:port>
-          <tns:flowSpaceEntry>
-              <tns:policy>0</tns:policy>
-              <tns:dl_type>2</tns:dl_type>
-              <tns:tp_dst>423</tns:tp_dst>
-          </tns:flowSpaceEntry>
-          <tns:flowSpaceEntry>
-              <tns:policy>0</tns:policy>
-              <tns:dl_type>2</tns:dl_type>
-              <tns:tp_dst>423</tns:tp_dst>
-          </tns:flowSpaceEntry>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>2580021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>46</tns:port>
-        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>26</tns:remotePort>
-        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>43</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>48</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>1</tns:port>
-        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
-        <tns:remotePort>0</tns:remotePort>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>1f40021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>41</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>43</tns:port>
-        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>26</tns:remotePort>
-        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-        <tns:remotePort>46</tns:remotePort>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>44</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>12c0021f7cae400</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>33</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>35</tns:port>
-      </tns:interfaceEntry>
-      <tns:interfaceEntry>
-        <tns:port>36</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>c80021f7cae400</tns:nodeId>
-    </tns:node>
-  </tns:switchEntry>
-
-  <tns:switchEntry>
-    <tns:node>
-      <tns:nodeId>123456789ab</tns:nodeId>
-      <tns:interfaceEntry>
-        <tns:port>0</tns:port>
-      </tns:interfaceEntry>
-    </tns:node>
-  </tns:switchEntry>
-  
-  <tns:flowSpaceEntry>
-    <tns:policy>1</tns:policy>
-    <tns:dl_src>*</tns:dl_src>
-    <tns:dl_dst>*</tns:dl_dst>
-    <tns:dl_type>2048</tns:dl_type>
-    <tns:vlan_id>*</tns:vlan_id>
-    <tns:ip_src>192.168.0.0/16</tns:ip_src>
-    <tns:ip_dst>192.168.0.0/16</tns:ip_dst>
-    <tns:ip_proto>*</tns:ip_proto>
-    <tns:tp_src>*</tns:tp_src>
-    <tns:tp_dst>*</tns:tp_dst>
-  </tns:flowSpaceEntry>
-
-</tns:RSpec>
-'''
+#    return '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+#<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
+#
+#  <tns:version>1.0</tns:version>
+#
+#  <tns:remoteEntry>
+#    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
+#    <tns:remoteType>PLNode</tns:remoteType>
+#    <tns:node>
+#      <tns:nodeId>9dsafj</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>0</tns:port>
+#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>1</tns:remotePort>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:remoteEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>640021f7cae400</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>26</tns:port>
+#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>46</tns:remotePort>
+#        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>43</tns:remotePort>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>28</tns:port>
+#          <tns:flowSpaceEntry>
+#              <tns:policy>0</tns:policy>
+#              <tns:dl_type>2</tns:dl_type>
+#              <tns:tp_dst>423</tns:tp_dst>
+#          </tns:flowSpaceEntry>
+#          <tns:flowSpaceEntry>
+#              <tns:policy>0</tns:policy>
+#              <tns:dl_type>2</tns:dl_type>
+#              <tns:tp_dst>423</tns:tp_dst>
+#          </tns:flowSpaceEntry>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:switchEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>2580021f7cae400</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>46</tns:port>
+#        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>26</tns:remotePort>
+#        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>43</tns:remotePort>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>48</tns:port>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>1</tns:port>
+#        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
+#        <tns:remotePort>0</tns:remotePort>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:switchEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>1f40021f7cae400</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>41</tns:port>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>43</tns:port>
+#        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>26</tns:remotePort>
+#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
+#        <tns:remotePort>46</tns:remotePort>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>44</tns:port>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:switchEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>12c0021f7cae400</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>33</tns:port>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>35</tns:port>
+#      </tns:interfaceEntry>
+#      <tns:interfaceEntry>
+#        <tns:port>36</tns:port>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:switchEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>c80021f7cae400</tns:nodeId>
+#    </tns:node>
+#  </tns:switchEntry>
+#
+#  <tns:switchEntry>
+#    <tns:node>
+#      <tns:nodeId>123456789ab</tns:nodeId>
+#      <tns:interfaceEntry>
+#        <tns:port>0</tns:port>
+#      </tns:interfaceEntry>
+#    </tns:node>
+#  </tns:switchEntry>
+#  
+#  <tns:flowSpaceEntry>
+#    <tns:policy>1</tns:policy>
+#    <tns:dl_src>*</tns:dl_src>
+#    <tns:dl_dst>*</tns:dl_dst>
+#    <tns:dl_type>2048</tns:dl_type>
+#    <tns:vlan_id>*</tns:vlan_id>
+#    <tns:ip_src>192.168.0.0/16</tns:ip_src>
+#    <tns:ip_dst>192.168.0.0/16</tns:ip_dst>
+#    <tns:ip_proto>*</tns:ip_proto>
+#    <tns:tp_src>*</tns:tp_src>
+#    <tns:tp_dst>*</tns:tp_dst>
+#  </tns:flowSpaceEntry>
+#
+#</tns:RSpec>
+#'''
     
     global server, CH_cred, CH_hrn
 
@@ -267,7 +269,7 @@ def update_rspec(self_am):
         node_type = xpath.Evaluate("name(..)", context=context)
         
         kwargs = {'nodeId': nodeId,
-                  'img_url': '/img/blue_circle.png',
+                  'img_url': OFSWITCH_DEFAULT_IMG,
                   }
 
         if(node_type == 'tns:remoteEntry'):
