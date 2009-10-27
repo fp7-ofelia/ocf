@@ -1,5 +1,0 @@
-Code needs following:
-1. xsd from CodeSynthesis. The binary file xsd must be in PATH
-2. The header files of libxsd must be place in INCLUDE
-3. The rspec.xsd must be in the same directory as aggrMgr.cc
-
