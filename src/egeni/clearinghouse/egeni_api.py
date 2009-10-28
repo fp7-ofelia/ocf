@@ -17,9 +17,9 @@ from django.db.models import Count
 
 OFSWITCH_DEFAULT_IMG = "/img/ofswitch.png"
 
-key_file = '/home/jnaous/tmp/seethara.pkey'
-cert_file = '/home/jnaous/tmp/seethara.cert'
-cred_file = '/home/jnaous/tmp/seethara.cred'
+key_file = '/home/srini/.sfi/seethara.pkey'
+cert_file = '/home/srini/.sfi/seethara.cert'
+cred_file = '/home/srini/.sfi/seethara.cred'
 CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)
 server = {}
@@ -60,13 +60,17 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server, CH_cred
+    global server
     if am_url not in server:
         connect_to_soap_server(am_url)
 
+    # Ideally, the following should be loaded dynamically
+    slice_id = 'plc.openflow.egeni'
+    slice_cred = file('/home/srini/.sfi/slice_egeni.cred').read()
+
     # The second param is supposed to be HRN, but replaced with slice_id
-    request_hash = key.compute_hash([CH_cred, str(slice_id), str(rspec)])
-    result = server[am_url].create_slice(CH_cred, str(slice_id), str(rspec), request_hash)
+    request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
+    result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec), request_hash)
     debug(result)
     
     return ""    
