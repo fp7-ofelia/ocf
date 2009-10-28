@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="e-geni/plugin.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/e-geni/src/jar-out.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <jar path="egeni/plugin.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/egeni/src/jar-out.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <manifest generateManifest="true" manifestLocation="/egeni/plugin-manifest.txt" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
@@ -11,38 +11,45 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.tree"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.navigation"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.hierarchical.model"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.traverse"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;egeni.clearinghouse.plugin"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.routing"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.generate"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph.plaf.basic"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;img"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.alg.util"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.organic"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.demo"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.graph"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.hierarchical"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.algebra.cost"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.util"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph.event"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.components.labels"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.ext"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;egeni.clearinghouse.plugin.graphics"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.alg"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph.plaf"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.algebra"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.io.svg"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph.graph"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgraph.util"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.graph"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.util"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;org.jgrapht.event"/>
-        <javaElement handleIdentifier="=e-geni/src&lt;com.jgraph.layout.simple"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.io.svg"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.ext"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.event"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.generate"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.permutation"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.navigation"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.alg"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.isomorphism"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph.event"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.algebra"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.alg.util"/>
+        <javaElement handleIdentifier="=egeni/src&lt;img"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.equivalence"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.routing"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph.plaf.basic"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.util"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.algebra.cost"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.organic"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.dag"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.alg"/>
+        <javaElement handleIdentifier="=egeni/src&lt;egeni.clearinghouse.plugin"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph.graph"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.traverse"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.graph"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.experimental.alg.color"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.simple"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.tree"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.hierarchical"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.util"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.components.labels"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph.plaf"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph.util"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.graph"/>
+        <javaElement handleIdentifier="=egeni/src&lt;egeni.clearinghouse.plugin.graphics"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgrapht.demo"/>
+        <javaElement handleIdentifier="=egeni/src&lt;com.jgraph.layout.hierarchical.model"/>
+        <javaElement handleIdentifier="=egeni/src&lt;org.jgraph"/>
     </selectedElements>
 </jardesc>

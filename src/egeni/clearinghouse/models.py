@@ -108,14 +108,8 @@ class Interface(models.Model):
     remoteIfaces = models.ManyToManyField('self', symmetrical=False, through="Link")
     
     # PlanetLab additional things
-    max_kbyte = models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
     address = models.IPAddressField(blank=True, null=True)
-    type = models.CharField(max_length=200, blank=True, null=True)
-    init_params = models.TextField(blank=True, null=True)
-    ip_spoof = models.BooleanField(blank=True, null=True)
-    max_rate = models.IntegerField(blank=True, null=True)
-    min_rate = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
         return "Interface "+self.portNum+" of node "+self.ownerNode.nodeId
@@ -129,11 +123,6 @@ class Link(models.Model):
     src = models.ForeignKey(Interface, related_name='src_link_set')
     dst = models.ForeignKey(Interface, related_name='dst_link_set')
     
-    # PlanetLab additional fields
-    bandwidth = models.IntegerField(blank=True, null=True)
-    max_allocation = models.IntegerField(blank=True, null=True)
-    type = models.CharField(max_length=200, blank=True, null=True)
-
     def __unicode__(self):
         return "Link from " + self.src.__unicode__() \
                 + " to " + self.dst.__unicode__()
@@ -153,20 +142,6 @@ class Slice(models.Model):
     # x,y settings and other per-slice per-node settings
     gui_nodes = models.ManyToManyField(Node, through="NodeSliceGUI", related_name='gui_slice_set')
     
-    # PlanetLab additional fields
-    start_date = models.DateField("Start date", blank=True, null=True)
-    start_time = models.TimeField("Start time", blank=True, null=True)
-    end_date = models.DateField("End date", blank=True, null=True)
-    end_time = models.TimeField("End time", blank=True, null=True)
-    
-    def get_utc_start_time(self):
-        # TODO
-        return "xxxx"
-    
-    def get_utc_duration(self):
-        # TODO
-        return "yyyy"
-
     def get_absolute_url(self):
         return('slice_flash_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
@@ -192,23 +167,9 @@ class NodeSliceStatus(models.Model):
     has_error = models.BooleanField()
     
     # PlanetLab additional fields
-    init_params = models.TextField(blank=True, null=True)
     cpu_min = models.IntegerField(blank=True, null=True)
     cpu_share = models.IntegerField(blank=True, null=True)
     cpu_pct = models.IntegerField(blank=True, null=True)
-    disk_max =  models.IntegerField(blank=True, null=True)
-    start_date = models.DateField("Start date", blank=True, null=True)
-    start_time = models.TimeField("Start time", blank=True, null=True)
-    end_date = models.DateField("End date", blank=True, null=True)
-    end_time = models.TimeField("End time", blank=True, null=True)
-
-    def get_utc_start_time(self):
-        # TODO
-        return "xxxx"
-    
-    def get_utc_duration(self):
-        # TODO
-        return "yyyy"
 
 class NodeSliceGUI(models.Model):
     '''
@@ -234,28 +195,22 @@ class LinkSliceStatus(models.Model):
     removed = models.BooleanField()
     has_error = models.BooleanField()
     
-    # PlanetLab additional fields
-    start_date = models.DateField("Start date", blank=True, null=True)
-    start_time = models.TimeField("Start time", blank=True, null=True)
-    end_date = models.DateField("End date", blank=True, null=True)
-    end_time = models.TimeField("End time", blank=True, null=True)
-    init_params = models.TextField(blank=True, null=True)    
-
-    def get_utc_start_time(self):
-        # TODO
-        return "xxxx"
-    
-    def get_utc_duration(self):
-        # TODO
-        return "yyyy"
-    
 class SliceForm(ModelForm):
     class Meta:
         model = Slice
         fields = ('name', 'controller_url')
 
 class FlowSpace(models.Model):
-    policy = models.CharField(max_length=2)
+    TYPE_ALLOW = 1
+    TYPE_DENY  = -1
+    TYPE_RD_ONLY = 0
+    
+    POLICY_TYPE_CHOICES={TYPE_ALLOW: 'Allow',
+                         TYPE_DENY: 'Deny',
+                         TYPE_RD_ONLY: 'Read Only',
+                         }
+
+    policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items())
     dl_src = models.CharField(max_length=17)
     dl_dst = models.CharField(max_length=17)
     dl_type = models.CharField(max_length=5)
@@ -268,7 +223,8 @@ class FlowSpace(models.Model):
     slice = models.ForeignKey(Slice, null=True, blank=True)
     
     def __unicode__(self):
-        return("Port: "+self.interface.portNum+", dl_src: "+self.dl_src
+        return("Policy: "+FlowSpace.POLICY_TYPE_CHOICES[self.policy]
+               +", dl_src: "+self.dl_src
                +", dl_dst: "+self.dl_dst+", dl_type: "+self.dl_type
                +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
                +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
