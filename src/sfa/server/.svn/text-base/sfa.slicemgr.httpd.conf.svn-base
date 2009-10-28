@@ -1,0 +1,24 @@
+Listen 12347
+
+<VirtualHost *:12347>
+    ErrorLog logs/sfa_ssl_error_log
+    TransferLog logs/sfa_ssl_access_log
+    CustomLog logs/ssl_request_log \
+          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b
+    LogLevel warn
+
+    SSLEngine on
+    SSLProtocol all -SSLv2
+
+    SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
+    SSLCertificateFile /etc/sfa/authorities/server.cert
+    SSLCertificateKeyFile /etc/sfa/authorities/server.key
+    SetEnvIf User-Agent ".*MSIE.*" \
+         nokeepalive ssl-unclean-shutdown \
+         downgrade-1.0 force-response-1.0
+
+    SetHandler mod_python
+    PythonPath "sys.path + ['/usr/lib/python2.5/site-packages/sfa/', '/usr/lib/python2.5/site-packages/sfa/server/']"
+    PythonHandler SfaSliceMgrModPython
+
+</VirtualHost> 

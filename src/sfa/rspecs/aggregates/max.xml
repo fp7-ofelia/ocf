@@ -1,0 +1,35 @@
+<rspec name="max" 
+    xmlns="http://www.maxgigapop.net/sfa/rspec/07/09">
+    <capacity>
+        <netspec name="predefined_physical_topology">
+            <nodespec name="planetlab2">
+                <node>planetlab2.dragon.maxgigapop.net</node>
+                <ifspec name="pl23" linkid="pl23"/>
+                <ifspec name="pl24" linkid="pl24"/>
+                <ifspec name="pl25" linkid="pl25"/>
+            </nodespec>
+            <nodespec name="planetlab3">
+                <node>planetlab3.dragon.maxgigapop.net</node>
+                <ifspec name="pl32" linkid="pl23"/>
+                <ifspec name="pl34" linkid="pl34"/>
+                <ifspec name="pl35" linkid="pl35"/>
+            </nodespec>
+            <nodespec name="planetlab4">
+                <node>planetlab4.dragon.maxgigapop.net</node>
+                <ifspec name="pl42" linkid="pl24"/>
+                <ifspec name="pl43" linkid="pl34"/>
+                <ifspec name="pl45" linkid="pl45"/>
+            </nodespec>
+            <nodespec name="planetlab5">
+                <node>planetlab5.dragon.maxgigapop.net</node> 
+                <ifspec name="pl52" linkid="pl25"/>
+                <ifspec name="pl53" linkid="pl35"/>
+                <ifspec name="pl54" linkid="pl45"/>
+            </nodespec>
+        </netspec>
+    </capacity>
+    <request>
+        <ifspec name="tns:pl23" ip="10.0.0.1"/>
+        <ifspec name="tns:pl32" ip="10.0.0.2"/>
+    </request>
+</rspec>

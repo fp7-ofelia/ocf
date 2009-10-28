@@ -1,0 +1,131 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/15344/sfa/trunk/sfa/methods
+END
+remove.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/15335/sfa/trunk/sfa/methods/remove.py
+END
+remove_peer_object.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/15339/sfa/trunk/sfa/methods/remove_peer_object.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/15291/sfa/trunk/sfa/methods/__init__.py
+END
+get_gid.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/15320/sfa/trunk/sfa/methods/get_gid.py
+END
+stop_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/stop_slice.py
+END
+get_aggregates.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/get_aggregates.py
+END
+get_credential.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/15321/sfa/trunk/sfa/methods/get_credential.py
+END
+get_resources.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/get_resources.py
+END
+list.py
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/15321/sfa/trunk/sfa/methods/list.py
+END
+start_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/start_slice.py
+END
+resolve.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/15321/sfa/trunk/sfa/methods/resolve.py
+END
+get_registries.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/get_registries.py
+END
+delete_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/delete_slice.py
+END
+get_slices.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/15344/sfa/trunk/sfa/methods/get_slices.py
+END
+create_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/create_slice.py
+END
+get_ticket.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/14644/sfa/trunk/sfa/methods/get_ticket.py
+END
+update.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/15335/sfa/trunk/sfa/methods/update.py
+END
+register.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/15335/sfa/trunk/sfa/methods/register.py
+END
+reset_slices.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/reset_slices.py
+END
+register_peer_object.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/15339/sfa/trunk/sfa/methods/register_peer_object.py
+END
+create_gid.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/15336/sfa/trunk/sfa/methods/create_gid.py
+END

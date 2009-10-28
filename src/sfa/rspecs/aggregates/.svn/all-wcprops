@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/15349/sfa/trunk/sfa/rspecs/aggregates
+END
+rspec_manager_max.py
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/14644/sfa/trunk/sfa/rspecs/aggregates/rspec_manager_max.py
+END
+rspec_manager_vini.py
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/15127/sfa/trunk/sfa/rspecs/aggregates/rspec_manager_vini.py
+END
+max.xml
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/14644/sfa/trunk/sfa/rspecs/aggregates/max.xml
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/14644/sfa/trunk/sfa/rspecs/aggregates/__init__.py
+END
+rspec_manager_openflow.py
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/15131/sfa/trunk/sfa/rspecs/aggregates/rspec_manager_openflow.py
+END
+openflow.xml
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15112/sfa/trunk/sfa/rspecs/aggregates/openflow.xml
+END
+rspec_manager_pl.py
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/15127/sfa/trunk/sfa/rspecs/aggregates/rspec_manager_pl.py
+END
