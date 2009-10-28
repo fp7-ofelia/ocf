@@ -1,3 +1,3 @@
-<tns:switchEntry>
-  {% include "rspec/egeni-node.xml" %}
-</tns:switchEntry>
+  <tns:switchEntry>
+{% include "rspec/egeni-node.xml" %}
+  </tns:switchEntry>

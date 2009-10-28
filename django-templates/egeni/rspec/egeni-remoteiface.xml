@@ -1,2 +1,2 @@
-<tns:remoteNodeId>remote_iface.ownerNode.nodeId</tns:remoteNodeId>
-<tns:remotePort>remote_iface.portNum</tns:remotePort>
+        <tns:remoteNodeId>remote_iface.ownerNode.nodeId</tns:remoteNodeId>
+        <tns:remotePort>remote_iface.portNum</tns:remotePort>

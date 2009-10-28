@@ -18,7 +18,6 @@ class AggregateManager:
     def __unicode__(self):
         return 'AM ' + self.name + ' at ' + self.url
 
-
 class Node:
     """A node
     Agrs: aggregate manager this node belongs to, node ID, type of the node (switch, host, or others)
