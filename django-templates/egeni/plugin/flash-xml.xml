@@ -5,14 +5,14 @@
 	  <url>{% url slice_flash_detail slice.id %}</url>
 	</submit>
 
-{% for node in nodes %}
+{% for nodeId, node_info in nodes_dict.items %}
 	<node>
-	  <id>{{ node.nodeId }}</id>
-	  <x>{{ node.x }}</x>
-	  <y>{{ node.y }}</y>
-	  <img>{{ node.img_url }}</img>
-	  <name>{{ node.nodeId }}</name>
-	  <is_selected>{{ node|is_in_set:slice.nodes.all }}</is_selected>
+	  <id>{{ nodeId }}</id>
+	  <x>{{ node_info.x }}</x>
+	  <y>{{ node_info.y }}</y>
+	  <img>{{ node_info.node.img_url }}</img>
+	  <name>{{ nodeId }}</name>
+	  <is_selected>{{ node_info.node|is_in_set:slice.nodes.all }}</is_selected>
 	  <has_err>False</has_err>
 	</node>
 {% endfor %}

@@ -17,6 +17,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.swing.Icon;
@@ -50,8 +51,10 @@ import org.xml.sax.SAXException;
 
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.JGraphLayout;
+import com.jgraph.layout.graph.JGraphSpringLayout;
 import com.jgraph.layout.organic.JGraphFastOrganicLayout;
 import com.jgraph.layout.organic.JGraphOrganicLayout;
+import com.jgraph.layout.organic.JGraphSelfOrganizingOrganicLayout;
 import com.jgraph.layout.routing.JGraphParallelRouter;
 import com.jgraph.layout.tree.JGraphRadialTreeLayout;
 
@@ -155,22 +158,34 @@ public class JGraphTopoPanel extends JPanel {
 				}
 			}
 		});
-		
+
+		/* Get the nodes that need to be laid out */
+		Random rand = new Random();
+		Set<JGraphNode> vset = new HashSet<JGraphNode>();
+		for(JGraphNode n: graphNodes.values()) {
+			if(n.getX() < 0 || n.getY() < 0) {
+				n.setLocation(rand.nextDouble()*INITIAL_WIDTH*0.5,
+						rand.nextDouble()*INITIAL_HEIGHT*0.5);
+				System.err.println("Adding for layout node "+n.getId());
+				vset.add(n);
+			}
+		}
 		/* Layout the graph nicely */
+		System.err.println("Doing layout");
 		JGraphFacade facade = new JGraphFacade(jgraph);
 		facade.setDirected(true);
+		facade.setVerticesFilter(vset);
 		JGraphOrganicLayout layout = new JGraphOrganicLayout();
 		/* TODO: Figure out the best settings for these parameters */
 		layout.setOptimizeNodeDistribution(true);
 		layout.setOptimizeEdgeLength(true);
-		layout.setNodeDistributionCostFactor(60000);
+		layout.setNodeDistributionCostFactor(600000);
 		layout.setEdgeLengthCostFactor(0.001);
-		/* Make it deterministic */
-		layout.setDeterministic(true);
 		/* Run the layout */
 		layout.run(facade);
 		Map nested = facade.createNestedMap(true, true);
 		jgraph.getGraphLayoutCache().edit(nested);
+		System.err.println("Layout done");
 		
 		JGraphParallelRouter.getSharedInstance().setEdgeDeparture(5);
 		JGraphParallelRouter.getSharedInstance().setEdgeSeparation(8);
@@ -271,13 +286,13 @@ public class JGraphTopoPanel extends JPanel {
 				n.getElementsByTagName(
 				"id").item(0).getTextContent();
 			
-			int x =
-				Integer.parseInt(
+			double x =
+				Double.parseDouble(
 						n.getElementsByTagName(
 						"x").item(0).getTextContent());
 				
-			int y =
-				Integer.parseInt(
+			double y =
+				Double.parseDouble(
 						n.getElementsByTagName(
 						"y").item(0).getTextContent());
 			
@@ -400,29 +415,9 @@ public class JGraphTopoPanel extends JPanel {
 			}
 		}
 		return paramsAsString.toString();
-    }
-    
-    /**
-     * Get the ids of the given key element
-     * @param key: one of "node_id" or "link_id"
-     * @return a String[] of all the selected ids in the topology
-     */
-    public String[] getIDs(String key) {
-    	Set<String> s = getTopoMap().get(key);
-    	String[] o = new String[s.size()];
-    	o = s.toArray(o);
-    	return o;
-    }
-    
-    public String[] getNodeIDs(){
-    	System.err.println("Called getNodes2");
-    	return getIDs("node_id");
-    }
-    public String[] getLinkIDs(){
-    	return getIDs("link_id");
-    }
+    }    
 
-	/**
+    /**
 	 * Does a GET to the given URL if params is null. Otherwise,
 	 * sends the params in a POST.
 	 * @param url: the URL to connect to
@@ -455,5 +450,16 @@ public class JGraphTopoPanel extends JPanel {
 		}
 		
 		return con.getInputStream();
+	}
+	
+	public JGraphNode[] getGraphNodes() {
+		JGraphNode[] a = new JGraphNode[graphNodes.size()];
+		a = graphNodes.values().toArray(a);
+		return a;
+	}
+
+	public JGraphLink[] getGraphLinks() {
+		JGraphLink[] a = new JGraphLink[graphLinks.size()];
+		return graphLinks.values().toArray(a);
 	}
 }

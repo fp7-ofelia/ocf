@@ -79,7 +79,10 @@
     		<element name="hostEntry" type="tns:hostInfo"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="remoteNodeEntry" type="tns:remoteNodeInfo" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="remoteNodeEntry" type="tns:remoteNodeInfo"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="flowSpaceEntry" type="tns:flowSpaceInfo" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     </complexType>
 

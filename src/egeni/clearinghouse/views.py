@@ -1,44 +1,63 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect, HttpResponseServerError
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseRedirect, HttpResponseBadRequest,\
+    HttpRequest, HttpResponseForbidden
+from django.http import HttpResponse
+from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
-import os
+import egeni_api, plc_api
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
+XPOS_FIELD = "x-pos"
+YPOS_FIELD = "y-pos"
 
 def home(request):
     '''Show the list of slices, and form for creating new slice'''
 
     if request.method == 'POST':
-        slice = Slice(owner=request.user, committed=False)
-        form = SliceForm(request.POST, instance=slice)
-        print "<0>"
-        if form.is_valid():
-            print "<1>"
-            slice = form.save()
-            print "<2>"
-            return HttpResponseRedirect(slice.get_absolute_url())
-        print "<3>"
+        if not request.POST.has_key("action"):
+            return HttpResponseBadRequest("Missing field action")
+        
+        if request.POST["action"] == "delete_slice":
+            slice_ids = request.POST.getlist('del_sel')
+            slices = request.user.slice_set.filter(id__in=slice_ids)
+            for am in AggregateManager.objects.all():
+                for slice in slices:
+                    egeni_api.delete_slice(am.url, slice.id)
+            slices.delete()
+            return HttpResponseRedirect(reverse('home'))
+
+        elif request.POST["action"] == "create_slice":
+            slice = Slice(owner=request.user, committed=False)
+            form = SliceForm(request.POST, instance=slice)
+            if form.is_valid():
+                slice = form.save()
+                return HttpResponseRedirect(slice.get_absolute_url())
+        
+        else:
+            return HttpResponseBadRequest(
+                "Unknown action value: %s" % request.POST["action"])
     else:
         # get reserved and unreserved slices
         form = SliceForm()
         
-    reserved_slices = request.user.slice_set.filter(committed=True)
-    reserved_ids = reserved_slices.values_list('id', flat=True)
-    unreserved_slices = request.user.slice_set.exclude(id__in=reserved_ids)
-    
-    return render_to_response("clearinghouse/home.html",
-                              {'reserved_slices': reserved_slices,
-                               'unreserved_slices': unreserved_slices,
-                               'form': form})
+        reserved_slices = request.user.slice_set.filter(committed=True)
+        unreserved_slices = request.user.slice_set.filter(committed=False)
+        
+        do_del = request.user.slice_set.count() > 0
+        return render_to_response("clearinghouse/home.html",
+                                  {'do_del': do_del,
+                                   'reserved_slices': reserved_slices,
+                                   'unreserved_slices': unreserved_slices,
+                                   'form': form})            
 
 def slice_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     agg_list = AggregateManager.objects.all()
     
     # create a formset to handle all flowspaces
@@ -96,11 +115,13 @@ def slice_detail(request, slice_id):
 
 def slice_flash_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, FlowSpace)
     
-    print "<xx>"
+    print "<xx> request method %s" % request.method
     
     if request.method == "POST":
 #        if NODE_ID_FIELD not in request.POST or LINK_ID_FIELD not in request.POST:
@@ -113,6 +134,46 @@ def slice_flash_detail(request, slice_id):
         
         link_ids = request.POST.getlist(LINK_ID_FIELD)
         node_ids = request.POST.getlist(NODE_ID_FIELD)
+        x_positions = request.POST.getlist(XPOS_FIELD)
+        y_positions = request.POST.getlist(YPOS_FIELD)
+        
+        print "xpos: %s" % x_positions
+        print "ypos: %s" % y_positions
+        
+        # Update the positions of the nodes
+        for id_x in x_positions:
+            id, x = id_x.split("-")
+            try:
+                n = Node.objects.get(nodeId=id)
+            except Node.DoesNotExist:
+                continue
+            
+            nsg, created = NodeSliceGUI.objects.get_or_create(
+                                slice=slice,
+                                node=n,
+                                defaults={'x': x,
+                                          'y': -1}
+                                )
+            nsg.x = x
+            nsg.save()
+            
+        for id_y in y_positions:
+            id, y = id_y.split("-")
+            try:
+                n = Node.objects.get(nodeId=id)
+            except Node.DoesNotExist:
+                continue
+            
+            nsg, created = NodeSliceGUI.objects.get_or_create(
+                                slice=slice,
+                                node=n,
+                                defaults={'x': -1,
+                                          'y': y}
+                                )
+            nsg.y = y
+            nsg.save()
+        
+        # TODO: Delete all the old NodeSliceGUIs
         
         # delete old links and nodes
         LinkSliceStatus.objects.filter(
@@ -132,7 +193,12 @@ def slice_flash_detail(request, slice_id):
                                               'has_error': False,
                                               }
                                     )
+            if created:
+                print "Link ID: %s new in slice" % id
+            else:
+                print "Link ID: %s already seen" % id
             
+        node_slice_set = []
         for id in node_ids:
             print "Node: %s" % id;
             node = get_object_or_404(Node, pk=id)
@@ -144,18 +210,37 @@ def slice_flash_detail(request, slice_id):
                                               'has_error': False,
                                               }
                                     )
+            if created:
+                print "Node ID: %s new in slice" % id
+            else:
+                print "Node ID: %s already seen" % id
+                
+            node_slice_set.append(through)
 
-        # get the RSpec of the Slice
-        rspec = render_to_string("rspec/egeni-rspec.xml",
-                                 {"node_set": slice.nodes.all(),
-                                  "slice": slice})
-            
         formset.save()
         slice.committed = False
         slice.save()
         
-        # TODO: Do actual reservation    
-        slice.committed = False
+        # get the RSpec of the Slice for each am and reserve
+        for am in AggregateManager.objects.filter(
+                        type=AggregateManager.TYPE_OF):
+            rspec = render_to_string("rspec/egeni-rspec.xml",
+                                     {"node_set": slice.nodes.filter(aggMgr=am),
+                                      "am": am,
+                                      "slice": slice})
+            errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
+        
+            # TODO: Parse errors here
+        
+        rspec = render_to_string("rspec/pl-rspec.xml",
+                                 {"node_slice_set": node_slice_set,
+                                  "slice": slice})
+        errors = plc_api.reserve_slice(rspec, slice_id)
+        # TODO: parse pl errors
+        
+        slice.committed = True
+        slice.save()
+        print "Redirecting"
         return HttpResponseRedirect(reverse('slice_flash_detail', args=[slice_id]))
 
     elif request.method == "GET":
@@ -185,6 +270,8 @@ def slice_get_xsd(request, slice_id):
 
 def slice_get_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
     print "Doing topo view"
     
     if request.method == "GET":
@@ -194,23 +281,37 @@ def slice_get_topo(request, slice_id):
         # get all the local nodes
         nodes = Node.objects.all().exclude(is_remote=True)
         
+        nodes_dict = {}
+        for n in nodes:
+            try:
+                nsg = NodeSliceGUI.objects.get(slice=slice,
+                                               node=n)
+            except NodeSliceGUI.DoesNotExist:
+                x = -1
+                y = -1
+            
+            else:
+                x = nsg.x
+                y = nsg.y
+                        
+            nodes_dict[n.nodeId] = {'node': n,
+                                    'x': x,
+                                    'y': y,
+                                    }
+        
         # get all the local links
         links = Link.objects.filter(
                     src__ownerNode__is_remote=False,
                     dst__ownerNode__is_remote=False)
 
-        print "rendering xml"
-
         xml = render_to_string("plugin/flash-xml.xml",
-                               {'nodes': nodes,
+                               {'nodes_dict': nodes_dict,
                                 'links': links,
                                 'slice': slice})
-        print xml
+
         return HttpResponse(xml, mimetype="text/xml")
     else:
         return HttpResponseNotAllowed("GET")
-
-
 
 
 def am_create(request):

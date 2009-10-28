@@ -4,6 +4,13 @@ Created on Oct 17, 2009
 @author: jnaous
 '''
 
+import elementtree.ElementTree as et
+from elementtree.ElementTree import ElementTree 
+from models import *
+from django.db.models import Count
+
+PLNODE_DEFAULT_IMG = "/img/plnode.png"
+
 def reserve_slice(am_url, rspec, slice_id):
     '''
     Reserves the slice identified by slice_id or
@@ -27,8 +34,110 @@ def delete_slice(am_url, slice_id):
 def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
-    '''    
-    pass
+    '''
+    return '''<?xml version="1.0" encoding="UTF-8"?>
+<RSpec start_time="1235696400" duration="2419200">
+    <networks>
+        <NetSpec name="planetlab.us" start_time="1235696400" duration="2419200">
+            <nodes>
+                <NodeSpec name="planetlab-1.cs.princeton.edu" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
+                    <net_if>
+                        <IfSpec name="128.112.139.71" addr="128.112.139.71" type="ipv4" init_params="" min_rate="0" max_rate="10000000" max_kbyte="" ip_spoof="" />
+                    </net_if>
+                </NodeSpec>
+                <NodeSpec name="planetlab-2.cs.princeton.edu" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
+                    <net_if>
+                        <IfSpec name="128.112.139.72" addr="128.112.139.72" type="ipv4" init_params="" min_rate="0" max_rate="10000000" max_kbyte="" ip_spoof="" />
+                        <IfSpec name="128.112.139.120" addr="128.112.139.120" type="proxy" init_params="" min_rate="0" max_rate="" max_kbyte="" ip_spoof="" />
+                        <IfSpec name="128.112.139.119" addr="128.112.139.119" type="proxy" init_params="" min_rate="0" max_rate="" max_kbyte="" ip_spoof="" />
+                    </net_if>
+                </NodeSpec>
+            </nodes>
+        </NetSpec>
+        <NetSpec name="planetlab.eu" start_time="" duration="">
+            <nodes>
+                <NodeSpec name="onelab03.onelab.eu" type="" init_params="" cpu_min="" cpu_share="" cpu_pct="" disk_max="" start_time="" duration="">
+                    <net_if>
+                        <IfSpec name="128.112.139.321" addr="128.112.139.321" type="ipv4" init_params="" min_rate="0" max_rate="10000000" max_kbyte="" ip_spoof="" />
+                    </net_if>
+                </NodeSpec>
+            </nodes>
+        </NetSpec>
+    </networks>
+</RSpec>
+'''
 
 def update_rspec(self_am):
-    pass
+    '''
+    Read and parse the RSpec specifying all 
+    nodes from the aggregate manager using the E-GENI
+    RSpec
+    '''
+    
+    xml_str = get_rspec(self_am.url)
+    tree = ElementTree(et.fromstring(xml_str))
+
+    # keep track of created ids to delete old ones
+    node_ids = []
+    iface_ids = []
+    for netspec_elem in tree.getiterator("NetSpec"):
+        am, created = AggregateManager.get_or_create(
+                                    name=netspec_elem.get("name"),
+                                    url=netspec_elem.get("name"),
+                                    type=AggregateManager.TYPE_PL,
+                                    )
+        
+        for node_elem in netspec_elem.getiterator("nodes/NodeSpec"):
+            name = node_elem.get("name")
+            type = node_elem.get("name") or AggregateManager.TYPE_PL
+            node, created = Node.objects.get_or_create(
+                          nodeId=name,
+                          name=name,
+                          type=type,
+                          defaults={"is_remote": False,
+                                    "remoteURL": am.url,
+                                    "aggMgr": am,
+                                    "img_url": PLNODE_DEFAULT_IMG,
+                                    }
+                          )
+            
+            if not created:
+                node.remoteURL = am.url
+                node.aggMgr = am
+                node.save()
+                
+            node_ids.append(node.nodeId)
+            
+            # add all the interfaces
+            for i, iface_elem in enumerate(node_elem.getiterator("net_if/IfSpec")):
+                kwargs = {}
+                for attrib in ("name", "addr", "type", "init_params",
+                               "min_rate", "max_rate", "max_kbyte",
+                               "ip_spoof",
+                               ):
+                    kwargs[attrib] = iface_elem.get(attrib)
+                
+                # TODO: port nums
+                kwargs["portNum"] = i
+                
+                # TODO: How do they maintain a consistent mapping of iface
+                # to identifier e.g. when addresses change. Is name consistent?
+                iface, created = Interface.objects.get_or_create(
+                            name=kwargs["name"],
+                            ownerNode=node,
+                            defaults=kwargs,
+                            )
+                
+                if not created:
+                    for fld in kwargs:
+                        iface.__setattr__(fld, kwargs[fld])
+                    iface.save()
+            
+                iface_ids.append(iface.id)
+                
+    # delete all the old stuff
+    Node.objects.filter(type=Node.TYPE_PL).exclude(
+                        nodeId__in=node_ids).delete()
+    Interface.objects.filter(
+        ownerNode__type=Node.TYPE_PL).exclude(
+            id__in=iface_ids).delete()

@@ -13,16 +13,30 @@
 	    
         function doSubmit(form) {
         	
-            // get the list of node_ids
-            var node_ids = guiPlugin.getNodeIDs();
-            for(var i=0, len=node_ids.length; i<len; i++) {
-                addHiddenInput("node_id_"+i, "node_id", node_ids[i]);
-            }
-            
+        	var topoPanel = guiPlugin.getTopoPanel();
+
+        	/* get the nodes */
+        	var nodes = topoPanel.getGraphNodes();
+        	
+        	/* for each node, send back its new x,y pos and whether or not it
+        	 * is selected */
+        	for(var i = 0, len = nodes.length; i < len; i++) {
+        	  var n = nodes[i];
+        	  var is_sel = n.isSelected().toString();
+        	  if(is_sel == "true") {
+        	    addHiddenInput("node_id_"+i, "node_id", n.getId());
+        	  }
+        	  addHiddenInput("node_id_x", "x-pos", n.getId()+"-"+n.getX());
+        	  addHiddenInput("node_id_y", "y-pos", n.getId()+"-"+n.getY());
+        	}
+
             // get the list of link_ids
-            var link_ids = guiPlugin.getLinkIDs();
-            for(var i=0, len=link_ids.length; i<len; i++) {
-                addHiddenInput("link_id_"+i, "link_id", link_ids[i]);
+            var links = topoPanel.getGraphLinks();
+            for(var i=0, len=links.length; i<len; i++) {
+            	var l = links[i];
+            	if(l.isSelected().toString() == "true") {
+            		addHiddenInput("link_id_"+i, "link_id", l.getId());
+            	}
             }
 
             return true;

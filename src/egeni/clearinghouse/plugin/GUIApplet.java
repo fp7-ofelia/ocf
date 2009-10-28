@@ -47,13 +47,8 @@ public class GUIApplet extends JApplet {
     	return "Hello from java";
     }
     
-    public String[] getNodeIDs() {
-    	System.err.println("Called getNodes");
-    	String[] s = topoPanel.getNodeIDs();
-    	System.err.println("returning from getNodes with "+s);
-    	return s;
+    public JGraphTopoPanel getTopoPanel() {
+    	return topoPanel;
     }
-    public String[] getLinkIDs() {
-    	return topoPanel.getLinkIDs();
-    }
+    
 }
