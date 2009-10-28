@@ -3,3 +3,4 @@
 .project
 .pydevproject
 egeni.db
+*.pyc
