@@ -6,4 +6,5 @@
 {% include "rspec/egeni-interface.xml" %}
       {% endif %}
       {% endfor %}
+      <tns:controllerUrl>{{ controller_url }}</tns:controllerUrl>
     </tns:node>
