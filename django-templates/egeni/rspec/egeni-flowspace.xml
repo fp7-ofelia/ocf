@@ -1,0 +1,12 @@
+  <tns:flowSpaceEntry>
+    <tns:policy>{{ flowspace.policy }}</tns:policy>
+    <tns:dl_src>{{ flowspace.dl_src }}</tns:dl_src>
+    <tns:dl_dst>{{ flowspace.dl_dst }}</tns:dl_dst>
+    <tns:dl_type>{{ flowspace.dl_type }}</tns:dl_type>
+    <tns:vlan_id>{{ flowspace.vlan_id }}</tns:vlan_id>
+    <tns:ip_src>{{ flowspace.ip_src }}</tns:ip_src>
+    <tns:ip_dst>{{ flowspace.ip_dst }}</tns:ip_dst>
+    <tns:ip_proto>{{ flowspace.ip_proto }}</tns:ip_proto>
+    <tns:tp_src>{{ flowspace.tp_src }}</tns:tp_src>
+    <tns:tp_dst>{{ flowspace.tp_dst }}</tns:tp_dst>
+  </tns:flowSpaceEntry>
