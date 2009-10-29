@@ -29,7 +29,11 @@ def home(request):
             slices = request.user.slice_set.filter(id__in=slice_ids)
             for am in AggregateManager.objects.all():
                 for slice in slices:
-                    egeni_api.delete_slice(am.url, slice.id)
+                    try:
+                        egeni_api.delete_slice(am.url, slice.id)
+                    except Exception, e:
+                        print e
+                        print "Error deleting slice. Will still remove from DB."
             slices.delete()
             return HttpResponseRedirect(reverse('home'))
 
@@ -234,6 +238,16 @@ def slice_flash_detail(request, slice_id):
             rspec = render_to_string("rspec/egeni-rspec.xml",
                                      {"node_set": slice.nodes.filter(aggMgr=am),
                                       "am": am,
+                                      "fs_flds": ["dl_src",
+                                                  "dl_dst",
+                                                  "dl_type",
+                                                  "vlan_id",
+                                                  "nw_src",
+                                                  "nw_dst",
+                                                  "nw_proto",
+                                                  "tp_src",
+                                                  "tp_dst",
+                                                  ],
                                       "slice": slice})
             print "Reservation RSpec: %s" % rspec
             errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
@@ -257,9 +271,13 @@ def slice_flash_detail(request, slice_id):
 #            am.updateRSpec()
         formset = FSFormSet(instance=slice)
         print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
+        xml = slice_get_topo_string(slice)
+        print "Flash xml"
+        print xml
         return render_to_response("clearinghouse/slice_flash_detail.html",
                                   {'slice': slice,
                                    'fsformset': formset,
+                                   'topo_xml': xml,
                                    })
     else:
         return HttpResponseNotAllowed("GET", "POST")
@@ -284,43 +302,45 @@ def slice_get_topo(request, slice_id):
     print "Doing topo view"
     
     if request.method == "GET":
-        for am in AggregateManager.objects.all():
-            am.updateRSpec()
-        print "Done update"
-        # get all the local nodes
-        nodes = Node.objects.all().exclude(is_remote=True)
-        
-        nodes_dict = {}
-        for n in nodes:
-            try:
-                nsg = NodeSliceGUI.objects.get(slice=slice,
-                                               node=n)
-            except NodeSliceGUI.DoesNotExist:
-                x = -1
-                y = -1
-            
-            else:
-                x = nsg.x
-                y = nsg.y
-                        
-            nodes_dict[n.nodeId] = {'node': n,
-                                    'x': x,
-                                    'y': y,
-                                    }
-        
-        # get all the local links
-        links = Link.objects.filter(
-                    src__ownerNode__is_remote=False,
-                    dst__ownerNode__is_remote=False)
-
-        xml = render_to_string("plugin/flash-xml.xml",
-                               {'nodes_dict': nodes_dict,
-                                'links': links,
-                                'slice': slice})
-
+        xml = slice_get_topo_string(slice)
         return HttpResponse(xml, mimetype="text/xml")
     else:
         return HttpResponseNotAllowed("GET")
+
+def slice_get_topo_string(slice):
+    for am in AggregateManager.objects.all():
+        am.updateRSpec()
+    print "Done update"
+    # get all the local nodes
+    nodes = Node.objects.all().exclude(is_remote=True)
+    print nodes
+    nodes_dict = {}
+    for n in nodes:
+        try:
+            nsg = NodeSliceGUI.objects.get(slice=slice,
+                                           node=n)
+        except NodeSliceGUI.DoesNotExist:
+            x = -1
+            y = -1
+        
+        else:
+            x = nsg.x
+            y = nsg.y
+                    
+        nodes_dict[n.nodeId] = {'node': n,
+                                'x': x,
+                                'y': y,
+                                }
+
+    # get all the local links
+    links = Link.objects.filter(
+                src__ownerNode__is_remote=False,
+                dst__ownerNode__is_remote=False)
+
+    return render_to_string("plugin/flash-xml.xml",
+                           {'nodes_dict': nodes_dict,
+                            'links': links,
+                            'slice': slice})
 
 
 def am_create(request):

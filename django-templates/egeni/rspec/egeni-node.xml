@@ -6,5 +6,7 @@
 {% include "rspec/egeni-interface.xml" %}
       {% endif %}
       {% endfor %}
-      <tns:controllerUrl>{{ controller_url }}</tns:controllerUrl>
+      {% if slice %}
+      <tns:controllerUrl>{{ slice.controller_url }}</tns:controllerUrl>
+      {% endif %}
     </tns:node>

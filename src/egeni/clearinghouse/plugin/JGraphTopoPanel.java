@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -77,16 +78,6 @@ public class JGraphTopoPanel extends JPanel {
 	 */
 	public static final Color BG_COLOR = Color.white;
 
-	/**
-	 * URL to submit information to
-	 */
-	private URL submit;
-	
-	/**
-	 * Codebase of running app or applet
-	 */
-	private URL codeBase;
-	
 	private Map<String, JGraphNode> graphNodes;
 	private Map<String, JGraphLink> graphLinks;
 	
@@ -98,14 +89,11 @@ public class JGraphTopoPanel extends JPanel {
 	
 	/**
 	 * Construct new panel
-	 * @param codeBase: URL to use as the base for other URLs
-	 * @param inputURL: URL where the XML of the graph is stored
+	 * @param inputXML: InputStream whence to read the xml
 	 */
 	@SuppressWarnings({ "unchecked", "static-access" })
-	public JGraphTopoPanel(URL codeBase, URL inputURL) {
+	public JGraphTopoPanel(InputStream inputXML) {
 		super(new BorderLayout());
-		
-		this.codeBase = codeBase;
 		
 		this.graphNodes = new HashMap<String, JGraphNode>();
 		this.graphLinks = new HashMap<String, JGraphLink>();
@@ -117,7 +105,7 @@ public class JGraphTopoPanel extends JPanel {
 		jgraph = new JGraph(jgAdapter);
 		this.adjustDisplaySettings(jgraph);
 
-		parseInputXML(inputURL);
+		parseInputXML(inputXML);
 		
 		JScrollPane sPane = new JScrollPane(jgraph);
 		this.add(sPane, BorderLayout.CENTER);
@@ -228,12 +216,12 @@ public class JGraphTopoPanel extends JPanel {
         jg.setDropEnabled(false);
         jg.setSizeable(false);
     }
-
+    
     /**
      * Read XML from the inputURL and parse it into a set of nodes and links
      * @param inputURL
      */
-	private void parseInputXML(URL inputURL) {
+	private void parseInputXML(InputStream is) {
 		Document doc = null;
 		try {
 //			SchemaFactory sfactory = SchemaFactory.newInstance(
@@ -248,14 +236,9 @@ public class JGraphTopoPanel extends JPanel {
 //			factory.setSchema(schema);
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			doc = builder.parse(this.getOrPost(inputURL, null));
+			doc = builder.parse(is);
 		} catch (SAXException e) {
 			JLabel err = new JLabel("ERROR: Could not parse XML");
-			this.add(err);
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			JLabel err = new JLabel("ERROR: Could not read XML");
 			this.add(err);
 			e.printStackTrace();
 			return;
@@ -264,19 +247,13 @@ public class JGraphTopoPanel extends JPanel {
 			this.add(err);
 			e.printStackTrace();
 			return;
-		}
-		
-		try {
-			submit = new URL(this.codeBase.toString()
-					+ doc.getElementsByTagName("submit").item(0));
-		} catch (MalformedURLException e) {
-			JLabel err = new JLabel(
-					"ERROR: Malformed URL: "+inputURL.toString());
+		} catch (IOException e) {
+			JLabel err = new JLabel("ERROR: Could not read XML");
 			this.add(err);
 			e.printStackTrace();
 			return;
 		}
-
+		
 		NodeList nodes = doc.getElementsByTagName("node");
 		System.err.println("**** Found "+nodes.getLength()+" nodes");
 		for(int i=0; i<nodes.getLength(); i++) {
@@ -403,55 +380,6 @@ public class JGraphTopoPanel extends JPanel {
 		return map;
     }
     
-    public String getParamsString(Map<String, Set<String>> map) {
-		StringBuffer paramsAsString = new StringBuffer("");
-		for(String k: map.keySet()) {
-			Set<String> v = map.get(k);
-			for(String val: v) {
-				if(paramsAsString.length()>0){
-					paramsAsString.append("&");
-				}
-				paramsAsString.append(k+"="+val);
-			}
-		}
-		return paramsAsString.toString();
-    }    
-
-    /**
-	 * Does a GET to the given URL if params is null. Otherwise,
-	 * sends the params in a POST.
-	 * @param url: the URL to connect to
-	 * @param params: fields to send in POST. If null, then do a GET instead.
-	 */
-	private InputStream getOrPost(
-			final URL url,
-			final Map<String, Set<String>> map) 
-	throws MalformedURLException, IOException {
-		Boolean doOutput = map != null;
-		String paramsAsString = null;
-		if(doOutput) {
-			paramsAsString = getParamsString(map);
-		}
-//		String outStr = URLEncoder.encode(paramsAsString.toString(), "UTF-8");
-		
-		// send parameters to server
-		URLConnection con = url.openConnection();
-		con.setDoOutput(doOutput);
-		con.setDoInput(true);
-		
-		if(doOutput) {
-			con.setRequestProperty("Content=length", String
-					.valueOf(paramsAsString.length()));
-			
-			OutputStreamWriter out = new OutputStreamWriter(
-					con.getOutputStream());
-			out.write(paramsAsString);
-			out.close();
-		}
-		
-		return con.getInputStream();
-	}
-	
 	public JGraphNode[] getGraphNodes() {
 		JGraphNode[] a = new JGraphNode[graphNodes.size()];
 		a = graphNodes.values().toArray(a);

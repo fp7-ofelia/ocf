@@ -16,8 +16,13 @@
     		code:'egeni.clearinghouse.plugin.GUIApplet.class',
     		archive:'./plugin.jar',
     		cache_option:'No',
+    		session_id:'{{ session_id }}',
     		width:800, height:600} ;
-    var parameters = {inputURL:'topo/'} ;
+	{% if topology_xml %}
+    var parameters = {inputXML:'{{ topo_xml }}'}
+    {% else %}
+    var parameters = {inputURL:'topo/'}
+    {% endif %}
     var version = '1.6' ;
     deployJava.runApplet(attributes, parameters, version);
 </script>

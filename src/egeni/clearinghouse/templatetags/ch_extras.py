@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -30,3 +31,18 @@ def contains(value, arg):
     '''returns result of arg in value'''
     
     return arg in value
+
+@register.filter
+def flowspace_tag(flowspace, field):
+    '''return a tag from the flowspace for the field'''
+
+    try:
+        val = flowspace.__getattribute__(field)
+    except Exception, e:
+        print e
+        return mark_safe("")
+    
+    if val == "*":
+        return mark_safe("")
+    else:
+        return mark_safe("<tns:%s>%s</tns:%s>" % (field, val, field))

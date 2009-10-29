@@ -17,9 +17,9 @@ from django.db.models import Count
 
 OFSWITCH_DEFAULT_IMG = "/img/ofswitch.png"
 
-key_file = '/home/srini/.sfi/seethara.pkey'
-cert_file = '/home/srini/.sfi/seethara.cert'
-cred_file = '/home/srini/.sfi/seethara.cred'
+key_file = '../cred/seethara.pkey'
+cert_file = '../cred/seethara.cert'
+cred_file = '../cred/seethara.cred'
 CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)
 server = {}
@@ -66,7 +66,7 @@ def reserve_slice(am_url, rspec, slice_id):
 
     # Ideally, the following should be loaded dynamically
     slice_id = 'plc.openflow.egeni'
-    slice_cred = file('/home/srini/.sfi/slice_egeni.cred').read()
+    slice_cred = file(cred_file).read()
 
     # The second param is supposed to be HRN, but replaced with slice_id
     request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])

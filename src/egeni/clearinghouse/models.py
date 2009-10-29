@@ -112,7 +112,7 @@ class Interface(models.Model):
     address = models.IPAddressField(blank=True, null=True)
 
     def __unicode__(self):
-        return "Interface "+self.portNum+" of node "+self.ownerNode.nodeId
+        return "Interface %u of node %s" % (self.portNum, self.ownerNode.nodeId)
         
 class Link(models.Model):
     '''
@@ -133,7 +133,7 @@ class Slice(models.Model):
     
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=200, unique=True)
-    controller_url = models.URLField('Slice Controller URL', verify_exists=False)
+    controller_url = models.CharField('Slice Controller URL', max_length=200)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
     committed = models.BooleanField()
