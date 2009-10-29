@@ -165,7 +165,7 @@ def slice_flash_detail(request, slice_id):
             nsg.x = x
             nsg.save()
             
-            if n.x == None:
+            if not n.x:
                 n.x = x
                 n.save()
             
@@ -185,7 +185,7 @@ def slice_flash_detail(request, slice_id):
             nsg.y = y
             nsg.save()
 
-            if n.y == None:
+            if not n.y:
                 n.y = y
                 n.save()
         

@@ -299,8 +299,13 @@ def update_rspec(self_am):
                        'is_remote':True}
                 kwargs.update(**mod)
                 
-                node_obj = models.Node(**kwargs)
+                node_obj, created = models.Node.objects.get_or_create(
+                                            nodeId=nodeId, defaults=kwargs)
+                for k,v in mod.items():
+                    node_obj.__setattr__(k, v)
+                    
                 node_obj.save()
+                
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
             
@@ -317,7 +322,11 @@ def update_rspec(self_am):
                        'is_remote':False}
                 kwargs.update(**mod)
                 
-                node_obj = models.Node(**kwargs)
+                node_obj, created = models.Node.objects.get_or_create(
+                                            nodeId=nodeId, defaults=kwargs)
+                for k,v in mod.items():
+                    node_obj.__setattr__(k, v)
+
                 node_obj.save()
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
@@ -334,7 +343,11 @@ def update_rspec(self_am):
             kwargs.update(**mod)
             debug("node added")
             
-            node_obj = models.Node(**kwargs)
+            node_obj, created = models.Node.objects.get_or_create(
+                                        nodeId=nodeId, defaults=kwargs)
+            for k,v in mod.items():
+                node_obj.__setattr__(k, v)
+
             new_local_ids.append(nodeId)
             node_obj.save()
             debug("node saved")
