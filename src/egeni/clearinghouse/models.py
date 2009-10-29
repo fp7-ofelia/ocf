@@ -14,8 +14,8 @@ class AggregateManager(models.Model):
     TYPE_OF = 'OF'
     TYPE_PL = 'PL'
     
-    AM_TYPE_CHOICES={TYPE_OF: 'E-GENI Aggregate Manager',
-                     TYPE_PL: 'PlanetLab Aggregate Manager',
+    AM_TYPE_CHOICES={TYPE_OF: 'E-GENI Aggregate',
+                     TYPE_PL: 'PlanetLab Aggregate',
                      }
 
     # @ivar name: The name of the aggregate manager. Must be unique 
@@ -94,6 +94,10 @@ class Node(models.Model):
     # @ivar img_url: URL of the image used for when the node is drawn
     img_url = models.CharField(max_length=200)
     
+    # initial x and y fields to use
+    x = models.FloatField(blank=True, null=True)
+    y = models.FloatField(blank=True, null=True)
+
     def __unicode__(self):
         return "Node %s" % self.nodeId
     
@@ -133,10 +137,11 @@ class Slice(models.Model):
     
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=200, unique=True)
-    controller_url = models.CharField('Slice Controller URL', max_length=200)
+    controller_url = models.CharField('OpenFlow Controller URL', max_length=200)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
     committed = models.BooleanField()
+    aggMgrs = models.ManyToManyField(AggregateManager, verbose_name="Aggregates")
 
     # nodes that this slice has seen. We use this to store a user's
     # x,y settings and other per-slice per-node settings
@@ -198,7 +203,7 @@ class LinkSliceStatus(models.Model):
 class SliceForm(ModelForm):
     class Meta:
         model = Slice
-        fields = ('name', 'controller_url')
+        fields = ('name', 'controller_url', 'aggMgrs')
 
 class FlowSpace(models.Model):
     TYPE_ALLOW = 1

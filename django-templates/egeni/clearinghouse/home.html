@@ -34,10 +34,14 @@
 
 <div id="new_slice">
     <h1>Create new slice:</h1>
+    Select the aggregates you want to use in the slice, and add its name and
+    the URL for the OpenFlow switch controller.<br></br>
     <form id="add_slice" method="POST" action="">
 		<input type="hidden" name="action" id="action" value="create_slice"></input>
-        {{ form.as_p }}
-        <input id="create_submit" type="submit" value="Create">
+        <table border="0">		
+        {{ form.as_table }}
+        </table>
+        <input id="create_submit" type="submit" value="Create"></input>
     </form>
 </div>
 {% endblock %}

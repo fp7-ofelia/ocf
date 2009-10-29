@@ -59,7 +59,8 @@ def home(request):
                                   {'do_del': do_del,
                                    'reserved_slices': reserved_slices,
                                    'unreserved_slices': unreserved_slices,
-                                   'form': form})            
+                                   'aggMgrs': AggregateManager.objects.all(),
+                                   'form': form})          
 
 def slice_detail(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
@@ -164,6 +165,10 @@ def slice_flash_detail(request, slice_id):
             nsg.x = x
             nsg.save()
             
+            if n.x == None:
+                n.x = x
+                n.save()
+            
         for id_y in y_positions:
             id, y = id_y.split("-")
             try:
@@ -179,6 +184,10 @@ def slice_flash_detail(request, slice_id):
                                 )
             nsg.y = y
             nsg.save()
+
+            if n.y == None:
+                n.y = y
+                n.save()
         
         # TODO: Delete all the old NodeSliceGUIs
         
@@ -225,6 +234,12 @@ def slice_flash_detail(request, slice_id):
             node_slice_set.append(through)
 
         formset.save()
+        
+        of_agg_mgrs = AggregateManager.objects.filter(
+                        type=AggregateManager.TYPE_OF)
+        if slice.committed:
+            [egeni_api.delete_slice(am.url, slice_id) for am in of_agg_mgrs]
+
         slice.committed = False
         slice.save()
         
@@ -320,8 +335,8 @@ def slice_get_topo_string(slice):
             nsg = NodeSliceGUI.objects.get(slice=slice,
                                            node=n)
         except NodeSliceGUI.DoesNotExist:
-            x = -1
-            y = -1
+            x = n.x or -1
+            y = n.y or -1
         
         else:
             x = nsg.x
