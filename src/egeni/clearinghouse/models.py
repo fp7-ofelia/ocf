@@ -37,6 +37,9 @@ class AggregateManager(models.Model):
     connected_node_set = models.ManyToManyField("Node",
                                                 related_name='connected_am_set',
                                                 blank=True, null=True)
+    
+    # @ivar extra_context: Aggregate specific information
+    extra_context = models.TextField(blank=True, null=True)
 
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -98,6 +101,9 @@ class Node(models.Model):
     x = models.FloatField(blank=True, null=True)
     y = models.FloatField(blank=True, null=True)
 
+    # @ivar extra_context: Aggregate specific information
+    extra_context = models.TextField(blank=True, null=True)
+
     def __unicode__(self):
         return "Node %s" % self.nodeId
     
@@ -113,7 +119,10 @@ class Interface(models.Model):
     
     # PlanetLab additional things
     name = models.CharField(max_length=200, blank=True, null=True)
-    address = models.IPAddressField(blank=True, null=True)
+    addr = models.IPAddressField(blank=True, null=True)
+
+    # @ivar extra_context: Aggregate specific information
+    extra_context = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
         return "Interface %u of node %s" % (self.portNum, self.ownerNode.nodeId)
@@ -127,6 +136,9 @@ class Link(models.Model):
     src = models.ForeignKey(Interface, related_name='src_link_set')
     dst = models.ForeignKey(Interface, related_name='dst_link_set')
     
+    # @ivar extra_context: Aggregate specific information
+    extra_context = models.TextField(blank=True, null=True)
+
     def __unicode__(self):
         return "Link from " + self.src.__unicode__() \
                 + " to " + self.dst.__unicode__()

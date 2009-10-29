@@ -150,7 +150,7 @@ def slice_flash_detail(request, slice_id):
         
         # Update the positions of the nodes
         for id_x in x_positions:
-            id, x = id_x.split("-")
+            id, x = id_x.split(":::")
             try:
                 n = Node.objects.get(nodeId=id)
             except Node.DoesNotExist:
@@ -170,7 +170,7 @@ def slice_flash_detail(request, slice_id):
                 n.save()
             
         for id_y in y_positions:
-            id, y = id_y.split("-")
+            id, y = id_y.split(":::")
             try:
                 n = Node.objects.get(nodeId=id)
             except Node.DoesNotExist:

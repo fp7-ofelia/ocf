@@ -237,7 +237,7 @@ def get_rspec(am_url):
     request_hash = key.compute_hash([CH_cred, CH_hrn])
     debug("Getting result")
     result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
-    print result
+#    print result
     return result
 
 def update_rspec(self_am):

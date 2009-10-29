@@ -18,7 +18,7 @@ urlpatterns = patterns('django.views.generic',
 )
 
 urlpatterns += patterns('egeni.clearinghouse.views',
-    url(r'^/slice_home/$', 'slice_home', name='slice_home'),
+    url(r'^slice_home/$', 'slice_home', name='slice_home'),
     url(r'^(?P<slice_id>\w+)/slice_detail/$', 'slice_detail', name='slice_detail'),
     url(r'^(?P<slice_id>\w+)/slice_flash_detail/$', 'slice_flash_detail', name='slice_flash_detail'),
     url(r'^(?P<slice_id>\w+)/slice_flash_detail/topo/$', 'slice_get_topo', name='slice_get_topo'),

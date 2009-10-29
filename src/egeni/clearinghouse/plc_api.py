@@ -6,10 +6,16 @@ Created on Oct 17, 2009
 
 import elementtree.ElementTree as et
 from elementtree.ElementTree import ElementTree 
-from models import *
+import models
 from django.db.models import Count
+import egeni_api
 
 PLNODE_DEFAULT_IMG = "/img/plnode.png"
+
+en_debug = 1
+def debug(s):
+    if(en_debug):
+        print(s)
 
 def reserve_slice(am_url, rspec, slice_id):
     '''
@@ -23,13 +29,13 @@ def reserve_slice(am_url, rspec, slice_id):
     rspec contains only the failing node without its interfaces.
     '''
     
-    return ""    
+    return egeni_api.reserve_slice(am_url, rspec, slice_id)
 
 def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    pass
+    return egeni_api.delete_slice(am_url, slice_id)
 
 def get_rspec(am_url):
     '''
@@ -67,6 +73,8 @@ def get_rspec(am_url):
 </RSpec>
 '''
 
+    return egeni_api.get_rspec(am_url)
+
 def update_rspec(self_am):
     '''
     Read and parse the RSpec specifying all 
@@ -76,28 +84,30 @@ def update_rspec(self_am):
     
     xml_str = get_rspec(self_am.url)
     tree = ElementTree(et.fromstring(xml_str))
+    
+    debug("Parsing xml:")
+    debug(xml_str)
 
     # keep track of created ids to delete old ones
     node_ids = []
     iface_ids = []
-    for netspec_elem in tree.getiterator("NetSpec"):
-        am, created = AggregateManager.get_or_create(
-                                    name=netspec_elem.get("name"),
-                                    url=netspec_elem.get("name"),
-                                    type=AggregateManager.TYPE_PL,
-                                    )
+    for netspec_elem in tree.findall("*/NetSpec"):
+        netspec_name = netspec_elem.get("name")
         
-        for node_elem in netspec_elem.getiterator("nodes/NodeSpec"):
+        for node_elem in netspec_elem.findall("*/NodeSpec"):
+            debug("found node elem %s" % node_elem)
             name = node_elem.get("name")
+            debug("name: %s" % name)
             type = node_elem.get("name") or AggregateManager.TYPE_PL
-            node, created = Node.objects.get_or_create(
+            node, created = models.Node.objects.get_or_create(
                           nodeId=name,
-                          name=name,
-                          type=type,
-                          defaults={"is_remote": False,
-                                    "remoteURL": am.url,
-                                    "aggMgr": am,
+                          defaults={"name": name,
+                                    "type": type,
+                                    "is_remote": False,
+                                    "remoteURL": self_am.url,
+                                    "aggMgr": self_am,
                                     "img_url": PLNODE_DEFAULT_IMG,
+                                    "extra_context": "netspec__name=%s" % netspec_name,
                                     }
                           )
             
@@ -109,11 +119,11 @@ def update_rspec(self_am):
             node_ids.append(node.nodeId)
             
             # add all the interfaces
-            for i, iface_elem in enumerate(node_elem.getiterator("net_if/IfSpec")):
+            for i, iface_elem in enumerate(node_elem.findall("*/IfSpec")):
                 kwargs = {}
-                for attrib in ("name", "addr", "type", "init_params",
-                               "min_rate", "max_rate", "max_kbyte",
-                               "ip_spoof",
+                for attrib in ("name", "addr", #"type", "init_params",
+#                               "min_rate", "max_rate", "max_kbyte",
+#                               "ip_spoof",
                                ):
                     kwargs[attrib] = iface_elem.get(attrib)
                 
@@ -122,7 +132,7 @@ def update_rspec(self_am):
                 
                 # TODO: How do they maintain a consistent mapping of iface
                 # to identifier e.g. when addresses change. Is name consistent?
-                iface, created = Interface.objects.get_or_create(
+                iface, created = models.Interface.objects.get_or_create(
                             name=kwargs["name"],
                             ownerNode=node,
                             defaults=kwargs,
@@ -134,10 +144,12 @@ def update_rspec(self_am):
                     iface.save()
             
                 iface_ids.append(iface.id)
-                
+    
+    debug("Added nodes %s" % node_ids)
+    
     # delete all the old stuff
-    Node.objects.filter(type=Node.TYPE_PL).exclude(
+    models.Node.objects.filter(type=models.Node.TYPE_PL).exclude(
                         nodeId__in=node_ids).delete()
-    Interface.objects.filter(
-        ownerNode__type=Node.TYPE_PL).exclude(
+    models.Interface.objects.filter(
+        ownerNode__type=models.Node.TYPE_PL).exclude(
             id__in=iface_ids).delete()

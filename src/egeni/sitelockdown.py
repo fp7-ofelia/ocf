@@ -14,7 +14,7 @@ class SiteLockDown(object):
     """
     def process_request (self, request):
     
-        return None
+#        return None
     
         try:
             request.django_root
