@@ -17,7 +17,7 @@ YPOS_FIELD = "y-pos"
 
 REL_PATH = "."
 
-def home(request):
+def slice_home(request):
     '''Show the list of slices, and form for creating new slice'''
 
     if request.method == 'POST':
@@ -35,7 +35,7 @@ def home(request):
                         print e
                         print "Error deleting slice. Will still remove from DB."
             slices.delete()
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('slice_home'))
 
         elif request.POST["action"] == "create_slice":
             slice = Slice(owner=request.user, committed=False)
@@ -55,7 +55,7 @@ def home(request):
         unreserved_slices = request.user.slice_set.filter(committed=False)
         
         do_del = request.user.slice_set.count() > 0
-        return render_to_response("clearinghouse/home.html",
+        return render_to_response("clearinghouse/slice_home.html",
                                   {'do_del': do_del,
                                    'reserved_slices': reserved_slices,
                                    'unreserved_slices': unreserved_slices,
@@ -99,7 +99,7 @@ def slice_detail(request, slice_id):
             
             # TODO: Do reservation here
             
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('slice_home'))
         
     else:
         print "<zz>"
@@ -327,7 +327,9 @@ def slice_get_topo_string(slice):
         am.updateRSpec()
     print "Done update"
     # get all the local nodes
-    nodes = Node.objects.all().exclude(is_remote=True)
+    nodes = Node.objects.all().exclude(
+                is_remote=True).filter(
+                    aggMgr__id__in=slice.aggMgrs.values_list('id', flat=True))
     print nodes
     nodes_dict = {}
     for n in nodes:

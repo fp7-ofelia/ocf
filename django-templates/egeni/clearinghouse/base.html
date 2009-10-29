@@ -5,17 +5,10 @@
     </head>
     
     <body>
-        <div class="userctrl">
-            {% block userctrl %}
-            <a href="/clearinghouse/">Home</a>
-            <a href="/accounts/logout/">Logout</a>
-            {% endblock %}
-        </div>
+        <a href="/accounts/logout/">Logout</a>
+        <a href="/clearinghouse/">Home</a>
         
         {% block scripts %}{% endblock %}
-
-        <div id="content">
-            {% block content %}{% endblock %}
-        </div>
+        {% block content %}{% endblock %}
     </body>
 </html>

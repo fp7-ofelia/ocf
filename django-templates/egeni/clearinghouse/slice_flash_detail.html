@@ -2,6 +2,8 @@
 {% load ch_extras %}
 
 {% block content %}
+<a href="{% url slice_home %}">Slice Control Panel</a>
+
 <h1>Details for Slice {{ slice.name }}</h1>
 
 {% if error_message %}

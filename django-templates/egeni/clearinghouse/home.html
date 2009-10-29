@@ -2,46 +2,15 @@
 {% load ch_extras %}
 
 {% block content %}
-<div id="slices">
-	<form id="del_slice" method="POST" action="">
-		<input type="hidden" name="action" id="action" value="delete_slice"></input>
-	    {% if reserved_slices %}
-	    <h1>Fully Reserved Slices:</h1>
-	    <ul>
-	        {% for slice in reserved_slices %}
-	        <li><input type="checkbox" name="del_sel" 
-	        value="{{ slice.id }}"></input>
-            <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-	        {% endfor %}
-	    </ul>
-	    {% endif %}
-	
-	    {% if unreserved_slices %}
-	    <h1>Partial or Unreserved Slices:</h1>
-	    <ul>
-	        {% for slice in unreserved_slices %}
-	        <li><input type="checkbox" name="del_sel" 
-	        value="{{ slice.id }}"></input>
-	        <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-	        {% endfor %}
-	    </ul>
-	    {% endif %}
-		{% if do_del %}
-	    <input id="del_submit" type="submit" value="Delete" >
-		{% endif %}
-	</form>
-</div>
+<a href="{% url slice_home %}">Slice Control Panel</a>
 
-<div id="new_slice">
-    <h1>Create new slice:</h1>
-    Select the aggregates you want to use in the slice, and add its name and
-    the URL for the OpenFlow switch controller.<br></br>
-    <form id="add_slice" method="POST" action="">
-		<input type="hidden" name="action" id="action" value="create_slice"></input>
-        <table border="0">		
-        {{ form.as_table }}
-        </table>
-        <input id="create_submit" type="submit" value="Create"></input>
-    </form>
-</div>
+<h1>Statistics:</h1>
+<table border="0">
+<tr><td>Number of aggregates</td> <td>:</td> <td>{{ aggmgr_count }}</td></tr>
+<tr><td>Number of nodes</td>      <td>:</td> <td>{{ node_count }}</td></tr>
+<tr><td>Number of links</td>      <td>:</td> <td>{{ link_count }}</td></tr>
+<tr><td>Number of slices</td>     <td>:</td> <td>{{ slice_count }}</td></tr>
+<tr><td>Number of users</td>      <td>:</td> <td>{{ user_count }}</td></tr>
+</table>
+
 {% endblock %}
