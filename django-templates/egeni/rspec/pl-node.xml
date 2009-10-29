@@ -1,0 +1,16 @@
+			<NodeSpec name="{{ node_slice.node.name }}" type="{{ node_slice.node.type }}"
+			init_params="{{ node_slice.init_params }}"
+			cpu_min="{{ node_slice.cpu_min }}"
+			cpu_share="{{ node_slice.cpu_share }}"
+			cpu_pct="{{ node_slice.cpu_pct }}"
+			disk_max="{{ node_slice.disk_max }}"
+			start_time="{{ node_slice.get_utc_start_time }}"
+			duration="{{ node_slice.get_utc_duration }}">
+				<net_if>
+					{% for iface in node_slice.node.interface_set.objects.all %}
+					{% if slice|has_interface:iface %}
+{% include "rspec/pl-interface.xml" %}
+					{% endif %}
+					{% endfor %}
+				</net_if>
+			</NodeSpec>
