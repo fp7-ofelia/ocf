@@ -1,9 +1,10 @@
 {% load ch_extras %}
-<tns:node>
-  <tns:nodeId>{{ node.nodeId }}</tns:nodeId>
-  {% for iface in node.interface_set.objects.all %}
-  {% if not slice or slice|has_interface:iface %}
-  {% include "rspec/egeni-interface.xml" %}
-  {% endif %}
-  {% endfor %}
-</tns:node>
+    <tns:node>
+      <tns:nodeId>{{ node.nodeId }}</tns:nodeId>
+      {% for iface in node.interface_set.objects.all %}
+      {% if not slice or slice|has_interface:iface %}
+{% include "rspec/egeni-interface.xml" %}
+      {% endif %}
+      {% endfor %}
+      <tns:controllerUrl>{{ controller_url }}</tns:controllerUrl>
+    </tns:node>

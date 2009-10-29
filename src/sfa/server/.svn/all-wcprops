@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/15341/sfa/trunk/sfa/server
+END
+registry.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/15318/sfa/trunk/sfa/server/registry.py
+END
+sfa.slicemgr.httpd.conf
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15295/sfa/trunk/sfa/server/sfa.slicemgr.httpd.conf
+END
+sfa-server.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/15186/sfa/trunk/sfa/server/sfa-server.py
+END
+sfa.aggregate.httpd.conf
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/15295/sfa/trunk/sfa/server/sfa.aggregate.httpd.conf
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/14644/sfa/trunk/sfa/server/__init__.py
+END
+sfa.registry.httpd.conf
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15295/sfa/trunk/sfa/server/sfa.registry.httpd.conf
+END
+SfaSliceMgrModPython.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15341/sfa/trunk/sfa/server/SfaSliceMgrModPython.py
+END
+sfa-clean-peer-records.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/15213/sfa/trunk/sfa/server/sfa-clean-peer-records.py
+END
+SfaAggregateModPython.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/15341/sfa/trunk/sfa/server/SfaAggregateModPython.py
+END
+SfaRegistryModPython.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15319/sfa/trunk/sfa/server/SfaRegistryModPython.py
+END
+slicemgr.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/14644/sfa/trunk/sfa/server/slicemgr.py
+END
+aggregate.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/15318/sfa/trunk/sfa/server/aggregate.py
+END

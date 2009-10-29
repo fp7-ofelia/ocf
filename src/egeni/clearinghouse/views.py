@@ -8,11 +8,14 @@ from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
 import egeni_api, plc_api
+import os
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
 XPOS_FIELD = "x-pos"
 YPOS_FIELD = "y-pos"
+
+REL_PATH = "."
 
 def home(request):
     '''Show the list of slices, and form for creating new slice'''
@@ -221,6 +224,10 @@ def slice_flash_detail(request, slice_id):
         slice.committed = False
         slice.save()
         
+        print "slice FS:"
+        for f in slice.flowspace_set.all():
+            print f
+        
         # get the RSpec of the Slice for each am and reserve
         for am in AggregateManager.objects.filter(
                         type=AggregateManager.TYPE_OF):
@@ -228,6 +235,7 @@ def slice_flash_detail(request, slice_id):
                                      {"node_set": slice.nodes.filter(aggMgr=am),
                                       "am": am,
                                       "slice": slice})
+            print "Reservation RSpec: %s" % rspec
             errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
         
             # TODO: Parse errors here
@@ -257,15 +265,16 @@ def slice_flash_detail(request, slice_id):
         return HttpResponseNotAllowed("GET", "POST")
 
 def slice_get_img(request, slice_id, img_name):
-    image_data = open("../../img/%s" % img_name, "rb").read()
+    print "PWD: %s" % os.getcwd() 
+    image_data = open("%s/img/%s" % (REL_PATH, img_name), "rb").read()
     return HttpResponse(image_data, mimetype="image/png")
 
 def slice_get_plugin(request, slice_id):
-    jar = open("../../plugin.jar", "rb").read()
+    jar = open("%s/../plugin.jar" % REL_PATH, "rb").read()
     return HttpResponse(jar, mimetype="application/java-archive")
 
 def slice_get_xsd(request, slice_id):
-    xsd = open("../plugin.xsd", "rb").read()
+    xsd = open("%s/plugin.xsd" % REL_PATH, "rb").read()
     return HttpResponse(xsd, mimetype="application/xml")    
 
 def slice_get_topo(request, slice_id):

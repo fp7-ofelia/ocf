@@ -17,18 +17,18 @@ from django.db.models import Count
 
 OFSWITCH_DEFAULT_IMG = "/img/ofswitch.png"
 
-key_file = './geniclearinghouse.pkey'
-cert_file = './geniclearinghouse.cert'
-cred_file = './geniclearinghouse.cred'
-CH_hrn = 'plc.openflow.geniclearinghouse'
+key_file = '/home/srini/.sfi/seethara.pkey'
+cert_file = '/home/srini/.sfi/seethara.cert'
+cred_file = '/home/srini/.sfi/seethara.cred'
+CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)
 server = {}
 done_init = False
 
-en_debug = 0;
+en_debug = 0
 def debug(s):
     if(en_debug):
-        print(s);
+        print(s)
 
 def init():
     global CH_cred, cred_file, done_init
@@ -60,13 +60,17 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server, CH_cred
+    global server
     if am_url not in server:
         connect_to_soap_server(am_url)
 
+    # Ideally, the following should be loaded dynamically
+    slice_id = 'plc.openflow.egeni'
+    slice_cred = file('/home/srini/.sfi/slice_egeni.cred').read()
+
     # The second param is supposed to be HRN, but replaced with slice_id
-    request_hash = key.compute_hash([CH_cred, str(slice_id), str(rspec)])
-    result = server[am_url].create_slice(CH_cred, str(slice_id), str(rspec), request_hash)
+    request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
+    result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec), request_hash)
     debug(result)
     
     return ""    
@@ -220,13 +224,18 @@ def get_rspec(am_url):
 #'''
     
     global server, CH_cred, CH_hrn
+    
+    debug("Called get rspec")
 
     if am_url not in server:
+        debug("Connecting to server")
         connect_to_soap_server(am_url)
 
     # The HRN is used to identify the person issuing this call.
     # Currently unused
+    debug("computing hash")
     request_hash = key.compute_hash([CH_cred, CH_hrn])
+    debug("Getting result")
     result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
     print result
     return result
@@ -473,9 +482,13 @@ def update_rspec(self_am):
             num = int(xpath.Evaluate("number()", context=context))
             debug("<8> %s %s" % (num, id))
             
-            remote_iface_obj = models.Interface.objects.get(portNum__exact=num,
-                                                            ownerNode__nodeId=id,
-                                                            )
+            try:
+                remote_iface_obj = models.Interface.objects.get(portNum=num,
+                                                                ownerNode__nodeId=id,
+                                                                )
+            except models.Interface.DoesNotExist, e:
+                print "XML malformed. Remote iface for node id %s and port num %s does not exist." % (id, num)
+                continue
             
             remote_iface_ids.append(remote_iface_obj.id)
             
