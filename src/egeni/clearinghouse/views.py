@@ -245,7 +245,7 @@ def slice_flash_detail(request, slice_id):
                 if am.type == AggregateManager.TYPE_OF:
                     egeni_api.delete_slice(am.url, slice_id)
                 elif am.type == AggregateManager.TYPE_PL:
-                    plc_api.delete_slice(am_url, slice_id)
+                    plc_api.delete_slice(am.url, slice_id)
         
         slice.committed = False
         slice.save()
