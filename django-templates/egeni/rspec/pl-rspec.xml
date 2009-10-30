@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RSpec start_time="{{ slice.get_utc_start_time }}" duration="{{ slice.get_utc_duration }}">
 	<networks>
-		{% for am in am_set %}
+		{% for netspec, nodes in nodes_dict.items %}
 {% include "rspec/pl-netspec.xml" %}
 		{% endfor %}
 	</networks>

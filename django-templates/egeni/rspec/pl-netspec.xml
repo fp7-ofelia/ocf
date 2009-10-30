@@ -1,8 +1,8 @@
-		<NetSpec name="{{ am.name }}" start_time="" duration="">
-			{% for node_slice in node_slice_set %}
-			{% ifeq node_slice.node.aggMgr am %}
+		<NetSpec name="{{ netspec }}" start_time="" duration="">
+		    <nodes>
+				{% for node in nodes %}
 {% include rspec/pl-node.xml %}
-			{% endifeq %}
-			{% endfor %}
+				{% endfor %}
+			</nodes>
 		</NetSpec>
 		
