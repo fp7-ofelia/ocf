@@ -125,7 +125,7 @@ def slice_detail(request, slice_id):
                                'fsformset': formset,
                                })
 
-def slice_flash_detail(request, slice_id):
+def slice_flash_detail(request, slice_id, confirm=False):
     slice = get_object_or_404(Slice, pk=slice_id)
     if slice.owner != request.user:
         return HttpResponseForbidden()
@@ -158,6 +158,7 @@ def slice_flash_detail(request, slice_id):
             try:
                 n = Node.objects.get(nodeId=id)
             except Node.DoesNotExist:
+                print "!!!! In reserve Node %s does not exist" % id
                 continue
             
             nsg, created = NodeSliceGUI.objects.get_or_create(
@@ -178,6 +179,7 @@ def slice_flash_detail(request, slice_id):
             try:
                 n = Node.objects.get(nodeId=id)
             except Node.DoesNotExist:
+                print "!!!! In reserve Node %s does not exist" % id
                 continue
             
             nsg, created = NodeSliceGUI.objects.get_or_create(
@@ -250,10 +252,6 @@ def slice_flash_detail(request, slice_id):
         slice.committed = False
         slice.save()
         
-        print "slice FS:"
-        for f in slice.flowspace_set.all():
-            print f
-        
         # get the RSpec of the Slice for each am and reserve
         for am in AggregateManager.objects.all():
             if am.type == AggregateManager.TYPE_OF:
@@ -271,7 +269,6 @@ def slice_flash_detail(request, slice_id):
                                                       "tp_dst",
                                                       ],
                                           "slice": slice})
-                print "Reservation RSpec: %s" % rspec
                 errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
         
                 # TODO: Parse errors here
@@ -284,7 +281,7 @@ def slice_flash_detail(request, slice_id):
                     if not nodes_dict.has_key(netspec):
                         nodes_dict[netspec] = []
                     nodes_dict[netspec].append(node)
-                    
+                print "Nodes dict: %s" % nodes_dict
                 rspec = render_to_string("rspec/pl-rspec.xml",
                                          {"node_slice_set": node_slice_set,
                                           "slice": slice,
@@ -295,28 +292,27 @@ def slice_flash_detail(request, slice_id):
         
         slice.committed = True
         slice.save()
-        print "Redirecting"
-        return HttpResponseRedirect(reverse('slice_flash_detail', args=[slice_id]))
+        return HttpResponseRedirect(reverse('slice_resv_confirm', args=[slice_id]))
 
     elif request.method == "GET":
 #        for am in agg_list:
 #            print "<aa>"
 #            am.updateRSpec()
         formset = FSFormSet(instance=slice)
-        print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
         xml = slice_get_topo_string(slice)
-        print "Flash xml"
-        print xml
         return render_to_response("clearinghouse/slice_flash_detail.html",
                                   {'slice': slice,
                                    'fsformset': formset,
                                    'topo_xml': xml,
+                                   'confirm': confirm,
                                    })
     else:
         return HttpResponseNotAllowed("GET", "POST")
+    
+def slice_resv_confirm(request, slice_id):
+    return slice_flash_detail(request, slice_id, True)
 
 def slice_get_img(request, slice_id, img_name):
-    print "PWD: %s" % os.getcwd() 
     image_data = open("%s/img/%s" % (REL_PATH, img_name), "rb").read()
     return HttpResponse(image_data, mimetype="image/png")
 

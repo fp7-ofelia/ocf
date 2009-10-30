@@ -41,4 +41,9 @@
 
             return true;
 	    }
+        
+        {% if confirm %}
+        alert("Slice was reserved!");
+        {% endif %}
+        
 	</script>

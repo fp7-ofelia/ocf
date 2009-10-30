@@ -12,7 +12,7 @@ import egeni_api
 
 PLNODE_DEFAULT_IMG = "/img/server-2u-rev.png"
 
-en_debug = 1
+en_debug = 0
 def debug(s):
     if(en_debug):
         print(s)
@@ -29,14 +29,14 @@ def reserve_slice(am_url, rspec, slice_id):
     rspec contains only the failing node without its interfaces.
     '''
     
-    #return egeni_api.reserve_slice(am_url, rspec, slice_id)
+#    return egeni_api.reserve_slice(am_url, rspec, slice_id)
     print "Reserving PL Slice: %s" % rspec
 
 def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    #return egeni_api.delete_slice(am_url, slice_id)
+#    return egeni_api.delete_slice(am_url, slice_id)
 
 def get_rspec(am_url):
     '''
@@ -99,10 +99,13 @@ def update_rspec(self_am):
             debug("found node elem %s" % node_elem)
             name = node_elem.get("name")
             debug("name: %s" % name)
-            type = node_elem.get("name") or AggregateManager.TYPE_PL
+            type = models.AggregateManager.TYPE_PL
+            n = models.Node.objects.filter(type=type)
+            debug("Get: %s" % n)
             node, created = models.Node.objects.get_or_create(
                           nodeId=name,
-                          defaults={"name": name,
+                          defaults={"nodeId": name,
+                                    "name": name,
                                     "type": type,
                                     "is_remote": False,
                                     "remoteURL": self_am.url,
@@ -112,17 +115,20 @@ def update_rspec(self_am):
                                     }
                           )
             
+            debug("Node new: %s" % created)
+            
             if not created:
-                node.remoteURL = am.url
-                node.aggMgr = am
-                node.save()
-                
+                node.remoteURL = self_am.url
+                node.aggMgr = self_am
+            
+            self_am.connected_node_set.add(node)
+            node.save()
             node_ids.append(node.nodeId)
             
             # add all the interfaces
             for i, iface_elem in enumerate(node_elem.findall("*/IfSpec")):
                 kwargs = {}
-                for attrib in ("name", "addr", #"type", "init_params",
+                for attrib in ("name", "addr", "type", #"init_params",
 #                               "min_rate", "max_rate", "max_kbyte",
 #                               "ip_spoof",
                                ):
@@ -149,8 +155,12 @@ def update_rspec(self_am):
     debug("Added nodes %s" % node_ids)
     
     # delete all the old stuff
-    models.Node.objects.filter(type=models.Node.TYPE_PL).exclude(
-                        nodeId__in=node_ids).delete()
+    for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
+        debug("Deleting %s " % n.nodeId)
+        
+    models.Node.objects.filter(
+        aggMgr=self_am).exclude(
+            nodeId__in=node_ids).delete()
     models.Interface.objects.filter(
-        ownerNode__type=models.Node.TYPE_PL).exclude(
+        ownerNode__aggMgr=self_am).exclude(
             id__in=iface_ids).delete()

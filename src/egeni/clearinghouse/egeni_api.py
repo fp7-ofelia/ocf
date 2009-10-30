@@ -82,6 +82,9 @@ def delete_slice(am_url, slice_id):
     Delete the slice.
     '''
     
+    # TODO: remove after debugging
+    return
+    
     global server
     if am_url not in server:
         connect_to_soap_server(am_url)

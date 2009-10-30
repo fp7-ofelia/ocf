@@ -1,3 +1,4 @@
+{% load ch_extras %}
 				<NodeSpec name="{{ node.name }}" type=""
 				init_params=""
 				cpu_min=""
@@ -6,6 +7,7 @@
 				disk_max=""
 				start_time=""
 				duration="">
+					{% if node.interface_set.objects.all %}
 					<net_if>
 						{% for iface in node.interface_set.objects.all %}
 						{% if slice|has_interface:iface %}
@@ -13,4 +15,5 @@
 						{% endif %}
 						{% endfor %}
 					</net_if>
+					{% endif %}
 				</NodeSpec>

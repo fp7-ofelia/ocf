@@ -120,6 +120,7 @@ class Interface(models.Model):
     # PlanetLab additional things
     name = models.CharField(max_length=200, blank=True, null=True)
     addr = models.IPAddressField(blank=True, null=True)
+    type = models.CharField(max_length=200, blank=True, null=True)
 
     # @ivar extra_context: Aggregate specific information
     extra_context = models.TextField(blank=True, null=True)
