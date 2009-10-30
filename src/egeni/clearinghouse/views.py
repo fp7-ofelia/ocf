@@ -30,9 +30,13 @@ def slice_home(request):
             for am in AggregateManager.objects.all():
                 for slice in slices:
                     try:
-                        egeni_api.delete_slice(am.url, slice.id)
+                        if am.type == AggregateManager.TYPE_OF:
+                            egeni_api.delete_slice(am.url, slice.id)
+                        elif am.type == AggregateManager.TYPE_PL:
+                            plc_api.delete_slice(am.url, slice.id)
                     except Exception, e:
                         print e
+                        traceback.print_exc()
                         print "Error deleting slice. Will still remove from DB."
             slices.delete()
             return HttpResponseRedirect(reverse('slice_home'))
@@ -199,7 +203,7 @@ def slice_flash_detail(request, slice_id):
         
         # create new links and ids
         for id in link_ids:
-            print "Link: %s" % id;
+            print "Link: %s" % id
             link = get_object_or_404(Link, pk=id)
             through, created = LinkSliceStatus.objects.get_or_create(
                                     slice=slice,
@@ -216,7 +220,7 @@ def slice_flash_detail(request, slice_id):
             
         node_slice_set = []
         for id in node_ids:
-            print "Node: %s" % id;
+            print "Node: %s" % id
             node = get_object_or_404(Node, pk=id)
             through, created = NodeSliceStatus.objects.get_or_create(
                                     slice=slice,
@@ -235,11 +239,14 @@ def slice_flash_detail(request, slice_id):
 
         formset.save()
         
-        of_agg_mgrs = AggregateManager.objects.filter(
-                        type=AggregateManager.TYPE_OF)
+        # Delete the old slice so we can create it again
         if slice.committed:
-            [egeni_api.delete_slice(am.url, slice_id) for am in of_agg_mgrs]
-
+            for am in AggregateManager.objects.all():
+                if am.type == AggregateManager.TYPE_OF:
+                    egeni_api.delete_slice(am.url, slice_id)
+                elif am.type == AggregateManager.TYPE_PL:
+                    plc_api.delete_slice(am_url, slice_id)
+        
         slice.committed = False
         slice.save()
         
@@ -248,32 +255,43 @@ def slice_flash_detail(request, slice_id):
             print f
         
         # get the RSpec of the Slice for each am and reserve
-        for am in AggregateManager.objects.filter(
-                        type=AggregateManager.TYPE_OF):
-            rspec = render_to_string("rspec/egeni-rspec.xml",
-                                     {"node_set": slice.nodes.filter(aggMgr=am),
-                                      "am": am,
-                                      "fs_flds": ["dl_src",
-                                                  "dl_dst",
-                                                  "dl_type",
-                                                  "vlan_id",
-                                                  "nw_src",
-                                                  "nw_dst",
-                                                  "nw_proto",
-                                                  "tp_src",
-                                                  "tp_dst",
-                                                  ],
-                                      "slice": slice})
-            print "Reservation RSpec: %s" % rspec
-            errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
+        for am in AggregateManager.objects.all():
+            if am.type == AggregateManager.TYPE_OF:
+                rspec = render_to_string("rspec/egeni-rspec.xml",
+                                         {"node_set": slice.nodes.filter(aggMgr=am),
+                                          "am": am,
+                                          "fs_flds": ["dl_src",
+                                                      "dl_dst",
+                                                      "dl_type",
+                                                      "vlan_id",
+                                                      "nw_src",
+                                                      "nw_dst",
+                                                      "nw_proto",
+                                                      "tp_src",
+                                                      "tp_dst",
+                                                      ],
+                                          "slice": slice})
+                print "Reservation RSpec: %s" % rspec
+                errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
         
-            # TODO: Parse errors here
-        
-        rspec = render_to_string("rspec/pl-rspec.xml",
-                                 {"node_slice_set": node_slice_set,
-                                  "slice": slice})
-        errors = plc_api.reserve_slice(rspec, slice_id)
-        # TODO: parse pl errors
+                # TODO: Parse errors here
+                
+            elif am.type == AggregateManager.TYPE_PL:
+                nodes_dict = {}
+                node_set = slice.nodes.filter(aggMgr=am)
+                for node in node_set:
+                    netspec = node.extra_context.split("=")[1]
+                    if not nodes_dict.has_key(netspec):
+                        nodes_dict[netspec] = []
+                    nodes_dict[netspec].append(node)
+                    
+                rspec = render_to_string("rspec/pl-rspec.xml",
+                                         {"node_slice_set": node_slice_set,
+                                          "slice": slice,
+                                          "nodes_dict": nodes_dict,
+                                          })
+                errors = plc_api.reserve_slice(am.url, rspec, slice_id)
+                # TODO: parse pl errors
         
         slice.committed = True
         slice.save()

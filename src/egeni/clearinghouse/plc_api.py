@@ -10,7 +10,7 @@ import models
 from django.db.models import Count
 import egeni_api
 
-PLNODE_DEFAULT_IMG = "/img/plnode.png"
+PLNODE_DEFAULT_IMG = "/img/server-2u-rev.png"
 
 en_debug = 1
 def debug(s):
@@ -29,13 +29,14 @@ def reserve_slice(am_url, rspec, slice_id):
     rspec contains only the failing node without its interfaces.
     '''
     
-    return egeni_api.reserve_slice(am_url, rspec, slice_id)
+    #return egeni_api.reserve_slice(am_url, rspec, slice_id)
+    print "Reserving PL Slice: %s" % rspec
 
 def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    return egeni_api.delete_slice(am_url, slice_id)
+    #return egeni_api.delete_slice(am_url, slice_id)
 
 def get_rspec(am_url):
     '''

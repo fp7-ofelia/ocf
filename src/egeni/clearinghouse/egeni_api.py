@@ -14,12 +14,14 @@ from xml.dom import minidom
 from xml import xpath
 import models
 from django.db.models import Count
+import traceback
 
-OFSWITCH_DEFAULT_IMG = "/img/ofswitch.png"
+OFSWITCH_DEFAULT_IMG = "/img/switch.png"
 
 key_file = '../cred/seethara.pkey'
 cert_file = '../cred/seethara.cert'
 cred_file = '../cred/seethara.cred'
+
 CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)
 server = {}
@@ -64,9 +66,9 @@ def reserve_slice(am_url, rspec, slice_id):
     if am_url not in server:
         connect_to_soap_server(am_url)
 
-    # Ideally, the following should be loaded dynamically
+    # TODO: the following should be loaded from the DB
     slice_id = 'plc.openflow.egeni'
-    slice_cred = file(cred_file).read()
+    slice_cred = file('../cred/slice_egeni.cred').read()
 
     # The second param is supposed to be HRN, but replaced with slice_id
     request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
@@ -79,14 +81,19 @@ def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    global server, CH_cred
+    
+    global server
     if am_url not in server:
         connect_to_soap_server(am_url)
 
+    # TODO: the following should be loaded from the DB
+    slice_id = 'plc.openflow.egeni'
+    slice_cred = file('../cred/slice_egeni.cred').read()
+
     # The second param is supposed to be HRN, but replaced with slice_id
-    request_hash = key.compute_hash([CH_cred, str(slice_id)])
-    result = server[am_url].delete_slice(CH_cred, str(slice_id), request_hash)
-    pass
+    request_hash = key.compute_hash([slice_cred, str(slice_id)])
+    result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
+    
 
 def get_rspec(am_url):
     '''
