@@ -3,6 +3,7 @@ package egeni.clearinghouse.plugin;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -74,12 +75,24 @@ public class JGraphTopoPanel extends JPanel {
 	private static final int INITIAL_WIDTH = 800;
 	
 	/**
+	 * Max Icon width
+	 */
+	public static final int MAX_ICON_WIDTH = 64;
+	
+	/**
+	 * Max Icon height
+	 */
+	public static final int MAX_ICON_HEIGHT = 64;
+
+	/**
 	 * Background color
 	 */
 	public static final Color BG_COLOR = Color.white;
 
 	private Map<String, JGraphNode> graphNodes;
 	private Map<String, JGraphLink> graphLinks;
+	
+	private Map<String, Image> images;
 	
 	private ListenableGraph<JGraphNode, JGraphLink> graph;
 	private JGraphModelAdapter<JGraphNode, JGraphLink> jgAdapter;
@@ -97,6 +110,7 @@ public class JGraphTopoPanel extends JPanel {
 		
 		this.graphNodes = new HashMap<String, JGraphNode>();
 		this.graphLinks = new HashMap<String, JGraphLink>();
+		this.images = new HashMap<String, Image>();
 		
 		graph = new ListenableDirectedGraph<JGraphNode, JGraphLink>(JGraphLink.class);
 		
@@ -339,15 +353,44 @@ public class JGraphTopoPanel extends JPanel {
 		}
 	}
 
-	/** Returns an ImageIcon, or null if the path was invalid. */
+	/**
+	 * Gets the image specified by the path, scales it, and stores 
+	 * it if not already done so before. Then returns an ImageIcon
+	 * using that image.
+	 */
     protected ImageIcon createImageIcon(String path,
     		String description) {
+    	
+    	/* If we already have loaded and scaled this image then use it */
+    	if(images.containsKey(path)) {
+    		return new ImageIcon(images.get(path), description);
+    	}
+    	
         URL imgURL = getClass().getResource(path);
+        ImageIcon imgIcon = null;
         if (imgURL != null) {
-            return new ImageIcon(imgURL, description);
+            imgIcon = new ImageIcon(imgURL, description);
         } else {
             System.err.println("Couldn't find file: " + path);
-            return new ImageIcon(path);
+            imgIcon = new ImageIcon(path);
+        }
+        if(imgIcon != null) {
+        	int h = -1;
+        	int w = -1;
+        	/* get the largest ratio */
+        	if(imgIcon.getIconHeight() * 1.0 / MAX_ICON_HEIGHT
+        			> imgIcon.getIconWidth() * 1.0 / MAX_ICON_WIDTH) {
+        		/* scale by height */
+        		h = Math.min(MAX_ICON_HEIGHT, imgIcon.getIconHeight());
+        	} else {
+        		/* scale by width */
+        		w = Math.min(MAX_ICON_WIDTH, imgIcon.getIconWidth());        		
+        	}
+        	Image scaledImg = imgIcon.getImage().getScaledInstance(w, h, Image.SCALE_DEFAULT);
+        	images.put(path, scaledImg);
+        	return new ImageIcon(scaledImg, description);
+        } else {
+        	return new ImageIcon((Image)null, description);
         }
     }
 

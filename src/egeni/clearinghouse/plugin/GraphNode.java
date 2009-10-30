@@ -14,6 +14,9 @@ import javax.swing.event.MouseInputAdapter;
  */
 public class GraphNode extends MouseInputAdapter {
 
+	public static int MAX_WIDTH = 64;
+	public static int MAX_HEIGHT = 64;
+	
 	private String id;
 	private Icon sel_img;
 	private Icon unsel_img;
@@ -70,9 +73,12 @@ public class GraphNode extends MouseInputAdapter {
 		}
 		this.label.setIcon(img);
 		this.label.setText(name);
+		int w = Math.max(img.getIconWidth(), MAX_WIDTH);
+		int h = Math.max(img.getIconHeight(), MAX_HEIGHT);
+		
 		this.label.setBounds(
 				this.label.getX(), this.label.getY(),
-				img.getIconWidth(), img.getIconHeight());
+				w, h);
 //		this.label.repaint();
 	}
 

@@ -171,15 +171,15 @@ public class TopoPanel extends JPanel implements ActionListener {
 						n.getElementsByTagName(
 						"y").item(0).getTextContent());
 			
-			Icon sel_img = createImageIcon(
+			ImageIcon sel_img = createImageIcon(
 					n.getElementsByTagName("sel_img").item(0).getTextContent(),
 					"Selected Node");
 
-			Icon unsel_img = createImageIcon(
+			ImageIcon unsel_img = createImageIcon(
 					n.getElementsByTagName("unsel_img").item(0).getTextContent(),
 					"Deselected Node");
 
-			Icon err_img = createImageIcon(
+			ImageIcon err_img = createImageIcon(
 					n.getElementsByTagName("err_img").item(0).getTextContent(),
 					"Erroroneous Node");
 			
