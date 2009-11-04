@@ -2,15 +2,57 @@
 {% load ch_extras %}
 
 {% block content %}
-<a href="{% url slice_home %}">Slice Control Panel</a>
 
-<h1>Statistics:</h1>
-<table border="0">
-<tr><td>Number of aggregates</td> <td>:</td> <td>{{ aggmgr_count }}</td></tr>
-<tr><td>Number of nodes</td>      <td>:</td> <td>{{ node_count }}</td></tr>
-<tr><td>Number of links</td>      <td>:</td> <td>{{ link_count }}</td></tr>
-<tr><td>Number of slices</td>     <td>:</td> <td>{{ slice_count }}</td></tr>
-<tr><td>Number of users</td>      <td>:</td> <td>{{ user_count }}</td></tr>
-</table>
+<div id="main">
+    <h1>GENI Dashboard:</h1>
+    
+    <div id="announcements">
+        <h2>Announcements:</h2>
+        {% for a in announcements %}
+        <p>{{ a }}</p>
+        {% empty %}
+        <p>No new announcements.</p>
+        {% endfor %}
+    </div>
 
+    <div id="functions">
+        {% if show_admin %}
+        <h2>Admin Functions:</h2>
+        <p><a href="{% url aggmgr_list user=user %}">Aggregate Administration</a></p>
+        <p><a href="{% url user_admin_home %}">User Administration</a></p>
+        <p><a href="{% url slice_admin_home %}">Slice Administration</a></p>
+        {% endif %}
+        {% if show_user %}
+        <h2>User Functions:</h2>
+        <p><a href="{% url slice_home %}">Slice Control Panel</a></p>
+        <h2>Your Current Stats</h2>
+        <table id="user_stats_table">
+            <tr><td>Number of active slices</td>     <td>:</td> <td>{{ active_slice_count }}</td></tr>
+            <tr><td>Number of inactive slices</td>   <td>:</td> <td>{{ inactive_slice_count }}</td></tr>
+            <tr><td>Number of reserved hosts</td>    <td>:</td> <td>{{ reserved_host_count }}</td></tr>
+            <tr><td>Number of reserved switches</td> <td>:</td> <td>{{ reserved_switch_count }}</td></tr>
+        </table>
+        {% endif %}
+    </div>
+    
+    <div id="stats">
+        <h2>Global GENI Stats:</h2>
+        <table id="stats_table">
+            <tr><td>Number of aggregates</td> <td>:</td> <td>{{ aggmgr_count }}</td></tr>
+            <tr><td>Number of nodes</td>      <td>:</td> <td>{{ node_count }}</td></tr>
+            <tr><td>Number of links</td>      <td>:</td> <td>{{ link_count }}</td></tr>
+            <tr><td>Number of slices</td>     <td>:</td> <td>{{ slice_count }}</td></tr>
+            <tr><td>Number of users</td>      <td>:</td> <td>{{ user_count }}</td></tr>
+        </table>
+    </div>
+    
+    <div id="errors">
+        <h2>Last Warnings and Errors:</h2>
+        {% for error in errors %}
+        <p>{{ error.date }} - {{ error.text }}</p>
+        {% empty %}
+        <p>No new warnings or errors.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

@@ -5,8 +5,13 @@
     </head>
     
     <body>
-        <a href="/accounts/logout/">Logout</a>
-        <a href="/clearinghouse/">Home</a>
+    	<div id="links">
+	        <a href="/clearinghouse/">Dashboard</a>
+			<a href="{% url slice_home %}">Slice Control Panel</a>
+			<a href="{% url password_change %}">Account Settings</a>
+			<a href="/clearinghouse/help/">Help</a>
+	        <a href="/accounts/logout/">Logout</a>
+        </div>
         {% block scripts %}{% endblock %}
         {% block content %}{% endblock %}
     </body>
