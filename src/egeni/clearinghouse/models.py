@@ -40,6 +40,9 @@ class AggregateManager(models.Model):
     
     # @ivar extra_context: Aggregate specific information
     extra_context = models.TextField(blank=True, null=True)
+    
+    # @ivar owner is the creator of the aggregate manager
+    owner = models.ForeignKey(User)
 
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
@@ -253,3 +256,25 @@ class FlowSpaceForm(ModelForm):
     class Meta:
         model=FlowSpace
         exclude = ('slice')
+
+class DatedMessage(models.Model):
+    TYPE_ERROR = 'error'
+    TYPE_WARNING = 'warning'
+    TYPE_ANNOUNCE = 'announcement'
+    
+    MSG_TYPE_CHOICES={TYPE_ERROR: 'Error',
+                      TYPE_WARNING: 'Warning',
+                      TYPE_ANNOUNCE: 'Announcement',
+                     }
+    type = models.CharField(max_length=20, choices=MSG_TYPE_CHOICES.items())
+    datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
+    text = models.TextField()
+    
+    def format_date(self):
+        return self.datetime.strftime("%Y-%m-%d")
+
+    def format_time(self):
+        return self.datetime.strftime("%H:%M:%S")
+    
+    def __unicode__(self):
+        return "%s %s - %s" % (self.format_date(), self.format_time(), self.text)
