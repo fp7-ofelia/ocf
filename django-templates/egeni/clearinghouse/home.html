@@ -3,10 +3,10 @@
 
 {% block content %}
 
-<div id="main">
+<div class="main">
     <h1>GENI Dashboard:</h1>
     
-    <div id="announcements">
+    <div class="announcements">
         <h2>Announcements:</h2>
         {% for a in announcements %}
         <p>{{ a }}</p>
@@ -15,12 +15,14 @@
         {% endfor %}
     </div>
 
-    <div id="functions">
+    <div class="functions">
         {% if show_admin %}
         <h2>Admin Functions:</h2>
-        <p><a href="{% url aggmgr_list user=user %}">Aggregate Administration</a></p>
+        <p><a href="{% url aggmgr_admin_home %}">Aggregate Administration</a></p>
+        {% comment %}
         <p><a href="{% url user_admin_home %}">User Administration</a></p>
         <p><a href="{% url slice_admin_home %}">Slice Administration</a></p>
+        {% endcomment %}
         {% endif %}
         {% if show_user %}
         <h2>User Functions:</h2>
@@ -35,7 +37,7 @@
         {% endif %}
     </div>
     
-    <div id="stats">
+    <div class="stats">
         <h2>Global GENI Stats:</h2>
         <table id="stats_table">
             <tr><td>Number of aggregates</td> <td>:</td> <td>{{ aggmgr_count }}</td></tr>
@@ -46,7 +48,7 @@
         </table>
     </div>
     
-    <div id="errors">
+    <div class="errors">
         <h2>Last Warnings and Errors:</h2>
         {% for error in errors %}
         <p>{{ error.date }} - {{ error.text }}</p>

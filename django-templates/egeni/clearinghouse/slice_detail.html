@@ -2,80 +2,82 @@
 {% load ch_extras %}
 
 {% block content %}
-<h1>Details for Slice {{ slice.name }}</h1>
-
-{% if error_message %}
-<div class="error">
-<p><strong>{{ error_message }}</strong></p>
-</div>
-{% endif %}
-
-<div class="details">
-    <form method="POST" action="">
-        {% for am in aggmgr_list %}
-        <h2>Nodes in Aggregate Manager {{ am.name }}</h2>
-        <ol id="switches">
-            {% for node in am.get_local_nodes %}
-            <li><input type="checkbox" name="am_{{ am.id }}" value="{{ node.nodeId }}" 
-            {{ node|check_in_set:slice.nodes.all }} />
-                Node ID <strong><a name="{{ am.id }}_{{ node.nodeId }}">{{ node.nodeId }}</a></strong> 
-                <ol id="{{ nodeId }}_ifaces">
-                    {% for iface in node.interface_set.all %}
-                    <li>port <strong>{{ iface.portNum }}</strong>
-                        {% if iface.remoteIfaces.count %}
-                        connected to
-                        <ol>
-                            {% for remoteiface in iface.remoteIfaces.all %}
-                            <li>port <strong>{{ remoteiface.portNum }}</strong> of node <strong>
-                            	{% if remoteiface.ownerNode.aggMgr %}
-                                <a href="#{{ remoteiface.ownerNode.aggMgr.id }}_{{ remoteiface.ownerNode.nodeId }}">
-                                    {{ remoteiface.ownerNode.nodeId }}
-                                </a>
-                                {% else %}
-	                            {{ remoteiface.ownerNode.nodeId }}
-                                {% endif %}
-                                .</strong>
-                            </li>
-                            {% endfor %}
-                        </ol>
-                        {% else %}
-                        <strong>unconnected</strong>.
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ol>
-            </li>
-            {% endfor %}
-        </ol>
-        {% endfor %}
-        
-        <h2>Flow Space Description</h2>
-        {{ fsformset.management_form }}
-        <table border="1">
-        	<tr>
-       			{% for field in fsformset.forms.0 %}
-       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
-        				<td><strong>{{ field.label_tag }}</strong></td>
-        			{% endif %}
-	        	{% endfor %}
-        	</tr>
-       		{% for form in fsformset.forms %}
-       			<tr>
-       				{% for field in form %}
+<div class="main">
+	<h1>Details for Slice {{ slice.name }}</h1>
+	
+	{% if error_message %}
+	<div class="error">
+	<p><strong>{{ error_message }}</strong></p>
+	</div>
+	{% endif %}
+	
+	<div class="details">
+	    <form method="POST" action="">
+	        {% for am in aggmgr_list %}
+	        <h2>Nodes in Aggregate Manager {{ am.name }}</h2>
+	        <ol id="switches">
+	            {% for node in am.get_local_nodes %}
+	            <li><input type="checkbox" name="am_{{ am.id }}" value="{{ node.nodeId }}" 
+	            {{ node|check_in_set:slice.nodes.all }} />
+	                Node ID <strong><a name="{{ am.id }}_{{ node.nodeId }}">{{ node.nodeId }}</a></strong> 
+	                <ol id="{{ nodeId }}_ifaces">
+	                    {% for iface in node.interface_set.all %}
+	                    <li>port <strong>{{ iface.portNum }}</strong>
+	                        {% if iface.remoteIfaces.count %}
+	                        connected to
+	                        <ol>
+	                            {% for remoteiface in iface.remoteIfaces.all %}
+	                            <li>port <strong>{{ remoteiface.portNum }}</strong> of node <strong>
+	                            	{% if remoteiface.ownerNode.aggMgr %}
+	                                <a href="#{{ remoteiface.ownerNode.aggMgr.id }}_{{ remoteiface.ownerNode.nodeId }}">
+	                                    {{ remoteiface.ownerNode.nodeId }}
+	                                </a>
+	                                {% else %}
+		                            {{ remoteiface.ownerNode.nodeId }}
+	                                {% endif %}
+	                                .</strong>
+	                            </li>
+	                            {% endfor %}
+	                        </ol>
+	                        {% else %}
+	                        <strong>unconnected</strong>.
+	                        {% endif %}
+	                    </li>
+	                    {% endfor %}
+	                </ol>
+	            </li>
+	            {% endfor %}
+	        </ol>
+	        {% endfor %}
+	        
+	        <h2>Flow Space Description</h2>
+	        {{ fsformset.management_form }}
+	        <table border="1">
+	        	<tr>
+	       			{% for field in fsformset.forms.0 %}
 	       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
-			            	<td>{{ field.errors }} {{ field }}</td>
+	        				<td><strong>{{ field.label_tag }}</strong></td>
 	        			{% endif %}
-	    	    	{% endfor %}
-	    	    </tr>
-    			{% for field in form %}
-	       			{% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
-			           	{{ field }}
-	        		{% endif %}
-	    	    {% endfor %}
-			{% endfor %}
-        </table>
-        <!--  {{ fsformset }}-->
-        <p><strong>Ready?</strong> <input type="submit" value="Submit" /></p>
-    </form>
+		        	{% endfor %}
+	        	</tr>
+	       		{% for form in fsformset.forms %}
+	       			<tr>
+	       				{% for field in form %}
+		       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+				            	<td>{{ field.errors }} {{ field }}</td>
+		        			{% endif %}
+		    	    	{% endfor %}
+		    	    </tr>
+	    			{% for field in form %}
+		       			{% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
+				           	{{ field }}
+		        		{% endif %}
+		    	    {% endfor %}
+				{% endfor %}
+	        </table>
+	        <!--  {{ fsformset }}-->
+	        <p><strong>Ready?</strong> <input type="submit" value="Submit" /></p>
+	    </form>
+	</div>
 </div>
 {% endblock %}

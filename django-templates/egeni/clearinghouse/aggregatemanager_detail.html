@@ -1,24 +1,28 @@
 {% extends "clearinghouse/base.html" %}
 
 {% block content %}
-<div class="details">
-    <h2>Select node from Aggregate Manager {{ am.name }}</h2>
-    
-    url: {{ am.url }} <br />
-</div>
-
-{% if error_message %}
-<div class="error">
-<p><strong>{{ error_message }}</strong></p>
-</div>
-{% endif %}
-
-<div class="nodes">
-    <h2>Nodes</h2>
-    <form method="POST" action="">
-        <ol id="switches">
-            {% for node in am.node_set.all %}
-            <li><input type="checkbox" name={{ node.nodeId }} />Node ID <a name="{{ node.nodeId }}">{{ node.nodeId }}</a> 
+<div class="main">
+	<div class="details">
+	    <h1>Aggregate Manager {{ am.name }}</h1>
+	    <p>managed by {{ am.owner.username }}</p>
+	    <form method="post" action="">
+            {{ form.as_p }}
+            <input type="submit" value="Save Changes">
+        </form>
+        <p><a href="{% url aggmgr_delete am.id %}">Delete</a></p>
+	</div>
+	
+	{% if error_message %}
+	<div class="error">
+	<p><strong>{{ error_message }}</strong></p>
+	</div>
+	{% endif %}
+	
+	<div class="nodes">
+	    <h2>Nodes:</h2>
+        <ol id="nodes">
+            {% for node in am.local_node_set.all %}
+            <li>Node <a name="{{ node.nodeId }}">{{ node.name }}</a> 
                 <ol id="{{ nodeId }}_ifaces">
                     {% for iface in node.interface_set.all %}
                     <li>port {{ iface.portNum }}
@@ -26,9 +30,9 @@
                         connected to
                         <ol>
                             {% for remoteiface in iface.remoteIfaces.all %}
-                            <li>port remoteiface.portNum of node 
+                            <li>port {{ remoteiface.portNum }} of node 
                                 <a href="#{{ remoteiface.ownerNode.nodeId }}">
-                                    {{ remoteiface.ownerNode.nodeId }}
+                                    {{ remoteiface.ownerNode.name }}
                                 </a>
                             </li>
                             {% endfor %}
@@ -42,7 +46,6 @@
             </li>
             {% endfor %}
         </ol>
-        <input type="submit" value="Use Selected Nodes" />
-    </form>
+	</div>
 </div>
 {% endblock %}

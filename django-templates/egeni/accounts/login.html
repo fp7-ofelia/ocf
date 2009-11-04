@@ -3,16 +3,16 @@
 {% block userctrl %}{% endblock %}
 
 {% block content %}
-<div id="main">
+<div class="main">
     <h1>Welcome to GENI!</h1>
     
-    <div id="Errors">
+    <div class="errors">
         {% if form.errors %}
         <p><b><font color=red>Your username and password didn't match. Please try again.</font></b></p>
         {% endif %}
     </div>
 
-    <div id="login">
+    <div class="login">
         <form method="post" action="{% url django.contrib.auth.views.login %}">
             <table id="login_inputs">
                 <tr>
@@ -32,11 +32,11 @@
             </table>
         </form>
     </div>
-    <div id="contact">
+    <div class="contact">
         If you have not yet created an account or forgot your password,
         please <a href="mailto:clearinghouse@csl-mail1.stanford.edu">contact us</a>.
     </div>
-    <div id="geni_info">
+    <div class="geni_info">
         The Global Environment for Network Innovations (GENI), a
         project sponsored by the National Science Foundation, is
         open and broadly inclusive, providing collaborative and
@@ -44,7 +44,7 @@
         public to catalyze groundbreaking discoveries and
         innovation in these emerging global networks.
     </div>
-    <div id="learn_more">
+    <div class="learn_more">
         To learn more about GENI, click <a href="http://www.geni.net/">here</a>.
     </div>
 </div>

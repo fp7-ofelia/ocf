@@ -1,10 +1,7 @@
-from django.forms.formsets import BaseFormSet
 from django.db import models
 from django.db.models import permalink
-from django.forms import ModelForm, Form
-import django.forms as forms
+from django.forms import ModelForm
 from django.contrib.auth.models import User
-from django.forms.fields import IntegerField
 import egeni_api
 import plc_api
 
@@ -43,7 +40,7 @@ class AggregateManager(models.Model):
     
     # @ivar owner is the creator of the aggregate manager
     owner = models.ForeignKey(User)
-
+    
     def get_absolute_url(self):
         return ('am_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
@@ -72,6 +69,11 @@ class AggregateManager(models.Model):
         if error:
             # parse the error xml
             pass
+
+class AggregateManagerForm(ModelForm):
+    class Meta:
+        model = AggregateManager
+        fields = ('name', 'url', 'type')
 
 class Node(models.Model):
     '''
@@ -278,3 +280,34 @@ class DatedMessage(models.Model):
     
     def __unicode__(self):
         return "%s %s - %s" % (self.format_date(), self.format_time(), self.text)
+
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, unique=True)
+    created_by = models.ForeignKey(User, null=True, blank=True, related_name="created_user_set")
+    is_aggregate_admin = models.BooleanField()
+    is_user_admin = models.BooleanField()
+    is_researcher = models.BooleanField()
+    
+    def __unicode__(self):
+        return "User profile for user %s" % self.user.username
+    
+    @classmethod
+    def get_or_create_profile(cls, user):
+        try:
+            profile = user.get_profile()
+        except UserProfile.DoesNotExist:
+            if user.is_staff or user.is_superuser:
+                profile = cls.objects.create(
+                                user=user,
+                                is_aggregate_admin=True,
+                                is_user_admin=True,
+                                is_researcher=True,
+                                )
+            else:
+                profile = cls.objects.create(
+                                user=user,
+                                is_aggregate_admin=False,
+                                is_user_admin=False,
+                                is_researcher=False,
+                                )
+        return profile

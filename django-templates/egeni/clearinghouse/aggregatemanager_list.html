@@ -1,22 +1,21 @@
 {% extends "clearinghouse/base.html" %}
 
 {% block content %}
-<div class="new">
-    <h2> Create a new Aggregate Manager. </h2>
-    <form method="post" action="create/">
-        <label for="name">Name</label>
-        <input type="text" name="name" id="name"></input><br/>
-        <label for="url">URL</label>
-        <input type="text" name="url" id="url"></input><br/>
-        <input type="submit" value="create aggregate manager">
-    </form>
-</div>
-<div class="list">
-    <h2> Current Aggregate Managers </h2>
-    <ol id="ams">
-        {% for object in object_list %}
-        <li><a href="{{ object.id }}/detail/">{{ object.name }}</a></li>
-        {% endfor %}
-    </ol>
+<div class="main">
+	<div class="new_am">
+	    <h2> Create a new Aggregate Manager. </h2>
+	    <form method="post" action="">
+	        {{ form.as_p }}
+            <input type="submit" value="create aggregate manager">
+        </form>
+    </div>
+    <div class="list">
+        <h2> Current Aggregate Managers </h2>
+        <ol id="ams">
+            {% for am in am_list %}
+            <li><a href="{{ am.get_absolute_url }}">{{ am.name }}</a></li>
+            {% endfor %}
+        </ol>
+    </div>
 </div>
 {% endblock %}

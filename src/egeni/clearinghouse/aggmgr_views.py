@@ -6,55 +6,69 @@ from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
-from django.forms.models import inlineformset_factory
-import egeni_api, plc_api
-import os
+from django.contrib.auth.decorators import user_passes_test
 
-LINK_ID_FIELD = "link_id"
-NODE_ID_FIELD = "node_id"
-XPOS_FIELD = "x-pos"
-YPOS_FIELD = "y-pos"
+def can_access(user):
+    '''Can the user access the aggregate manager views?'''
+    profile = UserProfile.get_or_create_profile(user)
+    return user.is_staff or profile.is_aggregate_admin
 
-REL_PATH = "."
-
-def am_create(request):
-    error_msg = u"No POST data sent."
-    if(request.method == "POST"):
-        post = request.POST.copy()
-        if(post.has_key('name') and post.has_key('url')):
-            # Get info
-            name = post['name']
-            url = post['url']
-            
-            new_am = AggregateManager.objects.create(name=name,
-                                                     url=url,
-                                                     )
-            return HttpResponseRedirect(new_am.get_absolute_url())
-        else:
-            error_msg = u"Insufficient data. Need at least name and url"
-            return HttpResponseBadRequest(error_msg)
+@user_passes_test(can_access)
+def home(request):
+    '''show list of agg mgrs and form to create new one'''
+    
+    if request.user.is_staff:
+        am_list = AggregateManager.objects.all()
     else:
-        return HttpResponseNotAllowed("GET")
+        am_list = AggregateManager.objects.filter(owner=request.user)
 
-def am_detail(request, am_id):
+    if request.method == "GET":
+        form = AggregateManagerForm()
+        
+    elif request.method == "POST":
+        am = AggregateManager(owner=request.user)
+        form = AggregateManagerForm(request.POST, instance=am)
+        if form.is_valid():
+            am = form.save()
+            return HttpResponseRedirect(am.get_absolute_url())
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
+    
+    return render_to_response('clearinghouse/aggregatemanager_list.html',
+                              {'am_list': am_list,
+                               'form': form,
+                               })
+
+@user_passes_test(can_access)
+def detail(request, am_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=am_id)
+    
+    if not request.user.is_staff and am.owner != request.user:
+        return HttpResponseForbidden()
+    
     if(request.method == "GET"):
-        return render_to_response("clearinghouse/aggregatemanager_detail.html",
-                                  {'object':am})
-        
-    elif(request.method == "POST"):
+        form = AggregateManagerForm(instance=am)
         try:
             am.updateRSpec()
         except Exception, e:
             print "Update RSpec Exception"; print e
             return render_to_response("clearinghouse/aggregatemanager_detail.html",
-                                      {'object':am,
+                                      {'am':am,
+                                       'form': form,
                                        'error_message':"Error Parsing/Updating the RSpec: %s" % e,
                                        })
-        else:
-            am.save()
-            return HttpResponseRedirect(am.get_absolute_url())
+    
+    elif(request.method == "POST"):
+        form = AggregateManagerForm(request.POST, instance=am)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("aggmgr_saved",
+                                                kwargs={'extra_context': {'am': am}}))
     else:
         return HttpResponseNotAllowed("GET", "POST")
 
+    return render_to_response("clearinghouse/aggregatemanager_detail.html",
+                              {'am':am,
+                               'form': form,
+                               })

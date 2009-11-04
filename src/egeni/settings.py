@@ -83,3 +83,5 @@ INSTALLED_APPS = (
 )
 
 LOGIN_REDIRECT_URL = '/clearinghouse/'
+
+AUTH_PROFILE_MODULE = "clearinghouse.UserProfile"

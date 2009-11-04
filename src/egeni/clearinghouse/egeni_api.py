@@ -306,6 +306,7 @@ def update_rspec(self_am):
                 
                 mod = {'type':remoteType,
                        'remoteURL':remoteURL,
+                       'name': nodeId,
                        'is_remote':True}
                 kwargs.update(**mod)
                 
@@ -329,6 +330,7 @@ def update_rspec(self_am):
                 mod = {'type':remoteType,
                        'remoteURL':remoteURL,
                        'aggMgr':am,
+                       'name': nodeId,
                        'is_remote':False}
                 kwargs.update(**mod)
                 
@@ -348,6 +350,7 @@ def update_rspec(self_am):
             mod = {'type':models.Node.TYPE_OF,
                    'remoteURL':self_am.url,
                    'aggMgr':self_am,
+                   'name': nodeId,
                    'is_remote':False}
             debug("Adding new node")
             kwargs.update(**mod)

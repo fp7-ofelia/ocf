@@ -15,6 +15,16 @@ def home(request):
                'link_count': Link.objects.count(),
                'slice_count': Slice.objects.count(),
                'user_count': User.objects.count(),
+               'active_slice_count': Slice.objects.filter(owner=request.user, committed=True).count(),
+               'inactive_slice_count': Slice.objects.filter(owner=request.user, committed=False).count(),
+               'reserved_host_count': NodeSliceStatus.objects.filter(node__type=Node.TYPE_PL,
+                                                                     reserved=True,
+                                                                     slice__owner=request.user,
+                                                                     ).count(),
+               'reserved_switch_count': NodeSliceStatus.objects.filter(node__type=Node.TYPE_OF,
+                                                                       reserved=True,
+                                                                       slice__owner=request.user,
+                                                                       ).count(),
                }
     
     context['announcements'] = DatedMessage.objects.filter(type=DatedMessage.TYPE_ANNOUNCE)
