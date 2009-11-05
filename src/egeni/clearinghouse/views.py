@@ -1,11 +1,13 @@
 from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, HttpResponseBadRequest,\
-    HttpRequest, HttpResponseForbidden
+    HttpRequest, HttpResponseForbidden, Http404
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.db.models import Q
+
+REL_PATH = "."
 
 def home(request):
     '''Show the Clearinghouse dashboard'''
@@ -36,3 +38,18 @@ def home(request):
     
     return render_to_response("clearinghouse/home.html", context)
 
+def get_img(request, img_name):
+    print "Reading image %s" % img_name
+    if "/" in img_name:
+        return HttpResponseForbidden()
+    
+    try:
+        print "<1>"
+        image_data = open("%s/img/%s" % (REL_PATH, img_name), "rb").read()
+        print "<2>"
+        bla, extension = img_name.split(".")
+        print "<3>"
+        return HttpResponse(image_data, mimetype="image/%s" % extension)
+    except Exception, e:
+        print e
+        return Http404()

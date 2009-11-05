@@ -7,6 +7,7 @@ from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.contrib.auth.decorators import user_passes_test
+from django.views.generic import list_detail
 
 def can_access(user):
     '''Can the user access the aggregate manager views?'''
@@ -43,11 +44,13 @@ def home(request):
 def detail(request, am_id):
     # get the aggregate manager object
     am = get_object_or_404(AggregateManager, pk=am_id)
+    print "detail for am %s" % am.name
     
     if not request.user.is_staff and am.owner != request.user:
         return HttpResponseForbidden()
     
     if(request.method == "GET"):
+        print "Get detail for am %s" % am.name
         form = AggregateManagerForm(instance=am)
         try:
             am.updateRSpec()
@@ -58,13 +61,18 @@ def detail(request, am_id):
                                        'form': form,
                                        'error_message':"Error Parsing/Updating the RSpec: %s" % e,
                                        })
+        print "Done get"
     
     elif(request.method == "POST"):
+        print "Post detail for am %s" % am.name
         form = AggregateManagerForm(request.POST, instance=am)
+        print "Validating"
         if form.is_valid():
+            print "Validation done"
             form.save()
-            return HttpResponseRedirect(reverse("aggmgr_saved",
-                                                kwargs={'extra_context': {'am': am}}))
+            print "Done post"
+            return HttpResponseRedirect(reverse("aggmgr_saved", args=(am.id,)))
+        print "Form error"
     else:
         return HttpResponseNotAllowed("GET", "POST")
 
@@ -72,3 +80,14 @@ def detail(request, am_id):
                               {'am':am,
                                'form': form,
                                })
+    
+@user_passes_test(can_access)
+def saved(request, am_id):
+    am = get_object_or_404(AggregateManager, pk=am_id)
+    
+    if not request.user.is_staff and am.owner != request.user:
+        return HttpResponseForbidden()
+    
+    return render_to_response("clearinghouse/aggregatemanager_saved.html",
+                              {'am': am},
+                              )

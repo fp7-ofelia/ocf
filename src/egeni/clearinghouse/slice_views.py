@@ -9,193 +9,74 @@ from egeni.clearinghouse.models import *
 from django.forms.models import inlineformset_factory
 import egeni_api, plc_api
 import os
+import messaging
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
-XPOS_FIELD = "x-pos"
-YPOS_FIELD = "y-pos"
+POS_FIELD = "pos"
 
 REL_PATH = "."
 
 def slice_home(request):
     '''Show the list of slices, and form for creating new slice'''
 
+    # if the user is posting a create request
     if request.method == 'POST':
-        if not request.POST.has_key("action"):
-            return HttpResponseBadRequest("Missing field action")
-        
-        if request.POST["action"] == "delete_slice":
-            slice_ids = request.POST.getlist('del_sel')
-            slices = request.user.slice_set.filter(id__in=slice_ids)
-            for am in AggregateManager.objects.all():
-                for slice in slices:
-                    try:
-                        if am.type == AggregateManager.TYPE_OF:
-                            egeni_api.delete_slice(am.url, slice.id)
-                        elif am.type == AggregateManager.TYPE_PL:
-                            plc_api.delete_slice(am.url, slice.id)
-                    except Exception, e:
-                        print e
-                        traceback.print_exc()
-                        print "Error deleting slice. Will still remove from DB."
-            slices.delete()
-            return HttpResponseRedirect(reverse('slice_home'))
+        slice = Slice(owner=request.user, committed=False)
+        form = SliceNameForm(request.POST, instance=slice)
+        if form.is_valid():
+            slice = form.save()
+            return HttpResponseRedirect(reverse("slice_select_aggregates", kwargs={"slice_id": slice.id}))
 
-        elif request.POST["action"] == "create_slice":
-            slice = Slice(owner=request.user, committed=False)
-            form = SliceForm(request.POST, instance=slice)
-            if form.is_valid():
-                slice = form.save()
-                return HttpResponseRedirect(slice.get_absolute_url())
-        
-        else:
-            return HttpResponseBadRequest(
-                "Unknown action value: %s" % request.POST["action"])
     else:
-        # get reserved and unreserved slices
-        form = SliceForm()
-        
-        reserved_slices = request.user.slice_set.filter(committed=True)
-        unreserved_slices = request.user.slice_set.filter(committed=False)
-        
-        do_del = request.user.slice_set.count() > 0
-        return render_to_response("clearinghouse/slice_home.html",
-                                  {'do_del': do_del,
-                                   'reserved_slices': reserved_slices,
-                                   'unreserved_slices': unreserved_slices,
-                                   'aggMgrs': AggregateManager.objects.all(),
-                                   'form': form})          
+        slice = Slice(owner=request.user, committed=False)
+        form = SliceNameForm(instance=slice)
 
-def slice_detail(request, slice_id):
-    slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
-    agg_list = AggregateManager.objects.all()
-    
-    # create a formset to handle all flowspaces
-    FSFormSet = inlineformset_factory(Slice, FlowSpace)
-    
-    print "<xx>"
-    
-    if request.method == "POST":
-        print "<yy>"
-        # get all the selected nodes
-        for am in agg_list:
-            # remove from slice the nodes that are not in the post
-            nodes = slice.nodes.exclude(
-                nodeId__in=request.POST.getlist("am_%s" % am.id))
-            [slice.nodes.remove(n) for n in nodes]
-            
-            # add to slice nodes that are in post but not in slice
-            nodes = am.local_node_set.filter(
-                nodeId__in=request.POST.getlist("am_%s" % am.id))
-            nodes = nodes.exclude(
-                nodeId__in=slice.nodes.values_list('nodeId', flat=True))
-            print "nodes: %s" % nodes
-            [slice.nodes.add(n) for n in nodes]
-            
-        formset = FSFormSet(request.POST, request.FILES, instance=slice)
-        if formset.is_valid():
-            formset.save()
-            
-            slice.committed = True
-            slice.save()
-            
-            # TODO: Do reservation here
-            
-            return HttpResponseRedirect(reverse('slice_home'))
-        
-    else:
-        print "<zz>"
-        for am in agg_list:
-            print "<aa>"
-            am.updateRSpec()
-        formset = FSFormSet(instance=slice)
-        print "Slice nodeIds: %s" % slice.nodes.values_list('nodeId', flat=True)
-    
-#        print "Formset: "
-#        print formset
-#        print "forms: "
-#        for form in formset.forms:
-#            print form.as_table()
-        
-    return render_to_response("clearinghouse/slice_detail.html",
-                              {'aggmgr_list': agg_list,
-                               'slice': slice,
-                               'fsformset': formset,
-                               })
+    slices = request.user.slice_set.all()
+    return render_to_response("clearinghouse/slice_home.html",
+                              {'slices': slices,
+                               'aggMgrs': AggregateManager.objects.all(),
+                               'form': form})
 
-def slice_flash_detail(request, slice_id, confirm=False):
+def slice_select_aggregates(request, slice_id):
+    '''Show a list of Aggregates and select some'''
     slice = get_object_or_404(Slice, pk=slice_id)
     if slice.owner != request.user:
         return HttpResponseForbidden()
     
-    # create a formset to handle all flowspaces
-    FSFormSet = inlineformset_factory(Slice, FlowSpace)
+    if request.method == 'GET':
+        am_list = AggregateManager.objects.all()
+        return render_to_response("clearinghouse/slice_select_aggregates.html",
+                                  {'am_list': am_list,
+                                   'slice': slice,
+                                   })
+        
+    elif request.method == 'POST':
+        am_ids = request.POST.getlist("am")
+        ams = AggregateManager.objects.filter(pk__in=am_ids)
+        [slice.aggMgrs.add(am) for am in ams]
+        slice.save()
+        return HttpResponseRedirect(reverse("slice_select_topo", kwargs={"slice_id": slice.id}))
     
-    print "<xx> request method %s" % request.method
-    
+    return HttpResponseNotAllowed("GET", "POST")
+
+def slice_select_topo(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
+
     if request.method == "POST":
-#        if NODE_ID_FIELD not in request.POST or LINK_ID_FIELD not in request.POST:
-#            return HttpResponseBadRequest("Missing fields %s or %s" 
-#                                          % (LINK_ID_FIELD, NODE_ID_FIELD))
-        
-        formset = FSFormSet(request.POST, request.FILES, instance=slice)
-        if not formset.is_valid():
-            return HttpResponseBadRequest("Form is invalid")
-        
         link_ids = request.POST.getlist(LINK_ID_FIELD)
         node_ids = request.POST.getlist(NODE_ID_FIELD)
-        x_positions = request.POST.getlist(XPOS_FIELD)
-        y_positions = request.POST.getlist(YPOS_FIELD)
+        positions = request.POST.getlist(POS_FIELD)
         
-        print "xpos: %s" % x_positions
-        print "ypos: %s" % y_positions
-        
-        # Update the positions of the nodes
-        for id_x in x_positions:
-            id, x = id_x.split(":::")
-            try:
-                n = Node.objects.get(nodeId=id)
-            except Node.DoesNotExist:
-                print "!!!! In reserve Node %s does not exist" % id
-                continue
-            
-            nsg, created = NodeSliceGUI.objects.get_or_create(
-                                slice=slice,
-                                node=n,
-                                defaults={'x': x,
-                                          'y': -1}
-                                )
-            nsg.x = x
-            nsg.save()
-            
-            if not n.x:
-                n.x = x
-                n.save()
-            
-        for id_y in y_positions:
-            id, y = id_y.split(":::")
-            try:
-                n = Node.objects.get(nodeId=id)
-            except Node.DoesNotExist:
-                print "!!!! In reserve Node %s does not exist" % id
-                continue
-            
-            nsg, created = NodeSliceGUI.objects.get_or_create(
-                                slice=slice,
-                                node=n,
-                                defaults={'x': -1,
-                                          'y': y}
-                                )
-            nsg.y = y
-            nsg.save()
-
-            if not n.y:
-                n.y = y
-                n.save()
-        
-        # TODO: Delete all the old NodeSliceGUIs
+        # collect the positions
+        pos_dict = {}
+        for p in positions:
+            id, xy = p.split(":::")
+            x, y = xy.split(",")
+            pos_dict[id] = (x, y)
+        NodeSliceGUI.update_pos(pos_dict, slice)
         
         # delete old links and nodes
         LinkSliceStatus.objects.filter(
@@ -215,12 +96,7 @@ def slice_flash_detail(request, slice_id, confirm=False):
                                               'has_error': False,
                                               }
                                     )
-            if created:
-                print "Link ID: %s new in slice" % id
-            else:
-                print "Link ID: %s already seen" % id
             
-        node_slice_set = []
         for id in node_ids:
             print "Node: %s" % id
             node = get_object_or_404(Node, pk=id)
@@ -232,113 +108,193 @@ def slice_flash_detail(request, slice_id, confirm=False):
                                               'has_error': False,
                                               }
                                     )
-            if created:
-                print "Node ID: %s new in slice" % id
-            else:
-                print "Node ID: %s already seen" % id
-                
-            node_slice_set.append(through)
-
-        formset.save()
         
-        # Delete the old slice so we can create it again
-        if slice.committed:
-            for am in AggregateManager.objects.all():
+        slice.save()
+        
+        return HttpResponseRedirect(reverse('slice_select_openflow', args=[slice_id]))
+
+    elif request.method == "GET":
+        xml = slice_get_topo_string(slice)
+        return render_to_response("clearinghouse/slice_select_topo.html",
+                                  {'slice': slice,
+                                   'topo_xml': xml,
+                                   })
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
+
+def slice_select_openflow(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
+
+    # create a formset to handle all flowspaces
+    FSFormSet = inlineformset_factory(Slice, FlowSpace)
+    
+    if request.method == "POST":
+        if "type" not in request.POST:
+            return HttpResponseBadRequest("Missing field 'type'")
+        
+        type = request.POST["type"]
+        form = SliceURLForm(request.POST, instance=slice)
+        
+        if form.is_valid():
+            slice = form.save()
+            
+        if type == "advanced":
+            formset = FSFormSet(request.POST, request.FILES, instance=slice)
+            if formset.is_valid() and form.is_valid():
+                formset.save()
+                slice.committed = False
+                slice.save()
+                return HttpResponseRedirect(reverse("slice_resv_summary", args=[slice_id]))
+        else:
+            slice.flowspace_set.all().delete()
+            if type == "http":
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               nw_proto="6",
+                               tp_src="80",
+                               )
+                fs.save()
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               nw_proto="6",
+                               tp_dst="80",
+                               )
+                fs.save()
+            elif type == "ip":
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               )
+                fs.save()
+            elif type == "tcp":
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               nw_proto="6",
+                               )
+                fs.save()
+            elif type == "special":
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               nw_proto="6",
+                               tp_src="10001",
+                               )
+                fs.save()
+                fs = FlowSpace(slice=slice,
+                               policy=FlowSpace.TYPE_ALLOW,
+                               dl_type="2048",
+                               nw_proto="6",
+                               tp_dst="10001",
+                               )
+                fs.save()
+            else:
+                return HttpResponseBadRequest("Unexpected value of packet type %s" % type)
+            
+            slice.save()
+            formset = FSFormSet(instance=slice)
+            if form.is_valid():
+                return HttpResponseRedirect(reverse("slice_resv_summary", args=[slice_id]))
+    
+    elif request.method == "GET":
+        formset = FSFormSet(instance=slice)
+        form = SliceURLForm(instance=slice)
+
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
+        
+    return render_to_response("clearinghouse/slice_select_openflow.html",
+                              {'slice': slice,
+                               'formset': formset,
+                               'form': form,
+                               })
+
+def slice_resv_summary(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == "GET":
+        return render_to_response("clearinghouse/slice_resv_summary.html",
+                                  {'slice': slice})
+        
+    elif request.method == "POST":
+        # Delete the old slice from the AMs so we can create it again
+        for am in slice.aggMgrs.objects.all():
+            try:
                 if am.type == AggregateManager.TYPE_OF:
                     egeni_api.delete_slice(am.url, slice_id)
                 elif am.type == AggregateManager.TYPE_PL:
                     plc_api.delete_slice(am.url, slice_id)
+            except Exception, e:
+                text = "Error deleting slice %s to re-reserve from Aggregate %s: %s. Will still remove from DB." % (slice.name, am.name, e)
+                print text
+                messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
         
         slice.committed = False
         slice.save()
         
         # get the RSpec of the Slice for each am and reserve
+        commit = True
         for am in AggregateManager.objects.all():
-            if am.type == AggregateManager.TYPE_OF:
-                rspec = render_to_string("rspec/egeni-rspec.xml",
-                                         {"node_set": slice.nodes.filter(aggMgr=am),
-                                          "am": am,
-                                          "fs_flds": ["dl_src",
-                                                      "dl_dst",
-                                                      "dl_type",
-                                                      "vlan_id",
-                                                      "nw_src",
-                                                      "nw_dst",
-                                                      "nw_proto",
-                                                      "tp_src",
-                                                      "tp_dst",
-                                                      ],
-                                          "slice": slice})
-                errors = egeni_api.reserve_slice(am.url, rspec, slice_id);
+            try:
+                am.reserve_slice(slice)
+            except Exception, e:
+                text = "Error reserving slice %s in Aggregate %s: %s." % (slice.name, am.name, e)
+                print text
+                commit = False
+                messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
         
-                # TODO: Parse errors here
-                
-            elif am.type == AggregateManager.TYPE_PL:
-                nodes_dict = {}
-                node_set = slice.nodes.filter(aggMgr=am)
-                for node in node_set:
-                    netspec = node.extra_context.split("=")[1]
-                    if not nodes_dict.has_key(netspec):
-                        nodes_dict[netspec] = []
-                    nodes_dict[netspec].append(node)
-                print "Nodes dict: %s" % nodes_dict
-                rspec = render_to_string("rspec/pl-rspec.xml",
-                                         {"node_slice_set": node_slice_set,
-                                          "slice": slice,
-                                          "nodes_dict": nodes_dict,
-                                          })
-                errors = plc_api.reserve_slice(am.url, rspec, slice_id)
-                # TODO: parse pl errors
-        
-        slice.committed = True
+        slice.committed = commit
         slice.save()
         return HttpResponseRedirect(reverse('slice_resv_confirm', args=[slice_id]))
 
-    elif request.method == "GET":
-#        for am in agg_list:
-#            print "<aa>"
-#            am.updateRSpec()
-        formset = FSFormSet(instance=slice)
-        xml = slice_get_topo_string(slice)
-        return render_to_response("clearinghouse/slice_flash_detail.html",
-                                  {'slice': slice,
-                                   'fsformset': formset,
-                                   'topo_xml': xml,
-                                   'confirm': confirm,
-                                   })
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+
+# TODO        
+def slice_delete(request, slice_id):
+    '''Confirm delete and delete slice'''
+    slice_ids = request.POST.getlist('del_sel')
+    slices = request.user.slice_set.filter(id__in=slice_ids)
+    for am in AggregateManager.objects.all():
+        for slice in slices:
+            try:
+                if am.type == AggregateManager.TYPE_OF:
+                    egeni_api.delete_slice(am.url, slice.id)
+                elif am.type == AggregateManager.TYPE_PL:
+                    plc_api.delete_slice(am.url, slice.id)
+            except Exception, e:
+                print e
+                traceback.print_exc()
+                text = "Error deleting slice %s from Aggregate %s. Will still remove from DB." % (slice.name, am.name)
+                print text
+                messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
+                
+    slices.delete()
+    return HttpResponseRedirect(reverse('slice_home'))
+    
 def slice_resv_confirm(request, slice_id):
     return slice_flash_detail(request, slice_id, True)
-
-def slice_get_img(request, slice_id, img_name):
-    image_data = open("%s/img/%s" % (REL_PATH, img_name), "rb").read()
-    return HttpResponse(image_data, mimetype="image/png")
 
 def slice_get_plugin(request, slice_id):
     jar = open("%s/../plugin.jar" % REL_PATH, "rb").read()
     return HttpResponse(jar, mimetype="application/java-archive")
 
-def slice_get_xsd(request, slice_id):
-    xsd = open("%s/plugin.xsd" % REL_PATH, "rb").read()
-    return HttpResponse(xsd, mimetype="application/xml")    
-
-def slice_get_topo(request, slice_id):
-    slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
-    print "Doing topo view"
-    
-    if request.method == "GET":
-        xml = slice_get_topo_string(slice)
-        return HttpResponse(xml, mimetype="text/xml")
-    else:
-        return HttpResponseNotAllowed("GET")
-
 def slice_get_topo_string(slice):
     for am in AggregateManager.objects.all():
-        am.updateRSpec()
+        try:
+            am.updateRSpec()
+        except Exception, e:
+            messaging.add_msg_for_user(
+                request.user,
+                "Error updating RSpec for Aggregate %s: %s" % (am.name, e),
+                DatedMessage.TYPE_ERROR)
     print "Done update"
     # get all the local nodes
     nodes = Node.objects.all().exclude(

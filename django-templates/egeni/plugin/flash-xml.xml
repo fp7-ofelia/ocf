@@ -1,10 +1,6 @@
 {% load ch_extras %}<?xml version="1.0" encoding="UTF-8"?>
 <document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-	<submit>
-	  <url>{% url slice_flash_detail slice.id %}</url>
-	</submit>
-
 {% for nodeId, node_info in nodes_dict.items %}
 	<node>
 	  <id>{{ nodeId }}</id>

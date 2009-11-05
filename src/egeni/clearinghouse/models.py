@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import permalink
-from django.forms import ModelForm
+from django.forms import ModelForm, ModelMultipleChoiceField
 from django.contrib.auth.models import User
 import egeni_api
 import plc_api
@@ -17,6 +17,18 @@ class AggregateManager(models.Model):
 
     # @ivar name: The name of the aggregate manager. Must be unique 
     name = models.CharField(max_length=200, unique=True)
+    
+    # @ivar description
+    description = models.TextField(blank=True, null=True)
+    
+    # @ivar components
+    components = models.TextField(blank=True, null=True)
+    
+    # @ivar available
+    available = models.BooleanField(default=True)
+    
+    # @ivar logo_url: location where the logo is found
+    logo_url = models.URLField("Logo URL", blank=True, null=True, verify_exists=False)
     
     # @ivar url: Location where the aggregate manager can be reached
     url = models.URLField('Aggregate Manager URL', unique=True, verify_exists=False)
@@ -58,22 +70,52 @@ class AggregateManager(models.Model):
         else:
             return plc_api.update_rspec(self)
         
-    def makeReservation(self):
+    def reserve_slice(self, slice):
         '''Request a reservation and return a message on success or failure'''
         
+        if not self.available:
+            return ""
+        
         if self.type == AggregateManager.TYPE_OF:
-            error = egeni_api.reserve_slice(self)
-        else:
-            error = plc_api.reserve_slice(self)
+            rspec = render_to_string("rspec/egeni-rspec.xml",
+                                     {"node_set": slice.nodes.filter(aggMgr=self),
+                                      "am": self,
+                                      "fs_flds": ["dl_src",
+                                                  "dl_dst",
+                                                  "dl_type",
+                                                  "vlan_id",
+                                                  "nw_src",
+                                                  "nw_dst",
+                                                  "nw_proto",
+                                                  "tp_src",
+                                                  "tp_dst",
+                                                  ],
+                                      "slice": slice})
+            errors = egeni_api.reserve_slice(self.url, rspec, slice.id)
             
-        if error:
+        elif self.type == AggregateManager.TYPE_PL:
+            nodes_dict = {}
+            node_set = slice.nodes.filter(aggMgr=self)
+            for node in node_set:
+                netspec = node.extra_context.split("=")[1]
+                if not nodes_dict.has_key(netspec):
+                    nodes_dict[netspec] = []
+                nodes_dict[netspec].append(node)
+            rspec = render_to_string("rspec/pl-rspec.xml",
+                                     {"node_slice_set": slice.nodeslicestatus_set,
+                                      "slice": slice,
+                                      "nodes_dict": nodes_dict,
+                                      })
+            errors = plc_api.reserve_slice(self.url, rspec, slice_id)
+            
+        if errors:
             # parse the error xml
             pass
 
 class AggregateManagerForm(ModelForm):
     class Meta:
         model = AggregateManager
-        fields = ('name', 'url', 'type')
+        fields = ('name', 'url', 'type', 'available', 'logo_url', 'description', 'components')
 
 class Node(models.Model):
     '''
@@ -155,7 +197,7 @@ class Slice(models.Model):
     
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=200, unique=True)
-    controller_url = models.CharField('OpenFlow Controller URL', max_length=200)
+    controller_url = models.CharField('OpenFlow Controller URL', max_length=200, null=True, blank=True)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
     committed = models.BooleanField()
@@ -205,6 +247,43 @@ class NodeSliceGUI(models.Model):
     
     x = models.FloatField()
     y = models.FloatField()
+    
+    @classmethod
+    def update_pos(cls, pos_dict, slice):
+        '''creates or updates instances of NodeSliceGUI with positions
+        in pos_dict.
+        @param pos_dict: is maps nodeId -> (x, y)
+        @param slice: the slice for which the positions are updated
+        '''
+        
+        # Update the positions of the nodes
+        for id, (x, y) in pos_dict:
+            try:
+                n = Node.objects.get(nodeId=id)
+            except Node.DoesNotExist:
+                print "In update_pos node %s does not exist" % id
+                messaging.add_msg_for_user(
+                    slice.owner,
+                    "Positioning non-existant node id %s. Ignored.",
+                    DatedMessage.TYPE_WARNING)
+                continue
+            
+            nsg, created = cls.objects.get_or_create(
+                                slice=slice,
+                                node=n,
+                                defaults={'x': x,
+                                          'y': y}
+                                )
+            nsg.x = x
+            nsg.y = y
+            nsg.save()
+            
+            if not n.x or not n.y:
+                n.x = x
+                n.y = y
+                n.save()
+        
+        # TODO: Delete all the old NodeSliceGUIs
 
 class LinkSliceStatus(models.Model):
     '''
@@ -222,6 +301,17 @@ class SliceForm(ModelForm):
     class Meta:
         model = Slice
         fields = ('name', 'controller_url', 'aggMgrs')
+        
+class SliceNameForm(ModelForm):
+    class Meta:
+        model = Slice
+        fields = ('name')
+
+class SliceURLForm(ModelForm):
+    class Meta:
+        model = Slice
+        fields = ('controller_url')
+
 
 class FlowSpace(models.Model):
     TYPE_ALLOW = 1
@@ -233,16 +323,16 @@ class FlowSpace(models.Model):
                          TYPE_RD_ONLY: 'Read Only',
                          }
 
-    policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items())
-    dl_src = models.CharField(max_length=17)
-    dl_dst = models.CharField(max_length=17)
-    dl_type = models.CharField(max_length=5)
-    vlan_id = models.CharField(max_length=4)
-    nw_src = models.CharField(max_length=18)
-    nw_dst = models.CharField(max_length=18)
-    nw_proto = models.CharField(max_length=3)
-    tp_src = models.CharField(max_length=5)
-    tp_dst = models.CharField(max_length=5)
+    policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items(), default=TYPE_ALLOW)
+    dl_src = models.CharField(max_length=17, default="*")
+    dl_dst = models.CharField(max_length=17, default="*")
+    dl_type = models.CharField(max_length=5, default="*")
+    vlan_id = models.CharField(max_length=4, default="*")
+    nw_src = models.CharField(max_length=18, default="*")
+    nw_dst = models.CharField(max_length=18, default="*")
+    nw_proto = models.CharField(max_length=3, default="*")
+    tp_src = models.CharField(max_length=5, default="*")
+    tp_dst = models.CharField(max_length=5, default="*")
     slice = models.ForeignKey(Slice, null=True, blank=True)
     
     def __unicode__(self):
@@ -271,6 +361,8 @@ class DatedMessage(models.Model):
     type = models.CharField(max_length=20, choices=MSG_TYPE_CHOICES.items())
     datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
     text = models.TextField()
+    
+    user = models.ForeignKey(User, related_name="messages")
     
     def format_date(self):
         return self.datetime.strftime("%Y-%m-%d")

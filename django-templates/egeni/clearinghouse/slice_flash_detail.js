@@ -26,8 +26,7 @@
               if(is_sel == "true") {
                 addHiddenInput("node_id_"+i, "node_id", n.getId());
               }
-              addHiddenInput("node_id_x", "x-pos", n.getId()+":::"+n.getX());
-              addHiddenInput("node_id_y", "y-pos", n.getId()+":::"+n.getY());
+              addHiddenInput("node_id_pos", "pos", n.getId()+":::"+n.getX()+","+n.getY());
             }
 
             // get the list of link_ids
