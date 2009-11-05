@@ -1,0 +1,83 @@
+{% extends "clearinghouse/base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<div class="main">
+    
+    <h1>Step 3: Select Packet Types and OpenFlow Controller for Slice {{ slice.name }}</h1>
+    
+    {% if error_message %}
+    <div class="error">
+    <p><strong>{{ error_message }}</strong></p>
+    </div>
+    {% endif %}
+    
+    <form class="form" onsubmit="return doSubmit(this.typesdropdown)" id='sliceForm' method="POST" action="">
+        <div class="controller form">
+	        <h2>OpenFlow Controller:</h2>
+	        <table class="controller table">
+	        {{ form.as_table }}
+	        </table>
+        </div>
+        
+        <div class="flowspace form">
+            <div class="packet types">
+                <h2>Select Packet Types:</h2>
+                <select name="typesdropdown">
+		            <option value="http">All HTTP</option>
+                    <option value="ip">All IP</option>
+                    <option value="tcp">All TCP</option>
+		            <option value="special">All CDN</option>
+		            <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            
+            <div class="flowspace table">
+	            {{ fsformset.management_form }}
+	            <table border="1">
+	                <tr>
+		                {% for field in fsformset.forms.0 %}
+		                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+	                    <td><strong>{{ field.label_tag }}</strong></td>
+		                {% endif %}
+		                {% endfor %}
+	                </tr>
+	                {% for form in fsformset.forms %}
+	                <tr>
+		                {% for field in form %}
+		                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+                        <td>{{ field.errors }} {{ field }}</td>
+	                    {% endif %}
+	                    {% endfor %}
+	                </tr>
+	                {% for field in form %}
+	                {% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
+	                {{ field }}
+	                {% endif %}
+	                {% endfor %}
+	                {% endfor %}
+	            </table>
+            </div>
+            <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script language="JavaScript">
+    function addHiddenInput(id, name, val) {
+        var form = document.getElementById("sliceForm");
+        var newIn = document.createElement("input");
+        newIn.name = name;
+        newIn.type = "hidden";
+        newIn.id = id;
+        newIn.value = val;
+        form.appendChild(newIn);
+    }
+    function doSubmit(menu) {
+        addHiddenInput("type", "type", menu.opetions[menu.selectedIndex].value);
+        return true;
+    }
+</script>
+{% endblock %}

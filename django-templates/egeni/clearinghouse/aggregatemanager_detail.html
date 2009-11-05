@@ -6,7 +6,9 @@
 	    <h1>Aggregate Manager {{ am.name }}</h1>
 	    <p>managed by {{ am.owner.username }}</p>
 	    <form method="post" action="">
-            {{ form.as_p }}
+	    	<table class="aggmgr_form">
+	        {{ form.as_table }}
+	        </table>
             <input type="submit" value="Save Changes">
         </form>
         <p><a href="{% url aggmgr_delete am.id %}">Delete</a></p>

@@ -3,47 +3,48 @@
 
 {% block content %}
 <div class="main">
-    <div id="slices">
-        <form id="del_slice" method="POST" action="">
-            <input type="hidden" name="action" id="action" value="delete_slice"></input>
-            {% if reserved_slices %}
-            <h1>Fully Reserved Slices:</h1>
-            <ul>
-                {% for slice in reserved_slices %}
-                <li><input type="checkbox" name="del_sel" 
-                value="{{ slice.id }}"></input>
-                <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        
-            {% if unreserved_slices %}
-            <h1>Partial or Unreserved Slices:</h1>
-            <ul>
-                {% for slice in unreserved_slices %}
-                <li><input type="checkbox" name="del_sel" 
-                value="{{ slice.id }}"></input>
-                <a href="{{ slice.get_absolute_url }}">{{ slice.name }}</a></li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-            {% if do_del %}
-            <input id="del_submit" type="submit" value="Delete" >
-            {% endif %}
-        </form>
-    </div>
-    
-    <div id="new_slice">
-        <h1>Create new slice:</h1>
-        Select the aggregates you want to use in the slice, and add its name and
-        the URL for the OpenFlow switch controller.<br></br>
+    <h1>Slice Control Panel</h1>
+    <div class="new_slice">
+        <h2>Create New Slice:</h2>
         <form id="add_slice" method="POST" action="">
-            <input type="hidden" name="action" id="action" value="create_slice"></input>
-            <table border="0">        
+            <table class="slice_name">        
             {{ form.as_table }}
             </table>
             <input id="create_submit" type="submit" value="Create"></input>
         </form>
     </div>
+    <div id="slices">
+        <h2>Current Slices:</h2>
+        {% if not slices.count %}
+        None.
+        {% else %}
+        <table class="slice_table" border="1">
+            <tr>
+                <td>Slice Name</td>
+                <td>Hosts</td>
+                <td>Switches</td>
+                <td>Status</td>
+                <td>Actions</td>
+            </tr>
+            {% for slice in slices %}
+            <tr>
+                <td>{{ slice.name }}</td>
+                <td>{{ slice.nodes.count }}</td>
+                <td>{{ slice.links.count }}</td>
+                {% if slice.committed %}
+                <td>Reserved</td>
+                {% else %}
+                <td>Unreserved</td>
+                {% endif %}
+                <td>
+                    <a href="{{ slice.get_absolute_url }}">edit</a>,
+                    <a href="{% url slice_delete slice.id %}">delete</a>
+                    <a href="{% url slice_resv_summary slice.id %}">summary</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>    
 </div>
 {% endblock %}
