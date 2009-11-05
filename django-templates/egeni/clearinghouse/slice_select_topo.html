@@ -20,10 +20,10 @@
                 cache_option:'No',
                 session_id:'{{ session_id }}',
                 width:800, height:600} ;
-        {% if topology_xml %}
+        {% if topo_xml %}
         var parameters = {inputXML:'{{ topo_xml }}'}
         {% else %}
-        var parameters = {inputURL:'xml/'}
+        var parameters = {inputURL:'topo.xml'}
         {% endif %}
         var version = '1.6' ;
         deployJava.runApplet(attributes, parameters, version);

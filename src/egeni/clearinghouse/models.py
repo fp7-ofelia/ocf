@@ -200,7 +200,7 @@ class Slice(models.Model):
     controller_url = models.CharField('OpenFlow Controller URL', max_length=200, null=True, blank=True)
     nodes = models.ManyToManyField(Node, through="NodeSliceStatus")
     links = models.ManyToManyField(Link, through="LinkSliceStatus")
-    committed = models.BooleanField()
+    committed = models.BooleanField(default=False)
     aggMgrs = models.ManyToManyField(AggregateManager, verbose_name="Aggregates")
 
     # nodes that this slice has seen. We use this to store a user's
@@ -257,7 +257,7 @@ class NodeSliceGUI(models.Model):
         '''
         
         # Update the positions of the nodes
-        for id, (x, y) in pos_dict:
+        for id, (x, y) in pos_dict.items():
             try:
                 n = Node.objects.get(nodeId=id)
             except Node.DoesNotExist:
@@ -305,12 +305,12 @@ class SliceForm(ModelForm):
 class SliceNameForm(ModelForm):
     class Meta:
         model = Slice
-        fields = ('name')
+        fields = ('name',)
 
 class SliceURLForm(ModelForm):
     class Meta:
         model = Slice
-        fields = ('controller_url')
+        fields = ('controller_url',)
 
 
 class FlowSpace(models.Model):

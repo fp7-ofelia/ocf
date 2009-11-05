@@ -13,11 +13,15 @@
     </div>
     <div class="list">
         <h2> Current Aggregate Managers </h2>
+        {% if am_list.count %}
         <ol id="ams">
             {% for am in am_list %}
             <li><a href="{{ am.get_absolute_url }}">{{ am.name }}</a></li>
             {% endfor %}
         </ol>
+        {% else %}
+        None defined.
+        {% endif %}
     </div>
 </div>
 {% endblock %}

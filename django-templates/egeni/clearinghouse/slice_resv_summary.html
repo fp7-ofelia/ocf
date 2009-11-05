@@ -1,0 +1,26 @@
+{% extends "clearinghouse/base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<div class="main">
+    
+    <h1>Step 4: Confirm Reservation for Slice {{ slice.name }}</h1>
+    
+    {% if error_message %}
+    <div class="error">
+    <p><strong>{{ error_message }}</strong></p>
+    </div>
+    {% endif %}
+    
+    <div class="stats">
+        <table id="stats_table">
+            <tr><td>Number of nodes</td>      <td>:</td> <td>{{ slice.nodes.all.count }}</td></tr>
+            <tr><td>Number of links</td>      <td>:</td> <td>{{ slice.links.all.count }}</td></tr>
+        </table>
+    </div>
+    
+    <form class="confirm reservation form" method="POST" action="">
+            <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
+    </form>
+</div>
+{% endblock %}

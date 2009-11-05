@@ -6,6 +6,7 @@ from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.db.models import Q
+import messaging
 
 REL_PATH = "."
 
@@ -30,8 +31,12 @@ def home(request):
                }
     
     context['announcements'] = DatedMessage.objects.filter(type=DatedMessage.TYPE_ANNOUNCE)
-    context['errors'] = DatedMessage.objects.filter(Q(type=DatedMessage.TYPE_ERROR)
-                                                    | Q(type=DatedMessage.TYPE_WARNING))
+    
+    if request.user.is_staff:
+        context['errors'] = DatedMessage.objects.filter(Q(type=DatedMessage.TYPE_ERROR)
+                                                        | Q(type=DatedMessage.TYPE_WARNING))
+    else:
+        context['errors'] = messaging.get_and_delete_user_messages(request.user)
     
     context['show_admin'] = request.user.is_staff
     context['show_user']  = not context['show_admin']
@@ -44,11 +49,8 @@ def get_img(request, img_name):
         return HttpResponseForbidden()
     
     try:
-        print "<1>"
         image_data = open("%s/img/%s" % (REL_PATH, img_name), "rb").read()
-        print "<2>"
         bla, extension = img_name.split(".")
-        print "<3>"
         return HttpResponse(image_data, mimetype="image/%s" % extension)
     except Exception, e:
         print e

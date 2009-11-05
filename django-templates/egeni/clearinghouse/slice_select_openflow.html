@@ -4,7 +4,7 @@
 {% block content %}
 <div class="main">
     
-    <h1>Step 3: Select Packet Types and OpenFlow Controller for Slice {{ slice.name }}</h1>
+    <h1>Step 3: Packet Types and OpenFlow Controller for Slice {{ slice.name }}</h1>
     
     {% if error_message %}
     <div class="error">
@@ -58,7 +58,7 @@
 	                {% endfor %}
 	            </table>
             </div>
-            <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
+            <input id='submit' type="submit" value="Save" />
         </div>
     </form>
 </div>
@@ -76,7 +76,7 @@
         form.appendChild(newIn);
     }
     function doSubmit(menu) {
-        addHiddenInput("type", "type", menu.opetions[menu.selectedIndex].value);
+        addHiddenInput("type", "type", menu.options[menu.selectedIndex].value);
         return true;
     }
 </script>

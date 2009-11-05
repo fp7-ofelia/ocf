@@ -31,6 +31,8 @@ def slice_home(request):
     else:
         slice = Slice(owner=request.user, committed=False)
         form = SliceNameForm(instance=slice)
+#        form = SliceNameForm()
+        print form
 
     slices = request.user.slice_set.all()
     return render_to_response("clearinghouse/slice_home.html",
@@ -43,6 +45,8 @@ def slice_select_aggregates(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
     if slice.owner != request.user:
         return HttpResponseForbidden()
+    
+    print "%s" % request.method
     
     if request.method == 'GET':
         am_list = AggregateManager.objects.all()
@@ -114,10 +118,10 @@ def slice_select_topo(request, slice_id):
         return HttpResponseRedirect(reverse('slice_select_openflow', args=[slice_id]))
 
     elif request.method == "GET":
-        xml = slice_get_topo_string(slice)
+#        xml = slice_get_topo_string(slice)
         return render_to_response("clearinghouse/slice_select_topo.html",
                                   {'slice': slice,
-                                   'topo_xml': xml,
+#                                   'topo_xml': xml,
                                    })
     else:
         return HttpResponseNotAllowed("GET", "POST")
@@ -209,7 +213,7 @@ def slice_select_openflow(request, slice_id):
         
     return render_to_response("clearinghouse/slice_select_openflow.html",
                               {'slice': slice,
-                               'formset': formset,
+                               'fsformset': formset,
                                'form': form,
                                })
 
@@ -224,7 +228,7 @@ def slice_resv_summary(request, slice_id):
         
     elif request.method == "POST":
         # Delete the old slice from the AMs so we can create it again
-        for am in slice.aggMgrs.objects.all():
+        for am in slice.aggMgrs.all():
             try:
                 if am.type == AggregateManager.TYPE_OF:
                     egeni_api.delete_slice(am.url, slice_id)
@@ -251,7 +255,7 @@ def slice_resv_summary(request, slice_id):
         
         slice.committed = commit
         slice.save()
-        return HttpResponseRedirect(reverse('slice_resv_confirm', args=[slice_id]))
+        return HttpResponseRedirect(reverse('slice_resv_confirm'))
 
     else:
         return HttpResponseNotAllowed("GET", "POST")
@@ -279,12 +283,21 @@ def slice_delete(request, slice_id):
     slices.delete()
     return HttpResponseRedirect(reverse('slice_home'))
     
-def slice_resv_confirm(request, slice_id):
-    return slice_flash_detail(request, slice_id, True)
-
 def slice_get_plugin(request, slice_id):
     jar = open("%s/../plugin.jar" % REL_PATH, "rb").read()
     return HttpResponse(jar, mimetype="application/java-archive")
+
+def slice_get_topo_xml(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
+    print "Doing topo view"
+    
+    if request.method == "GET":
+        xml = slice_get_topo_string(slice)
+        return HttpResponse(xml, mimetype="text/xml")
+    else:
+        return HttpResponseNotAllowed("GET")
 
 def slice_get_topo_string(slice):
     for am in AggregateManager.objects.all():

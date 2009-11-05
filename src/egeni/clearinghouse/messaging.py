@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 def get_user_messages(user):
     '''return a queryset of all messages for a particular user'''
     
-    return user.messages
+    return user.messages.all()
 
 def get_and_delete_user_messages(user):
     '''
@@ -28,5 +28,5 @@ def add_msg_for_user(user, text, type):
     users is a list of User instances and msg is a string
     '''
     
-    user.messages.create(type=type, text=msg)
+    user.messages.create(type=type, text=text)
 
