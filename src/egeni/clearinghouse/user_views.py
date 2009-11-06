@@ -94,8 +94,10 @@ def detail(request, user_id):
 
     return render_to_response("clearinghouse/user_detail.html",
                               {'user': user,
+                               'slices': user.slice_set.all(),
                                'pwd_form': pwd_form,
                                'user_form': user_form,
+                               'show_owner': True,
                                'userprofile_form': userprofile_form,
                                })
     

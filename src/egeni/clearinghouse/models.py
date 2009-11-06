@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import permalink
-from django.forms import ModelForm, ModelMultipleChoiceField
+from django import forms
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 import egeni_api
@@ -113,7 +113,7 @@ class AggregateManager(models.Model):
             # parse the error xml
             pass
 
-class AggregateManagerForm(ModelForm):
+class AggregateManagerForm(forms.ModelForm):
     class Meta:
         model = AggregateManager
         fields = ('name', 'url', 'type', 'available', 'logo_url', 'description', 'components')
@@ -298,17 +298,17 @@ class LinkSliceStatus(models.Model):
     removed = models.BooleanField()
     has_error = models.BooleanField()
     
-class SliceForm(ModelForm):
+class SliceForm(forms.ModelForm):
     class Meta:
         model = Slice
         fields = ('name', 'controller_url', 'aggMgrs')
         
-class SliceNameForm(ModelForm):
+class SliceNameForm(forms.ModelForm):
     class Meta:
         model = Slice
         fields = ('name',)
 
-class SliceURLForm(ModelForm):
+class SliceURLForm(forms.ModelForm):
     class Meta:
         model = Slice
         fields = ('controller_url',)
@@ -344,7 +344,7 @@ class FlowSpace(models.Model):
                +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
                +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
 
-class FlowSpaceForm(ModelForm):
+class FlowSpaceForm(forms.ModelForm):
     # TODO: add validation using policy manager
     class Meta:
         model=FlowSpace
@@ -382,7 +382,7 @@ class UserProfile(models.Model):
     is_researcher = models.BooleanField("Can create slices", default=False)
     
     def __unicode__(self):
-        return "User profile for user %s" % self.user.username
+        return "%s" % self.user
     
     @classmethod
     def get_or_create_profile(cls, user):
@@ -405,22 +405,25 @@ class UserProfile(models.Model):
                                 )
         return profile
 
-class UserProfileFormNonSU(ModelForm):
+class UserProfileFormNonSU(forms.ModelForm):
     class Meta:
         model = UserProfile
         exclude = ('user', 'created_by', 'is_aggregate_admin', 'is_user_admin', 'is_researcher')
         
-class UserProfileFormSU(ModelForm):
+class UserProfileFormSU(forms.ModelForm):
     class Meta:
         model = UserProfile
         exclude = ('user', 'created_by',)
 
-class UserFormNonSU(ModelForm):
+class UserFormNonSU(forms.ModelForm):
     class Meta:
         model = User
         exclude = ('username', 'password', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'groups', 'user_permissions')
 
-class UserFormSU(ModelForm):
+class UserFormSU(forms.ModelForm):
     class Meta:
         model = User
         exclude = ('username', 'password', 'last_login', 'date_joined', 'groups', 'user_permissions')
+
+class SelectResearcherForm(forms.Form):
+    researcher_profile = forms.ModelChoiceField(UserProfile.objects.filter(is_researcher=True), label="Owner")

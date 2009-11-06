@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
+from django.contrib.auth.decorators import user_passes_test
 from django.forms.models import inlineformset_factory
 import egeni_api, plc_api
 import os
@@ -17,34 +18,67 @@ POS_FIELD = "pos"
 
 REL_PATH = "."
 
+def can_access(user):
+    '''Can the user access the user views?'''
+    profile = UserProfile.get_or_create_profile(user)
+    return user.is_staff or profile.is_user_admin or profile.is_researcher
+
+def check_access(user, slice):
+    '''Can the user edit/view the slice?'''
+    users = UserProfile.objects.filter(created_by=user).values_list('user', flat=True)
+    return user.is_superuser or user.is_staff or slice.owner == user or slice.owner in users
+
+@user_passes_test(can_access)
 def slice_home(request):
     '''Show the list of slices, and form for creating new slice'''
-
+    
     # if the user is posting a create request
     if request.method == 'POST':
-        slice = Slice(owner=request.user, committed=False)
+        if request.user.is_staff:
+            owner_form = SelectResearcherForm(request.POST)
+            if owner_form.is_valid():
+                owner_profile = owner_form.cleaned_data['researcher_profile']
+                owner = owner_profile.user
+        elif UserProfile.get_or_create_profile(request.user).is_researcher:
+            owner = request.user
+        else:
+            return HttpResponseForbidden("You don't have permission to create a slice.")
+
+        slice = Slice(owner=owner, committed=False)
         form = SliceNameForm(request.POST, instance=slice)
-        if form.is_valid():
+        if owner and form.is_valid():
             slice = form.save()
             return HttpResponseRedirect(reverse("slice_select_aggregates", kwargs={"slice_id": slice.id}))
 
     else:
-        slice = Slice(owner=request.user, committed=False)
-        form = SliceNameForm(instance=slice)
-#        form = SliceNameForm()
-        print form
+        form = SliceNameForm()
+        if request.user.is_staff:
+            owner_form = SelectResearcherForm()
 
-    slices = request.user.slice_set.all()
+    if request.user.is_staff:
+        slices = Slice.objects.all()
+        show_owner = True
+    elif UserProfile.get_or_create_profile(request.user).is_user_admin:
+        users = UserProfile.objects.filter(created_by=request.user).values_list('user', flat=True)
+        slices = Slice.objects.filter(owner__in=users)
+        show_owner = True
+    else:
+        slices = request.user.slice_set.all()
+        show_owner = False
+    
     return render_to_response("clearinghouse/slice_home.html",
                               {'slices': slices,
                                'aggMgrs': AggregateManager.objects.all(),
+                               'owner_form': owner_form,
+                               'show_owner': show_owner,
                                'form': form})
 
+@user_passes_test(can_access)
 def slice_select_aggregates(request, slice_id):
     '''Show a list of Aggregates and select some'''
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
     
     print "%s" % request.method
     
@@ -64,10 +98,11 @@ def slice_select_aggregates(request, slice_id):
     
     return HttpResponseNotAllowed("GET", "POST")
 
+@user_passes_test(can_access)
 def slice_select_topo(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
 
     if request.method == "POST":
         link_ids = request.POST.getlist(LINK_ID_FIELD)
@@ -126,10 +161,11 @@ def slice_select_topo(request, slice_id):
     else:
         return HttpResponseNotAllowed("GET", "POST")
 
+@user_passes_test(can_access)
 def slice_select_openflow(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
 
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, FlowSpace)
@@ -217,10 +253,13 @@ def slice_select_openflow(request, slice_id):
                                'form': form,
                                })
 
+@user_passes_test(can_access)
 def slice_resv_summary(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
+
+    print "Doing resv summary"
 
     slice.committed = False
     slice.save()
@@ -265,10 +304,11 @@ def slice_resv_summary(request, slice_id):
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+@user_passes_test(can_access)
 def slice_resv_confirm(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
 
     if request.method == "GET":
         return render_to_response("clearinghouse/slice_resv_summary.html",
@@ -277,37 +317,38 @@ def slice_resv_confirm(request, slice_id):
                                    })
     return HttpResponseNotAllowed("GET")
 
-# TODO        
+@user_passes_test(can_access)
 def slice_delete(request, slice_id):
     '''Confirm delete and delete slice'''
-    slice_ids = request.POST.getlist('del_sel')
-    slices = request.user.slice_set.filter(id__in=slice_ids)
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
+
     for am in AggregateManager.objects.all():
-        for slice in slices:
-            try:
-                if am.type == AggregateManager.TYPE_OF:
-                    egeni_api.delete_slice(am.url, slice.id)
-                elif am.type == AggregateManager.TYPE_PL:
-                    plc_api.delete_slice(am.url, slice.id)
-            except Exception, e:
-                print e
-                traceback.print_exc()
-                text = "Error deleting slice %s from Aggregate %s. Will still remove from DB." % (slice.name, am.name)
-                print text
-                messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
+        try:
+            if am.type == AggregateManager.TYPE_OF:
+                egeni_api.delete_slice(am.url, slice.id)
+            elif am.type == AggregateManager.TYPE_PL:
+                plc_api.delete_slice(am.url, slice.id)
+        except Exception, e:
+            print e
+            traceback.print_exc()
+            text = "Error deleting slice %s from Aggregate %s. Will still remove from DB." % (slice.name, am.name)
+            print text
+            messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
                 
-    slices.delete()
+    slice.delete()
     return HttpResponseRedirect(reverse('slice_home'))
     
 def slice_get_plugin(request, slice_id):
     jar = open("%s/../plugin.jar" % REL_PATH, "rb").read()
     return HttpResponse(jar, mimetype="application/java-archive")
 
+@user_passes_test(can_access)
 def slice_get_topo_xml(request, slice_id):
     slice = get_object_or_404(Slice, pk=slice_id)
-    if slice.owner != request.user:
-        return HttpResponseForbidden()
-    print "Doing topo view"
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
     
     if request.method == "GET":
         xml = slice_get_topo_string(slice)

@@ -23,14 +23,7 @@ urlpatterns += patterns('egeni.clearinghouse.slice_views',
     url(r'^slice/(?P<slice_id>\w+)/select/openflow/$', 'slice_select_openflow', name='slice_select_openflow'),
     url(r'^slice/(?P<slice_id>\w+)/resv/summary$', 'slice_resv_summary', name='slice_resv_summary'),
     url(r'^slice/(?P<slice_id>\w+)/resv/confirm$', 'slice_resv_confirm', name='slice_resv_confirm'),
-)
-
-urlpatterns += patterns('django.views.generic',
-    url(r'^slice/(?P<object_id>\d+)/delete/$',
-        'create_update.delete_object', 
-        {'model': Slice,
-         'post_delete_redirect': "../../"},
-        "slice_delete"),
+    url(r'^slice/(?P<slice_id>\w+)/delete$', 'slice_delete', name='slice_delete'),
 )
 
 ################## Aggregate Managers #########################
@@ -48,3 +41,4 @@ urlpatterns += patterns('egeni.clearinghouse.user_views',
     url(r'^user/(?P<user_id>\d+)/saved/$', 'saved', name='user_saved'),
     url(r'^user/(?P<user_id>\d+)/delete/$', 'delete', name="user_delete"),
 )
+

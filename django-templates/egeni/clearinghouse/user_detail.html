@@ -4,6 +4,7 @@
 <div class="main">
     <h1>User {{ user.username }}</h1>
     <div class="new user">
+        <h2>User Info:</h2>
         <form class="new user form" method="post" action="">
             <table class="new user table">
             {{ pwd_form.as_table }}
@@ -17,6 +18,10 @@
             <input type="submit" value="Save User">
             <button type="button" class="delete button" onclick="parent.location='{% url user_delete user.id %}'" value="Delete">Delete</button>
         </form>
+    </div>
+    <div class="slices">
+        <h2>Current Slices:</h2>
+        {% include "clearinghouse/slice_list.html" %}
     </div>
 </div>
 {% endblock %}
