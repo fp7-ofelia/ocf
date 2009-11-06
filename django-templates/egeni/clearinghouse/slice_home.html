@@ -37,7 +37,7 @@
                 <td>Unreserved</td>
                 {% endif %}
                 <td>
-                    <a href="{{ slice.get_absolute_url }}">edit</a>,
+                    <a href="{% url slice_select_aggregates slice.id %}">edit</a>,
                     <a href="{% url slice_delete slice.id %}">delete</a>
                     <a href="{% url slice_resv_summary slice.id %}">summary</a>
                 </td>

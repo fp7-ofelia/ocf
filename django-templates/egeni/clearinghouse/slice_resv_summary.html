@@ -4,23 +4,67 @@
 {% block content %}
 <div class="main">
     
-    <h1>Step 4: Confirm Reservation for Slice {{ slice.name }}</h1>
+    <h1>Step 4: Reservation for Slice {{ slice.name }}</h1>
     
     {% if error_message %}
     <div class="error">
-    <p><strong>{{ error_message }}</strong></p>
+    <h2>{{ error_message }}</h2>
+    </div>
+    {% endif %}
+    
+    {% if confirm %}
+    <div class="confirm">
+    <h2>Slice reserved!</h2>
     </div>
     {% endif %}
     
     <div class="stats">
+        <h2>Summary:</h2>
         <table id="stats_table">
+            <tr><td>OpenFlow controller</td>  <td>:</td> <td>{{ slice.controller_url  }}</td></tr>
             <tr><td>Number of nodes</td>      <td>:</td> <td>{{ slice.nodes.all.count }}</td></tr>
             <tr><td>Number of links</td>      <td>:</td> <td>{{ slice.links.all.count }}</td></tr>
         </table>
     </div>
     
+    <div class="nodes list">
+        <h2>Nodes:</h2>
+        {% if slice.nodes.all.count %}
+        <ul>
+        {% for node in slice.nodes.all %}
+            <li>Node {{ node.name }}</li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        None.
+        {% endif %}
+    </div>
+    
+    <div class="links list">
+        <h2>Links:</h2>
+        {% if slice.links.all.count %}
+        <table class="links table" border="1">
+            <tr><td>From</td><td>To</td></tr>
+        {% for link in slice.links.all %}
+            <tr><td>{{ link.src.ownerNode.name }}</td><td>{{ link.dst.ownerNode.name }}</td></tr>
+        {% endfor %}
+        </table>
+        {% else %}
+        None.
+        {% endif %}
+    </div>
+    
+    {% if not slice.committed %}
     <form class="confirm reservation form" method="POST" action="">
-            <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
+        <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
     </form>
+    {% endif %}
+    
+    {% if confirm %}
+    <div class="urls">
+    <p>Return to <a href="{% url slice_home %}">Slice Control Panel</a></p>
+    </div>
+    {% endif %}
+    
 </div>
 {% endblock %}

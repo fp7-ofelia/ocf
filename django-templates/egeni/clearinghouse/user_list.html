@@ -1,0 +1,31 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>User Administration</h1>
+    <div class="list users">
+        <h2>Current Users{% if not owner.is_staff %} Created by {{ owner.username }}{% endif %}</h2>
+
+        {% if user_list.count %}
+        <ul id="users">
+            {% for user in user_list %}
+            <li><a href="{% url user_detail user.id %}">{{ user.username }}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        None defined.
+        {% endif %}
+    </div>
+    <div class="new user">
+        <h2> Create a new User. </h2>
+        <form class="new user form" method="post" action="">
+            <table class="new user table">
+	            {{ pwd_form.as_table }}
+	            {{ user_form.as_table }}
+	            {{ userprofile_form.as_table }}
+            </table>
+            <input type="submit" value="Create User">
+        </form>
+    </div>
+</div>
+{% endblock %}

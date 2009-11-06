@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import permalink
 from django.forms import ModelForm, ModelMultipleChoiceField
+from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 import egeni_api
 import plc_api
@@ -376,9 +377,9 @@ class DatedMessage(models.Model):
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
     created_by = models.ForeignKey(User, null=True, blank=True, related_name="created_user_set")
-    is_aggregate_admin = models.BooleanField()
-    is_user_admin = models.BooleanField()
-    is_researcher = models.BooleanField()
+    is_aggregate_admin = models.BooleanField("Can add aggregates", default=False)
+    is_user_admin = models.BooleanField("Can add users", default=False)
+    is_researcher = models.BooleanField("Can create slices", default=False)
     
     def __unicode__(self):
         return "User profile for user %s" % self.user.username
@@ -403,3 +404,23 @@ class UserProfile(models.Model):
                                 is_researcher=False,
                                 )
         return profile
+
+class UserProfileFormNonSU(ModelForm):
+    class Meta:
+        model = UserProfile
+        exclude = ('user', 'created_by', 'is_aggregate_admin', 'is_user_admin', 'is_researcher')
+        
+class UserProfileFormSU(ModelForm):
+    class Meta:
+        model = UserProfile
+        exclude = ('user', 'created_by',)
+
+class UserFormNonSU(ModelForm):
+    class Meta:
+        model = User
+        exclude = ('username', 'password', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'groups', 'user_permissions')
+
+class UserFormSU(ModelForm):
+    class Meta:
+        model = User
+        exclude = ('username', 'password', 'last_login', 'date_joined', 'groups', 'user_permissions')

@@ -1,0 +1,22 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>User {{ user.username }}</h1>
+    <div class="new user">
+        <form class="new user form" method="post" action="">
+            <table class="new user table">
+            {{ pwd_form.as_table }}
+            <tr>
+                <td><strong><label for="change_pwd">Change password?</label></strong></td>
+                <td><input type="checkbox" id="change_pwd" name="change_pwd" value="change_pwd" /></td>
+            </tr>
+            {{ user_form.as_table }}
+            {{ userprofile_form.as_table }}
+            </table>
+            <input type="submit" value="Save User">
+            <button type="button" class="delete button" onclick="parent.location='{% url user_delete user.id %}'" value="Delete">Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

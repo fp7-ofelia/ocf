@@ -9,7 +9,7 @@
     <div class="announcements">
         <h2>Announcements:</h2>
         {% for a in announcements %}
-        <p>{{ a }}</p>
+        <p class="announcement msg">{{ a }}</p>
         {% empty %}
         <p>No new announcements.</p>
         {% endfor %}
@@ -19,8 +19,8 @@
         {% if show_admin %}
         <h2>Admin Functions:</h2>
         <p><a href="{% url aggmgr_admin_home %}">Aggregate Administration</a></p>
-        {% comment %}
         <p><a href="{% url user_admin_home %}">User Administration</a></p>
+        {% comment %}
         <p><a href="{% url slice_admin_home %}">Slice Administration</a></p>
         {% endcomment %}
         {% endif %}
@@ -51,7 +51,7 @@
     <div class="errors">
         <h2>Last Warnings and Errors:</h2>
         {% for error in errors %}
-        <p>{{ error.date }} - {{ error.text }}</p>
+        <p class="error msg">{{ error }}</p>
         {% empty %}
         <p>No new warnings or errors.</p>
         {% endfor %}

@@ -2,26 +2,27 @@
 
 {% block content %}
 <div class="main">
-	<div class="new_am">
-	    <h2> Create a new Aggregate Manager. </h2>
-	    <form method="post" action="">
-	    	<table class="aggmgr_form">
-	        {{ form.as_table }}
-	        </table>
-            <input type="submit" value="Add Aggregate">
-        </form>
-    </div>
+    <h1>Aggregate Administration</h1>
     <div class="list">
         <h2> Current Aggregate Managers </h2>
         {% if am_list.count %}
-        <ol id="ams">
+        <ul id="ams">
             {% for am in am_list %}
             <li><a href="{{ am.get_absolute_url }}">{{ am.name }}</a></li>
             {% endfor %}
-        </ol>
+        </ul>
         {% else %}
         None defined.
         {% endif %}
+    </div>
+    <div class="new_am">
+        <h2> Create a new Aggregate Manager. </h2>
+        <form method="post" action="">
+            <table class="aggmgr_form">
+            {{ form.as_table }}
+            </table>
+            <input type="submit" value="Add Aggregate">
+        </form>
     </div>
 </div>
 {% endblock %}

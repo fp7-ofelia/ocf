@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from egeni.clearinghouse.models import *
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 ################## General #########################
@@ -37,12 +38,13 @@ urlpatterns += patterns('egeni.clearinghouse.aggmgr_views',
     url(r'^aggmgr/$', 'home', name='aggmgr_admin_home'),
     url(r'^aggmgr/(?P<am_id>\d+)/detail/$', 'detail', name='am_detail'),
     url(r'^aggmgr/(?P<am_id>\d+)/saved/$', 'saved', name='aggmgr_saved'),
+    url(r'^aggmgr/(?P<am_id>\d+)/delete/$', 'delete', name="aggmgr_delete"),
 )
 
-urlpatterns += patterns('django.views.generic',
-    url(r'^aggmgr/(?P<object_id>\d+)/delete/$',
-        'create_update.delete_object', 
-        {'model': AggregateManager,
-         'post_delete_redirect': "../../"},
-        "aggmgr_delete"),
+################## Users #########################
+urlpatterns += patterns('egeni.clearinghouse.user_views',
+    url(r'^user/$', 'home', name='user_admin_home'),
+    url(r'^user/(?P<user_id>\d+)/detail/$', 'detail', name='user_detail'),
+    url(r'^user/(?P<user_id>\d+)/saved/$', 'saved', name='user_saved'),
+    url(r'^user/(?P<user_id>\d+)/delete/$', 'delete', name="user_delete"),
 )

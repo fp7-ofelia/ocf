@@ -222,6 +222,8 @@ def slice_resv_summary(request, slice_id):
     if slice.owner != request.user:
         return HttpResponseForbidden()
 
+    slice.committed = False
+    slice.save()
     if request.method == "GET":
         return render_to_response("clearinghouse/slice_resv_summary.html",
                                   {'slice': slice})
@@ -238,9 +240,9 @@ def slice_resv_summary(request, slice_id):
                 text = "Error deleting slice %s to re-reserve from Aggregate %s: %s. Will still remove from DB." % (slice.name, am.name, e)
                 print text
                 messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
-        
-        slice.committed = False
-        slice.save()
+                return render_to_response("clearinghouse/slice_resv_summary.html",
+                                          {'slice': slice,
+                                           'error_message': "Error reserving slice"})
         
         # get the RSpec of the Slice for each am and reserve
         commit = True
@@ -252,14 +254,28 @@ def slice_resv_summary(request, slice_id):
                 print text
                 commit = False
                 messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
+                return render_to_response("clearinghouse/slice_resv_summary.html",
+                                          {'slice': slice,
+                                           'error_message': "Error reserving slice"})
         
         slice.committed = commit
         slice.save()
-        return HttpResponseRedirect(reverse('slice_resv_confirm'))
+        return HttpResponseRedirect(reverse('slice_resv_confirm', args=(slice.id,)))
 
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+def slice_resv_confirm(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if slice.owner != request.user:
+        return HttpResponseForbidden()
+
+    if request.method == "GET":
+        return render_to_response("clearinghouse/slice_resv_summary.html",
+                                  {'slice': slice,
+                                   'confirm': True,
+                                   })
+    return HttpResponseNotAllowed("GET")
 
 # TODO        
 def slice_delete(request, slice_id):

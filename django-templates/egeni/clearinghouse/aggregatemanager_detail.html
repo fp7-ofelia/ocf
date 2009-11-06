@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="main">
+    <h1>Aggregate Manager {{ am.name }}</h1>
 	<div class="details">
-	    <h1>Aggregate Manager {{ am.name }}</h1>
 	    <div class="detail logo"><img src="{{ am.logo_url }}" /></div>
 	    <p>managed by {{ am.owner.username }}</p>
 	    <form method="post" action="">
@@ -11,8 +11,8 @@
 	        {{ form.as_table }}
 	        </table>
             <input type="submit" value="Save Changes">
+            <button type="button" class="delete button" onclick="parent.location='{% url aggmgr_delete am.id %}'" value="Delete">Delete</button>
         </form>
-        <p><a href="{% url aggmgr_delete am.id %}">Delete</a></p>
 	</div>
 	
 	{% if error_message %}
@@ -23,32 +23,32 @@
 	
 	<div class="nodes">
 	    <h2>Nodes:</h2>
-        <ol id="nodes">
+        <ul id="nodes">
             {% for node in am.local_node_set.all %}
-            <li>Node <a name="{{ node.nodeId }}">{{ node.name }}</a> 
-                <ol id="{{ nodeId }}_ifaces">
+            <li>Node <strong><a name="{{ node.nodeId }}">{{ node.name }}</a></strong> 
+                <ul id="{{ nodeId }}_ifaces">
                     {% for iface in node.interface_set.all %}
-                    <li>port {{ iface.portNum }}
+                    <li>port <strong>{{ iface.portNum }}</strong>
                         {% if iface.remoteIfaces.count %}
                         connected to
-                        <ol>
+                        <ul>
                             {% for remoteiface in iface.remoteIfaces.all %}
-                            <li>port {{ remoteiface.portNum }} of node 
+                            <li>port <strong>{{ remoteiface.portNum }}</strong> of node 
                                 <a href="#{{ remoteiface.ownerNode.nodeId }}">
-                                    {{ remoteiface.ownerNode.name }}
+                                    <strong>{{ remoteiface.ownerNode.name }}</strong>
                                 </a>
                             </li>
                             {% endfor %}
-                        </ol>
+                        </ul>
                         {% else %}
                         unconnected.
                         {% endif %}
                     </li>
                     {% endfor %}
-                </ol>
+                </ul>
             </li>
             {% endfor %}
-        </ol>
+        </ul>
 	</div>
 </div>
 {% endblock %}

@@ -1,0 +1,9 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>User {{ user.username }} was saved.</h1>
+    <p>Return to <a href="{% url user_detail user.id %}">User Detail</a></p>
+    <p>Return to <a href="{% url user_admin_home %}">User Administration</a></p>
+</div>
+{% endblock %}

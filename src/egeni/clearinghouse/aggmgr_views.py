@@ -7,7 +7,7 @@ from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.contrib.auth.decorators import user_passes_test
-from django.views.generic import list_detail
+from django.views.generic import list_detail, create_update
 
 def can_access(user):
     '''Can the user access the aggregate manager views?'''
@@ -31,7 +31,7 @@ def home(request):
         form = AggregateManagerForm(request.POST, instance=am)
         if form.is_valid():
             am = form.save()
-            return HttpResponseRedirect(am.get_absolute_url())
+            return HttpResponseRedirect(reverse("aggmgr_saved", args=(am.id,)))
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
@@ -91,3 +91,15 @@ def saved(request, am_id):
     return render_to_response("clearinghouse/aggregatemanager_saved.html",
                               {'am': am},
                               )
+
+@user_passes_test(can_access)
+def delete(request, am_id):
+    am = get_object_or_404(AggregateManager, pk=am_id)
+    if not request.user.is_staff and am.owner != request.user:
+        return HttpResponseForbidden()
+    
+    return create_update.delete_object(request,
+                                       AggregateManager,
+                                       reverse("aggmgr_admin_home"),
+                                       am_id)
+
