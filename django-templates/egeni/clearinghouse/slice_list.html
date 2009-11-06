@@ -1,0 +1,32 @@
+        {% if not slices.count %}
+        None.
+        {% else %}
+        <table class="slice_table" border="1">
+            <tr>
+                <td>Slice Name</td>
+                {% if show_owner %}<td>Owner</td>{% endif %}
+                <td>Hosts</td>
+                <td>Switches</td>
+                <td>Status</td>
+                <td>Actions</td>
+            </tr>
+            {% for slice in slices %}
+            <tr>
+                <td>{{ slice.name }}</td>
+                {% if show_owner %}<td>{{ slice.owner.username }}</td>{% endif %}
+                <td>{{ slice.nodes.count }}</td>
+                <td>{{ slice.links.count }}</td>
+                {% if slice.committed %}
+                <td>Reserved</td>
+                {% else %}
+                <td>Unreserved</td>
+                {% endif %}
+                <td>
+                    <a href="{% url slice_select_aggregates slice.id %}">edit</a>,
+                    <a href="{% url slice_delete slice.id %}">delete</a>
+                    <a href="{% url slice_resv_summary slice.id %}">summary</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
