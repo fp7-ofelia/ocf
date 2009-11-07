@@ -11,6 +11,7 @@ from django.forms.models import inlineformset_factory
 import egeni_api, plc_api
 import os
 import messaging
+from traceback import print_exc
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
@@ -261,13 +262,14 @@ def slice_resv_summary(request, slice_id):
 
     print "Doing resv summary"
 
-    slice.committed = False
-    slice.save()
     if request.method == "GET":
         return render_to_response("clearinghouse/slice_resv_summary.html",
                                   {'slice': slice})
         
     elif request.method == "POST":
+        slice.committed = False
+        slice.save()
+
         # Delete the old slice from the AMs so we can create it again
         for am in slice.aggMgrs.all():
             try:
@@ -276,6 +278,8 @@ def slice_resv_summary(request, slice_id):
                 elif am.type == AggregateManager.TYPE_PL:
                     plc_api.delete_slice(am.url, slice_id)
             except Exception, e:
+                print e
+                print_exc()
                 text = "Error deleting slice %s to re-reserve from Aggregate %s: %s. Will still remove from DB." % (slice.name, am.name, e)
                 print text
                 messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
@@ -283,12 +287,16 @@ def slice_resv_summary(request, slice_id):
                                           {'slice': slice,
                                            'error_message': "Error reserving slice"})
         
+        print "Done deleting old reservations"
+        
         # get the RSpec of the Slice for each am and reserve
         commit = True
         for am in AggregateManager.objects.all():
             try:
                 am.reserve_slice(slice)
             except Exception, e:
+                print e
+                print_exc()
                 text = "Error reserving slice %s in Aggregate %s: %s." % (slice.name, am.name, e)
                 print text
                 commit = False
@@ -296,6 +304,9 @@ def slice_resv_summary(request, slice_id):
                 return render_to_response("clearinghouse/slice_resv_summary.html",
                                           {'slice': slice,
                                            'error_message': "Error reserving slice"})
+
+        print "Done making new reservations"
+        print "Errors: %s" % (not commit,)
         
         slice.committed = commit
         slice.save()
@@ -351,21 +362,23 @@ def slice_get_topo_xml(request, slice_id):
         return HttpResponseForbidden("You don't have permission to access this slice.")
     
     if request.method == "GET":
+        for am in AggregateManager.objects.all():
+            try:
+                am.updateRSpec()
+            except Exception, e:
+                print e
+                print_exc()
+                messaging.add_msg_for_user(
+                    request.user,
+                    "Error updating RSpec for Aggregate %s: %s" % (am.name, e),
+                    DatedMessage.TYPE_ERROR)
+        print "Done update"
         xml = slice_get_topo_string(slice)
         return HttpResponse(xml, mimetype="text/xml")
     else:
         return HttpResponseNotAllowed("GET")
 
 def slice_get_topo_string(slice):
-    for am in AggregateManager.objects.all():
-        try:
-            am.updateRSpec()
-        except Exception, e:
-            messaging.add_msg_for_user(
-                request.user,
-                "Error updating RSpec for Aggregate %s: %s" % (am.name, e),
-                DatedMessage.TYPE_ERROR)
-    print "Done update"
     # get all the local nodes
     nodes = Node.objects.all().exclude(
                 is_remote=True).filter(

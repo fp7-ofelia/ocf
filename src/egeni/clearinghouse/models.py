@@ -107,7 +107,7 @@ class AggregateManager(models.Model):
                                       "slice": slice,
                                       "nodes_dict": nodes_dict,
                                       })
-            errors = plc_api.reserve_slice(self.url, rspec, slice_id)
+            errors = plc_api.reserve_slice(self.url, rspec, slice.id)
             
         if errors:
             # parse the error xml
@@ -207,6 +207,9 @@ class Slice(models.Model):
     # nodes that this slice has seen. We use this to store a user's
     # x,y settings and other per-slice per-node settings
     gui_nodes = models.ManyToManyField(Node, through="NodeSliceGUI", related_name='gui_slice_set')
+    
+    def __unicode__(self):
+        return "Slice %s owned by %s" % (self.name, self.owner.username)
     
     def get_absolute_url(self):
         return('slice_flash_detail', [str(self.id)])

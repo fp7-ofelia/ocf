@@ -21,7 +21,7 @@
     <div class="stats">
         <h2>Summary:</h2>
         <table id="stats_table">
-            <tr><td>OpenFlow controller</td>  <td>:</td> <td>{{ slice.controller_url  }}</td></tr>
+            <tr><td>OpenFlow controller</td>  <td>:</td> <td>{% if slice.controller %}{{ slice.controller_url  }}{% else %}Not defined.{% endif %}</td></tr>
             <tr><td>Number of nodes</td>      <td>:</td> <td>{{ slice.nodes.all.count }}</td></tr>
             <tr><td>Number of links</td>      <td>:</td> <td>{{ slice.links.all.count }}</td></tr>
         </table>
@@ -54,17 +54,18 @@
         {% endif %}
     </div>
     
-    {% if not slice.committed %}
     <form class="confirm reservation form" method="POST" action="">
-        <p><strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input></p>
+        <p>
+        {% if not slice.committed %}
+        <strong>Ready?</strong> <input id='submit' type="submit" value="Reserve!"></input>
+        {% endif %}
+        <button type="button" class="delete button" onclick="parent.location='{% url slice_delete slice.id %}'" value="Delete">Delete</button>
+        </p>
     </form>
-    {% endif %}
     
-    {% if confirm %}
     <div class="urls">
     <p>Return to <a href="{% url slice_home %}">Slice Control Panel</a></p>
     </div>
-    {% endif %}
     
 </div>
 {% endblock %}
