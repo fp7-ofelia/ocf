@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.contrib.auth.decorators import user_passes_test
 from django.views.generic import list_detail, create_update
-from django.contrib.auth.forms import UserCreationForm, AdminPasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm
 
 def can_access(user):
     '''Can the user access the user views?'''
@@ -48,6 +48,10 @@ def home(request):
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+    # Make sure they all have profiles
+    for u in user_list:
+        UserProfile.get_or_create_profile(u)
+    
     return render_to_response('clearinghouse/user_list.html',
                               {'owner': request.user,
                                'user_list': user_list,
@@ -72,12 +76,12 @@ def detail(request, user_id):
         UserProfileFormCls = UserProfileFormNonSU
 
     if request.method == "GET":
-        pwd_form = AdminPasswordChangeForm(user)
+        pwd_form = AdminPasswordChangeFormDisabled(user)
         user_form = UserFormCls(instance=user)
         userprofile_form = UserProfileFormCls(instance=profile)
         
     elif request.method == "POST":
-        pwd_form = AdminPasswordChangeForm(user, request.POST)
+        pwd_form = AdminPasswordChangeFormDisabled(user, request.POST)
         user_form = UserFormCls(request.POST, instance=user)
         userprofile_form = UserProfileFormCls(request.POST, instance=profile)
         if user_form.is_valid() and userprofile_form.is_valid():

@@ -3,6 +3,7 @@ from django.db.models import permalink
 from django import forms
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import AdminPasswordChangeForm
 import egeni_api
 import plc_api
 
@@ -22,14 +23,14 @@ class AggregateManager(models.Model):
     # @ivar description
     description = models.TextField(blank=True, null=True)
     
-    # @ivar components
-    components = models.TextField(blank=True, null=True)
-    
     # @ivar available
     available = models.BooleanField(default=True)
     
-    # @ivar logo_url: location where the logo is found
-    logo_url = models.URLField("Logo URL", blank=True, null=True, verify_exists=False)
+    # @ivar logo: logo for the aggregate
+    logo = models.ImageField("Aggregate Logo Image", upload_to="img/logos", blank=True, null=True)
+    
+    # @ivar location: Where the aggregate is
+    location = models.CharField("Location", max_length=200, blank=True, null=True)
     
     # @ivar url: Location where the aggregate manager can be reached
     url = models.URLField('Aggregate Manager URL', unique=True, verify_exists=False)
@@ -55,7 +56,7 @@ class AggregateManager(models.Model):
     owner = models.ForeignKey(User)
     
     def get_absolute_url(self):
-        return ('am_detail', [str(self.id)])
+        return ('aggmgr_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
 
     def __unicode__(self):
@@ -112,11 +113,17 @@ class AggregateManager(models.Model):
         if errors:
             # parse the error xml
             pass
+        
+    def get_switch_count(self):
+        return self.local_node_set.filter(type=Node.TYPE_OF).count()
+    
+    def get_host_count(self):
+        return self.local_node_set.filter(type=Node.TYPE_PL).count()
 
 class AggregateManagerForm(forms.ModelForm):
     class Meta:
         model = AggregateManager
-        fields = ('name', 'url', 'type', 'available', 'logo_url', 'description', 'components')
+        fields = ('name', 'url', 'type', 'available', 'logo', 'location', 'description')
 
 class Node(models.Model):
     '''
@@ -379,6 +386,7 @@ class DatedMessage(models.Model):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
+    affiliation = models.CharField(max_length=200, default="")
     created_by = models.ForeignKey(User, null=True, blank=True, related_name="created_user_set")
     is_aggregate_admin = models.BooleanField("Can add aggregates", default=False)
     is_user_admin = models.BooleanField("Can add users", default=False)
@@ -430,3 +438,9 @@ class UserFormSU(forms.ModelForm):
 
 class SelectResearcherForm(forms.Form):
     researcher_profile = forms.ModelChoiceField(UserProfile.objects.filter(is_researcher=True), label="Owner")
+
+class AdminPasswordChangeFormDisabled(AdminPasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(AdminPasswordChangeFormDisabled, self).__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs['disabled'] = True
+        self.fields['password2'].widget.attrs['disabled'] = True

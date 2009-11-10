@@ -6,26 +6,7 @@
     <h1>Step 1 - Select Aggregates for Slice {{ slice.name }}</h1>
     <div class="slice select aggregates">
         <form method="post" action="" class="slice aggregate form">
-            <table class="slice aggregate table" border="1">
-                <tr>
-                    <td></td>
-                    <td>Logo</td>
-                    <td>Description</td>
-                    <td>Components</td>
-                    <td>Status</td>
-                </tr>
-                {% for am in am_list %}
-                <tr>
-                    <td><input type="checkbox" name="am" value="{{ am.pk }}"
-                    {% if not am.available %}disabled{% endif %}
-                    {{ am|check_in_set:slice.aggMgrs.all }}/></td>
-                    <td>{% if am.logo_url %}<img class="am_logo" src="{{ am.logo_url }}" />{% endif %}</td>
-                    <td>{{ am.description }}</td>
-                    <td>{{ am.components }}</td>
-                    <td>{% if am.available %}Active{% else %}Inactive{% endif %}</td>
-                </tr>
-                {% endfor %}
-            </table>
+            {% include "clearinghouse/aggregatemanager_table.html" %}
             <input type='submit' value="Select" />
         </form>
     </div>

@@ -66,6 +66,9 @@ def slice_home(request):
     else:
         slices = request.user.slice_set.all()
         show_owner = False
+
+    if not request.user.is_staff:
+        owner_form = None
     
     return render_to_response("clearinghouse/slice_home.html",
                               {'slices': slices,
@@ -87,6 +90,7 @@ def slice_select_aggregates(request, slice_id):
         am_list = AggregateManager.objects.all()
         return render_to_response("clearinghouse/slice_select_aggregates.html",
                                   {'am_list': am_list,
+                                   'show_input': True,
                                    'slice': slice,
                                    })
         

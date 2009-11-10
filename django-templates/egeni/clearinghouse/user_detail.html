@@ -1,17 +1,23 @@
 {% extends "clearinghouse/base.html" %}
 
 {% block content %}
+<script type="text/javascript">
+    function togglePwd() {
+        document.getElementById("id_password1").disabled = !document.getElementById("id_password1").disabled;
+        document.getElementById("id_password2").disabled = !document.getElementById("id_password2").disabled;
+    }
+</script>
 <div class="main">
     <h1>User {{ user.username }}</h1>
     <div class="new user">
         <h2>User Info:</h2>
         <form class="new user form" method="post" action="">
             <table class="new user table">
-            {{ pwd_form.as_table }}
             <tr>
                 <td><strong><label for="change_pwd">Change password?</label></strong></td>
-                <td><input type="checkbox" id="change_pwd" name="change_pwd" value="change_pwd" /></td>
+                <td><input type="checkbox" id="change_pwd" name="change_pwd" value="change_pwd" onChange="togglePwd()" /></td>
             </tr>
+            {{ pwd_form.as_table }}
             {{ user_form.as_table }}
             {{ userprofile_form.as_table }}
             </table>

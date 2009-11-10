@@ -4,20 +4,26 @@
 <div class="main">
     <h1>User Administration</h1>
     <div class="list users">
-        <h2>Current Users{% if not owner.is_staff %} Created by {{ owner.username }}{% endif %}</h2>
-
+        <h2>Current users{% if not owner.is_staff %} Created by {{ owner.username }}{% endif %}:</h2>
         {% if user_list.count %}
-        <ul id="users">
+        <table class="users" border="1">
+            <tr><td>Username</td><td>Real Name</td><td>Affiliation</td><td>Slices</td><td>Actions</td></tr>
             {% for user in user_list %}
-            <li><a href="{% url user_detail user.id %}">{{ user.username }}</a></li>
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.get_profile.affiliation }}</td>
+                <td>{{ user.slice_set.all.count }}</td>
+                <td><a href="{% url user_detail user.id %}">edit</a>, <a href="{% url user_delete user.id %}">delete</a></td>
+            </tr>
             {% endfor %}
-        </ul>
+        </table>
         {% else %}
         None defined.
         {% endif %}
     </div>
     <div class="new user">
-        <h2> Create a new User. </h2>
+        <h2> Create a new user: </h2>
         <form class="new user form" method="post" action="">
             <table class="new user table">
 	            {{ pwd_form.as_table }}

@@ -4,7 +4,7 @@
 <div class="main">
     <h1>Aggregate Manager {{ am.name }}</h1>
 	<div class="details">
-	    <div class="detail logo"><img src="{{ am.logo_url }}" /></div>
+	    <div class="detail logo">{% if am.logo %}<img src="{{ am.logo.url }}" />{% endif %}</div>
 	    <p>managed by {{ am.owner.username }}</p>
 	    <form method="post" action="">
 	    	<table class="aggmgr_form">
