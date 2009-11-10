@@ -5,9 +5,23 @@ Here's what you need to do to run the clearinghouse:
 	sudo /sbin/OCICLI http://software.opensuse.org/ymp/devel:languages:python/openSUSE_11.1/python-django.ymp
 	(Make sure you add the devel:languages:python repo)
 
-2- install missing python modules. On openSuSE do:
+2- install missing python modules. Assuming you have Python 2.6 you will need:
+
+	Princeton's SFA
+		Pull from svn co http://svn.planet-lab.org/svn/sfa/trunk sfa
+		Set the path in settings.py correctly.
+	ZSI
+		http://pywebsvcs.sourceforge.net/
+	M2Crypto
+		http://chandlerproject.org/Projects/MeTooCrypto
+	Suds
+		https://fedorahosted.org/suds/
+	An XPath implementation, e.g. py-dom-xpath
+		http://code.google.com/p/py-dom-xpath/
+	
+    On openSuSE some of these you can add some (all?) of them via zypper:
     	
-	sudo zypper install python-openssl python-m2crypto python-suds
+	   sudo zypper install python-openssl python-m2crypto python-suds
 
 3- get the geniwrapper code. Go to the directory where you want to put the wrapper code. Then do:
   

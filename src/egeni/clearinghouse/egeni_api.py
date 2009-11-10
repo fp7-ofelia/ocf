@@ -11,16 +11,16 @@ from sfa.util import soapprotocol
 from sfa.trust.certificate import Keypair
 
 from xml.dom import minidom
-from xml import xpath
+from xpath import xpath
 import models
 from django.db.models import Count
 import traceback
 
 OFSWITCH_DEFAULT_IMG = "/img/switch.png"
 
-key_file = '../cred/seethara.pkey'
-cert_file = '../cred/seethara.cert'
-cred_file = '../cred/seethara.cred'
+key_file = '../../cred/seethara.pkey'
+cert_file = '../../cred/seethara.cert'
+cred_file = '../../cred/seethara.cred'
 
 CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)

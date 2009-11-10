@@ -31,7 +31,9 @@ class SiteLockDown(object):
         if not request.user.is_authenticated () and not \
            (request.path == settings.LOGIN_URL or
             path.startswith ('/admin/') or
-            path.startswith ('/accounts/passwd/reset')
+            path.startswith ('/accounts/passwd/reset') or
+            path.startswith ('/img/') or
+            path.startswith ('/css/')
            ):
             return HttpResponseRedirect (login_url)
 

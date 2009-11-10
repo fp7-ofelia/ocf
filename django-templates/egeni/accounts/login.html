@@ -11,7 +11,16 @@
         <p><b><font color=red>Your username and password didn't match. Please try again.</font></b></p>
         {% endif %}
     </div>
-
+    <div class="geni_info">
+        The Global Environment for Network Innovations (GENI), a
+        project sponsored by the National Science Foundation, is
+        open and broadly inclusive, providing collaborative and
+        exploratory environments for academia, industry and the
+        public to catalyze groundbreaking discoveries and
+        innovation in these emerging global networks.<br/>
+		<br/>
+        To learn more about GENI, click <a href="http://www.geni.net/">here</a>.
+    </div>
     <div class="login">
         <form method="post" action="{% url django.contrib.auth.views.login %}">
             <table id="login_inputs">
@@ -35,17 +44,6 @@
     <div class="contact">
         If you have not yet created an account or forgot your password,
         please <a href="mailto:clearinghouse@csl-mail1.stanford.edu">contact us</a>.
-    </div>
-    <div class="geni_info">
-        The Global Environment for Network Innovations (GENI), a
-        project sponsored by the National Science Foundation, is
-        open and broadly inclusive, providing collaborative and
-        exploratory environments for academia, industry and the
-        public to catalyze groundbreaking discoveries and
-        innovation in these emerging global networks.
-    </div>
-    <div class="learn_more">
-        To learn more about GENI, click <a href="http://www.geni.net/">here</a>.
     </div>
 </div>
 {% endblock %}

@@ -4,8 +4,8 @@ Created on Oct 17, 2009
 @author: jnaous
 '''
 
-import elementtree.ElementTree as et
-from elementtree.ElementTree import ElementTree 
+import xml.etree.ElementTree as et
+from xml.etree.ElementTree import ElementTree 
 import models
 from django.db.models import Count
 import egeni_api

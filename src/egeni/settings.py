@@ -1,10 +1,25 @@
 # Django settings for egeni project.
+import sys
 import os
+from os.path import abspath, dirname, join
+
+# Check include paths for a number of modules
+SFA_PATH='../../../sfa/'  # Princeton's SFA from http://svn.planet-lab.org/svn/sfa/trunk
+
+sys.path.insert(0, abspath(join(dirname(__file__), SFA_PATH)))
+try:
+    from sfa.util import soapprotocol 
+except ImportError as e:
+    sys.stderr.write( "WARNING: Can't find sfa.util from the Princeton SFA package.\n")
+    sys.stderr.write( "         This will cause slice management to fail later.\n")
 
 EGENI_DIR = os.path.join(os.path.dirname(__file__), '../..')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+# For serving static content - dev version only
+STATIC_DOC_ROOT = os.path.join(os.path.dirname(__file__), '../../site_media')
 
 ADMINS = (
     ('Jad Naous', 'jnaous@stanford.edu'),
