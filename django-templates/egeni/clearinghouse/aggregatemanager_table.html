@@ -1,0 +1,35 @@
+{% load ch_extras %}
+        {% if am_list.count %}
+        <table class="slice aggregate table" border="1">
+            <tr>
+                {% if show_input %}<td></td>{% endif %}
+                <td>Logo</td>
+                <td>Location</td>
+                <td>Description</td>
+                <td>Switches</td>
+                <td>Hosts</td>
+                {% if show_owner %}<td>Owner</td>{% endif %}
+                <td>Status</td>
+                {% if show_actions %}<td>Actions</td>{% endif %}
+            </tr>
+            {% for am in am_list %}
+            <tr>
+                {% if show_input %}
+                <td><input type="checkbox" name="am" value="{{ am.pk }}"
+                    {% if not am.available %}disabled{% endif %}
+                    {{ am|check_in_set:slice.aggMgrs.all }}/></td>
+                {% endif %}
+                <td>{% if am.logo %}<img class="am_logo" src="{{ am.logo.url }}" />{% endif %}</td>
+                <td>{{ am.location }}</td>
+                <td>{{ am.description }}</td>
+                <td>{{ am.get_switch_count }}</td>
+                <td>{{ am.get_host_count }}</td>
+                {% if show_owner %}<td><a href="{% url user_detail am.owner.id %}">{{ am.owner.username }}</a></td>{% endif %}
+                <td>{% if am.available %}Active{% else %}Inactive{% endif %}</td>
+                {% if show_actions %}<td><a href="{% url aggmgr_detail am.id %}">edit</a>, <a href="{% url aggmgr_delete am.id %}">delete</a></td>{% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        None defined.
+        {% endif %}
