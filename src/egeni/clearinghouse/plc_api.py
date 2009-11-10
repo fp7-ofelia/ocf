@@ -4,8 +4,11 @@ Created on Oct 17, 2009
 @author: jnaous
 '''
 
-import xml.etree.ElementTree as et
-from xml.etree.ElementTree import ElementTree 
+try:
+    import xml.etree.ElementTree as et
+except:
+    import elementtree.ElementTree as et
+
 import models
 from django.db.models import Count
 import egeni_api
@@ -84,7 +87,7 @@ def update_rspec(self_am):
     '''
     
     xml_str = get_rspec(self_am.url)
-    tree = ElementTree(et.fromstring(xml_str))
+    tree = et.ElementTree(et.fromstring(xml_str))
     
     debug("Parsing xml:")
     debug(xml_str)

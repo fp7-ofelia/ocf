@@ -5,15 +5,7 @@
     <h1>Aggregate Administration</h1>
     <div class="list">
         <h2> Current Aggregate Managers </h2>
-        {% if am_list.count %}
-        <ul id="ams">
-            {% for am in am_list %}
-            <li><a href="{{ am.get_absolute_url }}">{{ am.name }}</a></li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        None defined.
-        {% endif %}
+        {% include "clearinghouse/aggregatemanager_table.html" %}
     </div>
     <div class="new_am">
         <h2> Create a new Aggregate Manager. </h2>

@@ -8,6 +8,8 @@ from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
 from django.contrib.auth.decorators import user_passes_test
 from django.views.generic import list_detail, create_update
+import traceback
+import messaging
 
 def can_access(user):
     '''Can the user access the aggregate manager views?'''
@@ -35,8 +37,11 @@ def home(request):
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+    print form.as_table()
     return render_to_response('clearinghouse/aggregatemanager_list.html',
                               {'am_list': am_list,
+                               'show_owner': request.user.is_staff,
+                               'show_actions': True,
                                'form': form,
                                })
 
@@ -56,6 +61,10 @@ def detail(request, am_id):
             am.updateRSpec()
         except Exception, e:
             print "Update RSpec Exception"; print e
+            traceback.print_exc()
+            messaging.add_msg_for_user(request.user, 
+                                       "Error updating RSpec for Aggregate %s: %s" % (am.name, e),
+                                       DatedMessage.TYPE_ERROR)
             return render_to_response("clearinghouse/aggregatemanager_detail.html",
                                       {'am':am,
                                        'form': form,

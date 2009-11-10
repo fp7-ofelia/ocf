@@ -10,7 +10,8 @@ urlpatterns = patterns('django.views.generic',
 
 urlpatterns += patterns('egeni.clearinghouse.views',
     url(r'^$', 'home', name='home'),
-    url(r'img/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img')
+    url(r'^img/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
+    url(r'^media/img/logos/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
 )
 
 ################## Slices #########################
@@ -29,7 +30,7 @@ urlpatterns += patterns('egeni.clearinghouse.slice_views',
 ################## Aggregate Managers #########################
 urlpatterns += patterns('egeni.clearinghouse.aggmgr_views',
     url(r'^aggmgr/$', 'home', name='aggmgr_admin_home'),
-    url(r'^aggmgr/(?P<am_id>\d+)/detail/$', 'detail', name='am_detail'),
+    url(r'^aggmgr/(?P<am_id>\d+)/detail/$', 'detail', name='aggmgr_detail'),
     url(r'^aggmgr/(?P<am_id>\d+)/saved/$', 'saved', name='aggmgr_saved'),
     url(r'^aggmgr/(?P<am_id>\d+)/delete/$', 'delete', name="aggmgr_delete"),
 )
