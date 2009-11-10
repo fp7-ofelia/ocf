@@ -5,24 +5,23 @@
     <h1>Aggregate Manager {{ am.name }}</h1>
 	<div class="details">
 	    <div class="detail logo">{% if am.logo %}<img src="{{ am.logo.url }}" />{% endif %}</div>
-	    <p>managed by {{ am.owner.username }}</p>
+	    <p>This Aggregate is managed by {{ am.owner.username }}</p>
 	    <form method="post" action="">
-	    	<table class="aggmgr_form">
+	    	<table class="formtable aggmgr_form">
 	        {{ form.as_table }}
 	        </table>
             <input type="submit" value="Save Changes">
             <button type="button" class="delete button" onclick="parent.location='{% url aggmgr_delete am.id %}'" value="Delete">Delete</button>
         </form>
 	</div>
-	
-	{% if error_message %}
-	<div class="error">
-	<p><strong>{{ error_message }}</strong></p>
-	</div>
-	{% endif %}
-	
+	<br/>
 	<div class="nodes">
-	    <h2>Nodes:</h2>
+	    <h2>Nodes in this Aggregate:</h2>
+		{% if error_message %}
+		<div class="errorlist">
+		<p><strong>{{ error_message }}</strong></p>
+		</div>
+		{% endif %}
         <ul id="nodes">
             {% for node in am.local_node_set.all %}
             <li>Node <strong><a name="{{ node.nodeId }}">{{ node.name }}</a></strong> 

@@ -332,7 +332,7 @@ h1 {
 	}
 
 h2 {
-	font-size: 1.3em;
+	font-size: 1.2em;
 	}
 
 h2.pagetitle {
@@ -561,12 +561,15 @@ body {
 /*	Begin Headers */
 h1 {
 	padding-top: 0px;
-	padding-bottom: 10px;
-	margin: 0;
+	padding-bottom: 5px;
+	margin: 0px 0px 25px 0px;
+	border-width: 0px 0px 1px 0px;
+	border-style: solid;
+	border-color: #CCC;
 	}
 
 h2 {
-	margin: 30px 0 0;
+	margin: 15px 0 5px;
 	}
 
 h2.pagetitle {
@@ -955,8 +958,11 @@ div.functions h2 {
 }
 
 div.functions a {
-    font-size:13px;
-    text-decoration:underline;
+    font-size:14px;
+}
+
+div.functions p {
+    margin: 11px;
 }
 
 div.stats {
@@ -987,33 +993,66 @@ div.errors {
         padding-top: 1px;
 }
 
+.errorlist {
+    color: #F00;
+}
+
 /* 
-	Clean and crisp table styles
-	written by Mats Lindblad http://blogs.su.se/matlin/
+    Table Styles
 */
 
-table.slice_table {
+/* Table for Forms */
+
+table.formtable {
 	border-collapse: collapse;
 	border: 1px solid #CCC;
 	margin-bottom:10px;
-	margin-top:5px;}
-table.slice_table th {
-	padding: 5px 10px;
-	color: #047;
-	font-weight: bold;
-	text-align: left;
+	margin-top:5px;
 }
-table.slice_table thead th {
-	border: 1px solid #87CEFA;
-	white-space: nowrap;
-	background: #F0F8FF;
+
+table.formtable_noborder {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:10px;
+	margin-top:5px;
 }
-table.slice_table tbody td ,tbody th {
+
+	
+table.formtable tbody td ,tbody th {
 	padding: 5px 10px;
 	background: #fff;
 	color: #000;
 }
-table.slice_table tbody th {
+
+table.formtable_noborder tbody td ,tbody th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+	
+/* Full Table */
+
+table.fulltable {
+	border-collapse: collapse;
+	border: 1px solid #CCC;
+	margin-bottom:10px;
+	margin-top:5px;
+}
+table.fulltable thead {
+	white-space: nowrap;
+	background: #E0E8FF;
+	font-weight: bold;
+	padding: 3px;
+}
+table.fulltable thead td {
+    padding: 5px 10px;
+}
+table.fulltable tbody td ,tbody th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+table.fulltable tbody th {
 	color: #005;
 	font-weight: normal;
 	font-variant: normal;

@@ -7,13 +7,14 @@
     <div class="new_slice">
         <h2>Create New Slice:</h2>
         <form id="add_slice" method="POST" action="">
-            <table class="slice_name">        
+            <table class="formtable slice_name">        
             {{ form.as_table }}
             {% if owner_form %}{{ owner_form.as_table }}{% endif %}
             </table>
             <input id="create_submit" type="submit" value="Create"></input>
         </form>
     </div>
+	<br/>
     <div id="slices">
         <h2>Current Slices:</h2>
         {% include "clearinghouse/slice_list.html" %}

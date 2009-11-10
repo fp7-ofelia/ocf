@@ -15,7 +15,7 @@
     <form class="form" onsubmit="return doSubmit(this.typesdropdown)" id='sliceForm' method="POST" action="">
         <div class="controller form">
 	        <h2>OpenFlow Controller:</h2>
-	        <table class="controller table">
+	        <table class="formtable controllertable">
 	        {{ form.as_table }}
 	        </table>
         </div>
@@ -32,7 +32,7 @@
                 </select>
             </div>
             
-            <div class="flowspace table">
+            <div class="fulltable flowspacetable">
 	            {{ fsformset.management_form }}
 	            <table border="1">
 	                <tr>

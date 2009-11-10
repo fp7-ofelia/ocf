@@ -52,7 +52,7 @@
 	        
 	        <h2>Flow Space Description</h2>
 	        {{ fsformset.management_form }}
-	        <table class="flowspace_table" border="1">
+	        <table class="fulltable flowspace_table" border="1">
 	        	<tr>
 	       			{% for field in fsformset.forms.0 %}
 	       				{% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}

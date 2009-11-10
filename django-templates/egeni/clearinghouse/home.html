@@ -18,9 +18,9 @@
     <div class="functions">
         {% if show_admin %}
         <h2>Admin Functions:</h2>
-        <p><a href="{% url aggmgr_admin_home %}">Aggregate Administration</a></p>
-        <p><a href="{% url user_admin_home %}">User Administration</a></p>
-        <p><a href="{% url slice_home %}">Slice Administration</a></p>
+        <p><a href="{% url aggmgr_admin_home %}" <img style="vertical-align:middle; margin-top: -3px;" src="/img/aggregate-tiny.png"> Aggregate Administration</a></p>
+        <p><a href="{% url slice_home %}"><img style="vertical-align:middle; margin-top: -3px;" src="/img/slice-tiny.png"> Slice Administration</a></p>
+        <p><a href="{% url user_admin_home %}"><img style="vertical-align:middle; margin-top: -3px;" src="/img/users-tiny.png"> User Administration</a></p>
         {% endif %}
         {% if show_user %}
         <h2>User Functions:</h2>
@@ -38,11 +38,11 @@
     <div class="stats">
         <h2>Global GENI Stats:</h2>
         <table id="stats_table">
-            <tr><td>Number of aggregates</td> <td>:</td> <td>{{ aggmgr_count }}</td></tr>
-            <tr><td>Number of nodes</td>      <td>:</td> <td>{{ node_count }}</td></tr>
-            <tr><td>Number of links</td>      <td>:</td> <td>{{ link_count }}</td></tr>
-            <tr><td>Number of slices</td>     <td>:</td> <td>{{ slice_count }}</td></tr>
-            <tr><td>Number of users</td>      <td>:</td> <td>{{ user_count }}</td></tr>
+            <tr><td>Total registered Aggregates:</td>  <td>{{ aggmgr_count }}</td></tr>
+            <tr><td>Total Nodes for all Aggregates:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>       <td>{{ node_count }}</td></tr>
+            <tr><td>Total Links for all Aggregates:</td>       <td>{{ link_count }}</td></tr>
+            <tr><td>Currently Active Slices:</td>      <td>{{ slice_count }}</td></tr>
+            <tr><td>Registered Users in the System:</td>       <td>{{ user_count }}</td></tr>
         </table>
     </div>
     
