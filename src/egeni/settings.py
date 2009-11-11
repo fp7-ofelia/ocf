@@ -9,7 +9,7 @@ SFA_PATH='../../../sfa/'  # Princeton's SFA from http://svn.planet-lab.org/svn/s
 sys.path.insert(0, abspath(join(dirname(__file__), SFA_PATH)))
 try:
     from sfa.util import soapprotocol 
-except ImportError as e:
+except ImportError, e:
     sys.stderr.write( "WARNING: Can't find sfa.util from the Princeton SFA package.\n")
     sys.stderr.write( "         This will cause slice management to fail later.\n")
 
@@ -20,6 +20,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # For serving static content - dev version only
 STATIC_DOC_ROOT = os.path.join(os.path.dirname(__file__), '../../site_media')
+# For serving uploaded images
+#UPLOAD_IMAGE_ROOT = os.path.joing(os.path.dirname(__file__), '../../media/site_media')
+
 
 ADMINS = (
     ('Jad Naous', 'jnaous@stanford.edu'),
@@ -28,7 +31,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = EGENI_DIR + '/egeni.db'             # Or path to database file if using sqlite3.
+DATABASE_NAME = os.path.join(EGENI_DIR, 'egeni.db')             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
