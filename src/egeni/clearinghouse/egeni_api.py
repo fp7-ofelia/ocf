@@ -17,12 +17,14 @@ from sfa.trust.certificate import Keypair
 import models
 from django.db.models import Count
 import traceback
+import os
+from django.conf import settings
 
 OFSWITCH_DEFAULT_IMG = "/img/switch.png"
 
-key_file = '../../cred/seethara.pkey'
-cert_file = '../../cred/seethara.cert'
-cred_file = '../../cred/seethara.cred'
+key_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.pkey')
+cert_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.cert')
+cred_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.cred')
 
 CH_hrn = 'plc.openflow.seethara'
 key = Keypair(filename=key_file)
