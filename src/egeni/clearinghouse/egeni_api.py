@@ -53,7 +53,7 @@ def connect_to_soap_server(am_url):
 
     server[am_url]= soapprotocol.get_server(am_url, key_file, cert_file)
 
-def reserve_slice(am_url, rspec, slice_id):
+def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
     '''
     Reserves the slice identified by slice_id or
     updates the slice if already reserved on the AM.
@@ -64,7 +64,7 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server
+    global server, key
     if am_url not in server:
         connect_to_soap_server(am_url)
 
@@ -73,13 +73,17 @@ def reserve_slice(am_url, rspec, slice_id):
     slice_cred = file('../cred/slice_egeni.cred').read()
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
-    result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec), request_hash)
+    if is_planetlab:
+        result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec))
+    else:
+        request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
+        result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec), request_hash)
+
     debug(result)
     
     return ""    
 
-def delete_slice(am_url, slice_id):
+def delete_slice(am_url, slice_id, is_planetlab=0):
     '''
     Delete the slice.
     '''
@@ -87,7 +91,7 @@ def delete_slice(am_url, slice_id):
     # TODO: remove after debugging
     return
     
-    global server
+    global server, key
     if am_url not in server:
         connect_to_soap_server(am_url)
 
@@ -96,11 +100,14 @@ def delete_slice(am_url, slice_id):
     slice_cred = file('../cred/slice_egeni.cred').read()
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    request_hash = key.compute_hash([slice_cred, str(slice_id)])
-    result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
+    if is_planetlab:
+        result = server[am_url].delete_slice(slice_cred, str(slice_id), str(rspec))
+    else:
+        request_hash = key.compute_hash([slice_cred, str(slice_id)])
+        result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
     
 
-def get_rspec(am_url):
+def get_rspec(am_url, is_planetlab=0):
     '''
     Returns the RSpec of available resources.
     '''
@@ -244,11 +251,12 @@ def get_rspec(am_url):
 
     # The HRN is used to identify the person issuing this call.
     # Currently unused
-    debug("computing hash")
-    request_hash = key.compute_hash([CH_cred, CH_hrn])
     debug("Getting result")
-    result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
-#    print result
+    if is_planetlab:
+        result = server[am_url].get_resources(CH_cred)
+    else:
+        request_hash = key.compute_hash([CH_cred, CH_hrn])
+        result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
     return result
 
 

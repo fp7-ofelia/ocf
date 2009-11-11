@@ -9,7 +9,7 @@ SFA_PATH='../../../sfa/'  # Princeton's SFA from http://svn.planet-lab.org/svn/s
 sys.path.insert(0, abspath(join(dirname(__file__), SFA_PATH)))
 try:
     from sfa.util import soapprotocol 
-except ImportError as e:
+except ImportError, e:
     sys.stderr.write( "WARNING: Can't find sfa.util from the Princeton SFA package.\n")
     sys.stderr.write( "         This will cause slice management to fail later.\n")
 
