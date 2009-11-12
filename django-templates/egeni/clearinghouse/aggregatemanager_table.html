@@ -5,6 +5,7 @@
 				<tr>
 	                {% if show_input %}<td></td>{% endif %}
 	                <td>Logo</td>
+	                <td>Name</td>
 	                <td>Location</td>
 	                <td>Description</td>
 	                <td><img src="/img/switch-tiny.png"></td>
@@ -22,6 +23,7 @@
                     {{ am|check_in_set:slice.aggMgrs.all }}/></td>
                 {% endif %}
                 <td>{% if am.logo %}<img class="am_logo" src="{{ am.logo.url }}" />{% endif %}</td>
+                <td>{{ am.name }}</td>
                 <td>{{ am.location }}</td>
                 <td>{{ am.description }}</td>
                 <td align="center">{{ am.get_switch_count }}</td>
