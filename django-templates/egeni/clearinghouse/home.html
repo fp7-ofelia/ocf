@@ -8,11 +8,15 @@
     
     <div class="announcements">
         <h2>Announcements:</h2>
+        {% if announcements %}
+        <table class="last_announcements_table">
         {% for a in announcements %}
-        <p class="announcement msg">{{ a }}</p>
-        {% empty %}
-        <p>No new announcements.</p>
+            <tr><td>{{ a.format_date }}</td><td>{{ a.format_time }}</td><td>{{ a.text }}</td></tr>
         {% endfor %}
+        </table>
+        {% else %}
+        <p>No new announcements.</p>
+        {% endif %}
     </div>
 
     <div class="functions">
