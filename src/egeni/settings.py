@@ -20,8 +20,6 @@ TEMPLATE_DEBUG = DEBUG
 
 # For serving static content - dev version only
 STATIC_DOC_ROOT = os.path.join(os.path.dirname(__file__), '../../site_media')
-# For serving uploaded images
-#UPLOAD_IMAGE_ROOT = os.path.joing(os.path.dirname(__file__), '../../media/site_media')
 
 
 ADMINS = (
@@ -56,7 +54,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = EGENI_DIR+'/media'
+MEDIA_ROOT = os.path.join(STATIC_DOC_ROOT, "uploads")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).

@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 from egeni.clearinghouse.models import *
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 ################## General #########################
 urlpatterns = patterns('django.views.generic',
@@ -10,8 +11,14 @@ urlpatterns = patterns('django.views.generic',
 
 urlpatterns += patterns('egeni.clearinghouse.views',
     url(r'^$', 'home', name='home'),
-    url(r'^img/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
-    url(r'^media/img/logos/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
+#    url(r'^img/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
+#    url(r'^media/img/logos/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
+)
+
+urlpatterns += patterns('',
+    # TODO: Serve static content, should be removed in production deployment
+    (r'^img/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_DOC_ROOT}),
+    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 )
 
 ################## Slices #########################
