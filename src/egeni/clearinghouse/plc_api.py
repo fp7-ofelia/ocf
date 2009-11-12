@@ -161,9 +161,12 @@ def update_rspec(self_am):
     for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
         debug("Deleting %s " % n.nodeId)
         
-    models.Node.objects.filter(
-        aggMgr=self_am).exclude(
-            nodeId__in=node_ids).delete()
-    models.Interface.objects.filter(
-        ownerNode__aggMgr=self_am).exclude(
-            id__in=iface_ids).delete()
+    if node_ids:
+        models.Node.objects.filter(
+            aggMgr=self_am).exclude(
+                nodeId__in=node_ids).delete()
+    
+    if iface_ids:
+        models.Interface.objects.filter(
+            ownerNode__aggMgr=self_am).exclude(
+                id__in=iface_ids).delete()

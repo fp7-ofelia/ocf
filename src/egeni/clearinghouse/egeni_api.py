@@ -20,7 +20,11 @@ import traceback
 import os
 from django.conf import settings
 
-OFSWITCH_DEFAULT_IMG = "/img/switch.png"
+IMG_DICT = {'default': "/img/switch.png",
+            'HP': "/img/switch-5406zl.png",
+            'NEC': "/img/switch-nec-ip8800.png",
+            }
+
 
 key_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.pkey')
 cert_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.cert')
@@ -113,136 +117,7 @@ def get_rspec(am_url, is_planetlab=0):
     '''
     Returns the RSpec of available resources.
     '''
-#    return '''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-#<tns:RSpec xmlns:tns="http://yuba.stanford.edu/geniLight/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/geniLight/rspec http://yuba.stanford.edu/geniLight/rspec.xsd">
-#
-#  <tns:version>1.0</tns:version>
-#
-#  <tns:remoteEntry>
-#    <tns:remoteURL>pl.princeton.edu:2134</tns:remoteURL>
-#    <tns:remoteType>PLNode</tns:remoteType>
-#    <tns:node>
-#      <tns:nodeId>9dsafj</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>0</tns:port>
-#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>1</tns:remotePort>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:remoteEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>640021f7cae400</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>26</tns:port>
-#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>46</tns:remotePort>
-#        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>43</tns:remotePort>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>28</tns:port>
-#          <tns:flowSpaceEntry>
-#              <tns:policy>0</tns:policy>
-#              <tns:dl_type>2</tns:dl_type>
-#              <tns:tp_dst>423</tns:tp_dst>
-#          </tns:flowSpaceEntry>
-#          <tns:flowSpaceEntry>
-#              <tns:policy>0</tns:policy>
-#              <tns:dl_type>2</tns:dl_type>
-#              <tns:tp_dst>423</tns:tp_dst>
-#          </tns:flowSpaceEntry>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:switchEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>2580021f7cae400</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>46</tns:port>
-#        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>26</tns:remotePort>
-#        <tns:remoteNodeId>1f40021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>43</tns:remotePort>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>48</tns:port>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>1</tns:port>
-#        <tns:remoteNodeId>9dsafj</tns:remoteNodeId>
-#        <tns:remotePort>0</tns:remotePort>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:switchEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>1f40021f7cae400</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>41</tns:port>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>43</tns:port>
-#        <tns:remoteNodeId>640021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>26</tns:remotePort>
-#        <tns:remoteNodeId>2580021f7cae400</tns:remoteNodeId>
-#        <tns:remotePort>46</tns:remotePort>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>44</tns:port>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:switchEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>12c0021f7cae400</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>33</tns:port>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>35</tns:port>
-#      </tns:interfaceEntry>
-#      <tns:interfaceEntry>
-#        <tns:port>36</tns:port>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:switchEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>c80021f7cae400</tns:nodeId>
-#    </tns:node>
-#  </tns:switchEntry>
-#
-#  <tns:switchEntry>
-#    <tns:node>
-#      <tns:nodeId>123456789ab</tns:nodeId>
-#      <tns:interfaceEntry>
-#        <tns:port>0</tns:port>
-#      </tns:interfaceEntry>
-#    </tns:node>
-#  </tns:switchEntry>
-#  
-#  <tns:flowSpaceEntry>
-#    <tns:policy>1</tns:policy>
-#    <tns:dl_src>*</tns:dl_src>
-#    <tns:dl_dst>*</tns:dl_dst>
-#    <tns:dl_type>2048</tns:dl_type>
-#    <tns:vlan_id>*</tns:vlan_id>
-#    <tns:ip_src>192.168.0.0/16</tns:ip_src>
-#    <tns:ip_dst>192.168.0.0/16</tns:ip_dst>
-#    <tns:ip_proto>*</tns:ip_proto>
-#    <tns:tp_src>*</tns:tp_src>
-#    <tns:tp_dst>*</tns:tp_dst>
-#  </tns:flowSpaceEntry>
-#
-#</tns:RSpec>
-#'''
-    
+
     global server, CH_cred, CH_hrn
     
     debug("Called get rspec")
@@ -269,7 +144,7 @@ def update_rspec(self_am):
     RSpec
     '''
     
-    ns = "http://yuba.stanford.edu/geniLight/rspec"
+    ns = "http://yuba.stanford.edu/egeni/rspec"
     
     debug("Getting XML")
 
@@ -298,70 +173,55 @@ def update_rspec(self_am):
         parent = parent_map[node_elem]
         node_type = parent.tag
         
+        debug("node_type for %s is %s" % (nodeId, node_type))
+        
         kwargs = {'nodeId': nodeId,
-                  'img_url': OFSWITCH_DEFAULT_IMG,
+                  'img_url': IMG_DICT['default'],
                   'name': nodeId,
                   }
 
-        if('remoteEntry' in node_type):
-            remoteType = parent.findtext("{%s}remoteType" % ns)
-            remoteURL = parent.findtext("{%s}remoteURL" % ns)
-            
-            # check if this clearinghouse knows about this AM
+        if('remoteNodeEntry' in node_type):
+            # check if this clearinghouse knows about this node
             try:
-                am = models.AggregateManager.objects.get(url=remoteURL)
+                node_obj = models.Node.objects.get(pk=nodeId)
             
-            # Nope we don't know about the remote AM
-            except models.AggregateManager.DoesNotExist:
+            # Nope we don't know about the node
+            except models.Node.DoesNotExist:
                 
                 debug("+++++ Adding remote out CH Node %s" % nodeId)
                 
-                mod = {'type':remoteType,
-                       'remoteURL':remoteURL,
-                       'is_remote':True}
+                mod = {'is_remote':True}
                 kwargs.update(**mod)
                 
-                node_obj, created = models.Node.objects.get_or_create(
-                                            nodeId=nodeId, defaults=kwargs)
-                for k,v in mod.items():
-                    node_obj.__setattr__(k, v)
-                    
+                node_obj = models.Node(**kwargs)
                 node_obj.save()
                 
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
             
-            # We do know about the remote AM
+            # We do know about the remote node
             else:
-                if remoteURL == self_am.URL:
-                    raise Exception("Remote URL is my URL, but entry is remote.")
-                
-                debug("+++++ Adding remote in CH Node %s" % nodeId)
-
-                mod = {'type':remoteType,
-                       'remoteURL':remoteURL,
-                       'aggMgr':am,
-                       'is_remote':False}
-                kwargs.update(**mod)
-                
-                node_obj, created = models.Node.objects.get_or_create(
-                                            nodeId=nodeId, defaults=kwargs)
-                for k,v in mod.items():
-                    node_obj.__setattr__(k, v)
-
-                node_obj.save()
+                debug("+++++ Not doing anything already known %s" % nodeId)
                 self_am.remote_node_set.add(node_obj)
                 new_remote_ids.append(nodeId)
         
         # Entry controlled by this AM
         else:
             debug("+++++ Adding local Node %s" % nodeId)
-
+            
             mod = {'type':models.Node.TYPE_OF,
-                   'remoteURL':self_am.url,
                    'aggMgr':self_am,
                    'name': nodeId,
                    'is_remote':False}
+
+            features = parent.findtext("{%s}switchFeatures" % ns)
+            debug("Features: %s" % features)
+            for k,v in IMG_DICT.items():
+                if k in features:
+                    mod['img_url'] = v
+                    break
+            mod['extra_context'] = features
+            
             debug("Adding new node")
             kwargs.update(**mod)
             debug("node added")
@@ -392,21 +252,19 @@ def update_rspec(self_am):
 
     # delete all old local nodes
     self_am.local_node_set.exclude(nodeId__in=new_local_ids).delete()
-    self_am.local_node_set.filter(nodeId__in=new_remote_ids).delete()
     
-    debug("*** All new nodes")
+    debug("*** All local nodes now")
     for n in self_am.local_node_set.filter():
         debug("    %s" % n.nodeId)
 
     # Remove stale remote nodes
     [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.exclude(nodeId__in=new_remote_ids)]
-    [self_am.remote_node_set.remove(n) for n in self_am.remote_node_set.filter(nodeId__in=new_local_ids)]
     
     debug("*** All connected nodes")
     for n in self_am.connected_node_set.filter():
         debug("    %s" % n.nodeId)
     
-    debug("*** All old connected nodes")
+    debug("*** All now unconnected nodes")
     for n in self_am.connected_node_set.exclude(
                 nodeId__in=new_local_ids).exclude(
                     nodeId__in=new_remote_ids):
@@ -436,7 +294,6 @@ def update_rspec(self_am):
     # In the second iteration create all the interfaces and flowspaces
     interfaces = tree.findall("//{%s}interfaceEntry" % ns)
 
-    print "Interfaces: "; print interfaces
     # list of interfaces added
     new_iface_ids = []
     for interface in interfaces:
