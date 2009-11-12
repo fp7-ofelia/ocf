@@ -82,7 +82,7 @@ public class JGraphLink extends DefaultEdge {
         		GraphConstants.setLineColor(attr, Color.blue);
         	}
         } else {
-    		GraphConstants.setLineColor(attr, Color.black);
+    		GraphConstants.setLineColor(attr, Color.darkGray);
         }
 
         // TODO: Clean up generics once JGraph goes generic

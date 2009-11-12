@@ -4,6 +4,7 @@
 package egeni.clearinghouse.plugin;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.BorderFactory;
@@ -69,6 +70,7 @@ public class JGraphNode {
         GraphConstants.setForeground(attr, Color.black);
         GraphConstants.setOpaque(attr, false);
         GraphConstants.setIcon(attr, img);
+        GraphConstants.setFont(attr, new Font("Helvetica", Font.ITALIC, 12));
         
         // TODO: Clean up generics once JGraph goes generic
         AttributeMap cellAttr = new AttributeMap();

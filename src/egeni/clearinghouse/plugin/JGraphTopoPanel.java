@@ -72,7 +72,7 @@ public class JGraphTopoPanel extends JPanel {
 	/**
 	 * Initial preferred width of the canvas
 	 */
-	private static final int INITIAL_WIDTH = 800;
+	private static final int INITIAL_WIDTH = 740;
 	
 	/**
 	 * Max Icon width
@@ -386,7 +386,7 @@ public class JGraphTopoPanel extends JPanel {
         		/* scale by width */
         		w = Math.min(MAX_ICON_WIDTH, imgIcon.getIconWidth());        		
         	}
-        	Image scaledImg = imgIcon.getImage().getScaledInstance(w, h, Image.SCALE_DEFAULT);
+        	Image scaledImg = imgIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
         	images.put(path, scaledImg);
         	return new ImageIcon(scaledImg, description);
         } else {
