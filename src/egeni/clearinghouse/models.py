@@ -134,13 +134,9 @@ class Node(models.Model):
     TYPE_PL = 'PL';
 
     nodeId = models.CharField(max_length=200, primary_key=True)
-    type = models.CharField(max_length=200)
+    type = models.CharField(max_length=200, null=True, blank=True)
     name = models.CharField(max_length=200)
-    
     is_remote = models.BooleanField()
-    
-    # @ivar remoteURL: indicates URL of controller
-    remoteURL = models.URLField("Controller URL", verify_exists=False)
     
     # @ivar aggMgr: The AM that created the node or controls it
     aggMgr = models.ForeignKey(AggregateManager,
@@ -150,7 +146,7 @@ class Node(models.Model):
                                )
     
     # @ivar img_url: URL of the image used for when the node is drawn
-    img_url = models.CharField(max_length=200)
+    img_url = models.CharField(max_length=200, null=True, blank=True)
     
     # initial x and y fields to use
     x = models.FloatField(blank=True, null=True)
