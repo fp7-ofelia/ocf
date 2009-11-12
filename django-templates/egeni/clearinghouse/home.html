@@ -48,11 +48,15 @@
     
     <div class="errors">
         <h2>Last Warnings and Errors:</h2>
+        {% if errors %}
+        <table class="last_errors_table">
         {% for error in errors %}
-        <p class="error msg">{{ error }}</p>
-        {% empty %}
-        <p>No new warnings or errors.</p>
+            <tr><td>{{ error.format_date }}</td><td>{{ error.format_time }}</td><td>{{ error.text }}</td></tr>
         {% endfor %}
+        </table>
+        {% else %}
+        <p>No new warnings or errors.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
