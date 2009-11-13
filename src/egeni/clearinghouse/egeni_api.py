@@ -177,6 +177,8 @@ def update_rspec(self_am):
         nodeId = node_elem.findtext("{%s}nodeId" % ns)
         try:
             nodeName = node_elem.findtext("{%s}nodeName" % ns)
+            if not nodeName:
+                nodeName = ""
         except:
             nodeName = nodeId
         parent = parent_map[node_elem]
@@ -202,7 +204,7 @@ def update_rspec(self_am):
                 mod = {'is_remote':True}
                 kwargs.update(**mod)
                 
-                node_obj = models.Node(**kwargs)
+                node_obj = models.Node.objects.create(**kwargs)
                 node_obj.save()
                 
                 self_am.remote_node_set.add(node_obj)

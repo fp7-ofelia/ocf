@@ -2,7 +2,6 @@
 <tns:RSpec xmlns:tns="http://yuba.stanford.edu/egeni/rspec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://yuba.stanford.edu/egeni/rspec http://yuba.stanford.edu/egeni/rspec.xsd">
   <tns:version>1.0</tns:version>
   {% if slice %}
-  <tns:controllerUrl>{{ slice.controller_url }}</tns:controllerUrl>
   {% endif %}
   {% for node in node_set %}
 {% include "rspec/egeni-switchentry.xml" %}
@@ -12,4 +11,5 @@
 {% include "rspec/egeni-flowspace.xml" %}
   {% endfor %}
   {% endif %}
+  <tns:controllerUrl>{{ slice.controller_url }}</tns:controllerUrl>
 </tns:RSpec>

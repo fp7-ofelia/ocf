@@ -72,6 +72,41 @@ class AggregateManager(models.Model):
         else:
             return plc_api.update_rspec(self)
         
+    def get_resv_rspec(self, slice):
+        if not self.available:
+            return ""
+        
+        if self.type == AggregateManager.TYPE_OF:
+            rspec = render_to_string("rspec/egeni-rspec.xml",
+                                     {"node_set": slice.nodes.filter(aggMgr=self),
+                                      "am": self,
+                                      "fs_flds": ["dl_src",
+                                                  "dl_dst",
+                                                  "dl_type",
+                                                  "vlan_id",
+                                                  "nw_src",
+                                                  "nw_dst",
+                                                  "nw_proto",
+                                                  "tp_src",
+                                                  "tp_dst",
+                                                  ],
+                                      "slice": slice})
+            
+        elif self.type == AggregateManager.TYPE_PL:
+            nodes_dict = {}
+            node_set = slice.nodes.filter(aggMgr=self)
+            for node in node_set:
+                netspec = node.extra_context.split("=")[1]
+                if not nodes_dict.has_key(netspec):
+                    nodes_dict[netspec] = []
+                nodes_dict[netspec].append(node)
+            rspec = render_to_string("rspec/pl-rspec.xml",
+                                     {"node_slice_set": slice.nodeslicestatus_set,
+                                      "slice": slice,
+                                      "nodes_dict": nodes_dict,
+                                      })
+        return rspec
+        
     def reserve_slice(self, slice):
         '''Request a reservation and return a message on success or failure'''
         
@@ -223,8 +258,9 @@ class Slice(models.Model):
         return true if the interface is a src or dst in any link in
         this slice
         '''
+        
         return (self.links.filter(src=iface).count()
-                + self.links.filter(src=iface).count()) > 0
+                + self.links.filter(dst=iface).count()) > 0
                 
     def get_host_count(self):
         return self.nodes.filter(type=Node.TYPE_PL).count()

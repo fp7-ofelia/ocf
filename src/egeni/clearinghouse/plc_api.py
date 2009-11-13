@@ -40,7 +40,8 @@ def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-    return egeni_api.delete_slice(am_url, slice_id, 1)
+#    return egeni_api.delete_slice(am_url, slice_id, 1)
+    return 
 
 def get_rspec(am_url):
     '''
@@ -165,31 +166,30 @@ def update_rspec(self_am):
     
 #    debug("Added nodes %s" % node_ids)
     
-    # delete all the old stuff
-    for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
-        try:
-            debug("Deleting %s " % id)
-            models.Node.objects.get(nodeId=n.id).delete()
-        except:
-            debug("Error deleting")
-            traceback.print_exc()
-        
-        
     # TODO: These things are causing Errors
 #        models.Node.objects.filter(
 #            aggMgr=self_am).exclude(
 #                nodeId__in=node_ids).delete()
+#        models.Interface.objects.filter(
+#            ownerNode__aggMgr=self_am).exclude(
+#                id__in=iface_ids).delete()
     
-    for n in models.Interface.objects.filter(
-                ownerNode__aggMgr=self_am).exclude(
-                    id__in=iface_ids):
+    # delete all the old stuff
+    for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
         try:
             debug("Deleting %s " % id)
-            models.Interface.objects.get(id=n.id).delete()
+            models.Node.objects.get(nodeId=n.nodeId).delete()
         except:
             debug("Error deleting")
             traceback.print_exc()
 
-#        models.Interface.objects.filter(
-#            ownerNode__aggMgr=self_am).exclude(
-#                id__in=iface_ids).delete()
+    for id in iface_ids:
+        try:
+            n = models.Interface.objects.get(id=id)
+            n.delete()
+        except models.Interface.DoesNotExist:
+            pass
+        except:
+            debug("Error deleting")
+            traceback.print_exc()
+

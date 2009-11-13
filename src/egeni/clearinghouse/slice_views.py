@@ -393,6 +393,8 @@ def slice_get_topo_xml(request, slice_id):
     if request.method == "GET":
         for am in slice.aggMgrs.all():
             try:
+                print "Rspec: "
+                print am.get_resv_rspec(slice)
                 am.updateRSpec()
             except Exception, e:
                 print e
