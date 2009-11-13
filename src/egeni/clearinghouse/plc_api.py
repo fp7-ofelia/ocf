@@ -180,16 +180,16 @@ def update_rspec(self_am):
 #            aggMgr=self_am).exclude(
 #                nodeId__in=node_ids).delete()
     
-        for n in models.Interface.objects.filter(
-                    ownerNode__aggMgr=self_am).exclude(
-                        id__in=iface_ids):
-            try:
-                debug("Deleting %s " % id)
-                models.Node.objects.get(nodeId=n.id).delete()
-            except:
-                debug("Error deleting")
-                traceback.print_exc()
-                
+    for n in models.Interface.objects.filter(
+                ownerNode__aggMgr=self_am).exclude(
+                    id__in=iface_ids):
+        try:
+            debug("Deleting %s " % id)
+            models.Interface.objects.get(id=n.id).delete()
+        except:
+            debug("Error deleting")
+            traceback.print_exc()
+
 #        models.Interface.objects.filter(
 #            ownerNode__aggMgr=self_am).exclude(
 #                id__in=iface_ids).delete()
