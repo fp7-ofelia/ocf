@@ -53,11 +53,14 @@
     </div>
     
     <div class="errors">
-        <h2>Last Warnings and Errors:</h2>
+        <h2>Last Warnings and Errors</h2>
         {% if errors %}
         <table class="last_errors_table">
+    	<thead>
+			<tr><th>Date</th><th>Time</th><th>Message</th></tr>
+		</thead>
         {% for error in errors %}
-            <tr><td>{{ error.format_date }}</td><td>{{ error.format_time }}</td><td>{{ error.text }}</td></tr>
+            <tr><td  class="errdate">{{ error.format_date }}</td><td class="errtime">{{ error.format_time }}</td><td>{{ error.text }}</td></tr>
         {% endfor %}
         </table>
         {% else %}
