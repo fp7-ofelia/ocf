@@ -22,10 +22,11 @@ import org.jgrapht.ext.JGraphModelAdapter;
  */
 public class JGraphNode {
 	
-	public static final int BORDER_THICKNESS = 3;
+	public static final int BORDER_THICKNESS = 0;
 	
 	private String id;
 	private Icon img;
+	private Icon trImg;
 	private String name;
 	private Boolean isReserved;
 	private Boolean has_error;
@@ -39,6 +40,7 @@ public class JGraphNode {
 	 * @param x x position of the node on the canvas in percent
 	 * @param y y position of the node on the canvas in percent
 	 * @param img Image to use as icon for the node
+	 * @param trImg Image to use as icon for the node when not selected (transparent)
 	 * @param name Name of node to display
 	 * @param isSelected Whether the node is selected or not
 	 * @param hasError Whether the node has an error or not
@@ -47,12 +49,13 @@ public class JGraphNode {
 			JGraphModelAdapter<JGraphNode, JGraphLink> jgAdapter,
 			Graph<JGraphNode,JGraphLink> graph,
 			String id, double x, double y,
-			Icon img, String name,
+			Icon img, Icon trImg, String name,
 			Boolean isReserved, Boolean hasError) {
 		super();
 		this.jgAdapter = jgAdapter;
 		this.id = id;
 		this.img = img;
+		this.trImg = trImg;
 		this.name = name;
 		this.isReserved = isReserved;
 		this.isSelected = isReserved;
@@ -69,8 +72,8 @@ public class JGraphNode {
         GraphConstants.setAutoSize(attr, true);
         GraphConstants.setForeground(attr, Color.black);
         GraphConstants.setOpaque(attr, false);
-        GraphConstants.setIcon(attr, img);
-        GraphConstants.setFont(attr, new Font("Helvetica", Font.ITALIC, 12));
+//        GraphConstants.setIcon(attr, img);
+        GraphConstants.setFont(attr, new Font("Arial", Font.PLAIN, 12));
         
         // TODO: Clean up generics once JGraph goes generic
         AttributeMap cellAttr = new AttributeMap();
@@ -93,16 +96,16 @@ public class JGraphNode {
                 bounds.getHeight());
 
         GraphConstants.setBounds(attr, newBounds);
+    	if(hasError()) {
+            GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.red, 3));
+    	} else {
+    		GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.red, 0));
+    	}
+    	
         if(isSelected()) {
-        	if(hasError()) {
-                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.red, BORDER_THICKNESS));
-        	} else if (isReserved()){
-                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.green, BORDER_THICKNESS));
-        	} else {
-                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.blue, BORDER_THICKNESS));
-        	}
+            GraphConstants.setIcon(attr, img);
         } else {
-            GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.black, BORDER_THICKNESS));
+            GraphConstants.setIcon(attr, trImg);
         }
 
         // TODO: Clean up generics once JGraph goes generic

@@ -12,6 +12,7 @@ except:
 import models
 from django.db.models import Count
 import egeni_api
+import traceback
 
 PLNODE_DEFAULT_IMG = "/img/server-2u-rev.png"
 
@@ -89,8 +90,8 @@ def update_rspec(self_am):
     xml_str = get_rspec(self_am.url)
     tree = et.ElementTree(et.fromstring(xml_str))
     
-    debug("Parsing xml:")
-    debug(xml_str)
+#    debug("Parsing xml:")
+#    debug(xml_str)
 
     # keep track of created ids to delete old ones
     node_ids = []
@@ -99,30 +100,37 @@ def update_rspec(self_am):
         netspec_name = netspec_elem.get("name")
         
         for node_elem in netspec_elem.findall("*/NodeSpec"):
-            debug("found node elem %s" % node_elem)
+#            debug("found node elem %s" % node_elem)
             name = node_elem.get("name")
-            debug("name: %s" % name)
-            type = models.AggregateManager.TYPE_PL
-            n = models.Node.objects.filter(type=type)
-            debug("Get: %s" % n)
+#            debug("name: %s" % name)
+            
+            # TODO: this is a hack
+            if name.startswith("of"):
+                debug("Found of-pl node: %s" % name)
+#                continue
+            
+            type = models.Node.TYPE_PL
+            
+            kwargs = {"nodeId": name,
+                      "name": name,
+                      "type": type,
+                      "is_remote": False,
+                      "aggMgr": self_am,
+                      "img_url": PLNODE_DEFAULT_IMG,
+                      "extra_context": "netspec__name=%s" % netspec_name,
+                      }
+
+            
             node, created = models.Node.objects.get_or_create(
                           nodeId=name,
-                          defaults={"nodeId": name,
-                                    "name": name,
-                                    "type": type,
-                                    "is_remote": False,
-                                    "remoteURL": self_am.url,
-                                    "aggMgr": self_am,
-                                    "img_url": PLNODE_DEFAULT_IMG,
-                                    "extra_context": "netspec__name=%s" % netspec_name,
-                                    }
+                          defaults=kwargs,
                           )
             
-            debug("Node new: %s" % created)
+#            debug("Node new: %s" % created)
             
             if not created:
-                node.remoteURL = self_am.url
-                node.aggMgr = self_am
+                for k,v in kwargs.items():
+                    node.__setattr__(k, v)
             
             self_am.connected_node_set.add(node)
             node.save()
@@ -155,18 +163,33 @@ def update_rspec(self_am):
             
                 iface_ids.append(iface.id)
     
-    debug("Added nodes %s" % node_ids)
+#    debug("Added nodes %s" % node_ids)
     
     # delete all the old stuff
     for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
-        debug("Deleting %s " % n.nodeId)
+        try:
+            debug("Deleting %s " % id)
+            models.Node.objects.get(nodeId=n.id).delete()
+        except:
+            debug("Error deleting")
+            traceback.print_exc()
         
-    if node_ids:
-        models.Node.objects.filter(
-            aggMgr=self_am).exclude(
-                nodeId__in=node_ids).delete()
+        
+    # TODO: These things are causing Errors
+#        models.Node.objects.filter(
+#            aggMgr=self_am).exclude(
+#                nodeId__in=node_ids).delete()
     
-    if iface_ids:
-        models.Interface.objects.filter(
-            ownerNode__aggMgr=self_am).exclude(
-                id__in=iface_ids).delete()
+        for n in models.Interface.objects.filter(
+                    ownerNode__aggMgr=self_am).exclude(
+                        id__in=iface_ids):
+            try:
+                debug("Deleting %s " % id)
+                models.Node.objects.get(nodeId=n.id).delete()
+            except:
+                debug("Error deleting")
+                traceback.print_exc()
+                
+#        models.Interface.objects.filter(
+#            ownerNode__aggMgr=self_am).exclude(
+#                id__in=iface_ids).delete()

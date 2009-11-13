@@ -23,6 +23,8 @@ from django.conf import settings
 IMG_DICT = {'default': "/img/switch.png",
             'HP': "/img/switch-5406zl.png",
             'NEC': "/img/switch-nec-ip8800.png",
+            'netfpga': "/img/switch-netfpga.png",
+            'soekris': "/img/soekris-net4801.jpg",
             }
 
 
@@ -35,7 +37,7 @@ key = Keypair(filename=key_file)
 server = {}
 done_init = False
 
-en_debug = 1
+en_debug = 0
 def debug(s):
     if(en_debug):
         print(s)
@@ -134,6 +136,8 @@ def get_rspec(am_url, is_planetlab=0):
     else:
         request_hash = key.compute_hash([CH_cred, CH_hrn])
         result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
+        
+#    print result
     return result
 
 
@@ -170,6 +174,10 @@ def update_rspec(self_am):
     for node_elem in node_elems:
         # get the node ID string
         nodeId = node_elem.findtext("{%s}nodeId" % ns)
+        try:
+            nodeName = node_elem.findtext("{%s}nodeName" % ns)
+        except:
+            nodeName = nodeId
         parent = parent_map[node_elem]
         node_type = parent.tag
         
@@ -177,7 +185,7 @@ def update_rspec(self_am):
         
         kwargs = {'nodeId': nodeId,
                   'img_url': IMG_DICT['default'],
-                  'name': nodeId,
+                  'name': nodeName,
                   }
 
         if('remoteNodeEntry' in node_type):
@@ -211,15 +219,16 @@ def update_rspec(self_am):
             
             mod = {'type':models.Node.TYPE_OF,
                    'aggMgr':self_am,
-                   'name': nodeId,
+                   'name': nodeName,
                    'is_remote':False}
 
             features = parent.findtext("{%s}switchFeatures" % ns)
             debug("Features: %s" % features)
             for k,v in IMG_DICT.items():
-                if k in features:
+                if k in features or k in nodeName:
                     mod['img_url'] = v
                     break
+            
             mod['extra_context'] = features
             
             debug("Adding new node")
@@ -291,13 +300,13 @@ def update_rspec(self_am):
         num_cnxns=Count('connected_am_set')).filter(
             num_cnxns=0).delete()
     
-    # In the second iteration create all the interfaces and flowspaces
+    # In the second iteration create all the interfaces
     interfaces = tree.findall("//{%s}interfaceEntry" % ns)
 
     # list of interfaces added
     new_iface_ids = []
+    new_ifaces = []
     for interface in interfaces:
-        # move the context
         nodeId = parent_map[interface].findtext("{%s}nodeId" % ns)
         debug("*** Getting connected node %s" % nodeId)
         node_obj = self_am.connected_node_set.get(pk=nodeId)
@@ -306,30 +315,38 @@ def update_rspec(self_am):
         debug("<0> %s" % portNum)
         
         # check if the iface exists
-        iface_obj, created = \
-            models.Interface.objects.get_or_create(portNum=portNum,
+        try:
+            iface_obj, created = \
+                    models.Interface.objects.get_or_create(portNum=portNum,
+                                            ownerNode__nodeId=nodeId,
+                                            defaults={'ownerNode': node_obj})
+        except models.Interface.MultipleObjectsReturned, e:
+            print "Found duplicate iface for node %s, port %s" % (nodeId, portNum)
+            models.Interface.objects.filter(portNum=portNum,
+                                            ownerNode__nodeId=nodeId).delete()
+            iface_obj, created = \
+                    models.Interface.objects.get_or_create(portNum=portNum,
                                             ownerNode__nodeId=nodeId,
                                             defaults={'ownerNode': node_obj})
         
         new_iface_ids.append(iface_obj.id)
-        
-        if not created:
-            iface_obj.ownerNode = node_obj
+        new_ifaces.append(iface_obj)
+        iface_obj.save()
+        debug("+++++ Added interface: id %s port %s node %s" % (iface_obj.id, iface_obj.portNum, iface_obj.ownerNode))
+        debug("Iface new: %s" % created)
     
     # delete extra ifaces: only those whom this AM created
-    models.Interface.objects.exclude(
-        id__in=new_iface_ids).filter(
-            ownerNode__aggMgr=self_am).delete()
+    for i in models.Interface.objects.filter(
+        ownerNode__aggMgr=self_am).exclude(
+            id__in=new_iface_ids):
+        debug("Print deleting iface: %s" % i)
+
+    models.Interface.objects.filter(
+        ownerNode__aggMgr=self_am).exclude(
+            id__in=new_iface_ids).delete()
     
     # In the third iteration, add all the remote connections
-    for interface in interfaces:
-        # move the context
-        nodeId = parent_map[interface].findtext("{%s}nodeId" % ns)
-        portNum = int(interface.findtext("{%s}port" % ns))
-        iface_obj = models.Interface.objects.get(portNum__exact=portNum,
-                                                 ownerNode__nodeId=nodeId,
-                                                 )
-        
+    for interface, iface_obj in zip(interfaces, new_ifaces):
         # get the remote ifaces
         other_nodeIDs = interface.findall("{%s}remoteNodeId" % ns)
         other_ports = interface.findall("{%s}remotePort" % ns)
@@ -338,6 +355,8 @@ def update_rspec(self_am):
 
         nodes_ports = zip(other_nodeIDs, other_ports)
         remote_iface_ids = []
+        src_link_ids = []
+        dst_link_ids = []
         for remote_node_id_elem, remote_port_elem in nodes_ports:
             # get the remote node object
             id = remote_node_id_elem.text
@@ -352,6 +371,10 @@ def update_rspec(self_am):
                                                                 )
             except models.Interface.DoesNotExist, e:
                 print "XML malformed. Remote iface for node id %s and port num %s does not exist." % (id, num)
+                print "remote node has ifaces:"
+                n = models.Node.objects.get(nodeId=id)
+                for i in n.interface_set.all():
+                    print i
                 continue
             
             remote_iface_ids.append(remote_iface_obj.id)
@@ -360,12 +383,18 @@ def update_rspec(self_am):
             link, created = models.Link.objects.get_or_create(
                                 src=iface_obj, dst=remote_iface_obj)
             link.save()
+            src_link_ids.append(link.id)
             
-            # add the connection
+            link, created = models.Link.objects.get_or_create(
+                                dst=iface_obj, src=remote_iface_obj)
+            link.save()
+            dst_link_ids.append(link.id)
+
             debug("<3>"); debug(id); debug(num)
             
-        # remove old connections
-        iface_obj.remoteIfaces.exclude(id__in=remote_iface_ids).delete()
+        # delete old links
+        iface_obj.src_link_set.exclude(id__in=src_link_ids).delete()
+        iface_obj.dst_link_set.exclude(id__in=dst_link_ids).delete()
 
     # parse the flowspace
     fs_entries = tree.findall("*/{%s}flowSpaceEntry" % ns)

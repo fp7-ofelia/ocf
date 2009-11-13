@@ -12,6 +12,8 @@ import egeni_api, plc_api
 import os
 import messaging
 from traceback import print_exc
+from django.db.models import Count
+
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
@@ -97,6 +99,7 @@ def slice_select_aggregates(request, slice_id):
     elif request.method == 'POST':
         am_ids = request.POST.getlist("am")
         ams = AggregateManager.objects.filter(pk__in=am_ids)
+        [slice.aggMgrs.remove(am) for am in slice.aggMgrs.exclude(pk__in=am_ids)]
         [slice.aggMgrs.add(am) for am in ams]
         slice.save()
         return HttpResponseRedirect(reverse("slice_select_topo", kwargs={"slice_id": slice.id}))
@@ -109,10 +112,13 @@ def slice_select_topo(request, slice_id):
     if not check_access(request.user, slice):
         return HttpResponseForbidden("You don't have permission to access this slice.")
 
+    print "+++++++++++++++ Doing select_topo"
     if request.method == "POST":
         link_ids = request.POST.getlist(LINK_ID_FIELD)
         node_ids = request.POST.getlist(NODE_ID_FIELD)
         positions = request.POST.getlist(POS_FIELD)
+        
+        print "select_topo post: %s" % request.POST
         
         # collect the positions
         pos_dict = {}
@@ -366,7 +372,7 @@ def slice_get_topo_xml(request, slice_id):
         return HttpResponseForbidden("You don't have permission to access this slice.")
     
     if request.method == "GET":
-        for am in AggregateManager.objects.all():
+        for am in slice.aggMgrs.all():
             try:
                 am.updateRSpec()
             except Exception, e:
@@ -387,6 +393,13 @@ def slice_get_topo_string(slice):
     nodes = Node.objects.all().exclude(
                 is_remote=True).filter(
                     aggMgr__id__in=slice.aggMgrs.values_list('id', flat=True))
+    
+    print "Getting topo string"
+    
+    nodes = nodes.annotate(
+        num_cnxns=Count('interface__remoteIfaces')).exclude(
+            num_cnxns=0)
+
     print nodes
     nodes_dict = {}
     for n in nodes:

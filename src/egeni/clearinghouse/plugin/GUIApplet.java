@@ -66,6 +66,7 @@ public class GUIApplet extends JApplet {
     }
     
     public JGraphTopoPanel getTopoPanel() {
+    	System.err.println("Returning topo panel");
     	return topoPanel;
     }
 

@@ -1,14 +1,20 @@
 package egeni.clearinghouse.plugin;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.RGBImageFilter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +83,7 @@ public class JGraphTopoPanel extends JPanel {
 	/**
 	 * Max Icon width
 	 */
-	public static final int MAX_ICON_WIDTH = 64;
+	public static final int MAX_ICON_WIDTH = 85;
 	
 	/**
 	 * Max Icon height
@@ -93,6 +99,7 @@ public class JGraphTopoPanel extends JPanel {
 	private Map<String, JGraphLink> graphLinks;
 	
 	private Map<String, Image> images;
+	private Map<Image, Image> transparentImages;
 	
 	private ListenableGraph<JGraphNode, JGraphLink> graph;
 	private JGraphModelAdapter<JGraphNode, JGraphLink> jgAdapter;
@@ -111,6 +118,7 @@ public class JGraphTopoPanel extends JPanel {
 		this.graphNodes = new HashMap<String, JGraphNode>();
 		this.graphLinks = new HashMap<String, JGraphLink>();
 		this.images = new HashMap<String, Image>();
+		this.transparentImages = new HashMap<Image, Image>();
 		
 		graph = new ListenableDirectedGraph<JGraphNode, JGraphLink>(JGraphLink.class);
 		
@@ -143,7 +151,7 @@ public class JGraphTopoPanel extends JPanel {
 				// Get Cell under Mousepointer
 				int x = e.getX(), y = e.getY();
 				
-				System.out.println("Pressed: "+x+","+y);
+//				System.out.println("Pressed: "+x+","+y);
 				DefaultGraphCell o =
 					(DefaultGraphCell)jgraph.getFirstCellForLocation(x, y);
 				if(o != null) {
@@ -154,7 +162,7 @@ public class JGraphTopoPanel extends JPanel {
 			// TODO: Make efficient
 			public void mouseReleased(MouseEvent e) {
 				if(onComponent) {
-					System.out.println("Released: "+e.getX()+","+e.getY());
+//					System.out.println("Released: "+e.getX()+","+e.getY());
 					resizeGraph();
 					onComponent = false;
 				}
@@ -168,12 +176,12 @@ public class JGraphTopoPanel extends JPanel {
 			if(n.getX() < 0 || n.getY() < 0) {
 				n.setLocation(rand.nextDouble()*INITIAL_WIDTH*0.5,
 						rand.nextDouble()*INITIAL_HEIGHT*0.5);
-				System.err.println("Adding for layout node "+n.getId());
+//				System.err.println("Adding for layout node "+n.getId());
 				vset.add(n);
 			}
 		}
 		/* Layout the graph nicely */
-		System.err.println("Doing layout");
+//		System.err.println("Doing layout");
 		JGraphFacade facade = new JGraphFacade(jgraph);
 		facade.setDirected(true);
 		facade.setVerticesFilter(vset);
@@ -187,7 +195,7 @@ public class JGraphTopoPanel extends JPanel {
 		layout.run(facade);
 		Map nested = facade.createNestedMap(true, true);
 		jgraph.getGraphLayoutCache().edit(nested);
-		System.err.println("Layout done");
+//		System.err.println("Layout done");
 		
 		JGraphParallelRouter.getSharedInstance().setEdgeDeparture(5);
 		JGraphParallelRouter.getSharedInstance().setEdgeSeparation(8);
@@ -204,11 +212,11 @@ public class JGraphTopoPanel extends JPanel {
 			if((t = r.getMaxX()) > x) {
 				x = t;
 			}
-			System.out.println("x: " + t);
+//			System.out.println("x: " + t);
 			if((t = r.getMaxY()) > y) {
 				y = t;
 			}
-			System.out.println("y: " + t);
+//			System.out.println("y: " + t);
 			jgraph.setPreferredSize(new Dimension((int) x, (int) y));
 		}
 	}
@@ -287,9 +295,10 @@ public class JGraphTopoPanel extends JPanel {
 						n.getElementsByTagName(
 						"y").item(0).getTextContent());
 			
-			Icon img = createImageIcon(
+			ImageIcon img = createImageIcon(
 					n.getElementsByTagName("img").item(0).getTextContent(),
 					"Selected Node");
+			ImageIcon trImg = createTransparentImageIcon(img.getImage(), "Unselected Node");
 
 			String name = n.getElementsByTagName(
 					"name").item(0).getTextContent();
@@ -302,7 +311,7 @@ public class JGraphTopoPanel extends JPanel {
 			
 			JGraphNode v = new JGraphNode(
 					jgAdapter, graph,
-					id, x, y, img, 
+					id, x, y, img, trImg,
 					name, is_selected, 
 					has_error);
 			graphNodes.put(id, v);
@@ -311,7 +320,7 @@ public class JGraphTopoPanel extends JPanel {
 		NodeList links = doc.getElementsByTagName("link");
 		System.err.println("**** Found "+links.getLength()+" links");
 		for(int i=0; i<links.getLength(); i++) {
-			System.err.println("    Doing link "+i);
+//			System.err.println("    Doing link "+i);
 			Element n = (Element) links.item(i);
 			
 			String id = 
@@ -331,7 +340,7 @@ public class JGraphTopoPanel extends JPanel {
 			Boolean has_error = n.getElementsByTagName(
 					"has_err").item(0).getTextContent(
 							).equalsIgnoreCase("True");
-			System.err.println("    v1 Done link "+i);
+//			System.err.println("    v1 Done link "+i);
 			
 			if(!graphNodes.containsKey(src_id)) {
 				System.err.printf("Link %d missing src id %s\n", i, src_id);
@@ -348,7 +357,7 @@ public class JGraphTopoPanel extends JPanel {
 						graphNodes.get(dst_id),
 						l);
 				graphLinks.put(id, l);
-				System.err.println("    Added link "+i);
+//				System.err.println("    Added link "+i);
 			}
 		}
 	}
@@ -393,6 +402,51 @@ public class JGraphTopoPanel extends JPanel {
         	return new ImageIcon((Image)null, description);
         }
     }
+    
+    protected ImageIcon createTransparentImageIcon(Image img, String description) {
+    	if(this.transparentImages.containsKey(img)) {
+    		return new ImageIcon(this.transparentImages.get(img));
+    	}
+    	
+    	ImageFilter grayFilter = new RGBImageFilter() {
+    		
+    		Boolean canFilterIndexColorModel = true;
+    		
+			@Override
+			public int filterRGB(int x, int y, int rgb) {
+				int a = rgb & 0xff000000;
+				int r = (rgb >> 16) & 0xff;
+				int g = (rgb >> 8) & 0xff;
+				int b = rgb & 0xff;
+				r = (r+255)/2;
+				g = (g+255)/2;
+				b = (b+255)/2;
+				return a | (r << 16) | (g << 8) | b;
+			}
+		};
+		
+		Image aimg = createImage(new FilteredImageSource(img.getSource(), grayFilter));
+    	
+//    	BufferedImageBuilder bib = new BufferedImageBuilder();
+//    	BufferedImage bimg = bib.bufferImage(img);
+//
+//    	// Create the image using the
+//		BufferedImage aimg = new BufferedImage(bimg.getWidth(), bimg
+//				.getHeight(), BufferedImage.TRANSLUCENT);
+//		// Get the images graphics
+//		Graphics2D g = aimg.createGraphics();
+//		// Set the Graphics composite to Alpha
+//		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+//				(float)0.5));
+//		// Draw the LOADED img into the prepared reciver image
+//		g.drawImage(bimg, null, 0, 0);
+//		// let go of all system resources in this Graphics
+//		g.dispose();
+
+		// Return the image
+		this.transparentImages.put(img, aimg);
+		return new ImageIcon(aimg, description);
+	}
 
     /**
      * Returns a Map mapping:

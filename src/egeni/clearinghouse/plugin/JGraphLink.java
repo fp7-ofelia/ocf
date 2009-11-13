@@ -17,7 +17,7 @@ public class JGraphLink extends DefaultEdge {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public static final int WIDTH = 4;
+	public static final int WIDTH = 3;
 	
 	private String id;
 	private Boolean is_selected;
@@ -58,6 +58,7 @@ public class JGraphLink extends DefaultEdge {
         AttributeMap attr = cell.getAttributes();
         GraphConstants.setLineWidth(attr, WIDTH);
         GraphConstants.setLineStyle(attr, GraphConstants.STYLE_SPLINE);
+        GraphConstants.setLineEnd(attr, GraphConstants.ARROW_SIMPLE);
         GraphConstants.setRouting(attr, JGraphParallelRouter.getSharedInstance());
 
         // TODO: Clean up generics once JGraph goes generic
@@ -76,13 +77,14 @@ public class JGraphLink extends DefaultEdge {
         if(isSelected()) {
         	if(hasError()) {
         		GraphConstants.setLineColor(attr, Color.red);
-        	} else if(isReserved()) {
-        		GraphConstants.setLineColor(attr, Color.green);
+//        	} else if(isReserved()) {
+//        		GraphConstants.setLineColor(attr, Color.green);
         	} else {
-        		GraphConstants.setLineColor(attr, Color.blue);
+        		GraphConstants.setLineColor(attr, new Color(0, 0, 85));
+//        		GraphConstants.setLineColor(attr, Color.blue);
         	}
         } else {
-    		GraphConstants.setLineColor(attr, Color.darkGray);
+    		GraphConstants.setLineColor(attr, new Color(0, 0, 85, 255*55/100));
         }
 
         // TODO: Clean up generics once JGraph goes generic

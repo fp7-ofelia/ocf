@@ -4,6 +4,11 @@
 {% block content %}
 <div class="main">
     <h1>Slice Control Panel</h1>
+    <div id="slices">
+        <h2>Current Slices:</h2>
+        {% include "clearinghouse/slice_list.html" %}
+    </div>
+    <br />    
     <div class="new_slice">
         <h2>Create New Slice:</h2>
         <form id="add_slice" method="POST" action="">
@@ -14,10 +19,5 @@
             <input id="create_submit" type="submit" value="Create"></input>
         </form>
     </div>
-	<br/>
-    <div id="slices">
-        <h2>Current Slices:</h2>
-        {% include "clearinghouse/slice_list.html" %}
-    </div>    
 </div>
 {% endblock %}

@@ -177,7 +177,7 @@ class Interface(models.Model):
     extra_context = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return "Interface %u of node %s" % (self.portNum, self.ownerNode.nodeId)
+        return "Interface %u of node %s id %s" % (self.portNum, self.ownerNode.nodeId, self.id)
         
 class Link(models.Model):
     '''
@@ -225,6 +225,12 @@ class Slice(models.Model):
         '''
         return (self.links.filter(src=iface).count()
                 + self.links.filter(src=iface).count()) > 0
+                
+    def get_host_count(self):
+        return self.nodes.filter(type=Node.TYPE_PL).count()
+    
+    def get_switch_count(self):
+        return self.nodes.filter(type=Node.TYPE_OF).count()
     
 class NodeSliceStatus(models.Model):
     '''
@@ -285,10 +291,11 @@ class NodeSliceGUI(models.Model):
             nsg.y = y
             nsg.save()
             
-            if not n.x or not n.y:
+            if n.x < 0 or n.x == None or n.y < 0 or n.y == None:
                 n.x = x
                 n.y = y
                 n.save()
+                print "updated node %s to x y %s,%s" % (n.nodeId, x, y)
         
         # TODO: Delete all the old NodeSliceGUIs
 

@@ -36,6 +36,11 @@ def contains(value, arg):
 def flowspace_tag(flowspace, field):
     '''return a tag from the flowspace for the field'''
 
+    if field.startswith("nw"):
+        xml_field = field.replace("nw", "ip")
+    else:
+        xml_field = field
+
     try:
         val = flowspace.__getattribute__(field)
     except Exception, e:
@@ -45,4 +50,4 @@ def flowspace_tag(flowspace, field):
     if val == "*":
         return mark_safe("")
     else:
-        return mark_safe("<tns:%s>%s</tns:%s>" % (field, val, field))
+        return mark_safe("<tns:%s>%s</tns:%s>" % (xml_field, val, xml_field))

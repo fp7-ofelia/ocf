@@ -21,7 +21,7 @@
     <div class="stats">
         <h2>Summary:</h2>
         <table class="fulltable" id="stats_table">
-            <tr><td>OpenFlow controller</td>  <td>:</td> <td>{% if slice.controller %}{{ slice.controller_url  }}{% else %}Not defined.{% endif %}</td></tr>
+            <tr><td>OpenFlow controller</td>  <td>:</td> <td>{% if slice.controller_url %}{{ slice.controller_url  }}{% else %}Not defined.{% endif %}</td></tr>
             <tr><td>Number of nodes</td>      <td>:</td> <td>{{ slice.nodes.all.count }}</td></tr>
             <tr><td>Number of links</td>      <td>:</td> <td>{{ slice.links.all.count }}</td></tr>
         </table>
@@ -40,14 +40,14 @@
         {% endif %}
     </div>
     
-    <div class="links list">
+    <div class="fulltable slice_list">
         <h2>Links:</h2>
         {% if slice.links.all.count %}
         <table class="fulltable linkstable">
-            <tr><td>From</td><td>To</td></tr>
-        {% for link in slice.links.all %}
+            <thead><tr><td>From</td><td>To</td></tr></thead>
+            {% for link in slice.links.all %}
             <tr><td>{{ link.src.ownerNode.name }}</td><td>{{ link.dst.ownerNode.name }}</td></tr>
-        {% endfor %}
+            {% endfor %}
         </table>
         {% else %}
         None.

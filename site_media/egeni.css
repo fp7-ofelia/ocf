@@ -966,11 +966,11 @@ div.functions p {
 }
 
 div.stats {
-    width: 335px;
+    width: 345px;
     border: 1px solid #AAA;   
     padding: 10px;
     float:right;
-    height:120px;
+    height:150px;
 }
 div.stats h2 {
     margin-top: 0px;

@@ -1,8 +1,7 @@
     <script src="http://www.java.com/js/deployJava.js"></script>
 	
 	<script language="JavaScript">
-	    function addHiddenInput(id, name, val) {
-	        var form = document.getElementById("sliceForm");
+	    function addHiddenInput(form, id, name, val) {
 	        var newIn = document.createElement("input");
 	        newIn.name = name;
 	        newIn.type = "hidden";
@@ -12,8 +11,8 @@
 	    }
 	    
         function doSubmit(form) {
-        	
-        	var topoPanel = guiPlugin.getTopoPanel();
+
+        	var topoPanel = document.guiPlugin.getTopoPanel();
 
         	/* get the nodes */
             var nodes = topoPanel.getGraphNodes();
@@ -24,9 +23,9 @@
               var n = nodes[i];
               var is_sel = n.isSelected().toString();
               if(is_sel == "true") {
-                addHiddenInput("node_id_"+i, "node_id", n.getId());
+                addHiddenInput(form, "node_id_"+i, "node_id", n.getId());
               }
-              addHiddenInput("node_id_pos", "pos", n.getId()+":::"+n.getX()+","+n.getY());
+              addHiddenInput(form, "node_id_pos", "pos", n.getId()+":::"+n.getX()+","+n.getY());
             }
 
             // get the list of link_ids
@@ -34,7 +33,7 @@
             for(var i=0, len=links.length; i<len; i++) {
                 var l = links[i];
                 if(l.isSelected().toString() == "true") {
-                    addHiddenInput("link_id_"+i, "link_id", l.getId());
+                    addHiddenInput(form, "link_id_"+i, "link_id", l.getId());
                 }
             }
 
