@@ -361,6 +361,9 @@ class FlowSpace(models.Model):
                +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
                +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
                +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
+        
+    def get_policy_xml(self):
+        return FlowSpace.POLICY_TYPE_XML[self.policy]
 
 class FlowSpaceForm(forms.ModelForm):
     # TODO: add validation using policy manager

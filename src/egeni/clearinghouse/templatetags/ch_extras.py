@@ -43,8 +43,7 @@ def flowspace_tag(flowspace, field):
 
     try:
         val = flowspace.__getattribute__(field)
-        if field == ("policy"):
-            val = flowspace.POLICY_TYPE_XML[val]
+            
     except Exception, e:
         print e
         return mark_safe("")
