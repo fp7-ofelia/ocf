@@ -40,11 +40,11 @@ function showDiv(foo) {
                     <option value="ip">All IP</option>
                     <option value="tcp">All TCP</option>
 		            <option value="special">All CDN</option>
-		            <option value="advanced">Advanced</option>
+		            <option value="advanced" selected="selected">Advanced</option>
                 </select>
             </div>
             
-            <div id="flowspacedivid"  style="display:none;">
+            <div id="flowspacedivid" >
 	            {{ fsformset.management_form }}
 	            <table border="1" class="fulltable flowspacetable">
 					<thead>
