@@ -1089,5 +1089,21 @@ table.last_errors_table tr td {
 }
 
 .errdate {
-    
 }
+
+table.flowspacetable select {
+    width: 70px;
+}
+
+table.flowspacetable input {
+    width: 55px;
+}
+
+table.flowspacetable tr th {
+    padding: 2px 5px;
+}
+
+table.flowspacetable tr td {
+    padding: 1px 1px;
+}
+

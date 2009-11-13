@@ -2,6 +2,18 @@
 {% load ch_extras %}
 
 {% block content %}
+<script type="text/javascript">
+<!--
+function showDiv(foo) {
+	obj = document.getElementById("flowspacedivid");
+	if (foo == "advanced") {
+		obj.style.display = 'block';
+	} else {
+		obj.style.display = 'none';
+	}
+}
+//-->
+</script>
 <div class="main">
     
     <h1>Step 3: Packet Types and OpenFlow Controller for Slice {{ slice.name }}</h1>
@@ -23,7 +35,7 @@
         <div class="flowspace form">
             <div class="packet types">
                 <h2>Select Packet Types:</h2>
-                <select name="typesdropdown">
+                <select name="typesdropdown" onchange="showDiv(this.value);">
 		            <option value="http">All HTTP</option>
                     <option value="ip">All IP</option>
                     <option value="tcp">All TCP</option>
@@ -32,16 +44,18 @@
                 </select>
             </div>
             
-            <div class="fulltable flowspacetable">
+            <div id="flowspacedivid"  style="display:none;">
 	            {{ fsformset.management_form }}
-	            <table border="1">
-	                <tr>
-		                {% for field in fsformset.forms.0 %}
-		                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
-	                    <td><strong>{{ field.label_tag }}</strong></td>
-		                {% endif %}
-		                {% endfor %}
-	                </tr>
+	            <table border="1" class="fulltable flowspacetable">
+					<thead>
+		                <tr>
+			                {% for field in fsformset.forms.0 %}
+			                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+		                    <th><strong>{{ field.label_tag }}</strong></th>
+			                {% endif %}
+			                {% endfor %}
+		                </tr>
+					</thead>
 	                {% for form in fsformset.forms %}
 	                <tr>
 		                {% for field in form %}
