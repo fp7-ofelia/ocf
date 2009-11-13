@@ -14,7 +14,14 @@
     
     {% if confirm %}
     <div class="confirm">
-    <h2>Slice reserved!</h2>
+    <h2>Slice reserved and should be running in ~15 minutes!</h2>
+    </div>
+    {% endif %}
+    
+    {% if confirm %}
+    <div class="key_file_link">
+    <h2>PlanetLab <a href="{% url slice_get_key slice.id %}">login key</a>:</h2>
+    <a href="{% url slice_get_key slice.id %}">Download login key</a> to login to your PlanetLab nodes.
     </div>
     {% endif %}
     

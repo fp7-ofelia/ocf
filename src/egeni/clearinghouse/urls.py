@@ -32,6 +32,7 @@ urlpatterns += patterns('egeni.clearinghouse.slice_views',
     url(r'^slice/(?P<slice_id>\w+)/resv/summary$', 'slice_resv_summary', name='slice_resv_summary'),
     url(r'^slice/(?P<slice_id>\w+)/resv/confirm$', 'slice_resv_confirm', name='slice_resv_confirm'),
     url(r'^slice/(?P<slice_id>\w+)/delete$', 'slice_delete', name='slice_delete'),
+    url(r'^slice/(?P<slice_id>\w+)/pl-key.pkey$', 'slice_get_key', name='slice_get_key'),
 )
 
 ################## Aggregate Managers #########################

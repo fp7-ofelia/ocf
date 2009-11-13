@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponseBadRequest,\
     HttpRequest, HttpResponseForbidden
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from egeni.clearinghouse.models import *
@@ -320,6 +320,9 @@ def slice_resv_summary(request, slice_id):
         
         slice.committed = commit
         slice.save()
+        
+        # TODO: generate and store the key to login to PL nodes
+        
         return HttpResponseRedirect(reverse('slice_resv_confirm', args=(slice.id,)))
 
     else:
@@ -337,6 +340,22 @@ def slice_resv_confirm(request, slice_id):
                                    'confirm': True,
                                    })
     return HttpResponseNotAllowed("GET")
+
+# TODO: Rewrite function to pull key from DB
+@user_passes_test(can_access)
+def slice_get_key(request, slice_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
+
+    print "Reading key"
+
+    try:
+        key_data = open("../cred/seethara.pkey", "rb").read()
+        return HttpResponse(key_data, mimetype="text/plain")
+    except Exception, e:
+        print e
+        raise Http404()
 
 @user_passes_test(can_access)
 def slice_delete(request, slice_id):
