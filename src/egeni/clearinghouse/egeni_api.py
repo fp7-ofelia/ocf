@@ -96,8 +96,9 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
     Delete the slice.
     '''
     
-#    # TODO: remove after debugging
-#    return
+    # TODO: remove after debugging
+    if not is_planetlab:
+        return
 
     global server, key
     if am_url not in server:
@@ -109,7 +110,7 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
 
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
-        result = server[am_url].delete_slice(slice_cred, str(slice_id), str(rspec))
+        result = server[am_url].delete_slice(slice_cred, str(slice_id))
     else:
         request_hash = key.compute_hash([slice_cred, str(slice_id)])
         result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
