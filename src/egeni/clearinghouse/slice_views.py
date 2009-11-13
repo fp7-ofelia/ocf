@@ -232,14 +232,12 @@ def slice_select_openflow(request, slice_id):
                 fs = FlowSpace(slice=slice,
                                policy=FlowSpace.TYPE_ALLOW,
                                dl_type="2048",
-                               nw_proto="6",
                                tp_src="10001",
                                )
                 fs.save()
                 fs = FlowSpace(slice=slice,
                                policy=FlowSpace.TYPE_ALLOW,
                                dl_type="2048",
-                               nw_proto="6",
                                tp_dst="10001",
                                )
                 fs.save()
