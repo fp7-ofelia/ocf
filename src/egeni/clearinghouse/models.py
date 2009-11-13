@@ -336,6 +336,11 @@ class FlowSpace(models.Model):
                          TYPE_DENY: 'Deny',
                          TYPE_RD_ONLY: 'Read Only',
                          }
+    
+    POLICY_TYPE_XML={TYPE_ALLOW: 'allow',
+                     TYPE_DENY: 'deny',
+                     TYPE_RD_ONLY: 'readonly',
+                     }
 
     policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items(), default=TYPE_ALLOW)
     dl_src = models.CharField(max_length=17, default="*")
