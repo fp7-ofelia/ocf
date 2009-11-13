@@ -96,6 +96,8 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
     Delete the slice.
     '''
     
+    return
+
     # TODO: remove after debugging
     if not is_planetlab:
         return
@@ -105,7 +107,6 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
         connect_to_soap_server(am_url)
 
     # TODO: the following should be loaded from the DB
-    slice_id = 'plc.openflow.egeni'
     slice_cred = file('../cred/slice_egeni.cred').read()
 
     # The second param is supposed to be HRN, but replaced with slice_id

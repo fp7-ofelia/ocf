@@ -40,8 +40,8 @@ def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
-#    return egeni_api.delete_slice(am_url, slice_id, 1)
     return 
+    return egeni_api.delete_slice(am_url, slice_id, 1)
 
 def get_rspec(am_url):
     '''
