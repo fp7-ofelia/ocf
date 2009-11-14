@@ -22,7 +22,7 @@
                     {% if not am.available %}disabled{% endif %}
                     {{ am|check_in_set:slice.aggMgrs.all }}/></td>
                 {% endif %}
-                <td>{% if am.logo %}<img class="am_logo" src="{{ am.logo.url }}" />{% endif %}</td>
+                <td align="center">{% if am.logo %}<img class="am_logo" src="{{ am.logo.url }}" />{% endif %}</td>
                 <td>{{ am.name }}</td>
                 <td>{{ am.location }}</td>
                 <td>{{ am.description }}</td>
