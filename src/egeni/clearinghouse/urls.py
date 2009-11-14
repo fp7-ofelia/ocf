@@ -11,8 +11,6 @@ urlpatterns = patterns('django.views.generic',
 
 urlpatterns += patterns('egeni.clearinghouse.views',
     url(r'^$', 'home', name='home'),
-#    url(r'^img/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
-#    url(r'^media/img/logos/(?P<img_name>[\w.-]+)$', 'get_img', name='get_img'),
 )
 
 urlpatterns += patterns('',

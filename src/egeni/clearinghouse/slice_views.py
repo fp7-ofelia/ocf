@@ -86,7 +86,7 @@ def slice_select_aggregates(request, slice_id):
     if not check_access(request.user, slice):
         return HttpResponseForbidden("You don't have permission to access this slice.")
     
-    print "%s" % request.method
+#    print "%s" % request.method
     
     if request.method == 'GET':
         am_list = AggregateManager.objects.all()
@@ -118,7 +118,7 @@ def slice_select_topo(request, slice_id):
         node_ids = request.POST.getlist(NODE_ID_FIELD)
         positions = request.POST.getlist(POS_FIELD)
         
-        print "select_topo post: %s" % request.POST
+#        print "select_topo post: %s" % request.POST
         
         # collect the positions
         pos_dict = {}
@@ -136,7 +136,7 @@ def slice_select_topo(request, slice_id):
         
         # create new links and ids
         for id in link_ids:
-            print "Link: %s" % id
+#            print "Link: %s" % id
             link = get_object_or_404(Link, pk=id)
             through, created = LinkSliceStatus.objects.get_or_create(
                                     slice=slice,
@@ -148,7 +148,7 @@ def slice_select_topo(request, slice_id):
                                     )
             
         for id in node_ids:
-            print "Node: %s" % id
+#            print "Node: %s" % id
             node = get_object_or_404(Node, pk=id)
             through, created = NodeSliceStatus.objects.get_or_create(
                                     slice=slice,
@@ -416,16 +416,18 @@ def slice_get_topo_string(slice):
     nodes = nodes.annotate(
         num_cnxns=Count('interface__remoteIfaces')).exclude(
             num_cnxns=0)
-
-    print nodes
+        
     nodes_dict = {}
     for n in nodes:
         try:
             nsg = NodeSliceGUI.objects.get(slice=slice,
                                            node=n)
         except NodeSliceGUI.DoesNotExist:
-            x = n.x or -1
-            y = n.y or -1
+            if n.nodeId in Node.LOCATION_DICT:
+                x, y = Node.LOCATION_DICT[n.nodeId]
+            else:
+                x = n.x or -1
+                y = n.y or -1
         
         else:
             x = nsg.x

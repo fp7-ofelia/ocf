@@ -75,6 +75,11 @@ def detail(request, am_id):
     elif(request.method == "POST"):
         print "Post detail for am %s" % am.name
         form = AggregateManagerForm(request.POST, instance=am)
+        print form
+        print "post:"
+        print request.POST
+        print "request"
+        print request
         print "Validating"
         if form.is_valid():
             print "Validation done"

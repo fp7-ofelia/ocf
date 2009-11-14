@@ -169,8 +169,8 @@ def update_rspec(self_am):
     debug("-----My AM id: %s" %  self_am.id)
     
     node_elems = tree.findall("*/{%s}node" % ns)
-    print "node elems:"
-    print node_elems
+    debug("node elems:")
+    debug(node_elems)
     
     # In the first iteration create all the nodes
     for node_elem in node_elems:
@@ -375,10 +375,6 @@ def update_rspec(self_am):
                                                                 )
             except models.Interface.DoesNotExist, e:
                 print "XML malformed. Remote iface for node id %s and port num %s does not exist." % (id, num)
-                print "remote node has ifaces:"
-                n = models.Node.objects.get(nodeId=id)
-                for i in n.interface_set.all():
-                    print i
                 continue
             
             remote_iface_ids.append(remote_iface_obj.id)

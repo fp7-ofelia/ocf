@@ -18,8 +18,10 @@
                 id:'guiPlugin',
                 code:'egeni.clearinghouse.plugin.GUIApplet.class',
                 archive:'./plugin.jar',
+                {% comment %}
                 cache_option:'No',
                 session_id:'{{ session_id }}',
+                {% endcomment %}
                 width:740, height:600} ;
         {% if topo_xml %}
         var parameters = {inputXML:'{{ topo_xml }}'}

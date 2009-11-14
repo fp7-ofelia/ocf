@@ -106,8 +106,7 @@ def update_rspec(self_am):
 #            debug("name: %s" % name)
             
             # TODO: this is a hack
-            if name.startswith("of"):
-                debug("Found of-pl node: %s" % name)
+#            if not name.startswith("of"):
 #                continue
             
             type = models.Node.TYPE_PL
@@ -175,9 +174,11 @@ def update_rspec(self_am):
 #                id__in=iface_ids).delete()
     
     # delete all the old stuff
+#    print "new ids: %s" % node_ids
+    
     for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
         try:
-            debug("Deleting %s " % id)
+            debug("Deleting %s " % n.nodeId)
             models.Node.objects.get(nodeId=n.nodeId).delete()
         except:
             debug("Error deleting")

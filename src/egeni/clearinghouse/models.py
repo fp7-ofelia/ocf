@@ -58,6 +58,12 @@ class AggregateManager(models.Model):
     def get_absolute_url(self):
         return ('aggmgr_detail', [str(self.id)])
     get_absolute_url = permalink(get_absolute_url)
+    
+    def get_logo_url(self):
+        if "nternet2" in self.name:
+            return "/clearinghouse/media/img/logos/logo-internet2.gif"
+        else:
+            return self.logo.url
 
     def __unicode__(self):
         return AggregateManager.AM_TYPE_CHOICES[self.type] + ' ' + self.name + ' at ' + self.url
@@ -165,8 +171,30 @@ class Node(models.Model):
     Anything that has interfaces. Can be a switch or a host or a stub.
     '''
     
-    TYPE_OF = 'OF';
-    TYPE_PL = 'PL';
+    TYPE_OF = 'OF'
+    TYPE_PL = 'PL'
+    
+    LOCATION_DICT = {
+        '0012e2786763': (51, 381),
+        '002320e9f311': (413, 476),
+        '0012e298a5d0': (74, 130),
+        '0012e27831f3': (74, 267),
+        '0012e2b8f3d2': (188, 372),
+        '002320dce53a': (596, 370),
+        '002320f412a4': (596, 31),
+        '002320ec2128': (596, 160),
+        '0012e298a5ce': (181, 268),
+        '004e46324304': (56, 19),
+        '00232033441c': (439, 323),
+        '00232055661c': (283, 325),
+        '00232011221c': (364, 198),
+        '176001b3fc54700': (210, 121),
+        'of-planet3.stanford.edu': (218, 118),
+        'of-planet4.stanford.edu': (604, 492),
+        'of-planet2.stanford.edu': (25, 506),
+        'of-planet1.stanford.edu': (179, 503),
+        'of-planet5.stanford.edu': (423, 25),
+        }
 
     nodeId = models.CharField(max_length=200, primary_key=True)
     type = models.CharField(max_length=200, null=True, blank=True)
