@@ -61,7 +61,7 @@ class AggregateManager(models.Model):
     
     def get_logo_url(self):
         if "nternet2" in self.name:
-            return "/clearinghouse/media/img/logos/logo-internet2.gif"
+            return "/clearinghouse/media/img/logos/logo-internet2.png"
         else:
             return self.logo.url
 
@@ -72,6 +72,9 @@ class AggregateManager(models.Model):
         return self.local_node_set.all()
     
     def updateRSpec(self):
+        if not self.available:
+            return ""
+        
         print "Update RSpec Type %s" % self.type
         if self.type == AggregateManager.TYPE_OF:
             return egeni_api.update_rspec(self)

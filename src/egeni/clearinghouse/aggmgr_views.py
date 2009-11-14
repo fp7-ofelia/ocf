@@ -58,7 +58,8 @@ def detail(request, am_id):
         print "Get detail for am %s" % am.name
         form = AggregateManagerForm(instance=am)
         try:
-            am.updateRSpec()
+            if am.available:
+                am.updateRSpec()
         except Exception, e:
             print "Update RSpec Exception"; print e
             traceback.print_exc()
