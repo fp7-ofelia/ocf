@@ -1107,3 +1107,6 @@ table.flowspacetable tr td {
     padding: 1px 1px;
 }
 
+table.fulltable tbody td.logocol {
+    padding: 0px;
+}
