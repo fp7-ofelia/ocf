@@ -11,7 +11,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.jgraph.layout.routing.JGraphParallelRouter;
 
-public class JGraphLink extends DefaultEdge {
+public class JGraphLink extends DefaultEdge implements SelectableItem {
 	/**
 	 * 
 	 */
@@ -106,15 +106,22 @@ public class JGraphLink extends DefaultEdge {
 		this.id = id;
 	}
 
+	@Override
 	public Boolean isSelected() {
 		return is_selected;
 	}
 
+	@Override
 	public void setSelected(Boolean isSelected) {
 		is_selected = isSelected;
 		updateView();
 	}
 
+	@Override
+	public void toggleSelected() {
+		setSelected(!isSelected());
+	}
+	
 	public Boolean hasError() {
 		return has_error;
 	}
@@ -124,10 +131,6 @@ public class JGraphLink extends DefaultEdge {
 		updateView();
 	}
 
-	public void toggleSelected() {
-		setSelected(!isSelected());
-	}
-	
 	public Boolean isReserved() {
 		return is_reserved;
 	}

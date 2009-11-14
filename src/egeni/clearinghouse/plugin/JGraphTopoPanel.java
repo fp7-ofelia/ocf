@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -24,9 +26,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -43,6 +47,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.jgraph.JGraph;
 import org.jgraph.event.GraphLayoutCacheEvent;
 import org.jgraph.event.GraphLayoutCacheListener;
+import org.jgraph.event.GraphSelectionEvent;
+import org.jgraph.event.GraphSelectionListener;
 import org.jgraph.graph.AttributeMap;
 import org.jgraph.graph.DefaultGraphCell;
 import org.jgraph.graph.GraphConstants;
@@ -126,6 +132,31 @@ public class JGraphTopoPanel extends JPanel {
 		
 		jgraph = new JGraph(jgAdapter);
 		this.adjustDisplaySettings(jgraph);
+		jgraph.addGraphSelectionListener(new GraphSelectionListener() {
+			@Override
+			public void valueChanged(GraphSelectionEvent e) {
+				Object[] o = jgraph.getSelectionCells();
+				if(o == null) return;
+				/* if any cell is unselected then select all */
+				Boolean doSelect = false;
+				LinkedList<SelectableItem> items = new LinkedList<SelectableItem>();
+				/* check to see if anything is not selected */
+				for(Object c: o) {
+					DefaultGraphCell cell = (DefaultGraphCell) c;
+					Object u = cell.getUserObject();
+					if(u instanceof SelectableItem) {
+						items.add((SelectableItem)u);
+						if(!((SelectableItem)u).isSelected()) {
+							doSelect = true;
+						}
+					}
+				}
+				/* set the selection status */
+				for(SelectableItem u: items) {
+					u.setSelected(doSelect);
+				}
+			}
+		});
 
 		parseInputXML(inputXML);
 		
@@ -140,10 +171,8 @@ public class JGraphTopoPanel extends JPanel {
 					(DefaultGraphCell)jgraph.getFirstCellForLocation(x, y);
 				if(o == null) return;
 				Object u = o.getUserObject();
-				if(u instanceof JGraphNode) {
-					((JGraphNode)u).toggleSelected();
-				} else if(u instanceof JGraphLink) {
-					((JGraphLink)u).toggleSelected();
+				if(u instanceof SelectableItem) {
+					((SelectableItem)u).toggleSelected();
 				}
 			}
 			

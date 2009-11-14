@@ -20,7 +20,7 @@ import org.jgrapht.ext.JGraphModelAdapter;
  * @author jnaous
  *
  */
-public class JGraphNode {
+public class JGraphNode implements SelectableItem{
 	
 	public static final int BORDER_THICKNESS = 0;
 	
@@ -177,13 +177,20 @@ public class JGraphNode {
 		updateView(getBounds());
 	}
 
+	@Override
 	public Boolean isSelected() {
 		return isSelected;
 	}
 
+	@Override
 	public void setSelected(Boolean isSelected) {
 		this.isSelected = isSelected;
 		updateView(getBounds());
+	}
+
+	@Override
+	public void toggleSelected() {
+		setSelected(!isSelected());
 	}
 
 	public Boolean hasError() {
@@ -193,9 +200,5 @@ public class JGraphNode {
 	public void setError(Boolean hasError) {
 		has_error = hasError;
 		updateView(getBounds());
-	}
-
-	public void toggleSelected() {
-		setSelected(!isSelected());
 	}
 }
