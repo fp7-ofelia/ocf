@@ -191,7 +191,7 @@ class Node(models.Model):
         '00232033441c': (439, 323),
         '00232055661c': (283, 325),
         '00232011221c': (364, 198),
-        '176001b3fc54700': (210, 121),
+        '176001b3fc54700': (210, 34),
         'of-planet3.stanford.edu': (218, 118),
         'of-planet4.stanford.edu': (604, 492),
         'of-planet2.stanford.edu': (25, 506),
