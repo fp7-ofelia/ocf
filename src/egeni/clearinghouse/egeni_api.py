@@ -114,7 +114,7 @@ def connect_to_soap_server(am_url):
 
     server[am_url]= soapprotocol.get_server(am_url, key_file, cert_file)
 
-def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
+def reserve_slice(am_url, rspec, slice_id):
     '''
     Reserves the slice identified by slice_id or
     updates the slice if already reserved on the AM.
@@ -134,27 +134,18 @@ def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
     slice_hrn = get_slice_hrn(slice_id)
     
     # The second param is supposed to be HRN, but replaced with slice_id
-    if is_planetlab:
-        print slice_cred
-        result = server[am_url].create_slice(slice_cred, slice_hrn, str(rspec))
-    else:
-        request_hash = key.compute_hash([slice_cred, slice_hrn, str(rspec)])
-        result = server[am_url].create_slice(slice_cred, slice_hrn, str(rspec), request_hash)
+    result = server[am_url].create_slice(slice_cred, slice_hrn, str(rspec))
 
     debug(result)
     
     return ""    
 
-def delete_slice(am_url, slice_id, is_planetlab=0):
+def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
     '''
     
     return
-
-    # TODO: remove after debugging
-#    if not is_planetlab:
-#        return
 
     global server, key
     if am_url not in server:
@@ -165,13 +156,9 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
     slice_hrn = get_slice_hrn(slice_id)
 
     # The second param is supposed to be HRN, but replaced with slice_id
-    if is_planetlab:
-        result = server[am_url].delete_slice(slice_cred, slice_hrn)
-    else:
-        request_hash = key.compute_hash([slice_cred, slice_hrn])
-        result = server[am_url].delete_slice(slice_cred, slice_hrn, request_hash)
+    result = server[am_url].delete_slice(slice_cred, slice_hrn)
 
-def get_rspec(am_url, is_planetlab=0):
+def get_rspec(am_url):
     '''
     Returns the RSpec of available resources.
     '''
@@ -187,11 +174,7 @@ def get_rspec(am_url, is_planetlab=0):
     # The HRN is used to identify the person issuing this call.
     # Currently unused
     debug("Getting result")
-    if is_planetlab:
-        result = server[am_url].get_resources(CH_cred.save_to_string(save_parents=True))
-    else:
-        request_hash = key.compute_hash([CH_cred.save_to_string(save_parents=True), CH_hrn])
-        result = server[am_url].get_resources(CH_cred.save_to_string(save_parents=True), CH_hrn, request_hash)
+    result = server[am_url].get_resources(CH_cred.save_to_string(save_parents=True))
         
 #    print result
     return result
