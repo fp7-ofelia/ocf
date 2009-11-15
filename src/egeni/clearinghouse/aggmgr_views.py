@@ -118,3 +118,10 @@ def delete(request, am_id):
                                        reverse("aggmgr_admin_home"),
                                        am_id)
 
+@user_passes_test(can_access)
+def rspec(request, am_id):
+    am = get_object_or_404(AggregateManager, pk=am_id)
+    if not request.user.is_staff and am.owner != request.user:
+        return HttpResponseForbidden()
+    
+    return HttpResponse(am.get_avail_rspec(), mimetype="text/xml")

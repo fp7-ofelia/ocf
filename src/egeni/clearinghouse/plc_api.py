@@ -34,9 +34,9 @@ def reserve_slice(am_url, rspec, slice_id):
     rspec contains only the failing node without its interfaces.
     '''
     
-    return egeni_api.reserve_slice(am_url, rspec, slice_id, 1)
     print "Reserving PL Slice: %s" % rspec
-
+    return egeni_api.reserve_slice(am_url, rspec, slice_id, 1)
+    
 def delete_slice(am_url, slice_id):
     '''
     Delete the slice.
@@ -82,7 +82,7 @@ def get_rspec(am_url):
 
     return egeni_api.get_rspec(am_url, 1)
 
-def update_rspec_from_plcapi(self_am):
+def update_rspec(self_am):
     '''
     Read from PCLAPI directly the node belonging to OpenFlow project
     '''
@@ -93,8 +93,8 @@ def update_rspec_from_plcapi(self_am):
     tags = s.GetNodes(auth,{'site_id':11467},['hostname'])
     
     node_ids = []
-    for i in range(len(tags)):
-        name = tags[i]['hostname']:
+    for tag in tags:
+        name = tag['hostname']
         type = models.Node.TYPE_PL
         
         kwargs = {"nodeId": name,
@@ -103,7 +103,7 @@ def update_rspec_from_plcapi(self_am):
                   "is_remote": False,
                   "aggMgr": self_am,
                   "img_url": PLNODE_DEFAULT_IMG,
-                  "extra_context": "netspec__name=%s" % netspec_name,
+                  "extra_context": "netspec__name=%s" % "plc",
                   }
 
         node, created = models.Node.objects.get_or_create(
@@ -111,13 +111,14 @@ def update_rspec_from_plcapi(self_am):
                       defaults=kwargs,
                       )
         
-#            debug("Node new: %s" % created)
-        
-        if not created:
+        if created:
+            node.interface_set.get_or_create(portNum=0)
+        else:
             for k,v in kwargs.items():
                 node.__setattr__(k, v)
         
         self_am.connected_node_set.add(node)
+        node_ids.append(name)
         node.save()
 
     for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
@@ -128,17 +129,7 @@ def update_rspec_from_plcapi(self_am):
             debug("Error deleting")
             traceback.print_exc()
 
-    for id in iface_ids:
-        try:
-            n = models.Interface.objects.get(id=id)
-            n.delete()
-        except models.Interface.DoesNotExist:
-            pass
-        except:
-            debug("Error deleting")
-            traceback.print_exc()
-
-def update_rspec(self_am):
+def update_rspec_full(self_am):
     '''
     Read and parse the RSpec specifying all 
     nodes from the aggregate manager using the E-GENI
@@ -240,14 +231,3 @@ def update_rspec(self_am):
         except:
             debug("Error deleting")
             traceback.print_exc()
-
-    for id in iface_ids:
-        try:
-            n = models.Interface.objects.get(id=id)
-            n.delete()
-        except models.Interface.DoesNotExist:
-            pass
-        except:
-            debug("Error deleting")
-            traceback.print_exc()
-

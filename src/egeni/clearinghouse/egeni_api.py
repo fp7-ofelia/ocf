@@ -37,6 +37,8 @@ key = Keypair(filename=key_file)
 server = {}
 done_init = False
 
+#slice_name = 'plc.openflow.egeni'
+
 en_debug = 0
 def debug(s):
     if(en_debug):
@@ -77,7 +79,6 @@ def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
         connect_to_soap_server(am_url)
 
     # TODO: the following should be loaded from the DB
-    slice_id = 'plc.openflow.egeni'
     slice_cred = file('../cred/slice_egeni.cred').read()
 
     # The second param is supposed to be HRN, but replaced with slice_id

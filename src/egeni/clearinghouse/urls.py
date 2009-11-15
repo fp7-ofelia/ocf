@@ -39,6 +39,7 @@ urlpatterns += patterns('egeni.clearinghouse.aggmgr_views',
     url(r'^aggmgr/(?P<am_id>\d+)/detail/$', 'detail', name='aggmgr_detail'),
     url(r'^aggmgr/(?P<am_id>\d+)/saved/$', 'saved', name='aggmgr_saved'),
     url(r'^aggmgr/(?P<am_id>\d+)/delete/$', 'delete', name="aggmgr_delete"),
+    url(r'^aggmgr/(?P<am_id>\d+)/rspec.xml$', 'rspec', name="aggmgr_rspec"),
 )
 
 ################## Users #########################

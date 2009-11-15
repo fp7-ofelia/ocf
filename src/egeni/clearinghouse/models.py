@@ -61,7 +61,7 @@ class AggregateManager(models.Model):
     
     def get_logo_url(self):
         if "nternet2" in self.name:
-            return "/clearinghouse/media/img/logos/logo-internet2.png"
+            return "/clearinghouse/media/img/logo-internet2.png"
         else:
             return self.logo.url
 
@@ -80,6 +80,14 @@ class AggregateManager(models.Model):
             return egeni_api.update_rspec(self)
         else:
             return plc_api.update_rspec(self)
+        
+    def get_avail_rspec(self):
+        if self.type == AggregateManager.TYPE_OF:
+            return egeni_api.get_rspec(self.url)
+        elif self.type == AggregateManager.TYPE_PL:
+            return plc_api.get_rspec(self.url)
+        else:
+            return ""
         
     def get_resv_rspec(self, slice):
         if not self.available:
@@ -458,6 +466,9 @@ class DatedMessage(models.Model):
 
     def format_time(self):
         return self.datetime.strftime("%H:%M:%S")
+    
+    def get_type(self):
+        return DatedMessage[self.type]
     
     def __unicode__(self):
         return "%s %s - %s" % (self.format_date(), self.format_time(), self.text)

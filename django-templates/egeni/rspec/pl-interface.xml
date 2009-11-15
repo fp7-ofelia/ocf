@@ -1,9 +1,1 @@
-						<IfSpec
-						name="{{ iface.name }}" 
-						addr="{{ iface.address }}"
-						type="{{ iface.type }}"
-						init_params=""
-						ip_spoof=""
-						max_rate=""
-						min_rate="">
-						</IfSpec>
+<IfSpec	name="{{ iface.name }}"	addr="{{ iface.address }}" type="{{ iface.type }}" init_params="" ip_spoof="" max_rate="" min_rate="" />
