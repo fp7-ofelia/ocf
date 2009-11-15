@@ -70,12 +70,16 @@ def init():
         else: 
             print "Failed to get authority credential"
 
+def get_slice_hrn(slice_id):
+    '''Returns the human-readable name for the slice'''
+    return "%s.slice%s" %(AUTH_hrn, slice_id)
+
 def get_slice_cred(slice_id):
     global CH_cred, AUTH_hrn
     if not done_init: init()
     # bootstrap slice credential from user credential
     user_cred = CH_cred
-    slice_cred = registry.get_credential(user_cred, "slice", "%s.%s" % (AUTH_hrn, slice_id))
+    slice_cred = registry.get_credential(user_cred, "slice", get_slice_hrn(slice_id))
     if slice_cred:
         return slice_cred
     else:
@@ -85,14 +89,16 @@ def add_slice(slice_id):
     global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
     if not done_init: init()
 
-    record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s.%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"><researcher>%s</researcher></record>' % (AUTH_hrn, AUTH_hrn, slice_id, slice_id, CH_hrn))
+    record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"><researcher>%s</researcher></record>' % (AUTH_hrn, get_slice_hrn(slice_id), slice_id, CH_hrn))
     registry.register(auth_cred, record)
+    os.system("/usr/bin/wget http://www.planet-lab.org/scripts/ofhack.php")
+    os.unlink("ofhack.php")
 
 def remove_slice(slice_id):
     global auth_cred, AUTH_hrn, registry
     if not done_init: init()
 
-    registry.remove(auth_cred, "slice", "%s.%s" % (AUTH_hrn, slice_id))
+    registry.remove(auth_cred, "slice", get_slice_hrn(slice_id))
 
 def connect_to_soap_server(am_url):
     global server, CH_hrn, key_file, cert_file, done_init
@@ -125,7 +131,7 @@ def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
     
     # TODO: the following should be loaded from the DB
     slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
-    slice_hrn = "%s.%s" % (AUTH_hrn, slice_id)
+    slice_hrn = get_slice_hrn(slice_id)
     
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
@@ -156,7 +162,7 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
 
     # TODO: the following should be loaded from the DB
     slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
-    slice_hrn = "%s.%s" % (AUTH_hrn, slice_id)
+    slice_hrn = get_slice_hrn(slice_id)
 
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
