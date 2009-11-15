@@ -129,9 +129,9 @@ class AggregateManager(models.Model):
             return ""
         
         if self.type == AggregateManager.TYPE_OF:
-            egeni_api.delete_slice(self.url, slice.id, 0)
+            egeni_api.delete_slice(self.url, slice.id)
         elif self.type == AggregateManager.TYPE_PL:
-            plc_api.delete_slice(self.url, slice.id, 1)
+            plc_api.delete_slice(self.url, slice.id)
         
     def reserve_slice(self, slice):
         '''Request a reservation and return a message on success or failure'''
@@ -280,7 +280,7 @@ class Slice(models.Model):
         return true if the interface is a src or dst in any link in
         this slice
         '''
-        
+        return True
         return (self.links.filter(src=iface).count()
                 + self.links.filter(dst=iface).count()) > 0
                 

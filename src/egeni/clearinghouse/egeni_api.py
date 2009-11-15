@@ -43,10 +43,11 @@ AUTH_hrn = 'plc.openflow'
 key = Keypair(filename=key_file)
 server = {}
 done_init = False
+registry = None
 
 #slice_name = 'plc.openflow.egeni'
 
-en_debug = 0
+en_debug = 1
 def debug(s):
     if(en_debug):
         print(s)
@@ -69,14 +70,27 @@ def init():
         else: 
             print "Failed to get authority credential"
 
+def get_slice_cred(slice_id):
+    global CH_cred, AUTH_hrn
+    if not done_init: init()
+    # bootstrap slice credential from user credential
+    user_cred = CH_cred
+    slice_cred = registry.get_credential(user_cred, "slice", "%s.%s" % (AUTH_hrn, slice_id))
+    if slice_cred:
+        return slice_cred
+    else:
+        print "Failed to get slice credential"
+
 def add_slice(slice_id):
     global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
+    if not done_init: init()
 
     record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s.%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"><researcher>%s</researcher></record>' % (AUTH_hrn, AUTH_hrn, slice_id, slice_id, CH_hrn))
     registry.register(auth_cred, record)
 
 def remove_slice(slice_id):
-    global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
+    global auth_cred, AUTH_hrn, registry
+    if not done_init: init()
 
     registry.remove(auth_cred, "slice", "%s.%s" % (AUTH_hrn, slice_id))
 
@@ -108,9 +122,9 @@ def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
     global server, key
     if am_url not in server:
         connect_to_soap_server(am_url)
-
+    
     # TODO: the following should be loaded from the DB
-    slice_cred = file('../cred/slice_egeni.cred').read()
+    slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
 
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
@@ -139,7 +153,7 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
         connect_to_soap_server(am_url)
 
     # TODO: the following should be loaded from the DB
-    slice_cred = file('../cred/slice_egeni.cred').read()
+    slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
 
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
@@ -147,7 +161,6 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
     else:
         request_hash = key.compute_hash([slice_cred, str(slice_id)])
         result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
-    
 
 def get_rspec(am_url, is_planetlab=0):
     '''
@@ -166,10 +179,10 @@ def get_rspec(am_url, is_planetlab=0):
     # Currently unused
     debug("Getting result")
     if is_planetlab:
-        result = server[am_url].get_resources(CH_cred)
+        result = server[am_url].get_resources(CH_cred.save_to_string(save_parents=True))
     else:
-        request_hash = key.compute_hash([CH_cred, CH_hrn])
-        result = server[am_url].get_resources(CH_cred, CH_hrn, request_hash)
+        request_hash = key.compute_hash([CH_cred.save_to_string(save_parents=True), CH_hrn])
+        result = server[am_url].get_resources(CH_cred.save_to_string(save_parents=True), CH_hrn, request_hash)
         
 #    print result
     return result
@@ -382,24 +395,25 @@ def update_rspec(self_am):
             id__in=new_iface_ids).delete()
     
     # In the third iteration, add all the remote connections
+    src_link_ids = []
+    dst_link_ids = []
     for interface, iface_obj in zip(interfaces, new_ifaces):
         # get the remote ifaces
         other_nodeIDs = interface.findall("{%s}remoteNodeId" % ns)
         other_ports = interface.findall("{%s}remotePort" % ns)
 
-        debug("<1> nodes:%s ports:%s" % (other_nodeIDs, other_ports))
+        debug("doing remotes for iface %s" % iface_obj)
+        debug("remote nodes:%s ports:%s" % (other_nodeIDs, other_ports))
 
         nodes_ports = zip(other_nodeIDs, other_ports)
         remote_iface_ids = []
-        src_link_ids = []
-        dst_link_ids = []
         for remote_node_id_elem, remote_port_elem in nodes_ports:
             # get the remote node object
             id = remote_node_id_elem.text
             
             # get the remote interface at that remote node
             num = int(remote_port_elem.text)
-            debug("<8> %s %s" % (num, id))
+            debug("remote iface port %s id %s" % (num, id))
             
             try:
                 remote_iface_obj = models.Interface.objects.get(portNum=num,
@@ -411,6 +425,7 @@ def update_rspec(self_am):
             
             remote_iface_ids.append(remote_iface_obj.id)
             
+            debug("Adding link")
             # get the link or create one if it doesn't exist
             link, created = models.Link.objects.get_or_create(
                                 src=iface_obj, dst=remote_iface_obj)
@@ -424,7 +439,12 @@ def update_rspec(self_am):
 
             debug("<3>"); debug(id); debug(num)
             
+    for iface_obj in new_ifaces:
         # delete old links
+        for i in iface_obj.src_link_set.exclude(id__in=src_link_ids):
+            print "Deleting link %s" % i
+        for i in iface_obj.dst_link_set.exclude(id__in=dst_link_ids):
+            print "Deleting link %s" % i
         iface_obj.src_link_set.exclude(id__in=src_link_ids).delete()
         iface_obj.dst_link_set.exclude(id__in=dst_link_ids).delete()
 

@@ -52,6 +52,8 @@ def slice_home(request):
         form = SliceNameForm(request.POST, instance=slice)
         if owner and form.is_valid():
             slice = form.save()
+            print "Registering PL slice"
+            egeni_api.add_slice(slice.id)
             return HttpResponseRedirect(reverse("slice_select_aggregates", kwargs={"slice_id": slice.id}))
 
     else:
@@ -289,6 +291,8 @@ def slice_resv_summary(request, slice_id):
                 text = "Error deleting slice %s to re-reserve from Aggregate %s: %s. Will still remove from DB." % (slice.name, am.name, e)
                 print text
                 messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
+                # TODO Catch the proper exception
+                continue
                 return render_to_response("clearinghouse/slice_resv_summary.html",
                                           {'slice': slice,
                                            'error_message': "Error reserving slice"})
@@ -372,6 +376,11 @@ def slice_delete(request, slice_id):
                 print text
                 messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
 
+        try:
+            egeni_api.remove_slice(slice.id)
+        except Exception, e:
+            traceback.print_exc()
+        
     return create_update.delete_object(request,
                                        Slice,
                                        reverse("slice_home"),

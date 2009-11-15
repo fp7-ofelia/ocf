@@ -33,9 +33,6 @@ def reserve_slice(am_url, rspec, slice_id):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    print "Registering PL slice"
-    egeni_api.add_slice(slice_id)
-    
     print "Reserving PL Slice: %s" % rspec
     return egeni_api.reserve_slice(am_url, rspec, slice_id, 1)
     
@@ -44,7 +41,6 @@ def delete_slice(am_url, slice_id):
     Delete the slice.
     '''
 
-    egeni_api.remove_slice(slice_id)
     return egeni_api.delete_slice(am_url, slice_id, 1)
 
 def get_rspec(am_url):
