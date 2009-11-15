@@ -47,7 +47,7 @@ registry = None
 
 #slice_name = 'plc.openflow.egeni'
 
-en_debug = 1
+en_debug = 0
 def debug(s):
     if(en_debug):
         print(s)
@@ -119,19 +119,21 @@ def reserve_slice(am_url, rspec, slice_id, is_planetlab=0):
     If reserving the node failed but not due to the interface, the
     rspec contains only the failing node without its interfaces.
     '''
-    global server, key
+    global server, key, AUTH_hrn
     if am_url not in server:
         connect_to_soap_server(am_url)
     
     # TODO: the following should be loaded from the DB
     slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
-
+    slice_hrn = "%s.%s" % (AUTH_hrn, slice_id)
+    
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
-        result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec))
+        print slice_cred
+        result = server[am_url].create_slice(slice_cred, slice_hrn, str(rspec))
     else:
-        request_hash = key.compute_hash([slice_cred, str(slice_id), str(rspec)])
-        result = server[am_url].create_slice(slice_cred, str(slice_id), str(rspec), request_hash)
+        request_hash = key.compute_hash([slice_cred, slice_hrn, str(rspec)])
+        result = server[am_url].create_slice(slice_cred, slice_hrn, str(rspec), request_hash)
 
     debug(result)
     
@@ -154,13 +156,14 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
 
     # TODO: the following should be loaded from the DB
     slice_cred = get_slice_cred(slice_id).save_to_string(save_parents=True)
+    slice_hrn = "%s.%s" % (AUTH_hrn, slice_id)
 
     # The second param is supposed to be HRN, but replaced with slice_id
     if is_planetlab:
-        result = server[am_url].delete_slice(slice_cred, str(slice_id))
+        result = server[am_url].delete_slice(slice_cred, slice_hrn)
     else:
-        request_hash = key.compute_hash([slice_cred, str(slice_id)])
-        result = server[am_url].delete_slice(slice_cred, str(slice_id), request_hash)
+        request_hash = key.compute_hash([slice_cred, slice_hrn])
+        result = server[am_url].delete_slice(slice_cred, slice_hrn, request_hash)
 
 def get_rspec(am_url, is_planetlab=0):
     '''
