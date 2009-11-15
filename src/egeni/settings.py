@@ -101,3 +101,6 @@ INSTALLED_APPS = (
 LOGIN_REDIRECT_URL = '/clearinghouse/'
 
 AUTH_PROFILE_MODULE = "clearinghouse.UserProfile"
+
+SFI_CONF_DIR = os.path.join(EGENI_DIR, "cred")
+SFI_EXEC_DIR = os.path.join(EGENI_DIR, "src/sfa/client")
