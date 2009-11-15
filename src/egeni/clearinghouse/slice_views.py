@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest,\
 from django.http import HttpResponse, Http404
 from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.core.urlresolvers import reverse
+from django.views.generic import create_update
 from egeni.clearinghouse.models import *
 from django.contrib.auth.decorators import user_passes_test
 from django.forms.models import inlineformset_factory
@@ -13,7 +14,7 @@ import os
 import messaging
 from traceback import print_exc
 from django.db.models import Count
-
+import traceback
 
 LINK_ID_FIELD = "link_id"
 NODE_ID_FIELD = "node_id"
@@ -281,10 +282,7 @@ def slice_resv_summary(request, slice_id):
         # Delete the old slice from the AMs so we can create it again
         for am in slice.aggMgrs.all():
             try:
-                if am.type == AggregateManager.TYPE_OF:
-                    egeni_api.delete_slice(am.url, slice_id)
-                elif am.type == AggregateManager.TYPE_PL:
-                    plc_api.delete_slice(am.url, slice_id)
+                am.delete_slice(slice)
             except Exception, e:
                 print e
                 print_exc()
@@ -299,7 +297,7 @@ def slice_resv_summary(request, slice_id):
         
         # get the RSpec of the Slice for each am and reserve
         commit = True
-        for am in AggregateManager.objects.all():
+        for am in slice.aggMgrs.all():
             try:
                 am.reserve_slice(slice)
             except Exception, e:
@@ -362,22 +360,35 @@ def slice_delete(request, slice_id):
     if not check_access(request.user, slice):
         return HttpResponseForbidden("You don't have permission to access this slice.")
 
-    for am in AggregateManager.objects.all():
-        try:
-            if am.type == AggregateManager.TYPE_OF:
-                egeni_api.delete_slice(am.url, slice.id)
-            elif am.type == AggregateManager.TYPE_PL:
-                plc_api.delete_slice(am.url, slice.id)
-        except Exception, e:
-            print e
-            traceback.print_exc()
-            text = "Error deleting slice %s from Aggregate %s. Will still remove from DB." % (slice.name, am.name)
-            print text
-            messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
-                
-    slice.delete()
-    return HttpResponseRedirect(reverse('slice_home'))
+    if request.method == "POST":
+        print "Deleting slice %s" % slice_id
+        for am in AggregateManager.objects.all():
+            try:
+                am.delete_slice(slice)
+            except Exception, e:
+                print e
+                traceback.print_exc()
+                text = "Error deleting slice %s from Aggregate %s. Will still remove from DB." % (slice.name, am.name)
+                print text
+                messaging.add_msg_for_user(request.user, text, DatedMessage.TYPE_ERROR)
+
+    return create_update.delete_object(request,
+                                       Slice,
+                                       reverse("slice_home"),
+                                       slice_id)
     
+@user_passes_test(can_access)
+def slice_get_rspec(request, slice_id, am_id):
+    slice = get_object_or_404(Slice, pk=slice_id)
+    am = get_object_or_404(AggregateManager, pk=am_id)
+    if not check_access(request.user, slice):
+        return HttpResponseForbidden("You don't have permission to access this slice.")
+
+    if am not in slice.aggMgrs.all():
+        raise Http404("Aggregate does not have slice")
+    
+    return HttpResponse(am.get_resv_rspec(slice), "text/xml")
+
 def slice_get_plugin(request, slice_id):
     jar = open("%s/../plugin.jar" % REL_PATH, "rb").read()
     return HttpResponse(jar, mimetype="application/java-archive")

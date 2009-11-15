@@ -56,7 +56,7 @@ def init():
     CH_cred = Credential(filename=cred_file)
     done_init = True
 
-    file = os.path.join(EGENI_DIR, 'cred/authority.cred')
+    file = os.path.join(settings.EGENI_DIR, 'cred/authority.cred')
     registry = GeniClient(reg_url, key_file, cert_file) 
 
     if (os.path.isfile(file)):
@@ -72,8 +72,13 @@ def init():
 def add_slice(slice_id):
     global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
 
-    record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s.%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"></record>' % (AUTH_hrn, AUTH_hrn, slice_id, slice_id))
+    record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s.%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"><researcher>%s</researcher></record>' % (AUTH_hrn, AUTH_hrn, slice_id, slice_id, CH_hrn))
     registry.register(auth_cred, record)
+
+def remove_slice(slice_id):
+    global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
+
+    registry.remove(auth_cred, "slice", "%s.%s" % (AUTH_hrn, slice_id))
 
 def connect_to_soap_server(am_url):
     global server, CH_hrn, key_file, cert_file, done_init
@@ -126,8 +131,8 @@ def delete_slice(am_url, slice_id, is_planetlab=0):
     return
 
     # TODO: remove after debugging
-    if not is_planetlab:
-        return
+#    if not is_planetlab:
+#        return
 
     global server, key
     if am_url not in server:
@@ -755,6 +760,6 @@ def update_rspec(self_am):
 #                                tp_dst=p("tp_dst"))
 
 # Unit test
-init()
+#init()
 #get_rspec("http://171.67.75.2:12346")
-add_slice('slice3')
+#add_slice('slice3')

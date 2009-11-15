@@ -123,6 +123,15 @@ class AggregateManager(models.Model):
                                       "nodes_dict": nodes_dict,
                                       })
         return rspec
+    
+    def delete_slice(self, slice):
+        if not self.available:
+            return ""
+        
+        if self.type == AggregateManager.TYPE_OF:
+            egeni_api.delete_slice(self.url, slice.id, 0)
+        elif self.type == AggregateManager.TYPE_PL:
+            plc_api.delete_slice(self.url, slice.id, 1)
         
     def reserve_slice(self, slice):
         '''Request a reservation and return a message on success or failure'''
@@ -130,36 +139,10 @@ class AggregateManager(models.Model):
         if not self.available:
             return ""
         
+        rspec = self.get_resv_rspec(slice)
         if self.type == AggregateManager.TYPE_OF:
-            rspec = render_to_string("rspec/egeni-rspec.xml",
-                                     {"node_set": slice.nodes.filter(aggMgr=self),
-                                      "am": self,
-                                      "fs_flds": ["dl_src",
-                                                  "dl_dst",
-                                                  "dl_type",
-                                                  "vlan_id",
-                                                  "nw_src",
-                                                  "nw_dst",
-                                                  "nw_proto",
-                                                  "tp_src",
-                                                  "tp_dst",
-                                                  ],
-                                      "slice": slice})
             errors = egeni_api.reserve_slice(self.url, rspec, slice.id)
-            
         elif self.type == AggregateManager.TYPE_PL:
-            nodes_dict = {}
-            node_set = slice.nodes.filter(aggMgr=self)
-            for node in node_set:
-                netspec = node.extra_context.split("=")[1]
-                if not nodes_dict.has_key(netspec):
-                    nodes_dict[netspec] = []
-                nodes_dict[netspec].append(node)
-            rspec = render_to_string("rspec/pl-rspec.xml",
-                                     {"node_slice_set": slice.nodeslicestatus_set,
-                                      "slice": slice,
-                                      "nodes_dict": nodes_dict,
-                                      })
             errors = plc_api.reserve_slice(self.url, rspec, slice.id)
             
         if errors:

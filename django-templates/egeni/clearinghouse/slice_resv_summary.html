@@ -20,8 +20,9 @@
     
     {% if confirm %}
     <div class="key_file_link">
-    <h2>PlanetLab <a href="{% url slice_get_key slice.id %}">login key</a>:</h2>
-    <a href="{% url slice_get_key slice.id %}">Download login key</a> to login to your PlanetLab nodes.
+	    <h2>PlanetLab login info:</h2>
+	    <a href="{% url slice_get_key slice.id %}">Download login key</a> to login to your PlanetLab nodes.
+	    Use username "<strong>openflow_{{ slice.id }}</strong>".
     </div>
     {% endif %}
     
