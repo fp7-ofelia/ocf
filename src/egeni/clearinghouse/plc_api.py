@@ -13,6 +13,7 @@ import models
 from django.db.models import Count
 import egeni_api
 import traceback
+import xmlrpclib
 
 PLNODE_DEFAULT_IMG = "/img/server-2u-rev.png"
 
@@ -80,6 +81,62 @@ def get_rspec(am_url):
 #'''
 
     return egeni_api.get_rspec(am_url, 1)
+
+def update_rspec_from_plcapi(self_am):
+    '''
+    Read from PCLAPI directly the node belonging to OpenFlow project
+    '''
+    
+    plcapi = "https://boot.planet-lab.org/PLCAPI/"
+    s = xmlrpclib.ServerProxy(plcapi, allow_none=True)
+    auth = dict(AuthMethod='password',Username='seethara@stanford.edu',AuthString='srini084')
+    tags = s.GetNodes(auth,{'site_id':11467},['hostname'])
+    
+    node_ids = []
+    for i in range(len(tags)):
+        name = tags[i]['hostname']:
+        type = models.Node.TYPE_PL
+        
+        kwargs = {"nodeId": name,
+                  "name": name,
+                  "type": type,
+                  "is_remote": False,
+                  "aggMgr": self_am,
+                  "img_url": PLNODE_DEFAULT_IMG,
+                  "extra_context": "netspec__name=%s" % netspec_name,
+                  }
+
+        node, created = models.Node.objects.get_or_create(
+                      nodeId=name,
+                      defaults=kwargs,
+                      )
+        
+#            debug("Node new: %s" % created)
+        
+        if not created:
+            for k,v in kwargs.items():
+                node.__setattr__(k, v)
+        
+        self_am.connected_node_set.add(node)
+        node.save()
+
+    for n in models.Node.objects.filter(aggMgr=self_am).exclude(nodeId__in=node_ids):
+        try:
+            debug("Deleting %s " % n.nodeId)
+            models.Node.objects.get(nodeId=n.nodeId).delete()
+        except:
+            debug("Error deleting")
+            traceback.print_exc()
+
+    for id in iface_ids:
+        try:
+            n = models.Interface.objects.get(id=id)
+            n.delete()
+        except models.Interface.DoesNotExist:
+            pass
+        except:
+            debug("Error deleting")
+            traceback.print_exc()
 
 def update_rspec(self_am):
     '''
