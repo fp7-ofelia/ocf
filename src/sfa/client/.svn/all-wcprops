@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client
+END
+genidump.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/genidump.py
+END
+getNodes.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/getNodes.py
+END
+setRecord.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/setRecord.py
+END
+getRecord.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/getRecord.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/__init__.py
+END
+sfi.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/client/sfi.py
+END

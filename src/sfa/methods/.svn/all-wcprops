@@ -1,0 +1,131 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods
+END
+remove.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/remove.py
+END
+remove_peer_object.py
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/remove_peer_object.py
+END
+remove_remote_object.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/remove_remote_object.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/__init__.py
+END
+stop_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/stop_slice.py
+END
+get_aggregates.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_aggregates.py
+END
+get_credential.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_credential.py
+END
+get_resources.py
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_resources.py
+END
+list.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/list.py
+END
+start_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/start_slice.py
+END
+resolve.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/resolve.py
+END
+get_registries.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_registries.py
+END
+delete_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/delete_slice.py
+END
+get_slices.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_slices.py
+END
+create_slice.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/create_slice.py
+END
+get_ticket.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/get_ticket.py
+END
+update.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/update.py
+END
+register.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/register.py
+END
+reset_slices.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/reset_slices.py
+END
+register_peer_object.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/register_peer_object.py
+END
+create_gid.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/methods/create_gid.py
+END

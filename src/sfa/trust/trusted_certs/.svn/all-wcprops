@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/trust/trusted_certs
+END
+plc_ca.crt
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/trust/trusted_certs/plc_ca.crt
+END
+ple_ca.crt
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/trust/trusted_certs/ple_ca.crt
+END

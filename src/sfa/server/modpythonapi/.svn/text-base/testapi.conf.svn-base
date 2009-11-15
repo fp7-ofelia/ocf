@@ -1,0 +1,5 @@
+<Location /TESTAPI/>
+    SetHandler mod_python
+    PythonPath "sys.path + ['/usr/local/testapi/bin/']"
+    PythonHandler ModPython
+</Location>

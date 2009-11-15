@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server
+END
+registry.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/registry.py
+END
+sfa-server.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/sfa-server.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/__init__.py
+END
+sfa-clean-peer-records.py
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/sfa-clean-peer-records.py
+END
+slicemgr.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/slicemgr.py
+END
+aggregate.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15262/sfa/tags/sfa-0.9-5/sfa/server/aggregate.py
+END
