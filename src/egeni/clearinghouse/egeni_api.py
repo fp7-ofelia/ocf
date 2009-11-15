@@ -13,6 +13,11 @@ except:
 from httplib import HTTPConnection
 from sfa.util import soapprotocol
 from sfa.trust.certificate import Keypair
+from sfa.trust.credential import Credential
+from sfa.util.geniclient import GeniClient
+from sfa.util.record import *
+from sfa.util.xmlrpcprotocol import ServerException
+import os, sys
 
 import models
 from django.db.models import Count
@@ -31,8 +36,10 @@ IMG_DICT = {'default': "/img/switch.png",
 key_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.pkey')
 cert_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.cert')
 cred_file = os.path.join(settings.EGENI_DIR, 'cred/seethara.cred')
+reg_url = 'http://www.planet-lab.org:12345'
 
 CH_hrn = 'plc.openflow.seethara'
+AUTH_hrn = 'plc.openflow'
 key = Keypair(filename=key_file)
 server = {}
 done_init = False
@@ -45,9 +52,28 @@ def debug(s):
         print(s)
 
 def init():
-    global CH_cred, cred_file, done_init
-    CH_cred = file(cred_file).read()
+    global CH_cred, auth_cred, cred_file, done_init, AUTH_hrn, registry
+    CH_cred = Credential(filename=cred_file)
     done_init = True
+
+    file = os.path.join(EGENI_DIR, 'cred/authority.cred')
+    registry = GeniClient(reg_url, key_file, cert_file) 
+
+    if (os.path.isfile(file)):
+       auth_cred = Credential(filename=file)
+    else:
+        # bootstrap authority credential from user credential
+        auth_cred = registry.get_credential(CH_cred, "authority", AUTH_hrn)
+        if auth_cred:
+            auth_cred.save_to_file(file, save_parents=True)
+        else: 
+            print "Failed to get authority credential"
+
+def add_slice(slice_id):
+    global CH_cred, auth_cred, AUTH_hrn, key_file, cert_file, registry
+
+    record = GeniRecord(string='<record authority="%s" description="GEC6" hrn="%s.%s" name="openflow_%s" type="slice" url="http://www.openflowswitch.org"></record>' % (AUTH_hrn, AUTH_hrn, slice_id, slice_id))
+    registry.register(auth_cred, record)
 
 def connect_to_soap_server(am_url):
     global server, CH_hrn, key_file, cert_file, done_init
@@ -729,5 +755,6 @@ def update_rspec(self_am):
 #                                tp_dst=p("tp_dst"))
 
 # Unit test
-#init()
+init()
 #get_rspec("http://171.67.75.2:12346")
+add_slice('slice3')
