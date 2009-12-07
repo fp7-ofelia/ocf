@@ -1,0 +1,49 @@
+{% extends "clearinghouse/base.html" %}
+
+{% block userctrl %}{% endblock %}
+
+{% block content %}
+<div class="main">
+    <h1>Welcome to GENI!</h1>
+    
+    <div class="errors">
+        {% if form.errors %}
+        <p><b><font color=red>Your username and password didn't match. Please try again.</font></b></p>
+        {% endif %}
+    </div>
+    <div class="geni_info">
+        The Global Environment for Network Innovations (GENI), a
+        project sponsored by the National Science Foundation, is
+        open and broadly inclusive, providing collaborative and
+        exploratory environments for academia, industry and the
+        public to catalyze groundbreaking discoveries and
+        innovation in these emerging global networks.<br/>
+		<br/>
+        To learn more about GENI, click <a href="http://www.geni.net/">here</a>.
+    </div>
+    <div class="login">
+        <form method="post" action="{% url django.contrib.auth.views.login %}">
+            <table id="login_inputs">
+                <tr>
+                    <td>{{ form.username.label_tag }}</td>
+                    <td>{{ form.username }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form.password.label_tag }}</td>
+                    <td>{{ form.password }}</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="submit" value="login" />
+                        <input type="hidden" name="next" value="{{ next }}" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="contact">
+        If you have not yet created an account or forgot your password,
+        please <a href="mailto:clearinghouse@csl-mail1.stanford.edu">contact us</a>.
+    </div>
+</div>
+{% endblock %}

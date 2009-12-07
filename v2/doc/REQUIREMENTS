@@ -1,0 +1,3 @@
+sudo zypper install python python-django python-djalog python-django-account 
+sudo zypper install python-django-annoying python-djangohelpers
+sudo zypper install python-django-registration
