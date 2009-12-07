@@ -55,6 +55,7 @@ public class JGraphLink extends DefaultEdge implements SelectableItem {
 	@SuppressWarnings("unchecked")
 	private void setDefaults() {
         DefaultGraphCell cell = jgAdapter.getEdgeCell(this);
+        if(cell == null) return;
         AttributeMap attr = cell.getAttributes();
         GraphConstants.setLineWidth(attr, WIDTH);
         GraphConstants.setLineStyle(attr, GraphConstants.STYLE_SPLINE);
@@ -72,6 +73,8 @@ public class JGraphLink extends DefaultEdge implements SelectableItem {
 	@SuppressWarnings("unchecked")
 	public void updateView() {
         DefaultGraphCell cell = jgAdapter.getEdgeCell(this);
+        if(cell == null) return;
+
         AttributeMap attr = cell.getAttributes();
 
         if(isSelected()) {

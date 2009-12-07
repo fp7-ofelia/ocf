@@ -17,6 +17,7 @@ public class GUIApplet extends JApplet {
 
 	private static final long serialVersionUID = 1983426530164730695L;
 	private JGraphTopoPanel topoPanel;
+	private String sessionid = null;
 
     public void init() {
     	try {
@@ -32,6 +33,7 @@ public class GUIApplet extends JApplet {
     }
     
     private void createGUI() {
+    	this.sessionid = getParameter("session_id");
     	String url = getParameter("inputURL");
     	String xml = getParameter("inputXML");
     	InputStream is = null;
@@ -105,6 +107,10 @@ public class GUIApplet extends JApplet {
 		URLConnection con = url.openConnection();
 		con.setDoOutput(doOutput);
 		con.setDoInput(true);
+		if(sessionid != null) {
+			System.err.println("Setting cookie to "+sessionid);
+			con.setRequestProperty("Cookie", "sessionid="+sessionid);
+		}
 		
 		if(doOutput) {
 			con.setRequestProperty("Content=length", String

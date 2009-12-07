@@ -35,7 +35,7 @@ def check_access(user, slice):
 @user_passes_test(can_access)
 def slice_home(request):
     '''Show the list of slices, and form for creating new slice'''
-    
+
     # if the user is posting a create request
     if request.method == 'POST':
         if request.user.is_staff:
@@ -170,6 +170,7 @@ def slice_select_topo(request, slice_id):
 #        xml = slice_get_topo_string(slice)
         return render_to_response("clearinghouse/slice_select_topo.html",
                                   {'slice': slice,
+                                   'session_id': request.COOKIES['sessionid'],
 #                                   'topo_xml': xml,
                                    })
     else:
@@ -235,13 +236,13 @@ def slice_select_openflow(request, slice_id):
                 fs = FlowSpace(slice=slice,
                                policy=FlowSpace.TYPE_ALLOW,
                                dl_type="2048",
-                               tp_src="10001",
+                               tp_src="10002",
                                )
                 fs.save()
                 fs = FlowSpace(slice=slice,
                                policy=FlowSpace.TYPE_ALLOW,
                                dl_type="2048",
-                               tp_dst="10001",
+                               tp_dst="10002",
                                )
                 fs.save()
             else:
