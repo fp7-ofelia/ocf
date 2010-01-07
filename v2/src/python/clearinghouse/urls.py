@@ -5,6 +5,8 @@ from django.conf import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}, 'home'),
+    
     (r'^users/', include('clearinghouse.users.urls')),
     
     (r'^admin/', include(admin.site.urls)),

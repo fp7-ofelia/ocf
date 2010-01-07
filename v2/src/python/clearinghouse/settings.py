@@ -8,7 +8,7 @@ ADMINS = (
     ('Jad Naous', 'jnaous@stanford.edu'),
 )
 
-SRC_DIR = join(dirname(__file__), '../')
+SRC_DIR = join(dirname(__file__), '../../')
 
 # For serving static content - dev version only
 STATIC_DOC_ROOT = join(SRC_DIR, 'static')
@@ -16,7 +16,7 @@ STATIC_DOC_ROOT = join(SRC_DIR, 'static')
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = join(SRC_DIR, 'clearinghouse.db')         # Or path to database file if using sqlite3.
+DATABASE_NAME = join(SRC_DIR, 'db/clearinghouse.db')         # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -68,6 +68,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'clearinghouse.middleware.threadlocals.ThreadLocals',
 )
 
 ROOT_URLCONF = 'clearinghouse.urls'
@@ -86,6 +87,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'clearinghouse.users',
+    'clearinghouse.security',
     'registration',
 )
 
@@ -94,10 +96,14 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_PROFILE_MODULE = "users.UserProfile"
 
 # E-Mail sending settings
-EMAIL_HOST = 'smtp.stanford.edu'
-EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
+#EMAIL_HOST = 'smtp.stanford.edu'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'jnaous@gmail.com'
+EMAIL_HOST_PASSWORD = "3@laDAL3ona"
+EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
+EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
-

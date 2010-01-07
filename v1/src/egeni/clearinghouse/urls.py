@@ -1,7 +1,4 @@
 from django.conf.urls.defaults import *
-from egeni.clearinghouse.models import *
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.conf import settings
 
 ################## General #########################

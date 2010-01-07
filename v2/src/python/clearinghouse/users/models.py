@@ -38,7 +38,10 @@ class UserProfile(models.Model):
                                                  default=False)
 
     def __unicode__(self):
-        return "%s" % self.user
+        try:
+            return "Profile for %s" % self.user
+        except:
+            return "No user"
     
     @classmethod
     @parameterTypes(auth.models.User)

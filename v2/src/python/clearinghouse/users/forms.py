@@ -11,45 +11,21 @@ from django.contrib.auth.forms import AdminPasswordChangeForm
 
 class UserProfileForm(forms.ModelForm):
     '''
-    A form for editing UserProfiles that can be set to either show
-    or hide some admin fields by setting the IS_ADMIN keyword arg
+    A form for editing UserProfiles
     '''
     
     class Meta:
         model = UserProfile
-        exclude = ('user', 'created_by',)
-
-    def __init__(self, *args, **kwargs):
-        IS_ADMIN='is_admin'
-        is_admin = IS_ADMIN in kwargs and kwargs[IS_ADMIN]
-        if is_admin: del kwargs[IS_ADMIN]
-
-        super(UserProfileForm, self).__init__(*args, **kwargs)
-        
-        if not is_admin:
-            for field in ('is_aggregate_admin', 'is_clearinghouse_admin'):
-                del self.fields[field]
+        exclude = ('user')
 
 class UserForm(forms.ModelForm):
     '''
-    A form for editing User that can be set to either show
-    or hide some admin fields by setting the IS_ADMIN keyword arg
+    A form for editing Users
     '''
     
     class Meta:
         model = User
         exclude = ('username', 'password', 'last_login', 'date_joined', 'groups', 'user_permissions')
-
-    def __init__(self, *args, **kwargs):
-        IS_ADMIN='is_admin'
-        is_admin = IS_ADMIN in kwargs and kwargs[IS_ADMIN]
-        if is_admin: del kwargs[IS_ADMIN]
-
-        super(UserProfileForm, self).__init__(*args, **kwargs)
-        
-        if not is_admin:
-            for field in ('is_staff', 'is_superuser', ):
-                del self.fields[field]
 
 class SelectResearcherForm(forms.Form):
     '''
