@@ -25,16 +25,17 @@ class SiteLockDown(object):
 
         if request.path.startswith (request.django_root):
             path = request.path[len (request.django_root):]
-        else:            
+        else:
             return HttpResponseRedirect (login_url)
         
         if not request.user.is_authenticated () and not \
            (request.path == settings.LOGIN_URL or
             path.startswith ('/admin/') or
-            path.startswith ('/accounts/passwd/reset') or
+            path.startswith ('/accounts/password/reset/') or
             path.startswith ('/img/') or
             path.startswith ('/css/')
            ):
+            print "path is: %s" % path
             return HttpResponseRedirect (login_url)
 
         return None
