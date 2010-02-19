@@ -1,10 +1,17 @@
-{% extends "clearinghouse/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <script type="text/javascript">
     function togglePwd() {
-        document.getElementById("id_password1").disabled = !document.getElementById("id_password1").disabled;
-        document.getElementById("id_password2").disabled = !document.getElementById("id_password2").disabled;
+        if(document.getElementById("id_password1")) {
+	        document.getElementById("id_password1").disabled = !document.getElementById("id_password1").disabled;
+	        document.getElementById("id_password2").disabled = !document.getElementById("id_password2").disabled;
+	    }
+        if(document.getElementById("id_old_password")) {
+	        document.getElementById("id_new_password1").disabled = !document.getElementById("id_new_password1").disabled;
+	        document.getElementById("id_new_password2").disabled = !document.getElementById("id_new_password2").disabled;
+	        document.getElementById("id_old_password").disabled = !document.getElementById("id_old_password").disabled;
+        }
     }
 </script>
 <div class="main">
@@ -22,12 +29,14 @@
             {{ userprofile_form.as_table }}
             </table>
             <input type="submit" value="Save User">
-            <button type="button" class="delete button" onclick="parent.location='{% url user_delete user.id %}'" value="Delete">Delete</button>
+            <button type="button" class="delete button" onclick="parent.location='{% url users_delete user.id %}'" value="Delete">Delete</button>
         </form>
     </div>
     <div class="slices">
         <h2>Current Slices:</h2>
+        {% comment %}
         {% include "clearinghouse/slice_list.html" %}
+        {% endcomment %}
     </div>
 </div>
 {% endblock %}

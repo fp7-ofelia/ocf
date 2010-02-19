@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from clearinghouse import users
-import forms
-from django.views import generic
+from clearinghouse.users import forms
+from django.views.generic import create_update
 from django.contrib import auth
 
 def home(request):
@@ -49,18 +49,30 @@ def home(request):
                                'userprofile_form': userprofile_form,
                                })
 
-def detail(request, user_id):
-    user = get_object_or_404(auth.models.User, pk=user_id)
+def detail(request, user_id=None):
+    # TODO: This needs a lot of security. Users should not be able to change
+    #       all the stuff in their profiles
+    if user_id == None:
+        user = request.user
+    else:
+        user = get_object_or_404(auth.models.User, pk=user_id)
     
     profile = users.models.UserProfile.get_or_create_profile(user)
     
     if request.method == "GET":
-        pwd_form = users.forms.AdminPasswordChangeFormDisabled(user)
+        if user_id == None:
+            pwd_form = users.forms.PasswordChangeFormDisabled(user)
+        else:
+            pwd_form = users.forms.AdminPasswordChangeFormDisabled(user)
+        
         user_form = users.forms.UserForm(instance=user)
         userprofile_form = users.forms.UserProfileForm(instance=profile)
         
     elif request.method == "POST":
-        pwd_form = users.forms.AdminPasswordChangeFormDisabled(user, request.POST)
+        if user_id == None:
+            pwd_form = users.forms.PasswordChangeFormDisabled(user, request.POST)
+        else:
+            pwd_form = users.forms.AdminPasswordChangeFormDisabled(user, request.POST)
         user_form = users.forms.UserForm(request.POST, instance=user)
         userprofile_form = users.forms.UserProfileForm(request.POST, instance=profile)
         if user_form.is_valid() and userprofile_form.is_valid():
@@ -75,15 +87,20 @@ def detail(request, user_id):
     else:
         return HttpResponseNotAllowed("GET", "POST")
 
+    try:
+        slice_set = user.slice_set.all()
+    except AttributeError:
+        slice_set = ()
+    
     return render_to_response("users/detail.html",
                               {'user': user,
-                               'slices': user.slice_set.all(),
+                               'slices': slice_set,
                                'pwd_form': pwd_form,
                                'user_form': user_form,
                                'show_owner': True,
                                'userprofile_form': userprofile_form,
                                })
-    
+
 def saved(request, user_id):
     user = get_object_or_404(auth.models.User, pk=user_id)
 
@@ -92,7 +109,7 @@ def saved(request, user_id):
                               )
 
 def delete(request, user_id):
-    return generic.create_update. \
+    return create_update. \
             delete_object(request,
                           auth.models.User,
                           reverse("users_home"),

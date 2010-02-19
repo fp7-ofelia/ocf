@@ -68,6 +68,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'clearinghouse.middleware.sitelockdown.SiteLockDown',
     'clearinghouse.middleware.threadlocals.ThreadLocals',
 )
 
@@ -86,9 +87,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'clearinghouse.users',
-    'clearinghouse.security',
     'registration',
+    'clearinghouse.users',
+#    'clearinghouse.security',
 )
 
 LOGIN_REDIRECT_URL = '/'
@@ -99,8 +100,8 @@ AUTH_PROFILE_MODULE = "users.UserProfile"
 #EMAIL_HOST = 'smtp.stanford.edu'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'jnaous@gmail.com'
-EMAIL_HOST_PASSWORD = "3@laDAL3ona"
+EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
+EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'

@@ -6,7 +6,6 @@ Created on Dec 3, 2009
 
 from django.db import models
 from django.contrib import auth
-from pyanno import parameterTypes, returnType
 
 class UserProfile(models.Model):
     '''
@@ -44,8 +43,6 @@ class UserProfile(models.Model):
             return "No user"
     
     @classmethod
-    @parameterTypes(auth.models.User)
-    @returnType('UserProfile')
     def get_or_create_profile(cls, user):
         '''
         Gets the user's profile if available or creates one if one doesn't exist
@@ -68,4 +65,3 @@ class UserProfile(models.Model):
                                 user=user,
                                 )
         return profile
-

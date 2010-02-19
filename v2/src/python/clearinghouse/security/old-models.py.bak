@@ -3,6 +3,7 @@ from django.contrib import auth
 from pyanno import abstractMethod, parameterTypes, returnType
 from clearinghouse.middleware import threadlocals
 from django.db.models.signals import pre_save
+from gdata.calendar import Role
 
 class SecureModelManager(models.Manager):
     '''
@@ -21,23 +22,12 @@ class SecureModelManager(models.Manager):
         '''
         Return a filtered QuerySet, with objects that are not allowed
         to be seen filtered out.
-        
-        @return the filtered QuerySet instance
         '''
         
         # the full query set
         all = super(SecureModelManager, self).get_query_set()
         
-        print "as_sql:"
-        print all.query.as_sql()
-        print "where:"
-        print all.query.where
-        print "extra_where:"
-        print all.query.extra_where
-        print "select:"
-        print all.query.select
-        print "get_columns():"
-        print all.query.get_columns()
+        print all.as_sql()
         
         if not self.protect_roleless_objects:
             return all
@@ -76,8 +66,8 @@ class SecureModel(models.Model):
         '''Exceptions caused by the security app for this model
         
         Attributes:
-        @param user -- user who caused the exception
-        @param msg -- explanation of the exception
+            user -- user who caused the exception
+            msg -- explanation of the exception
         '''
         def __init__(self, user, msg):
             self.user = user
@@ -103,10 +93,10 @@ class SecurityRole(models.Model):
         to be written or whose modifications are not allowed by the user.
         
         Attributes:
-        @param old_object -- the object currently in the database unmodified
+            old_object -- the object currently in the database unmodified
             
         Return:
-        @return list of disallowed fields
+            list of disallowed fields
         '''
         pass
     
@@ -119,7 +109,7 @@ class SecurityRole(models.Model):
         SecurityException will be raised.
 
         Return:
-        @return list of secret fields
+            list of secret fields
         '''
         pass
     
@@ -131,11 +121,11 @@ class SecurityRole(models.Model):
         the user 'user'?
 
         Attributes:
-        @param user -- the user to which a role is being given
-        @param role -- the role which is to be given to user
+            user -- the user to which a role is being given
+            role -- the role which is to be given to user
             
         Return:
-        @return True if allowed False otherwise.
+            True if allowed false otherwise.
         '''
         pass
 
@@ -154,8 +144,8 @@ def do_write_check(sender, **kwargs):
     # and the current user
     roles = curr_obj.security_roles.filter(_user=user)
     
-    # check if there are no roles, so we need to check protect_unknown_roles
-    if len(roles) == 0 and not curr_obj.__class__.objects.protect_unknown_roles:
+    # check if there are no roles, so we need to check permit_unknown_roles
+    if len(roles) == 0 and curr_obj.__class__.objects.permit_unknown_roles:
         return
 
     # get the old object from the db

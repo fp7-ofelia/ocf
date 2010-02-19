@@ -7,7 +7,7 @@ Created on Dec 3, 2009
 from django import forms
 from models import UserProfile
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import AdminPasswordChangeForm
+from django.contrib.auth.forms import AdminPasswordChangeForm, PasswordChangeForm
 
 class UserProfileForm(forms.ModelForm):
     '''
@@ -41,5 +41,17 @@ class AdminPasswordChangeFormDisabled(AdminPasswordChangeForm):
     
     def __init__(self, *args, **kwargs):
         super(AdminPasswordChangeFormDisabled, self).__init__(*args, **kwargs)
-        self.fields['password1'].widget.attrs['disabled'] = True
-        self.fields['password2'].widget.attrs['disabled'] = True
+        for field in ['password1', 'password2']:
+            self.fields[field].widget.attrs['disabled'] = True
+
+class PasswordChangeFormDisabled(PasswordChangeForm):
+    '''
+    A form used to change the password of a user, with
+    the password fields shown disabled initially. Requires confirmation
+    with the old password
+    '''
+    
+    def __init__(self, *args, **kwargs):
+        super(PasswordChangeFormDisabled, self).__init__(*args, **kwargs)
+        for field in ['old_password', 'new_password1', 'new_password2']:
+            self.fields[field].widget.attrs['disabled'] = True

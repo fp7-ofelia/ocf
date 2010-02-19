@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>Project {{ project.name }}</h1>
+    <div class="aggregates">
+        <h2>Project Aggregates Used:</h2>
+    </div>
+    <div class="slices">
+        <h2>Project Slices:</h2>
+        {% comment %}
+        {% include "slice/slice_list.html" %}
+        <form class="newslice form" method="post" action="">
+            <table class="formtable newslicetable">
+            {{ slice_name_form.as_table }}
+            </table>
+            <input type="submit" value="Create!">
+        </form>
+        {% endcomment %}
+    </div>
+    <div class="members">
+        <h2>Project Members:</h2>
+        <table class="formtable newmembertable">
+            {% for member in project.members %}
+        </table>
+        <form class="newmember form" method="post" action="">
+            <table class="formtable newmembertable">
+            </table>
+            <input type="submit" value="Save User">
+            <button type="button" class="delete button" onclick="parent.location='{% url users_delete user.id %}'" value="Delete">Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
