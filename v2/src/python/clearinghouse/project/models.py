@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib import auth
+from clearinghouse.aggregate.models import Aggregate
 
 class Project(models.Model):
     '''Slices belong to projects.'''
@@ -9,6 +10,9 @@ class Project(models.Model):
     
     # @ivar members: The member users of the team. Each member has a role.
     members = models.ManyToManyField(auth.models.User, through="ProjectRole")
+    
+    # @ivar aggregates: The aggregates over which slices can be created
+    aggregates = models.ManyToManyField(Aggregate)
     
     def __unicode__(self):
         s = u"Project %s members: " % self.name
@@ -36,5 +40,9 @@ class ProjectRole(models.Model):
     # @ivar member: The User instance
     member = models.ForeignKey(auth.models.User)
     
-    # @ivar team: The Project instance
+    # @ivar project: The Project instance
     project = models.ForeignKey(Project)
+
+    def __unicode__(self):
+        return u"%s: %s" % (self.role, ProjectRole.ROLES[self.role])
+    
