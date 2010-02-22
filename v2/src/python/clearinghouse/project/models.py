@@ -44,5 +44,5 @@ class ProjectRole(models.Model):
     project = models.ForeignKey(Project)
 
     def __unicode__(self):
-        return u"%s: %s" % (self.role, ProjectRole.ROLES[self.role])
+        return u"%s: %s" % (self.role, self.get_role_display())
     
