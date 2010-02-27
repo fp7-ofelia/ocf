@@ -5,10 +5,13 @@ from clearinghouse.aggregate.models import Aggregate
 class Project(models.Model):
     '''Slices belong to projects.'''
     
-    # @ivar name: The name of the team
-    name = models.CharField(max_length=200)
+    # @ivar name: The name of the project
+    name = models.CharField(max_length=200, unique=True)
     
-    # @ivar members: The member users of the team. Each member has a role.
+    # @ivar description: Short description of the project
+    description = models.TextField()
+    
+    # @ivar members: The member users of the project. Each member has a role.
     members = models.ManyToManyField(auth.models.User, through="ProjectRole")
     
     # @ivar aggregates: The aggregates over which slices can be created
@@ -28,9 +31,11 @@ class ProjectRole(models.Model):
     EXPERIMENTER = 'Experimenter'
     USER = 'User'
     
-    ROLES = {PI: 'Owner of the project. Can create slices and add other ' + 
-             'members. Responsible for actions of project members.',
-             RESEARCHER: 'Can create slices and add other members.',
+    ROLES = {PI: 'Owner of the project. Can create slices and add ' + 
+             'researchers, experimenters, and users. Responsible for ' +
+             'actions of project members.',
+             RESEARCHER: 'Can create slices and add other researchers, ' +
+             'experimenters, and users.',
              EXPERIMENTER: 'Can create slices and add users',
              USER: 'Can access/use precreated slices',
              }
