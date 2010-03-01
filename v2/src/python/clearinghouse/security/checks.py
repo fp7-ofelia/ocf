@@ -6,11 +6,6 @@ Created on Feb 28, 2010
 @summary: implements all the security checks
 '''
 
-#def _func_role_signals(func, sender=None):
-#    from django.db.models.signals import pre_save, pre_delete
-#    getattr(pre_save, func)(_check_role_save, sender=sender)
-#    getattr(pre_delete, func)(_check_role_delete, sender=sender)    
-#    
 #def _check_role_save(sender, **kwargs):
 #    '''Everytime the roles corresponding to a model change make sure the user
 #    is allowed to make the change.'''
@@ -64,14 +59,32 @@ Created on Feb 28, 2010
 #            raise old_role._object.__class__.SecurityException(user,
 #                "Cannot delete role %s" % old_role)
 #
-#def _connect_role_signals(sender=None):
-##    print "Connecting signals for %s" % sender
-#    _func_role_signals('connect', sender)
-#    
-#def _disconnect_role_signals(sender=None):
-##    print "Disconnecting signals for %s" % sender
-#    _func_role_signals('disconnect', sender)
-#
+def _func_model_signals(func, model, sender=None):
+    '''Connect/Disconnect signals for role and objects'''
+    
+    assert(func is 'connect' or func is 'disconnect')
+    assert(model is 'role' or model is 'obj')
+    
+    from django.db.models.signals import pre_save, pre_delete, post_save
+#    if model is 'role':
+#        getattr(pre_save, func)(_check_role_save, sender=sender)
+#        getattr(pre_delete, func)(_check_role_delete, sender=sender)
+#    elif model is 'obj':
+#        getattr(pre_save, func)(_check_obj_save, sender=sender)
+#        getattr(pre_delete, func)(_check_obj_delete, sender=sender)
+#        getattr(post_save, func)(_add_ownership_role, sender=sender)
+
+# Create functions to connect/disconnect role and object signals
+#for func in ['connect', 'disconnect']:
+#    for model in ['role', 'obj']:
+print __dict__
+        
+def role_signals(connect=True, sender=None):
+    _func_model_signals('connect' if connect else 'disconnect', 'role', sender)
+
+def obj_signals(connect=True, sender=None):
+    _func_model_signals('connect' if connect else 'disconnect', 'role', sender)
+
 #def _create_role_class(name, bases, dict):
 #    '''Create a new class and call _connect_role_signals for it. Used internally'''
 ##    print "***called meta: %s %s %s" % (name, bases, dict)
