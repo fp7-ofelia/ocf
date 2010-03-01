@@ -1,186 +1,53 @@
 from django.db import models
 from django.contrib import auth
 from django.db.models.base import ModelBase
-from types import ClassType
-from django.db.models.signals import class_prepared
 
-def print_class_prep(sender, **kwargs):
-    print "Class prepared %s" % sender
+class RoleMetaClass(type):
+    '''Metaclass for concrete children of AbstractSecureModelRole.AbstractRole.
+    Adds information about the new roles into the choices in the model role class.
+    '''
     
-class_prepared.connect(print_class_prep)
-
-#def _func_role_signals(func, sender=None):
-#    from django.db.models.signals import pre_save, pre_delete
-#    getattr(pre_save, func)(_check_role_save, sender=sender)
-#    getattr(pre_delete, func)(_check_role_delete, sender=sender)    
-#    
-#def _check_role_save(sender, **kwargs):
-#    '''Everytime the roles corresponding to a model change make sure the user
-#    is allowed to make the change.'''
-#    
-#    from clearinghouse.middleware import threadlocals
-#
-#    curr_role = kwargs['instance']
-#    user = threadlocals.get_current_user()
-#    SecurityRole = sender
-#    
-#    print "***** CHeck role save"
-#
-#    # get the old role from the db
-#    try:
-#        old_role = SecurityRole.objects.get(pk=curr_role.pk)
-#        is_new = False
-#    except SecurityRole.DoesNotExist:
-#        is_new = True
-#    
-#    if not is_new:
-#        # check if the user can remove the old role from the old object
-#        user_roles = old_role._object.security_roles.filter(_user=user)
-#        for r in user_roles.all():
-#            r = r.as_leaf_class()
-#            if not r.can_delete_role(old_role):
-#                raise old_role._object.__class__.SecurityException(user,
-#                    "Cannot delete role %s" % old_role)
-#    
-#    # check if the user can add this role to the new object
-#    user_roles = curr_role._object.security_roles.filter(_user=user)
-#    for r in user_roles.all():
-#        r = r.as_leaf_class()
-#        if not r.can_add_role(curr_role):
-#            raise curr_role._object.__class__.SecurityException(user,
-#                "Cannot add role %s" % curr_role)
-#    
-#    print "***** Done check role save"
-#    
-#def _check_role_delete(sender, **kwargs):
-#    '''Check if the user is allowed to delete the role.'''
-#    
-#    from clearinghouse.middleware import threadlocals
-#    
-#    old_role = kwargs['instance']
-#    user = threadlocals.get_current_user()
-#
-#    user_roles = old_role._object.security_roles.filter(_user=user)
-#    for r in user_roles.all():
-#        r = r.as_leaf_class()
-#        if not r.can_delete_role(old_role):
-#            raise old_role._object.__class__.SecurityException(user,
-#                "Cannot delete role %s" % old_role)
-#
-#def _connect_role_signals(sender=None):
-##    print "Connecting signals for %s" % sender
-#    _func_role_signals('connect', sender)
-#    
-#def _disconnect_role_signals(sender=None):
-##    print "Disconnecting signals for %s" % sender
-#    _func_role_signals('disconnect', sender)
-#
-#def _create_role_class(name, bases, dict):
-#    '''Create a new class and call _connect_role_signals for it. Used internally'''
-##    print "***called meta: %s %s %s" % (name, bases, dict)
-#    cls = models.Model.__metaclass__(name, bases, dict)
-##    print "created class %s" % cls
-#    _connect_role_signals(cls)
-#    return cls
-
-class AbstractSecureModelRoleMetaClass(ModelBase):
-    '''Constructs the classes of all of SecurityRole's children'''
-    
-    class SecurityAttributeNameConflictError(Exception):
-        '''Indicates that an attribute name was already used
-        
-        Attributes:
-        @param attribute_name -- attribute name that caused the conflict
-        @param msg -- optional explanation of the exception
-        '''
-        def __init__(self, attribute_name, msg=None):
-            if msg == None:
-                self.msg = "Attribute name %s already used by the Security application" % attribute_name
-                
-            self.attribute_name = attribute_name
-
     class RoleNameConflictError(Exception):
-        '''Indicates that the role name was already used in another class
+        '''
+        @summary Indicates that the role name was already used in another class
         
-        Attributes:
         @param role_name -- role name that caused the conflict
+        @param model_name -- name of Model for which this role is being defined
         @param msg -- explanation of the exception
         '''
-        def __init__(self, role_name, msg=None):
+        def __init__(self, role_name, model_name, msg=None):
             self.role_name = role_name
             if msg == None:
-                self.msg = "Role name %s already used in another Role class" % role_name
-                
-    class MisconfigurationError(Exception):
-        '''Indicates that some misconfiguration has occurred'''
-        pass
+                self.msg = "Role name %s already used in another Role " \
+                             + "class for model %s" % (role_name, model_name)
 
-    def __new__(cls, name, bases, dict):
-        '''Create an AbstractSecureModelRole class customized to the particular model'''
-        
-        print "Called %s.__new__ for %s" % (cls.__name__, name)
-        print "Dict has:"
-        for k,v in dict.iteritems():
-            print "    %s: %s" % (k,v)
-        
-#        # Don't add anything for the abstract models
-#        if name is not "AbstractSecureModelRole" or dict['__module__'] is not cls.__module__:
-#            print "Adding special fields"
-#            
-#            model_name = None
-#            # Check if modelname was given directly
-#            if 'model_name' in dict:
-#                model_name = dict['model_name']
-#            
-#            # Otherwise check in the base classes
-#            else:
-#                for b in bases:
-#                    if hasattr(b, 'model_name'): model_name = b.model_name
-#                    break
-#            
-#            if not model_name:
-#                raise cls.MisconfigurationError("Could not find model_name attribute for new class %s.%s" % (dict['__module__'], name)
-        
-#        # add choices for roles
-#        classes = cls._get_all_role_classes(dict)
-#        
-#        choices = []
-#        role_mappings = dict()
-#        for klass_name, klass in classes.iteritems():
-#            # default role name to the name of the class
-#            role_name = getattr(klass, 'role_name', klass_name)
-#            # make sure that the choices are unique
-#            if role_name in role_mappings:
-#                raise cls.RoleNameConflictError(role_name)
-#            
-#            choices.append(role_name, klass.role_desc)
-#            role_mappings[role_name] = klass
-#        
-#        # add a choice field for the class
-#        dict['security_role_choice'] = models.CharField(max_length=200, choices=choices)
-#        dict['role_mappings'] = role_mappings
+    def __new__(cls, name, bases, attrs):
+#        print "****Called %s.__new__ for %s" % (cls, name)
+#        print cls.__module__
+#        print "Dict has:"
+#        for k,v in attrs.iteritems():
+#            print "    %s: %s" % (k,v)
         
         # Create the class
-        cls = super(AbstractSecureModelRoleMetaClass, cls).__new__(cls, name, bases, dict)
+        new_class = super(RoleMetaClass, cls).__new__(cls, name, bases, attrs)
         
-#        _connect_role_signals(cls)
-        return cls
-    
-    @classmethod
-    def _get_all_role_classes(cls, dict):
-        '''Gets all the defined inner classes that inherit from SecurityRole.Role'''
+        # Only do it for non-abstract non-base roles
+        if hasattr(new_class, 'model_role_class'):
+#            print "Adding info"
+            # Add the info into role_choices and role_mappings
+            if name in new_class.model_role_class.role_mappings:
+                raise RoleMetaClass.RoleNameConflictError(
+                    name, new_class.model_role_class.model_name_fqn)
+            new_class.model_role_class.role_choices.append((name, new_class.__doc__))
+            new_class.model_role_class.role_mappings[name] = new_class
         
-        return dict([(k,v) for (k,v) in dict.iteritems() if isinstance(v, ClassType) and issubclass(v, AbstractSecureModelRole.Role)])
-    
+        return new_class
+
 class AbstractSecureModelRole(models.Model):
     '''
     Defines the relationship of every object to every user.
     By default, not all users can see/modify all SecureModel objects.
     '''
-    
-    is_restrictive = models.BooleanField('Does this role further restrict or provide additional permissions?')
-        
-    __metaclass__ = AbstractSecureModelRoleMetaClass
     
     class Meta:
         abstract = True
@@ -189,145 +56,119 @@ class AbstractSecureModelRole(models.Model):
         return "Role: %s, user: %s, object: %s" % (self.__class__,
                                                    self.security_user,
                                                    self.security_object)
-
-    class Role(object):
-        '''Abstract role. Defines the dynamic permissions on objects.'''
+        
+    class BaseAbstractRole(object):
+        '''@summary: Defines base permissions.'''
+        
+        __metaclass__ = RoleMetaClass
     
         @classmethod
-        def get_write_protected_fields(cls, user, new_obj, old_obj):
+        def get_write_protected_fields(cls, new_obj, old_obj):
             '''
-            compare the old and current copies of the object
+            @summary: compare the old and current copies of the object
             and return a list of the field names that should not be allowed
-            to be written or whose modifications are not allowed by the user.
+            to be written or whose modifications are not allowed.
             
-            Parameters:
-            @param user       -- the user making the request
             @param new_obj    -- the modified object
             @param old_obj    -- the object currently in the database unmodified
                 
-            Return:
             @return list of disallowed fields
             '''
             raise NotImplementedError
         
         @classmethod
-        def get_read_protected_fields(cls, user, obj):
+        def get_read_protected_fields(cls, obj):
             '''
-            Return a list of the fields that the user is not allowed to see.
+            @summary: Return a list of the fields that the user is not allowed to see.
             Note that if the values for read-protected fields are modified, a
             SecurityException will be raised.
     
-            Parameters:
-            @param user      -- the user making the request
             @param obj       -- the object being read
-
-            Return:
+    
             @return list of secret fields
             '''
             raise NotImplementedError
             
         @classmethod
-        def can_delete(cls, user, obj):
+        def can_delete(cls, obj):
             '''
-            Does this role allow user to delete the object?
+            @summary: Does this role allow deleting the object?
     
-            Parameters:
-            @param user      -- the user making the request
             @param obj       -- the object being deleted
-
-            Return:
+    
             @return True if allowed False otherwise.
             '''
             raise NotImplementedError
         
         @classmethod
-        def can_write(cls, user, obj):
+        def can_write(cls, obj):
             '''
-            Does this role allow user to write the object?
+            @summary: Does this role allow writing the object?
     
-            Parameters:
-            @param user      -- the user making the request
             @param obj       -- the object being written
-
-            Return:
+    
             @return True if allowed False otherwise.
             '''
             raise NotImplementedError
             
         @classmethod
-        def can_add_role(cls, req_user, obj, role, rcv_user):
+        def can_add_role(cls, req_user, obj, role, user):
             '''
-            Does this role allow user 'req_user' to give the Role 'role'
-            for object 'obj' to user 'rcv_user'?
+            @summary: Does this role allow giving the Role 'role'
+            for object 'obj' to user 'user'?
     
-            Parameters:
-            @param req_user   -- The user making the request
             @param obj        -- The object over which the role is given
             @param role       -- The Role that is being given
-            @param rcv_user   -- The user who will be given the new role
+            @param user       -- The user who will be given the new role
     
-            Return:
             @return True if allowed False otherwise.
             '''
             raise NotImplementedError
         
         @classmethod
-        def can_del_role(cls, req_user, obj, role, rcv_user):
+        def can_del_role(cls, req_user, obj, role, user):
             '''
-            Does this role allow user 'req_user' to remove the SecurityRole.Role 'role'
-            for object 'obj' from user 'rcv_user'?
+            @summary: Does this role allow removing the SecurityRole.Role 'role'
+            for object 'obj' from user 'user'?
     
-            Parameters:
-            @param req_user   -- The user making the request
             @param obj        -- The object over which the role is removed
             @param role       -- The SecurityRole.Role that is being removed
-            @param rcv_user   -- The user from whome the role will be removed
+            @param user       -- The user from whom the role will be removed
     
-            Return:
             @return True if allowed False otherwise.
             '''
             raise NotImplementedError
-        
-    class Owner(Role):
-        '''Default role assigned to the owner of a newly created object'''
+            
+    class BaseOwner(BaseAbstractRole):
+        '''Gives full permissions.'''
     
         @classmethod
-        def get_write_protected_fields(cls, user, new_obj, old_obj):
+        def get_write_protected_fields(cls, new_obj, old_obj):
             return []
         
         @classmethod
-        def get_read_protected_fields(cls, user, obj):
+        def get_read_protected_fields(cls, obj):
             return []
         
         @classmethod
-        def can_delete(cls, user, obj):
+        def can_delete(cls, obj):
             return True
         
         @classmethod
-        def can_write(cls, user, obj):
+        def can_write(cls, obj):
             return True
                     
         @classmethod
-        def can_add_role(cls, req_user, obj, role, rcv_user):
+        def can_add_role(cls, obj, role, user):
             return True
         
         @classmethod
-        def can_del_role(cls, req_user, obj, role, rcv_user):
+        def can_del_role(cls, obj, role, user):
             return True
-        
+
 ################################################################################
 # Now the SecureModel Code
 #
-
-#def secure_class_prepared_handler(sender, **kwargs):
-#    '''Make sure that 'classes' is defined as an attribute in all
-#    SecurityRole children, and count the successors for SecureModel'''
-#     
-#    if SecurityRole in sender.mro():
-#        # check that classes is defined
-#        if 'classes' not in sender.__dict__:
-#            raise Exception("You need to define a 'classes' attribute in "+
-#                "SecurityRole child %s" % sender)
         
 class SecureModelManager(models.Manager):
     '''
@@ -364,105 +205,6 @@ class SecureModelManager(models.Manager):
             self.model,
             protect_roleless_objects=self.protect_roleless_objects)
 
-#def _check_obj_save(sender, **kwargs):
-#    '''
-#    Get the old copy of the object, and send it to the security role
-#    to ask if the current copy has any fields that are write-protected.
-#    '''
-#    
-#    from clearinghouse.middleware import threadlocals
-#    
-#    SecureModel = sender
-#    
-#    curr_obj = kwargs['instance']
-#    
-#    print "Checking object %s save" % curr_obj
-#    
-#    # get the user
-#    user = threadlocals.get_current_user()
-#    
-#    # Otherwise, get the SecurityRoles associated with this object
-#    # and the current user
-#    roles = curr_obj.security_roles.filter(_user=user)
-#
-#    # get the old object from the db
-#    try:
-#        old_obj = curr_obj.__class__.objects.get(pk=curr_obj.pk)
-#    except SecureModel.DoesNotExist:
-#        # The object is not in the database to begin with.
-#        return
-##    except AttributeError:
-##        print "Saving instance %s for the first time" % curr_obj
-##        return
-#        
-#    # check if there are no roles, so we need to check protect_roleless_objects
-#    if len(roles) == 0 and curr_obj.__class__.objects.protect_roleless_objects:
-#        return
-#    
-#    # now get what each role doesn't allow to write, and see if
-#    # the intersection is empty => write is allowed by union of roles
-#    disallowed_fields = set(curr_obj._meta.fields)
-#    for role in roles.all():
-#        role = role.as_leaf_class()
-#        disallowed_fields.intersection_update(
-#            set(role.get_write_protected_fields(old_obj)))
-#    
-#    if len(disallowed_fields) > 0:
-#        vals = [curr_obj.get_attr(f) for f in disallowed_fields]
-#        raise curr_obj.__class__.SecurityException(user, "Writing to fields %s"
-#                " with the values %s not allowed" % (disallowed_fields, vals))
-#
-#    print "Done checking object %s save" % curr_obj
-#
-#def _check_obj_delete(sender, **kwargs):
-#    '''Only allow the delete if the user is allowed to delete the object'''
-#    
-#    from clearinghouse.middleware import threadlocals
-#    
-#    curr_obj = kwargs['instance']
-#    user = threadlocals.get_current_user()
-#    
-#    # get the current user's roles
-#    roles = curr_obj.security_roles.filter(_user=user)
-#    
-#    for role in roles.all():
-#        if role.can_delete():
-#            return
-#        
-#    raise curr_obj.__class__.SecurityException(user, "Deleting object %s"
-#                " is not allowed" % curr_obj)
-#
-#def _add_ownership_role(sender, **kwargs):
-#    '''If the object was just created and protect_roleless_objects is set, then
-#    give the current user as an OwnerSecurityRole'''
-#
-#    from clearinghouse.middleware import threadlocals
-#    
-#    curr_obj = kwargs['instance']
-#    print "called _add_ownership_role to obj %s" % curr_obj
-#
-#    if kwargs['created'] and curr_obj.__class__.objects.protect_roleless_objects:
-#        # add an ownership role to the user for this object
-#        user = threadlocals.get_current_user()
-#        if user:
-#            threadlocals.push_admin_mode()
-#            OwnerSecurityRole.objects.create(_user=user, _object=curr_obj)
-#            threadlocals.pop_admin_mode()
-#
-#def _func_obj_signals(func, sender=None):
-#    from django.db.models.signals import pre_save, post_save, pre_delete
-#    getattr(pre_save, func)(_check_obj_save, sender=sender)
-#    getattr(pre_delete, func)(_check_obj_delete, sender=sender)
-#    getattr(post_save, func)(_add_ownership_role, sender=sender)
-#    
-#def _connect_obj_signals(sender=None):
-##    print "Connecting signals for %s" % sender
-#    _func_obj_signals('connect', sender)
-#    
-#def _disconnect_obj_signals(sender=None):
-##    print "Disconnecting signals for %s" % sender
-#    _func_obj_signals('disconnect', sender)
-
 class SecureModelMetaClass(ModelBase):
     def __new__(cls, name, bases, dict):
         import sys
@@ -475,9 +217,8 @@ class SecureModelMetaClass(ModelBase):
             # First create a new class for the securityroles for this model
             __import__(dict['__module__'])
             module = sys.modules[dict['__module__']]
-            role_class = cls.create_abstractrole_class(name, module)
-#            abstract_role_name = "%s.%s" % (role_class.__module__, role_class.__name__)
-            abstract_role_name = "%s" % role_class.__name__
+            role_class = cls.create_baserole_class(name, module)
+            base_role_name = "%s" % role_class.__name__
     
             # Check if the Model is a child of another model that already
             # has been processed and has security_object_users defined
@@ -489,7 +230,7 @@ class SecureModelMetaClass(ModelBase):
             if not processed:
                 # Add the m2m field on the model
                 dict['security_object_users'] = models.ManyToManyField(auth.models.User,
-                                                                       through=abstract_role_name)
+                                                                       through=base_role_name)
 
         # Create the Model class itself
         cls = super(SecureModelMetaClass, cls).__new__(cls, name, bases, dict)
@@ -499,15 +240,44 @@ class SecureModelMetaClass(ModelBase):
         return cls
     
     @classmethod
-    def create_abstractrole_class(cls, model_name, module):
-        role_name = "Abstract%sRole" % model_name
+    def create_baserole_class(cls, model_name, module):
+        role_name = "Base%sRole" % model_name
         related_name = "%ss" % model_name.lower()
+        
+        # Create a new inner abstract_role specific to the model so we
+        # can add an attribute to it pointing back to the outer class
+        abstract_role_class = type('AbstractRole',
+                                   (AbstractSecureModelRole.BaseAbstractRole,),
+                                   {'__module__': module,
+                                    '__metaclass__': RoleMetaClass})
+        
+        # Create the base role class
+        role_choices = []
         new_class = type(role_name,
                          (AbstractSecureModelRole,),
                          {'security_object': models.ForeignKey(model_name, related_name=related_name),
                           'security_user': models.ForeignKey(auth.models.User, related_name=related_name),
+                          'AbstractRole': abstract_role_class,
+                          'role_choices': role_choices,
+                          'role_mappings': {},
+                          'model_name_fqn': "%s.%s" % (module.__name__, model_name),
+                          'security_role_choice': models.CharField(max_length=200, choices=role_choices),
                           '__module__': module.__name__})
+        
+        # Add a pointer to new class so we can get role_choices and role_mappings
+        abstract_role_class.model_role_class = new_class
+        
+        # Create and add the owner class
+        owner_dict = AbstractSecureModelRole.BaseOwner.__dict__.copy()
+        owner_dict['__module__'] = module
+        new_class.Owner = type('Owner', (abstract_role_class,), owner_dict)
+        
+        # Add the new class to the list of loaded classes
         setattr(module, new_class.__name__, new_class)
+        
+        # Connect role signals so that changes to the role get checked
+#        checks.connect_role_signals(new_class)
+        
         return new_class
     
 class AbstractSecureModel(models.Model):
@@ -537,42 +307,9 @@ class AbstractSecureModel(models.Model):
             self.user = user
             self.msg = msg
     
-def connect_all_signals():
-    pass
-#    print "Connecting signals:"
-
-#    # Get all successors of SecureModel
-#    obj_successors = utils.itersubclasses(SecureModel)
-#    for s in obj_successors:
-##        print "    for %s" % s
-#        _connect_obj_signals(s)
-#        
-#    role_successors = utils.itersubclasses(SecurityRole)
-#    for s in role_successors:
-##        print "    for %s" % s
-#        _connect_role_signals(s)
-
-
-def disconnect_all_signals():
-    pass
-##    print "Disconnecting signals:"
-#
-#    # Get all successors of SecureModel
-#    obj_successors = utils.itersubclasses(SecureModel)
-#    for s in obj_successors:
-##        print "    for %s" % s
-#        _disconnect_obj_signals(s)
-#        
-#    role_successors = utils.itersubclasses(SecurityRole)
-#    for s in role_successors:
-##        print "    for %s" % s
-#        _disconnect_role_signals(s)
-
 # NOTES:
 # Models should not be defined with unique columns that are secret. Otherwise,
 # when adding a new instance, the values might not be unique.
 #
 # Need to make sure to set the correct current user for ownership or to remove
 # the ownership after adding and set the right roles
-
-# TODO: Solve the inheritance issue where looking up roles gives generic SecurityRole objects.

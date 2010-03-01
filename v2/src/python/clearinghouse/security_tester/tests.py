@@ -38,6 +38,12 @@ class TestAll(TestCase):
 
     def test_setup(self):
         '''This tests always passes. Makes sure the setup goes OK'''
+        from models import BaseTestModelRole
+        print BaseTestModelRole.role_choices
+        print BaseTestModelRole.AbstractRole.__dict__
+        print TestModelRole.User.__dict__
+        print TestModelRole.User.__bases__[0]
+        print TestModelRole.Owner
         pass
         
 #    def test_ownership(self):
