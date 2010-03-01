@@ -6,7 +6,7 @@ Replace these with more appropriate tests for your application.
 """
 
 from django.test import TestCase
-from clearinghouse.security_tester.models import TestModel, TestModelRole
+from clearinghouse.security_tester.models import TestModel, TestModelRole, BaseTestModelRole
 from clearinghouse.middleware import threadlocals
 from django.contrib.auth.models import User
 
@@ -20,40 +20,30 @@ class TestAll(TestCase):
         self.user_test_model = TestModel.objects.create()
         self.roleless_test_model = TestModel.objects.create()
         
-#        print "++++++"
-#        roles = SecurityRole.objects.all()
-#        owner_roles = OwnerSecurityRole.objects.all()
-#        print "roles: %s" % roles
-#        for r in roles:
-#            r = r.as_leaf_class()
-#            print r
-#        print "ownerroles: %s" % owner_roles
-#        for r in owner_roles:
-#            print r.__dict__
-        self.admin_test_role = TestModelRole.objects.create(security_user=self.user, security_object=self.admin_test_model)
-#        self.user_test_role = UserTestRole.objects.create(_user=self.user, _object=self.user_test_model)
+        self.admin_test_role = TestModelRole.objects.create(
+            security_user=self.user,
+            security_object=self.admin_test_model,
+            security_role_choice='Admin')
+        self.user_test_role = TestModelRole.objects.create(
+            security_user=self.user,
+            security_object=self.admin_test_model,
+            security_role_choice='User')
         threadlocals.push_current_user(self.user)
         print "******* Done SetUp"
-#        print SecureTestModel.__metaclass__
 
     def test_setup(self):
         '''This tests always passes. Makes sure the setup goes OK'''
-        from models import BaseTestModelRole
-        print BaseTestModelRole.role_choices
-        print BaseTestModelRole.AbstractRole.__dict__
-        print TestModelRole.User.__dict__
-        print TestModelRole.User.__bases__[0]
-        print TestModelRole.Owner
         pass
         
-#    def test_ownership(self):
-#        '''Check that the owner is given ownership roles'''
-#        self.assertEqual(self.owner.security_roles.all().count(), 3)
-#        
-#        for r in self.owner.security_roles.all():
-#            r = r.as_leaf_class()
-#            self.assertEqual(r.__class__, OwnerSecurityRole)
-#        
+    def test_ownership(self):
+        '''Check that the owner is given ownership roles'''
+        self.assertEqual(self.owner.security_testmodel_roles.all().count(),
+            3, 'owner does not have three roles.')
+        
+        for r in self.owner.security_testmodel_roles.all():
+            self.assertEqual(r.security_role_choice, 'Owner', 'Owner has non-ownership role!')
+        
+        
 #    def test_protect_roleless_obj(self):
 #        '''Tests that objects that do not have a role for the current user are
 #        not seen in the returned querysets.'''

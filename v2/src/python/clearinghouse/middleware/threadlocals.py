@@ -1,6 +1,6 @@
 # threadlocals middleware
-from clearinghouse.security.models import connect_all_signals,\
-    disconnect_all_signals
+#from clearinghouse.security.models import connect_all_signals,\
+#    disconnect_all_signals
 
 try:
     from threading import local
@@ -19,21 +19,17 @@ def pop_current_user(u):
     _thread_locals.user_stack = getattr(_thread_locals, 'user_stack', [None, None])
     return _thread_locals.user_stack.pop()
 
-def push_admin_mode():
-    _thread_locals.admin_stack = getattr(_thread_locals, 'admin_stack', [])
-    if not _thread_locals.admin_stack:
-        # disconnect all signals
-        disconnect_all_signals()
-    _thread_locals.admin_stack.append(True)
+def push_obj(obj):
+    _thread_locals.obj_stack = getattr(_thread_locals, 'obj_stack', [])
+    _thread_locals.obj_stack.append(obj)
     
-def pop_admin_mode():
-    _thread_locals.admin_stack = getattr(_thread_locals, 'admin_stack', [])
-    if not _thread_locals.admin_stack:
-        raise AdminModeException()
-    connect_all_signals()
-    _thread_locals.admin_stack.pop()
+def pop_obj():
+    _thread_locals.obj_stack = getattr(_thread_locals, 'obj_stack', [])
+    if not _thread_locals.obj_stack:
+        raise ObjStackException()
+    return _thread_locals.obj_stack.pop()
 
-class AdminModeException(Exception):
+class ObjStackException(Exception):
     '''Should be raised when pop_admin_mode is called but not 
     already in admin mode'''
 

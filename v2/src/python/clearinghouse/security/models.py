@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib import auth
 from django.db.models.base import ModelBase
+from clearinghouse.security import checks
 
 class RoleMetaClass(type):
     '''Metaclass for concrete children of AbstractSecureModelRole.AbstractRole.
@@ -37,7 +38,7 @@ class RoleMetaClass(type):
             # Add the info into role_choices and role_mappings
             if name in new_class.model_role_class.role_mappings:
                 raise RoleMetaClass.RoleNameConflictError(
-                    name, new_class.model_role_class.model_name_fqn)
+                    name, new_class.model_role_class.model_fqn)
             new_class.model_role_class.role_choices.append((name, new_class.__doc__))
             new_class.model_role_class.role_mappings[name] = new_class
         
@@ -57,6 +58,16 @@ class AbstractSecureModelRole(models.Model):
                                                    self.security_user,
                                                    self.security_object)
         
+    @classmethod
+    def get_roles_for_user(cls, user):
+        roles = cls.objects.filter(security_user=user)
+        for r in roles.all():
+            r = r.role_mappings[r.security_role_choice]
+            yield r
+            
+    def get_role(self):
+        return self.role_mappings[self.security_role_choice]
+    
     class BaseAbstractRole(object):
         '''@summary: Defines base permissions.'''
         
@@ -112,13 +123,13 @@ class AbstractSecureModelRole(models.Model):
             raise NotImplementedError
             
         @classmethod
-        def can_add_role(cls, req_user, obj, role, user):
+        def can_add_role(cls, obj, role, user):
             '''
             @summary: Does this role allow giving the Role 'role'
             for object 'obj' to user 'user'?
     
             @param obj        -- The object over which the role is given
-            @param role       -- The Role that is being given
+            @param role       -- The Role class that is being given
             @param user       -- The user who will be given the new role
     
             @return True if allowed False otherwise.
@@ -126,13 +137,13 @@ class AbstractSecureModelRole(models.Model):
             raise NotImplementedError
         
         @classmethod
-        def can_del_role(cls, req_user, obj, role, user):
+        def can_del_role(cls, obj, role, user):
             '''
             @summary: Does this role allow removing the SecurityRole.Role 'role'
             for object 'obj' from user 'user'?
     
             @param obj        -- The object over which the role is removed
-            @param role       -- The SecurityRole.Role that is being removed
+            @param role       -- The SecurityRole.Role class that is being removed
             @param user       -- The user from whom the role will be removed
     
             @return True if allowed False otherwise.
@@ -209,40 +220,36 @@ class SecureModelMetaClass(ModelBase):
     def __new__(cls, name, bases, dict):
         import sys
         
-        print "Called SecureModelMetaClass.__new__ for %s" % name
+#        print "Called SecureModelMetaClass.__new__ for %s" % name
         
         # Don't do anything special for the abstract class
         if name is not 'AbstractSecureModel' or dict['__module__'] is not cls.__module__:
-            print "Adding special fields"
+#            print "Adding special fields"
             # First create a new class for the securityroles for this model
             __import__(dict['__module__'])
             module = sys.modules[dict['__module__']]
             role_class = cls.create_baserole_class(name, module)
             base_role_name = "%s" % role_class.__name__
     
-            # Check if the Model is a child of another model that already
-            # has been processed and has security_object_users defined
-            processed = False
-            for base in bases:
-                if issubclass(base, AbstractSecureModel) and base is not AbstractSecureModel:
-                    processed = True
-            
-            if not processed:
-                # Add the m2m field on the model
-                dict['security_object_users'] = models.ManyToManyField(auth.models.User,
-                                                                       through=base_role_name)
+            # Add the m2m field on the model
+            security_related_users_name = 'security_%s_users' % name.lower()
+            dict[security_related_users_name] = \
+                models.ManyToManyField(auth.models.User,
+                                       through=base_role_name,
+                                       related_name='security_%s_objects' % name.lower())
+            dict['security_base_role_class'] = role_class
 
         # Create the Model class itself
         cls = super(SecureModelMetaClass, cls).__new__(cls, name, bases, dict)
         
         # Connect the signals to monitor changes to the instances
-#        _connect_obj_signals(cls)
+        checks._connect_obj_signals(cls)
         return cls
     
     @classmethod
     def create_baserole_class(cls, model_name, module):
         role_name = "Base%sRole" % model_name
-        related_name = "%ss" % model_name.lower()
+        related_name = "security_%s_roles" % model_name.lower()
         
         # Create a new inner abstract_role specific to the model so we
         # can add an attribute to it pointing back to the outer class
@@ -257,11 +264,13 @@ class SecureModelMetaClass(ModelBase):
                          (AbstractSecureModelRole,),
                          {'security_object': models.ForeignKey(model_name, related_name=related_name),
                           'security_user': models.ForeignKey(auth.models.User, related_name=related_name),
+                          'security_related_name': related_name,
                           'AbstractRole': abstract_role_class,
                           'role_choices': role_choices,
                           'role_mappings': {},
-                          'model_name_fqn': "%s.%s" % (module.__name__, model_name),
-                          'security_role_choice': models.CharField(max_length=200, choices=role_choices),
+                          'model_fqn': "%s.%s" % (module.__name__, model_name),
+                          'security_role_choice': models.CharField(max_length=200,
+                                                                   choices=role_choices),
                           '__module__': module.__name__})
         
         # Add a pointer to new class so we can get role_choices and role_mappings
@@ -276,7 +285,7 @@ class SecureModelMetaClass(ModelBase):
         setattr(module, new_class.__name__, new_class)
         
         # Connect role signals so that changes to the role get checked
-#        checks.connect_role_signals(new_class)
+        checks.connect_role_signals(new_class)
         
         return new_class
     
@@ -297,9 +306,8 @@ class AbstractSecureModel(models.Model):
         abstract = True
     
     class SecurityException(Exception):
-        '''Exceptions caused by the security app for this model
+        '''@summary: Exceptions caused by the security app for this model
         
-        Attributes:
         @param user -- user who caused the exception
         @param msg -- explanation of the exception
         '''
@@ -307,9 +315,12 @@ class AbstractSecureModel(models.Model):
             self.user = user
             self.msg = msg
     
-# NOTES:
+# TODO: NOTES:
 # Models should not be defined with unique columns that are secret. Otherwise,
 # when adding a new instance, the values might not be unique.
 #
 # Need to make sure to set the correct current user for ownership or to remove
 # the ownership after adding and set the right roles
+#
+# Be careful with inheritance. A child's roles are different from the parent's.
+# So if accessing an object using the parent, only the parent's roles are checked.
