@@ -9,7 +9,8 @@ Created on Feb 28, 2010
 @TODO: Check that the parents' security permissions are good too
 '''
 from clearinghouse.middleware import threadlocals
-from clearinghouse.security import utils, models
+from clearinghouse.security import utils
+import sys
 
 def _check_role_delete(sender, **kwargs):
     '''Check if the user is allowed to delete the role.'''
@@ -166,32 +167,54 @@ def _create_model_signal_funcs(func, model):
 # Create functions to connect/disconnect role and object signals
 for func in ['connect', 'disconnect']:
     for model in ['role', 'obj']:
-        locals()['_%s_%s_signals' % (func, model)] = _create_model_signal_funcs(func, model)
+        locals()['%s_%s_signals' % (func, model)] = _create_model_signal_funcs(func, model)
 
-def connect_all_signals():
-    # Get all successors of SecureModel
-    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
-    for s in obj_successors:
-        _connect_obj_signals(s)
-        
-    role_successors = utils.itersubclasses(models.BaseAbstractRole)
-    for s in role_successors:
-        _connect_role_signals(s)
+def diconnect_receivers():
+    from django.db.models.signals import pre_save, pre_delete, post_save
+    funcs = {'pre_save': [_check_role_save, _check_obj_save],
+             'pre_delete': [_check_role_delete, _check_obj_delete],
+             'post_save': [_add_ownership_role],
+             }
+    receivers = {'pre_save': [], 'pre_delete':[], 'post_save':[]}
+    for k, funcs in funcs.items():
+        module = sys.modules[k]
+        for i, (r_key, func) in enumerate(module.receivers):
+            if func in funcs:
+                receivers[k].append((r_key, func))
+                del module.receivers[i]
+    
+    return receivers
+#    # Get all successors of SecureModel
+#    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
+#    for s in obj_successors:
+#        connect_obj_signals(s)
+#        
+#    role_successors = utils.itersubclasses(models.BaseAbstractRole)
+#    for s in role_successors:
+#        connect_role_signals(s)
 
-def disconnect_all_signals():
-    # Get all successors of SecureModel
-    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
-    for s in obj_successors:
-        _disconnect_obj_signals(s)
-        
-    role_successors = utils.itersubclasses(models.BaseAbstractRole)
-    for s in role_successors:
-        _disconnect_role_signals(s)
+def connect_receivers(receivers):
+    from django.db.models.signals import pre_save, pre_delete, post_save
+    for k, rcvr_tuples in receivers.items():
+        module = sys.modules[k]
+        for r in rcvr_tuples:
+            module.receivers.append(r)
+    
+#    # Get all successors of SecureModel
+#    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
+#    for s in obj_successors:
+#        disconnect_obj_signals(s)
+#        
+#    role_successors = utils.itersubclasses(models.BaseAbstractRole)
+#    for s in role_successors:
+#        disconnect_role_signals(s)
+    pass
 
 def push_admin_mode():
-    disconnect_all_signals()
+    rcvrs = disconnect_receivers()
     threadlocals.push_obj(True)
+    return rcvrs
     
-def pop_admin_mode():
+def pop_admin_mode(receivers):
     threadlocals.pop_obj()
-    connect_all_signals()
+    connect_receivers(receivers)

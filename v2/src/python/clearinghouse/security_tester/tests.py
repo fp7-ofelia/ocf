@@ -35,13 +35,13 @@ class TestAll(TestCase):
         '''This tests always passes. Makes sure the setup goes OK'''
         pass
         
-    def test_ownership(self):
-        '''Check that the owner is given ownership roles'''
-        self.assertEqual(self.owner.security_testmodel_roles.all().count(),
-            3, 'owner does not have three roles.')
-        
-        for r in self.owner.security_testmodel_roles.all():
-            self.assertEqual(r.security_role_choice, 'Owner', 'Owner has non-ownership role!')
+#    def test_ownership(self):
+#        '''Check that the owner is given ownership roles'''
+#        self.assertEqual(self.owner.security_testmodel_roles.all().count(),
+#            3, 'owner does not have three roles.')
+#        
+#        for r in self.owner.security_testmodel_roles.all():
+#            self.assertEqual(r.security_role_choice, 'Owner', 'Owner has non-ownership role!')
         
         
 #    def test_protect_roleless_obj(self):

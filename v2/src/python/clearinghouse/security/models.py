@@ -243,7 +243,7 @@ class SecureModelMetaClass(ModelBase):
         cls = super(SecureModelMetaClass, cls).__new__(cls, name, bases, dict)
         
         # Connect the signals to monitor changes to the instances
-        checks._connect_obj_signals(cls)
+        checks.connect_obj_signals(cls)
         return cls
     
     @classmethod
