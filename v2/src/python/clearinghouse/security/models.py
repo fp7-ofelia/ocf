@@ -57,14 +57,7 @@ class AbstractSecureModelRole(models.Model):
         return "Role: %s, user: %s, object: %s" % (self.__class__,
                                                    self.security_user,
                                                    self.security_object)
-        
-    @classmethod
-    def get_roles_for_user(cls, user):
-        roles = cls.objects.filter(security_user=user)
-        for r in roles.all():
-            r = r.role_mappings[r.security_role_choice]
-            yield r
-            
+
     def get_role(self):
         return self.role_mappings[self.security_role_choice]
     
@@ -341,6 +334,12 @@ class AbstractSecureModel(models.Model):
         '''Return the name of the reverse foreign key used to relate the model
         and users to roles for the model'''
         return get_security_related_roles_name(cls.__name__)
+
+    def get_roles_for_user(self, user):
+        '''Get all the roles this user has with this instance'''
+        roles = self.security_base_role_class.objects.filter(
+            security_user= user, security_object=self)
+        return [r.get_role() for r in roles.all()]
 
     class Meta:
         abstract = True

@@ -18,8 +18,7 @@ def _check_role_delete(sender, **kwargs):
     old_role = kwargs['instance']
     user = threadlocals.get_current_user()
 
-    user_roles = old_role.security_object.\
-        security_base_role_class.get_roles_for_user(user)
+    user_roles = old_role.security_object.get_roles_for_user(user)
     
     for r in user_roles:
         if not r.can_del_role(old_role.security_object,
@@ -48,8 +47,7 @@ def _check_role_save(sender, **kwargs):
         _check_role_delete(sender, {'instance': old_role})
 
     # check if the user can add this role to the new object
-    user_roles = curr_role.security_object.\
-        security_base_role_class.get_roles_for_user(user)
+    user_roles = curr_role.security_object.get_roles_for_user(user)
     
     for r in user_roles:
         if not r.can_add_role(curr_role.security_object,
@@ -77,7 +75,7 @@ def _check_obj_save(sender, **kwargs):
     
     # Otherwise, get the SecurityRoles associated with this object
     # and the current user
-    roles = curr_obj.security_base_role_class.get_roles_for_user(user)
+    roles = curr_obj.get_roles_for_user(user)
 
     # get the old object from the db
     try:
@@ -95,7 +93,7 @@ def _check_obj_save(sender, **kwargs):
     
     # now get what each role doesn't allow to write, and see if
     # the intersection is empty => write is allowed by union of roles
-    disallowed_fields = set(curr_obj._meta.fields)
+    disallowed_fields = [f.attname for f in curr_obj._meta.fields]
     write_allowed = True
     for role in roles:
         write_allowed = write_allowed and role.can_write(old_obj)
@@ -120,7 +118,7 @@ def _check_obj_delete(sender, **kwargs):
     user = threadlocals.get_current_user()
     
     # get the current user's roles
-    roles = curr_obj.security_base_role_class.get_roles_for_user(user)
+    roles = curr_obj.get_roles_for_user(user)
     
     for role in roles:
         if role.can_delete(curr_obj):
@@ -170,7 +168,6 @@ for func in ['connect', 'disconnect']:
         locals()['%s_%s_signals' % (func, model)] = _create_model_signal_funcs(func, model)
 
 def disconnect_receivers():
-#    from django.db.models.signals import pre_save, pre_delete, post_save
     funcs = {'pre_save': [_check_role_save, _check_obj_save],
              'pre_delete': [_check_role_delete, _check_obj_delete],
              'post_save': [_add_ownership_role],
@@ -186,17 +183,8 @@ def disconnect_receivers():
                 del module.receivers[i]
     
     return receivers
-#    # Get all successors of SecureModel
-#    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
-#    for s in obj_successors:
-#        connect_obj_signals(s)
-#        
-#    role_successors = utils.itersubclasses(models.BaseAbstractRole)
-#    for s in role_successors:
-#        connect_role_signals(s)
 
 def connect_receivers(receivers):
-    from django.db.models.signals import pre_save, pre_delete, post_save
     for k, rcvr_tuples in receivers.items():
         signals = __import__('django.db.models.signals', 
                             fromlist=[k])
@@ -204,16 +192,6 @@ def connect_receivers(receivers):
         for r in rcvr_tuples:
             module.receivers.append(r)
     
-#    # Get all successors of SecureModel
-#    obj_successors = utils.itersubclasses(models.AbstractSecureModel)
-#    for s in obj_successors:
-#        disconnect_obj_signals(s)
-#        
-#    role_successors = utils.itersubclasses(models.BaseAbstractRole)
-#    for s in role_successors:
-#        disconnect_role_signals(s)
-    pass
-
 def push_admin_mode():
     rcvrs = disconnect_receivers()
     threadlocals.push_obj(True)
