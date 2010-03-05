@@ -105,7 +105,7 @@ def _check_obj_save(sender, **kwargs):
                 "Writing to object %s not allowed." % old_obj)
         
     if len(disallowed_fields) > 0:
-        vals = [curr_obj.get_attr(f) for f in disallowed_fields]
+        vals = [getattr(curr_obj, f) for f in disallowed_fields]
         raise curr_obj.SecurityException(user, "Writing to fields %s"
                 " with the values %s not allowed" % (disallowed_fields, vals))
 
