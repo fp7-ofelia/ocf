@@ -93,7 +93,7 @@ def _check_obj_save(sender, **kwargs):
     
     # now get what each role doesn't allow to write, and see if
     # the intersection is empty => write is allowed by union of roles
-    disallowed_fields = [f.attname for f in curr_obj._meta.fields]
+    disallowed_fields = set([f.attname for f in curr_obj._meta.fields])
     write_allowed = True
     for role in roles:
         write_allowed = write_allowed and role.can_write(old_obj)
