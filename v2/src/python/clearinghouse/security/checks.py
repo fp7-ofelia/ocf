@@ -81,7 +81,7 @@ def _check_obj_save(sender, **kwargs):
 
     # get the old object from the db
     try:
-        old_obj = curr_obj.objects.get(pk=curr_obj.pk)
+        old_obj = curr_obj.__class__.objects.get(pk=curr_obj.pk)
     except SecureModel.DoesNotExist:
         # The object is not in the database to begin with.
         return
@@ -90,7 +90,7 @@ def _check_obj_save(sender, **kwargs):
 #        return
         
     # check if there are no roles, so we need to check protect_roleless_objects
-    if len(roles) == 0 and curr_obj.objects.protect_roleless_objects:
+    if len(roles) == 0 and curr_obj.__class__.objects.protect_roleless_objects:
         return
     
     # now get what each role doesn't allow to write, and see if
@@ -136,15 +136,15 @@ def _add_ownership_role(sender, **kwargs):
     curr_obj = kwargs['instance']
     print "called _add_ownership_role to obj %s" % curr_obj
 
-    if kwargs['created'] and curr_obj.objects.protect_roleless_objects:
+    if kwargs['created'] and curr_obj.__class__.objects.protect_roleless_objects:
         # add an ownership role to the user for this object
         user = threadlocals.get_current_user()
         if user:
-            push_admin_mode()
+            ctxt = push_admin_mode()
             curr_obj.security_base_role_class.objects.create(
                 security_user=user, security_object=curr_obj,
                 security_role_choice='Owner')
-            pop_admin_mode()
+            pop_admin_mode(ctxt)
 
 def _create_model_signal_funcs(func, model):
     '''Connect/Disconnect signals for role and objects'''
@@ -169,15 +169,17 @@ for func in ['connect', 'disconnect']:
     for model in ['role', 'obj']:
         locals()['%s_%s_signals' % (func, model)] = _create_model_signal_funcs(func, model)
 
-def diconnect_receivers():
-    from django.db.models.signals import pre_save, pre_delete, post_save
+def disconnect_receivers():
+#    from django.db.models.signals import pre_save, pre_delete, post_save
     funcs = {'pre_save': [_check_role_save, _check_obj_save],
              'pre_delete': [_check_role_delete, _check_obj_delete],
              'post_save': [_add_ownership_role],
              }
     receivers = {'pre_save': [], 'pre_delete':[], 'post_save':[]}
     for k, funcs in funcs.items():
-        module = sys.modules[k]
+        signals = __import__('django.db.models.signals', 
+                            fromlist=[k])
+        module = getattr(signals, k)
         for i, (r_key, func) in enumerate(module.receivers):
             if func in funcs:
                 receivers[k].append((r_key, func))
@@ -196,7 +198,9 @@ def diconnect_receivers():
 def connect_receivers(receivers):
     from django.db.models.signals import pre_save, pre_delete, post_save
     for k, rcvr_tuples in receivers.items():
-        module = sys.modules[k]
+        signals = __import__('django.db.models.signals', 
+                            fromlist=[k])
+        module = getattr(signals, k)
         for r in rcvr_tuples:
             module.receivers.append(r)
     

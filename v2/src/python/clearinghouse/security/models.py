@@ -216,6 +216,24 @@ class SecureModelManager(models.Manager):
             self.model,
             protect_roleless_objects=self.protect_roleless_objects)
 
+def get_security_related_users_name(cls_name):
+    '''Return the name of the m2m field used to relate the model
+    with class name cls_name to its users'''
+    
+    return "security_%s_users" % cls_name.lower()
+
+def get_security_related_objects_name(cls_name):
+    '''Return the name of the reverse m2m used to relate users with
+    the model with class name cls_name'''
+    
+    return "security_%s_objects" % cls_name.lower()
+
+def get_security_related_roles_name(cls_name):
+    '''Return the name of the reverse foreign key used to relate
+    the model with class name cls_name and users to the role for the model'''
+    
+    return "security_%s_roles" % cls_name.lower()
+
 class SecureModelMetaClass(ModelBase):
     def __new__(cls, name, bases, dict):
         import sys
@@ -232,11 +250,11 @@ class SecureModelMetaClass(ModelBase):
             base_role_name = "%s" % role_class.__name__
     
             # Add the m2m field on the model
-            security_related_users_name = 'security_%s_users' % name.lower()
+            security_related_users_name = get_security_related_users_name(name)
             dict[security_related_users_name] = \
                 models.ManyToManyField(auth.models.User,
                                        through=base_role_name,
-                                       related_name='security_%s_objects' % name.lower())
+                                       related_name=get_security_related_objects_name(name))
             dict['security_base_role_class'] = role_class
 
         # Create the Model class itself
@@ -249,7 +267,7 @@ class SecureModelMetaClass(ModelBase):
     @classmethod
     def create_baserole_class(cls, model_name, module):
         role_name = "Base%sRole" % model_name
-        related_name = "security_%s_roles" % model_name.lower()
+        related_name = get_security_related_roles_name(model_name)
         
         # Create a new inner abstract_role specific to the model so we
         # can add an attribute to it pointing back to the outer class
@@ -262,18 +280,22 @@ class SecureModelMetaClass(ModelBase):
         role_choices = []
         new_class = type(role_name,
                          (AbstractSecureModelRole,),
-                         {'security_object': models.ForeignKey(model_name, related_name=related_name),
-                          'security_user': models.ForeignKey(auth.models.User, related_name=related_name),
+                         {'security_object': models.ForeignKey(model_name,
+                                                related_name=related_name),
+                          'security_user': models.ForeignKey(auth.models.User,
+                                                related_name=related_name),
                           'security_related_name': related_name,
                           'AbstractRole': abstract_role_class,
                           'role_choices': role_choices,
                           'role_mappings': {},
                           'model_fqn': "%s.%s" % (module.__name__, model_name),
-                          'security_role_choice': models.CharField(max_length=200,
-                                                                   choices=role_choices),
+                          'security_role_choice': models.CharField(
+                                                        max_length=200,
+                                                        choices=role_choices),
                           '__module__': module.__name__})
         
-        # Add a pointer to new class so we can get role_choices and role_mappings
+        # Add a pointer to new class so we can get 
+        # role_choices and role_mappings
         abstract_role_class.model_role_class = new_class
         
         # Create and add the owner class
@@ -301,6 +323,24 @@ class AbstractSecureModel(models.Model):
     objects = SecureModelManager()
 
     __metaclass__ = SecureModelMetaClass
+
+    @classmethod
+    def get_security_related_users_name(cls):
+        '''Return the name of the m2m field used to relate the model
+        to its users'''
+        return get_security_related_users_name(cls.__name__)
+
+    @classmethod
+    def get_security_related_objects_name(cls):
+        '''Return the name of the reverse m2m used to relate users with
+        the model'''
+        return get_security_related_users_name(cls.__name__)
+
+    @classmethod
+    def get_security_related_roles_name(cls):
+        '''Return the name of the reverse foreign key used to relate the model
+        and users to roles for the model'''
+        return get_security_related_roles_name(cls.__name__)
 
     class Meta:
         abstract = True

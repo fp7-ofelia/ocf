@@ -24,7 +24,6 @@ class SecureQuery(sql.Query):
     
 #        print "called results_iter"
         from clearinghouse.middleware import threadlocals
-        from clearinghouse.security.models import SecurityRole
         
         # get the user requesting the query set
         user = threadlocals.get_current_user()
@@ -36,8 +35,10 @@ class SecureQuery(sql.Query):
             
         if self.protect_roleless_objects:
             # filter out any objects that are not related to the current user
-            self.add_q(Q(_obj_users=user))
-            self.add_select_related(['_obj_users', 'security_roles']) 
+            self.add_q(
+                Q(**{self.model.get_security_related_users_name():user}))
+            self.add_select_related(
+                [self.model.get_security_related_roles_name()]) 
 
 #        print "+++++++++++++++++++++++++++++++++++++"
 #        print "Executing secure_results_iter"
