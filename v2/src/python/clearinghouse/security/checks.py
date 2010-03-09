@@ -144,19 +144,27 @@ def _add_ownership_role(sender, **kwargs):
                 security_role_choice='Owner')
             pop_admin_mode(ctxt)
 
+def _check_obj_init(sender, **kwargs):
+    '''Remove hidden fields from the object'''
+    # TODO: Write this up.
+    pass
+
 def _create_model_signal_funcs(func, model):
     '''Connect/Disconnect signals for role and objects'''
     
     assert(func is 'connect' or func is 'disconnect')
     assert(model is 'role' or model is 'obj')
     
-    from django.db.models.signals import pre_save, pre_delete, post_save
+    from django.db.models.signals import pre_save, pre_delete
+    from django.db.models.signals import post_save, post_init
+    
     if model is 'role':
         def new_f(sender=None):
             getattr(pre_save, func)(_check_role_save, sender=sender)
             getattr(pre_delete, func)(_check_role_delete, sender=sender)
     else: # model is 'obj'
         def new_f(sender=None):
+            getattr(post_init, func)(_check_obj_init, sender=sender)
             getattr(pre_save, func)(_check_obj_save, sender=sender)
             getattr(pre_delete, func)(_check_obj_delete, sender=sender)
             getattr(post_save, func)(_add_ownership_role, sender=sender)
@@ -168,7 +176,8 @@ for func in ['connect', 'disconnect']:
         locals()['%s_%s_signals' % (func, model)] = _create_model_signal_funcs(func, model)
 
 def disconnect_receivers():
-    funcs = {'pre_save': [_check_role_save, _check_obj_save],
+    funcs = {'post_init': [_check_obj_init],
+             'pre_save': [_check_role_save, _check_obj_save],
              'pre_delete': [_check_role_delete, _check_obj_delete],
              'post_save': [_add_ownership_role],
              }

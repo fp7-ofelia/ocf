@@ -89,8 +89,9 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 #    'registration',
 #    'clearinghouse.users',
-    'clearinghouse.security',
-    'clearinghouse.security_tester',
+#    'clearinghouse.security',
+#    'clearinghouse.security_tester',
+    'clearinghouse.difc',
 )
 
 LOGIN_REDIRECT_URL = '/'
