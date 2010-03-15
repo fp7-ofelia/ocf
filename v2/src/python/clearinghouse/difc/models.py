@@ -3,7 +3,55 @@ from django.db.models.base import ModelBase
 from django.contrib import auth
 from django.db.models.fields import Field
 from clearinghouse.middleware import threadlocals
+from django.contrib.contenttypes.generic import GenericForeignKey
+from django.db.models.signals import pre_save
+from django.conf import settings, global_settings
+import checks
 
+
+class Category(models.Model):
+    '''DIFC category'''
+    
+    __owners = models.ManyToManyField(auth.models.User,
+                                      related_name="owned_categories")
+    
+#    def __init__(self, *args, **kwargs):
+#        super(models.Model, self).__init__(*args, **kwargs)
+#        TODO: Fix this shit
+#        if len(self.__owners.all()) == 0:
+#            self.__owners.add(threadlocals.get_current_user())
+#        
+    def give_ownership_to(self, user):
+        '''@summary: Check that the current user can give ownership
+        
+        @param user: user to give ownership to
+        '''
+        if threadlocals.get_current_user() in list(self.__owners.all()):
+            self.__owners.add(user)
+        else:
+            raise checks.SecurityException(
+                "User cannot give ownership to %s" % user)
+        
+    def disown(self):
+        '''@summary remove current user from owners'''
+        try:
+            self.__owners.remove(threadlocals.get_current_user())
+        except:
+            pass
+        
+    def __unicode__(self):
+        return u"%s" % self.id
+
+#class CategorySet(models.Model):
+#    '''A collection of categories that are disjunctively checked'''
+#    categories = models.ManyToManyField('Category')
+#    
+#    def __iter__(self):
+#        return self.categories.all().__iter__()
+#    
+#    def __unicode__(self):
+#        return u"CategorySet: %s" % ",".join(
+#            [u"%s" % c for c in self.categories.all()])
 class SecureModelManager(models.Manager):
     '''
     Default Manager class for SecureModel subclasses. Mainly used
@@ -27,17 +75,38 @@ class SecureModelBase(ModelBase):
     '''Add DIFC labels to SecureModel sub-class fields'''
     
     @classmethod
-    def get_label_name(cls, attname):
-        return "%s_difc_label" % attname
+    def get_secrecy_label_name(cls, attname):
+        return "%s_secrecy_label" % attname
     
+    @classmethod
+    def get_integrity_label_name(cls, attname):
+        return "%s_integrity_label" % attname
+    
+    @classmethod
+    def get_catset_related_name(cls, modelname, attname, type):
+        return "related_%s_%s_%s_objects" % (modelname, attname, type)
+
     def __new__(cls, name, bases, attrs):
         # for each field, add a difc label field
         for attname, att in attrs.items():
             if isinstance(att, Field):
-                attrs[cls.get_label_name(attname)] = \
-                    models.ManyToManyField('Category')
+                attrs[cls.get_secrecy_label_name(attname)] = \
+                    models.ManyToManyField(
+#                        CategorySet,
+                        Category,
+                        related_name=cls.get_catset_related_name(
+                            name, attname, "secrecy"))
+                attrs[cls.get_integrity_label_name(attname)] = \
+                    models.ManyToManyField(
+#                        CategorySet,
+                        Category,
+                        related_name=cls.get_catset_related_name(
+                            name, attname, "integrity"))
         klass = super(SecureModelBase, cls).__new__(cls, name, bases, attrs)
-        
+        pre_save.connect(checks.check_object_save, klass)
+        # store table-name for model in settings
+        settings.secure_models = getattr(settings, "secure_models", [])
+        settings.secure_models.append(klass._meta.db_table)
         return klass
 
 class SecureModel(models.Model):
@@ -53,71 +122,23 @@ class SecureModel(models.Model):
     objects = SecureModelManager()
     
     __metaclass__ = SecureModelBase
-    
+
+    def get_FIELD_label(self, attname):
+        '''@summary: get a 2-tuple of secrecy and integrity categories for
+        field 'attname'
+        
+        @param attname: Name of the field whose label we want
+        '''
+        
+        secrecy_sets_name = self.__class__.__metaclass__.\
+            get_secrecy_label_name(attname)
+        integrity_sets_name = self.__class__.__metaclass__.\
+            get_integrity_label_name(attname)
+        
+        s_catsets = getattr(self, secrecy_sets_name).all()
+        i_catsets = getattr(self, integrity_sets_name).all()
+
+        return (s_catsets, i_catsets)
+
     class Meta:
         abstract = True
-    
-class Category(models.Model):
-    '''DIFC category'''
-    
-    __owners = models.ManyToManyField(auth.models.User,
-                                    related_name="owned_categories")
-    
-    __users = models.ManyToManyField(auth.models.User,
-                                   related_name="clearance_categories")
-    
-    def __init__(self, *args, **kwargs):
-        super(models.Model, self).__init__(*args, **kwargs)
-        
-        if len(self.__owners.all()) == 0:
-            self.__owners.add(threadlocals.get_current_user())
-        
-    def give_ownership_to(self, user):
-        '''@summary: Check that the current user can give ownership
-        
-        @param user: user to give ownership to
-        '''
-        if threadlocals.get_current_user() in list(self.__owners.all()):
-            self.__owners.add(user)
-        else:
-            raise Category.SecurityException(
-                "User cannot give ownership to %s" % user)
-        
-    def disown(self):
-        '''@summary remove current user from owners'''
-        try:
-            self.__owners.remove(threadlocals.get_current_user())
-        except:
-            pass
-    
-    def give_clearance_to(self, user):
-        '''@summary: Check that the current user can give clearance
-        
-        @param user: user to give clearance to
-        '''
-        if threadlocals.get_current_user() in list(self.__owners.all()):
-            self.__users.add(user)
-        else:
-            raise Category.SecurityException(
-                "User cannot give clearance to %s" % user)
-            
-    def remove_clearance_from(self, user):
-        '''@summary: Remove clearance from user 'user'
-        
-        @param user: user to remove clearance from.
-        '''
-        if threadlocals.get_current_user() in list(self.__owners.all()):
-            self.__users.remove(user)
-        else:
-            raise Category.SecurityException(
-                "User cannot remove clearance from %s" % user)
-
-    class SecurityException(Exception):
-        '''@summary: Exceptions caused by the difc app for this category
-        
-        @param user -- user who caused the exception
-        @param msg -- explanation of the exception
-        '''
-        def __init__(self, user, msg):
-            self.user = user
-            self.msg = msg

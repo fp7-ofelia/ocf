@@ -15,7 +15,7 @@ def push_current_user(u):
     _thread_locals.user_stack = getattr(_thread_locals, 'user_stack', [])
     _thread_locals.user_stack.append(u)
 
-def pop_current_user(u):
+def pop_current_user():
     _thread_locals.user_stack = getattr(_thread_locals, 'user_stack', [None, None])
     return _thread_locals.user_stack.pop()
 
@@ -29,12 +29,22 @@ def pop_obj():
         raise ObjStackException()
     return _thread_locals.obj_stack.pop()
 
+def get_current_label():
+    _thread_locals.current_label = getattr(_thread_locals, 'current_label', ([],[]))
+    return _thread_locals.current_label
+
 class ObjStackException(Exception):
     '''Should be raised when pop_admin_mode is called but not 
     already in admin mode'''
+    pass
 
 class ThreadLocals(object):
     """Middleware that gets various objects from the
     request object and saves them in thread local storage."""
     def process_request(self, request):
         _thread_locals.user_stack = [getattr(request, 'user', None)]
+        _thread_locals.current_label = ([],[])
+        
+    def process_response(self, request, response):
+        pop_current_user()
+    
