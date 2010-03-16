@@ -92,6 +92,7 @@ INSTALLED_APPS = (
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
     'clearinghouse.difc',
+    'clearinghouse.difc_tester',
 )
 
 LOGIN_REDIRECT_URL = '/'
