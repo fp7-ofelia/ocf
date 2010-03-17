@@ -4,7 +4,7 @@ from django.contrib import auth
 from django.db.models.fields import Field
 from clearinghouse.middleware import threadlocals
 from django.contrib.contenttypes.generic import GenericForeignKey
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save, post_init
 from django.conf import settings, global_settings
 import checks
 
@@ -15,13 +15,10 @@ class Category(models.Model):
     __owners = models.ManyToManyField(auth.models.User,
                                       related_name="owned_categories")
     
-#    def __init__(self, *args, **kwargs):
-#        super(models.Model, self).__init__(*args, **kwargs)
-#        TODO: Fix this shit
-#        if len(self.__owners.all()) == 0:
-#            self.__owners.add(threadlocals.get_current_user())
-#        
-    def give_ownership_to(self, user):
+    __users = models.ManyToManyField(auth.models.User,
+                                    related_name="usable_categories")
+
+    def add_owner(self, user):
         '''@summary: Check that the current user can give ownership
         
         @param user: user to give ownership to
@@ -38,20 +35,40 @@ class Category(models.Model):
             self.__owners.remove(threadlocals.get_current_user())
         except:
             pass
+    
+    def add_user(self, user):
+        '''@summary: Check that current user is allowed to give usage and do it
+        
+        @param user: User to allow access
+        '''
+        if threadlocals.get_current_user() in list(self.__owners.all()):
+            self.__users.add(user)
+        else:
+            raise checks.SecurityException(
+                "User cannot give ownership to %s" % user)
+            
+    def remove_user(self, user):
+        if threadlocals.get_current_user() in list(self.__owners.all()) or \
+        user == threadlocals.get_current_user():
+            try:
+                self.__users.remove(user)
+            except:
+                pass
+        else:
+            raise checks.SecurityException(
+                "User cannot deny use to %s" % user)
         
     def __unicode__(self):
         return u"%s" % self.id
+    
+    @classmethod
+    def post_save(cls, sender, **kwargs):
+        cat = kwargs['instance']
+        if len(cat.__owners) == 0:
+            cat.__owners.add(threadlocals.get_current_user())
 
-#class CategorySet(models.Model):
-#    '''A collection of categories that are disjunctively checked'''
-#    categories = models.ManyToManyField('Category')
-#    
-#    def __iter__(self):
-#        return self.categories.all().__iter__()
-#    
-#    def __unicode__(self):
-#        return u"CategorySet: %s" % ",".join(
-#            [u"%s" % c for c in self.categories.all()])
+post_save.connect(Category.post_save, Category)
+
 class SecureModelManager(models.Manager):
     '''
     Default Manager class for SecureModel subclasses. Mainly used
@@ -122,6 +139,10 @@ class SecureModel(models.Model):
     objects = SecureModelManager()
     
     __metaclass__ = SecureModelBase
+    
+    def __init__(self, *args, **kwargs):
+        super(SecureModel, self).__init__(*args, **kwargs)
+        # TODO: clear or hide? all fields that are not allowed to be seen
 
     def get_FIELD_label(self, attname):
         '''@summary: get a 2-tuple of secrecy and integrity categories for

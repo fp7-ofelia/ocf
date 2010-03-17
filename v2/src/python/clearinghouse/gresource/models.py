@@ -9,7 +9,7 @@ class Resource(models.Model):
     # @ivar aggregate: The aggregate that controls/owns this resource
     aggregate = models.ForeignKey(Aggregate)
     
-    # @ivar name: A human-readable name for the resources
+    # @ivar name: A human-readable name for the resource
     name = models.CharField(max_length=200)
     
     def __unicode__(self):
