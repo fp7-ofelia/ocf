@@ -97,6 +97,10 @@ def check_object_save(sender, **kwargs):
                 raise SecurityException(
                     threadlocals.get_current_user(),
                     "Field %s cannot be modified." % field.attname)
+
+def check_object_post_init(sender, **kwargs):
+    new_object = kwargs['instance']
+    # TODO: what happens with new init, and what about init from DB?
             
 class SecurityException(Exception):
     '''@summary: Exceptions caused by the difc app for this category
