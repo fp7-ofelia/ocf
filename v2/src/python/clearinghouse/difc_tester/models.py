@@ -17,3 +17,6 @@ class TestModel2(difc_models.SecureModel):
     def __unicode__(self):
         return u"%s" % self.name
     
+class TestModel3(TestModel2):
+    m2m_mods = models.ManyToManyField(TestModel)
+    

@@ -51,13 +51,13 @@ class SecureQuery(sql.Query):
                     
                 # Get the info about the field
                 field, model, direct, m2m = opts.get_field_by_name(name)
-                if isinstance(owner_class, SecureModelBase):
+                if isinstance(owner_class, SecureModelBase) and direct:
                     # get the label filter predicates
                     new_s_f = "%s%s" % (
-                        "__".join(parts[:pos] + "__" if pos else ""), # all prev flds
+                        "__".join(parts[:pos]) + "__" if pos else "", # all prev flds
                         owner_class.__metaclass__.get_secrecy_label_name(name))
                     new_i_f = "%s%s" % (
-                        "__".join(parts[:pos] + "__" if pos else ""), # all prev flds
+                        "__".join(parts[:pos]) + "__" if pos else "", # all prev flds
                         owner_class.__metaclass__.get_integrity_label_name(name))
                     # add filters for all categories
                     if not curr_s_lbl:
@@ -73,14 +73,14 @@ class SecureQuery(sql.Query):
                     for c in curr_i_lbl:
                         self.add_q(Q(**{new_i_f: c}))
                     
-                if direct:
-                    if field.rel:
-                        # a related field, so check if SecureModel
-                        owner_class = field.rel.to
-                        opts = field.rel.to._meta
-                else:
-                    # TODO: What do we do about indirect rels?
-                    pass
+                if hasattr(field, 'rel') and field.rel:
+                    # a related field, so check if SecureModel
+                    owner_class = field.rel.to
+                    opts = field.rel.to._meta
+                elif hasattr(field, 'parent_model'):
+                    owner_class = field.model
+                    opts = field.model._meta
+
         
 #    def results_iter(self):
 #        '''Add filters to remove hidden/secret data from results'''

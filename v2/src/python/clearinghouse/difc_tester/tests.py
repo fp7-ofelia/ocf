@@ -46,6 +46,17 @@ class TestAll(TestCase):
         self.fm1 = TestModel2.objects.create(d=5, other=self.m1, name="fm1")
         self.fm2 = TestModel2.objects.create(d=10, other=self.m2, name="fm2")
         
+        self.ffm1 =  TestModel3.objects.create(d=100, other=self.m1, name="ffm1")
+        self.ffm1.m2m_mods.add(self.m1)
+        self.ffm2 =  TestModel3.objects.create(d=100, other=self.m2, name="ffm2")
+        self.ffm2.m2m_mods.add(self.m2)
+        self.ffm3 =  TestModel3.objects.create(d=100, other=self.m3, name="ffm3")
+        self.ffm3.m2m_mods.add(self.m3)
+        self.ffm12 =  TestModel3.objects.create(d=100, other=self.m3, name="ffm12")
+        self.ffm12.m2m_mods.add(self.m1, self.m2)
+        self.ffm123 =  TestModel3.objects.create(d=100, other=self.m3, name="ffm123")
+        self.ffm123.m2m_mods.add(self.m1, self.m2, self.m3)
+        
     def tearDown(self):
         del threadlocals.get_current_label()[0][:]
         del threadlocals.get_current_label()[1][:]
@@ -143,4 +154,61 @@ class TestAll(TestCase):
         self.assertTrue(self.m1 in qs)
         self.assertFalse(self.m2 in qs)
         self.assertFalse(self.m3 in qs)
+        
+    def test_extended_constrained_query(self):
+        self.fm1.other_secrecy_label.add(self.cat1)
+        qs = TestModel2.objects.filter(other__in=[self.m1,self.m2, self.m3])
+        self.assertFalse(self.fm1 in qs)
+        self.assertTrue(self.fm2 in qs)
+
+        threadlocals.get_current_label()[0].extend([self.cat1])
+        qs = TestModel2.objects.filter(other__in=[self.m1,self.m2, self.m3])
+        self.assertTrue(self.fm1 in qs)
+        self.assertTrue(self.fm2 in qs)
+
+        self.m1.a_secrecy_label.add(self.cat2)
+        qs = TestModel2.objects.filter(other__a__in=[1,2,3])
+        self.assertFalse(self.fm1 in qs)
+        self.assertTrue(self.fm2 in qs)
+        
+        threadlocals.get_current_label()[0].extend([self.cat2])
+        qs = TestModel2.objects.filter(other__in=[self.m1,self.m2, self.m3])
+        self.assertTrue(self.fm1 in qs)
+        self.assertTrue(self.fm2 in qs)
+
+    def test_reverse_constrained_query(self):
+        qs = TestModel.objects.filter(testmodel2__in=[self.fm1, self.fm2])
+        self.assertTrue(self.m1 in qs)
+        self.assertTrue(self.m2 in qs)
+
+        self.fm1.d_secrecy_label.add(self.cat1)
+        qs = TestModel.objects.filter(testmodel2__d__gt=0)
+        print qs.query
+        self.assertFalse(self.m1 in qs)
+        self.assertTrue(self.m2 in qs)
+        
+    def test_m2m_constrained_query(self):
+        self.ffm123.m2m_mods_secrecy_label.add(self.cat1)
+        qs = TestModel3.objects.filter(m2m_mods=self.m1)
+        self.assertTrue(self.ffm1 in qs)
+        self.assertTrue(self.ffm12 in qs)
+        self.assertFalse(self.ffm123 in qs)
+        self.assertFalse(self.ffm2 in qs)
+        self.assertFalse(self.ffm3 in qs)
+        
+        threadlocals.get_current_label()[0].extend([self.cat1])
+        qs = TestModel3.objects.filter(m2m_mods=self.m1)
+        self.assertTrue(self.ffm1 in qs)
+        self.assertTrue(self.ffm12 in qs)
+        self.assertTrue(self.ffm123 in qs)
+        self.assertFalse(self.ffm2 in qs)
+        self.assertFalse(self.ffm3 in qs)
+        
+        self.m1.a_secrecy_label.add(self.cat2)
+        qs = TestModel3.objects.filter(m2m_mods__a__gt=0)
+        self.assertFalse(self.ffm1 in qs)
+        self.assertTrue(self.ffm12 in qs)
+        self.assertTrue(self.ffm123 in qs)
+        self.assertTrue(self.ffm2 in qs)
+        self.assertTrue(self.ffm3 in qs)
         

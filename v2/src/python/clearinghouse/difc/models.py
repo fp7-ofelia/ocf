@@ -16,8 +16,8 @@ class Category(models.Model):
                                       related_name="owned_categories")
     
     __users = models.ManyToManyField(auth.models.User,
-                                    related_name="usable_categories")
-
+                                     related_name="usable_categories")
+    
     def add_owner(self, user):
         '''@summary: Check that the current user can give ownership
         
@@ -64,8 +64,11 @@ class Category(models.Model):
     @classmethod
     def post_save(cls, sender, **kwargs):
         cat = kwargs['instance']
-        if len(cat.__owners) == 0:
+        if len(cat.__owners.all()) == 0:
             cat.__owners.add(threadlocals.get_current_user())
+            post_save.disconnect(Category.post_save, Category)
+            cat.save()
+            post_save.connect(Category.post_save, Category)
 
 post_save.connect(Category.post_save, Category)
 

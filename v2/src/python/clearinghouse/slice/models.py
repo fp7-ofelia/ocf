@@ -10,11 +10,15 @@ class Slice(models.Model):
     name = models.CharField(max_length=200)
     
     # @ivar aggregates: Set of aggregates the slice uses
-    aggregates = models.ManyToManyField(Aggregate)
+    aggregates = models.ManyToManyField(Aggregate, through='AggregateSliceInfo')
     
     # @ivar resources: Set of resources in this slice
     resources = models.ManyToManyField(Resource)
     
     # @ivar project: Project in which this slice belongs
     project = models.ForeignKey(Project)
+    
+class AggregateSliceInfo(models.Model):
+    '''Holds additional aggregate-specific information about the slice'''
+    slice = models.ForeignKey(Slice)
     

@@ -1,12 +1,29 @@
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 class Aggregate(models.Model):
-    '''Holds information about an aggregate'''
+    '''Holds information about an aggregate. Needs to be extended by plugins.'''
     
     name = models.CharField(max_length=200, unique=True)
     
+    # The fields below are used to relate the parent Aggregate type
+    # to the actual Aggregate type (a child or grandchild...) 
+    # that should be used.
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey()
+    
     class Meta:
         abstract = True
+        
+    def __init__(self, *args, **kwargs):
+        if 'content_object' not in kwargs:
+            kwargs['content_object'] = self
+        super(Aggregate, self).__init__(*args, **kwargs)
+        
+    def __getattribute__(self, name):
+        return self.content_object.__getattr__(name)
     
     def reload_resources(self):
         '''Reload the available resources into the DB'''
