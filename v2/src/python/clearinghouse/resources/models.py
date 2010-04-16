@@ -82,7 +82,7 @@ class Node(Resource):
                 {'through': "neighbors_through"},
             )
         }
-        redelegate = ['aggregate']
+        redelegate = ['aggregate', 'slices']
     
 class Link(Resource):
     '''
@@ -93,10 +93,10 @@ class Link(Resource):
         fields = {
             'nodes': (
                 models.ManyToManyField,
-                ("self", "Nodes connected to this link"),
+                (Node, "Nodes connected to this link"),
                 {'related_name': 'links'},
-                (None, "nodes_comment"),
+                ("node_class", "nodes_comment"),
                 {'through': "nodes_through"},
             )
         }
-        redelegate = ['aggregate']
+        redelegate = ['aggregate', 'slices']

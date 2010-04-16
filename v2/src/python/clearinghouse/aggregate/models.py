@@ -49,9 +49,9 @@ class Aggregate(Extendable):
             ),
         }
         
-    def reload_resources(self):
-        '''Reload the available resources into the DB'''
-        raise NotImplementedError()
+#    def reload_resources(self):
+#        '''Reload the available resources into the DB'''
+#        raise NotImplementedError()
 
     def create_slice(self, slice_id, *args, **kwargs):
         '''Create a new slice with the given slice_id
