@@ -1,0 +1,3 @@
+V	130419035449Z		00	unknown	/C=US/ST=California/O=Stanford University/CN=stanfordca
+V	110420035640Z		01	unknown	/C=US/ST=California/L=Stanford/O=Stanford/CN=stanfordam
+V	110420040005Z		02	unknown	/C=US/ST=Some-State/O=Internet Widgits Pty Ltd/CN=alice

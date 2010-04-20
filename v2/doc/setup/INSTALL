@@ -1,0 +1,33 @@
+The following directions apply for openSuSE 11.2:
+
+Note the following conventions. A '#' at the beginning of a line means execute
+as root, while a '$' means execute as normal user.
+
+Install requirements to run our Django project:
+-----------------------------------------------
+# zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
+# zypper install python-setuptools python-django
+# easy_install django-registration rpc4django
+
+Test Django Application:
+------------------------
+$ cd <egeni_root>/v2/src/python/clearinghouse
+$ python manage.py runserver
+
+Point your browser to localhost:8000 to make sure Django works. Kill the server.
+
+Setup Apache2 to use SSL:
+-------------------------
+# zypper addrepo http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
+# zypper install apache2 apache2-mod_wsgi
+# sed -i '{s/APACHE_CONF_INCLUDE_FILES=""/APACHE_CONF_INCLUDE_FILES="/etc/apache2/httpd.conf.local"/}' /etc/sysconfig/apache2
+# cp <egeni_root>/v2/src/config/apache/httpd.conf.local /etc/apache2/
+# sed -i '{s/egeni_root/<actual_egeni_root>/}' /etc/apache2/httpd.conf.local
+# cp <egeni_root>/v2/src/config/apache/vhost-ssl.conf /etc/apache2/vhosts.d/
+# a2enmod ssl
+# a2enflag SSL
+# /usr/bin/gensslcert
+# sed -i '{s/Listen 80/#Listen 80/}' /etc/apache2/listen.conf
+# /etc/init.d/apache2 restart
+
+Point your browser to https://localhost/ to make sure SSL works.
