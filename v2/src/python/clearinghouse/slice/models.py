@@ -28,4 +28,3 @@ class GenericAggregateSliceInfo(Extendable):
     class Meta:
         abstract = True
 
-class Reservation(Extendable):

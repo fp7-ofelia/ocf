@@ -11,6 +11,9 @@ urlpatterns = patterns('',
     
     (r'^admin/', include(admin.site.urls)),
 
+    # GENI API RPC URL
+    (r'^gapi$', 'rpc4django.views.serve_rpc_request'),
+    
     # TODO Change to the following after 0.8 of registration is out
     # (r'^accounts/', include('registration.backends.default.urls')),
     (r'^accounts/', include('registration.urls')),

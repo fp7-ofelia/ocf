@@ -41,7 +41,7 @@ class Rule(models.Model):
     exclude_params = models.ManyToManyField(FilterParam)
     filter_first = models.BooleanField("Apply the filtering rule first?",
                                        default=True)
-    field_names = models.ManyToMany(FieldName)
+    field_names = models.ManyToManyField(FieldName)
     
     def get_model_instances(self, instance):
         filters = {}

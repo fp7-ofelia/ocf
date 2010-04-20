@@ -1,9 +1,9 @@
 from django.db import models
-from clearinghouse import aggregate
-from clearinghouse import resources
-from clearinghouse import slice
+from clearinghouse.aggregate import models as aggregate_models
+from clearinghouse.resources import models as resource_models
+from clearinghouse.slice import models as slice_models
 
-class Aggregate(aggregate.models.Aggregate):
+class Aggregate(aggregate_models.Aggregate):
     shared_key = models.CharField(max_length=1024)
     url = models.CharField(max_length=1024)
     
@@ -54,13 +54,13 @@ class Aggregate(aggregate.models.Aggregate):
         '''
         raise NotImplementedError()
 
-class Switch(resources.models.Node):
+class Switch(resource_models.Node):
     class Extend:
         replacements={
             "sliver_class": "SwitchSliver"
         }
 
-class Link(resources.models.Link):
+class Link(resource_models.Link):
     class Extend:
         replacements={
             "sliver_class": "LinkSliver",
@@ -105,11 +105,11 @@ class Interface(models.Model):
     switch = models.ForeignKey(Switch)
     link = models.ForeignKey(Link)
 
-class SwitchSliver(resources.models.Sliver):
+class SwitchSliver(resource_models.Sliver):
     switch = models.ForeignKey(Switch)
     slice = models.ForeignKey(slice.models.Slice)
     
-class LinkSliver(resources.models.Sliver):
+class LinkSliver(resource_models.Sliver):
     link = models.ForeignKey(Link)
     slice = models.ForeignKey(slice.models.Slice)
 

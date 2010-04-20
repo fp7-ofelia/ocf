@@ -1,1 +1,2 @@
-# Create your views here.
+from rpc4django import rpcmethod
+
