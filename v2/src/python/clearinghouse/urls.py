@@ -8,12 +8,10 @@ urlpatterns = patterns('',
     (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}, 'home'),
     
     (r'^users/', include('clearinghouse.users.urls')),
+    (r'^openflow/', include('clearinghouse.openflow.urls')),
     
     (r'^admin/', include(admin.site.urls)),
 
-    # GENI API RPC URL
-    (r'^gapi$', 'rpc4django.views.serve_rpc_request'),
-    
     # TODO Change to the following after 0.8 of registration is out
     # (r'^accounts/', include('registration.backends.default.urls')),
     (r'^accounts/', include('registration.urls')),
