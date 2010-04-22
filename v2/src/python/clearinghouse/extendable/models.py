@@ -42,34 +42,36 @@ class ExtendableMeta(ModelBase):
                     getattr(base_extend, "fields", {}).items():
                         field_cls, args, kwargs, args_repl, kwargs_repl = fval
                         if fname in extended_fields:
-                            raise Exception("Extended field %s from %s already "
-                                + "defined in another parent of %s.%s" % (
-                                    fname, base, attrs['__module__'], name))
+                            raise Exception(
+                                "Extended field '%s' from %s " % (fname, base)
+                                +"already defined in another parent of "
+                                +"%s.%s" % (attrs['__module__'], name))
                         else:
                             clashes = set(args_repl).intersection(repl_kw)
                             clashes = clashes.union(set(kwargs_repl.values())\
                                 .intersection(repl_kw))
                             if clashes:
                                 raise Exception(
-                                    "Replacement keywords %s from %s already "
-                                    + "defined in another parent of %s.%s" % (
-                                        clashes, attrs['__module__'],
+                                    "Replacement keywords '%s' " % clashes
+                                    +"from %s already " % attrs['__module__']
+                                    +"defined in another parent of %s.%s" % (
                                         name, base))
                             else:
                                 extended_fields[fname] = fval
                                 
-            # get the delegations and check that they are all in extended_fields
+            # get the delegations, check that they are all in extended_fields
             delegations = getattr(extend, "redelegate", [])
             for d in delegations:
                 if d not in extended_fields:
-                    raise Exception("Redelegated field '%s' is not an extended"
-                                    +" field in any of %s.%s's parents.",
-                                    (d, attrs['__module__'], name))
+                    raise Exception(
+                        "Redelegated field '%s' is not an extended" % d
+                        +" field in any of %s.%s's parents." %(
+                            attrs['__module__'], name))
                 else:
                     # remove the field from the list to add to this class
                     # and put it in this class's inner Extend
-                    attrs['Meta'].fields = getattr(attrs['Meta'], "fields", {})
-                    attrs['Meta'].fields[d] = extended_fields[d]
+                    extend.fields = getattr(extend, "fields", {})
+                    extend.fields[d] = extended_fields[d]
                     del extended_fields[d]
             
             if extended_fields:
@@ -103,9 +105,12 @@ class ExtendableMeta(ModelBase):
                     
                     # check for clashes
                     if fname in attrs:
-                        raise Exception("Field %s clashes with extended field "
-                                        +"in class %s.%s",
-                                        (fname, attrs['__module__'], name))
+                        print fname
+                        print attrs['__module__']
+                        print name
+                        raise Exception(
+                            "Field '%s' clashes with extended field " % fname
+                            +"in class %s.%s" % (attrs['__module__'], name))
                     
                     # now create the field in this class
                     attrs[fname] = field_cls(*args, **kwargs)

@@ -3,7 +3,7 @@ Created on Apr 20, 2010
 
 @author: jnaous
 '''
-from rpc4djnago import rpcmethod
+from rpc4django import rpcmethod
 from gcf import gam
 
 CREDENTIALS_TYPE = 'array' # of strings
