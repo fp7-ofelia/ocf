@@ -5,12 +5,13 @@ as root, while a '$' means execute as normal user.
 
 Install requirements to run our Django project:
 -----------------------------------------------
-# zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
+# zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
 # zypper install python-setuptools python-django
-# easy_install django-registration rpc4django
+# easy_install -Z django-registration rpc4django
 
 Test Django Application:
 ------------------------
+$ export PYTHONPATH=$PYTHONPATH:<egeni_root>/v2/src/python
 $ cd <egeni_root>/v2/src/python/clearinghouse
 $ python manage.py runserver
 
@@ -31,3 +32,4 @@ Setup Apache2 to use SSL:
 # /etc/init.d/apache2 restart
 
 Point your browser to https://localhost/ to make sure SSL works.
+s

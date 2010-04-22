@@ -31,12 +31,16 @@ class OpenFlowInterface(models.Model):
     link = models.ForeignKey(OpenFlowLink)
 
 class OpenFlowSwitchSliver(resource_models.Sliver):
-    switch = models.ForeignKey(OpenFlowSwitch)
-    slice = models.ForeignKey(slice_models.Slice)
+    class Extend:
+        replacements={
+            "resource_class": OpenFlowSwitch,
+        }
     
 class OpenFlowLinkSliver(resource_models.Sliver):
-    link = models.ForeignKey(OpenFlowLink)
-    slice = models.ForeignKey(slice_models.Slice)
+    class Extend:
+        replacements={
+            "resource_class": OpenFlowLink,
+        }
 
 class FlowSpaceRule(models.Model):
     TYPE_ALLOW = 1
