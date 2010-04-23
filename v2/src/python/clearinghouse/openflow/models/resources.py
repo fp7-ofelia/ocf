@@ -17,7 +17,6 @@ class OpenFlowSwitch(resource_models.Node):
         }
 
 class OpenFlowLink(resource_models.Link):
-    link_id = models.CharField(max_length=100)
     class Extend:
         replacements={
             "sliver_class": "OpenFlowLinkSliver",

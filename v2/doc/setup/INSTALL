@@ -34,7 +34,7 @@ group www.
 In the step below don't forget to escape the '/' with a '\' as in '\/' for the
 <actual_egeni_root> part, e.g. \/usr\/lib\/egeni
 # sed -i '{s/egeni_root/<actual_egeni_root>/}' /etc/apache2/httpd.conf.local
-# cp <egeni_root>/v2/src/config/apache/vhost-ssl.conf /etc/apache2/vhosts.d/
+# ln -s <egeni_root>/v2/src/config/apache/vhost-ssl.conf /etc/apache2/vhosts.d/
 # a2enmod wsgi
 # a2enmod ssl
 # a2enflag SSL
@@ -43,3 +43,9 @@ In the step below don't forget to escape the '/' with a '\' as in '\/' for the
 # /etc/init.d/apache2 restart
 
 Point your browser to https://localhost/ to make sure SSL works.
+
+Add Certificates for Trusted GENI sites:
+----------------------------------------
+# cp <geni-ca-cert> /etc/apache2/ssl.crt/<geni-ca>.crt
+# make -C /etc/apache2/ssl.crt
+# /etc/init.d/apache2 restart

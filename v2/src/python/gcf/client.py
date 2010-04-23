@@ -114,6 +114,7 @@ def exercise_am(host, port, keyfile, certfile, verbose=False):
     url = 'https://%s' % (host)
     if port:
         url = '%s:%s' % (url, port)
+    url = url + '/openflow/gapi'
     server = xmlrpclib.ServerProxy(url, transport=cert_transport,
                                    verbose=verbose)
     # Temporary until CH is connected
