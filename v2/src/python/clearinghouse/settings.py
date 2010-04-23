@@ -68,9 +68,14 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+#    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'clearinghouse.middleware.sitelockdown.SiteLockDown',
-    'clearinghouse.middleware.threadlocals.ThreadLocals',
+#    'clearinghouse.middleware.threadlocals.ThreadLocals',
 )
+
+#AUTHENTICATION_BACKENDS = (
+#    'django.contrib.auth.backends.RemoteUserBackend',
+#)
 
 ROOT_URLCONF = 'clearinghouse.urls'
 
@@ -87,12 +92,21 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-#    'registration',
-#    'clearinghouse.users',
+    'rpc4django',
+    'clearinghouse.extendable',
+#    'clearinghouse.extendable_tester',
+    'registration',
+    'clearinghouse.aggregate',
+    'clearinghouse.openflow',
+#    'clearinghouse.permission',
+    'clearinghouse.project',
+    'clearinghouse.resources',
+    'clearinghouse.slice',
+    'clearinghouse.users',
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
-    'clearinghouse.difc',
-    'clearinghouse.difc_tester',
+#    'clearinghouse.difc',
+#    'clearinghouse.difc_tester',
 )
 
 LOGIN_REDIRECT_URL = '/'
