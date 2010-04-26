@@ -26,13 +26,15 @@ class Resource(Extendable):
             ),
             'slices': (
                 models.ManyToManyField,
-                (Slice, "Slices this resource is used in"),
-                {'through': "Sliver"},
-                (None, "slices_comment"),
-                {'through': "sliver_class"},
+                (Slice,),
+                {'through': "Sliver",
+                 'verbose_name': "Slices this resource is used in"},
+                (None,),
+                {'through': "sliver_class",
+                 'verbose_name': "slices_comment"},
             ),
         }
-        mandatory = ["sliver_class"]
+        mandatory = ["aggregate_class", "sliver_class"]
     
     def __unicode__(self):
         if hasattr(self, "aggregate"):
@@ -52,12 +54,12 @@ class Sliver(Extendable):
                 models.ForeignKey,
                 (Resource, "Resource this sliver is part of"),
                 {},
-                (None, "resource_comment"),
+                ("resource_class", "resource_comment"),
                 {},
             ),
             'slice': (
                 models.ForeignKey,
-                (Resource, "Slice this sliver is part of"),
+                (Slice, "Slice this sliver is part of"),
                 {},
                 (None, "slice_comment"),
                 {},
@@ -76,10 +78,12 @@ class Node(Resource):
         fields = {
             'neighbors': (
                 models.ManyToManyField,
-                ("self", "Node's neighbors"),
-                {'symmetrical': False},
-                (None, "nodes_comment"),
-                {'through': "neighbors_through"},
+                ("self",),
+                {'symmetrical': False,
+                 "verbose_name": "Node's neighbors"},
+                (None,),
+                {'through': "neighbors_through",
+                 "verbose_name": "nodes_comment"},
             )
         }
         redelegate = ['aggregate', 'slices']
@@ -93,10 +97,12 @@ class Link(Resource):
         fields = {
             'nodes': (
                 models.ManyToManyField,
-                (Node, "Nodes connected to this link"),
-                {'related_name': 'links'},
-                ("node_class", "nodes_comment"),
-                {'through': "nodes_through"},
+                (Node,),
+                {'related_name': 'links',
+                 'verbose_name': "Nodes connected to this link"},
+                ("node_class",),
+                {'through': "nodes_through",
+                 'verbose_name': "nodes_comment"},
             )
         }
         redelegate = ['aggregate', 'slices']

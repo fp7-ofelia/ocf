@@ -18,34 +18,35 @@ class Aggregate(Extendable):
         fields = {
             'admins_info': (
                 models.ManyToManyField,
-                ("AggregateAdminInfo",
-                 "Info about users allowed to administer the aggregate"),
-                {},
-                ("admin_info_class", "admins_comment"),
-                {'through': 'admin_info_through'},
+                ("AggregateAdminInfo",),
+                {"verbose_name": "Info about users allowed to administer the aggregate"},
+                ("admin_info_class",),
+                {'through': 'admin_info_through',
+                 'verbose_name': "admins_comment",},
             ),
             'users_info': (
                 models.ManyToManyField,
-                ("AggregateUserInfo",
-                 "Info about users allowed to use aggregate"),
-                {},
-                ("user_info_class", "users_comment"),
-                {'through': 'user_info_through'},
+                ("AggregateUserInfo",),
+                {"help_text": "Info about users allowed to use aggregate"},
+                ("user_info_class",),
+                {'through': 'user_info_through',
+                 "verbose_name":  "users_comment"},
             ),
             'slices_info': (
                 models.ManyToManyField,
-                ("AggregateSliceInfo", "Info on slices using the aggregate"),
-                {},
-                ("slice_info_class", "slices_comment"),
-                {'through': 'slice_info_through'},
+                ("AggregateSliceInfo",),
+                {"help_text":  "Info on slices using the aggregate"},
+                ("slice_info_class",),
+                {'through': 'slice_info_through',
+                 'verbose_name': "slices_comment"},
             ),
             'projects_info': (
                 models.ManyToManyField,
-                ("AggregateProjectInfo",
-                 "Info on projects using the aggregate"),
-                {},
-                ("project_info_class", "projects_comment"),
-                {'through': 'project_info_through'},
+                ("AggregateProjectInfo",),
+                {'help_text': "Info on projects using the aggregate"},
+                ("project_info_class",),
+                {'through': 'project_info_through',
+                 'verbose_name':  "projects_comment"},
             ),
         }
         
@@ -109,10 +110,11 @@ class AggregateUserInfo(Extendable):
         fields = {
             'aggregates': (
                 models.ManyToManyField,
-                (Aggregate, "Aggregates the user is allowed to use"),
-                {},
-                ("aggregate_class", "aggregates_comment"),
-                {'through': 'aggregates_through'},
+                (Aggregate,),
+                {'verbose_name': "Aggregates the user is allowed to use"},
+                ("aggregate_class",),
+                {'through': 'aggregates_through',
+                 'verbose_name': "aggregates_comment"},
             ),
             'user': (
                 models.OneToOneField,
@@ -132,10 +134,11 @@ class AggregateAdminInfo(Extendable):
         fields = {
             'aggregates': (
                 models.ManyToManyField,
-                (Aggregate, "Aggregates the user is allowed to administer"),
-                {},
-                ("aggregate_class", "aggregates_comment"),
-                {'through': 'aggregates_through'},
+                (Aggregate,),
+                {'verbose_name': "Aggregates the user is allowed to administer"},
+                ("aggregate_class",),
+                {'through': 'aggregates_through',
+                 'verbose_name':  "aggregates_comment"},
             ),
             'user': (
                 models.OneToOneField,
@@ -155,10 +158,11 @@ class AggregateSliceInfo(Extendable):
         fields = {
             'aggregates': (
                 models.ManyToManyField,
-                (Aggregate, "Aggregates the slice is allowed to use"),
-                {},
-                ("aggregate_class", "aggregates_comment"),
-                {'through': 'aggregates_through'},
+                (Aggregate,),
+                {'verbose_name': "Aggregates the slice is allowed to use"},
+                ("aggregate_class",),
+                {'through': 'aggregates_through',
+                 'verbose_name': "aggregates_comment"},
             ),
             'slice': (
                 models.OneToOneField,
@@ -178,10 +182,11 @@ class AggregateProjectInfo(Extendable):
         fields = {
             'aggregates': (
                 models.ManyToManyField,
-                (Aggregate, "Aggregates the project is allowed to use"),
-                {},
-                ("aggregate_class", "aggregates_comment"),
-                {'through': 'aggregates_through'},
+                (Aggregate,),
+                {'verbose_name': "Aggregates the project is allowed to use"},
+                ("aggregate_class",),
+                {'through': 'aggregates_through',
+                 'verbose_name': "aggregates_comment"},
             ),
             'project': (
                 models.OneToOneField,

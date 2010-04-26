@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib import auth
-from clearinghouse.aggregate.models import Aggregate
 
 class Project(models.Model):
     '''
@@ -17,7 +16,6 @@ class Project(models.Model):
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
     members = models.ManyToManyField(auth.models.User)
-    aggregates = models.ManyToManyField(Aggregate)
     
     def __unicode__(self):
         s = u"Project %s members: " % self.name
