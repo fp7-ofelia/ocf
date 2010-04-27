@@ -125,3 +125,6 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
+
+TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
+MY_CA = join(TRUSTED_CA_PATH, 'ca.crt')

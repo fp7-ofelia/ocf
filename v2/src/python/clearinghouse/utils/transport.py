@@ -100,14 +100,14 @@ class PyCURLSafeTransport(PyCURLTransport):
     """Handles a cURL HTTP transaction to an XML-RPC server
     and also can validate certs."""
     def __init__(self, username = None, password = None,
-                 timeout = 300, ca_cert_path = None):
+                 timeout = 300, ca_cert_path = None, ca_cert_file = None):
         PyCURLTransport.__init__(self, username, password, timeout)
 
         self._proto = "https"
 
         # Setup certificates
-        if ca_cert_path:
-            self._curl.setopt(pycurl.CAPATH, ca_cert_path)
+        if ca_cert_file or ca_cert_path:
+            self._curl.setopt(pycurl.CAPATH, ca_cert_file or ca_cert_path)
             self._curl.setopt(pycurl.SSL_VERIFYPEER, 1)
             self._curl.setopt(pycurl.SSL_VERIFYHOST, 2)
 

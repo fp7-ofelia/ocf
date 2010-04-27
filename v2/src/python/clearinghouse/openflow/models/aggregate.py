@@ -5,6 +5,7 @@
 import os
 from django.db import models
 from clearinghouse.aggregate import models as aggregate_models
+from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
 
 class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
     pass
@@ -67,12 +68,7 @@ class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
     pass
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
-    password = models.CharField(max_length=1024,
-                                default=lambda: os.urandom(1024))
-    max_password_age = models.IntegerField(
-        help_text='Maximum age of password in days', default=60)
-    password_timestamp = models.DateTimeField(auto_now_add=True)
-    url = models.URLField(max_length=1024, verify_exists=True)
+    client = models.OneToOneField(PasswordXMLRPCClient)
     
     class Extend:
         replacements= {
@@ -81,12 +77,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             'slice_info_class': OpenFlowSliceInfo,
             'project_info_class': OpenFlowProjectInfo,
         }
-    
-    def get_server_instance(self):
-        from xmlrpclib import ServerProxy
-        from clearinghouse.utils import PyCURLSafeTransport
-        return ServerProxy(self.url, ) #TODO Finish this
-    
+        
     def update_slice(self, slice, server=None):
         server = server or self.get_server_instance()
         self.delete_slice(self, slice, server)
@@ -94,6 +85,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
     def reserve_slice(self, slice, server=None):
         server = server or self.get_server_instance()
+        
         # get all the slivers that are in this aggregate
         switch_slivers = slice.openflowswitchsliver_set.filter(switch__aggregate=self)
         link_slivers = slice.openflowswitchsliver_set.filter(switch__aggregate=self)
