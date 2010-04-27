@@ -19,7 +19,6 @@ agg_mgr = gam.AggregateManager()
 
 @rpcmethod(signature=[VERSION_TYPE])
 def GetVersion(**kwargs):
-#    print "GetVersion kwargs: %s" % kwargs 
     return dict(geni_api=1)
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])

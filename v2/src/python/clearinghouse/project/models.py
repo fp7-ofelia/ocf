@@ -18,6 +18,5 @@ class Project(models.Model):
     members = models.ManyToManyField(auth.models.User)
     
     def __unicode__(self):
-        s = u"Project %s members: " % self.name
-        s = s + ", ".join(self.members)
+        s = u"Project %s members: %s" % (self.name, self.members.all())
         return s

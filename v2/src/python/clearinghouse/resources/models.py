@@ -19,10 +19,10 @@ class Resource(Extendable):
         fields = {
             'aggregate': (
                 models.ForeignKey,
-                (Aggregate, "Aggregate the resource belongs to"),
-                {},
-                ("aggregate_class", "aggregate_comment"),
-                {},
+                (Aggregate,),
+                {"verbose_name": "Aggregate the resource belongs to"},
+                ("aggregate_class",),
+                {"verbose_name":  "aggregate_comment"},
             ),
             'slices': (
                 models.ManyToManyField,
@@ -52,17 +52,17 @@ class Sliver(Extendable):
         fields = {
             'resource': (
                 models.ForeignKey,
-                (Resource, "Resource this sliver is part of"),
-                {},
-                ("resource_class", "resource_comment"),
-                {},
+                (Resource,),
+                {"verbose_name": "Resource this sliver is part of"},
+                ("resource_class",),
+                {"verbose_name": "resource_comment"},
             ),
             'slice': (
                 models.ForeignKey,
-                (Slice, "Slice this sliver is part of"),
-                {},
-                (None, "slice_comment"),
-                {},
+                (Slice,),
+                {"verbose_name": "Slice this sliver is part of"},
+                (None,),
+                {"verbose_name": "slice_comment"},
             ),
         }
 

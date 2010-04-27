@@ -55,4 +55,3 @@ class PasswordXMLRPCClient(models.Model):
             cert_file.write(cert)
         
         subprocess.call(['make', '-C', settings.TRUSTED_CA_PATH])
-        

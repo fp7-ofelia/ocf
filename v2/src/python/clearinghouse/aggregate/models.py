@@ -118,10 +118,10 @@ class AggregateUserInfo(Extendable):
             ),
             'user': (
                 models.OneToOneField,
-                (auth.models.User, "User to which this info relates"),
-                {},
-                (None, "user_comment"),
-                {},
+                (auth.models.User,),
+                {"verbose_name": "User to which this info relates"},
+                (None,),
+                {"verbose_name":  "user_comment"},
             ),
         }
         
@@ -142,10 +142,10 @@ class AggregateAdminInfo(Extendable):
             ),
             'user': (
                 models.OneToOneField,
-                (auth.models.User, "User to which this info relates"),
-                {},
-                (None, "user_comment"),
-                {},
+                (auth.models.User,),
+                {"verbose_name":  "User to which this info relates"},
+                (None,),
+                {"vebose_name": "user_comment"},
             ),
         }
         
@@ -166,10 +166,10 @@ class AggregateSliceInfo(Extendable):
             ),
             'slice': (
                 models.OneToOneField,
-                (Slice, "Slice to which this info relates"),
-                {},
-                (None, "slice_comment"),
-                {},
+                (Slice,),
+                {"verbose_name": "Slice to which this info relates"},
+                (None,),
+                {"verbose_name": "slice_comment"},
             ),
         }
         
@@ -190,10 +190,10 @@ class AggregateProjectInfo(Extendable):
             ),
             'project': (
                 models.OneToOneField,
-                (Project, "Project to which this info relates"),
-                {},
-                (None, "project_comment"),
-                {},
+                (Project,),
+                {"verbose_name":  "Project to which this info relates"},
+                (None,),
+                {"verbose_name": "project_comment"},
             ),
         }
         
