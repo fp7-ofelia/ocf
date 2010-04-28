@@ -9,6 +9,13 @@ Install requirements to run our Django project:
 # zypper install python-setuptools python-django python-curl
 # easy_install -Z django-registration rpc4django wadofstuff-django-serializers
 
+Edit Django Settings:
+---------------------
+edit the <egeni_root>/v2/src/python/clearinghouse/settings.py and:
+1. Set the database parameters (see the Django documentation).
+2. Set the SITE_DOMAIN to your host's address
+3. Set the SITE_NAME to what you would like to call your site
+
 Test Django Application:
 ------------------------
 $ export PYTHONPATH=$PYTHONPATH:<egeni_root>/v2/src/python
