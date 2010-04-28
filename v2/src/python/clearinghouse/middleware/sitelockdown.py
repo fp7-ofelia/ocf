@@ -30,6 +30,8 @@ class SiteLockDown(object):
         
         if not request.user.is_authenticated () and not \
         (request.path == settings.LOGIN_URL or
+         path.startswith ('/accounts/register') or
+         path.startswith ('/accounts/activate') or
          path.startswith ('/admin/') or
          path.startswith ('/accounts/password/reset') or
          path.startswith ('/img/') or

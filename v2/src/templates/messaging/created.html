@@ -1,0 +1,17 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Created Message{% endblock title %}
+
+{% block content %}
+<div class="iframe_info_msg">
+    Message created.
+</div>
+
+<script>
+    function redirect() {
+        window.location = "{% url messaging_create %}";
+    }
+    window.parent.frames["latest_msgs"].location = "{% url messaging_latest %}";
+    setTimeout('redirect();', 3000);
+</script>
+{% endblock content %}

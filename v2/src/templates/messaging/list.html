@@ -1,0 +1,31 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Messages{% endblock title %}
+
+{% block content %}
+{% if latest %}
+<form method="post" action="">
+	<table class="messages" id="messages">
+	    <tr>
+	        <th></th><th>Type</th><th>Date</th><th>Message</th>
+        </tr>
+        {% for a in latest %}
+        <tr>
+            <td><input type="checkbox" name="selected" value="{{ a.id }}" /></td>
+            <td>{{ a.get_type_display }}</td>
+            <td>{{ a.format_date }}</td>
+            <td>{{ a.format_time }}</td>
+            <td>{{ a.text }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="iframe_button" id="latest_msg_del_button">
+        <input type="submit" value="Delete Selected" />
+    </div>
+</form>
+{% else %}
+<div class="iframe_info_msg">
+    No new messages.
+</div>
+{% endif %} 
+{% endblock content %}

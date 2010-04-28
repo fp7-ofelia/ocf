@@ -1,0 +1,14 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Create Message{% endblock title %}
+
+{% block content %}
+<form method="post" action="">
+    <table class="messages" id="create_messages_table">
+    {{ form.as_table }}
+    </table>
+    <div class="iframe_button" id="send_msg_button">
+        <input type="submit" value="Send Message" />
+    </div>
+</form>
+{% endblock content %}

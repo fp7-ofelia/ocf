@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     
     (r'^users/', include('clearinghouse.users.urls')),
     (r'^openflow/', include('clearinghouse.openflow.urls')),
+    (r'^messages/', include('clearinghouse.messaging.urls')),
     
     (r'^admin/', include(admin.site.urls)),
 
@@ -17,6 +18,7 @@ urlpatterns = patterns('',
     (r'^accounts/', include('registration.urls')),
 
     # TODO: Serve static content, should be removed in production deployment
+    # serve from another domain to speed up connections (no cookies needed)
     (r'^img/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     (r'^css/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 )

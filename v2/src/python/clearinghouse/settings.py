@@ -97,12 +97,14 @@ INSTALLED_APPS = (
 #    'clearinghouse.extendable_tester',
     'registration',
     'clearinghouse.aggregate',
+    'clearinghouse.messaging',
     'clearinghouse.openflow',
 #    'clearinghouse.permission',
     'clearinghouse.project',
     'clearinghouse.resources',
     'clearinghouse.slice',
     'clearinghouse.users',
+    'clearinghouse.defaultsite',
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
 #    'clearinghouse.difc',
@@ -128,3 +130,11 @@ ACCOUNT_ACTIVATION_DAYS = 3
 
 TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
 MY_CA = join(TRUSTED_CA_PATH, 'ca.crt')
+
+# default site
+SITE_ID = 1
+SITE_NAME = "Expedient Clearinghouse"
+SITE_DOMAIN = "beirut.stanford.edu"
+
+# Messaging settings
+NUM_LATEST_MSGS = 10

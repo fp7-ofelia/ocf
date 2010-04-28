@@ -112,13 +112,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                     'excludes': (
                         'switch_sliver',
                     ),
-                    'relations': {
-                        'interface': {
-                            'fields': (
-                                'port_num',
-                            ),
-                        },
-                    },
                 },
             },
         )
@@ -131,7 +124,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             for fs in s['flowspacerule_set']:
                 fsd = {}
                 for f in ('direction', 'policy', 'dl_src', 'dl_dst', 'dl_type',
-                'vlan_id', 'nw_src', 'nw_dst', 'nw_proto', 'tp_src', 'tp_dst'):
+                'vlan_id', 'nw_src', 'nw_dst', 'nw_proto', 'tp_src', 'tp_dst',
+                'port_num'):
                     fsd[f] = fs[f]
                 d['flowspace'].append(fsd)
             sw_slivers.append(d)
@@ -232,7 +226,7 @@ class FlowSpaceRule(models.Model):
     nw_proto = models.CharField(max_length=3, default="*")
     tp_src = models.CharField(max_length=5, default="*")
     tp_dst = models.CharField(max_length=5, default="*")
-    interface = models.ForeignKey(OpenFlowInterface)
+    port_num = models.CharField(max_length=4, default="*")
     switch_sliver = models.ForeignKey(OpenFlowSwitchSliver)
     
     def __unicode__(self):
@@ -242,6 +236,3 @@ class FlowSpaceRule(models.Model):
                +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
                +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
                +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
-    
-    def to_dict(self):
-        pass
