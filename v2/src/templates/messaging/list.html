@@ -20,6 +20,8 @@
         {% endfor %}
     </table>
     <div class="iframe_button" id="latest_msg_del_button">
+        <input type="button" onclick="window.location={% url messaging_all %}"
+        value="Show All" />
         <input type="submit" value="Delete Selected" />
     </div>
 </form>
@@ -28,4 +30,13 @@
     No new messages.
 </div>
 {% endif %} 
+
+<script>
+    function refresh() {
+        window.location = "{% url messaging_latest %}";
+        //document.getElement
+        setTimeout('redirect();', 10000);
+    }
+    setTimeout('redirect();', 10000);
+</script>
 {% endblock content %}

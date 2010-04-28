@@ -11,7 +11,6 @@
     function redirect() {
         window.location = "{% url messaging_create %}";
     }
-    window.parent.frames["latest_msgs"].location = "{% url messaging_latest %}";
     setTimeout('redirect();', 3000);
 </script>
 {% endblock content %}
