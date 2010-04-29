@@ -27,7 +27,7 @@ class Aggregate(Extendable):
             'users_info': (
                 models.ManyToManyField,
                 ("AggregateUserInfo",),
-                {"help_text": "Info about users allowed to use aggregate"},
+                {"verbose_name": "Info about users allowed to use aggregate"},
                 ("user_info_class",),
                 {'through': 'user_info_through',
                  "verbose_name":  "users_comment"},
@@ -35,7 +35,7 @@ class Aggregate(Extendable):
             'slices_info': (
                 models.ManyToManyField,
                 ("AggregateSliceInfo",),
-                {"help_text":  "Info on slices using the aggregate"},
+                {"verbose_name":  "Info on slices using the aggregate"},
                 ("slice_info_class",),
                 {'through': 'slice_info_through',
                  'verbose_name': "slices_comment"},
@@ -43,7 +43,7 @@ class Aggregate(Extendable):
             'projects_info': (
                 models.ManyToManyField,
                 ("AggregateProjectInfo",),
-                {'help_text': "Info on projects using the aggregate"},
+                {'verbose_name': "Info on projects using the aggregate"},
                 ("project_info_class",),
                 {'through': 'project_info_through',
                  'verbose_name':  "projects_comment"},

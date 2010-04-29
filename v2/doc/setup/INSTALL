@@ -7,7 +7,7 @@ Install requirements to run our Django project:
 -----------------------------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
 # zypper install python-setuptools python-django python-curl
-# easy_install -Z django-registration rpc4django wadofstuff-django-serializers
+# easy_install -Z django-registration rpc4django
 
 Edit Django Settings:
 ---------------------

@@ -22,21 +22,27 @@ def reserve_slice(slice_id, project_name, project_description,
     - C{datapath_id}: the switch's datapath id
     - C{flowspace}: an array of dicts describing the switch's flowspace
     Each such dict has the following keys:
-        - C{port_num}: string. the port for this flowspace
+        - C{id}: integer. Per clearinghouse unique identifier for the rule.
         - C{direction}: string. 'ingress', 'egress', or 'bidirectional'
         - C{policy}: int. 1 for 'allow', -1 for 'deny', 0 for read only
-        - C{dl_src}: string. link layer address in "xx:xx:xx:xx:xx:xx"
-        format or '*' for wildcard
-        - C{dl_dst}: string. link layer address in "xx:xx:xx:xx:xx:xx"
-        format or '*' for wildcard
-        - C{vlan_id}: string. vlan id or "*" for wildcard
-        - C{nw_src}: network address in "x.x.x.x" format
-        or '*' for wildcard
-        - C{nw_dst}: string. network address in "x.x.x.x" format
-        or '*' for wildcard
-        - C{nw_proto}: string. network protocol or "*" for wildcard
-        - C{tp_src}: string. transport port or "*" for wildcard
-        - C{tp_dst}: string. transport port or "*" for wildcard
+        - C{port_num_start}, C{port_num_end}: string. the port range for this 
+        flowspace
+        - C{dl_src_start}, C{dl_src_end}: string. link layer address range in
+        "xx:xx:xx:xx:xx:xx" format or '*' for wildcard
+        - C{dl_dst_start}, C{dl_dst_end}: string. link layer address range in
+        "xx:xx:xx:xx:xx:xx" format or '*' for wildcard
+        - C{vlan_id_start}, C{vlan_id_end}: string. vlan id range or
+        "*" for wildcard
+        - C{nw_src_start}, C{nw_src_end}: string. network address range in 
+        "x.x.x.x" format or '*' for wildcard
+        - C{nw_dst_start}, C{nw_dst_end}: string. network address range in
+        "x.x.x.x" format or '*' for wildcard
+        - C{nw_proto_start}, C{nw_proto_end}: string. network protocol range or
+        "*" for wildcard
+        - C{tp_src_start}, C{tp_src_end}: string. transport port range or "*"
+        for wildcard
+        - C{tp_dst_start}, C{tp_dst_end}: string. transport port range or "*"
+        for wildcard
 
     The C{link_sliver} list contains a dict for each link to be added to the
     slice's topology. Each such dict has the following items:
@@ -62,23 +68,31 @@ def reserve_slice(slice_id, project_name, project_description,
     @param slice_id: an int that uniquely identifies the slice at the 
         clearinghouse.
     @type slice_id: int
+    
     @param project_name: a name for the project under which this slice 
         is created
     @type project_name: string
+    
     @param project_description: text describing the project
     @type project_description: string
+    
     @param slice_name: Name for the slice
     @type slice_name: string
+    
     @param slice_description: text describing the slice/experiment
     @type slice_description: string
+    
     @param switch_sliver: description of the topology and flowspace for slice
     @type switch_sliver: list of dicts
+    
     @param link_sliver: description of the links in the slice topology
     @type link_sliver: list of dicts
+    
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
+    
     @return: switches and links that have caused errors
     @rtype: dict
     '''

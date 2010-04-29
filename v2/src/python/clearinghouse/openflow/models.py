@@ -10,7 +10,6 @@ from clearinghouse.resources import models as resource_models
 from clearinghouse.slice import models as slice_models
 from clearinghouse.aggregate import models as aggregate_models
 from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
-from django.core import serializers
 
 class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
     pass
@@ -19,58 +18,8 @@ class OpenFlowUserInfo(aggregate_models.AggregateUserInfo):
     pass
 
 class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
-#    def get_rpc_info(self):
-#        '''
-#        Get the information about the slice to use in XML-RPC with AM.
-#        
-#        @return {'id': self.slice.id, 'name': self.slice.name,
-#                 'description': self.slice.description}
-#        '''
-#        
-#        for sw in self.slice.openflowswitchsliver_set.\
-#        filter(switch__aggregate=self):
-#        
-#        
-#        return {'id': self.slice.id, 'name': self.slice.name,
-#                'description': self.slice.description}
-#        
-#    def get_switches_info(self):
-#        '''
-#        Get the information about switches in the topology to
-#        use in XML-RPC with the AM. For each switch in the topology
-#        of the aggregate, returns a dict that has the following keys.
-#        
-#        - C{dpid}: the switch's datapath id
-#        - C{flowspace}: an array of dicts describing the switch's flowspace
-#            Each such dict has the following keys:
-#                - C{port}: the port for this flowspace
-#                - C{direction}: 'ingress', 'egress', or 'bidirectional'
-#                - C{policy}: 1 for 'allow', -1 for 'deny', 0 for read only
-#                - C{dl_src}: link layer address in "xx:xx:xx:xx:xx:xx" format
-#                    or '*' for wildcard
-#                - C{dl_dst}: link layer address in "xx:xx:xx:xx:xx:xx" format
-#                    or '*' for wildcard
-#                - C{vlan_id}: vlan id as an int or -1 for wildcard
-#                - C{nw_src}: network address in "x.x.x.x" format
-#                    or '*' for wildcard
-#                - C{nw_dst}: network address in "x.x.x.x" format
-#                    or '*' for wildcard
-#                - C{nw_proto}: network protocol as an int or -1 for wildcard
-#                - C{tp_src}: transport port as an int or -1 for wildcard
-#                - C{tp_dst}: transport port as an int or -1 for wildcard
-#        
-#        @return returns an array of dicts with information for each switch
-#        '''
-#        ret = []
-#        for sw in self.slice.openflowswitchsliver_set.\
-#        filter(switch__aggregate=self):
-#            d = {'dpid': sw.switch.datapath_id}
-#            fs_set = []
-#            for fs in sw.flowspace_set.all():
-#                fs_set = fs_set.append({
-#                    'port': fs.interface.
-#                })
-    pass    
+    controller_url = models.CharField("URL of the slice's OpenFlow controller",
+                                      max_length=100)
 
 class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
     pass
@@ -93,67 +42,34 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # get all the slivers that are in this aggregate
         sw_slivers_qs = \
             slice.openflowswitchsliver_set.filter(switch__aggregate=self)
+        sw_slivers_qs.select_related('resource', 'flowspacerule_set')
+        
         link_slivers_qs = \
             slice.openflowswitchsliver_set.filter(switch__aggregate=self)
-        
-        sw_slivers_ser = serializers.serialize(
-            'python', sw_slivers_qs,
-            fields=(
-                'resource',
-                'flowspacerule_set',
-            ),
-            relations={
-                'resource': {
-                    'fields': (
-                        'datapath_id',
-                    ),
-                },
-                'flowspacerule_set': {
-                    'excludes': (
-                        'switch_sliver',
-                    ),
-                },
-            },
-        )
+        link_slivers_qs.select_related('resource')
         
         sw_slivers = []
-        for s in sw_slivers_ser:
+        for s in sw_slivers_qs:
             d = {}
-            d['datapath_id'] = s['resource']['datapath_id']
+            d['datapath_id'] = s.resource.datapath_id
             d['flowspace'] = []
-            for fs in s['flowspacerule_set']:
+            for fs in s.flowspacerule_set:
                 fsd = {}
-                for f in ('direction', 'policy', 'dl_src', 'dl_dst', 'dl_type',
-                'vlan_id', 'nw_src', 'nw_dst', 'nw_proto', 'tp_src', 'tp_dst',
-                'port_num'):
-                    fsd[f] = fs[f]
+                for f in fs._meta.fields:
+                    fsd[f.name] = getattr(fs, f.name)
                 d['flowspace'].append(fsd)
             sw_slivers.append(d)
-            
-        
-        link_slivers_ser = serializers.serialize(
-            'python', link_slivers_qs,
-            fields=(
-                'resource',
-            ),
-            relations={
-                'resource': {
-                    'fields': (
-                        'link_id',
-                    ),
-                }  
-            },
-        )
         
         link_slivers = []
-        for s in link_slivers_ser:
+        for s in link_slivers_qs:
             d = {}
-            d['link_id'] = s['resource']['link_id']
+            d['link_id'] = s.resource.link_id
             link_slivers.append(d)
             
         return self.client.reserve_slice(
             slice.id, slice.project.name, slice.project.description,
-            slice.name, slice.description,
+            slice.name, slice.description, 
+            slice.openflowsliceinfo.controller_url,
             sw_slivers, link_slivers)
         
     def delete_slice(self, slice, server=None):
@@ -212,22 +128,56 @@ class FlowSpaceRule(models.Model):
                        DIR_BI: 'Bidirectional',
                        }
 
+    switch_sliver = models.ForeignKey(OpenFlowSwitchSliver)
+
     direction = models.CharField(max_length=20,
                                  choices=DIRECTION_CHOICES.items(),
                                  default=DIR_BI)
     policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items(),
                                       default=TYPE_ALLOW)
-    dl_src = models.CharField(max_length=17, default="*")
-    dl_dst = models.CharField(max_length=17, default="*")
-    dl_type = models.CharField(max_length=5, default="*")
-    vlan_id = models.CharField(max_length=4, default="*")
-    nw_src = models.CharField(max_length=18, default="*")
-    nw_dst = models.CharField(max_length=18, default="*")
-    nw_proto = models.CharField(max_length=3, default="*")
-    tp_src = models.CharField(max_length=5, default="*")
-    tp_dst = models.CharField(max_length=5, default="*")
-    port_num = models.CharField(max_length=4, default="*")
-    switch_sliver = models.ForeignKey(OpenFlowSwitchSliver)
+    dl_src_start = models.CharField('Link layer source address range start',
+                                    max_length=17, default="*")
+    dl_dst_start = models.CharField('Link layer destination address range start',
+                                    max_length=17, default="*")
+    dl_type_start = models.CharField('Link layer type range start',
+                                     max_length=5, default="*")
+    vlan_id_start = models.CharField('VLAN ID range start',
+                                     max_length=4, default="*")
+    nw_src_start = models.CharField('Network source address range start',
+                                    max_length=18, default="*")
+    nw_dst_start = models.CharField('Network destination address range start',
+                                    max_length=18, default="*")
+    nw_proto_start = models.CharField('Network protocol range start',
+                                      max_length=3, default="*")
+    tp_src_start = models.CharField('Transport source port range start',
+                                    max_length=5, default="*")
+    tp_dst_start = models.CharField('Transport destination port range start',
+                                    max_length=5, default="*")
+    port_num_start = models.CharField('Switch port number range start',
+                                      max_length=4, default="*")
+    
+    dl_src_end = models.CharField('Link Layer Source Address Range End',
+                                  max_length=17, default="*")
+    dl_src_end = models.CharField('Link layer source address range end',
+                                    max_length=17, default="*")
+    dl_dst_end = models.CharField('Link layer destination address range end',
+                                    max_length=17, default="*")
+    dl_type_end = models.CharField('Link layer type range end',
+                                     max_length=5, default="*")
+    vlan_id_end = models.CharField('VLAN ID range end',
+                                     max_length=4, default="*")
+    nw_src_end = models.CharField('Network source address range end',
+                                    max_length=18, default="*")
+    nw_dst_end = models.CharField('Network destination address range end',
+                                    max_length=18, default="*")
+    nw_proto_end = models.CharField('Network protocol range end',
+                                      max_length=3, default="*")
+    tp_src_end = models.CharField('Transport source port range end',
+                                    max_length=5, default="*")
+    tp_dst_end = models.CharField('Transport destination port range end',
+                                    max_length=5, default="*")
+    port_num_end = models.CharField('Switch port number range end',
+                                      max_length=4, default="*")
     
     def __unicode__(self):
         return("Policy: "+FlowSpaceRule.POLICY_TYPE_CHOICES[self.policy]
