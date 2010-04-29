@@ -825,29 +825,58 @@ table.fulltable tbody th {
 	font-size: 1em;
 }
 
-table.last_errors_table {
+table.msg_table {
     border-spacing: 0px;
     border: 0px;
     margin: 15px 0px;
     padding: 0px;
+    width: 730px;
 }
 
-table.last_errors_table td {
+table.msg_table td {
     vertical-align: top;
-    font-family:courier, "courier new", monospace;
+    /*font-family:courier, "courier new", monospace;*/
     padding:4px 6px 4px 6px; 
 }
 
-table.last_errors_table thead td {
+table.msg_table thead td {
 	font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
 }
 
-table.last_errors_table tr th {
+table.msg_table tr th {
 	border-bottom: 1px solid #000;
 }
 
-table.last_errors_table tr td {
+table.msg_table tr td {
 	border-bottom: 1px solid #CCC;
+}
+
+table.msg_table .select_checkbox {
+    width:10px;
+}
+
+table.msg_table .type {
+    width:80px;
+}
+
+table.msg_table .date {
+    width:80px;
+}
+
+table.msg_table .time {
+    width:60px;
+}
+
+table.msg_table td.msg_text {
+    text-align:left;
+}
+
+table.msg_table .error,.warning {
+	color:#9a1b1b;
+}
+
+table.msg_table .error {
+    font-weight:bold;
 }
 
 .errtime {
@@ -877,13 +906,48 @@ table.fulltable tbody td.logocol {
     padding: 0px;
 }
 
-div.iframe_button {
-    position:absolute;
-    bottom:0;
-    right:0;
+div.iframe_div {
+	position:relative;
+	top:0;
+	left:0;
 }
 
 div.iframe_info_msg {
     position:relative;
     top:100px;
+}
+
+/* creating message */
+div.create_msg_div {
+	position:relative;
+}
+
+div.create_msg {
+	position:relative;
+    top:0;
+    left:0;
+    height:122px;
+}
+
+#type_users_div {
+	position:absolute;
+	top:0;
+	left:0px;
+}
+
+#message_div {
+    position:absolute;
+    top:0;
+    right:0px;
+}
+
+#send_msg_button {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+
+div.form_error_msgs {
+	position:relative;
+	text-align:left;
 }

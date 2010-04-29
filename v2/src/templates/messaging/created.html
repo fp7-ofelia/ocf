@@ -4,14 +4,19 @@
 
 {% block content %}
 <div class="iframe_info_msg">
-    Message created.
+    <div class="info_msg">
+        Message created.
+    </div>
+    <div class="info_msg_links">
+        Go to <a href="{% url messaging_create %}">Create another</a>
+        or <a href="{% url messaging_latest %}">View messages</a>.
+    </div>
 </div>
 
 <script>
     function redirect() {
-        window.location = "{% url messaging_create %}";
+        window.location = "{% url messaging_latest %}";
     }
-    window.parent.frames["latest_msgs"].location = "{% url messaging_latest %}";
-    setTimeout('redirect();', 3000);
+    setTimeout('redirect();', 2000);
 </script>
 {% endblock content %}

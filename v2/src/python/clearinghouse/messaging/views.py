@@ -42,18 +42,6 @@ def create(request):
     Create a new message
     '''
     
-#    if request.method == "GET":
-#        msg_form = MessageForm()
-#        
-#    elif request.method == "POST":
-#        msg_form = MessageForm(request.POST)
-#        if msg_form.is_valid():
-#            msg_form.save()
-#            return HttpResponseRedirect(reverse("messaging_created"))
-#        
-#    else:
-#        return HttpResponseNotAllowed("GET", "POST")
-
     return create_update.create_object(
         request,
         form_class=MessageForm,

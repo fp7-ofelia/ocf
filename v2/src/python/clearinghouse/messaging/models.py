@@ -56,11 +56,10 @@ class DatedMessage(models.Model):
                       TYPE_WARNING: 'Warning',
                       TYPE_ANNOUNCE: 'Announcement',
                      }
-    type = models.CharField(max_length=20, choices=MSG_TYPE_CHOICES.items())
+    type = models.CharField("Message type", max_length=20, choices=MSG_TYPE_CHOICES.items())
     datetime = models.DateTimeField(auto_now=True, auto_now_add=True, editable=False)
-    text = models.CharField(max_length=400)
-    
-    users = models.ManyToManyField(User, related_name="messages")
+    users = models.ManyToManyField(User, related_name="messages", verbose_name="Recipients")
+    msg_text = models.CharField("Message", max_length=200)
     
     def format_date(self):
         return self.datetime.strftime("%Y-%m-%d")
