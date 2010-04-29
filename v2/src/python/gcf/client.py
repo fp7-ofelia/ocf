@@ -129,6 +129,8 @@ def exercise_am(host, port, keyfile, certfile, verbose=False):
     else:
         print 'failed'
 
+    return
+
     print 'Testing ListResources...',
     options = dict()
     rspec = server.ListResources(credentials, options)

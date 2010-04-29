@@ -4,6 +4,7 @@ Created on Apr 26, 2010
 @author: jnaous
 '''
 from rpc4django import rpcmethod
+from django.contrib.auth.models import User
 
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
@@ -11,7 +12,7 @@ from rpc4django import rpcmethod
                       'array', 'array'])
 def reserve_slice(slice_id, project_name, project_description,
                   slice_name, slice_description,
-                  switch_sliver, link_sliver):
+                  switch_sliver, link_sliver, **kwargs):
     '''
     Create an OpenFlow slice. 
     
@@ -74,6 +75,10 @@ def reserve_slice(slice_id, project_name, project_description,
     @type switch_sliver: list of dicts
     @param link_sliver: description of the links in the slice topology
     @type link_sliver: list of dicts
+    @param kwargs: will contain additional useful information about the request.
+        Of most use are the items in the C{kwargs['request'].META dict. These
+        include 'REMOTE_USER' which is the username of the user connecting or
+        if using x509 certs then the domain name.
     @return: switches and links that have caused errors
     @rtype: dict
     '''
@@ -85,14 +90,50 @@ def reserve_slice(slice_id, project_name, project_description,
     }
 
 @rpcmethod(signature=['string', 'int'])
-def delete_slice(slice_id):
+def delete_slice(slice_id, **kwargs):
     '''
     Delete the slice with id slice_id.
     
     @param slice_id: an int that uniquely identifies the slice at the 
         Clearinghouseclearinghouse.
     @type slice_id: int
+    @param kwargs: will contain additional useful information about the request.
+        Of most use are the items in the C{kwargs['request'].META dict. These
+        include 'REMOTE_USER' which is the username of the user connecting or
+        if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
+    
+    return ""
+
+@rpcmethod(signature=['string', 'string'])
+def reset_password(new_password, **kwargs):
+    '''
+    Change the current password used for the clearinghouse to 'new_password'.
+    
+    @param new_password: the new password to use for authentication.
+    @type new_password: random string of 1024 characters
+    @param kwargs: will contain additional useful information about the request.
+        Of most use are the items in the C{kwargs['request'].META dict. These
+        include 'REMOTE_USER' which is the username of the user connecting or
+        if using x509 certs then the domain name.
+    @return: Error message if there is any.
+    @rtype: string
+    '''
+    
+    username = kwargs['request'].META['REMOTE_USER']
+    
+    dummy = User.objects.get_or_create(username='xmlrpcdummy')
+    
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExistError:
+        # Do not return an error indicating the user does not
+        # exist so we don't provide an easy way for probing for usernames.
+        # We also do a set_password on the dummy user so we don't worry
+        # about timing attacks.
+        user = dummy
+    
+    user.set_password(new_password)
     
     return ""

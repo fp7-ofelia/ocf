@@ -6,7 +6,7 @@ class PasswordXMLRPCClient(models.Model):
     password = models.CharField(max_length=1024,
                                 default=lambda: os.urandom(1024))
     max_password_age = models.IntegerField(
-        help_text='Maximum age of password in days', default=60)
+        'Maximum password age in days', default=60)
     password_timestamp = models.DateField(auto_now_add=True)
     url = models.URLField(max_length=1024, verify_exists=True)
     
@@ -55,3 +55,4 @@ class PasswordXMLRPCClient(models.Model):
             cert_file.write(cert)
         
         subprocess.call(['make', '-C', settings.TRUSTED_CA_PATH])
+
