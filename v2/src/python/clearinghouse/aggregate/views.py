@@ -15,3 +15,8 @@ def list_aggs(request, number=None):
         template_object_name="aggregate",
     )
     
+def create(request):
+    '''
+    Create a new aggregate and connect to it.
+    '''
+    pass

@@ -4,10 +4,8 @@ Created on Apr 26, 2010
 @author: jnaous
 '''
 
-import os
 from django.db import models
 from clearinghouse.resources import models as resource_models
-from clearinghouse.slice import models as slice_models
 from clearinghouse.aggregate import models as aggregate_models
 from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
 
@@ -26,6 +24,7 @@ class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCClient)
+    type = 'OpenFlow'
     
     class Extend:
         replacements= {
@@ -38,15 +37,11 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     def update_slice(self, slice):
         slice.reserve_slice(slice)
         
-    def reserve_slice(self, slice):
+    def reserve_slice(self, user, slice, slice_password):
         # get all the slivers that are in this aggregate
         sw_slivers_qs = \
             slice.openflowswitchsliver_set.filter(switch__aggregate=self)
         sw_slivers_qs.select_related('resource', 'flowspacerule_set')
-        
-        link_slivers_qs = \
-            slice.openflowswitchsliver_set.filter(switch__aggregate=self)
-        link_slivers_qs.select_related('resource')
         
         sw_slivers = []
         for s in sw_slivers_qs:
@@ -60,17 +55,11 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 d['flowspace'].append(fsd)
             sw_slivers.append(d)
         
-        link_slivers = []
-        for s in link_slivers_qs:
-            d = {}
-            d['link_id'] = s.resource.link_id
-            link_slivers.append(d)
-            
         return self.client.reserve_slice(
             slice.id, slice.project.name, slice.project.description,
             slice.name, slice.description, 
             slice.openflowsliceinfo.controller_url,
-            sw_slivers, link_slivers)
+            user.email, slice_password, sw_slivers)
         
     def delete_slice(self, slice, server=None):
         return self.client.delete_slice(slice.id)

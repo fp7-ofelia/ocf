@@ -8,11 +8,12 @@ from django.contrib.auth.models import User
 
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
-                      'string', 'string',
+                      'string', 'string', 'string',
                       'array', 'array'])
 def reserve_slice(slice_id, project_name, project_description,
-                  slice_name, slice_description,
-                  switch_sliver, link_sliver, **kwargs):
+                  slice_name, slice_description, controller_url,
+                  owner_email, owner_password,
+                  switch_slivers, **kwargs):
     '''
     Create an OpenFlow slice. 
     
@@ -44,12 +45,6 @@ def reserve_slice(slice_id, project_name, project_description,
         - C{tp_dst_start}, C{tp_dst_end}: string. transport port range or "*"
         for wildcard
 
-    The C{link_sliver} list contains a dict for each link to be added to the
-    slice's topology. Each such dict has the following items:
-    
-    - C{link_id}: an identifier for the link given to the clearinghouse by the
-    aggregate manager.
-        
     The call returns a dict with the following items:
     - C{error_msg}: a summary error message or "" if no errors occurred.
     - C{switches}: a list of dicts with the following items:
@@ -58,12 +53,6 @@ def reserve_slice(slice_id, project_name, project_description,
         - all other fields of the C{switch_sliver} dicts mentioned above
         (port_num, direction, ...). The values for these items are the error
         messages associated with each field.
-    - C{links}: a list of dicts with the following items:
-        - C{link_id}: id of the link with the error
-        - C{error}: optional error msg for the link
-        - all other fields of C{link_sliver} dicts mentioned above (currently
-        none other than link_id). The values are error messages associated
-        with each field
 
     @param slice_id: an int that uniquely identifies the slice at the 
         clearinghouse.
@@ -82,11 +71,23 @@ def reserve_slice(slice_id, project_name, project_description,
     @param slice_description: text describing the slice/experiment
     @type slice_description: string
     
+    @param controller_url: The URL for the slice's OpenFlow controller specified
+        as <transport>:<hostname>[:<port>], where:
+            - tranport is 'tcp' ('ssl' will be added later)
+            - hostname is the controller's hostname
+            - port is the port on which the controller listens to openflow
+            messages (defaults to 6633).
+    @type controller_url: string
+    
+    @param owner_email: email of the person responsible for the slice
+    @type owner_email: string
+    
+    @param owner_password: initial password the user can use to login to the
+        FlowVisor Web interface. Will need to be changed on initial login.
+    @type owner_password: string
+    
     @param switch_sliver: description of the topology and flowspace for slice
     @type switch_sliver: list of dicts
-    
-    @param link_sliver: description of the links in the slice topology
-    @type link_sliver: list of dicts
     
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META dict. These
@@ -100,7 +101,6 @@ def reserve_slice(slice_id, project_name, project_description,
     return {
         'error_msg': "",
         'switches': [],
-        'links': [],
     }
 
 @rpcmethod(signature=['string', 'int'])
@@ -121,7 +121,7 @@ def delete_slice(slice_id, **kwargs):
     return ""
 
 @rpcmethod(signature=['string', 'string'])
-def reset_password(new_password, **kwargs):
+def change_password(new_password, **kwargs):
     '''
     Change the current password used for the clearinghouse to 'new_password'.
     

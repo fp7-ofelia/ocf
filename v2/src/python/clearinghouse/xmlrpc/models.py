@@ -10,6 +10,8 @@ class PasswordXMLRPCClient(models.Model):
     password_timestamp = models.DateField(auto_now_add=True)
     url = models.URLField(max_length=1024, verify_exists=True)
     
+    verify_ca = models.BooleanField(default=True)
+    
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCClient, self).__init__(*args, **kwargs)
         
@@ -18,16 +20,23 @@ class PasswordXMLRPCClient(models.Model):
         from django.conf import settings
         from datetime import timedelta, date
         
-        self.proxy = ServerProxy(
-            self.url, PyCURLSafeTransport(
-                username=self.username,
-                password=self.password,
-                ca_cert_path=settings.TRUSTED_CA_PATH))
+        if self.verify_ca:
+            self.proxy = ServerProxy(
+                self.url, PyCURLSafeTransport(
+                    username=self.username,
+                    password=self.password,
+                    ca_cert_path=settings.TRUSTED_CA_PATH))
+        else:
+            self.proxy = ServerProxy(
+                self.url, PyCURLSafeTransport(
+                    username=self.username,
+                    password=self.password,
+                ))
         
         # if the password has expired, it's time to set a new one
         max_age = timedelta(days=self.max_password_age)
         if self.password_timestamp + max_age >= date.today():
-            self.proxy.reset_password(os.urandom(1024))
+            self.proxy.change_password(os.urandom(1024))
 
     def __getattr__(self, name):
         return getattr(self.proxy, name)
@@ -49,10 +58,10 @@ class PasswordXMLRPCClient(models.Model):
         cert = ssl.get_server_certificate((res.hostname, port))
         
         # dump it in the directory, and run make
-        with open(os.path.join(settings.TRUSTED_CA_PATH,
+        with open(os.path.join(settings.XMLRPC_TRUSTED_CA_PATH,
                                res.hostname+".ca.cert"),
                  'w') as cert_file:
             cert_file.write(cert)
         
-        subprocess.call(['make', '-C', settings.TRUSTED_CA_PATH])
+        subprocess.call(['make', '-C', settings.XMLRPC_TRUSTED_CA_PATH])
 

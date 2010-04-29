@@ -3,6 +3,7 @@ from clearinghouse.extendable.models import Extendable
 from clearinghouse.slice.models import Slice
 from clearinghouse.project.models import Project
 from django.contrib import auth
+from django.conf import settings
 
 class Aggregate(Extendable):
     '''
@@ -13,6 +14,11 @@ class Aggregate(Extendable):
     '''
     
     name = models.CharField(max_length=200, unique=True)
+    logo = models.ImageField('Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
+                             blank=True, null=True)
+    type = 'Generic'
+    description = models.TextField()
+    location = models.CharField("Location", max_length=200)
     
     class Extend:
         fields = {
@@ -49,10 +55,6 @@ class Aggregate(Extendable):
                  'verbose_name':  "projects_comment"},
             ),
         }
-        
-#    def reload_resources(self):
-#        '''Reload the available resources into the DB'''
-#        raise NotImplementedError()
 
     def create_slice(self, slice_id, *args, **kwargs):
         '''Create a new slice with the given slice_id
@@ -95,6 +97,12 @@ class Aggregate(Extendable):
         @param kwargs: additional optional keyword arguments
         '''
         raise NotImplementedError()
+    
+    def get_logo_url(self):
+        try:
+            return self.logo.url
+        except:
+            return ""
 
 class AggregateUserInfo(Extendable):
     '''

@@ -1,0 +1,67 @@
+{% extends "iframebase.html" %}
+
+{% block title %}List Aggregates{% endblock title %}
+
+{% block content %}
+<script>
+    function gotoall() {
+        window.location="{% url messaging_all %}";
+    }
+    function refresh() {
+        window.location = "{% url messaging_latest %}";
+    }
+    function toggle_all() {
+        s_all = document.getElementById("selectall");
+        elems = document.getElementsByName("selected");
+        for(i = 0; i < elems.length; i++) {
+            elems[i].checked = s_all.checked;
+        }
+    }
+    function gotocreate() {
+        window.location = "{% url messaging_create %}";
+    }
+</script>
+
+<form method="post" action="">
+    {% if latest %}
+	<table class="fulltable" id="messages">
+	    <tr>
+            <th class="logo">Logo</th>
+            <th class="name">Name</th>
+            <th class="location">Location</th>
+	        <th class="description">Description</th>
+	        <th class="resources">Size</th>
+	        <th class="owner">Owner</th>
+	        <th class="status">Status</th>
+        </tr>
+        {% for a in latest %}
+        <tr>
+	        <td class="logo">{{ am.get_logo_url }}</td>
+	        <td class="name">Name</td>
+	        <td class="location">Location</td>
+	        <td class="description">Description</td>
+	        <td class="resources">Size</td>
+	        <td class="owner">Owner</td>
+	        <td class="status">Status</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="iframe_button" id="latest_msg_buttons">
+        <input type="button" onclick="gotocreate();" value="Create" />
+        <input type="button" onclick="gotoall();" value="Show All" />
+        <input type="button" onclick="refresh();" value="Refresh" />
+        <input type="submit" value="Delete Selected" />
+    </div>
+    {% else %}
+    <div class="iframe_info_msg">
+        <div class="info_msg">
+            No new messages.
+        </div>
+	    <div class="iframe_button" id="latest_msg_buttons">
+        <input type="button" onclick="gotocreate();" value="Create" />
+	        <input type="button" onclick="refresh();" value="Refresh" />
+	    </div>
+    </div>
+    {% endif %}
+</form>
+{% endblock content %}
