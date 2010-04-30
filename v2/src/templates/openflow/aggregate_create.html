@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Create OpenFlow Aggregate{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<form method="post" action="">
+	<table>
+	{{ agg_form.as_table }}
+	</table>
+	<table>
+	{{ client_form.as_table }}
+	</table>
+	<input type="submit" value="Create" />
+	</form>
+</div>
+{% endblock content %}

@@ -14,6 +14,7 @@ class Resource(Extendable):
     '''
     
     name = models.CharField(max_length=200)
+    available = models.BooleanField("Available", default=True)
     
     class Extend:
         fields = {

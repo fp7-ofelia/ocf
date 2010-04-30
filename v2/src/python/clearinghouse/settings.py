@@ -97,6 +97,7 @@ INSTALLED_APPS = (
 #    'clearinghouse.extendable_tester',
     'registration',
     'clearinghouse.aggregate',
+    'clearinghouse.utils',
     'clearinghouse.messaging',
     'clearinghouse.openflow',
 #    'clearinghouse.permission',

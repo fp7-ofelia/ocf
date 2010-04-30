@@ -8,6 +8,7 @@ from django.db import models
 from clearinghouse.resources import models as resource_models
 from clearinghouse.aggregate import models as aggregate_models
 from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
+from django.core.urlresolvers import reverse
 
 class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
     pass
@@ -24,7 +25,6 @@ class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCClient)
-    type = 'OpenFlow'
     
     class Extend:
         replacements= {
@@ -34,10 +34,13 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             'project_info_class': OpenFlowProjectInfo,
         }
         
+    class Meta:
+        verbose_name = "OpenFlow Aggregate"
+
     def update_slice(self, slice):
         slice.reserve_slice(slice)
         
-    def reserve_slice(self, user, slice, slice_password):
+    def create_slice(self, user, slice, slice_password):
         # get all the slivers that are in this aggregate
         sw_slivers_qs = \
             slice.openflowswitchsliver_set.filter(switch__aggregate=self)
