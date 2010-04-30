@@ -1,22 +1,21 @@
-# Django settings for optin_manager project.
+# Django settings for OM project.
 from os.path import dirname, join
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Jad Naous', 'jnaous@stanford.edu'),
+     ('Peyman Kazemian', 'kazemian@stanford.edu'),
 )
 
 SRC_DIR = join(dirname(__file__), '../../')
 
-# For serving static content - dev version only
 STATIC_DOC_ROOT = join(SRC_DIR, 'static')
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = join(SRC_DIR, 'db/optin_manager.db') # Or path to database file if using sqlite3.
+DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_NAME = join(SRC_DIR, 'omdb/om.db')  # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -33,7 +32,7 @@ TIME_ZONE = 'America/Los_Angeles'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+SITE_ID = 2
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -54,7 +53,7 @@ MEDIA_URL = '/static_media/'
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'b=+o(p@=qnlh4v_dufodnq&b9d$b319$6t+49xk0f+#$_m!m8h'
+SECRET_KEY = '2f(jw$r445m^g3#1e)mysi2c#4ny83*4al=#adkj1o98ic+44i'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -67,15 +66,15 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'clearinghouse.middleware.sitelockdown.SiteLockDown',
 )
 
-ROOT_URLCONF = 'optin_manager.urls'
+ROOT_URLCONF = 'OM.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    join(SRC_DIR, 'python/OM/templates')
 )
 
 INSTALLED_APPS = (
@@ -86,4 +85,23 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'rpc4django',
     'registration',
+    'OM.users',
+    'OM.flowspace',
 )
+
+AUTH_PROFILE_MODULE = "users.UserProfile"
+
+LOGIN_REDIRECT_URL = '/'
+
+# E-Mail sending settings
+#EMAIL_HOST = 'smtp.stanford.edu'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'geni.opt.in.manager@gmail.com'
+EMAIL_HOST_PASSWORD = "stanfordom!"
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
+EMAIL_SUBJECT_PREFIX = '[GENI-Opt IN Manager]'
+
+# Registration App settings
+ACCOUNT_ACTIVATION_DAYS = 3
