@@ -2,10 +2,10 @@
 from django.http import *
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from OM import flowspace
-from OM.flowspace import forms
-from OM.flowspace.models import OptedInFlowSpace, AdminFlowSpace, RequestedAdminFlowSpace, RequestedUserFlowSpace
-from OM.flowspace.helper import IPRangeToString
+from optin_manager import flowspace
+from optin_manager.flowspace import forms
+from optin_manager.flowspace.models import OptedInFlowSpace, AdminFlowSpace, RequestedAdminFlowSpace, RequestedUserFlowSpace
+from optin_manager.flowspace.helper import IPRangeToString
 
 @login_required
 def view_opt_in(request):

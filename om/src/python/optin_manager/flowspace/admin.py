@@ -1,5 +1,5 @@
 # admin file for flowspace - to be used in debuging
-from OM.flowspace.models import OptedInFlowSpace
+from optin_manager.flowspace.models import OptedInFlowSpace
 from django.contrib import admin
 
 class OptedInFlowSpaceAdmin(admin.ModelAdmin):
