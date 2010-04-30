@@ -15,7 +15,7 @@ STATIC_DOC_ROOT = join(SRC_DIR, 'static')
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = join(SRC_DIR, 'omdb/om.db')  # Or path to database file if using sqlite3.
+DATABASE_NAME = join(SRC_DIR, 'db/om.db')  # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -68,13 +68,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'OM.urls'
+ROOT_URLCONF = 'optin_manager.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    join(SRC_DIR, 'python/OM/templates')
+    join(SRC_DIR, 'templates')
 )
 
 INSTALLED_APPS = (
@@ -85,8 +85,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'rpc4django',
     'registration',
-    'OM.users',
-    'OM.flowspace',
+    'optin_manager.users',
+    'optin_manager.flowspace',
 )
 
 AUTH_PROFILE_MODULE = "users.UserProfile"

@@ -5,13 +5,13 @@ from django.conf import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^$', 'OM.users.views.index'),
-    (r'^dashboard$', 'OM.users.views.dashboard'),
+    (r'^$', 'optin_manager.users.views.index'),
+    (r'^dashboard$', 'optin_manager.users.views.dashboard'),
 
-    (r'^flowspace/', include('OM.flowspace.urls')),
+    (r'^flowspace/', include('optin_manager.flowspace.urls')),
 
     # Example:
-    # (r'^OM/', include('OM.foo.urls')),
+    # (r'^optin_manager/', include('optin_manager.foo.urls')),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:
