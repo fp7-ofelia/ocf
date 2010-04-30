@@ -6,40 +6,45 @@ class PasswordXMLRPCClient(models.Model):
     password = models.CharField(max_length=1024,
                                 default=lambda: os.urandom(1024))
     max_password_age = models.IntegerField(
-        'Maximum password age in days', default=60)
+        'Maximum password age in days', default=60,
+        help_text="Set to -1 to never expire.")
     password_timestamp = models.DateField(auto_now_add=True)
-    url = models.URLField(max_length=1024, verify_exists=True)
+    url = models.URLField("XML-RPC Server URL", max_length=1024, verify_exists=True)
     
-    verify_ca = models.BooleanField(default=True)
+    verify_ca = models.BooleanField("Verify the CA in SSL connections?",
+                                    default=True)
     
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCClient, self).__init__(*args, **kwargs)
         
-        from xmlrpclib import ServerProxy
-        from clearinghouse.utils import PyCURLSafeTransport
-        from django.conf import settings
-        from datetime import timedelta, date
-        
-        if self.verify_ca:
-            self.proxy = ServerProxy(
-                self.url, PyCURLSafeTransport(
-                    username=self.username,
-                    password=self.password,
-                    ca_cert_path=settings.TRUSTED_CA_PATH))
-        else:
-            self.proxy = ServerProxy(
-                self.url, PyCURLSafeTransport(
-                    username=self.username,
-                    password=self.password,
-                ))
-        
-        # if the password has expired, it's time to set a new one
-        max_age = timedelta(days=self.max_password_age)
-        if self.password_timestamp + max_age >= date.today():
-            self.proxy.change_password(os.urandom(1024))
-
     def __getattr__(self, name):
-        return getattr(self.proxy, name)
+        if name == "proxy":
+            from xmlrpclib import ServerProxy
+            from clearinghouse.utils import PyCURLSafeTransport
+            from django.conf import settings
+            from datetime import timedelta, date
+            
+            if self.verify_ca:
+                self.proxy = ServerProxy(
+                    self.url, PyCURLSafeTransport(
+                        username=self.username,
+                        password=self.password,
+                        ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH))
+            else:
+                self.proxy = ServerProxy(
+                    self.url, PyCURLSafeTransport(
+                        username=self.username,
+                        password=self.password,
+                    ))
+            
+            # if the password has expired, it's time to set a new one
+            max_age = timedelta(days=self.max_password_age)
+            if self.password_timestamp + max_age >= date.today():
+                self.proxy.change_password(os.urandom(1024))
+                
+            return self.proxy
+        else:
+            return getattr(self.proxy, name)
 
     def install_trusted_ca(self):
         '''

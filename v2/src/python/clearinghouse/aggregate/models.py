@@ -4,6 +4,8 @@ from clearinghouse.slice.models import Slice
 from clearinghouse.project.models import Project
 from django.contrib import auth
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.contrib.contenttypes.models import ContentType
 
 class Aggregate(Extendable):
     '''
@@ -16,9 +18,9 @@ class Aggregate(Extendable):
     name = models.CharField(max_length=200, unique=True)
     logo = models.ImageField('Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
                              blank=True, null=True)
-    type = 'Generic'
     description = models.TextField()
     location = models.CharField("Location", max_length=200)
+    available = models.BooleanField("Available", default=False)
     
     class Extend:
         fields = {
@@ -55,54 +57,25 @@ class Aggregate(Extendable):
                  'verbose_name':  "projects_comment"},
             ),
         }
+        
+    class Meta:
+        verbose_name = "Generic Aggregate"
 
-    def create_slice(self, slice_id, *args, **kwargs):
-        '''Create a new slice with the given slice_id
-        and the resources specified. Does not actually
-        make the reservation. Use start_slice for that.
-        
-        @param slice_id: unique id to give to the slice
-        @type slice_id: L{str}
-        @param args: additional optional arguments
-        @param kwargs: additional optional keyword arguments
-        '''
-        raise NotImplementedError()
-    
-    def start_slice(self, slice_id, *args, **kwargs):
-        '''Reserves/allocates the resources in the aggregate
-        
-        @param slice_id: unique id of slice to start
-        @type slice_id: L{str}
-        @param args: additional optional arguments
-        @param kwargs: additional optional keyword arguments
-        '''
-        raise NotImplementedError()
-    
-    def delete_slice(self, slice_id, *args, **kwargs):
-        '''Delete slice with given slice_id
-        
-        @param slice_id: unique id of slice to delete
-        @type slice_id: L{str}
-        @param args: additional optional arguments
-        @param kwargs: additional optional keyword arguments
-        '''
-        raise NotImplementedError()
-    
-    def stop_slice(self, slice_id, *args, **kwargs):
-        '''Stops running the slice, but does not delete it.
-        
-        @param slice_id: unique id of slice to stop
-        @type slice_id: L{str}
-        @param args: additional optional arguments
-        @param kwargs: additional optional keyword arguments
-        '''
-        raise NotImplementedError()
-    
     def get_logo_url(self):
         try:
             return self.logo.url
         except:
             return ""
+        
+    def get_edit_url(self):
+        ct = ContentType.objects.get_for_model(self.__class__)
+        return reverse("%s_aggregate_edit" % ct.app_label,
+                       kwargs={'obj_id': self.id})
+
+    @classmethod
+    def get_create_url(cls):
+        ct = ContentType.objects.get_for_model(cls)
+        return reverse("%s_aggregate_create" % ct.app_label)
 
 class AggregateUserInfo(Extendable):
     '''
