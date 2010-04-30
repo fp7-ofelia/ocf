@@ -94,6 +94,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'rpc4django',
     'clearinghouse.extendable',
+    'clearinghouse.xmlrpc',
 #    'clearinghouse.extendable_tester',
     'registration',
     'clearinghouse.aggregate',

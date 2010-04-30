@@ -1,15 +1,16 @@
 from django.db import models
 import os
+import binascii
 
 class PasswordXMLRPCClient(models.Model):
     username = models.CharField(max_length=1024)
     password = models.CharField(max_length=1024,
-                                default=lambda: os.urandom(1024))
+        default=lambda: binascii.b2a_qp(os.urandom(1024)))
     max_password_age = models.IntegerField(
-        'Maximum password age in days', default=60,
-        help_text="Set to -1 to never expire.")
+        'Maximum password age in days', default=60)
     password_timestamp = models.DateField(auto_now_add=True)
-    url = models.URLField("XML-RPC Server URL", max_length=1024, verify_exists=True)
+    url = models.URLField("XML-RPC Server URL", max_length=1024,
+                          verify_exists=True)
     
     verify_ca = models.BooleanField("Verify the CA in SSL connections?",
                                     default=True)
@@ -40,7 +41,7 @@ class PasswordXMLRPCClient(models.Model):
             # if the password has expired, it's time to set a new one
             max_age = timedelta(days=self.max_password_age)
             if self.password_timestamp + max_age >= date.today():
-                self.proxy.change_password(os.urandom(1024))
+                self.proxy.change_password(binascii.b2a_qp(os.urandom(1024)))
                 
             return self.proxy
         else:

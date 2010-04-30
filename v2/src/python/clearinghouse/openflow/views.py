@@ -13,7 +13,7 @@ def aggregate_create(request):
     if request.method == "GET":
         agg_form = OpenFlowAggregateForm()
         client_form = PasswordXMLRPCClientForm()
-        
+        print client_form.as_table()
     elif request.method == "POST":
         agg_form = OpenFlowAggregateForm(request.POST)
         client_form = PasswordXMLRPCClientForm(request.POST)
