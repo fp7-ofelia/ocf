@@ -11,7 +11,6 @@ def _get_aggregate_types():
     return get_subclasses_verbose_names(Aggregate)
 
 class AggregateTypeForm(forms.Form):
-    print "agg types**********: %s" % list(_get_aggregate_types())
     type = forms.ChoiceField(
         label="Aggregate Type",
         choices=_get_aggregate_types())

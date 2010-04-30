@@ -3,8 +3,8 @@ import os
 import binascii
 
 class PasswordXMLRPCClient(models.Model):
-    username = models.CharField(max_length=1024)
-    password = models.CharField(max_length=1024,
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=3072,
         default=lambda: binascii.b2a_qp(os.urandom(1024)))
     max_password_age = models.IntegerField(
         'Maximum password age in days', default=60)
