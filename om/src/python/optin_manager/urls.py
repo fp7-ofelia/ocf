@@ -23,7 +23,14 @@ urlpatterns = patterns('',
 
     (r'^accounts/', include('registration.urls')),
 
-    # TODO: Serve static content, should be removed in production deployment
-    (r'^img/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-    (r'^css/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+)
+
+static_file_tuple = (r'^%s/(?P<path>.*)$' % settings.MEDIA_URL[1:],
+                     'django.views.static.serve',
+                     {'document_root': "%s" % settings.MEDIA_ROOT})
+urlpatterns += patterns('',
+   # TODO: Serve static content, should be removed in production deployment
+    # serve from another domain to speed up connections (no cookies needed)
+    url(*static_file_tuple, name="img_media"),
+    url(*static_file_tuple, name="css_media"),
 )
