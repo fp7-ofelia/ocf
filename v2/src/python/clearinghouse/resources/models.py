@@ -14,7 +14,8 @@ class Resource(Extendable):
     '''
     
     name = models.CharField(max_length=200)
-    available = models.BooleanField("Available", default=True)
+    available = models.BooleanField("Available", default=True, editable=False)
+    status_change_timestamp = models.DateTimeField(editable=False)
     
     class Extend:
         fields = {
@@ -66,44 +67,3 @@ class Sliver(Extendable):
                 {"verbose_name": "slice_comment"},
             ),
         }
-
-class Node(Resource):
-    '''
-    Generic representation of a node
-    
-    @param neighbors: (optional) this node's neighbors
-    @type neighbors: L{ManyToManyField} with "self"
-    '''
-    
-    class Extend:
-        fields = {
-            'neighbors': (
-                models.ManyToManyField,
-                ("self",),
-                {'symmetrical': False,
-                 "verbose_name": "Node's neighbors"},
-                (None,),
-                {'through': "neighbors_through",
-                 "verbose_name": "nodes_comment"},
-            )
-        }
-        redelegate = ['aggregate', 'slices']
-    
-class Link(Resource):
-    '''
-    Links connect neighboring nodes.
-    '''
-    
-    class Extend:
-        fields = {
-            'nodes': (
-                models.ManyToManyField,
-                (Node,),
-                {'related_name': 'links',
-                 'verbose_name': "Nodes connected to this link"},
-                ("node_class",),
-                {'through': "nodes_through",
-                 'verbose_name': "nodes_comment"},
-            )
-        }
-        redelegate = ['aggregate', 'slices']

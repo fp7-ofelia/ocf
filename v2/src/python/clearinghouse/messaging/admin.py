@@ -3,7 +3,7 @@ Created on Apr 28, 2010
 
 @author: jnaous
 '''
-from models import PasswordXMLRPCClient
+import models
 from django.contrib import admin
 
-admin.site.register(PasswordXMLRPCClient)
+admin.site.register(models.DatedMessage)

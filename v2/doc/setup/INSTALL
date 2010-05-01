@@ -6,7 +6,7 @@ as root, while a '$' means execute as normal user.
 Install requirements to run our Django project:
 -----------------------------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
-# zypper install python-setuptools python-django python-curl python-decorator
+# zypper install python-setuptools python-django python-curl python-decorator python-django-autoslug
 # easy_install -Z django-registration rpc4django
 
 Edit Django Settings:
@@ -68,3 +68,7 @@ Setting up the GENI test harness:
 - Add the 'clearinghouse.gapi_tester' to INSTALLED_APPLICATIONS
 - Create a temporary directory for SFA <sfa-tmp>
 - Run the server with the environment variable TMPDIR set to <sfa-tmp>
+- Since nothing is persistent with the geni tests, you will need to reuse the
+  same Python Django process for each request. To do that, add the following
+  line to httpd.conf.local:
+  WSGIDaemonProcess clearinghouse processes=1 threads=1

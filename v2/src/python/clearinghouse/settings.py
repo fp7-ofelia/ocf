@@ -94,20 +94,21 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'rpc4django',
     'clearinghouse.gapi_tester',
-#    'clearinghouse.extendable',
-#    'clearinghouse.xmlrpc',
-#    'registration',
-#    'clearinghouse.aggregate',
-#    'clearinghouse.utils',
-#    'clearinghouse.messaging',
-#    'clearinghouse.openflow',
-#    'clearinghouse.project',
-#    'clearinghouse.resources',
-#    'clearinghouse.slice',
-#    'clearinghouse.users',
-#    'clearinghouse.defaultsite',
-#    'clearinghouse.extendable_tester',
+    'autoslug',
+    'clearinghouse.extendable',
+    'clearinghouse.xmlrpc_serverproxy',
+    'registration',
+    'clearinghouse.aggregate',
+    'clearinghouse.utils',
+    'clearinghouse.messaging',
+    'clearinghouse.openflow',
+    'clearinghouse.project',
+    'clearinghouse.resources',
+    'clearinghouse.slice',
+    'clearinghouse.users',
+    'clearinghouse.defaultsite',
 ###### IGNORE ############################
+#    'clearinghouse.extendable_tester',
 #    'clearinghouse.permission',
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
@@ -147,3 +148,5 @@ NUM_LATEST_MSGS = 10
 
 # Aggregate app settings
 AGGREGATE_LOGOS_DIR = "img/logos"
+
+# slugify

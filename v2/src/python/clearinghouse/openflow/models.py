@@ -5,10 +5,14 @@ Created on Apr 26, 2010
 '''
 
 from django.db import models
+from django.db.models.query import Q
 from clearinghouse.resources import models as resource_models
 from clearinghouse.aggregate import models as aggregate_models
-from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
+from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from django.core.urlresolvers import reverse
+from django.utils.datetime_safe import datetime
+from autoslug.fields import AutoSlugField
+import traceback
 
 class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
     class Extend:
@@ -37,7 +41,7 @@ class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
         }
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
-    client = models.OneToOneField(PasswordXMLRPCClient)
+    client = models.OneToOneField(PasswordXMLRPCServerProxy)
     
     class Extend:
         replacements= {
@@ -49,6 +53,129 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
     class Meta:
         verbose_name = "OpenFlow Aggregate"
+        
+    def setup_new_aggregate(self, hostname):
+        self.client.change_password()
+        self.client.register_topology_callback(
+            "https://%s/openflow/xmlrpc/" % hostname,
+            "%s" % self.pk,
+        )
+        
+    def get_raw_topology(self):
+        '''
+        Get the topology for this aggregate as a set of links.
+        '''
+        # Create a filter that selects any connection that connects a switch
+        # in this aggregate
+        filter = Q(src_iface__switch__aggregate=self) | \
+            Q(dst_iface__switch__aggregate=self)
+            
+        # optimize so we don't hit the DB multiple times
+        qs = OpenFlowConnection.objects.filter(filter)
+        qs.select_related("src_iface","src_iface__switch",
+                          "dst_iface","dst_iface__switch")
+        
+        # Dump the links into tuples
+        links = set()
+        for cnxn in qs:
+                links.add((cnxn.src_iface.switch.datapath_id,
+                           cnxn.src_iface.port_num,
+                           cnxn.dst_iface.switch.datapath_id,
+                           cnxn.dst_iface.port_num))
+        return links
+    
+    def update_topology(self):
+        '''
+        Read the topology from the OM and FV, parse it, and store it.
+        '''
+        from clearinghouse.utils import create_or_update
+        def unslugify(slug):
+            return tuple(map(int, slug.split("_")))
+        
+        # Get the active topology information from the AM
+        links_raw = self.client.get_links()
+#        switches_raw = self.client.get_switches()
+        
+        # optimize the parsing by storing information in vars
+        current_links = self.get_raw_topology()
+        current_switches = self.openflowswitch_set.all()
+        current_dpids = set(current_switches.values_list('datapath_id', flat=True))
+#        current_ifaces = self.openflowinterface_set.all().values_list('switch','port_num')
+#        current_ifaces = map(
+#            lambda(a,b): (current_switches.get(pk=a).datapath_id, b),
+#            current_ifaces,
+#        )
+        current_ifaces = map(
+            unslugify,
+            self.openflowinterface_set.all().values_list("slug", flat=True))
+        
+        attrs_set = []
+        ordered_active_links = []
+        active_links = set()
+        active_dpids = set()
+        active_ifaces = set()
+        for src_dpid, src_port, dst_dpid, dst_port, attrs in links_raw:
+            link = (src_dpid, src_port, dst_dpid, dst_port)
+            active_links.add(link)
+            active_ifaces.add((src_dpid, src_port))
+            active_ifaces.add((dst_dpid, dst_port))
+            active_dpids.add(src_dpid)
+            active_dpids.add(dst_dpid)
+            attrs_set.append(attrs)
+            ordered_active_links.append(link)
+        
+        new_links = active_links - current_links
+        dead_links = current_links - active_links
+        new_dpids = active_dpids - current_dpids
+        dead_dpids = current_dpids - active_dpids
+        new_ifaces = active_ifaces - current_ifaces
+        dead_ifaces = current_ifaces - active_ifaces
+        
+        # create the new datapaths
+        for dpid in new_dpids:
+            OpenFlowSwitch.objects.create(
+                name=dpid,
+                datapath_id=dpid,
+                aggregate=self,
+                available=True,
+                status_change_timestamp=datetime.now(),
+            )
+        
+        # make old datapaths unavailable
+        self.openflowswitch_set.filter(
+            datapath_id__in=dead_dpids).update(
+                available=False, status_change_timestamp=datetime.now())
+            
+        # create new ifaces
+        for iface in new_ifaces:
+            OpenFlowInterface.objects.create(
+                name="",
+                port_num=iface[1],
+                switch=OpenFlowSwitch.objects.get(datapath_id=iface[0]),
+            )
+        
+        # make old ifaces unavailable
+        dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
+        OpenFlowInterface.objects.filter(
+            slug__in=dead_iface_slugs).update(
+                available=False, status_change_timestamp=datetime.now())
+        
+        # create new links
+        for link in new_links:
+            OpenFlowConnection.objects.create(
+                src_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[0:1]),
+                dst_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[2:3]),
+            )
+            
+        # delete old links
+        for link in dead_links:
+            try:
+                c = OpenFlowConnection.objects.get(slug="%s_%s_%s_%s" % link)
+            except OpenFlowConnection.DoesNotExist:
+                print "WARNING: Connection that was thought to be dead not found in DB."
+                traceback.print_exc()
+            else:
+                c.delete()
 
     def update_slice(self, slice):
         slice.reserve_slice(slice)
@@ -81,41 +208,58 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         return self.client.delete_slice(slice.id)
     
     def check_status(self):
-        return self.available and self.client.is_available()
+        return self.available # TODO: and self.client.is_available()
 
-class OpenFlowSwitch(resource_models.Node):
-    datapath_id = models.CharField(max_length=100, unique=True)
+class OpenFlowSwitch(resource_models.Resource):
+    datapath_id = models.IntegerField(unique=True)
     
     class Extend:
         replacements={
             "sliver_class": "OpenFlowSwitchSliver",
         }
 
-class OpenFlowLink(resource_models.Link):
-    link_id = models.CharField(max_length=100)
-    
-    class Extend:
-        replacements={
-            "sliver_class": "OpenFlowLinkSliver",
-            "nodes_through": "OpenFlowInterface",
-            "node_class": OpenFlowSwitch,
-        }
+class OpenFlowConnection(models.Model):
+    '''Connection between two interfaces'''
+    src_iface = models.ForeignKey("OpenFlowInterface",
+                                  related_name="ingress_connections")
+    dst_iface = models.ForeignKey("OpenFlowInterface",
+                                  related_name="egress_connections")
+    slug = AutoSlugField(
+        populate_from=lambda instance: "%s_%s_%s_%s" % (
+            instance.src_iface.switch.datapath_id,
+            instance.src_iface.port_num,
+            instance.dst_iface.switch.datapath_id,
+            instance.dst_iface.port_num,
+        )
+    )
 
-class OpenFlowInterface(models.Model):
+class OpenFlowInterface(resource_models.Resource):
     port_num = models.IntegerField()
     switch = models.ForeignKey(OpenFlowSwitch)
-    link = models.ForeignKey(OpenFlowLink)
+    ingress_neighbors = models.ManyToManyField(
+        'self', symmetrical=False,
+        related_name="egress_neighbors",
+        through=OpenFlowConnection,
+    )
+    slug = AutoSlugField(
+        populate_from=lambda instance: "%s_%s" % (
+            instance.switch.datapath_id, instance.port_num))
+
+    class Extend:
+        replacements={
+            "sliver_class": "OpenFlowInterfaceSliver",
+        }
 
 class OpenFlowSwitchSliver(resource_models.Sliver):
     class Extend:
         replacements={
             "resource_class": OpenFlowSwitch,
         }
-    
-class OpenFlowLinkSliver(resource_models.Sliver):
+
+class OpenFlowInterfaceSliver(resource_models.Sliver):
     class Extend:
         replacements={
-            "resource_class": OpenFlowLink,
+            "resource_class": OpenFlowInterface,
         }
 
 class FlowSpaceRule(models.Model):

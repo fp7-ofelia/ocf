@@ -5,14 +5,14 @@ Created on Apr 29, 2010
 '''
 
 from django import forms
-from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
+from models import PasswordXMLRPCServerProxy
 
-class PasswordXMLRPCClientForm(forms.ModelForm):
+class PasswordXMLRPCServerProxyForm(forms.ModelForm):
     '''
     A form that can be used to create/edit info on a PasswordXMLRPCClient
     '''
     class Meta:
-        model = PasswordXMLRPCClient
+        model = PasswordXMLRPCServerProxy
 
     def clean_url(self):
         '''Always use https'''

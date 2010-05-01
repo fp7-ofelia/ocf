@@ -5,12 +5,14 @@ Created on Apr 26, 2010
 '''
 from rpc4django import rpcmethod
 from django.contrib.auth.models import User
+from pprint import pprint
+from optin_manager.xmlrpc_server.models import CallBackServerProxy
 
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
                       'array', 'array'])
-def reserve_slice(slice_id, project_name, project_description,
+def create_slice(slice_id, project_name, project_description,
                   slice_name, slice_description, controller_url,
                   owner_email, owner_password,
                   switch_slivers, **kwargs):
@@ -86,8 +88,8 @@ def reserve_slice(slice_id, project_name, project_description,
         FlowVisor Web interface. Will need to be changed on initial login.
     @type owner_password: string
     
-    @param switch_sliver: description of the topology and flowspace for slice
-    @type switch_sliver: list of dicts
+    @param switch_slivers: description of the topology and flowspace for slice
+    @type switch_slivers: list of dicts
     
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
@@ -97,6 +99,19 @@ def reserve_slice(slice_id, project_name, project_description,
     @return: switches and links that have caused errors
     @rtype: dict
     '''
+    
+    print "reserve_slice got the following:"
+    print "    slice_id: %s" % slice_id
+    print "    project_name: %s" % project_name
+    print "    project_desc: %s" % project_description
+    print "    slice_name: %s" % slice_name
+    print "    slice_desc: %s" % slice_description
+    print "    controller: %s" % controller_url
+    print "    owner_email: %s" % owner_email
+    print "    owner_pass: %s" % owner_password
+    print "    switch_slivers"
+    pprint(switch_slivers, indent=8)
+    print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
 
     return {
         'error_msg': "",
@@ -118,6 +133,37 @@ def delete_slice(slice_id, **kwargs):
     @return error message if there are any errors or "" otherwise.
     '''
     
+    return ""
+
+@rpcmethod(signature=['array'])
+def get_switches():
+    '''
+    Return what the FlowVisor gives.
+    '''
+
+    return []
+
+@rpcmethod(signature=['array'])
+def get_links():
+    '''
+    Return what the FlowVisor gives.
+    '''
+    
+    return []
+
+@rpcmethod(signature=['string', 'string', 'string'])
+def register_topology_callback(url, cookie, **kwargs):
+    '''
+    Store some information for the topology callback.
+    '''
+    username = kwargs['request'].META['REMOTE_USER']
+
+    attrs = {'url': url, 'cookie': cookie}
+    filter_attrs = {'username': username}
+    rows = CallBackServerProxy.objects.filter(**filter_attrs).update(**attrs)
+    if not rows:
+        attrs.update(filter_attrs)
+        CallBackServerProxy.objects.create(**attrs)
     return ""
 
 @rpcmethod(signature=['string', 'string'])
@@ -159,4 +205,4 @@ def ping(data):
     return a string that is "%s: PONG" % data
     '''
     
-    return "%s: PONG" % data
+    return "PONG: %s" % data

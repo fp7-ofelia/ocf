@@ -87,6 +87,8 @@ INSTALLED_APPS = (
     'registration',
     'optin_manager.users',
     'optin_manager.flowspace',
+    'optin_manager.xmlrpc_server',
+    'clearinghouse.xmlrpc_serverproxy',
 )
 
 AUTH_PROFILE_MODULE = "users.UserProfile"

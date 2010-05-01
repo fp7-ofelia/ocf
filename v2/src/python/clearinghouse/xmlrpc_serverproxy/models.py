@@ -2,10 +2,18 @@ from django.db import models
 import os
 import binascii
 
-class PasswordXMLRPCClient(models.Model):
+def random_password():
+    return binascii.b2a_qp(os.urandom(1024))
+
+class PasswordXMLRPCServerProxy(models.Model):
+    '''
+    Implements a server proxy for XML-RPC calls that checks SSL certs and
+    uses a password to talk to the server. The password is automatically renewed
+    whenever it expires.
+    '''
+    
     username = models.CharField(max_length=100)
-    password = models.CharField(max_length=3072,
-        default=lambda: binascii.b2a_qp(os.urandom(1024)))
+    password = models.CharField(max_length=3072, default=random_password)
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
     password_timestamp = models.DateField(auto_now_add=True)
@@ -13,9 +21,6 @@ class PasswordXMLRPCClient(models.Model):
                           verify_exists=False)
     
     verify_ca = models.BooleanField("Verify CA?", default=True)
-    
-    def __init__(self, *args, **kwargs):
-        super(PasswordXMLRPCClient, self).__init__(*args, **kwargs)
         
     def __getattr__(self, name):
         if name == "proxy":
@@ -42,16 +47,21 @@ class PasswordXMLRPCClient(models.Model):
             # if the password has expired, it's time to set a new one
             max_age = timedelta(days=self.max_password_age)
             if self.password_timestamp + max_age >= date.today():
-                self.proxy.change_password(binascii.b2a_qp(os.urandom(1024)))
+                self.change_password(random_password())
                 
             return self.proxy
         else:
             return getattr(self.proxy, name)
         
+    def change_password(self, password=None):
+        password = password or random_password()
+        self.proxy.change_password(password)
+        self.password = password
+        
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''
         try:
-            if self.ping("PING") == "PING: PONG":
+            if self.ping("PING") == "PONG: PING":
                 return True
         except Exception, e:
             import traceback
@@ -82,4 +92,3 @@ class PasswordXMLRPCClient(models.Model):
             cert_file.write(cert)
         
         subprocess.call(['make', '-C', settings.XMLRPC_TRUSTED_CA_PATH])
-

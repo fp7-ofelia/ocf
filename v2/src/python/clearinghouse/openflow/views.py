@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from clearinghouse.openflow.forms import OpenFlowAggregateForm
 from clearinghouse.openflow.models import OpenFlowAdminInfo
-from clearinghouse.xmlrpc.forms import PasswordXMLRPCClientForm
+from clearinghouse.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
 
 def aggregate_create(request):
     '''
@@ -13,11 +13,11 @@ def aggregate_create(request):
     
     if request.method == "GET":
         agg_form = OpenFlowAggregateForm()
-        client_form = PasswordXMLRPCClientForm()
+        client_form = PasswordXMLRPCServerProxyForm()
         print client_form.as_table()
     elif request.method == "POST":
         agg_form = OpenFlowAggregateForm(request.POST)
-        client_form = PasswordXMLRPCClientForm(request.POST)
+        client_form = PasswordXMLRPCServerProxyForm(request.POST)
         
         if client_form.is_valid() and agg_form.is_valid():
             client = client_form.save()
@@ -30,10 +30,9 @@ def aggregate_create(request):
                 user=request.user,
             )
             agg.admins_info.add(admin_info)
+            agg.setup_new_aggregate(request.META['HTTP_HOST'])
             agg.save()
-            return HttpResponseRedirect(reverse(
-                "aggregate_all",
-            ))
+            return HttpResponseRedirect(reverse("aggregate_all"))
     else:
         return HttpResponseNotAllowed("GET", "POST")
     

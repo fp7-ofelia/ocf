@@ -8,9 +8,9 @@ from django.contrib import admin
 
 admin.site.register(OpenFlowAdminInfo)
 admin.site.register(OpenFlowAggregate)
+admin.site.register(OpenFlowConnection)
 admin.site.register(OpenFlowInterface)
-admin.site.register(OpenFlowLink)
-admin.site.register(OpenFlowLinkSliver)
+admin.site.register(OpenFlowInterfaceSliver)
 admin.site.register(OpenFlowProjectInfo)
 admin.site.register(OpenFlowSliceInfo)
 admin.site.register(OpenFlowSwitch)
