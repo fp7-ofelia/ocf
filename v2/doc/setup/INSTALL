@@ -27,34 +27,32 @@ Point your browser to localhost:8000 to make sure Django works. Kill the server.
 Setup Apache2 to use SSL:
 -------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
-# zypper install apache2 apache2-mod_wsgi
-# sed -i '{s/APACHE_CONF_INCLUDE_FILES=""/APACHE_CONF_INCLUDE_FILES="\/etc\/apache2\/httpd.conf.local"/}' /etc/sysconfig/apache2
-# cp <egeni_root>/v2/src/config/apache/httpd.conf.local /etc/apache2/
+# zypper install apache2 apache2-mod_wsgi apache2-mod_macro
+# ln -s <egeni_root>/v2/src/config/apache/vhost-macros.conf /etc/apache2/conf.d/
+# ln -s <egeni_root>/v2/src/config/apache/vhost-clearinghouse.conf /etc/apache2/vhost.d/
+# mkdir /var/log/apache2/clearinghouse
+# chmod o-w /var/log/apache2/clearinghouse
+# a2enmod wsgi
+# a2enmod ssl
+# a2enmod macro
+# a2enflag SSL
+# /usr/bin/gensslcert
 
-In addition to the steps below, please make sure that apache can reach the
-the directories below for reading/writing since it is running as user wwwvar and
-group www.
+After the steps below, please ensure that apache can reach the the directories
+below for reading/writing since it is running as user wwwrun and group www:
 # chgrp -R www <egeni_root>/v2/src/
 # chmod -R g+r <egeni_root>/v2/src/
 # chmod -R g+rw <egeni_root>/v2/src/db
 
-In the step below don't forget to escape the '/' with a '\' as in '\/' for the
-<actual_egeni_root> part, e.g. \/usr\/lib\/egeni
-# sed -i '{s/egeni_root/<actual_egeni_root>/}' /etc/apache2/httpd.conf.local
-# ln -s <egeni_root>/v2/src/config/apache/vhost-ssl.conf /etc/apache2/vhosts.d/
-# a2enmod wsgi
-# a2enmod ssl
-# a2enflag SSL
-# /usr/bin/gensslcert
-# sed -i '{s/Listen 80/#Listen 80/}' /etc/apache2/listen.conf
+Restart apache:
 # /etc/init.d/apache2 restart
 
 Point your browser to https://localhost/ to make sure SSL works.
 
 Add Certificates for Trusted GENI sites:
 ----------------------------------------
-# cp <geni-ca-cert> /etc/apache2/ssl.crt/<geni-ca>.crt
 IMPORTANT: Note the .crt extension for the cert file
+# cp <geni-ca-cert> /etc/apache2/ssl.crt/<geni-ca>.crt
 # make -C /etc/apache2/ssl.crt
 # /etc/init.d/apache2 restart
 
@@ -69,6 +67,15 @@ Setting up the GENI test harness:
 - Create a temporary directory for SFA <sfa-tmp>
 - Run the server with the environment variable TMPDIR set to <sfa-tmp>
 - Since nothing is persistent with the geni tests, you will need to reuse the
-  same Python Django process for each request. To do that, add the following
-  line to httpd.conf.local:
-  WSGIDaemonProcess clearinghouse processes=1 threads=1
+  same Python Django process for each request. To do that, open 
+  vhost-macros.conf and replace the following line:
+
+    Use WSGISetup $app_name $prefix $app_path $extra_dir_macro MultiWSGIDaemonProcess
+
+  with this:
+  
+    Use WSGISetup $app_name $prefix $app_path $extra_dir_macro SingleWSGIDaemonProcess
+
+- Restart apache
+
+

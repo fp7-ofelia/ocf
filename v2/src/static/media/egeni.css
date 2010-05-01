@@ -8,7 +8,7 @@ body {
 	padding: 0px;
 	}
 
-img, div { behavior: url(/js/iepngfix.htc) }
+img, div { behavior: url(/media/js/iepngfix.htc) }
 
 #frontpage {
 	width: 1000px;
@@ -213,7 +213,7 @@ img, div { behavior: url(/js/iepngfix.htc) }
 
 #main_text {
 	margin-bottom: 10px;
-	background-image: url(/img/home.png);
+	background-image: url(../img/home.png);
 	background-repeat: no-repeat;
 	width: 378px;
 	height: 217px;
@@ -244,7 +244,7 @@ Tags: openflow
 
 /* Fix for IE6 */
 
-img, div { behavior: url(/js/iepngfix.htc) }
+img, div { behavior: url(/media/js/iepngfix.htc) }
 
 /* Begin Typography & Colors */
 

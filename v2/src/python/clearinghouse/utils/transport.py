@@ -59,6 +59,7 @@ class PyCURLTransport(xmlrpclib.Transport):
         # Set auth info if defined
         if username != None and password != None:
             self._curl.setopt(pycurl.USERPWD, "%s:%s" % (username, password))
+            self._curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_BASIC)
 
     def _check_return(self, host, handler, httpcode, buf):
         """Checks return code for various errors"""
