@@ -49,6 +49,10 @@ Restart apache:
 
 Point your browser to https://localhost/ to make sure SSL works.
 
+Using a different port:
+-----------------------
+To change the port to use, 
+
 Add Certificates for Trusted GENI sites:
 ----------------------------------------
 IMPORTANT: Note the .crt extension for the cert file

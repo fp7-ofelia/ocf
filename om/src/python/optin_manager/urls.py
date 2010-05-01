@@ -10,7 +10,7 @@ urlpatterns = patterns('',
 
     (r'^flowspace/', include('optin_manager.flowspace.urls')),
 
-    (r'^xmlrpc/', include('optin_manager.xmlrpc.urls')),
+    (r'^xmlrpc/', include('optin_manager.xmlrpc_server.urls')),
     # Example:
     # (r'^optin_manager/', include('optin_manager.foo.urls')),
 
