@@ -17,18 +17,21 @@
 				<th class="owners">Owners</th>
 				<th class="status">Status</th>
 			</tr>
-			{% comment %}
 			{% for generic_am in aggregate_list %}
 			{% with generic_am.as_leaf_class as am %}
+			{% if highlight_id and generic_am.id|equals:highlight_id %}
+			<tr class=highlight>
+			{% else %}
 			<tr>
+            {% endif %}
 				<td class="logo">{{ am.get_logo_url }}</td>
 				<td class="name"><a href="{{ am.get_edit_url }}">{{ am.name }}</a></td>
-				<td class="type">{{ am|get_meta_field:"verbose_name" }}</td>
+				<td class="type"><a href="{{ am.get_aggregates_url }}">{{ am|get_meta_field:"verbose_name" }}</a></td>
 				<td class="location">{{ am.location }}</td>
 				<td class="description">{{ am.description }}</td>
 				<td class="resources">{{ am.resource_set.count }}</td>
 				<td class="owners">
-					{% for admin_info in am.admins_info_set %}
+					{% for admin_info in am.admins_info.all %}
 					{{ admin_info.user.username }}
 					{% if not forloop.last %}
 					,
@@ -39,7 +42,6 @@
 			</tr>
 			{% endwith %}
 			{% endfor %}
-			{% endcomment %}
 		</table>
 	</div>
     <div class="links">

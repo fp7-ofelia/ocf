@@ -32,3 +32,13 @@ def get_meta_field(object, fieldname):
     '''return getattr(object._meta, fieldname)'''
     
     return getattr(object._meta, fieldname)
+
+@register.filter
+def get_class_field(object, fieldname):
+    '''return getattr(object.__class__, fieldname)'''
+    
+    return getattr(object.__class__, fieldname)
+
+@register.filter
+def equals(object1, object2):
+    return object1 == object2

@@ -13,3 +13,13 @@ class PasswordXMLRPCClientForm(forms.ModelForm):
     '''
     class Meta:
         model = PasswordXMLRPCClient
+
+    def clean_url(self):
+        '''Always use https'''
+        import urlparse
+        url = self.cleaned_data['url']
+        parsed = urlparse.urlparse(url, "https", False)
+        if parsed.scheme.lower() != "https":
+            raise forms.ValidationError("Server URL must be contacted using HTTPS")
+        return parsed.geturl()
+    

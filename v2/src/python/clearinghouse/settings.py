@@ -93,20 +93,22 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'rpc4django',
-    'clearinghouse.extendable',
-    'clearinghouse.xmlrpc',
+    'clearinghouse.gapi_tester',
+#    'clearinghouse.extendable',
+#    'clearinghouse.xmlrpc',
+#    'registration',
+#    'clearinghouse.aggregate',
+#    'clearinghouse.utils',
+#    'clearinghouse.messaging',
+#    'clearinghouse.openflow',
+#    'clearinghouse.project',
+#    'clearinghouse.resources',
+#    'clearinghouse.slice',
+#    'clearinghouse.users',
+#    'clearinghouse.defaultsite',
 #    'clearinghouse.extendable_tester',
-    'registration',
-    'clearinghouse.aggregate',
-    'clearinghouse.utils',
-    'clearinghouse.messaging',
-    'clearinghouse.openflow',
+###### IGNORE ############################
 #    'clearinghouse.permission',
-    'clearinghouse.project',
-    'clearinghouse.resources',
-    'clearinghouse.slice',
-    'clearinghouse.users',
-    'clearinghouse.defaultsite',
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
 #    'clearinghouse.difc',
@@ -130,7 +132,9 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
 
+# XML-RPC settings
 XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
+XMLRPC_TIMEOUT = 120
 MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 
 # default site

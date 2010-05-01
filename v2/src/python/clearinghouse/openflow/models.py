@@ -11,17 +11,30 @@ from clearinghouse.xmlrpc.models import PasswordXMLRPCClient
 from django.core.urlresolvers import reverse
 
 class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
-    pass
+    class Extend:
+        replacements = {
+            "aggregate_class": "OpenFlowAggregate",
+        }
 
 class OpenFlowUserInfo(aggregate_models.AggregateUserInfo):
-    pass
+    class Extend:
+        replacements = {
+            "aggregate_class": "OpenFlowAggregate",
+        }
 
 class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
     controller_url = models.CharField("URL of the slice's OpenFlow controller",
                                       max_length=100)
+    class Extend:
+        replacements = {
+            "aggregate_class": "OpenFlowAggregate",
+        }
 
 class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
-    pass
+    class Extend:
+        replacements = {
+            "aggregate_class": "OpenFlowAggregate",
+        }
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCClient)
@@ -66,6 +79,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
     def delete_slice(self, slice, server=None):
         return self.client.delete_slice(slice.id)
+    
+    def check_status(self):
+        return self.available and self.client.is_available()
 
 class OpenFlowSwitch(resource_models.Node):
     datapath_id = models.CharField(max_length=100, unique=True)

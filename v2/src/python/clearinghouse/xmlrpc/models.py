@@ -7,13 +7,12 @@ class PasswordXMLRPCClient(models.Model):
     password = models.CharField(max_length=3072,
         default=lambda: binascii.b2a_qp(os.urandom(1024)))
     max_password_age = models.IntegerField(
-        'Maximum password age in days', default=60)
+        'Max Password age (days)', default=60)
     password_timestamp = models.DateField(auto_now_add=True)
-    url = models.URLField("XML-RPC Server URL", max_length=1024,
-                          verify_exists=True)
+    url = models.URLField("Server URL", max_length=1024,
+                          verify_exists=False)
     
-    verify_ca = models.BooleanField("Verify the CA in SSL connections?",
-                                    default=True)
+    verify_ca = models.BooleanField("Verify CA?", default=True)
     
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCClient, self).__init__(*args, **kwargs)
@@ -28,12 +27,14 @@ class PasswordXMLRPCClient(models.Model):
             if self.verify_ca:
                 self.proxy = ServerProxy(
                     self.url, PyCURLSafeTransport(
+                        timeout=settings.XMLRPC_TIMEOUT,
                         username=self.username,
                         password=self.password,
                         ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH))
             else:
                 self.proxy = ServerProxy(
                     self.url, PyCURLSafeTransport(
+                        timeout=settings.XMLRPC_TIMEOUT,
                         username=self.username,
                         password=self.password,
                     ))
@@ -46,6 +47,17 @@ class PasswordXMLRPCClient(models.Model):
             return self.proxy
         else:
             return getattr(self.proxy, name)
+        
+    def is_available(self):
+        '''Call the server's ping method, and see if we get a pong'''
+        try:
+            if self.ping("PING") == "PING: PONG":
+                return True
+        except Exception, e:
+            import traceback
+            print "Exception while pinging server: %s" % e
+            traceback.print_exc()
+        return False
 
     def install_trusted_ca(self):
         '''

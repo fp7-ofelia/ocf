@@ -6,9 +6,9 @@ from clearinghouse.aggregate.forms import AggregateTypeForm
 from django.contrib.contenttypes.models import ContentType
 import sys
 
-def list_aggs(request, number=None):
+def list_aggs(request, obj_id=None):
     '''
-    Get a list of aggregates.
+    Get a list of aggregates. obj_id specifies id to highlight.
     '''
     
     qs = Aggregate.objects.all()
@@ -33,5 +33,8 @@ def list_aggs(request, number=None):
         queryset=qs,
         template_name="aggregate/list.html",
         template_object_name="aggregate",
-        extra_context={'form': form},
+        extra_context={
+            'form': form,
+            'highlight_id': obj_id,
+        },
     )

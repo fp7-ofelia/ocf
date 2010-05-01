@@ -90,7 +90,7 @@ def reserve_slice(slice_id, project_name, project_description,
     @type switch_sliver: list of dicts
     
     @param kwargs: will contain additional useful information about the request.
-        Of most use are the items in the C{kwargs['request'].META dict. These
+        Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
     
@@ -112,7 +112,7 @@ def delete_slice(slice_id, **kwargs):
         Clearinghouseclearinghouse.
     @type slice_id: int
     @param kwargs: will contain additional useful information about the request.
-        Of most use are the items in the C{kwargs['request'].META dict. These
+        Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
@@ -128,7 +128,7 @@ def change_password(new_password, **kwargs):
     @param new_password: the new password to use for authentication.
     @type new_password: random string of 1024 characters
     @param kwargs: will contain additional useful information about the request.
-        Of most use are the items in the C{kwargs['request'].META dict. These
+        Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
     @return: Error message if there is any.
@@ -151,3 +151,12 @@ def change_password(new_password, **kwargs):
     user.set_password(new_password)
     
     return ""
+
+@rpcmethod(signature=['string', 'string'])
+def ping(data):
+    '''
+    Test method to see that everything is up.
+    return a string that is "%s: PONG" % data
+    '''
+    
+    return "%s: PONG" % data

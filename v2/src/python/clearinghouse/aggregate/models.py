@@ -27,7 +27,8 @@ class Aggregate(Extendable):
             'admins_info': (
                 models.ManyToManyField,
                 ("AggregateAdminInfo",),
-                {"verbose_name": "Info about users allowed to administer the aggregate"},
+                {"verbose_name": "Info about users allowed to administer the aggregate",
+                 "related_name": "aggregates"},
                 ("admin_info_class",),
                 {'through': 'admin_info_through',
                  'verbose_name': "admins_comment",},
@@ -35,7 +36,8 @@ class Aggregate(Extendable):
             'users_info': (
                 models.ManyToManyField,
                 ("AggregateUserInfo",),
-                {"verbose_name": "Info about users allowed to use aggregate"},
+                {"verbose_name": "Info about users allowed to use aggregate",
+                 "related_name": "aggregates"},
                 ("user_info_class",),
                 {'through': 'user_info_through',
                  "verbose_name":  "users_comment"},
@@ -43,7 +45,8 @@ class Aggregate(Extendable):
             'slices_info': (
                 models.ManyToManyField,
                 ("AggregateSliceInfo",),
-                {"verbose_name":  "Info on slices using the aggregate"},
+                {"verbose_name":  "Info on slices using the aggregate",
+                 "related_name": "aggregates"},
                 ("slice_info_class",),
                 {'through': 'slice_info_through',
                  'verbose_name': "slices_comment"},
@@ -51,12 +54,19 @@ class Aggregate(Extendable):
             'projects_info': (
                 models.ManyToManyField,
                 ("AggregateProjectInfo",),
-                {'verbose_name': "Info on projects using the aggregate"},
+                {'verbose_name': "Info on projects using the aggregate",
+                 "related_name": "aggregates"},
                 ("project_info_class",),
                 {'through': 'project_info_through',
                  'verbose_name':  "projects_comment"},
             ),
         }
+        required = [
+            'admin_info_class',
+            'user_info_class',
+            'slice_info_class',
+            'project_info_class',
+        ]
         
     class Meta:
         verbose_name = "Generic Aggregate"
@@ -72,10 +82,18 @@ class Aggregate(Extendable):
         return reverse("%s_aggregate_edit" % ct.app_label,
                        kwargs={'obj_id': self.id})
 
+    def get_aggregates_url(self):
+        ct = ContentType.objects.get_for_model(self.__class__)
+        return reverse("%s_aggregate_home" % ct.app_label,
+                       kwargs={'obj_id': self.id})
+
     @classmethod
     def get_create_url(cls):
         ct = ContentType.objects.get_for_model(cls)
         return reverse("%s_aggregate_create" % ct.app_label)
+    
+    def check_status(self):
+        return self.available
 
 class AggregateUserInfo(Extendable):
     '''
@@ -89,14 +107,6 @@ class AggregateUserInfo(Extendable):
 
     class Extend:
         fields = {
-            'aggregates': (
-                models.ManyToManyField,
-                (Aggregate,),
-                {'verbose_name': "Aggregates the user is allowed to use"},
-                ("aggregate_class",),
-                {'through': 'aggregates_through',
-                 'verbose_name': "aggregates_comment"},
-            ),
             'user': (
                 models.OneToOneField,
                 (auth.models.User,),
@@ -113,14 +123,6 @@ class AggregateAdminInfo(Extendable):
     
     class Extend:
         fields = {
-            'aggregates': (
-                models.ManyToManyField,
-                (Aggregate,),
-                {'verbose_name': "Aggregates the user is allowed to administer"},
-                ("aggregate_class",),
-                {'through': 'aggregates_through',
-                 'verbose_name':  "aggregates_comment"},
-            ),
             'user': (
                 models.OneToOneField,
                 (auth.models.User,),
@@ -137,14 +139,6 @@ class AggregateSliceInfo(Extendable):
     
     class Extend:
         fields = {
-            'aggregates': (
-                models.ManyToManyField,
-                (Aggregate,),
-                {'verbose_name': "Aggregates the slice is allowed to use"},
-                ("aggregate_class",),
-                {'through': 'aggregates_through',
-                 'verbose_name': "aggregates_comment"},
-            ),
             'slice': (
                 models.OneToOneField,
                 (Slice,),
@@ -161,14 +155,6 @@ class AggregateProjectInfo(Extendable):
     
     class Extend:
         fields = {
-            'aggregates': (
-                models.ManyToManyField,
-                (Aggregate,),
-                {'verbose_name': "Aggregates the project is allowed to use"},
-                ("aggregate_class",),
-                {'through': 'aggregates_through',
-                 'verbose_name': "aggregates_comment"},
-            ),
             'project': (
                 models.OneToOneField,
                 (Project,),
@@ -177,6 +163,9 @@ class AggregateProjectInfo(Extendable):
                 {"verbose_name": "project_comment"},
             ),
         }
+        required = [
+            'aggregate_class',
+        ]
         
     class Meta:
         abstract = True

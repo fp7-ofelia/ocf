@@ -3,6 +3,7 @@ from clearinghouse.messaging.models import DatedMessage
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from clearinghouse.openflow.forms import OpenFlowAggregateForm
+from clearinghouse.openflow.models import OpenFlowAdminInfo
 from clearinghouse.xmlrpc.forms import PasswordXMLRPCClientForm
 
 def aggregate_create(request):
@@ -24,8 +25,15 @@ def aggregate_create(request):
             agg.client = client
             agg.save()
             agg_form.save_m2m()
-            return HttpResponseRedirect(reverse("openflow_aggregate_edit",
-                                                kwargs={'obj_id': agg.id}))
+            # Add current user as owner for the aggregate
+            admin_info = OpenFlowAdminInfo.objects.create(
+                user=request.user,
+            )
+            agg.admins_info.add(admin_info)
+            agg.save()
+            return HttpResponseRedirect(reverse(
+                "aggregate_all",
+            ))
     else:
         return HttpResponseNotAllowed("GET", "POST")
     

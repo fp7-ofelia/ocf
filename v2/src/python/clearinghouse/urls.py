@@ -7,6 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}, 'home'),
     
+    (r'^gapi_tester/', include('clearinghouse.gapi_tester.urls')),
     (r'^users/', include('clearinghouse.users.urls')),
     (r'^aggregate/', include('clearinghouse.aggregate.urls')),
     (r'^openflow/', include('clearinghouse.openflow.urls')),
