@@ -6,7 +6,7 @@ as root, while a '$' means execute as normal user.
 Install requirements to run our Django project:
 -----------------------------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
-# zypper install python-setuptools python-django python-curl python-decorator python-django-autoslug
+# zypper install python-setuptools python-django python-decorator python-django-autoslug python-m2crypto
 # easy_install -Z django-registration rpc4django
 
 Edit Django Settings:

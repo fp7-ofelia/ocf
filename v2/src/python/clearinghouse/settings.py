@@ -128,7 +128,7 @@ EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
 EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
-EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
+EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
@@ -147,4 +147,4 @@ SITE_DOMAIN = "beirut.stanford.edu"
 NUM_LATEST_MSGS = 10
 
 # Aggregate app settings
-AGGREGATE_LOGOS_DIR = "img/logos"
+AGGREGATE_LOGOS_DIR = "/"

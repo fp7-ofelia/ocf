@@ -19,8 +19,8 @@ class Aggregate(Extendable):
     logo = models.ImageField('Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
                              blank=True, null=True)
     description = models.TextField()
-    location = models.CharField("Location", max_length=200)
-    available = models.BooleanField("Available", default=False)
+    location = models.CharField("Geographic Location", max_length=200)
+    available = models.BooleanField("Available", default=True)
     
     class Extend:
         fields = {
@@ -86,6 +86,7 @@ class Aggregate(Extendable):
         ct = ContentType.objects.get_for_model(self.__class__)
         return reverse("%s_aggregate_home" % ct.app_label,
                        kwargs={'obj_id': self.id})
+
 
     @classmethod
     def get_create_url(cls):

@@ -111,7 +111,10 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
-    print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
+    try:
+        print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
+    except KeyError, e:
+        print "%s" % e
 
     return {
         'error_msg': "",
@@ -149,14 +152,24 @@ def get_links():
     Return what the FlowVisor gives.
     '''
     
-    return []
+    return [
+        [0, 0, 1, 0, {}],
+        [1, 0, 0, 0, {}],
+        [2, 0, 1, 0, {}],
+        [1, 0, 2, 0, {}],
+        [2, 0, 0, 0, {}],
+        [0, 0, 2, 0, {}],
+    ]
 
 @rpcmethod(signature=['string', 'string', 'string'])
 def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
-    username = kwargs['request'].META['REMOTE_USER']
+    try:
+        username = kwargs['request'].META['REMOTE_USER']
+    except KeyError, e:
+        return "ERROR: Anauthenticated user!"
 
     attrs = {'url': url, 'cookie': cookie}
     filter_attrs = {'username': username}
@@ -181,7 +194,12 @@ def change_password(new_password, **kwargs):
     @rtype: string
     '''
     
-    username = kwargs['request'].META['REMOTE_USER']
+    print kwargs
+    
+    try:
+        username = kwargs['request'].META['REMOTE_USER']
+    except KeyError, e:
+        return "ERROR: Anauthenticated user!"
     
     dummy = User.objects.get_or_create(username='xmlrpcdummy')
     
@@ -202,7 +220,7 @@ def change_password(new_password, **kwargs):
 def ping(data):
     '''
     Test method to see that everything is up.
-    return a string that is "%s: PONG" % data
+    return a string that is "PONG: %s" % data
     '''
-    
+
     return "PONG: %s" % data

@@ -26,8 +26,6 @@ def list_aggs(request, obj_id=None):
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
-    print form.as_p()
-    
     return list_detail.object_list(
         request,
         queryset=qs,

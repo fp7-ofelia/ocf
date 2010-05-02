@@ -1,7 +1,9 @@
 from django.db import models
 import os
 import binascii
-
+import datetime
+from django.conf import settings
+ 
 def random_password():
     return binascii.b2a_qp(os.urandom(1024))
 
@@ -20,43 +22,55 @@ class PasswordXMLRPCServerProxy(models.Model):
     url = models.URLField("Server URL", max_length=1024,
                           verify_exists=False)
     
-    verify_ca = models.BooleanField("Verify CA?", default=True)
-        
+    verify_certs = models.BooleanField("Verify Certificates?", default=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
+        self.transport = None
+    
     def __getattr__(self, name):
         if name == "proxy":
             from xmlrpclib import ServerProxy
-            from clearinghouse.utils import PyCURLSafeTransport
-            from django.conf import settings
-            from datetime import timedelta, date
+            from datetime import timedelta
             
-            if self.verify_ca:
-                self.proxy = ServerProxy(
-                    self.url, PyCURLSafeTransport(
-                        timeout=settings.XMLRPC_TIMEOUT,
-                        username=self.username,
-                        password=self.password,
-                        ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH))
+            # TODO: re-enable SSL/safe transport
+            if self.verify_certs:
+                from clearinghouse.utils import PyCURLSafeTransport
+                self.transport = PyCURLSafeTransport(
+                    timeout=settings.XMLRPC_TIMEOUT,
+                    username=self.username,
+                    password=self.password,
+                    ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
             else:
-                self.proxy = ServerProxy(
-                    self.url, PyCURLSafeTransport(
-                        timeout=settings.XMLRPC_TIMEOUT,
-                        username=self.username,
-                        password=self.password,
-                    ))
+                from clearinghouse.utils import PyCURLTransport
+                self.transport = PyCURLTransport(
+                    timeout=settings.XMLRPC_TIMEOUT,
+                    username=self.username,
+                    password=self.password)
+            
+            self.proxy = ServerProxy(self.url, self.transport)
             
             # if the password has expired, it's time to set a new one
             max_age = timedelta(days=self.max_password_age)
-            if self.password_timestamp + max_age >= date.today():
+            if (self.password_timestamp + max_age) >= datetime.date.today():
                 self.change_password(random_password())
                 
             return self.proxy
         else:
             return getattr(self.proxy, name)
         
+    def set_verify_certs(self, enable):
+        self.verify_certs = True
+        if self.transport:
+            self.transport.set_ssl_verify(settings.XMLRPC_TRUSTED_CA_PATH)
+        
     def change_password(self, password=None):
         password = password or random_password()
-        self.proxy.change_password(password)
+        self.password_timestamp = datetime.date.today()
+        retval = self.__getattr__('change_password')(password)
         self.password = password
+        # TODO: self.save()
+        return retval
         
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''
@@ -76,7 +90,6 @@ class PasswordXMLRPCServerProxy(models.Model):
         import ssl
         import urlparse
         import subprocess
-        from django.conf import settings
         
         # parse the url
         res = urlparse.urlparse(self.url)
@@ -85,9 +98,14 @@ class PasswordXMLRPCServerProxy(models.Model):
         # get the PEM-encoded certificate
         cert = ssl.get_server_certificate((res.hostname, port))
         
+        # the returned cert maybe messed up because python's ssl is crap. Fix it
+        if not cert.endswith("\n-----END CERTIFICATE-----\n"):
+            cert.replace("-----END CERTIFICATE-----\n",
+                         "\n-----END CERTIFICATE-----\n")
+        
         # dump it in the directory, and run make
         with open(os.path.join(settings.XMLRPC_TRUSTED_CA_PATH,
-                               res.hostname+".ca.cert"),
+                               res.hostname+"-ca.crt"),
                  'w') as cert_file:
             cert_file.write(cert)
         

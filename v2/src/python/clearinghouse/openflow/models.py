@@ -55,11 +55,17 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         verbose_name = "OpenFlow Aggregate"
         
     def setup_new_aggregate(self, hostname):
-        self.client.change_password()
-        self.client.register_topology_callback(
+        # TODO: enable SSL
+#        self.client.install_trusted_ca()
+        err = self.client.change_password()
+        if err: return err
+        err = self.client.register_topology_callback(
             "https://%s/openflow/xmlrpc/" % hostname,
             "%s" % self.pk,
         )
+        if err: return err
+        err = self.update_topology()
+        if err: return err
         
     def get_raw_topology(self):
         '''
@@ -67,21 +73,28 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         '''
         # Create a filter that selects any connection that connects a switch
         # in this aggregate
-        filter = Q(src_iface__switch__aggregate=self) | \
-            Q(dst_iface__switch__aggregate=self)
-            
-        # optimize so we don't hit the DB multiple times
-        qs = OpenFlowConnection.objects.filter(filter)
-        qs.select_related("src_iface","src_iface__switch",
-                          "dst_iface","dst_iface__switch")
-        
-        # Dump the links into tuples
+#        filter = Q(src_iface__switch__aggregate=self) | \
+#            Q(dst_iface__switch__aggregate=self)
+#            
+#        # optimize so we don't hit the DB multiple times
+#        qs = OpenFlowConnection.objects.filter(filter)
+#        qs.select_related("src_iface","src_iface__switch",
+#                          "dst_iface","dst_iface__switch")
+#        
+#        # Dump the links into tuples
+#        links = set()
+#        for cnxn in qs:
+#                links.add((cnxn.src_iface.switch.datapath_id,
+#                           cnxn.src_iface.port_num,
+#                           cnxn.dst_iface.switch.datapath_id,
+#                           cnxn.dst_iface.port_num))
+
         links = set()
-        for cnxn in qs:
-                links.add((cnxn.src_iface.switch.datapath_id,
-                           cnxn.src_iface.port_num,
-                           cnxn.dst_iface.switch.datapath_id,
-                           cnxn.dst_iface.port_num))
+        for iface in self.openflowinterface_set.all():
+            for in_ngbr in iface.ingress_neighbors.all():
+                links.add((iface.switch.datapath_id, iface.port_num,
+                           in_ngbr.switch.datapath_id, in_ngbr.port_num))
+
         return links
     
     def update_topology(self):
@@ -105,9 +118,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #            lambda(a,b): (current_switches.get(pk=a).datapath_id, b),
 #            current_ifaces,
 #        )
-        current_ifaces = map(
+        current_ifaces = set(map(
             unslugify,
-            self.openflowinterface_set.all().values_list("slug", flat=True))
+            self.openflowinterface_set.all().values_list("slug", flat=True)))
         
         attrs_set = []
         ordered_active_links = []
@@ -131,6 +144,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         new_ifaces = active_ifaces - current_ifaces
         dead_ifaces = current_ifaces - active_ifaces
         
+        # TODO: differentiate between non-existant and inactive resources
+        
         # create the new datapaths
         for dpid in new_dpids:
             OpenFlowSwitch.objects.create(
@@ -152,6 +167,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 name="",
                 port_num=iface[1],
                 switch=OpenFlowSwitch.objects.get(datapath_id=iface[0]),
+                aggregate=self,
+                available=True,
+                status_change_timestamp=datetime.now(),
             )
         
         # make old ifaces unavailable
@@ -163,8 +181,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # create new links
         for link in new_links:
             OpenFlowConnection.objects.create(
-                src_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[0:1]),
-                dst_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[2:3]),
+                src_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[0:2]),
+                dst_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[2:4]),
             )
             
         # delete old links
@@ -208,7 +226,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         return self.client.delete_slice(slice.id)
     
     def check_status(self):
-        return self.available # TODO: and self.client.is_available()
+        return self.available and self.client.is_available()
 
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.IntegerField(unique=True)
