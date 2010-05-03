@@ -35,14 +35,14 @@ class PasswordXMLRPCServerProxy(models.Model):
             
             # TODO: re-enable SSL/safe transport
             if self.verify_certs:
-                from clearinghouse.utils import PyCURLSafeTransport
+                from clearinghouse.utils.transport import PyCURLSafeTransport
                 self.transport = PyCURLSafeTransport(
                     timeout=settings.XMLRPC_TIMEOUT,
                     username=self.username,
                     password=self.password,
                     ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
             else:
-                from clearinghouse.utils import PyCURLTransport
+                from clearinghouse.utils.transport import PyCURLTransport
                 self.transport = PyCURLTransport(
                     timeout=settings.XMLRPC_TIMEOUT,
                     username=self.username,

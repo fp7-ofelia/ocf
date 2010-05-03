@@ -22,51 +22,60 @@ class Aggregate(Extendable):
     location = models.CharField("Geographic Location", max_length=200)
     available = models.BooleanField("Available", default=True)
     
-    class Extend:
-        fields = {
-            'admins_info': (
-                models.ManyToManyField,
-                ("AggregateAdminInfo",),
-                {"verbose_name": "Info about users allowed to administer the aggregate",
-                 "related_name": "aggregates"},
-                ("admin_info_class",),
-                {'through': 'admin_info_through',
-                 'verbose_name': "admins_comment",},
-            ),
-            'users_info': (
-                models.ManyToManyField,
-                ("AggregateUserInfo",),
-                {"verbose_name": "Info about users allowed to use aggregate",
-                 "related_name": "aggregates"},
-                ("user_info_class",),
-                {'through': 'user_info_through',
-                 "verbose_name":  "users_comment"},
-            ),
-            'slices_info': (
-                models.ManyToManyField,
-                ("AggregateSliceInfo",),
-                {"verbose_name":  "Info on slices using the aggregate",
-                 "related_name": "aggregates"},
-                ("slice_info_class",),
-                {'through': 'slice_info_through',
-                 'verbose_name': "slices_comment"},
-            ),
-            'projects_info': (
-                models.ManyToManyField,
-                ("AggregateProjectInfo",),
-                {'verbose_name': "Info on projects using the aggregate",
-                 "related_name": "aggregates"},
-                ("project_info_class",),
-                {'through': 'project_info_through',
-                 'verbose_name':  "projects_comment"},
-            ),
-        }
-        required = [
-            'admin_info_class',
-            'user_info_class',
-            'slice_info_class',
-            'project_info_class',
-        ]
+    admins_info = models.ManyToManyField(
+        "AggregateAdminInfo", verbose_name="Administrators")
+    users_info = models.ManyToManyField(
+        "AggregateUserInfo", verbose_name="Users")
+    slices_info = models.ManyToManyField(
+        "AggregateSliceInfo", verbose_name="Slices using the aggregate")
+    projects_info = models.ManyToManyField(
+        "AggregateProjectInfo", verbose_name="Projects using the aggregate")
+    
+#    class Extend:
+#        fields = {
+#            'admins_info': (
+#                models.ManyToManyField,
+#                ("AggregateAdminInfo",),
+#                {"verbose_name": "Info about users allowed to administer the aggregate",
+#                 "related_name": "aggregates"},
+#                ("admin_info_class",),
+#                {'through': 'admin_info_through',
+#                 'verbose_name': "admins_comment",},
+#            ),
+#            'users_info': (
+#                models.ManyToManyField,
+#                ("AggregateUserInfo",),
+#                {"verbose_name": "Info about users allowed to use aggregate",
+#                 "related_name": "aggregates"},
+#                ("user_info_class",),
+#                {'through': 'user_info_through',
+#                 "verbose_name":  "users_comment"},
+#            ),
+#            'slices_info': (
+#                models.ManyToManyField,
+#                ("AggregateSliceInfo",),
+#                {"verbose_name":  "Info on slices using the aggregate",
+#                 "related_name": "aggregates"},
+#                ("slice_info_class",),
+#                {'through': 'slice_info_through',
+#                 'verbose_name': "slices_comment"},
+#            ),
+#            'projects_info': (
+#                models.ManyToManyField,
+#                ("AggregateProjectInfo",),
+#                {'verbose_name': "Info on projects using the aggregate",
+#                 "related_name": "aggregates"},
+#                ("project_info_class",),
+#                {'through': 'project_info_through',
+#                 'verbose_name':  "projects_comment"},
+#            ),
+#        }
+#        required = [
+#            'admin_info_class',
+#            'user_info_class',
+#            'slice_info_class',
+#            'project_info_class',
+#        ]
         
     class Meta:
         verbose_name = "Generic Aggregate"
@@ -102,72 +111,76 @@ class AggregateUserInfo(Extendable):
     
     @param user: user to which this info relates
     @type user: One-to-one mapping to L{auth.models.User}
-    @param aggregates: aggregates which the owner of this info can use
-    @type aggregates: L{models.ManyToManyField} to L{Aggregate}
     '''
+    
+    user = models.OneToOneField(auth.models.User)
 
-    class Extend:
-        fields = {
-            'user': (
-                models.OneToOneField,
-                (auth.models.User,),
-                {"verbose_name": "User to which this info relates"},
-                (None,),
-                {"verbose_name":  "user_comment"},
-            ),
-        }
-        
-    class Meta:
-        abstract = True
+#    class Extend:
+#        fields = {
+#            'user': (
+#                models.OneToOneField,
+#                (auth.models.User,),
+#                {"verbose_name": "User to which this info relates"},
+#                (None,),
+#                {"verbose_name":  "user_comment"},
+#            ),
+#        }
+#        
+#    class Meta:
+#        abstract = True
 
 class AggregateAdminInfo(Extendable):
     
-    class Extend:
-        fields = {
-            'user': (
-                models.OneToOneField,
-                (auth.models.User,),
-                {"verbose_name":  "User to which this info relates"},
-                (None,),
-                {"vebose_name": "user_comment"},
-            ),
-        }
-        
-    class Meta:
-        abstract = True
+    admin = models.OneToOneField(
+        auth.models.User, verbose_name="Administrator")
+    
+#    class Extend:
+#        fields = {
+#            'user': (
+#                models.OneToOneField,
+#                (auth.models.User,),
+#                {"verbose_name":  "User to which this info relates"},
+#                (None,),
+#                {"vebose_name": "user_comment"},
+#            ),
+#        }
+#        
+#    class Meta:
+#        abstract = True
         
 class AggregateSliceInfo(Extendable):
     
-    class Extend:
-        fields = {
-            'slice': (
-                models.OneToOneField,
-                (Slice,),
-                {"verbose_name": "Slice to which this info relates"},
-                (None,),
-                {"verbose_name": "slice_comment"},
-            ),
-        }
-        
-    class Meta:
-        abstract = True
-        
+    slice = models.OneToOneField(Slice)
+    
+#    class Extend:
+#        fields = {
+#            'slice': (
+#                models.OneToOneField,
+#                (Slice,),
+#                {"verbose_name": "Slice to which this info relates"},
+#                (None,),
+#                {"verbose_name": "slice_comment"},
+#            ),
+#        }
+#        
+#    class Meta:
+#        abstract = True
+
 class AggregateProjectInfo(Extendable):
     
-    class Extend:
-        fields = {
-            'project': (
-                models.OneToOneField,
-                (Project,),
-                {"verbose_name":  "Project to which this info relates"},
-                (None,),
-                {"verbose_name": "project_comment"},
-            ),
-        }
-        required = [
-            'aggregate_class',
-        ]
-        
-    class Meta:
-        abstract = True
+    project = models.OneToOneField(Project)
+    
+#    class Extend:
+#        fields = {
+#            'project': (
+#                models.OneToOneField,
+#                (Project,),
+#                {"verbose_name":  "Project to which this info relates"},
+#                (None,),
+#                {"verbose_name": "project_comment"},
+#            ),
+#        }
+#        
+#    class Meta:
+#        abstract = True
         

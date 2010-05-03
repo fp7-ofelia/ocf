@@ -42,3 +42,4 @@ def get_class_field(object, fieldname):
 @register.filter
 def equals(object1, object2):
     return object1 == object2
+
