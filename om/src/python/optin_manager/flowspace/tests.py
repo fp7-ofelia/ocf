@@ -64,7 +64,7 @@ def setup():
     
    
     u = User.objects.get(pk=1)
-    ufs = UserFlowSpace(user=u)
+    ufs = AdminFlowSpace(user=u)
     ufs.save()
     
     u = User.objects.get(pk=2)
