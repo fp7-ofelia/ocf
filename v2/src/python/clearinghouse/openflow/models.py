@@ -261,7 +261,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # get all the slivers that are in this aggregate
         sw_slivers_qs = slice.sliver_set.filter(
             resource__aggregate=self,
-            resource__contenttype=ContentType.objects.get_for_model(
+            resource__content_type=ContentType.objects.get_for_model(
                 OpenFlowSwitch)
         ).select_related(
             'resource__openflowswitch',
@@ -273,7 +273,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             d = {}
             d['datapath_id'] = s.resource.openflowswitch.datapath_id
             d['flowspace'] = []
-            for fs in s.flowspacerule_set:
+            for fs in s.flowspacerule_set.all():
                 fsd = {}
                 for f in fs._meta.fields:
                     fsd[f.name] = getattr(fs, f.name)
@@ -283,7 +283,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         return self.client.create_slice(
             slice.id, slice.project.name, slice.project.description,
             slice.name, slice.description, 
-            slice.openflowsliceinfo.controller_url,
+            slice.aggregatesliceinfo.controller_url,
             user.email, slice_password, sw_slivers)
         
     def delete_slice(self, slice, server=None):
@@ -421,10 +421,10 @@ class FlowSpaceRule(models.Model):
     port_num_end = models.CharField('Switch port number range end',
                                       max_length=4, default="*")
     
-    def __unicode__(self):
-        return("Policy: "+FlowSpaceRule.POLICY_TYPE_CHOICES[self.policy]
-               +", port: " +self.interface.port_num+", dl_src: "+self.dl_src
-               +", dl_dst: "+self.dl_dst+", dl_type: "+self.dl_type
-               +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
-               +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
-               +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
+#    def __unicode__(self):
+#        return("Policy: "+FlowSpaceRule.POLICY_TYPE_CHOICES[self.policy]
+#               +", port: " +self.interface.port_num+", dl_src: "+self.dl_src
+#               +", dl_dst: "+self.dl_dst+", dl_type: "+self.dl_type
+#               +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
+#               +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
+#               +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
