@@ -6,7 +6,7 @@ as root, while a '$' means execute as normal user.
 Install requirements to run our Django project:
 -----------------------------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
-# zypper install python-setuptools python-django python-decorator python-django-autoslug python-m2crypto
+# zypper install python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging
 # easy_install -Z django-registration rpc4django
 
 Edit Django Settings:
@@ -27,9 +27,13 @@ Point your browser to localhost:8000 to make sure Django works. Kill the server.
 Setup Apache2 to use SSL:
 -------------------------
 # zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
-# zypper install apache2 apache2-mod_wsgi apache2-mod_macro
+# zypper install apache2 apache2-mod_wsgi apache2-mod_macro apache2-itk
 # ln -s <egeni_root>/v2/src/config/apache/vhost-macros.conf /etc/apache2/conf.d/
-# ln -s <egeni_root>/v2/src/config/apache/vhost-clearinghouse.conf /etc/apache2/vhost.d/
+
+Edit the <egeni_root>/v2/src/config/apache/vhost-clearinghouse.conf and point
+it to the correct <egeni_root> and set the correct port to listen to.
+
+# ln -s <egeni_root>/v2/src/config/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
 # mkdir /var/log/apache2/clearinghouse
 # chmod o-w /var/log/apache2/clearinghouse
 # a2enmod wsgi

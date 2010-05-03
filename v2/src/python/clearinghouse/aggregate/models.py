@@ -6,6 +6,7 @@ from django.contrib import auth
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import permalink
 
 class Aggregate(Extendable):
     '''
@@ -88,13 +89,16 @@ class Aggregate(Extendable):
         
     def get_edit_url(self):
         ct = ContentType.objects.get_for_model(self.__class__)
+        print "get edit url for agg from app %s" % ct.app_label
+        print reverse("%s_aggregate_edit" % ct.app_label,
+                       kwargs={'agg_id': self.id})
         return reverse("%s_aggregate_edit" % ct.app_label,
-                       kwargs={'obj_id': self.id})
+                       kwargs={'agg_id': self.id})
 
     def get_aggregates_url(self):
         ct = ContentType.objects.get_for_model(self.__class__)
         return reverse("%s_aggregate_home" % ct.app_label,
-                       kwargs={'obj_id': self.id})
+                       kwargs={'agg_id': self.id})
 
 
     @classmethod

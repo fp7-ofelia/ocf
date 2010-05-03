@@ -1,0 +1,34 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Create OpenFlow Aggregate{% endblock title %}
+
+{% block content %}
+{% if aggregate %}
+<script>
+	function goto_delete() {
+		window.location="{% url openflow_aggregate_delete aggregate.pk %}";
+	}
+</script>
+{% endif %}
+
+<div class="main">
+	<form method="post" action="">
+	<table class="openflow_create">
+	{{ agg_form.as_table }}
+	{{ client_form.as_table }}
+	{% if not create %}
+	<tr>
+		<th>Current status:</th>
+		<td class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+	</tr>
+	{% endif %}
+    </table>
+    {% if create %}
+	<input type="submit" value="Create" />
+	{% else %}
+	<input type="submit" value="Update" />
+	<input type="button" value="Delete" onclick="goto_delete();"/>
+	{% endif %}
+	</form>
+</div>
+{% endblock content %}

@@ -7,7 +7,7 @@ class DatedMessageManager(models.Manager):
     Add some convenience functions for working with messages.
     '''
     
-    def post_messages_to_users(self, msg_text, 
+    def post_message_to_users(self, msg_text, 
                                msg_type='announcement', **kwargs):
         '''
         send a message to users matching the filter arguments in kwargs.

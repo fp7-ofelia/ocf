@@ -54,7 +54,8 @@ def _add_switches_node(parent_elem, aggregate):
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
     dpids = OpenFlowSwitch.objects.filter(
-        aggregate=aggregate).values_list("datapath_id", flat=True)
+        aggregate=aggregate, active=True).values_list(
+            "datapath_id", flat=True)
         
     for dpid in dpids:
         et.SubElement(
@@ -137,13 +138,17 @@ def get_all_resources():
     '''
     
     root = _get_root_node()
-    return et.dump(root)
+    return et.tostring(root)
 
 RESV_RSPEC_TAG="resv_rspec"
 USER_TAG="user"
 FULLNAME="fullname"
 EMAIL="email"
 PASSWORD="password"
+PROJECT_TAG="project"
+SLICE_TAG="slice"
+DESCRIPTION="description"
+CONTROLLER="controller_url"
 FLOWSPACE_TAG="flowspace"
 POLICY_TAG="policy"
 PORT_TAG="port"
@@ -175,11 +180,12 @@ def create_slice(resv_rspec, slice_urn):
         <project
             name="Stanford Networking Group"
             description="Internet performance research to ..."
+        />
         <slice
             name="Crazy Load Balancer"
             description="Does this and that..."
             controller_url="tcp:controller.stanford.edu:6633"
-        </slice>
+        />
         <flowspace>
             <switches>
                 <switch dpid="0">
@@ -227,11 +233,77 @@ def create_slice(resv_rspec, slice_urn):
     # make the reservation
     # TODO: concat all the responses
     for aggregate, slivers in agg_slivers:
-        aggregate.client.reserve_slive(
+        aggregate.client.create_slice(
             slice_urn, project_name, project_desc,
             slice_name, slice_desc, 
             controller_url,
             email, password, slivers,
         )
     
-    return ""
+    # TODO: get the actual reserved things
+    return resv_rspec
+
+def _resv_parse_user(root):
+    '''parse the user tag from the root Element'''
+    user_elem = root.find(USER_TAG)
+    return (user_elem.get(EMAIL), user_elem.get(PASSWORD))
+
+def _resv_parse_slice(root):
+    slice_elem = root.find(SLICE_TAG)
+    return (slice_elem.get(NAME),
+            slice_elem.get(DESCRIPTION),
+            slice_elem.get(CONTROLLER))
+    
+def _resv_parse_project(root):
+    proj_elem = root.find(PROJECT_TAG)
+    return (proj_elem.get(NAME), proj_elem.get(DESCRIPTION))
+
+def _resv_parse_slivers(root):
+    '''Return a list of tuples (aggregate, slivers) where aggregate is
+    an OpenFlowAggregate instance and slivers is a list of dicts suitable for
+    use in the create_slice xml-rpc call of the OM'''
+    
+    flowspace_elems = root.findall(FLOWSPACE_TAG)
+    
+    dpid_fs_map = {}
+    
+    for flowspace_elem in flowspace_elems:
+        
+        fs = {}
+        # get a dict of the flowspace rule
+        for tag in POLICY_TAG, PORT_TAG, DL_SRC_TAG, DL_DST_TAG,\
+        DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
+        TP_SRC_TAG, TP_DST_TAG:
+            from_key = "%s_from" % tag
+            to_key = "%s_to" % tag
+            field_elem = flowspace_elem.find(tag)
+            if field_elem:
+                fs[from_key] = field_elem.get["from"]
+                fs[to_key] = field_elem.get["to"]
+            else:
+                fs[from_key] = WILDCARD
+                fs[to_key] = WILDCARD
+        
+        # now for each switch, add a mapping from the dpid to the fs
+        for switch_elem in flowspace_elem.find(SWITCHES_TAG).findall(SWITCH_TAG):
+            dpid = switch_elem.get(DPID)
+            if dpid not in dpid_fs_map:
+                dpid_fs_map[dpid] = []
+            dpid_fs_map[dpid].append(dpid)
+        
+    datapaths = dpid_fs_map.keys()
+    # get a list of all the available datapaths
+    qs = OpenFlowSwitch.objects.filter(
+        datapath_id__in=datapaths).select_related(
+            "aggregate")
+    
+    # This is a map from aggregate pk to a tuple (openflow_aggregate, list of slivers)
+    # each sliver is a list of dicts as described in the OM's create_slice call
+    agg_slivers_map = {}
+    for dp in qs:
+        if dp.aggregate.pk not in agg_slivers_map:
+            agg_slivers_map[dp.aggregate.pk] = (dp.aggregate.as_leaf_class(), [])
+        agg_slivers_map[dp.aggregate.pk][1].append(
+            dp.datapath_id, dpid_fs_map[dp.datapath_id])
+        
+    return agg_slivers_map.values()

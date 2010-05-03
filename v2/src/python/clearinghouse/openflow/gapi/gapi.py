@@ -5,7 +5,9 @@ Created on Apr 20, 2010
 '''
 from rpc4django import rpcmethod
 from decorator import decorator
-from gam import CredentialVerifier
+import rspec
+from django.contrib.auth.models import User
+from clearinghouse.openflow.models import OpenFlowAggregate
 
 CREDENTIALS_TYPE = 'array' # of strings
 OPTIONS_TYPE = 'struct'
@@ -16,7 +18,6 @@ SUCCESS_TYPE = 'boolean'
 STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
 
-__cred_verif = CredentialVerifier()
 
 __func_to_privs = dict(
     ListResources=('listresources',),
@@ -26,6 +27,8 @@ __func_to_privs = dict(
 )
 
 def check_cred(func, use_slice_urn, *args, **kwargs):
+    from gam import CredentialVerifier
+    cred_verif = CredentialVerifier()
     pem_cert = kwargs['request'].META['SSL_CLIENT_CERT']
     if use_slice_urn:
         slice_urn = args[0]
@@ -33,7 +36,7 @@ def check_cred(func, use_slice_urn, *args, **kwargs):
     else:
         slice_urn = None
         creds = args[0]
-    __cred_verif.verify_from_strings(
+    cred_verif.verify_from_strings(
         pem_cert, creds, slice_urn, __func_to_privs[func.func_name])
     return func(*args, **kwargs)
 
@@ -68,34 +71,47 @@ def GetVersion(**kwargs):
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
 @check_cred_no_urn
 def ListResources(credentials, options, **kwargs):
-    return agg_mgr.ListResources(credentials, options)
+    compressed = False
+    if options and 'geni_compressed' in options:
+        compressed  = options['geni_compressed']
+    result = rspec.get_all_resources()
+    # return an empty rspec
+    if compressed:
+        import xmlrpclib
+        import zlib
+        result = xmlrpclib.Binary(zlib.compress(result))
+    return result
 
 @check_ssl_verify_success
 @check_cred_urn
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
 def CreateSliver(slice_urn, credentials, rspec, **kwargs):
-    return agg_mgr.CreateSliver(slice_urn, credentials, rspec)
+    # check if the user is already in the DB
+    username = kwargs['request'].META['REMOTE_USER']
+    return rspec.create_slice(rspec, slice_urn)
 
 @check_ssl_verify_success
 @check_cred_urn
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
 def DeleteSliver(slice_urn, credentials, **kwargs):
-    return agg_mgr.DeleteSliver(slice_urn, credentials)
+    for aggregate in OpenFlowAggregate.objects.all():
+        aggregate.client.delete_slice(slice_urn)
+    return True
 
 @check_ssl_verify_success
 @check_cred_urn
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
 def SliverStatus(slice_urn, credentials, **kwargs):
-    return agg_mgr.SliverStatus(slice_urn, credentials)
+    return {}
 
 @check_ssl_verify_success
 @check_cred_urn
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE])
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
-    return agg_mgr.RenewSliver(slice_urn, credentials, expiration_time)
+    return True
 
 @check_ssl_verify_success
 @check_cred_urn
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
 def Shutdown(slice_urn, credentials, **kwargs):
-    return agg_mgr.Shutdown(slice_urn, credentials)
+    return True

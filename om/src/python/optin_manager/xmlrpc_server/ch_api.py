@@ -166,6 +166,7 @@ def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
+    from clearinghouse import utils
     try:
         username = kwargs['request'].META['REMOTE_USER']
     except KeyError, e:
@@ -173,10 +174,7 @@ def register_topology_callback(url, cookie, **kwargs):
 
     attrs = {'url': url, 'cookie': cookie}
     filter_attrs = {'username': username}
-    rows = CallBackServerProxy.objects.filter(**filter_attrs).update(**attrs)
-    if not rows:
-        attrs.update(filter_attrs)
-        CallBackServerProxy.objects.create(**attrs)
+    utils.create_or_update(CallBackServerProxy, filter_attrs, attrs)
     return ""
 
 @rpcmethod(signature=['string', 'string'])
@@ -196,11 +194,15 @@ def change_password(new_password, **kwargs):
     
     print kwargs
     
+    print"******** change_password started"
+    
     try:
         username = kwargs['request'].META['REMOTE_USER']
     except KeyError, e:
         return "ERROR: Anauthenticated user!"
     
+    print"******** change_password doing user"
+
     dummy = User.objects.get_or_create(username='xmlrpcdummy')
     
     try:
@@ -213,14 +215,21 @@ def change_password(new_password, **kwargs):
         user = dummy
     
     user.set_password(new_password)
+    user.save()
+
+    print "******** change_password Done to %s" % new_password
     
     return ""
 
 @rpcmethod(signature=['string', 'string'])
-def ping(data):
+def ping(data, **kwargs):
     '''
     Test method to see that everything is up.
     return a string that is "PONG: %s" % data
     '''
-
+    try:
+        username = kwargs['request'].META['REMOTE_USER']
+    except KeyError, e:
+        return "ERROR: Anauthenticated user!"
+    print "Pinged!"
     return "PONG: %s" % data

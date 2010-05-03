@@ -18,7 +18,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     password = models.CharField(max_length=3072, default=random_password)
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
-    password_timestamp = models.DateField(auto_now_add=True)
+    password_timestamp = models.DateTimeField(auto_now_add=True)
     url = models.URLField("Server URL", max_length=1024,
                           verify_exists=False)
     
@@ -32,18 +32,19 @@ class PasswordXMLRPCServerProxy(models.Model):
         if name == "proxy":
             from xmlrpclib import ServerProxy
             from datetime import timedelta
+            import time
             
             # TODO: re-enable SSL/safe transport
             if self.verify_certs:
-                from clearinghouse.utils.transport import PyCURLSafeTransport
-                self.transport = PyCURLSafeTransport(
+                from clearinghouse.utils.transport import PyCURLSafeTransport as transport
+                self.transport = transport(
                     timeout=settings.XMLRPC_TIMEOUT,
                     username=self.username,
                     password=self.password,
                     ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
             else:
-                from clearinghouse.utils.transport import PyCURLTransport
-                self.transport = PyCURLTransport(
+                from clearinghouse.utils.transport import PyCURLSafeTransport as transport
+                self.transport = transport(
                     timeout=settings.XMLRPC_TIMEOUT,
                     username=self.username,
                     password=self.password)
@@ -52,7 +53,11 @@ class PasswordXMLRPCServerProxy(models.Model):
             
             # if the password has expired, it's time to set a new one
             max_age = timedelta(days=self.max_password_age)
-            if (self.password_timestamp + max_age) >= datetime.date.today():
+            expiry_time = self.password_timestamp + max_age
+            # normalize because django is screwy
+            expiry_time = time.mktime(expiry_time.timetuple())
+            now = time.time()
+            if expiry_time <= now:
                 self.change_password(random_password())
                 
             return self.proxy
@@ -65,12 +70,15 @@ class PasswordXMLRPCServerProxy(models.Model):
             self.transport.set_ssl_verify(settings.XMLRPC_TRUSTED_CA_PATH)
         
     def change_password(self, password=None):
-        password = password or random_password()
-        self.password_timestamp = datetime.date.today()
-        retval = self.__getattr__('change_password')(password)
-        self.password = password
-        # TODO: self.save()
-        return retval
+        # TODO: Fix
+        return ""
+#        password = password or random_password()
+#        self.password_timestamp = datetime.date.today()
+#        retval = self.__getattr__('change_password')(password)
+#        self.password = password
+#        del self.proxy
+#        self.save()
+#        return retval
         
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''

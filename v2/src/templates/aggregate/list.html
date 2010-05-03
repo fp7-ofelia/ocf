@@ -38,7 +38,7 @@
 					{% endif %}
 					{% endfor %}
 		        </td>
-				<td class="status">{% if am.available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+				<td class="status">{% if am.check_status %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
 			</tr>
 			{% endwith %}
 			{% endfor %}

@@ -93,7 +93,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'rpc4django',
-    'clearinghouse.gapi_tester',
+#    'clearinghouse.gapi_tester',
     'autoslug',
     'clearinghouse.extendable',
     'clearinghouse.xmlrpc_serverproxy',

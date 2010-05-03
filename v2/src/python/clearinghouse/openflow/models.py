@@ -112,21 +112,21 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         links_raw = self.client.get_links()
 #        switches_raw = self.client.get_switches()
 
-        print "Link raw:"
-        pprint(links_raw, indent=4)
+#        print "Link raw:"
+#        pprint(links_raw, indent=4)
         
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
-        print "Current links:"
-        pprint (current_links, indent=4)
+#        print "Current links:"
+#        pprint (current_links, indent=4)
         
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-        print "Current switches:"
-        pprint (current_switches, indent=4)
+#        print "Current switches:"
+#        pprint (current_switches, indent=4)
 
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
-        print "Current dpids:"
-        pprint (current_dpids, indent=4)
+#        print "Current dpids:"
+#        pprint (current_dpids, indent=4)
         
 #        current_ifaces = self.openflowinterface_set.all().values_list('switch','port_num')
 #        current_ifaces = map(
@@ -137,8 +137,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             unslugify,
             OpenFlowInterface.objects.filter(
                 aggregate=self).values_list("slug", flat=True)))
-        print "Current iface:"
-        pprint (current_ifaces, indent=4)
+#        print "Current iface:"
+#        pprint (current_ifaces, indent=4)
         
         attrs_set = []
         ordered_active_links = []
@@ -155,12 +155,12 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             attrs_set.append(attrs)
             ordered_active_links.append(link)
 
-        print "active links:"
-        pprint (active_links, indent=4)
-        print "active ifaces:"
-        pprint (active_ifaces, indent=4)
-        print "active dpids:"
-        pprint (active_dpids, indent=4)
+#        print "active links:"
+#        pprint (active_links, indent=4)
+#        print "active ifaces:"
+#        pprint (active_ifaces, indent=4)
+#        print "active dpids:"
+#        pprint (active_dpids, indent=4)
         
         new_links = active_links - current_links
         dead_links = current_links - active_links
@@ -169,23 +169,23 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         new_ifaces = active_ifaces - current_ifaces
         dead_ifaces = current_ifaces - active_ifaces
         
-        print "New_links:"
-        pprint (new_links, indent=4)
-        print "New_dpids:"
-        pprint (new_dpids, indent=4)
-        print "New_ifaces:"
-        pprint (new_ifaces, indent=4)
-        
-        print "dead_links:"
-        pprint (dead_links, indent=4)
-        print "dead_dpids:"
-        pprint (dead_dpids, indent=4)
-        print "dead_ifaces:"
-        pprint (dead_ifaces, indent=4)
+#        print "New_links:"
+#        pprint (new_links, indent=4)
+#        print "New_dpids:"
+#        pprint (new_dpids, indent=4)
+#        print "New_ifaces:"
+#        pprint (new_ifaces, indent=4)
+#        
+#        print "dead_links:"
+#        pprint (dead_links, indent=4)
+#        print "dead_dpids:"
+#        pprint (dead_dpids, indent=4)
+#        print "dead_ifaces:"
+#        pprint (dead_ifaces, indent=4)
         
         # create the new datapaths
         for dpid in new_dpids:
-            print "Adding dpid %s" % dpid
+#            print "Adding dpid %s" % dpid
             create_or_update(
                 OpenFlowSwitch,
                 filter_attrs={
@@ -199,18 +199,18 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 }
             )
         
-        print "After adding: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
+#        print "After adding: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
         
         # make old datapaths unavailable
         current_switches.filter(
             datapath_id__in=dead_dpids).update(
                 available=False, status_change_timestamp=datetime.now())
 
-        print "After deleting: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
+#        print "After deleting: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
             
         # create new ifaces
         for iface in new_ifaces:
-            print "Adding iface %s_%s" % iface
+#            print "Adding iface %s_%s" % iface
             create_or_update(
                 OpenFlowInterface,
                 filter_attrs=dict(
@@ -227,7 +227,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 skip_attrs=['slug'],
             )
 
-        print "After adding: %s" % OpenFlowInterface.objects.filter(aggregate=self)
+#        print "After adding: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # make old ifaces unavailable
         dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
@@ -235,7 +235,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             aggregate=self, slug__in=dead_iface_slugs).update(
                 available=False, status_change_timestamp=datetime.now())
 
-        print "After deleting: %s" % OpenFlowInterface.objects.filter(aggregate=self)
+#        print "After deleting: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # create new links
         for link in new_links:
@@ -255,7 +255,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 c.delete()
 
     def update_slice(self, slice):
-        slice.reserve_slice(slice)
+        slice.create_slice(slice)
         
     def create_slice(self, user, slice, slice_password):
         # get all the slivers that are in this aggregate
@@ -280,7 +280,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 d['flowspace'].append(fsd)
             sw_slivers.append(d)
         
-        return self.client.reserve_slice(
+        return self.client.create_slice(
             slice.id, slice.project.name, slice.project.description,
             slice.name, slice.description, 
             slice.openflowsliceinfo.controller_url,

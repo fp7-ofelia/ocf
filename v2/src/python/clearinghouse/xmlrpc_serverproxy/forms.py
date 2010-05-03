@@ -19,9 +19,8 @@ class PasswordXMLRPCServerProxyForm(forms.ModelForm):
         import urlparse
         url = self.cleaned_data['url']
         parsed = urlparse.urlparse(url, "https", False)
-#        if parsed.scheme.lower() != "https":
-#            raise forms.ValidationError("Server URL must be contacted using HTTPS")
+        if parsed.scheme.lower() != "https":
+            raise forms.ValidationError("Server URL must be contacted using HTTPS")
         u = parsed.geturl()
         if not u.endswith("/"): u += "/"
         return u
-    
