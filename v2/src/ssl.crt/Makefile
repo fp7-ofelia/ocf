@@ -4,10 +4,11 @@
 ##
 
 SSL_PROGRAM=
+APACHE_CERTS="/etc/apache2/ssl.crt"
 
 update: clean
-	# link all the certs from apache
-	ln -s /etc/*.crt .
+	-@echo Linking all the certs from apache
+	-@ln -s $(APACHE_CERTS)/*.crt .
 	-@ssl_program="$(SSL_PROGRAM)"; \
 	if [ ".$$ssl_program" = . ]; then \
 	    for dir in . `echo $$PATH | sed -e 's/:/ /g'`; do \
@@ -52,4 +53,4 @@ update: clean
 
 clean:
 	-@rm -f [0-9a-fA-F]*.[0-9]*
-
+	-@rm -f `find . -type l`

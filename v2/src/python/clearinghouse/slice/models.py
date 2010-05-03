@@ -1,6 +1,5 @@
 from django.db import models
 from clearinghouse.project.models import Project
-from clearinghouse.extendable.models import Extendable
 
 class Slice(models.Model):
     '''
@@ -17,15 +16,3 @@ class Slice(models.Model):
     description = models.TextField()
     project = models.ForeignKey(Project)
     
-class GenericAggregateSliceInfo(Extendable):
-    '''
-    Holds additional aggregate-specific information about the slice
-    
-    @param slice: the slice to which the info is related
-    @type slice: L{models.ForeignKey} to L{Slice}
-    '''
-    slice = models.ForeignKey(Slice)
-    
-    class Meta:
-        abstract = True
-

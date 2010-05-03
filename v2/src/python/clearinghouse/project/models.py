@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib import auth
+from django.contrib.auth.models import User
 
 class Project(models.Model):
     '''
@@ -15,9 +15,8 @@ class Project(models.Model):
     
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    members = models.ManyToManyField(auth.models.User)
+    members = models.ManyToManyField(User)
     
     def __unicode__(self):
-        s = u"Project %s members: " % self.name
-        s = s + ", ".join(self.members)
+        s = u"Project %s members: %s" % (self.name, self.members.all())
         return s

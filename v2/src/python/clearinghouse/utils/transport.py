@@ -23,17 +23,20 @@
 # 02110-1301 USA
 #
 # $Id$
+from pprint import pprint
 
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-import xmlrpclib, pycurl
+import xmlrpclib
 
 class PyCURLTransport(xmlrpclib.Transport):
     """Handles a cURL HTTP transaction to an XML-RPC server."""
 
     def __init__(self, username = None, password = None, timeout = 300):
+        import pycurl
+        
         xmlrpclib.Transport.__init__(self)
 
         self.verbose = 0
@@ -58,7 +61,10 @@ class PyCURLTransport(xmlrpclib.Transport):
 
         # Set auth info if defined
         if username != None and password != None:
-            self._curl.setopt(pycurl.USERPWD, "%s:%s" % (username, password))
+            self._curl.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_BASIC)
+            self._curl.setopt(
+                pycurl.USERPWD,
+                ("%s:%s" % (username, password)).encode('ascii'))
 
     def _check_return(self, host, handler, httpcode, buf):
         """Checks return code for various errors"""
@@ -66,9 +72,13 @@ class PyCURLTransport(xmlrpclib.Transport):
 
     def request(self, host, handler, request_body, verbose = 0):
         """Performs actual request"""
+        
+        import pycurl
+
         buf = StringIO()
-        self._curl.setopt(pycurl.URL, 
-                "%s://%s%s" % (self._proto, host, handler))
+        self._curl.setopt(
+            pycurl.URL, 
+            ("%s://%s%s" % (self._proto, host, handler)).encode('ascii'))
         self._curl.setopt(pycurl.POSTFIELDS, request_body)
         self._curl.setopt(pycurl.WRITEFUNCTION, buf.write)
         self._curl.setopt(pycurl.VERBOSE, verbose)
@@ -101,21 +111,34 @@ class PyCURLSafeTransport(PyCURLTransport):
     and also can validate certs."""
     def __init__(self, username = None, password = None,
                  timeout = 300, ca_cert_path = None, ca_cert_file = None):
+
+        import pycurl
+
         PyCURLTransport.__init__(self, username, password, timeout)
 
         self._proto = "https"
-
-        # Setup certificates
-        if ca_cert_file or ca_cert_path:
-            self._curl.setopt(pycurl.CAPATH, ca_cert_file or ca_cert_path)
-            self._curl.setopt(pycurl.SSL_VERIFYPEER, 1)
-            self._curl.setopt(pycurl.SSL_VERIFYHOST, 2)
+        
+        self.set_ssl_verify(ca_cert_path, ca_cert_file)
 
     def _check_return(self, host, handler, httpcode, buf):
         """Check for SSL certs validity"""
+        
         if httpcode == 60:
             raise xmlrpclib.ProtocolError( 
                 host + handler, 
                 httpcode, 
                 "SSL certificate validation failed", 
                 None)
+            
+    def set_ssl_verify(self, ca_cert_path=None, ca_cert_file=None):
+        '''Enable/disable SSL verification'''
+        
+        import pycurl
+        
+        self._curl.setopt(pycurl.SSL_VERIFYPEER, 0)
+        self._curl.setopt(pycurl.SSL_VERIFYHOST, 0)
+        # Setup certificates
+        if ca_cert_file or ca_cert_path:
+            self._curl.setopt(pycurl.CAPATH, ca_cert_file or ca_cert_path)
+            self._curl.setopt(pycurl.SSL_VERIFYPEER, 1)
+            self._curl.setopt(pycurl.SSL_VERIFYHOST, 2)

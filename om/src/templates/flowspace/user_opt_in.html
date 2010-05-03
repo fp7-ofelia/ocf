@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+	<h2>Opt Traffic In, for User {{user.username}}</h2>
+	
+	<form name="input" action="/flowspace/opt_in" method="post">
+		<input type="submit" value="Opt In"/>
+	</form>
+</div>
+
+{% endblock content %}

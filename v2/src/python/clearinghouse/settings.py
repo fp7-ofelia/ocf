@@ -46,12 +46,12 @@ MEDIA_ROOT = join(STATIC_DOC_ROOT, "media")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static_media/'
+MEDIA_URL = '/static/media'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '6=egu-&rx7a+h%yjlt=lny=s+uz0$a_p8je=3q!+-^4w^zxkb8'
@@ -93,16 +93,23 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'rpc4django',
+#    'clearinghouse.gapi_tester',
+    'autoslug',
     'clearinghouse.extendable',
-#    'clearinghouse.extendable_tester',
+    'clearinghouse.xmlrpc_serverproxy',
     'registration',
     'clearinghouse.aggregate',
+    'clearinghouse.utils',
+    'clearinghouse.messaging',
     'clearinghouse.openflow',
-#    'clearinghouse.permission',
     'clearinghouse.project',
     'clearinghouse.resources',
     'clearinghouse.slice',
     'clearinghouse.users',
+    'clearinghouse.defaultsite',
+###### IGNORE ############################
+#    'clearinghouse.extendable_tester',
+#    'clearinghouse.permission',
 #    'clearinghouse.security',
 #    'clearinghouse.security_tester',
 #    'clearinghouse.difc',
@@ -121,10 +128,23 @@ EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
 EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
-EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse]'
+EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
 
-TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
-MY_CA = join(TRUSTED_CA_PATH, 'ca.crt')
+# XML-RPC settings
+XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
+XMLRPC_TIMEOUT = 120
+MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
+
+# default site
+SITE_ID = 1
+SITE_NAME = "Expedient Clearinghouse"
+SITE_DOMAIN = "beirut.stanford.edu"
+
+# Messaging settings
+NUM_LATEST_MSGS = 10
+
+# Aggregate app settings
+AGGREGATE_LOGOS_DIR = "/"

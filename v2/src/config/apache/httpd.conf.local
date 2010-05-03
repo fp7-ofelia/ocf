@@ -1,8 +1,0 @@
-LogLevel info
-
-WSGIScriptAlias / egeni_root/v2/src/python/apache/django.wsgi
-
-<Directory egeni_root/v2/src/python/apache>
-Order allow,deny
-Allow from all
-</Directory>

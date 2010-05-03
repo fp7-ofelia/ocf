@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<link rel="stylesheet" type="text/css" href="/css/egeni.css" />
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
 
 		<title>
 			{% block title %}GENI Clearinghouse{% endblock %}
@@ -13,15 +13,15 @@
 		<table bgcolor="#EEEEEE" width="800" border="0" align="center" cellpadding="3" cellspacing="0">
 			<tr>
 				<td align="left">
-					<img src="/img/genilogo.png" />
+					<img src="{% url img_media 'genilogo.png' %}" />
 				</td>
 				<td>
 					<div align="right" style="position: relative; top: 19px;">
- 						<a href="{% url home %}"><img src="/img/dashboard.png" alt="Dashboard" border="0" /></a><a 
-{% comment %}							href="{% url slice_home %}"><img src="/img/slice.png" alt="Slice Control Panel" border="0" /></a><a 
-{% endcomment %}							href="{% url users_my_detail %}"><img src="/img/account.png" alt="Account Settings" border="0" /></a><a 
-							href="/help/"><img src="/img/help.png" alt="Help" border="0" /></a><a 
-							href="{% url auth_logout %}"><img src="/img/logout.png" alt="Logout" border="0" /></a>
+ 						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
+{% comment %}							href="{% url slice_home %}"><img src="{% url img_media 'slice.png' %}" alt="Slice Control Panel" border="0" /></a><a 
+{% endcomment %}							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
+							href="/help/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
+							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
 					</div>
 				</td>
 			</tr>
@@ -32,7 +32,7 @@
 			</div>
 		</div>
 		<div id="footer">
-			(c) in 2009 by Stanford University. This software is licensed under the GENI License.
+			(c) in 2010 by Stanford University. This software is licensed under the GENI License.
 		</div>
 	</body>
 </html>

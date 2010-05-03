@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db.models import signals
 from django.db.models.base import ModelBase
+import pprint
 
 def _extendable_post_save(sender, **kwargs):
     '''Add the content_object if not already present'''
@@ -22,6 +23,10 @@ class ExtendableMeta(ModelBase):
         grandchildren of Extendable. Also connect the post_save signal
         to save the content_object.'''
         
+#        print "***********************************"
+#        print "Running extendable meta for %s" % name
+#        pprint.pprint(attrs)
+        
         # get the inner Extend class
         class Extend: pass
         extend = attrs.setdefault('Extend', Extend)
@@ -34,12 +39,15 @@ class ExtendableMeta(ModelBase):
             extended_fields = {}
             repl_kw = set()
             for base in bases:
+#                print "Checking base %s" % base
                 if isinstance(base, ExtendableMeta):
+#                    print "Base is ExtandableMeta instance"
                     base_extend = getattr(base, "Extend", Extend)
                     # check for clashes in field names and replacement keywords
                     # and add to dict
                     for fname, fval in \
                     getattr(base_extend, "fields", {}).items():
+#                        print "Processing inherited field %s" % fname
                         field_cls, args, kwargs, args_repl, kwargs_repl = fval
                         if fname in extended_fields:
                             raise Exception(
@@ -58,9 +66,12 @@ class ExtendableMeta(ModelBase):
                                         name, base))
                             else:
                                 extended_fields[fname] = fval
+            
+#            print "All extended fields: %s" % extended_fields.keys()
                                 
             # get the delegations, check that they are all in extended_fields
             delegations = getattr(extend, "redelegate", [])
+#            print "Delegations: %s" % delegations
             for d in delegations:
                 if d not in extended_fields:
                     raise Exception(
@@ -74,17 +85,20 @@ class ExtendableMeta(ModelBase):
                     extend.fields[d] = extended_fields[d]
                     del extended_fields[d]
             
+#            print "extend fields are now %s" % getattr(extend, "fields", {}).keys()
+#            print "extended_fields now has %s" % extended_fields.keys()
+            
             if extended_fields:
+#                print "adding extended fields"
                 # get replacements
                 repl = getattr(extend, 'replacements', {})
                 
                 # create each field in the child, replacing when necessary
                 for fname, fval in extended_fields.items():
+#                    print "adding %s" % (fname,)
                     # expand the information about the field
                     field_cls, args, kwargs, args_repl, kwargs_repl = fval
-                    
-                    # check if the field is redelegated
-                    
+
                     # check if there are any replacement for arguments
                     if args_repl:
                         if len(args_repl) != len(args):
@@ -105,9 +119,6 @@ class ExtendableMeta(ModelBase):
                     
                     # check for clashes
                     if fname in attrs:
-                        print fname
-                        print attrs['__module__']
-                        print name
                         raise Exception(
                             "Field '%s' clashes with extended field " % fname
                             +"in class %s.%s" % (attrs['__module__'], name))
