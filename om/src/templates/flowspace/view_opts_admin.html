@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+    <h2>Flowspaces Opted-In by {{user.username}}</h2>
+		<div align="right">
+			<a href="/dashboard">Dashboard</a><br/>
+		</div>
+
+		<div>
+		{% if error_message %}
+			<p color="red">{{error_message}}</p>
+		{% else %}
+			<p>{{user.username}}, you can set maximum priority to {{max_priority}} </p>
+			<p>Nice opts always have lower priority than harsh opts, regardless of their priority number</p>
+		{% endif %}
+		</div>
+
+		<div id="fstable">
+		<form name="input" action="/flowspace/update_opts" method="post">
+			<!--  csrf_token  -->
+			<table>
+				<tr> <th>Priority</th><th>Experiment</th></tr>
+				{% for opt in opts %}
+				<tr>
+				    <td><input type="text" name="p_{{opt.id}}" 
+						value="{{opt.priority}}"/>
+					</td>
+				    <td>
+						<a href="/flowspace/experiment/{{opt.experiment.id}}">
+						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
+						</a>
+					</td>
+
+				</tr>
+				{% endfor %}
+			</table>
+			<table>
+				<tr>
+					<td><input type="submit" value="Update"/></td>
+				</tr>
+			</table>
+		</form> 
+		</div>
+
+</div>
+{% endblock content %}

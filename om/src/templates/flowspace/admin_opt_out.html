@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>
+	<form name="input" action="/flowspace/opt_out" method="post">
+	<table>
+	<tr><th></th><th>FlowSpace</th><th>Experiment</th><th>Priority</th></tr>
+	{% for fs in allfs %}
+		<tr><td><input type="checkbox" name={{fs.id}}></td>
+		<td>{{fs}}</td>
+		<td>{{fs.opt.experiment.project_name}}:{{fs.opt.experiment.slice_name}}</td>
+		<td>{{fs.opt.priority}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<td><input type="submit" value="Opt Out"/></td>
+	</form>
+</div>
+{% endblock content %}

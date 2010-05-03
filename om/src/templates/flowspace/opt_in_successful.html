@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block scripts %}
+<script type="text/javascript">
+function clicked(){
+window.location="/dashboard"
+}
+</script>
+{% endblock %}
+{% block content %}
+<div class="main">
+	<center>
+	<b>You successfully opted into {{expname}}</b><br/>
+	<button type=button onClick="clicked()">OK</button>
+	</center>
+	
+</div>
+{% endblock content %}

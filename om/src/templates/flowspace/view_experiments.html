@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>
+	<table>
+	<tr><th>Slice ID</th><th>Project</th><th>Slice</th></tr>
+	{% for exp in exps %}
+	<tr><td><a href="/flowspace/experiment/{{exp.id}}">{{exp.slice_id}}</a></td>
+		<td>{{exp.project_name}}</td><td>{{exp.slice_name}}</td></tr>
+	{% endfor %}
+	</table>
+
+</div>
+
+{% endblock content %}
