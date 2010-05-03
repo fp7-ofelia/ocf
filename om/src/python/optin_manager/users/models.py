@@ -1,8 +1,20 @@
 from django.db import models
 from django.contrib import auth
-
+ 
+class Priority(object):
+     Aggregate_Admin        = 7000
+     Campus_Admin           = 6000
+     Department_Admin       = 5000
+     Building_Admin         = 4000
+     Group_Admin            = 3000
+     Strict_User            = 2000
+     Nice_User              = 1000
+     
+     Priority_MArgin        = 999
+     
+     Admins = ["Aggragate Admin", "Campus Admin", "Department Admin", "Building Admin", "Group Admin"]
+ 
 class UserProfile(models.Model):
-
     user                = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
     is_net_admin        = models.BooleanField("Can Confirm Flow Space Requests", default=False)
     max_priority_level  = models.IntegerField()
@@ -24,7 +36,7 @@ class UserProfile(models.Model):
             profile = cls.objects.create(
                         user=user,
                         is_net_admin = False,
-                        max_priority_level = 1,
+                        max_priority_level = Priority.Strict_User,
                         supervisor_id = 0
                         )
 

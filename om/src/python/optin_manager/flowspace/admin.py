@@ -1,9 +1,12 @@
 # admin file for flowspace - to be used in debuging
-from optin_manager.flowspace.models import OptedInFlowSpace
+from flowspace.models import UserOpts, Experiment, Topology, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
 from django.contrib import admin
 
-class OptedInFlowSpaceAdmin(admin.ModelAdmin):
-    pass
-    #fields = ('user', 'in_net_admin', 'max_priority_level','supervisor')
 
-admin.site.register(OptedInFlowSpace, OptedInFlowSpaceAdmin)
+admin.site.register(UserOpts)
+admin.site.register(Experiment)
+admin.site.register(Topology)
+admin.site.register(ExperimentFLowSpace)
+admin.site.register(OptsFlowSpace)
+admin.site.register(AdminFlowSpace)
+admin.site.register(UserFlowSpace)

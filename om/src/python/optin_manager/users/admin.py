@@ -1,4 +1,4 @@
-from optin_manager.users.models import UserProfile
+from users.models import UserProfile
 from django.contrib import admin
 
 class UserProfileAdmin(admin.ModelAdmin):
