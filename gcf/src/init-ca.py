@@ -10,6 +10,7 @@ key is created for a user named Alice.
 import optparse
 import os.path
 import sys
+from sfa.trust import gid
 
 CA_CERT_FILE = 'ca-cert.pem'
 CA_KEY_FILE = 'ca-key.pem'

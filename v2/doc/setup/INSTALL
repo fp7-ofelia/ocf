@@ -66,6 +66,7 @@ IMPORTANT: Note the .crt extension for the cert file
 
 Setting up the GENI test harness:
 ---------------------------------
+# zypper install python-dateutil
 - Unpack the latest harness and link its src directory to 'gcf' as a sibling of
   'clearinghouse'. If there's no __init__.py, add it as an empty file.
 - Follow the instructions in the harness README.txt to setup the test harness
