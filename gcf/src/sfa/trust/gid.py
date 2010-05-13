@@ -24,13 +24,13 @@
 # descendant of the certificate class.
 ##
 
-### $Id: gid.py 17622 2010-04-09 21:32:37Z jkarlin $
+### $Id: gid.py 17747 2010-04-20 20:19:33Z jkarlin $
 ### $URL: http://svn.planet-lab.org/svn/sfa/branches/geni-api/sfa/trust/gid.py $
 
-import uuid
 import xmlrpclib
+import uuid
 from sfa.trust.certificate import Certificate
-from sfa.util.namespace import hrn_to_urn, urn_to_hrn
+from sfa.util.namespace import *
 from sfa.util.sfalogging import logger
 
 ##
@@ -119,6 +119,12 @@ class GID(Certificate):
             self.decode()
         return self.urn            
 
+    def get_type(self):
+        if not self.urn:
+            self.decode()
+        _, t = urn_to_hrn(self.urn)
+        return t
+    
     ##
     # Encode the GID fields and package them into the subject-alt-name field
     # of the X509 certificate. This must be called prior to signing the

@@ -37,16 +37,16 @@
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
 
-privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "getcredential", "*"],
+privilege_table = {"authority": ["register", "remove", "update", "resolve", "list", "listresources", "getcredential", "*"],
                    "refresh": ["remove", "update"],
-                   "resolve": ["resolve", "list", "getcredential", "listresources", "getversion"],
-                   "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "deleteslice", "updateslice",
-                          "getsliceresources", "getticket", "loanresources", "stopslice", "startslice",
-                          "deleteslice", "resetslice", "listslices", "listnodes", "getpolicy", "createsliver"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver",  "deleteslice", "updateslice", "getsliceresources"],
+                   "resolve": ["resolve", "list", "listresources", "getcredential", "getversion"],
+                   "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "deleteslice", "deletesliver", "updateslice",  
+                          "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
+                          "deleteslice", "deletesliver", "resetslice", "listslices", "listnodes", "getpolicy", "sliverstatus"],
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver",  "deleteslice", "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "createsliver", "stopslice", "startslice", "deleteslice", "resetslice", "getsliceresources", "getgids"],
-                   "info": ["listslices", "listnodes", "getpolicy"],
+                   "control": ["updateslice", "createslice", "createsliver", "sliverstatus", "stopslice", "startslice", "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
+                   "info": ["listslices", "listnodes", "getpolicy","listresources"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
                    "operator": ["gettrustedcerts", "getgids"]}
 
@@ -100,54 +100,54 @@ def determine_rights(type, name):
 
 
 class Right:
-    ##
-    # Create a new right.
-    #
-    # @param kind is a string naming the right. For example "control"
+   ##
+   # Create a new right.
+   #
+   # @param kind is a string naming the right. For example "control"
 
-    def __init__(self, kind, delegate=False):
-        self.kind = kind
-        self.delegate = delegate
+   def __init__(self, kind, delegate=False):
+      self.kind = kind
+      self.delegate = delegate
+      
+   ##
+   # Test to see if this right object is allowed to perform an operation.
+   # Returns True if the operation is allowed, False otherwise.
+   #
+   # @param op_name is a string naming the operation. For example "listslices".
 
-    ##
-    # Test to see if this right object is allowed to perform an operation.
-    # Returns True if the operation is allowed, False otherwise.
-    #
-    # @param op_name is a string naming the operation. For example "listslices".
+   def can_perform(self, op_name):
+      allowed_ops = privilege_table.get(self.kind.lower(), None)
+      if not allowed_ops:
+         return False
 
-    def can_perform(self, op_name):
-        allowed_ops = privilege_table.get(self.kind.lower(), None)
-        if not allowed_ops:
-            return False
+      # if "*" is specified, then all ops are permitted
+      if "*" in allowed_ops:
+         return True
 
-        # if "*" is specified, then all ops are permitted
-        if "*" in allowed_ops:
-            return True
+      return (op_name.lower() in allowed_ops)
 
-        return (op_name.lower() in allowed_ops)
+   ##
+   # Test to see if this right is a superset of a child right. A right is a
+   # superset if every operating that is allowed by the child is also allowed
+   # by this object.
+   #
+   # @param child is a Right object describing the child right
 
-    ##
-    # Test to see if this right is a superset of a child right. A right is a
-    # superset if every operating that is allowed by the child is also allowed
-    # by this object.
-    #
-    # @param child is a Right object describing the child right
+   def is_superset(self, child):
+      my_allowed_ops = privilege_table.get(self.kind.lower(), None)
+      child_allowed_ops = privilege_table.get(child.kind.lower(), None)
 
-    def is_superset(self, child):
-        my_allowed_ops = privilege_table.get(self.kind.lower(), None)
-        child_allowed_ops = privilege_table.get(child.kind.lower(), None)
+      if not self.delegate:
+          return False
 
-        if not self.delegate:
-            return False
+      if "*" in my_allowed_ops:
+          return True
 
-        if "*" in my_allowed_ops:
-            return True
+      for right in child_allowed_ops:
+          if not right in my_allowed_ops:
+              return False
 
-        for right in child_allowed_ops:
-            if not right in my_allowed_ops:
-                return False
-
-        return True
+      return True
 
 ##
 # A RightList object represents a list of privileges.
@@ -201,7 +201,7 @@ class RightList:
     # Save the rightlist object to a string. It is saved in the format of a
     # comma-separated list.
 
-    def save_to_string(self):
+    def save_to_string(self):        
         right_names = []
         for right in self.rights:
             right_names.append('%s:%d' % (right.kind.strip(), right.delegate))

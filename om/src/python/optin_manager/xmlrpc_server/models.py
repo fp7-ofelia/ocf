@@ -25,7 +25,7 @@ class CallBackServerProxy(models.Model):
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''
         try:
-            if self.ping("PING") == "PING: PONG":
+            if self.ping("PING") == "PONG: PING":
                 return True
         except Exception, e:
             import traceback

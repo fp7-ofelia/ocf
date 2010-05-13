@@ -31,6 +31,7 @@ from pprint import pprint
 class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
     controller_url = models.CharField("URL of the slice's OpenFlow controller",
                                       max_length=100)
+    
 #    class Extend:
 #        replacements = {
 #            "aggregate_class": "OpenFlowAggregate",
@@ -61,11 +62,13 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #        self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
+        print "Registering callback"
         err = self.client.register_topology_callback(
             "https://%s/openflow/xmlrpc/" % hostname,
             "%s" % self.pk,
         )
         if err: return err
+        print "Updating topology."
         err = self.update_topology()
         if err: return err
         
@@ -110,23 +113,24 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
         # Get the active topology information from the AM
         links_raw = self.client.get_links()
+        print "******** Update topology"
 #        switches_raw = self.client.get_switches()
 
-#        print "Link raw:"
-#        pprint(links_raw, indent=4)
+        print "Link raw:"
+        pprint(links_raw, indent=4)
         
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
-#        print "Current links:"
-#        pprint (current_links, indent=4)
+        print "Current links:"
+        pprint (current_links, indent=4)
         
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-#        print "Current switches:"
-#        pprint (current_switches, indent=4)
+        print "Current switches:"
+        pprint (current_switches, indent=4)
 
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
-#        print "Current dpids:"
-#        pprint (current_dpids, indent=4)
+        print "Current dpids:"
+        pprint (current_dpids, indent=4)
         
 #        current_ifaces = self.openflowinterface_set.all().values_list('switch','port_num')
 #        current_ifaces = map(
@@ -137,8 +141,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             unslugify,
             OpenFlowInterface.objects.filter(
                 aggregate=self).values_list("slug", flat=True)))
-#        print "Current iface:"
-#        pprint (current_ifaces, indent=4)
+        print "Current ifaces:"
+        pprint (current_ifaces, indent=4)
         
         attrs_set = []
         ordered_active_links = []
@@ -428,3 +432,8 @@ class FlowSpaceRule(models.Model):
 #               +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
 #               +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
 #               +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
+
+class GAPISlice(models.Model):
+    slice_urn = models.CharField(max_length=300, primary_key=True)
+    switches = models.ManyToManyField(OpenFlowSwitch)
+    

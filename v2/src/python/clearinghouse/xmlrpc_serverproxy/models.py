@@ -1,3 +1,9 @@
+'''
+Created on Apr 30, 2010
+
+@author: jnaous
+'''
+
 from django.db import models
 import os
 import binascii
@@ -19,8 +25,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
     password_timestamp = models.DateTimeField(auto_now_add=True)
-    url = models.URLField("Server URL", max_length=1024,
-                          verify_exists=False)
+    url = models.CharField("Server URL", max_length=1024)
     
     verify_certs = models.BooleanField("Verify Certificates?", default=False)
     
@@ -34,22 +39,32 @@ class PasswordXMLRPCServerProxy(models.Model):
             from datetime import timedelta
             import time
             
-            # TODO: re-enable SSL/safe transport
-            if self.verify_certs:
-                from clearinghouse.utils.transport import PyCURLSafeTransport as transport
-                self.transport = transport(
-                    timeout=settings.XMLRPC_TIMEOUT,
-                    username=self.username,
-                    password=self.password,
-                    ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
+            if self.url.lower().startswith("https"):
+                if self.verify_certs:
+                    from clearinghouse.utils.transport import PyCURLSafeTransport as transport
+                    self.transport = transport(
+                        timeout=settings.XMLRPC_TIMEOUT,
+                        username=self.username,
+                        password=self.password,
+                        ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
+                else:
+                    from clearinghouse.utils.transport import PyCURLSafeTransport as transport
+                    self.transport = transport(
+                        timeout=settings.XMLRPC_TIMEOUT,
+                        username=self.username,
+                        password=self.password)
+                self.proxy = ServerProxy(self.url, self.transport)
+
             else:
-                from clearinghouse.utils.transport import PyCURLSafeTransport as transport
-                self.transport = transport(
-                    timeout=settings.XMLRPC_TIMEOUT,
-                    username=self.username,
-                    password=self.password)
+                from urlparse import urlparse
+                parsed = urlparse(self.url)
+                new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
+                                               self.username,
+                                               self.password,
+                                               parsed.netloc,
+                                               parsed.path)
+                self.proxy =  ServerProxy(new_url)
             
-            self.proxy = ServerProxy(self.url, self.transport)
             
             # if the password has expired, it's time to set a new one
             max_age = timedelta(days=self.max_password_age)
@@ -83,6 +98,8 @@ class PasswordXMLRPCServerProxy(models.Model):
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''
         try:
+            ret = self.ping("PING")
+            print "ping returned %s" % ret
             if self.ping("PING") == "PONG: PING":
                 return True
         except Exception, e:

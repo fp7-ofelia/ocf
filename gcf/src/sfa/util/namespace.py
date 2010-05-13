@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 # IN THE WORK.
 
-### $Id: namespace.py 17618 2010-04-08 18:44:31Z jkarlin $
+### $Id: namespace.py 17774 2010-04-22 21:54:47Z jkarlin $
 ### $URL: http://svn.planet-lab.org/svn/sfa/branches/geni-api/sfa/util/namespace.py $
 
 from sfa.util.faults import *
@@ -110,7 +110,14 @@ def hrn_to_urn(hrn, type=None):
 
     authority = get_authority(hrn)
     name = get_leaf(hrn)
-    urn = "+".join([unicode(part).replace('.', ':') \
-                    for part in ['',authority,type,name]])
+    
+    if authority.startswith("plc"):
+        if type == None:
+            urn = "+".join(['',authority.replace('.',':'),name])
+        else:
+            urn = "+".join(['',authority.replace('.',':'),type,name])
 
+    else:
+        urn = "+".join(['',authority,type,name])
+        
     return URN_PREFIX + urn

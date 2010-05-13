@@ -1,0 +1,4 @@
+
+Things to do:
+
+ * Implement client and server sides of RenewSliver

@@ -7,7 +7,8 @@ Contains functions to transform to and from RSpecs
 '''
 
 from xml.etree import cElementTree as et
-from clearinghouse.openflow.models import OpenFlowAggregate, OpenFlowSwitch
+from clearinghouse.openflow.models import OpenFlowAggregate, OpenFlowSwitch,\
+    GAPISlice
 from clearinghouse.slice.models import Slice
 
 RSPEC_TAG = "rspec"
@@ -54,7 +55,7 @@ def _add_switches_node(parent_elem, aggregate):
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
     dpids = OpenFlowSwitch.objects.filter(
-        aggregate=aggregate, active=True).values_list(
+        aggregate=aggregate, available=True).values_list(
             "datapath_id", flat=True)
         
     for dpid in dpids:
@@ -163,11 +164,13 @@ TP_SRC_TAG="tp_src"
 TP_DST_TAG="tp_dst"
 WILDCARD="*"
 
-def create_slice(resv_rspec, slice_urn):
+def parse_slice(resv_rspec):
     '''
-    Creates a slice for the particular user with the given username from the
-    description specified in resv_rspec, but does not store any information
-    about the slice.
+    Parses the reservation RSpec and returns a tuple:
+    (project_name, project_desc, slice_name, slice_desc, 
+    controller_url, email, password, agg_slivers) where slivers
+    is a list of (aggregate, slivers) tuples, and slivers is a dict suitable
+    for use in the create_slice xml-rpc call of the opt-in manager.
     
     The reservation rspec looks like the following:
     
@@ -230,18 +233,8 @@ def create_slice(resv_rspec, slice_urn):
     project_name, project_desc = _resv_parse_project(root)
     agg_slivers = _resv_parse_slivers(root)
     
-    # make the reservation
-    # TODO: concat all the responses
-    for aggregate, slivers in agg_slivers:
-        aggregate.client.create_slice(
-            slice_urn, project_name, project_desc,
-            slice_name, slice_desc, 
-            controller_url,
-            email, password, slivers,
-        )
-    
-    # TODO: get the actual reserved things
-    return resv_rspec
+    return (project_name, project_desc, slice_name, slice_desc, 
+            controller_url, email, password, agg_slivers)
 
 def _resv_parse_user(root):
     '''parse the user tag from the root Element'''
@@ -274,8 +267,8 @@ def _resv_parse_slivers(root):
         for tag in POLICY_TAG, PORT_TAG, DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
         TP_SRC_TAG, TP_DST_TAG:
-            from_key = "%s_from" % tag
-            to_key = "%s_to" % tag
+            from_key = "%s_start" % tag
+            to_key = "%s_end" % tag
             field_elem = flowspace_elem.find(tag)
             if field_elem:
                 fs[from_key] = field_elem.get["from"]
@@ -289,7 +282,7 @@ def _resv_parse_slivers(root):
             dpid = switch_elem.get(DPID)
             if dpid not in dpid_fs_map:
                 dpid_fs_map[dpid] = []
-            dpid_fs_map[dpid].append(dpid)
+            dpid_fs_map[dpid].append(fs)
         
     datapaths = dpid_fs_map.keys()
     # get a list of all the available datapaths
@@ -304,6 +297,7 @@ def _resv_parse_slivers(root):
         if dp.aggregate.pk not in agg_slivers_map:
             agg_slivers_map[dp.aggregate.pk] = (dp.aggregate.as_leaf_class(), [])
         agg_slivers_map[dp.aggregate.pk][1].append(
-            dp.datapath_id, dpid_fs_map[dp.datapath_id])
+            {'datapath_id': dp.datapath_id,
+             'flowspace': dpid_fs_map[dp.datapath_id]})
         
     return agg_slivers_map.values()
