@@ -27,7 +27,6 @@ def create_slice(slice_id, project_name, project_description,
     Each such dict has the following keys:
         - C{id}: integer. Per clearinghouse unique identifier for the rule.
         - C{direction}: string. 'ingress', 'egress', or 'bidirectional'
-        - C{policy}: int. 1 for 'allow', -1 for 'deny', 0 for read only
         - C{port_num_start}, C{port_num_end}: string. the port range for this 
         flowspace
         - C{dl_src_start}, C{dl_src_end}: string. link layer address range in

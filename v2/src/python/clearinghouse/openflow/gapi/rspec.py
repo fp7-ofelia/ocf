@@ -26,9 +26,8 @@ LOCATION = "location"
 NAME = "name"
 FLOWVISOR_URL = "flowvisor_url"
 
-# TODO: fix regexes enfing and so forth
-SWITCH_URN_REGEX = "^%s\+switch:(?P<dpid>)$" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
-PORT_URN_REGEX = "%s\+port:(?P<port>)" % SWITCH_URN_REGEX
+SWITCH_URN_REGEX = "^%s\+switch:(?P<dpid>\d+)$" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
+PORT_URN_REGEX = "%s\+port:(?P<port>\d+)" % SWITCH_URN_REGEX[:-1]
 
 switch_re = re.compile(SWITCH_URN_REGEX)
 port_re = re.compile(PORT_URN_REGEX)
@@ -37,7 +36,7 @@ def _dpid_to_urn(dpid):
     """
     Change the dpid into a URN.
     """
-    return "%s+switch:%s" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
+    return "%s+switch:%s" % (settings.OPENFLOW_GAPI_RSC_URN_PREFIX, dpid)
 
 def _urn_to_dpid(urn):
     """
@@ -46,7 +45,7 @@ def _urn_to_dpid(urn):
     m = switch_re.search(urn)
     
     if not m:
-        raise Exception("Unknown URN or badly formatted URN %s." % urn)
+        raise Exception("Unknown or badly formatted URN %s." % urn)
     
     return int(m.group('dpid'))
 
@@ -64,18 +63,18 @@ def _urn_to_port(urn):
 
     m = port_re.search(urn)
     if not m:
-        raise Exception("Unknown URN or badly formatted URN %s." % urn)
+        raise Exception("Unknown or badly formatted URN %s." % urn)
     
-    return int(m.group('dpid'))
+    return (int(m.group('dpid')), int(m.group('port')))
 
-def _get_root_node():
+def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''
     root = et.Element(RSPEC_TAG)
-    for aggregate in OpenFlowAggregate.objects.all():
-        _add_aggregate_node(root, aggregate)
+    for aggregate in OpenFlowAggregate.objects.filter(available=True):
+        _add_aggregate_node(root, aggregate, slice_urn, available)
     return root
 
-def _add_aggregate_node(parent_elem, aggregate):
+def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):
     '''Add an aggregate and the switches and links'''
     
     agg_elem = et.SubElement(
@@ -85,19 +84,24 @@ def _add_aggregate_node(parent_elem, aggregate):
         },
     )
 
-    _add_switches_node(agg_elem, aggregate)
-    _add_links_node(agg_elem, aggregate)
+    _add_switches_node(agg_elem, aggregate, slice_urn, available)
+    _add_links_node(agg_elem, aggregate, slice_urn, available)
     
     return agg_elem
 
-def _add_switches_node(parent_elem, aggregate):
+def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     '''Add the switches tag and all switches'''
     
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
-    dpids = OpenFlowSwitch.objects.filter(
-        aggregate=aggregate, available=True).values_list(
-            "datapath_id", flat=True)
+    dpids = OpenFlowSwitch.objects.filter(aggregate=aggregate)
+
+    if slice_urn:
+        dpids = dpids.filter(gapislice__slice_urn=slice_urn)
+    elif available != None:
+        dpids = dpids.filter(available=available)
+
+    dpids = dpids.values_list("datapath_id", flat=True)
         
     for dpid in dpids:
         et.SubElement(
@@ -107,11 +111,16 @@ def _add_switches_node(parent_elem, aggregate):
         )
     return switches_elem
 
-def _add_links_node(parent_elem, aggregate):
+def _add_links_node(parent_elem, aggregate, slice_urn, available):
     '''Add the links tag and all the links'''
     
     links_elem = et.SubElement(parent_elem, LINKS_TAG)
+
+    if slice_urn:
+        # TODO: don't know what particular links are in the slice (yet).
+        return links_elem
     
+    # Only available links are known
     links = aggregate.get_raw_topology()
     
     for s_dp, s_p, d_dp, d_p in links:
@@ -210,7 +219,7 @@ def get_resources(slice_urn, geni_available):
     at the Princeton network
     '''
     
-    root = _get_root_node()
+    root = _get_root_node(slice_urn, geni_available)
     return et.tostring(root)
 
 RESV_RSPEC_TAG="resv_rspec"
@@ -223,7 +232,6 @@ SLICE_TAG="slice"
 DESCRIPTION="description"
 CONTROLLER="controller_url"
 FLOWSPACE_TAG="flowspace"
-POLICY_TAG="policy"
 PORT_TAG="port"
 DL_SRC_TAG="dl_src"
 DL_DST_TAG="dl_dst"
@@ -266,7 +274,6 @@ def parse_slice(resv_rspec):
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
             </switches>
-            <policy value="1" />
             <port from="1" to="4" />
             <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
             <dl_dst from="*" to="*" />
@@ -282,18 +289,13 @@ def parse_slice(resv_rspec):
             <switches>
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
             </switches>
-            <policy value="-1" />
             <tp_src from="100" to="100" />
             <tp_dst from="100" to="*" />
         </flowspace>
     </resv_rspec>
     
     Any missing fields from the flowspace mean wildcard. All '*' means any
-    value. The policy can have the following values:
-
-    - C{1}: Allow
-    - C{-1}: Deny
-    - C{0}: Read-only
+    value.
     
     All integers can by specified as hex or decimal.
     '''
@@ -351,7 +353,7 @@ def _resv_parse_slivers(root):
         
         # now for each switch, add a mapping from the dpid to the fs
         for switch_elem in flowspace_elem.find(SWITCHES_TAG).findall(SWITCH_TAG):
-            dpid = switch_elem.get(DPID)
+            dpid = _urn_to_dpid(switch_elem.get(URN))
             if dpid not in dpid_fs_map:
                 dpid_fs_map[dpid] = []
             dpid_fs_map[dpid].append(fs)

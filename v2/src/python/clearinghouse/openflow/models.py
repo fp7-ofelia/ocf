@@ -113,24 +113,24 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
         # Get the active topology information from the AM
         links_raw = self.client.get_links()
-        print "******** Update topology"
+#        print "******** Update topology"
 #        switches_raw = self.client.get_switches()
 
-        print "Link raw:"
-        pprint(links_raw, indent=4)
+#        print "Link raw:"
+#        pprint(links_raw, indent=4)
         
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
-        print "Current links:"
-        pprint (current_links, indent=4)
+#        print "Current links:"
+#        pprint (current_links, indent=4)
         
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-        print "Current switches:"
-        pprint (current_switches, indent=4)
+#        print "Current switches:"
+#        pprint (current_switches, indent=4)
 
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
-        print "Current dpids:"
-        pprint (current_dpids, indent=4)
+#        print "Current dpids:"
+#        pprint (current_dpids, indent=4)
         
 #        current_ifaces = self.openflowinterface_set.all().values_list('switch','port_num')
 #        current_ifaces = map(
@@ -141,8 +141,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             unslugify,
             OpenFlowInterface.objects.filter(
                 aggregate=self).values_list("slug", flat=True)))
-        print "Current ifaces:"
-        pprint (current_ifaces, indent=4)
+#        print "Current ifaces:"
+#        pprint (current_ifaces, indent=4)
         
         attrs_set = []
         ordered_active_links = []
@@ -357,30 +357,8 @@ class OpenFlowInterface(resource_models.Resource):
 #        }
 
 class FlowSpaceRule(models.Model):
-    TYPE_ALLOW = 1
-    TYPE_DENY  = -1
-    TYPE_RD_ONLY = 0
-    
-    POLICY_TYPE_CHOICES={TYPE_ALLOW: 'Allow',
-                         TYPE_DENY: 'Deny',
-                         TYPE_RD_ONLY: 'Read Only',
-                         }
-    
-#    DIR_IN = 'ingress'
-#    DIR_OUT = 'egress'
-#    DIR_BI = 'bidirectional'
-#    DIRECTION_CHOICES={DIR_IN: 'Ingress',
-#                       DIR_OUT: 'Egress',
-#                       DIR_BI: 'Bidirectional',
-#                       }
-
     switch_sliver = models.ForeignKey(resource_models.Sliver)
 
-#    direction = models.CharField(max_length=20,
-#                                 choices=DIRECTION_CHOICES.items(),
-#                                 default=DIR_BI)
-    policy = models.SmallIntegerField(choices=POLICY_TYPE_CHOICES.items(),
-                                      default=TYPE_ALLOW)
     dl_src_start = models.CharField('Link layer source address range start',
                                     max_length=17, default="*")
     dl_dst_start = models.CharField('Link layer destination address range start',
@@ -424,14 +402,6 @@ class FlowSpaceRule(models.Model):
                                     max_length=5, default="*")
     port_num_end = models.CharField('Switch port number range end',
                                       max_length=4, default="*")
-    
-#    def __unicode__(self):
-#        return("Policy: "+FlowSpaceRule.POLICY_TYPE_CHOICES[self.policy]
-#               +", port: " +self.interface.port_num+", dl_src: "+self.dl_src
-#               +", dl_dst: "+self.dl_dst+", dl_type: "+self.dl_type
-#               +", vlan_id: "+self.vlan_id+", nw_src: "+self.nw_src
-#               +", nw_dst: "+self.nw_dst+", nw_proto: "+self.nw_proto
-#               +", tp_src: "+self.tp_src+", tp_dst: "+self.tp_dst)
 
 class GAPISlice(models.Model):
     slice_urn = models.CharField(max_length=300, primary_key=True)

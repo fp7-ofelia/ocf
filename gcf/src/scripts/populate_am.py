@@ -18,38 +18,39 @@ PORT = 443
 PREFIX = ""
 
 # Dummy OMs
-for i in range(NUM_DUMMY_OMS):
-    om = DummyOM.objects.create()
-    om.populate_links(NUM_SWITCHES_PER_AGG, NUM_LINKS_PER_AGG)
-    username = "clearinghouse%s" % i
-    password = "clearinghouse"
-    u = User.objects.create(username=username)
-    u.set_password(password)
-    u.save()
-    
-    # Add the aggregate to the CH
-    proxy = PasswordXMLRPCServerProxy.objects.create(
-        username=username,
-        password=password,
-        url="https://%s:%s/%sdummyom/%s/xmlrpc/" % (
-            HOST, PORT, PREFIX, om.id,
-        ),
-        verify_certs = False,
-    )
+def run():
+    for i in range(NUM_DUMMY_OMS):
+        om = DummyOM.objects.create()
+        om.populate_links(NUM_SWITCHES_PER_AGG, NUM_LINKS_PER_AGG)
+        username = "clearinghouse%s" % i
+        password = "clearinghouse"
+        u = User.objects.create(username=username)
+        u.set_password(password)
+        u.save()
 
-    # test availability
-    print "Checking availability."
-    if not proxy.is_available:
-        raise Exception("Problem: Proxy not available")
+        # Add the aggregate to the CH
+        proxy = PasswordXMLRPCServerProxy.objects.create(
+            username=username,
+            password=password,
+            url="https://%s:%s/%sdummyom/%s/xmlrpc/" % (
+                HOST, PORT, PREFIX, om.id,
+            ),
+            verify_certs = False,
+        )
 
-    # Add aggregate
-    of_agg = OpenFlowAggregate.objects.create(
-        name=username,
-        description="hello",
-        location="America",
-        client=proxy,
-    )
+        # test availability
+        print "Checking availability."
+        if not proxy.is_available:
+            raise Exception("Problem: Proxy not available")
 
-    err = of_agg.setup_new_aggregate(HOST)
-    if err:
-        raise Exception("Error setting up aggregate: %s" % err)
+        # Add aggregate
+        of_agg = OpenFlowAggregate.objects.create(
+            name=username,
+            description="hello",
+            location="America",
+            client=proxy,
+        )
+
+        err = of_agg.setup_new_aggregate(HOST)
+        if err:
+            raise Exception("Error setting up aggregate: %s" % err)
