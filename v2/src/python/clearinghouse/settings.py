@@ -1,1 +1,1 @@
-test_settings.py
+production_settings.py

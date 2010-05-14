@@ -100,9 +100,9 @@ class Clearinghouse(object):
         slice_uuid = uuid.uuid4()
         # Where was the slice created?
         (ipaddr, port) = self._server.socket._sock.getsockname()
-        public_id = 'IDN openflow//stanford openflow-ch slice %s//%s:%d' % (slice_uuid,
-                                                                            ipaddr,
-                                                                            port)
+        public_id = 'IDN openflow//stanford ch slice %s//%s:%d' % (slice_uuid,
+                                                                   ipaddr,
+                                                                   port)
         urn = publicid_to_urn(public_id)
         # Create a credential authorizing this user to use this slice.
         slice_gid = self.create_slice_gid(slice_uuid, urn)[0]

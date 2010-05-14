@@ -78,10 +78,7 @@ def create_user_credential(user_gid, issuer_keyfile, issuer_certfile):
 
 def get_subject(type):
     import socket
-    if type == "am":
-        return socket.getfqdn()
-    else:
-        return type
+    return type
 #    return dict(
 #        CN=socket.getfqdn(),
 #        C="XY",

@@ -7,9 +7,9 @@ Contains functions to transform to and from RSpecs
 '''
 
 from xml.etree import cElementTree as et
-from clearinghouse.openflow.models import OpenFlowAggregate, OpenFlowSwitch,\
-    GAPISlice
-from clearinghouse.slice.models import Slice
+from clearinghouse.openflow.models import OpenFlowAggregate, OpenFlowSwitch
+from django.conf import settings
+import re
 
 RSPEC_TAG = "rspec"
 NETWORK_TAG = "network"
@@ -18,14 +18,55 @@ LINK_TAG = "link"
 SWITCHES_TAG = "switches"
 SWITCH_TAG = "switch"
 
+URN = "urn"
+SRC_URN = "src_urn"
+DST_URN = "dst_urn"
+
 LOCATION = "location"
 NAME = "name"
 FLOWVISOR_URL = "flowvisor_url"
-SRC_DPID = "src_dpid"
-SRC_PORT = "src_port"
-DST_DPID = "dst_dpid"
-DST_PORT = "dst_port"
-DPID = "dpid"
+
+# TODO: fix regexes enfing and so forth
+SWITCH_URN_REGEX = "^%s\+switch:(?P<dpid>)$" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
+PORT_URN_REGEX = "%s\+port:(?P<port>)" % SWITCH_URN_REGEX
+
+switch_re = re.compile(SWITCH_URN_REGEX)
+port_re = re.compile(PORT_URN_REGEX)
+
+def _dpid_to_urn(dpid):
+    """
+    Change the dpid into a URN.
+    """
+    return "%s+switch:%s" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
+
+def _urn_to_dpid(urn):
+    """
+    Change from a switch URN to a dpid.
+    """
+    m = switch_re.search(urn)
+    
+    if not m:
+        raise Exception("Unknown URN or badly formatted URN %s." % urn)
+    
+    return int(m.group('dpid'))
+
+def _port_to_urn(dpid, port):
+    """
+    Specify an interface as URN.
+    """
+    
+    return "%s+port:%s" % (_dpid_to_urn(dpid), port)
+
+def _urn_to_port(urn):
+    """
+    Get the dpid and port from a urn specifiying a port.
+    """
+
+    m = port_re.search(urn)
+    if not m:
+        raise Exception("Unknown URN or badly formatted URN %s." % urn)
+    
+    return int(m.group('dpid'))
 
 def _get_root_node():
     '''Create the root node and add all aggregates'''
@@ -61,7 +102,7 @@ def _add_switches_node(parent_elem, aggregate):
     for dpid in dpids:
         et.SubElement(
             switches_elem, SWITCH_TAG, {
-                DPID: dpid,
+                URN: _dpid_to_urn(dpid),
             },
         )
     return switches_elem
@@ -76,15 +117,13 @@ def _add_links_node(parent_elem, aggregate):
     for s_dp, s_p, d_dp, d_p in links:
         et.SubElement(
             links_elem, LINK_TAG, {
-                SRC_DPID: s_dp,
-                SRC_PORT: s_p,
-                DST_DPID: d_dp,
-                DST_PORT: d_p,
+                SRC_URN: _port_to_urn(s_dp, s_p),
+                DST_URN: _port_to_urn(d_dp, d_p),
             },
         )
     return links_elem
 
-def get_all_resources():
+def get_resources(slice_urn, geni_available):
     '''
     Gets a list of all the resources under all the aggregates as XML.
     
@@ -102,16 +141,14 @@ def get_all_resources():
     
     C{<links>} has a list of C{<link>} nodes with the following attributes:
     
-    - C{src_dpid}: the datapath id of the source switch.
-    - C{src_port}: the number of the source switch's port.
-    - C{dst_dpid}: the datapath id of the destination switch.
-    - C{dst_port}: the number of the destination switch's port.
+    - C{src_urn}: identifier for the src port
+    - C{dst_urn}: identifier for the dst port
     
     Currently no other attributes are defined through there may be more later.
     
     C{<switches>} has a list of C{<switch>} nodes with the following attributes:
     
-    - C{dpid}: the datapath id of the switch.
+    - C{urn}: urn prefix for a switch:datapathid
     
     Currently no other attributes are defined through there may be more later.
     
@@ -120,22 +157,57 @@ def get_all_resources():
     <rspec>
         <network name="Stanford" location="Stanford, CA, USA">
             <switches>
-                <switch dpid="0" />
-                <switch dpid="1" />
-                <switch dpid="2" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2" />
             </switches>
             <links>
-                <link src_dpid="0" src_port="0" dst_dpid="1" dst_port="0" />
-                <link src_dpid="1" src_port="0" dst_dpid="0" dst_port="0" />
-                <link src_dpid="0" src_port="1" dst_dpid="2" dst_port="0" />
-                <link src_dpid="2" src_port="0" dst_dpid="0" dst_port="1" />
-                <link src_dpid="1" src_port="1" dst_dpid="2" dst_port="1" />
-                <link src_dpid="2" src_port="1" dst_dpid="1" dst_port="1" />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
+                />
+            </links>
+        </network>
+        <network name="Princeton" location="USA">
+            <switches>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:3" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:4" />
+            </switches>
+            <links>
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
+                />
+                <link
+                 src_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
+                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
+                />
             </links>
         </network>
     </rspec>
     
-    specifies a triangular graph.
+    specifies a triangular graph at the Stanford network and a single link
+    at the Princeton network
     '''
     
     root = _get_root_node()
@@ -191,8 +263,8 @@ def parse_slice(resv_rspec):
         />
         <flowspace>
             <switches>
-                <switch dpid="0">
-                <switch dpid="2">
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
             </switches>
             <policy value="1" />
             <port from="1" to="4" />
@@ -208,7 +280,7 @@ def parse_slice(resv_rspec):
         </flowspace>
         <flowspace>
             <switches>
-                <switch dpid="1">
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
             </switches>
             <policy value="-1" />
             <tp_src from="100" to="100" />

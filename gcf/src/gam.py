@@ -124,7 +124,8 @@ class AggregateManager(object):
                                                 credentials,
                                                 None,
                                                 privileges)
-        return self.proxy.ListResources(credentials, options)
+        retval = self.proxy.ListResources(credentials, options)
+        return retval
     
     def CreateSliver(self, slice_urn, credentials, rspec):
         print 'CreateSliver(%r)' % (slice_urn)
@@ -167,6 +168,7 @@ class AggregateManager(object):
         return self.proxy.ShutDown(slice_urn, credentials)
 
 def parse_args(argv):
+    import socket
     parser = optparse.OptionParser()
     parser.add_option("-k", "--keyfile",
                       help="key file name", metavar="FILE")
@@ -176,6 +178,9 @@ def parse_args(argv):
                       help="root ca certificate file name", metavar="FILE")
     # Could try to determine the real IP Address instead of the loopback
     # using socket.gethostbyname(socket.gethostname())
+    parser.add_option("-u", "--url",
+                      default="https://%s/openflow/gapi/" % socket.getfqdn(),
+                      help="URL to AM server.", metavar="URL")
     parser.add_option("-H", "--host", default='127.0.0.1',
                       help="server ip", metavar="HOST")
     parser.add_option("-p", "--port", type=int, default=8001,
@@ -194,7 +199,7 @@ def main(argv=None):
         level = logging.DEBUG
     logger = logging.Logger("am")
     logger.setLevel(level)
-    delegate = AggregateManager(opts.rootcafile)
+    delegate = AggregateManager(opts.rootcafile, opts.url)
     ams = geni.AggregateManagerServer((opts.host, opts.port),
                                       delegate=delegate,
                                       keyfile=opts.keyfile,

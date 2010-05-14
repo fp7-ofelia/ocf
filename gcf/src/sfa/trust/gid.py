@@ -203,8 +203,11 @@ class GID(Certificate):
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
-                raise GidParentHrn(self.parent.get_subject())
-
+                raise Exception(
+                    "Parent's HRN (%s) is a prefix of child's (%s)" % (
+                        self.parent.get_hrn(), self.get_hrn()
+                    )
+                )
         return
 
 
