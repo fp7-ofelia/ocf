@@ -8,37 +8,20 @@ from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
 from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt
+from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
 
 def convertStar(fs):
-    def _long_to_mac(l):
-        import re
-        if type(l) == str:
-            return l
-        s = "%012x" % l
-        m = re.findall("\w\w", s)
-        return ":".join(m)
-        
-    def _int_to_ip(i):
-        if type(i) == str:
-            return i
-        return "%s.%s.%s.%s" % (
-            (i >> 24) & 0xff,
-            (i >> 16) & 0xff,
-            (i >> 8) & 0xff,
-            i & 0xff,
-        )
     def _same(val):
         return "%s" % val
     
     attr_funcs = {
         # attr_name: (func to turn to str, width)
-        "dl_src": (_long_to_mac, 48),
-        "dl_dst": (_long_to_mac, 48),
+        "dl_src": (InttoMAC, 48),
+        "dl_dst": (InttoMAC, 48),
         "dl_type": (_same, 16),
         "vlan_id": (_same, 12),
-        "nw_src": (_int_to_ip, 32),
-        "nw_dst": (_int_to_ip, 32),
+        "nw_src": (IntToDottedIP, 32),
+        "nw_dst": (IntToDottedIP, 32),
         "nw_proto": (_same, 8),
         "tp_src": (_same, 16),
         "tp_dst": (_same, 16),
