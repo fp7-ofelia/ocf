@@ -6,15 +6,9 @@ Created on May 11, 2010
 from unittest import TestCase
 from transport import SafeTransportWithCert
 import xmlrpclib
-import socket
-from os.path import join, dirname
-from tests import settings
-import re
-from clearinghouse.openflow.gapi.rspec import RESV_RSPEC_TAG, FLOWSPACE_TAG,\
-    SWITCHES_TAG, SWITCH_TAG, URN
-
-SWITCH_URN_REGEX = "^(?P<prefix>.*)\+switch:(?P<dpid>\d+)$"
-PORT_URN_REGEX = "%s\+port:(?P<port>\d+)$" % SWITCH_URN_REGEX
+from os.path import join
+from tests import settings 
+from tests.helpers import parse_rspec, create_random_resv, kill_old_procs
 
 class CH_OM_Tests(TestCase):
     """
@@ -32,7 +26,7 @@ class CH_OM_Tests(TestCase):
         Tests the create slice rpc call.
         """
         pass
-
+    
 class GAPITests(TestCase):
     """
     Test the GENI API interface. This assumes that Apache is currently running
@@ -40,83 +34,6 @@ class GAPITests(TestCase):
     the dummy Opt-in Managers. Assumes all certificates and keys in ssl dir.
     """
 
-    class Switch(object):
-        def __init__(self, urn):
-            match = re.search(SWITCH_URN_REGEX, urn)
-            if not match:
-                raise Exception("Bad switch URN: %s" % urn)
-            self.prefix = match.group("prefix")
-            self.dpid = match.group("dpid")
-            self.urn = urn
-            
-        def add_to_switches_resv_elem(self, switches_elem):
-            from xml.etree import cElementTree as et
-            return et.SubElement(
-                switches_elem, SWITCH_TAG, {
-                    URN: self.urn,
-                }
-            )
-            
-    class Link(object):
-        def __init__(self, src_urn, dst_urn):
-            self.src_urn = src_urn
-            self.dst_urn = dst_urn
-
-            match = re.search(PORT_URN_REGEX, src_urn)
-            if not match:
-                raise Exception("Bad port URN: %s" % src_urn)
-            self.src_prefix = match.group("prefix")
-            self.src_dpid = match.group("dpid")
-            self.src_port = match.group("port")
-            
-            match = re.search(PORT_URN_REGEX, dst_urn)
-            if not match:
-                raise Exception("Bad port URN: %s" % dst_urn)
-            self.dst_prefix = match.group("prefix")
-            self.dst_dpid = match.group("dpid")
-            self.dst_port = match.group("port")
-            
-    class Flowspace(object):
-        def __init__(self, attrs, switches):
-            """
-            attrs is a dict with the following keys:
-            dl_src/dst/type
-            vlan_id
-            nw_src/dst/type
-            tp_src/dst
-            
-            Each key maps to a tuple specifying a range. e.g.
-            {'dl_src': ('*', '*'),
-             'nw_src': ('192.168.0.0', '192.168.255.255'),
-            }
-            
-            Some keys can be missing.
-             
-            switches is a list of Switch objects
-            """
-            self.attrs = attrs.copy()
-            self.switches = switches
-            
-        def add_to_rspec(self, root):
-            from xml.etree import cElementTree as et
-            fs_elem = et.SubElement(root, FLOWSPACE_TAG)
-            switches_elem = et.SubElement(fs_elem, SWITCHES_TAG)
-            for s in self.switches:
-                s.add_to_switches_resv_elem(switches_elem)
-
-            fset.SubElement(
-                switches_elem, 
-
-            for k, v in self.attrs.items():
-    def parse_rspec(self, rspec):
-        """
-        parse the rspec and return a tupe of lists of switches and links
-        """
-        from xml.etree import cElementTree as et
-        
-        root = et.fromstring(rspec)
-        # TODO: finish this parsing up.
-    
     def create_ch_slice(self):
         """
         Code mostly copied from GENI test harness from BBN.
@@ -127,86 +44,109 @@ class GAPITests(TestCase):
         slice_credential = cred.Credential(string=slice_cred_string)
         slice_gid = slice_credential.get_gid_object()
         slice_urn = slice_gid.get_urn()
-        print 'Slice URN = %s' % (slice_urn)
+#        print 'Slice URN = %s' % (slice_urn)
         
         # Set up the array of credentials as just the slice credential
         credentials = [slice_cred_string]
         
         return (slice_urn, credentials)
         
-    def _kill_old_procs(self):
-        import shlex, subprocess, os, signal, time
-        cmd = "netstat -l -t -p --numeric-ports"
-        args = shlex.split(cmd)
-        p = subprocess.Popen(args,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        p.wait()
-        o, e = p.communicate()
-        lines = o.splitlines()
-        for l in lines:
-            if "localhost:8001" in l:
-                cols = l.split()
-                prog = cols[6]
-                pid,sep,progname = prog.partition("/")
-                os.kill(int(pid), signal.SIGHUP)
-            if "localhost:8000" in l:
-                cols = l.split()
-                prog = cols[6]
-                pid,sep,progname = prog.partition("/")
-                os.kill(int(pid), signal.SIGHUP)
+    def setup_dummy_oms(self):
+        from clearinghouse.dummyom.models import DummyOM
+        from django.contrib.auth.models import User
+        from clearinghouse.openflow.models import OpenFlowAggregate
+        from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
         
-        time.sleep(1)
-            
+        for i in range(settings.NUM_DUMMY_OMS):
+            om = DummyOM.objects.create()
+            om.populate_links(settings.NUM_SWITCHES_PER_AGG, 
+                              settings.NUM_LINKS_PER_AGG)
+            username = "clearinghouse%s" % i
+            password = "clearinghouse"
+            u = User.objects.create(username=username)
+            u.set_password(password)
+            u.save()
+    
+            # Add the aggregate to the CH
+            proxy = PasswordXMLRPCServerProxy.objects.create(
+                username=username,
+                password=password,
+                url="https://%s:%s/%sdummyom/%s/xmlrpc/" % (
+                    settings.HOST, settings.PORT, settings.PREFIX, om.id,
+                ),
+                verify_certs = False,
+            )
+    
+            # test availability
+#            print "Checking availability."
+            if not proxy.is_available:
+                raise Exception("Problem: Proxy not available")
+    
+            # Add aggregate
+            of_agg = OpenFlowAggregate.objects.create(
+                name=username,
+                description="hello",
+                location="America",
+                client=proxy,
+            )
+    
+            err = of_agg.setup_new_aggregate(settings.HOST)
+            if err:
+                raise Exception("Error setting up aggregate: %s" % err)
+        
     def setUp(self):
         """
         Load the DB fixtures for the AM (running using Apache).
         Create an xml-rpc client to talk to the AM Proxy through GAPI.
         Run the test clearinghouse, and create client to talk to it.
         """
-        print "Doing Setup"
+#        print "Doing Setup"
         
-        from commands import call_env_command
+        from commands import call_env_command, Env
         import shlex, subprocess, time
         
         call_env_command(settings.CH_PROJECT_DIR, "flush", interactive=False)
-        call_env_command(settings.CH_PROJECT_DIR, "runscript", "populate_am", noscripts=False)
         
+        self.ch_env = Env(settings.CH_PROJECT_DIR)
+        self.ch_env.switch_to()
+        
+        self.setup_dummy_oms()
+        
+        # Create the ssl certificates if needed
         cmd = "make -C %s" % settings.SSL_DIR
-        self.ch_proc = subprocess.call(shlex.split(cmd),
-                                       stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
+        subprocess.call(shlex.split(cmd),
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
         
         
-#        # run the CH
-#        self._kill_old_procs()
+        # run the CH
+        kill_old_procs(8000, 8001)
 #        print "Running CH"
-#        cmd = "python %s -r %s -c %s -k %s -p 8001" % (
-#            join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
-#            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
-#        )
-#        args = shlex.split(cmd)
-#        self.ch_proc = subprocess.Popen(args,
-#                                        stdin=subprocess.PIPE,
-#                                        stdout=subprocess.PIPE,
-#                                        stderr=subprocess.PIPE)
-#
-#        # run the AM proxy
+        cmd = "python %s -r %s -c %s -k %s -p 8001" % (
+            join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
+            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
+        )
+        args = shlex.split(cmd)
+        self.ch_proc = subprocess.Popen(args,
+                                        stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+
+        # run the AM proxy
 #        print "Running AM Proxy"
-#        cmd = "python %s -r %s -c %s -k %s -p 8000" % (
-#            join(settings.GCF_DIR, "gam.py"), join(settings.SSL_DIR, "ca.crt"),
-#            join(settings.SSL_DIR, "server.crt"),
-#            join(settings.SSL_DIR, "server.key")
-#        )
-#        args = shlex.split(cmd)
-#        self.am_proc = subprocess.Popen(args,
-#                                        stdin=subprocess.PIPE,
-#                                        stdout=subprocess.PIPE,
-#                                        stderr=subprocess.PIPE)
-#        
-#        time.sleep(1)
+        cmd = "python %s -r %s -c %s -k %s -p 8000" % (
+            join(settings.GCF_DIR, "gam.py"), join(settings.SSL_DIR, "ca.crt"),
+            join(settings.SSL_DIR, "server.crt"),
+            join(settings.SSL_DIR, "server.key")
+        )
+        args = shlex.split(cmd)
+        self.am_proc = subprocess.Popen(args,
+                                        stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+        
+        time.sleep(1)
         
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
@@ -222,37 +162,203 @@ class GAPITests(TestCase):
             "https://localhost:8000/",
             transport=cert_transport)
 
-        print "Done Setup"
+#        print "Done Setup"
         
-#    def tearDown(self):
-#        try:
-#            self.ch_proc.terminate()
-#            self.am_proc.terminate()
-#        except:
-#            pass
-#        import time
-#        time.sleep(1)
+    def tearDown(self):
+        try:
+            del self.switches
+        except:
+            pass
+        try:
+            del self.links
+        except:
+            pass
+        
+        try:
+            self.am_proc.terminate()
+        except:
+            pass
+        try:
+            self.am_proc.terminate()
+        except:
+            pass
+
+        import time
+        time.sleep(1)
     
-    def test_0GetVersion(self):
+    def test_GetVersion(self):
         """
         Tests that get version returns 1.
         """
         self.assertEqual(self.am_client.GetVersion(), {'geni_api': 1})
 
-    def test_1ListResources(self):
+    def test_ListResources(self):
         """
         Check the list of resources.
         """
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        print self.am_client.ListResources(cred, options)
+        rspec = self.am_client.ListResources(cred, options)
+        
+#        print rspec
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+        
+        # check the number of switches and links
+        self.assertEqual(len(self.switches),
+                         settings.NUM_SWITCHES_PER_AGG * settings.NUM_DUMMY_OMS)
+        self.assertEqual(len(self.links),
+                         settings.NUM_LINKS_PER_AGG * settings.NUM_DUMMY_OMS)
     
-    def test_2CreateSliver(self):
+    def test_CreateSliver(self):
         """
         Tests that we can create a sliver.
         """
-        pass
+        from clearinghouse.openflow.models import GAPISlice
+        from clearinghouse.dummyom.models import DummyOMSlice
         
+        # get the resources
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = self.am_client.ListResources(cred, options)
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+
+        # create a random reservation
+        resv_rspec, flowspaces = create_random_resv(20, self.switches)
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        
+        # TODO: check that the full reservation rspec is returned
+        
+        # check that all the switches are stored in the slice on the CH
+        slice = GAPISlice.objects.get(slice_urn=slice_urn)
+        dpids = []
+        for fs in flowspaces:
+            for switch in fs.switches:
+                dpids.append(switch.dpid)
+        dpids = set(dpids)
+        # TODO: Do a better check
+        self.assertEqual(len(dpids), len(slice.switches.all()))
+        
+        # check that the create_slice call has reached the dummyoms correctly
+        # TODO: Do a better check
+        self.assertEqual(len(DummyOMSlice.objects.all()),
+                         settings.NUM_DUMMY_OMS)
+        
+    def test_CreateDeleteSliver(self):
+        """
+        Tests that we can create a sliver.
+        """
+        from clearinghouse.openflow.models import GAPISlice
+        from clearinghouse.dummyom.models import DummyOMSlice
+        
+        # get the resources
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = self.am_client.ListResources(cred, options)
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+
+        # create a random reservation
+        resv_rspec, flowspaces = create_random_resv(20, self.switches)
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        
+        # delete the sliver
+        self.assertTrue(self.am_client.DeleteSliver(slice_urn, cred))
+        
+        # Make sure it is gone from the CH and the OMs
+        self.assertTrue(GAPISlice.objects.all().count() == 0,
+                        "Slice not deleted in the Clearinghouse")
+        self.assertTrue(DummyOMSlice.objects.all().count() == 0,
+                        "Slice not deleted in the OMs")
+         
+
+    def test_parse_slice(self):
+        from clearinghouse.openflow.models import GAPISlice
+        from clearinghouse.dummyom.models import DummyOMSlice
+        
+        # get the resources
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = self.am_client.ListResources(cred, options)
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+        
+        # create a random reservation
+        vals = dict(
+           firstname="John", lastname="Doe",
+           email="john.doe@geni.net", password="slice_pass",
+           proj_name="Stanford Networking",
+           proj_desc="Making the world better.",
+           slice_name="Crazy Load Balancer",
+           slice_desc="Does this and that...",
+           ctrl_url="tcp:controller.stanford.edu:6633")
+        resv_rspec, flowspaces = create_random_resv(20, self.switches, **vals)
+        
+        from clearinghouse.openflow.gapi.rspec import parse_slice
+        project_name, project_desc, slice_name, slice_desc,\
+        controller_url, email, password, agg_slivers = parse_slice(resv_rspec)
+        
+        self.assertEqual(project_name, vals["proj_name"])
+        self.assertEqual(project_desc, vals["proj_desc"])
+        self.assertEqual(slice_name, vals["slice_name"])
+        self.assertEqual(slice_desc, vals["slice_desc"])
+        self.assertEqual(controller_url, vals["ctrl_url"])
+        self.assertEqual(email, vals["email"])
+        self.assertEqual(password, vals["password"])
+        
+        dpid_fs_map = {} # map dpid to requested fs
+        for fs in flowspaces:
+            for sw in fs.switches:
+                if sw.dpid not in dpid_fs_map:
+                    dpid_fs_map[int(sw.dpid)] = []
+                dpid_fs_map[int(sw.dpid)].append(fs)
+        
+        # check that all slivers parsed are correct
+        found_dpids = []
+        for agg, slivers in agg_slivers:
+            for sliver in slivers:
+                found_dpids.append(int(sliver['datapath_id']))
+                
+                fs_set_requested = dpid_fs_map[int(sliver['datapath_id'])]
+                fs_set_found = sliver['flowspace']
+                
+                # make sure that all the parsed flowspace was requested
+                found = False
+                for fs_found in fs_set_found:
+                    for fs_req in fs_set_requested:
+                        if fs_req.compare_to_sliver_fs(fs_found):
+                            found = True
+                            break
+                self.assertTrue(found, 
+                    "Didn't request flowspace %s for dpid %s" %\
+                    (fs_found, sliver['datapath_id']))
+                    
+                # make sure that all requested flowspace was parsed
+                found = False
+                for fs_req in fs_set_requested:
+                    for fs_found in fs_set_found:
+                        if fs_req.compare_to_sliver_fs(fs_found):
+                            found = True
+                            break
+                self.assertTrue(found,
+                    "Didn't find requested flowspace %s for dpid %s" %\
+                    (fs_found, sliver['datapath_id']))
+                    
+        # Check that each dpid is used only once
+        self.assertTrue(len(found_dpids) == len(set(found_dpids)),
+                        "Some dpids are used more than once.")
+            
+        
+        # check that all requested slivers have been indeed parsed
+        found_dpids = set(found_dpids)
+        requested_dpids = set(dpid_fs_map.keys())
+        self.assertEqual(found_dpids, requested_dpids)
+            
         
 if __name__ == '__main__':
     import unittest

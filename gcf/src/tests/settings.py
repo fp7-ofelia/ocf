@@ -14,7 +14,7 @@ GCF_DIR = join(dirname(__file__), "../")
 
 NUM_DUMMY_OMS = 3
 NUM_SWITCHES_PER_AGG = 10
-NUM_LINKS_PER_AGG = 10
+NUM_LINKS_PER_AGG = 20
 
 HOST = socket.getfqdn()
 PORT = 443

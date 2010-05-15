@@ -18,3 +18,29 @@ def call_env_command(project_path, *args, **kwargs):
     call_command(*args, **kwargs)
     
     sys.path[0] = backup
+
+class Env(object):
+    """
+    Use to switch between different django environments.
+    """
+    
+    def __init__(self, project_path):
+        self.project_path = project_path
+        
+    def switch_to(self):
+        from django.core.management import setup_environ
+        import sys
+        
+        self.backup_path = sys.path[0]
+        sys.path[0] = self.project_path
+        
+        import settings
+        
+        setup_environ(settings)
+        
+        from django.db.models.loading import get_models
+        loaded_models = get_models()
+
+    def switch_from(self):
+        import sys
+        sys.path[0] = self.backup_path

@@ -5,5 +5,5 @@ Created on May 14, 2010
 '''
 # TODO: write up the OM harness
 # TODO: write the Dummy FV
-# TODO: finish the gapi tests for CH
-
+# TODO: Add permissions to XMLRPC calls
+# TODO: Limit the scope of callable XMLRPC calls depending on the url

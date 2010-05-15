@@ -52,8 +52,8 @@ def create_slice(slice_id, project_name, project_description,
     print "    controller: %s" % controller_url
     print "    owner_email: %s" % owner_email
     print "    owner_pass: %s" % owner_password
-    print "    switch_slivers:"
-    pprint(switch_slivers, indent=8)
+#    print "    switch_slivers:"
+#    pprint(switch_slivers, indent=4)
     
     # update or create the slice
     slice = create_or_update(
@@ -107,9 +107,7 @@ def register_topology_callback(url, cookie, **kwargs):
     attrs = {'url': url, 'cookie': cookie}
     filter_attrs = {'username': kwargs['user'].username,
                     'om': kwargs['om']}
-    print "     Doing create or update"
     create_or_update(DummyCallBackProxy, filter_attrs, attrs)
-    print "     Done create or update"
     return ""
 
 @rpcmethod(signature=['string', 'string'])
