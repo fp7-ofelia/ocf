@@ -6,7 +6,7 @@ Created on Apr 26, 2010
 from rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
-from optin_manager.xmlrpc_server.models import CallBackServerProxy
+from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
 from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowSpace, UserOpts, OptsFlowSpace
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt
 
@@ -144,6 +144,8 @@ def create_slice(slice_id, project_name, project_description,
     @return: switches and links that have caused errors
     @rtype: dict
     '''
+    # TODO: add security check
+    
     e = Experiment()
     e.slice_id = slice_id
     e.project_name = project_name
@@ -159,10 +161,11 @@ def create_slice(slice_id, project_name, project_description,
         sw = Topology.objects.filter(dpid = sliver.datapath_id)[0]
         e.topology.add(sw)
     e.save()
-    # Add flowspace to experiment.
+    
     # TODO: future feature: for now, each experiment has one flowspace across all the switches it has requested.
     # It doesn't have per switch granularity .
     
+    # Add flowspace to experiment.
     for sfs in switch_slivers[0]:
         efs = ExperimentFLowSpace()
         efs.exp  = e
@@ -184,7 +187,13 @@ def create_slice(slice_id, project_name, project_description,
         efs.tp_dst_s = int(fs['tp_dst_start'])
         efs.tp_dst_e = int(fs['tp_dst_end'])
         efs.save()
-             
+     
+    # Inform FV(s) of the changes
+    for fv in CallBackFVProxy.objects.all():
+        fv_success = fv.addNewSlice(slice_id, owner_password, controller_url, owner_email)
+        if (not fv_success):
+            error_msg = "FlowVisor rejected this request"
+    
     print "reserve_slice got the following:"
     print "    slice_id: %s" % slice_id
     print "    project_name: %s" % project_name
@@ -196,13 +205,14 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
+    
     try:
         print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
     except KeyError, e:
         print "%s" % e
 
     return {
-        'error_msg': "",
+        'error_msg': error_msg,
         'switches': [],
     }
 
@@ -227,8 +237,12 @@ def delete_slice(sliceid, **kwargs):
         ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
         single_exp.delete()
         
-    # TODO: no error message for now. check validity of sliceid later
-    return ""
+    for fv in CallBackFVProxy.objects.all():
+        success = fv.deleteSlice(sliceid)
+        if (not success):
+            error_msg = "At least one flowvisor sent an error"
+        
+    return error_msg
 
 
 @rpcmethod(signature=['array'])
@@ -236,29 +250,35 @@ def get_switches():
     '''
     Return what the FlowVisor gives.
     '''
-    
-    return []
+    #TODO: security check
+    complete_list = []
+    for fv in CallBackFVProxy.objects.all():
+        switches = fv.get_switches()
+        complete_list.append(switches)
+        
+    return complete_list
+
 
 @rpcmethod(signature=['array'])
 def get_links():
     '''
     Return what the FlowVisor gives.
     '''
-    
-    return [
-        [0, 0, 1, 0, {}],
-        [1, 0, 0, 0, {}],
-        [2, 0, 1, 0, {}],
-        [1, 0, 2, 0, {}],
-        [2, 0, 0, 0, {}],
-        [0, 0, 2, 0, {}],
-    ]
+    #TODO: security check
+    complete_list = []
+    for fv in CallBackFVProxy.objects.all():
+        links = fv.get_links()
+        complete_list.append(links)
+        
+    return complete_list
+
 
 @rpcmethod(signature=['string', 'string', 'string'])
 def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
+    #TODO: security check
     from clearinghouse import utils
     try:
         username = kwargs['request'].META['REMOTE_USER']

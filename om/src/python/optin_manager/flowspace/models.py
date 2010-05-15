@@ -55,7 +55,7 @@ class FlowSpace(models.Model):
         
 
 class Switch(models.Model):
-    dpid                = models.IntegerField()
+    dpid                = models.CharField()
     egress_connections  = models.ManyToManyField('self', symmetrical = False, blank=True)
     
     def __unicode__(self):
@@ -109,7 +109,7 @@ class Experiment(models.Model):
     Holds information about the topology and flowspace request of an experiment
     '''
     topology            = models.ManyToManyField(Topology)
-    slice_id            = models.IntegerField()
+    slice_id            = models.CharField()
     project_name        = models.CharField(max_length = 40)
     project_desc        = models.CharField(blank=True, max_length = 400)
     slice_name          = models.CharField(max_length = 40)
