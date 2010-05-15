@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import auth
-from flowspace.utils import InttoMAC, IntToDottedIP
+from optin_manager.flowspace.utils import InttoMAC, IntToDottedIP
 
 class FlowSpace(models.Model):
     mac_src_s           = models.IntegerField("Start Source MAC address", null=True, default=0x000000000000)

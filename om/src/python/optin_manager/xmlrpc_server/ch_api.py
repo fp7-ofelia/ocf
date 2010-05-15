@@ -7,7 +7,53 @@ from rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy
+from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt
 
+def convertStar(fs):
+    if ( fs['dl_src_start'] =='*'):
+        fs['dl_src_start'] = '00:00:00:00:00:00'
+    if (fs['dl_src_end'] == '*' ):
+        fs['dl_src_start'] = 'FF:FF:FF:FF:FF:FF'
+
+    if ( fs['dl_dst_start'] =='*' ):
+        fs['dl_dst_start'] = '00:00:00:00:00:00'
+    if (fs['dl_dst_end'] == '*' ):
+        fs['dl_dst_end'] = 'FF:FF:FF:FF:FF:FF'     
+        
+    if ( fs['nw_src_start'] =='*'):
+        fs['nw_src_start'] = '0.0.0.0'
+    if (fs['nw_src_end'] == '*' ):
+        fs['nw_src_end'] = '255.255.255.255'
+        
+    if ( fs['nw_dst_start'] =='*'):
+        fs['dl_dst_start'] = '00:00:00:00:00:00'
+    if (fs['nw_dst_end'] == '*' ):
+        fs['nw_dst_end'] = '255.255.255.255'   
+              
+    if ( fs['tp_src_start'] =='*'):
+        fs['tp_src_start'] = '0'
+    if (fs['tp_src_end'] == '*' ):
+        fs['tp_src_end'] = '65535'
+        
+    if ( fs['tp_dst_start'] =='*'):
+        fs['tp_dst_start'] = '0' 
+    if (fs['tp_dst_end'] == '*' ):
+        fs['tp_dst_end'] = '65535' 
+        
+    if ( fs['vlan_id_start'] =='*' ):
+        fs['vlan_id_start'] = '0'
+    if (fs['vlan_id_end'] == '*' ):
+        fs['vlan_id_end'] = '2047' 
+        
+    if ( fs['nw_proto_start'] =='*'):
+        fs['nw_proto_start'] = '0'
+    if (fs['nw_proto_end'] == '*' ):
+        fs['nw_proto_end'] = '255'
+        
+    return fs
+
+               
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
@@ -98,7 +144,47 @@ def create_slice(slice_id, project_name, project_description,
     @return: switches and links that have caused errors
     @rtype: dict
     '''
+    e = Experiment()
+    e.slice_id = slice_id
+    e.project_name = project_name
+    e.project_desc = project_description
+    e.slice_name = slice_name
+    e.slice_desc = slice_description
+    e.controller_url = controller_url
+    e.owner_email = owner_email
+    e.owner_password = owner_password
     
+    # Add switches to experiments
+    for sliver in switch_slivers:
+        sw = Topology.objects.filter(dpid = sliver.datapath_id)[0]
+        e.topology.add(sw)
+    e.save()
+    # Add flowspace to experiment.
+    # TODO: future feature: for now, each experiment has one flowspace across all the switches it has requested.
+    # It doesn't have per switch granularity .
+    
+    for sfs in switch_slivers[0]:
+        efs = ExperimentFLowSpace()
+        efs.exp  = e
+        fs = convertStar(sfs)
+        efs.mac_src_s = MACtoInt(fs['dl_src_start'])
+        efs.mac_src_e = MACtoInt(fs['dl_src_end'])
+        efs.mac_dst_s = MACtoInt(fs['dl_dst_start'])
+        efs.mac_dst_e = MACtoInt(fs['dl_dst_end'])
+        efs.vlan_id_s = int(fs['vlan_id_start'])
+        efs.vlan_id_e  = int(fs['vlan_id_end'])
+        efs.ip_src_s = DottedIPToInt(fs['nw_src_start'])
+        efs.ip_src_e = DottedIPToInt(fs['nw_src_end'])
+        efs.ip_dst_s = DottedIPToInt(fs['nw_dst_start'])
+        efs.ip_dst_e = DottedIPToInt(fs['nw_dst_end'])
+        efs.ip_proto_s = int(fs['nw_proto_start'])
+        efs.ip_proto_e = int(fs['nw_proto_end'])
+        efs.tp_src_s = int(fs['tp_src_start'])
+        efs.tp_src_e = int(fs['tp_src_end'])
+        efs.tp_dst_s = int(fs['tp_dst_start'])
+        efs.tp_dst_e = int(fs['tp_dst_end'])
+        efs.save()
+             
     print "reserve_slice got the following:"
     print "    slice_id: %s" % slice_id
     print "    project_name: %s" % project_name
@@ -121,28 +207,36 @@ def create_slice(slice_id, project_name, project_description,
     }
 
 @rpcmethod(signature=['string', 'int'])
-def delete_slice(slice_id, **kwargs):
+def delete_slice(sliceid, **kwargs):
     '''
-    Delete the slice with id slice_id.
+    Delete the slice with id sliceid.
     
     @param slice_id: an int that uniquely identifies the slice at the 
         Clearinghouseclearinghouse.
-    @type slice_id: int
+    @type sliceid: int
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
-    
+    exps = Experiment.objects.filter(slice_id = sliceid)
+    for single_exp in exps:
+        OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
+        UserOpts.objects.filter(experiment = single_exp)
+        ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
+        single_exp.delete()
+        
+    # TODO: no error message for now. check validity of sliceid later
     return ""
+
 
 @rpcmethod(signature=['array'])
 def get_switches():
     '''
     Return what the FlowVisor gives.
     '''
-
+    
     return []
 
 @rpcmethod(signature=['array'])

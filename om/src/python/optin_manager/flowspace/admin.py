@@ -1,5 +1,5 @@
 # admin file for flowspace - to be used in debuging
-from models import UserOpts, Experiment, Topology, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
+from optin_manager.flowspace.models import UserOpts, Experiment, Topology, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
 from django.contrib import admin
 
 

@@ -1,5 +1,5 @@
-from flowspace.models import FlowSpace
-from flowspace.utils import MACtoInt, DottedIPToInt
+from optin_manager.flowspace.models import FlowSpace
+from optin_manager.flowspace.utils import MACtoInt, DottedIPToInt
 
 def SingleFSIntersect(f1,f2,resultModel):
     fr = resultModel()
