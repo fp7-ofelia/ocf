@@ -11,46 +11,48 @@ from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowS
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt
 
 def convertStar(fs):
-    if ( fs['dl_src_start'] =='*'):
-        fs['dl_src_start'] = '00:00:00:00:00:00'
-    if (fs['dl_src_end'] == '*' ):
-        fs['dl_src_start'] = 'FF:FF:FF:FF:FF:FF'
-
-    if ( fs['dl_dst_start'] =='*' ):
-        fs['dl_dst_start'] = '00:00:00:00:00:00'
-    if (fs['dl_dst_end'] == '*' ):
-        fs['dl_dst_end'] = 'FF:FF:FF:FF:FF:FF'     
+    def _long_to_mac(l):
+        import re
+        if type(l) == str:
+            return l
+        s = "%012x" % l
+        m = re.findall("\w\w", s)
+        return ":".join(m)
         
-    if ( fs['nw_src_start'] =='*'):
-        fs['nw_src_start'] = '0.0.0.0'
-    if (fs['nw_src_end'] == '*' ):
-        fs['nw_src_end'] = '255.255.255.255'
-        
-    if ( fs['nw_dst_start'] =='*'):
-        fs['dl_dst_start'] = '00:00:00:00:00:00'
-    if (fs['nw_dst_end'] == '*' ):
-        fs['nw_dst_end'] = '255.255.255.255'   
-              
-    if ( fs['tp_src_start'] =='*'):
-        fs['tp_src_start'] = '0'
-    if (fs['tp_src_end'] == '*' ):
-        fs['tp_src_end'] = '65535'
-        
-    if ( fs['tp_dst_start'] =='*'):
-        fs['tp_dst_start'] = '0' 
-    if (fs['tp_dst_end'] == '*' ):
-        fs['tp_dst_end'] = '65535' 
-        
-    if ( fs['vlan_id_start'] =='*' ):
-        fs['vlan_id_start'] = '0'
-    if (fs['vlan_id_end'] == '*' ):
-        fs['vlan_id_end'] = '2047' 
-        
-    if ( fs['nw_proto_start'] =='*'):
-        fs['nw_proto_start'] = '0'
-    if (fs['nw_proto_end'] == '*' ):
-        fs['nw_proto_end'] = '255'
-        
+    def _int_to_ip(i):
+        if type(i) == str:
+            return i
+        return "%s.%s.%s.%s" % (
+            (i >> 24) & 0xff,
+            (i >> 16) & 0xff,
+            (i >> 8) & 0xff,
+            i & 0xff,
+        )
+    def _same(val):
+        return "%s" % val
+    
+    attr_funcs = {
+        # attr_name: (func to turn to str, width)
+        "dl_src": (_long_to_mac, 48),
+        "dl_dst": (_long_to_mac, 48),
+        "dl_type": (_same, 16),
+        "vlan_id": (_same, 12),
+        "nw_src": (_int_to_ip, 32),
+        "nw_dst": (_int_to_ip, 32),
+        "nw_proto": (_same, 8),
+        "tp_src": (_same, 16),
+        "tp_dst": (_same, 16),
+        "port": (_same, 16),
+    }
+    
+    for attr_name, (to_str, width) in attr_funcs.items():
+        start = "%s_start" % attr_name
+        end = "%s_end" % attr_name
+        if start not in fs or (start in fs and start == "*"):
+            fs[start] = to_str(0)
+        if end not in fs or (end in fs and end == "*"):
+            fs[end] = to_str(2**width - 1)
+    
     return fs
 
                
