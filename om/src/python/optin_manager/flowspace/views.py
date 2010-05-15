@@ -1,13 +1,13 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from flowspace.models import UserOpts, OptsFlowSpace, Experiment, ExperimentFLowSpace, AdminFlowSpace, UserFlowSpace 
-from flowspace.models import FlowSpace
+from optin_manager.flowspace.models import UserOpts, OptsFlowSpace, Experiment, ExperimentFLowSpace, AdminFlowSpace, UserFlowSpace 
+from optin_manager.flowspace.models import FlowSpace
 from django.template import RequestContext
 from django.http import HttpResponse
-from flowspace.forms import AdminOptInForm
+from optin_manager.flowspace.forms import AdminOptInForm
 from django.forms.util import ErrorList
-from flowspace.helper import MultiFSIntersect, makeFlowSpace 
+from optin_manager.flowspace.helper import MultiFSIntersect, makeFlowSpace 
 
 @login_required
 def view_opt_in(request, error_msg):

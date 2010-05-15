@@ -1,7 +1,7 @@
-from users.models import UserProfile
+from optin_manager.users.models import UserProfile
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from flowspace.models import UserOpts, Topology, Experiment, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
+from optin_manager.flowspace.models import UserOpts, Topology, Experiment, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
 
 def config():
     Site.objects.all().delete()

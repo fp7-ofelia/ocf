@@ -1,9 +1,47 @@
-'''
-Created on Apr 30, 2010
-
-@author: jnaous
-'''
 from django.db import models
+from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
+from optin_manager.flowspace.models import Topology, Experiment, ExperimentFLowSpace
+
+class CallBackFVProxy(models.Model):
+    fv = models.ForeignKey(PasswordXMLRPCServerProxy)
+    
+    def changePassword(self, sliceName, new_password):
+        success = self.fv.change_password(sliceName, new_password)
+        return success
+        
+    def get_switches(self):
+        devices = self.fv.listDevices()
+        return devices
+    
+    def get_links(self):
+        links = self.fv.getLinks()
+        return links
+    
+    def addNewSlice(self,sliceName, passwd, controller, slice_email):
+        success = self.fv.createSlice(sliceName, passwd, controller, slice_email)
+        return success
+    
+    def deleteSlice(self,sliceName):
+        success = self.fv.deleteSlice(sliceName)
+        return success
+    
+    def updateTopology(self):
+        devices = self.fv.listDevices()
+        links = self.fv.getLinks()
+        Topology.objects.all().delete()
+        for device in devices:
+            t = Topology(dpid = device)
+            t.save()
+        for link in links:
+            dstDPID = link['dstDPID']
+            srcDPID = link['srcDPID']
+            srcsw = Topology.objects.filter(dpid = srcDPID)
+            dstsw = Topology.objects.filter(dpid = dstDPID)
+            if (srcsw and dstsw):
+                srcsw.egress_connections.add(dstsw)
+            
+            
+        
 
 class CallBackServerProxy(models.Model):
     '''

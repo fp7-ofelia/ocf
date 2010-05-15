@@ -1,5 +1,8 @@
 # Django settings for OM project.
 from os.path import dirname, join
+import sys
+
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,6 +12,7 @@ ADMINS = (
 )
 
 SRC_DIR = join(dirname(__file__), '../../')
+sys.path.append(join(SRC_DIR,'../../v2/src/python/')) 
 
 STATIC_DOC_ROOT = join(SRC_DIR, 'static')
 
@@ -88,7 +92,7 @@ INSTALLED_APPS = (
     'optin_manager.users',
     'optin_manager.flowspace',
     'optin_manager.xmlrpc_server',
-    #'clearinghouse.xmlrpc_serverproxy',
+    'clearinghouse.xmlrpc_serverproxy',
 )
 
 AUTH_PROFILE_MODULE = "users.UserProfile"
@@ -107,3 +111,8 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Opt IN Manager]'
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
+
+# XML-RPC settings
+XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
+XMLRPC_TIMEOUT = 120
+MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
