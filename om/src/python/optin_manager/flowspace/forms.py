@@ -1,5 +1,5 @@
 from django import forms
-from flowspace.utils import DottedIPToInt
+from optin_manager.flowspace.utils import DottedIPToInt
 from django.forms.util import ErrorList
 import re
 

@@ -52,17 +52,7 @@ class FlowSpace(models.Model):
         
     class Meta:
         abstract = True
-        
 
-class Switch(models.Model):
-    dpid                = models.CharField()
-    egress_connections  = models.ManyToManyField('self', symmetrical = False, blank=True)
-    
-    def __unicode__(self):
-        return "dpid: %d" % (self.dpid)
-    
-    class Meta:
-        abstract = True
  
 class UserFlowSpace(FlowSpace):
     '''
@@ -92,15 +82,6 @@ class RequestedUserFlowSpace(FlowSpace):
     user            = models.ForeignKey(auth.models.User, related_name = "user_fs_requester")
     admin           = models.ForeignKey(auth.models.User, related_name = "user_fs_approver")
     
-    
-        
-class Topology(Switch):
-    '''
-    Holds the topology through a list of switches in network with their connections
-    '''
-    pass
-
-
 '''
 Experiment, ExperimentFlowSpace stores information about each experiment
 '''    
@@ -108,8 +89,7 @@ class Experiment(models.Model):
     ''' 
     Holds information about the topology and flowspace request of an experiment
     '''
-    topology            = models.ManyToManyField(Topology)
-    slice_id            = models.CharField()
+    slice_id            = models.CharField(max_length = 15)
     project_name        = models.CharField(max_length = 40)
     project_desc        = models.CharField(blank=True, max_length = 400)
     slice_name          = models.CharField(max_length = 40)
@@ -120,9 +100,13 @@ class Experiment(models.Model):
     
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)
-    
+
 class ExperimentFLowSpace(FlowSpace):
-    exp                 = models.ForeignKey(Experiment)
+    dpid                  = models.CharField(max_length = 30)
+    direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
+    port_number_s = models.CharField("Start of Port Range", blank=True, default = '*',max_length = 10)
+    port_number_e = models.CharField("End of Port Range", blank=True, default='*',max_length = 10)
+    exp                   = models.ForeignKey(Experiment)
     
     
 '''
@@ -140,6 +124,23 @@ class UserOpts(models.Model):
     def __unicode__(self):
         return "User %s opt in %s" % (self.user,self.experiment)
 
+class MatchStruct(models.Model):
+    match              = models.CharField(max_length = 2000)
+    fv_id               = models.CharField(unique = True, max_length = 40)
+    priority        = models.IntegerField()
+   
+    def __unicode__(self):
+        return "Priority: %d, id:%s: %s"%(self.priority, self.fv_id, self.match)
+    
 class OptsFlowSpace(FlowSpace):
+    dpid                  = models.CharField(max_length = 30)
+    direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
+    port_number_s = models.CharField("Start of Port Range", blank=True, default = '*', max_length = 10)
+    port_number_e = models.CharField("End of Port Range", blank=True, default='*', max_length = 10)
     opt             = models.ForeignKey(UserOpts)
+    match_structs  = models.ManyToManyField(MatchStruct)
+    
+    def __unicode__(self):
+        fs_desc = super(OptsFlowSpace, self).__unicode__()
+        return "dpid; %s , FS: %s"%(self.dpid,fs_desc)
 

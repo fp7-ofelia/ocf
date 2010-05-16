@@ -7,8 +7,9 @@ from apps.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
-from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
+
 
 def convertStar(fs):
     def _same(val):
@@ -38,6 +39,16 @@ def convertStar(fs):
     
     return fs
 
+
+def getDirection(direction):
+    if (direction == 'ingress'):
+        return 0
+    if (direction == 'egress'):
+        return 1
+    if (direction == 'bidirectional'):
+        return 2
+    return 2
+               
 
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
@@ -139,38 +150,33 @@ def create_slice(slice_id, project_name, project_description,
     e.controller_url = controller_url
     e.owner_email = owner_email
     e.owner_password = owner_password
-    
+    e.save()
     # Add switches to experiments
     for sliver in switch_slivers:
-        sw = Topology.objects.filter(dpid = sliver.datapath_id)[0]
-        e.topology.add(sw)
-    e.save()
-    
-    # TODO: future feature: for now, each experiment has one flowspace across all the switches it has requested.
-    # It doesn't have per switch granularity .
-    
-    # Add flowspace to experiment.
-    for sfs in switch_slivers[0]:
-        efs = ExperimentFLowSpace()
-        efs.exp  = e
-        fs = convertStar(sfs)
-        efs.mac_src_s = MACtoInt(fs['dl_src_start'])
-        efs.mac_src_e = MACtoInt(fs['dl_src_end'])
-        efs.mac_dst_s = MACtoInt(fs['dl_dst_start'])
-        efs.mac_dst_e = MACtoInt(fs['dl_dst_end'])
-        efs.vlan_id_s = int(fs['vlan_id_start'])
-        efs.vlan_id_e  = int(fs['vlan_id_end'])
-        efs.ip_src_s = DottedIPToInt(fs['nw_src_start'])
-        efs.ip_src_e = DottedIPToInt(fs['nw_src_end'])
-        efs.ip_dst_s = DottedIPToInt(fs['nw_dst_start'])
-        efs.ip_dst_e = DottedIPToInt(fs['nw_dst_end'])
-        efs.ip_proto_s = int(fs['nw_proto_start'])
-        efs.ip_proto_e = int(fs['nw_proto_end'])
-        efs.tp_src_s = int(fs['tp_src_start'])
-        efs.tp_src_e = int(fs['tp_src_end'])
-        efs.tp_dst_s = int(fs['tp_dst_start'])
-        efs.tp_dst_e = int(fs['tp_dst_end'])
-        efs.save()
+        for sfs in sliver['flowspace']:
+            efs = ExperimentFLowSpace()
+            efs.exp  = e
+            efs.port_number_s = sfs['port_num_start']
+            efs.port_number_e = sfs['port_num_end']
+            efs.direction = getDirection(sfs['direction'])
+            fs = convertStar(sfs)
+            efs.mac_src_s = MACtoInt(fs['dl_src_start'])
+            efs.mac_src_e = MACtoInt(fs['dl_src_end'])
+            efs.mac_dst_s = MACtoInt(fs['dl_dst_start'])
+            efs.mac_dst_e = MACtoInt(fs['dl_dst_end'])
+            efs.vlan_id_s = int(fs['vlan_id_start'])
+            efs.vlan_id_e  = int(fs['vlan_id_end'])
+            efs.ip_src_s = DottedIPToInt(fs['nw_src_start'])
+            efs.ip_src_e = DottedIPToInt(fs['nw_src_end'])
+            efs.ip_dst_s = DottedIPToInt(fs['nw_dst_start'])
+            efs.ip_dst_e = DottedIPToInt(fs['nw_dst_end'])
+            efs.ip_proto_s = int(fs['nw_proto_start'])
+            efs.ip_proto_e = int(fs['nw_proto_end'])
+            efs.tp_src_s = int(fs['tp_src_start'])
+            efs.tp_src_e = int(fs['tp_src_end'])
+            efs.tp_dst_s = int(fs['tp_dst_start'])
+            efs.tp_dst_e = int(fs['tp_dst_end'])
+            efs.save()
      
     # Inform FV(s) of the changes
     for fv in CallBackFVProxy.objects.all():
@@ -224,7 +230,7 @@ def delete_slice(sliceid, **kwargs):
     for fv in CallBackFVProxy.objects.all():
         success = fv.deleteSlice(sliceid)
         if (not success):
-            error_msg = "At least one flowvisor sent an error"
+            error_msg = "flowvisor sent an error"
         
     return error_msg
 
