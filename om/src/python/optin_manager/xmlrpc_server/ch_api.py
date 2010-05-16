@@ -3,7 +3,7 @@ Created on Apr 26, 2010
 
 @author: jnaous
 '''
-from rpc4django import rpcmethod
+from apps.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
@@ -304,7 +304,7 @@ def change_password(new_password, **kwargs):
     
     try:
         user = User.objects.get(username=username)
-    except User.DoesNotExistError:
+    except User.DoesNotExist:
         # Do not return an error indicating the user does not
         # exist so we don't provide an easy way for probing for usernames.
         # We also do a set_password on the dummy user so we don't worry

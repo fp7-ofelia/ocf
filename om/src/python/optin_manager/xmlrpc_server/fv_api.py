@@ -1,4 +1,4 @@
-from rpc4django import rpcmethod
+from apps.rpc4django import rpcmethod
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
 from optin_manager.flowspace.models import Topology
 
