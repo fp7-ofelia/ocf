@@ -104,8 +104,8 @@ class Experiment(models.Model):
 class ExperimentFLowSpace(FlowSpace):
     dpid                  = models.CharField(max_length = 30)
     direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
-    port_number_s = models.CharField("Start of Port Range", blank=True, default = '*',max_length = 10)
-    port_number_e = models.CharField("End of Port Range", blank=True, default='*',max_length = 10)
+    port_number_s = models.CharField("Start of Port Range", blank=True, default=0)
+    port_number_e = models.CharField("End of Port Range", blank=True, default=0xFFFF)
     exp                   = models.ForeignKey(Experiment)
     
     
@@ -135,8 +135,8 @@ class MatchStruct(models.Model):
 class OptsFlowSpace(FlowSpace):
     dpid                  = models.CharField(max_length = 30)
     direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
-    port_number_s = models.CharField("Start of Port Range", blank=True, default = '*', max_length = 10)
-    port_number_e = models.CharField("End of Port Range", blank=True, default='*', max_length = 10)
+    port_number_s = models.IntegerField("Start of Port Range", default = 0)
+    port_number_e = models.IntegerField("End of Port Range", default=0xFFFF)
     opt             = models.ForeignKey(UserOpts)
     match_structs  = models.ManyToManyField(MatchStruct)
     
