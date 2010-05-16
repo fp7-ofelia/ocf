@@ -1,13 +1,13 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from flowspace.models import UserOpts, OptsFlowSpace, Experiment, ExperimentFLowSpace, AdminFlowSpace, UserFlowSpace 
-from flowspace.models import FlowSpace
+from optin_manager.flowspace.models import UserOpts, OptsFlowSpace, Experiment, ExperimentFLowSpace, AdminFlowSpace, UserFlowSpace 
+from optin_manager.flowspace.models import FlowSpace
 from django.template import RequestContext
 from django.http import HttpResponse
-from flowspace.forms import AdminOptInForm
+from optin_manager.flowspace.forms import AdminOptInForm
 from django.forms.util import ErrorList
-from flowspace.helper import MultiFSIntersect, makeFlowSpace 
+from optin_manager.flowspace.helper import MultiFSIntersect, makeFlowSpace 
 
 @login_required
 def view_opt_in(request, error_msg):
@@ -86,18 +86,66 @@ def add_opt_in(request):
             'form': form, 'user':request.user, 'experiments':exps, 'defexp': defexp,
         })
     else:
-        #User Opt In
-        return HttpResponse("trial")
+        selpri = 0
+        if (request.method == "POST"):
+            selpri = request.POST['priority']
+            defexp = request.POST['experiment']
+
+            if int(request.POST['priority']) > int(profile.max_priority_level):
+                msg = "Your maximum priority is %d"%(profile.max_priority_level)
+                error_msg = ErrorList([msg])
+            else:
+                selexp = Experiment.objects.get(id = defexp)
+                userFS = UserFlowSpace.objects.filter(user = request.user)
+                expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
+                    
+                # find flowspace intersection
+                result = MultiFSIntersect(expFS,userFS,OptsFlowSpace)  
+                if (len(result) > 0):
+                        OptsFlowSpace.objects.filter(opt__user = request.user).filter(opt__experiment = selexp).delete()
+                        # check if user already opted into this experiment,
+                        tmp = UserOpts.objects.filter(experiment = selexp)
+                        if (len(tmp) == 0):
+                            #add this experiment to opted-in experiments
+                            tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority']
+                                           ,nice=True )
+                            tmp.save()
+                        else:
+                            tmp = tmp[0]
+                            tmp.priority = request.POST['priority']
+                            tmp.save()
+
+                        for elem in result:
+                            elem.opt = tmp
+                            elem.save()
+     
+                        exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
+                        return render_to_response('flowspace/opt_in_successful.html', {
+                                'expname':exp_name})
+                else:
+                        error_msg = ErrorList(["No intersection between opted-in flowspace,\
+                        your flowspace and experiment flowspace"])     
+                                   
+        defexp = exps[0].id       
+        return render_to_response('flowspace/user_opt_in.html', {
+            'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
+        })                        
+
 
 @login_required
 def opt_out(request):
-    profile = request.user.get_profile()
-    if (profile.is_net_admin):
+        profile = request.user.get_profile()
+    #if (profile.is_net_admin):
         if (request.method == "POST"):
             for key in request.POST:
                 OptsFlowSpace.objects.get(id=key).delete()
-            
+            for key in request.POST:
+                userexpfs = OptsFlowSpace.objects.filter(opt__user = request.user).filter(opt__experiment__id = key)
+                if (not userexpfs):
+                     UserOpts.objects.filter(user = request.user).filter(experiment__id = key).delete()
+                     
         allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
+        
         return render_to_response('flowspace/admin_opt_out.html', {
                 'allfs':allfs})
         

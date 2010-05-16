@@ -3,8 +3,16 @@
 {% block content %}
 <div class="main">
 	<h2>Opt Traffic In, for User {{user.username}}</h2>
-	
+	{{ error_msg }}
 	<form name="input" action="/flowspace/opt_in" method="post">
+			<select name="experiment">
+				{% for exp in experiments %}
+				<option value="{{exp.id}}" {%ifequal defexp exp.id%} default {% endifequal %}>
+				{{exp.project_name}}:{{exp.slice_name}}
+				</option>
+				{% endfor %}
+			</select>
+			<input type="text" name="priority" value="{{selpri}}"/>
 		<input type="submit" value="Opt In"/>
 	</form>
 </div>

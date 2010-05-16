@@ -1,5 +1,8 @@
 # Django settings for OM project.
 from os.path import dirname, join
+import sys
+
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,6 +12,7 @@ ADMINS = (
 )
 
 SRC_DIR = join(dirname(__file__), '../../')
+sys.path.append(join(SRC_DIR,'../../v2/src/python/')) 
 
 STATIC_DOC_ROOT = join(SRC_DIR, 'static')
 
@@ -32,7 +36,7 @@ TIME_ZONE = 'America/Los_Angeles'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 2
+SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -50,7 +54,7 @@ MEDIA_URL = '/static/media'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '2f(jw$r445m^g3#1e)mysi2c#4ny83*4al=#adkj1o98ic+44i'
@@ -107,3 +111,8 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Opt IN Manager]'
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
+
+# XML-RPC settings
+XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, 'ssl.crt')
+XMLRPC_TIMEOUT = 120
+MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')

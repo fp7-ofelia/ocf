@@ -3,7 +3,7 @@ Created on May 1, 2010
 
 @author: jnaous
 '''
-from rpc4django import rpcmethod
+from apps.rpc4django import rpcmethod
 from clearinghouse.openflow.models import OpenFlowAggregate
 
 @rpcmethod(signature=['string', 'string'])

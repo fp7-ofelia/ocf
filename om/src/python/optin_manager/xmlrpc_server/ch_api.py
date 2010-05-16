@@ -6,7 +6,38 @@ Created on Apr 26, 2010
 from rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
-from optin_manager.xmlrpc_server.models import CallBackServerProxy
+from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
+from optin_manager.flowspace.models import Experiment, Topology, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
+
+def convertStar(fs):
+    def _same(val):
+        return "%s" % val
+    
+    attr_funcs = {
+        # attr_name: (func to turn to str, width)
+        "dl_src": (InttoMAC, 48),
+        "dl_dst": (InttoMAC, 48),
+        "dl_type": (_same, 16),
+        "vlan_id": (_same, 12),
+        "nw_src": (IntToDottedIP, 32),
+        "nw_dst": (IntToDottedIP, 32),
+        "nw_proto": (_same, 8),
+        "tp_src": (_same, 16),
+        "tp_dst": (_same, 16),
+        "port": (_same, 16),
+    }
+    
+    for attr_name, (to_str, width) in attr_funcs.items():
+        start = "%s_start" % attr_name
+        end = "%s_end" % attr_name
+        if start not in fs or (start in fs and start == "*"):
+            fs[start] = to_str(0)
+        if end not in fs or (end in fs and end == "*"):
+            fs[end] = to_str(2**width - 1)
+    
+    return fs
+
 
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
@@ -26,8 +57,6 @@ def create_slice(slice_id, project_name, project_description,
     - C{flowspace}: an array of dicts describing the switch's flowspace
     Each such dict has the following keys:
         - C{id}: integer. Per clearinghouse unique identifier for the rule.
-        - C{direction}: string. 'ingress', 'egress', or 'bidirectional'
-        - C{policy}: int. 1 for 'allow', -1 for 'deny', 0 for read only
         - C{port_num_start}, C{port_num_end}: string. the port range for this 
         flowspace
         - C{dl_src_start}, C{dl_src_end}: string. link layer address range in
@@ -99,6 +128,55 @@ def create_slice(slice_id, project_name, project_description,
     @return: switches and links that have caused errors
     @rtype: dict
     '''
+    # TODO: add security check
+    
+    e = Experiment()
+    e.slice_id = slice_id
+    e.project_name = project_name
+    e.project_desc = project_description
+    e.slice_name = slice_name
+    e.slice_desc = slice_description
+    e.controller_url = controller_url
+    e.owner_email = owner_email
+    e.owner_password = owner_password
+    
+    # Add switches to experiments
+    for sliver in switch_slivers:
+        sw = Topology.objects.filter(dpid = sliver.datapath_id)[0]
+        e.topology.add(sw)
+    e.save()
+    
+    # TODO: future feature: for now, each experiment has one flowspace across all the switches it has requested.
+    # It doesn't have per switch granularity .
+    
+    # Add flowspace to experiment.
+    for sfs in switch_slivers[0]:
+        efs = ExperimentFLowSpace()
+        efs.exp  = e
+        fs = convertStar(sfs)
+        efs.mac_src_s = MACtoInt(fs['dl_src_start'])
+        efs.mac_src_e = MACtoInt(fs['dl_src_end'])
+        efs.mac_dst_s = MACtoInt(fs['dl_dst_start'])
+        efs.mac_dst_e = MACtoInt(fs['dl_dst_end'])
+        efs.vlan_id_s = int(fs['vlan_id_start'])
+        efs.vlan_id_e  = int(fs['vlan_id_end'])
+        efs.ip_src_s = DottedIPToInt(fs['nw_src_start'])
+        efs.ip_src_e = DottedIPToInt(fs['nw_src_end'])
+        efs.ip_dst_s = DottedIPToInt(fs['nw_dst_start'])
+        efs.ip_dst_e = DottedIPToInt(fs['nw_dst_end'])
+        efs.ip_proto_s = int(fs['nw_proto_start'])
+        efs.ip_proto_e = int(fs['nw_proto_end'])
+        efs.tp_src_s = int(fs['tp_src_start'])
+        efs.tp_src_e = int(fs['tp_src_end'])
+        efs.tp_dst_s = int(fs['tp_dst_start'])
+        efs.tp_dst_e = int(fs['tp_dst_end'])
+        efs.save()
+     
+    # Inform FV(s) of the changes
+    for fv in CallBackFVProxy.objects.all():
+        fv_success = fv.addNewSlice(slice_id, owner_password, controller_url, owner_email)
+        if (not fv_success):
+            error_msg = "FlowVisor rejected this request"
     
     print "reserve_slice got the following:"
     print "    slice_id: %s" % slice_id
@@ -111,61 +189,80 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
+    
     try:
         print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
     except KeyError, e:
         print "%s" % e
 
     return {
-        'error_msg': "",
+        'error_msg': error_msg,
         'switches': [],
     }
 
 @rpcmethod(signature=['string', 'int'])
-def delete_slice(slice_id, **kwargs):
+def delete_slice(sliceid, **kwargs):
     '''
-    Delete the slice with id slice_id.
+    Delete the slice with id sliceid.
     
     @param slice_id: an int that uniquely identifies the slice at the 
         Clearinghouseclearinghouse.
-    @type slice_id: int
+    @type sliceid: int
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
-    
-    return ""
+    exps = Experiment.objects.filter(slice_id = sliceid)
+    for single_exp in exps:
+        OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
+        UserOpts.objects.filter(experiment = single_exp)
+        ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
+        single_exp.delete()
+        
+    for fv in CallBackFVProxy.objects.all():
+        success = fv.deleteSlice(sliceid)
+        if (not success):
+            error_msg = "At least one flowvisor sent an error"
+        
+    return error_msg
+
 
 @rpcmethod(signature=['array'])
 def get_switches():
     '''
     Return what the FlowVisor gives.
     '''
+    #TODO: security check
+    complete_list = []
+    for fv in CallBackFVProxy.objects.all():
+        switches = fv.get_switches()
+        complete_list.append(switches)
+        
+    return complete_list
 
-    return []
 
 @rpcmethod(signature=['array'])
 def get_links():
     '''
     Return what the FlowVisor gives.
     '''
-    
-    return [
-        [0, 0, 1, 0, {}],
-        [1, 0, 0, 0, {}],
-        [2, 0, 1, 0, {}],
-        [1, 0, 2, 0, {}],
-        [2, 0, 0, 0, {}],
-        [0, 0, 2, 0, {}],
-    ]
+    #TODO: security check
+    complete_list = []
+    for fv in CallBackFVProxy.objects.all():
+        links = fv.get_links()
+        complete_list.append(links)
+        
+    return complete_list
+
 
 @rpcmethod(signature=['string', 'string', 'string'])
 def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
+    #TODO: security check
     from clearinghouse import utils
     try:
         username = kwargs['request'].META['REMOTE_USER']

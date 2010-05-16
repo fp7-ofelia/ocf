@@ -1,6 +1,32 @@
+#----------------------------------------------------------------------
+# Copyright (c) 2010 Raytheon BBN Technologies
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and/or hardware specification (the "Work") to
+# deal in the Work without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Work, and to permit persons to whom the Work
+# is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Work.
+#
+# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
+# IN THE WORK.
+#----------------------------------------------------------------------
 
 import uuid
 from SecureXMLRPCServer import SecureXMLRPCServer
+import sfa.trust.gid as gid
+import sfa.trust.certificate as cert
+import sfa.trust.credential as cred
+import sfa.trust.rights as rights
 
 class ClearinghouseServer(object):
     """The public API for the Clearinghouse.  This class provides the
@@ -70,15 +96,14 @@ class Clearinghouse(object):
         return result
 
     def CreateSlice(self):
-        import sfa.trust.gid as gid
         # Create a random uuid for the slice
         slice_uuid = uuid.uuid4()
         # Where was the slice created?
         (ipaddr, port) = self._server.socket._sock.getsockname()
-        public_id = 'IDN geni.net//slice//%s//%s:%d' % (slice_uuid,
-                                                        ipaddr,
-                                                        port)
-        urn = urn_to_publicid(public_id)
+        public_id = 'IDN openflow//stanford ch slice %s//%s:%d' % (slice_uuid,
+                                                                   ipaddr,
+                                                                   port)
+        urn = publicid_to_urn(public_id)
         # Create a credential authorizing this user to use this slice.
         slice_gid = self.create_slice_gid(slice_uuid, urn)[0]
         # Get the creator info from the peer certificate
@@ -97,27 +122,27 @@ class Clearinghouse(object):
         return list()
     
     def create_slice_gid(self, subject, slice_urn):
-        import sfa.trust.gid as gid
-        import sfa.trust.certificate as cert
         newgid = gid.GID(create=True, uuid=gid.create_uuid(), urn=slice_urn)
         keys = cert.Keypair(create=True)
         newgid.set_pubkey(keys)
         issuer_key = cert.Keypair(filename=self.keyfile)
-        issuer_cert = cert.Certificate(filename=self.certfile)
+        issuer_cert = gid.GID(filename=self.certfile)
         newgid.set_issuer(issuer_key, cert=issuer_cert)
+        newgid.set_parent(issuer_cert)
         newgid.encode()
         newgid.sign()
         return newgid, keys
 
     def create_slice_credential(self, user_gid, slice_gid):
-        import sfa.trust.credential as cred
-        import sfa.trust.rights as rights
         ucred = cred.Credential()
         ucred.set_gid_caller(user_gid)
         ucred.set_gid_object(slice_gid)
         ucred.set_lifetime(3600)
         privileges = rights.determine_rights('user', None)
         privileges.add('embed')
+        # TODO: This should be 'control', not 'sa', but
+        # renewsliver is only an 'sa' privilege at this time.
+        privileges.add('sa')
         ucred.set_privileges(privileges)
         ucred.encode()
         ucred.set_issuer_keys(self.keyfile, self.certfile)
@@ -136,14 +161,20 @@ publicid_xforms = [(' ', '+'),
                    (':', '%3A'),
                    ('//', ':')]
 
+publicid_urn_prefix = 'urn:publicid:'
 
-def urn_from_publicid(id):
+def urn_to_publicid(urn):
+    # Remove prefix
+    if not urn.startswith(publicid_urn_prefix):
+        # Erroneous urn for conversion
+        raise ValueError('Invalid urn: ' + urn)
+    publicid = urn[len(publicid_urn_prefix):]
     for a, b in reversed(publicid_xforms):
-        id = id.replace(b, a)
-    return id
+        publicid = publicid.replace(b, a)
+    return publicid
 
-def urn_to_publicid(id):
+def publicid_to_urn(id):
     for a, b in publicid_xforms:
         id = id.replace(a, b)
     # prefix with 'urn:publicid:'
-    return 'urn:publicid:' + id
+    return publicid_urn_prefix + id

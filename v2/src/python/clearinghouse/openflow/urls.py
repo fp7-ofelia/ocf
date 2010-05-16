@@ -8,5 +8,6 @@ urlpatterns = patterns('clearinghouse.openflow.views',
 )
 
 urlpatterns += patterns('',
-    (r'^gapi$', 'rpc4django.views.serve_rpc_request'),
+    url(r'^gapi/$', 'apps.rpc4django.views.serve_rpc_request', name="openflow_gapi"),
+    url(r'^xmlrpc/$', 'apps.rpc4django.views.serve_rpc_request', name="openflow_xmlrpc"),
 )

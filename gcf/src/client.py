@@ -1,12 +1,38 @@
 #!/usr/bin/env python2.6
 
+#----------------------------------------------------------------------
+# Copyright (c) 2010 Raytheon BBN Technologies
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and/or hardware specification (the "Work") to
+# deal in the Work without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Work, and to permit persons to whom the Work
+# is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Work.
+#
+# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
+# IN THE WORK.
+#----------------------------------------------------------------------
+
+import base64
+import datetime
+import logging
 import optparse
 import random
 import sys
 import xml.dom.minidom as minidom
 import xmlrpclib
+import zlib
 import sfa.trust.credential as cred
-from pprint import pprint
 
 class SafeTransportWithCert(xmlrpclib.SafeTransport):
 
@@ -69,7 +95,7 @@ def test_create_sliver(server, slice_urn, slice_credential, dom):
             top.appendChild(resources.item(index).cloneNode(True))
     manifest_rspec = server.CreateSliver(slice_urn, slice_credential,
                                          request_rspec.toxml())
-    # XXX verify manifest_rspec
+    # TODO: verify manifest_rspec
     print 'passed'
 
 def test_delete_sliver(server, slice_urn, slice_credential):
@@ -132,10 +158,16 @@ def test_get_version(server):
     else:
         print 'failed'
 
-def test_list_resources(server, credentials):
+def test_list_resources(server, credentials, compressed=False, available=True,
+                        slice_urn=None):
     print 'Testing ListResources...',
-    options = dict()
+    options = dict(geni_compressed=compressed, geni_available=available)
+    if slice_urn:
+        options['geni_slice_urn'] = slice_urn
     rspec = server.ListResources(credentials, options)
+    if compressed:
+        rspec = zlib.decompress(base64.b64decode(rspec))
+    logging.debug(rspec)
     dom = verify_rspec(rspec)
     if dom:
         print 'passed'
@@ -155,14 +187,20 @@ def exercise_am(ch_server, am_server):
     credentials = [slice_cred_string]
 
     test_get_version(am_server)
-    
     dom = test_list_resources(am_server, credentials)
     test_create_sliver(am_server, slice_urn, credentials, dom)
     test_sliver_status(am_server, slice_urn, credentials)
-    #TODO: Fix expiration time
-    test_renew_sliver(am_server, slice_urn, credentials, 10)
+    test_list_resources(am_server, credentials, slice_urn=slice_urn)
+    
+    expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+    test_renew_sliver(am_server, slice_urn, credentials, expiration)
+    
     test_delete_sliver(am_server, slice_urn, credentials)
     
+    # Test compression on list resources
+    dom = test_list_resources(am_server, credentials, compressed=True,
+                              available=False)
+
     # Now create a slice and shut it down instead of deleting it.
     slice_cred_string = ch_server.CreateSlice()
     slice_credential = cred.Credential(string=slice_cred_string)
@@ -200,14 +238,22 @@ def parse_args(argv):
                       help="aggregate manager URL")
     parser.add_option("--debug", action="store_true", default=False,
                        help="enable debugging output")
+    parser.add_option("--debug-rpc", action="store_true", default=False,
+                      help="enable XML RPC debugging")
     return parser.parse_args()
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv
     opts = parse_args(argv)[0]
-    ch_server = make_server(opts.ch, opts.keyfile, opts.certfile, opts.debug)
-    am_server = make_server(opts.am, opts.keyfile, opts.certfile, opts.debug)
+    level = logging.INFO
+    if opts.debug:
+        level = logging.DEBUG
+    logging.basicConfig(level=level)
+    ch_server = make_server(opts.ch, opts.keyfile, opts.certfile,
+                            opts.debug_rpc)
+    am_server = make_server(opts.am, opts.keyfile, opts.certfile,
+                            opts.debug_rpc)
     exercise_am(ch_server, am_server)
     return 0
 

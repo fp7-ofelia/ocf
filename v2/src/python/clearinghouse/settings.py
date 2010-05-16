@@ -92,8 +92,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'rpc4django',
-#    'clearinghouse.gapi_tester',
+    'django_extensions',
+    'apps.rpc4django',
     'autoslug',
     'clearinghouse.extendable',
     'clearinghouse.xmlrpc_serverproxy',
@@ -107,6 +107,8 @@ INSTALLED_APPS = (
     'clearinghouse.slice',
     'clearinghouse.users',
     'clearinghouse.defaultsite',
+###### For Testing #######################
+    'clearinghouse.dummyom',
 ###### IGNORE ############################
 #    'clearinghouse.extendable_tester',
 #    'clearinghouse.permission',
@@ -148,3 +150,7 @@ NUM_LATEST_MSGS = 10
 
 # Aggregate app settings
 AGGREGATE_LOGOS_DIR = "/"
+
+# Openflow GAPI settings
+OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
+OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"

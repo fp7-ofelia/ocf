@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from users.models import UserProfile
+from optin_manager.users.models import UserProfile
 from django.contrib.auth.decorators import login_required
 from django.http import *
 

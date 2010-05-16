@@ -135,7 +135,7 @@ class AggregateUserInfo(Extendable):
 
 class AggregateAdminInfo(Extendable):
     
-    admin = models.OneToOneField(
+    admin = models.ForeignKey(
         auth.models.User, verbose_name="Administrator")
     
 #    class Extend:
@@ -154,7 +154,7 @@ class AggregateAdminInfo(Extendable):
         
 class AggregateSliceInfo(Extendable):
     
-    slice = models.OneToOneField(Slice)
+    slice = models.ForeignKey(Slice)
     
 #    class Extend:
 #        fields = {
@@ -172,7 +172,7 @@ class AggregateSliceInfo(Extendable):
 
 class AggregateProjectInfo(Extendable):
     
-    project = models.OneToOneField(Project)
+    project = models.ForeignKey(Project)
     
 #    class Extend:
 #        fields = {

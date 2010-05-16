@@ -20,7 +20,7 @@ def check_password(environ, user, password):
     db.reset_queries() 
 
     kwargs = {'username': user, 'is_active': True}
-
+    
     try: 
         try: 
             user = User.objects.get(**kwargs) 
