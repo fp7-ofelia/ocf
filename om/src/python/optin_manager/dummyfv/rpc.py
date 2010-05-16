@@ -7,8 +7,15 @@ Created on May 15, 2010
 from apps.rpc4django import rpcmethod
 from decorator import decorator
 from optin_manager.dummyfv.models import DummyFVSlice, DummyFVDevice,\
-    DummyFVLink, DummyFVRule
+    DummyFVLink, DummyFVRule, DummyFV
 from django.contrib.auth.models import User
+
+@decorator
+def get_fv(func, *args, **kwargs):
+    fv_id = kwargs['fv_id']
+    fv = DummyFV.objects.get(id=fv_id)
+    kwargs['fv'] = fv
+    return func(*args, **kwargs)
 
 @decorator
 def checkUser(func, *args, **kwargs):
@@ -26,34 +33,43 @@ def checkUser(func, *args, **kwargs):
        
     return func(*args, **kwargs)
 
-@checkUser 
+@checkUser
+@get_fv
 @rpcmethod(signature=['boolean', 'string', 'string', 'string', 'string'])
 def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
-    DummyFVSlice.objects.create(name=sliceName, password=passwd,
+    DummyFVSlice.objects.create(fv=kwargs['fv'],
+                                name=sliceName, password=passwd,
                                 controller_url=controller_url,
                                 email=slice_email)
     return True
 
 @checkUser 
+@get_fv
 @rpcmethod(signature=['array'])
 def listDevices(**kwargs):
-    return DummyFVDevice.objects.values_list('dpid', flat=True)
+    return DummyFVDevice.objects.filter(
+        fv=kwargs['fv']).values_list('dpid', flat=True)
 
 @checkUser 
+@get_fv
 @rpcmethod(signature=['array'])
 def getLinks(**kwargs):
     return [{"dstDPID": link.dst_dev.dpid,
              "dstPort": link.dst_port,
              "srcDPID": link.src_dev.dpid,
-             "srcPort": link.src_port} for link in DummyFVLink.objects.all()]
+             "srcPort": link.src_port} \
+             for link in DummyFVLink.objects.filter(fv=kwargs['fv'])]
     
 @checkUser 
+@get_fv
 @rpcmethod(signature=['boolean', 'string'])
 def deleteSlice(sliceName, **kwargs):
-    DummyFVSlice.objects.get(sliceName).delete()
+    DummyFVSlice.objects.filter(
+        fv=kwargs['fv']).get(sliceName).delete()
     return True
 
 @checkUser 
+@get_fv
 @rpcmethod(signature=['array', 'array'])
 def changeFlowSpace(changes, **kwargs):
     funcs = {"ADD": add_flowspace,
@@ -62,23 +78,24 @@ def changeFlowSpace(changes, **kwargs):
     ret = []
     for change in changes:
         operation = change.pop("operation")
-        ret.append(funcs[operation](**change))
+        ret.append(funcs[operation](kwargs['fv'], **change))
     
     return ret
 
-def add_flowspace(priority, dpid, match, actions):
+def add_flowspace(fv, priority, dpid, match, actions):
     import re
     slice_re = re.compile(r"Slice:(?P<name>.+)=(?P<perms>\d+)")
     axn_matches = slice_re.findall(actions)
     for axn in axn_matches:
         try:
-            slice = DummyFVSlice.objects.get(name=axn.group("name"))
+            slice = DummyFVSlice.objects.filter(
+                fv=fv).get(name=axn.group("name"))
         except DummyFVSlice.DoesNotExist:
-            print "Tried to add flowspace for non-existing slice %s" %\
-                axn.group("name")
-            return -1
+            raise Exception("Tried to add flowspace for non-existing " +\
+                            "slice %s" % axn.group("name"))
 
     rule = DummyFVRule.objects.create(
+        fv=fv,
         match=match,
         priority=priority,
         dpid=dpid,
@@ -87,32 +104,30 @@ def add_flowspace(priority, dpid, match, actions):
     
     return rule.id
 
-def remove_flowspace(id):
-    try:
-        rule = DummyFVRule.objects.get(id=int(id))
-    except DummyFVRule.DoesNotExist:
-        return -1
-    else:
-        rule.delete()
-        return id
+def remove_flowspace(fv, id):
+    rule = DummyFVRule.objects.filter(fv=fv).get(id=int(id))
+    rule.delete()
+    return id
     
-def change_flowspace(id, priority, dpid, match, actions):
+def change_flowspace(fv, id, priority, dpid, match, actions):
     import re
     slice_re = re.compile(r"Slice:(?P<name>.+)=(?P<perms>\d+)")
     axn_matches = slice_re.findall(actions)
     for axn in axn_matches:
         try:
-            slice = DummyFVSlice.objects.get(name=axn.group("name"))
+            slice = DummyFVSlice.objects.filter(
+                fv=fv).get(name=axn.group("name"))
         except DummyFVSlice.DoesNotExist:
-            print "Tried to change flowspace for non-existing slice %s" %\
+            raise Exception(
+                "Tried to change flowspace for non-existing slice %s" %\
                 axn.group("name")
-            return -1
+            )
 
     try:
-        rule = DummyFVRule.objects.get(id=id)
+        rule = DummyFVRule.objects.filter(fv=fv).get(id=id)
     except DummyFVRule.DoesNotExist:
-        print "Tried to change flowspace for non-existing rule id %s" % id
-        return -1
+        raise Exception("Tried to change flowspace for non-existing " + \
+                        "rule id %s" % id)
 
     rule.match = match
     rule.dpid = dpid

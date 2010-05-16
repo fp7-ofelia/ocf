@@ -5,9 +5,12 @@ Created on May 15, 2010
 '''
 from django.db import models
 
+class DummyFV(models.Model): pass
+
 class DummyFVDevice(models.Model):
     dpid = models.CharField(max_length=23)
-    
+    fv = models.ForeignKey(DummyFV)
+
     def __str__(self):
         return self.dpid
 
@@ -16,6 +19,7 @@ class DummyFVLink(models.Model):
     src_port = models.IntegerField()
     dst_dev = models.ForeignKey(DummyFVDevice)
     dst_port = models.IntegerField()
+    fv = models.ForeignKey(DummyFV)
     
     def __str__(self):
         return "%s,%s,%s,%s" % (self.src_dev, self.src_port,
@@ -26,6 +30,7 @@ class DummyFVSlice(models.Model):
     password = models.CharField(max_lengh=1024)
     controller_url = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
+    fv = models.ForeignKey(DummyFV)
     
 class DummyFVRuleManager(models.Manager):
     """
@@ -64,6 +69,8 @@ class DummyFVRule(models.Model):
     
     objects = DummyFVRuleManager()
     
+    fv = models.ForeignKey(DummyFV)
+
     match = models.CharField(max_length=2048)
     actions = models.CharField(max_length=200)
     prev = models.OneToOneField('self', related_name="next",
