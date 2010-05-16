@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from optin_manager.flowspace.forms import AdminOptInForm
 from django.forms.util import ErrorList
 from optin_manager.flowspace.helper import MultiFSIntersect, makeFlowSpace 
+from optin_manager.users.models import Priority
 
 @login_required
 def view_opt_in(request, error_msg):
@@ -34,6 +35,7 @@ def add_opt_in(request):
     if (profile.is_net_admin):
     
         if (request.method == "POST"):
+            #opt in request received; process it
             form = AdminOptInForm(request.POST)
             defexp = request.POST['experiment']
             if form.is_valid():
@@ -51,98 +53,107 @@ def add_opt_in(request):
                     
                     # find flowspace intersection
                     f = MultiFSIntersect(adminFS,[optedFS],FlowSpace)
-                    result = MultiFSIntersect(expFS,f,OptsFlowSpace)
                     
-                    #check if result is empty
-                    if (len(result) > 0):
-                        # check if user already opted into this experiment,
-                        tmp = UserOpts.objects.filter(experiment = selexp)
-                        print "before: "
-                        print tmp
-                        if (len(tmp) == 0):
-                            #add this experiment to opted-in experiments
-                            tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority']
-                                           ,nice=False )
-                            tmp.save()
-                        else:
-                            tmp = tmp[0]
-                            tmp.priority = request.POST['priority']
-                            tmp.save()
-
-                        for elem in result:
-                            elem.opt = tmp
-                            elem.save()
+                    intersected = False
+                    tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
+                    tmp.save()
+                    
+                    for fs in expFS:
+                        opted = MultiFSIntersect([fs],f,OptsFlowSpace)
+                        if (len(opted) > 0):
+                            intersected = True
+                            for opt in opted:
+                                opt.opt = tmp
+                                opt.dpid = fs.dpid
+                                opt.port_numebr_s = fs.port_number_s
+                                opt.port_numebr_e = fs.port_number_e
+                                opt.direction = fs.direction
+                                #TODO Match struct and FV call
+                                opt.save()
+                            
      
+                    if (intersected):
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                         return render_to_response('flowspace/opt_in_successful.html', {
                                 'expname':exp_name})
                     else:
+                        tmp.delete()
                         form._errors['general'] = ErrorList(["No intersection between opted-in flowspace,\
                         your flowspace and experiment flowspace"])
-        else:
+        else: #Not a post request
             defexp = exps[0].id
             form = AdminOptInForm()
         return render_to_response('flowspace/admin_opt_in.html', {
             'form': form, 'user':request.user, 'experiments':exps, 'defexp': defexp,
         })
-    else:
+    else: # A user optin page
         selpri = 0
         if (request.method == "POST"):
+            #opt in request received; process it
             selpri = request.POST['priority']
             defexp = request.POST['experiment']
-
-            if int(request.POST['priority']) > int(profile.max_priority_level):
+            
+             # check if priority is within allowable range
+            if selpri > int(profile.max_priority_level):
                 msg = "Your maximum priority is %d"%(profile.max_priority_level)
-                error_msg = ErrorList([msg])
+                form._errors["priority"] = ErrorList([msg])
             else:
                 selexp = Experiment.objects.get(id = defexp)
                 userFS = UserFlowSpace.objects.filter(user = request.user)
                 expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
-                    
-                # find flowspace intersection
-                result = MultiFSIntersect(expFS,userFS,OptsFlowSpace)  
-                if (len(result) > 0):
-                        OptsFlowSpace.objects.filter(opt__user = request.user).filter(opt__experiment = selexp).delete()
-                        # check if user already opted into this experiment,
-                        tmp = UserOpts.objects.filter(experiment = selexp)
-                        if (len(tmp) == 0):
-                            #add this experiment to opted-in experiments
-                            tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority']
-                                           ,nice=True )
-                            tmp.save()
-                        else:
-                            tmp = tmp[0]
-                            tmp.priority = request.POST['priority']
-                            tmp.save()
+                               
+                intersected = False
 
-                        for elem in result:
-                            elem.opt = tmp
-                            elem.save()
-     
-                        exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
-                        return render_to_response('flowspace/opt_in_successful.html', {
+                tmp = UserOpts.objects.filter(experiment = selexp)
+                if (len(tmp) > 0):
+                    tmp = tmp[0]
+                    tmp.delete()
+                    tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
+                    tmp.save()
+                    
+                for fs in expFS:
+                    opted = MultiFSIntersect([fs],userFS,OptsFlowSpace)
+                    if (len(opted) > 0):
+                        intersected = True
+                        for opt in opted:
+                            opt.opt = tmp
+                            opt.dpid = fs.dpid
+                            opt.port_numebr_s = fs.port_number_s
+                            opt.port_numebr_e = fs.port_number_e
+                            opt.direction = fs.direction
+                            #TODO Match struct and FV call
+                            opt.save()
+                                
+                if (intersected):     
+                    exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
+                    return render_to_response('flowspace/opt_in_successful.html', {
                                 'expname':exp_name})
                 else:
-                        error_msg = ErrorList(["No intersection between opted-in flowspace,\
+                    tmp.delete()
+                    error_msg = ErrorList(["No intersection between opted-in flowspace,\
                         your flowspace and experiment flowspace"])     
-                                   
-        defexp = exps[0].id       
-        return render_to_response('flowspace/user_opt_in.html', {
-            'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
-        })                        
-
-
+                    
+        else: #Not a post request
+            defexp = exps[0].id       
+            return render_to_response('flowspace/user_opt_in.html', {
+                'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
+            })  
+        
+    
 @login_required
 def opt_out(request):
         profile = request.user.get_profile()
-    #if (profile.is_net_admin):
+        #if (profile.is_net_admin):
         if (request.method == "POST"):
             for key in request.POST:
-                OptsFlowSpace.objects.get(id=key).delete()
-            for key in request.POST:
-                userexpfs = OptsFlowSpace.objects.filter(opt__user = request.user).filter(opt__experiment__id = key)
-                if (not userexpfs):
-                     UserOpts.objects.filter(user = request.user).filter(experiment__id = key).delete()
+                OptsFlowSpace.objects.get(id=key).delete()        
+                    
+        this_user_opts  = UserOpts.objects.filter(user = request.user)
+        for useropt in this_user_opts:
+            tmpfs = useropt.optsflowspace_set.all()
+            if (len(tmpfs) == 0):
+                useropt.delete()
+            
                      
         allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
         

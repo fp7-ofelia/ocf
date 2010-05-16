@@ -1,6 +1,6 @@
 from django.db import models
 from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
-from optin_manager.flowspace.models import Topology, Experiment, ExperimentFLowSpace
+from optin_manager.flowspace.models import  Experiment, ExperimentFLowSpace
 
 class CallBackFVProxy(models.Model):
     fv = models.ForeignKey(PasswordXMLRPCServerProxy)
@@ -24,24 +24,7 @@ class CallBackFVProxy(models.Model):
     def deleteSlice(self,sliceName):
         success = self.fv.deleteSlice(sliceName)
         return success
-    
-    def updateTopology(self):
-        devices = self.fv.listDevices()
-        links = self.fv.getLinks()
-        Topology.objects.all().delete()
-        for device in devices:
-            t = Topology(dpid = device)
-            t.save()
-        for link in links:
-            dstDPID = link['dstDPID']
-            srcDPID = link['srcDPID']
-            srcsw = Topology.objects.filter(dpid = srcDPID)
-            dstsw = Topology.objects.filter(dpid = dstDPID)
-            if (srcsw and dstsw):
-                srcsw.egress_connections.add(dstsw)
             
-            
-        
 
 class CallBackServerProxy(models.Model):
     '''

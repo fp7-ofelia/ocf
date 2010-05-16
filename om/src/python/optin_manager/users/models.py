@@ -10,7 +10,8 @@ class Priority(object):
      Strict_User            = 2000
      Nice_User              = 1000
      
-     Priority_MArgin        = 999
+     Priority_Margin        = 999
+     Priority_Scale          = 1000
      
      Admins = ["Aggragate Admin", "Campus Admin", "Department Admin", "Building Admin", "Group Admin"]
  

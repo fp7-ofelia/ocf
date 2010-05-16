@@ -87,9 +87,6 @@ def makeFlowSpace(PostObject):
     else:
         f.mac_dst_s = MACtoInt(PostObject['mac_to'])
         f.mac_dst_e = MACtoInt(PostObject['mac_to'])
-        
-    f.eth_type_s = 0x0800
-    f.eth_type_e = 0x0800
     
     f.vlan_id_s = int(PostObject['vlan_id_s'])
     f.vlan_id_e = int(PostObject['vlan_id_e'])
@@ -111,3 +108,25 @@ def makeFlowSpace(PostObject):
                 
     return f
     
+    
+def RangeToMatchStruct(rangeFS):
+    match = {}
+    if (rangeFS.mac_src_s > 0 or rangeFS.mac_src_e < 0xFFFFFFFFFFFF):
+        if (rangeFS.mac_src_s == rangeFS.mac_src_e):
+            match['dl_src']=[rangeFS.mac_src_s]
+        else:
+            match['dl_src']= range(rangeFS.mac_src_s,rangeFS.mac_src_e)
+            
+    if (rangeFS.mac_dst_s > 0 or rangeFS.mac_dst_e < 0xFFFFFFFFFFFF):
+        if (rangeFS.mac_dst_s == rangeFS.mac_dst_e):
+            match['dl_dst']=[rangeFS.mac_dst_s]
+        else:
+            match['dl_dst']= range(rangeFS.mac_dst_s,rangeFS.mac_dst_e)
+   
+    if (rangeFS.vlan_id_s > 0 or rangeFS.vlan_id_e < 0xFFF):
+        if (rangeFS.vlan_id_s == rangeFS.vlan_id_e):
+            match['dl_dst']=[rangeFS.vlan_id_s]
+        else:
+            match['dl_dst']= range(rangeFS.vlan_id_s,rangeFS.vlan_id_e)
+                
+    return match
