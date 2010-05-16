@@ -62,13 +62,13 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #        self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
-        print "Registering callback"
+#        print "Registering callback"
         err = self.client.register_topology_callback(
             "https://%s/openflow/xmlrpc/" % hostname,
             "%s" % self.pk,
         )
         if err: return err
-        print "Updating topology."
+#        print "Updating topology."
         err = self.update_topology()
         if err: return err
         
@@ -118,25 +118,20 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 
 #        print "Link raw:"
 #        pprint(links_raw, indent=4)
-        
+#        
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
 #        print "Current links:"
 #        pprint (current_links, indent=4)
-        
+#        
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
 #        print "Current switches:"
 #        pprint (current_switches, indent=4)
-
+#
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
 #        print "Current dpids:"
 #        pprint (current_dpids, indent=4)
         
-#        current_ifaces = self.openflowinterface_set.all().values_list('switch','port_num')
-#        current_ifaces = map(
-#            lambda(a,b): (current_switches.get(pk=a).datapath_id, b),
-#            current_ifaces,
-#        )
         current_ifaces = set(map(
             unslugify,
             OpenFlowInterface.objects.filter(
@@ -179,7 +174,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #        pprint (new_dpids, indent=4)
 #        print "New_ifaces:"
 #        pprint (new_ifaces, indent=4)
-#        
+        
 #        print "dead_links:"
 #        pprint (dead_links, indent=4)
 #        print "dead_dpids:"
@@ -203,14 +198,17 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 }
             )
         
-#        print "After adding: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
+#        print "After adding: %s" % OpenFlowSwitch.objects.filter(
+#            aggregate=self, available=True)
         
         # make old datapaths unavailable
-        current_switches.filter(
-            datapath_id__in=dead_dpids).update(
-                available=False, status_change_timestamp=datetime.now())
+        if dead_dpids:
+            current_switches.filter(
+                datapath_id__in=dead_dpids).update(
+                    available=False, status_change_timestamp=datetime.now())
 
-#        print "After deleting: %s" % OpenFlowSwitch.objects.filter(aggregate=self)
+#        print "After deleting: %s" % OpenFlowSwitch.objects.filter(
+#            aggregate=self, available=True)
             
         # create new ifaces
         for iface in new_ifaces:
@@ -234,18 +232,21 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #        print "After adding: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # make old ifaces unavailable
-        dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
-        OpenFlowInterface.objects.filter(
-            aggregate=self, slug__in=dead_iface_slugs).update(
-                available=False, status_change_timestamp=datetime.now())
+        if dead_ifaces:
+            dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
+            OpenFlowInterface.objects.filter(
+                aggregate=self, slug__in=dead_iface_slugs).update(
+                    available=False, status_change_timestamp=datetime.now())
 
 #        print "After deleting: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # create new links
         for link in new_links:
             OpenFlowConnection.objects.create(
-                src_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[0:2]),
-                dst_iface=OpenFlowInterface.objects.get(slug="%s_%s" % link[2:4]),
+                src_iface=OpenFlowInterface.objects.get(
+                    slug="%s_%s" % link[0:2]),
+                dst_iface=OpenFlowInterface.objects.get(
+                    slug="%s_%s" % link[2:4]),
             )
             
         # delete old links
@@ -253,7 +254,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             try:
                 c = OpenFlowConnection.objects.get(slug="%s_%s_%s_%s" % link)
             except OpenFlowConnection.DoesNotExist:
-                print "WARNING: Connection that was thought to be dead not found in DB."
+                print "WARNING: Connection that was thought to be dead" +\
+                    " not found in DB."
                 traceback.print_exc()
             else:
                 c.delete()
@@ -404,6 +406,6 @@ class FlowSpaceRule(models.Model):
                                       max_length=4, default="*")
 
 class GAPISlice(models.Model):
-    slice_urn = models.CharField(max_length=300, primary_key=True)
+    slice_urn = models.CharField(max_length=500, primary_key=True)
     switches = models.ManyToManyField(OpenFlowSwitch)
     

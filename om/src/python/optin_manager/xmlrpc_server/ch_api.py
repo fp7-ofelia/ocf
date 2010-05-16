@@ -3,54 +3,40 @@ Created on Apr 26, 2010
 
 @author: jnaous
 '''
-from rpc4django import rpcmethod
+from apps.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
 from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt
+from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
+
 
 def convertStar(fs):
-    if ( fs['dl_src_start'] =='*'):
-        fs['dl_src_start'] = '00:00:00:00:00:00'
-    if (fs['dl_src_end'] == '*' ):
-        fs['dl_src_start'] = 'FF:FF:FF:FF:FF:FF'
-
-    if ( fs['dl_dst_start'] =='*' ):
-        fs['dl_dst_start'] = '00:00:00:00:00:00'
-    if (fs['dl_dst_end'] == '*' ):
-        fs['dl_dst_end'] = 'FF:FF:FF:FF:FF:FF'     
-        
-    if ( fs['nw_src_start'] =='*'):
-        fs['nw_src_start'] = '0.0.0.0'
-    if (fs['nw_src_end'] == '*' ):
-        fs['nw_src_end'] = '255.255.255.255'
-        
-    if ( fs['nw_dst_start'] =='*'):
-        fs['dl_dst_start'] = '00:00:00:00:00:00'
-    if (fs['nw_dst_end'] == '*' ):
-        fs['nw_dst_end'] = '255.255.255.255'   
-              
-    if ( fs['tp_src_start'] =='*'):
-        fs['tp_src_start'] = '0'
-    if (fs['tp_src_end'] == '*' ):
-        fs['tp_src_end'] = '65535'
-        
-    if ( fs['tp_dst_start'] =='*'):
-        fs['tp_dst_start'] = '0' 
-    if (fs['tp_dst_end'] == '*' ):
-        fs['tp_dst_end'] = '65535' 
-        
-    if ( fs['vlan_id_start'] =='*' ):
-        fs['vlan_id_start'] = '0'
-    if (fs['vlan_id_end'] == '*' ):
-        fs['vlan_id_end'] = '2047' 
-        
-    if ( fs['nw_proto_start'] =='*'):
-        fs['nw_proto_start'] = '0'
-    if (fs['nw_proto_end'] == '*' ):
-        fs['nw_proto_end'] = '255'
-        
+    def _same(val):
+        return "%s" % val
+    
+    attr_funcs = {
+        # attr_name: (func to turn to str, width)
+        "dl_src": (InttoMAC, 48),
+        "dl_dst": (InttoMAC, 48),
+        "dl_type": (_same, 16),
+        "vlan_id": (_same, 12),
+        "nw_src": (IntToDottedIP, 32),
+        "nw_dst": (IntToDottedIP, 32),
+        "nw_proto": (_same, 8),
+        "tp_src": (_same, 16),
+        "tp_dst": (_same, 16),
+        "port": (_same, 16),
+    }
+    
+    for attr_name, (to_str, width) in attr_funcs.items():
+        start = "%s_start" % attr_name
+        end = "%s_end" % attr_name
+        if start not in fs or (start in fs and start == "*"):
+            fs[start] = to_str(0)
+        if end not in fs or (end in fs and end == "*"):
+            fs[end] = to_str(2**width - 1)
+    
     return fs
 
 
@@ -63,6 +49,7 @@ def getDirection(direction):
         return 2
     return 2
                
+
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
@@ -81,7 +68,6 @@ def create_slice(slice_id, project_name, project_description,
     - C{flowspace}: an array of dicts describing the switch's flowspace
     Each such dict has the following keys:
         - C{id}: integer. Per clearinghouse unique identifier for the rule.
-        - C{direction}: string. 'ingress', 'egress', or 'bidirectional'
         - C{port_num_start}, C{port_num_end}: string. the port range for this 
         flowspace
         - C{dl_src_start}, C{dl_src_end}: string. link layer address range in
@@ -324,7 +310,7 @@ def change_password(new_password, **kwargs):
     
     try:
         user = User.objects.get(username=username)
-    except User.DoesNotExistError:
+    except User.DoesNotExist:
         # Do not return an error indicating the user does not
         # exist so we don't provide an easy way for probing for usernames.
         # We also do a set_password on the dummy user so we don't worry

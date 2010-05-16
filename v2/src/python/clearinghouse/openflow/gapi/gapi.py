@@ -57,6 +57,7 @@ def ListResources(credentials, options, **kwargs):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
 def CreateSliver(slice_urn, credentials, rspec, **kwargs):
+    from django.db import transaction
     project_name, project_desc, slice_name, slice_desc,\
     controller_url, email, password, agg_slivers \
         = rspec_mod.parse_slice(rspec)
@@ -68,15 +69,11 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
             dpids.append(sliver['datapath_id'])
 
     switches = OpenFlowSwitch.objects.filter(datapath_id__in=dpids)
-    gapi_slice, created = GAPISlice.objects.get_or_create(slice_urn=slice_urn)
-    gapi_slice.switches.clear()
-    for s in switches:
-        gapi_slice.switches.add(s)
-    gapi_slice.save()
     
     # make the reservation
     # TODO: concat all the responses
     for aggregate, slivers in agg_slivers:
+        print "creating slice at aggregate."
         aggregate.client.create_slice(
             slice_urn, project_name, project_desc,
             slice_name, slice_desc, 
@@ -84,18 +81,26 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
             email, password, slivers,
         )
     
+    gapi_slice, created = GAPISlice.objects.get_or_create(slice_urn=slice_urn)
+    
+    gapi_slice.switches.clear()
+    for s in switches:
+        gapi_slice.switches.add(s)
+    gapi_slice.save()
+
     # TODO: get the actual reserved things
     return rspec
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
 def DeleteSliver(slice_urn, credentials, **kwargs):
+    for aggregate in OpenFlowAggregate.objects.all():
+        aggregate.client.delete_slice(slice_urn)
+
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
     except GAPISlice.DoesNotExist:
         no_such_slice(slice_urn)
     
-    for aggregate in OpenFlowAggregate.objects.all():
-        aggregate.client.delete_slice(slice_urn)
     return True
 
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
@@ -128,12 +133,12 @@ def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
 def Shutdown(slice_urn, credentials, **kwargs):
+    for aggregate in OpenFlowAggregate.objects.all():
+        aggregate.client.delete_slice(slice_urn)
+
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
     except GAPISlice.DoesNotExist:
         no_such_slice(slice_urn)
-    
-    for aggregate in OpenFlowAggregate.objects.all():
-        aggregate.client.delete_slice(slice_urn)
 
     return True

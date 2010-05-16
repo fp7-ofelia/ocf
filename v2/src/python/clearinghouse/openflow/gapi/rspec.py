@@ -26,11 +26,18 @@ LOCATION = "location"
 NAME = "name"
 FLOWVISOR_URL = "flowvisor_url"
 
-SWITCH_URN_REGEX = "^%s\+switch:(?P<dpid>\d+)$" % settings.OPENFLOW_GAPI_RSC_URN_PREFIX
-PORT_URN_REGEX = "%s\+port:(?P<port>\d+)" % SWITCH_URN_REGEX[:-1]
+SWITCH_URN_REGEX = r"^%s\+switch:(?P<dpid>\d+)$" % \
+    settings.OPENFLOW_GAPI_RSC_URN_PREFIX.replace("+", r"\+")
+PORT_URN_REGEX = r"%s\+port:(?P<port>\d+)$" % SWITCH_URN_REGEX[:-1]
 
 switch_re = re.compile(SWITCH_URN_REGEX)
 port_re = re.compile(PORT_URN_REGEX)
+
+class BadURNError(Exception):
+    def __init__(self, urn):
+        super(Exception, self).__init__(
+            "Unknown or badly formatted URN '%s'." % urn)
+    
 
 def _dpid_to_urn(dpid):
     """
@@ -45,7 +52,7 @@ def _urn_to_dpid(urn):
     m = switch_re.search(urn)
     
     if not m:
-        raise Exception("Unknown or badly formatted URN %s." % urn)
+        raise BadURNError(urn)
     
     return int(m.group('dpid'))
 
@@ -63,7 +70,7 @@ def _urn_to_port(urn):
 
     m = port_re.search(urn)
     if not m:
-        raise Exception("Unknown or badly formatted URN %s." % urn)
+        raise BadURNError(urn)
     
     return (int(m.group('dpid')), int(m.group('port')))
 
@@ -78,7 +85,7 @@ def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):
     '''Add an aggregate and the switches and links'''
     
     agg_elem = et.SubElement(
-        parent_elem, LINKS_TAG, {
+        parent_elem, NETWORK_TAG, {
             LOCATION: aggregate.location,
             NAME: aggregate.name,
         },
@@ -256,7 +263,8 @@ def parse_slice(resv_rspec):
     
     <resv_rspec>
         <user
-            fullname="John Doe"
+            firstname="John"
+            lastname="Doe"
             email="john.doe@geni.net"
             password="slice_pass"
         />
@@ -330,23 +338,23 @@ def _resv_parse_slivers(root):
     an OpenFlowAggregate instance and slivers is a list of dicts suitable for
     use in the create_slice xml-rpc call of the OM'''
     
-    flowspace_elems = root.findall(FLOWSPACE_TAG)
+    flowspace_elems = root.findall(".//%s" % FLOWSPACE_TAG)
     
     dpid_fs_map = {}
     
     for flowspace_elem in flowspace_elems:
-        
+#        print "parsing fs %s" % et.tostring(flowspace_elem)
         fs = {}
         # get a dict of the flowspace rule
-        for tag in POLICY_TAG, PORT_TAG, DL_SRC_TAG, DL_DST_TAG,\
+        for tag in PORT_TAG, DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
         TP_SRC_TAG, TP_DST_TAG:
             from_key = "%s_start" % tag
             to_key = "%s_end" % tag
             field_elem = flowspace_elem.find(tag)
-            if field_elem:
-                fs[from_key] = field_elem.get["from"]
-                fs[to_key] = field_elem.get["to"]
+            if field_elem != None:
+                fs[from_key] = field_elem.get("from")
+                fs[to_key] = field_elem.get("to")
             else:
                 fs[from_key] = WILDCARD
                 fs[to_key] = WILDCARD
