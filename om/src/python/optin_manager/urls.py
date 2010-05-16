@@ -11,18 +11,13 @@ urlpatterns = patterns('',
     (r'^flowspace/', include('optin_manager.flowspace.urls')),
 
     (r'^xmlrpc/', include('optin_manager.xmlrpc_server.urls')),
-    # Example:
-    # (r'^optin_manager/', include('optin_manager.foo.urls')),
-
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    
+    # For testing
+    (r'^dummyfv/', include('optin_manager.dummyfv.urls')),
+    
     (r'^admin/', include(admin.site.urls)),
 
     (r'^accounts/', include('registration.urls')),
-
 )
 
 static_file_tuple = (r'^%s/(?P<path>.*)$' % settings.MEDIA_URL[1:],
