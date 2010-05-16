@@ -38,7 +38,7 @@ def convertStar(fs):
     
     return fs
 
-               
+
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',

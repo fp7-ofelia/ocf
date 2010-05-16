@@ -4,29 +4,13 @@ Created on May 11, 2010
 @author: jnaous
 '''
 from unittest import TestCase
-from transport import SafeTransportWithCert
+from tests.transport import SafeTransportWithCert
 import xmlrpclib
 from os.path import join
-from tests import settings 
-from tests.helpers import parse_rspec, create_random_resv, kill_old_procs
+import test_settings as settings 
+from helpers import parse_rspec, create_random_resv, kill_old_procs
+from tests.commands import call_env_command, Env
 
-class CH_OM_Tests(TestCase):
-    """
-    Test the integration between the CH (aka AM) and the OM.
-    """
-
-    def setUp(self):
-        """
-        Load the CH and OM fixtures.
-        """
-        pass
-
-    def test_create_slice(self):
-        """
-        Tests the create slice rpc call.
-        """
-        pass
-    
 class GAPITests(TestCase):
     """
     Test the GENI API interface. This assumes that Apache is currently running
@@ -102,7 +86,6 @@ class GAPITests(TestCase):
         """
 #        print "Doing Setup"
         
-        from commands import call_env_command, Env
         import shlex, subprocess, time
         
         call_env_command(settings.CH_PROJECT_DIR, "flush", interactive=False)
@@ -132,7 +115,7 @@ class GAPITests(TestCase):
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
-
+        
         # run the AM proxy
 #        print "Running AM Proxy"
         cmd = "python %s -r %s -c %s -k %s -p 8000" % (

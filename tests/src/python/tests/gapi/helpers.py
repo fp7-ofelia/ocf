@@ -263,6 +263,7 @@ def kill_old_procs(self, *ports):
     for l in lines:
         for p in ports:
             if "localhost:%s" % p in l:
+#                print "killed process listening at localhost:%s" % p
                 cols = l.split()
                 prog = cols[6]
                 pid,sep,progname = prog.partition("/")
