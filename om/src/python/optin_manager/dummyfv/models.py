@@ -5,7 +5,34 @@ Created on May 15, 2010
 '''
 from django.db import models
 
-class DummyFV(models.Model): pass
+class DummyFV(models.Model):
+    def populateTopology(self, num_switches, num_links, use_random=False):
+        '''Create switches and random links'''
+        import random
+        from optin_manager.flowspace.utils import long_to_dpid
+        
+        if not use_random: random.seed(0)
+        
+        if num_switches >= 1000:
+            raise Exception("Can only create less than 1000 dpids per Dummy")
+        
+        for l in range(num_switches):
+            DummyFVDevice.objects.create(
+                dpid=long_to_dpid(self.id*1024+l),
+                fv=self,
+            )
+            
+        for l in range(num_links):
+            src, dst = random.sample(DummyFVDevice.objects.all(), 2)
+            src_port = random.randint(0, 3)
+            dst_port = random.randint(0, 3)
+            DummyFVLink.objects.create(
+                src_dev=src,
+                src_port=src_port,
+                dst_dev=dst,
+                dst_port=dst_port,
+                fv=self,
+            )
 
 class DummyFVDevice(models.Model):
     dpid = models.CharField(max_length=23)

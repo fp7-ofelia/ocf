@@ -19,19 +19,29 @@ def IPRangeToString(intip1, intip2):
     return total
 
 def MACtoInt(mac):
-    result = 0
-    exp = 5
-    for dbl in mac.split(':'):
-        result = result + int("0x%s"%dbl,16) * (256 ** exp)
-        exp = exp - 1
-    return result
+    import re
+    assert(re.match("..:..:..:..:..:..", mac))
+    parts = mac.split(":")
+    return int("".join(parts), base=16)
 
 def InttoMAC(mac):
-    result = ""
-    for exp in [5,4,3,2,1,0]:
-        tmp = hex(int(mac/(256 ** exp)))
-        result = result + tmp.split('x')[1] + ":"
-        mac = mac % (256 ** exp)
-    return (result.rstrip(":"))
+    if type(l) == str and ":" in str:
+        return l
+    s = "%012x" % long(l)
+    m = re.findall("\w\w", s)
+    return ":".join(m)
 
+def dpid_to_long(dpid):
+    import re
+    assert(re.match("..:..:..:..:..:..:..:..", dpid))
+    parts = dpid.split(":")
+    return int("".join(parts), base=16)
+
+def long_to_dpid(l):
+    import re
+    if type(l) == str and ":" in str:
+        return l
+    s = "%016x" % long(l)
+    m = re.findall("\w\w", s)
+    return ":".join(m)
 
