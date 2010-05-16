@@ -17,7 +17,8 @@ class OMTests(TestCase):
         Create a client to talk to the OM.
         """
         
-        call_env_command(test_settings.OM_PROJECT_DIR, "flush", interactive=False)
+        call_env_command(test_settings.OM_PROJECT_DIR, "flush",
+                         interactive=False)
         self.om_env = Env(test_settings.OM_PROJECT_DIR)
         self.om_env.switch_to()
         
@@ -41,3 +42,6 @@ class OMTests(TestCase):
         ret = self.om_client.ping("PING")
         self.assertEqual(ret, "PONG: PING", "Ping returned %s." % ret)
         
+if __name__ == '__main__':
+    import unittest
+    unittest.main()
