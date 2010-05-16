@@ -190,10 +190,49 @@ class GAPITests(TestCase):
         
         # check the number of switches and links
         self.assertEqual(len(self.switches),
-                         settings.NUM_SWITCHES_PER_AGG * settings.NUM_DUMMY_OMS)
+                         settings.NUM_SWITCHES_PER_AGG*settings.NUM_DUMMY_OMS)
         self.assertEqual(len(self.links),
                          settings.NUM_LINKS_PER_AGG * settings.NUM_DUMMY_OMS)
-    
+
+    def test_topoChange_ListResources(self):
+        """
+        Check the list of resources before and after a topology change
+        """
+        from clearinghouse.dummyom.models import DummyOM
+        
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = self.am_client.ListResources(cred, options)
+        
+#        print rspec
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+        
+        # check the number of switches and links
+        self.assertEqual(len(self.switches),
+                         settings.NUM_SWITCHES_PER_AGG*settings.NUM_DUMMY_OMS)
+        self.assertEqual(len(self.links),
+                         settings.NUM_LINKS_PER_AGG*settings.NUM_DUMMY_OMS)
+        
+        killed_dpids = []
+        for om in DummyOM.objects.all():
+            killed_dpids.append(om.kill_dpid())
+            om.dummycallbackproxy.call_back()
+            
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+        
+        # check the number of switches
+        self.assertEqual(
+            len(self.switches),
+            settings.NUM_SWITCHES_PER_AGG * settings.NUM_DUMMY_OMS - 1)
+        
+        # make sure all killed dpids are gone
+        for s in self.switches:
+            for d in killed_dpid:
+                self.assertFalse(str(s.dpid) == str(d))
+        
     def test_CreateSliver(self):
         """
         Tests that we can create a sliver.
@@ -229,6 +268,9 @@ class GAPITests(TestCase):
         # TODO: Do a better check
         self.assertEqual(len(DummyOMSlice.objects.all()),
                          settings.NUM_DUMMY_OMS)
+
+        # TODO: check the listresources call for the slice
+        
         
     def test_CreateDeleteSliver(self):
         """
@@ -258,7 +300,6 @@ class GAPITests(TestCase):
         self.assertTrue(DummyOMSlice.objects.all().count() == 0,
                         "Slice not deleted in the OMs")
          
-
     def test_parse_slice(self):
         from clearinghouse.openflow.models import GAPISlice
         from clearinghouse.dummyom.models import DummyOMSlice

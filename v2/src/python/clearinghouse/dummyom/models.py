@@ -104,7 +104,7 @@ class DummyCallBackProxy(models.Model):
     url = models.CharField(max_length=200)
     cookie = models.CharField(max_length=1024)
     username = models.CharField(max_length=1024)
-    om = models.ForeignKey(DummyOM)
+    om = models.OneToOneField(DummyOM)
     
     def call_back(self):
         from xmlrpclib import ServerProxy
