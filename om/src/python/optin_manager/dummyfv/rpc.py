@@ -5,34 +5,57 @@ Created on May 15, 2010
 '''
 
 from apps.rpc4django import rpcmethod
+from decorator import decorator
 from optin_manager.dummyfv.models import DummyFVSlice, DummyFVDevice,\
     DummyFVLink, DummyFVRule
+from django.contrib.auth.models import User
 
+@decorator
+def checkUser(func, *args, **kwargs):
+    if "request" not in kwargs:
+        raise Exception("Request not available for XML-RPC %s" % \
+                        func.func_name)
+    meta = kwargs["request"].META
+    if "REMOTE_USER" not in meta:
+        raise Exception("Remote user not authenticated for XML-RPC %s." %\
+                        func.func_name)
+    if User.objects.filter(username=meta["REMOTE_USER"]).count() == 0:
+       raise Exception("Remote user %s is unknown for call %s." % (
+            meta["REMOTE_USER"], func.func_name)
+       )
+       
+    return func(*args, **kwargs)
+
+@checkUser 
 @rpcmethod(signature=['boolean', 'string', 'string', 'string', 'string'])
-def createSlice(sliceName, passwd, controller_url, slice_email):
+def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
     DummyFVSlice.objects.create(name=sliceName, password=passwd,
                                 controller_url=controller_url,
                                 email=slice_email)
     return True
 
+@checkUser 
 @rpcmethod(signature=['array'])
-def listDevices():
+def listDevices(**kwargs):
     return DummyFVDevice.objects.values_list('dpid', flat=True)
 
+@checkUser 
 @rpcmethod(signature=['array'])
-def getLinks():
+def getLinks(**kwargs):
     return [{"dstDPID": link.dst_dev.dpid,
              "dstPort": link.dst_port,
              "srcDPID": link.src_dev.dpid,
              "srcPort": link.src_port} for link in DummyFVLink.objects.all()]
     
+@checkUser 
 @rpcmethod(signature=['boolean', 'string'])
-def deleteSlice(sliceName):
+def deleteSlice(sliceName, **kwargs):
     DummyFVSlice.objects.get(sliceName).delete()
     return True
 
+@checkUser 
 @rpcmethod(signature=['array', 'array'])
-def changeFlowSpace(changes):
+def changeFlowSpace(changes, **kwargs):
     funcs = {"ADD": add_flowspace,
              "REMOVE": remove_flowspace,
              "CHANGE": change_flowspace}
