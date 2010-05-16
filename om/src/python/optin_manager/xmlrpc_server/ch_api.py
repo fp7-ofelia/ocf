@@ -238,7 +238,7 @@ def get_switches():
     complete_list = []
     for fv in CallBackFVProxy.objects.all():
         switches = fv.get_switches()
-        complete_list.append(switches)
+        complete_list.extend(switches)
         
     return complete_list
 
@@ -252,7 +252,7 @@ def get_links():
     complete_list = []
     for fv in CallBackFVProxy.objects.all():
         links = fv.get_links()
-        complete_list.append(links)
+        complete_list.extend(links)
         
     return complete_list
 
