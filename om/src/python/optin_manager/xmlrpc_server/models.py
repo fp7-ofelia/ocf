@@ -3,8 +3,8 @@ from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from optin_manager.flowspace.models import  Experiment, ExperimentFLowSpace
 from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 
-class CallBackFVProxy(models.Model):
-    fv = models.ForeignKey(PasswordXMLRPCServerProxy)
+class CallBackFVProxy(PasswordXMLRPCServerProxy):
+    name = models.CharField("FV name",max_length = 40)
     
     def changePassword(self, sliceName, new_password):
         success = self.fv.change_password(sliceName, new_password)

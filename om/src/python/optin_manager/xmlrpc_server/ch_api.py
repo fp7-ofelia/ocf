@@ -11,33 +11,36 @@ from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, User
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
 
 
-def convertStar(fs):
-    def _same(val):
+class om_ch_translate(object):
+    def _same(self,val):
         return "%s" % val
     
     attr_funcs = {
         # attr_name: (func to turn to str, width)
-        "dl_src": (InttoMAC, 48),
-        "dl_dst": (InttoMAC, 48),
-        "dl_type": (_same, 16),
-        "vlan_id": (_same, 12),
-        "nw_src": (IntToDottedIP, 32),
-        "nw_dst": (IntToDottedIP, 32),
-        "nw_proto": (_same, 8),
-        "tp_src": (_same, 16),
-        "tp_dst": (_same, 16),
-        "port": (_same, 16),
+        "dl_src": (InttoMAC, MACtoInt, 48, "mac_src"),
+        "dl_dst": (InttoMAC, MACtoInt, 48, "mac_dst"),
+        "dl_type": (_same, int, 16, "eth_type"),
+        "vlan_id": (_same, int, 12, "vlan_id"),
+        "nw_src": (IntToDottedIP, DottedIPToInt, 32, "ip_src"),
+        "nw_dst": (IntToDottedIP, DottedIPToInt, 32, "ip_dst"),
+        "nw_proto": (_same, int, 8, "ip_proto"),
+        "tp_src": (_same, int, 16, "tp_src"),
+        "tp_dst": (_same, int, 16, "tp_dst"),
+        "port_num": (_same, int, 16, "port_number"),
     }
     
-    for attr_name, (to_str, width) in attr_funcs.items():
-        start = "%s_start" % attr_name
-        end = "%s_end" % attr_name
-        if start not in fs or (start in fs and start == "*"):
-            fs[start] = to_str(0)
-        if end not in fs or (end in fs and end == "*"):
-            fs[end] = to_str(2**width - 1)
-    
-    return fs
+def convertStar(fs):
+        for attr_name, (to_str, from_str, width, om_name) in om_ch_translate.attr_funcs.items():
+            start = "%s_start" % attr_name
+            end = "%s_end" % attr_name
+            om_start = "%s_s" % om_name
+            om_end = "%s_e" % om_name      
+            if start not in fs or (start in fs and start == "*"):
+                fs[om_start] = to_str(0)
+            if end not in fs or (end in fs and end == "*"):
+                fs[om_end] = to_str(2**width - 1)
+        
+        return fs
 
 
 def getDirection(direction):
@@ -151,31 +154,23 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_email = owner_email
     e.owner_password = owner_password
     e.save()
+
+    #inspired by Jad :)
     # Add switches to experiments
     for sliver in switch_slivers:
         for sfs in sliver['flowspace']:
             efs = ExperimentFLowSpace()
             efs.exp  = e
-            efs.port_number_s = sfs['port_num_start']
-            efs.port_number_e = sfs['port_num_end']
+
             efs.direction = getDirection(sfs['direction'])
             fs = convertStar(sfs)
-            efs.mac_src_s = MACtoInt(fs['dl_src_start'])
-            efs.mac_src_e = MACtoInt(fs['dl_src_end'])
-            efs.mac_dst_s = MACtoInt(fs['dl_dst_start'])
-            efs.mac_dst_e = MACtoInt(fs['dl_dst_end'])
-            efs.vlan_id_s = int(fs['vlan_id_start'])
-            efs.vlan_id_e  = int(fs['vlan_id_end'])
-            efs.ip_src_s = DottedIPToInt(fs['nw_src_start'])
-            efs.ip_src_e = DottedIPToInt(fs['nw_src_end'])
-            efs.ip_dst_s = DottedIPToInt(fs['nw_dst_start'])
-            efs.ip_dst_e = DottedIPToInt(fs['nw_dst_end'])
-            efs.ip_proto_s = int(fs['nw_proto_start'])
-            efs.ip_proto_e = int(fs['nw_proto_end'])
-            efs.tp_src_s = int(fs['tp_src_start'])
-            efs.tp_src_e = int(fs['tp_src_end'])
-            efs.tp_dst_s = int(fs['tp_dst_start'])
-            efs.tp_dst_e = int(fs['tp_dst_end'])
+            for attr_name,(to_str, from_str, width, om_name) in om_ch_translate.attr_func:
+                ch_start ="%s_start"%(attr_name)
+                ch_end ="%s_end"%(attr_name)
+                om_start ="%s_s"%(om_name)
+                om_end ="%s_e"%(om_name)
+                setattr(efs,om_start,from_str(fs[ch_start]))
+                setattr(efs,om_end,from_str(fs[ch_end]))
             efs.save()
      
     # Inform FV(s) of the changes
