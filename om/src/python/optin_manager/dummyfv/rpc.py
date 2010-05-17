@@ -33,9 +33,9 @@ def checkUser(func, *args, **kwargs):
         raise Exception("Remote user not authenticated for XML-RPC %s." %\
                         func.func_name)
     if User.objects.filter(username=meta["REMOTE_USER"]).count() == 0:
-       raise Exception("Remote user %s is unknown for call %s." % (
+        raise Exception("Remote user %s is unknown for call %s." % (
             meta["REMOTE_USER"], func.func_name)
-       )
+        )
        
     return func(*args, **kwargs)
 
