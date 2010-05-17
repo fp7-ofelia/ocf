@@ -1,6 +1,7 @@
 from django.db import models
 from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from optin_manager.flowspace.models import  Experiment, ExperimentFLowSpace
+from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 
 class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
@@ -10,16 +11,26 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
         return success
         
     def get_switches(self):
-        devices = self.fv.listDevices()
-        return devices
+        """
+        Change from FV format to CH format
+        """
+        dpids = self.fv.listDevices()
+        infos = [self.fv.getDeviceInfo() for d in dpids]
+        dpids = map(dpid_to_long, dpids)
+        return zip(dpids, infos)
     
     def get_links(self):
-        links = self.fv.getLinks()
-        return links
+        """
+        Change from FV format to CH format
+        """
+        return [(dpid_to_long(l.pop("srcDPID")),
+                 l.pop("srcPort"),
+                 dpid_to_long(l.pop("dstDPID")),
+                 l.pop("dstPort"),
+                 l) for l in self.fv.getLinks()]
     
     def addNewSlice(self,sliceName, passwd, controller, slice_email):
-        success = self.fv.createSlice(sliceName, passwd, controller, slice_email)
-        return success
+        return self.fv.createSlice(sliceName, passwd, controller, slice_email)
     
     def deleteSlice(self,sliceName):
         success = self.fv.deleteSlice(sliceName)

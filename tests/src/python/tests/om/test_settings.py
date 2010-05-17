@@ -9,7 +9,9 @@ import socket
 EGENI_DIR = join(dirname(__file__), "../../../../../")
 OM_PROJECT_DIR = join(EGENI_DIR, "om/src/python/optin_manager")
 
-print OM_PROJECT_DIR
+NUM_DUMMY_FVS = 1
+
+USER_RANDOM = False
 
 HOST = socket.getfqdn()
 PORT = 8443

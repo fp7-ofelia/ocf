@@ -168,7 +168,7 @@ class Flowspace(object):
                 }
             )
     
-    def compare_to_sliver_fs(self, sliver_fs):
+    def get_full_attrs(self):
         attr_names = ["dl_src", "dl_dst", "dl_type", "vlan_id", "nw_src",
                       "nw_dst", "nw_proto", "tp_src", "tp_dst", "port"]
 
@@ -181,8 +181,10 @@ class Flowspace(object):
             else:
                 temp["%s_start" % attr] = self.attrs[attr][0]
                 temp["%s_end" % attr] = self.attrs[attr][1]
-                
-        return temp == sliver_fs
+        return temp
+    
+    def compare_to_sliver_fs(self, sliver_fs):
+        return self.get_full_attrs() == sliver_fs
 
 def parse_rspec(rspec):
     """

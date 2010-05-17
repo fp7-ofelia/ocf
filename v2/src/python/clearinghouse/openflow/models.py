@@ -113,6 +113,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
         # Get the active topology information from the AM
         links_raw = self.client.get_links()
+
 #        print "******** Update topology"
 #        switches_raw = self.client.get_switches()
 

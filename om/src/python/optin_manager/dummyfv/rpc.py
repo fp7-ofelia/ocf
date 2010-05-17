@@ -12,6 +12,9 @@ from django.contrib.auth.models import User
 
 @decorator
 def get_fv(func, *args, **kwargs):
+    """
+    Add a 'fv' keyword pointing to the flowvisor responsible fore this call.
+    """
     fv_id = kwargs['fv_id']
     fv = DummyFV.objects.get(id=fv_id)
     kwargs['fv'] = fv
@@ -19,6 +22,9 @@ def get_fv(func, *args, **kwargs):
 
 @decorator
 def checkUser(func, *args, **kwargs):
+    """
+    Check that the user is authenticated and known.
+    """
     if "request" not in kwargs:
         raise Exception("Request not available for XML-RPC %s" % \
                         func.func_name)
@@ -49,6 +55,12 @@ def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
 def listDevices(**kwargs):
     return DummyFVDevice.objects.filter(
         fv=kwargs['fv']).values_list('dpid', flat=True)
+
+@checkUser
+@get_fv
+@rpcmethod(signature=['struct', 'string'])
+def getDeviceInfo(dpidStr):
+    return {}
 
 @checkUser 
 @get_fv
