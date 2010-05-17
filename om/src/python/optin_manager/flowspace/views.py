@@ -140,8 +140,8 @@ def add_opt_in(request):
                         for match in matches:
                             fv_arg={"operation":"REMOVE" , "id":match.fv_id}
                             fv_args.append(fv_arg)
-                        matches.delete()
-                    ofses.delete()
+                            match.delete()
+                        ofs.delete()
                     tmp.delete()
                     fv = FVServerProxy.objects.all()[0]
                     # TODO: Check for errors
@@ -272,6 +272,7 @@ def update_opts(request):
                     u.nice = False
             u.save()
 
+    # XMLRPC call 
     fv = FVServerProxy.objects.all()[0]
     fv.changeFlowSpace(fv_args)
           
