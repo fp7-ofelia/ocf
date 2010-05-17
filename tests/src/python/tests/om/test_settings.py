@@ -11,7 +11,7 @@ OM_PROJECT_DIR = join(EGENI_DIR, "om/src/python/optin_manager")
 
 NUM_DUMMY_FVS = 1
 
-USER_RANDOM = False
+USE_RANDOM = False
 
 HOST = socket.getfqdn()
 PORT = 8443

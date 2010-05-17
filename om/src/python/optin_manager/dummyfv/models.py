@@ -81,7 +81,7 @@ class DummyFVRuleManager(models.Manager):
                        prev__priority__ge=rule.priority)
             end = Q(is_head=True,
                     prev__priority__ge=rule.priority)
-            start = Q(is_head==True,
+            start = Q(is_head=True,
                       priority__le=rule.priority)
             before = self.filter(
                 normal|end|start).select_related()[0]

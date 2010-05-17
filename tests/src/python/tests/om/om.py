@@ -134,6 +134,7 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFV, DummyFVRule
         from optin_manager.dummyfv.models import DummyFVSlice
         import random
+        from optin_manager.flowspace.utils import dpid_to_long
         
         # get the switches into self.dpids_info
         self.test_get_switches()
@@ -145,7 +146,7 @@ class OMTests(TestCase):
             fs_set = [Flowspace.create_random([switch]) \
                       for j in random.randint(1,10)]
             switch_slivers.append({
-                "dapatapath_id": dpid_to_long(fs.switches[0]),
+                "dapatapath_id": dpid_to_long(switch[0]),
                 "flowspace": [fs.get_full_attrs() for fs in fs_set],
             })
         
