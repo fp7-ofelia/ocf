@@ -187,7 +187,7 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFV, DummyFVSlice
 
         num_slices = random.randint(1, 5)
-        for i in num_slices:
+        for i in range(num_slices):
             self.test_create_slice(id=i)
         
         # delete some slices and make sure they are gone
