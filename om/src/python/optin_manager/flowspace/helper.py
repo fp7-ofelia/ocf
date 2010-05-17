@@ -1,5 +1,6 @@
 from optin_manager.flowspace.models import FlowSpace
 from optin_manager.flowspace.utils import MACtoInt, DottedIPToInt
+from optin_manager.xmlrpc_server.ch_api import om_ch_translate
 
 def SingleFSIntersect(f1,f2,resultModel):
     fr = resultModel()
@@ -111,22 +112,32 @@ def makeFlowSpace(PostObject):
     
 def RangeToMatchStruct(rangeFS):
     match = {}
-    if (rangeFS.mac_src_s > 0 or rangeFS.mac_src_e < 0xFFFFFFFFFFFF):
-        if (rangeFS.mac_src_s == rangeFS.mac_src_e):
-            match['dl_src']=[rangeFS.mac_src_s]
-        else:
-            match['dl_src']= range(rangeFS.mac_src_s,rangeFS.mac_src_e)
-            
-    if (rangeFS.mac_dst_s > 0 or rangeFS.mac_dst_e < 0xFFFFFFFFFFFF):
-        if (rangeFS.mac_dst_s == rangeFS.mac_dst_e):
-            match['dl_dst']=[rangeFS.mac_dst_s]
-        else:
-            match['dl_dst']= range(rangeFS.mac_dst_s,rangeFS.mac_dst_e)
-   
-    if (rangeFS.vlan_id_s > 0 or rangeFS.vlan_id_e < 0xFFF):
-        if (rangeFS.vlan_id_s == rangeFS.vlan_id_e):
-            match['dl_dst']=[rangeFS.vlan_id_s]
-        else:
-            match['dl_dst']= range(rangeFS.vlan_id_s,rangeFS.vlan_id_e)
-                
-    return match
+    for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
+        om_start = "%s_s" % om_name
+        om_end = "%s_e" % om_name
+        if (getattr(rangeFS,om_start) > 0 or getattr(rangeFS,om_end) < 2**width-1):
+            if (getattr(rangeFS,om_start) == getattr(rangeFS,om_end)):
+                match[attr_name] = to_str(getattr(rangeFS,om_start))
+            else:
+                #TODO: fix it later: for now we just find the full x.x.x.x/y format that contain the interval
+                if (attr_name == "nw_src" or attr_name == "nw_dst"):
+                    ips = getattr(rangeFS,om_start)
+                    ipe = getattr(rangeFS,om_end)
+                    common = ips ^ ipe
+                    #count numebr of common bits
+                    leftmost_position = 0
+                    for i in range(0,31):
+                        if (common & 0x1<<i):
+                            leftmost_position = i
+                    match[attr_name] = "%s/%d"%(to_str(ips & (0xFFFFFFFF<<leftmost_position)),32-leftmost_position)
+                    
+                    
+                else:
+                    # TODO: If we expand this case, result will EXPLODE -- avoid it at any cost!
+                    # we may prevent users from entering ranges
+                    print "In Range to match function, a range replaced with full call"
+    result = ""
+    for key in match:
+        result = "%s%s=%s , "%(result,key,match[key])
+ 
+    return result

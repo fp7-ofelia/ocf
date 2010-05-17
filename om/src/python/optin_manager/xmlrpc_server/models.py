@@ -2,7 +2,7 @@ from django.db import models
 from clearinghouse.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from optin_manager.flowspace.models import  Experiment, ExperimentFLowSpace
 
-class CallBackFVProxy(PasswordXMLRPCServerProxy):
+class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
     def changePassword(self, sliceName, new_password):

@@ -1,14 +1,14 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from optin_manager.flowspace.models import UserOpts, OptsFlowSpace, Experiment, ExperimentFLowSpace, AdminFlowSpace, UserFlowSpace 
-from optin_manager.flowspace.models import FlowSpace
+from optin_manager.flowspace.models import *
 from django.template import RequestContext
 from django.http import HttpResponse
 from optin_manager.flowspace.forms import AdminOptInForm
 from django.forms.util import ErrorList
-from optin_manager.flowspace.helper import MultiFSIntersect, makeFlowSpace 
+from optin_manager.flowspace.helper import *
 from optin_manager.users.models import Priority
+from optin_manager.xmlrpc_server.models import FVServerProxy
 
 @login_required
 def view_opt_in(request, error_msg):
@@ -61,6 +61,7 @@ def add_opt_in(request):
                     for fs in expFS:
                         opted = MultiFSIntersect([fs],f,OptsFlowSpace)
                         if (len(opted) > 0):
+                            match_list = []
                             intersected = True
                             for opt in opted:
                                 opt.opt = tmp
@@ -68,10 +69,29 @@ def add_opt_in(request):
                                 opt.port_numebr_s = fs.port_number_s
                                 opt.port_numebr_e = fs.port_number_e
                                 opt.direction = fs.direction
-                                #TODO Match struct and FV call
                                 opt.save()
-                            
-     
+                                #make Match struct
+                                matchstr = RangeToMatchStruct(opt)
+                                # relative priority for this match struct is 0, because
+                                # right now, we just have one match struct.
+                                # TODO: consider multi-match structs
+                                match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
+                                match.save()
+                                match_list.append(match)
+                            fv_args = []
+                            for match in match_list:
+                                #TODO 4 is hard coded
+                                fv_arg = {"operation":"ADD", "priority":match.priority,
+                                            "dpid":match.optfs.dpid,"match":match.match,
+                                             "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
+                                fv_args.append(fv_arg)
+                            fv = FVServerProxy.objects.all()
+                            # TODO: check for errors in the following call
+                            return_ids = fv.changeFlowSpace(fv_args)
+                            for i in range(0,len(return_ids)-1):
+                                match_list[i].fv_id = return_ids[i]
+                                
+                                     
                     if (intersected):
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                         return render_to_response('flowspace/opt_in_successful.html', {
@@ -86,14 +106,17 @@ def add_opt_in(request):
         return render_to_response('flowspace/admin_opt_in.html', {
             'form': form, 'user':request.user, 'experiments':exps, 'defexp': defexp,
         })
-    else: # A user optin page
+        
+        
+    else: # A user opt-in page
+        
         selpri = 0
         if (request.method == "POST"):
             #opt in request received; process it
             selpri = request.POST['priority']
             defexp = request.POST['experiment']
             
-             # check if priority is within allowable range
+            # check if priority is within allowable range
             if selpri > int(profile.max_priority_level):
                 msg = "Your maximum priority is %d"%(profile.max_priority_level)
                 form._errors["priority"] = ErrorList([msg])
@@ -105,9 +128,23 @@ def add_opt_in(request):
                 intersected = False
 
                 tmp = UserOpts.objects.filter(experiment = selexp)
+                fv_args = []
                 if (len(tmp) > 0):
                     tmp = tmp[0]
+                    # first delete all previous opts into this experiment
+                    ofses = tmp.optsflowspace_set.all()
+                    for ofs in ofses:
+                        matches = ofs.matchstruct_set.all()
+                        for match in matches:
+                            fv_arg={"operation":"REMOVE" , "id":match.fv_id}
+                            fv_args.append(fv_arg)
+                        matches.delete()
+                    ofses.delete()
                     tmp.delete()
+                    fv = FVServerProxy.objects.all()[0]
+                    # TODO: Check for errors
+                    fv.changeFlowSpace(fv_args)
+                        
                     tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
                     tmp.save()
                     
@@ -116,13 +153,32 @@ def add_opt_in(request):
                     if (len(opted) > 0):
                         intersected = True
                         for opt in opted:
-                            opt.opt = tmp
-                            opt.dpid = fs.dpid
-                            opt.port_numebr_s = fs.port_number_s
-                            opt.port_numebr_e = fs.port_number_e
-                            opt.direction = fs.direction
-                            #TODO Match struct and FV call
-                            opt.save()
+                                opt.opt = tmp
+                                opt.dpid = fs.dpid
+                                opt.port_numebr_s = fs.port_number_s
+                                opt.port_numebr_e = fs.port_number_e
+                                opt.direction = fs.direction
+                                opt.save()
+                                #make Match struct
+                                matchstr = RangeToMatchStruct(opt)
+                                # relative priority for this match struct is the same as overall priority, because
+                                # right now, we just have one match struct.
+                                # TODO: consider multi-match structs
+                                match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
+                                match.save()
+                                match_list.append(match)
+                        fv_args = []
+                        for match in match_list:
+                            #TODO 4 is hard coded
+                            fv_arg = {"operation":"ADD", "priority":match.priority,
+                                            "dpid":match.optfs.dpid,"match":match.match,
+                                             "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
+                            fv_args.append(fv_arg)
+                        fv = FVServerProxy.objects.all()[0]
+                        # TODO: check for errors in the following call
+                        return_ids = fv.changeFlowSpace(fv_args)
+                        for i in range(0,len(return_ids)-1):
+                            match_list[i].fv_id = return_ids[i]
                                 
                 if (intersected):     
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
@@ -143,10 +199,22 @@ def add_opt_in(request):
 @login_required
 def opt_out(request):
         profile = request.user.get_profile()
+        # TODO
         #if (profile.is_net_admin):
         if (request.method == "POST"):
+            fv_args = []
             for key in request.POST:
-                OptsFlowSpace.objects.get(id=key).delete()        
+                ofs = OptsFlowSpace.objects.get(id=key)
+                for match in ofs.matchstruct_set.all():
+                    fv_arg = {"operation":"REMOVE", "id":match.fv_id}
+                    fv_args.append(fv_arg)
+                    match.delete()
+                ofs.delete() 
+            if (len(fv_args)>0):
+                fv = FVServerProxy.objects.all()[0]
+                #TODO: check return error
+                fv.changeFlowSpace(fv_args)
+                       
                     
         this_user_opts  = UserOpts.objects.filter(user = request.user)
         for useropt in this_user_opts:
@@ -165,7 +233,6 @@ def opt_out(request):
 
 @login_required
 def update_opts(request):
-    # TODO: add checks for range,...
     errors = 0
     keys = request.POST.keys()
     is_admin = request.user.get_profile().is_net_admin
@@ -178,6 +245,24 @@ def update_opts(request):
             pid = (key[2:len(key)])
             u = UserOpts.objects.get(pk=pid)
             u.priority = request.POST[key]
+            
+            fv_args = []
+            ofs = u.optsflowspace_set.all()
+            for fs in ofs:
+                matches = fs.matchstruct_set.all()
+                for match in matches:
+                    # TODO: add effect of prioirty scale later
+                    # TODO: hard coded 4
+                    match.priority = request.POST[key]
+                    fv_arg = {"operation":"CHANGE", "id":match.fv_id,
+                              "priority":match.priority, "dpid":fs.dpid, "match":match.match,
+                              "actions": "slice=%s:4"%fs.opt.experiment.slice_id,
+                              }
+            fv_args.append(fv_arg)
+            # TODO: check return value
+            fv = FVServerProxy.objects.all()[0]
+            fv.changeFlowSpace(fv_args)
+                                       
             if (not is_admin):
                 if (request.POST.has_key("n_"+pid)):
                     u.nice = True
