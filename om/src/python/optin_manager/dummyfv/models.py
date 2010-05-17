@@ -121,7 +121,7 @@ class DummyFVRule(models.Model):
     prev = models.OneToOneField('self', related_name="next",
                                 null=True, blank=True)
     is_head = models.BooleanField(default=False)
-    priority = models.Integer()
+    priority = models.IntegerField()
     dpid = models.CharField(max_length=100)
 
     def _remove_from_list(self):
