@@ -4,6 +4,7 @@ Created on May 15, 2010
 @author: jnaous
 '''
 from django.db import models
+from pprint import pprint
 
 class DummyFV(models.Model):
     def populateTopology(self, num_switches, num_links, use_random=False):
@@ -53,7 +54,7 @@ class DummyFVLink(models.Model):
                                 self.dst_dev, self.dst_port)
 
 class DummyFVSlice(models.Model):
-    name = models.CharField(max_length=500, unique=True)
+    name = models.CharField(max_length=500)
     password = models.CharField(max_lengh=1024)
     controller_url = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
@@ -91,6 +92,23 @@ class DummyFVRuleManager(models.Manager):
             before.prev = rule
             before.save()
             rule.save()
+            
+    def print_rules(self, fv=None):
+        if fv:
+            count = self.filter(fv=fv).count()
+        else:
+            count = self.count()
+            
+        if not count:
+            print "No rules defined."
+            return
+        
+        current = self.get(is_head=True)
+        rules = [("priority", "match", "actions", "dpid")]
+        for i in xrange(count):
+            rules.append((current.priority, current.match,
+                          current.actions, current.dpid))
+        pprint(rules)
     
 class DummyFVRule(models.Model):
     
