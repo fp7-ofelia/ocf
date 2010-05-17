@@ -9,6 +9,32 @@ from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
 from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
+from decorator import decorator
+
+@decorator
+def checkUser(func, *args, **kwargs):
+    """
+    Check that the user is authenticated and known.
+    """
+    if "request" not in kwargs:
+        raise Exception("Request not available for XML-RPC %s" % \
+                        func.func_name)
+    meta = kwargs["request"].META
+    if "REMOTE_USER" not in meta:
+        raise Exception(
+            "Remote user not authenticated for XML-RPC %s." % (
+                func.func_name,
+            )
+        )
+    if User.objects.filter(username=meta["REMOTE_USER"]).count() == 0:
+        raise Exception("Remote user %s is unknown for call %s." % (
+            meta["REMOTE_USER"], func.func_name)
+        )
+       
+    kwargs['username'] = meta["REMOTE_USER"]
+    # TODO: Check that the user can actually make the xmlrpc call
+       
+    return func(*args, **kwargs)
 
 def _same(val):
         return "%s" % val
@@ -52,7 +78,7 @@ def getDirection(direction):
         return 2
     return 2
                
-
+@checkUser
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
@@ -201,11 +227,6 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
-    
-    try:
-        print "    REMOTE_USER: %s" % kwargs['request'].META['REMOTE_USER']
-    except KeyError, e:
-        print "%s" % e
 
     # TODO: fix the return
     return {
@@ -213,6 +234,7 @@ def create_slice(slice_id, project_name, project_description,
         'switches': [],
     }
 
+@checkUser
 @rpcmethod(signature=['string', 'int'])
 def delete_slice(sliceid, **kwargs):
     '''
@@ -243,6 +265,7 @@ def delete_slice(sliceid, **kwargs):
     return error_msg
 
 
+@checkUser
 @rpcmethod(signature=['array'])
 def get_switches():
     '''
@@ -257,6 +280,7 @@ def get_switches():
     return complete_list
 
 
+@checkUser
 @rpcmethod(signature=['array'])
 def get_links():
     '''
@@ -271,23 +295,20 @@ def get_links():
     return complete_list
 
 
+@checkUser
 @rpcmethod(signature=['string', 'string', 'string'])
 def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
-    #TODO: security check
     from clearinghouse import utils
-    try:
-        username = kwargs['request'].META['REMOTE_USER']
-    except KeyError, e:
-        return "ERROR: Anauthenticated user!"
 
     attrs = {'url': url, 'cookie': cookie}
-    filter_attrs = {'username': username}
+    filter_attrs = {'username': kwargs['username']}
     utils.create_or_update(CallBackServerProxy, filter_attrs, attrs)
     return ""
 
+@checkUser
 @rpcmethod(signature=['string', 'string'])
 def change_password(new_password, **kwargs):
     '''
@@ -305,19 +326,10 @@ def change_password(new_password, **kwargs):
     
     print kwargs
     
-    print"******** change_password started"
-    
-    try:
-        username = kwargs['request'].META['REMOTE_USER']
-    except KeyError, e:
-        return "ERROR: Anauthenticated user!"
-    
-    print"******** change_password doing user"
-
     dummy = User.objects.get_or_create(username='xmlrpcdummy')
     
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(username=kwargs['username'])
     except User.DoesNotExist:
         # Do not return an error indicating the user does not
         # exist so we don't provide an easy way for probing for usernames.
@@ -332,15 +344,12 @@ def change_password(new_password, **kwargs):
     
     return ""
 
+@checkUser
 @rpcmethod(signature=['string', 'string'])
 def ping(data, **kwargs):
     '''
     Test method to see that everything is up.
     return a string that is "PONG: %s" % data
     '''
-    try:
-        username = kwargs['request'].META['REMOTE_USER']
-    except KeyError, e:
-        return "ERROR: Anauthenticated user!"
     print "Pinged!"
     return "PONG: %s" % data
