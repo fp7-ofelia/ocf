@@ -5,6 +5,7 @@ Created on May 11, 2010
 '''
 from os.path import join, dirname, basename
 import socket
+import sys
 
 SSL_DIR = join(dirname(__file__), "ssl")
 EGENI_DIR = join(dirname(__file__), "../../../../../")
@@ -18,3 +19,6 @@ NUM_LINKS_PER_AGG = 20
 HOST = socket.getfqdn()
 PORT = 443
 PREFIX = ""
+
+sys.path.append(GCF_DIR)
+sys.path.append(join(CH_PROJECT_DIR, ".."))
