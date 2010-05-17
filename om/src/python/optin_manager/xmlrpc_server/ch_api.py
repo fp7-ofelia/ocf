@@ -196,6 +196,7 @@ def create_slice(slice_id, project_name, project_description,
     except KeyError, e:
         print "%s" % e
 
+    # TODO: fix the return
     return {
         'error_msg': error_msg,
         'switches': [],
