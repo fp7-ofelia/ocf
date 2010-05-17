@@ -64,7 +64,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         if err: return err
 #        print "Registering callback"
         err = self.client.register_topology_callback(
-            "https://%s/openflow/xmlrpc/" % hostname,
+            "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
         )
         if err: return err

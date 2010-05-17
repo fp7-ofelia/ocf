@@ -38,7 +38,6 @@ def GetVersion(**kwargs):
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
 def ListResources(credentials, options, **kwargs):
     import base64, zlib
-    print "**********List resources"
 
     if not options:
         options = dict()
@@ -46,13 +45,13 @@ def ListResources(credentials, options, **kwargs):
     slice_urn = options.pop('geni_slice_urn', None)
     geni_available = options.pop('geni_available', True)
 
-    print "Getting resources"
     result = rspec_mod.get_resources(slice_urn, geni_available)
-    print "Done"
+
     # Optionally compress the result
     if 'geni_compressed' in options and options['geni_compressed']:
+        print "Compressing rspec"
         result = base64.b64encode(zlib.compress(result))
-    print "Returning results"
+
     return result
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])

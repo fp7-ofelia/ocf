@@ -13,8 +13,8 @@ class DummyOM(models.Model):
     
     def get_switches(self):
         dpids = []
-        dpids += self.dummyomlink_set.valueslist(['src_dpid'], flat=True)
-        dpids += self.dummyomlink_set.valueslist(['dst_dpid'], flat=True)
+        dpids += self.dummyomlink_set.values_list('src_dpid', flat=True)
+        dpids += self.dummyomlink_set.values_list('dst_dpid', flat=True)
         dpids = set(dpids)
         return [[dpid, {}] for dpid in dpids]
     

@@ -199,6 +199,7 @@ class GAPITests(TestCase):
         Check the list of resources before and after a topology change
         """
         from clearinghouse.dummyom.models import DummyOM
+        import zlib, base64
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
@@ -221,16 +222,20 @@ class GAPITests(TestCase):
             om.dummycallbackproxy.call_back()
             
         # Create switches and links
+        options = dict(geni_compressed=False, geni_available=True)
+#        comp_rspec = self.am_client.ListResources(cred, options)
+#        rspec = zlib.decompress(base64.b64decode(rspec))
+        rspec = self.am_client.ListResources(cred, options)
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches
         self.assertEqual(
             len(self.switches),
-            settings.NUM_SWITCHES_PER_AGG * settings.NUM_DUMMY_OMS - 1)
+            (settings.NUM_SWITCHES_PER_AGG - 1) * settings.NUM_DUMMY_OMS)
         
         # make sure all killed dpids are gone
         for s in self.switches:
-            for d in killed_dpid:
+            for d in killed_dpids:
                 self.assertFalse(str(s.dpid) == str(d))
         
     def test_CreateSliver(self):
@@ -377,7 +382,6 @@ class GAPITests(TestCase):
         self.assertTrue(len(found_dpids) == len(set(found_dpids)),
                         "Some dpids are used more than once.")
             
-        
         # check that all requested slivers have been indeed parsed
         found_dpids = set(found_dpids)
         requested_dpids = set(dpid_fs_map.keys())
