@@ -24,7 +24,7 @@ class OMTests(TestCase):
         
         from optin_manager.dummyfv.models import DummyFV
         from django.contrib.auth.models import User
-        from optin_manager.xmlrpc_server.models import CallBackFVProxy as FVServerProxy
+        from optin_manager.xmlrpc_server.models import FVServerProxy
         
         # Create the clearinghouse user
         username = "clearinghouse"
