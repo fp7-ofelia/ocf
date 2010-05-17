@@ -6,7 +6,7 @@ Created on Apr 26, 2010
 from apps.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
-from optin_manager.xmlrpc_server.models import CallBackServerProxy, CallBackFVProxy
+from optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
 from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
 
@@ -17,20 +17,20 @@ class om_ch_translate(object):
     
     attr_funcs = {
         # attr_name: (func to turn to str, width)
-        "dl_src": (InttoMAC, MACtoInt, 48, "mac_src"),
-        "dl_dst": (InttoMAC, MACtoInt, 48, "mac_dst"),
-        "dl_type": (_same, int, 16, "eth_type"),
-        "vlan_id": (_same, int, 12, "vlan_id"),
-        "nw_src": (IntToDottedIP, DottedIPToInt, 32, "ip_src"),
-        "nw_dst": (IntToDottedIP, DottedIPToInt, 32, "ip_dst"),
-        "nw_proto": (_same, int, 8, "ip_proto"),
-        "tp_src": (_same, int, 16, "tp_src"),
-        "tp_dst": (_same, int, 16, "tp_dst"),
-        "port_num": (_same, int, 16, "port_number"),
+        "dl_src": (InttoMAC, MACtoInt, 48, "mac_src","dl_src"),
+        "dl_dst": (InttoMAC, MACtoInt, 48, "mac_dst","dl_dst"),
+        "dl_type": (_same, int, 16, "eth_type","dl_type"),
+        "vlan_id": (_same, int, 12, "vlan_id","dl_vlan"),
+        "nw_src": (IntToDottedIP, DottedIPToInt, 32, "ip_src","nw_src"),
+        "nw_dst": (IntToDottedIP, DottedIPToInt, 32, "ip_dst","nw_dst"),
+        "nw_proto": (_same, int, 8, "ip_proto","nw_proto"),
+        "tp_src": (_same, int, 16, "tp_src","tp_src"),
+        "tp_dst": (_same, int, 16, "tp_dst","tp_dst"),
+        "port_num": (_same, int, 16, "port_number","in_port"),
     }
     
 def convertStar(fs):
-        for attr_name, (to_str, from_str, width, om_name) in om_ch_translate.attr_funcs.items():
+        for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
             start = "%s_start" % attr_name
             end = "%s_end" % attr_name
             om_start = "%s_s" % om_name
@@ -164,7 +164,7 @@ def create_slice(slice_id, project_name, project_description,
 
             efs.direction = getDirection(sfs['direction'])
             fs = convertStar(sfs)
-            for attr_name,(to_str, from_str, width, om_name) in om_ch_translate.attr_func:
+            for attr_name,(to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_func:
                 ch_start ="%s_start"%(attr_name)
                 ch_end ="%s_end"%(attr_name)
                 om_start ="%s_s"%(om_name)
@@ -174,7 +174,7 @@ def create_slice(slice_id, project_name, project_description,
             efs.save()
      
     # Inform FV(s) of the changes
-    for fv in CallBackFVProxy.objects.all():
+    for fv in FVServerProxy.objects.all():
         fv_success = fv.addNewSlice(slice_id, owner_password, controller_url, owner_email)
         if (not fv_success):
             error_msg = "FlowVisor rejected this request"
@@ -223,7 +223,7 @@ def delete_slice(sliceid, **kwargs):
         ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
         single_exp.delete()
         
-    for fv in CallBackFVProxy.objects.all():
+    for fv in FVServerProxy.objects.all():
         success = fv.deleteSlice(sliceid)
         if (not success):
             error_msg = "flowvisor sent an error"
@@ -238,7 +238,7 @@ def get_switches():
     '''
     #TODO: security check
     complete_list = []
-    for fv in CallBackFVProxy.objects.all():
+    for fv in FVServerProxy.objects.all():
         switches = fv.get_switches()
         complete_list.extend(switches)
         
@@ -252,7 +252,7 @@ def get_links():
     '''
     #TODO: security check
     complete_list = []
-    for fv in CallBackFVProxy.objects.all():
+    for fv in FVServerProxy.objects.all():
         links = fv.get_links()
         complete_list.extend(links)
         

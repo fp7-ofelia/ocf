@@ -54,8 +54,8 @@ class DummyFVLink(models.Model):
                                 self.dst_dev, self.dst_port)
 
 class DummyFVSlice(models.Model):
-    name = models.CharField(max_length=500)
-    password = models.CharField(max_lengh=1024)
+    name = models.CharField(max_length=500, unique=True)
+    password = models.CharField(max_length=1024)
     controller_url = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     fv = models.ForeignKey(DummyFV)

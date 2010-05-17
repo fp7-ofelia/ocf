@@ -93,7 +93,7 @@ INSTALLED_APPS = (
     'clearinghouse.xmlrpc_serverproxy',
     'clearinghouse.defaultsite',
 ###### For Testing #######################
-    'optin_manager.dummyfv',
+    #'optin_manager.dummyfv',
 )
 
 AUTH_PROFILE_MODULE = "users.UserProfile"
