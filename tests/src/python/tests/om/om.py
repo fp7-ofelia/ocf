@@ -57,11 +57,11 @@ class OMTests(TestCase):
                 name="Flowvisor %s" % i,
                 username=username,
                 password=password,
-                url = "https://%s:%s/dummyfv/%s/xmlrpc/",
+                url = "https://%s:%s/dummyfv/%s/xmlrpc/" % (
+                    test_settings.HOST, test_settings.PORT, fv.id,
+                ),
             )
             
-        
-        
     def test_ping(self):
         """
         Communications are up.
