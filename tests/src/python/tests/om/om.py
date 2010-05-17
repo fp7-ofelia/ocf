@@ -8,6 +8,7 @@ from unittest import TestCase
 from tests.commands import call_env_command, Env
 import test_settings
 import xmlrpclib
+from pprint import pprint
 
 class OMTests(TestCase):
     
@@ -103,18 +104,31 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFVLink
         from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 
-        links = set(self.om_client.get_links())
+        links = self.om_client.get_links()
+        links = set([tuple(l[:-1]) for l in links])
+#        print "Received links:"
+#        pprint(links)
+        
+        # TODO add checking for the link_infos (link attributes)
         
         expected = set([(
-            dpid_to_long(link.dst_dev.dpid),
-            link.dst_port,
             dpid_to_long(link.src_dev.dpid),
-            link.src_port, {}) for link in DummyFVLink.objects.all()])
+            link.src_port,
+            dpid_to_long(link.dst_dev.dpid),
+            link.dst_port) for link in DummyFVLink.objects.all()])
+#        print "Expected links:"
+#        pprint(expected)
         
-        self.assertEqual(
-            links, expected,
-            "Received links (%s) not same as expected (%s)" % (
-                links, expected,
+        self.assertTrue(
+            links.issubset(expected),
+            "Received links have %s not in expected links" % (
+                links - expected,
+            )
+        )
+        self.assertTrue(
+            expected.issubset(links),
+            "Expected links have %s not in received links" % (
+                expected - links,
             )
         )
         
