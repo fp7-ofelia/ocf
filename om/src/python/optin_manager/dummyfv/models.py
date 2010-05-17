@@ -43,9 +43,9 @@ class DummyFVDevice(models.Model):
         return self.dpid
 
 class DummyFVLink(models.Model):
-    src_dev = models.ForeignKey(DummyFVDevice)
+    src_dev = models.ForeignKey(DummyFVDevice, related_name="src_links")
     src_port = models.IntegerField()
-    dst_dev = models.ForeignKey(DummyFVDevice)
+    dst_dev = models.ForeignKey(DummyFVDevice, related_name="dst_links")
     dst_port = models.IntegerField()
     fv = models.ForeignKey(DummyFV)
     
