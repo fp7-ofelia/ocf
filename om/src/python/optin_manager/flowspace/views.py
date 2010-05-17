@@ -51,17 +51,18 @@ def add_opt_in(request):
                     optedFS = makeFlowSpace(request.POST)
                     expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
                     
-                    # find flowspace intersection
+                    # find  intersection of adminFS and opted FS
                     f = MultiFSIntersect(adminFS,[optedFS],FlowSpace)
-                    
                     intersected = False
+                    # add this opt to useropts
                     tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
                     tmp.save()
                     
+                    fv_args = []
+                    match_list = []
                     for fs in expFS:
                         opted = MultiFSIntersect([fs],f,OptsFlowSpace)
                         if (len(opted) > 0):
-                            match_list = []
                             intersected = True
                             for opt in opted:
                                 opt.opt = tmp
@@ -78,21 +79,22 @@ def add_opt_in(request):
                                 match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
                                 match.save()
                                 match_list.append(match)
-                            fv_args = []
-                            for match in match_list:
                                 #TODO 4 is hard coded
                                 fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
                                              "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
                                 fv_args.append(fv_arg)
-                            fv = FVServerProxy.objects.all()
-                            # TODO: check for errors in the following call
-                            return_ids = fv.changeFlowSpace(fv_args)
-                            for i in range(0,len(return_ids)-1):
-                                match_list[i].fv_id = return_ids[i]
-                                
-                                     
+                            
+                    # If there is any intersection, add them to FV
                     if (intersected):
+                        #TODO: if multi flowvisor, change this    
+                        fv = FVServerProxy.objects.all()[0]
+                        # TODO: check for errors in the following call
+                        return_ids = fv.changeFlowSpace(fv_args)
+                        for i in range(0,len(return_ids)):
+                            match_list[i].fv_id = return_ids[i]
+                            match_list[i].save()
+
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                         return render_to_response('flowspace/opt_in_successful.html', {
                                 'expname':exp_name})
@@ -111,15 +113,15 @@ def add_opt_in(request):
     else: # A user opt-in page
         
         selpri = 0
+        error_msg = ""
         if (request.method == "POST"):
             #opt in request received; process it
             selpri = request.POST['priority']
             defexp = request.POST['experiment']
             
             # check if priority is within allowable range
-            if selpri > int(profile.max_priority_level):
-                msg = "Your maximum priority is %d"%(profile.max_priority_level)
-                form._errors["priority"] = ErrorList([msg])
+            if int(selpri) > profile.max_priority_level:
+                error_msg = "Your maximum priority is %d"%(profile.max_priority_level)
             else:
                 selexp = Experiment.objects.get(id = defexp)
                 userFS = UserFlowSpace.objects.filter(user = request.user)
@@ -127,8 +129,8 @@ def add_opt_in(request):
                                
                 intersected = False
 
-                tmp = UserOpts.objects.filter(experiment = selexp)
                 fv_args = []
+                tmp = UserOpts.objects.filter(experiment = selexp)
                 if (len(tmp) > 0):
                     tmp = tmp[0]
                     # first delete all previous opts into this experiment
@@ -143,11 +145,12 @@ def add_opt_in(request):
                     tmp.delete()
                     fv = FVServerProxy.objects.all()[0]
                     # TODO: Check for errors
-                    fv.changeFlowSpace(fv_args)
-                        
-                    tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
-                    tmp.save()
-                    
+                    fv.changeFlowSpace(fv_args)        
+                tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
+                tmp.save()
+                
+                match_list = []
+                fv_args = []    
                 for fs in expFS:
                     opted = MultiFSIntersect([fs],userFS,OptsFlowSpace)
                     if (len(opted) > 0):
@@ -167,31 +170,32 @@ def add_opt_in(request):
                                 match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
                                 match.save()
                                 match_list.append(match)
-                        fv_args = []
-                        for match in match_list:
-                            #TODO 4 is hard coded
-                            fv_arg = {"operation":"ADD", "priority":match.priority,
+                                fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
                                              "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
-                            fv_args.append(fv_arg)
-                        fv = FVServerProxy.objects.all()[0]
-                        # TODO: check for errors in the following call
-                        return_ids = fv.changeFlowSpace(fv_args)
-                        for i in range(0,len(return_ids)-1):
-                            match_list[i].fv_id = return_ids[i]
+                                fv_args.append(fv_arg)
                                 
-                if (intersected):     
+                                
+                if (intersected):   
+                    fv = FVServerProxy.objects.all()[0]
+                    # TODO: check for errors in the following call
+                    return_ids = fv.changeFlowSpace(fv_args)
+                    for i in range(0,len(return_ids)):
+                        match_list[i].fv_id = return_ids[i] 
+                        match_list[i].save() 
+
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                     return render_to_response('flowspace/opt_in_successful.html', {
                                 'expname':exp_name})
                 else:
                     tmp.delete()
                     error_msg = ErrorList(["No intersection between opted-in flowspace,\
-                        your flowspace and experiment flowspace"])     
+                        your flowspace and experiment flowspace"]) 
+              
                     
         else: #Not a post request
             defexp = exps[0].id       
-            return render_to_response('flowspace/user_opt_in.html', {
+        return render_to_response('flowspace/user_opt_in.html', {
                 'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
             })  
         
@@ -237,6 +241,8 @@ def update_opts(request):
     keys = request.POST.keys()
     is_admin = request.user.get_profile().is_net_admin
     max_priority = request.user.get_profile().max_priority_level
+    
+    fv_args = []
     for key in keys:
         if key.startswith("p_"):
             if (int(request.POST[key]) > max_priority):
@@ -244,25 +250,21 @@ def update_opts(request):
                 continue
             pid = (key[2:len(key)])
             u = UserOpts.objects.get(pk=pid)
-            u.priority = request.POST[key]
+            u.priority = int(request.POST[key])
             
-            fv_args = []
             ofs = u.optsflowspace_set.all()
             for fs in ofs:
                 matches = fs.matchstruct_set.all()
                 for match in matches:
-                    # TODO: add effect of prioirty scale later
                     # TODO: hard coded 4
-                    match.priority = request.POST[key]
+                    match.priority = (match.priority%Priority.Priority_Scale) + int(request.POST[key])*Priority.Priority_Scale
+                    match.save()
                     fv_arg = {"operation":"CHANGE", "id":match.fv_id,
                               "priority":match.priority, "dpid":fs.dpid, "match":match.match,
                               "actions": "slice=%s:4"%fs.opt.experiment.slice_id,
                               }
-            fv_args.append(fv_arg)
-            # TODO: check return value
-            fv = FVServerProxy.objects.all()[0]
-            fv.changeFlowSpace(fv_args)
-                                       
+                    fv_args.append(fv_arg)
+                    
             if (not is_admin):
                 if (request.POST.has_key("n_"+pid)):
                     u.nice = True
@@ -270,7 +272,9 @@ def update_opts(request):
                     u.nice = False
             u.save()
 
-            
+    fv = FVServerProxy.objects.all()[0]
+    fv.changeFlowSpace(fv_args)
+          
     opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
     if (is_admin):
         return render_to_response('flowspace/view_opts_admin.html', {'opts':opts , 'user':request.user,

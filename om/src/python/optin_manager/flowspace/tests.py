@@ -1,12 +1,18 @@
 from optin_manager.users.models import UserProfile
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from optin_manager.flowspace.models import UserOpts,  Experiment, ExperimentFLowSpace, OptsFlowSpace, AdminFlowSpace, UserFlowSpace
+from optin_manager.flowspace.models import *
+from optin_manager.xmlrpc_server.models import *
+from optin_manager.xmlrpc_server.ch_api import delete_slice, create_slice
 
 def config():
     Site.objects.all().delete()
     UserProfile.objects.all().delete()
+    FVServerProxy.objects.all().delete()
     
+    fv = FVServerProxy(name="fv",url="example.com",username="peyman")
+    fv.save()
+        
     s = Site(domain="127:0.0.1:8000", name="om.egeni.com")
     s.save()
     
@@ -18,6 +24,7 @@ def config():
     p.save()
     
     o = User(username="user", password="user")
+    o.set_password("user")
     o.save()
     po = UserProfile.get_or_create_profile(o)
     po.is_net_admin = False
@@ -34,6 +41,8 @@ def setup():
     OptsFlowSpace.objects.all().delete()
     AdminFlowSpace.objects.all().delete()
     UserFlowSpace.objects.all().delete()
+    MatchStruct.objects.all()
+
     
     e1 = Experiment(slice_id = '1', project_name="Cool Project", slice_name="security app",
                    controller_url="controller.com:6633")
@@ -77,4 +86,12 @@ def setup():
     
     return 0
 
+def createslice():
+    args = [{"datapath_id":"00:00:00:00:00:11:11", 
+             "flowspace":[{"nw_src_start":"192.168.0.0","nw_src_end":"192.168.255.255"}]
+             }]
+    create_slice("123","test project","just a simpe test","test slice",
+                 "just a test slice","controller.com","owner@geni.com","password",args)
 
+def deleteslice():
+    delete_slice("123")

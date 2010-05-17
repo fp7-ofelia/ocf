@@ -7,15 +7,15 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
     def changePassword(self, sliceName, new_password):
-        success = self.fv.change_password(sliceName, new_password)
+        success = self.change_password(sliceName, new_password)
         return success
         
     def get_switches(self):
         """
         Change from FV format to CH format
         """
-        dpids = self.fv.listDevices()
-        infos = [self.fv.getDeviceInfo() for d in dpids]
+        dpids = self.listDevices()
+        infos = [self.getDeviceInfo() for d in dpids]
         dpids = map(dpid_to_long, dpids)
         return zip(dpids, infos)
     
@@ -27,15 +27,27 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  l.pop("srcPort"),
                  dpid_to_long(l.pop("dstDPID")),
                  l.pop("dstPort"),
-                 l) for l in self.fv.getLinks()]
+                 l) for l in self.getLinks()]
     
-    def addNewSlice(self,sliceName, passwd, controller, slice_email):
-        return self.fv.createSlice(sliceName, passwd, controller, slice_email)
     
-    def deleteSlice(self,sliceName):
-        success = self.fv.deleteSlice(sliceName)
-        return success
-            
+    # JUST FOR TESTING
+    #TODO: delete after debugging
+    def changeFlowSpace(self,input):
+        print "Change Flow Space Called: "
+        print input
+        result = []
+        import random
+        for i in range(0,len(input)):
+            result.append(int(random.uniform(1,2000000)))
+        return result
+    
+    def addNewSlice(self,slice_id, owner_password, controller_url, owner_email):
+        print "SLICE ADDED: %s %s %s"%(slice_id,controller_url,owner_email) 
+        return True          
+    
+    def deleteSlice(self,sliceid):
+        print "Delete Slice %s" % sliceid
+        return True 
 
 class CallBackServerProxy(models.Model):
     '''

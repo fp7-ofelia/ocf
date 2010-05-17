@@ -1,3 +1,5 @@
+import re
+
 def IntToDottedIP( intip ):
         octet = ''
         for exp in [3,2,1,0]:
@@ -19,26 +21,23 @@ def IPRangeToString(intip1, intip2):
     return total
 
 def MACtoInt(mac):
-    import re
     assert(re.match("..:..:..:..:..:..", mac))
     parts = mac.split(":")
     return int("".join(parts), base=16)
 
 def InttoMAC(mac):
-    if type(l) == str and ":" in str:
-        return l
-    s = "%012x" % long(l)
+    if type(mac) == str and ":" in str:
+        return mac
+    s = "%012x" % long(mac)
     m = re.findall("\w\w", s)
     return ":".join(m)
 
 def dpid_to_long(dpid):
-    import re
     assert(re.match("..:..:..:..:..:..:..:..", dpid))
     parts = dpid.split(":")
     return int("".join(parts), base=16)
 
 def long_to_dpid(l):
-    import re
     if type(l) == str and ":" in str:
         return l
     s = "%016x" % long(l)

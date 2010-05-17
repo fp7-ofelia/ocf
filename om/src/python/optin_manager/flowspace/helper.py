@@ -129,7 +129,7 @@ def RangeToMatchStruct(rangeFS):
                     for i in range(0,31):
                         if (common & 0x1<<i):
                             leftmost_position = i
-                    match[attr_name] = "%s/%d"%(to_str(ips & (0xFFFFFFFF<<leftmost_position)),32-leftmost_position)
+                    match[attr_name] = "%s/%d"%(to_str(ips & (0xFFFFFFFF<<leftmost_position)),31-leftmost_position)
                     
                     
                 else:

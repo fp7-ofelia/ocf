@@ -107,7 +107,9 @@ class ExperimentFLowSpace(FlowSpace):
     port_number_s = models.IntegerField("Start of Port Range", blank=True, default=0)
     port_number_e = models.IntegerField("End of Port Range", blank=True, default=0xFFFF)
     exp                   = models.ForeignKey(Experiment)
-    
+    def __unicode__(self):
+        fs_desc = super(ExperimentFLowSpace, self).__unicode__()
+        return "dpid; %s , FS: %s"%(self.dpid,fs_desc)   
     
 '''
 UserOpts, OptsFlowSpace stores information about each opt-in
@@ -121,23 +123,27 @@ class UserOpts(models.Model):
     experiment      = models.ForeignKey(Experiment)
     nice            = models.BooleanField(default = True)
     
+    def __unicode__(self):
+        return "user: %s  opted into: %s"%(self.user, self.experiment)   
+    
 class OptsFlowSpace(FlowSpace):
     dpid                  = models.CharField(max_length = 30)
     direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
     port_number_s = models.IntegerField("Start of Port Range", default = 0)
     port_number_e = models.IntegerField("End of Port Range", default=0xFFFF)
     opt             = models.ForeignKey(UserOpts)
-    
     def __unicode__(self):
         fs_desc = super(OptsFlowSpace, self).__unicode__()
         return "dpid; %s , FS: %s"%(self.dpid,fs_desc)
+
     
 class MatchStruct(models.Model):
     match              = models.CharField(max_length = 2000)
-    fv_id               = models.CharField(unique = True, max_length = 40)
+    #TODO unique should be true
+    fv_id               = models.CharField(unique = False, max_length = 40)
     priority        = models.IntegerField()
     optfs            = models.ForeignKey(OptsFlowSpace)
-    
     def __unicode__(self):
-        return "User %s opt in %s" % (self.user,self.experiment)
+        return "%s: %s"%(self.fv_id, self.match)
+
    

@@ -10,10 +10,11 @@ from optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProx
 from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
 from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
 
-
-class om_ch_translate(object):
-    def _same(self,val):
+def _same(val):
         return "%s" % val
+    
+class om_ch_translate(object):
+
     
     attr_funcs = {
         # attr_name: (func to turn to str, width)
@@ -30,15 +31,14 @@ class om_ch_translate(object):
     }
     
 def convertStar(fs):
+    
         for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
-            start = "%s_start" % attr_name
-            end = "%s_end" % attr_name
-            om_start = "%s_s" % om_name
-            om_end = "%s_e" % om_name      
-            if start not in fs or (start in fs and start == "*"):
-                fs[om_start] = to_str(0)
-            if end not in fs or (end in fs and end == "*"):
-                fs[om_end] = to_str(2**width - 1)
+            ch_start = "%s_start" % attr_name
+            ch_end = "%s_end" % attr_name   
+            if ch_start not in fs or (ch_start in fs and ch_start == "*"):
+                fs[ch_start] = to_str(0)
+            if ch_end not in fs or (ch_end in fs and ch_end == "*"):
+                fs[ch_end] = to_str(2**width - 1)
         
         return fs
 
@@ -158,13 +158,23 @@ def create_slice(slice_id, project_name, project_description,
     #inspired by Jad :)
     # Add switches to experiments
     for sliver in switch_slivers:
+        if "datapath_id" in sliver:
+            dpid = sliver['datapath_id']
+        else:
+            dpid = "00:00:00:00:00:00:00"
+            
         for sfs in sliver['flowspace']:
             efs = ExperimentFLowSpace()
             efs.exp  = e
-
-            efs.direction = getDirection(sfs['direction'])
+            efs.dpid = dpid
+            if "direction" in sfs:
+                efs.direction = getDirection(sfs['direction'])
+            else:
+                efs.direction = 2
+                
             fs = convertStar(sfs)
-            for attr_name,(to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_func:
+            print fs
+            for attr_name,(to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
                 ch_start ="%s_start"%(attr_name)
                 ch_end ="%s_end"%(attr_name)
                 om_start ="%s_s"%(om_name)
@@ -172,7 +182,8 @@ def create_slice(slice_id, project_name, project_description,
                 setattr(efs,om_start,from_str(fs[ch_start]))
                 setattr(efs,om_end,from_str(fs[ch_end]))
             efs.save()
-     
+    
+    error_msg = "" 
     # Inform FV(s) of the changes
     for fv in FVServerProxy.objects.all():
         fv_success = fv.addNewSlice(slice_id, owner_password, controller_url, owner_email)
@@ -223,6 +234,7 @@ def delete_slice(sliceid, **kwargs):
         ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
         single_exp.delete()
         
+    error_msg = ""   
     for fv in FVServerProxy.objects.all():
         success = fv.deleteSlice(sliceid)
         if (not success):

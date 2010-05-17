@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     (r'^xmlrpc/', include('optin_manager.xmlrpc_server.urls')),
     
     # For testing
-    (r'^dummyfv/', include('optin_manager.dummyfv.urls')),
+    #(r'^dummyfv/', include('optin_manager.dummyfv.urls')),
     
     (r'^admin/', include(admin.site.urls)),
 
