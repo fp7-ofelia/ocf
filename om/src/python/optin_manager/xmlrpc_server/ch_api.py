@@ -267,7 +267,7 @@ def delete_slice(sliceid, **kwargs):
 
 @checkUser
 @rpcmethod(signature=['array'])
-def get_switches():
+def get_switches(**kwargs):
     '''
     Return what the FlowVisor gives.
     '''
@@ -282,7 +282,7 @@ def get_switches():
 
 @checkUser
 @rpcmethod(signature=['array'])
-def get_links():
+def get_links(**kwargs):
     '''
     Return what the FlowVisor gives.
     '''
