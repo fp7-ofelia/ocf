@@ -15,7 +15,7 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
         Change from FV format to CH format
         """
         dpids = self.listDevices()
-        infos = [self.getDeviceInfo() for d in dpids]
+        infos = [self.getDeviceInfo(d) for d in dpids]
         dpids = map(dpid_to_long, dpids)
         return zip(dpids, infos)
     

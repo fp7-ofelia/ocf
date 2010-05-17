@@ -53,13 +53,13 @@ def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
 @get_fv
 @rpcmethod(signature=['array'])
 def listDevices(**kwargs):
-    return DummyFVDevice.objects.filter(
-        fv=kwargs['fv']).values_list('dpid', flat=True)
+    return list(DummyFVDevice.objects.filter(
+        fv=kwargs['fv']).values_list('dpid', flat=True))
 
 @checkUser
 @get_fv
 @rpcmethod(signature=['struct', 'string'])
-def getDeviceInfo(dpidStr):
+def getDeviceInfo(dpidStr, **kwargs):
     return {}
 
 @checkUser 
