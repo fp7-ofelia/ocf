@@ -168,17 +168,17 @@ def create_slice(slice_id, project_name, project_description,
     '''
     # TODO: add security check
 
-    print "create_slice got the following:"
-    print "    slice_id: %s" % slice_id
-    print "    project_name: %s" % project_name
-    print "    project_desc: %s" % project_description
-    print "    slice_name: %s" % slice_name
-    print "    slice_desc: %s" % slice_description
-    print "    controller: %s" % controller_url
-    print "    owner_email: %s" % owner_email
-    print "    owner_pass: %s" % owner_password
-    print "    switch_slivers"
-    pprint(switch_slivers, indent=8)
+#    print "create_slice got the following:"
+#    print "    slice_id: %s" % slice_id
+#    print "    project_name: %s" % project_name
+#    print "    project_desc: %s" % project_description
+#    print "    slice_name: %s" % slice_name
+#    print "    slice_desc: %s" % slice_description
+#    print "    controller: %s" % controller_url
+#    print "    owner_email: %s" % owner_email
+#    print "    owner_pass: %s" % owner_password
+#    print "    switch_slivers"
+#    pprint(switch_slivers, indent=8)
     
     e = Experiment()
     e.slice_id = slice_id
@@ -191,7 +191,7 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_password = owner_password
     e.save()
 
-    print "Experiment created"
+#    print "Experiment created"
 
     #inspired by Jad :)
     # Add switches to experiments
@@ -224,7 +224,7 @@ def create_slice(slice_id, project_name, project_description,
     error_msg = "" 
     # Inform FV(s) of the changes
     for fv in FVServerProxy.objects.all():
-        print "Calling fv.createSlice"
+#        print "Calling fv.createSlice"
         fv_success = fv.createSlice(
             e.get_fv_slice_name(), owner_password, controller_url, owner_email)
         if (not fv_success):
