@@ -1,8 +1,8 @@
 from optin_manager.flowspace.models import FlowSpace
-from optin_manager.flowspace.utils import MACtoInt, DottedIPToInt
+from optin_manager.flowspace.utils import mac_to_int, dotted_ip_to_int
 from optin_manager.xmlrpc_server.ch_api import om_ch_translate
 
-def SingleFSIntersect(f1,f2,resultModel):
+def single_fs_intersect(f1,f2,resultModel):
     fr = resultModel()
     
     fr.mac_src_s = max(f1.mac_src_s, f2.mac_src_s)
@@ -63,40 +63,40 @@ def SingleFSIntersect(f1,f2,resultModel):
 
 
 
-def MultiFSIntersect(FSs1, FSs2, resultModel):
+def multi_fs_intersect(FSs1, FSs2, resultModel):
     rFSs = []
     for FS1 in FSs1:
         for FS2 in FSs2:
-            rFS = SingleFSIntersect(FS1,FS2, resultModel)
+            rFS = single_fs_intersect(FS1,FS2, resultModel)
             if (rFS):
                 rFSs.append(rFS)
                 
     return rFSs
 
-def makeFlowSpace(PostObject):
+def make_flowspace(PostObject):
     f = FlowSpace()
     if (PostObject['mac_from'] == "*"):
         f.mac_src_s = 0
         f.mac_src_e = 0xffffffffffff
     else:
-        f.mac_src_s = MACtoInt(PostObject['mac_from'])
-        f.mac_src_e = MACtoInt(PostObject['mac_from'])
+        f.mac_src_s = mac_to_int(PostObject['mac_from'])
+        f.mac_src_e = mac_to_int(PostObject['mac_from'])
         
     if (PostObject['mac_to'] == "*"):
         f.mac_dst_s = 0
         f.mac_dst_e = 0xffffffffffff
     else:
-        f.mac_dst_s = MACtoInt(PostObject['mac_to'])
-        f.mac_dst_e = MACtoInt(PostObject['mac_to'])
+        f.mac_dst_s = mac_to_int(PostObject['mac_to'])
+        f.mac_dst_e = mac_to_int(PostObject['mac_to'])
     
     f.vlan_id_s = int(PostObject['vlan_id_s'])
     f.vlan_id_e = int(PostObject['vlan_id_e'])
     
-    f.ip_src_s = DottedIPToInt(PostObject['ip_from_s'])
-    f.ip_src_e= DottedIPToInt(PostObject['ip_from_e'])
+    f.ip_src_s = dotted_ip_to_int(PostObject['ip_from_s'])
+    f.ip_src_e= dotted_ip_to_int(PostObject['ip_from_e'])
     
-    f.ip_dst_s = DottedIPToInt(PostObject['ip_to_s'])
-    f.ip_dst_e= DottedIPToInt(PostObject['ip_to_e'])     
+    f.ip_dst_s = dotted_ip_to_int(PostObject['ip_to_s'])
+    f.ip_dst_e= dotted_ip_to_int(PostObject['ip_to_e'])     
     
     f.ip_proto_s = int(PostObject['ip_proto_s'])
     f.ip_proto_e = int(PostObject['ip_proto_e'])
@@ -110,7 +110,7 @@ def makeFlowSpace(PostObject):
     return f
     
     
-def RangeToMatchStruct(rangeFS):
+def range_to_match_struct(rangeFS):
     match = {}
     for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
         om_start = "%s_s" % om_name

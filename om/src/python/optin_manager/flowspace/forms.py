@@ -1,5 +1,5 @@
 from django import forms
-from optin_manager.flowspace.utils import DottedIPToInt
+from optin_manager.flowspace.utils import dotted_ip_to_int
 from django.forms.util import ErrorList
 import re
 
@@ -54,9 +54,9 @@ class AdminOptInForm(forms.Form):
         tp_to_e = cleaned_data.get("tp_to_e")
         if (vlan_id_s > vlan_id_e):
             self._errors["vlan_id_s"] = ErrorList(["Empty VLAN Range"])
-        if (DottedIPToInt(ip_from_s) > DottedIPToInt(ip_from_e)):
+        if (dotted_ip_to_int(ip_from_s) > dotted_ip_to_int(ip_from_e)):
             self._errors["ip_from_s"] = ErrorList(["Empty IP Range"])
-        if (DottedIPToInt(ip_to_s) > DottedIPToInt(ip_to_e)):
+        if (dotted_ip_to_int(ip_to_s) > dotted_ip_to_int(ip_to_e)):
             self._errors["ip_to_s"] = ErrorList(["Empty IP Range"])
         if (ip_proto_s > ip_proto_e):
             self._errors["ip_proto_s"] = ErrorList(["Empty IP Protocol Range"])

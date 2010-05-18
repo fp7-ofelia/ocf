@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>egeni2</name>
+	<name>Clearinghouse</name>
 	<comment></comment>
 	<projects>
+		<project>optin_manager</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -8,11 +8,11 @@ from django.contrib.auth.models import User
 from pprint import pprint
 from optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
 from optin_manager.flowspace.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-from optin_manager.flowspace.utils import DottedIPToInt, MACtoInt, IntToDottedIP, InttoMAC
+from optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int, int_to_dotted_ip, int_to_mac
 from decorator import decorator
 
 @decorator
-def checkUser(func, *args, **kwargs):
+def check_user(func, *args, **kwargs):
     """
     Check that the user is authenticated and known.
     """
@@ -42,19 +42,19 @@ def _same(val):
 class om_ch_translate(object):
     attr_funcs = {
         # attr_name: (func to turn to str, width)
-        "dl_src": (InttoMAC, MACtoInt, 48, "mac_src","dl_src"),
-        "dl_dst": (InttoMAC, MACtoInt, 48, "mac_dst","dl_dst"),
+        "dl_src": (int_to_mac, mac_to_int, 48, "mac_src","dl_src"),
+        "dl_dst": (int_to_mac, mac_to_int, 48, "mac_dst","dl_dst"),
         "dl_type": (_same, int, 16, "eth_type","dl_type"),
         "vlan_id": (_same, int, 12, "vlan_id","dl_vlan"),
-        "nw_src": (IntToDottedIP, DottedIPToInt, 32, "ip_src","nw_src"),
-        "nw_dst": (IntToDottedIP, DottedIPToInt, 32, "ip_dst","nw_dst"),
+        "nw_src": (int_to_dotted_ip, dotted_ip_to_int, 32, "ip_src","nw_src"),
+        "nw_dst": (int_to_dotted_ip, dotted_ip_to_int, 32, "ip_dst","nw_dst"),
         "nw_proto": (_same, int, 8, "ip_proto","nw_proto"),
         "tp_src": (_same, int, 16, "tp_src","tp_src"),
         "tp_dst": (_same, int, 16, "tp_dst","tp_dst"),
         "port_num": (_same, int, 16, "port_number","in_port"),
     }
     
-def convertStar(fs):
+def convert_star(fs):
     temp = fs.copy()
     for ch_name, (to_str, from_str, width, om_name, of_name) in \
     om_ch_translate.attr_funcs.items():
@@ -67,7 +67,7 @@ def convertStar(fs):
     return temp
 
 
-def getDirection(direction):
+def get_direction(direction):
     if (direction == 'ingress'):
         return 0
     if (direction == 'egress'):
@@ -76,7 +76,7 @@ def getDirection(direction):
         return 2
     return 2
                
-@checkUser
+@check_user
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
@@ -206,11 +206,11 @@ def create_slice(slice_id, project_name, project_description,
             efs.exp  = e
             efs.dpid = dpid
             if "direction" in sfs:
-                efs.direction = getDirection(sfs['direction'])
+                efs.direction = get_direction(sfs['direction'])
             else:
                 efs.direction = 2
                 
-            fs = convertStar(sfs)
+            fs = convert_star(sfs)
             for attr_name,(to_str, from_str, width, om_name, of_name) in \
             om_ch_translate.attr_funcs.items():
                 ch_start ="%s_start"%(attr_name)
@@ -236,7 +236,7 @@ def create_slice(slice_id, project_name, project_description,
         'switches': [],
     }
 
-@checkUser
+@check_user
 @rpcmethod(signature=['string', 'int'])
 def delete_slice(sliceid, **kwargs):
     '''
@@ -267,7 +267,7 @@ def delete_slice(sliceid, **kwargs):
     return error_msg
 
 
-@checkUser
+@check_user
 @rpcmethod(signature=['array'])
 def get_switches(**kwargs):
     '''
@@ -282,7 +282,7 @@ def get_switches(**kwargs):
     return complete_list
 
 
-@checkUser
+@check_user
 @rpcmethod(signature=['array'])
 def get_links(**kwargs):
     '''
@@ -297,7 +297,7 @@ def get_links(**kwargs):
     return complete_list
 
 
-@checkUser
+@check_user
 @rpcmethod(signature=['string', 'string', 'string'])
 def register_topology_callback(url, cookie, **kwargs):
     '''
@@ -310,7 +310,7 @@ def register_topology_callback(url, cookie, **kwargs):
     utils.create_or_update(CallBackServerProxy, filter_attrs, attrs)
     return ""
 
-@checkUser
+@check_user
 @rpcmethod(signature=['string', 'string'])
 def change_password(new_password, **kwargs):
     '''
@@ -346,7 +346,7 @@ def change_password(new_password, **kwargs):
     
     return ""
 
-@checkUser
+@check_user
 @rpcmethod(signature=['string', 'string'])
 def ping(data, **kwargs):
     '''
