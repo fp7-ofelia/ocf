@@ -133,8 +133,16 @@ class OMTests(TestCase):
         )
         
     def test_change_password(self):
-        # TODO: write up test_change_password
-        pass
+        """
+        Tests that the Clearinghouse password can be changed correctly.
+        """
+        from django.contrib.auth.models import User
+        self.om_client.change_password("new_password")
+        
+        user = User.objects.get(username="clearinghouse")
+        
+        self.assertTrue(user.check_password("new_password"))
+        
     
     def test_topology_callback(self):
         # TODO: write up test_topology_callback
@@ -196,9 +204,8 @@ class OMTests(TestCase):
                 email=args["owner_email"],
                 fv=fv,
             )
-            # TODO: Check that the rules are correct
-            DummyFVRule.objects.print_rules(fv=fv)
-            
+            self.assertEqual(DummyFVRule.objects.filter(fv=fv).count(), 0)
+
     def test_delete_slice(self):
         """
         Tests that slices are deleted correctly from the OM to FV
@@ -211,9 +218,11 @@ class OMTests(TestCase):
             self.test_create_slice(id=i)
         
         # delete some slices and make sure they are gone
-        for i in random.shuffle(range(1, num_slices)):
+        ids = range(1, num_slices)
+        random.shuffle(ids)
+        for i in ids:
             err = self.om_client.delete_slice(i)
-            self.assertEqual(err == "")
+            self.assertEqual(err, "")
             num_slices -= 1
             for fv in DummyFV.objects.all():
                 num_actual_slices = DummyFVSlice.objects.filter(fv=fv).count()

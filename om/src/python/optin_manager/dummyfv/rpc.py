@@ -80,7 +80,7 @@ def getLinks(**kwargs):
 @rpcmethod(signature=['boolean', 'string'])
 def deleteSlice(sliceName, **kwargs):
     DummyFVSlice.objects.filter(
-        fv=kwargs['fv']).get(sliceName).delete()
+        fv=kwargs['fv']).get(name=sliceName).delete()
     return True
 
 @checkUser 

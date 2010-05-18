@@ -258,14 +258,13 @@ def delete_slice(sliceid, **kwargs):
     ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
     single_exp.delete()
     
-    error_msg = ""   
+    error_msg = ""
     for fv in FVServerProxy.objects.all():
         success = fv.deleteSlice(single_exp.get_fv_slice_name())
         if not success:
             error_msg = "flowvisor sent an error"
         
     return error_msg
-
 
 @check_user
 @rpcmethod(signature=['array'])
