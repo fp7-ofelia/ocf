@@ -222,12 +222,11 @@ def create_slice(slice_id, project_name, project_description,
             efs.save()
     
     error_msg = "" 
-    # Inform FV(s) of the changes
-    for fv in FVServerProxy.objects.all():
-#        print "Calling fv.createSlice"
-        fv_success = fv.createSlice(
+    # Inform FV of the changes
+    fv = FVServerProxy.objects.all()[0]
+    fv_success = fv.createSlice(
             e.get_fv_slice_name(), owner_password, controller_url, owner_email)
-        if (not fv_success):
+    if (not fv_success):
             error_msg = "FlowVisor rejected this request"
     
     # TODO: fix the return
@@ -259,10 +258,10 @@ def delete_slice(sliceid, **kwargs):
     single_exp.delete()
     
     error_msg = ""
-    for fv in FVServerProxy.objects.all():
-        success = fv.deleteSlice(single_exp.get_fv_slice_name())
-        if not success:
-            error_msg = "flowvisor sent an error"
+    fv = FVServerProxy.objects.all()[0]
+    success = fv.deleteSlice(single_exp.get_fv_slice_name())
+    if not success:
+        error_msg = "flowvisor sent an error"
         
     return error_msg
 
@@ -274,9 +273,9 @@ def get_switches(**kwargs):
     '''
     #TODO: security check
     complete_list = []
-    for fv in FVServerProxy.objects.all():
-        switches = fv.get_switches()
-        complete_list.extend(switches)
+    fv = FVServerProxy.objects.all()[0]
+    switches = fv.get_switches()
+    complete_list.extend(switches)
         
     return complete_list
 
@@ -289,9 +288,9 @@ def get_links(**kwargs):
     '''
     #TODO: security check
     complete_list = []
-    for fv in FVServerProxy.objects.all():
-        links = fv.get_links()
-        complete_list.extend(links)
+    fv = FVServerProxy.objects.all()
+    links = fv.get_links()
+    complete_list.extend(links)
         
     return complete_list
 
