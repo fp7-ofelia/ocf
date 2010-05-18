@@ -115,29 +115,33 @@ def range_to_match_struct(rangeFS):
     for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
         om_start = "%s_s" % om_name
         om_end = "%s_e" % om_name
+        match[of_name] = []
         if (getattr(rangeFS,om_start) > 0 or getattr(rangeFS,om_end) < 2**width-1):
             if (getattr(rangeFS,om_start) == getattr(rangeFS,om_end)):
-                match[attr_name] = to_str(getattr(rangeFS,om_start))
+                match[of_name].append(to_str(getattr(rangeFS,om_start)))
             else:
-                #TODO: fix it later: for now we just find the full x.x.x.x/y format that contain the interval
                 if (attr_name == "nw_src" or attr_name == "nw_dst"):
                     ips = getattr(rangeFS,om_start)
                     ipe = getattr(rangeFS,om_end)
-                    common = ips ^ ipe
-                    #count numebr of common bits
-                    leftmost_position = 0
-                    for i in range(0,31):
-                        if (common & 0x1<<i):
-                            leftmost_position = i
-                    match[attr_name] = "%s/%d"%(to_str(ips & (0xFFFFFFFF<<leftmost_position)),31-leftmost_position)
-                    
-                    
+                    while (ips <= ipe):
+                        for i in range(1,32):
+                            if not ((ips | (2**i - 1 )) < ipe and (ips % 2**i)==0) :
+                                obtained_match = "%s/%d"%(to_str(ips),33-i)
+                                match[of_name].append(obtained_match)
+                                ips = (ips| (2**(i-1) - 1 )) + 1
+                                break
                 else:
-                    # TODO: If we expand this case, result will EXPLODE -- avoid it at any cost!
-                    # we may prevent users from entering ranges
-                    print "In Range to match function, a range replaced with full call"
-    result = ""
-    for key in match:
-        result = "%s%s=%s , "%(result,key,match[key])
+                    for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)):
+                        match[of_name].append(to_str(value))
+                        
+    #Now try to combine different of_name(s) together:
+    all_match = [""]
+    for key in match.keys():
+        new_match = []
+        for value in match[key]:
+            for elem in all_match:
+                new_match.append("%s%s=%s , "%(elem,key,value))
+        if len(match[key]) > 0:
+            all_match = new_match
  
-    return result
+    return all_match

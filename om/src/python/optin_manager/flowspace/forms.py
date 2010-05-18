@@ -19,8 +19,8 @@ class AdminOptInForm(forms.Form):
     mac_from    = MACAddressForm(initial = "*")
     mac_to      = MACAddressForm(initial = "*")
     
-    vlan_id_s   = forms.IntegerField(max_value = 255, initial = 0)
-    vlan_id_e   = forms.IntegerField(max_value = 255, initial = 255)
+    vlan_id_s   = forms.IntegerField(max_value = 4095, initial = 0)
+    vlan_id_e   = forms.IntegerField(max_value = 4095, initial = 4095)
 
     
     ip_from_s   = forms.IPAddressField()

@@ -72,18 +72,16 @@ def add_opt_in(request):
                                 opt.direction = fs.direction
                                 opt.save()
                                 #make Match struct
-                                matchstr = range_to_match_struct(opt)
-                                # relative priority for this match struct is 0, because
-                                # right now, we just have one match struct.
-                                # TODO: consider multi-match structs
-                                match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
-                                match.save()
-                                match_list.append(match)
-                                #TODO 4 is hard coded
-                                fv_arg = {"operation":"ADD", "priority":match.priority,
+                                matches = range_to_match_struct(opt)
+                                for single_match in matches:
+                                    match = MatchStruct(match = single_match, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
+                                    match.save()
+                                    match_list.append(match)
+                                    #TODO 4 is hard coded
+                                    fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
                                              "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
-                                fv_args.append(fv_arg)
+                                    fv_args.append(fv_arg)
                             
                     # If there is any intersection, add them to FV
                     if (intersected):
@@ -163,18 +161,15 @@ def add_opt_in(request):
                                 opt.direction = fs.direction
                                 opt.save()
                                 #make Match struct
-                                matchstr = range_to_match_struct(opt)
-                                # relative priority for this match struct is the same as overall priority, because
-                                # right now, we just have one match struct.
-                                # TODO: consider multi-match structs
-                                match = MatchStruct(match = matchstr, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
-                                match.save()
-                                match_list.append(match)
-                                fv_arg = {"operation":"ADD", "priority":match.priority,
+                                matches = range_to_match_struct(opt)
+                                for single_match in matches:
+                                    match = MatchStruct(match = single_match, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
+                                    match.save()
+                                    match_list.append(match)
+                                    fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
                                              "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
-                                fv_args.append(fv_arg)
-                                
+                                    fv_args.append(fv_arg)
                                 
                 if (intersected):   
                     fv = FVServerProxy.objects.all()[0]
