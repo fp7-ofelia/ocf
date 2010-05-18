@@ -251,15 +251,12 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             )
             
         # delete old links
-        for link in dead_links:
-            try:
-                c = OpenFlowConnection.objects.get(slug="%s_%s_%s_%s" % link)
-            except OpenFlowConnection.DoesNotExist:
-                print "WARNING: Connection that was thought to be dead" +\
-                    " not found in DB."
-                traceback.print_exc()
-            else:
-                c.delete()
+        link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
+        dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
+        if dead_cnxns.count < link_slugs:
+            print "WARNING: Some connections that were thought to be dead" +\
+                " not found in DB."
+        dead_cnxns.delete()
 
     def update_slice(self, slice):
         slice.create_slice(slice)

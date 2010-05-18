@@ -63,12 +63,9 @@ class DummyOM(models.Model):
         if dpid == None:
             dpid = random.choice(switches)[0]
 
-        src_links = self.dummyomlink_set.filter(src_dpid=dpid)
-        dst_links = self.dummyomlink_set.filter(dst_dpid=dpid)
-        for l in src_links:
-            l.delete()
-        for l in dst_links:
-            l.delete()
+        self.dummyomlink_set.filter(src_dpid=dpid).delete()
+        self.dummyomlink_set.filter(dst_dpid=dpid).delete()
+
         return dpid
 
 class DummyOMLink(models.Model):
