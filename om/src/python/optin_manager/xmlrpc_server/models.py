@@ -28,26 +28,6 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  dpid_to_long(l.pop("dstDPID")),
                  l.pop("dstPort"),
                  l) for l in self.getLinks()]
-    
-    
-    # JUST FOR TESTING
-    #TODO: delete after debugging
-    def changeFlowSpace(self,input):
-        print "Change Flow Space Called: "
-        print input
-        result = []
-        import random
-        for i in range(0,len(input)):
-            result.append(int(random.uniform(1,2000000)))
-        return result
-    
-    def addNewSlice(self,slice_id, owner_password, controller_url, owner_email):
-        print "SLICE ADDED: %s %s %s"%(slice_id,controller_url,owner_email) 
-        return True          
-    
-    def deleteSlice(self,sliceid):
-        print "Delete Slice %s" % sliceid
-        return True 
 
 class CallBackServerProxy(models.Model):
     '''

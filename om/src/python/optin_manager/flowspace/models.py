@@ -98,15 +98,18 @@ class Experiment(models.Model):
     owner_email         = models.CharField(blank=True, max_length = 120)
     owner_password      = models.CharField(blank=True, max_length = 40)
     
+    def get_fv_slice_name(self):
+        return "%s ID: %s" % (self.slice_name, self.slice_id)
+    
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)
 
 class ExperimentFLowSpace(FlowSpace):
-    dpid                  = models.CharField(max_length = 30)
-    direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
+    dpid          = models.CharField(max_length = 30)
+    direction     = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
     port_number_s = models.IntegerField("Start of Port Range", blank=True, default=0)
     port_number_e = models.IntegerField("End of Port Range", blank=True, default=0xFFFF)
-    exp                   = models.ForeignKey(Experiment)
+    exp           = models.ForeignKey(Experiment)
     def __unicode__(self):
         fs_desc = super(ExperimentFLowSpace, self).__unicode__()
         return "dpid; %s , FS: %s"%(self.dpid,fs_desc)   
@@ -127,22 +130,22 @@ class UserOpts(models.Model):
         return "user: %s  opted into: %s"%(self.user, self.experiment)   
     
 class OptsFlowSpace(FlowSpace):
-    dpid                  = models.CharField(max_length = 30)
-    direction           = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
+    dpid          = models.CharField(max_length = 30)
+    direction     = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
     port_number_s = models.IntegerField("Start of Port Range", default = 0)
     port_number_e = models.IntegerField("End of Port Range", default=0xFFFF)
-    opt             = models.ForeignKey(UserOpts)
+    opt           = models.ForeignKey(UserOpts)
     def __unicode__(self):
         fs_desc = super(OptsFlowSpace, self).__unicode__()
         return "dpid; %s , FS: %s"%(self.dpid,fs_desc)
 
     
 class MatchStruct(models.Model):
-    match              = models.CharField(max_length = 2000)
+    match       = models.CharField(max_length = 2000)
     #TODO unique should be true
-    fv_id               = models.CharField(unique = False, max_length = 40)
-    priority        = models.IntegerField()
-    optfs            = models.ForeignKey(OptsFlowSpace)
+    fv_id       = models.CharField(unique = False, max_length = 40)
+    priority    = models.IntegerField()
+    optfs       = models.ForeignKey(OptsFlowSpace)
     def __unicode__(self):
         return "%s: %s"%(self.fv_id, self.match)
 

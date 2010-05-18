@@ -40,8 +40,6 @@ def _same(val):
         return "%s" % val
     
 class om_ch_translate(object):
-
-    
     attr_funcs = {
         # attr_name: (func to turn to str, width)
         "dl_src": (InttoMAC, MACtoInt, 48, "mac_src","dl_src"),
@@ -57,16 +55,16 @@ class om_ch_translate(object):
     }
     
 def convertStar(fs):
-    
-        for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
-            ch_start = "%s_start" % attr_name
-            ch_end = "%s_end" % attr_name   
-            if ch_start not in fs or (ch_start in fs and ch_start == "*"):
-                fs[ch_start] = to_str(0)
-            if ch_end not in fs or (ch_end in fs and ch_end == "*"):
-                fs[ch_end] = to_str(2**width - 1)
-        
-        return fs
+    temp = fs.copy()
+    for ch_name, (to_str, from_str, width, om_name, of_name) in \
+    om_ch_translate.attr_funcs.items():
+        ch_start = "%s_start" % ch_name
+        ch_end = "%s_end" % ch_name
+        if ch_start not in fs or fs[ch_start] == "*":
+            temp[ch_start] = to_str(0)
+        if ch_end not in fs or fs[ch_end] == "*":
+            temp[ch_end] = to_str(2**width - 1)
+    return temp
 
 
 def getDirection(direction):
@@ -169,6 +167,18 @@ def create_slice(slice_id, project_name, project_description,
     @rtype: dict
     '''
     # TODO: add security check
+
+    print "create_slice got the following:"
+    print "    slice_id: %s" % slice_id
+    print "    project_name: %s" % project_name
+    print "    project_desc: %s" % project_description
+    print "    slice_name: %s" % slice_name
+    print "    slice_desc: %s" % slice_description
+    print "    controller: %s" % controller_url
+    print "    owner_email: %s" % owner_email
+    print "    owner_pass: %s" % owner_password
+    print "    switch_slivers"
+    pprint(switch_slivers, indent=8)
     
     e = Experiment()
     e.slice_id = slice_id
@@ -180,6 +190,8 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_email = owner_email
     e.owner_password = owner_password
     e.save()
+
+    print "Experiment created"
 
     #inspired by Jad :)
     # Add switches to experiments
@@ -199,8 +211,8 @@ def create_slice(slice_id, project_name, project_description,
                 efs.direction = 2
                 
             fs = convertStar(sfs)
-            print fs
-            for attr_name,(to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
+            for attr_name,(to_str, from_str, width, om_name, of_name) in \
+            om_ch_translate.attr_funcs.items():
                 ch_start ="%s_start"%(attr_name)
                 ch_end ="%s_end"%(attr_name)
                 om_start ="%s_s"%(om_name)
@@ -212,22 +224,12 @@ def create_slice(slice_id, project_name, project_description,
     error_msg = "" 
     # Inform FV(s) of the changes
     for fv in FVServerProxy.objects.all():
-        fv_success = fv.addNewSlice(slice_id, owner_password, controller_url, owner_email)
+        print "Calling fv.createSlice"
+        fv_success = fv.createSlice(
+            e.get_fv_slice_name(), owner_password, controller_url, owner_email)
         if (not fv_success):
             error_msg = "FlowVisor rejected this request"
     
-    print "reserve_slice got the following:"
-    print "    slice_id: %s" % slice_id
-    print "    project_name: %s" % project_name
-    print "    project_desc: %s" % project_description
-    print "    slice_name: %s" % slice_name
-    print "    slice_desc: %s" % slice_description
-    print "    controller: %s" % controller_url
-    print "    owner_email: %s" % owner_email
-    print "    owner_pass: %s" % owner_password
-    print "    switch_slivers"
-    pprint(switch_slivers, indent=8)
-
     # TODO: fix the return
     return {
         'error_msg': error_msg,
@@ -249,17 +251,17 @@ def delete_slice(sliceid, **kwargs):
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
-    exps = Experiment.objects.filter(slice_id = sliceid)
-    for single_exp in exps:
-        OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
-        UserOpts.objects.filter(experiment = single_exp)
-        ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
-        single_exp.delete()
-        
+    
+    single_exp = Experiment.objects.get(slice_id = sliceid)
+    OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
+    UserOpts.objects.filter(experiment = single_exp)
+    ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
+    single_exp.delete()
+    
     error_msg = ""   
     for fv in FVServerProxy.objects.all():
-        success = fv.deleteSlice(sliceid)
-        if (not success):
+        success = fv.deleteSlice(single_exp.get_fv_slice_name())
+        if not success:
             error_msg = "flowvisor sent an error"
         
     return error_msg

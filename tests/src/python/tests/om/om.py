@@ -157,10 +157,11 @@ class OMTests(TestCase):
         switch_slivers=[]
         for i in xrange(10):
             switch = random.choice(self.dpids_info)
+#            print "Creating flow space for switch %s" % switch
             fs_set = [Flowspace.create_random([switch]) \
-                      for j in random.randint(1,10)]
+                      for j in range(random.randint(1,10))]
             switch_slivers.append({
-                "dapatapath_id": dpid_to_long(switch[0]),
+                "dapatapath_id": switch[0],
                 "flowspace": [fs.get_full_attrs() for fs in fs_set],
             })
         
@@ -168,7 +169,7 @@ class OMTests(TestCase):
             "slice_id": id,
             "project_name": "project_name",
             "project_description": "project_description",
-            "slice_name": "slice name %s" % id,
+            "slice_name": "slice name-%s" % id,
             "slice_description": "slice_description",
             "controller_url": "bla:bla.bla.bla:6633",
             "owner_email": "bla@bla.com",
@@ -177,14 +178,19 @@ class OMTests(TestCase):
         }
         
         # Create!
-        ret = self.om_client.create_slice()
+        ret = self.om_client.create_slice(
+            args["slice_id"], args["project_name"], args["project_description"],
+            args["slice_name"], args["slice_description"],
+            args["controller_url"], args["owner_email"], args["owner_password"],
+            args["switch_slivers"]
+        )
         
         # check the return value
         self.assertEqual(ret, {'error_msg': "", 'switches': []})
         
         for fv in DummyFV.objects.all():
             DummyFVSlice.objects.get(
-                name=args["slice_name"],
+                name="%s ID: %s" % (args["slice_name"], args["slice_id"]),
                 password=args["owner_password"],
                 controller_url=args["controller_url"],
                 email=args["owner_email"],

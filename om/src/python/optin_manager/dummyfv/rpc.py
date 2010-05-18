@@ -43,10 +43,13 @@ def checkUser(func, *args, **kwargs):
 @get_fv
 @rpcmethod(signature=['boolean', 'string', 'string', 'string', 'string'])
 def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
-    DummyFVSlice.objects.create(fv=kwargs['fv'],
+    slice = DummyFVSlice.objects.create(fv=kwargs['fv'],
                                 name=sliceName, password=passwd,
                                 controller_url=controller_url,
                                 email=slice_email)
+    print "FV created slice name=%s, password=%s, url=%s, email=%s" % (
+        slice.name, slice.password, slice.controller_url, slice.email,
+    )
     return True
 
 @checkUser 
