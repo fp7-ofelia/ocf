@@ -48,11 +48,11 @@ def add_opt_in(request):
                     # object to find their intersection
                     selexp = Experiment.objects.get(id = defexp)
                     adminFS = AdminFlowSpace.objects.filter(user = request.user)
-                    optedFS = makeFlowSpace(request.POST)
+                    optedFS = make_flowspace(request.POST)
                     expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
                     
                     # find  intersection of adminFS and opted FS
-                    f = MultiFSIntersect(adminFS,[optedFS],FlowSpace)
+                    f = multi_fs_intersect(adminFS,[optedFS],FlowSpace)
                     intersected = False
                     # add this opt to useropts
                     tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
@@ -61,7 +61,7 @@ def add_opt_in(request):
                     fv_args = []
                     match_list = []
                     for fs in expFS:
-                        opted = MultiFSIntersect([fs],f,OptsFlowSpace)
+                        opted = multi_fs_intersect([fs],f,OptsFlowSpace)
                         if (len(opted) > 0):
                             intersected = True
                             for opt in opted:
@@ -72,7 +72,7 @@ def add_opt_in(request):
                                 opt.direction = fs.direction
                                 opt.save()
                                 #make Match struct
-                                matchstr = RangeToMatchStruct(opt)
+                                matchstr = range_to_match_struct(opt)
                                 # relative priority for this match struct is 0, because
                                 # right now, we just have one match struct.
                                 # TODO: consider multi-match structs
@@ -152,7 +152,7 @@ def add_opt_in(request):
                 match_list = []
                 fv_args = []    
                 for fs in expFS:
-                    opted = MultiFSIntersect([fs],userFS,OptsFlowSpace)
+                    opted = multi_fs_intersect([fs],userFS,OptsFlowSpace)
                     if (len(opted) > 0):
                         intersected = True
                         for opt in opted:
@@ -163,7 +163,7 @@ def add_opt_in(request):
                                 opt.direction = fs.direction
                                 opt.save()
                                 #make Match struct
-                                matchstr = RangeToMatchStruct(opt)
+                                matchstr = range_to_match_struct(opt)
                                 # relative priority for this match struct is the same as overall priority, because
                                 # right now, we just have one match struct.
                                 # TODO: consider multi-match structs

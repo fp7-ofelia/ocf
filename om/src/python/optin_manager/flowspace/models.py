@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import auth
-from optin_manager.flowspace.utils import InttoMAC, IntToDottedIP
+from optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 
 class FlowSpace(models.Model):
     mac_src_s           = models.IntegerField("Start Source MAC address", null=True, default=0x000000000000)
@@ -25,15 +25,15 @@ class FlowSpace(models.Model):
     def __unicode__(self):
         expression = ""
         if (self.mac_src_s > 0 and self.mac_src_e < 0xFFFFFFFFFFFF):
-            expression = expression + ("MAC Source Addr: %s-%s , " % (InttoMAC(self.mac_src_s), InttoMAC(self.mac_src_e)))
+            expression = expression + ("MAC Source Addr: %s-%s , " % (int_to_mac(self.mac_src_s), int_to_mac(self.mac_src_e)))
         if (self.mac_dst_s > 0 and self.mac_dst_e < 0xFFFFFFFFFFFF): 
-            expression = expression + ("MAC Destination Addr: %s-%s , " % (InttoMAC(self.mac_dst_s), InttoMAC(self.mac_dst_e))) 
+            expression = expression + ("MAC Destination Addr: %s-%s , " % (int_to_mac(self.mac_dst_s), int_to_mac(self.mac_dst_e))) 
         if (self.vlan_id_s > 0 and self.vlan_id_e < 0xFFF): 
             expression = expression + ("VALN id: %d-%d , " % (self.vlan_id_s,self.vlan_id_e)) 
         if (self.ip_src_s > 0 and self.ip_src_e < 0xFFFFFFFF):    
-            expression = expression + ("IP Source Addr: %s-%s , " % (IntToDottedIP(self.ip_src_s), IntToDottedIP(self.ip_src_e)))
+            expression = expression + ("IP Source Addr: %s-%s , " % (int_to_dotted_ip(self.ip_src_s), int_to_dotted_ip(self.ip_src_e)))
         if (self.ip_dst_s > 0 and self.ip_dst_e < 0xFFFFFFFF):    
-            expression = expression + ("IP Destination Addr: %s-%s , " % (IntToDottedIP(self.ip_dst_s), IntToDottedIP(self.ip_dst_e)))
+            expression = expression + ("IP Destination Addr: %s-%s , " % (int_to_dotted_ip(self.ip_dst_s), int_to_dotted_ip(self.ip_dst_e)))
         if (self.ip_proto_s > 0 and self.ip_proto_e < 0xFF):    
             expression = expression + ("IP Protocol Number: %s-%s , " % (self.ip_proto_s, self.ip_proto_e)) 
         if (self.tp_src_s > 0 and self.tp_src_e < 0xFFFF):    
@@ -46,8 +46,8 @@ class FlowSpace(models.Model):
                      
 #        return ("MAC Source Addr: %s-%s , MAC Destination Addr: %s-%s # IP Source Addr: %s-%s , \
 #            IP Destination Addr: %s-%s # TP Source Port: %d-%d , TP Destination Port: %d-%d" % 
-#        (InttoMAC(self.mac_src_s), InttoMAC(self.mac_src_e), InttoMAC(self.mac_dst_s), InttoMAC(self.mac_dst_e),
-#         IntToDottedIP(self.ip_src_s), IntToDottedIP(self.ip_src_e), IntToDottedIP(self.ip_dst_s), IntToDottedIP(self.ip_dst_e),
+#        (int_to_mac(self.mac_src_s), int_to_mac(self.mac_src_e), int_to_mac(self.mac_dst_s), int_to_mac(self.mac_dst_e),
+#         int_to_dotted_ip(self.ip_src_s), int_to_dotted_ip(self.ip_src_e), int_to_dotted_ip(self.ip_dst_s), int_to_dotted_ip(self.ip_dst_e),
 #          self.tp_src_s, self.tp_src_e, self.tp_dst_s, self.tp_dst_e) )   
         
     class Meta:
