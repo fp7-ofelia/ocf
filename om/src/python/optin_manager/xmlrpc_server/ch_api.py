@@ -101,7 +101,7 @@ def get_direction(direction):
                
 @check_user
 @rpcmethod(signature=['struct', # return value
-                      'int', 'string', 'string',
+                      'string', 'string', 'string',
                       'string', 'string', 'string',
                       'array', 'array'])
 def create_slice(slice_id, project_name, project_description,
@@ -146,7 +146,7 @@ def create_slice(slice_id, project_name, project_description,
         (port_num, direction, ...). The values for these items are the error
         messages associated with each field.
 
-    @param slice_id: an int that uniquely identifies the slice at the 
+    @param slice_id: a string that uniquely identifies the slice at the 
         clearinghouse.
     @type slice_id: int
     
