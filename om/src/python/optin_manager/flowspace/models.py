@@ -21,7 +21,19 @@ class FlowSpace(models.Model):
     tp_src_e            = models.IntegerField("End Source Transport Port" , null=True, default=0xFFFF)
     tp_dst_s            = models.IntegerField("Start Destination Transport Port" , null=True, default=0x0000)
     tp_dst_e            = models.IntegerField("End Destination Transport Port" , null=True, default=0xFFFF)
-        
+    
+    def stringify(self):
+        return "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s"%(
+                    self.mac_src_s,self.mac_src_e,
+                    self.mac_dst_s,self.mac_dst_e,
+                    self.vlan_id_s,self.vlan_id_e,
+                    self.ip_src_s,self.ip_src_e,
+                    self.ip_dst_s,self.ip_dst_e,
+                    self.ip_proto_s,self.ip_proto_e,
+                    self.tp_src_s,self.tp_src_e,
+                    self.tp_dst_s,self.tp_dst_e,
+                    )                      
+          
     def __unicode__(self):
         expression = ""
         if (self.mac_src_s > 0 and self.mac_src_e < 0xFFFFFFFFFFFF):

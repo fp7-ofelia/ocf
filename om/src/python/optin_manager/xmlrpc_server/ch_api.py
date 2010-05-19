@@ -70,6 +70,25 @@ def convert_star(fs):
             temp[ch_end] = to_str(2**width - 1)
     return temp
 
+def convert_star_int(fs):
+    temp = fs.copy()
+    for ch_name, (to_str, from_str, width, om_name, of_name) in \
+    om_ch_translate.attr_funcs.items():
+        ch_start = "%s_start" % ch_name
+        ch_end = "%s_end" % ch_name
+        
+        if ch_start not in fs or fs[ch_start] == "*":
+            temp[ch_start] = 0
+        else:
+            temp[ch_start] = from_str(fs[ch_start])
+            
+        if ch_end not in fs or fs[ch_end] == "*":
+            temp[ch_end] = 2**width - 1
+        else:
+            temp[ch_end] = from_str(fs[ch_end])   
+                    
+    return temp
+
 
 def get_direction(direction):
     if (direction == 'ingress'):
