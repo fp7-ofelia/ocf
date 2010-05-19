@@ -26,6 +26,7 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFV
         from django.contrib.auth.models import User
         from optin_manager.xmlrpc_server.models import FVServerProxy
+        from optin_manager.users.models import UserProfile
         
         # Create the clearinghouse user
         username = "clearinghouse"
@@ -34,11 +35,21 @@ class OMTests(TestCase):
         u.set_password(password)
         u.save()
         
+        profile = UserProfile.get_or_create_profile(u) 
+        profile.is_clearinghouse_user = True
+        profile.save()
         self.om_client = xmlrpclib.ServerProxy(
             "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
                 username, password, test_settings.HOST, test_settings.PORT
             )
         )
+        
+        #creat admin user
+        username = "admin"
+        password = "password"
+        u = User.objects.create(username=username, is_superuser=True, is_staff=True, is_active=True)
+        u.set_password(password)
+        u.save()
         
         # Create dummy FVs
         for i in range(test_settings.NUM_DUMMY_FVS):

@@ -30,9 +30,13 @@ def check_user(func, *args, **kwargs):
         raise Exception("Remote user %s is unknown for call %s." % (
             meta["REMOTE_USER"], func.func_name)
         )
-       
+    #Check that the user can actually make the xmlrpc call
+    this_user = User.objects.get(username = meta["REMOTE_USER"])
+    if (not this_user.get_profile().is_clearinghouse_user):
+        raise Exception("Remote user %s is not a clearinghouse user"%
+                       (meta["REMOTE_USER"])
+        )
     kwargs['username'] = meta["REMOTE_USER"]
-    # TODO: Check that the user can actually make the xmlrpc call
        
     return func(*args, **kwargs)
 
@@ -288,7 +292,7 @@ def get_links(**kwargs):
     '''
     #TODO: security check
     complete_list = []
-    fv = FVServerProxy.objects.all()
+    fv = FVServerProxy.objects.all()[0]
     links = fv.get_links()
     complete_list.extend(links)
         

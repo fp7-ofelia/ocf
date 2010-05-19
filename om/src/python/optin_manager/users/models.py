@@ -16,8 +16,9 @@ class Priority(object):
      Admins = ["Aggragate Admin", "Campus Admin", "Department Admin", "Building Admin", "Group Admin"]
  
 class UserProfile(models.Model):
-    user                = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
+    user                    = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
     is_net_admin        = models.BooleanField("Can Confirm Flow Space Requests", default=False)
+    is_clearinghouse_user   = models.BooleanField("Clearinghouse account", default=False)
     max_priority_level  = models.IntegerField()
     supervisor          = models.ForeignKey(auth.models.User, related_name = 'supervisor')
 
@@ -38,7 +39,8 @@ class UserProfile(models.Model):
                         user=user,
                         is_net_admin = False,
                         max_priority_level = Priority.Strict_User,
-                        supervisor_id = 0
+                        supervisor_id = 0,
+                        is_clearinghouse_user = False,
                         )
 
         return profile
