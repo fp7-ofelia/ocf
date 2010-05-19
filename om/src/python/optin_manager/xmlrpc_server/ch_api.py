@@ -183,7 +183,7 @@ def create_slice(slice_id, project_name, project_description,
 #    print "    owner_pass: %s" % owner_password
 #    print "    switch_slivers"
 #    pprint(switch_slivers, indent=8)
-    
+
     e = Experiment()
     e.slice_id = slice_id
     e.project_name = project_name
@@ -275,7 +275,6 @@ def get_switches(**kwargs):
     '''
     Return what the FlowVisor gives.
     '''
-    #TODO: security check
     complete_list = []
     fv = FVServerProxy.objects.all()[0]
     switches = fv.get_switches()
@@ -290,7 +289,6 @@ def get_links(**kwargs):
     '''
     Return what the FlowVisor gives.
     '''
-    #TODO: security check
     complete_list = []
     fv = FVServerProxy.objects.all()[0]
     links = fv.get_links()
@@ -326,10 +324,7 @@ def change_password(new_password, **kwargs):
         if using x509 certs then the domain name.
     @return: Error message if there is any.
     @rtype: string
-    '''
-    
-    print kwargs
-    
+    '''    
     dummy = User.objects.get_or_create(username='xmlrpcdummy')
     
     try:
@@ -343,8 +338,6 @@ def change_password(new_password, **kwargs):
     
     user.set_password(new_password)
     user.save()
-
-    print "******** change_password Done to %s" % new_password
     
     return ""
 

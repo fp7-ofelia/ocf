@@ -168,6 +168,7 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFVSlice
         import random
         from optin_manager.flowspace.utils import dpid_to_long
+        from optin_manager.flowspace.models import Experiment,ExperimentFLowSpace
         
         # get the switches into self.dpids_info
         self.test_get_switches()
@@ -207,6 +208,19 @@ class OMTests(TestCase):
         # check the return value
         self.assertEqual(ret, {'error_msg': "", 'switches': []})
         
+        #check the OM database to see if Experiment has been created correctly
+        returned = Experiment.objects.filter(slice_name=args["slice_name"])
+        self.assertEqual(returned.count(),1,"more than one slice with same name %s"%args["slice_name"])
+        expected = Experiment(id=returned[0].id,
+                              slice_id=args["slice_id"], project_name = args["project_name"],
+                              project_desc=args["slice_description"], slice_name=args["slice_name"],
+                              slice_desc=args["slice_description"], controller_url=args["controller_url"],
+                              owner_email=args["slice_description"],owner_password=args["owner_password"])
+        self.assertEqual(returned[0],expected,"The OM Experiment table is different from what expected %s != %s"%(returned[0],expected))
+        #check the OM database to see if ExperimentFlowSpace has been created correctly
+        expfs = ExperimentFLowSpace.objects.filter(exp=returned[0])
+        
+
         for fv in DummyFV.objects.all():
             DummyFVSlice.objects.get(
                 name="%s ID: %s" % (args["slice_name"], args["slice_id"]),
@@ -241,6 +255,8 @@ class OMTests(TestCase):
                     num_actual_slices == num_slices,
                     "Expected %s slices after delete but found %s" % (
                         num_slices, num_actual_slices))
+                # Check internal OM database:
+                
         
 if __name__ == '__main__':
     import unittest
