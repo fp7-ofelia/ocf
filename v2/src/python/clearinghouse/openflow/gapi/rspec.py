@@ -26,7 +26,7 @@ LOCATION = "location"
 NAME = "name"
 FLOWVISOR_URL = "flowvisor_url"
 
-SWITCH_URN_REGEX = r"^%s\+switch:(?P<dpid>\d+)$" % \
+SWITCH_URN_REGEX = r"^%s\+switch:(?P<dpid>[\d:a-fA-F]+)$" % \
     settings.OPENFLOW_GAPI_RSC_URN_PREFIX.replace("+", r"\+")
 PORT_URN_REGEX = r"%s\+port:(?P<port>\d+)$" % SWITCH_URN_REGEX[:-1]
 
@@ -54,7 +54,7 @@ def _urn_to_dpid(urn):
     if not m:
         raise BadURNError(urn)
     
-    return int(m.group('dpid'))
+    return m.group('dpid')
 
 def _port_to_urn(dpid, port):
     """
@@ -72,7 +72,7 @@ def _urn_to_port(urn):
     if not m:
         raise BadURNError(urn)
     
-    return (int(m.group('dpid')), int(m.group('port')))
+    return (m.group('dpid'), int(m.group('port')))
 
 def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''

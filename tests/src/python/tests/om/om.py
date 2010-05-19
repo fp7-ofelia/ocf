@@ -44,10 +44,11 @@ class OMTests(TestCase):
             )
         )
         
-        #creat admin user
+        # Create admin user
         username = "admin"
         password = "password"
-        u = User.objects.create(username=username, is_superuser=True, is_staff=True, is_active=True)
+        u = User.objects.create(username=username, is_superuser=True,
+                                is_staff=True, is_active=True)
         u.set_password(password)
         u.save()
         
@@ -87,7 +88,6 @@ class OMTests(TestCase):
         FV correctly.
         """
         from optin_manager.dummyfv.models import DummyFVDevice
-        from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 
         # TODO: Fix to also check the returned info
         self.dpids_info = self.om_client.get_switches()
@@ -95,10 +95,7 @@ class OMTests(TestCase):
         
         # check that we expect all the dpids
         expected = set(
-            map(
-                dpid_to_long,
-                DummyFVDevice.objects.values_list('dpid', flat=True),
-            )
+            DummyFVDevice.objects.values_list('dpid', flat=True),
         )
         
         self.assertEqual(
@@ -113,7 +110,6 @@ class OMTests(TestCase):
         Tests that the links are retrieved correctly from the FV.
         """
         from optin_manager.dummyfv.models import DummyFVLink
-        from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 
         links = self.om_client.get_links()
         links = set([tuple(l[:-1]) for l in links])
@@ -123,9 +119,9 @@ class OMTests(TestCase):
         # TODO add checking for the link_infos (link attributes)
         
         expected = set([(
-            dpid_to_long(link.src_dev.dpid),
+            link.src_dev.dpid,
             link.src_port,
-            dpid_to_long(link.dst_dev.dpid),
+            link.dst_dev.dpid,
             link.dst_port) for link in DummyFVLink.objects.all()])
 #        print "Expected links:"
 #        pprint(expected)
@@ -167,8 +163,8 @@ class OMTests(TestCase):
         from optin_manager.dummyfv.models import DummyFV, DummyFVRule
         from optin_manager.dummyfv.models import DummyFVSlice
         import random
-        from optin_manager.flowspace.utils import dpid_to_long
-        from optin_manager.flowspace.models import Experiment,ExperimentFLowSpace
+        from optin_manager.flowspace.models import Experiment
+        from optin_manager.flowspace.models import ExperimentFLowSpace
         from optin_manager.xmlrpc_server.ch_api import convert_star_int
         
         # get the switches into self.dpids_info
@@ -209,46 +205,65 @@ class OMTests(TestCase):
         # check the return value
         self.assertEqual(ret, {'error_msg': "", 'switches': []})
         
-        #check the OM database to see if Experiment has been created correctly
-
-                                    
-                                                  
+        # check the OM database to see if Experiment has been created correctly
         returned = Experiment.objects.filter(slice_name=args["slice_name"])
-        self.assertEqual(returned.count(),1,"more than one slice with same name %s"%args["slice_name"])
-        returned_string = "%s %s %s %s %s %s %s %s"%(returned[0].slice_id, returned[0].slice_name,
-                                                  returned[0].slice_desc, returned[0].project_name,
-                                                  returned[0].project_desc, returned[0].controller_url,
-                                                  returned[0].owner_email, returned[0].owner_password)
-        expected_string = "%s %s %s %s %s %s %s %s"%(args["slice_id"],args["slice_name"],
-                                                     args["slice_description"],args["project_name"],
-                                                     args["project_description"],args["controller_url"],
-                                                     args["owner_email"],args["owner_password"])
+        self.assertEqual(
+            returned.count(), 1 ,
+            "more than one slice with same name %s" % args["slice_name"])
+        returned_string = "%s %s %s %s %s %s %s %s" % (
+            returned[0].slice_id, returned[0].slice_name,
+            returned[0].slice_desc, returned[0].project_name,
+            returned[0].project_desc, returned[0].controller_url,
+            returned[0].owner_email, returned[0].owner_password
+        )
+        expected_string = "%s %s %s %s %s %s %s %s" % ( 
+            args["slice_id"],args["slice_name"],
+            args["slice_description"],args["project_name"],
+            args["project_description"],args["controller_url"],
+            args["owner_email"],args["owner_password"])
 
-        self.assertEqual(returned_string,expected_string,"The OM Experiment table is different from what expected %s != %s"%(returned_string,expected_string))
+        self.assertEqual(
+            returned_string, expected_string,
+            "The OM Experiment table is different " + \
+            "from what expected %s != %s" % (returned_string,expected_string)
+        )
         
-        #check the OM database to see if ExperimentFlowSpace has been created correctly
+        # check the OM database to see if ExperimentFlowSpace 
+        # has been created correctly
         expfs = ExperimentFLowSpace.objects.filter(exp=returned[0])
         returned_string = ""
         for fs in expfs:
-            returned_string = "%s %s %s %s %s "%(returned_string, fs.dpid,fs.port_number_s,fs.port_number_e,fs.stringify()) 
+            returned_string = "%s %s %s %s %s " % (
+                returned_string, fs.dpid, fs.port_number_s, fs.port_number_e,
+                fs.stringify()
+            )
         expected_string = ""
 
         for sliver in args["switch_slivers"]:
             for fs in sliver["flowspace"]:
                 fs = convert_star_int(fs)
-                expected_string = "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s "%(expected_string,
-                                        sliver["datapath_id"],fs["port_num_start"],fs["port_num_end"],
-                                        fs["dl_src_start"],fs["dl_src_end"],
-                                        fs["dl_dst_start"],fs["dl_dst_end"],
-                                        fs["vlan_id_start"],fs["vlan_id_end"],
-                                        fs["nw_src_start"],fs["nw_src_end"],
-                                        fs["nw_dst_start"],fs["nw_dst_end"],
-                                        fs["nw_proto_start"],fs["nw_proto_end"],
-                                        fs["tp_src_start"],fs["tp_src_end"],
-                                        fs["tp_dst_start"],fs["tp_dst_end"])
+                expected_string = \
+                    "%s %s %s %s %s %s %s %s %s %s %s " % (
+                        expected_string, sliver["datapath_id"],
+                        fs["port_num_start"], fs["port_num_end"],
+                        fs["dl_src_start"], fs["dl_src_end"],
+                        fs["dl_dst_start"], fs["dl_dst_end"],
+                        fs["vlan_id_start"], fs["vlan_id_end"],
+                        fs["nw_src_start"],
+                    ) +\
+                    "%s %s %s %s %s %s %s %s %s " % (
+                        fs["nw_src_end"], fs["nw_dst_start"], fs["nw_dst_end"],
+                        fs["nw_proto_start"], fs["nw_proto_end"],
+                        fs["tp_src_start"], fs["tp_src_end"],
+                        fs["tp_dst_start"], fs["tp_dst_end"]
+                    )
 
-        self.assertEqual(returned_string,expected_string,"Experiment FlowSpaces are not equal %s != %s"%(returned_string,expected_string))
-                
+        self.assertEqual(
+            returned_string, expected_string,
+            "Experiment FlowSpaces are not equal %s != %s" % (
+                returned_string,expected_string
+            )
+        )
 
         for fv in DummyFV.objects.all():
             DummyFVSlice.objects.get(
@@ -287,12 +302,18 @@ class OMTests(TestCase):
                         num_slices, num_actual_slices))
             # Check internal OM database:
             count = Experiment.objects.all().count()
-            self.assertEqual(count,num_slices,"There are more slices in OM than expected")
+            self.assertEqual(
+                count,num_slices,
+                "There are more slices in OM than expected")
             count = Experiment.objects.filter(slice_id=i).count()
-            self.assertEqual(count,0,"Slice in OM has not deleted!")
-            count = ExperimentFLowSpace.objects.filter(exp__slice_id = i).count() 
-            self.assertEqual(count,0,"FlowSpace associated with experiment slice_id=%d has not deleted completely"%i)            
-        
+            self.assertEqual(count, 0, "Slice in OM has not deleted!")
+            count = ExperimentFLowSpace.objects.filter(
+                exp__slice_id = i).count() 
+            self.assertEqual(
+                count, 0,
+                "FlowSpace associated with experiment slice_id" +\
+                "=%d has not deleted completely" % i)            
+
 if __name__ == '__main__':
     import unittest
     unittest.main()

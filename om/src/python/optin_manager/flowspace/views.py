@@ -88,7 +88,7 @@ def add_opt_in(request):
                         #TODO: if multi flowvisor, change this    
                         fv = FVServerProxy.objects.all()[0]
                         # TODO: check for errors in the following call
-                        return_ids = fv.changeFlowSpace(fv_args)
+                        return_ids = fv.api.changeFlowSpace(fv_args)
                         for i in range(0,len(return_ids)):
                             match_list[i].fv_id = return_ids[i]
                             match_list[i].save()
@@ -143,7 +143,7 @@ def add_opt_in(request):
                     tmp.delete()
                     fv = FVServerProxy.objects.all()[0]
                     # TODO: Check for errors
-                    fv.changeFlowSpace(fv_args)        
+                    fv.api.changeFlowSpace(fv_args)        
                 tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
                 tmp.save()
                 
@@ -174,7 +174,7 @@ def add_opt_in(request):
                 if (intersected):   
                     fv = FVServerProxy.objects.all()[0]
                     # TODO: check for errors in the following call
-                    return_ids = fv.changeFlowSpace(fv_args)
+                    return_ids = fv.api.changeFlowSpace(fv_args)
                     for i in range(0,len(return_ids)):
                         match_list[i].fv_id = return_ids[i] 
                         match_list[i].save() 
@@ -212,7 +212,7 @@ def opt_out(request):
             if (len(fv_args)>0):
                 fv = FVServerProxy.objects.all()[0]
                 #TODO: check return error
-                fv.changeFlowSpace(fv_args)
+                fv.api.changeFlowSpace(fv_args)
                        
                     
         this_user_opts  = UserOpts.objects.filter(user = request.user)
@@ -269,7 +269,7 @@ def update_opts(request):
 
     # XMLRPC call 
     fv = FVServerProxy.objects.all()[0]
-    fv.changeFlowSpace(fv_args)
+    fv.api.changeFlowSpace(fv_args)
           
     opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
     if (is_admin):

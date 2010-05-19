@@ -16,6 +16,9 @@ import traceback
 from django.contrib.contenttypes.models import ContentType
 from pprint import pprint
 
+def as_is_slugify(value):
+    return value
+
 #class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
 #    class Extend:
 #        replacements = {
@@ -108,35 +111,32 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         Read the topology from the OM and FV, parse it, and store it.
         '''
         from clearinghouse.utils import create_or_update
-        def unslugify(slug):
-            return tuple(map(int, slug.split("_")))
         
         # Get the active topology information from the AM
         links_raw = self.client.get_links()
 
 #        print "******** Update topology"
-#        switches_raw = self.client.get_switches()
 
 #        print "Link raw:"
 #        pprint(links_raw, indent=4)
-#        
+        
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
 #        print "Current links:"
 #        pprint (current_links, indent=4)
-#        
+        
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
 #        print "Current switches:"
 #        pprint (current_switches, indent=4)
-#
+
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
 #        print "Current dpids:"
 #        pprint (current_dpids, indent=4)
         
-        current_ifaces = set(map(
-            unslugify,
+        current_ifaces = set(
             OpenFlowInterface.objects.filter(
-                aggregate=self).values_list("slug", flat=True)))
+                aggregate=self).select_related(
+                    "switch").values_list("switch__datapath_id", "port_num"))
 #        print "Current ifaces:"
 #        pprint (current_ifaces, indent=4)
         
@@ -217,22 +217,22 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             create_or_update(
                 OpenFlowInterface,
                 filter_attrs=dict(
-                    slug="%s_%s" % iface,
+                    switch__datapath_id=iface[0],
+                    port_num=iface[1],
                     aggregate=self,
                 ),
                 new_attrs=dict(
                     name="",
-                    port_num=iface[1],
                     switch=OpenFlowSwitch.objects.get(datapath_id=iface[0]),
                     available=True,
                     status_change_timestamp=datetime.now(),
                 ),
-                skip_attrs=['slug'],
             )
 
 #        print "After adding: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # make old ifaces unavailable
+        # TODO: Is there a better way to w/o slugs?
         if dead_ifaces:
             dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
             OpenFlowInterface.objects.filter(
@@ -245,12 +245,17 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         for link in new_links:
             OpenFlowConnection.objects.create(
                 src_iface=OpenFlowInterface.objects.get(
-                    slug="%s_%s" % link[0:2]),
+                    switch__datapath_id=link[0],
+                    port_num=link[1],
+                ),
                 dst_iface=OpenFlowInterface.objects.get(
-                    slug="%s_%s" % link[2:4]),
+                    switch__datapath_id=link[2],
+                    port_num=link[3],
+                ),
             )
             
         # delete old links
+        # TODO: Is there a better way to filter these?
         link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
         dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
         if dead_cnxns.count < len(set(link_slugs)):
@@ -297,7 +302,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         return self.available and self.client.is_available()
 
 class OpenFlowSwitch(resource_models.Resource):
-    datapath_id = models.IntegerField(unique=True)
+    datapath_id = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return "OF Switch %s (%016x)" % (self.datapath_id, self.datapath_id)
@@ -318,7 +323,8 @@ class OpenFlowConnection(models.Model):
             instance.src_iface.port_num,
             instance.dst_iface.switch.datapath_id,
             instance.dst_iface.port_num,
-        )
+        ),
+        slugify=as_is_slugify,
     )
     
     def __unicode__(self):
@@ -334,7 +340,9 @@ class OpenFlowInterface(resource_models.Resource):
     )
     slug = AutoSlugField(
         populate_from=lambda instance: "%s_%s" % (
-            instance.switch.datapath_id, instance.port_num))
+            instance.switch.datapath_id, instance.port_num),
+        slugify=as_is_slugify,
+    )
 
     def __unicode__(self):
         return "OF Interface: %s" % self.slug

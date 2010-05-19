@@ -161,8 +161,9 @@ class GAPITests(TestCase):
             self.am_proc.terminate()
         except:
             pass
+        
         try:
-            self.am_proc.terminate()
+            self.ch_proc.terminate()
         except:
             pass
 
@@ -173,15 +174,20 @@ class GAPITests(TestCase):
         """
         Tests that get version returns 1.
         """
-        self.assertEqual(self.am_client.GetVersion(), {'geni_api': 1})
+        self.assertEqual(self.am_client.GetVersion()['geni_api'], 1)
 
-    def test_ListResources(self):
+    def test_ListResources(self, zipped=False):
         """
         Check the list of resources.
         """
         slice_urn, cred = self.create_ch_slice()
-        options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        options = dict(geni_compressed=zipped, geni_available=True)
+        if zipped:
+            import zlib, base64
+            comp_rspec = self.am_client.ListResources(cred, options)
+            rspec = zlib.decompress(base64.b64decode(comp_rspec))
+        else:
+            rspec = self.am_client.ListResources(cred, options)
         
 #        print rspec
         
@@ -194,12 +200,17 @@ class GAPITests(TestCase):
         self.assertEqual(len(self.links),
                          settings.NUM_LINKS_PER_AGG * settings.NUM_DUMMY_OMS)
 
+    def test_ZippedListResources(self):
+        """
+        Check the list of resources.
+        """
+        self.test_ListResources(zipped=True)
+
     def test_topoChange_ListResources(self):
         """
         Check the list of resources before and after a topology change
         """
         from clearinghouse.dummyom.models import DummyOM
-        import zlib, base64
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
@@ -223,8 +234,6 @@ class GAPITests(TestCase):
             
         # Create switches and links
         options = dict(geni_compressed=False, geni_available=True)
-#        comp_rspec = self.am_client.ListResources(cred, options)
-#        rspec = zlib.decompress(base64.b64decode(rspec))
         rspec = self.am_client.ListResources(cred, options)
         self.switches, self.links = parse_rspec(rspec)
         
@@ -344,16 +353,16 @@ class GAPITests(TestCase):
         for fs in flowspaces:
             for sw in fs.switches:
                 if sw.dpid not in dpid_fs_map:
-                    dpid_fs_map[int(sw.dpid)] = []
-                dpid_fs_map[int(sw.dpid)].append(fs)
+                    dpid_fs_map[sw.dpid] = []
+                dpid_fs_map[sw.dpid].append(fs)
         
         # check that all slivers parsed are correct
         found_dpids = []
         for agg, slivers in agg_slivers:
             for sliver in slivers:
-                found_dpids.append(int(sliver['datapath_id']))
+                found_dpids.append(sliver['datapath_id'])
                 
-                fs_set_requested = dpid_fs_map[int(sliver['datapath_id'])]
+                fs_set_requested = dpid_fs_map[sliver['datapath_id']]
                 fs_set_found = sliver['flowspace']
                 
                 # make sure that all the parsed flowspace was requested

@@ -14,6 +14,7 @@ def call_env_command(project_path, *args, **kwargs):
     import settings
     setup_environ(settings)
     call_command(*args, **kwargs)
+
     sys.path[0] = backup
 
 class Env(object):
@@ -28,11 +29,12 @@ class Env(object):
         from django.core.management import setup_environ
         import sys
         
+        self.curr_mods = sys.modules.copy()
+
         self.backup_path = sys.path[0]
         sys.path[0] = self.project_path
         
         import settings
-        
         setup_environ(settings)
         
         from django.db.models.loading import get_models

@@ -6,7 +6,7 @@ Created on May 15, 2010
 
 import re
 
-SWITCH_URN_REGEX = r"^(?P<prefix>.*)\+switch:(?P<dpid>\d+)$"
+SWITCH_URN_REGEX = r"^(?P<prefix>.*)\+switch:(?P<dpid>[:a-fA-F\d]+)$"
 PORT_URN_REGEX = r"%s\+port:(?P<port>\d+)$" % SWITCH_URN_REGEX[:-1]
 
 def _long_to_mac(l):

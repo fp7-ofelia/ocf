@@ -41,7 +41,8 @@ def checkUser(func, *args, **kwargs):
 
 @checkUser
 @get_fv
-@rpcmethod(signature=['boolean', 'string', 'string', 'string', 'string'])
+@rpcmethod(name="api.createSlice",
+           signature=['boolean', 'string', 'string', 'string', 'string'])
 def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
     slice = DummyFVSlice.objects.create(fv=kwargs['fv'],
                                 name=sliceName, password=passwd,
@@ -54,20 +55,23 @@ def createSlice(sliceName, passwd, controller_url, slice_email, **kwargs):
 
 @checkUser 
 @get_fv
-@rpcmethod(signature=['array'])
+@rpcmethod(name="api.listDevices",
+           signature=['array'])
 def listDevices(**kwargs):
     return list(DummyFVDevice.objects.filter(
         fv=kwargs['fv']).values_list('dpid', flat=True))
 
 @checkUser
 @get_fv
-@rpcmethod(signature=['struct', 'string'])
+@rpcmethod(name="api.getDeviceInfo",
+           signature=['struct', 'string'])
 def getDeviceInfo(dpidStr, **kwargs):
     return {}
 
 @checkUser 
 @get_fv
-@rpcmethod(signature=['array'])
+@rpcmethod(name="api.getLinks",
+           signature=['array'])
 def getLinks(**kwargs):
     return [{"dstDPID": link.dst_dev.dpid,
              "dstPort": link.dst_port,
@@ -77,7 +81,8 @@ def getLinks(**kwargs):
     
 @checkUser 
 @get_fv
-@rpcmethod(signature=['boolean', 'string'])
+@rpcmethod(name="api.deleteSlice",
+           signature=['boolean', 'string'])
 def deleteSlice(sliceName, **kwargs):
     DummyFVSlice.objects.filter(
         fv=kwargs['fv']).get(name=sliceName).delete()
@@ -85,7 +90,8 @@ def deleteSlice(sliceName, **kwargs):
 
 @checkUser 
 @get_fv
-@rpcmethod(signature=['array', 'array'])
+@rpcmethod(name="api.changeFlowSpace",
+           signature=['array', 'array'])
 def changeFlowSpace(changes, **kwargs):
     funcs = {"ADD": add_flowspace,
              "REMOVE": remove_flowspace,

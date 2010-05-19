@@ -6,6 +6,14 @@ Created on May 12, 2010
 
 from django.db import models
 
+def long_to_dpid(l):
+    import re
+    if type(l) == str and ":" in str:
+        return l
+    s = "%016x" % long(l)
+    m = re.findall("\w\w", s)
+    return ":".join(m)
+
 class DummyOM(models.Model):
     '''
     A dummy OM with a set of unique links.
@@ -35,7 +43,7 @@ class DummyOM(models.Model):
         
         dpids = []
         for l in range(num_switches):
-            dpids.append(self.id*1000+l)
+            dpids.append(long_to_dpid(self.id*1024+l))
             
         for l in range(num_links):
             src, dst = random.sample(dpids, 2)
@@ -72,9 +80,9 @@ class DummyOMLink(models.Model):
     '''
     A link used by the dummy OM fixtures.
     '''
-    src_dpid = models.IntegerField()
+    src_dpid = models.CharField(max_length=100)
     src_port = models.IntegerField()
-    dst_dpid = models.IntegerField()
+    dst_dpid = models.CharField(max_length=100)
     dst_port = models.IntegerField()
     om = models.ForeignKey(DummyOM)
     

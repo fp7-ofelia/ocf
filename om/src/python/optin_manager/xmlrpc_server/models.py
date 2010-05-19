@@ -6,28 +6,23 @@ from optin_manager.flowspace.utils import long_to_dpid, dpid_to_long
 class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
-    def changePassword(self, sliceName, new_password):
-        success = self.change_password(sliceName, new_password)
-        return success
-        
     def get_switches(self):
         """
         Change from FV format to CH format
         """
-        dpids = self.listDevices()
-        infos = [self.getDeviceInfo(d) for d in dpids]
-        dpids = map(dpid_to_long, dpids)
+        dpids = self.api.listDevices()
+        infos = [self.api.getDeviceInfo(d) for d in dpids]
         return zip(dpids, infos)
     
     def get_links(self):
         """
         Change from FV format to CH format
         """
-        return [(dpid_to_long(l.pop("srcDPID")),
+        return [(l.pop("srcDPID"),
                  l.pop("srcPort"),
-                 dpid_to_long(l.pop("dstDPID")),
+                 l.pop("dstDPID"),
                  l.pop("dstPort"),
-                 l) for l in self.getLinks()]
+                 l) for l in self.api.getLinks()]
 
 class CallBackServerProxy(models.Model):
     '''

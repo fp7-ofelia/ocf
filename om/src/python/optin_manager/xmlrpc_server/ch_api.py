@@ -222,7 +222,8 @@ def create_slice(slice_id, project_name, project_description,
         if "datapath_id" in sliver:
             dpid = sliver['datapath_id']
         else:
-            dpid = "00:00:00:00:00:00:00"
+            dpid = "00:" * 8
+            dpid = dpid[:-1]
             
         for sfs in sliver['flowspace']:
             efs = ExperimentFLowSpace()
@@ -247,7 +248,7 @@ def create_slice(slice_id, project_name, project_description,
     error_msg = "" 
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
-    fv_success = fv.createSlice(
+    fv_success = fv.api.createSlice(
             e.get_fv_slice_name(), owner_password, controller_url, owner_email)
     if (not fv_success):
             error_msg = "FlowVisor rejected this request"
@@ -282,7 +283,7 @@ def delete_slice(sliceid, **kwargs):
     
     error_msg = ""
     fv = FVServerProxy.objects.all()[0]
-    success = fv.deleteSlice(single_exp.get_fv_slice_name())
+    success = fv.api.deleteSlice(single_exp.get_fv_slice_name())
     if not success:
         error_msg = "flowvisor sent an error"
         

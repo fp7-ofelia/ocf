@@ -7,7 +7,7 @@ from os.path import join, dirname, basename
 import socket
 import sys
 
-SSL_DIR = join(dirname(__file__), "ssl")
+SSL_DIR = join(dirname(__file__), "../ssl")
 EGENI_DIR = join(dirname(__file__), "../../../../../")
 CH_PROJECT_DIR = join(EGENI_DIR, "v2/src/python/clearinghouse")
 GCF_DIR = join(EGENI_DIR, "gcf/src")

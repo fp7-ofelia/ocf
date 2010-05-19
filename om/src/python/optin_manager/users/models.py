@@ -16,11 +16,11 @@ class Priority(object):
      Admins = ["Aggragate Admin", "Campus Admin", "Department Admin", "Building Admin", "Group Admin"]
  
 class UserProfile(models.Model):
-    user                    = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
-    is_net_admin        = models.BooleanField("Can Confirm Flow Space Requests", default=False)
-    is_clearinghouse_user   = models.BooleanField("Clearinghouse account", default=False)
-    max_priority_level  = models.IntegerField()
-    supervisor          = models.ForeignKey(auth.models.User, related_name = 'supervisor')
+    user                   = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
+    is_net_admin           = models.BooleanField("Can Confirm Flow Space Requests", default=False)
+    is_clearinghouse_user  = models.BooleanField("Clearinghouse account", default=False)
+    max_priority_level     = models.IntegerField()
+    supervisor             = models.ForeignKey(auth.models.User, related_name = 'supervisor')
 
 
     def __unicode__(self):
