@@ -101,7 +101,7 @@ class Experiment(models.Model):
     ''' 
     Holds information about the topology and flowspace request of an experiment
     '''
-    slice_id            = models.CharField(max_length = 15)
+    slice_id            = models.CharField(max_length = 1024)
     project_name        = models.CharField(max_length = 40)
     project_desc        = models.CharField(blank=True, max_length = 400)
     slice_name          = models.CharField(max_length = 40)
