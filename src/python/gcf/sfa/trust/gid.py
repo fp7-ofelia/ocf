@@ -29,9 +29,9 @@
 
 import xmlrpclib
 import uuid
-from sfa.trust.certificate import Certificate
-from sfa.util.namespace import *
-from sfa.util.sfalogging import logger
+from gcf.sfa.trust.certificate import Certificate
+from gcf.sfa.util.namespace import *
+from gcf.sfa.util.sfalogging import logger
 
 ##
 # Create a new uuid. Returns the UUID as a string.

@@ -45,7 +45,7 @@ import M2Crypto
 from M2Crypto import X509
 from tempfile import mkstemp
 
-from sfa.util.faults import *
+from gcf.sfa.util.faults import *
 
 def convert_public_key(key):
     keyconvert_path = "/usr/bin/keyconvert"

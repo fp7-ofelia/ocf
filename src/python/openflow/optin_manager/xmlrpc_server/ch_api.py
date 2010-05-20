@@ -259,10 +259,7 @@ def create_slice(slice_id, project_name, project_description,
     print "Created slice with %s %s %s %s" % (
         e.get_fv_slice_name(), owner_password, controller_url, owner_email)
     if not fv_success:
-        print "Flowvisor create slice error"
         error_msg = "FlowVisor rejected this request"
-    
-    fv.api.getSliceInfo(e.get_fv_slice_name())
     
     # TODO: fix the return
     return {

@@ -22,7 +22,7 @@
 ### $Id: namespace.py 17774 2010-04-22 21:54:47Z jkarlin $
 ### $URL: http://svn.planet-lab.org/svn/sfa/branches/geni-api/sfa/util/namespace.py $
 
-from sfa.util.faults import *
+from gcf.sfa.util.faults import *
 
 URN_PREFIX = "urn:publicid:IDN"
 

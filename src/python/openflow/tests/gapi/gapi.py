@@ -7,8 +7,9 @@ from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
 import xmlrpclib
 from os.path import join
-import test_settings as settings 
-from helpers import parse_rspec, create_random_resv, kill_old_procs
+from openflow.tests import test_settings as settings
+from openflow.tests.helpers import parse_rspec, create_random_resv, \
+    kill_old_procs
 from expedient.common.tests.commands import call_env_command, Env
 
 class GAPITests(TestCase):
@@ -57,7 +58,7 @@ class GAPITests(TestCase):
                 username=username,
                 password=password,
                 url="https://%s:%s/%sdummyom/%s/xmlrpc/" % (
-                    settings.HOST, settings.PORT, settings.PREFIX, om.id,
+                    settings.HOST, settings.CH_PORT, settings.PREFIX, om.id,
                 ),
                 verify_certs = False,
             )

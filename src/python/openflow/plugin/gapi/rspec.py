@@ -7,7 +7,6 @@ Contains functions to transform to and from RSpecs
 '''
 
 from xml.etree import cElementTree as et
-from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch
 from django.conf import settings
 import re
 
@@ -76,6 +75,7 @@ def _urn_to_port(urn):
 
 def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''
+    from openflow.plugin.models import OpenFlowAggregate
     root = et.Element(RSPEC_TAG)
     for aggregate in OpenFlowAggregate.objects.filter(available=True):
         _add_aggregate_node(root, aggregate, slice_urn, available)
@@ -98,6 +98,7 @@ def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):
 
 def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     '''Add the switches tag and all switches'''
+    from openflow.plugin.models import OpenFlowSwitch
     
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
@@ -337,6 +338,8 @@ def _resv_parse_slivers(root):
     '''Return a list of tuples (aggregate, slivers) where aggregate is
     an OpenFlowAggregate instance and slivers is a list of dicts suitable for
     use in the create_slice xml-rpc call of the OM'''
+    
+    from openflow.plugin.models import OpenFlowSwitch
     
     flowspace_elems = root.findall(".//%s" % FLOWSPACE_TAG)
     

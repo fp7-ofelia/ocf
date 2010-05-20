@@ -34,9 +34,9 @@ import optparse
 import os.path
 import sys
 import geni
-import sfa.trust.gid as gid
-import sfa.trust.certificate as cert
-import sfa.trust.credential as cred
+import gcf.sfa.trust.gid as gid
+import gcf.sfa.trust.certificate as cert
+import gcf.sfa.trust.credential as cred
 
 CA_CERT_FILE = 'ca.crt'
 CA_KEY_FILE = 'ca.key'

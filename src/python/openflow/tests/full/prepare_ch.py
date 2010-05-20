@@ -14,7 +14,7 @@ def main(argv):
     ch_env = Env(proj_dir)
     ch_env.switch_to()
     
-    from expedient.plugins.openflow.models import OpenFlowAggregate
+    from openflow.plugin.models import OpenFlowAggregate
     from expedient.common.xmlrpc_serverproxy.models import \
         PasswordXMLRPCServerProxy
 

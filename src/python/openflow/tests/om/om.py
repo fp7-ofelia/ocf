@@ -6,9 +6,8 @@ Created on May 15, 2010
 
 from unittest import TestCase
 from expedient.common.tests.commands import call_env_command, Env
-import test_settings
+from openflow.tests import test_settings
 import xmlrpclib
-from pprint import pprint
 
 class OMTests(TestCase):
     
@@ -40,7 +39,7 @@ class OMTests(TestCase):
         profile.save()
         self.om_client = xmlrpclib.ServerProxy(
             "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
-                username, password, test_settings.HOST, test_settings.PORT
+                username, password, test_settings.HOST, test_settings.OM_PORT
             )
         )
         
@@ -71,7 +70,7 @@ class OMTests(TestCase):
                 username=username,
                 password=password,
                 url = "https://%s:%s/dummyfv/%s/xmlrpc/" % (
-                    test_settings.HOST, test_settings.PORT, fv.id,
+                    test_settings.HOST, test_settings.OM_PORT, fv.id,
                 ),
             )
             
@@ -159,7 +158,7 @@ class OMTests(TestCase):
         """
         Tests that slices are created correctly from the OM to the FV
         """
-        from openflow.plugin.tests.gapi.helpers import Flowspace
+        from openflow.tests.helpers import Flowspace
         from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVRule
         from openflow.optin_manager.dummyfv.models import DummyFVSlice
         import random

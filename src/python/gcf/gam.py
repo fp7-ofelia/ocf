@@ -36,8 +36,8 @@ import logging
 import optparse
 import xmlrpclib
 import geni
-import sfa.trust.credential as cred
-import sfa.trust.gid as gid
+import gcf.sfa.trust.credential as cred
+import gcf.sfa.trust.gid as gid
 
 class CredentialVerifier(object):
     

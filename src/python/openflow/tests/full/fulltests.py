@@ -5,12 +5,11 @@ Created on May 17, 2010
 '''
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
-import test_settings
+from openflow.tests import test_settings
 from helpers import SSHClientPlus
 import xmlrpclib, re
-from openflow.plugin.tests.gapi.helpers import kill_old_procs, parse_rspec,\
-    Flowspace
-from openflow.plugin.tests.gapi.helpers import create_random_resv
+from openflow.tests.helpers import kill_old_procs, parse_rspec, Flowspace
+from openflow.tests.helpers import create_random_resv
 import time
 from expedient.common.tests.commands import call_env_command, Env
 from os.path import join

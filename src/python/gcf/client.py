@@ -32,7 +32,7 @@ import sys
 import xml.dom.minidom as minidom
 import xmlrpclib
 import zlib
-import sfa.trust.credential as cred
+import gcf.sfa.trust.credential as cred
 
 class SafeTransportWithCert(xmlrpclib.SafeTransport):
 
