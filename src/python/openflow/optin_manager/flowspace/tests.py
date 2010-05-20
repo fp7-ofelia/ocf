@@ -1,9 +1,9 @@
-from ..users.models import UserProfile
+from openflow.optin_manager.users.models import UserProfile
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from models import *
-from ..xmlrpc_server.models import FVServerProxy
-from ..xmlrpc_server.ch_api import delete_slice, create_slice
+from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
+from openflow.optin_manager.xmlrpc_server.ch_api import delete_slice, create_slice
 
 def config():
     Site.objects.all().delete()

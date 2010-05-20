@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import auth
-from ..flowspace.utils import int_to_mac, int_to_dotted_ip
+from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 
 class FlowSpace(models.Model):
     mac_src_s           = models.IntegerField("Start Source MAC address", null=True, default=0x000000000000)

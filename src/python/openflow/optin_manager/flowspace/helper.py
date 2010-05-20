@@ -1,6 +1,6 @@
 from models import FlowSpace
 from utils import mac_to_int, dotted_ip_to_int
-from ..xmlrpc_server.ch_api import om_ch_translate
+from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
 
 def single_fs_intersect(f1,f2,resultModel):
     fr = resultModel()

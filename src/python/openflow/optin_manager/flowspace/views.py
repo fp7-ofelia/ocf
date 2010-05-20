@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from forms import AdminOptInForm
 from django.forms.util import ErrorList
 from helper import *
-from ..users.models import Priority
-from ..xmlrpc_server.models import FVServerProxy
+from openflow.optin_manager.users.models import Priority
+from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 
 @login_required
 def view_opt_in(request, error_msg):

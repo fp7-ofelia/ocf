@@ -159,13 +159,13 @@ class OMTests(TestCase):
         """
         Tests that slices are created correctly from the OM to the FV
         """
-        from ....plugin.tests.gapi.helpers import Flowspace
-        from ...dummyfv.models import DummyFV, DummyFVRule
-        from ...dummyfv.models import DummyFVSlice
+        from openflow.plugin.tests.gapi.helpers import Flowspace
+        from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVRule
+        from openflow.optin_manager.dummyfv.models import DummyFVSlice
         import random
-        from ...flowspace.models import Experiment
-        from ...flowspace.models import ExperimentFLowSpace
-        from ...xmlrpc_server.ch_api import convert_star_int
+        from openflow.optin_manager.flowspace.models import Experiment
+        from openflow.optin_manager.flowspace.models import ExperimentFLowSpace
+        from openflow.optin_manager.xmlrpc_server.ch_api import convert_star_int
         
         # get the switches into self.dpids_info
         self.test_get_switches()
@@ -280,8 +280,9 @@ class OMTests(TestCase):
         Tests that slices are deleted correctly from the OM to FV
         """
         import random
-        from ..models import DummyFV, DummyFVSlice
-        from ...flowspace.models import Experiment,ExperimentFLowSpace
+        from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVSlice
+        from openflow.optin_manager.flowspace.models import Experiment, \
+            ExperimentFLowSpace
 
         num_slices = random.randint(1, 5)
         for i in range(num_slices):

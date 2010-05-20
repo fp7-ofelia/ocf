@@ -6,7 +6,7 @@ Created on May 15, 2010
 
 from expedient.common.rpc4django import rpcmethod
 from decorator import decorator
-from ..dummyfv.models import DummyFVSlice, DummyFVDevice,\
+from openflow.optin_manager.dummyfv.models import DummyFVSlice, DummyFVDevice,\
     DummyFVLink, DummyFVRule, DummyFV
 from django.contrib.auth.models import User
 

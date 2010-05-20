@@ -7,7 +7,7 @@ Contains functions to transform to and from RSpecs
 '''
 
 from xml.etree import cElementTree as et
-from ..models import OpenFlowAggregate, OpenFlowSwitch
+from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch
 from django.conf import settings
 import re
 

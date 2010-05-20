@@ -7,9 +7,9 @@ from expedient.common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
-from ..flowspace.models import Experiment, ExperimentFLowSpace,\
+from openflow.optin_manager.flowspace.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace
-from ..flowspace.utils import dotted_ip_to_int, mac_to_int,\
+from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,\
     int_to_dotted_ip, int_to_mac
 from decorator import decorator
 

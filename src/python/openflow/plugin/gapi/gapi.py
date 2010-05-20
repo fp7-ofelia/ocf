@@ -5,7 +5,7 @@ Created on Apr 20, 2010
 '''
 from expedient.common.rpc4django import rpcmethod
 import rspec as rspec_mod
-from ..models import OpenFlowAggregate, GAPISlice, OpenFlowSwitch
+from openflow.plugin.models import OpenFlowAggregate, GAPISlice, OpenFlowSwitch
 
 CREDENTIALS_TYPE = 'array' # of strings
 OPTIONS_TYPE = 'struct'

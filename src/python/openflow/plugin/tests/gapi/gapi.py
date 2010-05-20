@@ -36,9 +36,9 @@ class GAPITests(TestCase):
         return (slice_urn, credentials)
         
     def setup_dummy_oms(self):
-        from ....dummyom.models import DummyOM
+        from openflow.dummyom.models import DummyOM
         from django.contrib.auth.models import User
-        from ...models import OpenFlowAggregate
+        from openflow.plugin.models import OpenFlowAggregate
         from expedient.common.xmlrpc_serverproxy.models import\
             PasswordXMLRPCServerProxy
         
@@ -211,7 +211,7 @@ class GAPITests(TestCase):
         """
         Check the list of resources before and after a topology change
         """
-        from ....dummyom.models import DummyOM
+        from openflow.dummyom.models import DummyOM
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
@@ -252,8 +252,8 @@ class GAPITests(TestCase):
         """
         Tests that we can create a sliver.
         """
-        from ...models import GAPISlice
-        from ....dummyom.models import DummyOMSlice
+        from openflow.plugin.models import GAPISlice
+        from openflow.dummyom.models import DummyOMSlice
         
         # get the resources
         slice_urn, cred = self.create_ch_slice()
@@ -291,8 +291,8 @@ class GAPITests(TestCase):
         """
         Tests that we can create a sliver.
         """
-        from ...models import GAPISlice
-        from ....dummyom.models import DummyOMSlice
+        from openflow.plugin.models import GAPISlice
+        from openflow.dummyom.models import DummyOMSlice
         
         # get the resources
         slice_urn, cred = self.create_ch_slice()
@@ -316,9 +316,9 @@ class GAPITests(TestCase):
                         "Slice not deleted in the OMs")
          
     def test_parse_slice(self):
-        from ...models import GAPISlice
-        from ....dummyom.models import DummyOMSlice
-        from ...gapi.rspec import parse_slice
+        from openflow.plugin.models import GAPISlice
+        from openflow.dummyom.models import DummyOMSlice
+        from openflow.plugin.gapi.rspec import parse_slice
         
         # get the resources
         slice_urn, cred = self.create_ch_slice()

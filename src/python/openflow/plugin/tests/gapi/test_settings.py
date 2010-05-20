@@ -7,10 +7,12 @@ from os.path import join, dirname
 import socket
 import sys
 
-PYTHON_DIR = join(dirname(__file__), "../../../../../../")
+PYTHON_DIR = join(dirname(__file__), "../../../../")
 CH_PROJECT_DIR = join(PYTHON_DIR, "expedient/clearinghouse")
 GCF_DIR = join(PYTHON_DIR, "gcf")
 SSL_DIR = join(dirname(__file__), "../ssl")
+
+print "********", CH_PROJECT_DIR
 
 NUM_DUMMY_OMS = 3
 NUM_SWITCHES_PER_AGG = 10

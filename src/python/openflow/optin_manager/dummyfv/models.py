@@ -10,7 +10,7 @@ class DummyFV(models.Model):
     def populateTopology(self, num_switches, num_links, use_random=False):
         '''Create switches and random links'''
         import random
-        from ..flowspace.utils import long_to_dpid
+        from openflow.optin_manager.flowspace.utils import long_to_dpid
         
         if not use_random: random.seed(0)
         
