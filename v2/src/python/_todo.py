@@ -9,3 +9,4 @@ Created on May 14, 2010
 # TODO: Add tests for CH ListResources with slice_urn specified
 # TODO: Add tests for CH ListResources with geni_available=False
 # TODO: Add tests for adding an Aggregate to the CH
+# TODO: Go through and add length checking so that we don't have silent truncations on saving models

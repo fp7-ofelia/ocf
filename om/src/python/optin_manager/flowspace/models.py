@@ -102,16 +102,18 @@ class Experiment(models.Model):
     Holds information about the topology and flowspace request of an experiment
     '''
     slice_id            = models.CharField(max_length = 1024)
-    project_name        = models.CharField(max_length = 40)
-    project_desc        = models.CharField(blank=True, max_length = 400)
-    slice_name          = models.CharField(max_length = 40)
-    slice_desc          = models.CharField(blank=True, max_length = 400)
-    controller_url      = models.CharField(max_length = 200)
-    owner_email         = models.CharField(blank=True, max_length = 120)
-    owner_password      = models.CharField(blank=True, max_length = 40)
+    project_name        = models.CharField(max_length = 1024)
+    project_desc        = models.CharField(blank=True, max_length = 1024)
+    slice_name          = models.CharField(max_length = 1024)
+    slice_desc          = models.CharField(blank=True, max_length = 1024)
+    controller_url      = models.CharField(max_length = 1024)
+    owner_email         = models.CharField(blank=True, max_length = 1024)
+    owner_password      = models.CharField(blank=True, max_length = 2048)
     
+    # TODO: takeout the replacement when Rob fixes the . escaping in FV
     def get_fv_slice_name(self):
-        return "%s ID: %s" % (self.slice_name, self.slice_id)
+        s = "%s ID: %s" % (self.slice_name, self.slice_id)
+        return s.replace(".", "_")
     
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)

@@ -13,6 +13,7 @@ CH_PROJECT_DIR = join(EGENI_DIR, "v2/src/python/clearinghouse")
 TESTS_DIR = join(EGENI_DIR, "tests/src/python/tests")
 GCF_DIR = join(EGENI_DIR, "gcf/src")
 SSL_DIR = join(dirname(__file__), "../ssl")
+FLOWVISOR_DIR = join(EGENI_DIR, "../flowvisor")
 
 sys.path.append(join(TESTS_DIR, ".."))
 sys.path.append(join(OM_PROJECT_DIR, ".."))
@@ -22,17 +23,17 @@ sys.path.append(GCF_DIR)
 USE_RANDOM = False
 
 HOST = socket.getfqdn()
-HOST_IP = socket.gethostbyname(HOST)
 OM_PORT = 8443
 CH_PORT = 443
 
 FLOWVISORS = [
     dict(
-        host=HOST_IP,
+        host="192.168.188.1",
         of_port=6633,
         xmlrpc_port=8080,
         username="root",
-        password="rootpassword"
+        password="rootpassword",
+        path=(FLOWVISOR_DIR, "default-config.xml"),
     ),
 ]
 MININET_VMS = ["192.168.188.129"]

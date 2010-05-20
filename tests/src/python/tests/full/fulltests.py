@@ -6,6 +6,15 @@ Created on May 17, 2010
 from unittest import TestCase
 from tests.transport import SafeTransportWithCert
 import test_settings
+from tests.full.helpers import SSHClientPlus
+
+# TODO: Some of this code works with multiple FVs, other parts assume only one.
+
+RUN_FV_SUBPROCESS = True
+DEBUG = False
+
+def dprint(str):
+    if DEBUG: print str
 
 class FullIntegration(TestCase):
     MININET_TOPO = "linear,2"
@@ -16,56 +25,86 @@ class FullIntegration(TestCase):
         Connect to the mininet_vm and run 'num' instances of nox as
         a pyswitch with packet dumping.
         """
-        from paramiko import SSHClient, AutoAddPolicy
+        import time
+        from helpers import SSHClientPlus
+        kill_client = SSHClientPlus.exec_command_plus(
+            mininet_vm, "mininet", "mininet",
+            "sudo kill `ps -ae | grep lt-nox_core | awk '{ print $1 }'`"
+        )
+        kill_client.wait()
+        time.sleep(2)
         
         self.nox_clients = []
         for i in xrange(num):
             port = port_start + i
-
-            client = SSHClient()
-            client.set_missing_host_key_policy(AutoAddPolicy())
-            client.connect(
-                mininet_vm, username="mininet", password="mininet",
+            cmd = "cd noxcore/build/src; ./nox_core -i ptcp:%s %s" % (
+                port, self.NOX_APPS,
             )
-            stdin, stdout, stderr = client.exec_command(
-                "cd noxcore/build/src; ./nox_core -i ptcp:%s %s" % (
-                    port, self.NOX_APPS,
-                )
+            client = SSHClientPlus.exec_command_plus(
+                mininet_vm, "mininet", "mininet", cmd
             )
-            
-            self.nox_clients.append((stdin, stdout, stderr, client))
+            time.sleep(2)
+            if DEBUG:
+                print "Communicating with nox client run on port %s" % port
+                out = client.communicate()
+                print "Client out:\n%s" % out
+                
+            self.nox_clients.append(client)
         
     def connect_networks(self, flowvisors, mininet_vms):
         """
         Create a 2-switch, 2-host linear topology on each mininet vm
         Connect the switches to the FV.
         """
-        from paramiko import SSHClient, AutoAddPolicy
+        from helpers import SSHClientPlus
+        import time
         
         num = min([len(flowvisors), len(mininet_vms)])
         
         self.mininet_vm_clients = []
         for i in xrange(num):
-            client = SSHClient()
-            client.set_missing_host_key_policy(AutoAddPolicy())
-            client.connect(
-                mininet_vms[i], username="mininet", password="mininet",
-            )
-            
-            stdin, stdout, stderr = client.exec_command(
-                "sudo mn --topo=%s --controller=remote "  % self.MININET_TOPO +
-                "--ip=%s --port=%s --mac --switch=ovsk" % (
+            cmd = "sudo mn --topo=%s "  % self.MININET_TOPO +\
+                "--controller=remote --ip=%s --port=%s --mac --switch=ovsk" % (
                     flowvisors[i]["host"], flowvisors[i]["of_port"],
                 )
+            client = SSHClientPlus.exec_command_plus(
+                mininet_vms[i], "mininet", "mininet", cmd,
             )
-            
-            self.mininet_vm_clients.append((stdin, stdout, stderr, client))
+            self.mininet_vm_clients.append(client)
+
+            time.sleep(2)
+
+            if DEBUG:
+                print "Communicating with mininet client"
+                out = client.communicate()
+                print "Client out:\n%s" % out
         
-    def clean_up_flowvisor(self, flowvisor):
+    def run_flowvisor(self, flowvisor):
         """
+        Run flowvisor.
         Delete all the rules and slices.
         """
         import xmlrpclib, re
+        from tests.gapi.helpers import kill_old_procs
+        import time
+        
+        if RUN_FV_SUBPROCESS:
+            kill_old_procs(flowvisor["of_port"],
+                           flowvisor["xmlrpc_port"])
+            time.sleep(2)
+            self.fv_procs.append(
+                self.run_proc_cmd(
+                    "%s/scripts/flowvisor.sh %s/%s" % (
+                        flowvisor["path"][0], flowvisor["path"][0],
+                        flowvisor["path"][1],
+                    )
+                )
+            )
+            # wait for flowvisor to be up
+            time.sleep(2)
+            #dprint("Communicating with Flowvisor.")
+            #dprint(self.fv_procs[-1].communicate())
+        
         id_re = re.compile(r"id=\[(?P<id>\d+)\]")
         s = xmlrpclib.ServerProxy(
             "https://%s:%s@%s:%s/xmlrpc" % (
@@ -83,7 +122,7 @@ class FullIntegration(TestCase):
         slices = s.api.listSlices()
         [s.api.deleteSlice(slice) for slice in slices if slice != "root"]
         
-        self.fv_client = s
+        self.fv_clients.append(s)
         
     def prepare_om(self, proj_dir, flowvisor, ch_username, ch_passwd):
         """
@@ -116,6 +155,15 @@ class FullIntegration(TestCase):
                 flowvisor["host"], flowvisor["xmlrpc_port"],
             ),
         )
+        
+        import xmlrpclib
+        self.om_client = xmlrpclib.ServerProxy(
+            "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
+                ch_username, ch_passwd,
+                test_settings.HOST, test_settings.OM_PORT,
+            )
+        )
+        
         self.om_env.switch_from()
         
     def prepare_ch(self, proj_dir, ch_host, ch_username, ch_passwd, 
@@ -133,7 +181,8 @@ class FullIntegration(TestCase):
         )
         proc.wait()
         out_data, err_data = proc.communicate()
-        print out_data, err_data
+        dprint(out_data)
+        dprint(err_data)
         
     def run_proc_cmd(self, cmd):
         """
@@ -153,6 +202,7 @@ class FullIntegration(TestCase):
         """
         from os.path import join
         import xmlrpclib
+        import time
 
         # create the certs if not already there.
         self.run_proc_cmd("make -C %s" % ssl_dir).wait()
@@ -171,10 +221,12 @@ class FullIntegration(TestCase):
         self.am_client = xmlrpclib.ServerProxy(
             "https://localhost:%s/" % am_port,
             transport=cert_transport)
+        
+        time.sleep(2)
 
     def run_geni_ch(self, gcf_dir, ssl_dir, ch_port):
         from os.path import join
-        import xmlrpclib
+        import xmlrpclib, time
 
         self.ch_proc = self.run_proc_cmd(
             "python %s -r %s -c %s -k %s -p %s" % (
@@ -189,7 +241,9 @@ class FullIntegration(TestCase):
         self.ch_client = xmlrpclib.ServerProxy(
             "https://localhost:%s/" % ch_port,
             transport=cert_transport)
-        
+
+        time.sleep(2)
+
     def create_ch_slice(self):
         """
         Code mostly copied from GENI test harness from BBN.
@@ -217,8 +271,10 @@ class FullIntegration(TestCase):
         from tests.gapi.helpers import kill_old_procs
         
         # clear all slices/flowspaces from fvs
+        self.fv_procs = []
+        self.fv_clients = []
         for flowvisor in test_settings.FLOWVISORS:
-            self.clean_up_flowvisor(flowvisor)
+            self.run_flowvisor(flowvisor)
             
         # Kill stale processes
         kill_old_procs(8000, 8001)
@@ -247,7 +303,7 @@ class FullIntegration(TestCase):
             ch_passwd,
         )
         
-        time.sleep(4)
+        time.sleep(2)
         
         # setup the CH (aka AM)
         self.prepare_ch(
@@ -272,37 +328,45 @@ class FullIntegration(TestCase):
         from tests.gapi.helpers import kill_old_procs
 
         # clear all slices/flowspaces from fvs
-        for flowvisor in test_settings.FLOWVISORS:
-            self.clean_up_flowvisor(flowvisor)
+        if RUN_FV_SUBPROCESS:
+            for fv_proc in self.fv_procs:
+                try:
+                    fv_proc.terminate()
+                except:
+                    pass
         
+        self.am_proc.terminate()
+        self.ch_proc.terminate()
+        
+        # kill ssh sessions
+        for c in self.nox_clients:
+            out = c.communicate("\03", check_closed=True)
+            dprint("nox stdout %s" % out)
+            
+        for c in self.mininet_vm_clients:
+            out = c.communicate("exit()\n", check_closed=True)
+            dprint("mn stdout %s" % out)
+        
+        time.sleep(5)
+
+        if RUN_FV_SUBPROCESS:
+            for flowvisor in test_settings.FLOWVISORS:
+                kill_old_procs(flowvisor["of_port"], flowvisor["xmlrpc_port"])
         
         # Kill stale processes
         kill_old_procs(8000, 8001)
 
-        # kill ssh sessions
         for c in self.nox_clients:
             try:
-                c[0].write("exit()\n")
+                c.close()
             except:
-                print "nox stdout %s" % c[1].read()
-                print "nox stderr %s" % c[2].read()
+                pass
             
         for c in self.mininet_vm_clients:
             try:
-                c[0].write("exit()\n")
+                c.close()
             except:
-                print "mn stdout %s" % c[1].read()
-                print "mn stderr %s" % c[2].read()
-        
-        time.sleep(4)
-        
-        for c in self.nox_clients:
-            c[3].close()
-            
-        for c in self.mininet_vm_clients:
-            c[3].close()
-
-        time.sleep(2)
+                pass
 
     def test_ListResources(self):
         """
@@ -314,23 +378,81 @@ class FullIntegration(TestCase):
         options = dict(geni_compressed=False, geni_available=True)
         rspec = self.am_client.ListResources(cred, options)
         
-        print rspec
+        dprint(rspec)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches and links
         self.assertEqual(len(self.switches), 2)
-        self.assertEqual(len(self.links), 1)
+        self.assertEqual(len(self.links), 2)
+        
+    def test_createSlice(self):
+        """
+        Test that the om calls the FV correctly.
+        """
+        from tests.gapi.helpers import Flowspace
+        f = Flowspace({"dl_dst": ("*", "*")},
+                      ["00:11:22:33:aa:bb:cc:dd"])
+        
+        attrs = f.get_full_attrs()
+        # create some random flowspaces
+        switch_slivers=[{"datapathid": "00:11:22:33:aa:bb:cc:dd",
+                         "flowspace": [attrs],
+                         }]
+
+        args = {
+            "slice_id": "slice_id",
+            "project_name": "project_name",
+            "project_description": "project_description",
+            "slice_name": "slice name-slice_id",
+            "slice_description": "slice_description",
+            "controller_url": "tcp:bla.bla.bla:6633",
+            "owner_email": "bla@bla.com",
+            "owner_password": "password",
+            "switch_slivers": switch_slivers,
+        }
+        
+        # Create!
+        ret = self.om_client.create_slice(
+            args["slice_id"], args["project_name"], args["project_description"],
+            args["slice_name"], args["slice_description"],
+            args["controller_url"], args["owner_email"], args["owner_password"],
+            args["switch_slivers"]
+        )
+        
+        self.assertTrue(ret)
+        
+        slices = self.fv_clients[0].api.listSlices()
+        self.assertEqual(len(slices), 2)
+        
+        if slices[0] == "root":
+            slice = slices[1]
+        else:
+            slice = slices[0]
+            
+        # TODO: Fix this test after Rob fixes escaping bug
+        self.assertEqual(
+            slice, "%s ID: %s" % (
+                args["slice_name"].replace(".", "_"),
+                args["slice_id"].replace(".", "_"),
+            )
+        )
+        
+        slice_info = self.fv_clients[0].api.getSliceInfo(slice)
+        self.assertEqual(slice_info["contact_email"], args["owner_email"])
+        self.assertEqual(slice_info["controller_port"], "6633")
+        self.assertEqual(slice_info["controller_hostname"], "bla.bla.bla")
         
     def test_CreateSliver(self):
         """
         Check that we can create slice on the FV
         """
         from tests.gapi.helpers import create_random_resv, parse_rspec
+        import time
         
         # check no other slices
-        slices = self.fv_client.api.listSlices()
+        slices = self.fv_clients[0].api.listSlices()
         self.assertEqual(len(slices), 1) # root
         
         # get the resources
@@ -354,24 +476,46 @@ class FullIntegration(TestCase):
         self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
         
         # TODO: check that the full reservation rspec is returned
-        slices = self.fv_client.api.listSlices()
+        slices = self.fv_clients[0].api.listSlices()
+        dprint(slices)
+
         self.assertEqual(len(slices), 2) # root + new slice
+        
+        fv_slice_name = slices[1] if slices[0] == "root" else slices[0]
         
         # Check the name
         self.assertTrue(
-            slice_name in slices[1], 
-            "Expected to find %s in slice name %s, but didn't" % (
-                slice_name, slices[1]
+            slice_name in fv_slice_name, 
+            "Expected to find '%s' in slice name '%s', but didn't" % (
+                slice_name, fv_slice_name,
             )
         )
         
         # Check the slice information
-        slice_info = self.fv_client.api.getSliceInfo(slices[1])
-        print slice_info
+        slice_info = self.fv_clients[0].api.getSliceInfo(fv_slice_name)
+        dprint(slice_info)
         self.assertEqual(slice_info["contact_email"], email)
         self.assertEqual(slice_info["controller_port"], "6633")
         self.assertEqual(slice_info["controller_hostname"],
                          test_settings.MININET_VMS[0])
+        
+        return (slice_urn, cred)
+
+    def test_CreateDeleteSliver(self):
+        """
+        Check that we can create then delete a sliver.
+        """
+        slice_urn, cred = self.test_CreateSliver()
+        
+        self.assertTrue(
+            self.am_client.DeleteSliver(slice_urn, cred),
+            "Failed to delete sliver.")
+        
+        self.assertEqual(
+            len(self.fv_clients[0].api.listSlices()),
+            1,
+            "Slice not deleted at FlowVisor",
+        )
 
 if __name__ == '__main__':
     import unittest

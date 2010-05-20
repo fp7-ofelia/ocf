@@ -191,17 +191,17 @@ def create_slice(slice_id, project_name, project_description,
     '''
     # TODO: add security check
 
-#    print "create_slice got the following:"
-#    print "    slice_id: %s" % slice_id
-#    print "    project_name: %s" % project_name
-#    print "    project_desc: %s" % project_description
-#    print "    slice_name: %s" % slice_name
-#    print "    slice_desc: %s" % slice_description
-#    print "    controller: %s" % controller_url
-#    print "    owner_email: %s" % owner_email
-#    print "    owner_pass: %s" % owner_password
-#    print "    switch_slivers"
-#    pprint(switch_slivers, indent=8)
+    print "create_slice got the following:"
+    print "    slice_id: %s" % slice_id
+    print "    project_name: %s" % project_name
+    print "    project_desc: %s" % project_description
+    print "    slice_name: %s" % slice_name
+    print "    slice_desc: %s" % slice_description
+    print "    controller: %s" % controller_url
+    print "    owner_email: %s" % owner_email
+    print "    owner_pass: %s" % owner_password
+    print "    switch_slivers"
+    pprint(switch_slivers, indent=8)
 
     e = Experiment()
     e.slice_id = slice_id
@@ -249,9 +249,18 @@ def create_slice(slice_id, project_name, project_description,
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
     fv_success = fv.api.createSlice(
-            e.get_fv_slice_name(), owner_password, controller_url, owner_email)
-    if (not fv_success):
-            error_msg = "FlowVisor rejected this request"
+        "%s" % e.get_fv_slice_name(),
+        "%s" % owner_password,
+        "%s" % controller_url,
+        "%s" % owner_email,
+    )
+    print "Created slice with %s %s %s %s" % (
+        e.get_fv_slice_name(), owner_password, controller_url, owner_email)
+    if not fv_success:
+        print "Flowvisor create slice error"
+        error_msg = "FlowVisor rejected this request"
+    
+    fv.api.getSliceInfo(e.get_fv_slice_name())
     
     # TODO: fix the return
     return {
