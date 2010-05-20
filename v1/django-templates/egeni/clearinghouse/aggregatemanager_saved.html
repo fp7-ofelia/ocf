@@ -1,9 +1,0 @@
-{% extends "clearinghouse/base.html" %}
-
-{% block content %}
-<div class="main">
-    <h1>Aggregate Manager {{ am.name }} was saved.</h1>
-    <p>Return to <a href="{% url aggmgr_detail am.id %}">Aggregate Detail</a></p>
-    <p>Return to <a href="{% url aggmgr_admin_home %}">Aggregate Administration Home</a></p>
-</div>
-{% endblock %}
