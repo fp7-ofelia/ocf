@@ -21,7 +21,7 @@
         	{% endfor %}
         </table>
         {% if user_can_mod_aggregate %}
-        <form class="newaggregate form" method="post" action="">
+        <form class="newaggregate form" method="post" action="">{% csrf_token %}
         	<table class="formtable newaggregatetable">
         		{{ aggregate_add_form.as_table }}
         		<input type="submit" value="Add" />
@@ -44,7 +44,7 @@
         	{% endfor %}
         </table>
         {% if user_can_mod_slice %}
-        <form class="newslice form" method="post" action="">
+        <form class="newslice form" method="post" action="">{% csrf_token %}
             <table class="formtable newslicetable">
             	{{ slice_name_form.as_table }}
             </table>
@@ -75,7 +75,7 @@
             {% endfor %}
         </table>
         {% if user_can_mod_member %}
-        <form class="newmember form" method="post" action="">
+        <form class="newmember form" method="post" action="">{% csrf_token %}
             <table class="formtable newmembertable">
             	{{ new_member_form.as_table }}
             </table>

@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>{% trans "Registration" %}</h1>
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
   {{ form.as_table }}
 
   <input type="submit" value="{% trans 'Submit' %}" />

@@ -18,7 +18,7 @@
     <h1>User {{ user.username }}</h1>
     <div class="new user">
         <h2>User Info:</h2>
-        <form class="new user form" method="post" action="">
+        <form class="new user form" method="post" action="">{% csrf_token %}
             <table class="formtable newusertable">
             <tr>
                 <td><strong><label for="change_pwd">Change password?</label></strong></td>

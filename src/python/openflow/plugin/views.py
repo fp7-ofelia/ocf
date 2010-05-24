@@ -75,9 +75,10 @@ def aggregate_crud(request, agg_id=None):
     )
     
 def aggregate_delete(request, agg_id):
-    return create_update. \
-            delete_object(request,
-                          OpenFlowAggregate,
-                          reverse("aggregate_all"),
-                          agg_id,
-                          template_name="openflow/plugin/aggregate_confirm_delete.html")
+    return create_update.delete_object(
+        request,
+        OpenFlowAggregate,
+        reverse("aggregate_all"),
+        agg_id,
+        template_name="openflow/plugin/aggregate_confirm_delete.html",
+    )

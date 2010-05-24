@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from expedient.clearinghouse import users
 from expedient.clearinghouse.users import forms
-from django.views.generic import create_update
+from django.views.generic import create_update, simple
 from django.contrib import auth
 
 def home(request):
@@ -42,12 +42,16 @@ def home(request):
     else:
         return HttpResponseNotAllowed("GET", "POST")
         
-    return render_to_response('expedient/clearinghouse/users/home.html',
-                              {'user_list': user_list,
-                               'pwd_form': pwd_form,
-                               'user_form': user_form,
-                               'userprofile_form': userprofile_form,
-                               })
+    return simple.direct_to_template(
+        request,
+        template='expedient/clearinghouse/users/home.html',
+        extra_context={
+            'user_list': user_list,
+            'pwd_form': pwd_form,
+            'user_form': user_form,
+            'userprofile_form': userprofile_form,
+        },
+    )
 
 def detail(request, user_id=None):
     # TODO: This needs a lot of security. Users should not be able to change
@@ -92,26 +96,35 @@ def detail(request, user_id=None):
     except AttributeError:
         slice_set = ()
     
-    return render_to_response("expedient/clearinghouse/users/detail.html",
-                              {'user': user,
-                               'slices': slice_set,
-                               'pwd_form': pwd_form,
-                               'user_form': user_form,
-                               'show_owner': True,
-                               'userprofile_form': userprofile_form,
-                               })
+    return simple.direct_to_template(
+        request,
+        template='expedient/clearinghouse/users/detail.html',
+        extra_context={
+            'user': user,
+            'slices': slice_set,
+            'pwd_form': pwd_form,
+            'user_form': user_form,
+            'show_owner': True,
+            'userprofile_form': userprofile_form,
+        },
+    )
 
 def saved(request, user_id):
     user = get_object_or_404(auth.models.User, pk=user_id)
 
-    return render_to_response("expedient/clearinghouse/users/saved.html",
-                              {'user': user},
-                              )
+    return simple.direct_to_template(
+        request,
+        template='expedient/clearinghouse/users/saved.html',
+        extra_context={
+            'user': user,
+        },
+    )
 
 def delete(request, user_id):
-    return create_update. \
-            delete_object(request,
-                          auth.models.User,
-                          reverse("users_home"),
-                          user_id,
-                          template_name="expedient/clearinghouse/users/confirm_delete.html")
+    return create_update.delete_object(
+        request,
+        auth.models.User,
+        reverse("users_home"),
+        user_id,
+        template_name="expedient/clearinghouse/users/confirm_delete.html",
+    )
