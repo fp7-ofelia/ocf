@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'optin_manager.users',
     'optin_manager.flowspace',
     'optin_manager.xmlrpc_server',
+    'optin_manager.omclient_tester',
     'clearinghouse.xmlrpc_serverproxy',
     'clearinghouse.defaultsite',
 ###### For Testing #######################

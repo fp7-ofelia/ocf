@@ -101,7 +101,7 @@ def add_opt_in(request):
                         form._errors['general'] = ErrorList(["No intersection between opted-in flowspace,\
                         your flowspace and experiment flowspace"])
         else: #Not a post request
-            defexp = exps[0].id
+            defexp = 0
             form = AdminOptInForm()
         return render_to_response('flowspace/admin_opt_in.html', {
             'form': form, 'user':request.user, 'experiments':exps, 'defexp': defexp,
@@ -189,7 +189,7 @@ def add_opt_in(request):
               
                     
         else: #Not a post request
-            defexp = exps[0].id       
+            defexp = 0       
         return render_to_response('flowspace/user_opt_in.html', {
                 'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
             })  
