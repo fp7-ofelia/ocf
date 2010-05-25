@@ -1,1 +1,0 @@
-<NetSpec name="{{ netspec }}" start_time="" duration=""><nodes>{% for node in nodes %}{% include "rspec/pl-node.xml" %}{% endfor %}</nodes></NetSpec>

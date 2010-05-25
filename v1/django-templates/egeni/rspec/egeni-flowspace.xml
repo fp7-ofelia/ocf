@@ -1,7 +1,0 @@
-{% load ch_extras %}
-  <tns:flowSpaceEntry>
-    <tns:policy>{{ flowspace.get_policy_xml }}</tns:policy>
-    {% for fs_fld in fs_flds %}
-    {{ flowspace|flowspace_tag:fs_fld }}
-    {% endfor %}
-  </tns:flowSpaceEntry>

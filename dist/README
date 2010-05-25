@@ -1,0 +1,112 @@
+INTRODUCTION:
+-------------
+This package contains code needed to run the Expedient Clearinghouse and 
+OpenFlow Aggregate manager.
+
+Expedient has been tested on openSuSE 11.2 with Apache. The package contains
+the following:
+- Source files specific to the expedient including python, html, and others
+- Configuration files that can be used to run Apache with the Clearinghouse
+- Tests for all components
+
+PREREQUISITES:
+--------------
+
+
+
+INSTALLATION:
+-------------
+The following instructions have only been tested on openSuSE 11.2.
+
+Unpack the expedient-x.y.z.tar.gz
+$ tar -czf expedient-x.y.z.tar.gz
+$ cd expedient-x.y.z
+$ sudo make install
+
+This installs apache and configures it to start serving expedient files.
+
+
+HOW IT WORKS:
+-------------
+There following diagram shows the major components:
+
++---------+     +-----------+      +----+      +----+     +---------+     +-------------+
+| network |-----| FlowVisor |------| OM |------| AM |-----| AMProxy |-----| GAPI Client |
++---------+     +-----------+      +----+      +----+     +---------+     +-------------+
+
+The AM Proxy receives GENI API calls, checks credentials and forwards the
+requests to the AM (the Expedient Clearinghouse). The AM Proxy is a modified
+client from the GENI test harness. The AM distributes the
+requests to the connected Opt-in Managers (OM) which control the FlowVisor.
+
+
+TESTS:
+------
+The tests will run on the installed environment. They require some setup to get
+working. The tests will flush the databases, so make sure to backup any
+important data the the Clearinghouse and Opt-In Manager databases.
+
+Get the Mininet VM and upgrade to OpenVSwitch 1.0:
+--------------------------------------------------
+Follow the instructions at
+http://www.openflowswitch.org/foswiki/bin/view/OpenFlow/Mininet to download and
+run mininet. This provides a VM with a virtual network.
+
+ssh into the mininet VM and install OpenVSwitch 1.0 with the kernel module by
+following the instructions at http://openvswitch.org/?page_id=10
+
+Setup a local Flowvisor:
+------------------------
+Grab the Flowvisor release, then compile and configure it. We will be testing
+with this version so don't use a production system.
+
+Edit test settings:
+-------------------
+edit /srv/www/expedient/src/python/tests/test_settings.py and correct the
+following settings:
+
+- The root password for the flowvisor you just configured (replacing
+  "rootpassword")
+  
+- The flowvisor "host" (change it to an IP address the mininet VM can use to
+  talk to processes on the host)
+  
+- FLOWVISOR_DIR (set to the path of the local flowvisor)
+
+- MININET_VMS (replace "192.168.188.129" with the VM's IP address)
+
+Run the tests:
+--------------
+To run the tests, as root:
+# cd /srv/www/expedient/src/python 
+# python openflow/tests/tests.py
+
+
+USAGE:
+------
+Flush the databases and create root users:
+# cd /srv/www/expedient/src/python 
+# python openflow/optin_manager/manage.py flush
+# python expedient/clearinghouse/manage.py flush
+
+Log in to the optin manager at https://localhost:8443/admin/ and create a
+clearinghouse user (setting the user's profile's is_clearinghouse_user flag).
+
+Log in to the expedient clearinghouse at https://localhost and add
+the optin manager using the windows shown. Set the aggregate url to
+https://localhost:8443/xmlrpc/xmlrpc/. Use the same username and password
+you just created on the optin manager.
+
+Users can register at the optin manager at https://localhost:8443/ and create
+accounts, but they do not own any flowspace that they can opt-in. The root user 
+should login using the admin interface and assign users flowspace so they can
+opt into experiments. This part has not been tested yet.
+
+The GENI API can be used to create and delete experiments. Currently shutdown
+is the same as delete, and renew always returns true since slices never expire.
+
+
+AUTHORS:
+--------
+   Jad Naous <jnaous@stanford.edu>
+   Peyman Kazemian <kazemian@stanford.edu>

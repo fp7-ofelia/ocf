@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>Project {{ project.name }}</h1>
+    <div class="proj_description">
+        {{ project.description }}
+    </div>
+    <div class="aggregates">
+        <h2>Project Aggregates Used:</h2>
+        <table class="aggregatetable">
+        	<thead><tr><td>Name</td><td>Actions</td></tr></thead>
+        	{% for agg in project.aggregates %}
+        	<tr>
+        		<td><a href="{% url aggregate_detail agg.id %}">agg.name</a></td>
+        		<td>
+        			<a href="{% url project_aggregate_info project.id agg.id %">details</a>,
+        			{% if user_can_mod_aggregate %}<a href="{% url project_agregate_remove project.id agg.id %">remove</a>{% endif %}
+        		</td>
+        	</tr>
+        	{% endfor %}
+        </table>
+        {% if user_can_mod_aggregate %}
+        <form class="newaggregate form" method="post" action="">{% csrf_token %}
+        	<table class="formtable newaggregatetable">
+        		{{ aggregate_add_form.as_table }}
+        		<input type="submit" value="Add" />
+        	</table>
+        </form>
+        {% endif %}
+    </div>
+    <div class="slices">
+        <h2>Project Slices:</h2>
+        <table class="slicetable">
+        	<thead><tr><td>Name</td><td>Actions</td></tr></thead>
+        	{% for slice in project.slice_set %}
+        	<tr>
+        		<td><a href="{% url slice_detail %}">slice.name</a></td>
+        		<td>
+        			{% if user_can_mod_slice %}<a href="{% url project_slice_delete project.id slice.id %">delete</a>,
+        			<a href="{% url slice_edit slice.id %">edit</a>{% endif %}
+        		</td>
+        	</tr>
+        	{% endfor %}
+        </table>
+        {% if user_can_mod_slice %}
+        <form class="newslice form" method="post" action="">{% csrf_token %}
+            <table class="formtable newslicetable">
+            	{{ slice_name_form.as_table }}
+            </table>
+            <input type="submit" value="Create!" />
+        </form>
+        {% endif %}
+    </div>
+    <div class="members">
+        <h2>Project Members:</h2>
+        <table class="formtable newmembertable">
+        	<thead><tr><td>Username</td><td>Real Name</td><td>Role</td><td>Actions</td></tr></thead>
+            {% for role in project.projectrole_set.all %}
+            <tr>
+            	<td><a href="{% url user_detail role.member.id %}">{{ role.member.username }}</a></td>
+            	<td>{{ role.member.first_name }} {{ role.member.last_name }}</td>
+            	<td>
+            		{% if user_can_mod_role %}
+            		<a href="{% url project_user_role project.id role.member.id %}">{{ role.role }}</a>
+            		{% else %}
+            		{{ role.role }}
+            		{% endif %}
+            	</td>
+	            <td>
+	            	{% if user_can_mod_member %}<a href="{% url project_user_remove project.id user.id %}">remove</a>,{% endif %}
+	            	{% if role.member.email %}<a href="mailto:{{ role.member.email }}">email</a>{% endif %}
+	            </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if user_can_mod_member %}
+        <form class="newmember form" method="post" action="">{% csrf_token %}
+            <table class="formtable newmembertable">
+            	{{ new_member_form.as_table }}
+            </table>
+            <input type="submit" value="Add" />
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

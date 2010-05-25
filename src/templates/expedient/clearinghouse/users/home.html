@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>User Administration</h1>
+<div class="list users">
+    <h2>Current users:</h2>
+    {% if user_list.count %}
+    <table class="fulltable users" border="1">
+        <thead><tr><td>Username</td><td>Real Name</td><td>Affiliation</td><td>Projects</td><td>Actions</td></tr></thead>
+        {% for user in user_list %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>{{ user.get_profile.affiliation }}</td>
+            <td align="center">{{ user.project_set.all.count }}</td>
+            <td><a href="{% url users_detail user.id %}">view/edit</a>,
+                <a href="{% url users_delete user.id %}">delete</a>{% if user.email %},
+                <a href="mailto:{{ user.email }}">email</a>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    None defined.
+    {% endif %}
+</div>
+<div class="new user">
+    <h2> Create a new user: </h2>
+    <form class="newuserform" method="post" action=".">{% csrf_token %}
+        <table class="formtable newuserform">
+         {{ pwd_form.as_table }}
+         {{ user_form.as_table }}
+         {{ userprofile_form.as_table }}
+        </table>
+        <input type="submit" value="Create User">
+    </form>
+</div>
+{% endblock %}
