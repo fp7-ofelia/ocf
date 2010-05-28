@@ -8,7 +8,12 @@ from django.db import models
 import os
 import binascii
 from django.conf import settings
- 
+from xmlrpclib import ServerProxy
+from datetime import timedelta, datetime
+import time
+from expedient.common.utils.transport import PyCURLSafeTransport as transport
+from urlparse import urlparse
+
 def random_password():
     return binascii.b2a_qp(os.urandom(1024))
 
@@ -34,22 +39,15 @@ class PasswordXMLRPCServerProxy(models.Model):
     
     def __getattr__(self, name):
         if name == "proxy":
-            from xmlrpclib import ServerProxy
-            from datetime import timedelta
-            import time
             
             if self.url.lower().startswith("https"):
                 if self.verify_certs:
-                    from expedient.common.utils.transport import\
-                        PyCURLSafeTransport as transport
                     self.transport = transport(
                         timeout=settings.XMLRPC_TIMEOUT,
                         username=self.username,
                         password=self.password,
                         ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
                 else:
-                    from expedient.common.utils.transport import\
-                        PyCURLSafeTransport as transport
                     self.transport = transport(
                         timeout=settings.XMLRPC_TIMEOUT,
                         username=self.username,
@@ -57,7 +55,6 @@ class PasswordXMLRPCServerProxy(models.Model):
                 self.proxy = ServerProxy(self.url, self.transport)
 
             else:
-                from urlparse import urlparse
                 parsed = urlparse(self.url)
                 new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
                                                self.username,
@@ -81,20 +78,26 @@ class PasswordXMLRPCServerProxy(models.Model):
             return getattr(self.proxy, name)
         
     def set_verify_certs(self, enable):
-        self.verify_certs = True
+        '''Enable/disable SSL certificate verification.'''
+        self.verify_certs = enable
         if self.transport:
-            self.transport.set_ssl_verify(settings.XMLRPC_TRUSTED_CA_PATH)
+            if enable:
+                self.transport.set_ssl_verify(
+                    ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
+            else:
+                self.transport.set_ssl_verify()
         
     def change_password(self, password=None):
-        # TODO: Fix
-        return ""
-#        password = password or random_password()
-#        self.password_timestamp = datetime.date.today()
-#        retval = self.__getattr__('change_password')(password)
-#        self.password = password
-#        del self.proxy
-#        self.save()
-#        return retval
+        '''Change the remote password'''
+        password = password or random_password()
+        self.password_timestamp = datetime.date.today()
+        err = self.__getattr__('change_password')(password)
+        if not err:
+            # password change succeeded
+            self.password = password
+            del self.proxy
+            self.save()
+        return err
         
     def is_available(self):
         '''Call the server's ping method, and see if we get a pong'''
@@ -114,11 +117,10 @@ class PasswordXMLRPCServerProxy(models.Model):
         Add the CA that signed the certificate for self.url as trusted.
         '''
         import ssl
-        import urlparse
         import subprocess
         
         # parse the url
-        res = urlparse.urlparse(self.url)
+        res = urlparse(self.url)
         port = res.port or 443
         
         # get the PEM-encoded certificate
