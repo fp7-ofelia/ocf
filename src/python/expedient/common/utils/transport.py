@@ -142,3 +142,4 @@ class PyCURLSafeTransport(PyCURLTransport):
             self._curl.setopt(pycurl.CAPATH, ca_cert_file or ca_cert_path)
             self._curl.setopt(pycurl.SSL_VERIFYPEER, 1)
             self._curl.setopt(pycurl.SSL_VERIFYHOST, 2)
+            

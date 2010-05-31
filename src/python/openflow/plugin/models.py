@@ -5,73 +5,43 @@ Created on Apr 26, 2010
 '''
 
 from django.db import models
-from django.db.models.query import Q
 from expedient.clearinghouse.resources import models as resource_models
 from expedient.clearinghouse.aggregate import models as aggregate_models
 from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
-import traceback
 from django.contrib.contenttypes.models import ContentType
-from pprint import pprint
 
 def as_is_slugify(value):
     return value
 
-#class OpenFlowAdminInfo(aggregate_models.AggregateAdminInfo):
-#    class Extend:
-#        replacements = {
-#            "aggregate_class": "OpenFlowAggregate",
-#        }
-
-#class OpenFlowUserInfo(aggregate_models.AggregateUserInfo):
-#    class Extend:
-#        replacements = {
-#            "aggregate_class": "OpenFlowAggregate",
-#        }
-
+class OpenFlowUserInfo(aggregate_models.AggregateUserInfo):
+    signed_license = models.BooleanField("Signed usage agreement?",
+                                         default=False)
+    
 class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
     controller_url = models.CharField("URL of the slice's OpenFlow controller",
                                       max_length=100)
-    
-#    class Extend:
-#        replacements = {
-#            "aggregate_class": "OpenFlowAggregate",
-#        }
-
-#class OpenFlowProjectInfo(aggregate_models.AggregateProjectInfo):
-#    class Extend:
-#        replacements = {
-#            "aggregate_class": "OpenFlowAggregate",
-#        }
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
+    usage_agreement = models.TextField()
     
-#    class Extend:
-#        replacements= {
-#            'admin_info_class': OpenFlowAdminInfo,
-#            'user_info_class': OpenFlowUserInfo,
-#            'slice_info_class': OpenFlowSliceInfo,
-#            'project_info_class': OpenFlowProjectInfo,
-#        }
-        
     class Meta:
         verbose_name = "OpenFlow Aggregate"
         
     def setup_new_aggregate(self, hostname):
-        # TODO: enable SSL
-#        self.client.install_trusted_ca()
+        self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
-#        print "Registering callback"
+        
         err = self.client.register_topology_callback(
             "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
         )
         if err: return err
-#        print "Updating topology."
+
         err = self.update_topology()
         if err: return err
         
@@ -79,24 +49,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         '''
         Get the topology for this aggregate as a set of links.
         '''
-        # Create a filter that selects any connection that connects a switch
-        # in this aggregate
-#        filter = Q(src_iface__switch__aggregate=self) | \
-#            Q(dst_iface__switch__aggregate=self)
-#            
-#        # optimize so we don't hit the DB multiple times
-#        qs = OpenFlowConnection.objects.filter(filter)
-#        qs.select_related("src_iface","src_iface__switch",
-#                          "dst_iface","dst_iface__switch")
-#        
-#        # Dump the links into tuples
-#        links = set()
-#        for cnxn in qs:
-#                links.add((cnxn.src_iface.switch.datapath_id,
-#                           cnxn.src_iface.port_num,
-#                           cnxn.dst_iface.switch.datapath_id,
-#                           cnxn.dst_iface.port_num))
-
         links = set()
         for iface in OpenFlowInterface.objects.filter(
         aggregate=self).select_related("switch", "ingress_neighbors__switch"):
