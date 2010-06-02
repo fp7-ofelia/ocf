@@ -9,6 +9,7 @@ from django.forms.util import ErrorList
 from helper import *
 from openflow.optin_manager.users.models import Priority
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
+from django.views.generic import simple
 
 @login_required
 def view_opt_in(request, error_msg):
@@ -17,14 +18,21 @@ def view_opt_in(request, error_msg):
     max_priority = request.user.get_profile().max_priority_level
 
     if request.user.get_profile().is_net_admin:
-        return render_to_response('openflow/optin_manager/flowspace/view_opts_admin.html', 
-                                  {'max_priority':max_priority, 'opts':opts , 'user':request.user},
-                              context_instance=RequestContext(request))
+        return simple.direct_to_template(request,
+                 template='openflow/optin_manager/flowspace/view_opts_admin.html',
+                 extra_context={'max_priority':max_priority, 
+                               'opts':opts ,
+                                'user':request.user
+                                },
+                    )
     else:
-        return render_to_response('openflow/optin_manager/flowspace/view_opts_user.html',
-                                  {'max_priority':max_priority, 'opts':opts , 'user':request.user},
-                              context_instance=RequestContext(request))
-
+        return simple.direct_to_template(request, 
+                    template = 'openflow/optin_manager/flowspace/view_opts_user.html', 
+                    extra_context={'max_priority':max_priority, 
+                                   'opts':opts , 
+                                   'user':request.user
+                                   }, 
+                    )
 
 @login_required
 def add_opt_in(request):
@@ -94,8 +102,10 @@ def add_opt_in(request):
                             match_list[i].save()
 
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
-                        return render_to_response('openflow/optin_manager/flowspace/opt_in_successful.html', {
-                                'expname':exp_name})
+                        return simple.direct_to_template(request, 
+                                            template = 'openflow/optin_manager/flowspace/opt_in_successful.html', 
+                                            extra_context = {'expname':exp_name}, 
+                                        )
                     else:
                         tmp.delete()
                         form._errors['general'] = ErrorList(["No intersection between opted-in flowspace,\
@@ -103,10 +113,15 @@ def add_opt_in(request):
         else: #Not a post request
             defexp = 0
             form = AdminOptInForm()
-        return render_to_response('openflow/optin_manager/flowspace/admin_opt_in.html', {
-            'form': form, 'user':request.user, 'experiments':exps, 'defexp': defexp,
-        })
-        
+        return simple.direct_to_template(request, 
+                                template = 'openflow/optin_manager/flowspace/admin_opt_in.html', 
+                                extra_context = {
+                                                'form': form, 
+                                                'user':request.user,
+                                                'experiments':exps,
+                                                'defexp': defexp,
+                                        },
+                            )        
         
     else: # A user opt-in page
         
@@ -180,8 +195,10 @@ def add_opt_in(request):
                         match_list[i].save() 
 
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
-                    return render_to_response('openflow/optin_manager/flowspace/opt_in_successful.html', {
-                                'expname':exp_name})
+                    return simple.direct_to_template(request, 
+                                        template = 'openflow/optin_manager/flowspace/opt_in_successful.html', 
+                                        extra_context = {'expname':exp_name,}, 
+                                    )
                 else:
                     tmp.delete()
                     error_msg = ErrorList(["No intersection between opted-in flowspace,\
@@ -189,10 +206,17 @@ def add_opt_in(request):
               
                     
         else: #Not a post request
-            defexp = 0       
-        return render_to_response('openflow/optin_manager/flowspace/user_opt_in.html', {
-                'user':request.user, 'experiments':exps, 'defexp': defexp, 'selpri':selpri, 'error_msg':error_msg
-            })  
+            defexp = 0     
+        return simple.direct_to_template(request, 
+                        template = 'openflow/optin_manager/flowspace/user_opt_in.html', 
+                        extra_context = {
+                                'user':request.user,
+                                'experiments':exps,
+                                'defexp': defexp,
+                                'selpri':selpri,
+                                'error_msg':error_msg,
+                            },
+                    )      
         
     
 @login_required
@@ -224,11 +248,11 @@ def opt_out(request):
                      
         allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
         
-        return render_to_response('openflow/optin_manager/flowspace/admin_opt_out.html', {
-                'allfs':allfs})
+        return simple.direct_to_template(request,
+                        template = 'openflow/optin_manager/flowspace/admin_opt_out.html', 
+                        extra_context = {'allfs':allfs},
+                    )
         
-
-
 
 @login_required
 def update_opts(request):
@@ -273,23 +297,44 @@ def update_opts(request):
           
     opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
     if (is_admin):
-        return render_to_response('openflow/optin_manager/flowspace/view_opts_admin.html', {'opts':opts , 'user':request.user,
-                                                      'max_priority':max_priority, 'error_message':errors},
-                              context_instance=RequestContext(request))
+        return simple.direct_to_template(request, 
+                        template = 'openflow/optin_manager/flowspace/view_opts_admin.html', 
+                        extra_context = {
+                                'opts':opts ,
+                                'user':request.user,
+                                'max_priority':max_priority,
+                                'error_message':errors
+                            },
+                    )
     else:
-        return render_to_response('openflow/optin_manager/flowspace/view_opts_user.html', {'opts':opts , 'user':request.user,
-                                                      'max_priority':max_priority, 'error_message':errors},
-                              context_instance=RequestContext(request))
+        return simple.direct_to_template(request, 
+                        template = 'openflow/optin_manager/flowspace/view_opts_user.html', 
+                        extra_context =  {
+                                'opts':opts,
+                                'user':request.user,
+                                'max_priority':max_priority,
+                                'error_message':errors
+                            },
+                    )
 
 @login_required
 def view_experiment(request, exp_id):
     theexp = Experiment.objects.filter(id=exp_id)
     allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
-    return render_to_response('openflow/optin_manager/flowspace/view_experiment.html', {
-            'exp':theexp[0], 'allfs':allfs, 'back':request.META['HTTP_REFERER']})     
+    return simple.direct_to_template(request, 
+                        template = 'openflow/optin_manager/flowspace/view_experiment.html', 
+                        extra_context = {
+                                        'exp':theexp[0],
+                                        'allfs':allfs,
+                                        'back':request.META['HTTP_REFERER']
+                                    }, 
+                    )
+   
 
 @login_required
 def view_experiments(request):
     exps = Experiment.objects.all()
-    return render_to_response('openflow/optin_manager/flowspace/view_experiments.html', {
-            'exps':exps})   
+    return simple.direct_to_template(request, 
+                            template = 'openflow/optin_manager/flowspace/view_experiments.html',
+                            extra_context = {'exps':exps}, 
+                            )

@@ -3,6 +3,10 @@ Created on May 15, 2010
 
 @author: jnaous
 '''
+import sys
+from os.path import dirname, join
+SRC_DIR = join(dirname(__file__), '../../../')
+sys.path.append(SRC_DIR)
 
 from unittest import TestCase
 from expedient.common.tests.commands import call_env_command, Env
@@ -319,88 +323,91 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        from optin_manager.xmlrpc_server.ch_api import om_ch_translate
-        from optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-        from django.contrib.auth.models import User 
-               
-        #make a normal user on system
-        username = "user"
-        password = "password"
-        u = User.objects.create(username=username, is_active=True)
-        u.set_password(password)
-        u.save()
-
-        
-        #assign a flowspace to the user
-        self.user_ip_src_s = random.randint(0,0x80000000)
-        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
-        self.user_ip_dst_s = random.randint(0,0x80000000)
-        self.user_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)
-        self.exp_ip_src_s = random.randint(0,0x80000000)
-        self.exp_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
-        self.exp_ip_dst_s = random.randint(0,0x80000000)
-        self.exp_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)   
-        fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
-        random.shuffle(fields)
-        print("FIELDS: %s"%fields)
-
-        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
-        self.user_field_name = om_name
-        self.user_field_s = random.randint(0,2**width-8)
-        self.user_field_e = self.user_field_s + 0
-        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[1]]
-        self.exp_field_name = om_name
-        self.exp_field_s = random.randint(0,2**width-8)
-        self.exp_field_e = self.exp_field_s + 0  
-        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
-                             ip_src_e=self.user_ip_src_e,  ip_dst_s=self.user_ip_dst_s,
-                             ip_dst_e=self.user_ip_dst_e)
-        setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
-        setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
-        ufs.save()     
-        
-        #create an experiment and assign a flowspace to it
-        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
-                                  project_desc="project description", slice_name="slice name",
-                                  slice_desc="slice description", controller_url="controller url",
-                                  owner_email="owner email", owner_password="owner password") 
-        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
-                            ip_src_s=self.exp_ip_src_s, ip_dst_s=self.exp_ip_dst_s,
-                            ip_src_e=self.exp_ip_src_e,  ip_dst_e=self.exp_ip_dst_e
-                             )
-        setattr(expfs,"%s_s"%self.exp_field_name,self.exp_field_s)
-        setattr(expfs,"%s_e"%self.exp_field_name,self.exp_field_e)
-        expfs.save()  
-        
-        # First authenticate
-        import urllib2
-        from urllib2 import install_opener, build_opener,Request, urlopen, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
-        from urllib import urlencode
-
-        auth_url = "http://%s:%s/accounts/login/"%(test_settings.HOST,test_settings.PORT)
-        auth_data = {"username":"user","password":"password"}
-        auth_data_enc = urlencode(auth_data)
-        pprint("@@@@@@@@ %s" % auth_data_enc)
-        r = Request(auth_url,auth_data_enc)
-        returned = urlopen(r)
-        pprint("************* LOGIN ******* %s"%returned.read())
-        
-        #loging
-        
-        exp_url = "https://%s:%s/flowspace/experiments"%(test_settings.HOST,test_settings.PORT)
-        r = Request(exp_url) 
-        #returned = urlopen(r)
-        #pprint("$$$$$$$$$$$$$ Exp $$$$$$$$$$$ %s"%returned.read())
-
-        
-        uopt = UserOpts.objects.all()
-        pprint("User OPT:%s"%uopt)   
-        exp = Experiment.objects.all()
-        pprint("EXPERIMENT %s"%exp)
-        expfs = ExperimentFLowSpace.objects.all()
-        pprint("EXPFS %s"%expfs)     
-        ufs = UserFlowSpace.objects.all()
-        pprint("USER FLOWSPACE: %s"%ufs)                 
+        from expedient.common.tests.client import login
+        logged_in = login("https://localhost:8443/accounts/login/","admin","password")
+        self.assertTrue(logged_in,"Could not log in")
+#        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
+#        from openflow.optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+#        from django.contrib.auth.models import User 
+#               
+#        #make a normal user on system
+#        username = "user"
+#        password = "password"
+#        u = User.objects.create(username=username, is_active=True)
+#        u.set_password(password)
+#        u.save()
+#
+#        
+#        #assign a flowspace to the user
+#        self.user_ip_src_s = random.randint(0,0x80000000)
+#        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
+#        self.user_ip_dst_s = random.randint(0,0x80000000)
+#        self.user_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)
+#        self.exp_ip_src_s = random.randint(0,0x80000000)
+#        self.exp_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
+#        self.exp_ip_dst_s = random.randint(0,0x80000000)
+#        self.exp_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)   
+#        fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
+#        random.shuffle(fields)
+#        print("FIELDS: %s"%fields)
+#
+#        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
+#        self.user_field_name = om_name
+#        self.user_field_s = random.randint(0,2**width-8)
+#        self.user_field_e = self.user_field_s + 0
+#        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[1]]
+#        self.exp_field_name = om_name
+#        self.exp_field_s = random.randint(0,2**width-8)
+#        self.exp_field_e = self.exp_field_s + 0  
+#        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
+#                             ip_src_e=self.user_ip_src_e,  ip_dst_s=self.user_ip_dst_s,
+#                             ip_dst_e=self.user_ip_dst_e)
+#        setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
+#        setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
+#        ufs.save()     
+#        
+#        #create an experiment and assign a flowspace to it
+#        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
+#                                  project_desc="project description", slice_name="slice name",
+#                                  slice_desc="slice description", controller_url="controller url",
+#                                  owner_email="owner email", owner_password="owner password") 
+#        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
+#                            ip_src_s=self.exp_ip_src_s, ip_dst_s=self.exp_ip_dst_s,
+#                            ip_src_e=self.exp_ip_src_e,  ip_dst_e=self.exp_ip_dst_e
+#                             )
+#        setattr(expfs,"%s_s"%self.exp_field_name,self.exp_field_s)
+#        setattr(expfs,"%s_e"%self.exp_field_name,self.exp_field_e)
+#        expfs.save()  
+#        
+#        # First authenticate
+#        import urllib2
+#        from urllib2 import install_opener, build_opener,Request, urlopen, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
+#        from urllib import urlencode
+#
+#        auth_url = "http://%s:%s/accounts/login/"%(test_settings.HOST,test_settings.PORT)
+#        auth_data = {"username":"user","password":"password"}
+#        auth_data_enc = urlencode(auth_data)
+#        pprint("@@@@@@@@ %s" % auth_data_enc)
+#        r = Request(auth_url,auth_data_enc)
+#        returned = urlopen(r)
+#        pprint("************* LOGIN ******* %s"%returned.read())
+#        
+#        #loging
+#        
+#        exp_url = "https://%s:%s/flowspace/experiments"%(test_settings.HOST,test_settings.PORT)
+#        r = Request(exp_url) 
+#        #returned = urlopen(r)
+#        #pprint("$$$$$$$$$$$$$ Exp $$$$$$$$$$$ %s"%returned.read())
+#
+#        
+#        uopt = UserOpts.objects.all()
+#        pprint("User OPT:%s"%uopt)   
+#        exp = Experiment.objects.all()
+#        pprint("EXPERIMENT %s"%exp)
+#        expfs = ExperimentFLowSpace.objects.all()
+#        pprint("EXPFS %s"%expfs)     
+#        ufs = UserFlowSpace.objects.all()
+#        pprint("USER FLOWSPACE: %s"%ufs)                 
 if __name__ == '__main__':
     import unittest
     unittest.main()
