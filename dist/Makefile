@@ -1,8 +1,8 @@
 DIRS = ../db ../src
 README = README
 INSTALL = install.sh
-FILES = Makefile $(README) $(INSTALL)
-VERSION = 0.0.1-alpha1
+FILES = Makefile $(README) $(INSTALL) CHANGES
+VERSION = 0.0.2-alpha1
 
 NAME = expedient
 

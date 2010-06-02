@@ -1,0 +1,27 @@
+05-19-2010: 0.0.1-alpha1
+    Initial release.
+
+06-02-2010: 0.0.2-alpha1
+    Changes:
+    - Added permissions to the Clearinghouse
+    - Added CSRF protection to Clearinghouse and Opt-In Manager
+    - Fixed password change to random password bug in 
+      PasswordXMLRPCServerProxy
+    - Fixed installing certificates
+    - Added additional test utilities
+    - Fixed bugs in Opt-In Manager
+    - Added more tests to Opt-In Manager
+
+    Known Issues:
+    - Need to enable certificate verification by default for 
+      PasswordXMLRPCServerProxy
+    - Some Opt-In Manager tests still fail because of missing cookies
+    - Permissions need to be applied
+    - Any URL that redirects to the rpc4django view can be used to 
+      access any xml-rpc call.
+    - GAPI for OpenFlow is a bit hackish and should be made more 
+      seamless. This requires finishing the permission system and 
+      separating RPC calls by URL.
+    - Permission system missing middleware to redirect to permission URL
+    - Documentation is lacking horribly.
+    - install.sh script still has the bugs from 0.0.1-alpha1
