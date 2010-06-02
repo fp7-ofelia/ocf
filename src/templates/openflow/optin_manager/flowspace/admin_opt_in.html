@@ -6,7 +6,7 @@
 	<div align="right">
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>	
-	<form name="input" action="/flowspace/opt_in" method="post">
+	<form name="input" action="/flowspace/opt_in" method="post">{% csrf_token %}
 		{{form.errors.general}}
 		<table>
 		<tr>
