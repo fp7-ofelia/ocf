@@ -99,7 +99,6 @@ def changeFlowSpace(changes, **kwargs):
     ret = []
     for change in changes:
         operation = change.pop("operation")
-        print("going to call operation: %s"%operation)
         result = funcs[operation](kwargs['fv'], change)
         ret.append(result)
     return ret
@@ -115,7 +114,6 @@ def add_flowspace(fv, change):
         except DummyFVSlice.DoesNotExist:
             raise Exception("Tried to add flowspace for non-existing " +\
                             "slice %s" % axn.group("name"))
-    print("going to call manager change is %s"%change)
     rule = DummyFVRule(
         fv=fv,
         match=change['match'],
@@ -123,28 +121,20 @@ def add_flowspace(fv, change):
         dpid=change['dpid'],
         actions=change['actions'],
     )
-    print("made it")
     rule.save()
-    print("reach out here")
     return rule.id
 
-def remove_flowspace(fv, id):
-    print("inside remove fs")
+def remove_flowspace(fv, change):
+    id = change['id']
     rule = DummyFVRule.objects.filter(fv=fv).get(id=int(id))
     rule.delete()
-    pprint("going to return from remove fs")
     return id
     
 def change_flowspace(fv, change):
     import re
-    print("inside change fs - change:")
-    print(change)
     slice_re = re.compile(r"Slice:(?P<name>.+)=(?P<perms>\d+)")
     axn_matches = slice_re.findall(change['actions'])
-    print("$$$$ the re done")
     for axn in axn_matches:
-        print("axn is:::")
-        print(axn)
         try:
             slice = DummyFVSlice.objects.filter(
                 fv=fv).get(name=axn.group("name"))
@@ -153,10 +143,8 @@ def change_flowspace(fv, change):
                 "Tried to change flowspace for non-existing slice %s" %\
                 axn.group("name")
             )
-    print("after for loop in change fs")
     try:
         rule = DummyFVRule.objects.filter(fv=fv).get(id=change['id'])
-        print("got the rule")
     except DummyFVRule.DoesNotExist:
         raise Exception("Tried to change flowspace for non-existing " + \
                         "rule id %s" % change['id'])
@@ -164,9 +152,6 @@ def change_flowspace(fv, change):
     rule.match = change['match']
     rule.dpid = change['dpid']
     rule.actions = change['actions']
-    print("in the middle")
     rule.priority = int(change['priority'])
-    print("before save")
     rule.save()
-    print("rule saved")
     return rule.id    

@@ -324,7 +324,7 @@ class OMTests(TestCase):
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
         pprint("HHAA")
-        from expedient.common.tests.client import login,get_and_post_form
+        from expedient.common.tests.client import browser
         from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
         from openflow.optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
         from django.contrib.auth.models import User 
@@ -376,40 +376,33 @@ class OMTests(TestCase):
         expfs.save()  
         
         # First authenticate
-        logged_in = login("https://localhost:8443/accounts/login/","admin","password")
+        b = browser()
+        b.cookie_setup()
+        logged_in = b.login("https://localhost:8443/accounts/login/","user","password")
         self.assertTrue(logged_in,"Could not log in")
         
-        g = get_and_post_form("https://localhost:8443/flowspace/opt_in",{'experiment':1,'priority':100})
+        g = b.get_and_post_form("https://localhost:8443/flowspace/opt_in",
+                                dict(experiment=1,priority=100)) 
         
-        print(g.read())
-        uopt = UserOpts.objects.all()
-        print("User OPT:%s"%uopt)  
+        uopt = UserOpts.objects.filter(user__username__exact="user")[0]
         
+        self.assertEqual(uopt.priority , 100)
+        
+        optfs = OptsFlowSpace.objects.filter(opt = uopt)[0]
+        self.assertEqual(optfs.ip_src_s , max(self.user_ip_src_s,self.exp_ip_src_s))
+        self.assertEqual(optfs.ip_src_e , min(self.user_ip_src_e,self.exp_ip_src_e))
+        self.assertEqual(getattr(optfs,"%s_s"%self.user_field_name), self.user_field_s)
+        self.assertEqual(getattr(optfs,"%s_e"%self.user_field_name), self.user_field_e)
+        self.assertEqual(getattr(optfs,"%s_s"%self.exp_field_name), self.exp_field_s)
+        self.assertEqual(getattr(optfs,"%s_e"%self.exp_field_name), self.exp_field_e)
 
-#        auth_url = "http://%s:%s/accounts/login/"%(test_settings.HOST,test_settings.PORT)
-#        auth_data = {"username":"user","password":"password"}
-#        auth_data_enc = urlencode(auth_data)
-#        pprint("@@@@@@@@ %s" % auth_data_enc)
-#        r = Request(auth_url,auth_data_enc)
-#        returned = urlopen(r)
-#        pprint("************* LOGIN ******* %s"%returned.read())
-#        
-#        #loging
-#        
-#        exp_url = "https://%s:%s/flowspace/experiments"%(test_settings.HOST,test_settings.PORT)
-#        r = Request(exp_url) 
-#        #returned = urlopen(r)
-#        #pprint("$$$$$$$$$$$$$ Exp $$$$$$$$$$$ %s"%returned.read())
-#
-#        
-#        uopt = UserOpts.objects.all()
-#        pprint("User OPT:%s"%uopt)   
-#        exp = Experiment.objects.all()
-#        pprint("EXPERIMENT %s"%exp)
-#        expfs = ExperimentFLowSpace.objects.all()
-#        pprint("EXPFS %s"%expfs)     
-#        ufs = UserFlowSpace.objects.all()
-#        pprint("USER FLOWSPACE: %s"%ufs)                 
+        # now test opt out:
+        g = b.get_and_post_form("https://localhost:8443/flowspace/opt_out",
+                                {"1":"checked"})
+        optfs = OptsFlowSpace.objects.filter(opt = uopt)
+        self.assertEqual(optfs.count(),0)   
+            
+
 if __name__ == '__main__':
     import unittest
     unittest.main()
