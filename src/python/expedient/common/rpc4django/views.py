@@ -20,6 +20,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from rpcdispatcher import RPCDispatcher
 from __init__ import version
+from django.views.decorators.csrf import csrf_exempt
 
 # these restrictions can change the functionality of rpc4django
 # but they are completely optional
@@ -125,6 +126,7 @@ def _is_xmlrpc_request(request):
     
     return False
 
+@csrf_exempt
 def serve_rpc_request(request, **kwargs):
     '''
     This method handles rpc calls based on the content type of the request

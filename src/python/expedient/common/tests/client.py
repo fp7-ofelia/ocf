@@ -70,8 +70,8 @@ def login(url, username, password):
     try:
         f = get_and_post_form(
             url, dict(
-                username="testuser",
-                password="password",
+                username=username,
+                password=password,
             )
         )
     except Exception:

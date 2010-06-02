@@ -10,6 +10,7 @@ ADMINS = (
 )
 
 SRC_DIR = join(dirname(__file__), '../../../')
+sys.path.append(join(SRC_DIR,'python/'))
 
 STATIC_DOC_ROOT = join(SRC_DIR, 'static/openflow/optin_manager')
 
@@ -64,6 +65,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
@@ -91,7 +93,6 @@ INSTALLED_APPS = (
     'openflow.optin_manager.users',
     'openflow.optin_manager.flowspace',
     'openflow.optin_manager.xmlrpc_server',
-    'optin_manager.omclient_tester',
 ###### For Testing #######################
     'openflow.optin_manager.dummyfv',
 )
