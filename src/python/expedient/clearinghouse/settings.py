@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'autoslug',
     'registration',
+    'expedient.common.permissions',
     'expedient.common.rpc4django',
     'expedient.common.utils',
     'expedient.common.extendable',

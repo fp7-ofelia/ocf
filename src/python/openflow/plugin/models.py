@@ -11,18 +11,75 @@ from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
-from django.contrib.contenttypes.models import ContentType
+from expedient.clearinghouse.project.permissions import require_obj_permissions_for_project
+from expedient.clearinghouse.slice.permissions import require_obj_permissions_for_slice
+from expedient.common.permissions.decorators import require_obj_permissions_for_user
+from django.contrib.auth.models import User
 
 def as_is_slugify(value):
     return value
 
-class OpenFlowUserInfo(aggregate_models.AggregateUserInfo):
-    signed_license = models.BooleanField("Signed usage agreement?",
-                                         default=False)
-    
 class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
     controller_url = models.CharField("URL of the slice's OpenFlow controller",
                                       max_length=100)
+    principal_investigator = models.ForeignKey(User)
+
+class OpenFlowSliverSet(resource_models.AggregateSliverSet):
+    """
+    Add some extra methods to AggregateSliverSet
+    """
+    
+    def update(self, slice_password, user):
+        """
+        Update the slivers at the aggregate.
+        """
+        raise NotImplementedError()
+            
+    def create(self, slice_password, user):
+        self._create(
+            slice_password, self.sliver_set.all(),
+            user=user, project=self.slice.project, slice=self.slice,
+        )
+    
+    def delete(self, user):
+        return self._delete(user=user)
+
+    @require_obj_permissions_for_project(["can_create_openflow_sliver"])
+    @require_obj_permissions_for_slice(["can_create_openflow_sliver"])
+    @require_obj_permissions_for_user(["can_create_openflow_sliver"])
+    def _create(self, slice_password, pi):
+        """
+        Create the slivers at the aggregate.
+        """
+
+        # get all the slivers that are in this aggregate
+        sw_slivers_qs = self.slivers.all().select_related(
+            'resource__openflowswitch',
+            'flowspacerule_set',
+        )
+        
+        sw_slivers = []
+        for s in sw_slivers_qs:
+            d = {}
+            d['datapath_id'] = s.resource.openflowswitch.datapath_id
+            d['flowspace'] = []
+            for fs in s.flowspacerule_set.all():
+                fsd = {}
+                for f in fs._meta.fields:
+                    fsd[f.name] = getattr(fs, f.name)
+                d['flowspace'].append(fsd)
+            sw_slivers.append(d)
+        
+        return self.aggregate.create_sliver_set(
+            self.slice.id, self.slice.project.name,
+            self.slice.project.description,
+            self.slice.name, self.slice.description, 
+            self.slice.aggregatesliceinfo.controller_url,
+            pi.email, slice_password, sw_slivers)
+        
+    @require_obj_permissions_for_user(["can_delete_openflow_sliver"], True)
+    def _delete(self):
+        return self.aggregate.delete_sliver_set(slice.id)
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
@@ -31,7 +88,11 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     class Meta:
         verbose_name = "OpenFlow Aggregate"
         
-    def setup_new_aggregate(self, hostname):
+    def setup_new_aggregate(self, hostname, user):
+        self._setup_new_aggregate(hostname, user=user)
+        
+    @require_obj_permissions_for_user(["can_admin_openflow_aggregate"], True)
+    def _setup_new_aggregate(self, hostname):
         self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
@@ -67,30 +128,17 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # Get the active topology information from the AM
         links_raw = self.client.get_links()
 
-#        print "******** Update topology"
-
-#        print "Link raw:"
-#        pprint(links_raw, indent=4)
-        
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
-#        print "Current links:"
-#        pprint (current_links, indent=4)
         
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-#        print "Current switches:"
-#        pprint (current_switches, indent=4)
 
         current_dpids = set(current_switches.values_list('datapath_id', flat=True))
-#        print "Current dpids:"
-#        pprint (current_dpids, indent=4)
         
         current_ifaces = set(
             OpenFlowInterface.objects.filter(
                 aggregate=self).select_related(
                     "switch").values_list("switch__datapath_id", "port_num"))
-#        print "Current ifaces:"
-#        pprint (current_ifaces, indent=4)
         
         attrs_set = []
         ordered_active_links = []
@@ -107,13 +155,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             attrs_set.append(attrs)
             ordered_active_links.append(link)
 
-#        print "active links:"
-#        pprint (active_links, indent=4)
-#        print "active ifaces:"
-#        pprint (active_ifaces, indent=4)
-#        print "active dpids:"
-#        pprint (active_dpids, indent=4)
-        
         new_links = active_links - current_links
         dead_links = current_links - active_links
         new_dpids = active_dpids - current_dpids
@@ -121,23 +162,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         new_ifaces = active_ifaces - current_ifaces
         dead_ifaces = current_ifaces - active_ifaces
         
-#        print "New_links:"
-#        pprint (new_links, indent=4)
-#        print "New_dpids:"
-#        pprint (new_dpids, indent=4)
-#        print "New_ifaces:"
-#        pprint (new_ifaces, indent=4)
-        
-#        print "dead_links:"
-#        pprint (dead_links, indent=4)
-#        print "dead_dpids:"
-#        pprint (dead_dpids, indent=4)
-#        print "dead_ifaces:"
-#        pprint (dead_ifaces, indent=4)
-        
         # create the new datapaths
         for dpid in new_dpids:
-#            print "Adding dpid %s" % dpid
             create_or_update(
                 OpenFlowSwitch,
                 filter_attrs={
@@ -151,21 +177,14 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 }
             )
         
-#        print "After adding: %s" % OpenFlowSwitch.objects.filter(
-#            aggregate=self, available=True)
-        
         # make old datapaths unavailable
         if dead_dpids:
             current_switches.filter(
                 datapath_id__in=dead_dpids).update(
                     available=False, status_change_timestamp=datetime.now())
 
-#        print "After deleting: %s" % OpenFlowSwitch.objects.filter(
-#            aggregate=self, available=True)
-            
         # create new ifaces
         for iface in new_ifaces:
-#            print "Adding iface %s_%s" % iface
             create_or_update(
                 OpenFlowInterface,
                 filter_attrs=dict(
@@ -181,8 +200,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 ),
             )
 
-#        print "After adding: %s" % OpenFlowInterface.objects.filter(aggregate=self)
-        
         # make old ifaces unavailable
         # TODO: Is there a better way to w/o slugs?
         if dead_ifaces:
@@ -190,8 +207,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             OpenFlowInterface.objects.filter(
                 aggregate=self, slug__in=dead_iface_slugs).update(
                     available=False, status_change_timestamp=datetime.now())
-
-#        print "After deleting: %s" % OpenFlowInterface.objects.filter(aggregate=self)
         
         # create new links
         for link in new_links:
@@ -215,53 +230,25 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
                 " not found in DB."
         dead_cnxns.delete()
 
-    def update_slice(self, slice):
-        slice.create_slice(slice)
-        
-    def create_slice(self, user, slice, slice_password):
-        # get all the slivers that are in this aggregate
-        sw_slivers_qs = slice.sliver_set.filter(
-            resource__aggregate=self,
-            resource__content_type=ContentType.objects.get_for_model(
-                OpenFlowSwitch)
-        ).select_related(
-            'resource__openflowswitch',
-            'flowspacerule_set',
-        )
-        
-        sw_slivers = []
-        for s in sw_slivers_qs:
-            d = {}
-            d['datapath_id'] = s.resource.openflowswitch.datapath_id
-            d['flowspace'] = []
-            for fs in s.flowspacerule_set.all():
-                fsd = {}
-                for f in fs._meta.fields:
-                    fsd[f.name] = getattr(fs, f.name)
-                d['flowspace'].append(fsd)
-            sw_slivers.append(d)
-        
-        return self.client.create_slice(
-            slice.id, slice.project.name, slice.project.description,
-            slice.name, slice.description, 
-            slice.aggregatesliceinfo.controller_url,
-            user.email, slice_password, sw_slivers)
-        
-    def delete_slice(self, slice, server=None):
-        return self.client.delete_slice(slice.id)
-    
     def check_status(self):
         return self.available and self.client.is_available()
+    
+    def create_sliver_set(self, slice_id, project_name, project_description,
+                          slice_name, slice_description, controller_url, email,
+                          slice_password, slivers_dict):
+        return self.client.create_slice(
+            slice_id, project_name, project_description,
+            slice_name, slice_description, controller_url, email,
+            slice_password, slivers_dict)
+        
+    def delete_sliver_set(self, slice_id):
+        return self.client.delete_slice(slice_id)
 
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
         return "OF Switch %s (%016x)" % (self.datapath_id, self.datapath_id)
-#    class Extend:
-#        replacements={
-#            "sliver_class": "OpenFlowSwitchSliver",
-#        }
 
 class OpenFlowConnection(models.Model):
     '''Connection between two interfaces'''
@@ -278,6 +265,9 @@ class OpenFlowConnection(models.Model):
         ),
         slugify=as_is_slugify,
     )
+    
+    class Meta:
+        unique_together=(("src_iface", "dst_iface"),)
     
     def __unicode__(self):
         return "OF Connection: %s" % self.slug
@@ -296,25 +286,11 @@ class OpenFlowInterface(resource_models.Resource):
         slugify=as_is_slugify,
     )
 
+    class Meta:
+        unique_together=(("switch", "port_num"),)
+
     def __unicode__(self):
         return "OF Interface: %s" % self.slug
-
-#    class Extend:
-#        replacements={
-#            "sliver_class": "OpenFlowInterfaceSliver",
-#        }
-
-#class OpenFlowSwitchSliver(resource_models.Sliver):
-#    class Extend:
-#        replacements={
-#            "resource_class": OpenFlowSwitch,
-#        }
-#
-#class OpenFlowInterfaceSliver(resource_models.Sliver):
-#    class Extend:
-#        replacements={
-#            "resource_class": OpenFlowInterface,
-#        }
 
 class FlowSpaceRule(models.Model):
     switch_sliver = models.ForeignKey(resource_models.Sliver)

@@ -6,8 +6,9 @@ Created on Dec 3, 2009
 
 from django.db import models
 from django.contrib import auth
+from expedient.common.permissions.models import PermissionUserModel
 
-class UserProfile(models.Model):
+class UserProfile(PermissionUserModel):
     '''
     Additional information about a user.
     
@@ -15,15 +16,10 @@ class UserProfile(models.Model):
     @type user: L{auth.models.User}
     @param affiliation: The organization to which the user is affiliated
     @type affiliation: L{str}
-    @param is_clearinghouse_admin: Can this user cross ownership boundaries?
-    @type is_clearinghouse_admin: L{bool}
     '''
 
     user                   = models.ForeignKey(auth.models.User, unique=True)
     affiliation            = models.CharField(max_length=200, default="")
-    is_clearinghouse_admin = models.BooleanField("Can cross ownership" \
-                                                 " boundaries",
-                                                 default=False)
 
     def __unicode__(self):
         try:

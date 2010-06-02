@@ -6,4 +6,5 @@ Created on May 28, 2010
 import models
 from django.contrib import admin
 
-admin.site.register(models.Permission)
+admin.site.register(models.ExpedientPermission)
+admin.site.register(models.ExpedientPermissionTarget)

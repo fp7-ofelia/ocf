@@ -3,15 +3,16 @@
 '''
 from django.db import models
 from expedient.clearinghouse.project.models import Project
+from expedient.common.permissions.models import PermissionUserModel
 
-class Slice(models.Model):
+class Slice(PermissionUserModel):
     '''
     Holds information about reservations across aggregates
-    @param name: The name of the Slice
+    @ivar name: The name of the Slice
     @type name: L{str}
-    @param description: Short description of the slice
+    @ivar description: Short description of the slice
     @type description: L{str}
-    @param project: Project in which this slice belongs
+    @ivar project: Project in which this slice belongs
     @type project: L{models.ForeignKey} to L{Project}
     '''
 

@@ -7,13 +7,15 @@ class DatedMessageManager(models.Manager):
     Add some convenience functions for working with messages.
     '''
     
-    def post_message_to_users(self, msg_text, 
+    def post_message_to_users(self, msg_text, sender=None,
                                msg_type='announcement', **kwargs):
         '''
         send a message to users matching the filter arguments in kwargs.
         
         @param msg_text: the text of the message
         @type msg_text: string
+        @param sender: the user sending the message. Default None.
+        @type sender: L{django.contrib.auth.models.User}
         @param msg_type: the message type. One of DatedMessage.TYPE_*
             Defaults to DatedMessage.TYPE_ANNOUNCE
         @type msg_type: One of DatedMessage.TYPE_*
@@ -21,8 +23,31 @@ class DatedMessageManager(models.Manager):
         '''
         
         self.create(
-            text=msg_text, type=msg_type,
+            text=msg_text, type=msg_type, sender=sender,
             users=User.objects.filter(**kwargs))
+        
+    def post_message_to_user(self, msg_text, user,
+                             sender=None, msg_type='announcement'):
+        '''
+        send a message to a user
+        
+        @param msg_text: the text of the message
+        @type msg_text: string
+        @param user: the receiver of the message or her username
+        @type user: L{django.contrib.auth.models.User} or string
+        @param sender: the user sending the message. Default None.
+        @type sender: L{django.contrib.auth.models.User}
+        @param msg_type: the message type. One of DatedMessage.TYPE_*
+            Defaults to DatedMessage.TYPE_ANNOUNCE
+        @type msg_type: One of DatedMessage.TYPE_*
+        '''
+        
+        if type(user) == User:
+            rcvr = user
+        else:
+            rcvr = User.objects.get(username=user)
+            
+        self.create(text=msg_text, type=msg_type, users=[rcvr], sender=sender)
         
     def delete_messages_for_user(self, msgs, user):
         '''
@@ -51,15 +76,24 @@ class DatedMessage(models.Model):
     TYPE_ERROR = 'error'
     TYPE_WARNING = 'warning'
     TYPE_ANNOUNCE = 'announcement'
+    TYPE_INFO = 'info'
+    TYPE_U2U = 'user to user'
     
     MSG_TYPE_CHOICES={TYPE_ERROR: 'Error',
                       TYPE_WARNING: 'Warning',
                       TYPE_ANNOUNCE: 'Announcement',
+                      TYPE_INFO: 'Informational',
+                      TYPE_U2U: 'From User',
                      }
-    type = models.CharField("Message type", max_length=20, choices=MSG_TYPE_CHOICES.items())
-    datetime = models.DateTimeField(auto_now=True, auto_now_add=True, editable=False)
-    users = models.ManyToManyField(User, related_name="messages", verbose_name="Recipients")
+    type = models.CharField("Message type", max_length=20,
+                            choices=MSG_TYPE_CHOICES.items())
+    datetime = models.DateTimeField(auto_now=True, auto_now_add=True,
+                                    editable=False)
+    users = models.ManyToManyField(User, related_name="messages",
+                                   verbose_name="Recipients")
     msg_text = models.CharField("Message", max_length=200)
+    sender = models.ForeignKey(User, related_name="sent_messages",
+                               editable=False, null=True, blank=True)
     
     def format_date(self):
         return self.datetime.strftime("%Y-%m-%d")
