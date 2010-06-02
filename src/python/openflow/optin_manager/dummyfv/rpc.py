@@ -3,7 +3,7 @@ Created on May 15, 2010
 
 @author: jnaous
 '''
-
+from pprint import pprint
 from expedient.common.rpc4django import rpcmethod
 from decorator import decorator
 from openflow.optin_manager.dummyfv.models import DummyFVSlice, DummyFVDevice,\
@@ -99,14 +99,15 @@ def changeFlowSpace(changes, **kwargs):
     ret = []
     for change in changes:
         operation = change.pop("operation")
-        ret.append(funcs[operation](kwargs['fv'], **change))
-    
+        print("going to call operation: %s"%operation)
+        result = funcs[operation](kwargs['fv'], change)
+        ret.append(result)
     return ret
 
-def add_flowspace(fv, priority, dpid, match, actions):
+def add_flowspace(fv, change):
     import re
     slice_re = re.compile(r"Slice:(?P<name>.+)=(?P<perms>\d+)")
-    axn_matches = slice_re.findall(actions)
+    axn_matches = slice_re.findall(change['actions'])
     for axn in axn_matches:
         try:
             slice = DummyFVSlice.objects.filter(
@@ -114,27 +115,36 @@ def add_flowspace(fv, priority, dpid, match, actions):
         except DummyFVSlice.DoesNotExist:
             raise Exception("Tried to add flowspace for non-existing " +\
                             "slice %s" % axn.group("name"))
-
-    rule = DummyFVRule.objects.create(
+    print("going to call manager change is %s"%change)
+    rule = DummyFVRule(
         fv=fv,
-        match=match,
-        priority=priority,
-        dpid=dpid,
-        actions=actions,
+        match=change['match'],
+        priority=int(change['priority']),
+        dpid=change['dpid'],
+        actions=change['actions'],
     )
-    
+    print("made it")
+    rule.save()
+    print("reach out here")
     return rule.id
 
 def remove_flowspace(fv, id):
+    print("inside remove fs")
     rule = DummyFVRule.objects.filter(fv=fv).get(id=int(id))
     rule.delete()
+    pprint("going to return from remove fs")
     return id
     
-def change_flowspace(fv, id, priority, dpid, match, actions):
+def change_flowspace(fv, change):
     import re
+    print("inside change fs - change:")
+    print(change)
     slice_re = re.compile(r"Slice:(?P<name>.+)=(?P<perms>\d+)")
-    axn_matches = slice_re.findall(actions)
+    axn_matches = slice_re.findall(change['actions'])
+    print("$$$$ the re done")
     for axn in axn_matches:
+        print("axn is:::")
+        print(axn)
         try:
             slice = DummyFVSlice.objects.filter(
                 fv=fv).get(name=axn.group("name"))
@@ -143,16 +153,20 @@ def change_flowspace(fv, id, priority, dpid, match, actions):
                 "Tried to change flowspace for non-existing slice %s" %\
                 axn.group("name")
             )
-
+    print("after for loop in change fs")
     try:
-        rule = DummyFVRule.objects.filter(fv=fv).get(id=id)
+        rule = DummyFVRule.objects.filter(fv=fv).get(id=change['id'])
+        print("got the rule")
     except DummyFVRule.DoesNotExist:
         raise Exception("Tried to change flowspace for non-existing " + \
-                        "rule id %s" % id)
+                        "rule id %s" % change['id'])
 
-    rule.match = match
-    rule.dpid = dpid
-    rule.actions = actions
-    rule.change_priority(priority)
+    rule.match = change['match']
+    rule.dpid = change['dpid']
+    rule.actions = change['actions']
+    print("in the middle")
+    rule.priority = int(change['priority'])
+    print("before save")
     rule.save()
+    print("rule saved")
     return rule.id    

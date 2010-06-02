@@ -131,7 +131,7 @@ def range_to_match_struct(rangeFS):
                                 ips = (ips| (2**(i-1) - 1 )) + 1
                                 break
                 else:
-                    for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)):
+                    for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)+1):
                         match[of_name].append(to_str(value))
                         
     #Now try to combine different of_name(s) together:

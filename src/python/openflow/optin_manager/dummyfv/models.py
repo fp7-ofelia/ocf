@@ -59,88 +59,10 @@ class DummyFVSlice(models.Model):
     controller_url = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     fv = models.ForeignKey(DummyFV)
-    
-class DummyFVRuleManager(models.Manager):
-    """
-    Store in decreasing order of priority.
-    """
-    def create(self, *args, **kwargs):
-        rule = super(DummyFVRuleManager, self).create(*args, **kwargs)
-        self.add(rule)
-        return rule
-        
-    def add(self, rule):
-        if self.count() == 0:
-            rule.is_head = True
-            rule.prev = rule
-            rule.save()
-            return rule.id
-        else:
-            from django.db.models import Q
-            normal = Q(priority__le=rule.priority,
-                       prev__priority__ge=rule.priority)
-            end = Q(is_head=True,
-                    prev__priority__ge=rule.priority)
-            start = Q(is_head=True,
-                      priority__le=rule.priority)
-            before = self.filter(
-                normal|end|start).select_related()[0]
-            if before.is_head and before.priority <= rule.priority:
-                rule.is_head = True
-                before.is_head = False
-            rule.prev = before.prev
-            before.prev = rule
-            before.save()
-            rule.save()
-            
-    def print_rules(self, fv=None):
-        if fv:
-            count = self.filter(fv=fv).count()
-        else:
-            count = self.count()
-            
-        if not count:
-            print "No rules defined."
-            return
-        
-        current = self.get(is_head=True)
-        rules = [("priority", "match", "actions", "dpid")]
-        for i in xrange(count):
-            rules.append((current.priority, current.match,
-                          current.actions, current.dpid))
-        pprint(rules)
-    
+     
 class DummyFVRule(models.Model):
-    
-    objects = DummyFVRuleManager()
-    
     fv = models.ForeignKey(DummyFV)
-
     match = models.CharField(max_length=2048)
     actions = models.CharField(max_length=200)
-    prev = models.OneToOneField('self', related_name="next",
-                                null=True, blank=True)
-    is_head = models.BooleanField(default=False)
     priority = models.IntegerField()
     dpid = models.CharField(max_length=100)
-
-    def _remove_from_list(self):
-        if self.prev != self:
-            self.next.prev = self.prev
-            self.next.save()
-        self.prev = self
-        self.save()
-        
-    def change_priority(self, priority):
-        """
-        Use this function to change priority so we can put the rule
-        in the right location.
-        """
-        self.priority = priority
-        self._remove_from_list()
-        self.objects.add(self)
-        
-    def delete(self):
-        self._remove_from_list()
-        return super(models.Model, self).delete()
-    

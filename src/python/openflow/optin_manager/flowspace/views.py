@@ -10,7 +10,8 @@ from helper import *
 from openflow.optin_manager.users.models import Priority
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from django.views.generic import simple
-
+from pprint import pprint
+                    
 @login_required
 def view_opt_in(request, error_msg):
     #return HttpResponse("view opt in")
@@ -88,7 +89,7 @@ def add_opt_in(request):
                                     #TODO 4 is hard coded
                                     fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
-                                             "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
+                                             "actions":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
                                     fv_args.append(fv_arg)
                             
                     # If there is any intersection, add them to FV
@@ -183,12 +184,16 @@ def add_opt_in(request):
                                     match_list.append(match)
                                     fv_arg = {"operation":"ADD", "priority":match.priority,
                                             "dpid":match.optfs.dpid,"match":match.match,
-                                             "action":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
+                                             "actions":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
                                     fv_args.append(fv_arg)
                                 
                 if (intersected):   
                     fv = FVServerProxy.objects.all()[0]
                     # TODO: check for errors in the following call
+                    
+                    # Send args in groups of 5 to avoid sending a large xmlrpc call
+                    pprint(fv_args)
+                    pprint("HEY")
                     return_ids = fv.api.changeFlowSpace(fv_args)
                     for i in range(0,len(return_ids)):
                         match_list[i].fv_id = return_ids[i] 

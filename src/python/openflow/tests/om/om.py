@@ -13,7 +13,7 @@ from expedient.common.tests.commands import call_env_command, Env
 from openflow.tests import test_settings
 import xmlrpclib
 import random
-
+from pprint import pprint
 
 class OMTests(TestCase):
     
@@ -323,67 +323,69 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        from expedient.common.tests.client import login
+        pprint("HHAA")
+        from expedient.common.tests.client import login,get_and_post_form
+        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
+        from openflow.optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+        from django.contrib.auth.models import User 
+               
+        #make a normal user on system
+        username = "user"
+        password = "password"
+        u = User.objects.create(username=username, is_active=True)
+        u.set_password(password)
+        u.save()
+
+        
+        #assign a flowspace to the user and experiment
+        self.user_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
+        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000
+      
+        self.exp_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
+        self.exp_ip_src_e = random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000
+        fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
+        random.shuffle(fields)
+
+        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
+        self.user_field_name = om_name
+        self.user_field_s = random.randint(0,2**width-3)
+        self.user_field_e = self.user_field_s + 1
+        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[1]]
+        self.exp_field_name = om_name
+        self.exp_field_s = random.randint(0,2**width-3)
+        self.exp_field_e = self.exp_field_s + 1  
+        
+        #assign flowspace to user
+        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
+                             ip_src_e=self.user_ip_src_e,)
+        setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
+        setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
+        ufs.save()     
+        
+        #create an experiment and assign a flowspace to it
+        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
+                                  project_desc="project description", slice_name="slice name",
+                                  slice_desc="slice description", controller_url="controller url",
+                                  owner_email="owner email", owner_password="owner password") 
+        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
+                            ip_src_s=self.exp_ip_src_s, 
+                            ip_src_e=self.exp_ip_src_e, 
+                             )
+        setattr(expfs,"%s_s"%self.exp_field_name,self.exp_field_s)
+        setattr(expfs,"%s_e"%self.exp_field_name,self.exp_field_e)
+        expfs.save()  
+        
+        # First authenticate
         logged_in = login("https://localhost:8443/accounts/login/","admin","password")
         self.assertTrue(logged_in,"Could not log in")
-#        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
-#        from openflow.optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-#        from django.contrib.auth.models import User 
-#               
-#        #make a normal user on system
-#        username = "user"
-#        password = "password"
-#        u = User.objects.create(username=username, is_active=True)
-#        u.set_password(password)
-#        u.save()
-#
-#        
-#        #assign a flowspace to the user
-#        self.user_ip_src_s = random.randint(0,0x80000000)
-#        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
-#        self.user_ip_dst_s = random.randint(0,0x80000000)
-#        self.user_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)
-#        self.exp_ip_src_s = random.randint(0,0x80000000)
-#        self.exp_ip_src_e = random.randint(0x80000000,0xFFFFFFFF)
-#        self.exp_ip_dst_s = random.randint(0,0x80000000)
-#        self.exp_ip_dst_e = random.randint(0x80000000,0xFFFFFFFF)   
-#        fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
-#        random.shuffle(fields)
-#        print("FIELDS: %s"%fields)
-#
-#        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
-#        self.user_field_name = om_name
-#        self.user_field_s = random.randint(0,2**width-8)
-#        self.user_field_e = self.user_field_s + 0
-#        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[1]]
-#        self.exp_field_name = om_name
-#        self.exp_field_s = random.randint(0,2**width-8)
-#        self.exp_field_e = self.exp_field_s + 0  
-#        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
-#                             ip_src_e=self.user_ip_src_e,  ip_dst_s=self.user_ip_dst_s,
-#                             ip_dst_e=self.user_ip_dst_e)
-#        setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
-#        setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
-#        ufs.save()     
-#        
-#        #create an experiment and assign a flowspace to it
-#        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
-#                                  project_desc="project description", slice_name="slice name",
-#                                  slice_desc="slice description", controller_url="controller url",
-#                                  owner_email="owner email", owner_password="owner password") 
-#        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
-#                            ip_src_s=self.exp_ip_src_s, ip_dst_s=self.exp_ip_dst_s,
-#                            ip_src_e=self.exp_ip_src_e,  ip_dst_e=self.exp_ip_dst_e
-#                             )
-#        setattr(expfs,"%s_s"%self.exp_field_name,self.exp_field_s)
-#        setattr(expfs,"%s_e"%self.exp_field_name,self.exp_field_e)
-#        expfs.save()  
-#        
-#        # First authenticate
-#        import urllib2
-#        from urllib2 import install_opener, build_opener,Request, urlopen, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
-#        from urllib import urlencode
-#
+        
+        g = get_and_post_form("https://localhost:8443/flowspace/opt_in",{'experiment':1,'priority':100})
+        
+        print(g.read())
+        uopt = UserOpts.objects.all()
+        print("User OPT:%s"%uopt)  
+        
+
 #        auth_url = "http://%s:%s/accounts/login/"%(test_settings.HOST,test_settings.PORT)
 #        auth_data = {"username":"user","password":"password"}
 #        auth_data_enc = urlencode(auth_data)
