@@ -11,16 +11,18 @@ from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,
     PermissionRegistrationConflict
 from django.contrib.auth.models import User
 
+DEFAULT_CONTROLLED_TYPE_PERMISSIONS = ["can_add", "can_view", "can_delete"]
+
 def register_controlled_type(
-                             model, can_change_url=None,
+                             model, can_add_url=None,
                              can_view_url=None, can_delete_url=None):
     """
     Creates a ControlledContentType object for the model with default
-    permission names: <module>.<modelname>.can_change/can_view/can_delete.
+    permission names: <module>.<modelname>.can_add/can_view/can_delete.
     
     @param model: the model whose class we wish to control.
     @type model: L{class}
-    @keyword can_change_url: url name for the can_change permission
+    @keyword can_add_url: url name for the can_add permission
     @keyword can_view_url: url name for the can_view permission
     @keyword can_delete_url: url name for the can_delete permission
     """
@@ -30,8 +32,8 @@ def register_controlled_type(
     try:
         ControlledContentType.objects.create(content_type=ct)
         register_permission(
-            "%s.%s.can_change" % (model.__module__, model.__name__),
-            can_change_url)
+            "%s.%s.can_add" % (model.__module__, model.__name__),
+            can_add_url)
         register_permission(
             "%s.%s.can_view" % (model.__module__, model.__name__),
             can_view_url)
@@ -89,3 +91,59 @@ def give_permission_to(giver, receiver, perm_name, delegatable=False):
         perm_user=receiver,
         can_delegate=delegatable,
     )
+
+def get_user_from_req(request, *args, **kwargs):
+    '''
+    Get the user profile from the request. This function is helpful when
+    using the require_*_permission_for_view decorators.
+
+    For example::
+    
+        @require_obj_permission_for_view(
+            ["can_view_obj_detail"],
+            get_user_from_req,
+            get_object_from_filter_func(Obj, 1),
+            ["GET"],
+        )
+        def view_obj_detail(request, obj_id):
+            ...
+    '''
+    return request.user
+
+def get_object_from_filter_func(klass, index, filter="pk"):
+    """
+    Returns a function that can be used for the require_*_permission_for_view
+    decorators to get an object from some argument.
+    
+    The returned function has a signature (*args, **kwargs) and mainly does
+    the following::
+    
+        klass.objects.get(**{filter: arg})
+        
+    where C{arg} is obtained from the arguments. If C{index} is an
+    C{int}, C{arg} is assumed to be positional. Otherwise, it is assumed to be
+    a keyword.
+    
+    For example::
+    
+        @require_obj_permission_for_view(
+            ["can_view_obj_detail"],
+            get_user_from_req,
+            get_object_from_filter_func(Obj, 1),
+            ["GET"],
+        )
+        def view_obj_detail(request, obj_id):
+            ...
+    
+    @param klass: The class of the object to be returned.
+    @type klass: class
+    @param index: location of the id in the arguments when the arguments are
+        given as (*args, **kwargs).
+    @type index: C{int} for positional, hashable for keyword.
+    @keyword filter: a filter to be used for obtaining the object.
+    @type filter: C{str}
+    
+    @return: A callable that returns an object from (*args, **kwargs)
+    """
+    
+    

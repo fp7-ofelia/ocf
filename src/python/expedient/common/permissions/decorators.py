@@ -7,11 +7,15 @@ from exceptions import PermissionDenied, PermissionSignatureError, \
     PermissionDecoratorUsageError
 from django.contrib.auth.models import User
 from models import ExpedientPermission, ControlledModel
-from django.db import DatabaseError
+from expedient.common.permissions.models import PermissionUserModel,\
+    ControlledContentType
+from expedient.common.permissions.utils import DEFAULT_CONTROLLED_TYPE_PERMISSIONS
 
 class require_obj_permissions(object):
     """
     Decorator that checks that one model has permissions to use another.
+    This should be used on object methods.
+    
     The decorator requires the following parameters on initialization:
     
     @param user_kw: the keyword used to pass the user object.
@@ -57,7 +61,8 @@ class require_obj_permissions(object):
             calling the method.
             """
             # checks if some permission name does not exist
-            self.perms_req = ExpedientPermission.objects.get_perms(self.perm_names)
+            self.perms_req = ExpedientPermission.objects.get_perms(
+                self.perm_names)
 
             # check for the permission
             try:
@@ -77,7 +82,7 @@ class require_obj_permissions(object):
 
             if missing:
                 raise PermissionDenied(
-                    missing.name, f.func_name, obj, user, missing.url_name)
+                    missing.name, obj, user, missing.url_name)
             
             # All is good. Call the function
             return f(obj, *args, **kw)
@@ -141,3 +146,138 @@ class require_obj_permissions_for_user(require_obj_permissions):
         
         return super(
             require_obj_permissions_for_user, self).__call__(f, prewrapper)
+
+class require_obj_permissions_for_view(object):
+    """
+    Decorator to be used on views. The decorator checks that a permission user
+    has the permissions listed in C{perm_names} for a target. The user and
+    target are given respectively by the C{user_func} and C{target_func}
+    parameters of the decorator. These should be callables that will take
+    the parameters of the decorated function. The decorator also accepts an
+    optional fourth parameter C{methods} that is a list of method names
+    for which the permission applies.
+    
+    One exception applies: The target_func may return a
+    C{django.contrib.auth.models.User} object instead of the profile to allow
+    for checking if the user is a superuser.
+    
+    For example:
+    
+    @require_obj_permissions_for_view(
+        ["can_delete_comment"],
+        lambda(request, blog_id, comment_id): get_object_or_404(Blog, pk=blog_id),
+        lambda(request, blog_id, comment_id): get_object_or_404(Comment, pk=comment_id),
+        ["POST"],
+    )
+    def delete_blog_comment(request, blog_id, comment_id):
+        ...
+    
+    @param perm_names: a list of permission names that are required.
+    @type perm_names: L{list} of L{str}
+    @param user_func: a callable that accepts the decorated methods arguments
+        and returns a L{PermissionUserModel} instance.
+    @type user_func: callable
+    @param target_func: a callable that accepts the decorated methods arguments
+        and returns a L{ControlledModel} instance.
+    @type target_func: callable
+    @keyword methods: list of methods for which the requirement applies.
+        Default is ["GET", "POST"].
+    @type methods: C{list} of C{str}
+    """
+    
+    def __init__(self, perm_names, user_func, target_func,
+                 methods=["GET", "POST"]):
+        self.perm_names = set(perm_names)
+        self.user_func = user_func
+        self.target_func = target_func
+        self.methods = methods
+        
+    def __call__(self, f):
+        def wrapper(f, request, *args, **kwargs):
+            if request.method in self.methods:
+                self.perms_req = ExpedientPermission.objects.get_perms(
+                    self.perm_names)
+                
+                user = self.user_func(request, *args, **kwargs)
+                
+                # We make an exception if the target is a User to check if
+                # the user is a superuser.
+                if not isinstance(user, User) or not user.is_superuser:
+                    if isinstance(user, User): user = user.get_profile()
+                    assert(isinstance(user, PermissionUserModel))
+                    
+                    target = self.target_func(request, *args, **kwargs)
+                    assert(isinstance(target, ControlledModel))
+                    
+                    missing = user.check_permissions(
+                        self.perms_req.filter(targets=target))
+                    
+                    if missing:
+                        raise PermissionDenied(
+                            missing.name, target, user, missing.url_name)
+            
+            # All is good. Call the function
+            return f(request, *args, **kwargs)
+        
+        return wrapper
+    
+class require_class_permission_for_view(require_obj_permissions):
+    """
+    Decorator to be used on views. The decorator checks that a permission user
+    has the permissions listed in C{perm_names} for a target class given in
+    C{target}. The user is given respectively by the C{user_func} parameter of
+    the decorator. The target class must be registered via the
+    L{utils.register_controlled_type} call. The decorator also accepts an
+    optional fourth parameter C{methods} that is a list of method names
+    for which the permission applies.
+    
+    The method accepts the shortened names for the default controlled type
+    permissions, and will append the full class information to the
+    permission name before checking. So the "can_delete" on class C{foo.Bar}
+    becomes "foo.Bar.can_delete". Other permissions are unchanged.
+    
+    This decorator is a subclass/wrapper around the 
+    L{require_obj_permissions_for_view} decorator.
+    
+    For example:
+    
+    @require_class_permissions_for_view(
+        ["can_add"],
+        lambda(request, blog_id): get_object_or_404(Blog, pk=blog_id),
+        Comment,
+        ["POST"],
+    )
+    def create_blog_comment(request, blog_id):
+        ...
+    
+    @param perm_names: a list of permission names that are required.
+    @type perm_names: L{list} of L{str}
+    @param user_func: a callable that accepts the decorated methods arguments
+        and returns a L{PermissionUserModel} instance.
+    @type user_func: callable
+    @param target: the model to which the permission applies
+    @type target: a registered controlled type.
+    @keyword methods: list of methods for which the requirement applies.
+        Default is ["GET", "POST"].
+    @type methods: C{list} of C{str}
+    """
+    
+    def __init__(self, perm_names, user_func, target,
+                 methods=["GET", "POST"]):
+
+        # define function to use as target_func
+        def target_func(*args, **kwargs):
+            return ControlledContentType.objects.get_for_model(target)
+        
+        # extend default permission names
+        full_perm_names = []
+        for name in perm_names:
+            if name in DEFAULT_CONTROLLED_TYPE_PERMISSIONS:
+                full_perm_names.append(
+                    "%s.%s.%s" % (target.__module__, target.__name__, name))
+            else:
+                full_perm_names.append(name)
+                
+        super(require_class_permission_for_view, self).__init__(
+            full_perm_names, user_func, target_func, methods)
+        

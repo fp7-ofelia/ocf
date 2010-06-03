@@ -5,7 +5,8 @@ Created on May 28, 2010
 '''
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.exceptions import PermissionDoesNotExist
+from expedient.common.permissions.exceptions import PermissionDoesNotExist,\
+    ModelNotRegisteredAsControlledType
 from django.db.models import Manager
 
 ## At the model level:
@@ -135,8 +136,23 @@ class PermissionUserModel(models.Model):
                                                           target=target)
         return self.check_permissions(perms_req)
 
+class ControlledContentTypeManager(models.Manager):
+    """
+    Manager that adds a convenience function for getting the
+    L{ControlledContentType} of a model if it exists. Raises 
+    """
+    def get_for_model(self, model):
+        ct = ContentType.objects.get_for_model(model)
+        try:
+            return self.get(content_type=ct)
+        except ControlledContentType.DoesNotExist:
+            raise ModelNotRegisteredAsControlledType(model)
+
 class ControlledContentType(ControlledModel):
     """
     Links permissions to ContentTypes to create class-level permissions.
     """
+
+    objects = ControlledContentTypeManager()
+    
     content_type = models.OneToOneField(ContentType)

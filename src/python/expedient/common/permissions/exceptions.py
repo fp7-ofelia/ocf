@@ -19,9 +19,9 @@ class PermissionDenied(Exception):
     Raised when a permission is denied/not found. Has a URL to be redirected to
     to obtain the required permission if possible.
     """
-    def __init__(self, perm_name, func_name, target, user, url_name):
-        message = "Permission %s was not found for permission user %s \
-to access method %s of target object %s" % (perm_name, user, func_name, target)
+    def __init__(self, perm_name, target, user, url_name):
+        message = "Permission %s was not found for permission user %s for \
+target object %s" % (perm_name, user, target)
         self.url_name = url_name
         self.target = target
         self.user = user
@@ -72,3 +72,13 @@ class PermissionCannotBeDelegated(Exception):
             giver, perm_name)
         super(PermissionCannotBeDelegated, self).__init__(message)
         
+class ModelNotRegisteredAsControlledType(Exception):
+    """
+    Raised when the ControlledContentType for a model is not found.
+    """
+    
+    def __init__(self, model):
+        super(ModelNotRegisteredAsControlledType, self).__init__(
+            "Model %s is not registered as a controlled type" % model,
+        )
+        self.model = model
