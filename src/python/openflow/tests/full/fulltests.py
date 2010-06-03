@@ -13,14 +13,13 @@ from openflow.tests.helpers import create_random_resv
 import time
 from expedient.common.tests.commands import call_env_command, Env
 from os.path import join
+from expedient.clearinghouse.loggingconf import getLogger
+
+logger = getLogger(__name__)
 
 # TODO: Some of this code works with multiple FVs, other parts assume only one.
 
-RUN_FV_SUBPROCESS = True
-DEBUG = False
-
-def dprint(str):
-    if DEBUG: print str
+RUN_FV_SUBPROCESS = False
 
 class FullIntegration(TestCase):
     MININET_TOPO = "linear,2"
@@ -48,11 +47,10 @@ class FullIntegration(TestCase):
                 mininet_vm, "mininet", "mininet", cmd
             )
             time.sleep(2)
-            if DEBUG:
-                print "Communicating with nox client run on port %s" % port
-                out = client.communicate()
-                print "Client out:\n%s" % out
-                
+            logger.debug("Communicating with nox client run on port %s" % port)
+            out = client.communicate()
+            logger.debug("Client out:\n%s" % out)
+
             self.nox_clients.append(client)
         
     def connect_networks(self, flowvisors, mininet_vms):
@@ -75,10 +73,9 @@ class FullIntegration(TestCase):
 
             time.sleep(2)
 
-            if DEBUG:
-                print "Communicating with mininet client"
-                out = client.communicate()
-                print "Client out:\n%s" % out
+            logger.debug("Communicating with mininet client")
+            out = client.communicate()
+            logger.debug("Client out:\n%s" % out)
         
     def run_flowvisor(self, flowvisor):
         """
@@ -103,13 +100,15 @@ class FullIntegration(TestCase):
         
         id_re = re.compile(r"id=\[(?P<id>\d+)\]")
         s = xmlrpclib.ServerProxy(
-            "https://%s:%s@%s:%s/xmlrpc" % (
+            "https://%s:%s@%s:%s" % (
                 flowvisor["username"], flowvisor["password"],
                 flowvisor["host"], flowvisor["xmlrpc_port"],
             )
         )
+        logger.info("Getting flowspace from flowvisor")
         flowspaces = s.api.listFlowSpace()
         ops = []
+        logger.info("Deleting all flowspace")
         for fs in flowspaces:
             id = id_re.search(fs).group("id")
             ops.append(dict(operation="REMOVE", id=id))
@@ -175,8 +174,8 @@ class FullIntegration(TestCase):
         )
         proc.wait()
         out_data, err_data = proc.communicate()
-        dprint(out_data)
-        dprint(err_data)
+        logger.debug(out_data)
+        logger.debug(err_data)
         
     def run_proc_cmd(self, cmd):
         """
@@ -326,11 +325,11 @@ class FullIntegration(TestCase):
         # kill ssh sessions
         for c in self.nox_clients:
             out = c.communicate("\03", check_closed=True)
-            dprint("nox stdout %s" % out)
+            logger.debug("nox stdout %s" % out)
             
         for c in self.mininet_vm_clients:
             out = c.communicate("exit()\n", check_closed=True)
-            dprint("mn stdout %s" % out)
+            logger.debug("mn stdout %s" % out)
         
         time.sleep(5)
 
@@ -361,7 +360,7 @@ class FullIntegration(TestCase):
         options = dict(geni_compressed=False, geni_available=True)
         rspec = self.am_client.ListResources(cred, options)
         
-        dprint(rspec)
+        logger.debug(rspec)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
@@ -456,7 +455,7 @@ class FullIntegration(TestCase):
         
         # TODO: check that the full reservation rspec is returned
         slices = self.fv_clients[0].api.listSlices()
-        dprint(slices)
+        logger.debug(slices)
 
         self.assertEqual(len(slices), 2) # root + new slice
         
@@ -472,7 +471,7 @@ class FullIntegration(TestCase):
         
         # Check the slice information
         slice_info = self.fv_clients[0].api.getSliceInfo(fv_slice_name)
-        dprint(slice_info)
+        logger.debug(slice_info)
         self.assertEqual(slice_info["contact_email"], email)
         self.assertEqual(slice_info["controller_port"], "6633")
         self.assertEqual(slice_info["controller_hostname"],

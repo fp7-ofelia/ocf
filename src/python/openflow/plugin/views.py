@@ -14,7 +14,7 @@ from django.db import transaction
 
 def aggregate_crud(request, agg_id=None):
     '''
-    Create a new OpenFlow Aggregate.
+    Create/update an OpenFlow Aggregate.
     '''
     
     if agg_id != None:
@@ -32,9 +32,11 @@ def aggregate_crud(request, agg_id=None):
         agg_form = OpenFlowAggregateForm(request.POST, instance=aggregate)
         client_form = PasswordXMLRPCServerProxyForm(request.POST, instance=client)
         if client_form.is_valid() and agg_form.is_valid():
+            # Save the client first
             client = client_form.save()
             if not client.is_available():
                 raise Exception("Client not available")
+            # Then save the aggregate and add the client
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
             aggregate.save()
@@ -75,6 +77,9 @@ def aggregate_crud(request, agg_id=None):
     )
     
 def aggregate_delete(request, agg_id):
+    """
+    Delete and aggregate.
+    """
     return create_update.delete_object(
         request,
         OpenFlowAggregate,

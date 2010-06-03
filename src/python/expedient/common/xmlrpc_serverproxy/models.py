@@ -13,9 +13,13 @@ from datetime import timedelta, datetime
 import time
 from expedient.common.utils.transport import PyCURLSafeTransport as transport
 from urlparse import urlparse
+from django.contrib.auth.models import User
+
+def get_max_password_len():
+    return User._meta.get_field_by_name('password')[0].max_length
 
 def random_password():
-    return binascii.b2a_qp(os.urandom(1024))
+    return binascii.b2a_hex(os.urandom(get_max_password_len()/2))
 
 class PasswordXMLRPCServerProxy(models.Model):
     '''
@@ -25,7 +29,8 @@ class PasswordXMLRPCServerProxy(models.Model):
     '''
     
     username = models.CharField(max_length=100)
-    password = models.CharField(max_length=3072, default=random_password)
+    password = models.CharField(max_length=get_max_password_len(),
+                                default=random_password)
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
     password_timestamp = models.DateTimeField(auto_now_add=True)
@@ -39,7 +44,6 @@ class PasswordXMLRPCServerProxy(models.Model):
     
     def __getattr__(self, name):
         if name == "proxy":
-            
             if self.url.lower().startswith("https"):
                 if self.verify_certs:
                     self.transport = transport(
@@ -53,7 +57,6 @@ class PasswordXMLRPCServerProxy(models.Model):
                         username=self.username,
                         password=self.password)
                 self.proxy = ServerProxy(self.url, self.transport)
-
             else:
                 parsed = urlparse(self.url)
                 new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
@@ -90,7 +93,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     def change_password(self, password=None):
         '''Change the remote password'''
         password = password or random_password()
-        self.password_timestamp = datetime.date.today()
+        self.password_timestamp = datetime.today()
         err = self.__getattr__('change_password')(password)
         if not err:
             # password change succeeded
@@ -103,7 +106,6 @@ class PasswordXMLRPCServerProxy(models.Model):
         '''Call the server's ping method, and see if we get a pong'''
         try:
             ret = self.ping("PING")
-            print "ping returned %s" % ret
             if self.ping("PING") == "PONG: PING":
                 return True
         except Exception, e:
@@ -118,7 +120,7 @@ class PasswordXMLRPCServerProxy(models.Model):
         '''
         import ssl
         import subprocess
-        
+
         # parse the url
         res = urlparse(self.url)
         port = res.port or 443
@@ -128,8 +130,8 @@ class PasswordXMLRPCServerProxy(models.Model):
         
         # the returned cert maybe messed up because python's ssl is crap. Fix it
         if not cert.endswith("\n-----END CERTIFICATE-----\n"):
-            cert.replace("-----END CERTIFICATE-----\n",
-                         "\n-----END CERTIFICATE-----\n")
+            cert = cert.replace("-----END CERTIFICATE-----",
+                                "\n-----END CERTIFICATE-----\n")
         
         # dump it in the directory, and run make
         with open(os.path.join(settings.XMLRPC_TRUSTED_CA_PATH,

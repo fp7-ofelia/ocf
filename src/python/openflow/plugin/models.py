@@ -46,8 +46,8 @@ class OpenFlowSliverSet(resource_models.AggregateSliverSet):
 
     @require_obj_permissions_for_project(["can_create_openflow_sliver"])
     @require_obj_permissions_for_slice(["can_create_openflow_sliver"])
-    @require_obj_permissions_for_user(["can_create_openflow_sliver"])
-    def _create(self, slice_password, pi):
+    @require_obj_permissions_for_user(["can_create_openflow_sliver"], False)
+    def _create(self, slice_password, pi, user=None):
         """
         Create the slivers at the aggregate.
         """
@@ -75,11 +75,12 @@ class OpenFlowSliverSet(resource_models.AggregateSliverSet):
             self.slice.project.description,
             self.slice.name, self.slice.description, 
             self.slice.aggregatesliceinfo.controller_url,
-            pi.email, slice_password, sw_slivers)
+            pi.email, slice_password, sw_slivers,
+            user=user, slice=self.slice, project=self.slice.project)
         
-    @require_obj_permissions_for_user(["can_delete_openflow_sliver"], True)
-    def _delete(self):
-        return self.aggregate.delete_sliver_set(slice.id)
+    @require_obj_permissions_for_user(["can_delete_openflow_sliver"], False)
+    def _delete(self, user=None):
+        return self.aggregate.delete_sliver_set(slice.id, user=user)
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
@@ -88,15 +89,11 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     class Meta:
         verbose_name = "OpenFlow Aggregate"
         
-    def setup_new_aggregate(self, hostname, user):
-        self._setup_new_aggregate(hostname, user=user)
-        
-    @require_obj_permissions_for_user(["can_admin_openflow_aggregate"], True)
-    def _setup_new_aggregate(self, hostname):
+    def setup_new_aggregate(self, hostname):
         self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
-        
+        print self.client.password
         err = self.client.register_topology_callback(
             "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
@@ -233,6 +230,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     def check_status(self):
         return self.available and self.client.is_available()
     
+    @require_obj_permissions_for_project(["can_use_openflow_aggregate"])
+    @require_obj_permissions_for_slice(["can_use_openflow_aggregate"])
+    @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
     def create_sliver_set(self, slice_id, project_name, project_description,
                           slice_name, slice_description, controller_url, email,
                           slice_password, slivers_dict):
@@ -241,6 +241,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
             slice_name, slice_description, controller_url, email,
             slice_password, slivers_dict)
         
+    @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
     def delete_sliver_set(self, slice_id):
         return self.client.delete_slice(slice_id)
 

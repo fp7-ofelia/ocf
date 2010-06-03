@@ -112,7 +112,6 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_PROFILE_MODULE = "users.UserProfile"
 
 # E-Mail sending settings
-#EMAIL_HOST = 'smtp.stanford.edu'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
@@ -143,3 +142,8 @@ AGGREGATE_LOGOS_DIR = "/"
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
+
+# Logging
+from expedient.clearinghouse import loggingconf
+import logging
+loggingconf.set_up(logging.DEBUG)

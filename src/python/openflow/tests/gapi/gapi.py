@@ -147,7 +147,7 @@ class GAPITests(TestCase):
             "https://localhost:8000/",
             transport=cert_transport)
 
-#        print "Done Setup"
+        time.sleep(2)
         
     def tearDown(self):
         try:

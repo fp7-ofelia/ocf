@@ -41,5 +41,9 @@ NUM_LINKS_PER_AGG = 20
 
 NUM_DUMMY_FVS = 1
 
+from expedient.clearinghouse import loggingconf
+import logging
+loggingconf.set_up(logging.DEBUG)
+
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
