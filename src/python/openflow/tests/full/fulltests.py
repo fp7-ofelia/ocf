@@ -19,7 +19,7 @@ logger = getLogger(__name__)
 
 # TODO: Some of this code works with multiple FVs, other parts assume only one.
 
-RUN_FV_SUBPROCESS = False
+RUN_FV_SUBPROCESS = True
 
 class FullIntegration(TestCase):
     MININET_TOPO = "linear,2"
@@ -105,10 +105,10 @@ class FullIntegration(TestCase):
                 flowvisor["host"], flowvisor["xmlrpc_port"],
             )
         )
-        logger.info("Getting flowspace from flowvisor")
+        logger.debug("Getting flowspace from flowvisor")
         flowspaces = s.api.listFlowSpace()
         ops = []
-        logger.info("Deleting all flowspace")
+        logger.debug("Deleting all flowspace")
         for fs in flowspaces:
             id = id_re.search(fs).group("id")
             ops.append(dict(operation="REMOVE", id=id))

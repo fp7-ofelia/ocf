@@ -146,4 +146,4 @@ OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 # Logging
 from expedient.clearinghouse import loggingconf
 import logging
-loggingconf.set_up(logging.DEBUG)
+loggingconf.set_up(logging.INFO)

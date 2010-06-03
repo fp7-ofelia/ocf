@@ -43,7 +43,7 @@ NUM_DUMMY_FVS = 1
 
 from expedient.clearinghouse import loggingconf
 import logging
-loggingconf.set_up(logging.DEBUG)
+loggingconf.set_up(logging.INFO)
 
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
