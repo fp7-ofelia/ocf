@@ -1,25 +1,23 @@
-'''
-@author: jnaous
-'''
-# Django settings for clearinghouse project.
+# Django settings for OM project.
 from os.path import dirname, join
+import sys
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Jad Naous', 'jnaous@stanford.edu'),
+    ('<your name>', '<your email>'),
 )
 
 SRC_DIR = join(dirname(__file__), '../../../')
+sys.path.append(join(SRC_DIR,'python/'))
 
-# For serving static content - dev version only
-STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
+STATIC_DOC_ROOT = join(SRC_DIR, 'static/openflow/optin_manager')
 
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = join(SRC_DIR, '../db/expedient/clearinghouse/clearinghouse.db') # Or path to database file if using sqlite3.
+DATABASE_NAME = join(SRC_DIR, '../db/openflow/optin_manager/om.db')  # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -57,7 +55,7 @@ MEDIA_URL = '/static/media'
 ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '6=egu-&rx7a+h%yjlt=lny=s+uz0$a_p8je=3q!+-^4w^zxkb8'
+SECRET_KEY = '2f(jw$r445m^g3#1e)mysi2c#4ny83*4al=#adkj1o98ic+44i'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -67,20 +65,19 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'expedient.clearinghouse.middleware.sitelockdown.SiteLockDown',
-    'expedient.common.permissions.middleware.PermissionMiddleware',
 )
 
-ROOT_URLCONF = 'expedient.clearinghouse.urls'
+ROOT_URLCONF = 'openflow.optin_manager.urls'
 
 TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
     join(SRC_DIR, 'templates'),
-    join(SRC_DIR, 'templates/expedient/clearinghouse'),
-    join(SRC_DIR, 'templates/expedient/common'),
+    join(SRC_DIR, 'templates/openflow/optin_manager'),
 )
 
 INSTALLED_APPS = (
@@ -89,38 +86,30 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'django_extensions',
-    'autoslug',
-    'registration',
-    'expedient.common.permissions',
     'expedient.common.rpc4django',
-    'expedient.common.utils',
-    'expedient.common.extendable',
     'expedient.common.xmlrpc_serverproxy',
-    'expedient.common.messaging',
     'expedient.common.defaultsite',
-    'expedient.clearinghouse.aggregate',
-    'expedient.clearinghouse.project',
-    'expedient.clearinghouse.resources',
-    'expedient.clearinghouse.slice',
-    'expedient.clearinghouse.users',
-    'openflow.plugin',
+    'registration',
+    'openflow.optin_manager.users',
+    'openflow.optin_manager.flowspace',
+    'openflow.optin_manager.xmlrpc_server',
 ###### For Testing #######################
-    'openflow.dummyom',
+    'openflow.optin_manager.dummyfv',
 )
-
-LOGIN_REDIRECT_URL = '/'
 
 AUTH_PROFILE_MODULE = "users.UserProfile"
 
+LOGIN_REDIRECT_URL = '/'
+
 # E-Mail sending settings
+#EMAIL_HOST = 'smtp.stanford.edu'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
-EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
+EMAIL_HOST_USER = 'geni.opt.in.manager@gmail.com'
+EMAIL_HOST_PASSWORD = "password" # example
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
-EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
+EMAIL_SUBJECT_PREFIX = '[GENI-Opt IN Manager]'
 
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
@@ -132,20 +121,5 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 
 # default site
 SITE_ID = 1
-SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "beirut.stanford.edu"
-
-# Messaging settings
-NUM_LATEST_MSGS = 10
-
-# Aggregate app settings
-AGGREGATE_LOGOS_DIR = "/"
-
-# Openflow GAPI settings
-OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
-OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
-
-# Logging
-from expedient.clearinghouse import loggingconf
-import logging
-loggingconf.set_up(logging.INFO)
+SITE_NAME = "Expedient Opt-In Manager"
+SITE_DOMAIN = "optinmanager.geni.org" # example

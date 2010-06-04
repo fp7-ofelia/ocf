@@ -7,7 +7,9 @@ interacting with them easily.
 @author: jnaous
 '''
 
-import paramiko
+import paramiko, logging
+logger = paramiko.util.get_logger("paramiko.transport")
+logger.setLevel(logging.WARNING)
 
 class SSHClientPlus(paramiko.SSHClient):
     @classmethod

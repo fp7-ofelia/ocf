@@ -11,7 +11,6 @@ It also contains a decorator to mark methods as rpc methods.
 import inspect
 import platform
 import pydoc
-import types
 import xmlrpclib
 from xmlrpclib import Fault
 from jsonrpcdispatcher import JSONRPCDispatcher, json
@@ -28,24 +27,15 @@ def rpcmethod(**kwargs):
     EXAMPLES:
     @rpcmethod()
     @rpcmethod(name='myns.myFuncName', signature=['int','int'])
-    @rpcmethod(permission='add_group')
+    @rpcmethod(permission='add_group', url_name="my_url_name")
     '''
     
     def set_rpcmethod_info(method):
         method.is_rpcmethod = True
-        method.signature = []
-        method.permission = None
-        method.external_name = getattr(method, '__name__')
-
-        if 'name' in kwargs:
-            method.external_name = kwargs['name']
-
-        if 'signature' in kwargs:
-            method.signature = kwargs['signature']
-            
-        if 'permission' in kwargs:
-            method.permission = kwargs['permission']
-
+        method.external_name = kwargs.get("name", getattr(method, '__name__'))
+        method.signature = kwargs.get('signature', [])
+        method.permission = kwargs.get('permission', None)
+        method.url_name = kwargs.get("url_name", "root")
         return method
     return set_rpcmethod_info
 
@@ -152,9 +142,8 @@ class RPCDispatcher:
     Dispatches method calls to either the xmlrpc or jsonrpc dispatcher
     '''
     
-    def __init__(self, url='', apps=[], restrict_introspection=False):
-        version = platform.python_version_tuple()
-        self.url = url
+    def __init__(self, url_name='root', restrict_introspection=False):
+        self.url_name = url_name
         self.rpcmethods = []        # a list of RPCMethod objects
         self.jsonrpcdispatcher = JSONRPCDispatcher()
         self.xmlrpcdispatcher = XMLRPCDispatcher()
@@ -164,8 +153,6 @@ class RPCDispatcher:
             self.register_method(self.system_methodhelp)
             self.register_method(self.system_methodsignature)
             self.register_method(self.system_describe)
-            
-        self.register_rpcmethods(apps)
         
     @rpcmethod(name='system.describe', signature=['struct'])
     def system_describe(self):
@@ -175,7 +162,6 @@ class RPCDispatcher:
         
         description = {}
         description['serviceType'] = 'RPC4Django JSONRPC+XMLRPC'
-        description['serviceURL'] = self.url,
         description['methods'] = [{'name': method.name, 
                                    'summary': method.help, 
                                    'params': method.get_params(),
@@ -222,31 +208,6 @@ class RPCDispatcher:
         raise Fault(APPLICATION_ERROR, 'No method found with name: ' + \
                     str(method_name))
                
-    def register_rpcmethods(self, apps):
-        '''
-        Scans the installed apps for methods with the rpcmethod decorator
-        Adds these methods to the list of methods callable via RPC
-        '''    
-        
-        for appname in apps:
-            # check each app for any rpcmethods
-            app = __import__(appname, globals(), locals(), ['*'])
-            for obj in dir(app):
-                method = getattr(app, obj)
-                if callable(method) and \
-                   getattr(method, 'is_rpcmethod', False):
-                    # if this method is callable and it has the rpcmethod
-                    # decorator, add it to the dispatcher
-                    self.register_method(method, method.external_name)
-                elif isinstance(method, types.ModuleType):
-                    # if this is not a method and instead a sub-module,
-                    # scan the module for methods with @rpcmethod
-                    try:
-                        self.register_rpcmethods(["%s.%s" % (appname, obj)])
-                    except ImportError:
-                        pass
-
-    
     def jsondispatch(self, raw_post_data, **kwargs):
         '''
         Sends the post data to a jsonrpc processor

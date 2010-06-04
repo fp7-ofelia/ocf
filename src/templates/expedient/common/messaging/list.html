@@ -22,7 +22,7 @@
     }
 </script>
 
-<form method="post" action="">
+<form method="post" action="">{% csrf_token %}
     {% if latest %}
 	<table class="msg_table" id="messages">
 	    <tr>

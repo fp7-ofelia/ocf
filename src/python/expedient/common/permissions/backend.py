@@ -3,6 +3,7 @@ Created on May 31, 2010
 
 @author: jnaous
 '''
+from expedient.common.permissions.models import ExpedientPermission
 
 class ExpedientPermissionsBackend(object):
     """Django backend for object permissions. Needs Django 1.2.
@@ -22,9 +23,11 @@ class ExpedientPermissionsBackend(object):
         Checks whether the passed user has passed permission for passed
         object (obj).
         """
-        try:
-            missing = user_obj.get_profile().check_permission_names(obj, perm)
-            return not missing
-        except:
+        if obj == None:
             return False
+    
+        missing, target = ExpedientPermission.objects.get_missing_for_target(
+            user_obj, [perm], obj)
         
+        return missing == None
+    

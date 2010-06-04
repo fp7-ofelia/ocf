@@ -6,25 +6,25 @@ Created on May 31, 2010
 
 class PermissionRegistrationConflict(Exception):
     """
-    Raised when a permission is registered with two different URLs.
+    Raised when a permission is registered with two different views.
     """
-    def __init__(self, perm_name, new_url, old_url):
+    def __init__(self, perm_name, new_view, old_view):
         message = "Permission %s is already registered " % perm_name
-        message += "with url name %s. Cannot register " % old_url
-        message += "again with url %s." % new_url
+        message += "with view name %s. Cannot register " % old_view
+        message += "again with view %s." % new_view
         super(PermissionRegistrationConflict, self).__init__(message)
 
 class PermissionDenied(Exception):
     """
-    Raised when a permission is denied/not found. Has a URL to be redirected to
-    to obtain the required permission if possible.
+    Raised when a permission is denied/not found.
     """
-    def __init__(self, perm_name, target, user, url_name):
+    def __init__(self, perm_name, target, user, allow_redirect=True):
         message = "Permission %s was not found for permission user %s for \
 target object %s" % (perm_name, user, target)
-        self.url_name = url_name
+        self.perm_name = perm_name
         self.target = target
         self.user = user
+        self.allow_redirect = allow_redirect
         super(PermissionDenied, self).__init__(message)
 
 class PermissionSignatureError(Exception):
@@ -42,11 +42,7 @@ class PermissionDecoratorUsageError(Exception):
     """
     Raised when the decorators are misused.
     """
-    
-    def __init__(self, object):
-        message = "Permissions cannot be used for object class \
-%s which does not inherit from ControlledModel" % object.__class__
-        super(PermissionDecoratorUsageError, self).__init__(message)
+    pass
 
 class PermissionDoesNotExist(Exception):
     """
@@ -71,14 +67,3 @@ class PermissionCannotBeDelegated(Exception):
         message = "Giver %s cannot delegate permission %s." % (
             giver, perm_name)
         super(PermissionCannotBeDelegated, self).__init__(message)
-        
-class ModelNotRegisteredAsControlledType(Exception):
-    """
-    Raised when the ControlledContentType for a model is not found.
-    """
-    
-    def __init__(self, model):
-        super(ModelNotRegisteredAsControlledType, self).__init__(
-            "Model %s is not registered as a controlled type" % model,
-        )
-        self.model = model

@@ -1,5 +1,26 @@
-05-19-2010: 0.0.1-alpha1
-    Initial release.
+06-07-2010: 0.0.3-alpha1
+    Changes:
+    - Fixed Opt-in and Opt-out tests.
+    - Bugs in Opt-out view fixed.
+    - Updated permission system with middleware and tests.
+    - Added additional tests for internal components.
+    - Fixed broken CSRF templates
+    - Fixed error with creating aggregates
+    - RPC system does not allow access to all calls from the same URL.
+    - Fixed broken permissions on core models.
+    
+    Known Issues:
+    - Opt-in manager flowspace delegation is work-in-progress.
+    - Opt-in manager has no simple way to connect to the flowvisor.
+    - Opt-in manager has no simple way to add a Clearinghouse user.
+    - Need to enable certificate verification by default for 
+      PasswordXMLRPCServerProxy
+    - Permissions need to be enforced.
+    - GAPI for OpenFlow is a bit hackish and should be made more 
+      seamless. This requires finishing the permission system and 
+      separating RPC calls by URL.
+    - Documentation is lacking horribly.
+    - install.sh script still has the bugs from 0.0.1-alpha1
 
 06-02-2010: 0.0.2-alpha1
     Changes:

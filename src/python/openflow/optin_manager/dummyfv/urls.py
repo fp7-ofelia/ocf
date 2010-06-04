@@ -3,10 +3,9 @@ Created on May 16, 2010
 
 @author: jnaous
 '''
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import patterns
+from expedient.common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns('',
-    url(r'^(?P<fv_id>\d+)/xmlrpc/$',
-        'expedient.common.rpc4django.views.serve_rpc_request',
-        name="dummyfv_rpc"),
+    rpc_url(r'^(?P<fv_id>\d+)/xmlrpc/$', name="dummyfv_rpc"),
 )

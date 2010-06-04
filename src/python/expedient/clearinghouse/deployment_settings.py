@@ -8,7 +8,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Jad Naous', 'jnaous@stanford.edu'),
+    ('<your name>', '<your email>'),
 )
 
 SRC_DIR = join(dirname(__file__), '../../../')
@@ -117,9 +117,9 @@ AUTH_PROFILE_MODULE = "users.UserProfile"
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
-EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
+EMAIL_HOST_PASSWORD = "the password" # example
 EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
+DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # Registration App settings
@@ -133,7 +133,7 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 # default site
 SITE_ID = 1
 SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "beirut.stanford.edu"
+SITE_DOMAIN = "clearinghouse.geni.org" # example
 
 # Messaging settings
 NUM_LATEST_MSGS = 10

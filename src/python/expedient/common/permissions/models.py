@@ -5,154 +5,271 @@ Created on May 28, 2010
 '''
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.exceptions import PermissionDoesNotExist,\
-    ModelNotRegisteredAsControlledType
-from django.db.models import Manager
+from expedient.common.permissions.exceptions import PermissionDoesNotExist
+from django.contrib.contenttypes.generic import GenericForeignKey
+from django.contrib.auth.models import User
 
-## At the model level:
-# require permissions for object methods
-# redirect to pages to request permissions
-# have some sensible default permissions
-## At the project level:
-# create roles that contain bunches of permissions
-# have permissions that are delegatable and not delegatable
-## Permission checks:
-# either explicitly given permissions or permissions by rules
-# Rule permissions:
-#   - teammates may send messages to each other:
-
-class ExpedientPermissionManager(Manager):
+class ExpedientPermissionManager(models.Manager):
     """
-    Adds some useful methods to the default manager type.
+    Implements methods for checking for missing permissions.
     """
-    
-    def get_perms(self, perm_names, target=None):
-        """
-        Returns a queryset of permissions with names in C{perm_names}. If
-        C{target} is specified then filter by target as well as names.
-        permission is missing, raises a L{PermissionDoesNotExist} exception.
-        
-        @param perm_names: list of permission names
-        @type perm_names: L{list} of L{str}
-        @keyword target: target for these permissions. Default None.
-        @type target: L{ControlledModel}
-        
-        @return: QuerySet of permissions
-        @rtype: QuerySet of L{ExpedientPermission}s
-        """
-        perms_req = ExpedientPermission.objects.filter(
-            name__in=list(set(perm_names)))
-        
-        if target:
-            perms_req = perms_req.filter(targets=target)
 
-        # check if some permission name does not exist
-        if perms_req.count() < len(perm_names):
-            perms_req_names = set(perms_req.values_list("name", flat=True))
-            perm_names = set(perm_names)
-            missing = perm_names - perms_req_names
-            raise PermissionDoesNotExist(missing.pop(), target=target)
+    def get_missing_for_target(self, user, perm_names, target):
+        """
+        Same as L{get_missing} but accepts a single target instance instead of
+        a queryset of targets.
+        """
+        if not isinstance(target, models.Model):
+            # assume class
+            target = ContentType.objects.get_for_model(target)
+            
+        return self.get_missing(user, perm_names,
+                                target.__class__.objects.filter(pk=target.pk))
         
-        return perms_req
-
+    def get_missing(self, user, perm_names, targets):
+        """
+        This is the method that should be used to check for permissions. All
+        other methods that check permissions are wrappers around this method.
+        
+        Get the first missing permission that the user object does not have for
+        all targets. If the ObjectPermission does not exist for the object, it
+        will be created and saved before returning it.
+        
+        One exception is made: if the user is actually a
+        C{django.contrib.auth.models.User} instance, then if the user is
+        a superuser, get_missing always returns None.
+        
+        @param user: The permission user for the targets
+        @type user: L{PermissionUser} or a model instance.
+        @param perm_names: names of permissions to search for
+        @type perm_names: iterable of C{str}
+        @param targets: objects whose permissions we are searching for
+        @type targets: C{QuerySet}
+        
+        @return: Missing permission and the target for which it is missing or
+            None if nothing is missing.
+        @rtype: tuple (L{ExpedientPermission}, target) or (None, None)
+        """
+        
+        if not isinstance(user, PermissionUser):
+            user, created = \
+                PermissionUser.objects.get_or_create_from_instance(user)
+        
+        # check for superuser
+        if isinstance(user.user, User) and user.user.is_superuser:
+            return (None, None)
+        
+        ct = ContentType.objects.get_for_model(targets.model)
+        ids = targets.values_list("pk", flat=True)
+        
+        obj_perms = ObjectPermission.objects.filter(
+            object_type=ct,
+            object_id__in=ids,
+            permission__name__in=perm_names,
+            users=user,
+        )
+        
+        if obj_perms.count() < len(perm_names) * len(ids):
+            # Check if all perm_names exist.
+            qs = self.filter(name__in=perm_names)
+            if qs.count() < len(set(perm_names)):
+                for name in qs.values_list("name", flat=True):
+                    if name not in perm_names:
+                        raise PermissionDoesNotExist(name)
+            # Find the missing permission
+            for perm_name in perm_names:
+                perm = qs.get(name=perm_name)
+                for id in ids:
+                    try:
+                        ObjectPermission.objects.get(
+                            object_type=ct,
+                            object_id=id,
+                            permission=perm,
+                            users=user,
+                        )
+                    except ObjectPermission.DoesNotExist:
+                        return (perm, targets.get(id=id))
+        else:
+            return (None, None)
+        
 class ExpedientPermission(models.Model):
     """
-    Users can own sets of permissions that are related to particular objects.
+    This class holds all instances of L{ObjectPermission} that have a particular
+    name. L{ObjectPermission} links users to a particular object.
+    
+    A permission may optionally have a view where the browser should be
+    redirected if the permission is missing (for example to request the
+    permission). The view is specified by its full path in C{view}.
+    
+    One limitation of the system right now is that we can only link to objects
+    that use a C{PositiveIntegerField} as the object ID.
+    
+    @cvar objects: a L{ExpedientPermissionManager} instance.
+    
+    @ivar name: The permission's name
+    @type name: C{str}
+    @ivar view: The full path to the view for the permission
+    @type view: C{str}
+    @ivar object_permissions: Per-object permissions with this permission name.
+    @type object_permissions: m2m relationship to L{ObjectPermission}.
     """
     
     objects = ExpedientPermissionManager()
     
-    name = models.CharField(max_length=200, unique=True)
-    url_name = models.URLField("Name of URL whence to obtain permission.",
-                               blank=True, null=True)
+    name = models.CharField(max_length=100, unique=True)
+    view = models.CharField("Permission View", max_length=300,
+                            blank=True, null=True)
     
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.url)
+        return "%s: %s" % (self.name, self.view)
+
+class GenericObjectManager(models.Manager):
+    """
+    Adds methods to retrieve generic objects when the model uses the
+    contenttypes framework.
     
+    @keyword ct_field: name of the ForeignKey field pointing to C{ContentType}.
+        Default is "content_type".
+    @keyword fk_field: name of the ID field for objects. Default is
+        C{object_id}.
+    """
+    def __init__(self, ct_field="content_type", fk_field="object_id"):
+        super(GenericObjectManager, self).__init__()
+        self.ct_field = ct_field
+        self.fk_field = fk_field
+        
+    def get_or_create_from_instance(self, instance, **kwargs):
+        """
+        Similar to the C{get_or_create} method, but accepts an instance
+        object to be used for the generic foreign key relation.
+        """
+        kwargs.update({
+            self.ct_field: ContentType.objects.get_for_model(instance),
+            self.fk_field: instance.id,
+        })
+        return self.get_or_create(**kwargs)
+    
+    def filter_from_instance(self, instance):
+        """
+        Get the generic objects pointing to the instance.
+        
+        @param instance: instance to retrieve the object for.
+
+        @return: C{QuerySet} containing all generic object.
+        """
+        return self.filter(**{
+            self.ct_field: ContentType.objects.get_for_model(instance),
+            self.fk_field: instance.id,
+        })
+        
+    def filter_from_queryset(self, queryset):
+        """
+        Get a filtered queryset that contains all the objects for all instances
+        in queryset. This will only return a query set of the objects found.
+        Some may not exist.
+        
+        @param queryset: QuerySet of objects whose generic counterparts we wish
+            to find.
+            
+        @return: C{QuerySet} that contains the generic objects.
+        """
+        return self.filter(**{
+            self.ct_field: ContentType.objects.get_for_model(queryset.model),
+            self.fk_field + "__in": queryset.values_list("pk", flat=True),
+        })
+
+class ObjectPermissionManager(GenericObjectManager):
+    """
+    Adds some useful methods to the default manager type.
+    """
+    
+    def __init__(self):
+        super(ObjectPermissionManager, self).__init__("object_type",
+                                                      "object_id")
+    
+    def get_for_object(self, perm_name, obj):
+        """
+        Get the object permission for this object with this name.
+        
+        @param perm_name: name of the permission
+        @type perm_name: C{str}
+        @param obj: object for which to get the permission
+        @type obj: a model.
+        """
+        return self.filter_for_object(obj).get(permission__name=perm_name)
+
+class ObjectPermission(models.Model):
+    """
+    Links a permission to its object using the C{contenttypes} framework and
+    to the set of users holding the permission.
+    
+    @cvar objects: L{ObjectPermissionManager} for the class.
+    
+    @ivar permission: The L{ExpedientPermission} of which this
+        L{ObjectPermission} is a sort of instance.
+    @type permission: L{ExpedientPermission}
+    @ivar object_type: The C{ContentType} indicating the class of the target.
+    @type object_type: ForeignKey to C{ContentType}
+    @ivar object_id: The id of the target.
+    @type object_id: positive C{int}
+    @ivar target: the object for this target.
+    @type target: varies
+    @ivar users: many-to-many relationship to users who hold the object
+        permission
+    @type users: C{ManyToManyField} to L{PermissionUser} through
+        L{PermissionInfo}
+    """
+
+    objects = ObjectPermissionManager()
+    
+    permission = models.ForeignKey(ExpedientPermission)
+    
+    object_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    target = GenericForeignKey("object_type", "object_id")
+    
+    users = models.ManyToManyField("PermissionUser", through="PermissionInfo")
+    
+    class Meta:
+        unique_together = (
+            ("permission", "object_type", "object_id"),
+        )
+    
+class PermissionUser(models.Model):
+    """
+    Links permissions to their users using the C{contenttypes} framework, where
+    users are not necessarily C{django.contrib.auth.models.User} instances.
+    
+    @cvar objects: L{GenericObjectManager} for the class
+    
+    @ivar user_type: The C{ContentType} indicating the class of the user.
+    @type user_type: ForeignKey to C{ContentType}
+    @ivar user_id: The id of the user.
+    @type user_id: positive C{int}
+    @ivar user: the object for this user.
+    @type user: varies
+    """
+    
+    objects = GenericObjectManager("user_type", "user_id")
+    
+    user_type = models.ForeignKey(ContentType)
+    user_id = models.PositiveIntegerField()
+    user = GenericForeignKey("user_type", "user_id")
+    
+    class Meta:
+        unique_together=(("user_type", "user_id"),)
+
 class PermissionInfo(models.Model):
     """
     Information on what the user model can do with the permission.
+    
+    @ivar obj_permission: the object permission for this info.
+    @type obj_permission: ForeignKey to L{ObjectPermission}
+    @ivar user: the user for this info.
+    @type user: ForeignKey to L{PermissionUser}
+    @ivar can_delegate: Can the user give this permission to someone else?
+    @type can_delegate: C{bool}
     """
-    permission = models.ForeignKey(ExpedientPermission)
-    perm_user = models.ForeignKey("PermissionUserModel")
+    obj_permission = models.ForeignKey(ObjectPermission)
+    user = models.ForeignKey(PermissionUser)
     can_delegate = models.BooleanField()
-    
-class ControlledModel(models.Model):
-    """
-    Models that want to require permissions on their methods must inherit
-    from ControlledModel.
-    """
-    permissions = models.ManyToManyField(
-        ExpedientPermission, related_name="targets")
-    
-class PermissionUserModel(models.Model):
-    """
-    Models that will need to have permissions must inherit from UserModel.
-    """
-    permissions = models.ManyToManyField(
-        ExpedientPermission, related_name="users", through=PermissionInfo)
-    
-    def check_permissions(self, perms_req):
-        """
-        Check that the the L{PermissionUserModel} has the permissions given in
-        C{perms_req}. Returns the first missing permission or None if all were
-        found.
-
-        @param perms_req: C{QuerySet} of required permissions
-        @type perms_req: C{QuerySet} of L{ExpedientPermission}s
-
-        @return: first missing permission or None if all are found
-        @rtype: L{ExpedientPermission} or None
-        """
-        
-        # find the permissions
-        perms_found = self.permissions.filter(pk__in=perms_req)
-        
-        # find the first missing permission and raise an exception
-        if perms_found.count() < perms_req.count():
-            for req in perms_req:
-                if req not in perms_found:
-                    return req
-        
-        else:
-            return None
-    
-    def check_permission_names(self, target, perm_names):
-        """
-        Check that the the L{PermissionUserModel} has the permissions whose
-        target is target and whose names are given in C{perm_names}. Returns the
-        first missing permission or None if all were found.
-        
-        @param target: permissions' target
-        @type target: L{ControlledModel}
-        @param perm_names: permission names
-        @type perm_names: L{list}
-        
-        @return: first missing permission or None if all are found
-        @rtype: L{ExpedientPermission} or None
-        """
-        
-        perms_req = ExpedientPermission.objects.get_perms(perm_names,
-                                                          target=target)
-        return self.check_permissions(perms_req)
-
-class ControlledContentTypeManager(models.Manager):
-    """
-    Manager that adds a convenience function for getting the
-    L{ControlledContentType} of a model if it exists. Raises 
-    """
-    def get_for_model(self, model):
-        ct = ContentType.objects.get_for_model(model)
-        try:
-            return self.get(content_type=ct)
-        except ControlledContentType.DoesNotExist:
-            raise ModelNotRegisteredAsControlledType(model)
-
-class ControlledContentType(ControlledModel):
-    """
-    Links permissions to ContentTypes to create class-level permissions.
-    """
-
-    objects = ControlledContentTypeManager()
-    
-    content_type = models.OneToOneField(ContentType)

@@ -5,9 +5,8 @@ from django.db import models
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.extendable.models import Extendable
 from expedient.clearinghouse.slice.models import Slice
-from expedient.common.permissions.models import ControlledModel
 
-class Resource(Extendable, ControlledModel):
+class Resource(Extendable):
     '''
     Generic model of a resource.
     
@@ -29,7 +28,7 @@ class Resource(Extendable, ControlledModel):
         return u"Resource: %s belonging to aggregate %s." % (
             self.name, self.aggregate)
 
-class Sliver(Extendable, ControlledModel):
+class Sliver(Extendable):
     '''
     Information on the reservation of a particular resource for a slice.
     '''
@@ -39,7 +38,7 @@ class Sliver(Extendable, ControlledModel):
     slice = models.ForeignKey(
         Slice, verbose_name="Slice this sliver is part of")
 
-class SliverSet(Extendable, ControlledModel):
+class SliverSet(Extendable):
     '''
     Groups Slivers.
     '''

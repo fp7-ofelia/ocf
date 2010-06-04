@@ -1,0 +1,102 @@
+'''
+Created on Jun 8, 2010
+
+Contains views for permissions tests
+
+@author: jnaous
+'''
+from django.shortcuts import get_object_or_404
+from models import PermissionTestClass
+from ..decorators import require_objs_permissions_for_view
+from ..utils import get_user_from_req, get_queryset
+from django.http import HttpResponse, HttpResponseRedirect
+from django.views.generic import create_update
+from django.core.urlresolvers import reverse
+from expedient.common.permissions.utils import give_permission_to,\
+    get_queryset_from_class
+from django.contrib.csrf.middleware import csrf_exempt
+
+@csrf_exempt
+@require_objs_permissions_for_view(
+    ["can_get_x2", "can_read_val"],
+    get_user_from_req,
+    get_queryset(PermissionTestClass, "obj_id"),
+)
+def test_view_x2(request, obj_id=None):
+    obj = get_object_or_404(PermissionTestClass, pk=obj_id)
+    return HttpResponse("%s" % obj.get_val_x2(user_kw=request.user))
+
+@csrf_exempt
+def test_view_crud(request, obj_id=None):
+    if obj_id == None:
+        # Creation
+        return test_view_create(request)
+    else:
+        # update:
+        return test_view_update(request, obj_id)
+
+@require_objs_permissions_for_view(
+    ["can_add"],
+    get_user_from_req,
+    get_queryset_from_class(PermissionTestClass),
+    ["POST"],
+)
+def test_view_create(request):
+    return create_update.create_object(
+        request, PermissionTestClass,
+        template_name="permissions/empty.html",
+        post_save_redirect=reverse("test_view_crud"),
+    )
+
+@require_objs_permissions_for_view(
+    ["can_set_val"],
+    get_user_from_req,
+    get_queryset(PermissionTestClass, 1),
+    ["POST"],
+)
+@require_objs_permissions_for_view(
+    ["can_read_val"],
+    get_user_from_req,
+    get_queryset(PermissionTestClass, 1),
+    ["GET"],
+)
+def test_view_update(request, obj_id):
+    return create_update.update_object(
+        request, PermissionTestClass,
+        object_id=obj_id,
+        template_name="permissions/empty.html",
+        post_save_redirect=reverse("test_view_update",
+                                   kwargs=dict(obj_id=obj_id)),
+    )
+
+@csrf_exempt
+def add_perms_view(request, permission, user, target, redirect_to=None):
+    if request.method == "POST":
+        give_permission_to(user, permission, target)
+        redirect_to = redirect_to or reverse("test_view_crud")
+        return HttpResponseRedirect(redirect_to)
+    else:
+        return HttpResponse(
+"""
+Do you want to get permissions to create PermissionTestClass instances?
+<form action="" method="POST">
+<input type="submit" value="Yes" />
+<input type="button" value="No" onclick="document.location='%s'" />
+</form>
+""" % reverse("test_view_crud"))
+
+@csrf_exempt
+def other_perms_view(request, permission, user, target, redirect_to=None):
+    if request.method == "POST":
+        give_permission_to(user, permission, target)
+        redirect_to = redirect_to or reverse("test_view_crud")
+        return HttpResponseRedirect(redirect_to)
+    else:
+        return HttpResponse(
+"""
+Do you want to get %s permission for obj id %s?
+<form action="" method="POST">
+<input type="submit" value="Yes" />
+<input type="button" value="No" onclick="document.location='%s'" />
+</form>
+""" % (permission.name, target.id, reverse("test_view_crud")))

@@ -6,9 +6,6 @@ from models import DatedMessage
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from forms import MessageForm
-from expedient.common.permissions.decorators import require_class_permission_for_view
-from expedient.common.permissions.utils import get_userprofile_from_req,\
-    get_object_from_filter_func
 
 def list_msgs(request, number=None):
     '''
@@ -43,12 +40,6 @@ def list_msgs(request, number=None):
 
     return HttpResponseNotAllowed("GET", "POST")
 
-@require_class_permission_for_view(
-    ["can_create"],
-    get_userprofile_from_req,
-    DatedMessage,
-    ["POST"],
-)
 def create(request):
     '''
     Create a new message

@@ -93,7 +93,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
-        print self.client.password
         err = self.client.register_topology_callback(
             "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
@@ -222,14 +221,8 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # TODO: Is there a better way to filter these?
         link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
         dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
-        if dead_cnxns.count < len(set(link_slugs)):
-            print "WARNING: Some connections that were thought to be dead" +\
-                " not found in DB."
         dead_cnxns.delete()
 
-    def check_status(self):
-        return self.available and self.client.is_available()
-    
     @require_obj_permissions_for_project(["can_use_openflow_aggregate"])
     @require_obj_permissions_for_slice(["can_use_openflow_aggregate"])
     @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
@@ -244,6 +237,25 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
     def delete_sliver_set(self, slice_id):
         return self.client.delete_slice(slice_id)
+    
+    ###################################################################
+    # Following are overrides from aggregate_models.Aggregate
+    
+    def check_status(self):
+        return self.available and self.client.is_available()
+
+    def get_edit_url(self):
+        return reverse("openflow_aggregate_edit",
+                       kwargs={'agg_id': self.id})
+
+    def get_aggregates_url(self):
+        return reverse("openflow_aggregate_edit",
+                       kwargs={'agg_id': self.id})
+
+    @classmethod
+    def get_create_url(cls):
+        return reverse("openflow_aggregate_create")
+    
 
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)

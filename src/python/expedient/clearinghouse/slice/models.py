@@ -3,9 +3,8 @@
 '''
 from django.db import models
 from expedient.clearinghouse.project.models import Project
-from expedient.common.permissions.models import PermissionUserModel
 
-class Slice(PermissionUserModel):
+class Slice(models.Model):
     '''
     Holds information about reservations across aggregates
     @ivar name: The name of the Slice

@@ -10,9 +10,8 @@ from django.contrib import auth
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.models import ControlledModel
 
-class Aggregate(Extendable, ControlledModel):
+class Aggregate(Extendable):
     '''
     Holds information about an aggregate. Needs to be extended by plugins.
     
@@ -47,9 +46,6 @@ class Aggregate(Extendable, ControlledModel):
         
     def get_edit_url(self):
         ct = ContentType.objects.get_for_model(self.__class__)
-        print "get edit url for agg from app %s" % ct.app_label
-        print reverse("%s_aggregate_edit" % ct.app_label,
-                       kwargs={'agg_id': self.id})
         return reverse("%s_aggregate_edit" % ct.app_label,
                        kwargs={'agg_id': self.id})
 

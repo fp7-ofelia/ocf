@@ -171,7 +171,7 @@ class Extendable(models.Model):
     the great grandchildren by specifying the field names in their C{redelegate}
     field of their inner C{Extend} class.
 
-    For example (from extendable_tester): ::
+    For example: ::
     
         from django.db import models
         
@@ -207,41 +207,6 @@ class Extendable(models.Model):
                     'other_model': YetAnotherModel,
                     'other_through': YetAnotherModelRel,
                 }
-        >>> from extendable_tester.models import *
-        >>> from django.contrib.contenttypes.models import ContentType
-        >>> parent = TestParent.objects.create()
-        >>> child1 = TestChild.objects.create()
-        >>> child2 = TestOtherChild.objects.create()
-        >>> other = OtherModel.objects.create()
-        >>> another = YetAnotherModel.objects.create()
-        >>> TestParent.objects.all()
-        [<TestParent: TestParent object>, <TestParent: TestParent object>, <TestParent: TestParent object>]
-        >>> [p.as_leaf_class() for p in TestParent.objects.all()]
-        [<TestParent: TestParent object>, <TestChild: TestChild object>, <TestOtherChild: TestOtherChild object>]
-        >>> [p.as_leaf_class() for p in TestParent.objects.all()]
-        [<TestParent: TestParent object>, <TestChild: TestChild object>, <TestOtherChild: TestOtherChild object>]
-        >>> other_rel = OtherModelRel(child=child2, other=another)
-        Traceback (most recent call last):
-          File "<console>", line 1, in <module>
-          File "/usr/lib/python2.6/site-packages/django/db/models/base.py", line 311, in __init__
-            setattr(self, field.name, rel_obj)
-          File "/usr/lib/python2.6/site-packages/django/db/models/fields/related.py", line 273, in __set__
-            self.field.name, self.field.rel.to._meta.object_name))
-        ValueError: Cannot assign "<TestOtherChild: TestOtherChild object>": "OtherModelRel.parent" must be a "TestChild" instance.
-        >>> other_rel = OtherModelRel(child=child1, other=another)
-        Traceback (most recent call last):
-          File "<console>", line 1, in <module>
-          File "/usr/lib/python2.6/site-packages/django/db/models/base.py", line 311, in __init__
-            setattr(self, field.name, rel_obj)
-          File "/usr/lib/python2.6/site-packages/django/db/models/fields/related.py", line 273, in __set__
-            self.field.name, self.field.rel.to._meta.object_name))
-        ValueError: Cannot assign "<YetAnotherModel: YetAnotherModel object>": "OtherModelRel.other" must be a "OtherModel" instance.
-        >>> other_rel = OtherModelRel(child=child1, other=other)
-        >>> other_rel.parent
-        <TestChild: TestChild object>
-        >>> q = TestParent.objects.filter(content_type=ContentType.objects.get_for_model(TestChild))
-        >>> [p.as_leaf_class() for p in q]
-        [<TestChild: TestChild object>]
     '''
     
     content_type = models.ForeignKey(ContentType, editable=False, 

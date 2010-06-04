@@ -1,7 +1,7 @@
 '''
 @author: jnaous
 '''
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 
@@ -18,6 +18,8 @@ urlpatterns = patterns('',
     
     # TODO: Remove after testing
     (r'^dummyom/', include('openflow.dummyom.urls')),
+    
+    (r'^permissions/', include('expedient.common.permissions.urls')),
     
     (r'^admin/', include(admin.site.urls)),
 

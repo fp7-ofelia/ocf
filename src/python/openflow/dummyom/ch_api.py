@@ -34,7 +34,8 @@ def get_om(func, *args, **kwargs):
 @rpcmethod(signature=['struct', # return value
                       'int', 'string', 'string',
                       'string', 'string', 'string',
-                      'array', 'array'])
+                      'array', 'array'],
+            url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def create_slice(slice_id, project_name, project_description,
@@ -74,7 +75,7 @@ def create_slice(slice_id, project_name, project_description,
         'switches': [],
     }
 
-@rpcmethod(signature=['string', 'int'])
+@rpcmethod(signature=['string', 'int'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def delete_slice(slice_id, **kwargs):
@@ -83,19 +84,19 @@ def delete_slice(slice_id, **kwargs):
     
     return ""
 
-@rpcmethod(signature=['array'])
+@rpcmethod(signature=['array'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def get_switches(**kwargs):
     return kwargs['om'].get_switches()
 
-@rpcmethod(signature=['array'])
+@rpcmethod(signature=['array'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def get_links(**kwargs):
     return kwargs['om'].get_links()    
 
-@rpcmethod(signature=['string', 'string', 'string'])
+@rpcmethod(signature=['string', 'string', 'string'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def register_topology_callback(url, cookie, **kwargs):
@@ -106,7 +107,7 @@ def register_topology_callback(url, cookie, **kwargs):
     create_or_update(DummyCallBackProxy, filter_attrs, attrs)
     return ""
 
-@rpcmethod(signature=['string', 'string'])
+@rpcmethod(signature=['string', 'string'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def change_password(new_password, **kwargs):
