@@ -22,7 +22,7 @@ class UserProfile(models.Model):
     is_clearinghouse_user  = models.BooleanField("Clearinghouse account", default=False)
     max_priority_level     = models.IntegerField()
     supervisor             = models.ForeignKey(auth.models.User, related_name = 'supervisor')
-
+    #admin_level     = models.IntegerField(default=)
 
     def __unicode__(self):
         try:

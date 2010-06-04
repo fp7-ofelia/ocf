@@ -1,4 +1,5 @@
 from models import FlowSpace
+from openflow.optin_manager.users.models import UserProfile
 from utils import mac_to_int, dotted_ip_to_int
 from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
 
@@ -62,7 +63,6 @@ def single_fs_intersect(f1,f2,resultModel):
     return fr
 
 
-
 def multi_fs_intersect(FSs1, FSs2, resultModel):
     rFSs = []
     for FS1 in FSs1:
@@ -75,19 +75,12 @@ def multi_fs_intersect(FSs1, FSs2, resultModel):
 
 def make_flowspace(PostObject):
     f = FlowSpace()
-    if (PostObject['mac_from'] == "*"):
-        f.mac_src_s = 0
-        f.mac_src_e = 0xffffffffffff
-    else:
-        f.mac_src_s = mac_to_int(PostObject['mac_from'])
-        f.mac_src_e = mac_to_int(PostObject['mac_from'])
+    
+    f.mac_src_s = mac_to_int(PostObject['mac_from_s'])
+    f.mac_src_e = mac_to_int(PostObject['mac_from_e'])
         
-    if (PostObject['mac_to'] == "*"):
-        f.mac_dst_s = 0
-        f.mac_dst_e = 0xffffffffffff
-    else:
-        f.mac_dst_s = mac_to_int(PostObject['mac_to'])
-        f.mac_dst_e = mac_to_int(PostObject['mac_to'])
+    f.mac_dst_s = mac_to_int(PostObject['mac_to_s'])
+    f.mac_dst_e = mac_to_int(PostObject['mac_to_e'])
     
     f.vlan_id_s = int(PostObject['vlan_id_s'])
     f.vlan_id_e = int(PostObject['vlan_id_e'])
@@ -145,3 +138,10 @@ def range_to_match_struct(rangeFS):
             all_match = new_match
  
     return all_match
+
+def singlefs_is_subset_of(singleFS, multiFS):
+    pass
+
+
+
+

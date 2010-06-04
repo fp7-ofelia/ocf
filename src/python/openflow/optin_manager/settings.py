@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'registration',
     'openflow.optin_manager.users',
     'openflow.optin_manager.flowspace',
+    'openflow.optin_manager.opts',
     'openflow.optin_manager.xmlrpc_server',
 ###### For Testing #######################
     'openflow.optin_manager.dummyfv',
@@ -122,4 +123,4 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 # default site
 SITE_ID = 1
 SITE_NAME = "Expedient Opt-In Manager"
-SITE_DOMAIN = "beirut.stanford.edu"
+SITE_DOMAIN = "localhost:8443"

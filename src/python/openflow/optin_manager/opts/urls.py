@@ -1,7 +1,7 @@
 #URLCONF for flowspace management app
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('openflow.optin_manager.flowspace.views',
+urlpatterns = patterns('openflow.optin_manager.opts.views',
     url(r'^view_opt_in$', 'view_opt_in',{'error_msg' : 0}),
     url(r'^opt_in$', 'add_opt_in'),
     url(r'^opt_out$', 'opt_out'),

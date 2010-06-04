@@ -1,5 +1,5 @@
 from django import forms
-from utils import dotted_ip_to_int
+from openflow.optin_manager.flowspace.utils import dotted_ip_to_int
 from django.forms.util import ErrorList
 import re
 
@@ -16,8 +16,10 @@ class MACAddressForm(forms.Field):
 
 class AdminOptInForm(forms.Form):
     
-    mac_from    = MACAddressForm(initial = "*")
-    mac_to      = MACAddressForm(initial = "*")
+    mac_from_s    = MACAddressForm(initial = "00:00:00:00:00:00")
+    mac_from_e    = MACAddressForm(initial = "FF:FF:FF:FF:FF:FF")
+    mac_to_s      = MACAddressForm(initial = "00:00:00:00:00:00")
+    mac_to_e      = MACAddressForm(initial = "FF:FF:FF:FF:FF:FF")
     
     vlan_id_s   = forms.IntegerField(max_value = 4095, initial = 0)
     vlan_id_e   = forms.IntegerField(max_value = 4095, initial = 4095)

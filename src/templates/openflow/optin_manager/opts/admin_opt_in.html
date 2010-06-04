@@ -6,7 +6,7 @@
 	<div align="right">
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>	
-	<form name="input" action="/flowspace/opt_in" method="post">{% csrf_token %}
+	<form name="input" action="/opts/opt_in" method="post">{% csrf_token %}
 		{{form.errors.general}}
 		<table>
 		<tr>
@@ -30,14 +30,14 @@
 		<td>
 			<label for="id_mac_from">Source MAC address</label>
 		</td><td>
-			{{form.mac_from}}
-		</td><td>{{form.errors.mac_from}}</td>
+			{{form.mac_from_s}}-{{form.mac_from_e}}
+		</td><td>{{form.errors.mac_from_s}}{{form.errors.mac_from_e}}</td>
 		</tr><tr>
 		<td>
 			<label for="id_mac_to">Destination MAC address</label>
 		</td><td>
-			{{form.mac_to}}
-		</td><td>{{form.errors.mac_to}}</td>
+			{{form.mac_to_s}}-{{form.mac_to_e}}
+		</td><td>{{form.errors.mac_to_s}}{{form.errors.mac_to_e}}</td>
 		</tr><tr>
 		<td>
 			<label>VLAN Range</label>

@@ -171,8 +171,8 @@ class OMTests(TestCase):
         from openflow.tests.helpers import Flowspace
         from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVRule
         from openflow.optin_manager.dummyfv.models import DummyFVSlice
-        from openflow.optin_manager.flowspace.models import Experiment
-        from openflow.optin_manager.flowspace.models import ExperimentFLowSpace
+        from openflow.optin_manager.opts.models import Experiment
+        from openflow.optin_manager.opts.models import ExperimentFLowSpace
         from openflow.optin_manager.xmlrpc_server.ch_api import convert_star_int
         
         # get the switches into self.dpids_info
@@ -289,7 +289,7 @@ class OMTests(TestCase):
         Tests that slices are deleted correctly from the OM to FV
         """
         from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVSlice
-        from openflow.optin_manager.flowspace.models import Experiment, \
+        from openflow.optin_manager.opts.models import Experiment, \
             ExperimentFLowSpace
 
         num_slices = random.randint(1, 5)
@@ -323,10 +323,9 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        pprint("HHAA")
         from expedient.common.tests.client import browser
         from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
-        from openflow.optin_manager.flowspace.models import UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
+        from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
         from django.contrib.auth.models import User 
                
         #make a normal user on system
@@ -355,6 +354,10 @@ class OMTests(TestCase):
         self.exp_field_s = random.randint(0,2**width-3)
         self.exp_field_e = self.exp_field_s + 1  
         
+        # assign full flowspace to admin:
+        adm = User.objects.get(username="admin")
+        AdminFlowSpace.objects.create(user=adm)
+        
         #assign flowspace to user
         ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
                              ip_src_e=self.user_ip_src_e,)
@@ -381,7 +384,7 @@ class OMTests(TestCase):
         logged_in = b.login("https://localhost:8443/accounts/login/","user","password")
         self.assertTrue(logged_in,"Could not log in")
         
-        g = b.get_and_post_form("https://localhost:8443/flowspace/opt_in",
+        g = b.get_and_post_form("https://localhost:8443/opts/opt_in",
                                 dict(experiment=1,priority=100)) 
         
         uopt = UserOpts.objects.filter(user__username__exact="user")[0]
@@ -397,7 +400,7 @@ class OMTests(TestCase):
         self.assertEqual(getattr(optfs,"%s_e"%self.exp_field_name), self.exp_field_e)
 
         # now test opt out:
-        g = b.get_and_post_form("https://localhost:8443/flowspace/opt_out",
+        g = b.get_and_post_form("https://localhost:8443/opts/opt_out",
                                 {"1":"checked"})
         optfs = OptsFlowSpace.objects.filter(opt = uopt)
         self.assertEqual(optfs.count(),0)   

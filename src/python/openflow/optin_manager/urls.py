@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     (r'^$', 'openflow.optin_manager.users.views.index'),
     (r'^dashboard$', 'openflow.optin_manager.users.views.dashboard'),
 
-    (r'^flowspace/', include('openflow.optin_manager.flowspace.urls')),
+    (r'^opts/', include('openflow.optin_manager.opts.urls')),
 
     (r'^xmlrpc/', include('openflow.optin_manager.xmlrpc_server.urls')),
     

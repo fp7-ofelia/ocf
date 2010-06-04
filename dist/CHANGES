@@ -12,6 +12,9 @@
     - Fixed bugs in Opt-In Manager
     - Added more tests to Opt-In Manager
 
+    - Opt-in and Opt-out tests work now.
+    - One bug in Opt-out view fixed.
+
     Known Issues:
     - Need to enable certificate verification by default for 
       PasswordXMLRPCServerProxy
@@ -25,3 +28,6 @@
     - Permission system missing middleware to redirect to permission URL
     - Documentation is lacking horribly.
     - install.sh script still has the bugs from 0.0.1-alpha1
+
+    - OM Admin hierarchy system in development.
+    - OM integration with webauth to be done.
