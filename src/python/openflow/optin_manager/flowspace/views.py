@@ -232,6 +232,10 @@ def opt_out(request):
         if (request.method == "POST"):
             fv_args = []
             for key in request.POST:
+                try:
+                    int(key)
+                except:
+                    continue
                 ofs = OptsFlowSpace.objects.get(id=key)
                 for match in ofs.matchstruct_set.all():
                     fv_arg = {"operation":"REMOVE", "id":match.fv_id}
