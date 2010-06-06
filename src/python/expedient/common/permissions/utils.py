@@ -3,49 +3,65 @@ Created on Jun 1, 2010
 
 @author: jnaous
 '''
+from django.db import models
 from expedient.common.permissions.models import ControlledContentType,\
-    ExpedientPermission, PermissionInfo
+    ExpedientPermission, PermissionInfo, ObjectPermission, PermissionUser
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,\
     PermissionRegistrationConflict
 from django.contrib.auth.models import User
+from django.conf.urls.defaults import patterns, url
 
-DEFAULT_CONTROLLED_TYPE_PERMISSIONS = ["can_add", "can_view", "can_delete"]
+DEFAULT_CONTROLLED_TYPE_PERMISSIONS = ["can_add", "can_view", "can_delete", "can_modify"]
+CONTROLLED_TYPE_URL_NAME = "permissions-controlled-type"
 
-def register_controlled_type(
-                             model, can_add_url=None,
-                             can_view_url=None, can_delete_url=None):
+def type_permission_url(view_func, model, perm_name):
     """
-    Creates a ControlledContentType object for the model with default
-    permission names: <module>.<modelname>.can_add/can_view/can_delete.
+    Get the url pattern to be used for type permissions.
+    """
+    ct_ct = ContentType.objects.get_for_model(model)
+    model_ct = ContentType.objects.get_for_model(model)
+    return url(
+        r"^/%s/%d/%d/(?P<usr_id>\d+)/$" % (perm_name, ct_ct.id, model_ct.id),
+        view_func,
+    )
+
+def register_type_default_permissions():
+    """
+    Creates default permissions: can_add/can_view/can_delete/can_modify for classes.
+    """
+    for perm_name in DEFAULT_CONTROLLED_TYPE_PERMISSIONS:
+        register_type_permission(perm_name)
+
+def register_type_permission(perm_name):
+    """
+    Add a new class level permission called C{perm_name}.
     
-    @param model: the model whose class we wish to control.
-    @type model: L{class}
-    @keyword can_add_url: url name for the can_add permission
-    @keyword can_view_url: url name for the can_view permission
-    @keyword can_delete_url: url name for the can_delete permission
+    @param perm_name: name of the new permission
+    @type perm_name: C{str}
+    """
+    new_url = "%s-%s" % (CONTROLLED_TYPE_URL_NAME, perm_name)
+    register_permission(perm_name, new_url)
+
+def register_permission_for_type(model, perm_name):
+    """
+    Add L{ObjectPermission}s for a model.
+    
+    @param model: the model which we wish to add the permission for.
+    @param perm_name: the permission name.
     """
     
-    ct = ContentType.objects.get_for_model(model)
+    model_ct = ContentType.objects.get_for_model(model)
     
-    try:
-        ControlledContentType.objects.create(content_type=ct)
-        register_permission(
-            "%s.%s.can_add" % (model.__module__, model.__name__),
-            can_add_url)
-        register_permission(
-            "%s.%s.can_view" % (model.__module__, model.__name__),
-            can_view_url)
-        register_permission(
-            "%s.%s.can_delete" % (model.__module__, model.__name__),
-            can_delete_url)
-    except IntegrityError:
-        pass
-        
+    ObjectPermission.objects.get_or_create(
+        permission=ExpedientPermission.objects.get(name=perm_name),
+        target=model_ct,
+    )
+
 def register_permission(name, url_name=None):
     """
-    Create a new permission.
+    Create a new L{ExpedientPermission}.
     
     @param name: The name of the permission. Must be globally unique.
     @type name: L{str}
@@ -61,34 +77,64 @@ def register_permission(name, url_name=None):
     else:
         if perm.url_name != url_name:
             raise PermissionRegistrationConflict(name, url_name, perm.url_name)
-    
-def give_permission_to(giver, receiver, perm_name, delegatable=False):
+
+def register_permission_for_object(object, perm_name):
     """
-    Gives permission to a permission user instance.
+    Wrapper around creating a L{ObjectPermission}.
+    """
+    ObjectPermission.objects.get_or_create(
+        permission=ExpedientPermission.objects.get(name=perm_name),
+        target=object,
+    )
+
+def give_permission_to(giver, receiver, perm_name, obj_or_class, delegatable=False):
+    """
+    Gives permission over object or class to a permission user instance.
     
-    @param giver: The permission user model giving the permission.
-    @type giver: L{expedient.common.permissions.models.PermissionUserModel} or
-        L{django.contrib.auth.models.User}.
-    @param receiver: The permission user model receiving the permission.
-    @type receiver: L{expedient.common.permissions.models.PermissionUserModel}
+    @param giver: The permission user giving the permission.
+    @type giver: object registered as permission user or L{PermissionUser}
+    @param receiver: The permission user receiving the permission.
+    @type receiver: object registered as permission user or L{PermissionUser}
     @param perm_name: The permission's name
     @type perm_name: L{str}
+    @param obj_or_class: The object or the class to give permission to.
+    @type obj_or_class: model instance or class
     @keyword delegatable: Can the receiver in turn give the permission out?
         Default is False.
     @type delegatable: L{bool}
     """
     
-    # Check the giver's permissions
-    if type(giver) != User or not giver.is_superuser:
-        try:
-            perm_info = giver.permissioninfo_set.all().get(
-                permission__name=perm_name, can_delegate=True)
-        except PermissionInfo.DoesNotExist:
+    if not isinstance(obj_or_class, models.Model):
+        # assume it's a model class, so get the contenttype for it.
+        obj_or_class = ContentType.objects.get_for_model(obj_or_class)
+    
+    if not isinstance(giver, PermissionUser):
+        giver, created = PermissionUser.objects.get_or_create_from_instance(
+            giver,
+        )
+        if created:
             raise PermissionCannotBeDelegated(giver, perm_name)
+    
+    if not isinstance(receiver, PermissionUser):
+        receiver, created = PermissionUser.objects.get_or_create_from_instance(
+            receiver,
+        )
+
+    # Check the giver's permissions
+    try:
+        perm_info = giver.permissioninfo_set.all().get(
+            obj_permission__permission__name=perm_name,
+            obj_permission__object_type=ContentType.objects.get_for_model(
+                obj_or_class),
+            obj_permission__object_id=obj_or_class.id,
+            can_delegate=True,
+        )
+    except PermissionInfo.DoesNotExist:
+        raise PermissionCannotBeDelegated(giver, perm_name)
 
     PermissionInfo.objects.create(
-        permission=perm_info.permission,
-        perm_user=receiver,
+        obj_permission=perm_info.obj_permission,
+        user=receiver,
         can_delegate=delegatable,
     )
 
@@ -99,10 +145,10 @@ def get_user_from_req(request, *args, **kwargs):
 
     For example::
     
-        @require_obj_permission_for_view(
+        @require_objs_permissions_for_view(
             ["can_view_obj_detail"],
             get_user_from_req,
-            get_object_from_filter_func(Obj, 1),
+            get_objects_from_filter_func(Obj, 1),
             ["GET"],
         )
         def view_obj_detail(request, obj_id):
