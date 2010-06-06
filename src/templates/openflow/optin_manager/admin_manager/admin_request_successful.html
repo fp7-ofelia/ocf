@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block scripts %}
+<script type="text/javascript">
+function clicked(){
+window.location="/dashboard"
+}
+</script>
+{% endblock %}
+{% block content %}
+<div class="main">
+	<center>
+	<b>{{user.username}},</b><br/>
+	Your admin request submitted successfully and waiting admin approval.<br/>
+	<button type=button onClick="clicked()">OK</button>
+	</center>
+	
+</div>
+{% endblock content %}

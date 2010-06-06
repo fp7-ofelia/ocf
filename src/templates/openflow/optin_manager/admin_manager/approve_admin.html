@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main">
+	<h2>Approve Admin Promotion Requests</h2>
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>	
+	
+	<table>
+	{% for req in reqs %}
+	<tr>
+	<td>{{req.user}}</td>
+	<td>{{req}}</td>
+	<td>{{req.req_priority}}</td>
+	<td><form name="input" 
+			action="/admin_manager/approve_admin/{{req.id}}/approve"
+			method="post">{% csrf_token %}
+			<input type="submit" value="Approve"/>
+			</form>
+	</td>
+	<td><form name="input" 
+			action="/admin_manager/approve_admin/{{req.id}}/reject"
+			method="post">{% csrf_token %}
+			<input type="submit" value="Reject"/>
+			</form>
+	</td>
+	
+	</tr>
+	
+	{% endfor %}
+	</table>
+	
+{% endblock content %}	

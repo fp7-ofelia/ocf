@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+	<h2> Setup FlowVisor </h2>
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>	
+	<form name="input" action="/controls/set_flowvisor" method="post">
+	{% csrf_token %}
+	{{form.as_p}}
+	<input type="submit" value="submit" />
+	</form>
+</div>
+{% endblock content %}
