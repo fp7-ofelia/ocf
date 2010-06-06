@@ -109,7 +109,8 @@ def add_opt_in(request):
                                         )
                     else:
                         tmp.delete()
-                        form._errors['general'] = ErrorList(["No intersection between opted-in flowspace,\
+                        form._errors['general'] = ErrorList(["No intersection \
+                        between opted-in flowspace,\
                         your flowspace and experiment flowspace"])
         else: #Not a post request
             defexp = 0

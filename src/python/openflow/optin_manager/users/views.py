@@ -19,6 +19,7 @@ def dashboard(request):
     return simple.direct_to_template(request, 
                             template = 'openflow/optin_manager/dashboard.html',
                             extra_context = {
+                                    'user':request.user,
                                     'profile': profile, 
                                     'username': username,
                             },
