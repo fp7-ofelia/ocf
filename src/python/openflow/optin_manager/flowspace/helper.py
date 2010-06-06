@@ -3,6 +3,47 @@ from openflow.optin_manager.users.models import UserProfile
 from utils import mac_to_int, dotted_ip_to_int
 from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
 
+class Intervals(object):
+    def __init__(self):
+        super(Intervals,self).__init__()
+        self.intervals = []
+        self.points = []
+        
+    def add_interval(self,istart,iend,index):
+        self.intervals.append([istart,iend,index])
+        self.points.append(istart)
+        self.points.append(iend)
+
+    def contain(self,istart,iend):
+        if (istart > iend): return False
+        self.intervals.sort(lambda x,y:cmp(x[0],y[0]))
+        current_point = istart
+        while (True):
+            actives = filter(lambda x:x[0] <= current_point and
+                              x[1] > current_point,self.intervals)
+            if (len(actives) == 0): return False
+            current_point = max(actives,key=lambda x:x[1])
+            current_point = current_point[1]
+            if (current_point >= iend): return True
+
+    def get_intersections(self,istart,iend):
+        indices = []
+        self.intervals.sort(lambda x,y:cmp(x[0],y[0]))
+        current_point = istart
+        while (True):
+            actives = filter(lambda x:x[0] <= current_point and
+                              x[1] > current_point,self.intervals)
+            current_point = min(
+                                filter(lambda x: x>current_point,self.points),
+                                )
+            if len(actives) == 0 and (not current_point):
+                break
+            elif len(actives) > 0:
+                indices.append(map(lambda x: x[2],actives))
+            if (current_point >= iend): break       
+        return indices
+
+
 def single_fs_intersect(f1,f2,resultModel):
     fr = resultModel()
     
@@ -140,8 +181,33 @@ def range_to_match_struct(rangeFS):
     return all_match
 
 def singlefs_is_subset_of(singleFS, multiFS):
-    pass
-
+    fields = ["ip_src","ip_dst","tp_src","tp_dst","mac_src","mac_dst",
+              "vlan_id","ip_proto","eth_type"]
+    potential_intersections = [range(len(multiFS))]
+    for field in fields:
+        field_s = getattr(singleFS,"%s_s"%field)
+        field_e = getattr(singleFS,"%s_e"%field)
+        new_intersections = []
+        print(potential_intersections)
+        for index_list in potential_intersections:
+            i = Intervals()
+            for index in index_list:
+                i.add_interval(getattr(multiFS[index], "%s_s"%field),
+                                    getattr(multiFS[index],"%s_e"%field),index )
+            if i.contain(field_s, field_e):
+                result = i.get_intersections(field_s, field_e)
+                for elem in result: new_intersections.append(elem)
+        potential_intersections = new_intersections
+        if len(potential_intersections)==0: return False
+    return True
+            
+def copy_fs(from_fs, to_fs):
+    fields = ["ip_src","ip_dst","tp_src","tp_dst","mac_src","mac_dst",
+              "vlan_id","ip_proto","eth_type"]
+    for field in fields:
+        setattr(to_fs, "%s_s"%field, getattr(from_fs,"%s_s"%field))  
+        setattr(to_fs, "%s_e"%field, getattr(from_fs,"%s_e"%field))  
+    
 
 
 
