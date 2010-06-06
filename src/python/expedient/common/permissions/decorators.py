@@ -133,18 +133,8 @@ class require_objs_permissions_for_view(object):
         self.methods = methods
         
     def __call__(self, f):
-        def wrapper(request, *args, **kwargs):
-            if request.method in self.methods:
-                user = self.user_func(request, *args, **kwargs)
-                targets = self.target_func(request, *args, **kwargs)
-
-                missing, target = ExpedientPermission.objects.get_missing(
-                    user, self.perm_names, targets)
-                        
-                if missing:
-                    raise PermissionDenied(missing.name, target, user)
-            
-            # All is good. Call the function
-            return f(request, *args, **kwargs)
-        
-        return wrapper
+        from middleware import PermissionMiddleware
+        PermissionMiddleware.add_required_view_permissions(
+            f, self.perm_names, self.user_func, self.target_func, self.methods,
+        )
+        return f

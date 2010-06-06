@@ -6,7 +6,8 @@ Created on May 1, 2010
 from expedient.common.rpc4django import rpcmethod
 from models import OpenFlowAggregate
 
-@rpcmethod(signature=['string', 'string'])
+# TODO: change this to be protected by some authentication
+@rpcmethod(signature=['string', 'string'], url_name="openflow_open_xmlrpc")
 def topology_changed(cookie, **kwargs):
     '''Reload the topology'''
     try:
@@ -16,7 +17,7 @@ def topology_changed(cookie, **kwargs):
     agg.update_topology()
     return ""
 
-@rpcmethod(signature=['string', 'string'])
+@rpcmethod(signature=['string', 'string'], url_name="openflow_open_xmlrpc")
 def ping(data):
     '''
     Test method to see that everything is up.

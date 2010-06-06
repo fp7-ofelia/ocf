@@ -7,7 +7,7 @@ be called from the urls.py module of a
 
 It should be called like this from urls.py:
 
-    (r'^RPC2$', 'rpc4django.views.serve_rpc_request'),
+    rpc_url(r'^RPC2$', name="my_url_name"),
 
 '''
 
@@ -17,7 +17,6 @@ from xml.parsers.expat import ExpatError
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.conf import settings
-from django.core.urlresolvers import reverse, NoReverseMatch
 import types
 from rpcdispatcher import RPCDispatcher
 from __init__ import version

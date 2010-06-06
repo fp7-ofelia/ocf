@@ -1,7 +1,8 @@
 '''
 @author: jnaous
 '''
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import patterns, url
+from expedient.common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns('openflow.plugin.views',
 #    url(r'^$', 'home', name='openflow_home'),
@@ -11,13 +12,7 @@ urlpatterns = patterns('openflow.plugin.views',
 )
 
 urlpatterns += patterns('',
-    url(r'^gapi/$',
-        'expedient.common.rpc4django.views.serve_rpc_request',
-        name="openflow_gapi"),
-    url(r'^xmlrpc/$',
-        'expedient.common.rpc4django.views.serve_rpc_request',
-        name="openflow_xmlrpc"),
-    url(r'^open/xmlrpc/$',
-        'expedient.common.rpc4django.views.serve_rpc_request',
-        name="openflow_open_xmlrpc"),
+    rpc_url(r'^gapi/$', name="openflow_gapi"),
+    rpc_url(r'^xmlrpc/$', name="openflow_xmlrpc"),
+    rpc_url(r'^open/xmlrpc/$', name="openflow_open_xmlrpc"),
 )

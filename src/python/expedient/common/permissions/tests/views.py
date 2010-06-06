@@ -26,15 +26,6 @@ def test_view_x2(request, obj_id=None):
     obj = get_object_or_404(PermissionTestClass, pk=obj_id)
     return HttpResponse("%s" % obj.get_val_x2(user_kw=request.user))
 
-@csrf_exempt
-def test_view_crud(request, obj_id=None):
-    if obj_id == None:
-        # Creation
-        return test_view_create(request)
-    else:
-        # update:
-        return test_view_update(request, obj_id)
-
 @require_objs_permissions_for_view(
     ["can_add"],
     get_user_from_req,
@@ -48,19 +39,22 @@ def test_view_create(request):
         post_save_redirect=reverse("test_view_crud"),
     )
 
+def test_protected_url(request):
+    return HttpResponse("Worked")
+
 @require_objs_permissions_for_view(
     ["can_set_val"],
     get_user_from_req,
-    get_queryset(PermissionTestClass, 1),
+    get_queryset(PermissionTestClass, 'obj_id'),
     ["POST"],
 )
 @require_objs_permissions_for_view(
     ["can_read_val"],
     get_user_from_req,
-    get_queryset(PermissionTestClass, 1),
+    get_queryset(PermissionTestClass, 'obj_id'),
     ["GET"],
 )
-def test_view_update(request, obj_id):
+def test_view_update(request, obj_id=None):
     return create_update.update_object(
         request, PermissionTestClass,
         object_id=obj_id,
@@ -94,9 +88,9 @@ def other_perms_view(request, permission, user, target, redirect_to=None):
     else:
         return HttpResponse(
 """
-Do you want to get %s permission for obj id %s?
+Do you want to get %s permission for obj %s?
 <form action="" method="POST">
 <input type="submit" value="Yes" />
 <input type="button" value="No" onclick="document.location='%s'" />
 </form>
-""" % (permission.name, target.id, reverse("test_view_crud")))
+""" % (permission.name, target, reverse("test_view_crud")))

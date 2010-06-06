@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,\
     PermissionRegistrationConflict, PermissionDoesNotExist
 from django.http import Http404
+from expedient.common.permissions.middleware import PermissionMiddleware
 
 def _stringify_func(f):
     if callable(f):
@@ -36,7 +37,7 @@ def register_permission_for_obj_or_class(obj_or_class, permission):
         except ExpedientPermission.DoesNotExist:
             raise PermissionDoesNotExist(permission)
 
-    ObjectPermission.objects.get_or_create_from_instance(
+    return ObjectPermission.objects.get_or_create_from_instance(
         obj_or_class,
         permission=permission,
     )
@@ -135,11 +136,14 @@ def give_permission_to(receiver, permission, obj_or_class,
         obj_perm, creatd = ObjectPermission.objects.get_or_create_from_instance(
             obj_or_class, permission=permission)
     
-    PermissionInfo.objects.create(
+    pi, created = PermissionInfo.objects.get_or_create(
         obj_permission=obj_perm,
         user=receiver,
-        can_delegate=delegatable,
+        defaults=dict(can_delegate=delegatable),
     )
+    if not created and pi.can_delegate != delegatable:
+        pi.can_delegate = delegatable
+        pi.save()
 
 def get_user_from_req(request, *args, **kwargs):
     '''
@@ -218,6 +222,18 @@ def get_queryset_from_class(klass):
         return ContentType.objects.filter(pk=ct.pk)
     return target_func
 
+def get_queryset_from_id(klass, id):
+    """
+    Returns a function usable as a C{target_func} parameter. The returned
+    function returns a C{QuerySet} containing one object with the given C{id}.
+    
+    @param klass: the class of the queryset's model.
+    @param id: the object's id.
+    """
+    def target_func(*args, **kwargs):
+        return klass.objects.filter(id=id)
+    return target_func
+
 def get_object_from_ids(ct_id, id):
     """
     Get an object from the ContentType id and from the object's id.
@@ -233,3 +249,11 @@ def get_object_from_ids(ct_id, id):
         return ct.get_object_for_this_type(pk=id)
     except ct.model_class().DoesNotExist:
         raise Http404()
+
+def require_objs_permissions_for_url(url, perm_names, user_func,
+                                     target_func, methods=["GET", "POST"]):
+    """
+    Convenience wrapper around L{PermissionMiddleware}.
+    """
+    PermissionMiddleware.add_required_url_permissions(
+        url, perm_names, user_func, target_func, methods)

@@ -30,3 +30,5 @@ icing-tr.pdf
 om.db
 om/src/db/om.db
 bin/
+.project
+.pydevproject
