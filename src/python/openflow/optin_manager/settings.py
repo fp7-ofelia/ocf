@@ -93,7 +93,9 @@ INSTALLED_APPS = (
     'openflow.optin_manager.users',
     'openflow.optin_manager.flowspace',
     'openflow.optin_manager.opts',
+    'openflow.optin_manager.admin_manager',
     'openflow.optin_manager.xmlrpc_server',
+    'openflow.optin_manager.controls',
 ###### For Testing #######################
     'openflow.optin_manager.dummyfv',
 )
