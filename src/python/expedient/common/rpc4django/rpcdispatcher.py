@@ -152,7 +152,7 @@ class RPCDispatcher:
     Dispatches method calls to either the xmlrpc or jsonrpc dispatcher
     '''
     
-    def __init__(self, url='', apps=[], restrict_introspection=False):
+    def __init__(self, url='', restrict_introspection=False):
         version = platform.python_version_tuple()
         self.url = url
         self.rpcmethods = []        # a list of RPCMethod objects
@@ -164,8 +164,6 @@ class RPCDispatcher:
             self.register_method(self.system_methodhelp)
             self.register_method(self.system_methodsignature)
             self.register_method(self.system_describe)
-            
-        self.register_rpcmethods(apps)
         
     @rpcmethod(name='system.describe', signature=['struct'])
     def system_describe(self):
@@ -222,31 +220,6 @@ class RPCDispatcher:
         raise Fault(APPLICATION_ERROR, 'No method found with name: ' + \
                     str(method_name))
                
-    def register_rpcmethods(self, apps):
-        '''
-        Scans the installed apps for methods with the rpcmethod decorator
-        Adds these methods to the list of methods callable via RPC
-        '''    
-        
-        for appname in apps:
-            # check each app for any rpcmethods
-            app = __import__(appname, globals(), locals(), ['*'])
-            for obj in dir(app):
-                method = getattr(app, obj)
-                if callable(method) and \
-                   getattr(method, 'is_rpcmethod', False):
-                    # if this method is callable and it has the rpcmethod
-                    # decorator, add it to the dispatcher
-                    self.register_method(method, method.external_name)
-                elif isinstance(method, types.ModuleType):
-                    # if this is not a method and instead a sub-module,
-                    # scan the module for methods with @rpcmethod
-                    try:
-                        self.register_rpcmethods(["%s.%s" % (appname, obj)])
-                    except ImportError:
-                        pass
-
-    
     def jsondispatch(self, raw_post_data, **kwargs):
         '''
         Sends the post data to a jsonrpc processor

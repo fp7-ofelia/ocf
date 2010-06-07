@@ -44,7 +44,7 @@ HTTP_ACCESS_ALLOW_ORIGIN = getattr(settings,
 # these will be scanned for @rpcmethod decorators
 APPS = getattr(settings, 'INSTALLED_APPS', [])
 
-def _check_request_permission(request, request_format='xml'):
+def _check_request_permission(request, request_format='xml', url_ns="root"):
     '''
     Checks whether this user has permission to perform the specified action
     This method does not check method call validity. That is done later
@@ -60,6 +60,7 @@ def _check_request_permission(request, request_format='xml'):
     '''
     
     user = getattr(request, 'user', None)
+    dispatcher = dispatchers["url_ns"]
     methods = dispatcher.list_methods()
     method_name = dispatcher.get_method_name(request.raw_post_data, \
                                              request_format)
@@ -126,12 +127,13 @@ def _is_xmlrpc_request(request):
     
     return False
 
-@csrf_exempt
-def serve_rpc_request(request, **kwargs):
+def serve_rpc_request(request, url_ns="root", **kwargs):
     '''
     This method handles rpc calls based on the content type of the request
     '''
-
+    
+    dispatcher = dispatchers[url_ns]
+    
     if request.method == "POST" and len(request.POST) > 0:
         # Handle POST request with RPC payload
         
@@ -145,7 +147,7 @@ def serve_rpc_request(request, **kwargs):
             if not _check_request_permission(request, 'xml'):
                 return HttpResponseForbidden()
             
-            resp = dispatcher.xmldispatch(request.raw_post_data, \
+            resp = dispatcher.xmldispatch(request.raw_post_data,
                                           request=request, **kwargs)
             response_type = 'text/xml'
         else:
@@ -155,7 +157,7 @@ def serve_rpc_request(request, **kwargs):
             if not _check_request_permission(request, 'json'):
                 return HttpResponseForbidden()
             
-            resp = dispatcher.jsondispatch(request.raw_post_data, \
+            resp = dispatcher.jsondispatch(request.raw_post_data,
                                            request=request)
             response_type = 'application/json'
             
@@ -205,12 +207,6 @@ def serve_rpc_request(request, **kwargs):
         return render_to_response('rpc4django/rpcmethod_summary.html', \
                                   template_data)
 
-# reverse the method for use with system.describe and ajax
-try:
-    URL = reverse(serve_rpc_request)
-except NoReverseMatch:
-    URL = ''
-    
 # exclude from the CSRF framework because RPC is intended to be used cross site
 try:
     # Django 1.2
@@ -226,7 +222,37 @@ except ImportError:
 if csrf_exempt is not None:
     serve_rpc_request = csrf_exempt(serve_rpc_request)
 
+dispatchers = _register_rpcmethods(APPS, RESTRICT_INTROSPECTION)
+
+def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
+    '''
+    Scans the installed apps for methods with the rpcmethod decorator
+    Adds these methods to the list of methods callable via RPC
+    '''
     
-# instantiate the rpcdispatcher -- this examines the INSTALLED_APPS
-# for any @rpcmethod decorators and adds them to the callable methods
-dispatcher = RPCDispatcher(URL, APPS, RESTRICT_INTROSPECTION) 
+    for appname in apps:
+        # check each app for any rpcmethods
+        app = __import__(appname, globals(), locals(), ['*'])
+        for obj in dir(app):
+            method = getattr(app, obj)
+            if callable(method) and \
+               getattr(method, 'is_rpcmethod', False):
+                # if this method is callable and it has the rpcmethod
+                # decorator, add it to the dispatcher
+                if method.url_ns not in dispatchers:
+                    url = reverse(serve_rpc_request,
+                              kwargs={"url_ns": method.url_ns})
+                    dispatchers[method.url_ns] = RPCDispatcher(
+                        url, restrict_introspection)
+                dispatchers[method.url_ns].register_method(
+                    method, method.external_name)
+            elif isinstance(method, types.ModuleType):
+                # if this is not a method and instead a sub-module,
+                # scan the module for methods with @rpcmethod
+                try:
+                    _register_rpcmethods(
+                        ["%s.%s" % (appname, obj)], 
+                        restrict_introspection, dispatchers)
+                except ImportError:
+                    pass
+    return dispatchers
