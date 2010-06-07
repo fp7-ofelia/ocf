@@ -10,9 +10,8 @@ from django.contrib import auth
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.models import ControlledModel
 
-class Aggregate(Extendable, ControlledModel):
+class Aggregate(Extendable):
     '''
     Holds information about an aggregate. Needs to be extended by plugins.
     

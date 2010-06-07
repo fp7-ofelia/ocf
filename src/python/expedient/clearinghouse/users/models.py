@@ -6,9 +6,8 @@ Created on Dec 3, 2009
 
 from django.db import models
 from django.contrib import auth
-from expedient.common.permissions.models import PermissionUserModel
 
-class UserProfile(PermissionUserModel):
+class UserProfile(models.Model):
     '''
     Additional information about a user.
     

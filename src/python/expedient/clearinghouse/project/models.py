@@ -3,9 +3,8 @@
 '''
 from django.db import models
 from django.contrib.auth.models import User
-from expedient.common.permissions.models import PermissionUserModel
 
-class Project(PermissionUserModel):
+class Project(models.Model):
     '''
     A project is a collection of users working on the same set of slices.
     

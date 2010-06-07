@@ -28,12 +28,14 @@ def class_permission_url(view_func, model, perm_name):
         view_func,
     )
 
-def register_class_default_permissions():
+def register_class_default_permissions(klass=None):
     """
-    Creates default permissions: can_add/can_view/can_delete/can_modify for classes.
+    Creates default permissions: can_add/can_view/can_delete/can_modify
+    for classes.
     """
     for perm_name in DEFAULT_CONTROLLED_CLASS_PERMISSIONS:
         register_class_permission(perm_name)
+        if klass: register_permission_for_obj_or_class(klass, perm_name)
 
 def register_class_permission(perm_name):
     """
@@ -57,11 +59,10 @@ def register_permission_for_obj_or_class(obj_or_class, perm_name):
     if not isinstance(obj_or_class, models.Model):
         # assume it's a model class, so get the contenttype for it.
         obj_or_class = ContentType.objects.get_for_model(obj_or_class)
-    register_permission_for_object(model_ct, perm_name)
 
-    ObjectPermission.objects.get_or_create(
+    ObjectPermission.objects.get_or_create_from_instance(
+        obj_or_class,
         permission=ExpedientPermission.objects.get(name=perm_name),
-        target=object,
     )
 
 def register_permission(name, url_name=None):
@@ -75,13 +76,10 @@ def register_permission(name, url_name=None):
     """
     
     # check if the permission is registered with a different url somewhere else
-    try:
-        perm = ExpedientPermission.objects.get(name=name)
-    except ExpedientPermission.DoesNotExist:
-        ExpedientPermission.objects.create(name=name, url_name=url_name)
-    else:
-        if perm.url_name != url_name:
-            raise PermissionRegistrationConflict(name, url_name, perm.url_name)
+    perm, created = ExpedientPermission.objects.get_or_create(
+        name=name, defaults=dict(url_name=url_name))
+    if not created and perm.url_name != url_name:
+        raise PermissionRegistrationConflict(name, url_name, perm.url_name)
 
 def give_permission_to(receiver, perm_name, obj_or_class,
                        giver=None, delegatable=False):

@@ -1,6 +1,14 @@
-05-19-2010: 0.0.1-alpha1
-    Initial release.
-
+06-07-2010: 0.0.3-alpha1
+    Changes:
+    - Fixed Opt-in and Opt-out tests.
+    - One bug in Opt-out view fixed.
+    - Checked out of the correct branch.
+    - Updated permission system.
+    
+    Known Issues:
+    - OM flowspace delegation is work-in-progress.
+    - OM integration with webauth incomplete.
+    
 06-02-2010: 0.0.2-alpha1
     Changes:
     - Added permissions to the Clearinghouse
@@ -25,3 +33,6 @@
     - Permission system missing middleware to redirect to permission URL
     - Documentation is lacking horribly.
     - install.sh script still has the bugs from 0.0.1-alpha1
+
+05-19-2010: 0.0.1-alpha1
+    Initial release.
