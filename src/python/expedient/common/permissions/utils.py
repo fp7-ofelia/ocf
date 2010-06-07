@@ -20,7 +20,7 @@ def class_permission_url(view_func, model, perm_name):
     """
     Get the url pattern to be used for class permissions.
     """
-    ct_ct = ContentType.objects.get_for_model(model)
+    ct_ct = ContentType.objects.get_for_model(ContentType)
     model_ct = ContentType.objects.get_for_model(model)
     return url(
         r"^%s/%d/%d/(?P<user_ct_id>\d+)/(?P<user_id>\d+)/$" % (
