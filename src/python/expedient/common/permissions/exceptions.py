@@ -22,6 +22,7 @@ class PermissionDenied(Exception):
     def __init__(self, perm_name, target, user, url_name):
         message = "Permission %s was not found for permission user %s for \
 target object %s" % (perm_name, user, target)
+        self.perm_name = perm_name
         self.url_name = url_name
         self.target = target
         self.user = user
