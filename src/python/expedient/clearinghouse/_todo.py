@@ -6,7 +6,8 @@ Created on May 14, 2010
 
 ## XMLRPC
 # TODO: Add permissions to XMLRPC calls
-# TODO: Limit the scope of callable XMLRPC calls depending on the url
+# DONE: Limit the scope of callable XMLRPC calls depending on the url
+# TODO: Update rpc4django tests
 
 ## GAPI
 # TODO: Check the security of calls to the Django GAPI, use x509 certs?
@@ -19,8 +20,8 @@ Created on May 14, 2010
 # TODO: Add tests for adding an Aggregate to the CH
 # TODO: Add Permissions for aggregates - urls, create/update/delete
 ### Permissions
-# TODO: Add Middleware to catch PermissionDenied exceptions and redirect
-# TODO: Add URLs for permissions: default and others.
+# DONE: Add Middleware to catch PermissionDenied exceptions and redirect
+# DONE: Add URLs for permissions: default and others.
 # TODO: Remove all old permission stuff from CH apps
 # TODO: Add pages/views for permission management
 # TODO: Add tests for permission system
