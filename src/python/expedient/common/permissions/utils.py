@@ -4,14 +4,12 @@ Created on Jun 1, 2010
 @author: jnaous
 '''
 from django.db import models
-from expedient.common.permissions.models import ControlledContentType,\
+from expedient.common.permissions.models import \
     ExpedientPermission, PermissionInfo, ObjectPermission, PermissionUser
 from django.contrib.contenttypes.models import ContentType
-from django.db import IntegrityError
 from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,\
-    PermissionRegistrationConflict
-from django.contrib.auth.models import User
-from django.conf.urls.defaults import patterns, url
+    PermissionRegistrationConflict, PermissionDoesNotExist
+from django.conf.urls.defaults import url
 
 DEFAULT_CONTROLLED_CLASS_PERMISSIONS = ["can_add", "can_view", "can_delete", "can_modify"]
 CONTROLLED_CLASS_URL_NAME = "permissions-controlled-class"
@@ -129,11 +127,20 @@ def give_permission_to(receiver, perm_name, obj_or_class,
                 obj_permission__object_id=obj_or_class.id,
                 can_delegate=True,
             )
+            obj_perm = perm_info.obj_permission
         except PermissionInfo.DoesNotExist:
             raise PermissionCannotBeDelegated(giver, perm_name)
-
+    else:
+        try:
+            perm = ExpedientPermission.objects.get(name=perm_name)
+        except ExpedientPermission.DoesNotExist:
+            raise PermissionDoesNotExist(perm_name)
+        
+        obj_perm, creatd = ObjectPermission.objects.get_or_create_from_instance(
+            obj_or_class, permission=perm)
+    
     PermissionInfo.objects.create(
-        obj_permission=perm_info.obj_permission,
+        obj_permission=obj_perm,
         user=receiver,
         can_delegate=delegatable,
     )

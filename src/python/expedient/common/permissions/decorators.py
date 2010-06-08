@@ -51,7 +51,7 @@ class require_obj_permissions(object):
         should have one argument: C{wrapper} which is the original function
         that would have been returned.
         """
-        def wrapper(f, obj, *args, **kw):
+        def require_obj_permissions_wrapper(obj, *args, **kw):
             """
             Wrapper for the called method that checks the permissions before
             calling the method.
@@ -77,9 +77,9 @@ class require_obj_permissions(object):
         
         # call the prewrapper if it is defined
         if prewrapper_func:
-            return prewrapper_func(wrapper)
+            return prewrapper_func(require_obj_permissions_wrapper)
         else:
-            return wrapper
+            return require_obj_permissions_wrapper
 
 class require_obj_permissions_for_user(require_obj_permissions):
     """
@@ -134,7 +134,7 @@ class require_objs_permissions_for_view(object):
         self.methods = methods
         
     def __call__(self, f):
-        def wrapper(f, request, *args, **kwargs):
+        def wrapper(request, *args, **kwargs):
             if request.method in self.methods:
                 user = self.user_func(request, *args, **kwargs)
                 targets = self.target_func(request, *args, **kwargs)

@@ -15,4 +15,4 @@ def set_up(level):
     logging.setup_done = True
 
 def getLogger(name):
-    return logging
+    return logging.getLogger(name)

@@ -9,18 +9,6 @@ from expedient.common.permissions.exceptions import PermissionDoesNotExist
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
 
-## At the model level:
-# require permissions for object methods
-# redirect to pages to request permissions
-# have some sensible default permissions
-## At the project level:
-# create roles that contain bunches of permissions
-# have permissions that are delegatable and not delegatable
-## Permission checks:
-# either explicitly given permissions or permissions by rules
-# Rule permissions:
-#   - teammates may send messages to each other:
-
 class ExpedientPermissionManager(models.Manager):
     """
     Implements methods for checking for missing permissions.
@@ -68,7 +56,8 @@ class ExpedientPermissionManager(models.Manager):
                 PermissionUser.objects.get_or_create_from_instance(user)
         
         # check for superuser
-        if isinstance(user.user, User) and user.user.is_superuser: return None
+        if isinstance(user.user, User) and user.user.is_superuser:
+            return (None, None)
         
         ct = ContentType.objects.get_for_model(targets.model)
         ids = targets.values_list("pk", flat=True)
@@ -101,7 +90,7 @@ class ExpedientPermissionManager(models.Manager):
                     except ObjectPermission.DoesNotExist:
                         return (perm, targets.get(id=id))
         else:
-            return None
+            return (None, None)
         
 class ExpedientPermission(models.Model):
     """
@@ -132,7 +121,7 @@ class ExpedientPermission(models.Model):
                                blank=True, null=True)
     
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.url)
+        return "%s: %s" % (self.name, self.url_name)
 
 class GenericObjectManager(models.Manager):
     """
@@ -145,6 +134,7 @@ class GenericObjectManager(models.Manager):
         C{object_id}.
     """
     def __init__(self, ct_field="content_type", fk_field="object_id"):
+        super(GenericObjectManager, self).__init__()
         self.ct_field = ct_field
         self.fk_field = fk_field
         
@@ -283,3 +273,29 @@ class PermissionInfo(models.Model):
     obj_permission = models.ForeignKey(ObjectPermission)
     user = models.ForeignKey(PermissionUser)
     can_delegate = models.BooleanField()
+
+from decorators import require_obj_permissions, require_obj_permissions_for_user
+
+class PermissionTestClass(models.Model):
+    """
+    Dummy class used for tests.
+    """
+
+    val = models.IntegerField()
+    
+    @require_obj_permissions("user_kw", ["can_get_x2", "can_read_val"], True)
+    def get_val_x2(self):
+        return self.val * 2
+    
+    @require_obj_permissions("user_kw", ["can_get_x3"], False)
+    def get_val_x3_other_val(self, user_kw=None):
+        return (self.val * 3, user_kw)
+    
+    @require_obj_permissions("test_kw", ["can_get_x4"])
+    def get_val_x4(self):
+        return self.val * 4
+    
+    @require_obj_permissions_for_user(["can_get_x5", "can_read_val"], False)
+    def get_val_x5_username(self, user=None):
+        return (self.val * 5, user.username)
+    

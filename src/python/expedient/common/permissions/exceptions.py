@@ -73,13 +73,14 @@ class PermissionCannotBeDelegated(Exception):
             giver, perm_name)
         super(PermissionCannotBeDelegated, self).__init__(message)
         
-class ModelNotRegisteredAsControlledType(Exception):
+class ModelNotRegisteredWithClassPermissions(Exception):
     """
-    Raised when the ControlledContentType for a model is not found.
+    Raised when a model's ContentType does not have ObjectPermissions
+    associated and so cannot use class permissions.
     """
     
     def __init__(self, model):
-        super(ModelNotRegisteredAsControlledType, self).__init__(
-            "Model %s is not registered as a controlled type" % model,
+        super(ModelNotRegisteredWithClassPermissions, self).__init__(
+            "Model %s is not registered as a controlled class" % model,
         )
         self.model = model

@@ -22,7 +22,7 @@ Created on May 14, 2010
 ### Permissions
 # DONE: Add Middleware to catch PermissionDenied exceptions and redirect
 # DONE: Add URLs for permissions: default and others.
-# TODO: Remove all old permission stuff from CH apps
+# DONE: Remove all old permission stuff from CH apps
 # TODO: Add pages/views for permission management
 # TODO: Add tests for permission system
 ### Project
