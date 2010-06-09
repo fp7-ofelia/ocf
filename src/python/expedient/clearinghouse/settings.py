@@ -72,6 +72,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'expedient.clearinghouse.middleware.sitelockdown.SiteLockDown',
+    'expedient.common.permissions.middleware.PermissionMiddleware',
 )
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
@@ -79,6 +80,7 @@ ROOT_URLCONF = 'expedient.clearinghouse.urls'
 TEMPLATE_DIRS = (
     join(SRC_DIR, 'templates'),
     join(SRC_DIR, 'templates/expedient/clearinghouse'),
+    join(SRC_DIR, 'templates/expedient/common'),
 )
 
 INSTALLED_APPS = (
