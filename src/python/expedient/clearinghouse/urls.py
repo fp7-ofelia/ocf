@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     # TODO: Remove after testing
     (r'^dummyom/', include('openflow.dummyom.urls')),
     
+    (r'^permissions/', include('expedient.common.permissions.urls')),
+    
     (r'^admin/', include(admin.site.urls)),
 
     # TODO: Change to the following after 0.8 of registration is out

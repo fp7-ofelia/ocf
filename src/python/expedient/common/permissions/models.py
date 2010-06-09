@@ -97,9 +97,9 @@ class ExpedientPermission(models.Model):
     This class holds all instances of L{ObjectPermission} that have a particular
     name. L{ObjectPermission} links users to a particular object.
     
-    A permission may optionally have a URL where the browser should be
+    A permission may optionally have a view where the browser should be
     redirected if the permission is missing (for example to request the
-    permission). The URL is specified by its name in C{url_name}.
+    permission). The view is specified by its full path in C{view}.
     
     One limitation of the system right now is that we can only link to objects
     that use a C{PositiveIntegerField} as the object ID.
@@ -107,9 +107,9 @@ class ExpedientPermission(models.Model):
     @cvar objects: a L{ExpedientPermissionManager} instance.
     
     @ivar name: The permission's name
-    @type name: string
-    @ivar url_name: The name of the URL whence to obtain permission
-    @type url_name: string
+    @type name: C{str}
+    @ivar view: The full path to the view for the permission
+    @type view: C{str}
     @ivar object_permissions: Per-object permissions with this permission name.
     @type object_permissions: m2m relationship to L{ObjectPermission}.
     """
@@ -117,11 +117,11 @@ class ExpedientPermission(models.Model):
     objects = ExpedientPermissionManager()
     
     name = models.CharField(max_length=100, unique=True)
-    url_name = models.URLField("Name of URL whence to obtain permission.",
-                               blank=True, null=True)
+    view = models.CharField("Permission View", max_length=300,
+                            blank=True, null=True)
     
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.url_name)
+        return "%s: %s" % (self.name, self.view)
 
 class GenericObjectManager(models.Manager):
     """
@@ -273,29 +273,3 @@ class PermissionInfo(models.Model):
     obj_permission = models.ForeignKey(ObjectPermission)
     user = models.ForeignKey(PermissionUser)
     can_delegate = models.BooleanField()
-
-from decorators import require_obj_permissions, require_obj_permissions_for_user
-
-class PermissionTestClass(models.Model):
-    """
-    Dummy class used for tests.
-    """
-
-    val = models.IntegerField()
-    
-    @require_obj_permissions("user_kw", ["can_get_x2", "can_read_val"], True)
-    def get_val_x2(self):
-        return self.val * 2
-    
-    @require_obj_permissions("user_kw", ["can_get_x3"], False)
-    def get_val_x3_other_val(self, user_kw=None):
-        return (self.val * 3, user_kw)
-    
-    @require_obj_permissions("test_kw", ["can_get_x4"])
-    def get_val_x4(self):
-        return self.val * 4
-    
-    @require_obj_permissions_for_user(["can_get_x5", "can_read_val"], False)
-    def get_val_x5_username(self, user=None):
-        return (self.val * 5, user.username)
-    

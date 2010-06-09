@@ -69,8 +69,7 @@ class require_obj_permissions(object):
                 user, self.perm_names, obj)
 
             if missing:
-                raise PermissionDenied(
-                    missing.name, obj, user, missing.url_name)
+                raise PermissionDenied(missing.name, obj, user)
             
             # All is good. Call the function
             return f(obj, *args, **kw)
@@ -101,7 +100,7 @@ class require_objs_permissions_for_view(object):
     optional fourth parameter C{methods} that is a list of method names
     for which the permission applies. C{target_func} must return a QuerySet.
     
-    For example:
+    For example::
     
     @require_objs_permissions_for_view(
         ["can_delete_comment"],
@@ -143,57 +142,9 @@ class require_objs_permissions_for_view(object):
                     user, self.perm_names, targets)
                         
                 if missing:
-                    raise PermissionDenied(
-                        missing.name, target, user, missing.url_name)
+                    raise PermissionDenied(missing.name, target, user)
             
             # All is good. Call the function
             return f(request, *args, **kwargs)
         
         return wrapper
-    
-class require_class_permissions_for_view(require_obj_permissions):
-    """
-    Decorator to be used on views. The decorator checks that a permission user
-    has the permissions listed in C{perm_names} for a target class given in
-    C{target}. The user is given respectively by the C{user_func} parameter of
-    the decorator. The decorator also accepts an
-    optional fourth parameter C{methods} that is a list of method names
-    for which the permission applies.
-    
-    This decorator is a subclass/wrapper around the 
-    L{require_objs_permissions_for_view} decorator.
-    
-    For example:
-    
-    @require_class_permissions_for_view(
-        ["can_add"],
-        lambda(request, blog_id): get_object_or_404(Blog, pk=blog_id),
-        Comment,
-        ["POST"],
-    )
-    def create_blog_comment(request, blog_id):
-        ...
-    
-    @param perm_names: a list of permission names that are required.
-    @type perm_names: L{list} of L{str}
-    @param user_func: a callable that accepts the decorated methods arguments
-        and returns a L{PermissionUserModel} instance.
-    @type user_func: callable
-    @param target: the model to which the permission applies
-    @type target: a model class.
-    @keyword methods: list of methods for which the requirement applies.
-        Default is ["GET", "POST"].
-    @type methods: C{list} of C{str}
-    """
-    
-    def __init__(self, perm_names, user_func, target,
-                 methods=["GET", "POST"]):
-
-        # define function to use as target_func
-        def target_func(*args, **kwargs):
-            ct = ContentType.objects.get_for_model(target)
-            return ContentType.objects.filter(pk=ct.pk)
-        
-        super(require_class_permissions_for_view, self).__init__(
-            perm_names, user_func, target_func, methods)
-        
