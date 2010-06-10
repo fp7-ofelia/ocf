@@ -12,7 +12,7 @@
 {% endif %}
 
 <div class="main">
-	<form method="post" action="">
+	<form method="post" action="">{% csrf_token %}
 	<table class="openflow_create">
 	{{ agg_form.as_table }}
 	{{ client_form.as_table }}
