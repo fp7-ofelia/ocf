@@ -1,7 +1,7 @@
 '''
 @author: jnaous
 '''
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 
