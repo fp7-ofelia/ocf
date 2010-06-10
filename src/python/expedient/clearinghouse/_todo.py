@@ -13,6 +13,8 @@ Created on May 14, 2010
 # TODO: Check the security of calls to the Django GAPI, use x509 certs?
 # TODO: Add tests for CH ListResources with slice_urn specified
 # TODO: Add tests for CH ListResources with geni_available=False
+# TODO: Change to stateful
+# TODO: Change rspec to allow remote opt-in 
 
 ## CH
 # TODO: Go through and add length checking so that we don't have silent truncations on saving models
@@ -37,6 +39,10 @@ Created on May 14, 2010
 # TODO: Add permissions for users
 ### Messaging
 # TODO: Add permissions for messaging
+
+## Openflow
+# TODO: Add remote opt-in API in OM
+# TODO: Add remote opt-in API in CH
 
 ## Documentation
 # TODO: Add info on doing flush and syncdb
