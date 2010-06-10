@@ -18,9 +18,9 @@ from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
+import types
 from rpcdispatcher import RPCDispatcher
 from __init__ import version
-from django.views.decorators.csrf import csrf_exempt
 
 # these restrictions can change the functionality of rpc4django
 # but they are completely optional
@@ -44,7 +44,7 @@ HTTP_ACCESS_ALLOW_ORIGIN = getattr(settings,
 # these will be scanned for @rpcmethod decorators
 APPS = getattr(settings, 'INSTALLED_APPS', [])
 
-def _check_request_permission(request, request_format='xml', url_ns="root"):
+def _check_request_permission(request, request_format='xml', url_name="root"):
     '''
     Checks whether this user has permission to perform the specified action
     This method does not check method call validity. That is done later
@@ -60,7 +60,7 @@ def _check_request_permission(request, request_format='xml', url_ns="root"):
     '''
     
     user = getattr(request, 'user', None)
-    dispatcher = dispatchers["url_ns"]
+    dispatcher = dispatchers[url_name]
     methods = dispatcher.list_methods()
     method_name = dispatcher.get_method_name(request.raw_post_data, \
                                              request_format)
@@ -127,18 +127,18 @@ def _is_xmlrpc_request(request):
     
     return False
 
-def serve_rpc_request(request, url_ns="root", **kwargs):
+def serve_rpc_request(request, url_name="root", **kwargs):
     '''
     This method handles rpc calls based on the content type of the request
     '''
     
-    dispatcher = dispatchers[url_ns]
+    dispatcher = dispatchers[url_name]
     
     if request.method == "POST" and len(request.POST) > 0:
         # Handle POST request with RPC payload
         
         if LOG_REQUESTS_RESPONSES:
-            logging.debug('Incoming request: %s' %str(request.raw_post_data))
+            logging.debug('Incoming request: %s' % str(request.raw_post_data))
             
         if _is_xmlrpc_request(request):
             if RESTRICT_XML:
@@ -196,7 +196,7 @@ def serve_rpc_request(request, url_ns="root", **kwargs):
         methods = dispatcher.list_methods()
         template_data = {
             'methods': methods,
-            'url': URL,
+            'url': dispatcher.url,
             
             # rpc4django version
             'version': version(),
@@ -222,8 +222,6 @@ except ImportError:
 if csrf_exempt is not None:
     serve_rpc_request = csrf_exempt(serve_rpc_request)
 
-dispatchers = _register_rpcmethods(APPS, RESTRICT_INTROSPECTION)
-
 def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
     '''
     Scans the installed apps for methods with the rpcmethod decorator
@@ -239,12 +237,18 @@ def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
                getattr(method, 'is_rpcmethod', False):
                 # if this method is callable and it has the rpcmethod
                 # decorator, add it to the dispatcher
-                if method.url_ns not in dispatchers:
-                    url = reverse(serve_rpc_request,
-                              kwargs={"url_ns": method.url_ns})
-                    dispatchers[method.url_ns] = RPCDispatcher(
+                if method.url_name not in dispatchers:
+                    # Try to figure out the URL for the url_name 
+                    try:
+                        url = reverse(method.url_name)
+                    except NoReverseMatch:
+                        if method.url_name == "root":
+                            url = reverse(serve_rpc_request)
+                        else:
+                            raise
+                    dispatchers[method.url_name] = RPCDispatcher(
                         url, restrict_introspection)
-                dispatchers[method.url_ns].register_method(
+                dispatchers[method.url_name].register_method(
                     method, method.external_name)
             elif isinstance(method, types.ModuleType):
                 # if this is not a method and instead a sub-module,
@@ -256,3 +260,6 @@ def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
                 except ImportError:
                     pass
     return dispatchers
+
+dispatchers = _register_rpcmethods(APPS, RESTRICT_INTROSPECTION)
+

@@ -11,7 +11,6 @@ It also contains a decorator to mark methods as rpc methods.
 import inspect
 import platform
 import pydoc
-import types
 import xmlrpclib
 from xmlrpclib import Fault
 from jsonrpcdispatcher import JSONRPCDispatcher, json
@@ -28,24 +27,15 @@ def rpcmethod(**kwargs):
     EXAMPLES:
     @rpcmethod()
     @rpcmethod(name='myns.myFuncName', signature=['int','int'])
-    @rpcmethod(permission='add_group')
+    @rpcmethod(permission='add_group', url_name="my_url_name")
     '''
     
     def set_rpcmethod_info(method):
         method.is_rpcmethod = True
-        method.signature = []
-        method.permission = None
-        method.external_name = getattr(method, '__name__')
-
-        if 'name' in kwargs:
-            method.external_name = kwargs['name']
-
-        if 'signature' in kwargs:
-            method.signature = kwargs['signature']
-            
-        if 'permission' in kwargs:
-            method.permission = kwargs['permission']
-
+        method.external_name = kwargs.get("name", getattr(method, '__name__'))
+        method.signature = kwargs.get('signature', [])
+        method.permission = kwargs.get('permission', None)
+        method.url_name = kwargs.get("url_name", "root")
         return method
     return set_rpcmethod_info
 
