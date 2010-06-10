@@ -11,8 +11,31 @@ the following:
 
 PREREQUISITES:
 --------------
-
-
+Following is the list of Python packages that are needed to run:
+    setuptools
+    django
+    decorator
+    django-autoslug
+    m2crypto
+    pycurl
+    python-imaging 
+    django-extensions 
+    dateutil libxmlsec1-1 
+    libxmlsec1-openssl1 
+    paramiko
+    python-crypto
+    django-renderform
+    python-webob
+    django-registration
+    python-xmlsec1
+    pyquery
+    
+Following is the list of packages to get Apache2 to work with Expedient:
+    apache2
+    apache2-mod_wsgi
+    apache2-mod_macro
+    apache2-itk
+    
 
 INSTALLATION:
 -------------
@@ -25,10 +48,21 @@ $ sudo make install
 
 This installs apache and configures it to start serving expedient files.
 
+Update the settings by going through /srv/www/openflow/optin_manager/settings.py
+and /srv/www/expedient/clearinghouse/settings.py and editing the following where
+applicable:
+- The ADMINS setting
+- The EMAIL_* settings
+- The XMLRPC_* settings and MY_CA according to your installation
+- The SITE_NAME and SITE_DOMAIN settings
+- The OPENFLOW_GAPI_* settings
+
+Restart Apache.
+
 
 HOW IT WORKS:
 -------------
-There following diagram shows the major components:
+The following diagram shows the major components:
 
 +---------+     +-----------+      +----+      +----+     +---------+     +-------------+
 | network |-----| FlowVisor |------| OM |------| AM |-----| AMProxy |-----| GAPI Client |
