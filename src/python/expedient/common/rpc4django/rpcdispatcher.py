@@ -142,9 +142,8 @@ class RPCDispatcher:
     Dispatches method calls to either the xmlrpc or jsonrpc dispatcher
     '''
     
-    def __init__(self, url='', restrict_introspection=False):
-        version = platform.python_version_tuple()
-        self.url = url
+    def __init__(self, url_name='root', restrict_introspection=False):
+        self.url_name = url_name
         self.rpcmethods = []        # a list of RPCMethod objects
         self.jsonrpcdispatcher = JSONRPCDispatcher()
         self.xmlrpcdispatcher = XMLRPCDispatcher()
@@ -163,7 +162,6 @@ class RPCDispatcher:
         
         description = {}
         description['serviceType'] = 'RPC4Django JSONRPC+XMLRPC'
-        description['serviceURL'] = self.url,
         description['methods'] = [{'name': method.name, 
                                    'summary': method.help, 
                                    'params': method.get_params(),

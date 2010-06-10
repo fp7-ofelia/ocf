@@ -196,7 +196,7 @@ def serve_rpc_request(request, url_name="root", **kwargs):
         methods = dispatcher.list_methods()
         template_data = {
             'methods': methods,
-            'url': dispatcher.url,
+            'url': request.path,
             
             # rpc4django version
             'version': version(),
@@ -238,16 +238,8 @@ def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
                 # if this method is callable and it has the rpcmethod
                 # decorator, add it to the dispatcher
                 if method.url_name not in dispatchers:
-                    # Try to figure out the URL for the url_name 
-                    try:
-                        url = reverse(method.url_name)
-                    except NoReverseMatch:
-                        if method.url_name == "root":
-                            url = reverse(serve_rpc_request)
-                        else:
-                            raise
                     dispatchers[method.url_name] = RPCDispatcher(
-                        url, restrict_introspection)
+                        method.url_name, restrict_introspection)
                 dispatchers[method.url_name].register_method(
                     method, method.external_name)
             elif isinstance(method, types.ModuleType):
