@@ -93,7 +93,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         self.client.install_trusted_ca()
         err = self.client.change_password()
         if err: return err
-        print self.client.password
         err = self.client.register_topology_callback(
             "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
@@ -222,9 +221,6 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         # TODO: Is there a better way to filter these?
         link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
         dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
-        if dead_cnxns.count < len(set(link_slugs)):
-            print "WARNING: Some connections that were thought to be dead" +\
-                " not found in DB."
         dead_cnxns.delete()
 
     def check_status(self):

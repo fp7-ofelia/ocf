@@ -42,11 +42,7 @@ class PermissionDecoratorUsageError(Exception):
     """
     Raised when the decorators are misused.
     """
-    
-    def __init__(self, object):
-        message = "Permissions cannot be used for object class \
-%s which does not inherit from ControlledModel" % object.__class__
-        super(PermissionDecoratorUsageError, self).__init__(message)
+    pass
 
 class PermissionDoesNotExist(Exception):
     """

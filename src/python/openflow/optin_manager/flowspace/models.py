@@ -110,10 +110,10 @@ class Experiment(models.Model):
     owner_email         = models.CharField(blank=True, max_length = 1024)
     owner_password      = models.CharField(blank=True, max_length = 2048)
     
-    # TODO: takeout the replacement when Rob fixes the . escaping in FV
+    # This hack here is because the Flowvisor doesn't do escaping properly.
     def get_fv_slice_name(self):
         s = "%s ID: %s" % (self.slice_name, self.slice_id)
-        return s.replace(".", "_")
+        return s.replace("!", "_")
     
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)

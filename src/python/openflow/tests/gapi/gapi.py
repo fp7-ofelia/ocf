@@ -11,7 +11,7 @@ from openflow.tests import test_settings as settings
 from openflow.tests.helpers import parse_rspec, create_random_resv, \
     kill_old_procs
 from expedient.common.tests.commands import call_env_command, Env
-
+    
 class GAPITests(TestCase):
     """
     Test the GENI API interface. This assumes that Apache is currently running
@@ -29,7 +29,6 @@ class GAPITests(TestCase):
         slice_credential = cred.Credential(string=slice_cred_string)
         slice_gid = slice_credential.get_gid_object()
         slice_urn = slice_gid.get_urn()
-#        print 'Slice URN = %s' % (slice_urn)
         
         # Set up the array of credentials as just the slice credential
         credentials = [slice_cred_string]
@@ -64,7 +63,6 @@ class GAPITests(TestCase):
             )
     
             # test availability
-#            print "Checking availability."
             if not proxy.is_available:
                 raise Exception("Problem: Proxy not available")
     
@@ -86,7 +84,6 @@ class GAPITests(TestCase):
         Create an xml-rpc client to talk to the AM Proxy through GAPI.
         Run the test clearinghouse, and create client to talk to it.
         """
-#        print "Doing Setup"
         
         import shlex, subprocess, time
         
@@ -107,7 +104,6 @@ class GAPITests(TestCase):
         
         # run the CH
         kill_old_procs(8000, 8001)
-#        print "Running CH"
         cmd = "python %s -r %s -c %s -k %s -p 8001" % (
             join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
@@ -119,7 +115,6 @@ class GAPITests(TestCase):
                                         stderr=subprocess.PIPE)
         
         # run the AM proxy
-#        print "Running AM Proxy"
         cmd = "python %s -r %s -c %s -k %s -p 8000" % (
             join(settings.GCF_DIR, "gam.py"), join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "server.crt"),
@@ -191,8 +186,6 @@ class GAPITests(TestCase):
         else:
             rspec = self.am_client.ListResources(cred, options)
         
-#        print rspec
-        
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
         
@@ -217,8 +210,6 @@ class GAPITests(TestCase):
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
         rspec = self.am_client.ListResources(cred, options)
-        
-#        print rspec
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)

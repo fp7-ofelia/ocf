@@ -139,4 +139,8 @@ class PasswordXMLRPCServerProxy(models.Model):
                  'w') as cert_file:
             cert_file.write(cert)
         
-        subprocess.call(['make', '-C', settings.XMLRPC_TRUSTED_CA_PATH])
+        subprocess.Popen(['make', '-C', settings.XMLRPC_TRUSTED_CA_PATH],
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         )

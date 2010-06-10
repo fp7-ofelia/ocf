@@ -6,16 +6,19 @@ Created on May 17, 2010
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from openflow.tests import test_settings
-from helpers import SSHClientPlus
 import xmlrpclib, re
 from openflow.tests.helpers import kill_old_procs, parse_rspec, Flowspace
 from openflow.tests.helpers import create_random_resv
 import time
 from expedient.common.tests.commands import call_env_command, Env
 from os.path import join
-from expedient.clearinghouse.loggingconf import getLogger
 
-logger = getLogger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+
+from helpers import SSHClientPlus
 
 # TODO: Some of this code works with multiple FVs, other parts assume only one.
 
@@ -166,24 +169,25 @@ class FullIntegration(TestCase):
         Add the OMs to the CH.
         """
         from os.path import dirname
-        proc = self.run_proc_cmd(
+        logger.debug("Running prepare_ch script.")
+        self.run_proc_cmd(
             "python %s/prepare_ch.py %s %s %s %s %s %s" % (
                 dirname(__file__), proj_dir, ch_host, ch_username, ch_passwd, 
                 om_host, om_port,
-            )
+            ),
+            wait=True,
         )
-        proc.wait()
-        out_data, err_data = proc.communicate()
-        logger.debug(out_data)
-        logger.debug(err_data)
         
-    def run_proc_cmd(self, cmd):
+    def run_proc_cmd(self, cmd, wait=False):
         """
         Run a command in a subprocess, return the new process.
         """
         import shlex, subprocess
         args = shlex.split(cmd)
-        return subprocess.Popen(args,
+        if wait:
+            return subprocess.call(args)
+        else:
+            return subprocess.Popen(args,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -369,62 +373,6 @@ class FullIntegration(TestCase):
         self.assertEqual(len(self.switches), 2)
         self.assertEqual(len(self.links), 2)
         
-    def test_createSlice(self):
-        """
-        Test that the om calls the FV correctly.
-        """
-        f = Flowspace({"dl_dst": ("*", "*")},
-                      ["00:11:22:33:aa:bb:cc:dd"])
-        
-        attrs = f.get_full_attrs()
-        # create some random flowspaces
-        switch_slivers=[{"datapathid": "00:11:22:33:aa:bb:cc:dd",
-                         "flowspace": [attrs],
-                         }]
-
-        args = {
-            "slice_id": "slice_id",
-            "project_name": "project_name",
-            "project_description": "project_description",
-            "slice_name": "slice name-slice_id",
-            "slice_description": "slice_description",
-            "controller_url": "tcp:bla.bla.bla:6633",
-            "owner_email": "bla@bla.com",
-            "owner_password": "password",
-            "switch_slivers": switch_slivers,
-        }
-        
-        # Create!
-        ret = self.om_client.create_slice(
-            args["slice_id"], args["project_name"], args["project_description"],
-            args["slice_name"], args["slice_description"],
-            args["controller_url"], args["owner_email"], args["owner_password"],
-            args["switch_slivers"]
-        )
-        
-        self.assertTrue(ret)
-        
-        slices = self.fv_clients[0].api.listSlices()
-        self.assertEqual(len(slices), 2)
-        
-        if slices[0] == "root":
-            slice = slices[1]
-        else:
-            slice = slices[0]
-            
-        # TODO: Fix this test after Rob fixes escaping bug
-        self.assertEqual(
-            slice, "%s ID: %s" % (
-                args["slice_name"].replace(".", "_"),
-                args["slice_id"].replace(".", "_"),
-            )
-        )
-        
-        slice_info = self.fv_clients[0].api.getSliceInfo(slice)
-        self.assertEqual(slice_info["contact_email"], args["owner_email"])
-        self.assertEqual(slice_info["controller_port"], "6633")
-        self.assertEqual(slice_info["controller_hostname"], "bla.bla.bla")
-        
     def test_CreateSliver(self):
         """
         Check that we can create slice on the FV
@@ -471,7 +419,7 @@ class FullIntegration(TestCase):
         
         # Check the slice information
         slice_info = self.fv_clients[0].api.getSliceInfo(fv_slice_name)
-        logger.debug(slice_info)
+        logger.debug("Slice info is %s" % slice_info)
         self.assertEqual(slice_info["contact_email"], email)
         self.assertEqual(slice_info["controller_port"], "6633")
         self.assertEqual(slice_info["controller_hostname"],
