@@ -15,22 +15,6 @@ from expedient.common.permissions.forms import PermissionRequestForm
 from django.views.generic import simple, create_update
 from django.contrib.auth.models import User
 
-def keyboard(banner=None):
-    import code, sys
-
-    # use exception trick to pick up the current frame
-    try:
-        raise None
-    except:
-        frame = sys.exc_info()[2].tb_frame.f_back
-
-    # evaluate commands in current namespace
-    namespace = frame.f_globals.copy()
-    namespace.update(frame.f_locals)
-
-    code.interact(banner=banner, local=namespace)
-
-
 def reraise_permission_denied(request, perm_name=None,
                               target_ct_id=None, target_id=None,
                               user_ct_id=None, user_id=None):
