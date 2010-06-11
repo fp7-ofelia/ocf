@@ -12,6 +12,7 @@ from xmlrpclib import ServerProxy
 from datetime import timedelta, datetime
 import time
 from expedient.common.utils.transport import PyCURLSafeTransport as transport
+from expedient.common.utils.transport import TestClientTransport
 from urlparse import urlparse
 from django.contrib.auth.models import User
 
@@ -36,7 +37,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     password_timestamp = models.DateTimeField(auto_now_add=True)
     url = models.CharField("Server URL", max_length=1024)
     
-    verify_certs = models.BooleanField("Verify Certificates?", default=False)
+    verify_certs = models.BooleanField("Verify Certificates?", default=True)
     
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
@@ -44,7 +45,11 @@ class PasswordXMLRPCServerProxy(models.Model):
     
     def __getattr__(self, name):
         if name == "proxy":
-            if self.url.lower().startswith("https"):
+            parsed = urlparse(self.url.lower())
+            # This scheme is used for debugging and looping back
+            if parsed.scheme == "test":
+                self.proxy = ServerProxy(parsed.path, TestClientTransport())
+            elif parsed.scheme == "https":
                 if self.verify_certs:
                     self.transport = transport(
                         timeout=settings.XMLRPC_TIMEOUT,
@@ -58,7 +63,6 @@ class PasswordXMLRPCServerProxy(models.Model):
                         password=self.password)
                 self.proxy = ServerProxy(self.url, self.transport)
             else:
-                parsed = urlparse(self.url)
                 new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
                                                self.username,
                                                self.password,
