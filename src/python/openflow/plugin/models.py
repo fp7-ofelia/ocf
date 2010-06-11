@@ -248,9 +248,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         return reverse("openflow_aggregate_edit",
                        kwargs={'agg_id': self.id})
 
-    def get_aggregates_url(self):
-        return reverse("openflow_aggregate_edit",
-                       kwargs={'agg_id': self.id})
+    @classmethod
+    def get_aggregates_url(cls):
+        return reverse("openflow_aggregate_home")
 
     @classmethod
     def get_create_url(cls):
