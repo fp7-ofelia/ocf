@@ -5,9 +5,9 @@ Created on May 28, 2010
 '''
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.exceptions import PermissionDoesNotExist
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
+from exceptions import PermissionDoesNotExist
 
 class ExpedientPermissionManager(models.Manager):
     """
@@ -177,7 +177,41 @@ class GenericObjectManager(models.Manager):
             self.ct_field: ContentType.objects.get_for_model(queryset.model),
             self.fk_field + "__in": queryset.values_list("pk", flat=True),
         })
-
+        
+    def filter_for_class(self, klass, **kwargs):
+        """
+        Convenience function to filter for generic objects related to a
+        particular class. Accepts same arguments as the normal C{filter()}
+        method.
+        
+        @param klass: Class to filter by.
+        """
+        
+        f = {self.ct_field: ContentType.objects.get_for_model(klass)}
+        f.update(kwargs)
+        return self.filter(**f)
+    
+    def get_objects_queryset(self, klass, generic_filter_args,
+                             object_filter_args):
+        """
+        Convenience function to filter both the generic objects and the objects
+        they point to, and return a queryset for the class C{klass}.
+        """
+        obj_ids = self.filter_for_class(
+            klass, **generic_filter_args).values_list("pk", flat=True)
+        return klass.objects.filter(pk__in=obj_ids, **object_filter_args)
+        
+    def filter_for_objects(self, klass, **object_filter_args):
+        """
+        Filter the generic objects by to return the queryset that contains
+        objects of class C{klass} filtered by the rest of the keywords.
+        """
+        ct = ContentType.objects.get_for_model(klass)
+        obj_ids = klass.objects.filter(
+            **object_filter_args).values_list("pk", flat=True)
+        return self.filter(**{self.ct_field: ct,
+                              "%s__in" % self.fk_field: obj_ids})
+        
 class ObjectPermissionManager(GenericObjectManager):
     """
     Adds some useful methods to the default manager type.
@@ -197,6 +231,28 @@ class ObjectPermissionManager(GenericObjectManager):
         @type obj: a model.
         """
         return self.filter_for_object(obj).get(permission__name=perm_name)
+    
+    def get_permitted_objects(self, klass, perm_names, perm_user):
+        """
+        Get a queryset of C{klass} instances that the permission user
+        C{perm_user} has permissions named by perm_names for.
+        """
+        if not isinstance(perm_user, PermissionUser):
+            perm_user, created = \
+                PermissionUser.objects.get_or_create_from_instance(perm_user)
+            if created:
+                return klass.objects.get_empty_query_set()
+
+        get = lambda(perm_name): \
+            set(ObjectPermission.objects.get_objects_queryset(
+                klass, dict(permission__name=perm_names[0], users=perm_user),
+                {}))
+        
+        objs = get(perm_names[0])
+        for name in perm_names[1:]:
+            objs.intersection_update(get(name))
+            
+        return klass.objects.filter(pk__in=objs)
 
 class ObjectPermission(models.Model):
     """
@@ -230,6 +286,10 @@ class ObjectPermission(models.Model):
     
     users = models.ManyToManyField("PermissionUser", through="PermissionInfo")
     
+    def __unicode__(self):
+        return u"%s object permission for %s" % (self.permission.name,
+                                                 self.target)
+    
     class Meta:
         unique_together = (
             ("permission", "object_type", "object_id"),
@@ -256,6 +316,9 @@ class PermissionUser(models.Model):
     user_id = models.PositiveIntegerField()
     user = GenericForeignKey("user_type", "user_id")
     
+    def __unicode__(self):
+        return u"%s" % self.user
+    
     class Meta:
         unique_together=(("user_type", "user_id"),)
 
@@ -273,3 +336,32 @@ class PermissionInfo(models.Model):
     obj_permission = models.ForeignKey(ObjectPermission)
     user = models.ForeignKey(PermissionUser)
     can_delegate = models.BooleanField()
+    
+    def __unicode__(self):
+        return u"%s - %s: Delegatable is %s" % (self.obj_permission,
+                                                self.user,
+                                                self.can_delegate)
+    
+    class Meta:
+        unique_together=(("obj_permission", "user"),)
+
+class PermissionRequest(models.Model):
+    """
+    A request from a C{auth.models.User} on behalf of a C{PermissionUser} to
+    obtain some permission for a particular target.
+    """
+    requesting_user = models.ForeignKey(User, related_name="sent_permission_requests")
+    permission_owner = models.ForeignKey(User, related_name="received_permission_requests")
+    requested_permission = models.ForeignKey(ObjectPermission)
+    message = models.TextField(default="", blank=True, null=True)
+    
+    def allow(self):
+        from utils import give_permission_to
+        give_permission_to(self.requesting_user,
+                           self.requested_permission.permission,
+                           self.requested_permission.target,
+                           self.permission_owner)
+        self.delete()
+        
+    def deny(self):
+        self.delete()

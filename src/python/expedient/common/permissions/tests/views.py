@@ -88,9 +88,9 @@ def other_perms_view(request, permission, user, target, redirect_to=None):
     else:
         return HttpResponse(
 """
-Do you want to get %s permission for obj id %s?
+Do you want to get %s permission for obj %s?
 <form action="" method="POST">
 <input type="submit" value="Yes" />
 <input type="button" value="No" onclick="document.location='%s'" />
 </form>
-""" % (permission.name, target.id, reverse("test_view_crud")))
+""" % (permission.name, target, reverse("test_view_crud")))

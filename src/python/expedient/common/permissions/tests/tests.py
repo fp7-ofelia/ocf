@@ -4,18 +4,18 @@ Created on Jun 7, 2010
 @author: jnaous
 '''
 
-from models import PermissionTestClass
-from ..models import ExpedientPermission
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.contrib.contenttypes.models import ContentType
+from ..models import ExpedientPermission, PermissionRequest
 from ..utils import create_permission, give_permission_to
 from ..exceptions import PermissionDenied, PermissionCannotBeDelegated
+from ..views import request_permission
 from views import other_perms_view, add_perms_view
-from django.core.urlresolvers import reverse
+from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
+
 import logging
-from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.middleware import PermissionMiddleware
-from expedient.common.permissions.utils import require_objs_permissions_for_url
 
 LOGGING_LEVEL = logging.DEBUG
 
@@ -27,6 +27,11 @@ def logging_set_up(level):
             format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
         logging.basicConfig(level=level, format=format)
     logging.setup_done = True
+
+def _request_perm_wrapper(*args, **kwargs):
+    return request_permission(
+        reverse("test_allowed"),
+        template="permissions/empty.html")(*args, **kwargs)
 
 def create_objects(test_case):
         # Create test objects
@@ -47,9 +52,10 @@ def create_objects(test_case):
         for perm in ["can_read_val", "can_get_x3", "can_call_protected_url",
                      "can_get_x4", "can_get_x5", "can_set_val"]:
             create_permission(perm, other_perms_view)
-        create_permission("can_get_x2")    
+        create_permission("can_get_x2")
         create_permission("can_add", add_perms_view)
-            
+        create_permission("test_request_perm", _request_perm_wrapper)
+        
         # Give permissions to users
         for obj in test_case.objs:
             for perm in ["can_read_val", "can_get_x2", "can_get_x5"]:
@@ -67,6 +73,10 @@ def create_objects(test_case):
                                    perm,
                                    obj,
                                    delegatable=True)
+
+            give_permission_to(test_case.u1, "test_request_perm",
+                               PermissionTestClass,
+                               delegatable=True)
 
 class TestObjectPermissions(test_mgr.SettingsTestCase):
     def setUp(self):
@@ -362,4 +372,46 @@ class TestRequests(test_mgr.SettingsTestCase):
             )
         ) + "?next=%s" % reverse("test_protected_url")
         self.assertRedirects(response, perm_url)
+        
+    def test_request_permission(self):
+        """
+        Test the generic request_permission view for permissions.
+        """
+        self.client.login(username="test2", password="password")
+
+        # get should be disallowed
+        response = self.client.get(reverse("test_request_perm"))
+        perm_url = reverse(
+            "permissions_url",
+            kwargs=dict(
+                perm_name="test_request_perm",
+                user_ct_id=ContentType.objects.get_for_model(User).id,
+                user_id = self.u2.id,
+                target_ct_id=ContentType.objects.get_for_model(ContentType).id,
+                target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
+            )
+        ) + "?next=%s" % reverse("test_request_perm")
+        self.assertRedirects(response, perm_url)
+        
+        # post a request for the permission
+        self.assertEqual(PermissionRequest.objects.count(), 0)
+        response = self.client.post(perm_url, {"permission_owner": 1,
+                                               "message": "hello",})
+        self.assertRedirects(response, reverse("test_allowed"))
+        self.assertEqual(PermissionRequest.objects.count(), 1)
+        perm_req = PermissionRequest.objects.all()[0]
+        self.assertEqual(perm_req.requesting_user, self.u2)
+        self.assertEqual(perm_req.permission_owner, self.u1)
+        self.assertEqual(
+            perm_req.requested_permission.target,
+            ContentType.objects.get_for_model(PermissionTestClass))
+        self.assertEqual(perm_req.requested_permission.permission.name,
+                         "test_request_perm")
+        self.assertEqual(perm_req.message, "hello")
+        
+        perm_req.allow()
+
+        # get should be allowed now
+        response = self.client.get(reverse("test_request_perm"))
+        self.assertEqual(response.status_code, 200)
         
