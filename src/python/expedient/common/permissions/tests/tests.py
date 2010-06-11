@@ -14,6 +14,8 @@ from django.core.urlresolvers import reverse
 from expedient.common.tests import manager as test_mgr
 import logging
 from django.contrib.contenttypes.models import ContentType
+from expedient.common.permissions.middleware import PermissionMiddleware
+from expedient.common.permissions.utils import require_objs_permissions_for_url
 
 LOGGING_LEVEL = logging.DEBUG
 
@@ -42,7 +44,7 @@ def create_objects(test_case):
         test_case.o3 = test_case.objs[0]
         
         # create permissions
-        for perm in ["can_read_val", "can_get_x3",
+        for perm in ["can_read_val", "can_get_x3", "can_call_protected_url",
                      "can_get_x4", "can_get_x5", "can_set_val"]:
             create_permission(perm, other_perms_view)
         create_permission("can_get_x2")    
@@ -202,6 +204,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
 
 class TestRequests(test_mgr.SettingsTestCase):
     urls = 'expedient.common.permissions.tests.test_urls'
+    
     def setUp(self):
         self.settings_manager.set(INSTALLED_APPS=(
             'django.contrib.auth',
@@ -338,4 +341,25 @@ class TestRequests(test_mgr.SettingsTestCase):
         
         obj = PermissionTestClass.objects.get(id=self.objs[0].id)
         self.assertEqual(obj.val, 5)
+        
+    def test_protected_url(self):
+        """
+        Try to access a protected url.
+        """
+        
+        self.client.login(username="test1", password="password")
+        
+        # Test create not allowed
+        response = self.client.post(reverse("test_protected_url"))
+        perm_url = reverse(
+            "permissions_url",
+            kwargs=dict(
+                perm_name="can_call_protected_url",
+                user_ct_id=ContentType.objects.get_for_model(User).id,
+                user_id = self.u1.id,
+                target_ct_id=ContentType.objects.get_for_model(ContentType).id,
+                target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
+            )
+        ) + "?next=%s" % reverse("test_protected_url")
+        self.assertRedirects(response, perm_url)
         
