@@ -23,15 +23,16 @@ def no_such_slice(self, slice_urn):
     fault_string = 'The slice named by %s does not exist' % (slice_urn)
     raise xmlrpclib.Fault(fault_code, fault_string)
     
-@rpcmethod(signature=['string', 'string'])
+@rpcmethod(signature=['string', 'string'], url_name="openflow_gapi")
 def ping(str, **kwargs):
     return "PONG: %s" % str
 
-@rpcmethod(signature=[VERSION_TYPE])
+@rpcmethod(signature=[VERSION_TYPE], url_name="openflow_gapi")
 def GetVersion(**kwargs):
     return dict(geni_api=1)
 
-@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
+@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
+           url_name="openflow_gapi")
 def ListResources(credentials, options, **kwargs):
     import base64, zlib
 
@@ -50,7 +51,8 @@ def ListResources(credentials, options, **kwargs):
 
     return result
 
-@rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE])
+@rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
+           url_name="openflow_gapi")
 def CreateSliver(slice_urn, credentials, rspec, **kwargs):
     from django.db import transaction
     project_name, project_desc, slice_name, slice_desc,\
@@ -86,7 +88,8 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
     # TODO: get the actual reserved things
     return rspec
 
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
+           url_name="openflow_gapi")
 def DeleteSliver(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
         aggregate.client.delete_slice(slice_urn)
@@ -98,7 +101,8 @@ def DeleteSliver(slice_urn, credentials, **kwargs):
     
     return True
 
-@rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
+@rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
+           url_name="openflow_gapi")
 def SliverStatus(slice_urn, credentials, **kwargs):
     retval = {
         'geni_urn': slice_urn,
@@ -122,11 +126,13 @@ def SliverStatus(slice_urn, credentials, **kwargs):
         })
     return retval
 
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE])
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE],
+           url_name="openflow_gapi")
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
     return True
 
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE])
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
+           url_name="openflow_gapi")
 def Shutdown(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
         aggregate.client.delete_slice(slice_urn)
