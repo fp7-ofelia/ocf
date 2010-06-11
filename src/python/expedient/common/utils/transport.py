@@ -112,8 +112,6 @@ class PyCURLSafeTransport(PyCURLTransport):
     def __init__(self, username = None, password = None,
                  timeout = 300, ca_cert_path = None, ca_cert_file = None):
 
-        import pycurl
-
         PyCURLTransport.__init__(self, username, password, timeout)
 
         self._proto = "https"
@@ -143,3 +141,19 @@ class PyCURLSafeTransport(PyCURLTransport):
             self._curl.setopt(pycurl.SSL_VERIFYPEER, 1)
             self._curl.setopt(pycurl.SSL_VERIFYHOST, 2)
             
+class TestClientTransport(xmlrpclib.Transport):
+    """Handles connections to XML-RPC server through Django test client"""
+    
+    def __init__(self, *args, **kwargs):
+        from django.test.client import Client
+        self.client = Client()
+
+    def request(self, host, handler, request_body, verbose=0):
+        self.verbose = verbose
+        response = self.client.post(handler,
+                                    request_body,
+                                    content_type="text/xml")
+        res = StringIO(response.content)
+        res.seek(0)
+        return self.parse_response(res)
+    
