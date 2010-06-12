@@ -6,13 +6,12 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from django.contrib import auth
-from clearinghouse.project.models import ProjectRole
-import models
+from models import ProjectRole, Project
 
 def detail(request, proj_id):
     '''Show information about the project and functions'''
     
-    project = get_object_or_404(models.Project, pk=proj_id)
+    project = get_object_or_404(Project, pk=proj_id)
     user_roles = ProjectRole.objects.all.filter(
         member=request.user,
         project=project)
