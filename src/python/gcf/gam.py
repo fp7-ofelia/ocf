@@ -24,8 +24,8 @@
 #----------------------------------------------------------------------
 
 import sys
-
-sys.path.append('./')
+from os import path
+sys.path.append(path.join(path.dirname(__file__), "../"))
 
 # Check python version. Requires 2.6 or greater, but less than 3.
 if sys.version_info < (2, 6):

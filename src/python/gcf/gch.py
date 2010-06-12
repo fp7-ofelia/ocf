@@ -24,10 +24,11 @@
 #----------------------------------------------------------------------
 
 import sys
+from os import path
+sys.path.append(path.join(path.dirname(__file__), "../"))
+
 import optparse
 import geni
-
-sys.path.append('./')
 
 class CommandHandler(object):
     
