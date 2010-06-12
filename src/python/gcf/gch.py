@@ -27,6 +27,8 @@ import sys
 import optparse
 import geni
 
+sys.path.append('./')
+
 class CommandHandler(object):
     
     # TODO: Implement a register handler to register aggregate managers

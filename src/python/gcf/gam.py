@@ -25,6 +25,8 @@
 
 import sys
 
+sys.path.append('./')
+
 # Check python version. Requires 2.6 or greater, but less than 3.
 if sys.version_info < (2, 6):
     raise Exception('Must use python 2.6 or greater.')
