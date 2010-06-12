@@ -11,8 +11,8 @@ def list_aggs(request, obj_id=None):
     Get a list of aggregates. obj_id specifies id to highlight.
     '''
     
-    qs = Aggregate.objects.all()
-    qs.select_related()
+    # Only list the aggregates of which the user is admin
+    qs = Aggregate.objects.filter(admins_info__admin=request.user)
     
     if request.method == "GET":
         form = AggregateTypeForm()
@@ -36,3 +36,4 @@ def list_aggs(request, obj_id=None):
             'highlight_id': obj_id,
         },
     )
+
