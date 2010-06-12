@@ -11,7 +11,7 @@ the following:
 
 PREREQUISITES:
 --------------
-Following is the list of Python packages that are needed to run:
+Following is a partial list of Python packages that are needed to run:
     setuptools
     django
     decorator
@@ -36,9 +36,14 @@ Following is the list of packages to get Apache2 to work with Expedient:
     apache2-mod_macro
     apache2-itk
     
+Some more packages might be necessary, and the package names might differ from
+the ones listed. This list will be updated to be accurate eventually.
 
 INSTALLATION:
 -------------
+See INSTALL for more accurate, manual instructions in case of problems with the
+below.
+
 The following instructions have only been tested on openSuSE 11.2.
 
 Unpack the expedient-x.y.z.tar.gz
@@ -82,6 +87,8 @@ important data the the Clearinghouse and Opt-In Manager databases.
 
 Get the Mininet VM and upgrade to OpenVSwitch 1.0:
 --------------------------------------------------
+See the INSTALL file for an easier recipe than the below.
+
 Follow the instructions at
 http://www.openflowswitch.org/foswiki/bin/view/OpenFlow/Mininet to download and
 run mininet. This provides a VM with a virtual network.
@@ -107,7 +114,7 @@ following settings:
   
 - FLOWVISOR_DIR (set to the path of the local flowvisor)
 
-- MININET_VMS (replace "192.168.188.129" with the VM's IP address)
+- MININET_VMS (replace "192.168.x.y" with the VM's IP address)
 
 Run the tests:
 --------------
