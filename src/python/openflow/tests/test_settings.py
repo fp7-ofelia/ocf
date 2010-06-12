@@ -4,7 +4,7 @@ Created on May 15, 2010
 @author: jnaous
 '''
 from os.path import join, dirname
-import socket
+import socket, sys
 
 PYTHON_DIR = join(dirname(__file__), "../../")
 OM_PROJECT_DIR = join(PYTHON_DIR, "openflow/optin_manager")
@@ -31,7 +31,7 @@ FLOWVISORS = [
         path=(FLOWVISOR_DIR, "default-config.xml"),
     ),
 ]
-MININET_VMS = ["192.168.188.129"]
+MININET_VMS = ["192.168.188.131"]
 
 NUM_EXPERIMENTS = 2
 
@@ -40,10 +40,6 @@ NUM_SWITCHES_PER_AGG = 10
 NUM_LINKS_PER_AGG = 20
 
 NUM_DUMMY_FVS = 1
-
-from expedient.clearinghouse import loggingconf
-import logging
-loggingconf.set_up(logging.INFO)
 
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
