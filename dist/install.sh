@@ -16,7 +16,7 @@ OPTIN_MANAGER="openflow/optin_manager"
 # install prereqs
 zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
 zypper addrepo -f http://download.opensuse.org/repositories/openSUSE:/11.2:/Contrib/standard/ contrib
-zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging python-django-extensions python-dateutil libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto
+zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-imaging python-django-extensions python-dateutil libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto
 easy_install -Z django-registration python-xmlsec1
 zypper install -l -f --force-resolution libxmlsec1-openssl-devel
 

@@ -8,19 +8,57 @@ from django.db import models
 import os
 import binascii
 from django.conf import settings
-from xmlrpclib import ServerProxy
 from datetime import timedelta, datetime
 import time
-from expedient.common.utils.transport import PyCURLSafeTransport as transport
 from expedient.common.utils.transport import TestClientTransport
 from urlparse import urlparse
 from django.contrib.auth.models import User
+import xmlrpclib
 
 def get_max_password_len():
-    return User._meta.get_field_by_name('password')[0].max_length
+    # M2Crypto does not like it when header fields are large. Creates bad
+    # requests. So limit to 40 hex characters = 20 bytes = 160 bits.
+    return 40
 
 def random_password():
     return binascii.b2a_hex(os.urandom(get_max_password_len()/2))
+
+def add_basic_auth(uri, username=None, password=None):
+    parsed = urlparse(uri.lower())
+    if username:
+        if password:
+            new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
+                                           username,
+                                           password,
+                                           parsed.netloc,
+                                           parsed.path)
+        else:
+            new_url = "%s://%s@%s%s" % (parsed.scheme,
+                                        username,
+                                        parsed.netloc,
+                                        parsed.path)
+    else:
+        new_url = uri
+    return new_url
+
+class BasicAuthServerProxy(xmlrpclib.ServerProxy):
+    def __init__(self, uri, username=None, password=None, **kwargs):
+        new_url = add_basic_auth(uri, username, password)
+        
+        # M2Crypto fails when using unicode URLs.
+        xmlrpclib.ServerProxy.__init__(self, str(new_url), **kwargs)
+
+    def __repr__(self):
+        parsed = urlparse(self._ServerProxy__host)
+        new_url = "%s://%s%s" % (parsed.scheme,
+                                 parsed.netloc,
+                                 parsed.path)
+        return (
+            "<ServerProxy for %s%s>" %
+            (new_url, self._ServerProxy__handler)
+            )
+
+    __str__ = __repr__
 
 class PasswordXMLRPCServerProxy(models.Model):
     '''
@@ -37,41 +75,31 @@ class PasswordXMLRPCServerProxy(models.Model):
     password_timestamp = models.DateTimeField(auto_now_add=True)
     url = models.CharField("Server URL", max_length=1024)
     
-    verify_certs = models.BooleanField("Verify Certificates?", default=True)
+    verify_certs = models.BooleanField("Verify Certificates?", default=False)
     
-    def __init__(self, *args, **kwargs):
-        super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
+    def _reset_proxy(self):
+        parsed = urlparse(self.url.lower())
         self.transport = None
+        # This scheme is used for debugging and looping back
+        if parsed.scheme == "test":
+            self.proxy = BasicAuthServerProxy(parsed.path,
+                                              username=self.username,
+                                              password=self.password,
+                                              transport=TestClientTransport())
+        elif parsed.scheme == "https":
+            from M2Crypto.m2xmlrpclib import SSL_Transport
+            self.transport = SSL_Transport()
+            self.proxy = BasicAuthServerProxy(self.url,
+                                              username=self.username,
+                                              password=self.password,
+                                              transport=self.transport)
+            self.set_verify_certs()
+        else:
+            self.proxy = BasicAuthServerProxy(self.url)
     
-    def __getattr__(self, name):
-        if name == "proxy":
-            parsed = urlparse(self.url.lower())
-            # This scheme is used for debugging and looping back
-            if parsed.scheme == "test":
-                self.proxy = ServerProxy(parsed.path, TestClientTransport())
-            elif parsed.scheme == "https":
-                if self.verify_certs:
-                    self.transport = transport(
-                        timeout=settings.XMLRPC_TIMEOUT,
-                        username=self.username,
-                        password=self.password,
-                        ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
-                else:
-                    self.transport = transport(
-                        timeout=settings.XMLRPC_TIMEOUT,
-                        username=self.username,
-                        password=self.password)
-                self.proxy = ServerProxy(self.url, self.transport)
-            else:
-                new_url = "%s://%s:%s@%s%s" % (parsed.scheme,
-                                               self.username,
-                                               self.password,
-                                               parsed.netloc,
-                                               parsed.path)
-                self.proxy =  ServerProxy(new_url)
-            
-            
-            # if the password has expired, it's time to set a new one
+    def _check_expiry(self):
+        # if the password has expired, it's time to set a new one
+        if self.password_timestamp:
             max_age = timedelta(days=self.max_password_age)
             expiry_time = self.password_timestamp + max_age
             # normalize because django is screwy
@@ -80,20 +108,33 @@ class PasswordXMLRPCServerProxy(models.Model):
             if expiry_time <= now:
                 self.change_password(random_password())
                 
-            return self.proxy
-        else:
-            return getattr(self.proxy, name)
+    def __init__(self, *args, **kwargs):
+        super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
+        self._reset_proxy()
+        self._check_expiry()
+    
+    def __getattr__(self, name):
+        if name == "proxy":
+            raise AttributeError("Attribute 'proxy' not found.")
+        return getattr(self.proxy, name)
         
-    def set_verify_certs(self, enable):
+    def save(self, *args, **kwargs):
+        super(PasswordXMLRPCServerProxy, self).save(*args, **kwargs)
+        self.set_verify_certs()
+        
+    def set_verify_certs(self):
         '''Enable/disable SSL certificate verification.'''
-        self.verify_certs = enable
         if self.transport:
-            if enable:
-                self.transport.set_ssl_verify(
-                    ca_cert_path=settings.XMLRPC_TRUSTED_CA_PATH)
+            from M2Crypto import SSL
+            if self.verify_certs:
+                self.transport.ssl_ctx.set_verify(
+                    SSL.verify_peer | SSL.verify_fail_if_no_peer_cert, 16)
+                self.transport.ssl_ctx.load_verify_locations(
+                    capath=settings.XMLRPC_TRUSTED_CA_PATH)
             else:
-                self.transport.set_ssl_verify()
-        
+                self.transport.ssl_ctx.set_verify(
+                    SSL.verify_none, 1)
+            
     def change_password(self, password=None):
         '''Change the remote password'''
         password = password or random_password()
@@ -102,8 +143,10 @@ class PasswordXMLRPCServerProxy(models.Model):
         if not err:
             # password change succeeded
             self.password = password
-            del self.proxy
+            self._reset_proxy()
             self.save()
+        else:
+            print "Error changing password: %s" % err
         return err
         
     def is_available(self):
@@ -132,7 +175,7 @@ class PasswordXMLRPCServerProxy(models.Model):
         # get the PEM-encoded certificate
         cert = ssl.get_server_certificate((res.hostname, port))
         
-        # the returned cert maybe messed up because python's ssl is crap. Fix it
+        # the returned cert maybe messed up because of python-ssl bug Issue8086
         if not cert.endswith("\n-----END CERTIFICATE-----\n"):
             cert = cert.replace("-----END CERTIFICATE-----",
                                 "\n-----END CERTIFICATE-----\n")
