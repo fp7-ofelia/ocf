@@ -3,6 +3,10 @@ Created on May 19, 2010
 
 @author: jnaous
 '''
+import sys
+from os.path import join, dirname
+PYTHON_DIR = join(dirname(__file__), "../../../")
+sys.path.append(PYTHON_DIR)
 
 def main(argv):
     from expedient.common.tests.commands import call_env_command, Env
