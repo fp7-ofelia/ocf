@@ -8,7 +8,9 @@ from expedient.clearinghouse.aggregate.forms import AggregateTypeForm
 
 def list_aggs(request, obj_id=None):
     '''
-    Get a list of aggregates. obj_id specifies id to highlight.
+    Get a list of aggregates. obj_id specifies id to highlight. On POST,
+    get the type of aggregate to be created and redirect to that model's
+    create url.
     '''
     
     qs = Aggregate.objects.all()
@@ -18,9 +20,7 @@ def list_aggs(request, obj_id=None):
     elif request.method == "POST":
         form = AggregateTypeForm(request.POST)
         if form.is_valid():
-            [module, sep, name] = form.cleaned_data['type'].rpartition(".")
-            _temp = __import__(module, globals(), locals(), [name])
-            model = getattr(_temp, name)
+            model = form.cleaned_data["type"].model_class()
             return HttpResponseRedirect(model.get_create_url())
     else:
         return HttpResponseNotAllowed("GET", "POST")
