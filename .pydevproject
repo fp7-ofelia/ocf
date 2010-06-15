@@ -9,6 +9,6 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 <pydev_variables_property name="org.python.pydev.PROJECT_VARIABLE_SUBSTITUTION">
 <key>DJANGO_SETTINGS_MODULE</key>
-<value>egeni.v2.src.python.clearinghouse.settings</value>
+<value>expedient.clearinghouse.settings</value>
 </pydev_variables_property>
 </pydev_project>
