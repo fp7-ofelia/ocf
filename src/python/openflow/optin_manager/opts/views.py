@@ -11,7 +11,8 @@ from openflow.optin_manager.users.models import Priority
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from django.views.generic import simple
 from pprint import pprint
-                    
+from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp
+              
 @login_required
 def view_opt_in(request, error_msg):
     #return HttpResponse("view opt in")
@@ -58,57 +59,18 @@ def add_opt_in(request):
                     selexp = Experiment.objects.get(id = defexp)
                     adminFS = AdminFlowSpace.objects.filter(user = request.user)
                     optedFS = make_flowspace(request.POST)
-                    expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
                     
                     # find  intersection of adminFS and opted FS
                     f = multi_fs_intersect(adminFS,[optedFS],FlowSpace)
-                    intersected = False
-                    # add this opt to useropts
-                    tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
-                    tmp.save()
-                    
-                    fv_args = []
-                    match_list = []
-                    for fs in expFS:
-                        opted = multi_fs_intersect([fs],f,OptsFlowSpace)
-                        if (len(opted) > 0):
-                            intersected = True
-                            for opt in opted:
-                                opt.opt = tmp
-                                opt.dpid = fs.dpid
-                                opt.port_numebr_s = fs.port_number_s
-                                opt.port_numebr_e = fs.port_number_e
-                                opt.direction = fs.direction
-                                opt.save()
-                                #make Match struct
-                                matches = range_to_match_struct(opt)
-                                for single_match in matches:
-                                    match = MatchStruct(match = single_match, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
-                                    match.save()
-                                    match_list.append(match)
-                                    #TODO 4 is hard coded
-                                    fv_arg = {"operation":"ADD", "priority":match.priority,
-                                            "dpid":match.optfs.dpid,"match":match.match,
-                                             "actions":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
-                                    fv_args.append(fv_arg)
-                            
-                    # If there is any intersection, add them to FV
-                    if (intersected):
-                        #TODO: if multi flowvisor, change this    
-                        fv = FVServerProxy.objects.all()[0]
-                        # TODO: check for errors in the following call
-                        return_ids = fv.api.changeFlowSpace(fv_args)
-                        for i in range(0,len(return_ids)):
-                            match_list[i].fv_id = return_ids[i]
-                            match_list[i].save()
 
+                    if (opt_fs_into_exp(f,selexp,request.user,
+                                        int(request.POST['priority']),False)):
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                         return simple.direct_to_template(request, 
                                             template = 'openflow/optin_manager/opts/opt_in_successful.html', 
                                             extra_context = {'expname':exp_name}, 
                                         )
                     else:
-                        tmp.delete()
                         form._errors['general'] = ErrorList(["No intersection \
                         between opted-in flowspace,\
                         your flowspace and experiment flowspace"])
@@ -144,62 +106,17 @@ def add_opt_in(request):
                                
                 intersected = False
 
-                fv_args = []
                 tmp = UserOpts.objects.filter(experiment = selexp)
                 if (len(tmp) > 0):
                     tmp = tmp[0]
                     # first delete all previous opts into this experiment
                     ofses = tmp.optsflowspace_set.all()
-                    for ofs in ofses:
-                        matches = ofs.matchstruct_set.all()
-                        for match in matches:
-                            fv_arg={"operation":"REMOVE" , "id":match.fv_id}
-                            fv_args.append(fv_arg)
-                            match.delete()
-                        ofs.delete()
-                    tmp.delete()
-                    fv = FVServerProxy.objects.all()[0]
-                    # TODO: Check for errors
-                    fv.api.changeFlowSpace(fv_args)        
-                tmp = UserOpts(experiment=selexp, user=request.user, priority=request.POST['priority'], nice=False )
-                tmp.save()
+                    opt_fses_outof_exp(ofses)
                 
-                match_list = []
-                fv_args = []    
-                for fs in expFS:
-                    opted = multi_fs_intersect([fs],userFS,OptsFlowSpace)
-                    if (len(opted) > 0):
-                        intersected = True
-                        for opt in opted:
-                                opt.opt = tmp
-                                opt.dpid = fs.dpid
-                                opt.port_numebr_s = fs.port_number_s
-                                opt.port_numebr_e = fs.port_number_e
-                                opt.direction = fs.direction
-                                opt.save()
-                                #make Match struct
-                                matches = range_to_match_struct(opt)
-                                for single_match in matches:
-                                    match = MatchStruct(match = single_match, priority = int(request.POST['priority'])*Priority.Priority_Scale, fv_id=0, optfs=opt)
-                                    match.save()
-                                    match_list.append(match)
-                                    fv_arg = {"operation":"ADD", "priority":match.priority,
-                                            "dpid":match.optfs.dpid,"match":match.match,
-                                             "actions":"slice=%s:4"%match.optfs.opt.experiment.slice_id}
-                                    fv_args.append(fv_arg)
-                                
-                if (intersected):   
-                    fv = FVServerProxy.objects.all()[0]
-                    # TODO: check for errors in the following call
-                    
-                    # Send args in groups of 5 to avoid sending a large xmlrpc call
-                    pprint(fv_args)
-                    pprint("HEY")
-                    return_ids = fv.api.changeFlowSpace(fv_args)
-                    for i in range(0,len(return_ids)):
-                        match_list[i].fv_id = return_ids[i] 
-                        match_list[i].save() 
-
+                tmp.delete()    
+                
+                if (opt_fs_into_exp(userFS,selexp,request.user,
+                                    int(request.POST['priority']),False)):
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                     return simple.direct_to_template(request, 
                                         template = 'openflow/optin_manager/opts/opt_in_successful.html', 
@@ -238,15 +155,7 @@ def opt_out(request):
                 except:
                     continue
                 ofs = OptsFlowSpace.objects.get(id=key)
-                for match in ofs.matchstruct_set.all():
-                    fv_arg = {"operation":"REMOVE", "id":match.fv_id}
-                    fv_args.append(fv_arg)
-                    match.delete()
-                ofs.delete() 
-            if (len(fv_args)>0):
-                fv = FVServerProxy.objects.all()[0]
-                #TODO: check return error
-                fv.api.changeFlowSpace(fv_args)
+                opt_fses_outof_exp([ofs])
                        
                     
         this_user_opts  = UserOpts.objects.filter(user = request.user)

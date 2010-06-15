@@ -188,7 +188,6 @@ def singlefs_is_subset_of(singleFS, multiFS):
         field_s = getattr(singleFS,"%s_s"%field)
         field_e = getattr(singleFS,"%s_e"%field)
         new_intersections = []
-        print(potential_intersections)
         for index_list in potential_intersections:
             i = Intervals()
             for index in index_list:

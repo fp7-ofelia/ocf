@@ -15,7 +15,6 @@ def index(request):
 def dashboard(request):
     profile = UserProfile.get_or_create_profile(request.user)
     username = profile.user.username
-    print "in the dashbaord call"
     return simple.direct_to_template(request, 
                             template = 'openflow/optin_manager/dashboard.html',
                             extra_context = {
