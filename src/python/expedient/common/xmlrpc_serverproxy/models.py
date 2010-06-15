@@ -122,7 +122,9 @@ class PasswordXMLRPCServerProxy(models.Model):
         
     def save(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).save(*args, **kwargs)
-        self.set_verify_certs()
+        if self.url:
+            self._reset_proxy()
+            self.set_verify_certs()
         
     def set_verify_certs(self):
         '''Enable/disable SSL certificate verification.'''
