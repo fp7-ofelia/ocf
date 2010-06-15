@@ -11,24 +11,27 @@ the following:
 
 PREREQUISITES:
 --------------
-Following is a partial list of Python packages that are needed to run:
+Following is a partial list of packages that are needed to run:
     setuptools
     django
     decorator
     django-autoslug
     m2crypto
-    pycurl
-    python-imaging 
+    python-imaging (pil)
     django-extensions 
-    dateutil libxmlsec1-1 
-    libxmlsec1-openssl1 
+    python-dateutil
+    pycrypto
     paramiko
-    python-crypto
     django-renderform
-    python-webob
+    webob
     django-registration
     python-xmlsec1
+    lxml
     pyquery
+
+Folowing are other needed packages
+    libxmlsec1-1 
+    libxmlsec1-openssl1 
     
 Following is the list of packages to get Apache2 to work with Expedient:
     apache2
