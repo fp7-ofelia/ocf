@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>
+	<h2> Flowspaces own by {{user.username}}
+	<form name="input" action="/admin_manager/user_unreg_fs" method="post">{% csrf_token %}
+	<table>
+	<tr><th></th><th>FlowSpace</th><th>Approved By</th></tr>
+	{% for fs in userfs %}
+		<tr><td><input type="checkbox" name="{{fs.id}}"/></td>
+		<td>{{fs}}</td>
+		<td>{{fs.approver}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<td><input type="submit" value="Unregister"/></td>
+	</form>
+</div>
+{% endblock content %}
