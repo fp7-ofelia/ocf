@@ -773,14 +773,14 @@ table.formtable {
 	border-collapse: collapse;
 	border: 1px solid #CCC;
 	margin-bottom:10px;
-	margin-top:5px;
+	margin-top:0px;
 }
 
 table.formtable_noborder {
 	border-collapse: collapse;
 	border-width: 0px;
 	margin-bottom:10px;
-	margin-top:5px;
+	margin-top:0px;
 }
 
 	
@@ -802,7 +802,7 @@ table.fulltable {
 	border-collapse: collapse;
 	border: 1px solid #CCC;
 	margin-bottom:10px;
-	margin-top:5px;
+	margin-top:0px;
 }
 table.fulltable thead {
 	white-space: nowrap;
@@ -828,7 +828,7 @@ table.fulltable tbody th {
 table.msg_table {
     border-spacing: 0px;
     border: 0px;
-    margin: 15px 0px;
+    margin: 0px 0px;
     padding: 0px;
     width: 730px;
 }
@@ -915,11 +915,11 @@ div.iframe_div {
 	top:0;
 	left:0;
 }
-
+/*
 div.iframe_info_msg {
     position:relative;
     top:100px;
-}
+}*/
 
 /* creating message */
 div.create_msg_div {

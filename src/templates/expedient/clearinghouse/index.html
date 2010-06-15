@@ -1,21 +1,28 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+{% endblock scripts %}
+
 {% block content %}
 <div class="main">
 	<h1>Welcome to the GENI Clearinghouse!</h1>
     
     <h2>Messages</h2>
     <div name="div_messaging">
-		<iframe name="latest_msgs" src="{% url messaging_latest %}"
-		height="205" width="730">
+		<iframe class="dynsized" name="latest_msgs"
+		src="{% url messaging_latest %}"
+		scrolling="no" frameborder="0"
+		width="100%">
 		   <p>Your browser does not support iframes.</p>
 		</iframe>
     </div>
     
     <h2>Installed Aggregates</h2>
     <div name="div_aggregates">
-        <iframe name="installed_aggregates" src="{% url aggregate_all %}"
-        height="455" width="730">
+        <iframe class="dynsized" name="installed_aggregates"
+        src="{% url aggregate_all %}"
+        scrolling="no" frameborder="0"
+        width="100%">
            <p>Your browser does not support iframes.</p>
         </iframe>
     </div>
