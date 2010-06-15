@@ -28,6 +28,7 @@ Following is a partial list of packages that are needed to run:
     python-xmlsec1
     lxml
     pyquery
+    openssl
 
 Folowing are other needed packages
     libxmlsec1-1 
