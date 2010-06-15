@@ -100,7 +100,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     
     def _check_expiry(self):
         # if the password has expired, it's time to set a new one
-        if self.password_timestamp:
+        if self.password_timestamp and self.max_password_age:
             max_age = timedelta(days=self.max_password_age)
             expiry_time = self.password_timestamp + max_age
             # normalize because django is screwy
@@ -111,7 +111,8 @@ class PasswordXMLRPCServerProxy(models.Model):
                 
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
-        self._reset_proxy()
+        if self.url:
+            self._reset_proxy()
         self._check_expiry()
     
     def __getattr__(self, name):
