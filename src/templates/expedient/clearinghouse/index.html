@@ -5,19 +5,37 @@
 	<h1>Welcome to the GENI Clearinghouse!</h1>
     
     <h2>Messages</h2>
-    <div name="div_messaging">
-		<iframe name="latest_msgs" src="{% url messaging_latest %}"
-		height="205" width="730">
-		   <p>Your browser does not support iframes.</p>
-		</iframe>
+    <div id="div_messaging">
+    	<div id="div_message_list">
+			<form method="post" name="msg_list_form" action="">{% csrf_token %}
+				{% include "expedient/common/messaging/list.html" %}
+				<div id="msg_list_buttons">
+					<input type="submit" name="delete_msgs" value="Delete" />
+					<input type="button" name="create_msg" value="Create" />
+				</div>
+			</form>
+		</div>
+		<div id="div_message_create">
+			<form method="post" name="msg_create_form" action="">{% csrf_token %}
+	    		{% with msg_form as form %}
+				{% include "expedient/common/messaging/create.html" %}
+				{% endwith %}
+				<div id="msg_list_buttons">
+					<input type="submit" name="send_msg" value="Send" />
+				</div>
+			</form>
+		</div>
     </div>
     
-    <h2>Installed Aggregates</h2>
+    <h2>Aggregates</h2>
     <div name="div_aggregates">
-        <iframe name="installed_aggregates" src="{% url aggregate_all %}"
-        height="455" width="730">
-           <p>Your browser does not support iframes.</p>
-        </iframe>
+   		{% with agg_type_form as form %}
+		{% include "expedient/clearinghouse/aggregate/list.html" %}
+		{% endwith %}
+    </div>
+    
+    <h2>Projects</h2>
+    <div name="div_projects">
     </div>
     
 </div>
