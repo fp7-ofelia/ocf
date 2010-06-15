@@ -4,19 +4,10 @@
 # Django settings for clearinghouse project.
 from os.path import dirname, join
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
-ADMINS = (
-    ('Jad Naous', 'jnaous@stanford.edu'),
-)
-
 SRC_DIR = join(dirname(__file__), '../../../')
 
 # For serving static content - dev version only
 STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
-
-MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = join(SRC_DIR, '../db/expedient/clearinghouse/clearinghouse.db') # Or path to database file if using sqlite3.
@@ -35,8 +26,6 @@ TIME_ZONE = 'America/Los_Angeles'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -113,13 +102,7 @@ LOGIN_REDIRECT_URL = '/'
 
 AUTH_PROFILE_MODULE = "users.UserProfile"
 
-# E-Mail sending settings
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
-EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
-EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = 'no-reply@stanford.edu'
+DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # Registration App settings
@@ -133,7 +116,7 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 # default site
 SITE_ID = 1
 SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "beirut.stanford.edu"
+SITE_DOMAIN = "clearinghouse.geni.org" # example
 
 # Messaging settings
 NUM_LATEST_MSGS = 10
@@ -145,7 +128,18 @@ AGGREGATE_LOGOS_DIR = "/"
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 
+DEBUG = True
+
+# get custom install info
+from deployment_settings import *
+
+TEMPLATE_DEBUG = DEBUG
+MANAGERS = ADMINS
+
 # Logging
 from expedient.clearinghouse import loggingconf
 import logging
-loggingconf.set_up(logging.INFO)
+if DEBUG:
+    loggingconf.set_up(logging.DEBUG)
+else:
+    loggingconf.set_up(logging.INFO)

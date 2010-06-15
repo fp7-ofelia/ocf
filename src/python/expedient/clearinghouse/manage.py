@@ -1,7 +1,7 @@
-'''
-@author: jnaous
-'''
-#!/usr/bin/env python
+from os.path import dirname, join
+import sys
+sys.path.append(join(dirname(__file__), "../.."))
+
 from django.core.management import execute_manager
 try:
     import settings # Assumed to be in the same directory.
