@@ -3,6 +3,11 @@ Created on May 17, 2010
 
 @author: jnaous
 '''
+import sys
+from os.path import join, dirname
+PYTHON_DIR = join(dirname(__file__), "../../../")
+sys.path.append(PYTHON_DIR)
+
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from openflow.tests import test_settings
@@ -144,14 +149,17 @@ class FullIntegration(TestCase):
         profile.save()
         
         # Create the FV proxy connection
-        FVServerProxy.objects.create(
+        fv = FVServerProxy.objects.create(
             name="Flowvisor",
             username=flowvisor["username"],
             password=flowvisor["password"],
-            url = "https://%s:%s/xmlrpc" % (
+            url="https://%s:%s/xmlrpc" % (
                 flowvisor["host"], flowvisor["xmlrpc_port"],
             ),
+            verify_certs=False,
         )
+        fv.verify_certs = False
+        fv.save()
         
         self.om_client = xmlrpclib.ServerProxy(
             "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
