@@ -1,4 +1,10 @@
+{% extends "iframebase.html" %}
 {% load ch_extras %}
+
+{% block title %}List Aggregates{% endblock title %}
+
+{% block content %}
+<div class="aggregate_list">
 	<div class="table_div">
 		<table class="fulltable" id="messages">
 			<tr>
@@ -38,6 +44,11 @@
 			{% endfor %}
 		</table>
 	</div>
-    <div id="aggregate_create_form">
-        {{ form.as_p }}
+    <div class="links">
+        <form method="post" action="">{% csrf_token %}
+            {{ form.as_table }}
+            <input type="submit" value="Add Aggregate" />
+        </form>
     </div>
+</div>
+{% endblock content %}

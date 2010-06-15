@@ -1,3 +1,9 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Create Message{% endblock title %}
+
+{% block content %}
+<form method="post" action="">{% csrf_token %}
     <div class="form_error_msgs">
         {% for field in form.visible_fields %}
         {% if field.errors %}
@@ -21,7 +27,7 @@
                     <tr><th>{{ form.msg_text.label_tag }}:</th><td>{{ form.msg_text }}</td></tr>
                 </table>
 			</div>
-	        <div id="send_msg_button">
+	        <div class="iframe_button" id="send_msg_button">
 	            <input type="submit" value="Send Message" />
 	        </div>
 		</div>
@@ -29,3 +35,5 @@
     {% for field in form.hidden_fields %} 
     {{ field }}
     {% endfor %}
+</form>
+{% endblock content %}
