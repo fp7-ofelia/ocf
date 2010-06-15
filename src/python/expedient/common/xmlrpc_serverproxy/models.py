@@ -88,7 +88,8 @@ class PasswordXMLRPCServerProxy(models.Model):
                                               transport=TestClientTransport())
         elif parsed.scheme == "https":
             from M2Crypto.m2xmlrpclib import SSL_Transport
-            self.transport = SSL_Transport()
+            from M2Crypto.SSL import Context
+            self.transport = SSL_Transport(Context(protocol='tlsv1'))
             self.proxy = BasicAuthServerProxy(self.url,
                                               username=self.username,
                                               password=self.password,
