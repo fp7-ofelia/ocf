@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main">
+	<h2>Promote {{user.username}} to Admin</h2>
+	<div align="right">
+		<a href="/dashboard">Dashboard</a><br/>
+	</div>	
+	<form name="input" action="/admin_manager/promote_to_admin" method="post">{% csrf_token %}
+		{{form.errors.general}}
+		<input type=hidden name="priority" value=0 />
+		<label> Requested FlowSpace </label>
+		<table>
+		<tr>
+		<td>
+			<label for="id_mac_from">Source MAC address</label>
+		</td><td>
+			{{form.mac_from_s}}-{{form.mac_from_e}}
+		</td><td>{{form.errors.mac_from_s}}{{form.errors.mac_from_e}}</td>
+		</tr><tr>
+		<td>
+			<label for="id_mac_to">Destination MAC address</label>
+		</td><td>
+			{{form.mac_to_s}}-{{form.mac_to_e}}
+		</td><td>{{form.errors.mac_to_s}}{{form.errors.mac_to_e}}</td>
+		</tr><tr>
+		<td>
+			<label>VLAN Range</label>
+		</td><td>
+			{{form.vlan_id_s}} - {{form.vlan_id_e}}
+		</td><td>{{form.errors.vlan_id_s}}{{form.errors.vlan_id_s}}</td>
+		</tr><tr>
+		<td>
+			<label>Source IP Address</label>
+		</td><td>
+			{{form.ip_from_s}} - {{form.ip_from_e}}
+		</td><td>{{form.errors.ip_from_s}}{{form.errors.ip_from_e}}</td>
+		</tr><tr>
+		<td>
+			<label>Destination IP Address</label>
+		</td><td>
+			{{form.ip_to_s}} - {{form.ip_to_e}}
+		</td><td>{{form.errors.ip_to_s}}{{form.errors.ip_to_e}}</td>
+		</tr><tr>
+		<td>
+			<label>IP Protocol Range</label>
+		</td><td>
+			{{form.ip_proto_s}} - {{form.ip_proto_e}}
+		</td><td>{{form.errors.ip_proto_s}}{{form.errors.ip_proto_e}}</td>
+		</tr><tr>
+		<td>
+			<label>Transport Source Port Range</label>
+		</td><td>
+			{{form.tp_from_s}} - {{form.tp_from_e}}
+		</td><td>{{form.errors.tp_from_s}}{{form.errors.tp_from_e}}</td>
+		</tr><tr>
+		<td>
+			<label>Transport Destination Port Range</label>
+		</td><td>
+			{{form.tp_to_s}} - {{form.tp_to_e}}
+		</td><td>{{form.errors.tp_to_s}}{{form.errors.tp_to_e}}</td>
+		</tr>
+		</table>
+		<input type="submit" value="Submit Request"/>
+	</form>
+</div>
+
+{% endblock content %}

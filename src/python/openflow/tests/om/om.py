@@ -58,6 +58,8 @@ class OMTests(TestCase):
         u.save()
         profile = UserProfile.get_or_create_profile(u) 
         profile.is_net_admin = True
+        profile.supervisor = u
+        profile.max_priority_level = 7000
         profile.save()      
          
          
