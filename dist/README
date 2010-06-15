@@ -99,7 +99,10 @@ following the instructions at http://openvswitch.org/?page_id=10
 Setup a local Flowvisor:
 ------------------------
 Grab the Flowvisor release, then compile and configure it. We will be testing
-with this version so don't use a production system.
+with this version so don't use a production system. Make sure you delete the
+'mySSLKeyStore' file to generate a new certificate. When the tool asks for your
+full name, use "192.168.x.1" where x is the subnet of vmnet8 (from the previous
+step). 
 
 Edit test settings:
 -------------------
