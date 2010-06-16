@@ -15,6 +15,8 @@ import xmlrpclib
 import random
 from pprint import pprint
 
+SCHEME = "https" if test_settings.USE_HTTPS else "http"
+
 class OMTests(TestCase):
     
     def setUp(self):
@@ -44,7 +46,7 @@ class OMTests(TestCase):
         profile.is_clearinghouse_user = True
         profile.save()
         self.om_client = xmlrpclib.ServerProxy(
-            "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
+            SCHEME + "://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
                 username, password, test_settings.HOST, test_settings.OM_PORT
             )
         )
@@ -81,7 +83,7 @@ class OMTests(TestCase):
                 name="Flowvisor %s" % i,
                 username=username,
                 password=password,
-                url = "https://%s:%s/dummyfv/%s/xmlrpc/" % (
+                url = SCHEME+"://%s:%s/dummyfv/%s/xmlrpc/" % (
                     test_settings.HOST, test_settings.OM_PORT, fv.id,
                 ),
             )
@@ -383,10 +385,10 @@ class OMTests(TestCase):
         # First authenticate
         b = browser()
         b.cookie_setup()
-        logged_in = b.login("https://localhost:8443/accounts/login/","user","password")
+        logged_in = b.login(SCHEME+"://localhost:8443/accounts/login/","user","password")
         self.assertTrue(logged_in,"Could not log in")
         
-        g = b.get_and_post_form("https://localhost:8443/opts/opt_in",
+        g = b.get_and_post_form(SCHEME+"://localhost:8443/opts/opt_in",
                                 dict(experiment=1,priority=100)) 
         
         uopt = UserOpts.objects.filter(user__username__exact="user")[0]
@@ -402,7 +404,7 @@ class OMTests(TestCase):
         self.assertEqual(getattr(optfs,"%s_e"%self.exp_field_name), self.exp_field_e)
 
         # now test opt out:
-        g = b.get_and_post_form("https://localhost:8443/opts/opt_out",
+        g = b.get_and_post_form(SCHEME+"://localhost:8443/opts/opt_out",
                                 {"1":"checked"})
         optfs = OptsFlowSpace.objects.filter(opt = uopt)
         self.assertEqual(optfs.count(),0)   

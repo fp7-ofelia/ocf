@@ -19,15 +19,14 @@ from expedient.common.tests.commands import call_env_command, Env
 from os.path import join
 
 import logging
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 
 from helpers import SSHClientPlus
 
 # TODO: Some of this code works with multiple FVs, other parts assume only one.
 
 RUN_FV_SUBPROCESS = True
+SCHEME = "https" if test_settings.USE_HTTPS else "http"
 
 class FullIntegration(TestCase):
     MININET_TOPO = "linear,2"
@@ -149,7 +148,7 @@ class FullIntegration(TestCase):
         profile.save()
         
         # Create the FV proxy connection
-        fv = FVServerProxy.objects.create(
+        fv = FVServerProxy(
             name="Flowvisor",
             username=flowvisor["username"],
             password=flowvisor["password"],
@@ -158,11 +157,10 @@ class FullIntegration(TestCase):
             ),
             verify_certs=False,
         )
-        fv.verify_certs = False
         fv.save()
         
         self.om_client = xmlrpclib.ServerProxy(
-            "https://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
+            SCHEME+"://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
                 ch_username, ch_passwd,
                 test_settings.HOST, test_settings.OM_PORT,
             )
@@ -190,15 +188,15 @@ class FullIntegration(TestCase):
         """
         Run a command in a subprocess, return the new process.
         """
-        import shlex, subprocess
-        args = shlex.split(cmd)
-        if wait:
-            return subprocess.call(args)
+        if test_settings.SHOW_PROCESSES_IN_XTERM:
+            from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
         else:
-            return subprocess.Popen(args,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+            from expedient.common.tests.utils import run_cmd
+            
+        if wait:
+            return run_cmd(cmd).wait()
+        else:
+            return run_cmd(cmd)
         
     def run_am_proxy(self, gcf_dir, ssl_dir, am_port):
         """
@@ -358,6 +356,13 @@ class FullIntegration(TestCase):
             except:
                 pass
             
+        for c in self.fv_procs:
+            try:
+                c.close()
+            except:
+                pass
+
+            
         for c in self.mininet_vm_clients:
             try:
                 c.close()
@@ -368,6 +373,11 @@ class FullIntegration(TestCase):
         """
         Check the list of resources.
         """
+        # check the switches on the FV
+        devices = self.fv_clients[0].api.listDevices()
+        logger.debug("FV devices: %s" % devices)
+        self.assertEqual(len(devices), 2)
+        
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
         rspec = self.am_client.ListResources(cred, options)
