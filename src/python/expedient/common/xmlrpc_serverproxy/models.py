@@ -155,18 +155,32 @@ class PasswordXMLRPCServerProxy(models.Model):
             print "Error changing password: %s" % err
         return err
         
-    def is_available(self):
+    def is_available(self, get_info=False):
         '''Call the server's ping method, and see if we get a pong'''
         try:
             ret = self.ping("PING")
-            if self.ping("PING") == "PONG: PING":
-                return True
-        except Exception, e:
+        except Exception as e:
             import traceback
             print "Exception while pinging server: %s" % e
             traceback.print_exc()
-        return False
-
+            if get_info:
+                return (False, str(e))
+            else:
+                return False
+            
+        if ret == "PONG: PING":
+            if get_info:
+                return (True, None)
+            else:
+                return True
+        else:
+            msg = "Server at %s returned unexpected data %s" % (self.url, ret)
+            print msg
+            if get_info:
+                return (False, msg)
+            else:
+                return False
+        
     def install_trusted_ca(self):
         '''
         Add the CA that signed the certificate for self.url as trusted.
