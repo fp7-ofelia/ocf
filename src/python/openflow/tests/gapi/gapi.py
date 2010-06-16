@@ -3,13 +3,19 @@ Created on May 11, 2010
 
 @author: jnaous
 '''
+
+import sys
+from os.path import join, dirname
+PYTHON_DIR = join(dirname(__file__), "../../../")
+sys.path.append(PYTHON_DIR)
+
 from unittest import TestCase
-from expedient.common.utils.certtransport import SafeTransportWithCert
 import xmlrpclib
 from os.path import join
 from openflow.tests import test_settings as settings
 from openflow.tests.helpers import parse_rspec, create_random_resv, \
     kill_old_procs
+from expedient.common.utils.certtransport import SafeTransportWithCert
 from expedient.common.tests.commands import call_env_command, Env
     
 class GAPITests(TestCase):

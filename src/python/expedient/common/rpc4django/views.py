@@ -43,6 +43,22 @@ HTTP_ACCESS_ALLOW_ORIGIN = getattr(settings,
 # these will be scanned for @rpcmethod decorators
 APPS = getattr(settings, 'INSTALLED_APPS', [])
 
+class NonExistingDispatcher(Exception):
+    """Raised when the dispatcher for a particular name is not found."""
+    def __init__(self, path, url_name):
+        super(NonExistingDispatcher, self).__init__(
+            "URL name '%s' is not used in any rpcmethod,\
+ however, the URL '%s' uses it." % (url_name, path))
+        self.path = path
+        self.url_name = url_name
+
+def get_dispatcher(path, url_name):
+    try:
+        dispatcher = dispatchers[url_name]
+    except KeyError:
+        raise NonExistingDispatcher(path, url_name)
+    return dispatcher
+
 def _check_request_permission(request, request_format='xml', url_name="root"):
     '''
     Checks whether this user has permission to perform the specified action
@@ -59,7 +75,7 @@ def _check_request_permission(request, request_format='xml', url_name="root"):
     '''
     
     user = getattr(request, 'user', None)
-    dispatcher = dispatchers[url_name]
+    dispatcher = get_dispatcher(request.path, url_name)
     methods = dispatcher.list_methods()
     method_name = dispatcher.get_method_name(request.raw_post_data, \
                                              request_format)
@@ -131,7 +147,7 @@ def serve_rpc_request(request, url_name="root", **kwargs):
     This method handles rpc calls based on the content type of the request
     '''
     
-    dispatcher = dispatchers[url_name]
+    dispatcher = get_dispatcher(request.path, url_name)
     
     if request.method == "POST" and len(request.POST) > 0:
         # Handle POST request with RPC payload
@@ -143,7 +159,7 @@ def serve_rpc_request(request, url_name="root", **kwargs):
             if RESTRICT_XML:
                 raise Http404
             
-            if not _check_request_permission(request, 'xml'):
+            if not _check_request_permission(request, 'xml', url_name=url_name):
                 return HttpResponseForbidden()
             
             resp = dispatcher.xmldispatch(request.raw_post_data,
@@ -153,7 +169,7 @@ def serve_rpc_request(request, url_name="root", **kwargs):
             if RESTRICT_JSON:
                 raise Http404
             
-            if not _check_request_permission(request, 'json'):
+            if not _check_request_permission(request, 'json',url_name=url_name):
                 return HttpResponseForbidden()
             
             resp = dispatcher.jsondispatch(request.raw_post_data,

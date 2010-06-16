@@ -34,6 +34,7 @@ class SiteLockDown(object):
          path.startswith ('/accounts/password/reset') or
          path.startswith ('/img/') or
          path.startswith ('/css/') or
+         path.startswith('/static/media/') or
          path.endswith('/xmlrpc') or
          path.endswith('/xmlrpc/') or
          path.endswith('/gapi') or
