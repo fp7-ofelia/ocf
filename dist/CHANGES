@@ -1,3 +1,26 @@
+07-16-2010: 0.0.4-alpha2
+	Changes:
+	- Added better error messages when adding aggregates
+	- Added support for running xmlrpc using HTTP instead of HTTPS
+	- Added more output for tests (including windows for processes)
+	- Split settings in deployment_settings that depend on installation
+	- Fixed the package names in the README
+	- Added more documentation in the README
+	- Added friendlier user interface in OM for managing settings and flowspace
+	- Applied patch from Aaron Helsing (thanks) to install.sh
+	
+	Known Issues:
+	- Full integration tests currently fail because of mininet bug.
+	- Exceptions at the CH are raised to the user.
+    - Need to enable certificate verification by default for 
+      PasswordXMLRPCServerProxy, but certificate validation is currently
+      failing for some reason.
+    - Permissions need to be enforced.
+    - GAPI for OpenFlow is a bit hackish and should be made more 
+      seamless. This requires finishing the permission system.
+    - Documentation is lacking horribly.
+    - install.sh script still untested.
+	
 06-07-2010: 0.0.3-alpha1
     Changes:
     - Fixed Opt-in and Opt-out tests.
