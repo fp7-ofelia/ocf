@@ -41,13 +41,7 @@ class UserProfile(models.Model):
         try:
             profile = user.get_profile()
         except UserProfile.DoesNotExist:
-            if user.is_staff or user.is_superuser:
-                profile = cls.objects.create(
-                                user=user,
-                                is_clearinghouse_admin=True,
-                                )
-            else:
-                profile = cls.objects.create(
-                                user=user,
-                                )
+            profile = cls.objects.create(
+                            user=user,
+                            )
         return profile
