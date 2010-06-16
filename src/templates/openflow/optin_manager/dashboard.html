@@ -7,17 +7,20 @@
     {% if profile.is_net_admin %}
         <h1> {{ profile.user.username }} - Admin Dashboard </h1>
             <h2> Manage Requests </h2>
-                <a href = "/admin_manager/approve_admin">Manage Admin Requests</a><br/>
-                <a href = " ">Manage User Requests</a><br/>
-                <a href = " ">Request More Admin FlowSpace</a><br/>
-                <a href = " ">Give Up Admin FlowSpace</a><br/>
+                <a href = "/admin_manager/approve_admin">Approve Admin Requests</a><br/>
+                <a href = " ">Manage Admins Flowspaces</a><br/>
+                <a href = "/admin_manager/approve_user ">Approve User Requests</a><br/>
+                <a href = " ">Manage Users Flowspaces</a><br/>
             <h2> Manage Rules </h2>
                 <a href = "/opts/view_opt_in">Set Priorities</a><br/>
 				<a href = "/opts/opt_in">Add Rule</a><br/>
 				<a href = "/opts/opt_out">Remove Rule</a><br/>
                 <a href = "/opts/experiments">View Experiments</a><br/>
-            <h2> Profile </h2>
-                <a href = " /admin_manager/resign_admin">Resign Admin</a><br/>
+            <h2> Admin Profile </h2>
+            	<a href = "">Edit Profile</a><br/>
+                <a href = " ">Add Admin FlowSpace</a><br/>
+                <a href = " ">Give Up Admin FlowSpace</a><br/>
+                <a href = "/admin_manager/resign_admin">Resign Admin</a><br/>
 
     {% else %}
         <h1> {{ profile.user.username }} - User Dashboard </h1>
@@ -26,8 +29,10 @@
 				<a href = "/opts/opt_in">Opt In</a><br/>
 				<a href = "/opts/opt_out">Opt Out</a><br/>
                 <a href = "/opts/experiments">View Experiments</a><br/>
-            <h2> Profile </h2>
-            	<a href = "admin_manager/user_add_fs">Request Flowspace</a><br/>
+            <h2> User Profile </h2>
+            	<a href = "">Edit Profile</a><br/>
+            	<a href = "admin_manager/user_reg_fs">Register Flowspace</a><br/>
+            	<a href = "admin_manager/user_unreg_fs">Unregister Flowspace</a><br/>
                 <a href = "/admin_manager/promote_to_admin">Request to be Admin</a><br/>
     {% endif %}
     

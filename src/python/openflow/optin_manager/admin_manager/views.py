@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import simple
 from openflow.optin_manager.opts.models import AdminFlowSpace
 from openflow.optin_manager.users.models import UserProfile, Priority
+from openflow.optin_manager.flowspace.models import FlowSpace
 from openflow.optin_manager.opts.forms import AdminOptInForm
 from openflow.optin_manager.flowspace.helper import \
     singlefs_is_subset_of, make_flowspace,multi_fs_intersect, copy_fs
@@ -11,9 +12,11 @@ from django.http import HttpResponseRedirect
 from openflow.optin_manager.opts.models import UserFlowSpace, \
     AdminFlowSpace, UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
-
-
+from openflow.optin_manager.admin_manager.forms import UserRegForm
+from openflow.optin_manager.flowspace.utils import dotted_ip_to_int,\
+mac_to_int
 from django.forms.util import ErrorList
+from openflow.optin_manager.opts.helper import update_user_opts
 
 @login_required
 def promote_to_admin(request):
@@ -182,6 +185,11 @@ def resign_admin(request):
                     matches.delete()
                 optfses.delete()
             opts.delete()
+            
+            # TODO: set all the supervisors
+            
+            #TODO: set all the approvers
+            
             return HttpResponseRedirect("/dashboard")
     else:
             return simple.direct_to_template(request, 
@@ -193,81 +201,150 @@ def resign_admin(request):
 
     
 @login_required
-def user_add_fs(request):
-    pass
+def user_reg_fs(request):
     profile = request.user.get_profile()
     if (profile.is_net_admin):
-        # TODO: send to correct page
-        return 0
+        return HttpResponseRedirect("/dashboard")
     
     if (request.method == "POST"):
-        form = AdminOptInForm(request.POST)
-        if form.is_valid():
-            optedFS = make_flowspace(request.POST)
-            # check if the request FS is in strict hierarchy:
-            # this means that for each of the available AdminFS
-            # this should either be a subset of them or be disjoint
-            # from them:
+        form = UserRegForm(request.POST)
+        if (form.is_valid()):
+            # TODO: call admin personalized function here
+            # make flowspace from it:
+            fses = []
+            opted_fses = []
+            if (request.POST['mac_addr'] != "*"):
+                fs = FlowSpace()
+                fs.mac_src_s = mac_to_int(request.POST['mac_addr'])
+                fs.mac_src_e = fs.mac_src_s
+                fses.append(fs)
+                fs = FlowSpace()
+                fs.mac_dst_s = mac_to_int(request.POST['mac_addr'])
+                fs.mac_dst_e = fs.mac_dst_s
+                fses.append(fs)
+            else:
+                fs = FlowSpace()
+                fses.append(fs)
+            
+            if (request.POST['ip_addr'] != "0.0.0.0"):
+                for fs in fses:
+                    dup_fs = FlowSpace()
+                    copy_fs(fs,dup_fs)
+                    fs.ip_src_s = dotted_ip_to_int(request.POST['ip_addr'])
+                    fs.ip_src_e = fs.ip_src_s
+                    dup_fs.ip_dst_s = fs.ip_src_s
+                    dup_fs.ip_dst_e = fs.ip_src_s
+                    opted_fses.append(dup_fs)
+                    opted_fses.append(fs)
+            else:
+                opted_fses = fses
+
+            print("-----------")
             admins_list = UserProfile.objects.filter(is_net_admin=True)
             intersected_admins = []
             intersected_supervisors = []
-            for admin in admins_list:
-                adminfs = AdminFlowSpace.objects.filter(user=admin.user)
-                f = multi_fs_intersect(adminfs,[optedFS],FlowSpace)
-                if (f):
-                    if singlefs_is_subset_of(optedFS,adminfs):
+            for opted_fs in opted_fses:
+                for admin in admins_list:
+                    adminfs = AdminFlowSpace.objects.filter(user=admin.user)
+                    if singlefs_is_subset_of(opted_fs,adminfs):
                         intersected_admins.append(admin)
                         intersected_supervisors.append(admin.supervisor)
-                    else:
-                        msg = "The requested flowspace doesn't belong to a single \
-                            admin"
-                        form._errors["general"] = ErrorList([msg])
-                        return simple.direct_to_template(request, 
-                        template = "openflow/optin_manager/admin_manager/promote_to_admin.html",
-                                extra_context = {
-                                                 'form': form,
-                                                 'user':request.user,
-                                                 },
-                            )
-            selected_admin = None
-            for admin in intersected_admins:
-                if (admin not in intersected_supervisors or admin.supervisor==admin.user):
-                    selected_admin = admin
-                    break
-            if (not selected_admin):
-                #This shouldn't happen
-                return 0
-            
-            suggested_prioirty = selected_admin.user.get_profile().\
-                max_priority_level - Priority.Priority_Scale 
+                        
+                selected_admin = None
+                for admin in intersected_admins:
+                    if (admin not in intersected_supervisors or admin.supervisor==admin.user):
+                        selected_admin = admin
+                        break
+                if (not selected_admin):
+                    #This shouldn't happen
+                    return 0
                 
-            save_fs = RequestedAdminFlowSpace.objects.filter(user=request.user)
-            if not save_fs:
-                save_fs = RequestedAdminFlowSpace(
-                                                   user=request.user,
-                                                   admin=selected_admin.user,
-                                                   req_priority=suggested_prioirty)
-            else:
-                save_fs = save_fs[0]
-                save_fs.admin = selected_admin.user
-                save_fs.req_priority = suggested_prioirty
-
-            copy_fs(optedFS,save_fs)
-            save_fs.save()
-            
+                rfs = RequestedUserFlowSpace(
+                            user=request.user, admin=selected_admin.user)
+                copy_fs(opted_fs,rfs)
+                rfs.save()
+          
             return simple.direct_to_template(request, 
-            template ="openflow/optin_manager/admin_manager/admin_request_successful.html",
-                                extra_context = {
-                                                 'user':request.user,
-                                                 },
-                            )
-            
+            template ="openflow/optin_manager/admin_manager/reg_request_successful.html",
+                                extra_context = {'user':request.user}
+                            ) 
     else:
-        form = AdminOptInForm()
+        form_input = {}
+        if "REMOTE_ADDR" in request.META:
+            form_input['ip_addr'] = request.META['REMOTE_ADDR']
+        else:
+            form_input['ip_addr'] = "0.0.0.0"
+        form_input['mac_addr'] = "*"
+        form = UserRegForm(form_input)
+        
+    return simple.direct_to_template(request,
+                template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
+                extra_context = {
+                        'form':form,
+                                 },
+        )
+
+
+@login_required
+def approve_user(request,operation,req_id):
+    profile = request.user.get_profile()
+    if (not profile.is_net_admin):
+        return HttpResponseRedirect("/dashboard")
+    
+    if (request.method == "POST"):
+        op_req = RequestedUserFlowSpace.objects.get(id=req_id)
+        if (operation == 1):
+            #update new admin profile
+            op_profile = op_req.user.get_profile()
+            op_profile.max_priority_level = Priority.Strict_User
+            op_profile.save()
+            
+            
+            #copy requested into UserFlowSpace
+            ufs = UserFlowSpace(user=op_req.user, approver=op_req.admin)
+            copy_fs(op_req,ufs)
+            ufs.save()
+            update_user_opts(op_req.user)
+            
+        op_req.delete()
+    
+            
+    
+    reqs = RequestedUserFlowSpace.objects.filter(admin=request.user)
     return simple.direct_to_template(request, 
-    template = "openflow/optin_manager/admin_manager/promote_to_admin.html",
+    template = "openflow/optin_manager/admin_manager/approve_user.html",
                         extra_context = {
-                                                 'form': form,
+                                                 'reqs': reqs,
                                                  'user':request.user,
                                                  },
-                        )
+                        )  
+
+@login_required
+def user_unreg_fs(request):
+    profile = request.user.get_profile()
+    if (profile.is_net_admin):
+        return HttpResponseRedirect("/dashboard")
+    
+    if (request.method == "POST"):
+        print "POSTED"
+        for key in request.POST:
+            print "KEY IS %s"%key
+            try:
+                int(key)
+            except:
+                continue
+            UserFlowSpace.objects.get(id=int(key)).delete()
+
+        update_user_opts(request.user)
+        
+            
+    userfs = UserFlowSpace.objects.filter(user=request.user)
+    
+    return simple.direct_to_template(request, 
+    template = "openflow/optin_manager/admin_manager/user_unreg_fs.html",
+                        extra_context = {
+                                                 'userfs': userfs,
+                                                 'user':request.user,
+                                                 },
+                        )        
+            

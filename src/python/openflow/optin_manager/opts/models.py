@@ -6,7 +6,8 @@ class UserFlowSpace(FlowSpace):
     '''
     Holds information about the verified flowspace for each user
     '''
-    user            = models.ForeignKey(auth.models.User)        
+    user            = models.ForeignKey(auth.models.User, related_name = "user")        
+    approver     = models.ForeignKey(auth.models.User, related_name = "approver")
 
 class AdminFlowSpace(FlowSpace):
     '''

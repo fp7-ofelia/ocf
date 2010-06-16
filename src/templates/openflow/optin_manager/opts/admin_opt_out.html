@@ -9,7 +9,7 @@
 	<table>
 	<tr><th></th><th>FlowSpace</th><th>Experiment</th><th>Priority</th></tr>
 	{% for fs in allfs %}
-		<tr><td><input type="checkbox" name={{fs.id}}/></td>
+		<tr><td><input type="checkbox" name="{{fs.id}}"/></td>
 		<td>{{fs}}</td>
 		<td>{{fs.opt.experiment.project_name}}:{{fs.opt.experiment.slice_name}}</td>
 		<td>{{fs.opt.priority}}</td>
