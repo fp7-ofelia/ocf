@@ -60,14 +60,23 @@ $ sudo make install
 This installs apache and configures it to start serving expedient files.
 
 Update the settings by going through 
-/srv/www/openflow/optin_manager/deployment_settings.py and
-/srv/www/expedient/clearinghouse/deployment_settings.py and editing the
-following where applicable:
+/srv/www/src/python/openflow/optin_manager/deployment_settings.py and
+/srv/www/src/python/expedient/clearinghouse/deployment_settings.py and editing
+the following where applicable:
 - The ADMINS setting
 - The EMAIL_* settings
 - The XMLRPC_* settings and MY_CA according to your installation
 - The SITE_NAME and SITE_DOMAIN settings
 - The OPENFLOW_GAPI_* settings
+
+As root, do the following (also creating the superuser):
+# cd /srv/www/expedient/src/python
+# python expedient/clearinghouse/manage.py syncdb
+# python expedient/clearinghouse/manage.py flush
+# python openflow/optin_manager/manage.py syncdb
+# python expedient/optin_manager/manage.py flush
+
+The above steps need to be repeated after running the tests.
 
 Restart Apache.
 
@@ -138,18 +147,17 @@ Flush the database:
 # python openflow/optin_manager/manage.py flush
 
 Django ask to create a superuser. please provide the username/password 
-information.
-The superuser will be assigned the entire flowspace in the system on 
-first log in to opt-in manager.
+information. The superuser will be assigned the entire flowspace in the system
+on first log in to opt-in manager.
 
 Now go to optin manager webpage (https://localhost:8443/), log in using
 the superuser username/password, and set up:
 1) clearinghouse user. for doing this, use "set clearinghouse" link
-under "Manage Webiste". This is the username and password of clearinghouse
-when it sends xmlrpc calls to optin-manager
+   under "Manage Webiste". This is the username and password of clearinghouse
+   when it sends xmlrpc calls to optin-manager
 2) flowvisor. use "set flowvisor" link under "Manage Website"
 
-at this point, optin manager can can send xmlrpc calls to flowvisor and
+At this point, optin manager can can send xmlrpc calls to flowvisor and
 receive xmlrpc calls from clearinghouse.
 
 Now you can create users/ opt-in/opt-out,...
@@ -160,16 +168,16 @@ a typical workflow:
 * verify the new account (e-mail verification)
 * log in to the opt-in mnagare using the new account.
 * request some flowspace for the new user: using the "Register Flowspace" 
-link under "User Profile". enter some ip address and/or Mac address.
-then submit request.
+  link under "User Profile". enter some ip address and/or Mac address.
+  then submit request.
 * the request is now sent to the admin who owns the flowsapce to verify
-the request. in this case, the superuser. log in to optin manager website 
-using superuser credentials. 
+  the request. in this case, the superuser. log in to optin manager website 
+  using superuser credentials. 
 * go to "approve user requests" under "Manage Requests". you will see a couple
-of outstanding requests waiting for admin approval. approve them.
+  of outstanding requests waiting for admin approval. approve them.
 * Now the user have some flow space to play with. Using the Opt In/Opt Out/
-Set Prioirties, a user can opt flow spaces into experiments or opt out or 
-change priority orders.
+  Set Prioirties, a user can opt flow spaces into experiments or opt out or 
+  change priority orders.
 
 USAGE:
 ------
