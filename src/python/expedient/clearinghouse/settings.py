@@ -60,8 +60,15 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'expedient.clearinghouse.middleware.sitelockdown.SiteLockDown',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
+    'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
+    'expedient.common.middleware.sitelockdown.SiteLockDown',
     'expedient.common.permissions.middleware.PermissionMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
 )
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
@@ -130,6 +137,23 @@ OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 
 DEBUG = True
 
+# For Testing
+BASIC_AUTH_URLS = (
+    r'^/dummyom/.*',
+)
+
+SITE_LOCKDOWN_EXCEPTIONS = (
+    r'^/accounts/register/$',
+    r'^/accounts/activate/$',
+    r'^/admin/.*',
+    r'^/accounts/password/reset/$',
+    r'^/img/.*',
+    r'^/css/.*',
+    r'^/static/media/.*',
+    r'.*/xmlrpc/?',
+    r'.*/gapi/?',
+)
+
 # get custom install info
 from deployment_settings import *
 
@@ -137,7 +161,7 @@ TEMPLATE_DEBUG = DEBUG
 MANAGERS = ADMINS
 
 # Logging
-from expedient.clearinghouse import loggingconf
+from expedient.common import loggingconf
 import logging
 if DEBUG:
     loggingconf.set_up(logging.DEBUG)
