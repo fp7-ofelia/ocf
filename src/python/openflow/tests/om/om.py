@@ -362,7 +362,7 @@ class OMTests(TestCase):
         
         #assign flowspace to user
         ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
-                             ip_src_e=self.user_ip_src_e,)
+                             ip_src_e=self.user_ip_src_e,approver=adm)
         setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
         setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
         ufs.save()     
