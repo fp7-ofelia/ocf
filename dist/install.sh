@@ -13,18 +13,44 @@ CLEARINGHOUSE="expedient/clearinghouse"
 COMMON="expedient/clearinghouse"
 OPTIN_MANAGER="openflow/optin_manager"
 
+# Configs to do:
+# Edit Django Settings:
+# ---------------------
+# edit the <egeni_root>/src/python/expedient/clearinghouse/settings.py and:
+# 1. Set the database parameters (see the Django documentation).
+# 2. Set the SITE_DOMAIN to your host's address
+# 3. Set the SITE_NAME to what you would like to call your site
+# 4. Go through other settings to make sure they're all applicable.
+
+# Also edit src/python/openflow/optin_manger/settings.py
+# ADMINS
+# DB Engine if not sqlite3
+# TIME_ZONE
+# EMAIL_*
+# SITE_DOMAIN
+# MY_CA
+
+# Edit the <egeni_root>/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf and point
+# it to the correct <egeni_root> and set the correct port to listen to if different from default
+# Ditto src/config/openflow/optin_manager/apache/vhost-optinmgr.conf - but shouldnt need to change it
+
 # install prereqs
 zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
 zypper addrepo -f http://download.opensuse.org/repositories/openSUSE:/11.2:/Contrib/standard/ contrib
-zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-imaging python-django-extensions python-dateutil libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto
-easy_install -Z django-registration python-xmlsec1
+zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging python-django-extensions python-dateutil libxml libxml2 gcc libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto python-django-renderform python-webob sqlite3 python-openssl
+# Unknowns I thought I needed: libxslt-dev, python-dev xmlsec1
+
+# zypper install python-dateutil-1.5-6.1.noarch
+# This isnt found: easy_install -Z python-xmlsec1
+easy_install -Z django-registration pyquery
+# Ignore errors on below and force the install (option 2):
 zypper install -l -f --force-resolution libxmlsec1-openssl-devel
 
 cp -R ../expedient-$VERSION $BASE
 
-chown wwwrun:www -R $BASE
-chmod g+r -R $BASE
-chmod g+w -R $BASE/db
+chown -R wwwrun:www $BASE
+chmod -R g+r $BASE
+chmod -R g+w $BASE/db
 
 # Set the hostname
 FQDN=`hostname -f`
@@ -43,6 +69,8 @@ cp -s $BASE/src/config/$OPTIN_MANAGER/apache/vhost-optinmgr.conf /etc/apache2/co
 # Create Apache log directories
 mkdir -p /var/log/apache2/$CLEARINGHOUSE
 mkdir -p /var/log/apache2/$OPTIN_MANAGER
+chmod o-w /var/log/apache2/$CLEARINGHOUSE
+chmod o-w /var/log/apache2/$OPTIN_MANAGER
 
 # Enable various Apache flags
 a2enmod wsgi
