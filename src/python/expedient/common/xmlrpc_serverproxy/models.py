@@ -96,7 +96,9 @@ class PasswordXMLRPCServerProxy(models.Model):
                                               transport=self.transport)
             self.set_verify_certs()
         else:
-            self.proxy = BasicAuthServerProxy(self.url)
+            self.proxy = BasicAuthServerProxy(self.url,
+                                              username=self.username,
+                                              password=self.password)
     
     def _check_expiry(self):
         # if the password has expired, it's time to set a new one
@@ -174,6 +176,9 @@ class PasswordXMLRPCServerProxy(models.Model):
 
         # parse the url
         res = urlparse(self.url)
+        if res.scheme.lower() != "https":
+            return
+        
         port = res.port or 443
         
         # get the PEM-encoded certificate
