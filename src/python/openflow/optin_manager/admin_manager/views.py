@@ -319,6 +319,7 @@ def approve_user(request,operation,req_id):
                                                  },
                         )  
 
+import re
 @login_required
 def user_unreg_fs(request):
     profile = request.user.get_profile()
@@ -326,23 +327,32 @@ def user_unreg_fs(request):
         return HttpResponseRedirect("/dashboard")
     
     if (request.method == "POST"):
-        print "POSTED"
         for key in request.POST:
-            print "KEY IS %s"%key
+            verified = re.match(r"verif_(?P<id>\d+)",key)
+            pending = re.match(r"pend_(?P<id>\d+)",key)
             try:
-                int(key)
+                status = 0
+                if (verified):
+                    key_id = verified.group("id")
+                    status = 1
+                elif (pending):
+                    key_id =pending.group("id")
+                    status = 2
             except:
                 continue
-            UserFlowSpace.objects.get(id=int(key)).delete()
+            if (status == 1):
+                UserFlowSpace.objects.get(id=int(key_id)).delete()
+            elif (status == 2):
+                RequestedUserFlowSpace.objects.get(id=int(key_id)).delete()
 
         update_user_opts(request.user)
-        
             
     userfs = UserFlowSpace.objects.filter(user=request.user)
-    
+    reqfs = RequestedUserFlowSpace.objects.filter(user=request.user)
     return simple.direct_to_template(request, 
     template = "openflow/optin_manager/admin_manager/user_unreg_fs.html",
                         extra_context = {
+                                                 'reqfs': reqfs,
                                                  'userfs': userfs,
                                                  'user':request.user,
                                                  },
