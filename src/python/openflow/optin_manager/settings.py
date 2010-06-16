@@ -57,6 +57,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
+    'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
 )
 
 ROOT_URLCONF = 'openflow.optin_manager.urls'
@@ -107,6 +114,12 @@ SITE_NAME = "Expedient Opt-In Manager"
 SITE_DOMAIN = "localhost:8443"
 
 DEBUG = True
+
+BASIC_AUTH_URLS = (
+    r'^/xmlrpc/xmlrpc.*',
+    ### for testing
+    r'^/dummyfv/.*',
+)
 
 # get custom install info
 from deployment_settings import *
