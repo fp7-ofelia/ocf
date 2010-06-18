@@ -15,6 +15,9 @@ from django.contrib.contenttypes.models import ContentType
 #    get_user_from_req, get_queryset_from_class, get_queryset,\
 #    get_queryset_from_id, register_permission_for_obj_or_class
 
+import logging
+logger = logging.getLogger("Aggregate Models")
+
 class Aggregate(Extendable):
     '''
     Holds information about an aggregate. Needs to be extended by plugins.
@@ -45,7 +48,8 @@ class Aggregate(Extendable):
     def get_logo_url(self):
         try:
             return self.logo.url
-        except:
+        except Exception as e:
+            logger.debug("Exception getting logo url %s" % e)
             return ""
         
     def get_edit_url(self):
