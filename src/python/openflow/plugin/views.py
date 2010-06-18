@@ -40,6 +40,7 @@ def aggregate_crud(request, agg_id=None):
         logger.debug("Validating")
         if client_form.is_valid() and agg_form.is_valid():
             logger.debug("Forms are valid")
+            logger.debug("Got logo %s" % request.POST.get("logo", ""))
             # Save the client first
             client = client_form.save()
             # Then save the aggregate and add the client
@@ -50,6 +51,7 @@ def aggregate_crud(request, agg_id=None):
             # Add current user as owner for the aggregate
             admin_info, created = AggregateAdminInfo.objects.get_or_create(
                 admin=request.user,
+                aggregate=aggregate,
             )
             aggregate.admins_info.add(admin_info)
             err = aggregate.setup_new_aggregate(request.META['HTTP_HOST'])
