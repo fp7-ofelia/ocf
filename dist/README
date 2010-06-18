@@ -69,6 +69,14 @@ the following where applicable:
 - The SITE_NAME and SITE_DOMAIN settings
 - The OPENFLOW_GAPI_* settings
 
+NOTE: If your OS distribution does not have /usr/bin/gensslcert, you need
+to create self-signed server certificates using openssl. make sure you keep
+the certificates in the directories as mentioned in vhost-macros.conf and make
+the XMLRPC_TRUSTED_CA certificates directory writable by apache.
+
+Also, make sure that the directory has a Makefile that creates symlinks
+as required by apache's ssl_mod.
+
 As root, do the following (also creating the superuser):
 # cd /srv/www/expedient/src/python
 # python expedient/clearinghouse/manage.py syncdb
