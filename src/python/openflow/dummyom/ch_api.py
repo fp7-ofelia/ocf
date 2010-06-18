@@ -110,3 +110,13 @@ def change_password(new_password, **kwargs):
     kwargs['user'].save()
     print "******** change_password Done to %s" % new_password
     return ""
+
+@check_verified_user
+@rpcmethod(signature=['string', 'string'], url_name="dummyom_rpc")
+def ping(data, **kwargs):
+    '''
+    Test method to see that everything is up.
+    return a string that is "PONG: %s" % data
+    '''
+    print "Pinged!"
+    return "PONG: %s" % data
