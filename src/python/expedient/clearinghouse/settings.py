@@ -129,7 +129,7 @@ SITE_DOMAIN = "clearinghouse.geni.org" # example
 NUM_LATEST_MSGS = 10
 
 # Aggregate app settings
-AGGREGATE_LOGOS_DIR = "/"
+AGGREGATE_LOGOS_DIR = "aggregate_logos/"
 
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
