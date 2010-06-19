@@ -11,7 +11,8 @@ the following:
 
 PREREQUISITES:
 --------------
-Following is a partial list of packages that are needed to run:
+Following is a partial list of packages that are needed to run (their
+dependencies are not included):
     setuptools
     django
     decorator
@@ -30,9 +31,10 @@ Following is a partial list of packages that are needed to run:
     pyquery
     openssl
 
-Folowing are other needed packages
+Folowing are possibly other needed packages:
     libxmlsec1-1 
-    libxmlsec1-openssl1 
+    libxmlsec1-openssl1
+    python-devel 
     
 Following is the list of packages to get Apache2 to work with Expedient:
     apache2
@@ -57,14 +59,32 @@ $ sudo make install
 
 This installs apache and configures it to start serving expedient files.
 
-Update the settings by going through /srv/www/openflow/optin_manager/settings.py
-and /srv/www/expedient/clearinghouse/settings.py and editing the following where
-applicable:
+Update the settings by going through 
+/srv/www/src/python/openflow/optin_manager/deployment_settings.py and
+/srv/www/src/python/expedient/clearinghouse/deployment_settings.py and editing
+the following where applicable:
 - The ADMINS setting
 - The EMAIL_* settings
 - The XMLRPC_* settings and MY_CA according to your installation
 - The SITE_NAME and SITE_DOMAIN settings
 - The OPENFLOW_GAPI_* settings
+
+NOTE: If your OS distribution does not have /usr/bin/gensslcert, you need
+to create self-signed server certificates using openssl. make sure you keep
+the certificates in the directories as mentioned in vhost-macros.conf and make
+the XMLRPC_TRUSTED_CA certificates directory writable by apache.
+
+Also, make sure that the directory has a Makefile that creates symlinks
+as required by apache's ssl_mod.
+
+As root, do the following (also creating the superuser):
+# cd /srv/www/expedient/src/python
+# python expedient/clearinghouse/manage.py syncdb
+# python expedient/clearinghouse/manage.py flush
+# python openflow/optin_manager/manage.py syncdb
+# python expedient/optin_manager/manage.py flush
+
+The above steps need to be repeated after running the tests.
 
 Restart Apache.
 
@@ -135,18 +155,17 @@ Flush the database:
 # python openflow/optin_manager/manage.py flush
 
 Django ask to create a superuser. please provide the username/password 
-information.
-The superuser will be assigned the entire flowspace in the system on 
-first log in to opt-in manager.
+information. The superuser will be assigned the entire flowspace in the system
+on first log in to opt-in manager.
 
 Now go to optin manager webpage (https://localhost:8443/), log in using
 the superuser username/password, and set up:
 1) clearinghouse user. for doing this, use "set clearinghouse" link
-under "Manage Webiste". This is the username and password of clearinghouse
-when it sends xmlrpc calls to optin-manager
+   under "Manage Webiste". This is the username and password of clearinghouse
+   when it sends xmlrpc calls to optin-manager
 2) flowvisor. use "set flowvisor" link under "Manage Website"
 
-at this point, optin manager can can send xmlrpc calls to flowvisor and
+At this point, optin manager can can send xmlrpc calls to flowvisor and
 receive xmlrpc calls from clearinghouse.
 
 Now you can create users/ opt-in/opt-out,...
@@ -157,16 +176,16 @@ a typical workflow:
 * verify the new account (e-mail verification)
 * log in to the opt-in mnagare using the new account.
 * request some flowspace for the new user: using the "Register Flowspace" 
-link under "User Profile". enter some ip address and/or Mac address.
-then submit request.
+  link under "User Profile". enter some ip address and/or Mac address.
+  then submit request.
 * the request is now sent to the admin who owns the flowsapce to verify
-the request. in this case, the superuser. log in to optin manager website 
-using superuser credentials. 
+  the request. in this case, the superuser. log in to optin manager website 
+  using superuser credentials. 
 * go to "approve user requests" under "Manage Requests". you will see a couple
-of outstanding requests waiting for admin approval. approve them.
+  of outstanding requests waiting for admin approval. approve them.
 * Now the user have some flow space to play with. Using the Opt In/Opt Out/
-Set Prioirties, a user can opt flow spaces into experiments or opt out or 
-change priority orders.
+  Set Prioirties, a user can opt flow spaces into experiments or opt out or 
+  change priority orders.
 
 USAGE:
 ------
@@ -183,6 +202,16 @@ you just created on the optin manager.
 
 The GENI API can be used to create and delete experiments. Currently shutdown
 is the same as delete, and renew always returns true since slices never expire.
+
+
+Not using Apache or not using HTTPS:
+------------------------------------
+It is possible to use HTTP instead of HTTPS. However, you will need to
+manually edit Apache's configuration files to enable HTTP instead of HTTPS.
+
+You can also try running without Apache altogether and start by using django's
+built in development server. However, you will need to be careful because it
+is single threaded and deadlocks can occur (especially in tests).
 
 
 AUTHORS:

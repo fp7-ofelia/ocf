@@ -22,24 +22,22 @@ def check_user(func, *args, **kwargs):
         raise Exception("Request not available for XML-RPC %s" % \
                         func.func_name)
     meta = kwargs["request"].META
-    if "REMOTE_USER" not in meta:
-        raise Exception(
-            "Remote user not authenticated for XML-RPC %s." % (
-                func.func_name,
-            )
-        )
-    if User.objects.filter(username=meta["REMOTE_USER"]).count() == 0:
-        raise Exception("Remote user %s is unknown for call %s." % (
-            meta["REMOTE_USER"], func.func_name)
-        )
-    #Check that the user can actually make the xmlrpc call
-    this_user = User.objects.get(username = meta["REMOTE_USER"])
-    if (not this_user.get_profile().is_clearinghouse_user):
-        raise Exception("Remote user %s is not a clearinghouse user"%
-                       (meta["REMOTE_USER"])
-        )
-    kwargs['username'] = meta["REMOTE_USER"]
-       
+    
+    if not hasattr(kwargs["request"], "user"):
+        raise Exception("Authentication Middleware not installed in settings.")
+    
+    if not kwargs['request'].user.is_authenticated():
+        raise Exception("User not authenticated for XML-RPC %s." % func.func_name)
+    else:
+        kwargs['user'] = kwargs['request'].user
+        return func(*args, **kwargs)
+
+    # Check that the user can actually make the xmlrpc call
+    this_user = kwargs['user']
+    if not this_user.get_profile().is_clearinghouse_user:
+        raise Exception("Remote user %s is not a clearinghouse user" % (
+            this_user.username))
+        
     return func(*args, **kwargs)
 
 def _same(val):
@@ -186,7 +184,8 @@ def create_slice(slice_id, project_name, project_description,
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
-        if using x509 certs then the domain name.
+        if using x509 certs then the domain name. Additionally, kwargs has the
+        user using the 'user' key.
     
     @return: switches and links that have caused errors
     @rtype: dict
@@ -334,7 +333,7 @@ def register_topology_callback(url, cookie, **kwargs):
     from expedient.common import utils
 
     attrs = {'url': url, 'cookie': cookie}
-    filter_attrs = {'username': kwargs['username']}
+    filter_attrs = {'username': kwargs['user'].username}
     utils.create_or_update(CallBackServerProxy, filter_attrs, attrs)
     return ""
 
@@ -352,18 +351,8 @@ def change_password(new_password, **kwargs):
         if using x509 certs then the domain name.
     @return: Error message if there is any.
     @rtype: string
-    '''    
-    dummy = User.objects.get_or_create(username='xmlrpcdummy')
-    
-    try:
-        user = User.objects.get(username=kwargs['username'])
-    except User.DoesNotExist:
-        # Do not return an error indicating the user does not
-        # exist so we don't provide an easy way for probing for usernames.
-        # We also do a set_password on the dummy user so we don't worry
-        # about timing attacks.
-        user = dummy
-    
+    '''
+    user = kwargs['user']
     user.set_password(new_password)
     user.save()
     

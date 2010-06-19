@@ -62,14 +62,15 @@ def create_permission(name, view=None):
         when done.
         
     @type view: Full import path of the view as L{str} or the view function
-        object itself.
+        object itself. Note that the view must be importable by its a path
+        (i.e. cannot use nested functions).
         
     @return: the new L{ExpedientPermission}.
     """
-    
+    view = _stringify_func(view)
     # check if the permission is registered with a different view somewhere else
     perm, created = ExpedientPermission.objects.get_or_create(
-        name=name, defaults=dict(view=_stringify_func(view)))
+        name=name, defaults=dict(view=view))
     if not created and perm.view != view:
         raise PermissionRegistrationConflict(name, view, perm.view)
     

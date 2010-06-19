@@ -96,7 +96,9 @@ class PasswordXMLRPCServerProxy(models.Model):
                                               transport=self.transport)
             self.set_verify_certs()
         else:
-            self.proxy = BasicAuthServerProxy(self.url)
+            self.proxy = BasicAuthServerProxy(self.url,
+                                              username=self.username,
+                                              password=self.password)
     
     def _check_expiry(self):
         # if the password has expired, it's time to set a new one
@@ -122,7 +124,9 @@ class PasswordXMLRPCServerProxy(models.Model):
         
     def save(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).save(*args, **kwargs)
-        self.set_verify_certs()
+        if self.url:
+            self._reset_proxy()
+            self.set_verify_certs()
         
     def set_verify_certs(self):
         '''Enable/disable SSL certificate verification.'''
@@ -151,18 +155,32 @@ class PasswordXMLRPCServerProxy(models.Model):
             print "Error changing password: %s" % err
         return err
         
-    def is_available(self):
+    def is_available(self, get_info=False):
         '''Call the server's ping method, and see if we get a pong'''
         try:
             ret = self.ping("PING")
-            if self.ping("PING") == "PONG: PING":
-                return True
-        except Exception, e:
+        except Exception as e:
             import traceback
             print "Exception while pinging server: %s" % e
             traceback.print_exc()
-        return False
-
+            if get_info:
+                return (False, str(e))
+            else:
+                return False
+            
+        if ret == "PONG: PING":
+            if get_info:
+                return (True, None)
+            else:
+                return True
+        else:
+            msg = "Server at %s returned unexpected data %s" % (self.url, ret)
+            print msg
+            if get_info:
+                return (False, msg)
+            else:
+                return False
+        
     def install_trusted_ca(self):
         '''
         Add the CA that signed the certificate for self.url as trusted.
@@ -172,6 +190,9 @@ class PasswordXMLRPCServerProxy(models.Model):
 
         # parse the url
         res = urlparse(self.url)
+        if res.scheme.lower() != "https":
+            return
+        
         port = res.port or 443
         
         # get the PEM-encoded certificate

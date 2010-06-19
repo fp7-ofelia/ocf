@@ -114,13 +114,18 @@ class AggregateManager(object):
     def __init__(self, root_cert, proxy_url):
         self._cred_verifier = CredentialVerifier(root_cert)
         self.max_lease = datetime.timedelta(days=365)
-        self.proxy = xmlrpclib.ServerProxy(proxy_url, xmlrpclib.SafeTransport())
+        if proxy_url.startswith("https"):
+            self.proxy = xmlrpclib.ServerProxy(proxy_url,
+                                               xmlrpclib.SafeTransport())
+        else:
+            self.proxy = xmlrpclib.ServerProxy(proxy_url)
 
     def GetVersion(self):
+        logging.info("Called GetVersion")
         return self.proxy.GetVersion()
 
     def ListResources(self, credentials, options):
-        print 'ListResources(%r)' % (options)
+        logging.info('ListResources(%r)' % (options))
         privileges = ('listresources',)
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
@@ -130,7 +135,7 @@ class AggregateManager(object):
         return retval
     
     def CreateSliver(self, slice_urn, credentials, rspec):
-        print 'CreateSliver(%r)' % (slice_urn)
+        logging.info('CreateSliver(%r)' % (slice_urn))
         privileges = ('createsliver',)
         creds = self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                         credentials,
@@ -139,7 +144,7 @@ class AggregateManager(object):
         return self.proxy.CreateSliver(slice_urn, credentials, rspec)
 
     def DeleteSliver(self, slice_urn, credentials):
-        print 'DeleteSliver(%r)' % (slice_urn)
+        logging.info('DeleteSliver(%r)' % (slice_urn))
         privileges = ('deleteslice',)
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
@@ -148,7 +153,7 @@ class AggregateManager(object):
         return self.proxy.DeleteSliver(slice_urn, credentials)
     
     def SliverStatus(self, slice_urn, credentials):
-        print 'SliverStatus(%r)' % (slice_urn)
+        logging.info('SliverStatus(%r)' % (slice_urn))
         privileges = ('getsliceresources',)
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
@@ -157,7 +162,7 @@ class AggregateManager(object):
         return self.proxy.SliverStatus()
     
     def RenewSliver(self, slice_urn, credentials, expiration_time):
-        print 'RenewSliver(%r, %r)' % (slice_urn, expiration_time)
+        logging.info('RenewSliver(%r, %r)' % (slice_urn, expiration_time))
         privileges = ('renewsliver',)
         creds = self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                         credentials,
@@ -166,7 +171,7 @@ class AggregateManager(object):
         return self.proxy.RenewSliver(slice_urn, credentials, expiration_time)
     
     def Shutdown(self, slice_urn, credentials):
-        print 'Shutdown(%r)' % (slice_urn)
+        logging.info('Shutdown(%r)' % (slice_urn))
         return self.proxy.ShutDown(slice_urn, credentials)
 
 def parse_args(argv):
@@ -196,11 +201,9 @@ def main(argv=None):
         argv = sys.argv
     opts = parse_args(argv)[0]
     level = logging.INFO
-    logging.basicConfig(level=level)
     if opts.debug:
         level = logging.DEBUG
-    logger = logging.Logger("am")
-    logger.setLevel(level)
+    logging.basicConfig(level=level)
     delegate = AggregateManager(opts.rootcafile, opts.url)
     ams = geni.AggregateManagerServer((opts.host, opts.port),
                                       delegate=delegate,

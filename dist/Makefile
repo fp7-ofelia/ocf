@@ -35,11 +35,12 @@ $(NAME)-%.tar.gz: $(FILES)
 	@rm -rf $(NAME)-$*-temp
 	@echo "*** Replacing settings with clean deployment settings"
 	@for p in $(PROJECTS); do \
-		mv $(NAME)-$*/src/python/$$p/deployment_settings.py $(NAME)-$*/src/python/$$p/settings.py; \
+		mv $(NAME)-$*/src/python/$$p/deployment_settings_clean.py \
+		$(NAME)-$*/src/python/$$p/deployment_settings.py; \
 	done
 	@echo "*** Updating the version in files"
-	@sed -i '{s/VERSION=.*/VERSION=$(VERSION)/}' $(NAME)-$*/$(INSTALL)
-	@sed -i '{s/x\.y\.z/$(VERSION)/}' $(NAME)-$*/$(README)
+	@sed -i '{s/VERSION=.*/VERSION=$*/}' $(NAME)-$*/$(INSTALL)
+	@sed -i '{s/x\.y\.z/$*/}' $(NAME)-$*/$(README)
 	@echo "*** Cleaning the apache vhost configuration files"
 	@for f in $(APACHE_CONF_FILES); do \
 		sed -i '{s/\(Use SimpleSSLWSGIVHost\) \(.*\) \(.*\) \(.*\)/\1 \2 \3 \/srv\/www\/expedient/}' $(NAME)-$*/$$f; \

@@ -10,39 +10,75 @@ VERSION="x.y.z"
 
 BASE="/srv/www/expedient"
 CLEARINGHOUSE="expedient/clearinghouse"
-COMMON="expedient/clearinghouse"
+COMMON="expedient/common"
 OPTIN_MANAGER="openflow/optin_manager"
 
+# Configs to do:
+# Edit Django Settings:
+# ---------------------
+# edit the <egeni_root>/src/python/expedient/clearinghouse/settings.py and:
+# 1. Set the database parameters (see the Django documentation).
+# 2. Set the SITE_DOMAIN to your host's address
+# 3. Set the SITE_NAME to what you would like to call your site
+# 4. Go through other settings to make sure they're all applicable.
+
+# Also edit src/python/openflow/optin_manger/settings.py
+# ADMINS
+# DB Engine if not sqlite3
+# TIME_ZONE
+# EMAIL_*
+# SITE_DOMAIN
+# MY_CA
+
+# Edit the <egeni_root>/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf and point
+# it to the correct <egeni_root> and set the correct port to listen to if different from default
+# Ditto src/config/openflow/optin_manager/apache/vhost-optinmgr.conf - but shouldnt need to change it
+
 # install prereqs
-zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
-zypper addrepo -f http://download.opensuse.org/repositories/openSUSE:/11.2:/Contrib/standard/ contrib
-zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-imaging python-django-extensions python-dateutil libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto
-easy_install -Z django-registration python-xmlsec1
-zypper install -l -f --force-resolution libxmlsec1-openssl-devel
+zypper -n addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.2 python
+zypper -n addrepo -f http://download.opensuse.org/repositories/openSUSE:/11.2:/Contrib/standard/ contrib
+zypper -n install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging python-django-extensions python-dateutil libxml libxml2 gcc libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto python-django-renderform python-webob sqlite3 python-openssl gcc
+
+easy_install -Z django-registration pyquery
+
+echo **** Ignore errors next and force the install (option 2):
+zypper -n install -l -f --force-resolution libxmlsec1-openssl-devel
 
 cp -R ../expedient-$VERSION $BASE
 
-chown wwwrun:www -R $BASE
-chmod g+r -R $BASE
-chmod g+w -R $BASE/db
+chown -R wwwrun:www $BASE
+chmod -R g+r $BASE
+chmod -R g+w $BASE/db
+chgrp www /etc/apache2/ssl.crt
+chmod g+rw /etc/apache2/ssl.crt
 
 # Set the hostname
 FQDN=`hostname -f`
-sed -i '{s/SITE_DOMAIN.*/SITE_DOMAIN = $FQDN/}' $BASE/src/python/$CLEARINGHOUSE/settings.py
-sed -i '{s/SITE_DOMAIN.*/SITE_DOMAIN = $FQDN/}' $BASE/src/python/$OPTIN_MANAGER/settings.py
+sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = \"$FQDN\"/}" $BASE/src/python/$CLEARINGHOUSE/deployment_settings.py
+sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = \"$FQDN\"/}" $BASE/src/python/$OPTIN_MANAGER/deployment_settings.py
+
+# syncdb
+echo **** Setting up the databases. Please create superuser when asked (once for
+echo **** Expedient and once for the Opt-in Manager
+cd $BASE/src/python $CLEARINGHOUSE/manage.py syncdb
+cd $BASE/src/python $CLEARINGHOUSE/manage.py flush
+cd $BASE/src/python $OPTIN_MANAGER/manage.py syncdb
+cd $BASE/src/python $OPTIN_MANAGER/manage.py flush
 
 # Install Apache prereqs
-zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
-zypper install apache2 apache2-mod_wsgi apache2-mod_macro apache2-itk
+zypper -n addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
+zypper -n install apache2 apache2-mod_wsgi apache2-mod_macro apache2-itk
 
 # Add configuration
 cp -s $BASE/src/config/$COMMON/apache/vhost-macros.conf /etc/apache2/conf.d/
 cp -s $BASE/src/config/$CLEARINGHOUSE/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
-cp -s $BASE/src/config/$OPTIN_MANAGER/apache/vhost-optinmgr.conf /etc/apache2/conf.d/
+cp -s $BASE/src/config/$OPTIN_MANAGER/apache/vhost-optinmgr.conf /etc/apache2/vhosts.d/
 
 # Create Apache log directories
 mkdir -p /var/log/apache2/$CLEARINGHOUSE
 mkdir -p /var/log/apache2/$OPTIN_MANAGER
+chmod o-w /var/log/apache2/$CLEARINGHOUSE
+chmod o-w /var/log/apache2/$OPTIN_MANAGER
 
 # Enable various Apache flags
 a2enmod wsgi
@@ -55,3 +91,6 @@ a2enflag SSL
 
 # restart apache
 /etc/init.d/apache2 restart
+
+echo **** Don't forget to open the ports in the firewall by editing /etc/sysconfig/SuSEfirewall2
+echo **** After that you should be ready to run.

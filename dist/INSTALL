@@ -82,8 +82,16 @@ Summary:
     b- make
     c- sudo make install
 10- VM: Test mininet with flowvisor:
-    a- sudo mn --controller=remote --ip=192.168.x.1 --switch ovsk
+    a- sudo mn --controller=remote --ip=192.168.x.1 --switch ovsk --port=6633
     b- You should see flowvisor connect to a switch.
+    c- If you get an error: "TypeError: int argument required" it means you
+       are using a buggy version of mininet. A fix has been pushed into git:
+       i-   VM: mv mininet mininet.bak
+       ii-  VM: git clone git://yuba.stanford.edu/mininet.git
+       iii- VM: cd mininet
+       iv-  VM: git checkout -b tutorial origin/tutorial
+       v-   VM: sudo make install
+       vi-  Go back to 10-a.
 11- VM: exit the mininet shell
 12- Host: kill flowvisor.
 

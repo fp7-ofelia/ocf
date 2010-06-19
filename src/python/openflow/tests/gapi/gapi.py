@@ -17,7 +17,17 @@ from openflow.tests.helpers import parse_rspec, create_random_resv, \
     kill_old_procs
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from expedient.common.tests.commands import call_env_command, Env
-    
+
+if settings.SHOW_PROCESSES_IN_XTERM:
+    from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
+else:
+    from expedient.common.tests.utils import run_cmd
+
+import logging
+logger = logging.getLogger("gapi_test")
+
+SCHEME = "https" if settings.USE_HTTPS else "http"
+
 class GAPITests(TestCase):
     """
     Test the GENI API interface. This assumes that Apache is currently running
@@ -59,13 +69,12 @@ class GAPITests(TestCase):
             u.save()
     
             # Add the aggregate to the CH
+            url = SCHEME + "://%s:%s/%sdummyom/%s/xmlrpc/" % (
+                settings.HOST, settings.CH_PORT, settings.PREFIX, om.id)
+            
             proxy = PasswordXMLRPCServerProxy.objects.create(
-                username=username,
-                password=password,
-                url="https://%s:%s/%sdummyom/%s/xmlrpc/" % (
-                    settings.HOST, settings.CH_PORT, settings.PREFIX, om.id,
-                ),
-                verify_certs = False,
+                username=username, password=password,
+                url=url, verify_certs=False,
             )
     
             # test availability
@@ -91,7 +100,9 @@ class GAPITests(TestCase):
         Run the test clearinghouse, and create client to talk to it.
         """
         
-        import shlex, subprocess, time
+        import time, httplib
+        
+        logger.debug("setup started")
         
         call_env_command(settings.CH_PROJECT_DIR, "flush", interactive=False)
         
@@ -102,55 +113,65 @@ class GAPITests(TestCase):
         
         # Create the ssl certificates if needed
         cmd = "make -C %s" % settings.SSL_DIR
-        subprocess.call(shlex.split(cmd),
-                        stdin=subprocess.PIPE,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
+        run_cmd(cmd).wait()
         
         
         # run the CH
         kill_old_procs(8000, 8001)
-        cmd = "python %s -r %s -c %s -k %s -p 8001" % (
+        cmd = "python %s -r %s -c %s -k %s -p 8001 --debug" % (
             join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
         )
-        args = shlex.split(cmd)
-        self.ch_proc = subprocess.Popen(args,
-                                        stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
+        self.ch_proc = run_cmd(cmd, pause=True)
         
         # run the AM proxy
-        cmd = "python %s -r %s -c %s -k %s -p 8000" % (
-            join(settings.GCF_DIR, "gam.py"), join(settings.SSL_DIR, "ca.crt"),
+        cmd = "python %s -r %s -c %s -k %s -p 8000 -u %s --debug" % (
+            join(settings.GCF_DIR, "gam.py"),
+            join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "server.crt"),
-            join(settings.SSL_DIR, "server.key")
+            join(settings.SSL_DIR, "server.key"),
+            SCHEME + "://%s:%s/openflow/gapi/" % (settings.HOST, settings.CH_PORT),
         )
-        args = shlex.split(cmd)
-        self.am_proc = subprocess.Popen(args,
-                                        stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
+        self.am_proc = run_cmd(cmd, pause=True)
         
-        time.sleep(1)
-        
+        ch_host = "localhost:8001"
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
         self.ch_client = xmlrpclib.ServerProxy(
-            "https://localhost:8001/",
+            "https://"+ch_host+"/",
             transport=cert_transport)
         
+        am_host = "localhost:8000"
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
         self.am_client = xmlrpclib.ServerProxy(
-            "https://localhost:8000/",
+            "https://"+am_host+"/",
             transport=cert_transport)
-
-        time.sleep(2)
+        
+        cnxs = [httplib.HTTPSConnection(ch_host),
+                httplib.HTTPSConnection(am_host)]
+        for c in cnxs:
+            while(True):
+                try:
+                    c.connect()
+                except Exception as e:
+                    if "Connection refused" in str(e):
+                        time.sleep(1)
+                    elif "SSL" in str(e):
+                        break
+                    else:
+                        raise
+                else:
+                    break
+        
+        logger.debug("setup done")
         
     def tearDown(self):
+        if settings.PAUSE_AFTER_TESTS:
+            raw_input("Press ENTER to continue:")
+        
         try:
             del self.switches
         except:

@@ -12,16 +12,10 @@ from decorator import decorator
 
 @decorator
 def check_verified_user(func, *args, **kwargs):
-    try:
-        username = kwargs['request'].META['REMOTE_USER']
-        user = User.objects.get(username=username)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        pprint(kwargs, indent=8)
-        return "ERROR: %s: Unauthenticated user!" % func.func_name
+    if not kwargs['request'].user.is_authenticated():
+        raise Exception("ERROR: %s: Unauthenticated user!" % func.func_name)
     else:
-        kwargs['user'] = user
+        kwargs['user'] = kwargs['request'].user
         return func(*args, **kwargs)
 
 @decorator
@@ -116,3 +110,13 @@ def change_password(new_password, **kwargs):
     kwargs['user'].save()
     print "******** change_password Done to %s" % new_password
     return ""
+
+@check_verified_user
+@rpcmethod(signature=['string', 'string'], url_name="dummyom_rpc")
+def ping(data, **kwargs):
+    '''
+    Test method to see that everything is up.
+    return a string that is "PONG: %s" % data
+    '''
+    print "Pinged!"
+    return "PONG: %s" % data

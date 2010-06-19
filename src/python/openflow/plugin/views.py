@@ -12,6 +12,9 @@ from models import OpenFlowAggregate
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 
+import logging
+logger = logging.getLogger("OpenFlow plugin views")
+
 def aggregate_crud(request, agg_id=None):
     '''
     Create/update an OpenFlow Aggregate.
@@ -29,13 +32,17 @@ def aggregate_crud(request, agg_id=None):
         client_form = PasswordXMLRPCServerProxyForm(instance=client)
         
     elif request.method == "POST":
-        agg_form = OpenFlowAggregateForm(request.POST, instance=aggregate)
-        client_form = PasswordXMLRPCServerProxyForm(request.POST, instance=client)
+        logger.debug("aggregate_crud got post")
+        agg_form = OpenFlowAggregateForm(data=request.POST,
+                                         instance=aggregate)
+        client_form = PasswordXMLRPCServerProxyForm(data=request.POST,
+                                                    instance=client)
+        logger.debug("Validating")
         if client_form.is_valid() and agg_form.is_valid():
+            logger.debug("Forms are valid")
+            logger.debug("Got logo %s" % request.POST.get("logo", ""))
             # Save the client first
             client = client_form.save()
-            if not client.is_available():
-                raise Exception("Client not available")
             # Then save the aggregate and add the client
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
@@ -44,6 +51,7 @@ def aggregate_crud(request, agg_id=None):
             # Add current user as owner for the aggregate
             admin_info, created = AggregateAdminInfo.objects.get_or_create(
                 admin=request.user,
+                aggregate=aggregate,
             )
             aggregate.admins_info.add(admin_info)
             err = aggregate.setup_new_aggregate(request.META['HTTP_HOST'])
@@ -60,10 +68,11 @@ def aggregate_crud(request, agg_id=None):
             else:
                 aggregate.save()
             return HttpResponseRedirect(reverse("aggregate_all"))
+        logger.debug("Validation failed")
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
-    available = aggregate.check_status if aggregate else False
+    available = aggregate.check_status() if aggregate else False
     return simple.direct_to_template(
         request,
         template="openflow/plugin/aggregate_crud.html",

@@ -6,7 +6,7 @@
 {% block content %}
 <div class="aggregate_list">
 	<div class="table_div">
-		<table class="fulltable" id="messages">
+		<table class="fulltable" id="aggregates_table">
 			<tr>
 				<th class="logo">Logo</th>
                 <th class="name">Name</th>
@@ -16,6 +16,7 @@
 				<th class="resources">Size</th>
 				<th class="owners">Owners</th>
 				<th class="status">Status</th>
+				<th class="actions">Actions</th>
 			</tr>
 			{% for generic_am in aggregate_list %}
 			{% with generic_am.as_leaf_class as am %}
@@ -25,7 +26,7 @@
 			<tr>
             {% endif %}
 				<td class="logo">{{ am.get_logo_url }}</td>
-				<td class="name"><a href="{{ am.get_edit_url }}">{{ am.name }}</a></td>
+				<td class="name">{{ am.name }}</td>
 				<td class="type"><a href="{{ am.get_aggregates_url }}">{{ am|get_meta_field:"verbose_name" }}</a></td>
 				<td class="location">{{ am.location }}</td>
 				<td class="description">{{ am.description }}</td>
@@ -39,6 +40,10 @@
 					{% endfor %}
 		        </td>
 				<td class="status">{% if am.check_status %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+				<td class="actions">
+					<a href="{{ am.get_edit_url }}">edit</a>,
+					<a href={% url aggregate_delete generic_am.id %}>remove</a>
+				</td>
 			</tr>
 			{% endwith %}
 			{% endfor %}

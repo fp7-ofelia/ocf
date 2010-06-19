@@ -91,8 +91,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         
     def setup_new_aggregate(self, hostname):
         self.client.install_trusted_ca()
-        err = self.client.change_password()
-        if err: return err
+        # TODO: re-enable this for security. Currently disabled for testing.
+#        err = self.client.change_password()
+#        if err: return err
         err = self.client.register_topology_callback(
             "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,

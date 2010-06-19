@@ -13,6 +13,3 @@ def set_up(level):
             format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
         logging.basicConfig(level=level, format=format)
     logging.setup_done = True
-
-def getLogger(name):
-    return logging.getLogger(name)

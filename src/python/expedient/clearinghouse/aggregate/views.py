@@ -1,10 +1,11 @@
 '''
 @author jnaous
 '''
-from django.views.generic import list_detail
+from django.views.generic import list_detail, create_update
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.aggregate.forms import AggregateTypeForm
+from django.core.urlresolvers import reverse
 
 def list_aggs(request, obj_id=None):
     '''
@@ -36,3 +37,11 @@ def list_aggs(request, obj_id=None):
         },
     )
 
+def delete(request, obj_id):
+    return create_update.delete_object(
+        request,
+        model=Aggregate,
+        post_delete_redirect=reverse("aggregate_all"),
+        object_id=obj_id,
+        template_name="expedient/clearinghouse/aggregate/delete.html",
+    )
