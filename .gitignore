@@ -32,3 +32,4 @@ clearinghouse.db
 bin/
 .project
 .pydevproject
+db/openflow/optin_manager/om.db
