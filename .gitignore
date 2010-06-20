@@ -33,3 +33,5 @@ bin/
 .project
 .pydevproject
 db/openflow/optin_manager/om.db
+src/python/expedient/clearinghouse/deployment_settings.py
+src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf
