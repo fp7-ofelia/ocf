@@ -40,15 +40,14 @@ production networks, and is currently deployed in several universities.
     class Meta:
         verbose_name = "OpenFlow Aggregate"
         
-    def setup_new_aggregate(self, hostname):
+    def setup_new_aggregate(self, base_uri):
         self.client.install_trusted_ca()
         # TODO: re-enable this for security. Currently disabled for testing.
 #        err = self.client.change_password()
 #        if err: return err
+        if base_uri.endswith("/"): base_uri = base_uri[:-1]
         err = self.client.register_topology_callback(
-            "%s://%s%s" % (getattr(settings, "DOMAIN_SCHEME", "https"),
-                           hostname,
-                           reverse("openflow_open_xmlrpc")),
+            "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
         )
         if err: return err

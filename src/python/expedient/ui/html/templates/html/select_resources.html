@@ -56,6 +56,7 @@ $(document).ready(function(){
 
 <form action="" method="POST">
 {% for agg in openflow_aggs %}
+<h2>OpenFlow Aggregate {{ agg.name }}</h2>
 <div class="openflow">
 	<table class="openflow">
 		<tr class="header">
@@ -96,6 +97,7 @@ $(document).ready(function(){
 		{% endif %}
 		{% endfor %}
 	</table>
+	<input type="submit" value="Next" />
 </div>
 {% empty %}
 <p>There are no OpenFlow aggregates in the slice. </p>

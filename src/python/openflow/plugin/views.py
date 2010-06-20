@@ -51,7 +51,7 @@ def aggregate_crud(request, agg_id=None):
             aggregate.client = client
             aggregate.save()
             agg_form.save_m2m()
-            err = aggregate.setup_new_aggregate(request.META['HTTP_HOST'])
+            err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
             if err:
                 transaction.rollback()
                 if agg_id:
