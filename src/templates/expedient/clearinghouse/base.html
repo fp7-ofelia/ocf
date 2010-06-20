@@ -1,3 +1,4 @@
+{% load breadcrumbs %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
@@ -7,8 +8,17 @@
 			{% block title %}GENI Clearinghouse{% endblock %}
 		</title>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-		<script type="text/javascript" src="{% url js_media 'iframe.js' %}"></script>
-		{% block scripts %}{% endblock %} 
+		<script src="{% url js_media 'iframe.js' %}"></script>
+		<!-- simple frame busting -->
+		<script type="text/javascript">
+		if(top.location != document.location) {
+			top.location = document.location;
+		}
+		</script>
+		{% block scripts %}{% endblock %}
+		<style>
+		{% block style %}{% endblock %}
+		</style> 
 	</head>
 	<body>
 		<br/>
@@ -30,6 +40,18 @@
 		</table>
 		<div id="page">
 			<div id="content">
+				{% block messages %}
+				<div class="messages">
+					<table class="msg_table">
+						{% for msg in messages %}
+						<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
+							<td>{{ msg.msg_text }}</td>
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+				{% endblock %}
+				<div class="breadcrumbs">{% breadcrumbs %}</div>
 				{% block content %}{% endblock %}
 			</div>
 		</div>

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+{% load breadcrumbs %}
+
+{% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Slice {{ slice.name }} in Project {{ slice.project.name }}</h1>
+	</div>
+	<div class="detail_section">
+		<div class="actions">
+			<h2>Management Actions:</h2>
+	    	<p><a href="{% url slice_update slice.id %}">Edit</a> basic information.</p>
+	    	<p><a href="{% url slice_delete slice.id %}">Delete</a> slice.</p>
+	    	<table>
+	    		<tr>
+	    			<td>
+			    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
+							<input type="submit" value="Start Slice" />
+			    		</form>
+		    		</td>
+		    		<td>
+			    		<form action="{% url slice_stop slice.id %}" method="POST">{% csrf_token %}
+							<input type="submit" value="Stop Slice" />
+			    		</form>
+		    		</td>
+	    		</tr>
+	    	</table>
+	    </div>
+	    <div class="slice_description">
+	        {{ slice.description }}
+	    </div>
+    </div>
+    <div class="detail_section">
+	    <h2>Aggregates</h2>
+		<div class="aggregate_list">
+			{% with slice.aggregates.all as aggregate_list %}
+			{% if aggregate_list.count %}
+				{% with "slice/agg_list_actions.html" as action_template %}
+					{% include "aggregate/list_table.html" %}
+				{% endwith %}
+			{% else %}
+			<p>
+				This slice has no aggregates added to it. To be able to 
+				reserve resources on aggregates, you will need to add aggregates to
+				the slice.
+			</p>
+			{% endif %}
+			{% endwith %}
+		    <div class="center">
+		    	<input type="button" value="Add Aggregates"
+		    	onclick='document.location="{% url slice_add_agg slice.id %}"' />
+		    </div>
+		</div>
+	</div>
+	<div class="detail_section">
+		<h2>Resources in the slice</h2>
+		<div class="resource_list">
+			<div class="table_div center">
+				<table class="fulltable" id="resources_table">
+					<tr class="header">
+			            <th class="name">Name</th>
+			            <th class="type">Type</th>
+					</tr>
+					{% for resource in resource_list %}
+					<tr class="body">
+			            <td class="name">{{ resource.name }}</td>
+			            <td class="type">{{ resource|get_verbose_name }}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+			<div class="center">
+		    	<input type="button" value="Manage Slice Resources"
+		    	onclick='document.location="{% url slice_manage_resources slice.id %}"' />
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}

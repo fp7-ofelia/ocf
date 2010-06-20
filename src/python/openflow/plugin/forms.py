@@ -5,7 +5,7 @@ Created on Apr 29, 2010
 '''
 
 from django import forms
-from models import OpenFlowAggregate
+from models import OpenFlowAggregate, OpenFlowSliceInfo
 
 class OpenFlowAggregateForm(forms.ModelForm):
     '''
@@ -14,5 +14,9 @@ class OpenFlowAggregateForm(forms.ModelForm):
 
     class Meta:
         model = OpenFlowAggregate
-        exclude = ['client', 'admins_info', 'slices_info', 'projects_info',
-                   'users_info']
+        exclude = ['client', 'owner', 'users']
+
+class OpenFlowSliceInfoForm(forms.ModelForm):
+    class Meta:
+        model = OpenFlowSliceInfo
+        exclude = ["slice"]

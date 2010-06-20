@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db.models import signals
 from django.db.models.base import ModelBase
+from expedient.common.utils.managers import GenericObjectManager
 
 def _extendable_post_save(sender, **kwargs):
     '''Add the content_object if not already present'''
@@ -208,6 +209,8 @@ class Extendable(models.Model):
                     'other_through': YetAnotherModelRel,
                 }
     '''
+    
+    objects = GenericObjectManager("content_type", "object_id")
     
     content_type = models.ForeignKey(ContentType, editable=False, 
                                      null=True, blank=True)

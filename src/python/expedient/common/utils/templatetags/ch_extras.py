@@ -34,6 +34,12 @@ def get_meta_field(object, fieldname):
     return getattr(object._meta, fieldname)
 
 @register.filter
+def get_verbose_name(object):
+    '''return object's class's verbose name'''
+    
+    return getattr(object._meta, "verbose_name")
+
+@register.filter
 def get_class_field(object, fieldname):
     '''return getattr(object.__class__, fieldname)'''
     
@@ -43,3 +49,6 @@ def get_class_field(object, fieldname):
 def equals(object1, object2):
     return object1 == object2
 
+@register.filter
+def leaf_class_is(obj, klass):
+    return obj.content_type.model_class() == type(klass)

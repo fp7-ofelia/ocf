@@ -106,6 +106,10 @@ def detail(request, user_id=None):
             'user_form': user_form,
             'show_owner': True,
             'userprofile_form': userprofile_form,
+            'breadcrumbs': (
+                ("Home", reverse("home")),
+                ("Account for %s" % user.username, reverse("users_detail", args=[user.id])),
+            )
         },
     )
 

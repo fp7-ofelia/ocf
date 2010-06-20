@@ -37,17 +37,3 @@ class Sliver(Extendable):
         Resource, verbose_name="Resource this sliver is part of")
     slice = models.ForeignKey(
         Slice, verbose_name="Slice this sliver is part of")
-
-class SliverSet(Extendable):
-    '''
-    Groups Slivers.
-    '''
-    sliver_set = models.ManyToManyField(Sliver)
-
-class AggregateSliverSet(SliverSet):
-    """
-    Groups slivers by Aggregate and Slice, and is used to work with
-    slivers at an aggregate.
-    """
-    aggregate = models.ForeignKey(Aggregate)
-    slice = models.ForeignKey(Slice)

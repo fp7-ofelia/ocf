@@ -8,25 +8,30 @@ from django.conf import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^$', 'django.views.generic.simple.direct_to_template',
-     {'template': 'expedient/clearinghouse/index.html'}, 'home'),
+    url(r'^$', 'expedient.clearinghouse.views.home', name='home'),
     
     (r'^users/', include('expedient.clearinghouse.users.urls')),
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
+    (r'^project/', include('expedient.clearinghouse.project.urls')),
+    (r'^slice/', include('expedient.clearinghouse.slice.urls')),
     (r'^openflow/', include('openflow.plugin.urls')),
     (r'^messages/', include('expedient.common.messaging.urls')),
-    
-    # TODO: Remove after testing
-    (r'^dummyom/', include('openflow.dummyom.urls')),
-    
     (r'^permissions/', include('expedient.common.permissions.urls')),
-    
+    (r'^permissions/', include('expedient.common.permissions.urls')),
     (r'^admin/', include(admin.site.urls)),
 
     # TODO: Change to the following after 0.8 of registration is out
     # (r'^accounts/', include('registration.backends.default.urls')),
     (r'^accounts/', include('registration.urls')),
+
+    # TODO: Remove after testing
+    (r'^dummyom/', include('openflow.dummyom.urls')),
 )
+
+
+# Add the plugin URLs:
+for plugin in getattr(settings, "UI_PLUGINS", []):
+    urlpatterns += patterns('', (r'%s/' % plugin[1], include(plugin[2])))
 
 def get_static_url(name, path=""):
     static_file_tuple = (

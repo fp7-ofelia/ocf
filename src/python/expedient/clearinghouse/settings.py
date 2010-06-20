@@ -89,6 +89,7 @@ INSTALLED_APPS = (
     'autoslug',
     'registration',
     'expedient.common.permissions',
+    'expedient.common.breadcrumbs',
     'expedient.common.rpc4django',
     'expedient.common.utils',
     'expedient.common.extendable',
@@ -101,6 +102,7 @@ INSTALLED_APPS = (
     'expedient.clearinghouse.slice',
     'expedient.clearinghouse.users',
     'openflow.plugin',
+    'expedient.ui.html',
 ###### For Testing #######################
     'openflow.dummyom',
 )
@@ -127,6 +129,7 @@ SITE_DOMAIN = "clearinghouse.geni.org" # example
 
 # Messaging settings
 NUM_LATEST_MSGS = 10
+NUM_CONTEXT_MSGS = 3
 
 # Aggregate app settings
 AGGREGATE_LOGOS_DIR = "aggregate_logos/"
@@ -159,9 +162,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
-    "django.contrib.messages.context_processors.messages",
     'django.core.context_processors.request',
+    'expedient.common.messaging.context_processors.messaging',
 )
+
+# Installed UI Plugins
+UI_PLUGINS = (
+    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
+)
+
+DOMAIN_SCHEME = "https"
 
 # get custom install info
 from deployment_settings import *
