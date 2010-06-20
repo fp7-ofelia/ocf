@@ -90,7 +90,8 @@ class GAPITests(TestCase):
                 owner=u,
             )
     
-            err = of_agg.setup_new_aggregate(settings.HOST)
+            err = of_agg.setup_new_aggregate(
+                "%s://%s/" % (SCHEME, settings.HOST))
             if err:
                 raise Exception("Error setting up aggregate: %s" % err)
         
