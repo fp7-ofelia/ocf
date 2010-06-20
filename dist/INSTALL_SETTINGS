@@ -1,6 +1,0 @@
-VERSION="x.y.z"
-
-BASE="/srv/www/expedient"
-CLEARINGHOUSE="expedient/clearinghouse"
-COMMON="expedient/common"
-OPTIN_MANAGER="openflow/optin_manager"
