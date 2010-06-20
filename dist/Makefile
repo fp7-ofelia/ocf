@@ -1,7 +1,8 @@
 DIRS = db src
 README = README
-INSTALL = install.sh
-FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL
+INSTALL = install.sh install_clean.sh
+INSTALL_SETTINGS = install_settings
+FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL $(INSTALL_SETTINGS)
 
 NAME = expedient
 
@@ -39,7 +40,7 @@ $(NAME)-%.tar.gz: $(FILES)
 		$(NAME)-$*/src/python/$$p/deployment_settings.py; \
 	done
 	@echo "*** Updating the version in files"
-	@sed -i '{s/VERSION=.*/VERSION=$*/}' $(NAME)-$*/$(INSTALL)
+	@sed -i '{s/VERSION=.*/VERSION=$*/}' $(NAME)-$*/$(INSTALL_SETTINGS)
 	@sed -i '{s/x\.y\.z/$*/}' $(NAME)-$*/$(README)
 	@echo "*** Cleaning the apache vhost configuration files"
 	@for f in $(APACHE_CONF_FILES); do \
