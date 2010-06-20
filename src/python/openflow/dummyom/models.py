@@ -56,6 +56,13 @@ class DummyOM(models.Model):
                 dst_port=dst_port,
                 om=self,
             )
+            DummyOMLink.objects.create(
+                src_dpid=dst,
+                src_port=dst_port,
+                dst_dpid=src,
+                dst_port=src_port,
+                om=self,
+            )
             
     def kill_dpid(self, dpid=None, use_random=False):
         '''

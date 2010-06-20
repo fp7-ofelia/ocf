@@ -1037,6 +1037,7 @@ table.fulltable {
 	border: 1px solid #CCC;
 	margin-bottom:10px;
 	margin-top:5px;
+	width: 100%
 }
 table.fulltable thead {
 	white-space: nowrap;
@@ -1114,4 +1115,50 @@ table.fulltable tbody td.logocol {
 /* iframes */
 iframe {
     border: 1px solid #E0E8FF;
+}
+
+div.actions {
+	border: 1px solid #E0E8FF;
+	float: right;
+}
+div.proj_description {
+	height: 100px;
+}
+div.slice_description {
+	height: 100px;
+}
+
+div.breadcrumbs {
+	margin-bottom: 10px;
+}
+
+div.messages {
+	float: right;
+	border: 1px solid #E0E8FF;
+	width: 60%;
+	height: 56px;
+	position: relative;
+	top: -15px;
+	overflow: hidden;
+	font-size: smaller;
+}
+
+tr.old_message {
+	opacity: 0.4;
+}
+
+tr.error,.warning {
+	color:#9a1b1b;
+}
+
+tr.success {
+	color:green;
+}
+
+tr.error {
+    font-weight:bold;
+}
+
+table#resources_table {
+	width: 40%;
 }

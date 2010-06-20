@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block style %}
+table.openflow {
+	width: 100%;
+	border-spacing: 0px;
+	border-collapse: collapse;
+	border: 1px solid #CCC;
+}
+table.openflow .dpid,.ports {
+	border-bottom: 1px solid #000;
+}
+table.connections_table {
+	border-width: 0px;
+	width: 100%;
+}
+table.openflow td {
+	border-spacing: 0px;
+	padding: 0px;
+	border-collapse: collapse;
+}
+td.select_checkbox {
+	width: 24px;
+}
+table.connections {
+	width: 440px;
+}
+tr.odd {
+	background-color: #ecf4d7;
+}
+td.connected {
+	font-weight: bold;
+}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* boldface connected interfaces */
+$(document).ready(function(){
+	$(":checkbox[name=selected_ifaces]:checked").each(function(){
+		iface_id = $(this).attr("value");
+		$(".neighbor_"+iface_id).addClass("connected");
+	});
+	$(":checkbox[name=selected_ifaces]").click(function (){
+		iface_id = $(this).attr("value");
+		$(".neighbor_"+iface_id).toggleClass("connected");
+	});
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Select OpenFlow and PlanetLab Resources</h1>
+
+<form action="" method="POST">
+{% for agg in openflow_aggs %}
+<div class="openflow">
+	<table class="openflow">
+		<tr class="header">
+			<th class="dpid">Datapath ID</th>
+			<th class="ports">Connections (Port and Remote Port)</th>
+		</tr>
+		{% for rsc in agg.resource_set.all %}
+		{% if rsc|leaf_class_is:ofswitch_class %}
+		{% with rsc.as_leaf_class as switch %}
+		<tr class="body openflow">
+			<td class="dpid"><a name="{{ switch.id }}">{{ switch.datapath_id }}</a></td>
+			<td class="ports">
+				<table class="connections_table">
+					{% for iface in switch.openflowinterface_set.all %}
+					<tr class="body {% cycle 'odd' 'even' %}">
+						<td class="select_checkbox"><input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" /></td>
+						<td class="port_num">Port <a name="{{ iface.id }}">{{ iface.port_num }}</a></td>
+						<td class="connections">
+							<table class="connections">
+								{% for neighbor in iface.ingress_neighbors.all %}
+								<tr>
+									<td class="neighbor neighbor_{{ neighbor.id }}">
+										Connected to datapath <a href="#{{ neighbor.switch.id }}">
+										{{ neighbor.switch.datapath_id }}</a>
+										at port <a href="#{{ neighbor.id }}">
+										{{ neighbor.port_num }}</a>
+									</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</td>
+		</tr>
+		{% endwith %}
+		{% endif %}
+		{% endfor %}
+	</table>
+</div>
+{% empty %}
+<p>There are no OpenFlow aggregates in the slice. </p>
+{% endfor %}
+</form>
+
+{% endblock content %}

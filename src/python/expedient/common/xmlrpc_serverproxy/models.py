@@ -68,12 +68,11 @@ class PasswordXMLRPCServerProxy(models.Model):
     '''
     
     username = models.CharField(max_length=100)
-    password = models.CharField(max_length=get_max_password_len(),
-                                default=random_password)
+    password = models.CharField(max_length=get_max_password_len())
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
     password_timestamp = models.DateTimeField(auto_now_add=True)
-    url = models.CharField("Server URL", max_length=1024)
+    url = models.CharField("Server URL", max_length=1024, unique=True)
     
     verify_certs = models.BooleanField("Verify Certificates?", default=False)
     

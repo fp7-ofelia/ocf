@@ -27,12 +27,6 @@ class UserForm(forms.ModelForm):
         model = User
         exclude = ('username', 'password', 'last_login', 'date_joined', 'groups', 'user_permissions')
 
-#class SelectResearcherForm(forms.Form):
-#    '''
-#    A form that shows a choice to select researchers only.
-#    '''
-#    researcher_profile = forms.ModelChoiceField(UserProfile.objects.filter(is_researcher=True), label="Owner")
-
 class AdminPasswordChangeFormDisabled(AdminPasswordChangeForm):
     '''
     A form used to change the password of a user in the admin interface, with

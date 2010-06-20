@@ -3,14 +3,6 @@
 {% block title %}Create OpenFlow Aggregate{% endblock title %}
 
 {% block content %}
-{% if aggregate %}
-<script>
-	function goto_delete() {
-		window.location="{% url openflow_aggregate_delete aggregate.pk %}";
-	}
-</script>
-{% endif %}
-
 <div class="main">
 	<form method="post" action="">{% csrf_token %}
 	<table class="openflow_create">
@@ -27,8 +19,9 @@
 	<input type="submit" value="Create" />
 	{% else %}
 	<input type="submit" value="Update" />
-	<input type="button" value="Delete" onclick="goto_delete();"/>
+	<input type="button" value="Delete" onclick="document.location='{% url openflow_aggregate_delete aggregate.pk %}'"/>
 	{% endif %}
+	<input type="button" value="Cancel" onclick="document.location='{% url aggregate_all %}'"/>
 	</form>
 </div>
 {% endblock content %}

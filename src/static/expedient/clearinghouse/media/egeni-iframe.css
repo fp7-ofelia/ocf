@@ -774,6 +774,7 @@ table.formtable {
 	border: 1px solid #CCC;
 	margin-bottom:10px;
 	margin-top:0px;
+	width:100%;
 }
 
 table.formtable_noborder {
@@ -795,7 +796,7 @@ table.formtable_noborder tbody td ,tbody th {
 	background: #fff;
 	color: #000;
 }
-	
+
 /* Full Table */
 
 table.fulltable {
@@ -879,6 +880,10 @@ table.msg_table .error {
     font-weight:bold;
 }
 
+table.msg_table .success {
+    color:green;
+}
+
 .errtime {
     color: #00A;
 }
@@ -907,7 +912,11 @@ table.fulltable tbody td.logocol {
 }
 
 div.aggregate_list .fulltable {
-	width:730px;
+	width:100%;
+}
+
+div.project_list .fulltable {
+	width:100%;
 }
 
 div.iframe_div {

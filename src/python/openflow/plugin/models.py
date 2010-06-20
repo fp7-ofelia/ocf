@@ -6,83 +6,34 @@ Created on Apr 26, 2010
 
 from django.db import models
 from expedient.clearinghouse.resources import models as resource_models
+from expedient.clearinghouse.slice import models as slice_models
 from expedient.clearinghouse.aggregate import models as aggregate_models
 from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
-from expedient.clearinghouse.project.permissions import require_obj_permissions_for_project
-from expedient.clearinghouse.slice.permissions import require_obj_permissions_for_slice
-from expedient.common.permissions.decorators import require_obj_permissions_for_user
 from django.contrib.auth.models import User
+from django.http import Http404
+from django.conf import settings
 
 def as_is_slugify(value):
     return value
 
-class OpenFlowSliceInfo(aggregate_models.AggregateSliceInfo):
+class OpenFlowSliceInfo(models.Model):
+    slice = models.OneToOneField(slice_models.Slice)
     controller_url = models.CharField("URL of the slice's OpenFlow controller",
                                       max_length=100)
-    principal_investigator = models.ForeignKey(User)
-
-class OpenFlowSliverSet(resource_models.AggregateSliverSet):
-    """
-    Add some extra methods to AggregateSliverSet
-    """
-    
-    def update(self, slice_password, user):
-        """
-        Update the slivers at the aggregate.
-        """
-        raise NotImplementedError()
-            
-    def create(self, slice_password, user):
-        self._create(
-            slice_password, self.sliver_set.all(),
-            user=user, project=self.slice.project, slice=self.slice,
-        )
-    
-    def delete(self, user):
-        return self._delete(user=user)
-
-    @require_obj_permissions_for_project(["can_create_openflow_sliver"])
-    @require_obj_permissions_for_slice(["can_create_openflow_sliver"])
-    @require_obj_permissions_for_user(["can_create_openflow_sliver"], False)
-    def _create(self, slice_password, pi, user=None):
-        """
-        Create the slivers at the aggregate.
-        """
-
-        # get all the slivers that are in this aggregate
-        sw_slivers_qs = self.slivers.all().select_related(
-            'resource__openflowswitch',
-            'flowspacerule_set',
-        )
-        
-        sw_slivers = []
-        for s in sw_slivers_qs:
-            d = {}
-            d['datapath_id'] = s.resource.openflowswitch.datapath_id
-            d['flowspace'] = []
-            for fs in s.flowspacerule_set.all():
-                fsd = {}
-                for f in fs._meta.fields:
-                    fsd[f.name] = getattr(fs, f.name)
-                d['flowspace'].append(fsd)
-            sw_slivers.append(d)
-        
-        return self.aggregate.create_sliver_set(
-            self.slice.id, self.slice.project.name,
-            self.slice.project.description,
-            self.slice.name, self.slice.description, 
-            self.slice.aggregatesliceinfo.controller_url,
-            pi.email, slice_password, sw_slivers,
-            user=user, slice=self.slice, project=self.slice.project)
-        
-    @require_obj_permissions_for_user(["can_delete_openflow_sliver"], False)
-    def _delete(self, user=None):
-        return self.aggregate.delete_sliver_set(slice.id, user=user)
+    # TODO: It is not a good idea to store the password in the clear.
+    password = models.CharField(max_length=64)
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
+    information = \
+"""
+OpenFlow is an open standard that allows network switches to be controlled by
+a remote controller. It enables researchers to run experimental protocols in
+production networks, and is currently deployed in several universities.
+"""
+
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
     usage_agreement = models.TextField()
     
@@ -95,7 +46,9 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
 #        err = self.client.change_password()
 #        if err: return err
         err = self.client.register_topology_callback(
-            "https://%s%s" % (hostname, reverse("openflow_open_xmlrpc")),
+            "%s://%s%s" % (getattr(settings, "DOMAIN_SCHEME", "https"),
+                           hostname,
+                           reverse("openflow_open_xmlrpc")),
             "%s" % self.pk,
         )
         if err: return err
@@ -223,22 +176,7 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
         link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
         dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
         dead_cnxns.delete()
-
-    @require_obj_permissions_for_project(["can_use_openflow_aggregate"])
-    @require_obj_permissions_for_slice(["can_use_openflow_aggregate"])
-    @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
-    def create_sliver_set(self, slice_id, project_name, project_description,
-                          slice_name, slice_description, controller_url, email,
-                          slice_password, slivers_dict):
-        return self.client.create_slice(
-            slice_id, project_name, project_description,
-            slice_name, slice_description, controller_url, email,
-            slice_password, slivers_dict)
         
-    @require_obj_permissions_for_user(["can_use_openflow_aggregate"])
-    def delete_sliver_set(self, slice_id):
-        return self.client.delete_slice(slice_id)
-    
     ###################################################################
     # Following are overrides from aggregate_models.Aggregate
     
@@ -248,7 +186,27 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     def get_edit_url(self):
         return reverse("openflow_aggregate_edit",
                        kwargs={'agg_id': self.id})
+    
+    def add_to_slice(self, slice, next):
+        return reverse("openflow_aggregate_slice_add",
+                       kwargs={'agg_id': self.id,
+                               'slice_id': slice.id})+"?next="+next
 
+    def remove_from_slice(self, slice, next):
+        """
+        Stop the slice at the aggregate, then remove aggregate from the slice.
+        """
+        # check if there's info already (aggregate in slice already)
+        try:
+            info = OpenFlowSliceInfo.objects.get(slice=slice)
+        except OpenFlowSliceInfo.DoesNotExist:
+            raise Http404("OpenFlowSlice information for slice does not exist.")
+    
+        self.delete_slice(slice.id)
+        slice.aggregates.remove(self)
+        
+        return next
+        
     @classmethod
     def get_aggregates_url(cls):
         return reverse("openflow_aggregate_home")
@@ -257,12 +215,41 @@ class OpenFlowAggregate(aggregate_models.Aggregate):
     def get_create_url(cls):
         return reverse("openflow_aggregate_create")
     
+    def start_slice(self, slice):
+        # get all the slivers that are in this aggregate
+        sw_slivers_qs = slice.sliver_set.filter(
+            resource__aggregate=self).select_related(
+                'resource__openflowswitch', 'flowspacerule_set')
+        
+        sw_slivers = []
+        for s in sw_slivers_qs:
+            d = {}
+            d['datapath_id'] = s.resource.openflowswitch.datapath_id
+            d['flowspace'] = []
+            for fs in s.flowspacerule_set.all():
+                fsd = {}
+                for f in fs._meta.fields:
+                    fsd[f.name] = getattr(fs, f.name)
+                d['flowspace'].append(fsd)
+            sw_slivers.append(d)
 
+        return self.client.create_slice(
+            slice.slice_id, slice.project.project_name,
+            slice.project.project_description,
+            slice.name, slice.description,
+            slice.openflowsliceinfo.controller_url,
+            slice.owner.email,
+            slice.openflowsliceinfo.password, sw_slivers)
+
+    def stop_slice(self, slice):
+        return self.client.delete_slice(slice.id)
+    
+    
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
-        return "OF Switch %s (%016x)" % (self.datapath_id, self.datapath_id)
+        return "OF Switch %s" % self.datapath_id
 
 class OpenFlowConnection(models.Model):
     '''Connection between two interfaces'''

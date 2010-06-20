@@ -1,0 +1,40 @@
+{% extends "iframebase.html" %}
+{% load ch_extras %}
+
+{% block title %}List Projects{% endblock title %}
+{% block content %}
+<div class="project_list">
+	<div class="table_div">
+		<table class="fulltable" id="projects_table">
+			<tr>
+				<th class="name">Name</th>
+                <th class="description">Description</th>
+                <th class="owner">Owner</th>
+                <th class="slices">Slices</th>
+                <th class="actions">Actions</th>
+			</tr>
+			{% for project in project_list %}
+			<tr>
+				<td class="name">{{ project.name }}</td>
+				<td class="description">{{ project.description }}</td>
+                <td class="owner">{{ project.owner.username }}</td>
+                <td class="slices">
+                	{% for slice in project.slice_set.all %}
+                	<a href="{% url slice_detail slice.id %}">{{ slice.name }}</a>{% if not forloop.last %},{% endif %}
+                	{% endfor %}
+                </td>
+				<td class="actions">
+					<a href="{% url project_iframe_update project.id %}">update</a>,
+					<a href="{% url project_detail project.id %}">details</a>,
+					<a href="{% url project_delete project.id %}">delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+    <div class="create_project">
+        <input type="button" value="Create"
+        onclick="document.location='{% url project_create %}'"/>
+    </div>
+</div>
+{% endblock content %}

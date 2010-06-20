@@ -1,87 +1,74 @@
 {% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Project {{ project.name }}{% endblock title %}
 
 {% block content %}
 <div class="main">
-    <h1>Project {{ project.name }}</h1>
+	<div class="title">
+		<h1>Project {{ project.name }}</h1>
+	</div>
+	<div class="actions">
+		<h2>Management Actions:</h2>
+    	<p><a href="{% url project_update project.id %}">Edit</a> basic information.</p>
+    	<p><a href="{% url project_delete project.id %}">Delete</a> project.</p>
+    </div>
     <div class="proj_description">
         {{ project.description }}
     </div>
-    <div class="aggregates">
-        <h2>Project Aggregates Used:</h2>
-        <table class="aggregatetable">
-        	<thead><tr><td>Name</td><td>Actions</td></tr></thead>
-        	{% for agg in project.aggregates %}
-        	<tr>
-        		<td><a href="{% url aggregate_detail agg.id %}">agg.name</a></td>
-        		<td>
-        			<a href="{% url project_aggregate_info project.id agg.id %">details</a>,
-        			{% if user_can_mod_aggregate %}<a href="{% url project_agregate_remove project.id agg.id %">remove</a>{% endif %}
-        		</td>
-        	</tr>
-        	{% endfor %}
-        </table>
-        {% if user_can_mod_aggregate %}
-        <form class="newaggregate form" method="post" action="">{% csrf_token %}
-        	<table class="formtable newaggregatetable">
-        		{{ aggregate_add_form.as_table }}
-        		<input type="submit" value="Add" />
-        	</table>
-        </form>
-        {% endif %}
-    </div>
-    <div class="slices">
-        <h2>Project Slices:</h2>
-        <table class="slicetable">
-        	<thead><tr><td>Name</td><td>Actions</td></tr></thead>
-        	{% for slice in project.slice_set %}
-        	<tr>
-        		<td><a href="{% url slice_detail %}">slice.name</a></td>
-        		<td>
-        			{% if user_can_mod_slice %}<a href="{% url project_slice_delete project.id slice.id %">delete</a>,
-        			<a href="{% url slice_edit slice.id %">edit</a>{% endif %}
-        		</td>
-        	</tr>
-        	{% endfor %}
-        </table>
-        {% if user_can_mod_slice %}
-        <form class="newslice form" method="post" action="">{% csrf_token %}
-            <table class="formtable newslicetable">
-            	{{ slice_name_form.as_table }}
-            </table>
-            <input type="submit" value="Create!" />
-        </form>
-        {% endif %}
-    </div>
-    <div class="members">
-        <h2>Project Members:</h2>
-        <table class="formtable newmembertable">
-        	<thead><tr><td>Username</td><td>Real Name</td><td>Role</td><td>Actions</td></tr></thead>
-            {% for role in project.projectrole_set.all %}
-            <tr>
-            	<td><a href="{% url user_detail role.member.id %}">{{ role.member.username }}</a></td>
-            	<td>{{ role.member.first_name }} {{ role.member.last_name }}</td>
-            	<td>
-            		{% if user_can_mod_role %}
-            		<a href="{% url project_user_role project.id role.member.id %}">{{ role.role }}</a>
-            		{% else %}
-            		{{ role.role }}
-            		{% endif %}
-            	</td>
-	            <td>
-	            	{% if user_can_mod_member %}<a href="{% url project_user_remove project.id user.id %}">remove</a>,{% endif %}
-	            	{% if role.member.email %}<a href="mailto:{{ role.member.email }}">email</a>{% endif %}
-	            </td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% if user_can_mod_member %}
-        <form class="newmember form" method="post" action="">{% csrf_token %}
-            <table class="formtable newmembertable">
-            	{{ new_member_form.as_table }}
-            </table>
-            <input type="submit" value="Add" />
-        </form>
-        {% endif %}
-    </div>
+    <h2>Aggregates</h2>
+	<div class="aggregate_list">
+		{% with project.aggregates.all as aggregate_list %}
+		{% if aggregate_list.count %}
+			{% with "project/agg_list_actions.html" as action_template %}
+				{% include "aggregate/list_table.html" %}
+			{% endwith %}
+		{% else %}
+			This project has no aggregates added to it. To be able to
+			create slices that can reserve resources on aggregates, you will
+			need to add aggregates to the project.
+		{% endif %}
+		{% endwith %}
+	    <div class="center">
+	    	<input type="button" value="Add Aggregates"
+			onclick="document.location='{% url project_add_agg project.id %}'" />
+	    </div>
+	</div>
+	<h2>Slices</h2>
+	<div class="slice_list">
+		<div class="table_div">
+			<table class="fulltable" id="slice_table">
+				<tr class="head">
+		            <th class="name">Name</th>
+					<th class="description">Description</th>
+					<th class="resources">Size</th>
+					<th class="managers">Managers</th>
+					<th class="status">Reserved?</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for slice in project.slice_set.all %}
+				<tr class="body">
+					<td class="name">{{ slice.name }}</td>
+					<td class="description">{{ slice.description }}</td>
+					<td class="resources">{{ slice.resource_set.all.count }}</td>
+					<td class="managers">
+						<strong><a href="mailto:{{ slice.owner.email }}">{{ slice.owner.username }}</a></strong>{% for mgr in slice.managers.all %},
+						<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>
+						{% endfor %}
+			        </td>
+					<td class="status">{% if slice.reserved %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+					<td class="actions">
+						<a href="{% url slice_detail slice.id %}">details</a>,
+						<a href="{% url slice_delete slice.id %}">delete</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div class="center">
+	    	<input type="button" value="Create Slice"
+	    	onclick="document.location='{% url slice_create project.id %}'" />
+		</div>
+	</div>
 </div>
-{% endblock %}
+{% endblock content %}

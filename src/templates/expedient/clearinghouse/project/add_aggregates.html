@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Aggregates for Project {{ project.name }}{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Add an Aggregate for Project {{ project.name }}</h1>
+	</div>
+	<div class="aggregate_list">
+		{% if aggregate_list.count %}
+			{% with "project/agg_add_actions.html" as action_template %}
+				{% include "aggregate/list_table.html" %}
+			{% endwith %}
+		{% else %}
+			Either this project has all aggregates or there are no aggregates
+			installed at this Clearinghouse. Sorry, no aggregates to add.
+		{% endif %}
+	</div>
+	<div class="center">
+		<input type="button" value="Done"
+		onclick="document.location='{% url project_detail project.id %}'" />
+	</div>
+</div>
+{% endblock content %}

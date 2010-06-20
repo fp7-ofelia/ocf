@@ -22,9 +22,10 @@ class DatedMessageManager(models.Manager):
         @param kwargs: filter arguments (e.g. username='dumbuser')
         '''
         
-        self.create(
-            text=msg_text, type=msg_type, sender=sender,
-            users=User.objects.filter(**kwargs))
+        m = self.create(
+            msg_text=msg_text, type=msg_type, sender=sender,
+        )
+        m.users.add(users=User.objects.filter(**kwargs))
         
     def post_message_to_user(self, msg_text, user,
                              sender=None, msg_type='announcement'):
@@ -47,7 +48,8 @@ class DatedMessageManager(models.Manager):
         else:
             rcvr = User.objects.get(username=user)
             
-        self.create(text=msg_text, type=msg_type, users=[rcvr], sender=sender)
+        m = self.create(msg_text=msg_text, type=msg_type, sender=sender)
+        m.users.add(rcvr)
         
     def delete_messages_for_user(self, msgs, user):
         '''
@@ -74,12 +76,14 @@ class DatedMessage(models.Model):
     objects = DatedMessageManager()
     
     TYPE_ERROR = 'error'
+    TYPE_SUCCESS = 'success'
     TYPE_WARNING = 'warning'
     TYPE_ANNOUNCE = 'announcement'
     TYPE_INFO = 'info'
-    TYPE_U2U = 'user to user'
+    TYPE_U2U = 'user2user'
     
     MSG_TYPE_CHOICES={TYPE_ERROR: 'Error',
+                      TYPE_SUCCESS: 'Success',
                       TYPE_WARNING: 'Warning',
                       TYPE_ANNOUNCE: 'Announcement',
                       TYPE_INFO: 'Informational',

@@ -3,12 +3,14 @@
 {% block scripts %}
 {% endblock scripts %}
 
+{% block messages %}{% endblock %}
+
 {% block content %}
 <div class="main">
-	<h1>Welcome to the GENI Clearinghouse!</h1>
+	<h1>Welcome to the GENI Clearinghouse {{ request.user.username }}!</h1>
     
     <h2>Messages</h2>
-    <div name="div_messaging">
+    <div class="messaging">
 		<iframe class="dynsized" name="latest_msgs"
 		src="{% url messaging_latest %}"
 		scrolling="no" frameborder="0"
@@ -17,9 +19,9 @@
 		</iframe>
     </div>
     
-    <h2>Installed Aggregates</h2>
-    <div name="div_aggregates">
-        <iframe class="dynsized" name="installed_aggregates"
+    <h2>Aggregates</h2>
+    <div class="aggregates">
+        <iframe class="dynsized" name="aggregates"
         src="{% url aggregate_all %}"
         scrolling="no" frameborder="0"
         width="100%">
@@ -27,5 +29,15 @@
         </iframe>
     </div>
     
+    <h2>Projects</h2>
+    <div class="projects">
+        <iframe class="dynsized" name="projects"
+        src="{% url project_list %}"
+        scrolling="no" frameborder="0"
+        width="100%">
+           <p>Your browser does not support iframes.</p>
+        </iframe>
+    </div>
+
 </div>
 {% endblock content %}

@@ -4,16 +4,10 @@
 
 from django.db import models
 from expedient.common.extendable.models import Extendable
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.project.models import Project
-from django.contrib import auth
+from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
-#from django.db.models import signals
-#from expedient.common.permissions.utils import require_objs_permissions_for_url,\
-#    get_user_from_req, get_queryset_from_class, get_queryset,\
-#    get_queryset_from_id, register_permission_for_obj_or_class
 
 import logging
 logger = logging.getLogger("Aggregate Models")
@@ -26,25 +20,27 @@ class Aggregate(Extendable):
     @type name: L{str}
     '''
     
+    information = \
+"""
+No information available.
+"""
+    
     name = models.CharField(max_length=200, unique=True)
     logo = models.ImageField('Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
                              blank=True, null=True)
     description = models.TextField()
     location = models.CharField("Geographic Location", max_length=200)
     available = models.BooleanField("Available", default=True)
+    owner = models.ForeignKey(User, related_name="owned_aggregate_set")
+    managers = models.ManyToManyField(User, related_name="managed_aggregate_set", blank=True)
+    users = models.ManyToManyField(User, related_name="useable_aggregate_set")
     
-    admins_info = models.ManyToManyField(
-        "AggregateAdminInfo", verbose_name="Administrators")
-    users_info = models.ManyToManyField(
-        "AggregateUserInfo", verbose_name="Users")
-    slices_info = models.ManyToManyField(
-        "AggregateSliceInfo", verbose_name="Slices using the aggregate")
-    projects_info = models.ManyToManyField(
-        "AggregateProjectInfo", verbose_name="Projects using the aggregate")
-        
     class Meta:
         verbose_name = "Generic Aggregate"
 
+    def check_status(self):
+        return self.available
+    
     def get_logo_url(self):
         try:
             return self.logo.url
@@ -58,12 +54,78 @@ class Aggregate(Extendable):
         return reverse("%s_aggregate_edit" % ct.app_label,
                        kwargs={'agg_id': self.id})
 
+    def add_to_project(self, project, next):
+        """
+        Gives the aggregate a chance to request additional information for a
+        project. This method should return a URL to redirect to where the
+        user can create or update the additional information the aggregate
+        needs. When done, the aggregate should add itself to the project's
+        aggregates and then redirect to C{next}.
+        
+        If no extra information is needed, this function can return C{next}, 
+        but it still needs to add the aggregate to the project.
+        
+        Unless overridden in a subclass, this function will look for a url
+        with name <app_name>_aggregate_project_add by reversing the name with
+        it parameters 'agg_id' and 'proj_id'. It will append '?next=<next>' to
+        the URL if found. Otherwise, it simply adds the aggregate to the
+        project and returns C{next}.
+        """
+        ct = ContentType.objects.get_for_model(self.__class__)
+        try:
+            return reverse("%s_aggregate_project_add" % ct.app_label,
+                           kwargs={'agg_id': self.id,
+                                   'proj_id': project.id})+"?next="+next
+        except NoReverseMatch:
+            project.aggregates.add(self)
+            return next
+        
+    def remove_from_project(self, project, next):
+        """
+        Similar to L{add_to_project} but does the reverse, removing the
+        aggregate from the project.
+        """
+        ct = ContentType.objects.get_for_model(self.__class__)
+        try:
+            return reverse("%s_aggregate_project_remove" % ct.app_label,
+                           kwargs={'agg_id': self.id,
+                                   'proj_id': project.id})+"?next="+next
+        except NoReverseMatch:
+            project.aggregates.remove(self)
+            return next
+        
+    def add_to_slice(self, slice, next):
+        """
+        Works exactly the same as L{add_to_project} but for a slice.
+        """
+        ct = ContentType.objects.get_for_model(self.__class__)
+        try:
+            return reverse("%s_aggregate_slice_add" % ct.app_label,
+                           kwargs={'agg_id': self.id,
+                                   'slice_id': slice.id})+"?next="+next
+        except NoReverseMatch:
+            slice.aggregates.add(self)
+            return next
+
+    def remove_from_slice(self, slice, next):
+        """
+        Similar to L{add_to_slice} but does the reverse, removing the
+        aggregate from the slice.
+        """
+        ct = ContentType.objects.get_for_model(self.__class__)
+        try:
+            return reverse("%s_aggregate_slice_remove" % ct.app_label,
+                           kwargs={'agg_id': self.id,
+                                   'slice_id': slice.id})+"?next="+next
+        except NoReverseMatch:
+            slice.aggregates.remove(self)
+            return next
+
     @classmethod
     def get_aggregates_url(cls):
-        """Get the URL for aggregates of this type""" 
+        """Get the URL for aggregates of this type"""
         ct = ContentType.objects.get_for_model(cls)
-        return reverse("%s_aggregate_home" % ct.app_label)
-
+        return reverse("aggregate_info", args=[ct.id])
 
     @classmethod
     def get_create_url(cls):
@@ -71,57 +133,11 @@ class Aggregate(Extendable):
         ct = ContentType.objects.get_for_model(cls)
         return reverse("%s_aggregate_create" % ct.app_label)
     
-    def check_status(self):
-        return self.available
-
-class AggregateUserInfo(Extendable):
-    '''
-    Generic additional information about a user to use the aggregate.
+    def start_slice(self, slice):
+        """Start the slice in the actual resources."""
+        raise NotImplementedError()
     
-    @param user: user to which this info relates
-    @type user: One-to-one mapping to L{auth.models.User}
-    '''
-    user = models.ForeignKey(auth.models.User)
-
-class AggregateAdminInfo(Extendable):
+    def stop_slice(self, slice):
+        """Take out the resource reservation from the aggregates."""
+        raise NotImplementedError()
     
-    admin = models.ForeignKey(
-        auth.models.User, verbose_name="Administrator")
-    
-class AggregateSliceInfo(Extendable):
-    
-    slice = models.ForeignKey(Slice)
-
-class AggregateProjectInfo(Extendable):
-    
-    project = models.ForeignKey(Project)
-    
-# TODO: Fix aggregate permission checking
-#def add_required_perms(sender, **kwargs):
-#    """
-#    For each class that is a subclass of Aggregate, add create, edit, and delete
-#    permissions.
-#    """
-#    def add_edit_permissions(sender, **kwargs):
-#        if kwargs['created']:
-#            instance = kwargs['instance']
-#            require_objs_permissions_for_url(
-#                instance.get_edit_url(), ["can_view_aggregate"],
-#                get_user_from_req, get_queryset_from_id(sender, instance.id),
-#                methods=["GET"])
-#            require_objs_permissions_for_url(
-#                sender.get_edit_url(), ["can_edit_aggregate"],
-#                get_user_from_req, get_queryset_from_id(sender, instance.id),
-#                methods=["POST"])
-#    
-#    if issubclass(sender, Aggregate):
-#        register_permission_for_obj_or_class(sender, "can_add_aggregate")
-#        # Hookup to the create url
-#        require_objs_permissions_for_url(
-#            sender.get_create_url(), ["can_add_aggregate"],
-#            get_user_from_req, get_queryset_from_class(sender))
-#        
-#        # Add signal to protect the editing URL
-#        signals.post_save.connect(add_edit_permissions, sender=sender)
-#        
-#signals.class_prepared.connect(add_required_perms)

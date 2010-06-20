@@ -61,7 +61,7 @@ class GAPITests(TestCase):
         for i in range(settings.NUM_DUMMY_OMS):
             om = DummyOM.objects.create()
             om.populate_links(settings.NUM_SWITCHES_PER_AGG, 
-                              settings.NUM_LINKS_PER_AGG)
+                              settings.NUM_LINKS_PER_AGG/2)
             username = "clearinghouse%s" % i
             password = "clearinghouse"
             u = User.objects.create(username=username)
@@ -87,6 +87,7 @@ class GAPITests(TestCase):
                 description="hello",
                 location="America",
                 client=proxy,
+                owner=u,
             )
     
             err = of_agg.setup_new_aggregate(settings.HOST)
@@ -204,6 +205,7 @@ class GAPITests(TestCase):
         """
         Check the list of resources.
         """
+        from openflow.dummyom.models import DummyOM
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=zipped, geni_available=True)
         if zipped:
@@ -217,8 +219,9 @@ class GAPITests(TestCase):
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches and links
+        num_links = sum([len(d.get_switches()) for d in DummyOM.objects.all()])
         self.assertEqual(len(self.switches),
-                         settings.NUM_SWITCHES_PER_AGG*settings.NUM_DUMMY_OMS)
+                         num_links)
         self.assertEqual(len(self.links),
                          settings.NUM_LINKS_PER_AGG * settings.NUM_DUMMY_OMS)
 
@@ -242,8 +245,9 @@ class GAPITests(TestCase):
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches and links
+        num_links = sum([len(d.get_switches()) for d in DummyOM.objects.all()])
         self.assertEqual(len(self.switches),
-                         settings.NUM_SWITCHES_PER_AGG*settings.NUM_DUMMY_OMS)
+                         num_links)
         self.assertEqual(len(self.links),
                          settings.NUM_LINKS_PER_AGG*settings.NUM_DUMMY_OMS)
         
@@ -258,9 +262,9 @@ class GAPITests(TestCase):
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches
-        self.assertEqual(
-            len(self.switches),
-            (settings.NUM_SWITCHES_PER_AGG - 1) * settings.NUM_DUMMY_OMS)
+        num_links = sum([len(d.get_switches()) for d in DummyOM.objects.all()])
+        self.assertEqual(len(self.switches),
+                         num_links)
         
         # make sure all killed dpids are gone
         for s in self.switches:

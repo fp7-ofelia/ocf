@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Select a UI for Slice {{ slice.name }}{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Select a User Interface Plugin to Manage Resources in Slice {{ slice.name }}</h1>
+	</div>
+	<div class="ui_list">
+		{% if plugins %}
+		<div class="table_div">
+			<table class="fulltable" id="ui_table">
+				<tr class="header">
+		            <th class="name">Name</th>
+		            <th class="description">Description</th>
+		            <th class="actions">Actions</th>
+				</tr>
+				{% for ui in plugins %}
+				<tr class="body">
+		            <td class="name">{{ ui.0 }}</td>
+		            <td class="description">{{ ui.1 }}</td>
+		            <td class="actions">
+		            	<a href="{{ ui.2 }}">Open</a>
+		            </td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		{% else %}
+			<p>There are no UI plugins installed in Expedient. Please let us know
+			of this problem.</p>
+		{% endif %}
+	</div>
+	<div class="center">
+		<a href="{% url slice_detail slice.id %}">Go back.</a>
+	</div>
+</div>
+{% endblock content %}
