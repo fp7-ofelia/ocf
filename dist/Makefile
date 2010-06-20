@@ -51,5 +51,8 @@ $(NAME)-%.tar.gz: $(FILES)
 
 install:
 	@./install.sh
+	@./install_clean.sh
+update:
+	@./install.sh
 
-.PHONY: dist install test
+.PHONY: dist install test update

@@ -6,12 +6,7 @@
 # author: Jad Naous <jnaous@stanford.edu>
 #
 
-VERSION="x.y.z"
-
-BASE="/srv/www/expedient"
-CLEARINGHOUSE="expedient/clearinghouse"
-COMMON="expedient/common"
-OPTIN_MANAGER="openflow/optin_manager"
+source INSTALL_SETTINGS
 
 # Configs to do:
 # Edit Django Settings:
@@ -42,7 +37,7 @@ zypper -n install -l python-setuptools python-django python-decorator python-dja
 easy_install -Z django-registration pyquery
 
 echo **** Ignore errors next and force the install (option 2):
-zypper -n install -l -f --force-resolution libxmlsec1-openssl-devel
+zypper install -l -f --force-resolution libxmlsec1-openssl-devel
 
 cp -R ../expedient-$VERSION $BASE
 
@@ -51,19 +46,6 @@ chmod -R g+r $BASE
 chmod -R g+w $BASE/db
 chgrp www /etc/apache2/ssl.crt
 chmod g+rw /etc/apache2/ssl.crt
-
-# Set the hostname
-FQDN=`hostname -f`
-sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = \"$FQDN\"/}" $BASE/src/python/$CLEARINGHOUSE/deployment_settings.py
-sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = \"$FQDN\"/}" $BASE/src/python/$OPTIN_MANAGER/deployment_settings.py
-
-# syncdb
-echo **** Setting up the databases. Please create superuser when asked (once for
-echo **** Expedient and once for the Opt-in Manager
-cd $BASE/src/python $CLEARINGHOUSE/manage.py syncdb
-cd $BASE/src/python $CLEARINGHOUSE/manage.py flush
-cd $BASE/src/python $OPTIN_MANAGER/manage.py syncdb
-cd $BASE/src/python $OPTIN_MANAGER/manage.py flush
 
 # Install Apache prereqs
 zypper -n addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
