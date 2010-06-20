@@ -6,10 +6,15 @@ Created on Jun 19, 2010
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
-from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch
+from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
+    OpenFlowInterface
 
 def home(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
+    if request.method == "POST":
+        iface_ids = map(int, request.POST.getlist("selected_ifaces"))
+        
+        
     return simple.direct_to_template(
         request,
         template="html/select_resources.html",
