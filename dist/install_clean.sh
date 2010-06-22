@@ -1,14 +1,13 @@
 #!/bin/sh
 
-source INSTALL_SETTINGS
+source ./install_settings
 
 # syncdb
-echo **** Setting up the databases. Please create superuser when asked (once for
-echo **** Expedient and once for the Opt-in Manager
-cd $BASE/src/python $CLEARINGHOUSE/manage.py syncdb
-cd $BASE/src/python $CLEARINGHOUSE/manage.py flush
-cd $BASE/src/python $OPTIN_MANAGER/manage.py syncdb
-cd $BASE/src/python $OPTIN_MANAGER/manage.py flush
+python $BASE/src/python/$OPTIN_MANAGER/manage.py syncdb
+python $BASE/src/python/$OPTIN_MANAGER/manage.py flush
+python $BASE/src/python/$CLEARINGHOUSE/manage.py syncdb
+python $BASE/src/python/$CLEARINGHOUSE/manage.py flush
+
 
 # Set the hostname
 FQDN=`hostname -f`
