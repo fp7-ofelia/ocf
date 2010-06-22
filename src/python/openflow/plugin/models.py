@@ -15,6 +15,7 @@ from autoslug.fields import AutoSlugField
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.conf import settings
+from django.db.models import signals
 
 def as_is_slugify(value):
     return value
@@ -215,21 +216,29 @@ production networks, and is currently deployed in several universities.
         return reverse("openflow_aggregate_create")
     
     def start_slice(self, slice):
-        # get all the slivers that are in this aggregate
-        sw_slivers_qs = slice.sliver_set.filter(
-            resource__aggregate=self).select_related(
-                'resource__openflowswitch', 'flowspacerule_set')
+        # get all interfaces in this slice
+        ifaces = OpenFlowInterface.objects.filter(
+            slice_set=slice).select_related(
+                'flowspacerule_set', 'switch')
+        
+        # get the list of dpids in the slice
+        dpids = set(ifaces.values_list('switch__datapath_id', flat=True))
         
         sw_slivers = []
-        for s in sw_slivers_qs:
+        # For each dpid, get the flowspace by looking at the interface slivers
+        for dpid in dpids:
             d = {}
-            d['datapath_id'] = s.resource.openflowswitch.datapath_id
+            d['datapath_id'] = dpid
             d['flowspace'] = []
-            for fs in s.flowspacerule_set.all():
-                fsd = {}
-                for f in fs._meta.fields:
-                    fsd[f.name] = getattr(fs, f.name)
-                d['flowspace'].append(fsd)
+            for iface in ifaces.filter(switch__datapath_id=dpid):
+                sliver = iface.sliver_set.get(slice=slice)
+                for fs in sliver.flowspacerule_set.all():
+                    fsd = {"port_num_start": iface.port_num,
+                           "port_num_end": iface.port_num}
+                    for f in fs._meta.fields:
+                        if f.name != "sliver":
+                            fsd[f.name] = getattr(fs, f.name)
+                    d['flowspace'].append(fsd)
             sw_slivers.append(d)
 
         return self.client.create_slice(
@@ -292,8 +301,25 @@ class OpenFlowInterface(resource_models.Resource):
     def __unicode__(self):
         return "OF Interface: %s" % self.slug
 
+class OpenFlowInterfaceSliver(resource_models.Sliver):
+    class TooManySliversPerSlicePerInterface(Exception): pass
+    
+    @classmethod
+    def check_save(cls, sender, **kwargs):
+        """
+        Make sure there is only one OpenFlowInterfaceSliver per
+        slice per interface.
+        """
+        instance = kwargs["instance"]
+        if kwargs["created"]:
+            if OpenFlowInterfaceSliver.objects.filter(
+                slice=instance.slice, resource=instance.resource).count() > 1:
+                raise cls.TooManySliversPerSlicePerInterface()
+signals.post_save.connect(OpenFlowInterfaceSliver.check_save,
+                          OpenFlowInterface)
+
 class FlowSpaceRule(models.Model):
-    switch_sliver = models.ForeignKey(resource_models.Sliver)
+    sliver = models.ForeignKey(OpenFlowInterfaceSliver)
 
     dl_src_start = models.CharField('Link layer source address range start',
                                     max_length=17, default="*")
@@ -313,8 +339,6 @@ class FlowSpaceRule(models.Model):
                                     max_length=5, default="*")
     tp_dst_start = models.CharField('Transport destination port range start',
                                     max_length=5, default="*")
-    port_num_start = models.CharField('Switch port number range start',
-                                      max_length=4, default="*")
     
     dl_src_end = models.CharField('Link Layer Source Address Range End',
                                   max_length=17, default="*")
@@ -336,8 +360,6 @@ class FlowSpaceRule(models.Model):
                                     max_length=5, default="*")
     tp_dst_end = models.CharField('Transport destination port range end',
                                     max_length=5, default="*")
-    port_num_end = models.CharField('Switch port number range end',
-                                      max_length=4, default="*")
 
 class GAPISlice(models.Model):
     slice_urn = models.CharField(max_length=500, primary_key=True)

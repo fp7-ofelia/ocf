@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block content %}
+<div class="main">
+    
+    <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
+    
+    <form class="form" id='flowspace_formset' method="POST" action="">
+        <div class="flowspace">
+            <div id="flowspacedivid" >
+	            {{ fsformset }}
+            </div>
+			<br/>
+            <input id='submit' type="submit" value="Save" />
+        </div>
+    </form>
+</div>
+{% endblock %}

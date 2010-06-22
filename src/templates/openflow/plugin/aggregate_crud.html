@@ -1,4 +1,4 @@
-{% extends "iframebase.html" %}
+{% extends "base.html" %}
 
 {% block title %}Create OpenFlow Aggregate{% endblock title %}
 
@@ -21,7 +21,7 @@
 	<input type="submit" value="Update" />
 	<input type="button" value="Delete" onclick="document.location='{% url openflow_aggregate_delete aggregate.pk %}'"/>
 	{% endif %}
-	<input type="button" value="Cancel" onclick="document.location='{% url aggregate_all %}'"/>
+	<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
 	</form>
 </div>
 {% endblock content %}

@@ -10,6 +10,7 @@
 				<th class="name">Name</th>
                 <th class="description">Description</th>
                 <th class="owner">Owner</th>
+                <th class="members">Members</th>
                 <th class="slices">Slices</th>
                 <th class="actions">Actions</th>
 			</tr>
@@ -18,6 +19,11 @@
 				<td class="name">{{ project.name }}</td>
 				<td class="description">{{ project.description }}</td>
                 <td class="owner">{{ project.owner.username }}</td>
+                <td class="members">
+                	{% for member in projects.members.all %}
+					<a href="mailto:{{ member.email }}">{{ member.username }}</a>{% if not forloop.last %},{% endif %}
+					{% endfor %}
+                </td>
                 <td class="slices">
                 	{% for slice in project.slice_set.all %}
                 	<a href="{% url slice_detail slice.id %}">{{ slice.name }}</a>{% if not forloop.last %},{% endif %}

@@ -13,6 +13,9 @@ from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyF
 from models import OpenFlowAggregate, OpenFlowSliceInfo
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 import logging
+from django.forms.models import modelformset_factory
+from openflow.plugin.models import OpenFlowConnection
+from django.db.models import Q
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -69,7 +72,7 @@ def aggregate_crud(request, agg_id=None):
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                 )
             
-            return HttpResponseRedirect(reverse("aggregate_all"))
+            return HttpResponseRedirect(reverse("home"))
         logger.debug("Validation failed")
     else:
         return HttpResponseNotAllowed("GET", "POST")
@@ -84,8 +87,25 @@ def aggregate_crud(request, agg_id=None):
             "create": not agg_id,
             "aggregate": aggregate,
             "available": available,
+            "breadcrumbs": (
+                ('Home', reverse("home")),
+                ("%s OpenFlow Aggregate" % "Add" if agg_id else "Update", request.path),
+            )
         },
     )
+    
+def aggregate_add_static_connections(request, agg_id):
+    """
+    Show page to add static connections to other aggregates.
+    """
+    aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
+    ConnectionFormSet = modelformset_factory(OpenFlowConnection)
+    
+    if request.method == "POST":
+        filter = Q(src_iface__aggregate=aggregate) \
+            | Q(dst_iface__aggregate=aggregate)
+        formset = ConnectionFormSet(
+            request.POST, queryset=OpenFlowConnection.objects.filter(filter))
     
 def aggregate_delete(request, agg_id):
     """
