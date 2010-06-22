@@ -6,7 +6,7 @@
 # author: Jad Naous <jnaous@stanford.edu>
 #
 
-source INSTALL_SETTINGS
+source ./install_settings
 
 # Configs to do:
 # Edit Django Settings:
@@ -36,7 +36,7 @@ zypper -n install -l python-setuptools python-django python-decorator python-dja
 
 easy_install -Z django-registration pyquery
 
-echo **** Ignore errors next and force the install (option 2):
+echo **** Ignore errors next and force the install option 2:
 zypper install -l -f --force-resolution libxmlsec1-openssl-devel
 
 cp -R ../expedient-$VERSION $BASE
@@ -74,5 +74,3 @@ a2enflag SSL
 # restart apache
 /etc/init.d/apache2 restart
 
-echo **** Don't forget to open the ports in the firewall by editing /etc/sysconfig/SuSEfirewall2
-echo **** After that you should be ready to run.
