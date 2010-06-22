@@ -5,6 +5,9 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from utils import RegexMatcher
 
+import logging
+logger = logging.getLogger("sitelockdown")
+
 class SiteLockDown(RegexMatcher):
     """
     This middleware class will force almost every request coming from
@@ -34,6 +37,7 @@ class SiteLockDown(RegexMatcher):
         (path == settings.LOGIN_URL or
          self.matches(path)
          ):
+            logger.debug("Redirecting locked down site %s to login." % path)
             return HttpResponseRedirect (login_url)
 
         return None

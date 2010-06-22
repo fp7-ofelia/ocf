@@ -146,10 +146,10 @@ BASIC_AUTH_URLS = (
 )
 
 SITE_LOCKDOWN_EXCEPTIONS = (
-    r'^/accounts/register/$',
-    r'^/accounts/activate/$',
+    r'^/accounts/register/.*$',
+    r'^/accounts/activate/.*$',
     r'^/admin/.*',
-    r'^/accounts/password/reset/$',
+    r'^/accounts/password/reset/.*$',
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
