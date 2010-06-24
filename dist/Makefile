@@ -2,7 +2,7 @@ DIRS = db src
 README = README
 INSTALL = install.sh install_clean.sh
 INSTALL_SETTINGS = install_settings
-FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL $(INSTALL_SETTINGS)
+FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL $(INSTALL_SETTINGS) capath_makefile
 
 NAME = expedient
 
