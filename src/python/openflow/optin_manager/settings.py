@@ -110,8 +110,6 @@ ACCOUNT_ACTIVATION_DAYS = 3
 
 # default site
 SITE_ID = 1
-SITE_NAME = "Expedient Opt-In Manager"
-SITE_DOMAIN = "localhost:8443"
 
 DEBUG = True
 

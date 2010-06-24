@@ -14,6 +14,19 @@ from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,
 from decorator import decorator
 
 @decorator
+def check_fv_set(func, *arg, **kwargs):
+    fv = FVServerProxy.objects.all()
+    if len(fv) == 0: 
+        raise Exception("No flowvisor has been set. Please set Flowvisor\
+         URL first and then try again")
+    elif (len(fv) > 1):
+        raise Exception("More than one flowvisor is set in database. Make\
+         sure you you just have one flowvisor")
+    
+    return func(*arg, **kwargs)
+
+
+@decorator
 def check_user(func, *args, **kwargs):
     """
     Check that the user is authenticated and known.
@@ -100,6 +113,7 @@ def get_direction(direction):
     return 2
                
 @check_user
+#@check_fv_set
 @rpcmethod(signature=['struct', # return value
                       'string', 'string', 'string',
                       'string', 'string', 'string',
@@ -267,6 +281,7 @@ def create_slice(slice_id, project_name, project_description,
     }
 
 @check_user
+#@check_fv_set
 @rpcmethod(signature=['string', 'int'])
 def delete_slice(sliceid, **kwargs):
     '''
@@ -297,6 +312,7 @@ def delete_slice(sliceid, **kwargs):
     return error_msg
 
 @check_user
+#@check_fv_set
 @rpcmethod(signature=['array'])
 def get_switches(**kwargs):
     '''
@@ -311,6 +327,7 @@ def get_switches(**kwargs):
 
 
 @check_user
+#@check_fv_set
 @rpcmethod(signature=['array'])
 def get_links(**kwargs):
     '''
