@@ -7,6 +7,7 @@ from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.controls.forms import *
 
 def set_clearinghouse(request):
+    error_msg = ""
     if (not request.user.is_staff):
         return HttpResponseRedirect("/dashboard")
             
@@ -22,30 +23,32 @@ def set_clearinghouse(request):
         return 0
         
     if (request.method == "POST"):
-        if len(ch_users) == 0:
-            ch_user = User(username=request.POST["username"],
-                                first_name=request.POST["first_name"],
-                                last_name=request.POST["last_name"],
-                                email=request.POST["email"])
-            ch_user.set_password(request.POST["password"])
-            ch_user.save()
-            ch_profile = UserProfile.get_or_create_profile(ch_user)
-            ch_profile.is_net_admin = False
-            ch_profile.is_clearinghouse_user = True
-            ch_profile.max_priority_level = 0
-            ch_profile.save()
-        else:
-            profile.user.username = request.POST["username"]
-            profile.user.set_password(request.POST["password"])
-            profile.user.email = request.POST["email"]
-            profile.user.first_name = request.POST["first_name"]
-            profile.user.last_name = request.POST["last_name"]
-            profile.user.save()
-        return HttpResponseRedirect("/dashboard")
+        form = CHUserForm(request.POST)
+        if (form.is_valid()):
+            if len(ch_users) == 0:
+                ch_user = User(username=request.POST["username"])
+                ch_user.set_password(request.POST["password1"])
+                ch_user.save()
+                ch_profile = UserProfile.get_or_create_profile(ch_user)
+                ch_profile.is_net_admin = False
+                ch_profile.is_clearinghouse_user = True
+                ch_profile.max_priority_level = 0
+                ch_profile.save()
+            else:
+                profile.user.username = request.POST["username"]
+                profile.user.set_password(request.POST["password1"])
+                profile.user.save()
+            return HttpResponseRedirect("/dashboard")
     else:
-        return simple.direct_to_template(request,
+        if len(ch_users) == 1:
+            form = CHUserForm(pack_ch_user_info(profile.user))
+        else:
+            form = CHUserForm()
+               
+    return simple.direct_to_template(request,
                 template = 'openflow/optin_manager/controls/set_clearinghouse.html',
                 extra_context = {
+                        'error_msg': error_msg,
                         'profile':profile,
                         'already_exist':already_exist, 
                  }
