@@ -118,7 +118,7 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 ACCOUNT_ACTIVATION_DAYS = 3
 
 # XML-RPC settings
-XMLRPC_TRUSTED_CA_PATH = '/etc/apache2/ssl.crt'
+XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, '../ssl.crt')
 XMLRPC_TIMEOUT = 120
 MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 
