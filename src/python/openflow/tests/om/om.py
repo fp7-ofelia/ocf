@@ -327,7 +327,7 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        from expedient.common.tests.client import browser
+        from expedient.common.tests.client import Browser
         from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
         from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
         from django.contrib.auth.models import User 
@@ -383,7 +383,7 @@ class OMTests(TestCase):
         expfs.save()  
         
         # First authenticate
-        b = browser()
+        b = Browser()
         b.cookie_setup()
         logged_in = b.login(SCHEME+"://localhost:8443/accounts/login/","user","password")
         self.assertTrue(logged_in,"Could not log in")
