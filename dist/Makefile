@@ -1,8 +1,8 @@
-DIRS = db src
+DIRS = db src ssl.crt
 README = README
 INSTALL = install.sh install_clean.sh
 INSTALL_SETTINGS = install_settings
-FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL $(INSTALL_SETTINGS) capath_makefile
+FILES = Makefile $(README) $(INSTALL) CHANGES INSTALL $(INSTALL_SETTINGS)
 
 NAME = expedient
 
