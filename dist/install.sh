@@ -23,6 +23,7 @@ cp -R ../expedient-$VERSION $BASE
 chown -R wwwrun:www $BASE
 chmod -R g+r $BASE
 chmod -R g+w $BASE/db
+chmod -R g+w $BASE/ssl.crt
 
 # Add configuration
 cp -s $BASE/src/config/$COMMON/apache/vhost-macros.conf /etc/apache2/conf.d/
@@ -43,9 +44,6 @@ a2enflag SSL
 
 # Generate server certificates
 /usr/bin/gensslcert
-
-chgrp www /etc/apache2/ssl.crt
-chmod g+rw /etc/apache2/ssl.crt
 
 # restart apache
 /etc/init.d/apache2 restart
