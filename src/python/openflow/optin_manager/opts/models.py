@@ -35,7 +35,7 @@ class Experiment(models.Model):
     # TODO: takeout the replacement when Rob fixes the . escaping in FV
     def get_fv_slice_name(self):
         s = "%s ID: %s" % (self.slice_name, self.slice_id)
-        return s.replace(".", "_")
+        return s.replace(".", "_").replace(":", "_").replace("=", "_")
     
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)
