@@ -482,3 +482,81 @@ Now rm any file or link other than the Makefile.
 15. Connect local OM to Aggregate
 
 
+###########################################
+#         USING OPT-IN MANAGER            #
+###########################################
+
+1. Go to Opt-in manager (OM) website and log in using superuser credential
+you made during install process.
+
+2. Click on "Set Flowvisor" link (it is under "Manage Website" subtitle)
+
+3. Fill the form:
+	* Name: a name for this flowvisor
+	* URL: URL of this flowvisor (should have a format like 
+	http://flowvisor.com:8080)
+	* Username: your flowvisor account username
+	* Password: your flowvisor account password
+	* Max Password age: e.g. enter 60 days
+	* Verify certs: uncheck.
+
+then submit the form.
+
+4. Now in the dashboard, click on "Set Clearinghouse" (under "Manage Webiste"
+ subtitle).
+
+5. Set a username and password that will be used by Clearinghouse to connect 
+ to Opt-In manager. Then submit the form. This is the username and password 
+that you enter in clearinghouse when you created this openflow aggregate.
+
+At this point Clearinghouse is set up. now we will create a normal user account
+and opt into experiments.
+
+6. Log out of OM.
+
+7. Come back to log in page.
+
+8. Create a new user by clicking on "Register" link and then filling out the 
+form. 
+
+9. you will receive an e-mail. open the e-mail and activate your account.
+
+10. log in using the normal user credentials.
+
+11. First you need to request a flowspace. click on the "Register Flowspace"
+link.
+
+12. Enter the IP address of your machine, leave mac address as "*". then 
+submit the form.
+
+At this point, a request has been sent to the admin which needs to be 
+approved before proceeding. 
+	 
+13. Log out of OM.
+
+14. Log in again using superuser credentials.
+
+15. Click on "Approve UserRequests" link under "Manage Requests"
+
+16. You will see two requests. approve both by clicking on "Approve" button.
+
+17. Log out of OM.
+
+18. Log in using normal user credentials.
+
+At this point user owns some flowspace and can opt into available experiments.
+Before proceeding, make sure that you have created an experiment using 
+clearinghouse.
+
+19. To Opt In: Click on "Opt In" link under "Manage Opt-In(s)" and choose the
+experiment to opt-in. Choose a priority (e.g. 100), then click on "Opt In"
+
+20. To Opt Out: Click on "Opt Out". you will see a list of already opted 
+flowspaces. Choose the ones that you want to opt out of them, then click 
+"Opt Out".
+
+21. To set up opt in priorities: Click on "Set Priorities" link, change the 
+priorities as desired, then  click "Update".
+
+
+
