@@ -95,8 +95,6 @@ password. This will be needed twice. Once for Expedient and once for the OM.
 -------------------------------
 (To install emacs: sudo zypper install emacs)
 
-If you are using the same machine, you will 
-
 Note that OpenSuSE won't let you run X programs using sudo because the
 developers consider it a security risk. You need to become root by:
 
@@ -123,28 +121,12 @@ c) Edit EMAIL_* to be similar to the configuration of your mail server.
    Expedient sends registration and other emails, and so it requires the
    ability to send email.
 
-d) Default works in OpenSuSE, but for security, see below.
-   
-   Edit the XMLRPC_TRUSTED_CA_PATH to be the path where trusted CA
-   certificates are stored. The default in opensuse points to the default
-   path used by Apache, which should work by default, but is a security risk.
-   This path should be separate from that used by apache because this path
-   will be updated with new CAs when adding aggregates.
-   
-   Note this must be a directory that contains SSL certificates with symlinks
-   as required by Apache's ssl_mod. The directory must additionally contain a
-   Makefile that can update these symlinks.
-   
-   The included capath_makefile in /srv/www/expedient/ is such a Makefile.
-   Copy it to the path specified in XMLRPC_TRUSTED_CA_PATH (this is not
-   needed in opensuse).
-   
-e) Default works in OpenSuSE, but for advanced, see below.
+d) Edit MY_CA. Default works in OpenSuSE, but for advanced, see below.
    
    Edit the MY_CA variable to be the location of the CA certificate for the
    server.
    
-f) Edit SITE_NAME to be the name of the site. Default works usually. This is
+e) Edit SITE_NAME to be the name of the site. Default works usually. This is
    used in some locations to identify the website (like in emails). To change,
    edit the SITE_NAME, then do the following:
    
@@ -159,19 +141,19 @@ f) Edit SITE_NAME to be the name of the site. Default works usually. This is
    
      # python expedient/clearinghouse/manage.py syncdb
      
-g) If you set the FQDN variable in the install_settings file during
+f) If you set the FQDN variable in the install_settings file during
    installation correctly, then the SITE_DOMAIN should be set to that same
    variable with the addition of the port number.
    
    In case of error, set the SITE_DOMAIN and follow the same instruction to
    update the database as in changing the SITE_NAME above.
 
-h) OPENFLOW_GAPI_RSC_URN_PREFIX and OPENFLOW_GAPI_AM_URN specify the URNs used
+g) OPENFLOW_GAPI_RSC_URN_PREFIX and OPENFLOW_GAPI_AM_URN specify the URNs used
    for the OpenFlow GENI API. You can replace "stanford" with the deployment
    name (e.g. "bbn").
    
 You will then need to do the same for the optin manager settings (though there
-are less applicable settings there). These settings are in:
+is a smaller number of applicable settings there). These settings are in:
 
 /srv/www/expedient/src/python/openflow/optin_manager/deployment_settings.py
 
@@ -274,14 +256,14 @@ Otherwise you will need to edit the /etc/sysconfig/SuSEfirewall2 file, add
 Edit /srv/www/expedient/src/python/openflow/tests/test_settings.py as root 
 and correct the following settings:
 
-1- The root password for the flowvisor you just configured (replacing
+1- FLOWVISOR_DIR (set to the path of the local testing flowvisor)
+
+2- The root password for the flowvisor you just configured (replacing
    "rootpassword")
   
-2- The flowvisor "host" (change it to an IP address the mininet VM can use to
+3- The flowvisor "host" (change it to an IP address the mininet VM can use to
    talk to processes on the host)
   
-3- FLOWVISOR_DIR (set to the path of the local testing flowvisor)
-
 4- If mininet is installed, edit MININET_VMS (replace "a.b.x.y" with
    the mininet VM's IP address)
 
@@ -359,7 +341,11 @@ back to us please.
 12. Run the integration tests:
 ------------------------------
 These tests check that the Flowvisor, the OM, and the CH can talk to each
-other.
+other. For these tests, make sure there is no other copy of the flowvisor
+already running.
+
+Currently a bug in the latest Flowvisor prevents these tests from completing
+successfully. An older version of Flowvisor works, however.
 
 $ su -
 # cd /srv/www/expedient/src/python
