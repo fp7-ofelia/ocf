@@ -174,7 +174,10 @@ def range_to_match_struct(rangeFS):
         new_match = []
         for value in match[key]:
             for elem in all_match:
-                new_match.append("%s%s=%s , "%(elem,key,value))
+                if (elem == ""):
+                    new_match.append("%s=%s"%(key,value))                    
+                else:
+                    new_match.append("%s,%s=%s"%(elem,key,value))
         if len(match[key]) > 0:
             all_match = new_match
  
