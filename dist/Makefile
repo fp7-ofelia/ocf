@@ -1,4 +1,4 @@
-DIRS = db src
+DIRS = db src ssl.crt
 README = README
 INSTALL = install.sh install_clean.sh
 INSTALL_SETTINGS = install_settings
@@ -51,9 +51,10 @@ $(NAME)-%.tar.gz: $(FILES)
 	@rm -rf $(NAME)-$*
 
 install:
-	@./install.sh
-	@./install_clean.sh
+	@source ./install_settings; rm -rf $$BASE
+	@sh install.sh
+	@sh install_clean.sh
 update:
-	@./install.sh
+	@sh install.sh
 
 .PHONY: dist install test update

@@ -160,14 +160,17 @@ production networks, and is currently deployed in several universities.
         
         # create new links
         for link in new_links:
-            OpenFlowConnection.objects.create(
-                src_iface=OpenFlowInterface.objects.get(
-                    switch__datapath_id=link[0],
-                    port_num=link[1],
-                ),
-                dst_iface=OpenFlowInterface.objects.get(
-                    switch__datapath_id=link[2],
-                    port_num=link[3],
+            create_or_update(
+                OpenFlowConnection,
+                filter_attrs=dict(
+                    src_iface=OpenFlowInterface.objects.get(
+                        switch__datapath_id=link[0],
+                        port_num=link[1],
+                    ),
+                    dst_iface=OpenFlowInterface.objects.get(
+                        switch__datapath_id=link[2],
+                        port_num=link[3],
+                    ),
                 ),
             )
             

@@ -27,9 +27,7 @@ EMAIL_HOST_PASSWORD = "password" # example
 EMAIL_PORT = 587
 
 # XML-RPC settings
-XMLRPC_TRUSTED_CA_PATH = '/etc/apache2/ssl.crt'
-XMLRPC_TIMEOUT = 120
-MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
+MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
 
 # default site
 SITE_NAME = "Expedient Opt-In Manager"

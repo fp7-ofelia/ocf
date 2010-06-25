@@ -102,7 +102,7 @@ class GAPITests(TestCase):
         Run the test clearinghouse, and create client to talk to it.
         """
         
-        import time, httplib
+        import time, httplib, os
         
         logger.debug("setup started")
         
@@ -112,6 +112,10 @@ class GAPITests(TestCase):
         self.ch_env.switch_to()
         
         self.setup_dummy_oms()
+        
+        # store the trusted CA dir
+        from django.conf import settings as djangosettings
+        self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
         
         # Create the ssl certificates if needed
         cmd = "make -C %s" % settings.SSL_DIR
@@ -171,6 +175,14 @@ class GAPITests(TestCase):
         logger.debug("setup done")
         
     def tearDown(self):
+        # store the trusted CA dir
+        from django.conf import settings as djangosettings
+        import os
+        after = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
+        for path in after:
+            if path not in self.before:
+                os.unlink(os.path.join(djangosettings.XMLRPC_TRUSTED_CA_PATH, path))
+
         if settings.PAUSE_AFTER_TESTS:
             raw_input("Press ENTER to continue:")
         

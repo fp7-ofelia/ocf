@@ -327,7 +327,7 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        from expedient.common.tests.client import browser
+        from expedient.common.tests.client import Browser
         from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
         from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
         from django.contrib.auth.models import User 
@@ -383,12 +383,15 @@ class OMTests(TestCase):
         expfs.save()  
         
         # First authenticate
-        b = browser()
+        b = Browser()
         b.cookie_setup()
-        logged_in = b.login(SCHEME+"://localhost:8443/accounts/login/","user","password")
+        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
+                            (test_settings.HOST, test_settings.OM_PORT),
+                            "user","password")
         self.assertTrue(logged_in,"Could not log in")
         
-        g = b.get_and_post_form(SCHEME+"://localhost:8443/opts/opt_in",
+        g = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
+                                (test_settings.HOST, test_settings.OM_PORT),
                                 dict(experiment=1,priority=100)) 
         
         uopt = UserOpts.objects.filter(user__username__exact="user")[0]
@@ -404,7 +407,8 @@ class OMTests(TestCase):
         self.assertEqual(getattr(optfs,"%s_e"%self.exp_field_name), self.exp_field_e)
 
         # now test opt out:
-        g = b.get_and_post_form(SCHEME+"://localhost:8443/opts/opt_out",
+        g = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
+                                (test_settings.HOST, test_settings.OM_PORT),
                                 {"1":"checked"})
         optfs = OptsFlowSpace.objects.filter(opt = uopt)
         self.assertEqual(optfs.count(),0)   

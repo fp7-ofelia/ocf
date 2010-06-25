@@ -208,6 +208,7 @@ class PasswordXMLRPCServerProxy(models.Model):
                  'w') as cert_file:
             cert_file.write(cert)
         
+        # TODO: Don't run make here. Do the linking manually.
         subprocess.Popen(['make', '-C', settings.XMLRPC_TRUSTED_CA_PATH],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,

@@ -8,7 +8,7 @@ Contains functions to login and manage forms.
 import urllib, urllib2, cookielib
 
     
-class browser():  
+class Browser():  
     
     def cookie_setup(self):
         """"

@@ -9,24 +9,16 @@
 	<form name="input" action="/controls/set_clearinghouse" method="post">
 	{% csrf_token %}
 	<table>
-	<tr><td><label>First Name</label></td>
-	<td><input type="text" name="first_name" value=
-		"{%if already_exist %}{{profile.user.first_name}}{% endif %}"/>
-	</td></tr>
-	<tr><td><label>Last Name</label></td>
-	<td><input type="text" name="last_name" value=
-		"{%if already_exist %}{{profile.user.last_name}}{% endif %}"/>
-	</td></tr>
-	<tr><td><label>E-mail</label></td>
-	<td><input type="text" name="email" value=
-		"{%if already_exist %}{{profile.user.email}}{% endif %}"/>
-	</td></tr>
 	<tr><td><label>Username</label></td>
 	<td><input type="text" name="username" value=
 		"{%if already_exist %}{{profile.user.username}}{% endif %}"/>
 	</td></tr>
 	<tr><td><label>Password</label></td>
-	<td><input type="password" name="password" value=
+	<td><input type="password" name="password1" value=
+		"{%if already_exist %}{{profile.user.password}}{% endif %}"/>
+	</td></tr>
+	<tr><td><label>Retype Password</label></td>
+	<td><input type="password" name="password2" value=
 		"{%if already_exist %}{{profile.user.password}}{% endif %}"/>
 	</td></tr>
 	<tr><td><input type="submit" value="submit" /></td>
