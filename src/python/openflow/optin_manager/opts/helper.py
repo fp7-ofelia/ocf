@@ -33,7 +33,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                     #TODO 4 is hard coded
                     fv_arg = {"operation":"ADD", "priority":"%d"%match.priority,
                                     "dpid":match.optfs.dpid,"match":match.match,
-                                    "actions":"Slice=%s:4"%match.optfs.opt.experiment.slice_id}
+                                    "actions":"Slice=%s:4"%match.optfs.opt.experiment.get_fv_slice_name()}
                     fv_args.append(fv_arg)
                             
                     # If there is any intersection, add them to FV

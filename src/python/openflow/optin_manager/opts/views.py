@@ -199,7 +199,7 @@ def update_opts(request):
                     match.save()
                     fv_arg = {"operation":"CHANGE", "id":match.fv_id,
                               "priority":match.priority, "dpid":fs.dpid, "match":match.match,
-                              "actions": "slice=%s:4"%fs.opt.experiment.slice_id,
+                              "actions": "slice=%s:4"%fs.opt.experiment.get_fv_slice_name(),
                               }
                     fv_args.append(fv_arg)
                     
