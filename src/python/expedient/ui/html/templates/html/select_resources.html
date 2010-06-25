@@ -33,6 +33,9 @@ td.connected {
 	font-weight: bold;
 }
 
+td.port_num {
+	width: 45px;
+}
 {% endblock %}
 
 {% block scripts %}
@@ -42,9 +45,11 @@ $(document).ready(function(){
 	$(":checkbox[name=selected_ifaces]:checked").each(function(){
 		iface_id = $(this).attr("value");
 		$(".neighbor_"+iface_id).addClass("connected");
+		$(".iface_"+iface_id).addClass("connected");
 	});
 	$(":checkbox[name=selected_ifaces]").click(function (){
 		iface_id = $(this).attr("value");
+		$(".iface_"+iface_id).toggleClass("connected");
 		$(".neighbor_"+iface_id).toggleClass("connected");
 	});
 	$("input[name=clear_button]").click(function (){
@@ -76,9 +81,9 @@ $(document).ready(function(){
 					{% for iface in switch.openflowinterface_set.all %}
 					<tr class="body {% cycle 'odd' 'even' %}">
 						<td class="select_checkbox">
-							<input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" checked="{% if iface in slice.resource.all %}True{% else %}False{% endif %}" />
+							<input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" {% if iface.id in checked_ids %}checked{% endif %} />
 						</td>
-						<td class="port_num">Port <a name="{{ iface.id }}">{{ iface.port_num }}</a></td>
+						<td class="port_num iface_{{ iface.id }}">Port <a name="{{ iface.id }}">{{ iface.port_num }}</a></td>
 						<td class="connections">
 							<table class="connections">
 								{% for neighbor in iface.ingress_neighbors.all %}

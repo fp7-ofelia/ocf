@@ -9,7 +9,32 @@
     <form class="form" id='flowspace_formset' method="POST" action="">
         <div class="flowspace">
             <div id="flowspacedivid" >
-	            {{ fsformset }}
+	            {{ fsformset.management_form }}
+	            <table border="1" class="fulltable flowspacetable">
+					<thead>
+		                <tr>
+			                {% for field in fsformset.forms.0 %}
+			                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+		                    <th><strong>{{ field.label_tag }}</strong></th>
+			                {% endif %}
+			                {% endfor %}
+		                </tr>
+					</thead>
+	                {% for form in fsformset.forms %}
+	                <tr>
+		                {% for field in form %}
+		                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
+                        <td>{{ field.errors }} {{ field }}</td>
+	                    {% endif %}
+	                    {% endfor %}
+	                </tr>
+	                {% for field in form %}
+	                {% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
+	                {{ field }}
+	                {% endif %}
+	                {% endfor %}
+	                {% endfor %}
+	            </table>
             </div>
 			<br/>
             <input id='submit' type="submit" value="Save" />

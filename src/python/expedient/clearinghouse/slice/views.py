@@ -96,7 +96,7 @@ def start(request, slice_id):
     '''Start the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
-        slice.start()
+        slice.start(request.user)
         DatedMessage.objects.post_message_to_user(
             "Successfully started slice %s" % slice.name,
             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
@@ -106,7 +106,7 @@ def stop(request, slice_id):
     '''Stop the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
-        slice.stop()
+        slice.stop(request.user)
         DatedMessage.objects.post_message_to_user(
             "Successfully stopped slice %s" % slice.name,
             request.user, msg_type=DatedMessage.TYPE_SUCCESS)

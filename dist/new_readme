@@ -91,6 +91,9 @@ When prompted with the following:
 Type 'yes' and hit enter. Then enter an administrator username/email and
 password. This will be needed twice. Once for Expedient and once for the OM.
 
+We have run into issues where the package download freezes. If this happens
+type CTRL-C twice and restart.
+
 6. Update the runtime settings:
 -------------------------------
 (To install emacs: sudo zypper install emacs)
@@ -191,7 +194,7 @@ Other settings for the certificate are not necessary. When deploying somewhere
 else, make sure the hostname you use to connect the OM to the FlowVisor
 matches the name you use here when creating the certificate for the FlowVisor.
 
-Run the flowvisor.
+Test running the flowvisor, then kill it.
 
 Note that we need a local flowvisor setup this way for testing, but the
 flowvisor can run anywhere for deployment.
@@ -344,8 +347,7 @@ These tests check that the Flowvisor, the OM, and the CH can talk to each
 other. For these tests, make sure there is no other copy of the flowvisor
 already running.
 
-Currently a bug in the latest Flowvisor prevents these tests from completing
-successfully. An older version of Flowvisor works, however.
+Make sure the firewall is down or setup for correctly (See step 8).
 
 $ su -
 # cd /srv/www/expedient/src/python
@@ -474,89 +476,178 @@ You also need to make sure that there are no extraneous certificates.
 Now rm any file or link other than the Makefile.
 
 ###########################################
-#             DEPLOYMENT                  #
+#              DEPLOYMENT                 #
 ###########################################
 
-14. Setup local OM and connect to FlowVisor and Mininet
+14. Run the Flowvisor somewhere reachable by the machine:
+---------------------------------------------------------
+Note the SSL certificate requirements in step 7. You can run the same test
+Flowvisor.
 
-15. Connect local OM to Aggregate
+15. Run a Mininet VM and connect to the Flowvisor:
+--------------------------------------------------
 
+In the mininet VM:
 
-###########################################
-#         USING OPT-IN MANAGER            #
-###########################################
+$ sudo mn --topo=linear,4 --controller=remote --ip=<flowvisor_IP> --switch=ovsk
 
-1. Go to Opt-in manager (OM) website and log in using superuser credential
-you made during install process.
+You should see switches connecting to the Flowvisor in the Flowvisor's
+terminal.
 
-2. Click on "Set Flowvisor" link (it is under "Manage Website" subtitle)
+16. Setup the Opt-In Manager:
+-----------------------------
 
-3. Fill the form:
+a) Go to Opt-in manager (OM) website (https://hostname:8443) and log in using
+   the superuser credentials you made during install process.
+
+b) Click on "Set Flowvisor" link (under "Manage Website" subtitle)
+
+c) Fill the form:
 	* Name: a name for this flowvisor
 	* URL: URL of this flowvisor (should have a format like 
-	http://flowvisor.com:8080)
-	* Username: your flowvisor account username
+	  "http://flowvisor.com:8080/xmlrpc")
+	* Username: your flowvisor account username (usually "root")
 	* Password: your flowvisor account password
 	* Max Password age: e.g. enter 60 days
 	* Verify certs: uncheck.
 
 then submit the form.
 
-4. Now in the dashboard, click on "Set Clearinghouse" (under "Manage Webiste"
- subtitle).
+d) Now on the home page, click on "Set Clearinghouse" (under
+   "Manage Website").
 
-5. Set a username and password that will be used by Clearinghouse to connect 
- to Opt-In manager. Then submit the form. This is the username and password 
-that you enter in clearinghouse when you created this openflow aggregate.
+e) Set a username and password that will be used by Expedient to connect
+   to the Opt-In manager. Then submit the form. This is the username and
+   password that you will enter in Expedient when you add this openflow
+   aggregate. This username must be unique.
 
-At this point Clearinghouse is set up. now we will create a normal user account
-and opt into experiments.
+17. Setup Expedient:
+--------------------
 
-6. Log out of OM.
+a) Log in to the Expedient site (https://hostname) and log in using the
+   superuser credentials created the install process.
 
-7. Come back to log in page.
+b) Click on the drop menu and select "OpenFlow Aggregate" then click
+   "Add Aggregate".
+   
+c) Fill the form then submit:
+   * Name: a name to identify the OpenFlow aggregate at Expedient.
+   * Logo: Unused.
+   * Description: A description that will be used to describe the aggregate.
+   * Geographic Location
+   * Available: Keep checked. Indicates that the aggregate is enabled.
+   * Usage Agreement: An agreement users of the aggregate using the Expedient
+     Web interface will be required to accept.
+   * Managers: Other users who can manage the Aggregate. This is currently not
+     enforced.
+   * Username/Password: The username and password set in step 16.c.
+   * Max Password Age: After which Expedient will automatically change the
+     password. Eventually we will probably change this system.
+   * Server URL: The location of the Opt-In manager:
+     "https://hostname:8443/xmlrpc/xmlrpc/". Make sure you use the
+     fully-qualified domain name, not "localhost" or an IP address unless these
+     are what the SSL certificate returns as Common Name.
+   * verify certs: Unchecked.
+   
+d) Run the GENI API Proxy and a GENI Clearinghouse:
 
-8. Create a new user by clicking on "Register" link and then filling out the 
-form. 
+$ export PYTHONPATH=/srv/www/expedient/src/python
+$ mkdir ssl
+$ python /srv/www/expedient/src/python/gcf/init-ca.py -d ssl --am --ch --ca --exp
+$ python /srv/www/expedient/src/python/gcf/gam.py -u https://localhost:443//openflow/gapi/ -r ssl/ca.crt -c ssl/server.crt -k ssl/server.key -p 8000 --debug
 
-9. you will receive an e-mail. open the e-mail and activate your account.
+In another terminal (same working directory):
+$ export PYTHONPATH=/srv/www/expedient/src/python
+$ python /srv/www/expedient/src/python/gcf/gch.py -r ssl/ca.crt -c ssl/ch.crt -k ssl/ch.key -p 8001 --debug
 
-10. log in using the normal user credentials.
+###########################################
+#                 USAGE                   #
+###########################################
 
-11. First you need to request a flowspace. click on the "Register Flowspace"
-link.
+18. Register a new user:
+------------------------
 
-12. Enter the IP address of your machine, leave mac address as "*". then 
-submit the form.
+This will require two roles: the user and the admin (using the super user
+credentials from installation).
 
-At this point, a request has been sent to the admin which needs to be 
-approved before proceeding. 
+a) If logged into the OM, log out.
+
+b) Come back to the login page.
+
+c) Create a new user by clicking on "Register" link and then filling out the 
+   form. 
+
+d) You will receive an e-mail. Open the e-mail to activate the account.
+
+e) Log in using the normal user credentials.
+
+19. Request Flowspace:
+----------------------
+a) First you need to request flowspace. click on the "Register Flowspace"
+   link.
+
+b) Enter the IP address of your machine, leave mac address as "*". then 
+   submit the form.
+
+At this point, a request has been sent to the admin who needs to approve it.
 	 
-13. Log out of OM.
+c) Log out of OM.
 
-14. Log in again using superuser credentials.
+d) Log in again using superuser credentials.
 
-15. Click on "Approve UserRequests" link under "Manage Requests"
+e) Click on "Approve User Requests" link under "Manage Requests"
 
-16. You will see two requests. approve both by clicking on "Approve" button.
+f) You will see two requests. Approve both by clicking on "Approve" button.
 
-17. Log out of OM.
+g) Log out of OM.
 
-18. Log in using normal user credentials.
+20. Create an Experiment:
+-------------------------
+In a terminal, cd to the directory that has the "ssl/" directory created in
+step 17.d. Note that the exact switch ids will differ in your setup.
 
-At this point user owns some flowspace and can opt into available experiments.
-Before proceeding, make sure that you have created an experiment using 
-clearinghouse.
+$ export PYTHONPATH=/srv/www/expedient/src/python
+$ python
+Python 2.6.2 (r262:71600, Oct 24 2009, 03:16:31) 
+[GCC 4.4.1 [gcc-4_4-branch revision 150839]] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import gcf.sfa.trust.credential as cred
+>>> import xmlrpclib
+>>> from expedient.common.utils.certtransport import SafeTransportWithCert
+>>> cert_transport = SafeTransportWithCert(keyfile="ssl/experimenter.key", certfile="ssl/experimenter.crt")
+>>> am_client = xmlrpclib.ServerProxy("https://localhost:8000/", cert_transport)
+>>> am_client.GetVersion()
+{'geni_api': 1}
+>>> cert_transport = SafeTransportWithCert(keyfile="ssl/experimenter.key", certfile="ssl/experimenter.crt")
+>>> ch_client = xmlrpclib.ServerProxy("https://localhost:8001/", cert_transport)
+>>> slice_cred_string = ch_client.CreateSlice()
+>>> slice_credential = cred.Credential(string=slice_cred_string)
+>>> slice_gid = slice_credential.get_gid_object()
+>>> slice_urn = slice_gid.get_urn()
+>>> credentials = [slice_cred_string]
+>>> options = dict(geni_compressed=False, geni_available=True)
+>>> am_client.ListResources(credentials, options)
+'<rspec><network location="asdf" name="asdf"><switches><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd" /><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:ca:92:06" /><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:b1:f4:c0" /><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:d5:14:a4" /></switches><links><link dst_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:b1:f4:c0+port:1" src_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:ca:92:06+port:0" /><link dst_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:ca:92:06+port:1" src_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:d5:14:a4+port:0" /><link dst_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:d5:14:a4+port:1" src_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd+port:0" /><link dst_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd+port:1" src_urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:b1:f4:c0+port:0" /></links></network></rspec>'
+>>> resv = '<resv_rspec><user firstname="John" lastname="Doe" email="john.doe@geni.net" password="slice_pass" /><project name="Stanford Networking Group" description="Internet performance research to ..."  /> <slice name="Crazy Load Balancer" description="Does this and that..." controller_url="tcp:controller.stanford.edu:6633" /> <flowspace><switches><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd" /></switches></flowspace></resv_rspec>'
+>>> am_client.CreateSliver(slice_urn, credentials, resv)
+'<resv_rspec><user firstname="John" lastname="Doe" email="john.doe@geni.net" password="slice_pass" /><project name="Stanford Networking Group" description="Internet performance research to ..."  /> <slice name="Crazy Load Balancer" description="Does this and that..." controller_url="tcp:controller.stanford.edu:6633" /> <flowspace><switches><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd" /></switches></flowspace></resv_rspec>'
 
-19. To Opt In: Click on "Opt In" link under "Manage Opt-In(s)" and choose the
-experiment to opt-in. Choose a priority (e.g. 100), then click on "Opt In"
+21. Opt-in:
+-----------
 
-20. To Opt Out: Click on "Opt Out". you will see a list of already opted 
-flowspaces. Choose the ones that you want to opt out of them, then click 
-"Opt Out".
+a) Log in using normal user credentials.
 
-21. To set up opt in priorities: Click on "Set Priorities" link, change the 
-priorities as desired, then  click "Update".
+b) Click on "View Experiments" to see detailed information about created
+   experiments.
 
+c) Go back to the Dashboard (using the link on the left).
+
+d) Click on "Opt In" link under "Manage Opt-In(s)" and choose the
+   experiment to opt-in. Choose a priority (e.g. 100), then click on "Opt In"
+
+22. Opt-out:
+------------
+Click on "Opt Out". you will see a list of already opted flowspaces. Choose
+the ones that you want to opt out of them, then click "Opt Out".
 
 

@@ -206,8 +206,11 @@ production networks, and is currently deployed in several universities.
         except OpenFlowSliceInfo.DoesNotExist:
             raise Http404("OpenFlowSlice information for slice does not exist.")
     
-        if slice.reserved:
+        try:
             self.stop_slice(slice)
+        except:
+            pass
+        
         slice.aggregates.remove(self)
         
         return next
@@ -255,7 +258,7 @@ production networks, and is currently deployed in several universities.
             slice.openflowsliceinfo.password, sw_slivers)
 
     def stop_slice(self, slice):
-        return self.client.delete_slice(slice.id)
+        self.client.delete_slice(slice.id)
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
