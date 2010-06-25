@@ -23,9 +23,9 @@ class Project(models.Model):
     
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    members = models.ManyToManyField(User)
+    members = models.ManyToManyField(User, blank=True)
     owner = models.ForeignKey(User, related_name="owned_projects")
-    aggregates = models.ManyToManyField(Aggregate)
+    aggregates = models.ManyToManyField(Aggregate, blank=True)
     
     def __unicode__(self):
         s = u"Project %s members: %s" % (self.name, self.members.all())

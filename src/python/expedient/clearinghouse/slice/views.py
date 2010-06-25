@@ -46,7 +46,7 @@ def create(request, proj_id):
 def update(request, slice_id):
     '''Update a slice's information'''
     return generic_crud(
-        request, None, Slice,
+        request, slice_id, Slice,
         TEMPLATE_PATH+"/create_update.html",
         redirect=lambda instance:reverse("slice_detail", args=[instance.id]),
         extra_context={
@@ -186,8 +186,8 @@ def update_aggregate(request, slice_id, agg_id):
     slice = get_object_or_404(Slice, id=slice_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
-            "id", flat=True))
-    return HttpResponseRedirect(aggregate.add_to_project(
+            "id", flat=True)).as_leaf_class()
+    return HttpResponseRedirect(aggregate.add_to_slice(
         slice, reverse("slice_detail", args=[slice_id])))
 
 def remove_aggregate(request, slice_id, agg_id):
@@ -195,6 +195,6 @@ def remove_aggregate(request, slice_id, agg_id):
     slice = get_object_or_404(Slice, id=slice_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
-            "id", flat=True))
+            "id", flat=True)).as_leaf_class()
     return HttpResponseRedirect(aggregate.remove_from_slice(
         slice, reverse("slice_detail", args=[slice_id])))

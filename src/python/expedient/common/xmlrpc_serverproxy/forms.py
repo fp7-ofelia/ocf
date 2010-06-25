@@ -29,7 +29,13 @@ class PasswordXMLRPCServerProxyForm(forms.ModelForm):
         import urlparse
         url = self.cleaned_data['url']
         parsed = urlparse.urlparse(url, "https", False)
+        if parsed.port == None:
+            raise forms.ValidationError("Did not specify a port. Please \
+explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/") 
+        if parsed.port == 0:
+            raise forms.ValidationError("Invalid port number 0.") 
         u = parsed.geturl()
+        logger.debug("parsed url: %s" % u)
         if not u.endswith("/"): u += "/"
         return u
 

@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.http import Http404
 from django.conf import settings
 from django.db.models import signals
+from expedient.common.messaging.models import DatedMessage
 
 def as_is_slugify(value):
     return value
@@ -205,7 +206,8 @@ production networks, and is currently deployed in several universities.
         except OpenFlowSliceInfo.DoesNotExist:
             raise Http404("OpenFlowSlice information for slice does not exist.")
     
-        self.delete_slice(slice.id)
+        if slice.reserved:
+            self.stop_slice(slice)
         slice.aggregates.remove(self)
         
         return next
@@ -245,8 +247,8 @@ production networks, and is currently deployed in several universities.
             sw_slivers.append(d)
 
         return self.client.create_slice(
-            slice.slice_id, slice.project.project_name,
-            slice.project.project_description,
+            slice.id, slice.project.name,
+            slice.project.description,
             slice.name, slice.description,
             slice.openflowsliceinfo.controller_url,
             slice.owner.email,
@@ -254,7 +256,6 @@ production networks, and is currently deployed in several universities.
 
     def stop_slice(self, slice):
         return self.client.delete_slice(slice.id)
-    
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
@@ -319,7 +320,7 @@ class OpenFlowInterfaceSliver(resource_models.Sliver):
                 slice=instance.slice, resource=instance.resource).count() > 1:
                 raise cls.TooManySliversPerSlicePerInterface()
 signals.post_save.connect(OpenFlowInterfaceSliver.check_save,
-                          OpenFlowInterface)
+                          OpenFlowInterfaceSliver)
 
 class FlowSpaceRule(models.Model):
     sliver = models.ForeignKey(OpenFlowInterfaceSliver)

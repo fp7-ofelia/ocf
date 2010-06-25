@@ -11,25 +11,34 @@
 	</div>
 	<div class="detail_section">
 		<div class="actions">
-			<h2>Management Actions:</h2>
+			<h2>Management:</h2>
+			<p>Slice {% if not slice.started %}<strong>not</strong>{% endif %} started.</p>
+			<p>Slice {% if not slice.modified %}<strong>not</strong>{% endif %} modified.</p>
 	    	<p><a href="{% url slice_update slice.id %}">Edit</a> basic information.</p>
 	    	<p><a href="{% url slice_delete slice.id %}">Delete</a> slice.</p>
-	    	<table>
+			<table>
 	    		<tr>
 	    			<td>
 			    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
-							<input type="submit" value="Start Slice" />
+							<input 
+							type="submit" 
+							value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
+							{% if slice.started and not slice.modified %}disabled="true"{% endif %}/>
 			    		</form>
 		    		</td>
 		    		<td>
 			    		<form action="{% url slice_stop slice.id %}" method="POST">{% csrf_token %}
-							<input type="submit" value="Stop Slice" />
+							<input
+							type="submit"
+							value="Stop Slice"
+							{% if not slice.started %}disabled="true"{% endif %}/>
 			    		</form>
 		    		</td>
 	    		</tr>
 	    	</table>
-	    </div>
+		</div>
 	    <div class="slice_description">
+	    	<h2>Description</h2>
 	        {{ slice.description }}
 	    </div>
     </div>

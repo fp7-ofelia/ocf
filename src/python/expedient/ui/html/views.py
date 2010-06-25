@@ -8,26 +8,34 @@ from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.common.messaging.models import DatedMessage
 from django.forms.models import inlineformset_factory
+from django.core.urlresolvers import reverse
+from models import SliceFlowSpace
 
 def home(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
         iface_ids = map(int, request.POST.getlist("selected_ifaces"))
-        ifaces = OpenFlowInterface.objects.get(id__in=iface_ids)
+        ifaces = OpenFlowInterface.objects.filter(id__in=iface_ids)
         # TODO: Send message if id not found.
         # get or create slivers for the ifaces in the slice.
         for iface in ifaces:
+            # make sure all the selected interfaces are added
             sliver, created = OpenFlowInterfaceSliver.objects.get_or_create(
                 slice=slice, resource=iface)
             if created:
                 DatedMessage.objects.post_message_to_user(
                     "Successfully added interface %s to slice %s" % (
                         iface, slice.name),
-                    request.user, type=DatedMessage.TYPE_SUCCESS)
-                
+                    request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+        # Delete all unselected interfaces
+        to_del = OpenFlowInterfaceSliver.objects.exclude(
+            resource__id__in=iface_ids).filter(slice=slice)
+        for s in to_del:
+            s.delete()
+        
         return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
     else:
@@ -65,7 +73,7 @@ def flowspace(request, slice_id):
             formset = formset.save()
             DatedMessage.objects.post_message_to_user(
                 "Successfully set flowspace for slice %s" % slice.name,
-                request.user, type=DatedMessage.TYPE_SUCCESS,
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS,
             )
             return HttpResponseRedirect(
                 reverse("slice_detail", args=[slice_id]))

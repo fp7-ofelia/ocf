@@ -300,6 +300,11 @@ class FullIntegration(TestCase):
             ch_passwd,
         )
         
+        # store the trusted CA dir
+        import os
+        from django.conf import settings as djangosettings
+        self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
+
         time.sleep(2)
         
         # setup the CH (aka AM)
@@ -321,6 +326,17 @@ class FullIntegration(TestCase):
         Clean up the Flowvisor rules/slices
         Clear running stuff and so on...
         """
+        # restore the trusted CA dir
+        from django.conf import settings as djangosettings
+        import os
+        after = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
+        for path in after:
+            if path not in self.before:
+                os.unlink(os.path.join(djangosettings.XMLRPC_TRUSTED_CA_PATH, path))
+
+        if test_settings.PAUSE_AFTER_TESTS:
+            raw_input("Press ENTER to continue:")
+            
         # clear all slices/flowspaces from fvs
         if RUN_FV_SUBPROCESS:
             for fv_proc in self.fv_procs:

@@ -1121,11 +1121,15 @@ div.actions {
 	border: 1px solid #E0E8FF;
 	float: right;
 }
+
+td.actions {
+	width:40px;
+}
 div.proj_description {
 	height: 100px;
 }
 div.slice_description {
-	height: 100px;
+	height: 170px;
 }
 
 div.breadcrumbs {
@@ -1133,9 +1137,9 @@ div.breadcrumbs {
 }
 
 div.messages {
-	float: right;
+/*	float: right; */
 	border: 1px solid #E0E8FF;
-	width: 60%;
+	width: 100%;
 	height: 56px;
 	position: relative;
 	top: -15px;
@@ -1162,3 +1166,8 @@ tr.error {
 table#resources_table {
 	width: 40%;
 }
+
+table.detail_management_table {
+	width: 100%;
+}
+

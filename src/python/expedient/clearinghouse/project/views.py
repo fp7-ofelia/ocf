@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied
 import logging
 from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
-
+from django.db.models import Q
 logger = logging.getLogger("Project Views")
 
 TEMPLATE_PATH = "expedient/clearinghouse/project"
@@ -22,7 +22,7 @@ TEMPLATE_PATH = "expedient/clearinghouse/project"
 def list(request):
     '''Show list of projects'''
     
-    qs = Project.objects.filter(members=request.user)
+    qs = Project.objects.filter(Q(members=request.user)|Q(owner=request.user))
     return list_detail.object_list(
         request,
         queryset=qs,
@@ -164,7 +164,7 @@ def update_aggregate(request, proj_id, agg_id):
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
-            "id", flat=True))
+            "id", flat=True)).as_leaf_class()
     return HttpResponseRedirect(aggregate.add_to_project(
         project, reverse("project_detail", args=[proj_id])))
 
@@ -173,6 +173,6 @@ def remove_aggregate(request, proj_id, agg_id):
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
-            "id", flat=True))
+            "id", flat=True)).as_leaf_class()
     return HttpResponseRedirect(aggregate.remove_from_project(
         project, reverse("project_detail", args=[proj_id])))

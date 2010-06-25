@@ -9,6 +9,8 @@
 		<h1>OpenFlow Information for Slice {{ slice.name }}</h1>
 	</div>
 	<div class="form_div">
+		The following settings will apply to <strong>all</strong> OpenFlow
+		aggregates in the same slice.
 		<form action="" method="POST">{% csrf_token %}
 			<table class="formtable">
 			{{ form.as_table }}

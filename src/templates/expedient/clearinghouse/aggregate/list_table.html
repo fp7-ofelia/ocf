@@ -38,8 +38,8 @@
 			<td class="location">{{ am.location }}</td>
 			{% if not condensed %}
 			<td class="description">{{ am.description }}</td>
-			<td class="resources">{{ am.resource_set.count }}</td>
 			{% endif %}
+			<td class="resources">{{ am.resource_set.count }}</td>
 			<td class="managers">
 				<strong><a href="mailto:{{ am.owner.email }}">{{ am.owner.username }}</a></strong>{% for mgr in am.managers.all %},
 				<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>

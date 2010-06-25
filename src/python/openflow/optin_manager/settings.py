@@ -108,6 +108,11 @@ EMAIL_SUBJECT_PREFIX = '[GENI-Opt IN Manager]'
 # Registration App settings
 ACCOUNT_ACTIVATION_DAYS = 3
 
+# XML-RPC settings
+XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, '../ssl.crt')
+XMLRPC_TIMEOUT = 120
+MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
+
 # default site
 SITE_ID = 1
 

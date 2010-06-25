@@ -175,7 +175,7 @@ class GAPITests(TestCase):
         logger.debug("setup done")
         
     def tearDown(self):
-        # store the trusted CA dir
+        # restore the trusted CA dir
         from django.conf import settings as djangosettings
         import os
         after = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)

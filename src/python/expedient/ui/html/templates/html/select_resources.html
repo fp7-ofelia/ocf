@@ -47,6 +47,9 @@ $(document).ready(function(){
 		iface_id = $(this).attr("value");
 		$(".neighbor_"+iface_id).toggleClass("connected");
 	});
+	$("input[name=clear_button]").click(function (){
+		$(":checked").click();
+	});
 })
 </script>
 {% endblock %}
@@ -54,7 +57,7 @@ $(document).ready(function(){
 {% block content %}
 <h1>Select OpenFlow and PlanetLab Resources</h1>
 
-<form action="" method="POST">
+<form action="" method="POST">{% csrf_token %}
 {% for agg in openflow_aggs %}
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
 <div class="openflow">
@@ -72,7 +75,9 @@ $(document).ready(function(){
 				<table class="connections_table">
 					{% for iface in switch.openflowinterface_set.all %}
 					<tr class="body {% cycle 'odd' 'even' %}">
-						<td class="select_checkbox"><input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" /></td>
+						<td class="select_checkbox">
+							<input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" checked="{% if iface in slice.resource.all %}True{% else %}False{% endif %}" />
+						</td>
 						<td class="port_num">Port <a name="{{ iface.id }}">{{ iface.port_num }}</a></td>
 						<td class="connections">
 							<table class="connections">
@@ -97,8 +102,9 @@ $(document).ready(function(){
 		{% endif %}
 		{% endfor %}
 	</table>
-	<input type="submit" value="Next" />
 </div>
+<input type="submit" value="Next" />
+<input type="button" name="clear_button" value="Clear" />
 {% empty %}
 <p>There are no OpenFlow aggregates in the slice. </p>
 {% endfor %}
