@@ -122,7 +122,7 @@ def aggregate_delete(request, agg_id):
     if req.status_code == HttpResponseRedirect.status_code:
         DatedMessage.objects.post_message_to_user(
             "Successfully deleted aggregate %s" % aggregate.name,
-            request.user, DatedMessage.TYPE_ERROR,
+            request.user, msg_type=DatedMessage.TYPE_ERROR,
         )
     return req
 

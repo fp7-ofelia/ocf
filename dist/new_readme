@@ -474,43 +474,84 @@ You also need to make sure that there are no extraneous certificates.
 Now rm any file or link other than the Makefile.
 
 ###########################################
-#             DEPLOYMENT                  #
+#              DEPLOYMENT                 #
 ###########################################
 
-14. Setup local OM and connect to FlowVisor and Mininet
+14. Run the Flowvisor somewhere reachable by the machine:
+---------------------------------------------------------
+Note the SSL certificate requirements in step 7. You can run the same test
+Flowvisor.
 
-15. Connect local OM to Aggregate
+15. Run a Mininet VM and connect to the Flowvisor:
+--------------------------------------------------
 
+In the mininet VM:
 
-###########################################
-#         USING OPT-IN MANAGER            #
-###########################################
+$ sudo mn --topo=linear,4 --controller=remote --ip=<flowvisor_IP> --switch=ovs
 
-1. Go to Opt-in manager (OM) website and log in using superuser credential
-you made during install process.
+You should see switches connecting to the Flowvisor in the Flowvisor's
+terminal.
 
-2. Click on "Set Flowvisor" link (it is under "Manage Website" subtitle)
+16. Setup the Opt-In Manager:
+-----------------------------
 
-3. Fill the form:
+a) Go to Opt-in manager (OM) website (https://hostname:8443) and log in using
+   the superuser credentials you made during install process.
+
+b) Click on "Set Flowvisor" link (under "Manage Website" subtitle)
+
+c) Fill the form:
 	* Name: a name for this flowvisor
 	* URL: URL of this flowvisor (should have a format like 
-	http://flowvisor.com:8080)
-	* Username: your flowvisor account username
+	  "http://flowvisor.com:8080/xmlrpc")
+	* Username: your flowvisor account username (usually "root")
 	* Password: your flowvisor account password
 	* Max Password age: e.g. enter 60 days
 	* Verify certs: uncheck.
 
 then submit the form.
 
-4. Now in the dashboard, click on "Set Clearinghouse" (under "Manage Webiste"
- subtitle).
+d) Now on the home page, click on "Set Clearinghouse" (under
+   "Manage Website").
 
-5. Set a username and password that will be used by Clearinghouse to connect 
- to Opt-In manager. Then submit the form. This is the username and password 
-that you enter in clearinghouse when you created this openflow aggregate.
+e) Set a username and password that will be used by Expedient to connect
+   to the Opt-In manager. Then submit the form. This is the username and
+   password that you will enter in Expedient when you add this openflow
+   aggregate. This username must be unique.
 
-At this point Clearinghouse is set up. now we will create a normal user account
-and opt into experiments.
+17. Setup Expedient:
+--------------------
+
+a) Log in to the Expedient site (https://hostname) and log in using the
+   superuser credentials created the install process.
+
+b) Click on the drop menu and select "OpenFlow Aggregate" then click
+   "Add Aggregate".
+   
+c) Fill the form then submit:
+   * Name: a name to identify the OpenFlow aggregate at Expedient.
+   * Logo: Unused.
+   * Description: A description that will be used to describe the aggregate.
+   * Geographic Location
+   * Available: Keep checked. Indicates that the aggregate is enabled.
+   * Usage Agreement: An agreement users of the aggregate using the Expedient
+     Web interface will be required to accept.
+   * Managers: Other users who can manage the Aggregate. This is currently not
+     enforced.
+   * Username/Password: The username and password set in step 16.c.
+   * Max Password Age: After which Expedient will automatically change the
+     password. Eventually we will probably change this system.
+   * Server URL: The location of the Opt-In manager:
+     "https://hostname:8443/xmlrpc/xmlrpc/". Make sure you use the
+     fully-qualified domain name, not "localhost" or an IP address unless these
+     are what the SSL certificate returns as Common Name.
+   * verify certs: Unchecked.
+   
+
+
+
+At this point the Opt-in Manager is set up. Now we will create a normal
+user account and opt into experiments.
 
 6. Log out of OM.
 

@@ -5,6 +5,7 @@ from django.db import models
 from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.auth.models import User
+from expedient.common.messaging.models import DatedMessage
 
 class Slice(models.Model):
     '''
@@ -36,24 +37,35 @@ class Slice(models.Model):
     started = models.BooleanField(default=False, editable=False)
     modified = models.BooleanField(default=False, editable=False)
     
-    def start(self):
+    def start(self, user):
         """
         Should be an idempotent operation on the aggregates.
         """
         for agg in self.aggregates.all():
-            agg.as_leaf_class().start_slice(self)
+            try:
+                agg.as_leaf_class().start_slice(self)
+            except Exception as e:
+                DatedMessage.objects.post_message_to_user(
+                    "Error starting slice on aggregate %s: %s" % (
+                        agg.name, e),
+                    user=user, msg_type=DatedMessage.TYPE_ERROR)
         self.started = True
         self.modified = False
         self.save()
-            
-    def stop(self):
+
+    def stop(self, user):
         """
         Should be an idempotent operation on the aggregates.
         """
         for agg in self.aggregates.all():
-            agg.as_leaf_class().stop_slice(self)
+            try:
+                agg.as_leaf_class().stop_slice(self)
+            except Exception as e:
+                DatedMessage.objects.post_message_to_user(
+                    "Error stopping slice on aggregate %s: %s" % (
+                        agg.name, e),
+                    user=user, msg_type=DatedMessage.TYPE_ERROR)
         self.started = False
-        self.modified = False
         self.save()
             
     

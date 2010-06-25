@@ -109,7 +109,7 @@ class DatedMessage(models.Model):
         return DatedMessage[self.type]
     
     def __unicode__(self):
-        return "%s %s - %s" % (self.format_date(), self.format_time(), self.text)
+        return "%s %s - %s" % (self.format_date(), self.format_time(), self.msg_text)
 
 def clean_messages(sender, **kwargs):
     '''

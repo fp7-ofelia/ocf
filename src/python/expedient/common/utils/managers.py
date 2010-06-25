@@ -16,6 +16,9 @@ class GenericObjectManager(models.Manager):
     @keyword fk_field: name of the ID field for objects. Default is
         C{object_id}.
     """
+    
+    use_for_related_fields = True
+    
     def __init__(self, ct_field="content_type", fk_field="object_id"):
         super(GenericObjectManager, self).__init__()
         self.ct_field = ct_field

@@ -14,6 +14,9 @@ from django.forms.models import inlineformset_factory
 from django.core.urlresolvers import reverse
 from models import SliceFlowSpace
 
+import logging
+logger = logging.getLogger("html_ui_views")
+
 def home(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
@@ -36,9 +39,13 @@ def home(request, slice_id):
         for s in to_del:
             s.delete()
         
+        logger.debug("Done adding resources")
         return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
     else:
+        checked_ids = slice.resource_set.filter_for_objects(
+            OpenFlowInterface, slice_set=slice).values_list("id", flat=True)
+        logger.debug("Interfaces in slice: %s" % checked_ids)
         return simple.direct_to_template(
             request,
             template="html/select_resources.html",
@@ -46,6 +53,8 @@ def home(request, slice_id):
                 "openflow_aggs": OpenFlowAggregate.objects.filter(
                     slice=slice,
                 ),
+                "slice": slice,
+                "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
