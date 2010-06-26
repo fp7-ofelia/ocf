@@ -170,7 +170,17 @@ class FullIntegration(TestCase):
         self.user_field_e = self.user_field_s
 
         # assign full flowspace to admin:
-        adm = User.objects.get(username="admin")
+        username = "admin"
+        password = "password"
+        adm = User.objects.create(username=username, is_superuser=True,
+                                  is_staff=True, is_active=True)
+        adm.set_password(password)
+        adm.save()
+        profile = UserProfile.get_or_create_profile(adm) 
+        profile.is_net_admin = True
+        profile.supervisor = adm
+        profile.max_priority_level = 7000
+        profile.save()      
         AdminFlowSpace.objects.create(user=adm)
         
         # assign flowspace to user
