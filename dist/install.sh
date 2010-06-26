@@ -14,7 +14,7 @@ zypper addrepo -f http://download.opensuse.org/repositories/openSUSE:/11.2:/Cont
 zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/ Apache:Modules
 
 echo '----- Ignore errors next and force the install option 2:'
-zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging python-django-extensions python-dateutil libxml libxml2 gcc libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto python-django-renderform python-webob sqlite3 python-openssl gcc apache2 apache2-mod_wsgi apache2-mod_macro apache2-itk libxmlsec1-openssl-devel
+zypper install -l python-setuptools python-django python-decorator python-django-autoslug python-m2crypto python-curl python-imaging python-django-extensions python-dateutil libxml libxml2 gcc libxmlsec1-1 libxmlsec1-openssl1 python-paramiko python-crypto python-django-renderform python-webob sqlite3 python-openssl gcc apache2 apache2-mod_wsgi apache2-mod_macro apache2-itk libxmlsec1-openssl-devel python-devel
 
 easy_install -Z django-registration pyquery
 

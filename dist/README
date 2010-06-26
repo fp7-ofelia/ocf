@@ -92,7 +92,8 @@ Type 'yes' and hit enter. Then enter an administrator username/email and
 password. This will be needed twice. Once for Expedient and once for the OM.
 
 We have run into issues where the package download freezes. If this happens
-type CTRL-C twice and restart.
+type CTRL-C twice and restart. You can also change the repositories used to
+mirrors, in particular for the OSS and non-OSS repos.
 
 6. Update the runtime settings:
 -------------------------------
@@ -214,6 +215,9 @@ Install the mininet VM somewhere the machine running Expedient can ssh to,
 preferably on the same machine. Here are the instructions for installing on
 the same machine:
 
+The latest information is at:
+http://www.openflowswitch.org/foswiki/bin/view/OpenFlow/MininetVMSetupNotes.
+
 1-  Install vmware player
 2-  Download the latest vm tarball indicated on the page above, and unpack it.
 3-  Run vmwareplayer and open the VM.
@@ -240,9 +244,6 @@ the same machine:
        vi-  Go back to 10-a.
 11- VM: exit the mininet shell
 12- Host: kill flowvisor
-
-The latest information is at:
-http://www.openflowswitch.org/foswiki/bin/view/OpenFlow/MininetVMSetupNotes.
 
 If mininet is running on a separate machine you will need to open port 6633 on
 the flowvisor machine. The easiest way is to just shutdown the firewall:
@@ -644,6 +645,9 @@ c) Go back to the Dashboard (using the link on the left).
 
 d) Click on "Opt In" link under "Manage Opt-In(s)" and choose the
    experiment to opt-in. Choose a priority (e.g. 100), then click on "Opt In"
+
+We have run into a bug involving the interface between the Flowvisor and
+the OM at this point, causing Opt-In to fail.
 
 22. Opt-out:
 ------------
