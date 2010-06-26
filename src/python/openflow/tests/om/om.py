@@ -279,13 +279,13 @@ class OMTests(TestCase):
         )
 
         for fv in DummyFV.objects.all():
-            DummyFVSlice.objects.get(
-                name="%s ID: %s" % (args["slice_name"], args["slice_id"]),
-                password=args["owner_password"],
-                controller_url=args["controller_url"],
-                email=args["owner_email"],
-                fv=fv,
-            )
+#            DummyFVSlice.objects.get(
+#                name="%s ID: %s" % (args["slice_name"], args["slice_id"]),
+#                password=args["owner_password"],
+#                controller_url=args["controller_url"],
+#                email=args["owner_email"],
+#                fv=fv,
+#            )
             self.assertEqual(DummyFVRule.objects.filter(fv=fv).count(), 0)
 
     def test_delete_slice(self):
