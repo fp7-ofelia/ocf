@@ -138,6 +138,9 @@ class FullIntegration(TestCase):
         from django.contrib.auth.models import User
         from openflow.optin_manager.users.models import UserProfile
         from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
+        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
+        from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace
+        import random
         
         # Create the clearinghouse user
         u = User.objects.create(username=ch_username)
@@ -147,6 +150,36 @@ class FullIntegration(TestCase):
         profile.is_clearinghouse_user = True
         profile.save()
         
+        # make a normal user on system
+        username = "user"
+        password = "password"
+        u = User.objects.create(username=username, is_active=True)
+        u.set_password(password)
+        u.save()
+
+        # assign flowspace to the user
+        random.seed(0)
+        self.user_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
+        self.user_ip_src_e = self.user_ip_src_s
+        fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
+        random.shuffle(fields)
+
+        (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
+        self.user_field_name = om_name
+        self.user_field_s = random.randint(0,2**width-3)
+        self.user_field_e = self.user_field_s
+
+        # assign full flowspace to admin:
+        adm = User.objects.get(username="admin")
+        AdminFlowSpace.objects.create(user=adm)
+        
+        # assign flowspace to user
+        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
+                             ip_src_e=self.user_ip_src_e,approver=adm)
+        setattr(ufs,"%s_s"%self.user_field_name,self.user_field_s)
+        setattr(ufs,"%s_e"%self.user_field_name,self.user_field_e)
+        ufs.save()     
+
         # Create the FV proxy connection
         fv = FVServerProxy(
             name="Flowvisor",
@@ -476,6 +509,36 @@ class FullIntegration(TestCase):
             1,
             "Slice not deleted at FlowVisor",
         )
+        
+    def test_UserOptIn(self):
+        """
+        Test a user opting in.
+        """
+        from expedient.common.tests.client import Browser
+
+        # Create a slice
+        self.test_CreateSliver()
+        
+        # Get user to opt in
+        b = Browser()
+        b.cookie_setup()
+        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
+                            (test_settings.HOST, test_settings.OM_PORT),
+                            "user","password")
+        self.assertTrue(logged_in,"Could not log in")
+        
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                dict(experiment=1,priority=100)) 
+        self.assertEqual(f.code, 200)
+        self.assertTrue("You successfully opted into" in f.read())
+        
+        # now test opt out:
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                {"1":"checked"})
+        self.assertEqual(f.code, 200)
+        self.assertTrue("success" in f.read())
 
 if __name__ == '__main__':
     import unittest
