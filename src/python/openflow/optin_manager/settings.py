@@ -116,6 +116,8 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 # default site
 SITE_ID = 1
 
+DOMAIN_SCHEME = "https"
+
 DEBUG = True
 
 BASIC_AUTH_URLS = (
