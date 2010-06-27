@@ -135,14 +135,6 @@ e) Edit SITE_NAME to be the name of the site. Default works usually. This is
    edit the SITE_NAME, then do the following:
    
      # cd /srv/www/expedient/src/python
-     # python expedient/clearinghouse/manage.py shell_plus
-     
-   Then when in the Python shell:
-   
-     >>> for d in Site.objects.all(): d.delete()
-
-   Type enter twice, then ctrl-D to exit the shell.
-   
      # python expedient/clearinghouse/manage.py syncdb
      
 f) If you set the FQDN variable in the install_settings file during
