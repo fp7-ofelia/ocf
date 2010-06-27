@@ -32,4 +32,4 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 
 # default site
 SITE_NAME = "Expedient Opt-In Manager"
-SITE_DOMAIN = "localhost:8443"
+SITE_DOMAIN = 'beirut.stanford.edu'
