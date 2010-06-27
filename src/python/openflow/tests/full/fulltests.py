@@ -520,35 +520,35 @@ class FullIntegration(TestCase):
             "Slice not deleted at FlowVisor",
         )
         
-    def test_UserOptIn(self):
-        """
-        Test a user opting in.
-        """
-        from expedient.common.tests.client import Browser
-
-        # Create a slice
-        self.test_CreateSliver()
-        
-        # Get user to opt in
-        b = Browser()
-        b.cookie_setup()
-        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
-                            (test_settings.HOST, test_settings.OM_PORT),
-                            "user","password")
-        self.assertTrue(logged_in,"Could not log in")
-        
-        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
-                                (test_settings.HOST, test_settings.OM_PORT),
-                                dict(experiment=1,priority=100)) 
-        self.assertEqual(f.code, 200)
-        self.assertTrue("You successfully opted into" in f.read())
-        
-        # now test opt out:
-        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
-                                (test_settings.HOST, test_settings.OM_PORT),
-                                {"1":"checked"})
-        self.assertEqual(f.code, 200)
-        self.assertTrue("success" in f.read())
+#    def test_UserOptIn(self):
+#        """
+#        Test a user opting in.
+#        """
+#        from expedient.common.tests.client import Browser
+#
+#        # Create a slice
+#        self.test_CreateSliver()
+#        
+#        # Get user to opt in
+#        b = Browser()
+#        b.cookie_setup()
+#        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
+#                            (test_settings.HOST, test_settings.OM_PORT),
+#                            "user","password")
+#        self.assertTrue(logged_in,"Could not log in")
+#        
+#        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
+#                                (test_settings.HOST, test_settings.OM_PORT),
+#                                dict(experiment=1,priority=100)) 
+#        self.assertEqual(f.code, 200)
+#        self.assertTrue("You successfully opted into" in f.read())
+#        
+#        # now test opt out:
+#        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
+#                                (test_settings.HOST, test_settings.OM_PORT),
+#                                {"1":"checked"})
+#        self.assertEqual(f.code, 200)
+#        self.assertTrue("success" in f.read())
 
 if __name__ == '__main__':
     import unittest
