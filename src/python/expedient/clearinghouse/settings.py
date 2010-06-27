@@ -179,6 +179,9 @@ from deployment_settings import *
 TEMPLATE_DEBUG = DEBUG
 MANAGERS = ADMINS
 
+# Session cookie names to avoid conflicts
+SESSION_COOKIE_NAME = "ch_sessionid"
+
 # Logging
 from expedient.common import loggingconf
 import logging

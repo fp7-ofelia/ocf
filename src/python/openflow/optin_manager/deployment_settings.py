@@ -1,11 +1,12 @@
 # Django settings for OM project.
-from os.path import join
+from os.path import dirname, join
+import sys
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-     ('Peyman Kazemian', 'kazemian@stanford.edu'),
+    ('<your name>', '<your email>'),
 )
 
 # Local time zone for this installation. Choices can be found here:
@@ -22,14 +23,14 @@ SECRET_KEY = '2f(jw$r445m^g3#1e)mysi2c#4ny83*4al=#adkj1o98ic+44i'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'geni.opt.in.manager@gmail.com'
-EMAIL_HOST_PASSWORD = "stanfordom!"
+EMAIL_HOST_PASSWORD = "password" # example
 EMAIL_PORT = 587
 
 # XML-RPC settings
-XMLRPC_TRUSTED_CA_PATH = '/etc/apache2/ssl.crt'
-XMLRPC_TIMEOUT = 120
-MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
+MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
 
 # default site
 SITE_NAME = "Expedient Opt-In Manager"
 SITE_DOMAIN = 'beirut.stanford.edu'
+
+DOMAIN_SCHEME = "https"

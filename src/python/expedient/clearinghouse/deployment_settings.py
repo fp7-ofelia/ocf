@@ -1,11 +1,11 @@
 '''
 @author: jnaous
 '''
-from os.path import join
+from os.path import join, dirname
 
 DEBUG = True
 ADMINS = (
-    ('Jad Naous', 'jnaous@stanford.edu'),
+    ('<your name>', '<your email>'),
 )
 
 # Local time zone for this installation. Choices can be found here:
@@ -22,13 +22,13 @@ SECRET_KEY = '6=egu-&rx7a+h%yjlt=lny=s+uz0$a_p8je=3q!+-^4w^zxkb8'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
-EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
+EMAIL_HOST_PASSWORD = "the password" # example
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # XML-RPC settings
-MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
+MY_CA = join('/etc/apache2/ssl.crt/ca.crt')
 
 # default site
 SITE_NAME = "Expedient Clearinghouse"
