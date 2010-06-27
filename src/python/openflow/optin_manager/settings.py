@@ -124,6 +124,9 @@ BASIC_AUTH_URLS = (
     r'^/dummyfv/.*',
 )
 
+# Session cookie names to avoid conflicts
+SESSION_COOKIE_NAME = "om_sessionid"
+
 # get custom install info
 from deployment_settings import *
 
