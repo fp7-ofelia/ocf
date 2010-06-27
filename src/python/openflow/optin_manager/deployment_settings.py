@@ -34,3 +34,4 @@ SITE_NAME = "Expedient Opt-In Manager"
 SITE_DOMAIN = "optinmanager.geni.org" # example
 
 from secret_key import SECRET_KEY
+
