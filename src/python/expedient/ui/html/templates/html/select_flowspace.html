@@ -6,35 +6,79 @@
     
     <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
     
-    <form class="form" id='flowspace_formset' method="POST" action="">
+    <form class="form" id='flowspace_formset' method="POST" action="">{% csrf_token %}
         <div class="flowspace">
             <div id="flowspacedivid" >
 	            {{ fsformset.management_form }}
-	            <table border="1" class="fulltable flowspacetable">
+				{% for form in fsformset.forms %}
+				{% for hidden in form.hidden_fields %}
+				{{ hidden }}
+				{% endfor %}
+				{% if form.non_field_errors %}
+				<ul class="errorlist">{{ form.non_field_errors.as_ul }}</ul>
+				{% endif %}
+				<table border="1" class="fulltable">
 					<thead>
-		                <tr>
-			                {% for field in fsformset.forms.0 %}
-			                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
-		                    <th><strong>{{ field.label_tag }}</strong></th>
-			                {% endif %}
-			                {% endfor %}
-		                </tr>
+						<tr>
+							<th><strong>Field</strong></th>
+							<th><strong>Start</strong></th>
+							<th><strong>End</strong></th>
+						</tr>
 					</thead>
-	                {% for form in fsformset.forms %}
-	                <tr>
-		                {% for field in form %}
-		                {% if not field.label_tag|contains:"Slice" and not field.label_tag|contains:"Id" %}
-                        <td>{{ field.errors }} {{ field }}</td>
-	                    {% endif %}
-	                    {% endfor %}
-	                </tr>
-	                {% for field in form %}
-	                {% if field.label_tag|contains:"Slice" or field.label_tag|contains:"Id" %}
-	                {{ field }}
-	                {% endif %}
-	                {% endfor %}
-	                {% endfor %}
+					<tbody>
+						<tr>
+							<th>Src MAC</th>
+							<td>{{ form.dl_src_start.errors }} {{ form.dl_src_start }}</td>
+							<td>{{ form.dl_src_end.errors }} {{ form.dl_src_end }}</td>
+						</tr>
+						<tr>
+							<th>Dst MAC</th>
+							<td>{{ form.dl_dst_start.errors }} {{ form.dl_dst_start }}</td>
+							<td>{{ form.dl_dst_end.errors }} {{ form.dl_dst_end }}</td>
+						</tr>
+						<tr>
+							<th>Ethernet Type</th>
+							<td>{{ form.dl_type_start.errors }} {{ form.dl_type_start }}</td>
+							<td>{{ form.dl_type_end.errors }} {{ form.dl_type_end }}</td>
+						</tr>
+						<tr>
+							<th>VLAN ID</th>
+							<td>{{ form.vlan_id_start.errors }} {{ form.vlan_id_start }}</td>
+							<td>{{ form.vlan_id_end.errors }} {{ form.vlan_id_end }}</td>
+						</tr>
+						<tr>
+							<th>Src IP</th>
+							<td>{{ form.nw_src_start.errors }} {{ form.nw_src_start }}</td>
+							<td>{{ form.nw_src_end.errors }} {{ form.nw_src_end }}</td>
+						</tr>
+						<tr>
+							<th>Dst IP</th>
+							<td>{{ form.nw_dst_start.errors }} {{ form.nw_dst_start }}</td>
+							<td>{{ form.nw_dst_end.errors }} {{ form.nw_dst_end }}</td>
+						</tr>
+						<tr>
+							<th>IP Protocol</th>
+							<td>{{ form.nw_proto_start.errors }} {{ form.nw_proto_start }}</td>
+							<td>{{ form.nw_proto_end.errors }} {{ form.nw_proto_end }}</td>
+						</tr>
+						<tr>
+							<th>Src Port</th>
+							<td>{{ form.tp_src_start.errors }} {{ form.tp_src_start }}</td>
+							<td>{{ form.tp_src_end.errors }} {{ form.tp_src_end }}</td>
+						</tr>
+						<tr>
+							<th>Dst Port</th>
+							<td>{{ form.tp_dst_start.errors }} {{ form.tp_dst_start }}</td>
+							<td>{{ form.tp_dst_end.errors }} {{ form.tp_dst_end }}</td>
+						</tr>
+						<tr>
+							<th>Delete?</th>
+							<td>{{ form.DELETE }}</td>
+							<td></td>
+						</tr>
+					</tbody>
 	            </table>
+				{% endfor %}
             </div>
 			<br/>
             <input id='submit' type="submit" value="Save" />

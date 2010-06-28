@@ -7,7 +7,7 @@ from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
-    OpenFlowInterface, OpenFlowInterfaceSliver
+    OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.common.messaging.models import DatedMessage
 from django.forms.models import inlineformset_factory
@@ -38,6 +38,9 @@ def home(request, slice_id):
             resource__id__in=iface_ids).filter(slice=slice)
         for s in to_del:
             s.delete()
+        
+        slice.modified = True
+        slice.save()
         
         logger.debug("Done adding resources")
         return HttpResponseRedirect(reverse("html_plugin_flowspace",
@@ -75,17 +78,38 @@ def flowspace(request, slice_id):
     
     # create a formset to handle all flowspaces
     FSFormSet = inlineformset_factory(Slice, SliceFlowSpace)
-    
     if request.method == "POST":
+        logger.debug("Got post for flowspace")
         formset = FSFormSet(request.POST, instance=slice)
         if formset.is_valid():
+            logger.debug("Flowspace valid")
             formset = formset.save()
+            
+            # Update the Flowspace for the slivers
+            for fs in FlowSpaceRule.objects.filter(sliver__slice=slice):
+                fs.delete()
+                
+            slivers = OpenFlowInterfaceSliver.objects.filter(slice=slice)
+            for fs in SliceFlowSpace.objects.filter(slice=slice):
+                # get the wanted attributes into a dict
+                d = {}
+                for f in FlowSpaceRule._meta.fields:
+                    if f.name.endswith("end") or f.name.endswith("start"):
+                        d[f.name] = getattr(fs, f.name)
+                # now create fs for all the slivers
+                for s in slivers:
+                    d["sliver"] = s
+                    FlowSpaceRule.objects.create(**d)
+            
             DatedMessage.objects.post_message_to_user(
                 "Successfully set flowspace for slice %s" % slice.name,
                 request.user, msg_type=DatedMessage.TYPE_SUCCESS,
             )
+            
             return HttpResponseRedirect(
                 reverse("slice_detail", args=[slice_id]))
+        else:
+            logger.debug("Flowspace invalid: %s" % formset)
     elif request.method == "GET":
         formset = FSFormSet(instance=slice)
     else:

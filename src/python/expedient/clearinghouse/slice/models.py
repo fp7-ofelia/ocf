@@ -42,13 +42,7 @@ class Slice(models.Model):
         Should be an idempotent operation on the aggregates.
         """
         for agg in self.aggregates.all():
-            try:
-                agg.as_leaf_class().start_slice(self)
-            except Exception as e:
-                DatedMessage.objects.post_message_to_user(
-                    "Error starting slice on aggregate %s: %s" % (
-                        agg.name, e),
-                    user=user, msg_type=DatedMessage.TYPE_ERROR)
+            agg.as_leaf_class().start_slice(self)
         self.started = True
         self.modified = False
         self.save()
@@ -58,13 +52,7 @@ class Slice(models.Model):
         Should be an idempotent operation on the aggregates.
         """
         for agg in self.aggregates.all():
-            try:
-                agg.as_leaf_class().stop_slice(self)
-            except Exception as e:
-                DatedMessage.objects.post_message_to_user(
-                    "Error stopping slice on aggregate %s: %s" % (
-                        agg.name, e),
-                    user=user, msg_type=DatedMessage.TYPE_ERROR)
+            agg.as_leaf_class().stop_slice(self)
         self.started = False
         self.save()
             

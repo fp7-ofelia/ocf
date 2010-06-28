@@ -171,6 +171,11 @@ UI_PLUGINS = (
     ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
 )
 
+# Installed Aggregate Plugins
+AGGREGATE_PLUGINS = (
+    ('openflow.plugin.models.OpenFlowAggregate'),
+)
+
 DOMAIN_SCHEME = "https"
 
 # get custom install info

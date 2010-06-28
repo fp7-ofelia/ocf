@@ -225,4 +225,7 @@ class Extendable(models.Model):
         
     def as_leaf_class(self):
         '''Return this instance as the farthest descendant of its class'''
+        if not self.content_object:
+            self.content_object = self
+            self.save()
         return self.content_object

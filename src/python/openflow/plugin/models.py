@@ -226,7 +226,7 @@ production networks, and is currently deployed in several universities.
     def start_slice(self, slice):
         # get all interfaces in this slice
         ifaces = OpenFlowInterface.objects.filter(
-            slice_set=slice).select_related(
+            slice_set=slice, aggregate__id=self.id).select_related(
                 'flowspacerule_set', 'switch')
         
         # get the list of dpids in the slice
@@ -239,7 +239,7 @@ production networks, and is currently deployed in several universities.
             d['datapath_id'] = dpid
             d['flowspace'] = []
             for iface in ifaces.filter(switch__datapath_id=dpid):
-                sliver = iface.sliver_set.get(slice=slice)
+                sliver = iface.sliver_set.get(slice=slice).as_leaf_class()
                 for fs in sliver.flowspacerule_set.all():
                     fsd = {"port_num_start": iface.port_num,
                            "port_num_end": iface.port_num}
@@ -264,7 +264,7 @@ class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
     
     def __unicode__(self):
-        return "OF Switch %s" % self.datapath_id
+        return "OpenFlow Switch %s" % self.datapath_id
 
 class OpenFlowConnection(models.Model):
     '''Connection between two interfaces'''
@@ -304,9 +304,10 @@ class OpenFlowInterface(resource_models.Resource):
 
     class Meta:
         unique_together=(("switch", "port_num"),)
+        verbose_name = "OpenFlow Interface"
 
     def __unicode__(self):
-        return "OF Interface: %s" % self.slug
+        return "OpenFlow Interface %s for %s" % (self.port_num, self.switch)
 
 class OpenFlowInterfaceSliver(resource_models.Sliver):
     class TooManySliversPerSlicePerInterface(Exception): pass

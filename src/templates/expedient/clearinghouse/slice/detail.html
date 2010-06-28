@@ -4,6 +4,15 @@
 
 {% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
 
+{% block style %}
+#resources_table {
+    width: 100%;
+}
+#resource_list {
+    width: 100%;
+}
+{% endblock %}
+
 {% block content %}
 <div class="main">
 	<div class="title">
@@ -23,7 +32,7 @@
 							<input 
 							type="submit" 
 							value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
-							{% if slice.started and not slice.modified %}disabled="true"{% endif %}/>
+							/>
 			    		</form>
 		    		</td>
 		    		<td>
@@ -31,7 +40,7 @@
 							<input
 							type="submit"
 							value="Stop Slice"
-							{% if not slice.started %}disabled="true"{% endif %}/>
+							/>
 			    		</form>
 		    		</td>
 	    		</tr>
@@ -72,11 +81,13 @@
 					<tr class="header">
 			            <th class="name">Name</th>
 			            <th class="type">Type</th>
+						<th class="Description">Description</th>
 					</tr>
 					{% for resource in resource_list %}
 					<tr class="body">
 			            <td class="name">{{ resource.name }}</td>
 			            <td class="type">{{ resource|get_verbose_name }}</td>
+						<td class="Description">{{ resource }}</td>
 					</tr>
 					{% endfor %}
 				</table>
