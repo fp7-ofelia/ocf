@@ -17,6 +17,7 @@ from openflow.tests.helpers import create_random_resv
 import time
 from expedient.common.tests.commands import call_env_command, Env
 from os.path import join
+from expedient.common.tests.utils import drop_to_shell, wait_for_servers
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,7 +43,6 @@ class FullIntegration(TestCase):
             "sudo kill `ps -ae | grep lt-nox_core | awk '{ print $1 }'`"
         )
         kill_client.wait()
-        time.sleep(2)
         
         self.nox_clients = []
         for i in xrange(num):
@@ -102,16 +102,16 @@ class FullIntegration(TestCase):
                     )
                 )
             )
-            # wait for flowvisor to be up
-            time.sleep(2)
         
         id_re = re.compile(r"id=\[(?P<id>\d+)\]")
-        s = xmlrpclib.ServerProxy(
-            "https://%s:%s@%s:%s" % (
-                flowvisor["username"], flowvisor["password"],
-                flowvisor["host"], flowvisor["xmlrpc_port"],
-            )
+        fv_url = "https://%s:%s@%s:%s" % (
+            flowvisor["username"], flowvisor["password"],
+            flowvisor["host"], flowvisor["xmlrpc_port"],
         )
+
+        wait_for_servers([fv_url], 5)
+
+        s = xmlrpclib.ServerProxy(fv_url)
         logger.debug("Getting flowspace from flowvisor")
         flowspaces = s.api.listFlowSpace()
         ops = []
@@ -526,23 +526,33 @@ class FullIntegration(TestCase):
 #        """
 #        from expedient.common.tests.client import Browser
 #
+#        logger.debug("Creating sliver")
+#
 #        # Create a slice
 #        self.test_CreateSliver()
 #        
+#        logger.debug("Done creating sliver")
+#
 #        # Get user to opt in
+#        logger.debug("Logging into browser")
 #        b = Browser()
 #        b.cookie_setup()
 #        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
 #                            (test_settings.HOST, test_settings.OM_PORT),
 #                            "user","password")
 #        self.assertTrue(logged_in,"Could not log in")
-#        
+#        logger.debug("Login success")
+#        drop_to_shell(local=locals())
+#
 #        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
 #                                (test_settings.HOST, test_settings.OM_PORT),
-#                                dict(experiment=1,priority=100)) 
+#                                dict(experiment=1,priority=100))
+#        logger.debug("Posted opt-in request, reading response.")
+#        res = f.read()
 #        self.assertEqual(f.code, 200)
-#        self.assertTrue("You successfully opted into" in f.read())
+#        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
 #        
+#        logger.debug("Response fine, opting out.")
 #        # now test opt out:
 #        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
 #                                (test_settings.HOST, test_settings.OM_PORT),
