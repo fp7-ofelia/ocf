@@ -25,6 +25,10 @@ def checkUser(func, *args, **kwargs):
     """
     Check that the user is authenticated and known.
     """
+<<<<<<< HEAD
+
+=======
+>>>>>>> f4226659506a2508b294603b6a68c8a559cda4ba
     if "request" not in kwargs:
         raise Exception("Request not available for XML-RPC %s" % \
                         func.func_name)
@@ -87,6 +91,15 @@ def deleteSlice(sliceName, **kwargs):
     DummyFVSlice.objects.filter(
         fv=kwargs['fv']).get(name=sliceName).delete()
     return True
+
+
+@checkUser 
+@get_fv
+@rpcmethod(name="api.ping", url_name="dummyfv_rpc",
+           signature=['string', 'string'])
+def ping(data, **kwargs):
+    meta = kwargs["request"].META
+    return "PONG(%s): %s"%(meta["REMOTE_USER"],data)
 
 @checkUser 
 @get_fv

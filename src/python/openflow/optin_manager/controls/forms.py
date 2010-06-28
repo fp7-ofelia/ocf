@@ -6,16 +6,26 @@ class FVServerForm(forms.Form):
     name = forms.CharField(max_length = 40)
     url = forms.URLField()
     username = forms.CharField(max_length = 100)
-    password = forms.CharField(label='password',
+    password1 = forms.CharField(label='Password',
+                            widget=forms.PasswordInput(render_value=False))
+    password2 = forms.CharField(label='Retype Password',
+
                             widget=forms.PasswordInput(render_value=False)) 
     max_password_age = forms.IntegerField(max_value = 3650)
     verify_certs = forms.BooleanField(required=False)
     
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        if (cleaned_data.get("password1") != cleaned_data.get("password2")):
+            self._errors["general"] = ErrorList(["Passwords don't match"])
+
+
 def pack_fvserver_info(fvserverp):
     result={}
     result["name"] = fvserverp.name
     result["username"] = fvserverp.username
-    result["password"] = fvserverp.password
+    result["password1"] = fvserverp.password
+    result["password2"] = fvserverp.password
     result["url"] = fvserverp.url
     result["max_password_age"] = fvserverp.max_password_age
     result["verify_certs"] = fvserverp.verify_certs
@@ -23,15 +33,15 @@ def pack_fvserver_info(fvserverp):
 
 class CHUserForm(forms.Form):
     username = forms.CharField(max_length = 100)
-    password1 = forms.CharField(label='Password',
+    password1 = forms.CharField(label='New Password',
                             widget=forms.PasswordInput(render_value=False)) 
-    password2 = forms.CharField(label='Retype password',
+    password2 = forms.CharField(label='Retype new password',
                             widget=forms.PasswordInput(render_value=False)) 
     def clean(self):
         cleaned_data = self.cleaned_data
         if (cleaned_data.get("password1") != cleaned_data.get("password2")):
-            self._errors["passwords"] = ErrorList("Passwords don't match")
-            
+            self._errors["general"] = ErrorList(["Passwords don't match"])
+
 def pack_ch_user_info(chuser):
     result={}
     result["username"] = chuser.username
