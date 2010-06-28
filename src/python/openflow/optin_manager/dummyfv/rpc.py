@@ -25,10 +25,6 @@ def checkUser(func, *args, **kwargs):
     """
     Check that the user is authenticated and known.
     """
-<<<<<<< HEAD
-
-=======
->>>>>>> f4226659506a2508b294603b6a68c8a559cda4ba
     if "request" not in kwargs:
         raise Exception("Request not available for XML-RPC %s" % \
                         func.func_name)
