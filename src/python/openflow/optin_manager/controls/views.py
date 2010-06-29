@@ -82,15 +82,11 @@ def set_flowvisor(request):
         return 0
         
     if (request.method == "POST"):
-        form =FVServerForm(request.POST)
-        if (form.is_valid()):
+        pass_form =FVServerFormPassword(request.POST)
+        form = FVServerForm(request.POST) 
+        if (form.is_valid() and pass_form.is_valid()):
             if len(fvs) == 0:
-                fv = FVServerProxy(name = request.POST["name"],
-                               username=request.POST["username"],
-                               password=request.POST["password1"],
-                               url=request.POST["url"],
-                               max_password_age=request.POST["max_password_age"],
-                               )
+                fv = form.save(commit=False)
                 if ("verify_certs" in request.POST):
                     fv.verify_certs = True
                 else:
@@ -121,9 +117,12 @@ def set_flowvisor(request):
                     ErrorList(["Error pinging Flowvisor: No response"])
 
     else:
-        fv = FVServerProxy.get_or_create_fv()
-        fvform = pack_fvserver_info(fv)
-        form = FVServerForm(fvform)
+        if len(fvs)==0:
+            pass_form = FVServerFormPassword()
+            form = FVServerForm()
+        else:
+            pass_form = FVServerFormPassword()
+            form = FVServerForm(instance=fv)  
 
 
         
@@ -131,5 +130,6 @@ def set_flowvisor(request):
                 template = 'openflow/optin_manager/controls/set_flowvisor.html',
                 extra_context = {
                     'form':form,
+                    'pass_form':pass_form,
                  }
         )

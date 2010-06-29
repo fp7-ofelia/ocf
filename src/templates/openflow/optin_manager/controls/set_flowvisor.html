@@ -10,6 +10,7 @@
 	<form name="input" action="/controls/set_flowvisor" method="post">
 	{% csrf_token %}
 	{{form.as_p}}
+	{{pass_form.as_p}}	
 	<input type="submit" value="submit" />
 	</form>
 </div>
