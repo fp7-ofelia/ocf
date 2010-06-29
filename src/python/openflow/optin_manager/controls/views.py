@@ -87,6 +87,7 @@ def set_flowvisor(request):
         if (form.is_valid() and pass_form.is_valid()):
             if len(fvs) == 0:
                 fv = form.save(commit=False)
+                fv.password = request.POST["password1"]
                 if ("verify_certs" in request.POST):
                     fv.verify_certs = True
                 else:
