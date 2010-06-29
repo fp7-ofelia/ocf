@@ -108,11 +108,13 @@ $(document).ready(function(){
 		{% endfor %}
 	</table>
 </div>
-<input type="submit" value="Next" />
-<input type="button" name="clear_button" value="Clear" />
 {% empty %}
 <p>There are no OpenFlow aggregates in the slice. </p>
 {% endfor %}
+{% if openflow_aggs %}
+<input type="submit" value="Next" />
+<input type="button" name="clear_button" value="Clear" />
+{% endif %}
 </form>
 
 {% endblock content %}
