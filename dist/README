@@ -222,8 +222,9 @@ http://www.openflowswitch.org/foswiki/bin/view/OpenFlow/MininetVMSetupNotes.
 5-  Back in the host, ifconfig vmnet8 as a.b.x.1 if not already configured
 6-  From host ping a.b.x.y (After this, you can ssh into the VM)
 7-  VM: get latest openvswitch from http://openvswitch.org/releases/ and unpack.
-8-  VM: in the openvswitch-x.y.z directory:
+8-  VM: in the openvswitch-x.y.z directory that was just unpacked:
     a- ./configure --with-l26=/lib/modules/`uname -r`/build
+       * Note that this is a lower-case L in "--with-l26"
     b- make
     c- sudo make install
 9-  Host: run flowvisor.
@@ -502,7 +503,7 @@ b) Click on "Set Flowvisor" link (under "Manage Website" subtitle)
 c) Fill the form:
 	* Name: a name for this flowvisor
 	* URL: URL of this flowvisor (should have a format like 
-	  "http://flowvisor.com:8080/xmlrpc")
+	  "https://flowvisor.com:8080/xmlrpc")
 	* Username: your flowvisor account username (usually "root")
 	* Password: your flowvisor account password
 	* Max Password age: e.g. enter 60 days
@@ -545,8 +546,12 @@ c) Fill the form then submit:
      fully-qualified domain name, not "localhost" or an IP address unless these
      are what the SSL certificate returns as Common Name.
    * verify certs: Unchecked.
-   
-d) Run the GENI API Proxy and a GENI Clearinghouse:
+
+d) If you get an XMLRPC Fault, then something went wrong at the OM (for
+   example, it could not talk to the Flowvisor, or somethings else unexpected
+   happened).
+
+e) Run the GENI API Proxy and a GENI Clearinghouse:
 
 $ export PYTHONPATH=/srv/www/expedient/src/python
 $ mkdir ssl
@@ -628,6 +633,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> resv = '<resv_rspec><user firstname="John" lastname="Doe" email="john.doe@geni.net" password="slice_pass" /><project name="Stanford Networking Group" description="Internet performance research to ..."  /> <slice name="Crazy Load Balancer" description="Does this and that..." controller_url="tcp:controller.stanford.edu:6633" /> <flowspace><switches><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd" /></switches></flowspace></resv_rspec>'
 >>> am_client.CreateSliver(slice_urn, credentials, resv)
 '<resv_rspec><user firstname="John" lastname="Doe" email="john.doe@geni.net" password="slice_pass" /><project name="Stanford Networking Group" description="Internet performance research to ..."  /> <slice name="Crazy Load Balancer" description="Does this and that..." controller_url="tcp:controller.stanford.edu:6633" /> <flowspace><switches><switch urn="urn:publicid:IDN+openflow:stanford+switch:00:00:00:23:20:81:d3:dd" /></switches></flowspace></resv_rspec>'
+
+* Errors in talking to the gam maybe due to a wrong -u argument.
 
 21. Opt-in:
 -----------
