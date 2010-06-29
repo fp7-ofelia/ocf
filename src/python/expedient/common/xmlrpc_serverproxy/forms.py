@@ -41,12 +41,15 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
 
     def clean(self):
         logger.debug("Cleaning data")
+        if self._errors:
+            return self.cleaned_data
         p = PasswordXMLRPCServerProxy(**self.cleaned_data)
         avail, msg = p.is_available(get_info=True)
         if not avail:
+            url = self.cleaned_data.get("url", "None")
             raise forms.ValidationError(
                 "The url %s could not be reached. Check the url, username, "
                 "and password. The error message was: %s." % (
-                self.cleaned_data['url'], msg))
+                url, msg))
         logger.debug("Done cleaning data")
         return self.cleaned_data
