@@ -1163,10 +1163,6 @@ tr.error {
     font-weight:bold;
 }
 
-table#resources_table {
-	width: 40%;
-}
-
 table.detail_management_table {
 	width: 100%;
 }

@@ -88,6 +88,15 @@ def deleteSlice(sliceName, **kwargs):
         fv=kwargs['fv']).get(name=sliceName).delete()
     return True
 
+
+@checkUser 
+@get_fv
+@rpcmethod(name="api.ping", url_name="dummyfv_rpc",
+           signature=['string', 'string'])
+def ping(data, **kwargs):
+    meta = kwargs["request"].META
+    return "PONG(%s): %s"%(meta["REMOTE_USER"],data)
+
 @checkUser 
 @get_fv
 @rpcmethod(name="api.changeFlowSpace", url_name="dummyfv_rpc",

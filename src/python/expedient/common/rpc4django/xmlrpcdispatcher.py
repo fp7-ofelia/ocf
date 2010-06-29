@@ -6,6 +6,7 @@ import sys
 import xmlrpclib
 from xmlrpclib import Fault
 from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
+import traceback
 
 class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
     """
@@ -49,10 +50,12 @@ class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
                                        allow_none=self.allow_none, 
                                        encoding=self.encoding)
         except Fault, fault:
+            traceback.print_exc()
             response = xmlrpclib.dumps(fault, allow_none=self.allow_none,
                                        encoding=self.encoding)
         except:
             # report exception back to server
+            traceback.print_exc()
             exc_type, exc_value, exc_tb = sys.exc_info()
             response = xmlrpclib.dumps(
                 xmlrpclib.Fault(1, "%s:%s" % (exc_type, exc_value)),

@@ -118,6 +118,7 @@ SITE_ID = 1
 
 DOMAIN_SCHEME = "https"
 
+
 DEBUG = True
 
 BASIC_AUTH_URLS = (
@@ -125,6 +126,7 @@ BASIC_AUTH_URLS = (
     ### for testing
     r'^/dummyfv/.*',
 )
+
 
 # Session cookie names to avoid conflicts
 SESSION_COOKIE_NAME = "om_sessionid"

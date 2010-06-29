@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.controls.forms import *
+from django.db.models import Q
+
 
 def set_clearinghouse(request):
     error_msg = ""
@@ -16,29 +18,38 @@ def set_clearinghouse(request):
     profile = None
     if len(ch_users) == 0:
         already_exist = False
+        ch_id = -1
     elif len(ch_users) == 1:
         profile = ch_users[0]
+        ch_id = profile.user.id
     else:
         #this shouldn't happen
         return 0
         
     if (request.method == "POST"):
         form = CHUserForm(request.POST)
+
+  
         if (form.is_valid()):
-            if len(ch_users) == 0:
-                ch_user = User(username=request.POST["username"])
-                ch_user.set_password(request.POST["password1"])
-                ch_user.save()
-                ch_profile = UserProfile.get_or_create_profile(ch_user)
-                ch_profile.is_net_admin = False
-                ch_profile.is_clearinghouse_user = True
-                ch_profile.max_priority_level = 0
-                ch_profile.save()
+            same_uname = User.objects.filter(username = 
+                    request.POST["username"]).exclude(id = ch_id)
+            if (len(same_uname) > 0):
+                form._errors["general"] = ErrorList(["Username is not unique"])
             else:
-                profile.user.username = request.POST["username"]
-                profile.user.set_password(request.POST["password1"])
-                profile.user.save()
-            return HttpResponseRedirect("/dashboard")
+                if len(ch_users) == 0:
+                    ch_user = User(username=request.POST["username"])
+                    ch_user.set_password(request.POST["password1"])
+                    ch_user.save()
+                    ch_profile = UserProfile.get_or_create_profile(ch_user)
+                    ch_profile.is_net_admin = False
+                    ch_profile.is_clearinghouse_user = True
+                    ch_profile.max_priority_level = 0
+                    ch_profile.save()
+                else:
+                    profile.user.username = request.POST["username"]
+                    profile.user.set_password(request.POST["password1"])
+                    profile.user.save()
+                return HttpResponseRedirect("/dashboard")
     else:
         if len(ch_users) == 1:
             form = CHUserForm(pack_ch_user_info(profile.user))
@@ -50,7 +61,8 @@ def set_clearinghouse(request):
                 extra_context = {
                         'error_msg': error_msg,
                         'profile':profile,
-                        'already_exist':already_exist, 
+                        'form':form,
+
                  }
         )
         
@@ -75,7 +87,7 @@ def set_flowvisor(request):
             if len(fvs) == 0:
                 fv = FVServerProxy(name = request.POST["name"],
                                username=request.POST["username"],
-                               password=request.POST["password"],
+                               password=request.POST["password1"],
                                url=request.POST["url"],
                                max_password_age=request.POST["max_password_age"],
                                )
@@ -83,24 +95,36 @@ def set_flowvisor(request):
                     fv.verify_certs = True
                 else:
                     fv.verify_certs = False
-                fv.save()
+
             else:
                 fv.name = request.POST["name"]
                 fv.username = request.POST["username"]
-                fv.password = request.POST["password"]
+                fv.password = request.POST["password1"]
                 fv.url = request.POST["url"]
                 fv.max_password_age = request.POST["max_password_age"]
                 if ("verify_certs" in request.POST):
                     fv.verify_certs = True
                 else:
                     fv.verify_certs = False
-                fv.save()
-            return HttpResponseRedirect("/dashboard")
+
+            # try pinging FV to see if it really works:
+            try:
+                data = fv.api.ping("HELLO")
+                if (data != "PONG(%s): HELLO"%fv.username):
+                    form._errors["general"] = \
+                        ErrorList(["Flowvisor not responding as expected"])
+                else:
+                    fv.save()
+                    return HttpResponseRedirect("/dashboard")
+            except:
+                form._errors["general"] = \
+                    ErrorList(["Error pinging Flowvisor: No response"])
+
     else:
-        if len(fvs) == 1:
-            form = FVServerForm(pack_fvserver_info(fv))
-        else:
-            form = FVServerForm()
+        fv = FVServerProxy.get_or_create_fv()
+        fvform = pack_fvserver_info(fv)
+        form = FVServerForm(fvform)
+
 
         
     return simple.direct_to_template(request,

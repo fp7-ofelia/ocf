@@ -81,10 +81,11 @@ class PasswordXMLRPCServerProxy(models.Model):
         self.transport = None
         # This scheme is used for debugging and looping back
         if parsed.scheme == "test":
-            self.proxy = BasicAuthServerProxy(parsed.path,
-                                              username=self.username,
-                                              password=self.password,
-                                              transport=TestClientTransport())
+            self.proxy = BasicAuthServerProxy(
+                self.url.lower().replace("test", "http"),
+                username=self.username,
+                password=self.password,
+                transport=TestClientTransport())
         elif parsed.scheme == "https":
             from M2Crypto.m2xmlrpclib import SSL_Transport
             from M2Crypto.SSL import Context

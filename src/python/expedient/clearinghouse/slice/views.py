@@ -77,6 +77,8 @@ def delete(request, slice_id):
 def detail(request, slice_id):
     '''Show information about the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
+    resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
+    
     return list_detail.object_detail(
         request,
         Slice.objects.all(),
@@ -89,6 +91,7 @@ def detail(request, slice_id):
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
             ),
+            "resource_list": resource_list,
         }
     )
     
@@ -96,20 +99,38 @@ def start(request, slice_id):
     '''Start the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
-        slice.start(request.user)
-        DatedMessage.objects.post_message_to_user(
-            "Successfully started slice %s" % slice.name,
-            request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+        try:
+            slice.start(request.user)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            DatedMessage.objects.post_message_to_user(
+                "Error starting slice %s: %s" % (
+                    slice.name, e),
+                user=request.user, msg_type=DatedMessage.TYPE_ERROR)
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully started slice %s" % slice.name,
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     
 def stop(request, slice_id):
     '''Stop the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
-        slice.stop(request.user)
-        DatedMessage.objects.post_message_to_user(
-            "Successfully stopped slice %s" % slice.name,
-            request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+        try:
+            slice.stop(request.user)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            DatedMessage.objects.post_message_to_user(
+                "Error stopping slice %s: %s" % (
+                    slice.name, e),
+                user=request.user, msg_type=DatedMessage.TYPE_ERROR)
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully stopped slice %s" % slice.name,
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
 
 def select_ui_plugin(request, slice_id):

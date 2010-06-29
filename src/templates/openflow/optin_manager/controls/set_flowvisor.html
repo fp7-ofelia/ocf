@@ -6,6 +6,7 @@
 	<div align="right">
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>	
+	{{form.errors.general}}
 	<form name="input" action="/controls/set_flowvisor" method="post">
 	{% csrf_token %}
 	{{form.as_p}}

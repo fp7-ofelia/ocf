@@ -10,6 +10,9 @@ from models import DummyOM, DummyOMSlice, DummyCallBackProxy
 from expedient.common.utils import create_or_update
 from decorator import decorator
 
+import logging
+logger = logging.getLogger("DummyOM-API")
+
 @decorator
 def check_verified_user(func, *args, **kwargs):
     if not kwargs['request'].user.is_authenticated():
@@ -36,15 +39,15 @@ def create_slice(slice_id, project_name, project_description,
                   slice_name, slice_description, controller_url,
                   owner_email, owner_password,
                   switch_slivers, **kwargs):
-    print "reserve_slice got the following:"
-    print "    slice_id: %s" % slice_id
-    print "    project_name: %s" % project_name
-    print "    project_desc: %s" % project_description
-    print "    slice_name: %s" % slice_name
-    print "    slice_desc: %s" % slice_description
-    print "    controller: %s" % controller_url
-    print "    owner_email: %s" % owner_email
-    print "    owner_pass: %s" % owner_password
+    logger.debug("reserve_slice")
+    logger.debug("    slice_id: %s" % slice_id)
+    logger.debug("    project_name: %s" % project_name)
+    logger.debug("    project_desc: %s" % project_description)
+    logger.debug("    slice_name: %s" % slice_name)
+    logger.debug("    slice_desc: %s" % slice_description)
+    logger.debug("    controller: %s" % controller_url)
+    logger.debug("    owner_email: %s" % owner_email)
+    logger.debug("    owner_pass: %s" % owner_password)
     
     # update or create the slice
     slice = create_or_update(
@@ -73,8 +76,12 @@ def create_slice(slice_id, project_name, project_description,
 @check_verified_user
 @get_om
 def delete_slice(slice_id, **kwargs):
-    slice = DummyOMSlice.objects.get(slice_id=slice_id, om=kwargs['om'])
-    slice.delete()
+    try:
+        slice = DummyOMSlice.objects.get(slice_id=slice_id, om=kwargs['om'])
+    except DummyOMSlice.DoesNotExist:
+        pass
+    else:
+        slice.delete()
     
     return ""
 
@@ -94,7 +101,7 @@ def get_links(**kwargs):
 @check_verified_user
 @get_om
 def register_topology_callback(url, cookie, **kwargs):
-    print "Called register topology callback"
+    logger.debug("Called register topology callback")
     attrs = {'url': url, 'cookie': cookie}
     filter_attrs = {'username': kwargs['user'].username,
                     'om': kwargs['om']}
@@ -105,10 +112,10 @@ def register_topology_callback(url, cookie, **kwargs):
 @check_verified_user
 @get_om
 def change_password(new_password, **kwargs):
-    print"******** change_password started"
+    logger.debug("******** change_password started")
     kwargs['user'].set_password(new_password)
     kwargs['user'].save()
-    print "******** change_password Done to %s" % new_password
+    logger.debug("******** change_password Done to %s" % new_password)
     return ""
 
 @check_verified_user
@@ -118,5 +125,5 @@ def ping(data, **kwargs):
     Test method to see that everything is up.
     return a string that is "PONG: %s" % data
     '''
-    print "Pinged!"
+    logger.debug("Pinged!")
     return "PONG: %s" % data
