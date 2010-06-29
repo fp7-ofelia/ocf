@@ -63,17 +63,17 @@ def add_opt_in(request):
                     # find  intersection of adminFS and opted FS
                     f = multi_fs_intersect(adminFS,[optedFS],FlowSpace)
 
-                    if (opt_fs_into_exp(f,selexp,request.user,
-                                        int(request.POST['priority']),False)):
+                    opt_msg = opt_fs_into_exp(f,selexp,request.user,
+                                        int(request.POST['priority']),False)
+                    if (opt_msg == ""):
                         exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                         return simple.direct_to_template(request, 
                                             template = 'openflow/optin_manager/opts/opt_in_successful.html', 
                                             extra_context = {'expname':exp_name}, 
                                         )
                     else:
-                        form._errors['general'] = ErrorList(["No intersection \
-                        between opted-in flowspace,\
-                        your flowspace and experiment flowspace"])
+                        form._errors['general'] = ErrorList([opt_msg])
+
         else: #Not a post request
             defexp = 0
             form = AdminOptInForm()
@@ -115,8 +115,9 @@ def add_opt_in(request):
                 
                 tmp.delete()    
                 
-                if (opt_fs_into_exp(userFS,selexp,request.user,
-                                    int(request.POST['priority']),False)):
+                opt_msg = opt_fs_into_exp(userFS,selexp,request.user,
+                                    int(request.POST['priority']),False)
+                if (opt_msg == ""):
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                     return simple.direct_to_template(request, 
                                         template = 'openflow/optin_manager/opts/opt_in_successful.html', 
@@ -124,8 +125,7 @@ def add_opt_in(request):
                                     )
                 else:
                     tmp.delete()
-                    error_msg = ErrorList(["No intersection between opted-in flowspace,\
-                        your flowspace and experiment flowspace"]) 
+                    error_msg = ErrorList([opt_msg])
               
                     
         else: #Not a post request
@@ -144,38 +144,39 @@ def add_opt_in(request):
     
 @login_required
 def opt_out(request):
-        profile = request.user.get_profile()
-        # TODO
-        #if (profile.is_net_admin):
-        if (request.method == "POST"):
-            fv_args = []
-            for key in request.POST:
-                try:
-                    int(key)
-                except:
-                    continue
-                ofs = OptsFlowSpace.objects.get(id=key)
-                opt_fses_outof_exp([ofs])
+    error_msg = ""
+    profile = request.user.get_profile()
+    # TODO: different view for user
+    if (request.method == "POST"):
+        fv_args = []
+        for key in request.POST:
+            try:
+                int(key)
+            except:
+                continue
+            ofs = OptsFlowSpace.objects.get(id=key)
+            error_msg = opt_fses_outof_exp([ofs])
+                    
                        
                     
-        this_user_opts  = UserOpts.objects.filter(user = request.user)
-        for useropt in this_user_opts:
-            tmpfs = useropt.optsflowspace_set.all()
-            if (len(tmpfs) == 0):
-                useropt.delete()
+    this_user_opts  = UserOpts.objects.filter(user = request.user)
+    for useropt in this_user_opts:
+        tmpfs = useropt.optsflowspace_set.all()
+        if (len(tmpfs) == 0):
+            useropt.delete()
             
                      
-        allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
+    allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
         
-        return simple.direct_to_template(request,
-                        template = 'openflow/optin_manager/opts/admin_opt_out.html', 
-                        extra_context = {'allfs':allfs},
-                    )
+    return simple.direct_to_template(request,
+                template = 'openflow/optin_manager/opts/admin_opt_out.html', 
+                extra_context = {'allfs':allfs, 'error_msg':error_msg},
+            )
         
 
 @login_required
 def update_opts(request):
-    errors = 0
+    errors = []
     keys = request.POST.keys()
     is_admin = request.user.get_profile().is_net_admin
     max_priority = request.user.get_profile().max_priority_level
@@ -184,7 +185,7 @@ def update_opts(request):
     for key in keys:
         if key.startswith("p_"):
             if (int(request.POST[key]) > max_priority):
-                errors = "You entered priority %s, which is larger than your maximum(%s)" % (request.POST[key], max_priority)
+                errors.append("You entered priority %s, which is larger than your maximum(%s)" % (request.POST[key], max_priority))
                 continue
             pid = (key[2:len(key)])
             u = UserOpts.objects.get(pk=pid)
@@ -210,9 +211,16 @@ def update_opts(request):
                     u.nice = False
             u.save()
 
-    # XMLRPC call 
-    fv = FVServerProxy.objects.all()[0]
-    fv.api.changeFlowSpace(fv_args)
+    error_msg = ""
+    try:
+        fv = FVServerProxy.objects.all()[0]
+    except:
+        errors.append("Flowvisor not set")
+        
+    try:
+        fv.api.changeFlowSpace(fv_args)
+    except:
+        errors.append("change flowspace call failed in flowvisor")
           
     opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
     if (is_admin):
@@ -222,7 +230,7 @@ def update_opts(request):
                                 'opts':opts ,
                                 'user':request.user,
                                 'max_priority':max_priority,
-                                'error_message':errors
+                                'error_messages':errors
                             },
                     )
     else:
@@ -232,7 +240,7 @@ def update_opts(request):
                                 'opts':opts,
                                 'user':request.user,
                                 'max_priority':max_priority,
-                                'error_message':errors
+                                'error_messages':errors
                             },
                     )
 

@@ -38,17 +38,23 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                             
                     # If there is any intersection, add them to FV
         if (intersected):
-        #TODO: if multi flowvisor, change this    
-            fv = FVServerProxy.objects.all()[0]
-            # TODO: check for errors in the following call
-            return_ids = fv.api.changeFlowSpace(fv_args)
+            try:
+                fv = FVServerProxy.objects.all()[0]
+            except:
+                opt.delete()
+                return "No FlowVisor set"
+            try:
+                return_ids = fv.api.changeFlowSpace(fv_args)
+            except:
+                opt.delete()
+                return "fvi changeFlowSpace didn't go through"
             for i in range(0,len(return_ids)):
                 match_list[i].fv_id = return_ids[i]
                 match_list[i].save()
-            return True
+            return ""
         else:
             tmp.delete()
-            return False
+            return "No flowspace intersection found!"
         
 def opt_fses_outof_exp(fses):
     fv_args = []
@@ -60,10 +66,14 @@ def opt_fses_outof_exp(fses):
             match.delete()
         ofs.delete()
 
-    fv = FVServerProxy.objects.all()[0]
-    # TODO: Check for errors
-    print("FV ARGS: %s"%fv_args)
-    fv.api.changeFlowSpace(fv_args)     
+    try:
+        fv = FVServerProxy.objects.all()[0]
+    except:
+        return "No flowvisor set"
+    try:
+        fv.api.changeFlowSpace(fv_args)  
+    except:
+        return "Flowvisor internal error when removing flowspace entry"   
     
 def update_user_opts(user):
     user_opts = UserOpts.objects.filter(user=user)
