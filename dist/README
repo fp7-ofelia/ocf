@@ -177,6 +177,10 @@ To remove openjdk: sudo zypper rm java-1_6_0-openjdk java-1_6_0-openjdk-plugin
 After installing java, you will need to set the JAVA_HOME environment variable:
   
   export JAVA_HOME=/usr/lib/jvm/java-1.6.0-sun
+
+for 64 bit machines use the following:
+
+  export JAVA_HOME=/usr/lib64/jvm/java-1.6.0-sun
   
 After that, follow the Flowvisor instructions to build and run with the
 following exception: When the tool config-gen-default.sh tool asks for your
