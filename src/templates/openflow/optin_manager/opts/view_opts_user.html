@@ -8,12 +8,12 @@
 		</div>
 
 		<div>
-		{% if error_message %}
-			<p color="red">{{error_message}}</p>
-		{% else %}
+		{% for error in error_messages %}
+			<p><font color="red">{{error}}</font></p>
+		{% endfor %}
 			<p>{{user.username}}, you can set maximum priority to {{max_priority}} </p>
 			<p>Nice opts always have lower priority than harsh opts, regardless of their priority number</p>
-		{% endif %}
+
 		</div>
 
 		<div id="fstable">

@@ -5,19 +5,19 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
 
-    @classmethod
-    def get_or_create_fv(self):
-        fv = self.objects.all()
-        if (len(fv) == 0):
-            fv = self.objects.create(name="",
-                username="",
-                password="",
-                url = "",)
-        else:
-            fv = fv[0]
-
-        return fv
-    
+#    @classmethod
+#    def get_or_create_fv(self):
+#        fv = self.objects.all()
+#        if (len(fv) == 0):
+#            fv = self.objects.create(name="",
+#                username="",
+#                password="",
+#                url = "",)
+#        else:
+#            fv = fv[0]
+#
+#        return fv
+#    
 
     def get_switches(self):
         """
