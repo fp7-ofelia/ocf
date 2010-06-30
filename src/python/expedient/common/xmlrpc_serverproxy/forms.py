@@ -60,3 +60,6 @@ class PasswordXMLRPCServerProxyForm(forms.ModelForm,
     class Meta:
         model = PasswordXMLRPCServerProxy
 
+    def clean(self):
+        return PasswordXMLRPCServerProxyFormHelperAddin.clean(self)
+    
