@@ -6,7 +6,10 @@ from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.controls.forms import *
 from django.db.models import Q
+from django.core.urlresolvers import reverse
+import logging
 
+logger = logging.getLogger("ControlsViews")
 
 def set_clearinghouse(request):
     error_msg = ""
@@ -71,65 +74,89 @@ def set_flowvisor(request):
         return HttpResponseRedirect("/dashboard")
             
     fvs = FVServerProxy.objects.all()
-    already_exist = True
-    fv = None
-    if len(fvs) == 0:
-        already_exist = False
-    elif len(fvs) == 1:
+    if fvs.count():
         fv = fvs[0]
     else:
-        #this shouldn't happen
-        return 0
+        fv = None
         
-    if (request.method == "POST"):
-        form =FVServerForm(request.POST)
-        if (form.is_valid()):
-            if len(fvs) == 0:
-                fv = FVServerProxy(name = request.POST["name"],
-                               username=request.POST["username"],
-                               password=request.POST["password1"],
-                               url=request.POST["url"],
-                               max_password_age=request.POST["max_password_age"],
-                               )
-                if ("verify_certs" in request.POST):
-                    fv.verify_certs = True
-                else:
-                    fv.verify_certs = False
-
-            else:
-                fv.name = request.POST["name"]
-                fv.username = request.POST["username"]
-                fv.password = request.POST["password1"]
-                fv.url = request.POST["url"]
-                fv.max_password_age = request.POST["max_password_age"]
-                if ("verify_certs" in request.POST):
-                    fv.verify_certs = True
-                else:
-                    fv.verify_certs = False
-
-            # try pinging FV to see if it really works:
-            try:
-                data = fv.api.ping("HELLO")
-                if (data != "PONG(%s): HELLO"%fv.username):
-                    form._errors["general"] = \
-                        ErrorList(["Flowvisor not responding as expected"])
-                else:
-                    fv.save()
-                    return HttpResponseRedirect("/dashboard")
-            except:
-                form._errors["general"] = \
-                    ErrorList(["Error pinging Flowvisor: No response"])
-
+    if request.method == "POST":
+        logger.debug("Received post")
+        form = FVServerProxyForm(request.POST, instance=fv)
+        if form.is_valid():
+            logger.debug("Form is valid")
+            fv = form.save()
+            return HttpResponseRedirect(reverse("dashboard"))
+        logger.debug("Form is invalid: %s" % form.errors)
     else:
-        fv = FVServerProxy.get_or_create_fv()
-        fvform = pack_fvserver_info(fv)
-        form = FVServerForm(fvform)
-
-
+        form = FVServerProxyForm(instance=fv)
         
-    return simple.direct_to_template(request,
-                template = 'openflow/optin_manager/controls/set_flowvisor.html',
-                extra_context = {
-                    'form':form,
-                 }
-        )
+    return simple.direct_to_template(
+        request,
+        template="openflow/optin_manager/controls/set_flowvisor2.html",
+        extra_context={
+            "form": form,
+        },
+    )
+
+#    already_exist = True
+#    fv = None
+#    if len(fvs) == 0:
+#        already_exist = False
+#    elif len(fvs) == 1:
+#        fv = fvs[0]
+#    else:
+#        #this shouldn't happen
+#        return 0
+#        
+#    if (request.method == "POST"):
+#        pass_form =FVServerFormPassword(request.POST)
+#        form = FVServerForm(request.POST) 
+#        if (form.is_valid() and pass_form.is_valid()):
+#            if len(fvs) == 0:
+#                fv = form.save(commit=False)
+#                fv.password = request.POST["password1"]
+#                if ("verify_certs" in request.POST):
+#                    fv.verify_certs = True
+#                else:
+#                    fv.verify_certs = False
+#
+#            else:
+#                fv.name = request.POST["name"]
+#                fv.username = request.POST["username"]
+#                fv.password = request.POST["password1"]
+#                fv.url = request.POST["url"]
+#                fv.max_password_age = request.POST["max_password_age"]
+#                if ("verify_certs" in request.POST):
+#                    fv.verify_certs = True
+#                else:
+#                    fv.verify_certs = False
+#
+#            # try pinging FV to see if it really works:
+#            try:
+#                data = fv.api.ping("HELLO")
+#                if (data != "PONG(%s): HELLO"%fv.username):
+#                    form._errors["general"] = \
+#                        ErrorList(["Flowvisor not responding as expected"])
+#                else:
+#                    fv.save()
+#                    return HttpResponseRedirect("/dashboard")
+#            except:
+#                form._errors["general"] = \
+#                    ErrorList(["Error pinging Flowvisor: No response"])
+#
+#    else:
+#        if len(fvs)==0:
+#            pass_form = FVServerFormPassword()
+#            form = FVServerForm()
+#        else:
+#            pass_form = FVServerFormPassword()
+#            form = FVServerForm(instance=fv)  
+#
+#        
+#    return simple.direct_to_template(request,
+#                template = 'openflow/optin_manager/controls/set_flowvisor.html',
+#                extra_context = {
+#                    'form':form,
+#                    'pass_form':pass_form,
+#                 }
+#        )

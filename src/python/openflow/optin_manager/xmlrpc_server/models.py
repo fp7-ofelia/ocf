@@ -5,19 +5,19 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
 
-    @classmethod
-    def get_or_create_fv(self):
-        fv = self.objects.all()
-        if (len(fv) == 0):
-            fv = self.objects.create(name="",
-                username="",
-                password="",
-                url = "",)
-        else:
-            fv = fv[0]
-
-        return fv
-    
+#    @classmethod
+#    def get_or_create_fv(self):
+#        fv = self.objects.all()
+#        if (len(fv) == 0):
+#            fv = self.objects.create(name="",
+#                username="",
+#                password="",
+#                url = "",)
+#        else:
+#            fv = fv[0]
+#
+#        return fv
+#    
 
     def get_switches(self):
         """
@@ -36,6 +36,9 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  l.pop("dstDPID"),
                  l.pop("dstPort"),
                  l) for l in self.api.getLinks()]
+        
+    def ping(self, str):
+        return self.api.ping(str)
 
 class CallBackServerProxy(models.Model):
     '''

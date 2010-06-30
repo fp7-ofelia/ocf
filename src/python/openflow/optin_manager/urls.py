@@ -6,7 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'^$', 'openflow.optin_manager.users.views.index'),
-    (r'^dashboard$', 'openflow.optin_manager.users.views.dashboard'),
+    url(r'^dashboard$', 'openflow.optin_manager.users.views.dashboard', name="dashboard"),
 
     (r'^controls/', include('openflow.optin_manager.controls.urls')),
 
