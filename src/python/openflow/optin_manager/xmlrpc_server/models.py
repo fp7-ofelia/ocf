@@ -36,6 +36,9 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  l.pop("dstDPID"),
                  l.pop("dstPort"),
                  l) for l in self.api.getLinks()]
+        
+    def ping(self, str):
+        return self.api.ping(str)
 
 class CallBackServerProxy(models.Model):
     '''
