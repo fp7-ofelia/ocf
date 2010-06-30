@@ -49,7 +49,7 @@ class FVServerProxyForm(forms.ModelForm,
         if p1 != p2:
             logger.debug("Passwords don't match")
             raise forms.ValidationError("Passwords do not match. Re-enter password.")
-        return super(FVServerProxyForm, self).clean()
+        return PasswordXMLRPCServerProxyFormHelperAddin.clean(self)
 
 class CHUserForm(forms.Form):
     username = forms.CharField(max_length = 100)
