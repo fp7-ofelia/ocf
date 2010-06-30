@@ -248,7 +248,7 @@ the flowvisor machine. The easiest way is to just shutdown the firewall:
 	$ sudo /etc/init.d/SuSEfirewall2_setup stop
 	
 Otherwise you will need to edit the /etc/sysconfig/SuSEfirewall2 file, add
-6633 to the FW_CONFIGURATIONS_EXT settings then do:
+6633 to the FW_SERVICES_EXT_TCP settings then do:
 
 	$ sudo /etc/init.d/SuSEfirewall2_setup restart
 
