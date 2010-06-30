@@ -168,7 +168,7 @@ class PasswordXMLRPCServerProxy(models.Model):
             else:
                 return False
             
-        if ret == "PONG: PING":
+        if "PING" in ret and "PONG" in ret:
             if get_info:
                 return (True, None)
             else:
