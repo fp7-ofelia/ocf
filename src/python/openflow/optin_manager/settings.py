@@ -136,3 +136,11 @@ from deployment_settings import *
 
 TEMPLATE_DEBUG = DEBUG
 MANAGERS = ADMINS
+
+# Logging
+from expedient.common import loggingconf
+import logging
+if DEBUG:
+    loggingconf.set_up(logging.DEBUG)
+else:
+    loggingconf.set_up(logging.INFO)
