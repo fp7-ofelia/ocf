@@ -31,7 +31,9 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
         logger.debug("Cleaning data")
         if self._errors:
             return self.cleaned_data
-        p = self._meta.model(**self.cleaned_data)
+        d = dict(self.cleaned_data)
+        if "password2" in d: del d["password2"]
+        p = self._meta.model(**d)
         avail, msg = p.is_available(get_info=True)
         if not avail:
             url = self.cleaned_data.get("url", "None")
