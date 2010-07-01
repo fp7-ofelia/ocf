@@ -6,6 +6,9 @@ Created on Apr 20, 2010
 from expedient.common.rpc4django import rpcmethod
 import rspec as rspec_mod
 from openflow.plugin.models import OpenFlowAggregate, GAPISlice, OpenFlowSwitch
+import logging
+
+logger = logging.getLogger("OpenFlowGAPI")
 
 CREDENTIALS_TYPE = 'array' # of strings
 OPTIONS_TYPE = 'struct'
@@ -36,6 +39,7 @@ def GetVersion(**kwargs):
 def ListResources(credentials, options, **kwargs):
     import base64, zlib
 
+    logger.debug("Called ListResources")
     if not options:
         options = dict()
         
@@ -46,7 +50,7 @@ def ListResources(credentials, options, **kwargs):
 
     # Optionally compress the result
     if 'geni_compressed' in options and options['geni_compressed']:
-        print "Compressing rspec"
+        logger.debug("Compressing rspec")
         result = base64.b64encode(zlib.compress(result))
 
     return result
@@ -54,10 +58,14 @@ def ListResources(credentials, options, **kwargs):
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
            url_name="openflow_gapi")
 def CreateSliver(slice_urn, credentials, rspec, **kwargs):
-    from django.db import transaction
+
+    logger.debug("Called CreateSliver")
+
     project_name, project_desc, slice_name, slice_desc,\
     controller_url, email, password, agg_slivers \
         = rspec_mod.parse_slice(rspec)
+
+    logger.debug("Parsed Rspec")
 
     # create the slice in the DB
     dpids = []
@@ -66,6 +74,8 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
             dpids.append(sliver['datapath_id'])
 
     switches = OpenFlowSwitch.objects.filter(datapath_id__in=dpids)
+    
+    logger.debug("Slivers: %s" % agg_slivers)
     
     # make the reservation
     # TODO: concat all the responses
@@ -90,6 +100,8 @@ the opt-in manager at %s" % (e, aggregate.client.url))
     for s in switches:
         gapi_slice.switches.add(s)
     gapi_slice.save()
+    
+    logger.debug("Done creating sliver")
 
     # TODO: get the actual reserved things
     return rspec
