@@ -34,18 +34,19 @@ sed -i "{s/EMAIL_SUBJECT_PREFIX .*/EMAIL_SUBJECT_PREFIX = '$OM_EMAIL_SUBJECT_PRE
 
 cd $EXPEDIENT/src/python
 
+echo "SECRET_KEY=''" > $EXPEDIENT/src/python/$CH/secret_key.py
+echo "SECRET_KEY=''" > $EXPEDIENT/src/python/$OM/secret_key.py
+
+echo Generating secret keys...
+CH_KEY=`PYTHONPATH=$PYTHONPATH python $CH/manage.py generate_secret_key`
+OM_KEY=`PYTHONPATH=$PYTHONPATH python $OM/manage.py generate_secret_key`
+
 echo Setting up the databases
 flush-expedient.sh
 flush-om.sh
 
 python $CH/manage.py runscript create-superuser
 python $OM/manage.py runscript create-superuser
-
-echo > $EXPEDIENT/src/python/$CH/secret_key.py
-echo > $EXPEDIENT/src/python/$OM/secret_key.py
-
-CH_KEY=`python $CH/manage.py generate_secret_key`
-OM_KEY=`python $OM/manage.py generate_secret_key`
 
 echo "SECRET_KEY = '$CH_KEY'" > $EXPEDIENT/src/python/$CH/secret_key.py
 echo "SECRET_KEY = '$OM_KEY'" > $EXPEDIENT/src/python/$OM/secret_key.py
