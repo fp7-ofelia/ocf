@@ -37,6 +37,9 @@ class Switch(object):
         
     def __str__(self):
         return self.dpid
+    
+    def __unicode__(self):
+        return self.__str__()
         
     def add_to_resv_switches_elem(self, switches_elem):
         from xml.etree import cElementTree as et
@@ -68,7 +71,10 @@ class Link(object):
     def __str__(self):
         return "Link from %s.%s to %s.%s" % (
             self.src_dpid, self.src_port, self.dst_dpid, self.dst_port)
-        
+
+    def __unicode__(self):
+        return self.__str__()
+                
 class Flowspace(object):
     @classmethod
     def create_random(cls, all_switches):
