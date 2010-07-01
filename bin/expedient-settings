@@ -29,6 +29,10 @@ export MININET_IP=172.16.77.130
 # This is the port to use to SSH to the mininet VM
 export MININET_SSH_PORT=22
 
+# Use xterm to run subprocesses during the tests? If you can't use X for
+# some reason, set this to False.
+export SHOW_PROCESSES_IN_XTERM=True
+
 # Superuser settings for the OM and for the CH
 export SUPERUSER_USERNAME=expedient
 export SUPERUSER_PASSWORD=expedient
@@ -61,3 +65,4 @@ export OM_EMAIL_SUBJECT_PREFIX='[Opt-in Manager] '
 # This is the location where the certificates and keys for the GAM and GCH will
 # be stored.
 export GAPI_SSL_DIR=/home/expedient/gapi-ssl
+

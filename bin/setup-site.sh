@@ -58,6 +58,7 @@ sed -i "{s/^OM_PORT.*/OM_PORT = '$OM_PORT'/}" $EXPEDIENT/src/python/openflow/tes
 sed -i "{s/^CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/^SHOW_PROCESSES_IN_XTERM = .* /SHOW_PROCESSES_IN_XTERM = $SHOW_PROCESSES_IN_XTERM /}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 
 sudo gensslcert -n $DOMAIN_FQDN
 
