@@ -13,10 +13,10 @@ logger.setLevel(logging.WARNING)
 
 class SSHClientPlus(paramiko.SSHClient):
     @classmethod
-    def exec_command_plus(cls, addr, username, password, cmd):
+    def exec_command_plus(cls, addr, username, password, cmd, port=22):
         client = cls()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(addr, username=username, password=password)
+        client.connect(addr, username=username, password=password, port=port)
         transport = client.get_transport()
         client.channel = transport.open_session()
         client.channel.set_combine_stderr(True)
