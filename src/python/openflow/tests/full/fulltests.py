@@ -112,6 +112,7 @@ class FullIntegration(TestCase):
         )
 
         wait_for_servers([fv_url], 5)
+        time.sleep(2*test_settings.WAIT_MULTIPLIER)
 
         s = xmlrpclib.ServerProxy(fv_url)
         logger.debug("Getting flowspace from flowvisor")
