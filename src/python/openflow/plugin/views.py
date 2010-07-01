@@ -16,6 +16,8 @@ import logging
 from django.forms.models import modelformset_factory
 from openflow.plugin.models import OpenFlowConnection
 from django.db.models import Q
+from openflow.plugin.forms import OpenFlowStaticConnectionForm,\
+    OpenFlowConnectionSelectionForm
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -72,7 +74,7 @@ def aggregate_crud(request, agg_id=None):
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                 )
             
-            return HttpResponseRedirect(reverse("home"))
+            return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
         logger.debug("Validation failed")
     else:
         return HttpResponseNotAllowed("GET", "POST")
@@ -89,23 +91,78 @@ def aggregate_crud(request, agg_id=None):
             "available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
-                ("%s OpenFlow Aggregate" % "Add" if agg_id else "Update", request.path),
+                ("%s OpenFlow Aggregate" % "Update" if agg_id else "Add",
+                 request.path),
             )
         },
     )
     
-def aggregate_add_static_connections(request, agg_id):
+def aggregate_add_links(request, agg_id):
     """
     Show page to add static connections to other aggregates.
     """
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
-    ConnectionFormSet = modelformset_factory(OpenFlowConnection)
+    
+    filter = (
+        (     Q(src_iface__aggregate__id=aggregate.id)
+              & ~Q(dst_iface__aggregate__id=aggregate.id)  )
+        |
+        (     Q(dst_iface__aggregate__id=aggregate.id)
+              & ~Q(src_iface__aggregate__id=aggregate.id)  )
+    )
+    
+    existing_links = OpenFlowConnection.objects.filter(filter)
     
     if request.method == "POST":
-        filter = Q(src_iface__aggregate=aggregate) \
-            | Q(dst_iface__aggregate=aggregate)
-        formset = ConnectionFormSet(
-            request.POST, queryset=OpenFlowConnection.objects.filter(filter))
+        new_cnxn_form = OpenFlowStaticConnectionForm(aggregate, request.POST)
+        existing_links_form = OpenFlowConnectionSelectionForm(existing_links, request.POST)
+        # see if it's a request to delete or add links
+        if "add_links" in request.POST:
+            if new_cnxn_form.is_valid():
+                cnxns = new_cnxn_form.save_connections()
+                if not cnxns[0] and not cnxns[1]:
+                    msg = "links for both directions"
+                elif not cnxns[0] or not cnxns[1]:
+                    msg = "link for one direction"
+                else:
+                    msg = "no new links"
+                DatedMessage.objects.post_message_to_user(
+                    "Added %s to OpenFlow aggregate %s" % (aggregate.name, msg),
+                    user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+                return HttpResponseRedirect(request.path)
+        else: # must be deleting links
+            if existing_links_form.is_valid():
+                cnxns = existing_links_form.cleaned_data["connections"]
+                for c in cnxns:
+                    c.delete()
+                DatedMessage.objects.post_message_to_user(
+                    "Deleted %s static links to OpenFlow aggregate %s" % (
+                        len(cnxns), aggregate.name),
+                    user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+                return HttpResponseRedirect(request.path)
+    else:
+        new_cnxn_form = OpenFlowStaticConnectionForm(aggregate)
+        if existing_links.count():
+            existing_links_form = \
+                OpenFlowConnectionSelectionForm(existing_links)
+        else:
+            existing_links_form = None
+        logger.debug("new connection form: %s" % new_cnxn_form)
+    
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/aggregate_add_links.html",
+        extra_context={
+            "existing_links_form": existing_links_form,
+            "new_connection_form": new_cnxn_form,
+            "aggregate": aggregate,
+            "breadcrumbs": (
+                ('Home', reverse("home")),
+                ("Update OpenFlow Aggregate", reverse("openflow_aggregate_edit", args=[agg_id])),
+                ("Edit Static Links", reverse("openflow_aggregate_add_links", args=[agg_id])),
+            ),
+        },
+    )
     
 def aggregate_delete(request, agg_id):
     """

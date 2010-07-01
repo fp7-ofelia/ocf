@@ -11,9 +11,13 @@
 		<script src="{% url js_media 'iframe.js' %}"></script>
 		<!-- simple frame busting -->
 		<script type="text/javascript">
-		if(top.location != document.location) {
-			top.location = document.location;
-		}
+			if(top.location != document.location) {
+				top.location = document.location;
+			}
+			$(document).ready(function() {
+				// Set the size of the text inputs in formtable forms
+				$("table.formtable input[type=text]").width("335px");
+			})
 		</script>
 		{% block scripts %}{% endblock %}
 		<style>
