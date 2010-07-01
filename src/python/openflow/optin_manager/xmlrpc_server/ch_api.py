@@ -113,7 +113,7 @@ def get_direction(direction):
     return 2
                
 @check_user
-#@check_fv_set
+@check_fv_set
 @rpcmethod(signature=['struct', # return value
                       'string', 'string', 'string',
                       'string', 'string', 'string',
@@ -281,7 +281,7 @@ def create_slice(slice_id, project_name, project_description,
     }
 
 @check_user
-#@check_fv_set
+@check_fv_set
 @rpcmethod(signature=['string', 'int'])
 def delete_slice(sliceid, **kwargs):
     '''
@@ -296,6 +296,8 @@ def delete_slice(sliceid, **kwargs):
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
+    
+    print "Called delete_slice %s" % sliceid
     
     single_exp = Experiment.objects.get(slice_id = sliceid)
     OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
@@ -312,7 +314,7 @@ def delete_slice(sliceid, **kwargs):
     return error_msg
 
 @check_user
-#@check_fv_set
+@check_fv_set
 @rpcmethod(signature=['array'])
 def get_switches(**kwargs):
     '''
@@ -327,7 +329,7 @@ def get_switches(**kwargs):
 
 
 @check_user
-#@check_fv_set
+@check_fv_set
 @rpcmethod(signature=['array'])
 def get_links(**kwargs):
     '''

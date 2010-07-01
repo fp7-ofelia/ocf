@@ -5,21 +5,33 @@ Created on Jun 30, 2010
 '''
 import sys
 from os.path import join, dirname
+import random
 PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from openflow.tests import test_settings
-import xmlrpclib, re
-from openflow.tests.helpers import kill_old_procs, parse_rspec, Flowspace
+import xmlrpclib
+from openflow.tests.helpers import parse_rspec, Flowspace
 from openflow.tests.helpers import create_random_resv
-import time
+from expedient.common.tests.utils import drop_to_shell
 
 import logging
 logger = logging.getLogger("PostDeploymentTest")
 
 SCHEME = "https" if test_settings.USE_HTTPS else "http"
+
+FLOWVISOR = dict(
+    host="openflow5.stanford.edu",   # host for flowvisor's interface
+    xmlrpc_port=8080,         # XMLRPC port for the flowvisor
+    username="root",          # The username to use to connect to the FV
+    password="0fw0rk",        # The password to use to connect to the FV
+)
+
+GAM_URL = "https://openflow4.stanford.edu:8000/"
+GCH_URL = "https://openflow4.stanford.edu:8001/"
+CERTKEY_FILENAME = "experimenter2" # experimenter2.key and experimenter2.crt
 
 class Tests(TestCase):
 
@@ -44,20 +56,20 @@ class Tests(TestCase):
         Create clients at the Flowviso
         """
         cert_transport = SafeTransportWithCert(
-            keyfile=join(test_settings.SSL_DIR, "experimenter.key"),
-            certfile=join(test_settings.SSL_DIR, "experimenter.crt"))
+            keyfile=join(test_settings.SSL_DIR, "%s.key" % CERTKEY_FILENAME),
+            certfile=join(test_settings.SSL_DIR, "%s.crt" % CERTKEY_FILENAME))
         self.am_client = xmlrpclib.ServerProxy(
-            "https://localhost:8000/",
+            GAM_URL,
             transport=cert_transport)
         
         cert_transport = SafeTransportWithCert(
             keyfile=join(test_settings.SSL_DIR, "experimenter.key"),
             certfile=join(test_settings.SSL_DIR, "experimenter.crt"))
         self.ch_client = xmlrpclib.ServerProxy(
-            "https://localhost:8001/",
+            GCH_URL,
             transport=cert_transport)
         
-        flowvisor = test_settings.FLOWVISORS[0]
+        flowvisor = FLOWVISOR
         fv_url = "https://%s:%s@%s:%s" % (
             flowvisor["username"], flowvisor["password"],
             flowvisor["host"], flowvisor["xmlrpc_port"],
@@ -96,13 +108,13 @@ class Tests(TestCase):
         ###### CreateSliver ######
 
         # create a random reservation
-        slice_name = "SliceNameBla"
+        slice_name = "SliceNameBla %s" % random.randint(1, 10000000)
         email = "john.doe@geni.net"
         url = "tcp:%s:%s" % (test_settings.CONTROLLER_HOST,
                              test_settings.CONTROLLER_PORT)
         fs = [
-            Flowspace({"tp_dst": (80, 80)}, self.switches()),
-            Flowspace({"tp_src": (80, 80)}, self.switches()),
+            Flowspace({"tp_dst": (80, 80)}, self.switches),
+            Flowspace({"tp_src": (80, 80)}, self.switches),
         ]
         
         resv_rspec, flowspaces = create_random_resv(
@@ -159,3 +171,8 @@ class Tests(TestCase):
         slices_after = self.fv_client.api.listSlices()
         logger.debug("Slices at the FlowVisor after deleting slice: %s" %
             slices_before)
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()
+  

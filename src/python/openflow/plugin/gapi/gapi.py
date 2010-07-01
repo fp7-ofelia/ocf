@@ -71,12 +71,18 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
     # TODO: concat all the responses
     for aggregate, slivers in agg_slivers:
         print "creating slice at aggregate."
-        aggregate.client.create_slice(
-            slice_urn, project_name, project_desc,
-            slice_name, slice_desc, 
-            controller_url,
-            email, password, slivers,
-        )
+        try:
+            aggregate.client.create_slice(
+                slice_urn, project_name, project_desc,
+                slice_name, slice_desc, 
+                controller_url,
+                email, password, slivers,
+            )
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("Could not reserve slice. Got message '%s' from\
+the opt-in manager at %s" % (e, aggregate.client.url))
     
     gapi_slice, created = GAPISlice.objects.get_or_create(slice_urn=slice_urn)
     
@@ -92,7 +98,13 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
            url_name="openflow_gapi")
 def DeleteSliver(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
-        aggregate.client.delete_slice(slice_urn)
+        try:
+            aggregate.client.delete_slice(slice_urn)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("Could not delete slice. Got message '%s' from\
+the opt-in manager at %s" % (e, aggregate.client.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
@@ -135,7 +147,13 @@ def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
            url_name="openflow_gapi")
 def Shutdown(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
-        aggregate.client.delete_slice(slice_urn)
+        try:
+            aggregate.client.delete_slice(slice_urn)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("Could not shutdown slice. Got message '%s' from\
+the opt-in manager at %s" % (e, aggregate.client.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
