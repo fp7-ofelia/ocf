@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Edit External Static Links for Aggregate {{ aggregate.name }}{% endblock title %}
+
+{% block scripts %}
+<script>
+	$(document).ready(function() {
+		$("table.formtable select").width("450px");
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Edit External Static Links to Aggregate {{ aggregate.name }}</h1>
+	</div>
+	{% if existing_links_form %}
+	<div class="section current_links">
+		<h2>Delete existing links:</h2>
+		<form action="" method="post">{% csrf_token %}
+			<table class="formtable">
+				{{ existing_links_form.as_table }}
+			</table>
+			<input type="submit" name="delete_links" value="Delete Links" />
+		</form>
+	</div>
+	{% endif %}
+	<div class="section form_div">
+		<h2>Add new static links:</h2>
+		<form action="" method="POST">{% csrf_token %}
+			<table class="formtable">
+			{{ new_connection_form.as_table }}
+			</table>
+			<input type="submit" name="add_links" value="Add Link" />
+			<input type="button" value="Done" onclick="document.location='{% url home %}'"/>
+		</form>
+	</div>
+</div>
+{% endblock content %}

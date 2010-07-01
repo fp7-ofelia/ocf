@@ -280,13 +280,14 @@ class OpenFlowConnection(models.Model):
             instance.dst_iface.port_num,
         ),
         slugify=as_is_slugify,
+        editable=False,
     )
     
     class Meta:
         unique_together=(("src_iface", "dst_iface"),)
     
     def __unicode__(self):
-        return "OF Connection: %s" % self.slug
+        return "%s to %s" % (self.src_iface, self.dst_iface)
 
 class OpenFlowInterface(resource_models.Resource):
     port_num = models.IntegerField()
@@ -300,6 +301,7 @@ class OpenFlowInterface(resource_models.Resource):
         populate_from=lambda instance: "%s_%s" % (
             instance.switch.datapath_id, instance.port_num),
         slugify=as_is_slugify,
+        editable=False,
     )
 
     class Meta:
@@ -307,7 +309,7 @@ class OpenFlowInterface(resource_models.Resource):
         verbose_name = "OpenFlow Interface"
 
     def __unicode__(self):
-        return "OpenFlow Interface %s for %s" % (self.port_num, self.switch)
+        return "Port %s on %s" % (self.port_num, self.switch)
 
 class OpenFlowInterfaceSliver(resource_models.Sliver):
     class TooManySliversPerSlicePerInterface(Exception): pass
