@@ -3,16 +3,32 @@
 source expedient-settings
 
 # Update the settings for Expedient
-sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = '$DOMAIN_FQDN'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = '$DOMAIN_FQDN:$CH_PORT'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
 sed -i "{s/SITE_NAME.*/SITE_NAME = 'Expedient Clearinghouse at $SITE_NAME'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
 sed -i "{s/<your name>/$SUPERUSER_NAME/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
 sed -i "{s/<your email>/$SUPERUSER_EMAIL/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
 
+sed -i "{s/EMAIL_USE_TLS .*/EMAIL_USE_TLS = $EMAIL_USE_TLS/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/EMAIL_HOST .*/EMAIL_HOST = '$EMAIL_HOST'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/EMAIL_HOST_USER .*/EMAIL_HOST_USER .* = '$EMAIL_HOST_USER'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/EMAIL_HOST_PASSWORD .*/EMAIL_HOST_PASSWORD .* = '$EMAIL_HOST_PASSWORD'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/EMAIL_PORT .*/EMAIL_PORT .* = '$EMAIL_PORT'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/DEFAULT_FROM_EMAIL .*/DEFAULT_FROM_EMAIL .* = '$EXPEDIENT_DEFAULT_FROM_EMAIL'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+sed -i "{s/EMAIL_SUBJECT_PREFIX .*/EMAIL_SUBJECT_PREFIX .* = '$EXPEDIENT_EMAIL_SUBJECT_PREFIX'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
+
 # Update settings for the Optin manager
-sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = '$DOMAIN_FQDN'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/SITE_DOMAIN.*/SITE_DOMAIN = '$DOMAIN_FQDN:$OM_PORT'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
 sed -i "{s/SITE_NAME.*/SITE_NAME = 'Opt-In Manager at $SITE_NAME'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
 sed -i "{s/<your name>/$SUPERUSER_NAME/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
 sed -i "{s/<your email>/$SUPERUSER_EMAIL/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+
+sed -i "{s/EMAIL_USE_TLS .*/EMAIL_USE_TLS = $EMAIL_USE_TLS/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/EMAIL_HOST .*/EMAIL_HOST = '$EMAIL_HOST'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/EMAIL_HOST_USER .*/EMAIL_HOST_USER .* = '$EMAIL_HOST_USER'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/EMAIL_HOST_PASSWORD .*/EMAIL_HOST_PASSWORD .* = '$EMAIL_HOST_PASSWORD'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/EMAIL_PORT .*/EMAIL_PORT .* = '$EMAIL_PORT'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/DEFAULT_FROM_EMAIL .*/DEFAULT_FROM_EMAIL .* = '$OM_DEFAULT_FROM_EMAIL'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
+sed -i "{s/EMAIL_SUBJECT_PREFIX .*/EMAIL_SUBJECT_PREFIX .* = '$OM_EMAIL_SUBJECT_PREFIX'/}" $EXPEDIENT/src/python/$OM/deployment_settings.py
 
 cd $EXPEDIENT/src/python
 
