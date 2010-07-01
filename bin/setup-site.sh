@@ -59,7 +59,7 @@ sed -i "{s/^CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tes
 sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^SHOW_PROCESSES_IN_XTERM = .*/SHOW_PROCESSES_IN_XTERM = $SHOW_PROCESSES_IN_XTERM/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
-
+sed -i "{s/password=.*connect to the FV/password='$FV_ROOT_PASSWORD',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sudo gensslcert -n $DOMAIN_FQDN
 
 sudo /etc/init.d/apache2 restart
