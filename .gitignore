@@ -29,7 +29,6 @@ fig-vnodes.dia
 icing-tr.pdf
 om.db
 clearinghouse.db
-bin/
 .project
 .pydevproject
 db/openflow/optin_manager/om.db

@@ -23,6 +23,9 @@ CH_PORT = 443
 
 PREFIX = ""
 
+GAM_PORT = 8000
+GCH_PORT = 8001
+
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
@@ -34,10 +37,7 @@ FLOWVISORS = [
         path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
     ),
 ]
-MININET_VMS = ["192.168.1.130"]   # IP address of the mininet VM
-
-CONTROLLER_HOST = "localhost"     # hostname for test controller
-CONTROLLER_PORT = "16633"         # port for test controller
+MININET_VMS = [("192.168.1.130", 22)]   # IP address of the mininet VM
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
@@ -57,6 +57,11 @@ SHOW_PROCESSES_IN_XTERM = True    # If set to True, processes run as part of
 PAUSE_AFTER_TESTS = False         # If true, each test will wait for an Enter
                                   # from the user before tearing down (useful
                                   # to look at xterm output).
+
+WAIT_MULTIPLIER = 1               # Multiplies the sleep times in the fulltests
+                                  # If you are getting "connection refused"
+                                  # errors, increasing theis number might help
+                                  # make them pass on slower machines.
 
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
