@@ -12,9 +12,12 @@ def run_cmd_in_xterm(cmd, pause=False):
         cmd = cmd + "; read n"
     cmd = "xterm -e '%s'" % cmd
     
-    return run_cmd(cmd)
+    return _run_cmd(cmd)
 
 def run_cmd(cmd, pause=False):
+    return _run_cmd("sh -c '%s'" % cmd, pause)
+
+def _run_cmd(cmd, pause=False):
     import shlex, subprocess
     if pause:
         cmd = cmd + "; read n"
@@ -33,6 +36,7 @@ def drop_to_shell(local):
 
 def wait_for_servers(urls, timeout):
     import time, urlparse, httplib
+    from ssl import SSLError
     
     for u in urls:
         parsed = urlparse.urlparse(u.lower(), "https")
@@ -48,6 +52,8 @@ def wait_for_servers(urls, timeout):
         while(i < timeout):
             try:
                 cnxn.connect()
+            except SSLError:
+                break;
             except Exception as e:
                 if "Connection refused" in str(e):
                     time.sleep(1)
