@@ -37,7 +37,7 @@ FLOWVISORS = [
         path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
     ),
 ]
-MININET_VMS = [("192.168.1.130", 22)]   # IP address of the mininet VM
+MININET_VMS = [("192.168.1.130", 22)]    # IP address of the mininet VM
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
