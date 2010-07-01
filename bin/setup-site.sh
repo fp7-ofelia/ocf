@@ -45,9 +45,6 @@ echo Setting up the databases
 flush-expedient.sh
 flush-om.sh
 
-python $CH/manage.py runscript create-superuser
-python $OM/manage.py runscript create-superuser
-
 echo "SECRET_KEY = '$CH_KEY'" > $EXPEDIENT/src/python/$CH/secret_key.py
 echo "SECRET_KEY = '$OM_KEY'" > $EXPEDIENT/src/python/$OM/secret_key.py
 
