@@ -39,8 +39,9 @@ class FullIntegration(TestCase):
         a pyswitch with packet dumping.
         """
         kill_client = SSHClientPlus.exec_command_plus(
-            mininet_vm, "mininet", "mininet",
-            "sudo kill `ps -ae | grep lt-nox_core | awk '{ print $1 }'`"
+            mininet_vm[0], "mininet", "mininet",
+            "sudo kill `ps -ae | grep lt-nox_core | awk '{ print $1 }'`",
+            port=mininet_vm[1],
         )
         kill_client.wait()
         
@@ -51,9 +52,9 @@ class FullIntegration(TestCase):
                 port, self.NOX_APPS,
             )
             client = SSHClientPlus.exec_command_plus(
-                mininet_vm, "mininet", "mininet", cmd
+                mininet_vm[0], "mininet", "mininet", cmd, port=mininet_vm[1],
             )
-            time.sleep(2)
+            time.sleep(2*test_settings.WAIT_MULTIPLIER)
             logger.debug("Communicating with nox client run on port %s" % port)
             out = client.communicate()
             logger.debug("Client out:\n%s" % out)
@@ -74,11 +75,12 @@ class FullIntegration(TestCase):
                     flowvisors[i]["host"], flowvisors[i]["of_port"],
                 )
             client = SSHClientPlus.exec_command_plus(
-                mininet_vms[i], "mininet", "mininet", cmd,
+                mininet_vms[i][0], "mininet", "mininet", cmd,
+                port=mininet_vms[i][1],
             )
             self.mininet_vm_clients.append(client)
 
-            time.sleep(2)
+            time.sleep(2*test_settings.WAIT_MULTIPLIER)
 
             logger.debug("Communicating with mininet client")
             out = client.communicate()
@@ -93,7 +95,7 @@ class FullIntegration(TestCase):
         if RUN_FV_SUBPROCESS:
             kill_old_procs(flowvisor["of_port"],
                            flowvisor["xmlrpc_port"])
-            time.sleep(2)
+            time.sleep(2*test_settings.WAIT_MULTIPLIER)
             self.fv_procs.append(
                 self.run_proc_cmd(
                     "%s/scripts/flowvisor.sh %s/%s" % (
@@ -265,7 +267,7 @@ class FullIntegration(TestCase):
             "https://localhost:%s/" % am_port,
             transport=cert_transport)
         
-        time.sleep(2)
+        time.sleep(2*test_settings.WAIT_MULTIPLIER)
 
     def run_geni_ch(self, gcf_dir, ssl_dir, ch_port):
         """
@@ -285,7 +287,7 @@ class FullIntegration(TestCase):
             "https://localhost:%s/" % ch_port,
             transport=cert_transport)
 
-        time.sleep(2)
+        time.sleep(2*test_settings.WAIT_MULTIPLIER)
 
     def create_ch_slice(self):
         """
@@ -317,17 +319,17 @@ class FullIntegration(TestCase):
             self.run_flowvisor(flowvisor)
             
         # Kill stale processes
-        kill_old_procs(8000, 8001)
+        kill_old_procs(test_settings.GAM_PORT, test_settings.GCH_PORT)
         
         ch_username = "clearinghouse"
         ch_passwd = "ch_password"
         
-        # run experiment controllers
-        self.run_nox(
-            test_settings.MININET_VMS[0],
-            test_settings.NUM_EXPERIMENTS,
-            6633,
-        )
+#        # run experiment controllers
+#        self.run_nox(
+#            test_settings.MININET_VMS[0][0],
+#            test_settings.NUM_EXPERIMENTS,
+#            6633,
+#        )
         
         # connect the networks to FVs
         self.connect_networks(
@@ -348,7 +350,7 @@ class FullIntegration(TestCase):
         from django.conf import settings as djangosettings
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
 
-        time.sleep(2)
+        time.sleep(2*test_settings.WAIT_MULTIPLIER)
         
         # setup the CH (aka AM)
         self.prepare_ch(
@@ -361,8 +363,8 @@ class FullIntegration(TestCase):
         )
         
         # Run the AM proxy for GENI and the GENI clearinghouse
-        self.run_geni_ch(test_settings.GCF_DIR, test_settings.SSL_DIR, 8000)
-        self.run_am_proxy(test_settings.GCF_DIR, test_settings.SSL_DIR, 8001)
+        self.run_geni_ch(test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GAM_PORT)
+        self.run_am_proxy(test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
         
     def tearDown(self):
         """
@@ -392,29 +394,29 @@ class FullIntegration(TestCase):
         self.ch_proc.terminate()
         
         # kill ssh sessions
-        for c in self.nox_clients:
-            out = c.communicate("\03", check_closed=True)
-            logger.debug("nox stdout %s" % out)
+#        for c in self.nox_clients:
+#            out = c.communicate("\03", check_closed=True)
+#            logger.debug("nox stdout %s" % out)
             
         for c in self.mininet_vm_clients:
             out = c.communicate("exit()\n", check_closed=True)
             logger.debug("mn stdout %s" % out)
         
-        time.sleep(5)
+        time.sleep(5*test_settings.WAIT_MULTIPLIER)
 
         if RUN_FV_SUBPROCESS:
             for flowvisor in test_settings.FLOWVISORS:
                 kill_old_procs(flowvisor["of_port"], flowvisor["xmlrpc_port"])
         
         # Kill stale processes
-        kill_old_procs(8000, 8001)
+        kill_old_procs(test_settings.GAM_PORT, test_settings.GCH_PORT)
 
-        for c in self.nox_clients:
-            try:
-                c.close()
-            except:
-                pass
-            
+#        for c in self.nox_clients:
+#            try:
+#                c.close()
+#            except:
+#                pass
+
         for c in self.fv_procs:
             try:
                 c.close()
@@ -469,7 +471,7 @@ class FullIntegration(TestCase):
         # create a random reservation
         slice_name = "SliceNameBla"
         email = "john.doe@geni.net"
-        url = "tcp:%s:%s" % (test_settings.MININET_VMS[0], 6633)
+        url = "tcp:%s:%s" % (test_settings.MININET_VMS[0][0], 6633)
         resv_rspec, flowspaces = create_random_resv(
             2, self.switches,
             slice_name=slice_name,
@@ -500,7 +502,7 @@ class FullIntegration(TestCase):
         self.assertEqual(slice_info["contact_email"], email)
         self.assertEqual(slice_info["controller_port"], "6633")
         self.assertEqual(slice_info["controller_hostname"],
-                         test_settings.MININET_VMS[0])
+                         test_settings.MININET_VMS[0][0])
         
         return (slice_urn, cred)
 
