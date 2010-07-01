@@ -56,7 +56,7 @@ echo Updating test settings...
 sed -i "{s/HOST.*/HOST = '$DOMAIN_FQDN'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/OM_PORT.*/OM_PORT = '$OM_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
-sed -i "{s/host=.*/host='$DOMAIN_IP'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 
 sudo gensslcert -n $DOMAIN_FQDN
