@@ -1,11 +1,11 @@
 '''
 @author: jnaous
 '''
-from os.path import join, dirname
+from os.path import join
 
 DEBUG = True
 ADMINS = (
-    ('<your name>', '<your email>'),
+    ('Jad Naous', 'jnaous@stanford.edu'),
 )
 
 # Local time zone for this installation. Choices can be found here:
@@ -15,27 +15,29 @@ ADMINS = (
 # system time zone.
 TIME_ZONE = 'America/Los_Angeles'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '6=egu-&rx7a+h%yjlt=lny=s+uz0$a_p8je=3q!+-^4w^zxkb8'
-
 # E-Mail sending settings
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'clearinghouse.geni@gmail.com'
-EMAIL_HOST_PASSWORD = "the password" # example
+EMAIL_HOST_PASSWORD = "OpenF1owRu!z"
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # XML-RPC settings
-MY_CA = join('/etc/apache2/ssl.crt/ca.crt')
+MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
 
 # default site
 SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "clearinghouse.geni.org" # example
+SITE_DOMAIN = "beirut.stanford.edu"
 
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 
 DOMAIN_SCHEME = "https"
+<<<<<<< HEAD
+=======
+
+from secret_key import SECRET_KEY
+>>>>>>> 049c5e561df9833fe00747c284b9d1ad920200da

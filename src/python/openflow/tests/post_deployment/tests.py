@@ -113,17 +113,25 @@ class Tests(TestCase):
         url = "tcp:%s:%s" % (test_settings.CONTROLLER_HOST,
                              test_settings.CONTROLLER_PORT)
         fs = [
-            Flowspace({"tp_dst": (80, 80)}, self.switches),
-            Flowspace({"tp_src": (80, 80)}, self.switches),
+            Flowspace({"tp_dst": ("80", "80")}, self.switches),
+            Flowspace({"tp_src": ("80", "80")}, self.switches),
         ]
+        
+        logger.debug("Flowspace: [%s, %s]" % (fs[0], fs[1]))
         
         resv_rspec, flowspaces = create_random_resv(
             2, self.switches,
             slice_name=slice_name,
             email=email,
             ctrl_url=url,
-            flowspaces=[fs],
+            flowspaces=fs,
         )
+        
+        logger.debug("Reservation rspec: %s" % resv_rspec)
+        logger.debug("Flowspaces in rspec: [%s, %s]" % 
+                     (flowspaces[0], flowspaces[1]))
+        
+        raw_input("Press Enter to proceed with the reservation:")
         
         logger.debug("RSpec returned by reservation: %s" % 
             self.am_client.CreateSliver(slice_urn, cred, resv_rspec))

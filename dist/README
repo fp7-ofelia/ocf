@@ -556,7 +556,7 @@ e) Run the GENI API Proxy and a GENI Clearinghouse:
 $ export PYTHONPATH=/srv/www/expedient/src/python
 $ mkdir ssl
 $ python /srv/www/expedient/src/python/gcf/init-ca.py -d ssl --am --ch --ca --exp
-$ python /srv/www/expedient/src/python/gcf/gam.py -u https://localhost:443//openflow/gapi/ -r ssl/ca.crt -c ssl/server.crt -k ssl/server.key -p 8000 --debug
+$ python /srv/www/expedient/src/python/gcf/gam.py -u https://localhost:443/openflow/gapi/ -r ssl/ca.crt -c ssl/server.crt -k ssl/server.key -p 8000 --debug
 
 In another terminal (same working directory):
 $ export PYTHONPATH=/srv/www/expedient/src/python
