@@ -80,7 +80,7 @@ class Flowspace(object):
     def create_random(cls, all_switches):
         import random
         
-        if len(all_switches == 1):
+        if len(all_switches) == 1:
             switches = all_switches
         else:
             # pick a number of switches for the flowspace
