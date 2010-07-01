@@ -11,3 +11,5 @@ flush-om.sh
 flush-expedient.sh
 
 sudo rm /etc/udev/rules.d/70-persistent-net.rules
+
+rm ~/.bash_history
