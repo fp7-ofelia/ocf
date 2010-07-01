@@ -1,0 +1,60 @@
+# Settings for deployment
+# Author: Jad Naous
+
+# These settings indicate the locations in the repo. DO NOT CHANGE.
+export EXPEDIENT=/home/expedient/expedient
+export CH=expedient/clearinghouse
+export OM=openflow/optin_manager
+export PYTHONPATH=$PYTHONPATH:$EXPEDIENT/src/python
+
+# Set this to the Domain to be used to access the VM. This is going to be used
+# to generate the SSL certificate. If this machine is behind a NAT, use the
+# the name given to the NAT. If only using IP addresses, then you can use an
+# IP address here.
+export DOMAIN_FQDN=openflow4.stanford.edu
+
+# This should be the IP address of the domain given above. You can get the IP
+# address by executing: host <name> on the command line.
+export DOMAIN_IP=171.67.75.9
+
+# This is an identifier for various settings and informational strings.
+# Set it to the name of the site or organization.
+export SITE_NAME=stanford
+
+# This should be the location of the Mininet VM that should be used for testing
+# make sure that the Mininet VM can reach this machine and vice versa. Also
+# make sure that mininet is not already running on the Mininet VM.
+export MININET_IP=172.16.77.130
+
+# This is the port to use to SSH to the mininet VM
+export MININET_SSH_PORT=22
+
+# Superuser settings for the OM and for the CH
+export SUPERUSER_USERNAME=expedient
+export SUPERUSER_PASSWORD=expedient
+export SUPERUSER_EMAIL=expedient@expedient.com
+export SUPERUSER_NAME="John Doe"
+
+# These are the ports used to access the OM and Expedient. Defaults should work
+# unless you are using NAT and had to use different ports or changed the
+# default ports used to access the OM and Expedient running on the VM.
+export OM_PORT=8443
+export CH_PORT=443
+
+# These are the ports used for the GCH and the GAM. Similar note to the above.
+# The defaults should work for these.
+export GAM_PORT=8000
+export GCH_PORT=8001
+
+# These are the email settings. Set these to your smtp server's settings.
+export EMAIL_USE_TLS=True
+export EMAIL_HOST='smtp.gmail.com'
+export EMAIL_HOST_USER='clearinghouse.geni@gmail.com'
+export EMAIL_HOST_PASSWORD="the password"
+export EMAIL_PORT=587
+export DEFAULT_FROM_EMAIL='no-reply@geni.org'
+export EMAIL_SUBJECT_PREFIX='[GENI-Clearinghouse] '
+
+# This is the location where the certificates and keys for the GAM and GCH will
+# be stored.
+export GAPI_SSL_DIR=/home/expedient/gapi-ssl
