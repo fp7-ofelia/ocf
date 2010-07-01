@@ -23,6 +23,9 @@ CH_PORT = 443
 
 PREFIX = ""
 
+GAM_PORT = 8000
+GCH_PORT = 8001
+
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
@@ -34,10 +37,7 @@ FLOWVISORS = [
         path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
     ),
 ]
-MININET_VMS = ["172.16.77.130"]   # IP address of the mininet VM
-
-CONTROLLER_HOST = "localhost"     # hostname for test controller
-CONTROLLER_PORT = "16633"         # port for test controller
+MININET_VMS = [("172.16.77.131", "22")]   # IP, ssh port of the mininet VM
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
