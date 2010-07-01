@@ -36,6 +36,9 @@ FLOWVISORS = [
 ]
 MININET_VMS = ["172.16.77.130"]   # IP address of the mininet VM
 
+CONTROLLER_HOST = "localhost"     # hostname for test controller
+CONTROLLER_PORT = "16633"         # port for test controller
+
 NUM_EXPERIMENTS = 2               # Number of Slices
 
 NUM_DUMMY_OMS = 3                 # Number of Dummy OMs to use for GAPI tests.

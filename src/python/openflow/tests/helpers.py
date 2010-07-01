@@ -65,6 +65,10 @@ class Link(object):
         self.dst_dpid = match.group("dpid")
         self.dst_port = match.group("port")
         
+    def __str__(self):
+        return "Link from %s.%s to %s.%s" % (
+            self.src_dpid, self.src_port, self.dst_dpid, self.dst_port)
+        
 class Flowspace(object):
     @classmethod
     def create_random(cls, all_switches):
@@ -215,6 +219,7 @@ def create_random_resv(num_flowspaces, switches,
                        slice_name="Crazy Load Balancer",
                        slice_desc="Does this and that...",
                        ctrl_url="tcp:controller.stanford.edu:6633",
+                       flowspaces=None,
                        ):
     from xml.etree import cElementTree as et
     
@@ -244,11 +249,13 @@ def create_random_resv(num_flowspaces, switches,
         )
     )
     
-    flowspaces = []
-    for i in range(num_flowspaces):
-        f = Flowspace.create_random(switches)
-        f.add_to_rspec(root)
-        flowspaces.append(f)
+    if not flowspaces:
+        flowspaces = []
+        for i in range(num_flowspaces):
+            f = Flowspace.create_random(switches)
+            f.add_to_rspec(root)
+            flowspaces.append(f)
+    
     return (et.tostring(root), flowspaces)
 
 def kill_old_procs(self, *ports):
