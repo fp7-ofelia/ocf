@@ -80,11 +80,14 @@ class Flowspace(object):
     def create_random(cls, all_switches):
         import random
         
-        # pick a number of switches for the flowspace
-        num_sw = random.randint(1,len(all_switches))
-        
-        # choose switches
-        switches = random.sample(all_switches, num_sw)
+        if len(all_switches == 1):
+            switches = all_switches
+        else:
+            # pick a number of switches for the flowspace
+            num_sw = random.randint(1,len(all_switches))
+            
+            # choose switches
+            switches = random.sample(all_switches, num_sw)
         
         def flip_coin():
             return random.choice([True, False])
@@ -259,9 +262,11 @@ def create_random_resv(num_flowspaces, switches,
         flowspaces = []
         for i in range(num_flowspaces):
             f = Flowspace.create_random(switches)
-            f.add_to_rspec(root)
             flowspaces.append(f)
-    
+            
+    for f in flowspaces:
+        f.add_to_rspec(root)
+
     return (et.tostring(root), flowspaces)
 
 def kill_old_procs(self, *ports):
