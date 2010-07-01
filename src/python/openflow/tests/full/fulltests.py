@@ -110,6 +110,7 @@ class FullIntegration(TestCase):
         )
 
         wait_for_servers([fv_url], 5)
+        time.sleep(4)
 
         s = xmlrpclib.ServerProxy(fv_url)
         logger.debug("Getting flowspace from flowvisor")
@@ -265,7 +266,7 @@ class FullIntegration(TestCase):
             "https://localhost:%s/" % am_port,
             transport=cert_transport)
         
-        time.sleep(2)
+        time.sleep(4)
 
     def run_geni_ch(self, gcf_dir, ssl_dir, ch_port):
         """
@@ -285,7 +286,7 @@ class FullIntegration(TestCase):
             "https://localhost:%s/" % ch_port,
             transport=cert_transport)
 
-        time.sleep(2)
+        time.sleep(4)
 
     def create_ch_slice(self):
         """
@@ -348,7 +349,7 @@ class FullIntegration(TestCase):
         from django.conf import settings as djangosettings
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
 
-        time.sleep(2)
+        time.sleep(4)
         
         # setup the CH (aka AM)
         self.prepare_ch(

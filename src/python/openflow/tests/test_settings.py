@@ -17,7 +17,7 @@ FLOWVISOR_DIR = join(PYTHON_DIR, "../../../flowvisor")
 USE_RANDOM = False
 
 # Address and ports of the expedient clearinghouse and opt-in manager
-HOST = socket.getfqdn()
+HOST = "openflow4.stanford.edu"
 OM_PORT = 8443
 CH_PORT = 443
 
@@ -26,15 +26,15 @@ PREFIX = ""
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
-        host="172.16.77.1",       # IP address for flowvisor's interface
+        host="192.168.1.129",     # IP address for flowvisor's interface
         of_port=6633,             # openflow port
         xmlrpc_port=8080,         # XMLRPC port for the flowvisor
         username="root",          # The username to use to connect to the FV
-        password="password",      # The password to use to connect to the FV
+        password="rootpassword",  # The password to use to connect to the FV
         path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
     ),
 ]
-MININET_VMS = ["172.16.77.130"]   # IP address of the mininet VM
+MININET_VMS = ["192.168.1.130"]   # IP address of the mininet VM
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
