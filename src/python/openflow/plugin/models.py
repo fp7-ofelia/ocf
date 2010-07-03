@@ -43,16 +43,19 @@ production networks, and is currently deployed in several universities.
         verbose_name = "OpenFlow Aggregate"
         
     def setup_new_aggregate(self, base_uri):
-        self.client.install_trusted_ca()
+        try:
+            self.client.install_trusted_ca()
         # TODO: re-enable this for security. Currently disabled for testing.
 #        err = self.client.change_password()
 #        if err: return err
-        if base_uri.endswith("/"): base_uri = base_uri[:-1]
-        err = self.client.register_topology_callback(
-            "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
-            "%s" % self.pk,
-        )
-        if err: return err
+            if base_uri.endswith("/"): base_uri = base_uri[:-1]
+            err = self.client.register_topology_callback(
+                "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
+                "%s" % self.pk,
+            )
+            if err: return err
+        except Exception as ret_exception:
+            return str(ret_exception)
 
         err = self.update_topology()
         if err: return err
@@ -77,109 +80,112 @@ production networks, and is currently deployed in several universities.
         from expedient.common.utils import create_or_update
         
         # Get the active topology information from the AM
-        links_raw = self.client.get_links()
+        try:
+            links_raw = self.client.get_links()
 
-        # optimize the parsing by storing information in vars
-        current_links = self.get_raw_topology()
-        
-        current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-
-        current_dpids = set(current_switches.values_list('datapath_id', flat=True))
-        
-        current_ifaces = set(
-            OpenFlowInterface.objects.filter(
-                aggregate=self).select_related(
-                    "switch").values_list("switch__datapath_id", "port_num"))
-        
-        attrs_set = []
-        ordered_active_links = []
-        active_links = set()
-        active_dpids = set()
-        active_ifaces = set()
-        for src_dpid, src_port, dst_dpid, dst_port, attrs in links_raw:
-            link = (src_dpid, src_port, dst_dpid, dst_port)
-            active_links.add(link)
-            active_ifaces.add((src_dpid, src_port))
-            active_ifaces.add((dst_dpid, dst_port))
-            active_dpids.add(src_dpid)
-            active_dpids.add(dst_dpid)
-            attrs_set.append(attrs)
-            ordered_active_links.append(link)
-
-        new_links = active_links - current_links
-        dead_links = current_links - active_links
-        new_dpids = active_dpids - current_dpids
-        dead_dpids = current_dpids - active_dpids
-        new_ifaces = active_ifaces - current_ifaces
-        dead_ifaces = current_ifaces - active_ifaces
-        
-        # create the new datapaths
-        for dpid in new_dpids:
-            create_or_update(
-                OpenFlowSwitch,
-                filter_attrs={
-                    "datapath_id": dpid,
-                    "aggregate":self,
-                },
-                new_attrs={
-                    "name":dpid,
-                    "available": True,
-                    "status_change_timestamp": datetime.now(),
-                }
-            )
-        
-        # make old datapaths unavailable
-        if dead_dpids:
-            current_switches.filter(
-                datapath_id__in=dead_dpids).update(
-                    available=False, status_change_timestamp=datetime.now())
-
-        # create new ifaces
-        for iface in new_ifaces:
-            create_or_update(
-                OpenFlowInterface,
-                filter_attrs=dict(
-                    switch__datapath_id=iface[0],
-                    port_num=iface[1],
-                    aggregate=self,
-                ),
-                new_attrs=dict(
-                    name="",
-                    switch=OpenFlowSwitch.objects.get(datapath_id=iface[0]),
-                    available=True,
-                    status_change_timestamp=datetime.now(),
-                ),
-            )
-
-        # make old ifaces unavailable
-        # TODO: Is there a better way to w/o slugs?
-        if dead_ifaces:
-            dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
-            OpenFlowInterface.objects.filter(
-                aggregate=self, slug__in=dead_iface_slugs).update(
-                    available=False, status_change_timestamp=datetime.now())
-        
-        # create new links
-        for link in new_links:
-            create_or_update(
-                OpenFlowConnection,
-                filter_attrs=dict(
-                    src_iface=OpenFlowInterface.objects.get(
-                        switch__datapath_id=link[0],
-                        port_num=link[1],
-                    ),
-                    dst_iface=OpenFlowInterface.objects.get(
-                        switch__datapath_id=link[2],
-                        port_num=link[3],
-                    ),
-                ),
-            )
+            # optimize the parsing by storing information in vars
+            current_links = self.get_raw_topology()
             
-        # delete old links
-        # TODO: Is there a better way to filter these?
-        link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
-        dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
-        dead_cnxns.delete()
+            current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
+    
+            current_dpids = set(current_switches.values_list('datapath_id', flat=True))
+            
+            current_ifaces = set(
+                OpenFlowInterface.objects.filter(
+                    aggregate=self).select_related(
+                        "switch").values_list("switch__datapath_id", "port_num"))
+            
+            attrs_set = []
+            ordered_active_links = []
+            active_links = set()
+            active_dpids = set()
+            active_ifaces = set()
+            for src_dpid, src_port, dst_dpid, dst_port, attrs in links_raw:
+                link = (src_dpid, src_port, dst_dpid, dst_port)
+                active_links.add(link)
+                active_ifaces.add((src_dpid, src_port))
+                active_ifaces.add((dst_dpid, dst_port))
+                active_dpids.add(src_dpid)
+                active_dpids.add(dst_dpid)
+                attrs_set.append(attrs)
+                ordered_active_links.append(link)
+    
+            new_links = active_links - current_links
+            dead_links = current_links - active_links
+            new_dpids = active_dpids - current_dpids
+            dead_dpids = current_dpids - active_dpids
+            new_ifaces = active_ifaces - current_ifaces
+            dead_ifaces = current_ifaces - active_ifaces
+            
+            # create the new datapaths
+            for dpid in new_dpids:
+                create_or_update(
+                    OpenFlowSwitch,
+                    filter_attrs={
+                        "datapath_id": dpid,
+                        "aggregate":self,
+                    },
+                    new_attrs={
+                        "name":dpid,
+                        "available": True,
+                        "status_change_timestamp": datetime.now(),
+                    }
+                )
+            
+            # make old datapaths unavailable
+            if dead_dpids:
+                current_switches.filter(
+                    datapath_id__in=dead_dpids).update(
+                        available=False, status_change_timestamp=datetime.now())
+    
+            # create new ifaces
+            for iface in new_ifaces:
+                create_or_update(
+                    OpenFlowInterface,
+                    filter_attrs=dict(
+                        switch__datapath_id=iface[0],
+                        port_num=iface[1],
+                        aggregate=self,
+                    ),
+                    new_attrs=dict(
+                        name="",
+                        switch=OpenFlowSwitch.objects.get(datapath_id=iface[0]),
+                        available=True,
+                        status_change_timestamp=datetime.now(),
+                    ),
+                )
+    
+            # make old ifaces unavailable
+            # TODO: Is there a better way to w/o slugs?
+            if dead_ifaces:
+                dead_iface_slugs = ["%s_%s" % t for t in dead_ifaces]
+                OpenFlowInterface.objects.filter(
+                    aggregate=self, slug__in=dead_iface_slugs).update(
+                        available=False, status_change_timestamp=datetime.now())
+            
+            # create new links
+            for link in new_links:
+                create_or_update(
+                    OpenFlowConnection,
+                    filter_attrs=dict(
+                        src_iface=OpenFlowInterface.objects.get(
+                            switch__datapath_id=link[0],
+                            port_num=link[1],
+                        ),
+                        dst_iface=OpenFlowInterface.objects.get(
+                            switch__datapath_id=link[2],
+                            port_num=link[3],
+                        ),
+                    ),
+                )
+                
+            # delete old links
+            # TODO: Is there a better way to filter these?
+            link_slugs = ["%s_%s_%s_%s" % link for link in dead_links]
+            dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
+            dead_cnxns.delete()
+        except Exception as ret_exception:
+            return str(ret_exception)
         
     ###################################################################
     # Following are overrides from aggregate_models.Aggregate
@@ -248,17 +254,23 @@ production networks, and is currently deployed in several universities.
                             fsd[f.name] = getattr(fs, f.name)
                     d['flowspace'].append(fsd)
             sw_slivers.append(d)
-
-        return self.client.create_slice(
+        try:
+            return self.client.create_slice(
             slice.id, slice.project.name,
             slice.project.description,
             slice.name, slice.description,
             slice.openflowsliceinfo.controller_url,
             slice.owner.email,
             slice.openflowsliceinfo.password, sw_slivers)
+        except Exception as ret_exception:
+            return {'error_msg':str(ret_exception),'switches':[]}
+
 
     def stop_slice(self, slice):
-        self.client.delete_slice(slice.id)
+        try:
+            self.client.delete_slice(slice.id)
+        except Exception:
+            return str(Exception)
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
