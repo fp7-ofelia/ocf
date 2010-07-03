@@ -5,40 +5,41 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)
     
 
-#    @classmethod
-#    def get_or_create_fv(self):
-#        fv = self.objects.all()
-#        if (len(fv) == 0):
-#            fv = self.objects.create(name="",
-#                username="",
-#                password="",
-#                url = "",)
-#        else:
-#            fv = fv[0]
-#
-#        return fv
-#    
-
     def get_switches(self):
         """
         Change from FV format to CH format
         """
-        dpids = self.api.listDevices()
-        infos = [self.api.getDeviceInfo(d) for d in dpids]
-        return zip(dpids, infos)
+        try:
+            dpids = self.api.listDevices()
+            infos = [self.api.getDeviceInfo(d) for d in dpids]
+            return zip(dpids, infos)
+        except Exception,e:
+            import traceback
+            traceback.print_exc()
+            raise e
     
     def get_links(self):
         """
         Change from FV format to CH format
         """
-        return [(l.pop("srcDPID"),
+        try:
+            return [(l.pop("srcDPID"),
                  l.pop("srcPort"),
                  l.pop("dstDPID"),
                  l.pop("dstPort"),
                  l) for l in self.api.getLinks()]
+        except Exception,e:
+            import traceback
+            traceback.print_exc()
+            raise e
         
     def ping(self, str):
-        return self.api.ping(str)
+        try:
+            return self.api.ping(str)
+        except Exception,e:
+            import traceback
+            traceback.print_exc()
+            return str(e)
 
 class CallBackServerProxy(models.Model):
     '''

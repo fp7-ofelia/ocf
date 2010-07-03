@@ -214,13 +214,17 @@ def update_opts(request):
     error_msg = ""
     try:
         fv = FVServerProxy.objects.all()[0]
-    except:
-        errors.append("Flowvisor not set")
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        errors.append("Flowvisor not set: %s"%str(e))
         
     try:
         fv.api.changeFlowSpace(fv_args)
-    except:
-        errors.append("change flowspace call failed in flowvisor")
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        errors.append("change flowspace call failed in flowvisor: %s"%str(e))
           
     opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
     if (is_admin):
