@@ -18,10 +18,10 @@ def check_fv_set(func, *arg, **kwargs):
     fv = FVServerProxy.objects.all()
     if len(fv) == 0: 
         raise Exception("No flowvisor has been set. Please set Flowvisor\
-         URL first and then try again")
+URL first and then try again")
     elif (len(fv) > 1):
         raise Exception("More than one flowvisor is set in database. Make\
-         sure you just have one flowvisor")
+sure you just have one flowvisor")
     
     return func(*arg, **kwargs)
 
