@@ -32,4 +32,3 @@ SITE_NAME = "Expedient Opt-In Manager"
 SITE_DOMAIN = "localhost:8443"
 
 from secret_key import SECRET_KEY
-
