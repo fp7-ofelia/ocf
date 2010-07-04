@@ -25,7 +25,7 @@ DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
 EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
 
 # XML-RPC settings
-MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
+MY_CA = '/etc/apache2/ssl.crt/ca.crt'
 
 # default site
 SITE_NAME = "Expedient Clearinghouse"
