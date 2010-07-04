@@ -29,6 +29,9 @@ A CA is created, as well as certificates and keys for two authorities:
 a clearinghouse and an aggregate manager. Finally, a user cert and
 key is created for a user named Alice.
 """
+import sys
+from os import path
+sys.path.append(path.join(path.dirname(__file__), "../"))
 
 import optparse
 import os.path

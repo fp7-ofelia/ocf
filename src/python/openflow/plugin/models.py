@@ -18,15 +18,21 @@ from django.conf import settings
 from django.db.models import signals
 from expedient.common.messaging.models import DatedMessage
 
+import logging
+logger = logging.getLogger("OpenflowModels")
+
 def as_is_slugify(value):
     return value
 
 class OpenFlowSliceInfo(models.Model):
     slice = models.OneToOneField(slice_models.Slice)
-    controller_url = models.CharField("URL of the slice's OpenFlow controller",
-                                      max_length=100)
+    controller_url = models.CharField(
+        "OpenFlow controller URL", max_length=100,
+        help_text="e.g. tcp:beirut.stanford.edu:6633")
     # TODO: It is not a good idea to store the password in the clear.
-    password = models.CharField(max_length=64)
+    password = models.CharField(
+        max_length=64, help_text="This is the password to use when accessing\
+ the slice directly at the flowvisors.")
 
 class OpenFlowAggregate(aggregate_models.Aggregate):
     information = \
@@ -48,11 +54,17 @@ production networks, and is currently deployed in several universities.
 #        err = self.client.change_password()
 #        if err: return err
         if base_uri.endswith("/"): base_uri = base_uri[:-1]
-        err = self.client.register_topology_callback(
-            "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
-            "%s" % self.pk,
-        )
-        if err: return err
+        try:
+            err = self.client.register_topology_callback(
+                "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
+                "%s" % self.pk,
+            )
+            if err: return err
+        except Exception as ret_exception:
+            import traceback
+            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            traceback.print_exc()
+            return str(ret_exception)
 
         err = self.update_topology()
         if err: return err
@@ -77,7 +89,13 @@ production networks, and is currently deployed in several universities.
         from expedient.common.utils import create_or_update
         
         # Get the active topology information from the AM
-        links_raw = self.client.get_links()
+        try:
+            links_raw = self.client.get_links()
+        except Exception as e:
+            import traceback
+            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            traceback.print_exc()
+            return "%s" % e
 
         # optimize the parsing by storing information in vars
         current_links = self.get_raw_topology()
@@ -248,17 +266,28 @@ production networks, and is currently deployed in several universities.
                             fsd[f.name] = getattr(fs, f.name)
                     d['flowspace'].append(fsd)
             sw_slivers.append(d)
-
-        return self.client.create_slice(
-            slice.id, slice.project.name,
-            slice.project.description,
-            slice.name, slice.description,
-            slice.openflowsliceinfo.controller_url,
-            slice.owner.email,
-            slice.openflowsliceinfo.password, sw_slivers)
+        try:
+            return self.client.create_slice(
+                slice.id, slice.project.name,
+                slice.project.description,
+                slice.name, slice.description,
+                slice.openflowsliceinfo.controller_url,
+                slice.owner.email,
+                slice.openflowsliceinfo.password, sw_slivers)
+        except Exception as ret_exception:
+            import traceback
+            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            traceback.print_exc()
+            return {'error_msg':str(ret_exception),'switches':[]}
 
     def stop_slice(self, slice):
-        self.client.delete_slice(slice.id)
+        try:
+            self.client.delete_slice(slice.id)
+        except Exception:
+            import traceback
+            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            traceback.print_exc()
+            return str(Exception)
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)

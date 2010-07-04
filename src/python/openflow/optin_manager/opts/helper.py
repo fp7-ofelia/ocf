@@ -40,14 +40,13 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
         if (intersected):
             try:
                 fv = FVServerProxy.objects.all()[0]
-            except:
-                opt.delete()
-                return "No FlowVisor set"
-            try:
                 return_ids = fv.api.changeFlowSpace(fv_args)
-            except:
+            except Exception,e:
                 opt.delete()
-                return "fvi changeFlowSpace didn't go through"
+                import traceback
+                traceback.print_exc()
+                return str(e)
+            
             for i in range(0,len(return_ids)):
                 match_list[i].fv_id = return_ids[i]
                 match_list[i].save()
@@ -68,12 +67,12 @@ def opt_fses_outof_exp(fses):
 
     try:
         fv = FVServerProxy.objects.all()[0]
-    except:
-        return "No flowvisor set"
-    try:
         fv.api.changeFlowSpace(fv_args)  
-    except:
-        return "Flowvisor internal error when removing flowspace entry"   
+        return ""
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        return str(e) 
     
 def update_user_opts(user):
     user_opts = UserOpts.objects.filter(user=user)

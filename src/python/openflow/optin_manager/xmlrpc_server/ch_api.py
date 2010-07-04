@@ -263,16 +263,22 @@ def create_slice(slice_id, project_name, project_description,
     error_msg = "" 
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
-    fv_success = fv.api.createSlice(
+    try:
+        fv_success = fv.api.createSlice(
         "%s" % e.get_fv_slice_name(),
         "%s" % owner_password,
         "%s" % controller_url,
         "%s" % owner_email,
-    )
+        )
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        raise e
+        
     print "Created slice with %s %s %s %s" % (
         e.get_fv_slice_name(), owner_password, controller_url, owner_email)
     if not fv_success:
-        error_msg = "FlowVisor rejected this request"
+        error_msg = "FlowVisor returned false for create slice xmlrpc call"
     
     # TODO: fix the return
     return {
@@ -307,9 +313,14 @@ def delete_slice(sliceid, **kwargs):
     
     error_msg = ""
     fv = FVServerProxy.objects.all()[0]
-    success = fv.api.deleteSlice(single_exp.get_fv_slice_name())
+    try:
+        success = fv.api.deleteSlice(single_exp.get_fv_slice_name())
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        raise e
     if not success:
-        error_msg = "flowvisor sent an error"
+        error_msg = "flowvisor returned false on delete slice xmlrpc call"
         
     return error_msg
 
@@ -322,7 +333,12 @@ def get_switches(**kwargs):
     '''
     complete_list = []
     fv = FVServerProxy.objects.all()[0]
-    switches = fv.get_switches()
+    try:
+        switches = fv.get_switches()
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        raise e        
     complete_list.extend(switches)
         
     return complete_list
@@ -337,7 +353,13 @@ def get_links(**kwargs):
     '''
     complete_list = []
     fv = FVServerProxy.objects.all()[0]
-    links = fv.get_links()
+    try:
+        links = fv.get_links()
+    except Exception,e:
+        import traceback
+        traceback.print_exc()
+        raise e   
+    
     complete_list.extend(links)
         
     return complete_list

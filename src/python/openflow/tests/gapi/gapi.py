@@ -11,7 +11,6 @@ sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
 import xmlrpclib
-from os.path import join
 from openflow.tests import test_settings as settings
 from openflow.tests.helpers import parse_rspec, create_random_resv, \
     kill_old_procs
@@ -22,6 +21,7 @@ if settings.SHOW_PROCESSES_IN_XTERM:
     from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
 else:
     from expedient.common.tests.utils import run_cmd
+from expedient.common.tests.utils import wait_for_servers
 
 import logging
 logger = logging.getLogger("gapi_test")
@@ -118,6 +118,8 @@ class GAPITests(TestCase):
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
         
         # Create the ssl certificates if needed
+        cmd = "make -C %s clean" % settings.SSL_DIR
+        run_cmd(cmd).wait()
         cmd = "make -C %s" % settings.SSL_DIR
         run_cmd(cmd).wait()
         
@@ -156,21 +158,7 @@ class GAPITests(TestCase):
             "https://"+am_host+"/",
             transport=cert_transport)
         
-        cnxs = [httplib.HTTPSConnection(ch_host),
-                httplib.HTTPSConnection(am_host)]
-        for c in cnxs:
-            while(True):
-                try:
-                    c.connect()
-                except Exception as e:
-                    if "Connection refused" in str(e):
-                        time.sleep(1)
-                    elif "SSL" in str(e):
-                        break
-                    else:
-                        raise
-                else:
-                    break
+        time.sleep(settings.WAIT_MULTIPLIER*2)
         
         logger.debug("setup done")
         

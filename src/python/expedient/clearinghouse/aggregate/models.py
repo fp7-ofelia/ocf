@@ -25,14 +25,23 @@ class Aggregate(Extendable):
 No information available.
 """
     
-    name = models.CharField(max_length=200, unique=True)
-    logo = models.ImageField('Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
-                             blank=True, null=True)
+    name = models.CharField(
+        max_length=200, unique=True,
+        help_text="Use a unique name for this aggregate.")
+    logo = models.ImageField(
+        'Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
+        editable=False, blank=True, null=True,
+        help_text="Select an optional logo.")
     description = models.TextField()
     location = models.CharField("Geographic Location", max_length=200)
-    available = models.BooleanField("Available", default=True)
+    available = models.BooleanField(
+        "Available", default=True,
+        help_text="Do you want to make this\
+ aggregate available for others to use?")
     owner = models.ForeignKey(User, related_name="owned_aggregate_set")
-    managers = models.ManyToManyField(User, related_name="managed_aggregate_set", blank=True)
+    managers = models.ManyToManyField(
+        User, related_name="managed_aggregate_set", blank=True,
+        help_text="Who else should administer this aggregate?")
     users = models.ManyToManyField(User, related_name="useable_aggregate_set")
     
     class Meta:

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from openflow.optin_manager.users.models import UserProfile
 from django.forms.util import ErrorList
 from django.forms import ModelForm
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
@@ -7,23 +8,6 @@ from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyF
 import logging
 
 logger = logging.getLogger("ControlsForms")
-
-#class FVServerForm(ModelForm):
-#    class Meta:
-#        model = FVServerProxy
-#        fields = ('name', 'url', 'max_password_age', 'verify_certs','username')
-#        
-#
-#class FVServerFormPassword(forms.Form):
-#    password1 = forms.CharField(label='Password',
-#                            widget=forms.PasswordInput(render_value=False))
-#    password2 = forms.CharField(label='Retype Password',
-#                            widget=forms.PasswordInput(render_value=False)) 
-#
-#    def clean(self):
-#        cleaned_data = self.cleaned_data
-#        if (cleaned_data.get("password1") != cleaned_data.get("password2")):
-#            self._errors["general"] = ErrorList(["Passwords don't match"])
 
 class FVServerProxyForm(forms.ModelForm,
                         PasswordXMLRPCServerProxyFormHelperAddin):
@@ -60,7 +44,19 @@ class CHUserForm(forms.Form):
     def clean(self):
         cleaned_data = self.cleaned_data
         if (cleaned_data.get("password1") != cleaned_data.get("password2")):
-            self._errors["general"] = ErrorList(["Passwords don't match"])
+            logger.debug("Passwords don't match")
+            raise forms.ValidationError("Passwords do not match. Re-enter password")
+        
+        username_cleaned = cleaned_data.get("username")
+        ch_users = UserProfile.objects.filter(is_clearinghouse_user=True)
+        if ch_users.count() > 0:
+            ch_id = ch_users[0].id
+            same_uname = User.objects.filter(username = username_cleaned).exclude(id = ch_id)
+        else:
+            same_uname = User.objects.filter(username = username_cleaned)
+
+        if (same_uname.count() > 0):
+            raise forms.ValidationError("Clearinghouse username already exist in system. Please enter a unique username")
 
 def pack_ch_user_info(chuser):
     result={}

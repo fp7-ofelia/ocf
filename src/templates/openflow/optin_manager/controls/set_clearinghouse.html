@@ -9,7 +9,9 @@
 	<p>{{form.errors.general}}</p>
 	<form name="input" action="/controls/set_clearinghouse" method="post">
 	{% csrf_token %}
-	{{form.as_p}}
+	<table class="formtable">
+	{{ form.as_table }}
+	</table>
 	<input type="submit" value="submit" />
 	</form>
 </div>

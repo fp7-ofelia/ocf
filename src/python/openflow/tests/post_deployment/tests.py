@@ -11,7 +11,6 @@ sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
-from openflow.tests import test_settings
 import xmlrpclib
 from openflow.tests.helpers import parse_rspec, Flowspace
 from openflow.tests.helpers import create_random_resv
@@ -20,8 +19,10 @@ from expedient.common.tests.utils import drop_to_shell
 import logging
 logger = logging.getLogger("PostDeploymentTest")
 
-SCHEME = "https" if test_settings.USE_HTTPS else "http"
+# Set this to "http" if you know the server uses HTTP instead of HTTPS.
+SCHEME = "https"
 
+# Settings for the flowvisor to verify slice creation and opt-in.
 FLOWVISOR = dict(
     host="openflow5.stanford.edu",   # host for flowvisor's interface
     xmlrpc_port=8080,         # XMLRPC port for the flowvisor
@@ -29,9 +30,22 @@ FLOWVISOR = dict(
     password="0fw0rk",        # The password to use to connect to the FV
 )
 
+# The URL for the GAPI proxy you want to use to communicate with Expedient
 GAM_URL = "https://openflow4.stanford.edu:8000/"
+
+# The URL to the GENI Clearinghouse that gives out the credentials.
 GCH_URL = "https://openflow4.stanford.edu:8001/"
-CERTKEY_FILENAME = "experimenter2" # experimenter2.key and experimenter2.crt
+
+# Where is the SSL certificate stored?
+SSL_DIR = "/home/expedient/expedient/gapi-ssl"
+
+# What is the first part of the filename of the experimenter's cert and key?
+CERTKEY_FILENAME = "experimenter" # experimenter.key and experimenter.crt
+
+# The location of the controller for the slice. If you are just testing the
+# gapi interface and not interested in actually seeing traffic at a controller,
+# you can set these to an arbitrary value.
+CONTROLLER_URL = "tcp:localhost:6633"
 
 class Tests(TestCase):
 
@@ -56,15 +70,15 @@ class Tests(TestCase):
         Create clients at the Flowviso
         """
         cert_transport = SafeTransportWithCert(
-            keyfile=join(test_settings.SSL_DIR, "%s.key" % CERTKEY_FILENAME),
-            certfile=join(test_settings.SSL_DIR, "%s.crt" % CERTKEY_FILENAME))
+            keyfile=join(SSL_DIR, "%s.key" % CERTKEY_FILENAME),
+            certfile=join(SSL_DIR, "%s.crt" % CERTKEY_FILENAME))
         self.am_client = xmlrpclib.ServerProxy(
             GAM_URL,
             transport=cert_transport)
         
         cert_transport = SafeTransportWithCert(
-            keyfile=join(test_settings.SSL_DIR, "experimenter.key"),
-            certfile=join(test_settings.SSL_DIR, "experimenter.crt"))
+            keyfile=join(SSL_DIR, "experimenter.key"),
+            certfile=join(SSL_DIR, "experimenter.crt"))
         self.ch_client = xmlrpclib.ServerProxy(
             GCH_URL,
             transport=cert_transport)
@@ -110,8 +124,8 @@ class Tests(TestCase):
         # create a random reservation
         slice_name = "SliceNameBla %s" % random.randint(1, 10000000)
         email = "john.doe@geni.net"
-        url = "tcp:%s:%s" % (test_settings.CONTROLLER_HOST,
-                             test_settings.CONTROLLER_PORT)
+        url = CONTROLLER_URL
+        
         fs = [
             Flowspace({"tp_dst": ("80", "80")}, self.switches),
             Flowspace({"tp_src": ("80", "80")}, self.switches),

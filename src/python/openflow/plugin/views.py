@@ -74,7 +74,7 @@ def aggregate_crud(request, agg_id=None):
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                 )
             
-            return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
+                return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
         logger.debug("Validation failed")
     else:
         return HttpResponseNotAllowed("GET", "POST")
