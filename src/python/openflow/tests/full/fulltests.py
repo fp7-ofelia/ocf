@@ -98,7 +98,7 @@ class FullIntegration(TestCase):
             time.sleep(2*test_settings.WAIT_MULTIPLIER)
             self.fv_procs.append(
                 self.run_proc_cmd(
-                    "%s/scripts/flowvisor.sh %s/%s" % (
+                    "%s/scripts/flowvisor.sh %s/%s 2>&1 | tee /tmp/flowvisor.out " % (
                         flowvisor["path"][0], flowvisor["path"][0],
                         flowvisor["path"][1],
                     )
@@ -111,8 +111,8 @@ class FullIntegration(TestCase):
             flowvisor["host"], flowvisor["xmlrpc_port"],
         )
 
-        wait_for_servers([fv_url], 5)
-        time.sleep(2*test_settings.WAIT_MULTIPLIER)
+        # wait_for_servers([fv_url], 5)
+        time.sleep(3*test_settings.WAIT_MULTIPLIER)
 
         s = xmlrpclib.ServerProxy(fv_url)
         logger.debug("Getting flowspace from flowvisor")
