@@ -67,8 +67,12 @@ class PasswordXMLRPCServerProxy(models.Model):
     whenever it expires.
     '''
     
-    username = models.CharField(max_length=100)
-    password = models.CharField(max_length=get_max_password_len())
+    username = models.CharField(
+        max_length=100,
+        help_text="Username to use to access the remote server.")
+    password = models.CharField(
+        max_length=get_max_password_len(),
+        help_text="Password to use to access the remote server.")
     max_password_age = models.IntegerField(
         'Max Password age (days)', default=60)
     password_timestamp = models.DateTimeField(auto_now_add=True)
