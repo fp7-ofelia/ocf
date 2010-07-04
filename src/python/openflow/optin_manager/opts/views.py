@@ -156,9 +156,7 @@ def opt_out(request):
                 continue
             ofs = OptsFlowSpace.objects.get(id=key)
             error_msg = opt_fses_outof_exp([ofs])
-                    
-                       
-                    
+                
     this_user_opts  = UserOpts.objects.filter(user = request.user)
     for useropt in this_user_opts:
         tmpfs = useropt.optsflowspace_set.all()
