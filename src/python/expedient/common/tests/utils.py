@@ -22,7 +22,7 @@ def _run_cmd(cmd, pause=False):
     if pause:
         cmd = cmd + "; read n"
     return subprocess.Popen(
-	cmd,
+	shlex.split(cmd),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)

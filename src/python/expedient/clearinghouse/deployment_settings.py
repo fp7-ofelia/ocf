@@ -36,8 +36,5 @@ OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 
 DOMAIN_SCHEME = "https"
-<<<<<<< HEAD
-=======
 
 from secret_key import SECRET_KEY
->>>>>>> 049c5e561df9833fe00747c284b9d1ad920200da

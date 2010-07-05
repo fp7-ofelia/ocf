@@ -126,24 +126,26 @@ class GAPITests(TestCase):
         
         
         # run the CH
-        kill_old_procs(8000, 8001)
-        cmd = "python %s -r %s -c %s -k %s -p 8001 --debug" % (
+        kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
+        cmd = "python %s -r %s -c %s -k %s -p %s --debug" % (
             join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
-            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
+            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
+            settings.GCH_PORT,
         )
         self.ch_proc = run_cmd(cmd, pause=True)
         
         # run the AM proxy
-        cmd = "python %s -r %s -c %s -k %s -p 8000 -u %s --debug" % (
+        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug" % (
             join(settings.GCF_DIR, "gam.py"),
             join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "server.crt"),
             join(settings.SSL_DIR, "server.key"),
+            settings.GAM_PORT,
             SCHEME + "://%s:%s/openflow/gapi/" % (settings.HOST, settings.CH_PORT),
         )
         self.am_proc = run_cmd(cmd, pause=True)
         
-        ch_host = "localhost:8001"
+        ch_host = "%s:%s" % (settings.HOST, settings.GCH_PORT)
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
@@ -151,7 +153,7 @@ class GAPITests(TestCase):
             "https://"+ch_host+"/",
             transport=cert_transport)
         
-        am_host = "localhost:8000"
+        am_host = "%s:%s" % (settings.HOST, settings.GAM_PORT)
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
