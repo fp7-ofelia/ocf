@@ -8,8 +8,12 @@ interacting with them easily.
 '''
 
 import paramiko, logging
-logger = paramiko.util.get_logger("paramiko.transport")
-logger.setLevel(logging.WARNING)
+plogger = paramiko.util.get_logger("paramiko.transport")
+plogger.setLevel(logging.WARNING)
+
+logger = logging.getLogger("SSHClientPlus")
+
+class TimeoutException(Exception): pass
 
 class SSHClientPlus(paramiko.SSHClient):
     @classmethod
@@ -44,3 +48,19 @@ class SSHClientPlus(paramiko.SSHClient):
     def wait(self):
         status = self.channel.recv_exit_status()
         return status
+
+    def wait_for_prompt(self, prompt="> ", timeout=10):
+        import time
+        read = ""
+        while timeout:
+            out = self.communicate()
+            read += out
+            
+            if out.endswith(prompt):
+                return read
+
+            time.sleep(1)
+            timeout = timeout - 1
+        
+        raise TimeoutException("wait_for_prompt timed out. Read: %s" % read)
+    

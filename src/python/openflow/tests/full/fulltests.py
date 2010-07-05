@@ -12,19 +12,15 @@ from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from openflow.tests import test_settings
 import xmlrpclib, re
-from openflow.tests.helpers import kill_old_procs, parse_rspec, Flowspace
+from openflow.tests.helpers import kill_old_procs, parse_rspec
 from openflow.tests.helpers import create_random_resv
-import time
 from expedient.common.tests.commands import call_env_command, Env
-from os.path import join
-from expedient.common.tests.utils import drop_to_shell, wait_for_servers
+from expedient.common.tests.utils import drop_to_shell, wrap_xmlrpc_call
 
 import logging
 logger = logging.getLogger(__name__)
 
 from helpers import SSHClientPlus
-
-# TODO: Some of this code works with multiple FVs, other parts assume only one.
 
 RUN_FV_SUBPROCESS = True
 SCHEME = "https" if test_settings.USE_HTTPS else "http"
@@ -54,10 +50,6 @@ class FullIntegration(TestCase):
             client = SSHClientPlus.exec_command_plus(
                 mininet_vm[0], "mininet", "mininet", cmd, port=mininet_vm[1],
             )
-            time.sleep(2*test_settings.WAIT_MULTIPLIER)
-            logger.debug("Communicating with nox client run on port %s" % port)
-            out = client.communicate()
-            logger.debug("Client out:\n%s" % out)
 
             self.nox_clients.append(client)
         
@@ -79,13 +71,10 @@ class FullIntegration(TestCase):
                 port=mininet_vms[i][1],
             )
             self.mininet_vm_clients.append(client)
+            logger.debug(
+                client.wait_for_prompt(
+                    prompt="Starting CLI:\n", timeout=test_settings.TIMEOUT))
 
-            time.sleep(2*test_settings.WAIT_MULTIPLIER)
-
-            logger.debug("Communicating with mininet client")
-            out = client.communicate()
-            logger.debug("Client out:\n%s" % out)
-        
     def run_flowvisor(self, flowvisor):
         """
         Run flowvisor.
@@ -95,7 +84,7 @@ class FullIntegration(TestCase):
         if RUN_FV_SUBPROCESS:
             kill_old_procs(flowvisor["of_port"],
                            flowvisor["xmlrpc_port"])
-            time.sleep(2*test_settings.WAIT_MULTIPLIER)
+
             self.fv_procs.append(
                 self.run_proc_cmd(
                     "%s/scripts/flowvisor.sh %s/%s 2>&1 | tee /tmp/flowvisor.out " % (
@@ -111,10 +100,12 @@ class FullIntegration(TestCase):
             flowvisor["host"], flowvisor["xmlrpc_port"],
         )
 
-        # wait_for_servers([fv_url], 5)
-        time.sleep(3*test_settings.WAIT_MULTIPLIER)
-
         s = xmlrpclib.ServerProxy(fv_url)
+        
+        logger.debug("Waiting for flowvisor to be up.")
+        ret = wrap_xmlrpc_call(s.api.ping, ["PONG"], {}, test_settings.TIMEOUT)
+        logger.debug("Ping returned: %s" % ret)
+        
         logger.debug("Getting flowspace from flowvisor")
         flowspaces = s.api.listFlowSpace()
         ops = []
@@ -267,8 +258,6 @@ class FullIntegration(TestCase):
         self.am_client = xmlrpclib.ServerProxy(
             "https://localhost:%s/" % am_port,
             transport=cert_transport)
-        
-        time.sleep(2*test_settings.WAIT_MULTIPLIER)
 
     def run_geni_ch(self, gcf_dir, ssl_dir, ch_port):
         """
@@ -288,15 +277,14 @@ class FullIntegration(TestCase):
             "https://localhost:%s/" % ch_port,
             transport=cert_transport)
 
-        time.sleep(2*test_settings.WAIT_MULTIPLIER)
-
     def create_ch_slice(self):
         """
         Code mostly copied from GENI test harness from BBN.
         """
         import gcf.sfa.trust.credential as cred
         
-        slice_cred_string = self.ch_client.CreateSlice()
+        slice_cred_string = wrap_xmlrpc_call(
+            self.ch_client.CreateSlice, [], {}, test_settings.TIMEOUT)
         slice_credential = cred.Credential(string=slice_cred_string)
         slice_gid = slice_credential.get_gid_object()
         slice_urn = slice_gid.get_urn()
@@ -350,8 +338,6 @@ class FullIntegration(TestCase):
         import os
         from django.conf import settings as djangosettings
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
-
-        time.sleep(2*test_settings.WAIT_MULTIPLIER)
         
         # setup the CH (aka AM)
         self.prepare_ch(
@@ -364,8 +350,10 @@ class FullIntegration(TestCase):
         )
         
         # Run the AM proxy for GENI and the GENI clearinghouse
-        self.run_geni_ch(test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GAM_PORT)
-        self.run_am_proxy(test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
+        self.run_geni_ch(
+            test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GAM_PORT)
+        self.run_am_proxy(
+            test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
         
     def tearDown(self):
         """
@@ -402,9 +390,8 @@ class FullIntegration(TestCase):
         for c in self.mininet_vm_clients:
             out = c.communicate("exit()\n", check_closed=True)
             logger.debug("mn stdout %s" % out)
+            c.wait()
         
-        time.sleep(5*test_settings.WAIT_MULTIPLIER)
-
         if RUN_FV_SUBPROCESS:
             for flowvisor in test_settings.FLOWVISORS:
                 kill_old_procs(flowvisor["of_port"], flowvisor["xmlrpc_port"])
@@ -442,7 +429,9 @@ class FullIntegration(TestCase):
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources, [cred, options], {}, 
+            test_settings.TIMEOUT)
         
         logger.debug(rspec)
         
@@ -452,6 +441,7 @@ class FullIntegration(TestCase):
         # check the number of switches and links
         self.assertEqual(len(self.switches), 2)
         self.assertEqual(len(self.links), 2)
+        return slice_urn, cred
         
     def test_CreateSliver(self):
         """
@@ -462,13 +452,8 @@ class FullIntegration(TestCase):
         self.assertEqual(len(slices), 1) # root
         
         # get the resources
-        slice_urn, cred = self.create_ch_slice()
-        options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        slice_urn, cred = self.test_ListResources()
         
-        # Create switches and links
-        self.switches, self.links = parse_rspec(rspec)
-
         # create a random reservation
         slice_name = "SliceNameBla"
         email = "john.doe@geni.net"
@@ -514,7 +499,10 @@ class FullIntegration(TestCase):
         slice_urn, cred = self.test_CreateSliver()
         
         self.assertTrue(
-            self.am_client.DeleteSliver(slice_urn, cred),
+            wrap_xmlrpc_call(
+                self.am_client.DeleteSliver,
+                [slice_urn, cred], {}, 
+                test_settings.TIMEOUT),
             "Failed to delete sliver.")
         
         self.assertEqual(
