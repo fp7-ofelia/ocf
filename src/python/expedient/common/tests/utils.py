@@ -4,6 +4,9 @@ Created on Jun 16, 2010
 @author: jnaous
 '''
 
+import logging
+logger = logging.getLogger("test_utils")
+
 def run_cmd_in_xterm(cmd, pause=False):
     """
     Runs a command in a subprocess xterm.
@@ -78,10 +81,12 @@ def wrap_xmlrpc_call(func, args, kwargs, timeout):
     import time, xmlrpclib
     for i in xrange(timeout):
         try:
-            return func(*args, **kwargs)
+            r = func(*args, **kwargs)
+            return r
         except xmlrpclib.Fault:
             raise
-        except Exception:
+        except:
+            logger.debug("     Trying to call func for the {%s}th again." % (i+1,))
             time.sleep(1)
             pass
     return func(*args, **kwargs)
