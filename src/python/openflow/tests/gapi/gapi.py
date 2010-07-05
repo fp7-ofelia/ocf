@@ -21,7 +21,7 @@ if settings.SHOW_PROCESSES_IN_XTERM:
     from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
 else:
     from expedient.common.tests.utils import run_cmd
-from expedient.common.tests.utils import wait_for_servers, wrap_xmlrpc_call
+from expedient.common.tests.utils import wrap_xmlrpc_call, drop_to_shell
 
 import logging
 logger = logging.getLogger("gapi_test")
@@ -127,7 +127,7 @@ class GAPITests(TestCase):
         
         # run the CH
         kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
-        cmd = "python %s -r %s -c %s -k %s -p %s --debug" % (
+        cmd = "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
             settings.GCH_PORT,
@@ -135,7 +135,7 @@ class GAPITests(TestCase):
         self.ch_proc = run_cmd(cmd, pause=True)
         
         # run the AM proxy
-        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug" % (
+        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gam.py"),
             join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "server.crt"),
