@@ -259,7 +259,7 @@ class FullIntegration(TestCase):
             keyfile=join(ssl_dir, "experimenter.key"),
             certfile=join(ssl_dir, "experimenter.crt"))
         self.am_client = xmlrpclib.ServerProxy(
-            "https://localhost:%s/" % am_port,
+            "https://%s:%s/" % (test_settings.HOST, am_port),
             transport=cert_transport)
         
         time.sleep(4)
@@ -279,7 +279,7 @@ class FullIntegration(TestCase):
             keyfile=join(ssl_dir, "experimenter.key"),
             certfile=join(ssl_dir, "experimenter.crt"))
         self.ch_client = xmlrpclib.ServerProxy(
-            "https://localhost:%s/" % ch_port,
+            "https://%s:%s/" % (test_settings.HOST, ch_port),
             transport=cert_transport)
 
         time.sleep(4)
