@@ -5,6 +5,7 @@
 export EXPEDIENT=/home/expedient/expedient
 export CH=expedient/clearinghouse
 export OM=openflow/optin_manager
+export FLOWVISOR=/home/expedient/flowvisor                         
 export PYTHONPATH=$PYTHONPATH:$EXPEDIENT/src/python
 
 # Set this to the Domain to be used to access the VM. This is going to be used

@@ -41,6 +41,15 @@ echo Generating secret keys...
 CH_KEY=`PYTHONPATH=$PYTHONPATH python $CH/manage.py generate_secret_key`
 OM_KEY=`PYTHONPATH=$PYTHONPATH python $OM/manage.py generate_secret_key`
 
+echo Updating settings for the FlowVisor
+# Setup flowvisor
+cd $FLOWVISOR
+rm -f mySSLKeyStore
+./scripts/config-gen-default.sh default-config $DOMAIN_IP $FV_ROOT_PASSWORD
+
+
+#
+
 echo Setting up the databases
 flush-expedient.sh
 flush-om.sh
