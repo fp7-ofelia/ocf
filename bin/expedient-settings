@@ -56,6 +56,7 @@ export GCH_PORT=8001
 
 # These are the ports used for the flowvisor. Defaults should work here as 
 # above.
+export FV_CONFIG=fv_vm_config.xml
 export FV_OF_PORT=6633
 export FV_RPC_PORT=8080
 

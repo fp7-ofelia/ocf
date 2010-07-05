@@ -44,9 +44,10 @@ OM_KEY=`PYTHONPATH=$PYTHONPATH python $OM/manage.py generate_secret_key`
 echo Updating settings for the FlowVisor
 # Setup flowvisor
 cd $FLOWVISOR
+make		# just to make sure it's up to date
 rm -f mySSLKeyStore
 # Rob, you need to set the ports here...
-./scripts/config-gen-default.sh default-config $DOMAIN_IP $FV_ROOT_PASSWORD
+./scripts/config-gen-default.sh $FV_CONFIG $DOMAIN_IP $FV_ROOT_PASSWORD $FV_OF_PORT $FV_RPC_PORT
 
 echo Setting up the databases
 flush-expedient.sh
@@ -62,6 +63,7 @@ sed -i "{s/^GAM_PORT.*/GAM_PORT = '$GAM_PORT'/}" $EXPEDIENT/src/python/openflow/
 sed -i "{s/^GCH_PORT.*/GCH_PORT = '$GCH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^OM_PORT.*/OM_PORT = '$OM_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/^FV_CONFIG.*/FV_CONFIG = '$FV_CONFIG'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/of_port=.*,/of_port=$FV_OF_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/xmlrpc_port=.*,/xmlrpc_port=$FV_RPC_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
