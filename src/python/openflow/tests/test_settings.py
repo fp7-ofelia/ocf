@@ -58,10 +58,8 @@ PAUSE_AFTER_TESTS = False         # If true, each test will wait for an Enter
                                   # from the user before tearing down (useful
                                   # to look at xterm output).
 
-WAIT_MULTIPLIER = 1               # Multiplies the sleep times in the fulltests
-                                  # If you are getting "connection refused"
-                                  # errors, increasing theis number might help
-                                  # make them pass on slower machines.
+TIMEOUT = 10                      # Time to wait for processes to run and for
+                                  # communication to work.
 
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
