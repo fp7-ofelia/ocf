@@ -45,10 +45,8 @@ echo Updating settings for the FlowVisor
 # Setup flowvisor
 cd $FLOWVISOR
 rm -f mySSLKeyStore
+# Rob, you need to set the ports here...
 ./scripts/config-gen-default.sh default-config $DOMAIN_IP $FV_ROOT_PASSWORD
-
-
-#
 
 echo Setting up the databases
 flush-expedient.sh
@@ -60,12 +58,34 @@ echo "SECRET_KEY = '$OM_KEY'" > $EXPEDIENT/src/python/$OM/secret_key.py
 echo Updating test settings...
 # fix the test_settings.py
 sed -i "{s/^HOST.*/HOST = '$DOMAIN_FQDN'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/^GAM_PORT.*/GAM_PORT = '$GAM_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/^GCH_PORT.*/GCH_PORT = '$GCH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^OM_PORT.*/OM_PORT = '$OM_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/of_port=.*,/of_port=$FV_OF_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/xmlrpc_port=.*,/xmlrpc_port=$FV_RPC_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^SHOW_PROCESSES_IN_XTERM = .*/SHOW_PROCESSES_IN_XTERM = $SHOW_PROCESSES_IN_XTERM/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/password=.*connect to the FV/password='$FV_ROOT_PASSWORD',  # The password to use to connect to the FV/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+
+# webserver settings
+if [ $CH_PORT != 443 ] ; then
+	# hacking around apache's unwillingness to have two Listen lines on the same port
+	sed -i "{s/#*Listen.*/Listen $CH_PORT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+
+else
+	sed -i "{s/^Listen.*/#Listen $CH_PORT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+fi
+sed -i "{s/Use SimpleSSLWSGIVHost [0-9]* /Use SimpleSSLWSGIVHost $CH_PORT /}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+if [ $OM_PORT != 443 ] ; then
+	# hacking around apache's unwillingness to have two Listen lines on the same port
+	sed -i "{s/#*Listen.*/Listen $OM_PORT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+else
+	sed -i "{s/^Listen.*/#Listen $OM_PORT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+fi
+sed -i "{s/Use SimpleSSLWSGIVHost [0-9]* /Use SimpleSSLWSGIVHost $OM_PORT /}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+
 sudo gensslcert -n $DOMAIN_FQDN
 
 sudo /etc/init.d/apache2 restart
