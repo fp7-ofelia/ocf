@@ -12,11 +12,11 @@ export PYTHONPATH=$PYTHONPATH:$EXPEDIENT/src/python
 # to generate the SSL certificate. If this machine is behind a NAT, use the
 # the name given to the NAT. If only using IP addresses, then you can use an
 # IP address here.
-export DOMAIN_FQDN=openflow4.stanford.edu
+export DOMAIN_FQDN=`hostname -f`
 
 # This should be the IP address of the domain given above. You can get the IP
 # address by executing: host <name> on the command line.
-export DOMAIN_IP=171.67.75.9
+export DOMAIN_IP=`/sbin/ifconfig eth0 | awk '/inet addr/ {split ($2,A,":"); print A[2]}'`
 
 # This is an identifier for various settings and informational strings.
 # Set it to the name of the site or organization.
