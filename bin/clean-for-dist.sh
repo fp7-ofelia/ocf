@@ -12,15 +12,15 @@ source expedient-settings
 
 cd $EXPEDIENT/src/python
 
-rm -f $CH/secret_key.py*
-rm -f $OM/secret_key.py*
-
 cp $CH/deployment_settings_clean.py $CH/deployment_settings.py
 cp $OM/deployment_settings_clean.py $OM/deployment_settings.py
 
 flush-om.sh
 flush-expedient.sh
 
-sudo rm /etc/udev/rules.d/70-persistent-net.rules
+rm -f $CH/secret_key.py*
+rm -f $OM/secret_key.py*
 
-rm ~/.bash_history
+sudo rm -f /etc/udev/rules.d/70-persistent-net.rules
+
+rm -f ~/.bash_history
