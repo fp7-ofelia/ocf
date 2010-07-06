@@ -64,7 +64,7 @@ sed -i "{s/^GCH_PORT.*/GCH_PORT = '$GCH_PORT'/}" $EXPEDIENT/src/python/openflow/
 sed -i "{s/^OM_PORT.*/OM_PORT = '$OM_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^CH_PORT.*/CH_PORT = '$CH_PORT'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^FV_CONFIG.*/FV_CONFIG = '$FV_CONFIG'/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
-sed -i "{s/host=.*/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/host=.*,/host='$DOMAIN_IP',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/of_port=.*,/of_port=$FV_OF_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/xmlrpc_port=.*,/xmlrpc_port=$FV_RPC_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
