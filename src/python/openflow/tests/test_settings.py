@@ -23,6 +23,10 @@ CH_PORT = 443
 
 PREFIX = ""
 
+
+FV_CONFIG = 'fv_vm_config.xml'
+
+FV_CONFIG = 'fv_vm_config.xml'
 GAM_PORT = 8000
 GCH_PORT = 8001
 
@@ -33,8 +37,8 @@ FLOWVISORS = [
         of_port=6633,             # openflow port
         xmlrpc_port=8080,         # XMLRPC port for the flowvisor
         username="root",          # The username to use to connect to the FV
-        password="rootpassword",  # The password to use to connect to the FV
-        path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
+        password='rootpassword',  # The password to use to connect to the FV
+        path=(FLOWVISOR_DIR, FV_CONFIG), # configuration file
     ),
 ]
 MININET_VMS = [("192.168.1.130", 22)]    # IP address of the mininet VM
