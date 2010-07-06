@@ -16,3 +16,9 @@ echo ------------------------------------------
 echo "-     Running Integration Tests          -"
 echo ------------------------------------------
 python $EXPEDIENT/src/python/openflow/tests/full/fulltests.py
+
+echo ------------------------------------------
+echo "-      Flushing the databases          -"
+echo ------------------------------------------
+flush-om.sh
+flush-expedient.sh

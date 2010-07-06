@@ -12,16 +12,21 @@ export PYTHONPATH=$PYTHONPATH:$EXPEDIENT/src/python
 # to generate the SSL certificate. If this machine is behind a NAT, use the
 # the name given to the NAT. If only using IP addresses, then you can use an
 # IP address here.
+# Use the line below if you want the setup script to guess your VM's hostname.
+# Make sure that DOMAIN_FQDN gets a sane hostname if you do.
 #export DOMAIN_FQDN=`hostname -f`
-export DOMAIN_FQDN=beirut.stanford.edu
+export DOMAIN_FQDN=
 
 # This should be the IP address of the domain given above. You can get the IP
 # address by executing: host <name> on the command line.
+#
 # Uncomment the line below to use the IP address of eth0
 #export DOMAIN_IP=`/sbin/ifconfig eth0 | awk '/inet addr/ {split ($2,A,":"); print A[2]}'`
-# Comment the line below to not use the IP address of DOMAIN_FQDN. You'll need
-# to have a separate "export DOMAIN_IP=w.x.y.z" if you want to use a custom IP address.
-export DOMAIN_IP=`host beirut.stanford.edu | awk '{print $4}'`
+#
+# Uncomment the line below to have setup guess the IP address from the
+# given FQDN. If you do, make sure that DOMAIN_IP is the right IP address.
+#export DOMAIN_IP=`host $DOMAIN_FQDN | awk '{print $4}'`
+export DOMAIN_IP=
 
 # This is an identifier for various settings and informational strings.
 # Set it to the name of the site or organization.
