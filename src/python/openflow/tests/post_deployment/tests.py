@@ -15,8 +15,10 @@ import xmlrpclib
 from openflow.tests.helpers import parse_rspec, Flowspace
 from openflow.tests.helpers import create_random_resv
 from expedient.common.tests.utils import drop_to_shell
-
 import logging
+from expedient.common import loggingconf
+loggingconf.set_up(logging.DEBUG) # Change logging.INFO for less output
+
 logger = logging.getLogger("PostDeploymentTest")
 
 # Set this to "http" if you know the server uses HTTP instead of HTTPS.
@@ -24,20 +26,20 @@ SCHEME = "https"
 
 # Settings for the flowvisor to verify slice creation and opt-in.
 FLOWVISOR = dict(
-    host="openflow5.stanford.edu",   # host for flowvisor's interface
+    host="beirut.stanford.edu",   # host for flowvisor's interface
     xmlrpc_port=8080,         # XMLRPC port for the flowvisor
     username="root",          # The username to use to connect to the FV
-    password="0fw0rk",        # The password to use to connect to the FV
+    password="rootpassword",        # The password to use to connect to the FV
 )
 
 # The URL for the GAPI proxy you want to use to communicate with Expedient
-GAM_URL = "https://openflow4.stanford.edu:8000/"
+GAM_URL = "https://beirut.stanford.edu:8000/"
 
 # The URL to the GENI Clearinghouse that gives out the credentials.
-GCH_URL = "https://openflow4.stanford.edu:8001/"
+GCH_URL = "https://beirut.stanford.edu:8001/"
 
 # Where is the SSL certificate stored?
-SSL_DIR = "/home/expedient/expedient/gapi-ssl"
+SSL_DIR = "/home/expedient/gapi-ssl"
 
 # What is the first part of the filename of the experimenter's cert and key?
 CERTKEY_FILENAME = "experimenter" # experimenter.key and experimenter.crt
@@ -77,8 +79,8 @@ class Tests(TestCase):
             transport=cert_transport)
         
         cert_transport = SafeTransportWithCert(
-            keyfile=join(SSL_DIR, "experimenter.key"),
-            certfile=join(SSL_DIR, "experimenter.crt"))
+            keyfile=join(SSL_DIR, "%s.key" % CERTKEY_FILENAME),
+            certfile=join(SSL_DIR, "%s.crt" % CERTKEY_FILENAME))
         self.ch_client = xmlrpclib.ServerProxy(
             GCH_URL,
             transport=cert_transport)
@@ -189,10 +191,10 @@ class Tests(TestCase):
         self.assertTrue(
             self.am_client.DeleteSliver(slice_urn, cred),
             "Failed to delete sliver.")
-        
+
         slices_after = self.fv_client.api.listSlices()
         logger.debug("Slices at the FlowVisor after deleting slice: %s" %
-            slices_before)
+            slices_after)
 
 if __name__ == '__main__':
     import unittest
