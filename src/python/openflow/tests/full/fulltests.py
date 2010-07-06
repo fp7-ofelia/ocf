@@ -62,6 +62,7 @@ class FullIntegration(TestCase):
         
         self.mininet_vm_clients = []
         for i in xrange(num):
+            logger.debug("Connecting to the mininet VM at %s:%s" % mininet_vms[i])
             cmd = "sudo mn --topo=%s "  % self.MININET_TOPO +\
                 "--controller=remote --ip=%s --port=%s --mac --switch=ovsk" % (
                     flowvisors[i]["host"], flowvisors[i]["of_port"],
