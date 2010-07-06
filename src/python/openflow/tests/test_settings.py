@@ -23,6 +23,8 @@ CH_PORT = 443
 
 PREFIX = ""
 
+
+FV_CONFIG = 'fv_vm_config.xml'
 GAM_PORT = 8000
 GCH_PORT = 8001
 
