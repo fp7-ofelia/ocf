@@ -10,6 +10,8 @@ fi
 
 source expedient-settings
 
+cp $EXPEDIENT/bin/expedient-settings-clean $EXPEDIENT/bin/expedient-settings
+
 cd $EXPEDIENT/src/python
 
 cp $CH/deployment_settings_clean.py $CH/deployment_settings.py
