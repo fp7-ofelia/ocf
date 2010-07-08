@@ -76,6 +76,27 @@ class Link(object):
         return self.__str__()
                 
 class Flowspace(object):
+    
+    @classmethod
+    def create_controlled_random(cls, all_switches):
+        import random
+        
+        if len(all_switches) == 1:
+            switches = all_switches
+        else:
+            # pick a number of switches for the flowspace
+            num_sw = random.randint(1,len(all_switches))
+            
+            # choose switches
+            switches = random.sample(all_switches, num_sw)
+                    
+                    
+        attrs = {}
+        attrs["nw_src"] = \
+            (_int_to_ip(random.randint(0,0x80000000) & 0xFFFF0000),
+            _int_to_ip(random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000))
+        return cls(attrs, switches)
+    
     @classmethod
     def create_random(cls, all_switches):
         import random
@@ -229,7 +250,7 @@ def create_random_resv(num_flowspaces, switches,
                        slice_desc="Does this and that...",
                        ctrl_url="tcp:controller.stanford.edu:6633",
                        flowspaces=None,
-                       ):
+                       fs_randomness=True):
     from xml.etree import cElementTree as et
     
     root = et.Element("resv_rspec")
@@ -261,7 +282,10 @@ def create_random_resv(num_flowspaces, switches,
     if not flowspaces:
         flowspaces = []
         for i in range(num_flowspaces):
-            f = Flowspace.create_random(switches)
+            if (fs_randomness):
+                f = Flowspace.create_random(switches)
+            else:
+                f = Flowspace.create_controlled_random(switches)
             flowspaces.append(f)
             
     for f in flowspaces:

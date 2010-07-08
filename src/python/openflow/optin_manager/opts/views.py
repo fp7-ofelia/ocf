@@ -157,13 +157,18 @@ def opt_out(request):
             ofs = OptsFlowSpace.objects.get(id=key)
             error_msg = opt_fses_outof_exp([ofs])
                 
+                
+        if (error_msg == ""):
+            error_msg = "Opt Out was Successful" 
+            
     this_user_opts  = UserOpts.objects.filter(user = request.user)
     for useropt in this_user_opts:
         tmpfs = useropt.optsflowspace_set.all()
         if (len(tmpfs) == 0):
             useropt.delete()
             
-                     
+  
+                 
     allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
         
     return simple.direct_to_template(request,

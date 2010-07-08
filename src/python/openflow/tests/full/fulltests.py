@@ -155,14 +155,14 @@ class FullIntegration(TestCase):
         # assign flowspace to the user
         random.seed(0)
         self.user_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
-        self.user_ip_src_e = self.user_ip_src_s
+        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000
         fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
         random.shuffle(fields)
 
         (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
         self.user_field_name = om_name
-        self.user_field_s = random.randint(0,2**width-3)
-        self.user_field_e = self.user_field_s
+        self.user_field_s = random.randint(0,2**(width)-3)
+        self.user_field_e = self.user_field_s + 1
 
         # assign full flowspace to admin:
         username = "admin"
@@ -311,8 +311,8 @@ class FullIntegration(TestCase):
         # Kill stale processes
         kill_old_procs(test_settings.GAM_PORT, test_settings.GCH_PORT)
         
-        ch_username = "clearinghouse"
-        ch_passwd = "ch_password"
+        self.ch_username = "clearinghouse"
+        self.ch_passwd = "ch_password"
         
 #        # run experiment controllers
 #        self.run_nox(
@@ -331,8 +331,8 @@ class FullIntegration(TestCase):
         self.prepare_om(
             test_settings.OM_PROJECT_DIR,
             test_settings.FLOWVISORS[0],
-            ch_username,
-            ch_passwd,
+            self.ch_username,
+            self.ch_passwd,
         )
         
         # store the trusted CA dir
@@ -344,8 +344,8 @@ class FullIntegration(TestCase):
         self.prepare_ch(
             test_settings.CH_PROJECT_DIR,
             test_settings.HOST,
-            ch_username,
-            ch_passwd,
+            self.ch_username,
+            self.ch_passwd,
             test_settings.HOST,
             test_settings.OM_PORT,
         )
@@ -357,6 +357,7 @@ class FullIntegration(TestCase):
             test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
         
     def tearDown(self):
+        pass
         """
         Clean up the Flowvisor rules/slices
         Clear running stuff and so on...
@@ -419,32 +420,7 @@ class FullIntegration(TestCase):
             except:
                 pass
 
-    def test_ListResources(self):
-        """
-        Check the list of resources.
-        """
-        # check the switches on the FV
-        devices = self.fv_clients[0].api.listDevices()
-        logger.debug("FV devices: %s" % devices)
-        self.assertEqual(len(devices), 2)
-        
-        slice_urn, cred = self.create_ch_slice()
-        options = dict(geni_compressed=False, geni_available=True)
-        rspec = wrap_xmlrpc_call(
-            self.am_client.ListResources, [cred, options], {}, 
-            test_settings.TIMEOUT)
-        
-        logger.debug(rspec)
-        
-        # Create switches and links
-        self.switches, self.links = parse_rspec(rspec)
-        
-        # check the number of switches and links
-        self.assertEqual(len(self.switches), 2)
-        self.assertEqual(len(self.links), 2)
-        return slice_urn, cred
-        
-    def test_CreateSliver(self):
+    def create_sliver_core(self,fs_randomness):
         """
         Check that we can create slice on the FV
         """
@@ -464,6 +440,7 @@ class FullIntegration(TestCase):
             slice_name=slice_name,
             email=email,
             ctrl_url=url,
+            fs_randomness = fs_randomness,
         )
         self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
         
@@ -493,6 +470,40 @@ class FullIntegration(TestCase):
         
         return (slice_urn, cred)
 
+
+    def test_ListResources(self):
+        """
+        Check the list of resources.
+        """
+
+        # check the switches on the FV
+        devices = self.fv_clients[0].api.listDevices()
+        logger.debug("FV devices: %s" % devices)
+        self.assertEqual(len(devices), 2)
+        
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources, [cred, options], {}, 
+            test_settings.TIMEOUT)
+        
+        logger.debug(rspec)
+        
+        # Create switches and links
+        self.switches, self.links = parse_rspec(rspec)
+        
+        # check the number of switches and links
+        self.assertEqual(len(self.switches), 2)
+        self.assertEqual(len(self.links), 2)
+        return slice_urn, cred
+        
+    def test_CreateSliver(self):
+        """
+        Check that we can create slice on the FV
+        """
+        return self.create_sliver_core(fs_randomness=True)
+        
+
     def test_CreateDeleteSliver(self):
         """
         Check that we can create then delete a sliver.
@@ -512,45 +523,126 @@ class FullIntegration(TestCase):
             "Slice not deleted at FlowVisor",
         )
         
-#    def test_UserOptIn(self):
-#        """
-#        Test a user opting in.
-#        """
-#        from expedient.common.tests.client import Browser
-#
-#        logger.debug("Creating sliver")
-#
-#        # Create a slice
-#        self.test_CreateSliver()
-#        
-#        logger.debug("Done creating sliver")
-#
-#        # Get user to opt in
-#        logger.debug("Logging into browser")
-#        b = Browser()
-#        b.cookie_setup()
-#        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
-#                            (test_settings.HOST, test_settings.OM_PORT),
-#                            "user","password")
-#        self.assertTrue(logged_in,"Could not log in")
-#        logger.debug("Login success")
+    def test_UserOptIn1(self):
+        """
+        Test a user opting in.
+        """
+        from expedient.common.tests.client import Browser
+        
+        # Prepare the CH again and flush its database
+        self.prepare_ch(
+            test_settings.CH_PROJECT_DIR,
+            test_settings.HOST,
+            self.ch_username,
+            self.ch_passwd,
+            test_settings.HOST,
+            test_settings.OM_PORT,
+        )
+        
+        #create an experiment through CH
+        self.create_sliver_core(fs_randomness=False)
+        
+        logger.debug("Done creating sliver")
+
+        # Get user to opt in
+        logger.debug("Logging into browser")
+        b = Browser()
+        b.cookie_setup()
+        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
+                            (test_settings.HOST, test_settings.OM_PORT),
+                            "user","password")
+        self.assertTrue(logged_in,"Could not log in")
+        logger.debug("Login success")
 #        drop_to_shell(local=locals())
-#
-#        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
-#                                (test_settings.HOST, test_settings.OM_PORT),
-#                                dict(experiment=1,priority=100))
-#        logger.debug("Posted opt-in request, reading response.")
-#        res = f.read()
-#        self.assertEqual(f.code, 200)
-#        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
-#        
-#        logger.debug("Response fine, opting out.")
-#        # now test opt out:
-#        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
-#                                (test_settings.HOST, test_settings.OM_PORT),
-#                                {"1":"checked"})
-#        self.assertEqual(f.code, 200)
-#        self.assertTrue("success" in f.read())
+
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                dict(experiment=1,priority=100))
+        logger.debug("Posted opt-in request, reading response.")
+        res = f.read()
+        self.assertEqual(f.code, 200)
+        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
+        
+        logger.debug("Response fine, opting out.")
+        # now test opt out:
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                {"1":"checked"})
+        res = f.read()
+        self.assertEqual(f.code, 200)
+        self.assertTrue("Successful" in res, "Returned %s"%res)        
+        
+    def test_UserOptIn2(self):
+        """
+        Test a user opting in.
+        """
+        from expedient.common.tests.client import Browser
+        from openflow.optin_manager.opts.models import Experiment,ExperimentFLowSpace
+        import random
+
+        # Prepare the CH again and flush its database
+        self.prepare_ch(
+            test_settings.CH_PROJECT_DIR,
+            test_settings.HOST,
+            self.ch_username,
+            self.ch_passwd,
+            test_settings.HOST,
+            test_settings.OM_PORT,
+        )
+                
+        slices = self.fv_clients[0].api.listSlices()
+        self.assertEqual(len(slices), 1) # root
+        
+        # get the resources
+        slice_urn, cred = self.create_ch_slice()
+        options = dict(geni_compressed=False, geni_available=True)
+        rspec = self.am_client.ListResources(cred, options)
+        
+        # Create switches and links
+        switches, links = parse_rspec(rspec)
+        
+        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
+                      project_desc="project description", slice_name="slice name",
+                      slice_desc="slice description", controller_url="controller url",
+                      owner_email="owner email", owner_password="owner password")
+            
+        for switch in switches:
+            exp_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
+            exp_ip_src_e = random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000
+            ExperimentFLowSpace.objects.create(exp=exp, dpid=switch.dpid,
+                            ip_src_s=exp_ip_src_s, 
+                            ip_src_e=exp_ip_src_e, 
+                             )
+
+        logger.debug("Done creating sliver")
+
+        # Get user to opt in
+        logger.debug("Logging into browser")
+        b = Browser()
+        b.cookie_setup()
+        logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
+                            (test_settings.HOST, test_settings.OM_PORT),
+                            "user","password")
+        self.assertTrue(logged_in,"Could not log in")
+        logger.debug("Login success")
+#        drop_to_shell(local=locals())
+
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                dict(experiment=1,priority=100))
+        logger.debug("Posted opt-in request, reading response.")
+        res = f.read()
+        self.assertEqual(f.code, 200)
+        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
+        
+        logger.debug("Response fine, opting out.")
+        # now test opt out:
+        f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%
+                                (test_settings.HOST, test_settings.OM_PORT),
+                                {"1":"checked"})
+        res = f.read()
+        self.assertEqual(f.code, 200)
+        self.assertTrue("Successful" in res, "Returned %s"%res)
 
 if __name__ == '__main__':
     import unittest
