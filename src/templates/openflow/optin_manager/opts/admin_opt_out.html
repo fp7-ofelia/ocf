@@ -5,7 +5,7 @@
 	<div align="right">
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>
-	<p>{{error_msg}}</p>
+	<p><font color="red">{{error_msg}}</font></p>
 	<form name="input" action="/opts/opt_out" method="post">{% csrf_token %}
 	<table>
 	<tr><th></th><th>FlowSpace</th><th>Experiment</th><th>Priority</th></tr>
