@@ -178,6 +178,11 @@ AGGREGATE_PLUGINS = (
 
 DOMAIN_SCHEME = "https"
 
+# Location of GENI x509 certs and keys for users
+GENI_X509_CERT = join(SRC_DIR, "../geni-x509/ch.crt")
+GENI_X509_KEY = join(SRC_DIR, "../geni-x509/ch.key")
+GENI_PUBLIC_ID = "IDN exedient//stanford ch"
+
 # get custom install info
 from deployment_settings import *
 

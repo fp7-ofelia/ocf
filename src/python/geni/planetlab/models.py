@@ -4,14 +4,14 @@ Created on Jul 4, 2010
 @author: jnaous
 '''
 from django.db import models
-from expedient.clearinghouse.resources.models import Resource
+from expedient.clearinghouse.resources.models import Resource, Sliver
+from expedient.clearinghouse.aggregate.models import Aggregate
 
 class PlanetLabNetwork(models.Model):
     """
     PlanetLab NetSpec.
     """
     name = models.CharField(max_length=100)
-    
     
 class PlanetLabLink(models.Model):
     """
@@ -22,8 +22,7 @@ class PlanetLabLink(models.Model):
     bw = models.IntegerField("Bandwidth")
     min_alloc = models.IntegerField("Minimum allocation")
     max_alloc = models.IntegerField("Maximum allocation")
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    network = models.ForeignKey(PlanetLabNetwork, related_name="links")
 
 class PlanetLabNode(Resource):
     '''
@@ -35,8 +34,7 @@ class PlanetLabNode(Resource):
     cpu_share = models.IntegerField()
     cpu_pct = models.IntegerField()
     disk_max = models.IntegerField()
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    network = models.ForeignKey(PlanetLabNetwork, related_name="nodes")
     
 class PlanetLabInterface(Resource):
     '''
@@ -53,3 +51,9 @@ class PlanetLabInterface(Resource):
     link = models.ForeignKey(PlanetLabLink, related_name="endpoints")
     node = models.ForeignKey(PlanetLabNode)
 
+class PlanetLabNodeSliver(Sliver):
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    
+class PlanetLabAggregate(Aggregate):
+    
