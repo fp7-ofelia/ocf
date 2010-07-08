@@ -29,7 +29,7 @@ MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
 
 # default site
 SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "beirut.stanford.edu"
+SITE_DOMAIN = "clearinghouse.geni.org" # example
 
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"

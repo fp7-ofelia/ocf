@@ -32,4 +32,10 @@ SITE_DOMAIN = "optinmanager.geni.org" # example
 
 DOMAIN_SCHEME = "https"
 
-from secret_key import SECRET_KEY
+try:
+    from secret_key import SECRET_KEY
+except:
+    import traceback
+    print "Could not import custom secret key because:"
+    traceback.print_exc()
+    print "Using generic insecure key. Make sure secret_key.py has a SECRET_KEY variable."

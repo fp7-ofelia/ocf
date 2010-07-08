@@ -17,27 +17,29 @@ FLOWVISOR_DIR = join(PYTHON_DIR, "../../../flowvisor")
 USE_RANDOM = False
 
 # Address and ports of the expedient clearinghouse and opt-in manager
-HOST = socket.getfqdn()
+HOST = "openflow4.stanford.edu"
 OM_PORT = 8443
 CH_PORT = 443
 
 PREFIX = ""
 
+
+FV_CONFIG = 'fv_vm_config.xml'
 GAM_PORT = 8000
 GCH_PORT = 8001
 
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
-        host="172.16.77.1",     # IP address for flowvisor's interface
+        host="192.168.1.129",     # IP address for flowvisor's interface
         of_port=6633,             # openflow port
         xmlrpc_port=8080,         # XMLRPC port for the flowvisor
         username="root",          # The username to use to connect to the FV
-        password="rootpassword",  # The password to use to connect to the FV
-        path=(FLOWVISOR_DIR, "default-config.xml"), # configuration file
+        password='rootpassword',  # The password to use to connect to the FV
+        path=(FLOWVISOR_DIR, FV_CONFIG), # configuration file
     ),
 ]
-MININET_VMS = [("172.16.77.131", 22)]   # IP, ssh port of the mininet VM
+MININET_VMS = [("192.168.1.130", 22)]    # IP address of the mininet VM
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
@@ -58,10 +60,8 @@ PAUSE_AFTER_TESTS = False         # If true, each test will wait for an Enter
                                   # from the user before tearing down (useful
                                   # to look at xterm output).
 
-WAIT_MULTIPLIER = 1               # Multiplies the sleep times in the fulltests
-                                  # If you are getting "connection refused"
-                                  # errors, increasing theis number might help
-                                  # make them pass on slower machines.
+TIMEOUT = 10                      # Time to wait for processes to run and for
+                                  # communication to work.
 
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))

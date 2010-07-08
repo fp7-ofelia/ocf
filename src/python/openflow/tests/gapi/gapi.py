@@ -21,7 +21,7 @@ if settings.SHOW_PROCESSES_IN_XTERM:
     from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
 else:
     from expedient.common.tests.utils import run_cmd
-from expedient.common.tests.utils import wait_for_servers
+from expedient.common.tests.utils import wrap_xmlrpc_call, drop_to_shell
 
 import logging
 logger = logging.getLogger("gapi_test")
@@ -41,7 +41,8 @@ class GAPITests(TestCase):
         """
         import gcf.sfa.trust.credential as cred
         
-        slice_cred_string = self.ch_client.CreateSlice()
+        slice_cred_string = wrap_xmlrpc_call(
+            self.ch_client.CreateSlice, [], {}, settings.TIMEOUT)
         slice_credential = cred.Credential(string=slice_cred_string)
         slice_gid = slice_credential.get_gid_object()
         slice_urn = slice_gid.get_urn()
@@ -125,24 +126,26 @@ class GAPITests(TestCase):
         
         
         # run the CH
-        kill_old_procs(8000, 8001)
-        cmd = "python %s -r %s -c %s -k %s -p 8001 --debug" % (
+        kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
+        cmd = "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
-            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key")
+            join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
+            settings.GCH_PORT,
         )
         self.ch_proc = run_cmd(cmd, pause=True)
         
         # run the AM proxy
-        cmd = "python %s -r %s -c %s -k %s -p 8000 -u %s --debug" % (
+        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gam.py"),
             join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "server.crt"),
             join(settings.SSL_DIR, "server.key"),
+            settings.GAM_PORT,
             SCHEME + "://%s:%s/openflow/gapi/" % (settings.HOST, settings.CH_PORT),
         )
         self.am_proc = run_cmd(cmd, pause=True)
         
-        ch_host = "localhost:8001"
+        ch_host = "%s:%s" % (settings.HOST, settings.GCH_PORT)
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
@@ -150,15 +153,13 @@ class GAPITests(TestCase):
             "https://"+ch_host+"/",
             transport=cert_transport)
         
-        am_host = "localhost:8000"
+        am_host = "%s:%s" % (settings.HOST, settings.GAM_PORT)
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
         self.am_client = xmlrpclib.ServerProxy(
             "https://"+am_host+"/",
             transport=cert_transport)
-        
-        time.sleep(settings.WAIT_MULTIPLIER*2)
         
         logger.debug("setup done")
         
@@ -194,13 +195,14 @@ class GAPITests(TestCase):
             pass
 
         import time
-        time.sleep(1)
     
     def test_GetVersion(self):
         """
         Tests that get version returns 1.
         """
-        self.assertEqual(self.am_client.GetVersion()['geni_api'], 1)
+        ret = wrap_xmlrpc_call(
+            self.am_client.GetVersion, [], {}, settings.TIMEOUT)
+        self.assertEqual(ret['geni_api'], 1)
 
     def test_ListResources(self, zipped=False):
         """
@@ -209,12 +211,12 @@ class GAPITests(TestCase):
         from openflow.dummyom.models import DummyOM
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=zipped, geni_available=True)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources,
+            [cred, options], {}, settings.TIMEOUT)
         if zipped:
             import zlib, base64
-            comp_rspec = self.am_client.ListResources(cred, options)
-            rspec = zlib.decompress(base64.b64decode(comp_rspec))
-        else:
-            rspec = self.am_client.ListResources(cred, options)
+            rspec = zlib.decompress(base64.b64decode(rspec))
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
@@ -240,7 +242,9 @@ class GAPITests(TestCase):
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources,
+            [cred, options], {}, settings.TIMEOUT)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
@@ -282,7 +286,9 @@ class GAPITests(TestCase):
         # get the resources
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources,
+            [cred, options], {}, settings.TIMEOUT)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
@@ -321,7 +327,9 @@ class GAPITests(TestCase):
         # get the resources
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources,
+            [cred, options], {}, settings.TIMEOUT)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)
@@ -347,7 +355,9 @@ class GAPITests(TestCase):
         # get the resources
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
-        rspec = self.am_client.ListResources(cred, options)
+        rspec = wrap_xmlrpc_call(
+            self.am_client.ListResources,
+            [cred, options], {}, settings.TIMEOUT)
         
         # Create switches and links
         self.switches, self.links = parse_rspec(rspec)

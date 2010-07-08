@@ -11,9 +11,13 @@ sys.path.append(SRC_DIR)
 from unittest import TestCase
 from expedient.common.tests.commands import call_env_command, Env
 from openflow.tests import test_settings
+from expedient.common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
 import random
 from pprint import pprint
+import logging
+
+logger = logging.getLogger("om_test")
 
 SCHEME = "https" if test_settings.USE_HTTPS else "http"
 
@@ -92,7 +96,8 @@ class OMTests(TestCase):
         """
         Communications are up.
         """
-        ret = self.om_client.ping("PING")
+        ret = wrap_xmlrpc_call(
+            self.om_client.ping, ["PING"], {}, test_settings.TIMEOUT)
         self.assertEqual(ret, "PONG: PING", "Ping returned %s." % ret)
         
     def test_get_switches(self):
@@ -103,7 +108,8 @@ class OMTests(TestCase):
         from openflow.optin_manager.dummyfv.models import DummyFVDevice
 
         # TODO: Fix to also check the returned info
-        self.dpids_info = self.om_client.get_switches()
+        self.dpids_info = wrap_xmlrpc_call(
+            self.om_client.get_switches, [], {}, test_settings.TIMEOUT)
         dpids = set([d[0] for d in self.dpids_info])
         
         # check that we expect all the dpids
@@ -124,7 +130,8 @@ class OMTests(TestCase):
         """
         from openflow.optin_manager.dummyfv.models import DummyFVLink
 
-        links = self.om_client.get_links()
+        links = wrap_xmlrpc_call(
+            self.om_client.get_links, [], {}, test_settings.TIMEOUT)
         links = set([tuple(l[:-1]) for l in links])
 #        print "Received links:"
 #        pprint(links)
@@ -157,7 +164,9 @@ class OMTests(TestCase):
         Tests that the Clearinghouse password can be changed correctly.
         """
         from django.contrib.auth.models import User
-        self.om_client.change_password("new_password")
+        wrap_xmlrpc_call(
+            self.om_client.change_password, ["new_password"], {},
+            test_settings.TIMEOUT)
         
         user = User.objects.get(username="clearinghouse")
         
@@ -304,7 +313,8 @@ class OMTests(TestCase):
         ids = range(1, num_slices)
         random.shuffle(ids)
         for i in ids:
-            err = self.om_client.delete_slice(i)
+            err = wrap_xmlrpc_call(
+                self.om_client.delete_slice, [i], {}, test_settings.TIMEOUT)
             self.assertEqual(err, "")
             num_slices -= 1
             for fv in DummyFV.objects.all():

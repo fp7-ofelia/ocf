@@ -13,7 +13,7 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
             dpids = self.api.listDevices()
             infos = [self.api.getDeviceInfo(d) for d in dpids]
             return zip(dpids, infos)
-        except Exception,e:
+        except Exception, e:
             import traceback
             traceback.print_exc()
             raise e
@@ -28,7 +28,7 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  l.pop("dstDPID"),
                  l.pop("dstPort"),
                  l) for l in self.api.getLinks()]
-        except Exception,e:
+        except Exception, e:
             import traceback
             traceback.print_exc()
             raise e
@@ -36,10 +36,10 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
     def ping(self, str):
         try:
             return self.api.ping(str)
-        except Exception,e:
+        except Exception, e:
             import traceback
             traceback.print_exc()
-            return str(e)
+            raise e
 
 class CallBackServerProxy(models.Model):
     '''

@@ -4,6 +4,9 @@ Created on Jun 16, 2010
 @author: jnaous
 '''
 
+import logging
+logger = logging.getLogger("test_utils")
+
 def run_cmd_in_xterm(cmd, pause=False):
     """
     Runs a command in a subprocess xterm.
@@ -22,11 +25,11 @@ def _run_cmd(cmd, pause=False):
     if pause:
         cmd = cmd + "; read n"
     return subprocess.Popen(
-        shlex.split(cmd),
+	shlex.split(cmd),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-
+    
 def drop_to_shell(local):
     import rlcompleter
     import readline
@@ -65,3 +68,25 @@ def wait_for_servers(urls, timeout):
             else:
                 break
             
+def wrap_xmlrpc_call(func, args, kwargs, timeout):
+    '''
+    Keep trying the xmlrpc call until a timeout occurs on errors that are not
+    xmlrpclib Faults.
+    
+    @param func: the function to call
+    @param args: list of arguments to pass to call
+    @param kwargs: dict of keyword args to pass to func
+    @param timeout: How many seconds to keep trying for.
+    '''
+    import time, xmlrpclib
+    for i in xrange(timeout):
+        try:
+            r = func(*args, **kwargs)
+            return r
+        except xmlrpclib.Fault:
+            raise
+        except:
+            logger.debug("     Trying to call func for the {%s}th again." % (i+1,))
+            time.sleep(1)
+            pass
+    return func(*args, **kwargs)
