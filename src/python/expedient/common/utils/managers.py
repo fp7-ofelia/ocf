@@ -89,7 +89,7 @@ class GenericObjectManager(models.Manager):
         
     def filter_for_objects(self, klass, **object_filter_args):
         """
-        Filter the generic objects by to return the queryset that contains
+        Filter the generic objects to return the queryset that contains
         objects of class C{klass} filtered by the rest of the keywords.
         """
         ct = ContentType.objects.get_for_model(klass)
