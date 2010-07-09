@@ -57,19 +57,19 @@ class GENIAggergate(Aggregate):
 
         self.proxy = xmlrpclib.ServerProxy(u, transport=transp)
     
-    def to_rspec(self, slice):
+    def _to_rspec(self, slice):
         """
         Change this slice into an rspec for this aggregates
         """
         raise NotImplementedError()
     
-    def list_resources(self, rspec):
+    def _list_resources(self, rspec):
         """
         Parse the rspec and update resources in the database.
         """
         raise NotImplementedError()
     
-    def create_sliver(self, slice):
+    def _create_sliver(self, slice):
         """
         Corresponds to the CreateSliver call of the GENI aggregate API.
         Creates a sliver on the aggregate from this slice.
@@ -88,7 +88,7 @@ class GENIAggergate(Aggregate):
     
         # TODO: parse reserved slice to see errors and such
     
-    def delete_sliver(self, slice):
+    def _delete_sliver(self, slice):
         """
         Corresponds to the DeleteSliver call of the GENI aggregate API.
         Stop and delete slice at the aggregate.
@@ -114,3 +114,19 @@ class GENIAggergate(Aggregate):
         """
         # TODO: fill up
         
+    ####################################################################
+    # Overrides from expedient.clearinghouse.aggregate.models.Aggregate
+    def check_status(self):
+        try:
+            ver = self.proxy.GetVersion()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return False
+        return self.available
+    
+    def start_slice(self, slice):
+        return self.create_sliver(slice)
+        
+    def stop_slice(self, slice):
+        return self.delete_sliver(slice)
