@@ -19,10 +19,10 @@ def help_msg(command=None):
         (required)switch_slivers=<list of switches and flowspaces> \n\
 <switch_slivers> \n\
     list of datapath_id and flowspaces. use the following format:\n\
-    [{'datapath_id':'00:00:00:00:00:00:01','flowspace':[{'id':1,\n\
-    'nw_src_start':'192.168.1.1','nw_src_end':'192.168.1.255'}]},{'datapath_id'\n\
-    :'00:00:00:00:00:00:02','flowspace':[{'id':2,'port_number_start':'1',\n\
-    'port_number_end':'4'}]}]\n\
+    '[{\"datapath_id\":\"00:00:00:00:00:00:01\",\"flowspace\":[{\"id\":1,\n\
+    \"nw_src_start\":\"192.168.1.1\",\"nw_src_end\":\"192.168.1.255\"}]},{\"datapath_id\"\n\
+    :\"00:00:00:00:00:00:02\",\"flowspace\":[{\"id\":2,\"port_number_start\":\"1\",\n\
+    \"port_number_end\":\"4\"}]}]'\n\
 flowspace fields:\n\
     (required)id: an id used for this flowspace\n\
     (optional)port_number_star, port_number_end (default:0,65535)\n\
@@ -35,13 +35,30 @@ flowspace fields:\n\
     (optional)tp_src_start,tp_src_end (default: transport layer port range)\n\
     (optional)tp_dst_start,tp_dst_end (default: transport layer port range)\n\
         "
+    delete_slice_msg = "delete_slice <CH username in OM> <CH password in OM> <OM URL> <slice id> \n"
+    get_switches_msg = "get_switches <CH username in OM> <CH password in OM> <OM URL> \n"
+    get_links_msg = "get_links <CH username in OM> <CH password in OM> <OM URL> \n"
+    change_password_msg = "change_password <CH username in OM> <CH password in OM> <OM URL> <new password>\n"
+    register_topology_callback_msg = "register_topology_callback <CH username in OM> <CH password in OM> <OM URL> <url> <cookie>\n"
+
     if (command == "ping"):
         return "python omctl.py %s"%ping_msg
     elif (command == "create_slice"):
         return "python omctl.py %s %s"%(create_slice_msg,slice_info_msg)
+    elif (command == "delete_slice"):
+        return "python omctl.py %s"%(delete_slice_msg)
+    elif (command == "get_switches"):
+        return "python omctl.py %s"%(get_switches_msg)
+    elif (command == "get_links"):
+        return "python omctl.py %s"%(get_links_msg)
+    elif (command == "change_password"):
+        return "python omctl.py %s"%(change_password_msg)
+    elif (command == "register_topology_callback"):
+        return "python omctl.py %s"%(register_topology_callback_msg)
     else:    
-        return "python omctl.py <command> <inputs> \n %s %s"%\
-            (ping_msg,create_slice_msg)
+        return "python omctl.py <command> <inputs> \n %s %s %s %s %s %s %s"%\
+            (ping_msg,create_slice_msg,delete_slice_msg,get_switches_msg,
+             get_links_msg, change_password_msg,register_topology_callback_msg)
     
     
 def xmlrpc_wrap_ping(username,password,url,ping_data):
@@ -65,9 +82,7 @@ def xmlrpc_wrap_create_slice(username, password, url, args):
     owner_email = "owner@expedient.com"
     owner_password = None
     switch_slivers = None
-    print "HERE"
     for arg in args:
-        print "arg is %s"%arg
         if arg.startswith("slice_id="):
             parts = arg.split('=')
             slice_id = int(parts[1])
@@ -97,21 +112,60 @@ def xmlrpc_wrap_create_slice(username, password, url, args):
             try:
                 switch_slivers = ast.literal_eval(parts[1])
             except Exception,e:
-                return str(e)
-            print "SWITCH SLIVERS %s"%switch_slivers
-    print "here"      
+                return str(e)  
     if not (slice_id and controller_url and owner_password and switch_slivers):
         return "Invalid syntax: %s"%help_msg("create_slice")
-    print "here2"      
     xmlrpc_proxy = PasswordXMLRPCServerProxy()
     xmlrpc_proxy.setup(username, password, url, False)
     try:
         returned = wrap_xmlrpc_call(xmlrpc_proxy.create_slice,[slice_id,project_name, 
                 project_description,slice_name, slice_description, controller_url,
                 owner_email, owner_password,switch_slivers],{},10)
-        print "here3"
         return returned
     except Exception,e:
-        print e
-        return e
+        return str(e)
+    
+def xmlrpc_wrap_delete_slice(username, password, url, slice_id):
+    xmlrpc_proxy = PasswordXMLRPCServerProxy()
+    xmlrpc_proxy.setup(username, password, url, False)
+    try:
+        returned_data = wrap_xmlrpc_call(xmlrpc_proxy.delete_slice,[slice_id],{},10)
+        return returned_data
+    except Exception,e:
+        return str(e)   
    
+def xmlrpc_wrap_get_switches(username, password, url):
+    xmlrpc_proxy = PasswordXMLRPCServerProxy()
+    xmlrpc_proxy.setup(username, password, url, False)
+    try:
+        returned_data = wrap_xmlrpc_call(xmlrpc_proxy.get_switches,[],{},10)
+        return returned_data
+    except Exception,e:
+        return str(e)
+    
+def xmlrpc_wrap_get_links(username, password, url):
+    xmlrpc_proxy = PasswordXMLRPCServerProxy()
+    xmlrpc_proxy.setup(username, password, url, False)
+    try:
+        returned_data = wrap_xmlrpc_call(xmlrpc_proxy.get_links,[],{},10)
+        return returned_data
+    except Exception,e:
+        return str(e)
+    
+def xmlrpc_wrap_change_password(username, password, url,new_password):
+    xmlrpc_proxy = PasswordXMLRPCServerProxy()
+    xmlrpc_proxy.setup(username, password, url, False)
+    try:
+        returned_data = wrap_xmlrpc_call(xmlrpc_proxy.change_password,[new_password],{},10)
+        return returned_data
+    except Exception,e:
+        return str(e)
+    
+def xmlrpc_wrap_register_topology_callback(username, password, om_url,url,cookie):
+    xmlrpc_proxy = PasswordXMLRPCServerProxy()
+    xmlrpc_proxy.setup(username, password, om_url, False)
+    try:
+        returned_data = wrap_xmlrpc_call(xmlrpc_proxy.register_topology_callback,[url,cookie],{},10)
+        return returned_data
+    except Exception,e:
+        return str(e)
