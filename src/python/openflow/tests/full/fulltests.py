@@ -357,7 +357,6 @@ class FullIntegration(TestCase):
             test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
         
     def tearDown(self):
-        pass
         """
         Clean up the Flowvisor rules/slices
         Clear running stuff and so on...
