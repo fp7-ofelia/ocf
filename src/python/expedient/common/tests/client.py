@@ -16,7 +16,7 @@ class Browser():
         """
         self.cookiejar = cookielib.CookieJar()        
         
-    def get_form_params(self, doc):
+    def get_form_inputs(self, doc):
         """
         parse the doc (a string), and return a dictionary of
         name->value.
@@ -52,7 +52,26 @@ class Browser():
                     result[options.eq(j).text()] = options.eq(j).attr.value
 
         return result
+    
+    def get_checkbox_choices(self, doc):
+        """
+        parse the doc (a string), and return a dictionary of
+        name->text. The checkboxes should be of the following format:
+        <input type="checkbox" name="something">text</input>
+        """
+        from pyquery import PyQuery as pq
         
+        d = pq(doc, parser="html")
+        inputs = d("input")
+        result = {}
+        
+        for i in range(0,len(inputs)):
+            if inputs.eq(i).attr.type=="checkbox":
+                choice = str(inputs.eq(i)).split(">")[1].lstrip()
+                result[choice] = inputs.eq(i).attr.name
+        
+        return result
+    
     def get_form(self,url):
         """
         Get the form at 'url'
@@ -90,7 +109,7 @@ class Browser():
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         urllib2.install_opener(opener)
         f = urllib2.urlopen(url)
-        form_params = self.get_form_params(f.read())
+        form_params = self.get_form_inputs(f.read())
         form_params.update(params)
     
         data = urllib.urlencode(form_params)

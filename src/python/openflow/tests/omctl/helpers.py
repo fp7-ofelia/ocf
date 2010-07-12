@@ -41,6 +41,7 @@ flowspace fields:\n\
     change_password_msg = "change_password <CH username in OM> <CH password in OM> <OM URL> <new password>\n"
     register_topology_callback_msg = "register_topology_callback <CH username in OM> <CH password in OM> <OM URL> <url> <cookie>\n"
     opt_in_msg = "opt_in <username in OM> <password in OM> <OM URL> <project name> <slice name> <priority (e.g.100)>\n"
+    opt_out_msg = "opt_out <username in OM> <password in OM> <OM URL> <project name> <slice name> \n"
 
     if (command == "ping"):
         return "python omctl.py %s"%ping_msg
@@ -58,6 +59,8 @@ flowspace fields:\n\
         return "python omctl.py %s"%(register_topology_callback_msg)
     elif (command == "opt_in"):
         return "python omctl.py %s"%(opt_in_msg)
+    elif (command == "opt_out"):
+        return "python omctl.py %s"%(opt_out_msg)
     else:    
         return "python omctl.py <command> <inputs> \n %s %s %s %s %s %s %s %s"%\
             (ping_msg,create_slice_msg,delete_slice_msg,get_switches_msg,
@@ -180,9 +183,7 @@ def http_wrap_opt_in(username, password, url, project_name, slice_name, priority
     
     #log in first
     log_in_url = "%s/accounts/login/"%url
-    print log_in_url
     logged_in = b.login(log_in_url, "user", "password")
-    print logged_in
     if not logged_in:
         return "Log in unsuccessful. Please check username and password"
     
@@ -199,6 +200,35 @@ def http_wrap_opt_in(username, password, url, project_name, slice_name, priority
     f = b.get_and_post_form(opt_in_url, dict(experiment=id,priority=priority))
     if ("success" in f.read()):
         return "Opt in was successful"
+    else:
+        return f.read()
+    
+def http_wrap_opt_out(username, password, url, project_name, slice_name):
+    b = Browser()
+    b.cookie_setup()
+    
+    #log in first
+    log_in_url = "%s/accounts/login/"%url
+    logged_in = b.login(log_in_url, "user", "password")
+    if not logged_in:
+        return "Log in unsuccessful. Please check username and password"
+    
+    #get experiment id:
+    opt_out_url = "%s/opts/opt_out"%url
+    f = b.get_form(opt_out_url)
+    options = b.get_checkbox_choices(f.read())
+
+    try:
+        id = options["%s:%s"%(project_name,slice_name)]
+    except Exception,e:
+        return "%s has not opted into experiment %s:%s"%(username,project_name,slice_name)
+    
+    #opt in request
+    data = {}
+    data[id] = "checked"
+    f = b.get_and_post_form(opt_out_url, data)
+    if ("Successful" in f.read()):
+        return "Opt out was successful"
     else:
         return f.read()
     
