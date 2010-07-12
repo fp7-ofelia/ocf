@@ -4,8 +4,7 @@ Created on Jun 18, 2010
 @author: jnaous
 '''
 from django.shortcuts import get_object_or_404
-from django.views.generic.create_update import get_model_and_form_class, \
-    redirect
+from django.views.generic.create_update import get_model_and_form_class
 from django.views.generic import simple
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.common.messaging.models import DatedMessage
