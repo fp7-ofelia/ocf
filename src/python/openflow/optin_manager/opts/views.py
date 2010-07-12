@@ -146,36 +146,58 @@ def add_opt_in(request):
 def opt_out(request):
     error_msg = ""
     profile = request.user.get_profile()
-    # TODO: different view for user
-    if (request.method == "POST"):
-        fv_args = []
-        for key in request.POST:
-            try:
-                int(key)
-            except:
-                continue
-            ofs = OptsFlowSpace.objects.get(id=key)
-            error_msg = opt_fses_outof_exp([ofs])
+    if (profile.is_net_admin):
+        if (request.method == "POST"):
+            fv_args = []
+            for key in request.POST:
+                try:
+                    int(key)
+                except:
+                    continue
+                ofs = OptsFlowSpace.objects.get(id=key)
+                error_msg = opt_fses_outof_exp([ofs])
+                    
+                    
+            if (error_msg == ""):
+                error_msg = "Opt Out was Successful" 
                 
+        this_user_opts  = UserOpts.objects.filter(user = request.user)
+        for useropt in this_user_opts:
+            tmpfs = useropt.optsflowspace_set.all()
+            if (len(tmpfs) == 0):
+                useropt.delete()
                 
-        if (error_msg == ""):
-            error_msg = "Opt Out was Successful" 
+        allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
             
-    this_user_opts  = UserOpts.objects.filter(user = request.user)
-    for useropt in this_user_opts:
-        tmpfs = useropt.optsflowspace_set.all()
-        if (len(tmpfs) == 0):
-            useropt.delete()
+        return simple.direct_to_template(request,
+                    template = 'openflow/optin_manager/opts/admin_opt_out.html', 
+                    extra_context = {'allfs':allfs, 'error_msg':error_msg},
+                )
+        
+        
+    else: #normal user
+        if (request.method == "POST"):
+            fv_args = []
+            for key in request.POST:
+                try:
+                    int(key)
+                except:
+                    continue
+                opt = UserOpts.objects.get(id=key)
+                ofs = OptsFlowSpace.objects.filter(opt=opt)
+                error_msg = opt_fses_outof_exp(ofs)
+                    
+                    
+            if (error_msg == ""):
+                error_msg = "Opt Out was Successful" 
+                opt.delete()
+                
+        allopts = UserOpts.objects.filter(user = request.user)
             
-  
-                 
-    allfs = OptsFlowSpace.objects.filter(opt__user = request.user)
-        
-    return simple.direct_to_template(request,
-                template = 'openflow/optin_manager/opts/admin_opt_out.html', 
-                extra_context = {'allfs':allfs, 'error_msg':error_msg},
-            )
-        
+        return simple.direct_to_template(request,
+                    template = 'openflow/optin_manager/opts/user_opt_out.html', 
+                    extra_context = {'allopts':allopts, 'error_msg':error_msg},
+                )
 
 @login_required
 def update_opts(request):
