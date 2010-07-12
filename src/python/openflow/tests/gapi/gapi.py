@@ -79,7 +79,7 @@ class GAPITests(TestCase):
             )
     
             # test availability
-            if not proxy.is_available:
+            if not proxy.is_available():
                 raise Exception("Problem: Proxy not available")
     
             # Add aggregate
