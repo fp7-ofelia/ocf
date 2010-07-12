@@ -164,25 +164,6 @@ def aggregate_add_links(request, agg_id):
         },
     )
     
-def aggregate_delete(request, agg_id):
-    """
-    Delete an aggregate.
-    """
-    aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
-    req = create_update.delete_object(
-        request,
-        OpenFlowAggregate,
-        reverse("aggregate_all"),
-        agg_id,
-        template_name=TEMPLATE_PATH+"/aggregate_confirm_delete.html",
-    )
-    if req.status_code == HttpResponseRedirect.status_code:
-        DatedMessage.objects.post_message_to_user(
-            "Successfully deleted aggregate %s" % aggregate.name,
-            request.user, msg_type=DatedMessage.TYPE_ERROR,
-        )
-    return req
-
 def aggregate_add_to_slice(request, agg_id, slice_id):
     """
     Add the aggregate to the slice. Check if the slice already has
