@@ -11,9 +11,8 @@ from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
 import uuid
-from gcf.geni.ch import publicid_to_urn
 
-class GENIAggregateSliceInfo(models.Model):
+class GENISliceInfo(models.Model):
     """
     Holds information about the slice that's relevant for the GENI API.
     
@@ -22,40 +21,50 @@ class GENIAggregateSliceInfo(models.Model):
     @ivar slice_urn: the slice's unique resource name. This will be
         automatically created in the __init__ function if not given.
     @type slice_urn: a string.
-    @ivar slice_credential: the slice's access credential. This will be
-        automatically created in the __init__ function if not given.
-    @type slice_credential: a string.
     """
     slice = models.OneToOneField(
-        Slice, related_name="geni_aggregate_slice_info")
+        Slice, related_name="geni_slice_info")
     slice_urn = models.CharField(max_length=1024)
-    slice_credential = models.TextField()
     
     def __init__(self, *args, **kwargs):
-        super(GENIAggregateSliceInfo, self).__init__(*args, **kwargs)
-        slice_uuid = uuid.uuid4()
-        urn = publicid_to_urn(settings.GENI_PUBLIC_ID)
-        # TODO: fill this up once GPO finishes the new gcf.
+        kwargs.setdefault(
+            "slice_urn", "%s+slice+%s" % (settings.GENI_URN, uuid.uuid4()))
+        super(GENISliceInfo, self).__init__(*args, **kwargs)
         
-
-class GENIAggergate(Aggregate):
+class GENIAggregate(Aggregate):
     url = models.URLField(max_length=200)
     
     class URLNotDefined(Exception): pass
     
-    def __init__(self, *args, **kwargs):
-        super(Aggregate, self).__init__(*args, **kwargs)
-
-        try:
-            u = self.url
-        except AttributeError:
-            raise self.URLNotDefined("Define the url attribute when init'ing\
- the GENIAggregate model.")
+    def __getattr__(self, name):
+        if name == "proxy":
+            try:
+                u = self.url
+            except AttributeError:
+                raise self.URLNotDefined("URL not set.")
+            
+            if not u:
+                raise self.URLNotDefined("URL not set.")
+            
+            transp = certtransport.SafeTransportWithCert(
+                keyfile=settings.GENI_X509_KEY, certfile=settings.GENI_X509_CERT)
+    
+            self.proxy = xmlrpclib.ServerProxy(u, transport=transp)
+    
+    @classmethod
+    def get_am_cred(cls):
+        """
+        Get the slice authority credentials to use for AM calls.
         
-        transp = certtransport.SafeTransportWithCert(
-            keyfile=settings.GENI_x509_KEY, certfile=settings.GENI_x509_CERT)
-
-        self.proxy = xmlrpclib.ServerProxy(u, transport=transp)
+        @return: GENI credential string.
+        """
+        if hasattr(self, "am_cred"):
+            return  cls.am_cred
+        
+        f = open(settings.GENI_CRED)
+        cls.am_cred = f.read()
+        f.close()
+        return cls.am_cred
     
     def _to_rspec(self, slice):
         """
@@ -63,7 +72,7 @@ class GENIAggergate(Aggregate):
         """
         raise NotImplementedError()
     
-    def _list_resources(self, rspec):
+    def _list_resources(self):
         """
         Parse the rspec and update resources in the database.
         """
@@ -76,11 +85,11 @@ class GENIAggergate(Aggregate):
         """
         
         rspec = self.as_leaf_class().to_rspec(slice)
-        info = slice.geni_aggregate_slice_info
+        info = slice.geni_slice_info
         
         try:
             reserved = self.proxy.CreateSliver(
-                info.slice_urn, [info.slice_credential], rspec)
+                info.slice_urn, [self.get_am_cred()], rspec)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -95,11 +104,11 @@ class GENIAggergate(Aggregate):
         """
         
         rspec = self.as_leaf_class().to_rspec(slice)
-        info = slice.geni_aggregate_slice_info
+        info = slice.geni_slice_info
         
         try:
             ret = self.proxy.DeleteSliver(
-                info.slice_urn, [info.slice_credential], rspec)
+                info.slice_urn, [self.get_am_cred()], rspec)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -113,6 +122,7 @@ class GENIAggergate(Aggregate):
         Returns the sliver's status at the aggregate.
         """
         # TODO: fill up
+        raise NotImplementedError()
         
     ####################################################################
     # Overrides from expedient.clearinghouse.aggregate.models.Aggregate
@@ -124,6 +134,14 @@ class GENIAggergate(Aggregate):
             traceback.print_exc()
             return False
         return self.available
+    
+    def add_to_slice(self, slice, next):
+        """
+        Create a GENISliceInfo instance for this slice if none exists.
+        """
+        info, created = GENISliceInfo.objects.get_or_create(slice=slice)
+        slice.aggregate.add(self)
+        return next
     
     def start_slice(self, slice):
         return self.create_sliver(slice)
