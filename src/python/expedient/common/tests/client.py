@@ -30,7 +30,45 @@ class Browser():
         inputs = [i for i in inputs if i.name]
         
         return dict([(i.name, i.value) for i in inputs])
+     
+     
+    def get_select_choices(self, doc, select_name):
+        """
+        parse the doc (a string), and return a dictionary of all
+        options and their values
+        """
+        from pyquery import PyQuery as pq
         
+        result={}
+        
+        d = pq(doc, parser="html")
+
+        selects = d("select")
+
+        for i in range(0,len(selects)):
+            if selects.eq(i).attr.name == select_name:
+                options = selects.find('option')
+                for j in range(0,len(options)):
+                    result[options.eq(j).text()] = options.eq(j).attr.value
+
+        return result
+        
+    def get_form(self,url):
+        """
+        Get the form at 'url'
+        
+        @param url: URL to get the form from.
+        @type url: string
+
+        @return: response from urllib2.urlopen
+        @rtype: file-like object (see L{urllib2.urlopen})
+        """
+        
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        urllib2.install_opener(opener)
+        f = urllib2.urlopen(url)
+        return f
+    
     def get_and_post_form(self,url, params, post_url=None):
         """
         Get the form at 'url', modify named parameters by those in 'params',

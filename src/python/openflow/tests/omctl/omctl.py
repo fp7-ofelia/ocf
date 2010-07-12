@@ -78,6 +78,16 @@ def main(argv):
         except Exception,e:
             print str(e)
             print "Invalid syntax\n %s"%help_msg("register_topology_callback")
+    elif (argv[0]=="opt_in"):
+        username = argv[1]
+        password = argv[2]
+        url = argv[3]
+        project_name = argv[4]
+        slice_name = argv[5]
+        priority = argv[6]
+        returned = http_wrap_opt_in(username,password,url,project_name,slice_name,priority)
+        print returned
+
             
 if __name__ == "__main__":
     import sys

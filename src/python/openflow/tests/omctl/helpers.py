@@ -1,7 +1,7 @@
 from XMLRPCServerProxy import PasswordXMLRPCServerProxy
 from expedient.common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
-
+from expedient.common.tests.client import Browser
 
 
 def help_msg(command=None):
@@ -40,6 +40,7 @@ flowspace fields:\n\
     get_links_msg = "get_links <CH username in OM> <CH password in OM> <OM URL> \n"
     change_password_msg = "change_password <CH username in OM> <CH password in OM> <OM URL> <new password>\n"
     register_topology_callback_msg = "register_topology_callback <CH username in OM> <CH password in OM> <OM URL> <url> <cookie>\n"
+    opt_in_msg = "opt_in <username in OM> <password in OM> <OM URL> <project name> <slice name> <priority (e.g.100)>\n"
 
     if (command == "ping"):
         return "python omctl.py %s"%ping_msg
@@ -55,10 +56,13 @@ flowspace fields:\n\
         return "python omctl.py %s"%(change_password_msg)
     elif (command == "register_topology_callback"):
         return "python omctl.py %s"%(register_topology_callback_msg)
+    elif (command == "opt_in"):
+        return "python omctl.py %s"%(opt_in_msg)
     else:    
-        return "python omctl.py <command> <inputs> \n %s %s %s %s %s %s %s"%\
+        return "python omctl.py <command> <inputs> \n %s %s %s %s %s %s %s %s"%\
             (ping_msg,create_slice_msg,delete_slice_msg,get_switches_msg,
-             get_links_msg, change_password_msg,register_topology_callback_msg)
+             get_links_msg, change_password_msg,register_topology_callback_msg,
+             opt_in_msg)
     
     
 def xmlrpc_wrap_ping(username,password,url,ping_data):
@@ -169,3 +173,33 @@ def xmlrpc_wrap_register_topology_callback(username, password, om_url,url,cookie
         return returned_data
     except Exception,e:
         return str(e)
+    
+def http_wrap_opt_in(username, password, url, project_name, slice_name, priority):
+    b = Browser()
+    b.cookie_setup()
+    
+    #log in first
+    log_in_url = "%s/accounts/login/"%url
+    print log_in_url
+    logged_in = b.login(log_in_url, "user", "password")
+    print logged_in
+    if not logged_in:
+        return "Log in unsuccessful. Please check username and password"
+    
+    #get experiment id:
+    opt_in_url = "%s/opts/opt_in"%url
+    f = b.get_form(opt_in_url)
+    options = b.get_select_choices(f.read(),"experiment")
+    try:
+        id = options["%s:%s"%(project_name,slice_name)]
+    except Exception,e:
+        return "Experiment %s:%s doesn't exist"%(project_name,slice_name)
+    
+    #opt in request
+    f = b.get_and_post_form(opt_in_url, dict(experiment=id,priority=priority))
+    if ("success" in f.read()):
+        return "Opt in was successful"
+    else:
+        return f.read()
+    
+    
