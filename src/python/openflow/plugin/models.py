@@ -199,49 +199,17 @@ production networks, and is currently deployed in several universities.
         dead_cnxns = OpenFlowConnection.objects.filter(slug__in=link_slugs)
         dead_cnxns.delete()
         
-    ###################################################################
-    # Following are overrides from aggregate_models.Aggregate
-    
-    def check_status(self):
-        return self.available and self.client.is_available()
-
-    def get_edit_url(self):
-        return reverse("openflow_aggregate_edit",
-                       kwargs={'agg_id': self.id})
-    
-    def add_to_slice(self, slice, next):
-        return reverse("openflow_aggregate_slice_add",
-                       kwargs={'agg_id': self.id,
-                               'slice_id': slice.id})+"?next="+next
-
-    def remove_from_slice(self, slice, next):
+    def _get_slivers(self, slice):
         """
-        Stop the slice at the aggregate, then remove aggregate from the slice.
+        Get the set of slivers in the slice for this aggregate in a format
+        that the OM understands.
+        
+        @param slice: The slice to get slivers from
+        @type slice: L{expedient.clearinghouse.slice.models.Slice}
+        @return: C{dict} containing a mapping from datapath ids in the aggregate
+            to flowspaces on that switch.
+        @rtype: C{dict}
         """
-        # check if there's info already (aggregate in slice already)
-        try:
-            info = OpenFlowSliceInfo.objects.get(slice=slice)
-        except OpenFlowSliceInfo.DoesNotExist:
-            raise Http404("OpenFlowSlice information for slice does not exist.")
-    
-        try:
-            self.stop_slice(slice)
-        except:
-            pass
-        
-        slice.aggregates.remove(self)
-        
-        return next
-        
-    @classmethod
-    def get_aggregates_url(cls):
-        return reverse("openflow_aggregate_home")
-
-    @classmethod
-    def get_create_url(cls):
-        return reverse("openflow_aggregate_create")
-    
-    def start_slice(self, slice):
         # get all interfaces in this slice
         ifaces = OpenFlowInterface.objects.filter(
             slice_set=slice, aggregate__id=self.id).select_related(
@@ -266,6 +234,34 @@ production networks, and is currently deployed in several universities.
                             fsd[f.name] = getattr(fs, f.name)
                     d['flowspace'].append(fsd)
             sw_slivers.append(d)
+            
+        return sw_slivers
+
+    ###################################################################
+    # Following are overrides from aggregate_models.Aggregate
+    
+    def check_status(self):
+        return self.available and self.client.is_available()
+
+    def get_edit_url(self):
+        return reverse("openflow_aggregate_edit",
+                       kwargs={'agg_id': self.id})
+    
+    def add_to_slice(self, slice, next):
+        return reverse("openflow_aggregate_slice_add",
+                       kwargs={'agg_id': self.id,
+                               'slice_id': slice.id})+"?next="+next
+
+    @classmethod
+    def get_aggregates_url(cls):
+        return reverse("openflow_aggregate_home")
+
+    @classmethod
+    def get_create_url(cls):
+        return reverse("openflow_aggregate_create")
+    
+    def start_slice(self, slice):
+        sw_slivers = self._get_slivers(slice)
         try:
             return self.client.create_slice(
                 slice.id, slice.project.name,
@@ -283,11 +279,11 @@ production networks, and is currently deployed in several universities.
     def stop_slice(self, slice):
         try:
             self.client.delete_slice(slice.id)
-        except Exception:
+        except Exception as e:
             import traceback
             logger.info("XML RPC call failed to aggregate %s" % self.name)
             traceback.print_exc()
-            return str(Exception)
+            return "%s" % e
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
