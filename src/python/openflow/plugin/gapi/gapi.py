@@ -82,7 +82,7 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
     for aggregate, slivers in agg_slivers:
         print "creating slice at aggregate."
         try:
-            aggregate.client.create_slice(
+            aggregate.client.proxy.create_slice(
                 slice_urn, project_name, project_desc,
                 slice_name, slice_desc, 
                 controller_url,
@@ -92,7 +92,7 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
             import traceback
             traceback.print_exc()
             raise Exception("Could not reserve slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.url))
+the opt-in manager at %s" % (e, aggregate.client.proxy.url))
     
     gapi_slice, created = GAPISlice.objects.get_or_create(slice_urn=slice_urn)
     
@@ -111,12 +111,12 @@ the opt-in manager at %s" % (e, aggregate.client.url))
 def DeleteSliver(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
         try:
-            aggregate.client.delete_slice(slice_urn)
+            aggregate.client.proxy.delete_slice(slice_urn)
         except Exception as e:
             import traceback
             traceback.print_exc()
             raise Exception("Could not delete slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.url))
+the opt-in manager at %s" % (e, aggregate.client.proxy.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
@@ -160,12 +160,12 @@ def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
 def Shutdown(slice_urn, credentials, **kwargs):
     for aggregate in OpenFlowAggregate.objects.all():
         try:
-            aggregate.client.delete_slice(slice_urn)
+            aggregate.client.proxy.delete_slice(slice_urn)
         except Exception as e:
             import traceback
             traceback.print_exc()
             raise Exception("Could not shutdown slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.url))
+the opt-in manager at %s" % (e, aggregate.client.proxy.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()

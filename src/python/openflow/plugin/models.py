@@ -55,7 +55,7 @@ production networks, and is currently deployed in several universities.
 #        if err: return err
         if base_uri.endswith("/"): base_uri = base_uri[:-1]
         try:
-            err = self.client.register_topology_callback(
+            err = self.client.proxy.register_topology_callback(
                 "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
                 "%s" % self.pk,
             )
@@ -263,7 +263,7 @@ production networks, and is currently deployed in several universities.
     def start_slice(self, slice):
         sw_slivers = self._get_slivers(slice)
         try:
-            return self.client.create_slice(
+            return self.client.proxy.create_slice(
                 slice.id, slice.project.name,
                 slice.project.description,
                 slice.name, slice.description,
@@ -278,7 +278,7 @@ production networks, and is currently deployed in several universities.
 
     def stop_slice(self, slice):
         try:
-            self.client.delete_slice(slice.id)
+            self.client.proxy.delete_slice(slice.id)
         except Exception as e:
             import traceback
             logger.info("XML RPC call failed to aggregate %s" % self.name)
