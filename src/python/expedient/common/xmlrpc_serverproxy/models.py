@@ -113,7 +113,7 @@ class PasswordXMLRPCServerProxy(models.Model):
             expiry_time = time.mktime(expiry_time.timetuple())
             now = time.time()
             if expiry_time <= now:
-                self.change_password(random_password())
+                self.proxy.change_password(random_password())
                 
     def __init__(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).__init__(*args, **kwargs)
@@ -121,10 +121,10 @@ class PasswordXMLRPCServerProxy(models.Model):
             self._reset_proxy()
         self._check_expiry()
     
-    def __getattr__(self, name):
-        if name == "proxy":
-            raise AttributeError("Attribute 'proxy' not found.")
-        return getattr(self.proxy, name)
+#    def __getattr__(self, name):
+#        if name == "proxy":
+#            raise AttributeError("Attribute 'proxy' not found.")
+#        return getattr(self.proxy, name)
         
     def save(self, *args, **kwargs):
         super(PasswordXMLRPCServerProxy, self).save(*args, **kwargs)
@@ -162,7 +162,7 @@ class PasswordXMLRPCServerProxy(models.Model):
     def is_available(self, get_info=False):
         '''Call the server's ping method, and see if we get a pong'''
         try:
-            ret = self.ping("PING")
+            ret = self.proxy.ping("PING")
         except Exception as e:
             import traceback
             print "Exception while pinging server: %s" % e
