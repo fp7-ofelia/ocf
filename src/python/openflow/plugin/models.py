@@ -52,6 +52,8 @@ production networks, and is currently deployed in several universities.
 #        if err: return err
         if base_uri.endswith("/"): base_uri = base_uri[:-1]
         try:
+            logger.debug("Registering topology callback at %s%s" % (
+                base_uri, reverse("openflow_open_xmlrpc")))
             err = self.client.proxy.register_topology_callback(
                 "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
                 "%s" % self.pk,
