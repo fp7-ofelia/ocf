@@ -58,8 +58,8 @@ CA_CERT_FILE = 'ca.crt'
 CA_KEY_FILE = 'ca.key'
 CH_CERT_FILE = 'ch.crt'
 CH_KEY_FILE = 'ch.key'
-AM_CERT_FILE = 'am.crt'
-AM_KEY_FILE = 'am.key'
+AM_CERT_FILE = 'server.crt'
+AM_KEY_FILE = 'server.key'
 
 # Substitute eg openflow:stanford
 #GPO_CA_CERT_PREFIX = "geni.net:gpo"
