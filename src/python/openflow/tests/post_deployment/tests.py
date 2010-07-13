@@ -69,7 +69,7 @@ class Tests(TestCase):
 
     def setUp(self):
         """
-        Create clients at the Flowviso
+        Create clients at the Flowvisor
         """
         cert_transport = SafeTransportWithCert(
             keyfile=join(SSL_DIR, "%s.key" % CERTKEY_FILENAME),
