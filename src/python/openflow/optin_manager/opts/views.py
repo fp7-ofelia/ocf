@@ -245,7 +245,7 @@ def update_opts(request):
         errors.append("Flowvisor not set: %s"%str(e))
         
     try:
-        fv.api.changeFlowSpace(fv_args)
+        fv.proxy.api.changeFlowSpace(fv_args)
     except Exception,e:
         import traceback
         traceback.print_exc()

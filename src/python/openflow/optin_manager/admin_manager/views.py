@@ -130,7 +130,7 @@ def approve_admin(request,operation,req_id):
                     for match in matches:
                         fv_arg = {"operation":"REMOVE","id":match.fv_id}
                         fv_args.append(fv_arg)
-                    fv.api.changeFlowSpace(fv_args)    
+                    fv.proxy.api.changeFlowSpace(fv_args)    
                     matches.delete()
                 optfses.delete()
             opts.delete()
@@ -181,7 +181,7 @@ def resign_admin(request):
                     for match in matches:
                         fv_arg = {"operation":"REMOVE","id":match.fv_id}
                         fv_args.append(fv_arg)
-                    fv.api.changeFlowSpace(fv_args)    
+                    fv.proxy.api.changeFlowSpace(fv_args)    
                     matches.delete()
                 optfses.delete()
             opts.delete()

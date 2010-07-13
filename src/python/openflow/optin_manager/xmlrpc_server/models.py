@@ -10,8 +10,8 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
         Change from FV format to CH format
         """
         try:
-            dpids = self.api.listDevices()
-            infos = [self.api.getDeviceInfo(d) for d in dpids]
+            dpids = self.proxy.api.listDevices()
+            infos = [self.proxy.api.getDeviceInfo(d) for d in dpids]
             return zip(dpids, infos)
         except Exception, e:
             import traceback
@@ -27,7 +27,7 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
                  l.pop("srcPort"),
                  l.pop("dstDPID"),
                  l.pop("dstPort"),
-                 l) for l in self.api.getLinks()]
+                 l) for l in self.proxy.api.getLinks()]
         except Exception, e:
             import traceback
             traceback.print_exc()
@@ -35,7 +35,7 @@ class FVServerProxy(PasswordXMLRPCServerProxy):
         
     def ping(self, str):
         try:
-            return self.api.ping(str)
+            return self.proxy.api.ping(str)
         except Exception, e:
             import traceback
             traceback.print_exc()
