@@ -172,7 +172,7 @@ class AggregateManager(object):
     
     def Shutdown(self, slice_urn, credentials):
         logging.info('Shutdown(%r)' % (slice_urn))
-        return self.proxy.ShutDown(slice_urn, credentials)
+        return self.proxy.Shutdown(slice_urn, credentials)
 
 def parse_args(argv):
     import socket
