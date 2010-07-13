@@ -9,6 +9,8 @@ from pprint import pprint, pformat
 from models import DummyOM, DummyOMSlice, DummyCallBackProxy
 from expedient.common.utils import create_or_update
 from decorator import decorator
+from base64 import b64encode
+import pickle
 
 import logging
 logger = logging.getLogger("DummyOM-API")
@@ -48,6 +50,7 @@ def create_slice(slice_id, project_name, project_description,
     logger.debug("    controller: %s" % controller_url)
     logger.debug("    owner_email: %s" % owner_email)
     logger.debug("    owner_pass: %s" % owner_password)
+    logger.debug(pformat("    slivers: %s" % switch_slivers))
     
     # update or create the slice
     slice = create_or_update(
@@ -64,7 +67,7 @@ def create_slice(slice_id, project_name, project_description,
             controller_url=controller_url,
             owner_email=owner_email,
             owner_password=owner_password,
-            switch_slivers=pformat(switch_slivers),
+            switch_slivers=b64encode(pickle.dumps(switch_slivers)),
         ),
     )
     return {
@@ -89,12 +92,14 @@ def delete_slice(slice_id, **kwargs):
 @check_verified_user
 @get_om
 def get_switches(**kwargs):
+    logger.debug("Called get_switches for OM id %s" % kwargs['om'].id)
     return kwargs['om'].get_switches()
 
 @rpcmethod(signature=['array'], url_name="dummyom_rpc")
 @check_verified_user
 @get_om
 def get_links(**kwargs):
+    logger.debug("Called get_links for OM id %s" % kwargs['om'].id)
     return kwargs['om'].get_links()    
 
 @rpcmethod(signature=['string', 'string', 'string'], url_name="dummyom_rpc")
