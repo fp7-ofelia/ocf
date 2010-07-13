@@ -146,8 +146,8 @@ class Clearinghouse(object):
             raise Exception("Missing CH key file %s" % keyfile)
         if certfile is None or not os.path.isfile(os.path.expanduser(certfile)):
             raise Exception("Missing CH cert file %s" % certfile)
-#        if user_cert is None or not os.path.isfile(os.path.expanduser(user_cert)):
-#            raise Exception("Missing user cert file %s" % user_cert)
+        if user_cert is None or not os.path.isfile(os.path.expanduser(user_cert)):
+            raise Exception("Missing user cert file %s" % user_cert)
 
         if ca_certs is None:
             raise Exception("Missing CA cert(s) arg")
@@ -254,11 +254,11 @@ class Clearinghouse(object):
                 import traceback
                 traceback.print_exc()
                 raise
-#                pass
+                pass
             
         if serverstr == "":
-            self.logger.error('Failed to generate complete user cert using trusted CAs. For user %s didnt find issuer %s cert' % (user_cert.get_subject(), user_cert.get_issuer())            
-            raise Exception('Failed to generate complete user cert using trusted CAs. For user %s didnt find issuer %s cert' % (user_cert.get_subject(), user_cert.get_issuer()))
+            self.logger.error('Failed to generate complete user cert using trusted CAs. For user %s didnt find issuer %s cert' % (user_cert.get_subject(), user_cert.get_issuer()))           
+#            raise Exception('Failed to generate complete user cert using trusted CAs. For user %s didnt find issuer %s cert' % (user_cert.get_subject(), user_cert.get_issuer()))
             # use the commandline user cert for test purposes? Raise an exception?
             # HACK!
             user_gid = gid.GID(filename=self.usercert)

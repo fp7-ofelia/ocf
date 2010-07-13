@@ -265,8 +265,10 @@ class FullIntegration(TestCase):
         Run the GENI Sample CH in a subprocess and connect to it.
         """
         self.ch_proc = self.run_proc_cmd(
-            "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-                join(gcf_dir, "gch.py"), join(ssl_dir, "ca.crt"),
+            "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+                join(gcf_dir, "gch.py"),
+                join(ssl_dir, "experimenter.crt"),
+                join(ssl_dir, "ca.crt"),
                 join(ssl_dir, "ch.crt"), join(ssl_dir, "ch.key"),
                 ch_port,
             )
@@ -441,7 +443,8 @@ class FullIntegration(TestCase):
             ctrl_url=url,
             fs_randomness = fs_randomness,
         )
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # TODO: check that the full reservation rspec is returned
         slices = self.fv_clients[0].api.listSlices()
