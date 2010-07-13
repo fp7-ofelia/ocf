@@ -127,8 +127,10 @@ class GAPITests(TestCase):
         
         # run the CH
         kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
-        cmd = "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-            join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
+        cmd = "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+            join(settings.GCF_DIR, "gch.py"),
+            join(settings.SSL_DIR, "experimenter.crt"),
+            join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
             settings.GCH_PORT,
         )
@@ -295,7 +297,8 @@ class GAPITests(TestCase):
 
         # create a random reservation
         resv_rspec, flowspaces = create_random_resv(20, self.switches)
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # TODO: check that the full reservation rspec is returned
         
@@ -336,7 +339,8 @@ class GAPITests(TestCase):
 
         # create a random reservation
         resv_rspec, flowspaces = create_random_resv(20, self.switches)
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # delete the sliver
         self.assertTrue(self.am_client.DeleteSliver(slice_urn, cred))
