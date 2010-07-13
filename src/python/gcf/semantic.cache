@@ -1,0 +1,27 @@
+;; Object gcf/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "gcf/"
+  :tables (list 
+   (semanticdb-table "init-ca.py"
+    :major-mode 'python-mode
+    :tags '(("\"\"\"Create a certificate authority and some basic certs and keys.
+
+A CA is created, as well as certificates and keys for two authorities:
+a clearinghouse and an aggregate manager. Finally, a user cert and
+key is created for a user named Alice.
+\"\"\"" code nil nil [1237 1483]) ("sys" include nil (dependency-file none) [1484 1494]) ("os" include nil (dependency-file none) [1495 1514]) ("sys" code nil nil [1515 1572]) ("optparse" include nil (dependency-file none) [1574 1589]) ("os.path" include nil (dependency-file none) [1590 1604]) ("sys" include nil (dependency-file none) [1605 1615]) ("geni" include nil nil [1616 1627]) ("gcf.sfa.trust.gid" include nil nil [1628 1659]) ("gcf.sfa.trust.certificate" include nil nil [1660 1700]) ("gcf.sfa.trust.credential" include nil nil [1701 1740]) ("CA_CERT_FILE" variable nil nil [1742 1765]) ("CA_KEY_FILE" variable nil nil [1766 1788]) ("CH_CERT_FILE" variable nil nil [1789 1812]) ("CH_KEY_FILE" variable nil nil [1813 1835]) ("AM_CERT_FILE" variable nil nil [1836 1863]) ("AM_KEY_FILE" variable nil nil [1864 1890]) ("create_cert" function (:arguments (("subject" variable nil (reparse-symbol function_parameters) [1908 1915]) ("type" variable nil (reparse-symbol function_parameters) [1917 1921]) ("issuer_key" variable nil (reparse-symbol function_parameters) [1923 1933]) ("issuer_cert" variable nil (reparse-symbol function_parameters) [1940 1951]))) nil [1892 2575]) ("create_user_credential" function (:arguments (("user_gid" variable nil (reparse-symbol function_parameters) [2603 2611]) ("issuer_keyfile" variable nil (reparse-symbol function_parameters) [2613 2627]) ("issuer_certfile" variable nil (reparse-symbol function_parameters) [2629 2644]))) nil [2576 2932]) ("get_subject" function (:arguments (("type" variable nil (reparse-symbol function_parameters) [2949 2953]))) nil [2933 2990]) ("make_ca_certs" function (:arguments (("dir" variable nil (reparse-symbol function_parameters) [3192 3195]))) nil [3174 3405]) ("make_ch_certs" function (:arguments (("dir" variable nil (reparse-symbol function_parameters) [3424 3427]))) nil [3406 3798]) ("make_am_certs" function (:arguments (("dir" variable nil (reparse-symbol function_parameters) [3817 3820]))) nil [3799 4203]) ("make_exp_certs" function (:arguments (("dir" variable nil (reparse-symbol function_parameters) [4223 4226]))) nil [4204 4606]) ("make_certs" function (:arguments (("dir" variable nil (reparse-symbol function_parameters) [4626 4629]))) nil [4611 4725]) ("parse_args" function (:arguments (("argv" variable nil (reparse-symbol function_parameters) [4902 4906]))) nil [4887 5586]) ("main" function (:arguments (("argv" variable nil (reparse-symbol function_parameters) [5596 5600]))) nil [5587 5973]) ("if" code nil nil [5974 6022]))
+    :file "init-ca.py"
+    :pointmax 6022
+    :unmatched-syntax 'nil
+    )
+   (semanticdb-table "gch.py"
+    :major-mode 'python-mode
+    :tags '(("sys" include nil nil [1240 1250]) ("os" include nil nil [1251 1270]) ("sys" code nil nil [1271 1328]) ("optparse" include nil nil [1330 1345]) ("geni" include nil nil [1346 1357]) ("CommandHandler" type (:superclasses ("object") :members (("runserver_handler" function (:arguments (("self" variable nil (reparse-symbol function_parameters) [1583 1587]) ("opts" variable nil (reparse-symbol function_parameters) [1589 1593]))) (reparse-symbol indented_block_body) [1561 1933])) :type "class") nil [1359 1933]) ("parse_args" function (:arguments (("argv" variable nil (reparse-symbol function_parameters) [1949 1953]))) nil [1934 2842]) ("main" function (:arguments (("argv" variable nil (reparse-symbol function_parameters) [2852 2856]))) nil [2843 3199]) ("if" code nil nil [3200 3248]))
+    :file "gch.py"
+    :pointmax 3248
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre4"
+  :semanticdb-version "2.0pre4"
+  )

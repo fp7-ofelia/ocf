@@ -1,3 +1,4 @@
+#----------------------------------------------------------------------
 # Copyright (c) 2008 Board of Trustees, Princeton University
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -18,15 +19,14 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 # IN THE WORK.
-
+#----------------------------------------------------------------------
 ##
 # Implements SFA GID. GIDs are based on certificates, and the GID class is a
 # descendant of the certificate class.
 ##
 
-### $Id: gid.py 17747 2010-04-20 20:19:33Z jkarlin $
-### $URL: http://svn.planet-lab.org/svn/sfa/branches/geni-api/sfa/trust/gid.py $
-
+### $Id: gid.py 18227 2010-06-09 18:30:58Z tmack $
+### $URL: http://svn.planet-lab.org/svn/sfa/trunk/sfa/trust/gid.py $
 import xmlrpclib
 import uuid
 from gcf.sfa.trust.certificate import Certificate
@@ -81,7 +81,7 @@ class GID(Certificate):
         
         Certificate.__init__(self, create, subject, string, filename)
         if subject:
-            logger.info("subject: %s" % subject)
+            logger.debug("Creating GID for subject: %s" % subject)
         if uuid:
             self.uuid = int(uuid)
         if hrn:
@@ -136,11 +136,11 @@ class GID(Certificate):
         else:
             urn = hrn_to_urn(self.hrn, None)
             
-        szURN = "URI:" + urn
-        szUUID = "URI:" + uuid.UUID(int=self.uuid).urn
+        str = "URI:" + urn
+
+        if self.uuid:
+            str += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
         
-        
-        str = szURN + ", " + szUUID
         self.set_data(str, 'subjectAltName')
 
         
@@ -184,7 +184,7 @@ class GID(Certificate):
 
         if self.parent and dump_parents:
             print " "*indent, "parent:"
-            self.parent.dump(indent+4)
+            self.parent.dump(indent+4, dump_parents)
 
     ##
     # Verify the chain of authenticity of the GID. First perform the checks
@@ -198,19 +198,22 @@ class GID(Certificate):
 
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
-        Certificate.verify_chain(self, trusted_certs)
-
+        trusted_root = Certificate.verify_chain(self, trusted_certs)        
+       
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not self.get_hrn().startswith(self.parent.get_hrn()):
-                raise Exception(
-                    "Parent's HRN (%s) is a prefix of child's (%s)" % (
-                        self.parent.get_hrn(), self.get_hrn()
-                    )
-                )
+                #print self.get_hrn(), " ", self.parent.get_hrn()
+                raise GidParentHrn("This cert %s HRN doesnt start with parent HRN %s" % (self.get_hrn(), self.parent.get_hrn()))
+        else:
+            # make sure that the trusted root's hrn is a prefix of the child's
+            trusted_gid = GID(string=trusted_root.save_to_string())
+            trusted_type = trusted_gid.get_type()
+            trusted_hrn = trusted_gid.get_hrn()
+            #if trusted_type == 'authority':
+            #    trusted_hrn = trusted_hrn[:trusted_hrn.rindex('.')]
+            cur_hrn = self.get_hrn()
+            if not self.get_hrn().startswith(trusted_hrn):
+                raise GidParentHrn("Trusted roots HRN %s isnt start of this cert %s" % (trusted_hrn, cur_hrn))
+
         return
-
-
-
-
-

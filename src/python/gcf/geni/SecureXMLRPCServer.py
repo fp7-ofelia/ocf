@@ -47,8 +47,10 @@ class SecureXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
 
     def setup(self):
         SimpleXMLRPCRequestHandler.setup(self)
+        # This first is humanreadable subjectAltName URI, etc
         self.server.peercert = self.request.getpeercert()
         self.server.der_cert = self.request.getpeercert(binary_form=True)
+        # This last is what a GID is created from
         self.server.pem_cert = self.der_to_pem(self.server.der_cert)
 
     def finish(self):
@@ -68,7 +70,7 @@ class SecureXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
         
 
 class SecureXMLRPCServer(SimpleXMLRPCServer):
-    """An extension to SimpleXMLRPCServer that adds SLL support."""
+    """An extension to SimpleXMLRPCServer that adds SSL support."""
 
     def __init__(self, addr, requestHandler=SecureXMLRPCRequestHandler,
                  logRequests=False, allow_none=False, encoding=None,
@@ -84,5 +86,8 @@ class SecureXMLRPCServer(SimpleXMLRPCServer):
                                       ssl_version=ssl.PROTOCOL_SSLv23,
                                       ca_certs=ca_certs)
         if bind_and_activate:
+            # This next throws a socket.error on error, eg
+            # Address already in use or Permission denied. 
+            # Catch for clearer error message?
             self.server_bind()
             self.server_activate()
