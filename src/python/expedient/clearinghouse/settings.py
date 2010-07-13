@@ -199,6 +199,11 @@ MANAGERS = ADMINS
 # Session cookie names to avoid conflicts
 SESSION_COOKIE_NAME = "ch_sessionid"
 
+# workaround to allow test:// schemes
+import urlparse
+urlparse.uses_netloc.append("test")
+urlparse.uses_fragment.append("test")
+
 # Logging
 from expedient.common import loggingconf
 import logging
