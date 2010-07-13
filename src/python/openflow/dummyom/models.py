@@ -6,6 +6,9 @@ Created on May 12, 2010
 
 from django.db import models
 
+import logging
+logger = logging.getLogger("DummyOMModels")
+
 def long_to_dpid(l):
     import re
     if type(l) == str and ":" in str:
@@ -137,5 +140,7 @@ class DummyCallBackProxy(models.Model):
     
     def call_back(self):
         from xmlrpclib import ServerProxy
+        logger.debug("DummyCallBackProxy.call_back at %s with cookie %s" % (
+            self.url, self.cookie))
         s = ServerProxy(self.url)
         s.topology_changed(self.cookie)

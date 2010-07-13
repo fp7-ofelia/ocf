@@ -82,7 +82,7 @@ class Tests(TestCase):
                 response,
                 expected_url=reverse("openflow_aggregate_add_links", args=[i+1]),
             )
-
+            
     def test_double_update(self):
         """
         Make sure updating twice works.
