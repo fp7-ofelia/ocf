@@ -6,18 +6,15 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models import Q
 from expedient.clearinghouse.slice.models import Slice
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.utils.views import generic_crud
 from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
-from models import OpenFlowAggregate, OpenFlowSliceInfo
+from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
+from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 import logging
-from django.forms.models import modelformset_factory
-from openflow.plugin.models import OpenFlowConnection
-from django.db.models import Q
-from openflow.plugin.forms import OpenFlowStaticConnectionForm,\
-    OpenFlowConnectionSelectionForm
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -147,7 +144,6 @@ def aggregate_add_links(request, agg_id):
                 OpenFlowConnectionSelectionForm(existing_links)
         else:
             existing_links_form = None
-        logger.debug("new connection form: %s" % new_cnxn_form)
     
     return simple.direct_to_template(
         request,
