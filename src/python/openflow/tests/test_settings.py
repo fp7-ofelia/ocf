@@ -60,7 +60,7 @@ PAUSE_AFTER_TESTS = False         # If true, each test will wait for an Enter
                                   # from the user before tearing down (useful
                                   # to look at xterm output).
 
-TIMEOUT = 10                      # Time to wait for processes to run and for
+TIMEOUT = 20                      # Time to wait for processes to run and for
                                   # communication to work.
 
 # basic settings sanity checks

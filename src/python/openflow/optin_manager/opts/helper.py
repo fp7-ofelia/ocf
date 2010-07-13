@@ -6,6 +6,7 @@ from openflow.optin_manager.users.models import Priority
 
 def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     expFS = ExperimentFLowSpace.objects.filter(exp = exp)
+    print "EXP FS: %s"%expFS
     intersected = False
     # add this opt to useropts
     tmp = UserOpts(experiment=exp, user=user, priority=priority, nice=nice )
@@ -18,6 +19,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
         if (len(opted) > 0):
             intersected = True
             for opt in opted:
+                print "ITERATED"
                 opt.opt = tmp
                 opt.dpid = fs.dpid
                 opt.port_numebr_s = fs.port_number_s
@@ -26,6 +28,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                 opt.save()
                 #make Match struct
                 matches = range_to_match_struct(opt)
+                print "MATCHES ARE: %s"%matches
                 for single_match in matches:
                     match = MatchStruct(match = single_match, priority = priority*Priority.Priority_Scale, fv_id=0, optfs=opt)
                     match.save()
@@ -37,7 +40,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                     fv_args.append(fv_arg)
                             
                     # If there is any intersection, add them to FV
-        if (intersected):
+    if (intersected):
             try:
                 fv = FVServerProxy.objects.all()[0]
                 return_ids = fv.api.changeFlowSpace(fv_args)
@@ -51,7 +54,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                 match_list[i].fv_id = return_ids[i]
                 match_list[i].save()
             return ""
-        else:
+    else:
             tmp.delete()
             return "No flowspace intersection found!"
         

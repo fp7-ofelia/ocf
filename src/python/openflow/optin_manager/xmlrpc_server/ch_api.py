@@ -228,6 +228,7 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_email = owner_email
     e.owner_password = owner_password
     e.save()
+    new_exp = e
 
 #    print "Experiment created"
 
@@ -240,6 +241,8 @@ def create_slice(slice_id, project_name, project_description,
             dpid = "00:" * 8
             dpid = dpid[:-1]
             
+            
+        all_efs = []
         for sfs in sliver['flowspace']:
             efs = ExperimentFLowSpace()
             efs.exp  = e
@@ -259,6 +262,7 @@ def create_slice(slice_id, project_name, project_description,
                 setattr(efs,om_start,from_str(fs[ch_start]))
                 setattr(efs,om_end,from_str(fs[ch_end]))
             efs.save()
+            all_efs.append(efs)
     
     error_msg = "" 
     # Inform FV of the changes
@@ -273,6 +277,9 @@ def create_slice(slice_id, project_name, project_description,
     except Exception,e:
         import traceback
         traceback.print_exc()
+        for efs in all_efs:
+            efs.delete()
+        new_exp.delete()
         raise e
         
     print "Created slice with %s %s %s %s" % (
