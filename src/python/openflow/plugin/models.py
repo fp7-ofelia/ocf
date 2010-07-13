@@ -13,7 +13,7 @@ from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
 from django.db.models import signals
-
+import xmlrpclib
 import logging
 from expedient.common.utils import create_or_update
 logger = logging.getLogger("OpenflowModels")
@@ -80,16 +80,13 @@ production networks, and is currently deployed in several universities.
                            in_ngbr.switch.datapath_id, in_ngbr.port_num))
 
         return links
-    
-    def parse_switches(self):
+
+    def parse_switches(self, active_switches_raw):
         '''
         Update the set of available switches.
         '''
         # switches already in the DB.
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
-
-        # switch info received from FlowVisor
-        active_switches_raw = self.client.proxy.get_switches()
         
         active_switch_ids = []
         active_iface_ids = []
@@ -144,12 +141,10 @@ production networks, and is currently deployed in several universities.
             aggregate=self).exclude(id__in=active_switch_ids).update(
                 available=False, status_change_timestamp=datetime.now())
         
-    def parse_links(self):
+    def parse_links(self, active_links_raw):
         '''
         Get the available links and update the network connections.
         '''
-        active_links_raw = self.client.proxy.get_links()
-    
         active_cnxn_ids = []
         # Create any missing connections.
         for src_dpid, src_port, dst_dpid, dst_port, attrs in active_links_raw:
@@ -181,12 +176,14 @@ production networks, and is currently deployed in several universities.
         Read the topology from the OM and FV, parse it, and store it.
         '''
         try:
-            self.parse_switches()
-            self.parse_links()
+            switches = self.client.proxy.get_switches()
+            links = self.client.proxy.get_links()
         except:
             import traceback
             traceback.print_exc()
             raise
+        self.parse_switches(switches)
+        self.parse_links(links)
         
     def _get_slivers(self, slice):
         """

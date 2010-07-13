@@ -99,7 +99,7 @@ def get_switches(**kwargs):
 @check_verified_user
 @get_om
 def get_links(**kwargs):
-    logger.debug("Called get_links for OM id %s" % kwargs['om'].id)
+    logger.debug("#################Called get_links for OM id %s" % kwargs['om'].id)
     return kwargs['om'].get_links()    
 
 @rpcmethod(signature=['string', 'string', 'string'], url_name="dummyom_rpc")

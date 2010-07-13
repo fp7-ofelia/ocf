@@ -82,6 +82,7 @@ class DummyOM(models.Model):
 
         self.dummyomlink_set.filter(src_dpid=dpid).delete()
         self.dummyomlink_set.filter(dst_dpid=dpid).delete()
+        self.dummyomswitch_set.get(dpid=dpid).delete()
 
         return dpid
 
@@ -96,10 +97,10 @@ class DummyOMLink(models.Model):
     om = models.ForeignKey(DummyOM)
     
     def get_as_tuple(self):
-        return [self.src_dpid,
-                self.src_port,
-                self.dst_dpid,
-                self.dst_port, {}] 
+        return [str(self.src_dpid),
+                str(self.src_port),
+                str(self.dst_dpid),
+                str(self.dst_port), {}] 
     
 class DummyOMSwitch(models.Model):
     '''
@@ -111,7 +112,8 @@ class DummyOMSwitch(models.Model):
     portList = models.CharField(max_length=1024)
 
     def get_as_tuple(self):
-        return [self.dpid, {"nPorts": self.nPorts, "portList": self.portList}]
+        t = [self.dpid, {"nPorts": str(self.nPorts), "portList": str(self.portList)}]
+        return t
     
 class DummyOMSlice(models.Model):
     '''
