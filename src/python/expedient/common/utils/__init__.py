@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
     '''
     If an object is found matching filter attrs, then update
@@ -19,7 +20,13 @@ def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
             if "__" in k:
                 del filter_attrs[k]
         filter_attrs.update(new_attrs)
-        obj = model.objects.create(**filter_attrs)
+        try:
+            obj = model.objects.create(**filter_attrs)
+        except IntegrityError:
+            import traceback
+            traceback.print_exc()
+            raise
+        
         created = True
     else:
         created = False
