@@ -5,7 +5,8 @@ Created on Jul 12, 2010
 '''
 
 from django.test import TestCase
-from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch
+from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch,\
+    DummyCallBackProxy
 from django.contrib.auth.models import User
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
     OpenFlowInterfaceSliver, FlowSpaceRule
@@ -82,6 +83,13 @@ class Tests(TestCase):
                 expected_url=reverse("openflow_aggregate_add_links", args=[i+1]),
             )
 
+    def test_double_update(self):
+        """
+        Make sure updating twice works.
+        """
+        self.test_create_aggregates()
+        OpenFlowAggregate.objects.all()[0].update_topology()
+            
     def test_add_to_project(self):
         """
         Create a project, add first aggregate to project.
