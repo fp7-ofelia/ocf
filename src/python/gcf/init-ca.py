@@ -152,8 +152,8 @@ def make_user_cert(dir, username, ch_keys, ch_gid):
     '''Make a GID/Cert for given username signed by given CH GID/keys, 
     saved in given directory. Not returned.'''
     (alice_gid, alice_keys) = create_cert(GCF_CERT_PREFIX,USER_CERT_TYPE,username, ch_keys, ch_gid)
-    alice_gid.save_to_file(os.path.join(dir, ('%s-cert.pem' % username)))
-    alice_keys.save_to_file(os.path.join(dir, ('%s-key.pem' % username)))
+    alice_gid.save_to_file(os.path.join(dir, ('%s.crt' % username)))
+    alice_keys.save_to_file(os.path.join(dir, ('%s.key' % username)))
 # Make a Credential for Alice
 #alice_cred = create_user_credential(alice_gid, CH_KEY_FILE, CH_CERT_FILE)
 #alice_cred.save_to_file('../alice-user-cred.xml')
@@ -163,9 +163,9 @@ def parse_args(argv):
     parser = optparse.OptionParser()
     parser.add_option("-d", "--directory", default='.',
                       help="directory for created cert files", metavar="DIR")
-    parser.add_option("-u", "--username", default='alice',
+    parser.add_option("-u", "--username", default='experimenter',
                       help="Experimenter username")
-    parser.add_option("--notAll", action="store_true", default=False,
+    parser.add_option("--notAll", action="store_true", default=True,
                       help="Do NOT create all cert/keys: Supply other options to generate particular certs.")
     parser.add_option("--ca", action="store_true", default=False,
                       help="Create CA cert/keys")
