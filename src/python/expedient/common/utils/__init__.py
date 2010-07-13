@@ -1,4 +1,3 @@
-from django.db.utils import IntegrityError
 def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
     '''
     If an object is found matching filter attrs, then update
@@ -8,7 +7,7 @@ def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
     (such as auto-created slug fields or to use default values).
     Returns tuple (object, created) where created is True if object is created.
     '''
-    
+    from django.db.utils import IntegrityError
     try:
         obj = model.objects.get(**filter_attrs)
     except model.DoesNotExist:
