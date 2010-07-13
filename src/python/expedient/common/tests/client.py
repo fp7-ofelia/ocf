@@ -7,31 +7,58 @@ Contains functions to login and manage forms.
 '''
 import urllib, urllib2, cookielib
 
+def parse_form(doc):
+    """
+    parse the doc (a string), and return a dictionary of
+    name->value.
+    """
+    from pyquery import PyQuery as pq
     
-class Browser():  
+    d = pq(doc, parser="html")
+    inputs = d("input")
+    
+    # filter the ones that have a name
+    inputs = [i for i in inputs if i.name]
+    
+    return dict([(i.name, i.value) for i in inputs])
+
+def test_get_and_post_form(client, url, params, post_url=None):
+    """
+    Get the form at C{url}, modify named parameters by those in C{params},
+    then submit at C{post_url} or C{url} if C{post_url} is unspecified.
+    Return response. This function uses the Django TestClient C{client}.
+    
+    @param client: client to use to make requests.
+    @type client: Django C{TestClient}.
+    @param url: URL to get the form from.
+    @type url: string
+    @param params: parameters to update the form with.
+    @type params: dict
+    @keyword post_url: (optional) URL to post the form to. If None then port to
+        C{url} instead.
+    @type post_url: str or None
+    @return: response from client.post()
+    @rtype: Test Response instance.
+    """
+    post_url = post_url or url
+    resp = client.get(url)
+    form_params = parse_form(resp.content)
+    form_params.update(params)
+    resp = client.post(post_url, form_params)
+    return resp
+
+class Browser(object):
     
     def cookie_setup(self):
         """"
         call at the beginning to set up cookiejar
         """
-        self.cookiejar = cookielib.CookieJar()        
+        self.cookiejar = cookielib.CookieJar()
         
     def get_form_params(self, doc):
-        """
-        parse the doc (a string), and return a dictionary of
-        name->value.
-        """
-        from pyquery import PyQuery as pq
+        return parse_form(doc) 
         
-        d = pq(doc, parser="html")
-        inputs = d("input")
-        
-        # filter the ones that have a name
-        inputs = [i for i in inputs if i.name]
-        
-        return dict([(i.name, i.value) for i in inputs])
-        
-    def get_and_post_form(self,url, params, post_url=None):
+    def get_and_post_form(self, url, params, post_url=None):
         """
         Get the form at 'url', modify named parameters by those in 'params',
         then submit at 'post_url' or 'url' if 'post_url' is unspecified.
@@ -61,7 +88,7 @@ class Browser():
         f = urllib2.urlopen(req)
         return f
     
-    def login(self,url, username, password):
+    def login(self, url, username, password):
         """
         Log in at the given URL.
         
