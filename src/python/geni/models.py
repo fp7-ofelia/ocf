@@ -10,7 +10,7 @@ from expedient.common.utils import certtransport
 from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
-import uuid
+from geni import management
 
 class GENISliceInfo(models.Model):
     """
@@ -27,8 +27,7 @@ class GENISliceInfo(models.Model):
     slice_urn = models.CharField(max_length=1024)
     
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault(
-            "slice_urn", "%s+slice+%s" % (settings.GENI_URN, uuid.uuid4()))
+        kwargs.setdefault("slice_urn", management.create_slice_urn())
         super(GENISliceInfo, self).__init__(*args, **kwargs)
         
 class GENIAggregate(Aggregate):
@@ -47,7 +46,8 @@ class GENIAggregate(Aggregate):
                 raise self.URLNotDefined("URL not set.")
             
             transp = certtransport.SafeTransportWithCert(
-                keyfile=settings.GENI_X509_KEY, certfile=settings.GENI_X509_CERT)
+                keyfile=settings.GCF_X509_CH_KEY,
+                certfile=settings.GCF_X509_CH_CERT)
     
             self.proxy = xmlrpclib.ServerProxy(u, transport=transp)
     
@@ -61,7 +61,7 @@ class GENIAggregate(Aggregate):
         if hasattr(self, "am_cred"):
             return  cls.am_cred
         
-        f = open(settings.GENI_CRED)
+        f = open(settings.GCF_NULL_SLICE_CRED)
         cls.am_cred = f.read()
         f.close()
         return cls.am_cred
