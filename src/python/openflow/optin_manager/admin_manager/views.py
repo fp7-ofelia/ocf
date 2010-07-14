@@ -239,7 +239,7 @@ def user_reg_fs(request):
             else:
                 opted_fses = fses
 
-            print("-----------")
+            
             admins_list = UserProfile.objects.filter(is_net_admin=True)
             intersected_admins = []
             intersected_supervisors = []

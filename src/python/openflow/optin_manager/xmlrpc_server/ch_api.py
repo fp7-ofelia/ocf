@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
-    UserOpts, OptsFlowSpace
+    UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,\
     int_to_dotted_ip, int_to_mac
 from decorator import decorator
@@ -218,7 +218,18 @@ def create_slice(slice_id, project_name, project_description,
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
 
-    e = Experiment()
+    
+    e = Experiment.objects.filter(slice_id=slice_id)
+    
+    if (e.count()==0):
+        e= Experiment()
+        exp_exist = False
+    else:
+        e = e[0]
+        old_exp = e
+        old_fv_name = e.get_fv_slice_name()
+        exp_exist = True
+
     e.slice_id = slice_id
     e.project_name = project_name
     e.project_desc = project_description
@@ -230,8 +241,11 @@ def create_slice(slice_id, project_name, project_description,
     e.save()
     new_exp = e
 
-#    print "Experiment created"
-
+    #delete all flowspaces associated with this experiment, if any already exist;
+    if (exp_exist):
+        ExperimentFLowSpace.objects.filter(exp = old_exp).delete()
+    
+    temp = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
     #inspired by Jad :)
     # Add switches to experiments
     for sliver in switch_slivers:
@@ -264,9 +278,18 @@ def create_slice(slice_id, project_name, project_description,
             efs.save()
             all_efs.append(efs)
     
-    error_msg = "" 
+    error_msg = ""
+    
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
+    errorlist = []
+    
+    if (exp_exist):
+        try:
+            fv.api.deleteSlice(old_fv_name)
+        except Exception,e:
+            errorlist.append(str(e))   
+           
     try:
         fv_success = fv.api.createSlice(
         "%s" % e.get_fv_slice_name(),
@@ -277,17 +300,28 @@ def create_slice(slice_id, project_name, project_description,
     except Exception,e:
         import traceback
         traceback.print_exc()
-        for efs in all_efs:
-            efs.delete()
+        ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
+        for fs in ofs:
+            MatchStruct.objects.filter(optfs = fs).delete()
+        ofs.delete()
+        UserOpts.objects.filter(experiment = new_exp).delete()
+        ExperimentFLowSpace.objects.filter(exp = new_exp).delete()
         new_exp.delete()
-        raise e
+        errorlist.append(str(e))
+        fv_success = False
+    if (exp_exist and fv_success):
+        from openflow.optin_manager.opts.helper import update_opts_into_exp
+        errs = update_opts_into_exp(old_exp)
+        errorlist.append(errs)
         
+
     print "Created slice with %s %s %s %s" % (
         e.get_fv_slice_name(), owner_password, controller_url, owner_email)
     if not fv_success:
-        error_msg = "FlowVisor returned false for create slice xmlrpc call"
+        errorlist.append("FlowVisor returned false for create slice xmlrpc call")
+        
+    error_msg = str(errorlist)
     
-    # TODO: fix the return
     return {
         'error_msg': error_msg,
         'switches': [],
@@ -313,8 +347,13 @@ def delete_slice(sliceid, **kwargs):
     print "Called delete_slice %s" % sliceid
     
     single_exp = Experiment.objects.get(slice_id = sliceid)
-    OptsFlowSpace.objects.filter(opt__experiment = single_exp).delete()
-    UserOpts.objects.filter(experiment = single_exp)
+    # get all flowspaces opted into this exp
+    ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
+    # delete all match structs for each flowspace
+    for fs in ofs:
+        MatchStruct.objects.filter(optfs = fs).delete()
+    ofs.delete()
+    UserOpts.objects.filter(experiment = single_exp).delete()
     ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
     single_exp.delete()
     
