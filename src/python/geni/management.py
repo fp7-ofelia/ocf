@@ -39,17 +39,29 @@ def create_expedient_certs():
     ch_cert.save_to_file(settings.GCF_X509_CH_CERT)
     ch_key.save_to_file(settings.GCF_X509_CH_KEY)
 
-def create_slice_gid():
+def create_slice_urn():
+    """
+    Get a new URN for a slice.
+    
+    @return: urn
+    @rtype: string
+    """
+    
+    return "urn:publicid:IDN+%s+slice+%s:%s" % (
+        settings.GCF_URN_PREFIX, uuid.uuid4(), settings.SITE_DOMAIN)
+
+def create_slice_gid(slice_urn):
     """
     Create a gid for a slice and return it and its key.
+    
+    @param slice_urn: urn for which to create a gid
+    @type slice_urn: string
     
     @return: new Slice GID and Slice key.
     @rtype: (C{gcf.sfa.trust.gid.GID} instance, C{gcf.sfa.trust.certificate.Keypair} instance)
     """
     from gcf.sfa.trust import gid, certificate
     
-    slice_urn = "urn:publicid:IDN+%s+slice+%s:%s" % (
-        settings.GCF_URN_PREFIX, uuid.uuid4(), settings.SITE_DOMAIN)
     newgid = gid.GID(
         create=True, subject=SLICE_GID_SUBJ,
         uuid=gid.create_uuid(), urn=slice_urn)
@@ -92,7 +104,8 @@ def create_null_slice_cred():
     """
     from gcf.sfa.trust import gid
     
-    slice_gid, slice_keys = create_slice_gid()
+    slice_urn = create_slice_urn()
+    slice_gid, slice_keys = create_slice_gid(slice_urn)
     user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
     ucred = create_slice_credential(user_gid, slice_gid)
     ucred.save_to_string(settings.GCF_NULL_SLICE_CRED)
