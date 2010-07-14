@@ -1,3 +1,4 @@
+#----------------------------------------------------------------------
 # Copyright (c) 2008 Board of Trustees, Princeton University
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -18,22 +19,26 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 # IN THE WORK.
-
+#----------------------------------------------------------------------
 import logging
+import os
 
 #SFA access log initialization
-
-SFA_ACCESS_LOGFILE='/var/log/sfa_access.log'
-#SFA_HTTPD_ACCESS_LOGFILE='/tmp/sfa_httpd_access.log'
+TMPDIR = os.getenv("TMPDIR", "/tmp")
+#SFA_HTTPD_ACCESS_LOGFILE = TMPDIR + "/" + 'sfa_httpd_access.log'
 SFA_HTTPD_ACCESS_LOGFILE='/dev/null'
+#SFA_ACCESS_LOGFILE='/var/log/sfa_access.log'
+SFA_ACCESS_LOGFILE='/dev/null'
 logger=logging.getLogger('sfa')
 logger.setLevel(logging.INFO)
+
 try:
-     logfile=logging.FileHandler(SFA_ACCESS_LOGFILE)
+    logfile=logging.FileHandler(SFA_ACCESS_LOGFILE)
 except IOError:
-     # This is usually a permissions error becaue the file is
-     # owned by root, but httpd is trying to access it.
-     logfile=logging.FileHandler(SFA_HTTPD_ACCESS_LOGFILE)
+    # This is usually a permissions error becaue the file is
+    # owned by root, but httpd is trying to access it.
+    logfile=logging.FileHandler(SFA_HTTPD_ACCESS_LOGFILE)
+    
 formatter = logging.Formatter("%(asctime)s - %(message)s")
 logfile.setFormatter(formatter)
 logger.addHandler(logfile)

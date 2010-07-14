@@ -79,7 +79,7 @@ class GAPITests(TestCase):
             )
     
             # test availability
-            if not proxy.is_available:
+            if not proxy.is_available():
                 raise Exception("Problem: Proxy not available")
     
             # Add aggregate
@@ -127,8 +127,10 @@ class GAPITests(TestCase):
         
         # run the CH
         kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
-        cmd = "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-            join(settings.GCF_DIR, "gch.py"), join(settings.SSL_DIR, "ca.crt"),
+        cmd = "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+            join(settings.GCF_DIR, "gch.py"),
+            join(settings.SSL_DIR, "experimenter.crt"),
+            join(settings.SSL_DIR, "ca.crt"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
             settings.GCH_PORT,
         )
@@ -271,10 +273,11 @@ class GAPITests(TestCase):
         self.assertEqual(len(self.switches),
                          num_links)
         
-        # make sure all killed dpids are gone
+        # make sure all killed dpids are gone: None of the dpids still
+        # here should have the dpid of a killed switch.
         for s in self.switches:
             for d in killed_dpids:
-                self.assertFalse(str(s.dpid) == str(d))
+                self.assertNotEqual(str(s.dpid), str(d))
         
     def test_CreateSliver(self):
         """
@@ -295,7 +298,8 @@ class GAPITests(TestCase):
 
         # create a random reservation
         resv_rspec, flowspaces = create_random_resv(20, self.switches)
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # TODO: check that the full reservation rspec is returned
         
@@ -336,7 +340,8 @@ class GAPITests(TestCase):
 
         # create a random reservation
         resv_rspec, flowspaces = create_random_resv(20, self.switches)
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # delete the sliver
         self.assertTrue(self.am_client.DeleteSliver(slice_urn, cred))

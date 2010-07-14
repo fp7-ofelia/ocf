@@ -102,6 +102,8 @@ INSTALLED_APPS = (
     'expedient.clearinghouse.slice',
     'expedient.clearinghouse.users',
     'openflow.plugin',
+    'geni',
+    'geni.planetlab',
     'expedient.ui.html',
 ###### For Testing #######################
     'openflow.dummyom',
@@ -125,7 +127,7 @@ MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 # default site
 SITE_ID = 1
 SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "clearinghouse.geni.org" # example
+SITE_DOMAIN = "clearinghouse.geni.org"
 
 # Messaging settings
 NUM_LATEST_MSGS = 10
@@ -141,10 +143,12 @@ OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 DEBUG = True
 
 # For Testing
+# URLs that accept HTTP Basic Authentication.
 BASIC_AUTH_URLS = (
     r'^/dummyom/.*',
 )
 
+# List of locations that do not need authentication to access.
 SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/accounts/register/.*$',
     r'^/accounts/activate/.*$',
@@ -171,12 +175,20 @@ UI_PLUGINS = (
     ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
 )
 
-# Installed Aggregate Plugins
+# Installed Aggregate Models
 AGGREGATE_PLUGINS = (
     ('openflow.plugin.models.OpenFlowAggregate'),
+    ('geni.planetlab.models.PlanetLabAggregate'),
 )
 
+# What is the scheme to use when sending urls? 
 DOMAIN_SCHEME = "https"
+
+# Location of GENI x509 certs and keys
+GENI_X509_CERT = join(SRC_DIR, "../geni-x509/ch.crt")
+GENI_X509_KEY = join(SRC_DIR, "../geni-x509/ch.key")
+GENI_CRED = join(SRC_DIR, "../geni-x509/ch.cred")
+GENI_URN = "urn:publicid:IDN+expedient:stanford+ch"
 
 # get custom install info
 from deployment_settings import *
@@ -186,6 +198,11 @@ MANAGERS = ADMINS
 
 # Session cookie names to avoid conflicts
 SESSION_COOKIE_NAME = "ch_sessionid"
+
+# workaround to allow test:// schemes
+import urlparse
+urlparse.uses_netloc.append("test")
+urlparse.uses_fragment.append("test")
 
 # Logging
 from expedient.common import loggingconf

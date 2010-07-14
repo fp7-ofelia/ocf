@@ -26,9 +26,11 @@ RUN_FV_SUBPROCESS = True
 SCHEME = "https" if test_settings.USE_HTTPS else "http"
 
 class FullIntegration(TestCase):
-    MININET_TOPO = "linear,2"
+    MININET_TOPO = "tree,2"
+    EXPECTED_NUM_SWITCHES = 3
+    EXPECTED_NUM_LINKS = 4
     NOX_APPS = "pyswitch packetdump"
-    
+
     def run_nox(self, mininet_vm, num, port_start):
         """
         Connect to the mininet_vm and run 'num' instances of nox as
@@ -53,7 +55,7 @@ class FullIntegration(TestCase):
 
             self.nox_clients.append(client)
         
-    def connect_networks(self, flowvisors, mininet_vms):
+    def connect_networks(self, flowvisors, mininet_vms, switch="ovsk"):
         """
         Create a 2-switch, 2-host linear topology on each mininet vm
         Connect the switches to the FV.
@@ -64,8 +66,8 @@ class FullIntegration(TestCase):
         for i in xrange(num):
             logger.debug("Connecting to the mininet VM at %s:%s" % mininet_vms[i])
             cmd = "sudo mn --topo=%s "  % self.MININET_TOPO +\
-                "--controller=remote --ip=%s --port=%s --mac --switch=ovsk" % (
-                    flowvisors[i]["host"], flowvisors[i]["of_port"],
+                "--controller=remote --ip=%s --port=%s --mac --switch=%s" % (
+                    flowvisors[i]["host"], flowvisors[i]["of_port"], switch,
                 )
             client = SSHClientPlus.exec_command_plus(
                 mininet_vms[i][0], "mininet", "mininet", cmd,
@@ -265,8 +267,10 @@ class FullIntegration(TestCase):
         Run the GENI Sample CH in a subprocess and connect to it.
         """
         self.ch_proc = self.run_proc_cmd(
-            "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-                join(gcf_dir, "gch.py"), join(ssl_dir, "ca.crt"),
+            "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+                join(gcf_dir, "gch.py"),
+                join(ssl_dir, "experimenter.crt"),
+                join(ssl_dir, "ca.crt"),
                 join(ssl_dir, "ch.crt"), join(ssl_dir, "ch.key"),
                 ch_port,
             )
@@ -325,6 +329,7 @@ class FullIntegration(TestCase):
         self.connect_networks(
             test_settings.FLOWVISORS,
             test_settings.MININET_VMS,
+            test_settings.MININET_SWITCH_TYPE,
         )
         
         # setup the OM
@@ -441,7 +446,8 @@ class FullIntegration(TestCase):
             ctrl_url=url,
             fs_randomness = fs_randomness,
         )
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # TODO: check that the full reservation rspec is returned
         slices = self.fv_clients[0].api.listSlices()
@@ -478,7 +484,7 @@ class FullIntegration(TestCase):
         # check the switches on the FV
         devices = self.fv_clients[0].api.listDevices()
         logger.debug("FV devices: %s" % devices)
-        self.assertEqual(len(devices), 2)
+        self.assertEqual(len(devices), self.EXPECTED_NUM_SWITCHES)
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
@@ -492,8 +498,8 @@ class FullIntegration(TestCase):
         self.switches, self.links = parse_rspec(rspec)
         
         # check the number of switches and links
-        self.assertEqual(len(self.switches), 2)
-        self.assertEqual(len(self.links), 2)
+        self.assertEqual(len(self.switches), self.EXPECTED_NUM_SWITCHES)
+        self.assertEqual(len(self.links), self.EXPECTED_NUM_LINKS)
         return slice_urn, cred
         
     def test_CreateSliver(self):

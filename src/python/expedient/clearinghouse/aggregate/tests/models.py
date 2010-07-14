@@ -6,4 +6,3 @@ Created on Jun 11, 2010
 from .. import models
 
 class DummyAggregate(models.Aggregate): pass
-class DummyAggregateAdminInfo(models.AggregateAdminInfo): pass

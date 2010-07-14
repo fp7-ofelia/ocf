@@ -24,4 +24,5 @@
 from ca import CertificateAuthority
 from ch import Clearinghouse
 from ch import publicid_to_urn, urn_to_publicid
+from verifier import CredentialVerifier
 from am import AggregateManager, AggregateManagerServer

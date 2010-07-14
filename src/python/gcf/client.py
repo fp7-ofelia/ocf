@@ -22,16 +22,28 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
 #----------------------------------------------------------------------
+"""
+Simple test client for testing the GENI GCF Clearinghouse and 
+AggregateManager. exercise_am is main method
+"""
+
+import sys
+
+# Check python version. Requires 2.6 or greater, but less than 3.
+if sys.version_info < (2, 6):
+    raise Exception('Must use python 2.6 or greater.')
+elif sys.version_info >= (3,):
+    raise Exception('Not python 3 ready')
 
 import base64
 import datetime
 import logging
 import optparse
 import random
-import sys
 import xml.dom.minidom as minidom
 import xmlrpclib
 import zlib
+
 import gcf.sfa.trust.credential as cred
 
 class SafeTransportWithCert(xmlrpclib.SafeTransport):
@@ -89,12 +101,13 @@ def test_create_sliver(server, slice_urn, slice_credential, dom):
     else:
         # pick two at random
         indices = range(resources.length)
-        for i in range(2):
+        for _ in range(2):
             index = random.choice(indices)
             indices.remove(index)
             top.appendChild(resources.item(index).cloneNode(True))
+    users = [{'key':''}]
     manifest_rspec = server.CreateSliver(slice_urn, slice_credential,
-                                         request_rspec.toxml())
+                                         request_rspec.toxml(), users)
     # TODO: verify manifest_rspec
     print 'passed'
 
@@ -152,6 +165,7 @@ def test_shutdown(server, slice_urn, credentials):
 
 def test_get_version(server):
     print 'Testing GetVersion...',
+    # This next throws exceptions on errors
     vdict = server.GetVersion()
     if vdict['geni_api'] == 1:
         print 'passed'
@@ -167,7 +181,7 @@ def test_list_resources(server, credentials, compressed=False, available=True,
     rspec = server.ListResources(credentials, options)
     if compressed:
         rspec = zlib.decompress(base64.b64decode(rspec))
-    logging.debug(rspec)
+    logging.getLogger('client').debug(rspec)
     dom = verify_rspec(rspec)
     if dom:
         print 'passed'
@@ -181,7 +195,7 @@ def exercise_am(ch_server, am_server):
     slice_credential = cred.Credential(string=slice_cred_string)
     slice_gid = slice_credential.get_gid_object()
     slice_urn = slice_gid.get_urn()
-    print 'Slice URN = %s' % (slice_urn)
+    print 'Slice Creation SUCCESS: URN = %s' % (slice_urn)
     
     # Set up the array of credentials as just the slice credential
     credentials = [slice_cred_string]
@@ -223,15 +237,9 @@ def make_server(url, keyfile, certfile, verbose=False):
 def parse_args(argv):
     parser = optparse.OptionParser()
     parser.add_option("-k", "--keyfile",
-                      help="key file name", metavar="FILE")
+                      help="experimenter key file name", metavar="FILE")
     parser.add_option("-c", "--certfile",
-                      help="certificate file name", metavar="FILE")
-    # Could try to determine the real IP Address instead of the loopback
-    # using socket.gethostbyname(socket.gethostname())
-    parser.add_option("-H", "--host", default='127.0.0.1',
-                      help="server ip", metavar="HOST")
-    parser.add_option("-p", "--port", type=int, default=8000,
-                      help="server port", metavar="PORT")
+                      help="experimenter certificate file name", metavar="FILE")
     parser.add_option("--ch", default='https://localhost:8000/',
                       help="clearinghouse URL")
     parser.add_option("--am", default='https://localhost:8001/',
@@ -250,8 +258,14 @@ def main(argv=None):
     if opts.debug:
         level = logging.DEBUG
     logging.basicConfig(level=level)
+    logger = logging.getLogger('client')
+    if not opts.keyfile or not opts.certfile:
+        sys.exit('Missing required arguments -k for Key file and -c for cert file')
+
+    logger.info('CH Server is %s. Using keyfile %s, certfile %s', opts.ch, opts.keyfile, opts.certfile)
     ch_server = make_server(opts.ch, opts.keyfile, opts.certfile,
                             opts.debug_rpc)
+    logger.info('AM Server is %s. Using keyfile %s, certfile %s', opts.am, opts.keyfile, opts.certfile)
     am_server = make_server(opts.am, opts.keyfile, opts.certfile,
                             opts.debug_rpc)
     exercise_am(ch_server, am_server)

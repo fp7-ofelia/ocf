@@ -131,6 +131,11 @@ BASIC_AUTH_URLS = (
 # Session cookie names to avoid conflicts
 SESSION_COOKIE_NAME = "om_sessionid"
 
+# workaround to allow test:// schemes
+import urlparse
+urlparse.uses_netloc.append("test")
+urlparse.uses_fragment.append("test")
+
 # get custom install info
 from deployment_settings import *
 

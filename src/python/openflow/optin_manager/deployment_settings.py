@@ -33,4 +33,10 @@ MY_CA = join('/etc/apache2/ssl.crt', 'ca.crt')
 SITE_NAME = "Expedient Opt-In Manager"
 SITE_DOMAIN = "optinmanager.geni.org" # example
 
-from secret_key import SECRET_KEY
+try:
+    from secret_key import SECRET_KEY
+except:
+    import traceback
+    print "Could not import custom secret key because:"
+    traceback.print_exc()
+    print "Using generic insecure key. Make sure secret_key.py has a SECRET_KEY variable."

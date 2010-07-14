@@ -6,6 +6,9 @@ Created on May 12, 2010
 
 from django.db import models
 
+import logging
+logger = logging.getLogger("DummyOMModels")
+
 def long_to_dpid(l):
     import re
     if type(l) == str and ":" in str:
@@ -20,17 +23,10 @@ class DummyOM(models.Model):
     '''
     
     def get_switches(self):
-        dpids = []
-        dpids += self.dummyomlink_set.values_list('src_dpid', flat=True)
-        dpids += self.dummyomlink_set.values_list('dst_dpid', flat=True)
-        dpids = set(dpids)
-        return [[dpid, {}] for dpid in dpids]
+        return [s.get_as_tuple() for s in self.dummyomswitch_set.all()]
     
     def get_links(self):
-        return [[link.src_dpid,
-                 link.src_port,
-                 link.dst_dpid,
-                 link.dst_port, {}] for link in self.dummyomlink_set.all()]
+        return [link.get_as_tuple() for link in self.dummyomlink_set.all()]
         
     def populate_links(self, num_switches, num_links, use_random=False):
         '''Create switches and random links'''
@@ -41,14 +37,20 @@ class DummyOM(models.Model):
         if num_switches >= 1000:
             raise Exception("Can only create less than 1000 dpids per DummyOM")
         
-        dpids = []
         for l in range(num_switches):
-            dpids.append(long_to_dpid(self.id*1024+l))
+            DummyOMSwitch.objects.create(
+                dpid=long_to_dpid(self.id*1024+l),
+                nPorts=8,
+                portList=",".join(map(str, range(0,8))),
+                om=self,
+            )
             
+        dpids = self.dummyomswitch_set.all().values_list("dpid", flat=True)
+        
         for l in range(num_links):
             src, dst = random.sample(dpids, 2)
-            src_port = random.randint(0, 3)
-            dst_port = random.randint(0, 3)
+            src_port = random.randint(0, 7)
+            dst_port = random.randint(0, 7)
             DummyOMLink.objects.create(
                 src_dpid=src,
                 src_port=src_port,
@@ -80,6 +82,7 @@ class DummyOM(models.Model):
 
         self.dummyomlink_set.filter(src_dpid=dpid).delete()
         self.dummyomlink_set.filter(dst_dpid=dpid).delete()
+        self.dummyomswitch_set.get(dpid=dpid).delete()
 
         return dpid
 
@@ -92,6 +95,25 @@ class DummyOMLink(models.Model):
     dst_dpid = models.CharField(max_length=100)
     dst_port = models.IntegerField()
     om = models.ForeignKey(DummyOM)
+    
+    def get_as_tuple(self):
+        return [str(self.src_dpid),
+                str(self.src_port),
+                str(self.dst_dpid),
+                str(self.dst_port), {}] 
+    
+class DummyOMSwitch(models.Model):
+    '''
+    A switch used by the dummy OM fixtures.
+    '''
+    dpid = models.CharField(max_length=100)
+    om = models.ForeignKey(DummyOM)
+    nPorts = models.IntegerField()
+    portList = models.CharField(max_length=1024)
+
+    def get_as_tuple(self):
+        t = [self.dpid, {"nPorts": str(self.nPorts), "portList": str(self.portList)}]
+        return t
     
 class DummyOMSlice(models.Model):
     '''
@@ -120,5 +142,7 @@ class DummyCallBackProxy(models.Model):
     
     def call_back(self):
         from xmlrpclib import ServerProxy
+        logger.debug("DummyCallBackProxy.call_back at %s with cookie %s" % (
+            self.url, self.cookie))
         s = ServerProxy(self.url)
         s.topology_changed(self.cookie)
