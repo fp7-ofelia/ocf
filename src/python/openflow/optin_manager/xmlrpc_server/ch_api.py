@@ -286,7 +286,7 @@ def create_slice(slice_id, project_name, project_description,
     
     if (exp_exist):
         try:
-            fv.api.deleteSlice(old_fv_name)
+            fv.proxy.api.deleteSlice(old_fv_name)
         except Exception,e:
             errorlist.append(str(e))   
            
@@ -320,7 +320,7 @@ def create_slice(slice_id, project_name, project_description,
     if not fv_success:
         errorlist.append("FlowVisor returned false for create slice xmlrpc call")
         
-    if errorlist.count() > 0:
+    if len(errorlist) > 0:
         error_msg = str(errorlist)
     else:
         error_msg = ""

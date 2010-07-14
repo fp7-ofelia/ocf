@@ -134,7 +134,7 @@ def update_opts_into_exp(exp):
         if (intersected):
             try:
                 fv = FVServerProxy.objects.all()[0]
-                return_ids = fv.api.changeFlowSpace(fv_args)
+                return_ids = fv.proxy.api.changeFlowSpace(fv_args)
             except Exception,e:
                 opted.delete()
                 match_list.delete()
