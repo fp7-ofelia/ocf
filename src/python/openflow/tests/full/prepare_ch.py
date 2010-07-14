@@ -39,7 +39,7 @@ def main(argv):
         if not proxy.is_available:
             raise Exception("Problem: Proxy not available")
         
-        u = User.objects.create(username="agg_owner")
+        u = User.objects.create(username="agg_owner", password="password")
     
         # Add aggregate
         of_agg = OpenFlowAggregate.objects.create(

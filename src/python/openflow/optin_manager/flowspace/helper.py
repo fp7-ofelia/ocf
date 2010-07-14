@@ -104,11 +104,21 @@ def single_fs_intersect(f1,f2,resultModel):
     return fr
 
 
-def multi_fs_intersect(FSs1, FSs2, resultModel):
+def multi_fs_intersect(FSs1, FSs2, resultModel, usePorts=False):
     rFSs = []
     for FS1 in FSs1:
         for FS2 in FSs2:
+            if (usePorts):
+                if (FS1.dpid != FS2.dpid or FS1.direction != FS2.direction
+                    or FS1.port_number_e < FS2.port_number_s or 
+                    FS1.port_number_s > FS2.port_number_e):
+                    continue
             rFS = single_fs_intersect(FS1,FS2, resultModel)
+            if (usePorts):
+                rFS.dpid = FS1.dpid
+                rFS.direction = FS1.direction
+                rFS.port_number_s = max(FS1.port_number_s,FS2.port_number_s)
+                rFS.port_number_e = min(FS1.port_number_e,FS2.port_number_e)
             if (rFS):
                 rFSs.append(rFS)
                 

@@ -35,7 +35,7 @@ class Experiment(models.Model):
     # TODO: takeout the replacement when Rob fixes the . escaping in FV
     def get_fv_slice_name(self):
         s = "%s ID: %s" % (self.slice_name, self.slice_id)
-        return s.replace(".", "_").replace(":", "_").replace("=", "_")
+        return s.replace(".", "_").replace(":", "_").replace("=", "_").replace(" ", "_").replace("'","_")
     
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)
@@ -73,7 +73,7 @@ class OptsFlowSpace(FlowSpace):
     opt           = models.ForeignKey(UserOpts)
     def __unicode__(self):
         fs_desc = super(OptsFlowSpace, self).__unicode__()
-        return "dpid; %s , FS: %s"%(self.dpid,fs_desc)
+        return "dpid: %s , FS: %s port %d - %d"%(self.dpid,fs_desc,self.port_number_s,self.port_number_e)
 
     
 class MatchStruct(models.Model):
