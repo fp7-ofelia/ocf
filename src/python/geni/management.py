@@ -9,65 +9,54 @@ import logging
 from django.db.models import signals
 import uuid
 
+SLICE_GID_SUBJ = "gcf.slice"
+SLICE_CRED_LIFETIME = 36000
+
 logger = logging.getLogger("geni-syncdb")
 
-def create_expedient_x509():
+def create_expedient_certs():
     """
     Create the expedient certificate and keys for use in GENI API.
     """
-    from gcf.sfa.trust import gid, certificate
-    urn = settings.GENI_URN
-    newgid = gid.GID(create=True, subject=urn, urn=urn, uuid=gid.create_uuid())
-    keys = certificate.Keypair(create=True)
-    newgid.set_pubkey(keys)
-    newgid.set_issuer(keys, subject=urn)
-    newgid.encode()
-    newgid.sign()
-    newgid.save_to_file(settings.GENI_X509_CERT)
-    keys.save_to_file(settings.GENI_X509_KEY)
+    # workaround the '-' in the filename :(
+    gcf = __import__("gcf.init-ca")
+    initca = getattr(gcf, "init-ca")
 
-def create_expedient_target_gid():
-    """
-    Create and return a GID with no target.
-    """
-    return create_slice_gid()
-
-def create_expedient_cred():
-    """
-    Create a credential that allows Expedient to do everything.
-    """
-    from gcf.sfa.trust import gid, credential, rights
-    gid = gid.GID(filename=settings.GENI_X509_CERT)
-    ucred = credential.Credential()
-    ucred.set_gid_caller(gid)
-    ucred.set_gid_object(create_expedient_target_gid()[0])
-    # TODO: This should be in settings.
-    ucred.set_lifetime(36000)
-    privileges = rights.determine_rights('sa', None)
-    privileges.add('embed')
-    privileges.add('refresh')
-    privileges.add('resolve')
-    privileges.add('info')
-    ucred.set_privileges(privileges)
-    ucred.encode()
-    ucred.set_issuer_keys(settings.GENI_X509_KEY, settings.GENI_X509_CERT)
-    ucred.sign()
-    ucred.save_to_file(filename=settings.GENI_CRED)
+    ca_cert, ca_key = initca.create_cert(
+        settings.GCF_URN_PREFIX,
+        initca.AUTHORITY_CERT_TYPE,
+        initca.CA_CERT_SUBJ)
     
+    ch_cert, ch_key = initca.create_cert(
+        settings.GCF_URN_PREFIX,
+        initca.AUTHORITY_CERT_TYPE,
+        initca.CH_CERT_SUBJ,
+        ca_key, ca_cert, True)
+    
+    ca_cert.save_to_file(settings.GCF_X509_CA_CERT)
+    ca_key.save_to_file(settings.GCF_X509_CA_KEY)
+    
+    ch_cert.save_to_file(settings.GCF_X509_CH_CERT)
+    ch_key.save_to_file(settings.GCF_X509_CH_KEY)
+
 def create_slice_gid():
     """
-    Create a gid for a slice and return it and its keys.
+    Create a gid for a slice and return it and its key.
     
-    @return: new Slice GID and Slice keys.
+    @return: new Slice GID and Slice key.
     @rtype: (C{gcf.sfa.trust.gid.GID} instance, C{gcf.sfa.trust.certificate.Keypair} instance)
     """
     from gcf.sfa.trust import gid, certificate
-    urn = "%s+slice+%s" % (settings.GENI_URN, uuid.uuid4())
-    newgid = gid.GID(create=True, uuid=gid.create_uuid(), urn=urn)
+    
+    slice_urn = "urn:publicid:IDN+%s+slice+%s:%s" % (
+        settings.GCF_URN_PREFIX, uuid.uuid4(), settings.SITE_DOMAIN)
+    newgid = gid.GID(
+        create=True, subject=SLICE_GID_SUBJ,
+        uuid=gid.create_uuid(), urn=slice_urn)
     keys = certificate.Keypair(create=True)
     newgid.set_pubkey(keys)
-    issuer_key = certificate.Keypair(filename=settings.GENI_X509_KEY)
-    issuer_cert = gid.GID(filename=settings.GENI_X509_CERT)
+    issuer_key = certificate.Keypair(filename=settings.GCF_X509_CH_KEY)
+    issuer_cert = gid.GID(filename=settings.GCF_X509_CH_CERT)
     newgid.set_issuer(issuer_key, cert=issuer_cert)
     newgid.set_parent(issuer_cert)
     newgid.encode()
@@ -84,21 +73,29 @@ def create_slice_credential(user_gid, slice_gid):
     @return slice_gid: C{gcf.sfa.trust.gid.GID} instance
     """
     from gcf.sfa.trust import credential, rights
+    
     ucred = credential.Credential()
     ucred.set_gid_caller(user_gid)
     ucred.set_gid_object(slice_gid)
-    # TODO: this should be in settings
-    ucred.set_lifetime(36000)
-    privileges = rights.determine_rights('user', None)
-    privileges.add('embed')
-    # TODO: This should be 'control', not 'sa', but
-    # renewsliver is only an 'sa' privilege at this time.
-    privileges.add('sa')
+    ucred.set_lifetime(SLICE_CRED_LIFETIME)
+    privileges = rights.determine_rights('slice', None)
     ucred.set_privileges(privileges)
     ucred.encode()
-    ucred.set_issuer_keys(settings.GENI_X509_KEY, settings.GENI_X509_CERT)
+    ucred.set_issuer_keys(settings.GCF_X509_CH_KEY, settings.GCF_X509_CH_CERT)
     ucred.sign()
-    return ucred        
+    return ucred
+
+def create_null_slice_cred():
+    """
+    Create credentials for a null slice so that Expedient can call
+    ListResources.
+    """
+    from gcf.sfa.trust import gid
+    
+    slice_gid, slice_keys = create_slice_gid()
+    user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
+    ucred = create_slice_credential(user_gid, slice_gid)
+    ucred.save_to_string(settings.GCF_NULL_SLICE_CRED)
 
 def _mkdirs(dirname):
     try:
@@ -115,15 +112,17 @@ def check_and_create_auth(sender, **kwargs):
     Check to see if the gid cert, keys, and credentials are readable, and
     create them if not.
     """
-    if not os.access(settings.GENI_X509_CERT, os.R_OK):
-        logger.info("Creating GENI API Certificate and KEY.")
+    if not os.access(settings.GCF_X509_CH_CERT, os.R_OK) or\
+    not os.access(settings.GCF_X509_CH_KEY, os.R_OK):
+        logger.info("Creating GENI API certificate and key.")
         _mkdirs(os.path.dirname(settings.GENI_X509_KEY))
-        create_expedient_x509()
+        create_expedient_certs()
     
-    if not os.access(settings.GENI_CRED, os.R_OK):
-        logger.info("Creating GENI API Credentials.")
-        _mkdirs(os.path.dirname(settings.GENI_CRED))
-        create_expedient_cred()
+    if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
+        logger.info("Creating GENI API null slice credentials.")
+        _mkdirs(os.path.dirname(settings.GCF_NULL_SLICE_CRED))
+        create_null_slice_cred()
+        
 
 # Request to run check_and_create_auth after syncdb
 signals.post_syncdb.connect(check_and_create_auth)

@@ -185,10 +185,15 @@ AGGREGATE_PLUGINS = (
 DOMAIN_SCHEME = "https"
 
 # Location of GENI x509 certs and keys
-GENI_X509_CERT = join(SRC_DIR, "../geni-x509/ch.crt")
-GENI_X509_KEY = join(SRC_DIR, "../geni-x509/ch.key")
-GENI_CRED = join(SRC_DIR, "../geni-x509/ch.cred")
-GENI_URN = "urn:publicid:IDN+expedient:stanford+ch"
+GCF_X509_CERT_DIR = join(SRC_DIR, "../gcf-x509.crt")
+GCF_X509_KEY_DIR = join(SRC_DIR, "../gcf-x509.key")
+GCF_X509_CRED_DIR = join(SRC_DIR, "../gcf-x509.cred")
+GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")
+GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.crt")
+GCF_X509_CA_CERT = join(GCF_X509_CERT_DIR, "ca.crt")
+GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.crt")
+GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
+GCF_URN_PREFIX = "expedient:stanford"
 
 # get custom install info
 from deployment_settings import *
