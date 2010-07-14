@@ -150,15 +150,29 @@ production networks, and is currently deployed in several universities.
         for src_dpid, src_port, dst_dpid, dst_port, attrs in active_links_raw:
             logger.debug("parsing link %s:%s - %s:%s" % (
                 src_dpid, src_port, dst_dpid, dst_port))
-            cnxn, created = OpenFlowConnection.objects.get_or_create(
-                src_iface=OpenFlowInterface.objects.get(
+            try:
+                src_iface = OpenFlowInterface.objects.get(
                     switch__datapath_id=src_dpid,
                     port_num=src_port,
-                ),
-                dst_iface=OpenFlowInterface.objects.get(
+                )
+            except OpenFlowInterface.DoesNotExist:
+                logger.warn("Tried to add connection for non-existing source\
+ interface %s:%s" % (src_dpid, src_port))
+                continue
+
+            try:
+                dst_iface = OpenFlowInterface.objects.get(
                     switch__datapath_id=dst_dpid,
                     port_num=dst_port,
-                ),
+                )
+            except OpenFlowInterface.DoesNotExist:
+                logger.warn("Tried to add connection for non-existing dest\
+ interface %s:%s" % (dst_dpid, dst_port))
+                continue
+
+            cnxn, created = OpenFlowConnection.objects.get_or_create(
+                src_iface=src_iface,
+                dst_iface=dst_iface,
             )
             active_cnxn_ids.append(cnxn.id)
             
