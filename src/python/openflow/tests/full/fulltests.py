@@ -562,6 +562,19 @@ class FullIntegration(TestCase):
         self.assertEqual(f.code, 200)
         self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
         
+        
+        # test if FV has the expected flowspace match entries
+        from expedient.common.tests.utils import run_cmd
+        fvctl = run_cmd(
+            "sh %s/scripts/fvctl.sh listFlowSpace" % (
+                test_settings.FLOWVISOR_DIR,
+            ),
+        )
+        data = fvctl.communicate(input="rootpassword")
+        fv_rules = data[0].split("\n")
+        print(fv_rules)
+        #for fv_rule in fv_rules
+        
         logger.debug("Response fine, opting out.")
         # now test opt out:
         f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_out"%

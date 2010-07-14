@@ -320,7 +320,10 @@ def create_slice(slice_id, project_name, project_description,
     if not fv_success:
         errorlist.append("FlowVisor returned false for create slice xmlrpc call")
         
-    error_msg = str(errorlist)
+    if errorlist.count() > 0:
+        error_msg = str(errorlist)
+    else:
+        error_msg = ""
     
     return {
         'error_msg': error_msg,
