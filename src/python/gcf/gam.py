@@ -22,6 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
 #----------------------------------------------------------------------
+"""
+Framework to run a GENI Aggregate Manager. See geni/am 
+"""
 
 import sys
 from os import path
@@ -36,84 +39,28 @@ elif sys.version_info >= (3,):
 import datetime
 import logging
 import optparse
+import os
 import xmlrpclib
 import geni
+from geni import CredentialVerifier
 import gcf.sfa.trust.credential as cred
 import gcf.sfa.trust.gid as gid
 
-class CredentialVerifier(object):
-    
-    def __init__(self, root_cert_file):
-        self.root_cert_files = [root_cert_file]
+# See sfa/trust/rights.py
+RENEWSLIVERPRIV = 'renewsliver'
+RESOURCEPUBLICIDPREFIX = 'geni.net'
+CREATESLIVERPRIV = 'createsliver'
+DELETESLIVERPRIV = 'deleteslice'
+SLIVERSTATUSPRIV = 'getsliceresources'
 
-    def verify_from_strings(self, gid_string, cred_strings, target_urn,
-                            privileges):
-        def make_cred(cred_string):
-            return cred.Credential(string=cred_string)
-        return self.verify(gid.GID(string=gid_string),
-                           map(make_cred, cred_strings),
-                           target_urn,
-                           privileges)
-        
-    def verify_source(self, source_gid, credential):
-        source_urn = source_gid.get_urn()
-        cred_source_urn = credential.get_gid_caller().get_urn()
-        logging.debug('Verifying source %r against credential %r source %r',
-                      source_urn, credential, cred_source_urn)
-        result = (cred_source_urn == source_urn)
-        if result:
-            logging.debug('Source URNs match')
-        else:
-            logging.debug('Source URNs do not match')
-        return result
-    
-    def verify_target(self, target_urn, credential):
-        if not target_urn:
-            logging.debug('No target specified, considering it a match.')
-            return True
-        else:
-            cred_target_urn = credential.get_gid_object().get_urn()
-            logging.debug('Verifying target %r against credential target %r',
-                          target_urn, cred_target_urn)
-            result = target_urn == cred_target_urn
-            if result:
-                logging.debug('Target URNs match.')
-            else:
-                logging.debug('Target URNs do not match.')
-            return result
-
-    def verify_privileges(self, privileges, credential):
-        result = True
-        privs = credential.get_privileges()
-        for priv in privileges:
-            if not privs.can_perform(priv):
-                logging.debug('Privilege %s not found', priv)
-                result = False
-        return result
-
-    def verify(self, gid, credentials, target_urn, privileges):
-        logging.debug('Verifying privileges')
-        result = list()
-        for cred in credentials:
-            if (self.verify_source(gid, cred) and
-                self.verify_target(target_urn, cred) and
-                self.verify_privileges(privileges, cred) and
-                cred.verify(self.root_cert_files)):
-                result.append(cred)
-        if result:
-            return result
-        else:
-            # We did not find any credential with sufficient privileges
-            # Raise an exception.
-            fault_code = 'Insufficient privileges'
-            fault_string = 'No credential was found with appropriate privileges.'
-            raise xmlrpclib.Fault(fault_code, fault_string)
+MAXLEASE_DAYS = 365
 
 class AggregateManager(object):
     
     def __init__(self, root_cert, proxy_url):
         self._cred_verifier = CredentialVerifier(root_cert)
-        self.max_lease = datetime.timedelta(days=365)
+        self.max_lease = datetime.timedelta(days=MAXLEASE_DAYS)
+        self.logger = logging.getLogger("gam")
         if proxy_url.startswith("https"):
             self.proxy = xmlrpclib.ServerProxy(proxy_url,
                                                xmlrpclib.SafeTransport())
@@ -121,12 +68,13 @@ class AggregateManager(object):
             self.proxy = xmlrpclib.ServerProxy(proxy_url)
 
     def GetVersion(self):
-        logging.info("Called GetVersion")
+        self.logger.info("Called GetVersion")
         return self.proxy.GetVersion()
 
     def ListResources(self, credentials, options):
-        logging.info('ListResources(%r)' % (options))
-        privileges = ('listresources',)
+        self.logger.info('ListResources(%r)' % (options))
+        #privileges = ('listresources',)
+        privileges = ()
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
                                                 None,
@@ -134,18 +82,19 @@ class AggregateManager(object):
         retval = self.proxy.ListResources(credentials, options)
         return retval
     
-    def CreateSliver(self, slice_urn, credentials, rspec):
-        logging.info('CreateSliver(%r)' % (slice_urn))
-        privileges = ('createsliver',)
+    def CreateSliver(self, slice_urn, credentials, rspec, users):
+        self.logger.info('CreateSliver(%r)' % (slice_urn))
+        privileges = (CREATESLIVERPRIV,)
         creds = self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                         credentials,
                                                         slice_urn,
                                                         privileges)
+        # FIXME: users arg!!
         return self.proxy.CreateSliver(slice_urn, credentials, rspec)
 
     def DeleteSliver(self, slice_urn, credentials):
-        logging.info('DeleteSliver(%r)' % (slice_urn))
-        privileges = ('deleteslice',)
+        self.logger.info('DeleteSliver(%r)' % (slice_urn))
+        privileges = (DELETESLIVERPRIV,)
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
                                                 slice_urn,
@@ -153,8 +102,8 @@ class AggregateManager(object):
         return self.proxy.DeleteSliver(slice_urn, credentials)
     
     def SliverStatus(self, slice_urn, credentials):
-        logging.info('SliverStatus(%r)' % (slice_urn))
-        privileges = ('getsliceresources',)
+        self.logger.info('SliverStatus(%r)' % (slice_urn))
+        privileges = (SLIVERSTATUSPRIV,)
         self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                 credentials,
                                                 slice_urn,
@@ -162,8 +111,8 @@ class AggregateManager(object):
         return self.proxy.SliverStatus()
     
     def RenewSliver(self, slice_urn, credentials, expiration_time):
-        logging.info('RenewSliver(%r, %r)' % (slice_urn, expiration_time))
-        privileges = ('renewsliver',)
+        self.logger.info('RenewSliver(%r, %r)' % (slice_urn, expiration_time))
+        privileges = (RENEWSLIVERPRIV,)
         creds = self._cred_verifier.verify_from_strings(self._server.pem_cert,
                                                         credentials,
                                                         slice_urn,
@@ -171,18 +120,24 @@ class AggregateManager(object):
         return self.proxy.RenewSliver(slice_urn, credentials, expiration_time)
     
     def Shutdown(self, slice_urn, credentials):
-        logging.info('Shutdown(%r)' % (slice_urn))
-        return self.proxy.Shutdown(slice_urn, credentials)
+        self.logger.info('Shutdown(%r)' % (slice_urn))
+        # TODO: No permission for Shutdown currently exists.
+        privileges = ()
+        self._cred_verifier.verify_from_strings(self._server.pem_cert,
+                                                        credentials,
+                                                        slice_urn,
+                                                        privileges)
+	return self.proxy.Shutdown(slice_urn, credentials)
 
 def parse_args(argv):
     import socket
     parser = optparse.OptionParser()
     parser.add_option("-k", "--keyfile",
-                      help="key file name", metavar="FILE")
+                      help="AM key file name", metavar="FILE")
     parser.add_option("-c", "--certfile",
-                      help="certificate file name", metavar="FILE")
+                      help="AM certificate file name (PEM format)", metavar="FILE")
     parser.add_option("-r", "--rootcafile",
-                      help="root ca certificate file name", metavar="FILE")
+                      help="Root CA certificates file or directory name (PEM format)", metavar="FILE")
     # Could try to determine the real IP Address instead of the loopback
     # using socket.gethostbyname(socket.gethostname())
     parser.add_option("-u", "--url",
@@ -204,13 +159,22 @@ def main(argv=None):
     if opts.debug:
         level = logging.DEBUG
     logging.basicConfig(level=level)
+    
+    if opts.rootcafile is None:
+        sys.exit('Missing path to Root CAs file or directory (-r argument)')
+
     delegate = AggregateManager(opts.rootcafile, opts.url)
+
+    # here rootcafile is supposed to be a single file with multiple
+    # certs possibly concatenated together
+    comboCertsFile = CredentialVerifier.getCAsFileFromDir(opts.rootcafile)
+
     ams = geni.AggregateManagerServer((opts.host, opts.port),
                                       delegate=delegate,
                                       keyfile=opts.keyfile,
                                       certfile=opts.certfile,
-                                      ca_certs=opts.rootcafile)
-    print 'Listening on port %d...' % (opts.port)
+                                      ca_certs=comboCertsFile)
+    logging.getLogger('gam').info('GENI AM Listening on port %d...' % (opts.port))
     ams.serve_forever()
 
 if __name__ == "__main__":

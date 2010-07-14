@@ -20,7 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
 #----------------------------------------------------------------------
+"""
+The Aggregate Manager server for the GENI Aggregate Manager.
+Invoked from gam.py
+Typically used with the ReferenceAggregateManager.
+The GENI AM API is defined in the AggregateManager class.
+"""
 
+import os
 import xmlrpclib
 import zlib
 from SecureXMLRPCServer import SecureXMLRPCServer
@@ -28,7 +35,6 @@ from SecureXMLRPCServer import SecureXMLRPCServer
 class AggregateManager(object):
     """The public API for a GENI Aggregate Manager.  This class provides the
     XMLRPC interface and invokes a delegate for all the operations.
-
     """
 
     def __init__(self, delegate):
@@ -38,24 +44,32 @@ class AggregateManager(object):
         return self._delegate.GetVersion()
 
     def ListResources(self, credentials, options):
+        """List all managed resources"""
         return self._delegate.ListResources(credentials, options)
 
-    def CreateSliver(self, slice_urn, credentials, rspec):
-        return self._delegate.CreateSliver(slice_urn, credentials, rspec)
+    def CreateSliver(self, slice_urn, credentials, rspec, users):
+        """Create a sliver with the given URN from the resources in the given RSpec."""
+        return self._delegate.CreateSliver(slice_urn, credentials, rspec, users)
 
     def DeleteSliver(self, slice_urn, credentials):
+        """Delete the given sliver."""
         return self._delegate.DeleteSliver(slice_urn, credentials)
 
     def SliverStatus(self, slice_urn, credentials):
+        """Get the status of the given sliver"""
         return self._delegate.SliverStatus(slice_urn, credentials)
 
     def RenewSliver(self, slice_urn, credentials, expiration_time):
+        """Excent the life of the given sliver"""
         return self._delegate.RenewSliver(slice_urn, credentials,
                                           expiration_time)
+
     def Shutdown(self, slice_urn, credentials):
+        """Emergency shutdown of the given sliver"""
         return self._delegate.Shutdown(slice_urn, credentials)
 
 class PrintingAggregateManager(object):
+    """A dummy AM that prints the called methods."""
 
     def GetVersion(self):
         print 'GetVersion()'
@@ -72,7 +86,7 @@ class PrintingAggregateManager(object):
             result = xmlrpclib.Binary(zlib.compress(result))
         return result
 
-    def CreateSliver(self, slice_urn, credentials, rspec):
+    def CreateSliver(self, slice_urn, credentials, rspec, users):
         print 'CreateSliver(%r)' % (slice_urn)
         return '<rspec/>'
 
@@ -94,10 +108,17 @@ class PrintingAggregateManager(object):
 
 
 class AggregateManagerServer(object):
-    """An XMLRPC Aggregate Manager Server."""
+    """An XMLRPC Aggregate Manager Server. Delegates calls to given delegate,
+    or the default printing AM."""
 
     def __init__(self, addr, delegate=None, keyfile=None, certfile=None,
                  ca_certs=None):
+        # ca_certs arg here must be a file of concatenated certs
+        if ca_certs is None:
+            raise Exception('Missing CA Certs')
+        elif not os.path.isfile(os.path.expanduser(ca_certs)):
+            raise Exception('CA Certs must be an existing file of accepted root certs: %s' % ca_certs)
+
         self._server = SecureXMLRPCServer(addr, keyfile=keyfile,
                                           certfile=certfile, ca_certs=ca_certs)
         if delegate is None:

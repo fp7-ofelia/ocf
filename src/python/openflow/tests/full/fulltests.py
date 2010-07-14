@@ -267,8 +267,10 @@ class FullIntegration(TestCase):
         Run the GENI Sample CH in a subprocess and connect to it.
         """
         self.ch_proc = self.run_proc_cmd(
-            "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-                join(gcf_dir, "gch.py"), join(ssl_dir, "ca.crt"),
+            "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+                join(gcf_dir, "gch.py"),
+                join(ssl_dir, "experimenter.crt"),
+                join(ssl_dir, "ca.crt"),
                 join(ssl_dir, "ch.crt"), join(ssl_dir, "ch.key"),
                 ch_port,
             )
@@ -444,7 +446,8 @@ class FullIntegration(TestCase):
             ctrl_url=url,
             fs_randomness = fs_randomness,
         )
-        self.am_client.CreateSliver(slice_urn, cred, resv_rspec)
+        users = [{'key':''}]
+        self.am_client.CreateSliver(slice_urn, cred, resv_rspec, users)
         
         # TODO: check that the full reservation rspec is returned
         slices = self.fv_clients[0].api.listSlices()
@@ -564,6 +567,19 @@ class FullIntegration(TestCase):
         res = f.read()
         self.assertEqual(f.code, 200)
         self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
+        
+        
+        # test if FV has the expected flowspace match entries
+        from expedient.common.tests.utils import run_cmd
+        fvctl = run_cmd(
+            "sh %s/scripts/fvctl.sh listFlowSpace" % (
+                test_settings.FLOWVISOR_DIR,
+            ),
+        )
+        data = fvctl.communicate(input="rootpassword")
+        fv_rules = data[0].split("\n")
+        print(fv_rules)
+        #for fv_rule in fv_rules
         
         logger.debug("Response fine, opting out.")
         # now test opt out:

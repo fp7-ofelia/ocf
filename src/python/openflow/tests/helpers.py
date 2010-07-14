@@ -92,9 +92,10 @@ class Flowspace(object):
                     
                     
         attrs = {}
-        attrs["nw_src"] = \
-            (_int_to_ip(random.randint(0,0x80000000) & 0xFFFF0000),
-            _int_to_ip(random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000))
+        
+#        attrs["nw_src"] = \
+#            (_int_to_ip(random.randint(0,0x80000000) & 0xFFFF0000),
+#            _int_to_ip(random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000))
         return cls(attrs, switches)
     
     @classmethod

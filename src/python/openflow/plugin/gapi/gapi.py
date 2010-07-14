@@ -92,7 +92,7 @@ def CreateSliver(slice_urn, credentials, rspec, **kwargs):
             import traceback
             traceback.print_exc()
             raise Exception("Could not reserve slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.proxy.url))
+the opt-in manager at %s" % (e, str(aggregate.client.url)))
     
     gapi_slice, created = GAPISlice.objects.get_or_create(slice_urn=slice_urn)
     
@@ -116,7 +116,7 @@ def DeleteSliver(slice_urn, credentials, **kwargs):
             import traceback
             traceback.print_exc()
             raise Exception("Could not delete slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.proxy.url))
+the opt-in manager at %s" % (e, aggregate.client.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()
@@ -165,7 +165,7 @@ def Shutdown(slice_urn, credentials, **kwargs):
             import traceback
             traceback.print_exc()
             raise Exception("Could not shutdown slice. Got message '%s' from\
-the opt-in manager at %s" % (e, aggregate.client.proxy.url))
+the opt-in manager at %s" % (e, aggregate.client.url))
 
     try:
         GAPISlice.objects.get(slice_urn=slice_urn).delete()

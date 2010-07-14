@@ -45,7 +45,7 @@ class DummyOM(models.Model):
                 om=self,
             )
             
-        dpids = DummyOMSwitch.objects.all().values_list("dpid", flat=True)
+        dpids = self.dummyomswitch_set.all().values_list("dpid", flat=True)
         
         for l in range(num_links):
             src, dst = random.sample(dpids, 2)
