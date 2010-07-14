@@ -194,6 +194,7 @@ GCF_X509_CA_CERT = join(GCF_X509_CERT_DIR, "ca.crt")
 GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.crt")
 GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
 GCF_URN_PREFIX = "expedient:stanford"
+CURRENT_GAPI_VERSTION = 1
 
 # get custom install info
 from deployment_settings import *
