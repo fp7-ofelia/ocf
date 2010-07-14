@@ -160,10 +160,13 @@ class PasswordXMLRPCServerProxy(models.Model):
             print "Error changing password: %s" % err
         return err
         
+    def ping(self, data):
+        return self.proxy.ping(data)
+        
     def is_available(self, get_info=False):
         '''Call the server's ping method, and see if we get a pong'''
         try:
-            ret = self.proxy.ping("PING")
+            ret = self.ping("PING")
         except Exception as e:
             import traceback
             print "Exception while pinging server: %s" % e
