@@ -79,7 +79,7 @@ class GAPITests(TestCase):
             )
     
             # test availability
-            if not proxy.is_available:
+            if not proxy.is_available():
                 raise Exception("Problem: Proxy not available")
     
             # Add aggregate
@@ -273,10 +273,11 @@ class GAPITests(TestCase):
         self.assertEqual(len(self.switches),
                          num_links)
         
-        # make sure all killed dpids are gone
+        # make sure all killed dpids are gone: None of the dpids still
+        # here should have the dpid of a killed switch.
         for s in self.switches:
             for d in killed_dpids:
-                self.assertFalse(str(s.dpid) == str(d))
+                self.assertNotEqual(str(s.dpid), str(d))
         
     def test_CreateSliver(self):
         """

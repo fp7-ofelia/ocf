@@ -43,7 +43,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     if (intersected):
             try:
                 fv = FVServerProxy.objects.all()[0]
-                return_ids = fv.api.changeFlowSpace(fv_args)
+                return_ids = fv.proxy.api.changeFlowSpace(fv_args)
             except Exception,e:
                 opt.delete()
                 import traceback
@@ -70,7 +70,7 @@ def opt_fses_outof_exp(fses):
 
     try:
         fv = FVServerProxy.objects.all()[0]
-        fv.api.changeFlowSpace(fv_args)  
+        fv.proxy.api.changeFlowSpace(fv_args)  
         return ""
     except Exception,e:
         import traceback

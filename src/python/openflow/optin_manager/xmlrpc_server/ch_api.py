@@ -18,10 +18,10 @@ def check_fv_set(func, *arg, **kwargs):
     fv = FVServerProxy.objects.all()
     if len(fv) == 0: 
         raise Exception("No flowvisor has been set. Please set Flowvisor\
-         URL first and then try again")
+URL first and then try again")
     elif (len(fv) > 1):
         raise Exception("More than one flowvisor is set in database. Make\
-         sure you just have one flowvisor")
+sure you just have one flowvisor")
     
     return func(*arg, **kwargs)
 
@@ -268,7 +268,7 @@ def create_slice(slice_id, project_name, project_description,
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
     try:
-        fv_success = fv.api.createSlice(
+        fv_success = fv.proxy.api.createSlice(
         "%s" % e.get_fv_slice_name(),
         "%s" % owner_password,
         "%s" % controller_url,
@@ -321,7 +321,7 @@ def delete_slice(sliceid, **kwargs):
     error_msg = ""
     fv = FVServerProxy.objects.all()[0]
     try:
-        success = fv.api.deleteSlice(single_exp.get_fv_slice_name())
+        success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
     except Exception,e:
         import traceback
         traceback.print_exc()

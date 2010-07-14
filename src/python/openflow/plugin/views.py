@@ -6,18 +6,15 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models import Q
 from expedient.clearinghouse.slice.models import Slice
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.utils.views import generic_crud
 from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
-from models import OpenFlowAggregate, OpenFlowSliceInfo
+from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
+from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 import logging
-from django.forms.models import modelformset_factory
-from openflow.plugin.models import OpenFlowConnection
-from django.db.models import Q
-from openflow.plugin.forms import OpenFlowStaticConnectionForm,\
-    OpenFlowConnectionSelectionForm
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -147,7 +144,6 @@ def aggregate_add_links(request, agg_id):
                 OpenFlowConnectionSelectionForm(existing_links)
         else:
             existing_links_form = None
-        logger.debug("new connection form: %s" % new_cnxn_form)
     
     return simple.direct_to_template(
         request,
@@ -164,25 +160,6 @@ def aggregate_add_links(request, agg_id):
         },
     )
     
-def aggregate_delete(request, agg_id):
-    """
-    Delete an aggregate.
-    """
-    aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
-    req = create_update.delete_object(
-        request,
-        OpenFlowAggregate,
-        reverse("aggregate_all"),
-        agg_id,
-        template_name=TEMPLATE_PATH+"/aggregate_confirm_delete.html",
-    )
-    if req.status_code == HttpResponseRedirect.status_code:
-        DatedMessage.objects.post_message_to_user(
-            "Successfully deleted aggregate %s" % aggregate.name,
-            request.user, msg_type=DatedMessage.TYPE_ERROR,
-        )
-    return req
-
 def aggregate_add_to_slice(request, agg_id, slice_id):
     """
     Add the aggregate to the slice. Check if the slice already has

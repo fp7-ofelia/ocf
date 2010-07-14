@@ -5,9 +5,8 @@
 {% block content %}
 <div class="main">
 	<form method="post" action="">{% csrf_token %}
-	<table class="formtable openflow_create">
-	{{ agg_form.as_table }}
-	{{ client_form.as_table }}
+	<table class="formtable">
+	{{ form.as_table }}
 	{% if not create %}
 	<tr>
 		<th>Current status:</th>

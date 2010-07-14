@@ -42,7 +42,8 @@ No information available.
     managers = models.ManyToManyField(
         User, related_name="managed_aggregate_set", blank=True,
         help_text="Who else should administer this aggregate?")
-    users = models.ManyToManyField(User, related_name="useable_aggregate_set")
+    users = models.ManyToManyField(
+        User, related_name="useable_aggregate_set", blank=True)
     
     class Meta:
         verbose_name = "Generic Aggregate"
@@ -62,6 +63,25 @@ No information available.
         ct = ContentType.objects.get_for_model(self.__class__)
         return reverse("%s_aggregate_edit" % ct.app_label,
                        kwargs={'agg_id': self.id})
+        
+    def get_delete_url(self, next):
+        """
+        Get the URL to use when deleting the project from the
+        Aggregate List. This function will first check if there is a URL
+        defined as <app_label>_aggregate_delete and return that if it
+        exists, attaching "?next=<C{next}>" to the end of the URL.
+        
+        @param next: URL to redirect to after deleting object.
+        
+        @return: URL to go to when requesting the aggregate be deleted.
+        """
+        ct = ContentType.objects.get_for_model(self.__class__)
+        try:
+            return reverse("%s_aggregate_delete" % ct.app_label,
+                           kwargs={'agg_id': self.id})+"?next="+next
+        except NoReverseMatch:
+            return reverse("aggregate_delete" % ct.app_label,
+                           kwargs={'agg_id': self.id})+"?next="+next
 
     def add_to_project(self, project, next):
         """
@@ -100,6 +120,12 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'proj_id': project.id})+"?next="+next
         except NoReverseMatch:
+            # Stop all the slices in the project for this aggregate.
+            for slice in project.slice_set.all():
+                try:
+                    self.as_leaf_class().stop_slice(slice)
+                except:
+                    pass
             project.aggregates.remove(self)
             return next
         
@@ -127,6 +153,10 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next="+next
         except NoReverseMatch:
+            try:
+                self.as_leaf_class().stop_slice(slice)
+            except:
+                pass
             slice.aggregates.remove(self)
             return next
 

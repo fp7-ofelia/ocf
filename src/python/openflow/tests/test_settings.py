@@ -17,7 +17,7 @@ FLOWVISOR_DIR = join(PYTHON_DIR, "../../../flowvisor")
 USE_RANDOM = False
 
 # Address and ports of the expedient clearinghouse and opt-in manager
-HOST = "openflow4.stanford.edu"
+HOST = 'beirut.stanford.edu'
 OM_PORT = 8443
 CH_PORT = 443
 
@@ -31,7 +31,7 @@ GCH_PORT = 8001
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
-        host="192.168.1.129",     # IP address for flowvisor's interface
+        host='171.64.74.50',     # IP address for flowvisor's interface
         of_port=6633,             # openflow port
         xmlrpc_port=8080,         # XMLRPC port for the flowvisor
         username="root",          # The username to use to connect to the FV
@@ -39,7 +39,10 @@ FLOWVISORS = [
         path=(FLOWVISOR_DIR, FV_CONFIG), # configuration file
     ),
 ]
-MININET_VMS = [("192.168.1.130", 22)]    # IP address of the mininet VM
+MININET_VMS = [('172.16.77.131', 22)]
+
+# Type of switch to use. One of "user", "ovsk", "kernel"
+MININET_SWITCH_TYPE = "user"
 
 NUM_EXPERIMENTS = 2               # Number of Slices
 
@@ -52,7 +55,7 @@ NUM_DUMMY_FVS = 1                 # Don't change. Num of Dummy FVs for OM tests
 USE_HTTPS = True                  # Run using HTTPS or HTTP to expedient & OM?
                                   # WARNING: This is experimental and untested
 
-SHOW_PROCESSES_IN_XTERM = True    # If set to True, processes run as part of
+SHOW_PROCESSES_IN_XTERM = True
                                   # the test suites will popup on separate
                                   # xterms. xterm must be installed.
 

@@ -4,7 +4,6 @@ Created on Jun 11, 2010
 @author: jnaous
 '''
 
-from django.conf import settings
 from expedient.common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -23,8 +22,6 @@ class Tests(SettingsTestCase):
             u.set_password("password")
             u.save()
         
-#        # Add aggregates
-#        logger.debug("Creating aggregates.")
         logger.debug("Setup done.")
         
     def test_list(self):
