@@ -251,8 +251,6 @@ class Clearinghouse(object):
 #                    print 'user cert not signed by that server'
                     pass
             except Exception, exc:
-                import traceback
-                traceback.print_exc()
                 pass
             
         if serverstr == "":
