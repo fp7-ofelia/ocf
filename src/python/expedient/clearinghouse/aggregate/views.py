@@ -45,6 +45,10 @@ def list(request, agg_id=None):
 def delete(request, agg_id):
     next = request.GET.get("next", None)
     aggregate = get_object_or_404(Aggregate, id=agg_id)
+    # Stop all slices using the aggregate
+    for s in aggregate.slice_set.all():
+        aggregate.as_leaf_class().stop_slice(s)
+    # Delete the aggregate.
     req = create_update.delete_object(
         request,
         model=Aggregate,
