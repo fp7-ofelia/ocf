@@ -253,7 +253,6 @@ class Clearinghouse(object):
             except Exception, exc:
                 import traceback
                 traceback.print_exc()
-                raise
                 pass
             
         if serverstr == "":
