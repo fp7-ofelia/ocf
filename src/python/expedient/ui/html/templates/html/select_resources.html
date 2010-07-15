@@ -151,7 +151,7 @@ at {{ agg.location }}.
 <p>There are no OpenFlow aggregates in the slice. </p>
 {% endfor %}
 
-{% if openflow_aggs %}
+{% if openflow_aggs or planetlab_aggs %}
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
 {% endif %}
