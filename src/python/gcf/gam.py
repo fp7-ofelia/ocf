@@ -89,7 +89,6 @@ class AggregateManager(object):
                                                         credentials,
                                                         slice_urn,
                                                         privileges)
-        # FIXME: users arg!!
         return self.proxy.CreateSliver(slice_urn, credentials, rspec)
 
     def DeleteSliver(self, slice_urn, credentials):
