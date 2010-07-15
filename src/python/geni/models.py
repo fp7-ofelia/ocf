@@ -76,6 +76,17 @@ class GENISliceInfo(models.Model):
         user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
         cred = management.create_slice_credential(user_gid, slice_gid)
         self.slice_cred = cred.save_to_string()
+        
+    def login_username(self):
+        """
+        Get the PlanetLab login username from the slice URN.
+        """
+        
+        parts = self.slice_urn.split("+")
+        name = parts[-1]
+        prefix = parts[1]
+        base = prefix.partition(":")[2]
+        return base+"_"+name
     
 class GENIAggregate(Aggregate):
     """
@@ -128,7 +139,13 @@ class GENIAggregate(Aggregate):
         
         try:
             reserved = self.proxy.CreateSliver(
-                info.slice_urn, [info.slice_cred], rspec, [{"key": [info.ssh_public_key]}])
+                info.slice_urn, [info.slice_cred], rspec,
+                [dict(name=settings.GCF_URN_PREFIX,
+                      urn="urn:publicid:IDN+%s+%s+%s" % (
+                            settings.GCF_URN_PREFIX, "authority", "ch"),
+                      keys=[info.ssh_public_key])
+                 ]
+            )
         except Exception as e:
             import traceback
             traceback.print_exc()
