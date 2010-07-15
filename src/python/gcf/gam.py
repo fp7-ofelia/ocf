@@ -147,6 +147,8 @@ def parse_args(argv):
                       help="server ip", metavar="HOST")
     parser.add_option("-p", "--port", type=int, default=8001,
                       help="server port", metavar="PORT")
+    parser.add_option("--reference", action="store_true", default=False,
+                      help="Run the reference AM instead of OpenFlow GAPI Proxy?")
     parser.add_option("--debug", action="store_true", default=False,
                        help="enable debugging output")
     return parser.parse_args()
@@ -160,10 +162,17 @@ def main(argv=None):
         level = logging.DEBUG
     logging.basicConfig(level=level)
     
+    if opts.reference:
+        from geni import reference
+        am_class = reference.AggregateManager
+    else:
+        am_class = AggregateManager
+        
     if opts.rootcafile is None:
         sys.exit('Missing path to Root CAs file or directory (-r argument)')
 
-    delegate = AggregateManager(opts.rootcafile, opts.url)
+    
+    delegate = am_class(opts.rootcafile, opts.url)
 
     # here rootcafile is supposed to be a single file with multiple
     # certs possibly concatenated together
