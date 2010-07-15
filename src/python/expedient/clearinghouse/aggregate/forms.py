@@ -21,7 +21,7 @@ def _get_aggregate_types():
 class ContentTypeChoiceField(forms.ModelChoiceField):
     """Create a label from the verbose name of the class"""
     def label_from_instance(self, obj):
-        return obj.model_class()._meta.verbose_name
+        return "%s" % obj
 
 class AggregateTypeForm(forms.Form):
     type = ContentTypeChoiceField(
