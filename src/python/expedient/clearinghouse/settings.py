@@ -178,7 +178,7 @@ UI_PLUGINS = (
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = (
     ('openflow.plugin.models.OpenFlowAggregate'),
-    ('geni.planetlab.models.PlanetLabAggregate'),
+#    ('geni.planetlab.models.PlanetLabAggregate'),
 )
 
 # What is the scheme to use when sending urls? 

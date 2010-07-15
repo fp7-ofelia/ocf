@@ -42,7 +42,7 @@ import gcf.sfa.trust.rights as rights
 
 # Substitute eg "openflow//stanford ch"
 #SLICEPUBID_PREFIX = "geni.net//gpo//gcf"
-SLICEPUBID_PREFIX = "openflow//stanford ch"
+SLICEPUBID_PREFIX = "openflow//stanford"
 SLICE_GID_SUBJ = "gcf.slice"
 
 USER_CRED_LIFE = 86400
@@ -251,9 +251,6 @@ class Clearinghouse(object):
 #                    print 'user cert not signed by that server'
                     pass
             except Exception, exc:
-                import traceback
-                traceback.print_exc()
-                raise
                 pass
             
         if serverstr == "":

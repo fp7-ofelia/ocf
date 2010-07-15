@@ -124,13 +124,12 @@ class GAPITests(TestCase):
         cmd = "make -C %s" % settings.SSL_DIR
         run_cmd(cmd).wait()
         
-        
         # run the CH
         kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
         cmd = "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gch.py"),
             join(settings.SSL_DIR, "experimenter.crt"),
-            join(settings.SSL_DIR, "ca.crt"),
+            join(settings.SSL_DIR, "certs"),
             join(settings.SSL_DIR, "ch.crt"), join(settings.SSL_DIR, "ch.key"),
             settings.GCH_PORT,
         )
@@ -139,7 +138,7 @@ class GAPITests(TestCase):
         # run the AM proxy
         cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
             join(settings.GCF_DIR, "gam.py"),
-            join(settings.SSL_DIR, "ca.crt"),
+            join(settings.SSL_DIR, "certs"),
             join(settings.SSL_DIR, "server.crt"),
             join(settings.SSL_DIR, "server.key"),
             settings.GAM_PORT,

@@ -250,7 +250,7 @@ class FullIntegration(TestCase):
         # run the am
         self.am_proc = self.run_proc_cmd(
             "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
-                join(gcf_dir, "gam.py"), join(ssl_dir, "ca.crt"),
+                join(gcf_dir, "gam.py"), join(ssl_dir, "certs"),
                 join(ssl_dir, "server.crt"), join(ssl_dir, "server.key"),
                 am_port,
             )
@@ -270,7 +270,7 @@ class FullIntegration(TestCase):
             "python %s -u %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
                 join(gcf_dir, "gch.py"),
                 join(ssl_dir, "experimenter.crt"),
-                join(ssl_dir, "ca.crt"),
+                join(ssl_dir, "certs"),
                 join(ssl_dir, "ch.crt"), join(ssl_dir, "ch.key"),
                 ch_port,
             )
@@ -484,7 +484,7 @@ class FullIntegration(TestCase):
         # check the switches on the FV
         devices = self.fv_clients[0].api.listDevices()
         logger.debug("FV devices: %s" % devices)
-        self.assertEqual(len(devices), self.EXPECTED_NUM_SWITCHES)
+        self.assertEqual(len(set(devices)), self.EXPECTED_NUM_SWITCHES)
         
         slice_urn, cred = self.create_ch_slice()
         options = dict(geni_compressed=False, geni_available=True)
