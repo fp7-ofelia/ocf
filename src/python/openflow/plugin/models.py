@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
 from django.db.models import signals
+from django.contrib.sites.models import Site
 import xmlrpclib
 import logging
 from expedient.common.utils import create_or_update
@@ -199,6 +200,12 @@ production networks, and is currently deployed in several universities.
         self.parse_switches(switches)
         self.parse_links(links)
         
+    def _get_slice_id(self, slice):
+        """
+        Get a slice id to use when creating slices at the OM.
+        """
+        return "%s_%s" % (Site.objects.get_current().domain, slice.id)
+        
     def _get_slivers(self, slice):
         """
         Get the set of slivers in the slice for this aggregate in a format
@@ -252,7 +259,7 @@ production networks, and is currently deployed in several universities.
         sw_slivers = self._get_slivers(slice)
         try:
             return self.client.proxy.create_slice(
-                slice.id, slice.project.name,
+                self._get_slice_id(slice), slice.project.name,
                 slice.project.description,
                 slice.name, slice.description,
                 slice.openflowsliceinfo.controller_url,
@@ -266,7 +273,7 @@ production networks, and is currently deployed in several universities.
 
     def stop_slice(self, slice):
         try:
-            self.client.proxy.delete_slice(slice.id)
+            self.client.proxy.delete_slice(self._get_slice_id(slice))
         except Exception as e:
             import traceback
             logger.info("XML RPC call failed to aggregate %s" % self.name)

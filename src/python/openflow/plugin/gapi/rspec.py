@@ -77,7 +77,10 @@ def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''
     from openflow.plugin.models import OpenFlowAggregate
     root = et.Element(RSPEC_TAG)
-    for aggregate in OpenFlowAggregate.objects.filter(available=True):
+    aggregates = OpenFlowAggregate.objects.filter(
+        available=True).exclude(
+            name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
+    for aggregate in aggregates:
         _add_aggregate_node(root, aggregate, slice_urn, available)
     return root
 

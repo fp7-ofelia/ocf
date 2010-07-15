@@ -31,13 +31,15 @@ MY_CA = join('/etc/apache2/ssl.crt/ca.crt')
 SITE_NAME = "Expedient Clearinghouse"
 SITE_DOMAIN = "clearinghouse.geni.org" # example
 
-# GENI Clearinghouse public ID. Replace stanford
-# with your deployment name.
-GENI_PUBLIC_ID = "IDN exedient//stanford ch"
-
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
+OPENFLOW_GAPI_FILTERED_AGGS = []
+
+# The domain name in URNs for Expedient acting as a Clearinghouse.
+# This must not have any spaces or illegal characters
+# not allowed in URNs or you will get cryptic errors.
+GCF_URN_PREFIX = "expedient:stanford"
 
 DOMAIN_SCHEME = "https"
 
