@@ -46,9 +46,12 @@ def create_slice_urn():
     @return: urn
     @rtype: string
     """
-    
-    return "urn:publicid:IDN+%s+slice+%s:%s" % (
-        settings.GCF_URN_PREFIX, uuid.uuid4(), settings.SITE_DOMAIN)
+    # TODO: Currently GCF uses the URN as the slice name for 
+    # MyPLC which has to be < 50 bytes.
+    uuid_str = str(uuid.uuid4())[0:7]
+    urn = "urn:publicid:IDN+%s+slice+%s" % (
+        settings.GCF_URN_PREFIX, uuid_str)
+    return urn
 
 def create_slice_gid(slice_urn):
     """
