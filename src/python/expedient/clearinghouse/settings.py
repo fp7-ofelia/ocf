@@ -178,7 +178,7 @@ UI_PLUGINS = (
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = (
     ('openflow.plugin.models.OpenFlowAggregate'),
-#    ('geni.planetlab.models.PlanetLabAggregate'),
+    ('geni.planetlab.models.PlanetLabAggregate'),
 )
 
 # What is the scheme to use when sending urls? 
@@ -188,13 +188,21 @@ DOMAIN_SCHEME = "https"
 GCF_X509_CERT_DIR = join(SRC_DIR, "../gcf-x509.crt")
 GCF_X509_KEY_DIR = join(SRC_DIR, "../gcf-x509.key")
 GCF_X509_CRED_DIR = join(SRC_DIR, "../gcf-x509.cred")
+
 GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")
-GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.crt")
+GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.key")
+
 GCF_X509_CA_CERT = join(GCF_X509_CERT_DIR, "ca.crt")
-GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.crt")
+GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.key")
+
 GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
+
+# The domain name in URNs. This must not have any spaces or illegal characters
+# not allowed in URNs or you will get cryptic errors.
 GCF_URN_PREFIX = "expedient:stanford"
-CURRENT_GAPI_VERSTION = 1
+
+# Latest version of the GENI API
+CURRENT_GAPI_VERSION = 1
 
 # get custom install info
 from deployment_settings import *
