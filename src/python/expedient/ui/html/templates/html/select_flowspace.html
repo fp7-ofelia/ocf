@@ -1,7 +1,20 @@
 {% extends "base.html" %}
 {% load ch_extras %}
 
+{% block style %}
+div.steps {
+	padding: 4px;
+	font-weight: bold;
+}
+{% endblock %}
+
 {% block content %}
+<div class="steps center">
+	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
+	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
+	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
+</div>
+
 <div class="main">
     
     <h1>Set FlowSpace for Slice {{ slice.name }}</h1>

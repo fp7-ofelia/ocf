@@ -2,7 +2,7 @@
 {% load ch_extras %}
 
 {% block style %}
-table.openflow {
+table.openflow,table.planetlab {
 	width: 100%;
 	border-spacing: 0px;
 	border-collapse: collapse;
@@ -36,6 +36,10 @@ td.connected {
 td.port_num {
 	width: 45px;
 }
+div.steps {
+	padding: 4px;
+	font-weight: bold;
+}
 {% endblock %}
 
 {% block scripts %}
@@ -60,11 +64,46 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block content %}
-<h1>Select OpenFlow and PlanetLab Resources</h1>
+<div class="steps center">
+	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
+	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
+	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
+</div>
 
 <form action="" method="POST">{% csrf_token %}
+
+<h1>1. Select PlanetLab Aggregates</h1>
+
+{% for agg in planetlab_aggs %}
+<h2>PlanetLab Aggregate {{ agg.name }}</h2>
+at {{ agg.location }}.
+<div class="planetlab">
+	<table class="planetlab">
+		<tr class="header">
+			<th class="select_checkbox"></th>
+			<th class="hostname">Hostname</th>
+		</tr>
+		{% for rsc in agg.resource_set.all %}
+		{% if rsc|leaf_class_is:planetlab_node_class %}
+		{% with rsc.as_leaf_class as node %}
+		<tr class="body planetlab {% cycle 'odd' 'even' %}">
+			<td class="select_checkbox">
+				<input type="checkbox" name="selected_nodes" value="{{ node.id }}" {% if node.id in checked_ids %}checked{% endif %} />
+			</td>
+			<td class="hostname">{{ node.name }}</td>
+		</tr>
+		{% endwith %}
+		{% endif %}
+		{% endfor %}
+	</table>
+</div>
+{% endfor %}
+
+<h1>2. Select OpenFlow Resources</h1>
+
 {% for agg in openflow_aggs %}
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
+at {{ agg.location }}.
 <div class="openflow">
 	<table class="openflow">
 		<tr class="header">
@@ -111,6 +150,7 @@ $(document).ready(function(){
 {% empty %}
 <p>There are no OpenFlow aggregates in the slice. </p>
 {% endfor %}
+
 {% if openflow_aggs %}
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
