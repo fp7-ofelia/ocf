@@ -238,28 +238,16 @@ production networks, and is currently deployed in several universities.
         return sw_slivers
 
     ###################################################################
-    # Following are overrides from aggregate_models.Aggregate
+    # Following are overrides from aggregate_models.Aggregate         #
+    ###################################################################
+    
+    @classmethod
+    def get_url_name_prefix(cls):
+        return "openflow"
     
     def check_status(self):
         return self.available and self.client.is_available()
 
-    def get_edit_url(self):
-        return reverse("openflow_aggregate_edit",
-                       kwargs={'agg_id': self.id})
-    
-    def add_to_slice(self, slice, next):
-        return reverse("openflow_aggregate_slice_add",
-                       kwargs={'agg_id': self.id,
-                               'slice_id': slice.id})+"?next="+next
-
-    @classmethod
-    def get_aggregates_url(cls):
-        return reverse("openflow_aggregate_home")
-
-    @classmethod
-    def get_create_url(cls):
-        return reverse("openflow_aggregate_create")
-    
     def start_slice(self, slice):
         sw_slivers = self._get_slivers(slice)
         try:
