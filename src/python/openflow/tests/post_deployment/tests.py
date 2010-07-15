@@ -150,7 +150,8 @@ class Tests(TestCase):
         raw_input("Press Enter to proceed with the reservation:")
         
         logger.debug("RSpec returned by reservation: %s" % 
-            self.am_client.CreateSliver(slice_urn, cred, resv_rspec))
+            self.am_client.CreateSliver(slice_urn, cred, resv_rspec,
+                                        users=[]))
         
         slices_after = self.fv_client.api.listSlices()
         logger.debug("Slices at the FlowVisor after creation: %s" %
