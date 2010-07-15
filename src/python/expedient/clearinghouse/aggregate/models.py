@@ -58,11 +58,22 @@ No information available.
             logger.debug("Exception getting logo url %s" % e)
             return ""
         
+    @classmethod
+    def get_url_name_prefix(cls):
+        """
+        Get the prefix to append to the beginning of url names when
+        getting default urls.
+        
+        By default this returns the application name.
+        """
+        ct = ContentType.objects.get_for_model(cls)
+        return ct.app_label
+        
     def get_edit_url(self):
         """Get the url of where to go to edit the aggregate"""
-        ct = ContentType.objects.get_for_model(self.__class__)
-        return reverse("%s_aggregate_edit" % ct.app_label,
-                       kwargs={'agg_id': self.id})
+        return reverse(
+            "%s_aggregate_edit" % self.__class__.get_url_name_prefix(),
+            kwargs={'agg_id': self.id})
         
     def get_delete_url(self, next):
         """
@@ -75,12 +86,12 @@ No information available.
         
         @return: URL to go to when requesting the aggregate be deleted.
         """
-        ct = ContentType.objects.get_for_model(self.__class__)
+        prefix = self.__class__.get_url_name_prefix()
         try:
-            return reverse("%s_aggregate_delete" % ct.app_label,
+            return reverse("%s_aggregate_delete" % prefix,
                            kwargs={'agg_id': self.id})+"?next="+next
         except NoReverseMatch:
-            return reverse("aggregate_delete" % ct.app_label,
+            return reverse("aggregate_delete" % prefix,
                            kwargs={'agg_id': self.id})+"?next="+next
 
     def add_to_project(self, project, next):
@@ -100,9 +111,9 @@ No information available.
         the URL if found. Otherwise, it simply adds the aggregate to the
         project and returns C{next}.
         """
-        ct = ContentType.objects.get_for_model(self.__class__)
+        prefix = self.__class__.get_url_name_prefix()
         try:
-            return reverse("%s_aggregate_project_add" % ct.app_label,
+            return reverse("%s_aggregate_project_add" % prefix,
                            kwargs={'agg_id': self.id,
                                    'proj_id': project.id})+"?next="+next
         except NoReverseMatch:
@@ -114,9 +125,9 @@ No information available.
         Similar to L{add_to_project} but does the reverse, removing the
         aggregate from the project.
         """
-        ct = ContentType.objects.get_for_model(self.__class__)
+        prefix = self.__class__.get_url_name_prefix()
         try:
-            return reverse("%s_aggregate_project_remove" % ct.app_label,
+            return reverse("%s_aggregate_project_remove" % prefix,
                            kwargs={'agg_id': self.id,
                                    'proj_id': project.id})+"?next="+next
         except NoReverseMatch:
@@ -133,9 +144,9 @@ No information available.
         """
         Works exactly the same as L{add_to_project} but for a slice.
         """
-        ct = ContentType.objects.get_for_model(self.__class__)
+        prefix = self.__class__.get_url_name_prefix()
         try:
-            return reverse("%s_aggregate_slice_add" % ct.app_label,
+            return reverse("%s_aggregate_slice_add" % prefix,
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next="+next
         except NoReverseMatch:
@@ -147,9 +158,9 @@ No information available.
         Similar to L{add_to_slice} but does the reverse, removing the
         aggregate from the slice.
         """
-        ct = ContentType.objects.get_for_model(self.__class__)
+        prefix = self.__class__.get_url_name_prefix()
         try:
-            return reverse("%s_aggregate_slice_remove" % ct.app_label,
+            return reverse("%s_aggregate_slice_remove" % prefix,
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next="+next
         except NoReverseMatch:
@@ -169,8 +180,8 @@ No information available.
     @classmethod
     def get_create_url(cls):
         """Get the URL to create aggregates of this type"""
-        ct = ContentType.objects.get_for_model(cls)
-        return reverse("%s_aggregate_create" % ct.app_label)
+        prefix = cls.get_url_name_prefix()
+        return reverse("%s_aggregate_create" % prefix)
     
     def start_slice(self, slice):
         """Start the slice in the actual resources."""
