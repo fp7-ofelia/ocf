@@ -9,6 +9,9 @@ from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from expedient.common.messaging.models import DatedMessage
+import logging
+
+logger = logging.getLogger("AggregateViews")
 
 TEMPLATE_PATH = "expedient/clearinghouse/aggregate"
 
@@ -43,7 +46,7 @@ def list(request, agg_id=None):
     )
 
 def delete(request, agg_id):
-    next = request.GET.get("next", None)
+    next = request.GET.get("next", None) or reverse("home")
     aggregate = get_object_or_404(Aggregate, id=agg_id)
     # Stop all slices using the aggregate
     for s in aggregate.slice_set.all():
@@ -60,7 +63,7 @@ def delete(request, agg_id):
     if req.status_code == HttpResponseRedirect.status_code:
         DatedMessage.objects.post_message_to_user(
             "Successfully deleted aggregate %s" % aggregate.name,
-            request.user, msg_type=DatedMessage.TYPE_ERROR,
+            request.user, msg_type=DatedMessage.TYPE_SUCCESS,
         )
     return req
 
