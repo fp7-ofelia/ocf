@@ -10,7 +10,7 @@ from django.db.models import signals
 import uuid
 
 SLICE_GID_SUBJ = "gcf.slice"
-SLICE_CRED_LIFETIME = 36000
+SLICE_CRED_LIFETIME = 360000000
 
 logger = logging.getLogger("geni-syncdb")
 
@@ -108,7 +108,7 @@ def create_null_slice_cred():
     slice_gid, slice_keys = create_slice_gid(slice_urn)
     user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
     ucred = create_slice_credential(user_gid, slice_gid)
-    ucred.save_to_string(settings.GCF_NULL_SLICE_CRED)
+    ucred.save_to_file(settings.GCF_NULL_SLICE_CRED)
 
 def _mkdirs(dirname):
     try:
@@ -128,12 +128,13 @@ def check_and_create_auth(sender, **kwargs):
     if not os.access(settings.GCF_X509_CH_CERT, os.R_OK) or\
     not os.access(settings.GCF_X509_CH_KEY, os.R_OK):
         logger.info("Creating GENI API certificate and key.")
-        _mkdirs(os.path.dirname(settings.GENI_X509_KEY))
+        _mkdirs(settings.GCF_X509_CERT_DIR)
+        _mkdirs(settings.GCF_X509_KEY_DIR)
         create_expedient_certs()
     
     if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
         logger.info("Creating GENI API null slice credentials.")
-        _mkdirs(os.path.dirname(settings.GCF_NULL_SLICE_CRED))
+        _mkdirs(settings.GCF_X509_CRED_DIR)
         create_null_slice_cred()
         
 
