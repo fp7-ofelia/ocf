@@ -146,6 +146,9 @@ def flowspace(request, slice_id):
                 request.user, msg_type=DatedMessage.TYPE_SUCCESS,
             )
             
+            slice.modified = True
+            slice.save()
+        
             return HttpResponseRedirect(
                 reverse("html_plugin_sshkeys", args=[slice_id]))
         else:
@@ -179,6 +182,9 @@ def sshkeys(request, slice_id):
     
     if request.method == "POST":
         slice.geni_slice_info.generate_ssh_keys()
+        slice.geni_slice_info.save()
+        slice.modified = True
+        slice.save()
         return HttpResponseRedirect(request.path)
     
     return simple.direct_to_template(
