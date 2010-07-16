@@ -26,8 +26,8 @@ else
 	echo Please create it using expedient/bin/expedient-settings-clean as template.
 fi
 
-rm -rf $EXPEDIENT
 cd ~
+rm -rf $EXPEDIENT
 git clone git://openflow.org/expedient `basename $EXPEDIENT`
 
 if [ X$1 != "X" ] ; then
