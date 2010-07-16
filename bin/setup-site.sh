@@ -129,5 +129,7 @@ sudo ln -s $EXPEDIENT/src/config/$CH/apache/vhost-optinmgr.conf /etc/apache2/vho
 
 sudo gensslcert -n $DOMAIN_FQDN
 
+init-gapi-ca.sh
+
 sudo /etc/init.d/apache2 restart
 

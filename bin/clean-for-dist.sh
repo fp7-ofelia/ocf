@@ -8,10 +8,22 @@ if [ X$choice != "XY" -a X$choice != "Xy" ] ; then
     exit 0
 fi
 
-if [ -e $EXPEDIENT/bin/expedient-settings ] ; then
-	source $EXPEDIENT/bin/expedient-settings
+# get the actual location of the setup-site script
+physical=`readlink $0`
+if [ $physical ]; then
+	bindir=`dirname $physical`
 else
-	source $EXPEDIENT/bin/expedient-settings-clean
+	bindir=`dirname $0`
+fi
+settings=$bindir/expedient-settings
+
+if [ -e `which expedient-settings` ] ; then
+	source expedient-settings
+elif [ -e $settings ] ; then
+	source $settings
+else 
+	echo Could not find expedient-settings file.
+	echo Please create it using expedient/bin/expedient-settings-clean as template.
 fi
 
 rm -rf $EXPEDIENT
