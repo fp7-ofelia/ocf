@@ -17,8 +17,12 @@ cd $EXPEDIENT/src/python
 cp $CH/deployment_settings_clean.py $CH/deployment_settings.py
 cp $OM/deployment_settings_clean.py $OM/deployment_settings.py
 
+rm -rf $GAPI_SSL_DIR/*
+
 flush-om.sh
 flush-expedient.sh
+
+rm -rf $EXPEDIENT/gcf-x509.*
 
 rm -f $CH/secret_key.py*
 rm -f $OM/secret_key.py*
@@ -26,3 +30,4 @@ rm -f $OM/secret_key.py*
 sudo rm -f /etc/udev/rules.d/70-persistent-net.rules
 
 rm -f ~/.bash_history
+
