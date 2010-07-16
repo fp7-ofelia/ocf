@@ -89,15 +89,19 @@ if [ $CH_PORT != 443 ] ; then
 else
 	sed -i "{s/^Listen.*/#Listen $CH_PORT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
 fi
-sed -i "{s/Use SimpleSSLWSGIVHost [0-9]* /Use SimpleSSLWSGIVHost $CH_PORT /}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+sed -i "{s/Use SimpleSSLWSGIVHost .*/Use SimpleSSLWSGIVHost $CH_PORT $CH $EXPEDIENT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+sudo ln -s $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
+
 if [ $OM_PORT != 443 ] ; then
 	# hacking around apache's unwillingness to have two Listen lines on the same port
 	sed -i "{s/#*Listen.*/Listen $OM_PORT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
 else
 	sed -i "{s/^Listen.*/#Listen $OM_PORT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
 fi
-sed -i "{s/Use SimpleSSLWSGIVHost [0-9]* /Use SimpleSSLWSGIVHost $OM_PORT /}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+sed -i "{s/Use SimpleSSLWSGIVHost .* /Use SimpleSSLWSGIVHost $OM_PORT $OM $EXPEDIENT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+sudo ln -s $EXPEDIENT/src/config/$CH/apache/vhost-optinmgr.conf /etc/apache2/vhosts.d/
 
 sudo gensslcert -n $DOMAIN_FQDN
 
 sudo /etc/init.d/apache2 restart
+
