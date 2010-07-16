@@ -86,3 +86,5 @@ export OM_EMAIL_SUBJECT_PREFIX='[Opt-in Manager] '
 # be stored.
 export GAPI_SSL_DIR=/home/expedient/gapi-ssl
 
+# Location to store database and settings snapshots
+SNAPSHOT_DIR=/home/expedient/snapshots
