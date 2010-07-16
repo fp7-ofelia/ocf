@@ -33,7 +33,7 @@ SITE_DOMAIN = "clearinghouse.geni.org" # example
 
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
-OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
+OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+authority+am"
 OPENFLOW_GAPI_FILTERED_AGGS = []
 
 # The domain name in URNs for Expedient acting as a Clearinghouse.
