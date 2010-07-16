@@ -29,12 +29,12 @@ fi
 cd ~
 rm -rf $EXPEDIENT
 git clone git://openflow.org/expedient `basename $EXPEDIENT`
+git remote add writeaccess git@openflow.org:expedient.git
 
 if [ X$1 != "X" ] ; then
 	echo "Checking out $1"
 	cd $EXPEDIENT
 	git checkout $1
-	git remote add writeaccess git@openflow.org:expedient.git
 fi
 
 cp $EXPEDIENT/bin/expedient-settings-clean $EXPEDIENT/bin/expedient-settings
