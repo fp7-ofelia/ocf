@@ -16,6 +16,6 @@ $FLOWVISOR/mySSLKeyStore \
 ver=`date +%F-%T`
 
 mkdir -p $SNAPSHOT_DIR
-tar -Pzcf $SNAPSHOT_DIR/expedient-snapshot-$ver.tar.gz $FILES
+tar -Pzcf $SNAPSHOT_DIR/$1-expedient-snapshot-$ver.tar.gz $FILES
 
 echo "Created archive: $SNAPSHOT_DIR/expedient-snapshot-$ver.tar.gz"
