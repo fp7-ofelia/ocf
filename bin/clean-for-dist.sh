@@ -27,7 +27,8 @@ else
 fi
 
 rm -rf $EXPEDIENT
-git clone git://openflow.org/expedient $EXPEDIENT
+cd ~
+git clone git://openflow.org/expedient `basename $EXPEDIENT`
 
 if [ X$1 != "X" ] ; then
 	echo "Checking out $1"
