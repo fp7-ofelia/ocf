@@ -1,6 +1,32 @@
 #!/bin/bash
 
-source expedient-settings
+# get the actual location of the setup-site script
+physical=`readlink $0`
+if [ $physical ]; then
+	bindir=`dirname $physical`
+else
+	bindir=`dirname $0`
+fi
+settings=$bindir/expedient-settings
+
+if [ -e `which expedient-settings` ] ; then
+	source expedient-settings
+elif [ -e $settings ] ; then
+	source $settings
+else 
+	echo Could not find expedient-settings file.
+	echo Please create it using expedient/bin/expedient-settings-clean as template.
+fi
+
+if [ -e ~/bin ] ; then
+	cd $bindir
+	for f in *.sh ; do
+		rm ~/bin/$f
+		ln -s $bindir/*.sh ~/bin
+	done
+	rm ~/bin/expedient-settings
+	ln -s $bindir/expedient-settings ~/bin
+fi
 
 # check that DOMAIN_IP and DOMAIN_FQDN are sane:
 if [ -z $DOMAIN_FQDN ] ; then
