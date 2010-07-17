@@ -42,6 +42,8 @@ cd $EXPEDIENT/src/python
 
 cp $CH/deployment_settings_clean.py $CH/deployment_settings.py
 cp $OM/deployment_settings_clean.py $OM/deployment_settings.py
+cp $CH/settings_clean.py $CH/settings.py
+cp $OM/settings_clean.py $OM/settings.py
 
 rm -rf $GAPI_SSL_DIR/*
 
