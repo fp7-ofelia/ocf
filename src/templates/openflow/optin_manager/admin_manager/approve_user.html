@@ -6,7 +6,8 @@
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>	
 	
-	<table>
+	<table class="formtable">
+	<tr><th>User</th><th>Requested Flowspace</th><th>Action</th></tr>
 	{% for req in reqs %}
 	<tr>
 	<td>{{req.user}}</td>

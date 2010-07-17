@@ -212,8 +212,21 @@ def user_reg_fs(request):
             # TODO: call admin personalized function here
             # make flowspace from it:
             fses = []
-            opted_fses = []
-            if (request.POST['mac_addr'] != "*"):
+            
+            if (request.POST['mac_addr'] != "*" and request.POST['ip_addr'] != "0.0.0.0"):
+                fs = FlowSpace()
+                fs.mac_src_s = mac_to_int(request.POST['mac_addr'])
+                fs.mac_src_e = fs.mac_src_s
+                fs.ip_src_s = dotted_ip_to_int(request.POST['ip_addr'])
+                fs.ip_src_e = fs.ip_src_s
+                fses.append(fs)
+                fs = FlowSpace()
+                fs.mac_dst_s = mac_to_int(request.POST['mac_addr'])
+                fs.mac_dst_e = fs.mac_dst_s
+                fs.ip_dst_s = dotted_ip_to_int(request.POST['ip_addr'])
+                fs.ip_dst_e = fs.ip_dst_s
+                fses.append(fs)
+            elif (request.POST['mac_addr'] != "*"):
                 fs = FlowSpace()
                 fs.mac_src_s = mac_to_int(request.POST['mac_addr'])
                 fs.mac_src_e = fs.mac_src_s
@@ -222,28 +235,28 @@ def user_reg_fs(request):
                 fs.mac_dst_s = mac_to_int(request.POST['mac_addr'])
                 fs.mac_dst_e = fs.mac_dst_s
                 fses.append(fs)
-            else:
+            elif (request.POST['ip_addr'] != "0.0.0.0"):
                 fs = FlowSpace()
-                fses.append(fs)
-            
-            if (request.POST['ip_addr'] != "0.0.0.0"):
-                for fs in fses:
-                    dup_fs = FlowSpace()
-                    copy_fs(fs,dup_fs)
-                    fs.ip_src_s = dotted_ip_to_int(request.POST['ip_addr'])
-                    fs.ip_src_e = fs.ip_src_s
-                    dup_fs.ip_dst_s = fs.ip_src_s
-                    dup_fs.ip_dst_e = fs.ip_src_s
-                    opted_fses.append(dup_fs)
-                    opted_fses.append(fs)
+                fs.ip_src_s = dotted_ip_to_int(request.POST['ip_addr'])
+                fs.ip_src_e = fs.ip_src_s
+                fs = FlowSpace()
+                fs.ip_dst_s = dotted_ip_to_int(request.POST['ip_addr'])
+                fs.ip_dst_e = fs.ip_dst_s
             else:
-                opted_fses = fses
+                return simple.direct_to_template(request,
+                    template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
+                    extra_context = {
+                        'error_msg':"Can not request the entire flowspace!",
+                        'form':form,
+                                 },
+                    )
+                
 
             
             admins_list = UserProfile.objects.filter(is_net_admin=True)
             intersected_admins = []
             intersected_supervisors = []
-            for opted_fs in opted_fses:
+            for opted_fs in fses:
                 for admin in admins_list:
                     adminfs = AdminFlowSpace.objects.filter(user=admin.user)
                     if singlefs_is_subset_of(opted_fs,adminfs):
@@ -280,6 +293,7 @@ def user_reg_fs(request):
     return simple.direct_to_template(request,
                 template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
                 extra_context = {
+                        'error_msg':"",
                         'form':form,
                                  },
         )
