@@ -6,7 +6,7 @@ Created on Apr 29, 2010
 
 from django import forms
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
-from openflow.plugin.models import OpenFlowInterface
+from openflow.plugin.models import OpenFlowInterface, NonOpenFlowConnection
 from expedient.common.utils import create_or_update
 
 class OpenFlowAggregateForm(forms.ModelForm):
@@ -28,14 +28,22 @@ class OpenFlowConnectionSelectionForm(forms.Form):
     A form to select multiple openflow connections.
     """
     
-    connections = forms.ModelMultipleChoiceField(
+    of_connections = forms.ModelMultipleChoiceField(
         OpenFlowConnection.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        label="Existing Connections")
+        required=False,
+        label="Existing OpenFlow Connections")
 
-    def __init__(self, queryset, *args, **kwargs):
+    non_of_connections = forms.ModelMultipleChoiceField(
+        NonOpenFlowConnection.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Existing Non-OpenFlow Connections")
+
+    def __init__(self, of_cnxn_qs, non_of_cnxn_qs, *args, **kwargs):
         super(OpenFlowConnectionSelectionForm, self).__init__(*args, **kwargs)
-        self.fields["connections"].queryset = queryset
+        self.fields["of_connections"].queryset = of_cnxn_qs
+        self.fields["non_of_connections"].queryset = non_of_cnxn_qs
     
 class OpenFlowStaticConnectionForm(forms.Form):
     """
@@ -85,4 +93,21 @@ class OpenFlowStaticConnectionForm(forms.Form):
         if not created: cnxn2 = None
         
         return (cnxn1, cnxn2)
+
+class NonOpenFlowStaticConnectionForm(forms.ModelForm):
+    """
+    A form for selecting a local interface and a non-openflow resource to
+    create a static connection.
+    """
     
+    class Meta:
+        model = NonOpenFlowConnection
+        
+    def __init__(self, aggregate, resource_qs, *args, **kwargs):
+        super(NonOpenFlowStaticConnectionForm, self).__init__(*args, **kwargs)
+
+        self.fields["of_iface"].queryset = \
+            OpenFlowInterface.objects.filter(aggregate__id=aggregate.id)
+    
+        self.fields["resource"].queryset = resource_qs
+
