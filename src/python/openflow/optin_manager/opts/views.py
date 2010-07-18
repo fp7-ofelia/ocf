@@ -122,6 +122,7 @@ def change_priority(request):
         
         nice_opts = UserOpts.objects.filter(user=request.user,nice=True).order_by('-priority')
         strict_opts = UserOpts.objects.filter(user=request.user,nice=False).order_by('-priority')
+ 
         return simple.direct_to_template(request, 
                     template = 'openflow/optin_manager/opts/view_opts_user.html', 
                     extra_context={ 

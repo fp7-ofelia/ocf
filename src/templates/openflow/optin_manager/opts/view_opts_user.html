@@ -13,6 +13,8 @@
 <script type="text/javascript">
 
 var highlighted_row = null;
+var simple = 0;
+window.onload = advsimple;
 
 function clicked(tr_id){
 	if (highlighted_row==null) {
@@ -193,6 +195,26 @@ function nicestrict() {
 	highlighted_row = new_row
 }
 
+function advsimple(){
+	table = document.getElementsByTagName("table")[2]
+	but = document.getElementById("advbut")
+	switchbut = document.getElementById("switch")
+	div = document.getElementById("adv")
+	if (simple==1 ) {
+		simple = 0
+		div.style.display = ""
+		switchbut.style.display = ""
+		but.childNodes[0].nodeValue = "Simple"
+	} else if (simple==0 && table.rows.length<=1) {
+		simple = 1
+		div.style.display = "None"
+		switchbut.style.display = "None"
+		but.childNodes[0].nodeValue = "Advanced"
+		
+	}
+}
+
+
 </script>
 {% endblock %}
 
@@ -207,14 +229,14 @@ function nicestrict() {
 		{% for error in error_msg %}
 			<p><font color="red">{{error}}</font></p>
 		{% endfor %}
-
 		</div>
 
 		<div>	
 		<center>
 		<button type=button onClick="updown(1)">Up</button>
 		<button type=button onClick="updown(-1)">Down</button>
-		<button type=button onClick="nicestrict()">Switch</button>  	
+		<button type=button id="switch" onClick="nicestrict()">Switch</button> 
+				
 		<form name="input" action="/opts/change_priority" method="post">
 		</center>
 			{% csrf_token %}
@@ -232,12 +254,15 @@ function nicestrict() {
 				</tr>
 				{% endfor %}
 			</table>
+			
+			<center><button type=button id="advbut" onClick="advsimple()">Simple</button></center>
+			<div id="adv">
 			<h2> strict opt-ins</h2>
-			<table class="fulltable" >
+			<table class="fulltable">
 				<tr><th><center>Experiment</center></th></tr>
 				{% for opt in strict_opts %}
 				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight")">
-					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')
+					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')"
 					onMouseout="mouse_out('td_{{opt.id}}')"><center>
 						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}(
 						<a href="/opts/experiment/{{opt.experiment.id}}">details</a>)
@@ -245,6 +270,8 @@ function nicestrict() {
 				</tr>
 				{% endfor %}
 			</table>
+			</div>
+			
 			{% for opt in strict_opts %}
 				<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}" id="ptr_{{opt.id}}"/>
 			{% endfor %}

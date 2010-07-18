@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<style>
+  td.expname {
+    width: 500px;
+  }
+  </style>
+  {% endblock %}
+  
+  
 {% block content %}
 <div class="main">
 	<div align="right">
@@ -10,11 +19,17 @@
 	{% endfor %}
 	<form name="input" action="/opts/opt_out" method="post">{% csrf_token %}
 	<table class="formtable">
-	<tr><th>Experiment</th><th>Priority</th></tr>
+	<tr><th></th><th><center>Experiment</center></th><th>Strict</th></tr>
 	{% for opt in allopts %}
-		<tr><td><input type="checkbox" name="{{opt.id}}">
-		{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}</input></td>
-		<td>{{opt.priority}}</td>
+		<tr>
+		<td><input type="checkbox" name="{{opt.id}}"/></td>
+		<td class="expname"><center>
+		{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}</center></td>
+		{% if opt.nice %}
+		<td>No</td>
+		{% else %}
+		<td>Yes</td>
+		{% endif %}
 		</tr>
 	{% endfor %}
 	</table>

@@ -562,11 +562,11 @@ class FullIntegration(TestCase):
 
         f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
                                 (test_settings.HOST, test_settings.OM_PORT),
-                                dict(experiment=1,priority=100))
+                                dict(experiment=1))
         logger.debug("Posted opt-in request, reading response.")
         res = f.read()
         self.assertEqual(f.code, 200)
-        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
+        self.assertTrue("successfully" in res, "Did not get successful opt in message: %s" % res)
         
         
         # test if FV has the expected flowspace match entries
@@ -647,11 +647,11 @@ class FullIntegration(TestCase):
 
         f = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
                                 (test_settings.HOST, test_settings.OM_PORT),
-                                dict(experiment=1,priority=100))
+                                dict(experiment=1))
         logger.debug("Posted opt-in request, reading response.")
         res = f.read()
         self.assertEqual(f.code, 200)
-        self.assertTrue("You successfully opted into" in res, "Did not get successful opt in message: %s" % res)
+        self.assertTrue("successfully" in res, "Did not get successful opt in message: %s" % res)
         
         logger.debug("Response fine, opting out.")
         # now test opt out:
