@@ -8,6 +8,7 @@ from django import forms
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from openflow.plugin.models import OpenFlowInterface, NonOpenFlowConnection
 from expedient.common.utils import create_or_update
+from django.forms.models import ModelChoiceField
 
 class OpenFlowAggregateForm(forms.ModelForm):
     '''
@@ -45,16 +46,21 @@ class OpenFlowConnectionSelectionForm(forms.Form):
         self.fields["of_connections"].queryset = of_cnxn_qs
         self.fields["non_of_connections"].queryset = non_of_cnxn_qs
     
+class AsLeafClassModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        if hasattr(obj, "as_leaf_class"):
+            return "%s" % obj.as_leaf_class()
+    
 class OpenFlowStaticConnectionForm(forms.Form):
     """
     A form for selecting a local and a remote interface to create a static
     bi-directional connection.
     """
     
-    local_interface = forms.ModelChoiceField(
+    local_interface = AsLeafClassModelChoiceField(
         OpenFlowInterface.objects.all())
     
-    remote_interface = forms.ModelChoiceField(
+    remote_interface = AsLeafClassModelChoiceField(
         OpenFlowInterface.objects.all())
     
     def __init__(self, aggregate, *args, **kwargs):
