@@ -58,9 +58,9 @@ function next_sibling(obj){
 function update_table(table,base) {
 	var row_count = table.rows.length
 	for(var i=1; i<row_count; i++) {
-		var row = table.rows[i]
-		hidden_elem = row.getElementsByTagName("input")[0]
-		hidden_elem.setAttribute("value",base+i)
+		var row_id = table.rows[i].getAttribute("id")
+		hidden_elem = document.getElementById("p"+row_id)
+		hidden_elem.setAttribute("value",base+row_count-i)
 	}
 }
 
@@ -71,18 +71,21 @@ function updown(ud){
 	tr_elem = highlighted_row
 	if (ud==1) {
 		prev_tr_elem = prev_sibling(tr_elem)
-		if (prev_tr_elem && prev_tr_elem.getElementsByTagName("input").length > 0) {
+		if (prev_tr_elem && prev_tr_elem.getElementsByTagName("td").length > 0) {
 		
 			tmp_html = prev_tr_elem.innerHTML
 			prev_tr_elem.innerHTML = tr_elem.innerHTML
 			tr_elem.innerHTML = tmp_html
 			
-			prev_hidden_elem = prev_tr_elem.getElementsByTagName("input")[0]
-			hidden_elem = tr_elem.getElementsByTagName("input")[0]
+			
+			prev_id = prev_tr_elem.getAttribute("id")
+			this_id = tr_elem.getAttribute("id")
+			prev_hidden_elem = document.getElementById("p"+prev_id)
+			this_hidden_elem = document.getElementById("p"+this_id)
 			prev_priority = prev_hidden_elem.getAttribute("value")
-			priority = hidden_elem.getAttribute("value")
-			prev_hidden_elem.setAttribute("value",priority)
-			hidden_elem.setAttribute("value",prev_priority)
+			this_priority = this_hidden_elem.getAttribute("value")
+			prev_hidden_elem.setAttribute("value",this_priority)
+			this_hidden_elem.setAttribute("value",prev_priority)
 			
 			to_be_copied = ["id","class","onClick"]
 			for (i=0; i<to_be_copied.length; i++){
@@ -98,18 +101,20 @@ function updown(ud){
 	}
 	if (ud==-1) {
 		next_tr_elem = next_sibling(tr_elem)
-		if (next_tr_elem && next_tr_elem.getElementsByTagName("input").length > 0) {
+		if (next_tr_elem && next_tr_elem.getElementsByTagName("td").length > 0) {
 		
 			tmp_html = next_tr_elem.innerHTML
 			next_tr_elem.innerHTML = tr_elem.innerHTML
 			tr_elem.innerHTML = tmp_html
 			
-			next_hidden_elem = next_tr_elem.getElementsByTagName("input")[0]
-			hidden_elem = tr_elem.getElementsByTagName("input")[0]
+			next_id = next_tr_elem.getAttribute("id")
+			this_id = tr_elem.getAttribute("id")
+			next_hidden_elem = document.getElementById("p"+next_id)
+			this_hidden_elem = document.getElementById("p"+this_id)
 			next_priority = next_hidden_elem.getAttribute("value")
-			priority = hidden_elem.getAttribute("value")
-			next_hidden_elem.setAttribute("value",priority)
-			hidden_elem.setAttribute("value",next_priority)
+			this_priority = this_hidden_elem.getAttribute("value")
+			next_hidden_elem.setAttribute("value",this_priority)
+			this_hidden_elem.setAttribute("value",next_priority)
 			
 			to_be_copied = ["id","class","onClick"]
 			for (i=0; i<to_be_copied.length; i++){
@@ -130,7 +135,8 @@ function nicestrict() {
 		return
 	} 
 	tr_elem = highlighted_row
-	selected_priority = parseInt(tr_elem.getElementsByTagName("input")[0].getAttribute("value"))
+	tr_id = tr_elem.getAttribute("id")
+	selected_priority = parseInt(document.getElementById("p"+tr_id).getAttribute("value"))
 	old_table = tr_elem.parentNode
 	var row_count = old_table.rows.length
 	for(var i=0; i<row_count; i++) {
@@ -161,11 +167,13 @@ function nicestrict() {
 		
 	// now try to find the previous optin and set priority accordingly
 	next_tr_elem = next_sibling(new_row)
-	if (next_tr_elem && next_tr_elem.getElementsByTagName("input").length > 0) {
-		next_priority = next_tr_elem.getElementsByTagName("input")[0].getAttribute("value")
-		new_row.getElementsByTagName("input")[0].setAttribute("value",parseInt(next_priority)+1)
+	new_row_id = new_row.getAttribute("id")
+	if (next_tr_elem && next_tr_elem.getElementsByTagName("td").length > 0) {
+		next_tr_id = next_tr_elem.getAttribute("id")
+		next_priority = document.getElementById("p"+next_tr_id).getAttribute("value")
+		document.getElementById("p"+new_row_id).setAttribute("value",parseInt(next_priority)+1)
 	} else {
-		new_row.getElementsByTagName("input")[0].setAttribute("value",new_base_priority+1)
+		document.getElementById("p"+new_row_id).setAttribute("value",new_base_priority+1)
 	}
 	update_table(old_table,old_base_priority)
 	highlighted_row = new_row
@@ -193,7 +201,7 @@ function nicestrict() {
 		<button type=button onClick="updown(1)">Up</button>
 		<button type=button onClick="updown(-1)">Down</button>
 		<button type=button onClick="nicestrict()">Switch</button>  	
-		<form name="input" action="/opts/update_opts" method="post">
+		<form name="input" action="/opts/change_priority" method="post">
 		</center>
 			{% csrf_token %}
 			<h2> flexible opt-ins</h2>
@@ -202,7 +210,6 @@ function nicestrict() {
 				{% for opt in nice_opts %}
 				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight">
 					<td><center>
-						<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}"/>
 						<a href="/opts/experiment/{{opt.experiment.id}}">
 						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
 						</a>
@@ -214,9 +221,8 @@ function nicestrict() {
 			<table class="formtable" >
 				<tr><th><center>Experiment</center></th></tr>
 				{% for opt in strict_opts %}
-				<tr id="tr_{{opt.id}}">
+				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight">
 					<td><center>
-						<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}"/>
 						<a href="/opts/experiment/{{opt.experiment.id}}">
 						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
 						</a>
@@ -224,6 +230,12 @@ function nicestrict() {
 				</tr>
 				{% endfor %}
 			</table>
+			{% for opt in strict_opts %}
+				<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}" id="ptr_{{opt.id}}"/>
+			{% endfor %}
+			{% for opt in nice_opts %}
+				<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}" id="ptr_{{opt.id}}"/>
+			{% endfor %}
 			<center>
 					<td><input type="submit" value="Update"/></td>
 			</center>
