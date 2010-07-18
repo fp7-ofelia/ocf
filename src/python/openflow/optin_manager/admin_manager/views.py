@@ -239,9 +239,11 @@ def user_reg_fs(request):
                 fs = FlowSpace()
                 fs.ip_src_s = dotted_ip_to_int(request.POST['ip_addr'])
                 fs.ip_src_e = fs.ip_src_s
+                fses.append(fs)
                 fs = FlowSpace()
                 fs.ip_dst_s = dotted_ip_to_int(request.POST['ip_addr'])
                 fs.ip_dst_e = fs.ip_dst_s
+                fses.append(fs)
             else:
                 return simple.direct_to_template(request,
                     template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
