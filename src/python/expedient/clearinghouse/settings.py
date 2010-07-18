@@ -142,7 +142,7 @@ OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
 
 # Which types of non-OpenFlow resources do OpenFlow Interface connect to? 
 OPENFLOW_OTHER_RESOURCES = (
-    ("geni.planetlab", "PlanetLabAggregate"),
+    ("geni.planetlab", "PlanetLabNode"),
 )
 
 DEBUG = True
