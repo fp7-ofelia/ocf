@@ -7,6 +7,8 @@ if [ $physical ]; then
 else
 	bindir=`dirname $0`
 fi
+cd $bindir
+bindir=`pwd`
 settings=$bindir/expedient-settings
 
 if [ -e `which expedient-settings` ] ; then
@@ -22,7 +24,7 @@ if [ -e ~/bin ] ; then
 	cd $bindir
 	for f in *.sh ; do
 		rm ~/bin/$f
-		ln -s $bindir/*.sh ~/bin
+		ln -s $bindir/$f ~/bin
 	done
 	rm ~/bin/expedient-settings
 	ln -s $bindir/expedient-settings ~/bin
@@ -39,6 +41,23 @@ if [ -z $DOMAIN_IP ] ; then
 fi
 
 echo Updating settings for Expedient...
+if [ ! -e $EXPEDIENT/src/python/$CH/deployment_settings.py ] ; then
+	cp $EXPEDIENT/src/python/$CH/deployment_settings_clean.py \
+		$EXPEDIENT/src/python/$CH/deployment_settings.py
+fi
+if [ ! -e $EXPEDIENT/src/python/$CH/settings.py ] ; then
+	cp $EXPEDIENT/src/python/$CH/settings_clean.py \
+		$EXPEDIENT/src/python/$CH/settings.py
+fi
+if [ ! -e $EXPEDIENT/src/python/$OM/deployment_settings.py ] ; then
+	cp $EXPEDIENT/src/python/$OM/deployment_settings_clean.py \
+		$EXPEDIENT/src/python/$OM/deployment_settings.py
+fi
+if [ ! -e $EXPEDIENT/src/python/$OM/settings.py ] ; then
+	cp $EXPEDIENT/src/python/$OM/settings_clean.py \
+		$EXPEDIENT/src/python/$OM/settings.py
+fi
+	
 # Update the settings for Expedient
 sed -i "{s/^SITE_DOMAIN.*/SITE_DOMAIN = '$DOMAIN_FQDN:$CH_PORT'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
 sed -i "{s/^SITE_NAME.*/SITE_NAME = 'Expedient Clearinghouse at $SITE_NAME'/}" $EXPEDIENT/src/python/$CH/deployment_settings.py
@@ -82,7 +101,6 @@ echo Updating settings for the FlowVisor
 cd $FLOWVISOR
 make		# just to make sure it's up to date
 rm -f mySSLKeyStore
-# Rob, you need to set the ports here...
 ./scripts/config-gen-default.sh $FV_CONFIG $DOMAIN_IP $FV_ROOT_PASSWORD $FV_OF_PORT $FV_RPC_PORT
 
 echo Setting up the databases
@@ -105,17 +123,18 @@ sed -i "{s/of_port=.*,/of_port=$FV_OF_PORT,/}" $EXPEDIENT/src/python/openflow/te
 sed -i "{s/xmlrpc_port=.*,/xmlrpc_port=$FV_RPC_PORT,/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^MININET_VMS.*/MININET_VMS = [('$MININET_IP', $MININET_SSH_PORT)]/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 sed -i "{s/^SHOW_PROCESSES_IN_XTERM = .*/SHOW_PROCESSES_IN_XTERM = $SHOW_PROCESSES_IN_XTERM/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
-sed -i "{s/password=.*connect to the FV/password='$FV_ROOT_PASSWORD',  # The password to use to connect to the FV/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
+sed -i "{s/password=.*,/password='$FV_ROOT_PASSWORD',/}" $EXPEDIENT/src/python/openflow/tests/test_settings.py
 
 # webserver settings
+echo Updating vhost files for apache...
 if [ $CH_PORT != 443 ] ; then
 	# hacking around apache's unwillingness to have two Listen lines on the same port
 	sed -i "{s/#*Listen.*/Listen $CH_PORT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
-
 else
 	sed -i "{s/^Listen.*/#Listen $CH_PORT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
 fi
-sed -i "{s/Use SimpleSSLWSGIVHost .*/Use SimpleSSLWSGIVHost $CH_PORT $CH $EXPEDIENT/}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+sed -i "{s#Use SimpleSSLWSGIVHost .*#Use SimpleSSLWSGIVHost $CH_PORT $CH $EXPEDIENT#}" $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf
+sudo rm /etc/apache2/vhosts.d/vhost-clearinghouse.conf
 sudo ln -s $EXPEDIENT/src/config/$CH/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
 
 if [ $OM_PORT != 443 ] ; then
@@ -124,12 +143,28 @@ if [ $OM_PORT != 443 ] ; then
 else
 	sed -i "{s/^Listen.*/#Listen $OM_PORT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
 fi
-sed -i "{s/Use SimpleSSLWSGIVHost .* /Use SimpleSSLWSGIVHost $OM_PORT $OM $EXPEDIENT/}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
-sudo ln -s $EXPEDIENT/src/config/$CH/apache/vhost-optinmgr.conf /etc/apache2/vhosts.d/
+sed -i "{s#Use SimpleSSLWSGIVHost .*#Use SimpleSSLWSGIVHost $OM_PORT $OM $EXPEDIENT#}" $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf
+sudo rm /etc/apache2/vhosts.d/vhost-optinmgr.conf
+sudo ln -s $EXPEDIENT/src/config/$OM/apache/vhost-optinmgr.conf /etc/apache2/vhosts.d/
+
+# change the username
+user=`whoami`
+sed -i "{s/\buser=.*\b/user=$user/}" $EXPEDIENT/src/config/expedient/common/apache/vhost-macros.conf
+sudo rm /etc/apache2/conf.d/vhost-macros.conf
+sudo ln -s $EXPEDIENT/src/config/expedient/common/apache/vhost-macros.conf /etc/apache2/conf.d/
 
 sudo gensslcert -n $DOMAIN_FQDN
 
 init-gapi-ca.sh
+
+# Create the log dirs
+logdir=/var/log/apache2/$CH
+echo Creating log directory $logdir
+sudo mkdir -p $logdir
+
+logdir=/var/log/apache2/$OM
+echo Creating log directory $logdir
+sudo mkdir -p $logdir
 
 sudo /etc/init.d/apache2 restart
 
