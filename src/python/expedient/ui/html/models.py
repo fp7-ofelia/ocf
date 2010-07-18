@@ -5,50 +5,31 @@ Created on Jun 19, 2010
 '''
 from django.db import models
 from expedient.clearinghouse.slice.models import Slice
+from expedient.common.utils import modelfields
+from openflow.plugin.models import FlowSpaceRule
 
 class SliceFlowSpace(models.Model):
     """
     Use one flowspace set for the whole slice.
     """
     slice = models.ForeignKey(Slice)
-
-    dl_src_start = models.CharField('Link layer source address range start',
-                                    max_length=17, default="*")
-    dl_dst_start = models.CharField('Link layer destination address range start',
-                                    max_length=17, default="*")
-    dl_type_start = models.CharField('Link layer type range start',
-                                     max_length=5, default="*")
-    vlan_id_start = models.CharField('VLAN ID range start',
-                                     max_length=4, default="*")
-    nw_src_start = models.CharField('Network source address range start',
-                                    max_length=18, default="*")
-    nw_dst_start = models.CharField('Network destination address range start',
-                                    max_length=18, default="*")
-    nw_proto_start = models.CharField('Network protocol range start',
-                                      max_length=3, default="*")
-    tp_src_start = models.CharField('Transport source port range start',
-                                    max_length=5, default="*")
-    tp_dst_start = models.CharField('Transport destination port range start',
-                                    max_length=5, default="*")
     
-    dl_src_end = models.CharField('Link Layer Source Address Range End',
-                                  max_length=17, default="*")
-    dl_src_end = models.CharField('Link layer source address range end',
-                                    max_length=17, default="*")
-    dl_dst_end = models.CharField('Link layer destination address range end',
-                                    max_length=17, default="*")
-    dl_type_end = models.CharField('Link layer type range end',
-                                     max_length=5, default="*")
-    vlan_id_end = models.CharField('VLAN ID range end',
-                                     max_length=4, default="*")
-    nw_src_end = models.CharField('Network source address range end',
-                                    max_length=18, default="*")
-    nw_dst_end = models.CharField('Network destination address range end',
-                                    max_length=18, default="*")
-    nw_proto_end = models.CharField('Network protocol range end',
-                                      max_length=3, default="*")
-    tp_src_end = models.CharField('Transport source port range end',
-                                    max_length=5, default="*")
-    tp_dst_end = models.CharField('Transport destination port range end',
-                                    max_length=5, default="*")
-        
+    dl_src = modelfields.MACAddressField(
+        'MAC Src', blank=True, null=True)
+    dl_dst = modelfields.MACAddressField(
+        'MAC Dst', blank=True, null=True)
+    dl_type = modelfields.LimitedIntegerField(
+        'Eth Type', max_value=2**16-1, min_value=0, blank=True, null=True)
+    vlan_id = modelfields.LimitedIntegerField(
+        'VLAN ID', max_value=2**12-1, min_value=0, blank=True, null=True)
+    nw_src = models.IPAddressField(
+        'IP Src', blank=True, null=True)
+    nw_dst = models.IPAddressField(
+        'IP Dst', blank=True, null=True)
+    nw_proto = modelfields.LimitedIntegerField(
+        'IP Proto', max_value=2**8-1, min_value=0, blank=True, null=True)
+    tp_src = modelfields.LimitedIntegerField(
+        'L4 Src', max_value=2**16-1, min_value=0, blank=True, null=True)
+    tp_dst = modelfields.LimitedIntegerField(
+        'L4 Dst', max_value=2**16-1, min_value=0, blank=True, null=True)
+    

@@ -64,8 +64,8 @@ AM_KEY_FILE = 'server.key'
 # Substitute eg openflow:stanford
 #GPO_CA_CERT_PREFIX = "geni.net:gpo"
 #GCF_CERT_PREFIX = "geni.net:gpo:gcf"
-GPO_CA_CERT_PREFIX = "expedient:stanford"
-GCF_CERT_PREFIX = "expedient:stanford"
+GPO_CA_CERT_PREFIX = "openflow:stanford"
+GCF_CERT_PREFIX = "openflow:stanford"
 
 USER_CERT_LIFE=3600
 # See sfa/trust/rights.py

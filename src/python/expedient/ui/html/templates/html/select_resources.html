@@ -82,6 +82,7 @@ at {{ agg.location }}.
 		<tr class="header">
 			<th class="select_checkbox"></th>
 			<th class="hostname">Hostname</th>
+			<th class="connections">Connections</th>
 		</tr>
 		{% for rsc in agg.resource_set.all %}
 		{% if rsc|leaf_class_is:planetlab_node_class %}
@@ -90,7 +91,23 @@ at {{ agg.location }}.
 			<td class="select_checkbox">
 				<input type="checkbox" name="selected_nodes" value="{{ node.id }}" {% if node.id in checked_ids %}checked{% endif %} />
 			</td>
-			<td class="hostname">{{ node.name }}</td>
+			<td class="hostname"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
+			<td class="connections">
+				<table class="connections">
+					{% for cnxn in rsc.openflow_connections.all %}
+					{% with cnxn.of_iface as neigbor %}
+					<tr>
+						<td class="neighbor neighbor_{{ neighbor.id }}">
+							Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
+							{{ neighbor.switch.datapath_id }}</a>
+							at port <a href="#iface_{{ neighbor.id }}">
+							{{ neighbor.port_num }}</a>
+						</td>
+					</tr>
+					{% endwith %}
+					{% endfor %}
+				</table>
+			</td>
 		</tr>
 		{% endwith %}
 		{% endif %}
@@ -114,7 +131,7 @@ at {{ agg.location }}.
 		{% if rsc|leaf_class_is:ofswitch_class %}
 		{% with rsc.as_leaf_class as switch %}
 		<tr class="body openflow">
-			<td class="dpid"><a name="{{ switch.id }}">{{ switch.datapath_id }}</a></td>
+			<td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
 			<td class="ports">
 				<table class="connections_table">
 					{% for iface in switch.openflowinterface_set.all %}
@@ -122,16 +139,24 @@ at {{ agg.location }}.
 						<td class="select_checkbox">
 							<input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" {% if iface.id in checked_ids %}checked{% endif %} />
 						</td>
-						<td class="port_num iface_{{ iface.id }}">Port <a name="{{ iface.id }}">{{ iface.port_num }}</a></td>
+						<td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
 						<td class="connections">
 							<table class="connections">
+								{% for cnxn in iface.nonopenflow_connections.all %}
+								<tr>
+									<td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
+										Connected to <a href="#rsc_{{ cnxn.resource.id }}">
+										{{ rsc.as_leaf_class }}</a>.
+									</td>
+								</tr>
+								{% endfor %}
 								{% for neighbor in iface.ingress_neighbors.all %}
 								<tr>
 									<td class="neighbor neighbor_{{ neighbor.id }}">
-										Connected to datapath <a href="#{{ neighbor.switch.id }}">
+										Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
 										{{ neighbor.switch.datapath_id }}</a>
-										at port <a href="#{{ neighbor.id }}">
-										{{ neighbor.port_num }}</a>
+										at port <a href="#iface_{{ neighbor.id }}">
+										{{ neighbor.port_num }}</a>.
 									</td>
 								</tr>
 								{% endfor %}

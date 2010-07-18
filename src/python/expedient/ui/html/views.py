@@ -133,9 +133,13 @@ def flowspace(request, slice_id):
             for fs in SliceFlowSpace.objects.filter(slice=slice):
                 # get the wanted attributes into a dict
                 d = {}
-                for f in FlowSpaceRule._meta.fields:
-                    if f.name.endswith("end") or f.name.endswith("start"):
-                        d[f.name] = getattr(fs, f.name)
+                for f in SliceFlowSpace._meta.fields:
+                    if f.name != "slice" and f.name != "id":
+                        val = getattr(fs, f.name)
+                        if val == None: val = "*"
+                        d[f.name+"_start"] = "%s" % val
+                        d[f.name+"_end"] = "%s" % val
+                        
                 # now create fs for all the slivers
                 for s in slivers:
                     d["sliver"] = s
@@ -149,12 +153,13 @@ def flowspace(request, slice_id):
             slice.modified = True
             slice.save()
         
-            return HttpResponseRedirect(
-                reverse("html_plugin_sshkeys", args=[slice_id]))
+            return HttpResponseRedirect(request.path)
         else:
             logger.debug("Flowspace invalid: %s" % formset)
+    
     elif request.method == "GET":
         formset = FSFormSet(instance=slice)
+    
     else:
         return HttpResponseNotAllowed("GET", "POST")
         

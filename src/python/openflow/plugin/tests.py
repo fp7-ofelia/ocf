@@ -4,14 +4,13 @@ Created on Jul 12, 2010
 @author: jnaous
 '''
 
-from django.test import TestCase
 from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch,\
     DummyCallBackProxy
 from django.contrib.auth.models import User
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
-    OpenFlowInterfaceSliver, FlowSpaceRule
+    OpenFlowInterfaceSliver, FlowSpaceRule, OpenFlowConnection,\
+    NonOpenFlowConnection
 from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
-
 import logging
 from django.core.urlresolvers import reverse
 from expedient.common.tests.client import test_get_and_post_form
@@ -19,19 +18,36 @@ from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.slice.models import Slice
 from base64 import b64decode
 import pickle
+from django.conf import settings
+from expedient.common.tests.manager import SettingsTestCase
+from expedient.clearinghouse.resources.models import Resource
+from expedient.clearinghouse.aggregate.models import Aggregate
+
 logger = logging.getLogger("OpenFlowPluginTests")
 
 NUM_DUMMY_OMS = 3
 NUM_SWITCHES_PER_AGG = 10
 NUM_LINKS_PER_AGG = 30
+NUM_TEST_RESOURCES = 10
 SCHEME = "test"
 HOST = "testserver"
 
-class Tests(TestCase):
+MOD = "openflow.plugin"
+
+class Tests(SettingsTestCase):
+    
     def setUp(self):
         """
-        Create DummyOMs and login.
+        Update settings, create DummyOMs and test models and login.
         """
+        # add the test application
+        self.settings_manager.set(
+            OPENFLOW_OTHER_RESOURCES=(
+                ("expedient.clearinghouse.resources", "Resource"),
+            ),
+            DEBUG_PROPAGATE_EXCEPTIONS=True,
+        )
+        
         self.test_user = User.objects.create_user(
             "user", "user@user.com", "password")
         
@@ -83,6 +99,124 @@ class Tests(TestCase):
                 expected_url=reverse("openflow_aggregate_add_links", args=[i+1]),
             )
             
+    def test_static_of_links(self):
+        """
+        Tests that we can add/delete openflow-to-openflow static links.
+        """
+        
+        self.test_create_aggregates()
+        
+        i = 0
+        url = reverse("openflow_aggregate_add_links", args=[i+1])
+        
+        local_iface = OpenFlowInterface.objects.filter(aggregate__pk=i+1)[0]
+        remote_iface = OpenFlowInterface.objects.filter(aggregate__pk=i+2)[0]
+        
+        self.assertEqual(
+            OpenFlowConnection.objects.filter(
+                src_iface=local_iface, dst_iface=remote_iface).count(), 0)
+        self.assertEqual(
+            OpenFlowConnection.objects.filter(
+                dst_iface=local_iface, src_iface=remote_iface).count(), 0)
+        
+        response = test_get_and_post_form(
+            self.client, url,
+            dict(
+                remote_interface=remote_iface.pk,
+                local_interface=local_iface.pk,
+            ),
+            del_params=["delete_links", "add_other_links"]
+        )
+        self.assertRedirects(
+            response,
+            expected_url=url,
+        )
+        
+        to_link = OpenFlowConnection.objects.get(
+            src_iface=local_iface, dst_iface=remote_iface)
+        from_link = OpenFlowConnection.objects.get(
+            dst_iface=local_iface, src_iface=remote_iface)
+        
+        # test delete
+        response = test_get_and_post_form(
+            self.client, url,
+            dict(
+                of_connections=[to_link.pk, from_link.pk],
+            ),
+            del_params=["add_links", "add_other_links"],
+        )
+        print response
+        self.assertRedirects(
+            response,
+            expected_url=url,
+        )
+        
+        self.assertEqual(
+            OpenFlowConnection.objects.filter(
+                src_iface=local_iface, dst_iface=remote_iface).count(), 0)
+        self.assertEqual(
+            OpenFlowConnection.objects.filter(
+                dst_iface=local_iface, src_iface=remote_iface).count(), 0)
+
+    def test_static_non_of_links(self):
+        """
+        Tests that we can add/delete openflow-to-openflow static links.
+        """
+        
+        self.test_create_aggregates()
+        
+        i = 0
+        url = reverse("openflow_aggregate_add_links", args=[i+1])
+        
+        iface = OpenFlowInterface.objects.filter(aggregate__pk=i+1)[0]
+
+        self.generic_agg = Aggregate.objects.create(
+            name="TestAggregate", owner=self.test_user)
+        
+        self.non_of_rsc = []
+        resource = Resource.objects.create(
+            name="TestResource%s" % i,
+            aggregate=self.generic_agg,
+        )
+        
+        self.assertEqual(
+            NonOpenFlowConnection.objects.filter(
+                of_iface=iface, resource=resource).count(), 0)
+        
+        response = test_get_and_post_form(
+            self.client, url,
+            dict(
+                of_iface=iface.pk,
+                resource=resource.pk,
+            ),
+            del_params=["delete_links", "add_links"]
+        )
+        self.assertRedirects(
+            response,
+            expected_url=url,
+        )
+        
+        cnxn = NonOpenFlowConnection.objects.get(
+            of_iface=iface, resource=resource)
+        
+        # test delete
+        response = test_get_and_post_form(
+            self.client, url,
+            dict(
+                non_of_connections=[cnxn.pk],
+            ),
+            del_params=["add_links", "add_other_links"],
+        )
+        print response
+        self.assertRedirects(
+            response,
+            expected_url=url,
+        )
+        
+        self.assertEqual(
+            NonOpenFlowConnection.objects.filter(
+                of_iface=iface, resource=resource).count(), 0)
+
     def test_double_update(self):
         """
         Make sure updating twice works.
