@@ -29,6 +29,20 @@ function clicked(tr_id){
 		
 }
 
+function setStyleById(i, p, v) {
+	var n = document.getElementById(i);
+	n.style[p] = v;
+}
+
+function mouse_over(td_id) {
+	setStyleById(td_id,'color','red')
+}
+
+function mouse_out(td_id) {
+	setStyleById(td_id,'color','black')
+}
+
+
 function prev_sibling(obj){
 	var sibling = obj.previousSibling;
 	while (sibling && sibling.nodeType != 1) {
@@ -205,27 +219,28 @@ function nicestrict() {
 		</center>
 			{% csrf_token %}
 			<h2> flexible opt-ins</h2>
-			<table class="formtable" >
+			<table class="fulltable" >
 				<tr><th><center>Experiment</center></th></tr>
 				{% for opt in nice_opts %}
 				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight">
-					<td><center>
-						<a href="/opts/experiment/{{opt.experiment.id}}">
-						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
+					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')"
+					onMouseout="mouse_out('td_{{opt.id}}')"><center>
+						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}(
+						<a href="/opts/experiment/{{opt.experiment.id}}">details</a>)
 						</a>
 					</center></td>
 				</tr>
 				{% endfor %}
 			</table>
 			<h2> strict opt-ins</h2>
-			<table class="formtable" >
+			<table class="fulltable" >
 				<tr><th><center>Experiment</center></th></tr>
 				{% for opt in strict_opts %}
-				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight">
-					<td><center>
-						<a href="/opts/experiment/{{opt.experiment.id}}">
-						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
-						</a>
+				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight")">
+					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')
+					onMouseout="mouse_out('td_{{opt.id}}')"><center>
+						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}(
+						<a href="/opts/experiment/{{opt.experiment.id}}">details</a>)
 					</center></td>
 				</tr>
 				{% endfor %}

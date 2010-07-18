@@ -5,7 +5,9 @@
 	<div align="right">
 		<a href="/dashboard">Dashboard</a><br/>
 	</div>
-	<p><font color="red">{{error_msg}}</font></p>
+	{% for msg in error_msg %}
+		<p><font color="red">{{msg}}</font></p>
+	{% endfor %}
 	<form name="input" action="/opts/opt_out" method="post">{% csrf_token %}
 	<table class="formtable">
 	<tr><th>FlowSpace</th><th>Experiment</th><th>Priority</th></tr>
