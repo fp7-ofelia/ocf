@@ -10,8 +10,35 @@ from openflow.optin_manager.flowspace.helper import *
 from openflow.optin_manager.users.models import Priority
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from django.views.generic import simple
-from pprint import pprint
 from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp
+
+@login_required     
+def change_priority(request):
+    
+    
+    if request.user.get_profile().is_net_admin:
+        opts = UserOpts.objects.filter(user=request.user).order_by('-priority')
+        pass
+    
+    else:
+        error_msg = []
+
+        
+        if (request.method == "POST"):
+            pass
+            
+        nice_opts = UserOpts.objects.filter(user=request.user,nice=True).order_by('-priority')
+        strict_opts = UserOpts.objects.filter(user=request.user,nice=False).order_by('-priority')
+
+        return simple.direct_to_template(request, 
+                    template = 'openflow/optin_manager/opts/view_opts_user.html', 
+                    extra_context={ 
+                                   'error_msg':error_msg,
+                                   'nice_opts':nice_opts , 
+                                   'strict_opts':strict_opts ,
+                                   'user':request.user,
+                                   }, 
+                    )           
               
 @login_required
 def view_opt_in(request, error_msg):
@@ -30,16 +57,24 @@ def view_opt_in(request, error_msg):
     else:
         return simple.direct_to_template(request, 
                     template = 'openflow/optin_manager/opts/view_opts_user.html', 
-                    extra_context={'max_priority':max_priority, 
+                    extra_context={ 
                                    'opts':opts , 
-                                   'user':request.user
+                                   'user':request.user,
                                    }, 
                     )
 
 @login_required
 def add_opt_in(request):
 
-    exps = Experiment.objects.all()
+    all_exps = Experiment.objects.all()
+    user_fs = UserFlowSpace.objects.filter(user=request.user)
+    exps = []
+    for exp in all_exps:
+        exp_fs = ExperimentFLowSpace.objects.filter(exp=exp)
+        intersection = multi_fs_intersect(exp_fs,user_fs,FlowSpace)
+        if (len(intersection)>0):
+            exps.append(exp)
+        
     profile = request.user.get_profile()
     
     if (profile.is_net_admin):
@@ -86,14 +121,16 @@ def add_opt_in(request):
                                                 'defexp': defexp,
                                         },
                             )        
-        
     else: # A user opt-in page
-        
-        selpri = 0
+        selpri = 1
         error_msg = ""
         if (request.method == "POST"):
             #opt in request received; process it
-            selpri = request.POST['priority']
+            all_this_user_opts = UserOpts.objects.filter(user=request.user,nice=True)
+            for user_opt in all_this_user_opts:
+                if user_opt.priority >= selpri:
+                    selpri = user_opt.priority + 1
+                    
             defexp = request.POST['experiment']
             
             # check if priority is within allowable range
@@ -102,9 +139,6 @@ def add_opt_in(request):
             else:
                 selexp = Experiment.objects.get(id = defexp)
                 userFS = UserFlowSpace.objects.filter(user = request.user)
-                expFS = ExperimentFLowSpace.objects.filter(exp = selexp)
-                               
-                intersected = False
 
                 tmp = UserOpts.objects.filter(experiment = selexp)
                 if (len(tmp) > 0):
@@ -116,7 +150,7 @@ def add_opt_in(request):
                 tmp.delete()    
                 
                 opt_msg = opt_fs_into_exp(userFS,selexp,request.user,
-                                    int(request.POST['priority']),False)
+                                    int(selpri),True)
                 if (opt_msg == ""):
                     exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
                     return simple.direct_to_template(request, 
@@ -199,6 +233,7 @@ def opt_out(request):
                     extra_context = {'allopts':allopts, 'error_msg':error_msg},
                 )
 
+
 @login_required
 def update_opts(request):
     errors = []
@@ -272,6 +307,7 @@ def update_opts(request):
                                 'error_messages':errors
                             },
                     )
+
 
 @login_required
 def view_experiment(request, exp_id):
