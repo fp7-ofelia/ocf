@@ -42,11 +42,11 @@ import gcf.sfa.trust.rights as rights
 
 # Substitute eg "openflow//stanford ch"
 #SLICEPUBID_PREFIX = "geni.net//gpo//gcf"
-SLICEPUBID_PREFIX = "openflow//stanford"
+SLICEPUBID_PREFIX = "openflow//bbn"
 SLICE_GID_SUBJ = "gcf.slice"
 
-USER_CRED_LIFE = 86400
-SLICE_CRED_LIFE = 3600
+USER_CRED_LIFE = 8640000
+SLICE_CRED_LIFE = 360000
 
 # The list of Aggregates that this Clearinghouse knows about
 # should be defined in the geni_aggregates file
