@@ -215,6 +215,9 @@ class GAPITests(TestCase):
         rspec = wrap_xmlrpc_call(
             self.am_client.ListResources,
             [cred, options], {}, settings.TIMEOUT)
+        
+        logger.debug("Got Advertisement RSpec: \n%s" % rspec)
+        
         if zipped:
             import zlib, base64
             rspec = zlib.decompress(base64.b64decode(rspec))
