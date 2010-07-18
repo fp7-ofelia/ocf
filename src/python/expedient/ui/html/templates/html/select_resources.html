@@ -14,7 +14,7 @@ table.openflow .dpid,.ports {
 table.connections_table {
 	border-width: 0px;
 	width: 100%;
-}
+} 
 table.openflow td {
 	border-spacing: 0px;
 	padding: 0px;
@@ -56,6 +56,16 @@ $(document).ready(function(){
 		$(".iface_"+iface_id).toggleClass("connected");
 		$(".neighbor_"+iface_id).toggleClass("connected");
 	});
+	$(":checkbox[name=selected_nodes]:checked").each(function(){
+		node_id = $(this).attr("value");
+		$(".neighbor_rsc_"+node_id).addClass("connected");
+		$(".rsc_"+node_id).addClass("connected");
+	});
+	$(":checkbox[name=selected_nodes]").click(function (){
+		node_id = $(this).attr("value");
+		$(".rsc_"+node_id).toggleClass("connected");
+		$(".neighbor_rsc_"+node_id).toggleClass("connected");
+	});
 	$("input[name=clear_button]").click(function (){
 		$(":checked").click();
 	});
@@ -78,41 +88,43 @@ $(document).ready(function(){
 <h2>PlanetLab Aggregate {{ agg.name }}</h2>
 at {{ agg.location }}.
 <div class="planetlab">
-	<table class="planetlab">
-		<tr class="header">
-			<th class="select_checkbox"></th>
-			<th class="hostname">Hostname</th>
-			<th class="connections">Connections</th>
-		</tr>
-		{% for rsc in agg.resource_set.all %}
-		{% if rsc|leaf_class_is:planetlab_node_class %}
-		{% with rsc.as_leaf_class as node %}
-		<tr class="body planetlab {% cycle 'odd' 'even' %}">
-			<td class="select_checkbox">
-				<input type="checkbox" name="selected_nodes" value="{{ node.id }}" {% if node.id in checked_ids %}checked{% endif %} />
-			</td>
-			<td class="hostname"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
-			<td class="connections">
-				<table class="connections">
-					{% for cnxn in rsc.openflow_connections.all %}
-					{% with cnxn.of_iface as neigbor %}
-					<tr>
-						<td class="neighbor neighbor_{{ neighbor.id }}">
-							Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
-							{{ neighbor.switch.datapath_id }}</a>
-							at port <a href="#iface_{{ neighbor.id }}">
-							{{ neighbor.port_num }}</a>
-						</td>
-					</tr>
-					{% endwith %}
-					{% endfor %}
-				</table>
-			</td>
-		</tr>
-		{% endwith %}
-		{% endif %}
-		{% endfor %}
+  <table class="planetlab">
+    <tr class="header">
+      <th class="select_checkbox"></th>
+      <th class="hostname">Hostname</th>
+      <th class="connections">Connections</th>
+    </tr>
+    {% for rsc in agg.resource_set.all %}
+    {% if rsc|leaf_class_is:planetlab_node_class %}
+    {% with rsc.as_leaf_class as node %}
+    <tr class="body planetlab {% cycle 'odd' 'even' %}">
+      <td class="select_checkbox">
+	<input type="checkbox" name="selected_nodes"
+	       value="{{ node.id }}"
+	       {% if node.id in checked_ids %}checked{% endif %} />
+      </td>
+      <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
+      <td class="connections">
+	<table class="connections">
+	  {% for cnxn in rsc.openflow_connections.all %}
+	  {% with cnxn.of_iface as neighbor %}
+	  <tr>
+	    <td class="neighbor neighbor_{{ neighbor.id }}">
+	      Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
+		{{ neighbor.switch.datapath_id }}</a>
+	      at port <a href="#iface_{{ neighbor.id }}">
+		{{ neighbor.port_num }}</a>
+	    </td>
+	  </tr>
+	  {% endwith %}
+	  {% endfor %}
 	</table>
+      </td>
+    </tr>
+    {% endwith %}
+    {% endif %}
+    {% endfor %}
+  </table>
 </div>
 {% endfor %}
 
@@ -122,64 +134,64 @@ at {{ agg.location }}.
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
 at {{ agg.location }}.
 <div class="openflow">
-	<table class="openflow">
-		<tr class="header">
-			<th class="dpid">Datapath ID</th>
-			<th class="ports">Connections (Port and Remote Port)</th>
+  <table class="openflow">
+    <tr class="header">
+      <th class="dpid">Datapath ID</th>
+      <th class="ports">Connections (Port and Remote Port)</th>
+    </tr>
+    {% for rsc in agg.resource_set.all %}
+    {% if rsc|leaf_class_is:ofswitch_class %}
+    {% with rsc.as_leaf_class as switch %}
+    <tr class="body openflow">
+      <td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
+      <td class="ports">
+	<table class="connections_table">
+	  {% for iface in switch.openflowinterface_set.all %}
+	  <tr class="body {% cycle 'odd' 'even' %}">
+	    <td class="select_checkbox">
+	      <input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" {% if iface.id in checked_ids %}checked{% endif %} />
+	    </td>
+	    <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
+	    <td class="connections">
+	      <table class="connections">
+		{% for cnxn in iface.nonopenflow_connections.all %}
+		<tr>
+		  <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
+		    Connected to <a href="#rsc_{{ cnxn.resource.id }}">
+		      {{ cnxn.resource.as_leaf_class }}</a>.
+		  </td>
 		</tr>
-		{% for rsc in agg.resource_set.all %}
-		{% if rsc|leaf_class_is:ofswitch_class %}
-		{% with rsc.as_leaf_class as switch %}
-		<tr class="body openflow">
-			<td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
-			<td class="ports">
-				<table class="connections_table">
-					{% for iface in switch.openflowinterface_set.all %}
-					<tr class="body {% cycle 'odd' 'even' %}">
-						<td class="select_checkbox">
-							<input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" {% if iface.id in checked_ids %}checked{% endif %} />
-						</td>
-						<td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
-						<td class="connections">
-							<table class="connections">
-								{% for cnxn in iface.nonopenflow_connections.all %}
-								<tr>
-									<td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
-										Connected to <a href="#rsc_{{ cnxn.resource.id }}">
-										{{ rsc.as_leaf_class }}</a>.
-									</td>
-								</tr>
-								{% endfor %}
-								{% for neighbor in iface.ingress_neighbors.all %}
-								<tr>
-									<td class="neighbor neighbor_{{ neighbor.id }}">
-										Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
-										{{ neighbor.switch.datapath_id }}</a>
-										at port <a href="#iface_{{ neighbor.id }}">
-										{{ neighbor.port_num }}</a>.
-									</td>
-								</tr>
-								{% endfor %}
-							</table>
-						</td>
-					</tr>
-					{% endfor %}
-				</table>
-			</td>
-		</tr>
-		{% endwith %}
-		{% endif %}
 		{% endfor %}
+		{% for neighbor in iface.ingress_neighbors.all %}
+		<tr>
+		  <td class="neighbor neighbor_{{ neighbor.id }}">
+		    Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
+		      {{ neighbor.switch.datapath_id }}</a>
+		    at port <a href="#iface_{{ neighbor.id }}">
+		      {{ neighbor.port_num }}</a>.
+		  </td>
+		</tr>
+		{% endfor %}
+	      </table>
+	    </td>
+	  </tr>
+	  {% endfor %}
 	</table>
+      </td>
+    </tr>
+    {% endwith %}
+    {% endif %}
+    {% endfor %}
+  </table>
 </div>
 {% empty %}
-<p>There are no OpenFlow aggregates in the slice. </p>
-{% endfor %}
+  <p>There are no OpenFlow aggregates in the slice. </p>
+  {% endfor %}
 
-{% if openflow_aggs or planetlab_aggs %}
-<input type="submit" value="Next" />
-<input type="button" name="clear_button" value="Clear" />
-{% endif %}
+  {% if openflow_aggs or planetlab_aggs %}
+  <input type="submit" value="Next" />
+  <input type="button" name="clear_button" value="Clear" />
+  {% endif %}
 </form>
 
 {% endblock content %}
