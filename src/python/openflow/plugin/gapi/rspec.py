@@ -116,7 +116,7 @@ def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     for switch in switches:
         switch_elem = et.SubElement(
             switches_elem, SWITCH_TAG, {
-                URN: _dpid_to_urn(switch.dpid),
+                URN: _dpid_to_urn(switch.datapath_id),
             },
         )
         _add_ports(switch_elem, switch)
@@ -128,7 +128,7 @@ def _add_ports(switch_elem, switch):
     for iface in switch.openflowinterface_set.all():
         et.SubElement(
             switch_elem, PORT_TAG, {
-                URN: _port_to_urn(switch.dpid, iface.port_num),
+                URN: _port_to_urn(switch.datapath_id, iface.port_num),
             }
         )
 
