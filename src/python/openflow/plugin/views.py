@@ -187,7 +187,8 @@ def aggregate_add_links(request, agg_id):
             aggregate, resource_qs)
         if of_cnxn_qs.count() + non_of_cnxn_qs.count():
             existing_links_form = \
-                OpenFlowConnectionSelectionForm(of_cnxn_qs, non_of_cnxn_qs).as_table()
+                OpenFlowConnectionSelectionForm(
+                    of_cnxn_qs, non_of_cnxn_qs).as_table()
         else:
             existing_links_form = None
 
