@@ -45,17 +45,9 @@ if [ ! -e $EXPEDIENT/src/python/$CH/deployment_settings.py ] ; then
 	cp $EXPEDIENT/src/python/$CH/deployment_settings_clean.py \
 		$EXPEDIENT/src/python/$CH/deployment_settings.py
 fi
-if [ ! -e $EXPEDIENT/src/python/$CH/settings.py ] ; then
-	cp $EXPEDIENT/src/python/$CH/settings_clean.py \
-		$EXPEDIENT/src/python/$CH/settings.py
-fi
 if [ ! -e $EXPEDIENT/src/python/$OM/deployment_settings.py ] ; then
 	cp $EXPEDIENT/src/python/$OM/deployment_settings_clean.py \
 		$EXPEDIENT/src/python/$OM/deployment_settings.py
-fi
-if [ ! -e $EXPEDIENT/src/python/$OM/settings.py ] ; then
-	cp $EXPEDIENT/src/python/$OM/settings_clean.py \
-		$EXPEDIENT/src/python/$OM/settings.py
 fi
 	
 # Update the settings for Expedient
