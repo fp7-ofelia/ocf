@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
+    'django_evolution',
     'autoslug',
     'registration',
     'expedient.common.permissions',
