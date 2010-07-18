@@ -1,11 +1,24 @@
 {% extends "base.html" %}
 {% load ch_extras %}
 
-{% block style %}
-div.steps {
-	padding: 4px;
-	font-weight: bold;
-}
+{% block scripts %}
+<script>
+	$(document).ready(function() {
+		$("table.fulltable td").css("padding", "1px 1px 1px 1px");
+	})
+</script>
+<style>
+	div.steps {
+		padding: 4px;
+		font-weight: bold;
+	}
+	table.fulltable input[type=text] {
+		width: 70px;
+	}
+	span.next_link {
+		font-weight: bold;
+	}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -19,82 +32,52 @@ div.steps {
     
     <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
     
+	<div class="help_text">
+	Each row of the table describes a class of traffic you would like your
+	controller to receive. For example, if you want to receive all incoming and
+	outgoing port 80 traffic, then you will need two rows. In the first, you
+	would set the "L4 Dst" field to 80. In the second, you would set the "L4
+	Src" field to 80.
+	<br />
+	<br />
+	Empty rows are unused. If you need more space, you can click "Save", and
+	additional empty rows will be displayed.
+	</div>
+
+	<br />
+	<br />
+	
     <form class="form" id='flowspace_formset' method="POST" action="">{% csrf_token %}
         <div class="flowspace">
             <div id="flowspacedivid" >
 	            {{ fsformset.management_form }}
 				{% for form in fsformset.forms %}
-				{% for hidden in form.hidden_fields %}
-				{{ hidden }}
+					{% for hidden in form.hidden_fields %}
+						{{ hidden }}
+					{% endfor %}
 				{% endfor %}
-				{% if form.non_field_errors %}
-				<ul class="errorlist">{{ form.non_field_errors.as_ul }}</ul>
-				{% endif %}
 				<table border="1" class="fulltable">
 					<thead>
-						<tr>
-							<th><strong>Field</strong></th>
-							<th><strong>Start</strong></th>
-							<th><strong>End</strong></th>
-						</tr>
+		                <tr>
+			                {% for field in fsformset.forms.0.visible_fields %}
+		                    <th><strong>{{ field.label_tag }}</strong></th>
+			                {% endfor %}
+		                </tr>
 					</thead>
-					<tbody>
-						<tr>
-							<th>Src MAC</th>
-							<td>{{ form.dl_src_start.errors }} {{ form.dl_src_start }}</td>
-							<td>{{ form.dl_src_end.errors }} {{ form.dl_src_end }}</td>
-						</tr>
-						<tr>
-							<th>Dst MAC</th>
-							<td>{{ form.dl_dst_start.errors }} {{ form.dl_dst_start }}</td>
-							<td>{{ form.dl_dst_end.errors }} {{ form.dl_dst_end }}</td>
-						</tr>
-						<tr>
-							<th>Ethernet Type</th>
-							<td>{{ form.dl_type_start.errors }} {{ form.dl_type_start }}</td>
-							<td>{{ form.dl_type_end.errors }} {{ form.dl_type_end }}</td>
-						</tr>
-						<tr>
-							<th>VLAN ID</th>
-							<td>{{ form.vlan_id_start.errors }} {{ form.vlan_id_start }}</td>
-							<td>{{ form.vlan_id_end.errors }} {{ form.vlan_id_end }}</td>
-						</tr>
-						<tr>
-							<th>Src IP</th>
-							<td>{{ form.nw_src_start.errors }} {{ form.nw_src_start }}</td>
-							<td>{{ form.nw_src_end.errors }} {{ form.nw_src_end }}</td>
-						</tr>
-						<tr>
-							<th>Dst IP</th>
-							<td>{{ form.nw_dst_start.errors }} {{ form.nw_dst_start }}</td>
-							<td>{{ form.nw_dst_end.errors }} {{ form.nw_dst_end }}</td>
-						</tr>
-						<tr>
-							<th>IP Protocol</th>
-							<td>{{ form.nw_proto_start.errors }} {{ form.nw_proto_start }}</td>
-							<td>{{ form.nw_proto_end.errors }} {{ form.nw_proto_end }}</td>
-						</tr>
-						<tr>
-							<th>Src Port</th>
-							<td>{{ form.tp_src_start.errors }} {{ form.tp_src_start }}</td>
-							<td>{{ form.tp_src_end.errors }} {{ form.tp_src_end }}</td>
-						</tr>
-						<tr>
-							<th>Dst Port</th>
-							<td>{{ form.tp_dst_start.errors }} {{ form.tp_dst_start }}</td>
-							<td>{{ form.tp_dst_end.errors }} {{ form.tp_dst_end }}</td>
-						</tr>
-						<tr>
-							<th>Delete?</th>
-							<td>{{ form.DELETE }}</td>
-							<td></td>
-						</tr>
-					</tbody>
+	                {% for form in fsformset.forms %}
+	                <tr>
+		                {% for field in form.visible_fields %}
+                        <td>{{ field.errors }} {{ field }}</td>
+	                    {% endfor %}
+	                </tr>
+	                {% endfor %}
 	            </table>
-				{% endfor %}
             </div>
 			<br/>
             <input id='submit' type="submit" value="Save" />
+			<span class="next_link">
+				<a href="{% url html_plugin_sshkeys slice.id %}">Next</a>
+			</span>
         </div>
     </form>
 </div>
