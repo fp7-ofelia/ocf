@@ -1152,20 +1152,15 @@ tr.highlighted {
 }
 	
 img.menuimg {
-	width: 75%;
-	height: 75%;
+	width: 180px;
+	height: 33px;
 	float: right;
 }
 
 img.submenuimg {
-	width: 65%;
-	height: 65%;
-	float: right;
-}
+	width: 150px;
+	height: 28px;
 
-img.steps,img.steps_non_active {
-	width: 80%;
-	height: 80%;
 }
 
 .setp_td {
@@ -1176,3 +1171,4 @@ img.steps,img.steps_non_active {
 	width: 500px;
 	height: 300px;
 }
+

@@ -348,8 +348,10 @@ def delete_slice(sliceid, **kwargs):
     '''
     
     print "Called delete_slice %s" % sliceid
-    
-    single_exp = Experiment.objects.get(slice_id = sliceid)
+    try:
+        single_exp = Experiment.objects.get(slice_id = sliceid)
+    except Experiment.DoesNotExist:
+        return "Experiment Doesnot Exist"
     # get all flowspaces opted into this exp
     ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
     # delete all match structs for each flowspace
