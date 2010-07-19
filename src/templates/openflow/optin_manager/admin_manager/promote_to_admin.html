@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
+
+{% block pagehead %} <h1>Promote {{user.username}} to Admin</h1> {% endblock %}
+
 {% block content %}
 <div class="main">
-	<h2>Promote {{user.username}} to Admin</h2>
-	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-	</div>	
+
 	<form name="input" action="/admin_manager/promote_to_admin" method="post">{% csrf_token %}
 		{{form.errors.general}}
 		<input type=hidden name="priority" value=0 />
@@ -59,8 +59,9 @@
 			{{form.tp_to_s}} - {{form.tp_to_e}}
 		</td><td>{{form.errors.tp_to_s}}{{form.errors.tp_to_e}}</td>
 		</tr>
+		<tr><td><input type="submit" value="Submit Request"/></td></tr>
 		</table>
-		<input type="submit" value="Submit Request"/>
+		
 	</form>
 </div>
 

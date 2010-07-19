@@ -1,0 +1,34 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="main">
+
+        <h1> {{ user.username }} - Admin Dashboard </h1>
+            <h2> Manage Requests </h2>
+                <a href = "/admin_manager/approve_admin">Approve Admin Requests</a><br/>
+                <a href = " ">Manage Admins Flowspaces</a><br/>
+                <a href = "/admin_manager/approve_user ">Approve User Requests</a><br/>
+                <a href = " ">Manage Users Flowspaces</a><br/>
+            <h2> Manage Rules </h2>
+                <a href = "/opts/view_opt_in">Set Priorities</a><br/>
+				<a href = "/opts/opt_in">Add Rule</a><br/>
+				<a href = "/opts/opt_out">Remove Rule</a><br/>
+                <a href = "/opts/experiments">View Experiments</a><br/>
+            <h2> Admin Profile </h2>
+            	<a href = "">Edit Profile</a><br/>
+                <a href = " ">Add Admin FlowSpace</a><br/>
+                <a href = " ">Give Up Admin FlowSpace</a><br/>
+                <a href = "/admin_manager/resign_admin">Resign Admin</a><br/>
+                
+            {% if user.is_staff %}
+    		<h2> Manage Website</h2> 
+    			<a href = "/controls/set_clearinghouse">Set Clearinghouse</a><br/>
+    			<a href = "/controls/set_flowvisor">Set FlowVisor</a><br/>
+    		{% endif %}
+    		
+    		<br/>
+				<a href="/accounts/logout">log out</a>
+
+</div>
+{% endblock content %}
+

@@ -8,4 +8,5 @@ urlpatterns = patterns('openflow.optin_manager.opts.views',
     url(r'^opt_out$', 'opt_out'),
     url(r'^experiments$', 'view_experiments'),
     url(r'^experiment/(?P<exp_id>\d+)$', 'view_experiment'),
+    url(r'^experiment_simple/(?P<exp_id>\d+)$', 'view_experiment_simple'),
 )

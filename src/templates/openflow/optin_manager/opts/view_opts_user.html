@@ -1,14 +1,8 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
+{% block pagehead %} <h1>Experiments Opted In by {{user.username}}</h1> {% endblock %}
 
 {% block scripts %}
-<style>
-  td {
-    width: 800px;
-  }
-  th {
-    width: 800px;
-  }
-</style>
+
 
 <script type="text/javascript">
 
@@ -163,11 +157,11 @@ function nicestrict() {
         }
 	}
 	if (selected_priority<1000) {
-    	new_table = document.getElementsByTagName("table")[2]
+    	new_table = document.getElementsByTagName("table")[3]
     	new_base_priority = 1000
     	old_base_priority = 0
     } else {
-    	new_table = document.getElementsByTagName("table")[1] 
+    	new_table = document.getElementsByTagName("table")[2] 
     	new_base_priority = 0
     	old_base_priority = 1000
     }
@@ -196,7 +190,7 @@ function nicestrict() {
 }
 
 function advsimple(){
-	table = document.getElementsByTagName("table")[2]
+	table = document.getElementsByTagName("table")[3]
 	but = document.getElementById("advbut")
 	switchbut = document.getElementById("switch")
 	div = document.getElementById("adv")
@@ -220,33 +214,29 @@ function advsimple(){
 
 {% block content %}
 <div class="main">
-    <h2>Experiments Opted In by {{user.username}}</h2>
-		<div align="right">
-			<a href="/dashboard">Dashboard</a><br/>
-		</div>
 
-		<div>
+		<div align="right">
 		{% for error in error_msg %}
 			<p><font color="red">{{error}}</font></p>
 		{% endfor %}
 		</div>
 
-		<div>	
-		<center>
+		<div id="setpriority">	
+
 		<button type=button onClick="updown(1)">Up</button>
 		<button type=button onClick="updown(-1)">Down</button>
 		<button type=button id="switch" onClick="nicestrict()">Switch</button> 
-				
+		
 		<form name="input" action="/opts/change_priority" method="post">
-		</center>
-			{% csrf_token %}
-			<h2> flexible opt-ins</h2>
-			<table class="fulltable" >
-				<tr><th><center>Experiment</center></th></tr>
+		{% csrf_token %}
+
+			<h2> Normal Opt-Ins</h2>
+			<table class="formtable">
+				<tr><th class="setp_td"><center>Experiment</center></th></tr>
 				{% for opt in nice_opts %}
 				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight">
 					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')"
-					onMouseout="mouse_out('td_{{opt.id}}')"><center>
+					onMouseout="mouse_out('td_{{opt.id}}')" class="setp_td"><center>
 						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}(
 						<a href="/opts/experiment/{{opt.experiment.id}}">details</a>)
 						</a>
@@ -255,21 +245,23 @@ function advsimple(){
 				{% endfor %}
 			</table>
 			
-			<center><button type=button id="advbut" onClick="advsimple()">Simple</button></center>
+			<button type=button id="advbut" onClick="advsimple()">Simple</button>
 			<div id="adv">
-			<h2> strict opt-ins</h2>
-			<table class="fulltable">
-				<tr><th><center>Experiment</center></th></tr>
+
+			<h2> Strict Opt-Ins</h2>
+			<table class="formtable">
+				<tr><th class="setp_td"><center>Experiment</center></th></tr>
 				{% for opt in strict_opts %}
 				<tr id="tr_{{opt.id}}" onClick="clicked('tr_{{opt.id}}')" class="non_highlight")">
 					<td id="td_{{opt.id}}" onMouseover="mouse_over('td_{{opt.id}}')"
-					onMouseout="mouse_out('td_{{opt.id}}')"><center>
+					onMouseout="mouse_out('td_{{opt.id}}')" class="setp_td"><center>
 						{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}(
 						<a href="/opts/experiment/{{opt.experiment.id}}">details</a>)
 					</center></td>
 				</tr>
 				{% endfor %}
 			</table>
+
 			</div>
 			
 			{% for opt in strict_opts %}
@@ -278,10 +270,11 @@ function advsimple(){
 			{% for opt in nice_opts %}
 				<input type="hidden" name="p_{{opt.id}}" value="{{opt.priority}}" id="ptr_{{opt.id}}"/>
 			{% endfor %}
-			<center>
+
 					<td><input type="submit" value="Update"/></td>
-			</center>
+
 		</form> 
+
 		</div>
 
 </div>
