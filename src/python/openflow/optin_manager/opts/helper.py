@@ -151,6 +151,20 @@ def update_opts_into_exp(exp):
     
     return errorlist
 
-        
+def update_match_struct_and_get_fv_args(useropt):
+    fv_args = [] 
+    ofs = useropt.optsflowspace_set.all()
+    for fs in ofs:
+        matches = fs.matchstruct_set.all()
+        for match in matches:
+            match.priority = (match.priority%Priority.Priority_Scale) + \
+            useropt.priority*Priority.Priority_Scale
+            match.save()
+            fv_arg = {"operation":"CHANGE", "id":match.fv_id,
+                    "priority":match.priority, "dpid":fs.dpid, "match":match.match,
+                    "actions": "slice=%s:4"%fs.opt.experiment.get_fv_slice_name(),
+                }
+            fv_args.append(fv_arg)
+    return fv_args
 
         

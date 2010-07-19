@@ -1115,3 +1115,8 @@ table.fulltable tbody td.logocol {
 iframe {
     border: 1px solid #E0E8FF;
 }
+
+tr.highlighted {
+	font-weight: bold;
+	}
+	

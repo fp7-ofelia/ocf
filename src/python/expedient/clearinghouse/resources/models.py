@@ -30,8 +30,8 @@ class Resource(Extendable):
         self.status_change_timestamp = datetime.now()
     
     def __unicode__(self):
-        return u"Resource: %s belonging to aggregate %s." % (
-            self.name, self.aggregate)
+        return u"Resource %s belonging to aggregate %s." % (
+            self.name, self.aggregate.name)
         
 class Sliver(Extendable):
     '''

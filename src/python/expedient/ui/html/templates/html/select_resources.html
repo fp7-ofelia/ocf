@@ -43,6 +43,7 @@ div.steps {
 {% endblock %}
 
 {% block scripts %}
+<script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
 $(document).ready(function(){
@@ -79,6 +80,115 @@ $(document).ready(function(){
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
 	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
 </div>
+
+<h1>Topology</h1>
+
+<div id="selected_node_info"></div>
+
+<script type="text/javascript+protovis">
+
+function get_node_type(d) {
+	var of_groups_len = {{ openflow_aggs.count }};
+	var pl_groups_len = {{ planetlab_aggs.count }};
+	
+	if(d.group < of_groups_len) {
+		return "openflow";
+	} else if(d.group < of_groups_len + pl_groups_len) {
+		return "planetlab";
+	} else {
+		return "unknown";
+	}
+}
+	
+var data = {
+	nodes: [
+		{% for node in protovis_nodes %}
+		{nodeValue:"{{ node.name }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
+		{% endfor %}
+	],
+	links: [
+		{% for link in protovis_links %}
+		{source:{{ link.src }}, target:{{ link.target }}, value:{{ link.value }}}{% if not forloop.last %},{% endif %}
+		{% endfor %}
+	],
+}
+
+var w = 740,
+    h = 400,
+    colors = pv.Colors.category20();
+
+var vis = new pv.Panel()
+    .width(w)
+    .height(h)
+    .fillStyle("white")
+    .event("mousedown", pv.Behavior.pan())
+    .event("mousewheel", pv.Behavior.zoom());
+
+var force = vis.add(pv.Layout.Force)
+	.bound(true)
+    .nodes(data.nodes)
+    .links(data.links);
+
+force.springLength(80);
+force.chargeConstant(-400);
+force.chargeTheta(0.2);
+
+force.link.add(pv.Line);
+
+// force.label.add(pv.Label);
+
+/*
+force.node.add(pv.Dot)
+    .size(function(d) (50))
+    .fillStyle(function(d) d.fix ? "brown" : colors(d.group))
+    .strokeStyle(function() this.fillStyle().darker())
+    .lineWidth(1)
+    .title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+    .event("drag", force);
+*/
+
+$("#selected_node_info").hide()
+
+force.node.add(pv.Image)
+	.url(function (d) {
+		type = get_node_type(d);
+		if(type == "openflow") {
+			return "{% url img_media 'switch-tiny.png' %}";
+		} else if(type == "planetlab") {
+			return "{% url img_media 'host-tiny.png' %}";
+		} else {
+			return "{% url img_media 'inactive.png' %}";
+		}
+	})
+	.def("i", -1)
+	.width(20)
+	.height(20)
+	.fillStyle(function(d) this.i() == this.index ? "red" : colors(d.group))
+    .strokeStyle(function() this.fillStyle().darker())
+	.cursor("pointer")
+	.title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+	.event("mouseover", function(d) {
+		/* display info on the selected node in the div */ 
+		type = get_node_type(d);
+		desc = "Unknown"
+		if(type == "openflow") {
+			desc = "OpenFlow switch";
+		} else if(type == "planetlab") {
+			desc = "PlanetLab node";
+		}
+		$("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
+		$("#selected_node_info").show();
+		/* store the info about the selected node and highlight it */
+		this.i(this.index);
+	})
+	.event("mouseout", function() this.i(-1))
+    .event("drag", force);
+
+vis.render();
+
+</script>
 
 <form action="" method="POST">{% csrf_token %}
 
@@ -193,5 +303,4 @@ at {{ agg.location }}.
   <input type="button" name="clear_button" value="Clear" />
   {% endif %}
 </form>
-
 {% endblock content %}
