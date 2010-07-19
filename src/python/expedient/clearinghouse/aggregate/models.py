@@ -32,8 +32,9 @@ No information available.
         'Logo', upload_to=settings.AGGREGATE_LOGOS_DIR,
         editable=False, blank=True, null=True,
         help_text="Select an optional logo.")
-    description = models.TextField()
-    location = models.CharField("Geographic Location", max_length=200)
+    description = models.TextField(default="")
+    location = models.CharField(
+        "Geographic Location", max_length=200, default="")
     available = models.BooleanField(
         "Available", default=True,
         help_text="Do you want to make this\

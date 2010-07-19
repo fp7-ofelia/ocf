@@ -29,6 +29,7 @@ class OMTests(TestCase):
         Create a client to talk to the OM.
         """
         
+        
         call_env_command(test_settings.OM_PROJECT_DIR, "flush",
                          interactive=False)
         self.om_env = Env(test_settings.OM_PROJECT_DIR)
@@ -91,7 +92,8 @@ class OMTests(TestCase):
                     test_settings.HOST, test_settings.OM_PORT, fv.id,
                 ),
             )
-            
+             
+ 
     def test_ping(self):
         """
         Communications are up.
@@ -338,10 +340,9 @@ class OMTests(TestCase):
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
         from expedient.common.tests.client import Browser
-        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
-        from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace
-        from django.contrib.auth.models import User 
-               
+        from openflow.optin_manager.opts.models import UserOpts, OptsFlowSpace 
+        from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace
+        from django.contrib.auth.models import User
         #make a normal user on system
         username = "user"
         password = "password"
@@ -359,6 +360,8 @@ class OMTests(TestCase):
         fields=["dl_src","dl_dst","vlan_id","tp_src","tp_dst"]
         random.shuffle(fields)
 
+
+        from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
         (to_str,from_str,width,om_name,of_name) = om_ch_translate.attr_funcs[fields[0]]
         self.user_field_name = om_name
         self.user_field_s = random.randint(0,2**width-3)
@@ -390,7 +393,7 @@ class OMTests(TestCase):
                              )
         setattr(expfs,"%s_s"%self.exp_field_name,self.exp_field_s)
         setattr(expfs,"%s_e"%self.exp_field_name,self.exp_field_e)
-        expfs.save()  
+        expfs.save() 
         
         # First authenticate
         b = Browser()
@@ -402,11 +405,11 @@ class OMTests(TestCase):
         
         g = b.get_and_post_form(SCHEME+"://%s:%s/opts/opt_in"%
                                 (test_settings.HOST, test_settings.OM_PORT),
-                                dict(experiment=1,priority=100)) 
+                                dict(experiment=1))
         
         uopt = UserOpts.objects.filter(user__username__exact="user")[0]
         
-        self.assertEqual(uopt.priority , 100)
+        self.assertEqual(uopt.priority , 1)
         
         optfs = OptsFlowSpace.objects.filter(opt = uopt)[0]
         self.assertEqual(optfs.ip_src_s , max(self.user_ip_src_s,self.exp_ip_src_s))
@@ -421,8 +424,29 @@ class OMTests(TestCase):
                                 (test_settings.HOST, test_settings.OM_PORT),
                                 {"1":"checked"})
         optfs = OptsFlowSpace.objects.filter(opt = uopt)
-        self.assertEqual(optfs.count(),0)   
-            
+        self.assertEqual(optfs.count(),0) 
+        self.create_more_exps()  
+        
+    def create_more_exps(self):
+        from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
+        # create a second experiemnt
+        exp = Experiment.objects.create(slice_id="second_id", project_name="second_project",
+                                  project_desc="project description", slice_name="second slice",
+                                  slice_desc="slice description", controller_url="http://controller.com",
+                                  owner_email="owner email", owner_password="owner password") 
+        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:02",
+                            ip_src_s=0x00123456, 
+                            ip_src_e=0x90123456, 
+                             )  
+        
+        exp = Experiment.objects.create(slice_id="third_id", project_name="third_project",
+                                  project_desc="project description", slice_name="third slice",
+                                  slice_desc="slice description", controller_url="http://controller.com",
+                                  owner_email="owner email", owner_password="owner password") 
+        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:03",
+                            ip_src_s=0x00333456, 
+                            ip_src_e=0x95123456, 
+                             ) 
 
 if __name__ == '__main__':
     import unittest

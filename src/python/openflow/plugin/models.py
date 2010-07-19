@@ -18,6 +18,7 @@ import xmlrpclib
 import logging
 from expedient.common.utils import create_or_update
 logger = logging.getLogger("OpenflowModels")
+parse_logger = logging.getLogger("OpenflowModelsParsing")
 
 def as_is_slugify(value):
     return value
@@ -130,7 +131,7 @@ production networks, and is currently deployed in several universities.
                         status_change_timestamp=datetime.now(), 
                     ),
                 )
-                logger.debug("Added interface %s:%s" % (dpid, port))
+                parse_logger.debug("Added interface %s:%s" % (dpid, port))
                 active_iface_ids.append(iface.id)
                 
         # make all inactive switches and interfaces unavailable.
@@ -149,7 +150,7 @@ production networks, and is currently deployed in several universities.
         active_cnxn_ids = []
         # Create any missing connections.
         for src_dpid, src_port, dst_dpid, dst_port, attrs in active_links_raw:
-            logger.debug("parsing link %s:%s - %s:%s" % (
+            parse_logger.debug("parsing link %s:%s - %s:%s" % (
                 src_dpid, src_port, dst_dpid, dst_port))
             try:
                 src_iface = OpenFlowInterface.objects.get(
@@ -309,6 +310,26 @@ class OpenFlowConnection(models.Model):
     def __unicode__(self):
         return "%s to %s" % (self.src_iface, self.dst_iface)
 
+class NonOpenFlowConnection(models.Model):
+    """Connection to/from an OpenFlow Interface to a non-OpenFlow Resource"""
+    
+    of_iface = models.ForeignKey(
+        "OpenFlowInterface",
+        verbose_name="OpenFlow Interface",
+        related_name="nonopenflow_connections")
+    
+    resource = models.ForeignKey(
+        resource_models.Resource,
+        verbose_name="Non-OpenFlow Resource",
+        related_name="openflow_connections")
+    
+    class Meta:
+        unique_together=(("of_iface", "resource"),)
+    
+    def __unicode__(self):
+        return "to/from %s from/to %s" % (
+            self.of_iface, self.resource.as_leaf_class())
+
 class OpenFlowInterface(resource_models.Resource):
     port_num = models.IntegerField()
     switch = models.ForeignKey(OpenFlowSwitch)
@@ -329,7 +350,8 @@ class OpenFlowInterface(resource_models.Resource):
         verbose_name = "OpenFlow Interface"
 
     def __unicode__(self):
-        return "Port %s on %s" % (self.port_num, self.switch)
+        return "Aggregate %s: Port %s on %s" % (
+            self.aggregate.name, self.port_num, self.switch)
 
 class OpenFlowInterfaceSliver(resource_models.Sliver):
     class TooManySliversPerSlicePerInterface(Exception): pass

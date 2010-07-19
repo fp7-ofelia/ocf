@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
+    'django_evolution',
     'autoslug',
     'registration',
     'expedient.common.permissions',
@@ -139,6 +140,11 @@ AGGREGATE_LOGOS_DIR = "aggregate_logos/"
 # Openflow GAPI settings
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
 OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
+
+# Which types of non-OpenFlow resources do OpenFlow Interface connect to? 
+OPENFLOW_OTHER_RESOURCES = (
+    ("geni.planetlab", "PlanetLabNode"),
+)
 
 DEBUG = True
 

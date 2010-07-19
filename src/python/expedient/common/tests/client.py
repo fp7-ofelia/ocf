@@ -22,7 +22,8 @@ def parse_form(doc):
     
     return dict([(i.name, i.value) for i in inputs])
 
-def test_get_and_post_form(client, url, params, post_url=None):
+def test_get_and_post_form(
+    client, url, params, del_params=[], post_url=None):
     """
     Get the form at C{url}, modify named parameters by those in C{params},
     then submit at C{post_url} or C{url} if C{post_url} is unspecified.
@@ -34,6 +35,9 @@ def test_get_and_post_form(client, url, params, post_url=None):
     @type url: string
     @param params: parameters to update the form with.
     @type params: dict
+    @keyword del_params: list of parameter names to delete from form. These
+        parameters are not submitted.
+    @type del_params: list of strings
     @keyword post_url: (optional) URL to post the form to. If None then port to
         C{url} instead.
     @type post_url: str or None
@@ -44,6 +48,9 @@ def test_get_and_post_form(client, url, params, post_url=None):
     resp = client.get(url)
     form_params = parse_form(resp.content)
     form_params.update(params)
+    for k in del_params:
+        if k in form_params:
+            del form_params[k]
     resp = client.post(post_url, form_params)
     return resp
 

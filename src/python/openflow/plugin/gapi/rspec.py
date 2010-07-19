@@ -16,6 +16,7 @@ LINKS_TAG = "links"
 LINK_TAG = "link"
 SWITCHES_TAG = "switches"
 SWITCH_TAG = "switch"
+PORT_TAG = "port"
 
 URN = "urn"
 SRC_URN = "src_urn"
@@ -105,22 +106,31 @@ def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
-    dpids = OpenFlowSwitch.objects.filter(aggregate=aggregate)
+    switches = OpenFlowSwitch.objects.filter(aggregate=aggregate)
 
     if slice_urn:
-        dpids = dpids.filter(gapislice__slice_urn=slice_urn)
+        switches = switches.filter(gapislice__slice_urn=slice_urn)
     elif available != None:
-        dpids = dpids.filter(available=available)
+        switches = switches.filter(available=available)
 
-    dpids = dpids.values_list("datapath_id", flat=True)
-        
-    for dpid in dpids:
-        et.SubElement(
+    for switch in switches:
+        switch_elem = et.SubElement(
             switches_elem, SWITCH_TAG, {
-                URN: _dpid_to_urn(dpid),
+                URN: _dpid_to_urn(switch.datapath_id),
             },
         )
+        _add_ports(switch_elem, switch)
+        
     return switches_elem
+
+def _add_ports(switch_elem, switch):
+    """Add the ports tags for the switch"""
+    for iface in switch.openflowinterface_set.all():
+        et.SubElement(
+            switch_elem, PORT_TAG, {
+                URN: _port_to_urn(switch.datapath_id, iface.port_num),
+            }
+        )
 
 def _add_links_node(parent_elem, aggregate, slice_urn, available):
     '''Add the links tag and all the links'''
@@ -177,9 +187,18 @@ def get_resources(slice_urn, geni_available):
     <rspec>
         <network name="Stanford" location="Stanford, CA, USA">
             <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" />
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1" />
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0 />
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1 />
+                </switch>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0 />
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1 />
+                </switch>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0 />
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1 />
+                </switch>
             </switches>
             <links>
                 <link
@@ -210,8 +229,12 @@ def get_resources(slice_urn, geni_available):
         </network>
         <network name="Princeton" location="USA">
             <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:3" />
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:4" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:3">
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0 />
+                </switch>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:4">
+                    <port urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0 />
+                </switch>
             </switches>
             <links>
                 <link

@@ -7,7 +7,8 @@ from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
-    OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule
+    OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
+    OpenFlowConnection, NonOpenFlowConnection
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponse
 from expedient.common.messaging.models import DatedMessage
@@ -64,6 +65,71 @@ def _update_planetlab_resources(request, slice):
         resource__id__in=node_ids).filter(slice=slice)
     to_del.delete()
 
+def _get_nodes_links(of_aggs, pl_aggs):
+    """
+    Get nodes and links usable by protovis.
+    """
+    nodes = []
+    links = []
+    
+    id_to_idx = {}
+    agg_ids = []
+    
+    for i, agg in enumerate(of_aggs):
+        agg_ids.append(agg.pk)
+        switches = OpenFlowSwitch.objects.filter(aggregate__pk=agg.pk)
+        for s in switches:
+            id_to_idx[s.id] = len(nodes)
+            nodes.append(dict(
+                name=s.name, group=i)
+            )
+    
+    for i, agg in enumerate(pl_aggs):
+        agg_ids.append(agg.pk)
+        pl_nodes = PlanetLabNode.objects.filter(aggregate__pk=agg.pk)
+        for n in pl_nodes:
+            id_to_idx[n.id] = len(nodes)
+            nodes.append(dict(
+                name=n.name, group=i+len(of_aggs))
+            )
+            
+    # get all connections with both interfaces in wanted aggregates
+    of_cnxn_qs = OpenFlowConnection.objects.filter(
+        src_iface__aggregate__id__in=agg_ids,
+        dst_iface__aggregate__id__in=agg_ids,
+    )
+    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+        of_iface__aggregate__id__in=agg_ids,
+        resource__id__in=id_to_idx.keys(),
+    )
+    
+    for cnxn in of_cnxn_qs:
+        links.append(
+            dict(
+                src=id_to_idx[cnxn.src_iface.switch.id],
+                target=id_to_idx[cnxn.dst_iface.switch.id],
+                value=1,
+            )
+        )
+    
+    for cnxn in non_of_cnxn_qs:
+        links.append(
+            dict(
+                src=id_to_idx[cnxn.of_iface.switch.id],
+                target=id_to_idx[cnxn.resource.id],
+                value=1,
+            )
+        )
+        links.append(
+            dict(
+                target=id_to_idx[cnxn.of_iface.switch.id],
+                src=id_to_idx[cnxn.resource.id],
+                value=1,
+            )
+        )
+        
+    return (nodes, links)
+
 def home(request, slice_id):
     """
     Display the list of planetlab and openflow aggregates and their resources.
@@ -88,13 +154,17 @@ def home(request, slice_id):
         checked_ids.extend(slice.resource_set.filter_for_objects(
             PlanetLabNode, slice_set=slice).values_list("id", flat=True))
         logger.debug("Interfaces in slice: %s" % checked_ids)
+        of_aggs = OpenFlowAggregate.objects.filter(slice=slice)
+        pl_aggs = PlanetLabAggregate.objects.filter(slice=slice)
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
         return simple.direct_to_template(
             request,
             template="html/select_resources.html",
             extra_context={
-                "openflow_aggs": OpenFlowAggregate.objects.filter(slice=slice),
-                "planetlab_aggs": PlanetLabAggregate.objects.filter(
-                    slice=slice),
+                "protovis_nodes": protovis_nodes,
+                "protovis_links": protovis_links,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
                 "slice": slice,
                 "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,
@@ -133,9 +203,13 @@ def flowspace(request, slice_id):
             for fs in SliceFlowSpace.objects.filter(slice=slice):
                 # get the wanted attributes into a dict
                 d = {}
-                for f in FlowSpaceRule._meta.fields:
-                    if f.name.endswith("end") or f.name.endswith("start"):
-                        d[f.name] = getattr(fs, f.name)
+                for f in SliceFlowSpace._meta.fields:
+                    if f.name != "slice" and f.name != "id":
+                        val = getattr(fs, f.name)
+                        if val == None: val = "*"
+                        d[f.name+"_start"] = "%s" % val
+                        d[f.name+"_end"] = "%s" % val
+                        
                 # now create fs for all the slivers
                 for s in slivers:
                     d["sliver"] = s
@@ -149,12 +223,13 @@ def flowspace(request, slice_id):
             slice.modified = True
             slice.save()
         
-            return HttpResponseRedirect(
-                reverse("html_plugin_sshkeys", args=[slice_id]))
+            return HttpResponseRedirect(request.path)
         else:
             logger.debug("Flowspace invalid: %s" % formset)
+    
     elif request.method == "GET":
         formset = FSFormSet(instance=slice)
+    
     else:
         return HttpResponseNotAllowed("GET", "POST")
         

@@ -1,19 +1,25 @@
 '''
 @author: jnaous
 '''
-from django.views.generic import simple, create_update
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
+from django.views.generic import simple
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.loading import cache
+from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 from expedient.clearinghouse.slice.models import Slice
+from expedient.clearinghouse.resources.models import Resource
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.utils.views import generic_crud
 from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
+from models import NonOpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
+from forms import NonOpenFlowStaticConnectionForm
 import logging
 
 logger = logging.getLogger("OpenFlow plugin views")
@@ -100,19 +106,43 @@ def aggregate_add_links(request, agg_id):
     """
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
     
-    filter = (
+    # Get the queryset of all openflow connections to/from this aggregate
+    of_iface_filter = (
         (     Q(src_iface__aggregate__id=aggregate.id)
               & ~Q(dst_iface__aggregate__id=aggregate.id)  )
         |
         (     Q(dst_iface__aggregate__id=aggregate.id)
               & ~Q(src_iface__aggregate__id=aggregate.id)  )
     )
+    of_cnxn_qs = OpenFlowConnection.objects.filter(of_iface_filter)
+
+    # Get the queryset of all non-openflow connections to aggregate
+    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+        of_iface__aggregate__id=aggregate.id)
     
-    existing_links = OpenFlowConnection.objects.filter(filter)
+    # get the set of resources openflow interfaces connect to
+    types = []
+    for app, model_name in getattr(settings, "OPENFLOW_OTHER_RESOURCES", []):
+        app_label = app.rpartition(".")[2]
+        logger.debug(
+            "getting model for app %s model %s" % (app_label, model_name))
+        model = cache.get_model(app_label, model_name)
+        if not model:
+            raise Exception(
+                "Error in settings: "
+                "Could not find model %s in application %s."
+                % (model_name, app))
+        types.append(ContentType.objects.get_for_model(model).id)
+    resource_qs = Resource.objects.filter(content_type__id__in=types)
     
     if request.method == "POST":
-        new_cnxn_form = OpenFlowStaticConnectionForm(aggregate, request.POST)
-        existing_links_form = OpenFlowConnectionSelectionForm(existing_links, request.POST)
+        new_cnxn_form = OpenFlowStaticConnectionForm(
+            aggregate, request.POST)
+        existing_links_form = OpenFlowConnectionSelectionForm(
+            of_cnxn_qs, non_of_cnxn_qs, request.POST)
+        new_other_cnxn_form = NonOpenFlowStaticConnectionForm(
+            aggregate, resource_qs, request.POST)
+        
         # see if it's a request to delete or add links
         if "add_links" in request.POST:
             if new_cnxn_form.is_valid():
@@ -124,12 +154,26 @@ def aggregate_add_links(request, agg_id):
                 else:
                     msg = "no new links"
                 DatedMessage.objects.post_message_to_user(
-                    "Added %s to OpenFlow aggregate %s" % (aggregate.name, msg),
+                    "Added %s to OpenFlow aggregate %s" % (msg, aggregate.name),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 return HttpResponseRedirect(request.path)
+            
+        elif "add_other_links" in request.POST:
+            if new_other_cnxn_form.is_valid():
+                cnxn = new_other_cnxn_form.save()
+                DatedMessage.objects.post_message_to_user(
+                    "Added static connection %s to OpenFlow aggregate %s"
+                        % (cnxn, aggregate.name),
+                    user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+                return HttpResponseRedirect(request.path)
+            
         else: # must be deleting links
             if existing_links_form.is_valid():
-                cnxns = existing_links_form.cleaned_data["connections"]
+                cnxns = list(existing_links_form.\
+                             cleaned_data["of_connections"])
+                cnxns.extend(
+                    list(existing_links_form.\
+                         cleaned_data["non_of_connections"]))
                 for c in cnxns:
                     c.delete()
                 DatedMessage.objects.post_message_to_user(
@@ -139,18 +183,22 @@ def aggregate_add_links(request, agg_id):
                 return HttpResponseRedirect(request.path)
     else:
         new_cnxn_form = OpenFlowStaticConnectionForm(aggregate)
-        if existing_links.count():
+        new_other_cnxn_form = NonOpenFlowStaticConnectionForm(
+            aggregate, resource_qs)
+        if of_cnxn_qs.count() + non_of_cnxn_qs.count():
             existing_links_form = \
-                OpenFlowConnectionSelectionForm(existing_links)
+                OpenFlowConnectionSelectionForm(
+                    of_cnxn_qs, non_of_cnxn_qs).as_table()
         else:
             existing_links_form = None
-    
+
     return simple.direct_to_template(
         request,
         template=TEMPLATE_PATH+"/aggregate_add_links.html",
         extra_context={
             "existing_links_form": existing_links_form,
-            "new_connection_form": new_cnxn_form,
+            "new_connection_form": new_cnxn_form.as_table(),
+            "new_other_connection_form": new_other_cnxn_form.as_table(),
             "aggregate": aggregate,
             "breadcrumbs": (
                 ('Home', reverse("home")),
