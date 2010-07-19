@@ -244,7 +244,14 @@ def add_opt_in(request):
               
                     
         else: #Not a post request
-            defexp = 0     
+            defexp = 0
+            
+        if (len(exps)>0):
+            exp_exist = True
+            first_exp = exps[0].id
+        else:
+            exp_exist = False
+            first_exp = 0
         return simple.direct_to_template(request, 
                         template = 'openflow/optin_manager/opts/user_opt_in.html', 
                         extra_context = {
@@ -253,6 +260,8 @@ def add_opt_in(request):
                                 'defexp': defexp,
                                 'selpri':selpri,
                                 'error_msg':error_msg,
+                                'exp_exist':exp_exist,
+                                'first_exp':first_exp,
                             },
                     )      
         
@@ -373,7 +382,18 @@ def view_experiment(request, exp_id):
                                     }, 
                     )
    
-
+@login_required
+def view_experiment_simple(request, exp_id):
+    theexp = Experiment.objects.filter(id=exp_id)
+    allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
+    return simple.direct_to_template(request, 
+                        template = 'openflow/optin_manager/opts/view_experiment_simple.html', 
+                        extra_context = {
+                                        'exp':theexp[0],
+                                        'allfs':allfs,
+                                    }, 
+                    )
+    
 @login_required
 def view_experiments(request):
     exps = Experiment.objects.all()
