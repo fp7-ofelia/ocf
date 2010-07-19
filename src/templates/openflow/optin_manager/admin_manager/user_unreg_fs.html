@@ -3,7 +3,9 @@
 {% block content %}
 <div class="main">
 	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
+	<a href="/dashboard">
+		<img src="{% url img_media 'dashboard_dark.png' %}" alt="dashboard" class="dashboard"/>
+	</a>
 	</div>
 	<h2> Approved flowspaces own by {{user.username}}
 	<form name="input" action="/admin_manager/user_unreg_fs" method="post">{% csrf_token %}

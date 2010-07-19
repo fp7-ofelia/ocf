@@ -3,8 +3,13 @@
 {% block content %}
 <div class="main">
 	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-		<a href={{back}}>Back</a>
+	<a href="/dashboard">
+		<img src="{% url img_media 'dashboard_dark.png' %}" alt="dashboard" class="dashboard"/>
+	</a>
+	<a href="{{back}}">
+		<img src="{% url img_media 'back_dark.png' %}" alt="back" class="dashboard"/>
+	</a>
+
 	</div>
 	<h2> Detail information for experiment {{exp.project_name}} : {{exp.slice_name}}</h2>
 	<b>Project Name: </b>{{exp.project_name}}<br/>

@@ -3,8 +3,10 @@
 <div class="main">
 	<h2>Promote {{user.username}} to Admin</h2>
 	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-	</div>	
+	<a href="/dashboard">
+		<img src="{% url img_media 'dashboard_dark.png' %}" alt="dashboard" class="dashboard"/>
+	</a>
+	</div>
 	<form name="input" action="/admin_manager/promote_to_admin" method="post">{% csrf_token %}
 		{{form.errors.general}}
 		<input type=hidden name="priority" value=0 />

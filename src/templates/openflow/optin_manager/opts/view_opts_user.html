@@ -220,10 +220,12 @@ function advsimple(){
 
 {% block content %}
 <div class="main">
+	<div align="right">
+	<a href="/dashboard">
+		<img src="{% url img_media 'dashboard_dark.png' %}" alt="dashboard" class="dashboard"/>
+	</a>
+	</div>
     <h2>Experiments Opted In by {{user.username}}</h2>
-		<div align="right">
-			<a href="/dashboard">Dashboard</a><br/>
-		</div>
 
 		<div>
 		{% for error in error_msg %}

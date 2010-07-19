@@ -2,10 +2,12 @@
 
 {% block content %}
 <div class="main">
-	<h2> Register User Flowspace </h2>
 	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-	</div>	
+	<a href="/dashboard">
+		<img src="{% url img_media 'dashboard_dark.png' %}" alt="dashboard" class="dashboard"/>
+	</a>
+	</div>
+	<h2> Register User Flowspace </h2>
 	<p><font color="red">{{error_msg}}</font></p>
 	<form name="input" action="/admin_manager/user_reg_fs" method="post">
 	{% csrf_token %}
