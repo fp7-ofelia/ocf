@@ -455,7 +455,8 @@ body {
 #page {
 	background-color: #FFFFFF;	
 	padding: 10px 0 0 0;
-	width: 800px;
+	width: 900px;
+	height: 600px;
 	margin: auto;
 	border: 1px solid #959596;
 	}
@@ -1030,6 +1031,22 @@ table.formtable_noborder tbody td ,tbody th {
 	color: #000;
 }
 	
+
+/* menutable */
+
+table.menutable {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:0px;
+	margin-top:0px;
+}
+
+table.menutable tbody td ,tbody th {
+	padding: 0px 0px;
+	background: #fff;
+	color: #000;
+}
+
 /* Full Table */
 
 table.fulltable {
@@ -1118,5 +1135,18 @@ iframe {
 
 tr.highlighted {
 	font-weight: bold;
-	}
+}
+	
+img.menuimg {
+	width: 75%;
+	height: 75%;
+}
+
+img.submenuimg {
+	width: 65%;
+	height: 65%;
+	position: relative;
+	left: 22px;
+}
+
 	
