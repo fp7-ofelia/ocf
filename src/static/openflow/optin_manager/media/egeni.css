@@ -263,6 +263,7 @@ body {
 	border: 1px solid #959596;
 	text-align: left;
 	}
+	
 
 #header {
 	background-color: #EEEEEE;
@@ -274,6 +275,7 @@ body {
 	}
 
 #content {
+	position: relative;
 	font-size: 1.2em;
 	padding-top: 20px;
 	padding-left:30px;
@@ -1032,7 +1034,19 @@ table.formtable_noborder tbody td ,tbody th {
 }
 	
 
-/* menutable */
+/* menutable and steptable */
+table.steptable {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:0px;
+	margin-top:0px;
+}
+
+table.steptable tbody td ,tbody th {
+	padding: 0px 0px;
+	background: #fff;
+	color: #000;
+}
 
 table.menutable {
 	border-collapse: collapse;
@@ -1140,13 +1154,25 @@ tr.highlighted {
 img.menuimg {
 	width: 75%;
 	height: 75%;
+	float: right;
 }
 
 img.submenuimg {
 	width: 65%;
 	height: 65%;
-	position: relative;
-	left: 22px;
+	float: right;
 }
 
+img.steps,img.steps_non_active {
+	width: 80%;
+	height: 80%;
+}
+
+.setp_td {
+	width: 500px;
+	}
 	
+#exp_iframe {
+	width: 500px;
+	height: 300px;
+}
