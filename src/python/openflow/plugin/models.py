@@ -270,7 +270,7 @@ production networks, and is currently deployed in several universities.
             import traceback
             logger.info("XML RPC call failed to aggregate %s" % self.name)
             traceback.print_exc()
-            return {'error_msg':str(ret_exception),'switches':[]}
+            raise
 
     def stop_slice(self, slice):
         try:
@@ -279,7 +279,7 @@ production networks, and is currently deployed in several universities.
             import traceback
             logger.info("XML RPC call failed to aggregate %s" % self.name)
             traceback.print_exc()
-            return "%s" % e
+            raise
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)
