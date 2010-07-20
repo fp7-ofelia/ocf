@@ -73,6 +73,11 @@ $(document).ready(function(){
 	$("input[name=select_all_button]").click(function (){
 		$(":checkbox:not(:checked)").click();
 	});
+	
+	$("input[name=select_tree_button]").click(function (){
+		$(":checked").click();
+		$(":checkbox.in_tree").click();
+	});
 })
 </script>
 {% endblock %}
@@ -106,7 +111,7 @@ function get_node_type(d) {
 var data = {
 	nodes: [
 		{% for node in protovis_nodes %}
-		{nodeValue:"{{ node.name }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
+		{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
 		{% endfor %}
 	],
 	links: [
@@ -213,7 +218,8 @@ at {{ agg.location }}.
     <tr class="body planetlab {% cycle 'odd' 'even' %}">
       <td class="select_checkbox">
 	<input type="checkbox" name="selected_nodes"
-	       value="{{ node.id }}"
+	       value="{{ node.id }}" id="rsc_id_{{ node.id }}"
+	       {% if node.id in tree_rsc_ids %}class="in_tree"{% endif %}
 	       {% if node.id in checked_ids %}checked{% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
@@ -262,7 +268,10 @@ at {{ agg.location }}.
 	  {% for iface in switch.openflowinterface_set.all %}
 	  <tr class="body {% cycle 'odd' 'even' %}">
 	    <td class="select_checkbox">
-	      <input type="checkbox" name="selected_ifaces" value="{{ iface.id }}" {% if iface.id in checked_ids %}checked{% endif %} />
+	      <input type="checkbox" name="selected_ifaces" 
+	      value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
+	      {% if iface.id in tree_rsc_ids %}class="in_tree"{% endif %}
+	      {% if iface.id in checked_ids %}checked{% endif %} />
 	    </td>
 	    <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
 	    <td class="connections">
@@ -304,7 +313,8 @@ at {{ agg.location }}.
   {% if openflow_aggs or planetlab_aggs %}
   <input type="submit" value="Next" />
   <input type="button" name="clear_button" value="Clear" />
-<input type="button" name="select_all_button" value="Select All" />
+  <input type="button" name="select_all_button" value="Select All" />
+  <input type="button" name="select_tree_button" value="Select Tree" />
   {% endif %}
 </form>
 {% endblock content %}

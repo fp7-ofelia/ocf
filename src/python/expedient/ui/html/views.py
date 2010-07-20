@@ -19,6 +19,7 @@ from geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
 import logging
+from pprint import pformat
 logger = logging.getLogger("html_ui_views")
 
 def _update_openflow_resources(request, slice):
@@ -65,6 +66,8 @@ def _update_planetlab_resources(request, slice):
         resource__id__in=node_ids).filter(slice=slice)
     to_del.delete()
 
+
+
 def _get_nodes_links(of_aggs, pl_aggs):
     """
     Get nodes and links usable by protovis.
@@ -81,7 +84,7 @@ def _get_nodes_links(of_aggs, pl_aggs):
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict(
-                name=s.name, group=i)
+                name=s.name, value=s.id, group=i)
             )
     
     for i, agg in enumerate(pl_aggs):
@@ -90,7 +93,7 @@ def _get_nodes_links(of_aggs, pl_aggs):
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                name=n.name, group=i+len(of_aggs))
+                name=n.name, value=n.id, group=i+len(of_aggs))
             )
             
     # get all connections with both interfaces in wanted aggregates
@@ -130,6 +133,70 @@ def _get_nodes_links(of_aggs, pl_aggs):
         
     return (nodes, links)
 
+def _get_tree_ports(of_aggs, pl_aggs):
+    """Implements Kruskal's algorihm to find a min spanning tree"""
+    
+    # Set of interfaces in the tree
+    tree = set()
+    
+    # Clusters is a mapping from a node id to the cluster
+    # of ids it is connected to given the connections found
+    # so far in the tree.
+    clusters = {}
+    
+    # aggregate ids
+    of_agg_ids = of_aggs.values_list("id", flat=True)
+    pl_agg_ids = pl_aggs.values_list("id", flat=True)
+    
+    # Get the set of all openflow connections in network
+    of_cnxn_qs = OpenFlowConnection.objects.filter(
+        src_iface__aggregate__id__in=of_agg_ids,
+        dst_iface__aggregate__id__in=of_agg_ids,
+    )
+    
+    # For each connection in the network
+    for cnxn in of_cnxn_qs:
+        logger.debug("clusters: %s" % pformat(clusters))
+        logger.debug("tree: %s" % tree)
+        # check if the endpoints' switches are in the same cluster
+        a = cnxn.src_iface.switch.id
+        b = cnxn.dst_iface.switch.id
+        logger.debug("Checking cnxn %s from %s to %s" % (cnxn, a, b))
+        if a in clusters and b in clusters and clusters[a] == clusters[b]:
+            continue
+        # if not, then add the connection to the tree
+        logger.debug("Adding cnxn %s-%s to tree" % (
+            cnxn.src_iface.id, cnxn.dst_iface.id))
+        tree.add(cnxn.src_iface.id)
+        tree.add(cnxn.dst_iface.id)
+        if a not in clusters:
+            clusters[a] = set([a])
+        if b not in clusters:
+            clusters[b] = set([b])
+        
+        # merge the two clusters together
+        merged_cluster = clusters[a] | clusters[b]
+        logger.debug("merged cluster: %s" % merged_cluster)
+        
+        for x in merged_cluster:
+            clusters[x] = merged_cluster
+
+#    # get the set of non openflow connections in the aggregates
+#    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+#        of_iface__aggregate__id__in=of_agg_ids,
+#        resource__aggregate__id__in=pl_agg_ids,
+#    )
+#
+#    # add the ports that are connected to the planetlab nodes
+#    iface_ids = list(non_of_cnxn_qs.values_list("of_iface__id", flat=True))
+#    tree.update(["%s" % i for i in iface_ids])
+#    tree.update(["%s" % i for i in \
+#        PlanetLabNode.objects.filter(
+#            aggregate__id__in=pl_agg_ids).values_list("id", flat=True)])
+    
+    # return the list of interface ids
+    return list(tree)
+    
 def home(request, slice_id):
     """
     Display the list of planetlab and openflow aggregates and their resources.
@@ -157,12 +224,15 @@ def home(request, slice_id):
         of_aggs = OpenFlowAggregate.objects.filter(slice=slice)
         pl_aggs = PlanetLabAggregate.objects.filter(slice=slice)
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
+        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+        
         return simple.direct_to_template(
             request,
             template="html/select_resources.html",
             extra_context={
                 "protovis_nodes": protovis_nodes,
                 "protovis_links": protovis_links,
+                "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,
                 "slice": slice,
