@@ -276,6 +276,8 @@ def create_slice(slice_id, project_name, project_description,
         except Exception,e:
             import traceback
             traceback.print_exc()
+            raise Exception(
+                "Could not create slice at the Flowvisor. Error was %s" % e)
             ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
             for fs in ofs:
                 MatchStruct.objects.filter(optfs = fs).delete()
@@ -308,11 +310,14 @@ def create_slice(slice_id, project_name, project_description,
         try:
             fv.proxy.api.deleteSlice(old_fv_name)
         except Exception,e:
+            raise Exception(
+                "Error while updating slice. Could not delete slice at the Flowvisor. Error was %s" % e)
             return{
-            'error_msg': "This experiments already exist in OM, but coudln't be deleted from fv: %s"%str(e),
-            'switches': [],
+                'error_msg': "This experiments already exists in OM, but could not be deleted from the flowvisor: %s" % str(e),
+                'switches': [],
             } 
-
+        old_exp.delete()
+    
         e.slice_id = slice_id
         e.project_name = project_name
         e.project_desc = project_description
@@ -324,8 +329,6 @@ def create_slice(slice_id, project_name, project_description,
         e.save()
         new_exp = e
 
-        ExperimentFLowSpace.objects.filter(exp = old_exp).delete()
-    
         for sliver in switch_slivers:
             if "datapath_id" in sliver:
                 dpid = sliver['datapath_id']
@@ -364,9 +367,11 @@ def create_slice(slice_id, project_name, project_description,
             "%s" % controller_url,
             "%s" % owner_email,
             )
-        except Exception,e:
+        except Exception, exc:
             import traceback
             traceback.print_exc()
+            raise Exception(
+                "Could not create slice at the Flowvisor. Error was %s" % exc)
             ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
             for fs in ofs:
                 MatchStruct.objects.filter(optfs = fs).delete()
@@ -374,7 +379,7 @@ def create_slice(slice_id, project_name, project_description,
             UserOpts.objects.filter(experiment = new_exp).delete()
             ExperimentFLowSpace.objects.filter(exp = new_exp).delete()
             new_exp.delete()
-            errorlist.append(str(e))
+            errorlist.append(str(exc))
             fv_success = False
         if (fv_success):
             from openflow.optin_manager.opts.helper import update_opts_into_exp
@@ -386,13 +391,7 @@ def create_slice(slice_id, project_name, project_description,
     # Inform FV of the changes
     fv = FVServerProxy.objects.all()[0]
     errorlist = []
-    
-    if (exp_exist):
-        try:
-            fv.proxy.api.deleteSlice(old_fv_name)
-        except Exception,e:
-            errorlist.append(str(e))   
-           
+               
     try:
         fv_success = fv.proxy.api.createSlice(
         "%s" % e.get_fv_slice_name(),
@@ -403,6 +402,8 @@ def create_slice(slice_id, project_name, project_description,
     except Exception,e:
         import traceback
         traceback.print_exc()
+        raise Exception(
+            "Could not create slice at the Flowvisor. Error was %s" % e)
         ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
         for fs in ofs:
             MatchStruct.objects.filter(optfs = fs).delete()
