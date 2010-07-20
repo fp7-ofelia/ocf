@@ -170,7 +170,7 @@ def update_match_struct_and_get_fv_args(useropt):
             useropt.priority*Priority.Priority_Scale
             match.save()
             fv_arg = {"operation":"CHANGE", "id":match.fv_id,
-                    "priority":match.priority, "dpid":fs.dpid, "match":match.match,
+                    "priority":"%d"%match.priority, "dpid":fs.dpid, "match":match.match,
                     "actions": "slice=%s:4"%fs.opt.experiment.get_fv_slice_name(),
                 }
             fv_args.append(fv_arg)
