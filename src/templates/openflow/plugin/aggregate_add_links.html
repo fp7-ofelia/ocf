@@ -42,7 +42,7 @@
 			{{ new_connection_form }}
 			</table>
 			<input type="submit" name="add_links" value="Add Link" />
-			<input type="button" value="Done" onclick="document.location='{% url home %}'"/>
+			<!--<input type="button" value="Done" onclick="document.location='{% url home %}'"/>-->
 		</form>
 		
 		<h2>Add new static links to other resources:</h2>
@@ -53,7 +53,8 @@
 			{{ new_other_connection_form }}
 			</table>
 			<input type="submit" name="add_other_links" value="Add Link" />
-			<input type="button" value="Done" onclick="document.location='{% url home %}'"/>
+			<!-- <input type="button" value="Done" onclick="document.location='{% url home %}'"/>-->
+			<a href="{% url home %}">Done</a>
 		</form>
 	</div>
 </div>
