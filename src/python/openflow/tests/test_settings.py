@@ -17,7 +17,7 @@ FLOWVISOR_DIR = join(PYTHON_DIR, "../../../flowvisor")
 USE_RANDOM = False
 
 # Address and ports of the expedient clearinghouse and opt-in manager
-HOST = 'beirut.stanford.edu'
+HOST = 'jadsm.site'
 OM_PORT = 8443
 CH_PORT = 443
 
@@ -31,7 +31,7 @@ GCH_PORT = 8001
 # Information about where the test flowvisor should run
 FLOWVISORS = [
     dict(
-        host='171.64.74.50',     # IP address for flowvisor's interface
+        host='192.168.237.128',     # IP address for flowvisor's interface
         of_port=6633,             # openflow port
         xmlrpc_port=8080,         # XMLRPC port for the flowvisor
         username="root",          # The username to use to connect to the FV
