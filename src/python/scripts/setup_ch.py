@@ -35,22 +35,27 @@ def run():
     
     # Add all planetlab aggregates
     for pl_agg in PL_AGGREGATE_INFO:
+        print "adding pl agg %s" % pl_agg["url"]
         response = test_get_and_post_form(
             client,
             reverse("planetlab_aggregate_create"),
             pl_agg,
         )
-        assert response.status_code == 301
+        print "got response %s" % response
+        assert response.status_code == 302
         
     for of_agg in OF_AGGREGATE_INFO:
+        print "adding of agg %s" % of_agg["url"]
         response = test_get_and_post_form(
             client,
             reverse("openflow_aggregate_create"),
             of_agg,
+            del_params=["verify_certs"],
         )
-        assert response.status_code == 301
+        assert response.status_code == 302
         
     for cnxn_tuple in OF_PL_CONNECTIONS:
+        print "adding cnxn %s" % (cnxn_tuple,)
         NonOpenFlowConnection.objects.get_or_create(
             of_iface=OpenFlowInterface.objects.get(
                 switch__datapath_id=cnxn_tuple[0],
@@ -76,15 +81,16 @@ def run():
                     description=project["description"],
                 ),
             )
-            assert response.status_code == 301
-            for slice in project["slices"]:
-                response = test_get_and_post_form(
-                    client, reverse("slice_create"),
-                    params=dict(
-                        name=slice["name"],
-                        description=slice["description"],
-                    ),
-                )
-                assert response.status_code == 301
+            assert response.status_code == 302
+            # This code is missing the project id. Need to get somehow to use reverse.
+            # for slice in project["slices"]:
+            #     response = test_get_and_post_form(
+            #         client, reverse("slice_create"),
+            #         params=dict(
+            #             name=slice["name"],
+            #             description=slice["description"],
+            #         ),
+            #     )
+            #     assert response.status_code == 302
         client.logout()
         

@@ -381,6 +381,10 @@ def _resv_parse_slivers(root):
             from_key = "%s_start" % tag
             to_key = "%s_end" % tag
             field_elem = flowspace_elem.find(tag)
+            if tag == "port":
+                # TODO: fix screw up...
+                from_key = "port_num_start"
+                to_key = "port_num_end"
             if field_elem != None:
                 fs[from_key] = field_elem.get("from")
                 fs[to_key] = field_elem.get("to")
