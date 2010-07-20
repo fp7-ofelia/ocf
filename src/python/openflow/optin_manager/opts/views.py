@@ -226,21 +226,21 @@ def add_opt_in(request):
                     tmp = tmp[0]
                     # first delete all previous opts into this experiment
                     ofses = tmp.optsflowspace_set.all()
-                    opt_fses_outof_exp(ofses)
-                
-                tmp.delete()    
-                
-                opt_msg = opt_fs_into_exp(userFS,selexp,request.user,
-                                    int(selpri),True)
-                if (opt_msg == ""):
-                    exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
-                    return simple.direct_to_template(request, 
-                                        template = 'openflow/optin_manager/opts/opt_in_successful.html', 
-                                        extra_context = {'expname':exp_name,}, 
-                                    )
-                else:
+                    error_msg = opt_fses_outof_exp(ofses)
+                    
+                if (error_msg ==""):
                     tmp.delete()
-                    error_msg = ErrorList([opt_msg])
+                    
+                    opt_msg = opt_fs_into_exp(userFS,selexp,request.user,
+                                        int(selpri),True)
+                    if (opt_msg == ""):
+                        exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
+                        return simple.direct_to_template(request, 
+                                            template = 'openflow/optin_manager/opts/opt_in_successful.html', 
+                                            extra_context = {'expname':exp_name,}, 
+                                        )
+                    else:
+                        error_msg = ErrorList([opt_msg])
               
                     
         else: #Not a post request
@@ -347,20 +347,19 @@ def opt_out(request):
                 
             try:
                 fv = FVServerProxy.objects.all()[0]
+                try:
+                    if len(fv_args) > 0:
+                        fv.proxy.api.changeFlowSpace(fv_args)
+                except Exception,e:
+                    import traceback
+                    traceback.print_exc()
+                    error_msg.append("update flowspace priorities in opt_out view failed: %s"%str(e))
             except Exception,e:
                 import traceback
                 traceback.print_exc()
                 error_msg.append("Flowvisor not set: %s"%str(e))
         
-            try:
-                if len(fv_args) > 0:
-                    fv.proxy.api.changeFlowSpace(fv_args)
-            except Exception,e:
-                import traceback
-                traceback.print_exc()
-                error_msg.append("update flowspace priorities in opt_out view failed: %s"%str(e))
-                
-            
+      
         allopts = UserOpts.objects.filter(user = request.user).order_by('-priority')
             
         return simple.direct_to_template(request,

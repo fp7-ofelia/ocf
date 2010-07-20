@@ -64,12 +64,13 @@ def opt_fses_outof_exp(fses):
         for match in matches:
             fv_arg={"operation":"REMOVE" , "id":match.fv_id}
             fv_args.append(fv_arg)
-            match.delete()
-        ofs.delete()
 
     try:
         fv = FVServerProxy.objects.all()[0]
-        fv.proxy.api.changeFlowSpace(fv_args)  
+        fv.proxy.api.changeFlowSpace(fv_args)
+        for ofs in fses:
+            ofs.matchstruct_set.all().delete()
+            ofs.delete()
         return ""
     except Exception,e:
         import traceback
@@ -84,9 +85,17 @@ def update_user_opts(user):
         t_priority = user_opt.priority
         t_exp = user_opt.experiment
         ofses = OptsFlowSpace.objects.filter(opt = user_opt)
-        opt_fses_outof_exp(ofses)
-        user_opt.delete()
-        opt_fs_into_exp(user_fs, t_exp, user, t_priority, t_nice)
+        msg = opt_fses_outof_exp(ofses)
+        if (msg == ""):
+            user_opt.delete()
+            msg2 = opt_fs_into_exp(user_fs, t_exp, user, t_priority, t_nice)
+            if (msg2 == ""):
+                return ""
+            else:
+                return "couldn't re-opt-in user flowspace in update_user_opts. msg was %s"%msg2
+        else:
+            return "couldn't opt out user flowspace in update_user_opts. msg was %s"%msg
+            
         
 def update_opts_into_exp(exp):
     '''
