@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib import auth
- 
+from django.db.models.signals import post_save
+
 class Priority(object):
     Aggregate_Admin        = 7000
     Campus_Admin           = 6000
@@ -45,3 +46,6 @@ class UserProfile(models.Model):
                         )
 
         return profile
+
+from openflow.optin_manager.users.user_signal_handler import super_user_save       
+post_save.connect(super_user_save, sender=auth.models.User)

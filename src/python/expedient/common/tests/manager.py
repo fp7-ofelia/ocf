@@ -62,3 +62,14 @@ class SettingsTestCase(TestCase):
     
     def tearDown(self):
         self.settings_manager.revert()
+
+class NonFlushingTestCase(SettingsTestCase):
+    """
+    A test case that does not flush the database.
+    """
+    def _fixture_setup(self):
+        """Do nothing"""
+        pass
+    def _fixture_teardown(self):
+        pass
+    
