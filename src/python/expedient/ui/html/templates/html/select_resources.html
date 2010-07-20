@@ -236,6 +236,12 @@ vis.render();
 </script>
 
 <form action="" method="POST">{% csrf_token %}
+{% if openflow_aggs or planetlab_aggs %}
+<input type="submit" value="Next" />
+<input type="button" name="clear_button" value="Clear" />
+<input type="button" name="select_all_button" value="Select All" />
+<input type="button" name="select_tree_button" value="Select Tree" />
+{% endif %}
 
 <h1>1. Select PlanetLab Aggregates</h1>
 
