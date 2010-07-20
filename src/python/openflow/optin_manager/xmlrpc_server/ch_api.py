@@ -223,60 +223,163 @@ def create_slice(slice_id, project_name, project_description,
     
     if (e.count()==0):
         e= Experiment()
-        exp_exist = False
-    else:
+        e.slice_id = slice_id
+        e.project_name = project_name
+        e.project_desc = project_description
+        e.slice_name = slice_name
+        e.slice_desc = slice_description
+        e.controller_url = controller_url
+        e.owner_email = owner_email
+        e.owner_password = owner_password
+        e.save()
+        new_exp = e
+        
+        for sliver in switch_slivers:
+            if "datapath_id" in sliver:
+                dpid = sliver['datapath_id']
+            else:
+                dpid = "00:" * 8
+                dpid = dpid[:-1]
+            
+            
+            all_efs = []
+            for sfs in sliver['flowspace']:
+                efs = ExperimentFLowSpace()
+                efs.exp  = e
+                efs.dpid = dpid
+                if "direction" in sfs:
+                    efs.direction = get_direction(sfs['direction'])
+                else:
+                    efs.direction = 2
+                    
+                fs = convert_star(sfs)
+                for attr_name,(to_str, from_str, width, om_name, of_name) in \
+                om_ch_translate.attr_funcs.items():
+                    ch_start ="%s_start"%(attr_name)
+                    ch_end ="%s_end"%(attr_name)
+                    om_start ="%s_s"%(om_name)
+                    om_end ="%s_e"%(om_name)
+                    setattr(efs,om_start,from_str(fs[ch_start]))
+                    setattr(efs,om_end,from_str(fs[ch_end]))
+                efs.save()
+                all_efs.append(efs)
+        
+        errorlist = []
+        fv = FVServerProxy.objects.all()[0]   
+        try:
+            fv_success = fv.proxy.api.createSlice(
+            "%s" % e.get_fv_slice_name(),
+            "%s" % owner_password,
+            "%s" % controller_url,
+            "%s" % owner_email,
+            )
+        except Exception,e:
+            import traceback
+            traceback.print_exc()
+            ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
+            for fs in ofs:
+                MatchStruct.objects.filter(optfs = fs).delete()
+            ofs.delete()
+            UserOpts.objects.filter(experiment = new_exp).delete()
+            ExperimentFLowSpace.objects.filter(exp = new_exp).delete()
+            new_exp.delete()
+            errorlist.append(str(e))
+            fv_success = False
+            
+        if not fv_success:
+            errorlist.append("FlowVisor returned false for create slice xmlrpc call")
+            error_msg = str(errorlist)
+        else:   
+            print "Created slice with %s %s %s %s" % (
+            e.get_fv_slice_name(), owner_password, controller_url, owner_email)
+            error_msg = ""
+            
+        return {
+            'error_msg': error_msg,
+            'switches': [],
+        }     
+             
+    else: # update experiment
         e = e[0]
         old_exp = e
         old_fv_name = e.get_fv_slice_name()
-        exp_exist = True
 
-    e.slice_id = slice_id
-    e.project_name = project_name
-    e.project_desc = project_description
-    e.slice_name = slice_name
-    e.slice_desc = slice_description
-    e.controller_url = controller_url
-    e.owner_email = owner_email
-    e.owner_password = owner_password
-    e.save()
-    new_exp = e
+        fv = FVServerProxy.objects.all()[0]
+        try:
+            fv.proxy.api.deleteSlice(old_fv_name)
+        except Exception,e:
+            return{
+            'error_msg': "This experiments already exist in OM, but coudln't be deleted from fv: %s"%str(e),
+            'switches': [],
+            } 
 
-    #delete all flowspaces associated with this experiment, if any already exist;
-    if (exp_exist):
+        e.slice_id = slice_id
+        e.project_name = project_name
+        e.project_desc = project_description
+        e.slice_name = slice_name
+        e.slice_desc = slice_description
+        e.controller_url = controller_url
+        e.owner_email = owner_email
+        e.owner_password = owner_password
+        e.save()
+        new_exp = e
+
         ExperimentFLowSpace.objects.filter(exp = old_exp).delete()
     
-    temp = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
-    #inspired by Jad :)
-    # Add switches to experiments
-    for sliver in switch_slivers:
-        if "datapath_id" in sliver:
-            dpid = sliver['datapath_id']
-        else:
-            dpid = "00:" * 8
-            dpid = dpid[:-1]
-            
-            
-        all_efs = []
-        for sfs in sliver['flowspace']:
-            efs = ExperimentFLowSpace()
-            efs.exp  = e
-            efs.dpid = dpid
-            if "direction" in sfs:
-                efs.direction = get_direction(sfs['direction'])
+        for sliver in switch_slivers:
+            if "datapath_id" in sliver:
+                dpid = sliver['datapath_id']
             else:
-                efs.direction = 2
+                dpid = "00:" * 8
+                dpid = dpid[:-1]
                 
-            fs = convert_star(sfs)
-            for attr_name,(to_str, from_str, width, om_name, of_name) in \
-            om_ch_translate.attr_funcs.items():
-                ch_start ="%s_start"%(attr_name)
-                ch_end ="%s_end"%(attr_name)
-                om_start ="%s_s"%(om_name)
-                om_end ="%s_e"%(om_name)
-                setattr(efs,om_start,from_str(fs[ch_start]))
-                setattr(efs,om_end,from_str(fs[ch_end]))
-            efs.save()
-            all_efs.append(efs)
+                
+            all_efs = []
+            for sfs in sliver['flowspace']:
+                efs = ExperimentFLowSpace()
+                efs.exp  = e
+                efs.dpid = dpid
+                if "direction" in sfs:
+                    efs.direction = get_direction(sfs['direction'])
+                else:
+                    efs.direction = 2
+                    
+                fs = convert_star(sfs)
+                for attr_name,(to_str, from_str, width, om_name, of_name) in \
+                om_ch_translate.attr_funcs.items():
+                    ch_start ="%s_start"%(attr_name)
+                    ch_end ="%s_end"%(attr_name)
+                    om_start ="%s_s"%(om_name)
+                    om_end ="%s_e"%(om_name)
+                    setattr(efs,om_start,from_str(fs[ch_start]))
+                    setattr(efs,om_end,from_str(fs[ch_end]))
+                efs.save()
+                all_efs.append(efs)
+                
+        errorlist = []      
+        try:
+            fv_success = fv.proxy.api.createSlice(
+            "%s" % e.get_fv_slice_name(),
+            "%s" % owner_password,
+            "%s" % controller_url,
+            "%s" % owner_email,
+            )
+        except Exception,e:
+            import traceback
+            traceback.print_exc()
+            ofs = OptsFlowSpace.objects.filter(opt__experiment = new_exp)
+            for fs in ofs:
+                MatchStruct.objects.filter(optfs = fs).delete()
+            ofs.delete()
+            UserOpts.objects.filter(experiment = new_exp).delete()
+            ExperimentFLowSpace.objects.filter(exp = new_exp).delete()
+            new_exp.delete()
+            errorlist.append(str(e))
+            fv_success = False
+        if (fv_success):
+            from openflow.optin_manager.opts.helper import update_opts_into_exp
+            errs = update_opts_into_exp(old_exp)
+            errorlist.append(errs)
     
     error_msg = ""
     
@@ -309,26 +412,23 @@ def create_slice(slice_id, project_name, project_description,
         new_exp.delete()
         errorlist.append(str(e))
         fv_success = False
-    if (exp_exist and fv_success):
+        return {
+            'error_msg': str(errorlist),
+            'switches': [],
+        }
+    if (fv_success):
         from openflow.optin_manager.opts.helper import update_opts_into_exp
-        errs = update_opts_into_exp(old_exp)
-        errorlist.append(errs)
-        
-
-    print "Created slice with %s %s %s %s" % (
-        e.get_fv_slice_name(), owner_password, controller_url, owner_email)
-    if not fv_success:
-        errorlist.append("FlowVisor returned false for create slice xmlrpc call")
-        
-    if len(errorlist) > 0:
-        error_msg = str(errorlist)
-    else:
-        error_msg = ""
+        errorlist = update_opts_into_exp(old_exp)
+        if (len(errorlist)>0):
+            pass
+            # what should we do in this case?
+        print "Created slice with %s %s %s %s" % (
+            e.get_fv_slice_name(), owner_password, controller_url, owner_email)
     
-    return {
-        'error_msg': error_msg,
-        'switches': [],
-    }
+        return {
+            'error_msg': "",
+            'switches': [],
+        }
 
 @check_user
 @check_fv_set
@@ -348,32 +448,34 @@ def delete_slice(sliceid, **kwargs):
     '''
     
     print "Called delete_slice %s" % sliceid
+    
     try:
         single_exp = Experiment.objects.get(slice_id = sliceid)
     except Experiment.DoesNotExist:
         return "Experiment Doesnot Exist"
-    # get all flowspaces opted into this exp
-    ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
-    # delete all match structs for each flowspace
-    for fs in ofs:
-        MatchStruct.objects.filter(optfs = fs).delete()
-    ofs.delete()
-    UserOpts.objects.filter(experiment = single_exp).delete()
-    ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
-    single_exp.delete()
     
-    error_msg = ""
     fv = FVServerProxy.objects.all()[0]
     try:
         success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise e
-    if not success:
-        error_msg = "flowvisor returned false on delete slice xmlrpc call"
+        return "Couldn't delete slice on flowvisor: %s"%str(e)
+     
+    # get all flowspaces opted into this exp
+    ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
+    
+    # delete all match structs for each flowspace
+    for fs in ofs:
+        MatchStruct.objects.filter(optfs = fs).delete()
         
-    return error_msg
+    # delete all flowspaces opted into this exp
+    ofs.delete()
+    UserOpts.objects.filter(experiment = single_exp).delete()
+    ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
+    single_exp.delete()
+    
+    return ""
 
 @check_user
 @check_fv_set
