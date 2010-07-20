@@ -204,12 +204,14 @@ def flowspace(request, slice_id):
                 # get the wanted attributes into a dict
                 d = {}
                 for f in SliceFlowSpace._meta.fields:
+                    logger.debug("Doing field %s" % f.name)
                     if f.name != "slice" and f.name != "id":
                         val = getattr(fs, f.name)
-                        if val == None: val = "*"
+                        if val == None or val == "": val = "*"
                         d[f.name+"_start"] = "%s" % val
                         d[f.name+"_end"] = "%s" % val
                         
+                logger.debug("Saved flowspace %s" % d)
                 # now create fs for all the slivers
                 for s in slivers:
                     d["sliver"] = s

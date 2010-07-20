@@ -1,11 +1,9 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
+{% block pagehead %} <h1>Give Up FLowSpace</h1> {% endblock %}
 
 {% block content %}
 <div class="main">
-	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-	</div>
-	<h2> Approved flowspaces own by {{user.username}}
+	<h2> Approved flowspaces own by {{user.username}}</h2>
 	<form name="input" action="/admin_manager/user_unreg_fs" method="post">{% csrf_token %}
 	<table>
 	<tr><th></th><th>FlowSpace</th><th>Approved By</th></tr>
@@ -16,7 +14,7 @@
 		</tr>
 	{% endfor %}
 	</table>
-	<h2> Pending flowspace requests
+	<h2> Pending flowspace requests</h2>
 	<table>
 	<tr><th></th><th>FlowSpace</th><th>Administrator</th></tr>
 	{% for fs in reqfs %}

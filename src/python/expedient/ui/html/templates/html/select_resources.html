@@ -60,6 +60,9 @@ $(document).ready(function(){
 	$("input[name=clear_button]").click(function (){
 		$(":checked").click();
 	});
+	$("input[name=select_all_button]").click(function (){
+		$(":checkbox:not(:checked)").click();
+	});
 })
 </script>
 {% endblock %}
@@ -289,6 +292,7 @@ at {{ agg.location }}.
 {% if openflow_aggs or planetlab_aggs %}
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
+<input type="button" name="select_all_button" value="Select All" />
 {% endif %}
 </form>
 {% endblock content %}
