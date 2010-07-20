@@ -195,10 +195,10 @@ def _get_tree_ports(of_aggs, pl_aggs):
 
     # add the ports that are connected to the planetlab nodes
     iface_ids = list(non_of_cnxn_qs.values_list("of_iface__id", flat=True))
-    tree.update(["%s" % i for i in iface_ids])
-    tree.update(["%s" % i for i in \
+    tree.update(iface_ids)
+    tree.update(
         PlanetLabNode.objects.filter(
-            aggregate__id__in=pl_agg_ids).values_list("id", flat=True)])
+            aggregate__id__in=pl_agg_ids).values_list("id", flat=True))
     
     # return the list of interface ids
     return list(tree)
