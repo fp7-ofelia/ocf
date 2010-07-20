@@ -111,7 +111,9 @@ def _get_nodes_links(of_aggs, pl_aggs):
             dict(
                 src=id_to_idx[cnxn.src_iface.switch.id],
                 target=id_to_idx[cnxn.dst_iface.switch.id],
-                value=1,
+                value="rsc_id_%s-rsc_id_%s" % (
+                    cnxn.src_iface.id, cnxn.dst_iface.id
+                ),
             )
         )
     
@@ -120,14 +122,18 @@ def _get_nodes_links(of_aggs, pl_aggs):
             dict(
                 src=id_to_idx[cnxn.of_iface.switch.id],
                 target=id_to_idx[cnxn.resource.id],
-                value=1,
+                value="rsc_id_%s-rsc_id_%s" % (
+                    cnxn.of_iface.id, cnxn.resource.id
+                ),
             )
         )
         links.append(
             dict(
                 target=id_to_idx[cnxn.of_iface.switch.id],
                 src=id_to_idx[cnxn.resource.id],
-                value=1,
+                value="rsc_id_%s-rsc_id_%s" % (
+                    cnxn.resource.id, cnxn.of_iface.id
+                ),
             )
         )
         
@@ -181,18 +187,18 @@ def _get_tree_ports(of_aggs, pl_aggs):
         for x in merged_cluster:
             clusters[x] = merged_cluster
 
-#    # get the set of non openflow connections in the aggregates
-#    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
-#        of_iface__aggregate__id__in=of_agg_ids,
-#        resource__aggregate__id__in=pl_agg_ids,
-#    )
-#
-#    # add the ports that are connected to the planetlab nodes
-#    iface_ids = list(non_of_cnxn_qs.values_list("of_iface__id", flat=True))
-#    tree.update(["%s" % i for i in iface_ids])
-#    tree.update(["%s" % i for i in \
-#        PlanetLabNode.objects.filter(
-#            aggregate__id__in=pl_agg_ids).values_list("id", flat=True)])
+    # get the set of non openflow connections in the aggregates
+    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+        of_iface__aggregate__id__in=of_agg_ids,
+        resource__aggregate__id__in=pl_agg_ids,
+    )
+
+    # add the ports that are connected to the planetlab nodes
+    iface_ids = list(non_of_cnxn_qs.values_list("of_iface__id", flat=True))
+    tree.update(["%s" % i for i in iface_ids])
+    tree.update(["%s" % i for i in \
+        PlanetLabNode.objects.filter(
+            aggregate__id__in=pl_agg_ids).values_list("id", flat=True)])
     
     # return the list of interface ids
     return list(tree)

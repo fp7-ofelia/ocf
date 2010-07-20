@@ -56,6 +56,7 @@ $(document).ready(function(){
 		iface_id = $(this).attr("value");
 		$(".iface_"+iface_id).toggleClass("connected");
 		$(".neighbor_"+iface_id).toggleClass("connected");
+		vis.render();
 	});
 	$(":checkbox[name=selected_nodes]:checked").each(function(){
 		node_id = $(this).attr("value");
@@ -66,6 +67,7 @@ $(document).ready(function(){
 		node_id = $(this).attr("value");
 		$(".rsc_"+node_id).toggleClass("connected");
 		$(".neighbor_rsc_"+node_id).toggleClass("connected");
+		vis.render();
 	});
 	$("input[name=clear_button]").click(function (){
 		$(":checked").click();
@@ -116,7 +118,7 @@ var data = {
 	],
 	links: [
 		{% for link in protovis_links %}
-		{source:{{ link.src }}, target:{{ link.target }}, value:{{ link.value }}}{% if not forloop.last %},{% endif %}
+		{source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
 		{% endfor %}
 	],
 }
@@ -130,7 +132,7 @@ var vis = new pv.Panel()
     .height(h)
     .fillStyle("white")
     .event("mousedown", pv.Behavior.pan())
-    .event("mousewheel", pv.Behavior.zoom());
+    .event("mousewheel", pv.Behavior.zoom(5));
 
 var force = vis.add(pv.Layout.Force)
 	.bound(true)
@@ -141,7 +143,18 @@ force.springLength(80);
 force.chargeConstant(-400);
 force.chargeTheta(0.2);
 
-force.link.add(pv.Line);
+force.link.add(pv.Line)
+	.strokeStyle(function(d, p) {
+		/* if any resources on the link are selected */
+		rsc_ids = p.value.split("-");
+		if($(":checkbox#"+rsc_ids[0]+":checked").length) {
+			return "red";
+		}
+		if($(":checkbox#"+rsc_ids[1]+":checked").length) {
+			return "red";
+		}
+		return "black";
+	});
 
 // force.label.add(pv.Label);
 
@@ -172,8 +185,20 @@ force.node.add(pv.Image)
 	.def("i", -1)
 	.width(20)
 	.height(20)
-	.fillStyle(function(d) this.i() == this.index ? "red" : colors(d.group))
-    .strokeStyle(function() this.fillStyle().darker())
+	.fillStyle(function(d) {
+		/* mouseover */
+		if (this.i() == this.index) {
+			return "brown";
+		}
+		return colors(d.group);
+	})
+    .strokeStyle(function(d) {
+		/* if any ports are selected */
+		if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
+			return "red";
+		}
+		return this.fillStyle().darker();
+	})
 	.cursor("pointer")
 	.title(function(d) d.nodeName)
     .event("mousedown", pv.Behavior.drag())
@@ -192,6 +217,18 @@ force.node.add(pv.Image)
 		this.i(this.index);
 	})
 	.event("mouseout", function() this.i(-1))
+	.event("click", function(d) {
+		/* if all are selected then unselect all */
+		selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length
+		all_len = $(":checkbox:.node_id_"+d.nodeValue).length
+		if(selected_len == all_len) {
+			$(":checkbox:checked.node_id_"+d.nodeValue).click();
+		}
+		/* else, select all */
+		else {
+			$(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
+		}
+	})
     .event("drag", force);
 
 vis.render();
@@ -219,7 +256,7 @@ at {{ agg.location }}.
       <td class="select_checkbox">
 	<input type="checkbox" name="selected_nodes"
 	       value="{{ node.id }}" id="rsc_id_{{ node.id }}"
-	       {% if node.id in tree_rsc_ids %}class="in_tree"{% endif %}
+	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
 	       {% if node.id in checked_ids %}checked{% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
@@ -270,7 +307,7 @@ at {{ agg.location }}.
 	    <td class="select_checkbox">
 	      <input type="checkbox" name="selected_ifaces" 
 	      value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
-	      {% if iface.id in tree_rsc_ids %}class="in_tree"{% endif %}
+	      class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
 	      {% if iface.id in checked_ids %}checked{% endif %} />
 	    </td>
 	    <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
