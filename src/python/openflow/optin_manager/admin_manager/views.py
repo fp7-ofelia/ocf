@@ -272,7 +272,9 @@ def user_reg_fs(request):
                         break
                 if (not selected_admin):
                     #This shouldn't happen
-                    return 0
+                    raise Exception("Could not find an administrator to approve this "
+                                    "request. admins_list: %s, intersected_admins: %s" % 
+                                    (admins_list, intersected_admins))
                 
                 rfs = RequestedUserFlowSpace(
                             user=request.user, admin=selected_admin.user)
