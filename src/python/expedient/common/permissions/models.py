@@ -18,14 +18,26 @@ class ExpedientPermissionManager(models.Manager):
     def get_missing_for_target(self, user, perm_names, target):
         """
         Same as L{get_missing} but accepts a single target instance instead of
-        a queryset of targets.
+        a queryset of targets, and only returns the missing
+        L{ExpedientPermission}.
+        
+        @param user: The permission user for the targets
+        @type user: L{PermissionUser} or a model instance.
+        @param perm_names: names of permissions to search for
+        @type perm_names: iterable of C{str}
+        @param target: object whose permissions we are searching for
+        @type target: C{Model}
+        
+        @return: Missing permission.
+        @rtype: L{ExpedientPermission} or None
         """
         if not isinstance(target, models.Model):
             # assume class
             target = ContentType.objects.get_for_model(target)
             
-        return self.get_missing(user, perm_names,
-                                target.__class__.objects.filter(pk=target.pk))
+        return self.get_missing(
+            user, perm_names, target.__class__.objects.filter(pk=target.pk)
+        )[0]
         
     def get_missing(self, user, perm_names, targets):
         """

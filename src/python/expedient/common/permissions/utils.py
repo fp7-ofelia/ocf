@@ -20,11 +20,16 @@ def _stringify_func(f):
 
 def register_permission_for_obj_or_class(obj_or_class, permission):
     """
-    Add L{ObjectPermission}s for a model.
+    Add L{ObjectPermission} for a model.
     
     @param obj_or_class: the object instance or class which we wish to add 
         the permission for.
-    @param permission: the permission's name or the L{ExpedientPermission} instance
+    @type obj_or_class: C{Model} instance or C{class}.
+    @param permission: the permission's name or the L{ExpedientPermission}
+        instance
+    @type permission: L{ExpedientPermission} or string
+    @return: The registered object permission.
+    @rtype: L{ObjectPermission}
     """
     
     if not isinstance(obj_or_class, models.Model):

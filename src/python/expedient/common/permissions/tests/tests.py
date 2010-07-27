@@ -17,17 +17,6 @@ from expedient.common.tests import manager as test_mgr
 
 import logging
 
-LOGGING_LEVEL = logging.DEBUG
-
-def logging_set_up(level):
-    if not hasattr(logging, "setup_done"):
-        if level == logging.DEBUG:
-            format = '%(asctime)s:%(name)s:%(levelname)s:%(pathname)s:%(lineno)s:%(message)s'
-        else:
-            format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
-        logging.basicConfig(level=level, format=format)
-    logging.setup_done = True
-
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
         reverse("test_allowed"),
@@ -36,7 +25,7 @@ def _request_perm_wrapper(*args, **kwargs):
 def create_objects(test_case):
         # Create test objects
         test_case.objs = []
-        for i in xrange(2):
+        for _ in xrange(2):
             test_case.objs.append(PermissionTestClass.objects.create(val=1))
             
         # Create 2 users
@@ -88,7 +77,6 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             'expedient.common.permissions.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
-        logging_set_up(LOGGING_LEVEL)
         self.logger = logging.getLogger("TestObjectPermissions")
         create_objects(self)
         self.logger.debug("Done setup")
@@ -224,7 +212,6 @@ class TestRequests(test_mgr.SettingsTestCase):
             'expedient.common.permissions.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
-        logging_set_up(LOGGING_LEVEL)
         self.logger = logging.getLogger("TestRequests")
         create_objects(self)
         self.logger.debug("Done setup")

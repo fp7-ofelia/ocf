@@ -8,7 +8,7 @@ from models import ExpedientPermission
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.middleware.threadlocals import get_thread_locals
 
-class require_obj_permissions(object):
+class require_obj_permissions_for_method(object):
     """
     Decorator that checks that one model has permissions to use another.
     
@@ -22,7 +22,8 @@ class require_obj_permissions(object):
     For example::
     
         class TestModel(models.Model):
-            @require_obj_permissions("user", ["can_call_methods", "can_call_test"])
+            @require_obj_permissions_for_method(
+                "user", ["can_call_methods", "can_call_test"])
             def test_method(self, paramA, paramB):
                 pass
         
@@ -46,14 +47,13 @@ class require_obj_permissions(object):
             d = get_thread_locals()
             try:
                 user = d[self.user_kw]
-            except AttributeError:
-                if self.user_kw not in d:
-                    raise exceptions.PermissionUserNotInThreadLocals(
-                        self.user_kw)
+            except KeyError:
+                raise exceptions.PermissionUserNotInThreadLocals(
+                    self.user_kw)
             if not user:
                 raise exceptions.NonePermissionUserException(self.user_kw)
 
-            missing, temp = ExpedientPermission.objects.get_missing_for_target(
+            missing = ExpedientPermission.objects.get_missing_for_target(
                 user, self.perm_names, obj)
 
             if missing:
@@ -62,21 +62,7 @@ class require_obj_permissions(object):
             # All is good. Call the function
             return f(obj, *args, **kw)
         
-        # call the prewrapper if it is defined
-        if prewrapper_func:
-            return prewrapper_func(require_obj_permissions_wrapper)
-        else:
-            return require_obj_permissions_wrapper
-
-class require_obj_permissions_for_user(require_obj_permissions):
-    """
-    Wrapper around require_obj_permissions that sets the C{user_kw} parameter
-    to "user"
-    """
-    
-    def __init__(self, perm_names, pop_user_kw=True):
-        super(require_obj_permissions_for_user, self).__init__(
-            "user", perm_names, pop_user_kw)
+        return require_obj_permissions_wrapper
 
 class require_objs_permissions_for_view(object):
     """

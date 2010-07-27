@@ -16,7 +16,6 @@ from expedient.common.permissions.utils import give_permission_to,\
     get_queryset_from_class
 from django.contrib.csrf.middleware import csrf_exempt
 
-@csrf_exempt
 @require_objs_permissions_for_view(
     ["can_get_x2", "can_read_val"],
     get_user_from_req,
@@ -63,7 +62,6 @@ def test_view_update(request, obj_id=None):
                                    kwargs=dict(obj_id=obj_id)),
     )
 
-@csrf_exempt
 def add_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
         give_permission_to(user, permission, target)
@@ -79,7 +77,6 @@ Do you want to get permissions to create PermissionTestClass instances?
 </form>
 """ % reverse("test_view_crud"))
 
-@csrf_exempt
 def other_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
         give_permission_to(user, permission, target)

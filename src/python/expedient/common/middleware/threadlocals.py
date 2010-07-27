@@ -9,8 +9,31 @@ except ImportError:
 _thread_locals = local()
 
 def get_thread_locals():
+    """
+    Returns the dictionary of all parsed keywords in the request.
+    """
     _thread_locals.d = getattr(_thread_locals, "d", {})
     return _thread_locals.d
+
+def add_parser(kw, func):
+    """
+    Add a request parser for a keyword.
+    When a request arrives, the parser C{func} will be used to set the value
+    for the C{kw} keyword in the thread-local storage.
+    
+    @param kw: The keyword to use for the result of this parser.
+    @type kw: hashable value
+    @param func: a function that accepts the request and returns a value
+    @type func: callable.
+    """
+    ThreadLocals.add_parser(kw, func)
+
+def get_parser(kw):
+    """
+    Get the parser function stored for the keyword C{kw} or None if
+    it doesn't exist.
+    """
+    return ThreadLocals.__parser.get(kw, None)
 
 class ParserRedefined(Exception):
     """
