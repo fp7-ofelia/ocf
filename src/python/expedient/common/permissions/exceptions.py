@@ -4,6 +4,25 @@ Created on May 31, 2010
 @author: jnaous
 '''
 
+class PermissionUserNotInThreadLocals(Exception):
+    """
+    Raised when the user was not parsed and stored in thread local storage.
+    """
+    def __init__(self, user_kw):
+        self.user_kw = user_kw
+        super(PermissionUserNotInThreadLocals, self).__init__(
+            "Threadlocal storage does not have the user keyword %s. "
+            "This might be caused by not adding a parser to the Threadlocals "
+            "middleware to parse the request for this keyword."
+             % user_kw
+        )
+
+class NonePermissionUserException(Exception):
+    """
+    Raised when the permission user is None.
+    """
+    pass
+
 class PermissionRegistrationConflict(Exception):
     """
     Raised when a permission is registered with two different views.

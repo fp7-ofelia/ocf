@@ -3,25 +3,21 @@ Created on May 31, 2010
 
 @author: jnaous
 '''
-from exceptions import PermissionDenied, PermissionSignatureError
+import exceptions
 from models import ExpedientPermission
 from django.contrib.contenttypes.models import ContentType
+from expedient.common.middleware.threadlocals import get_thread_locals
 
 class require_obj_permissions(object):
     """
     Decorator that checks that one model has permissions to use another.
-    This should be used on object methods.
     
     The decorator requires the following parameters on initialization:
     
-    @param user_kw: the keyword used to pass the user object.
-    @type user_kw: L{str}
+    @param user_kw: the keyword used to store the user object in threadlocals.
+    @type user_kw: C{str}
     @param perm_names: a list of permission names that are required.
-    @type perm_names: L{list} of L{str}
-    @keyword pop_user_kw: Should the C{user_kw} keyword be removed from the
-        keyword arguments or left in when calling the decorated method? Default
-        is True. Useful in case the decorated function uses the same keyword.
-    @type pop_user_kw: L{bool}
+    @type perm_names: C{list} of C{str}
     
     For example::
     
@@ -29,47 +25,39 @@ class require_obj_permissions(object):
             @require_obj_permissions("user", ["can_call_methods", "can_call_test"])
             def test_method(self, paramA, paramB):
                 pass
-            
-    Then to call test_method::
-    
-        >>> t = TestModel()
-        >>> t.test_method(paramA, paramB, user=some_user_object)
         
     """
     
-    def __init__(self, user_kw, perm_names, pop_user_kw=True):
+    def __init__(self, user_kw, perm_names):
         self.perm_names = set(perm_names)
         self.user_kw = user_kw
-        self.pop_user_kw = pop_user_kw
     
-    def __call__(self, f, prewrapper_func=None):
+    def __call__(self, f):
         """
         This method is called on execution of the decorator to get the wrapper
-        defined inside. The C{prewrapper_func} keyword argument is available for
-        subclasses. If defined, the output of the prewrapper function is
-        returned instead of the wrapper function. The prewrapper function 
-        should have one argument: C{wrapper} which is the original function
-        that would have been returned.
+        defined inside.
         """
         def require_obj_permissions_wrapper(obj, *args, **kw):
             """
             Wrapper for the called method that checks the permissions before
             calling the method.
             """
-            # check for the permission
+            # check if the user exists in the request
+            d = get_thread_locals()
             try:
-                if self.pop_user_kw:
-                    user = kw.pop(self.user_kw)
-                else:
-                    user = kw[self.user_kw]
-            except KeyError:
-                raise PermissionSignatureError(self.user_kw)
+                user = d[self.user_kw]
+            except AttributeError:
+                if self.user_kw not in d:
+                    raise exceptions.PermissionUserNotInThreadLocals(
+                        self.user_kw)
+            if not user:
+                raise exceptions.NonePermissionUserException(self.user_kw)
 
             missing, temp = ExpedientPermission.objects.get_missing_for_target(
                 user, self.perm_names, obj)
 
             if missing:
-                raise PermissionDenied(missing.name, obj, user)
+                raise exceptions.PermissionDenied(missing.name, obj, user)
             
             # All is good. Call the function
             return f(obj, *args, **kw)
