@@ -7,39 +7,45 @@ except ImportError:
     from django.utils._threading_local import local
 
 _thread_locals = local()
-def get_current_user():
-    return getattr(_thread_locals, 'user_stack', [None])[-1]
 
-def push_current_user(u):
-    _thread_locals.user_stack = getattr(_thread_locals, 'user_stack', [])
-    _thread_locals.user_stack.append(u)
+def get_thread_locals():
+    _thread_locals.d = getattr(_thread_locals, "d", {})
+    return _thread_locals.d
 
-def pop_current_user():
-    _thread_locals.user_stack = getattr(_thread_locals, 'user_stack',
-                                        [None, None])
-    return _thread_locals.user_stack.pop()
-
-def push_obj(obj):
-    _thread_locals.obj_stack = getattr(_thread_locals, 'obj_stack', [])
-    _thread_locals.obj_stack.append(obj)
-    
-def pop_obj():
-    _thread_locals.obj_stack = getattr(_thread_locals, 'obj_stack', [])
-    if not _thread_locals.obj_stack:
-        raise ObjStackException()
-    return _thread_locals.obj_stack.pop()
-
-class ObjStackException(Exception):
-    '''Should be raised when pop_obj is called but there's 
-    nothing on the stack''' 
-    pass
+class ParserRedefined(Exception):
+    """
+    Raised when L{models.ThreadLocals.add_parser} is called twice for the same
+    keyword.
+    """
+    def __init__(self, keyword):
+        self.keyword = keyword
+        super(ParserRedefined, self).__init__(
+            "Threadlocals parser to get keyword %s from request redefined." 
+            % keyword)
 
 class ThreadLocals(object):
     """Middleware that gets various objects from the
     request object and saves them in thread local storage."""
+    
+    __parsers = {}
+    
+    @classmethod
+    def add_parser(cls, kw, func):
+        """
+        Add a function to parse a request, get an object, and store it in
+        thread locals storage
+        """
+        if kw in cls.__parsers:
+            raise ParserRedefined(kw)
+        
+        cls.__parsers[kw] = func
+
     def process_request(self, request):
-        _thread_locals.user_stack = [getattr(request, 'user', None)]
+        """Parse request and set keywords"""
+        d = get_thread_locals()
+        for kw, func in self.__parsers:
+            d[kw] = func(request)
         
     def process_response(self, request, response):
-        pop_current_user()
-    
+        """Reset thread locals"""
+        _thread_locals.d = {}
