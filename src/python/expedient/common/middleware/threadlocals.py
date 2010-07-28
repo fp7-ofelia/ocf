@@ -66,9 +66,13 @@ class ThreadLocals(object):
     def process_request(self, request):
         """Parse request and set keywords"""
         d = get_thread_locals()
-        for kw, func in self.__parsers:
+        for kw, func in self.__parsers.items():
             d[kw] = func(request)
+            
+        return None
         
     def process_response(self, request, response):
         """Reset thread locals"""
         _thread_locals.d = {}
+        return response
+    
