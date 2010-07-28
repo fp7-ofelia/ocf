@@ -10,7 +10,10 @@ from expedient.common.middleware import threadlocals
 def user_parse_func(request):
     return request.user
 threadlocals.add_parser("user_kw", user_parse_func)
-threadlocals.add_parser("test_kw", user_parse_func)
+
+def test_parse_func(request):
+    return PermissionTestClass.objects.get(id=1)
+threadlocals.add_parser("test_kw", test_parse_func)
 
 class PermissionTestClass(models.Model):
     """

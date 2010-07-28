@@ -16,6 +16,7 @@ from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
 
 import logging
+from expedient.common.middleware import threadlocals
 
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
@@ -79,7 +80,6 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         self.logger = logging.getLogger("TestObjectPermissions")
         create_objects(self)
-        self.logger.debug("Done setup")
         
     def test_get_missing(self):
         """
@@ -115,23 +115,22 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         L{models.ExpedientPermissionManager} is correct.
         """
         
-        missing, target = ExpedientPermission.objects.get_missing_for_target(
+        missing = ExpedientPermission.objects.get_missing_for_target(
             self.u1, ["can_get_x2", "can_get_x3"], self.objs[0])
         
-        self.assertTrue(target == self.objs[0])
         self.assertTrue(
             missing == ExpedientPermission.objects.get(name="can_get_x3"))
         
-        missing, target = ExpedientPermission.objects.get_missing_for_target(
+        missing = ExpedientPermission.objects.get_missing_for_target(
             self.u1, ["can_get_x2", "can_read_val"], self.objs[0])
         
-        self.assertTrue(target == None and missing == None)
+        self.assertTrue(missing == None)
 
-        missing, target = ExpedientPermission.objects.get_missing_for_target(
+        missing = ExpedientPermission.objects.get_missing_for_target(
             self.o3, ["can_get_x2", "can_read_val"], self.objs[0])
         
-        self.assertTrue(target == self.objs[0] and\
-                        missing == ExpedientPermission.objects.get(name="can_get_x2"))
+        self.assertTrue(
+            missing == ExpedientPermission.objects.get(name="can_get_x2"))
 
     def test_obj_method_decorators(self):
         """
@@ -139,40 +138,54 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         L{require_obj_permissions_for_user} are correct.
         """
         
-        for obj in self.objs:
-            self.assertEqual(obj.get_val_x2(user_kw=self.u1), 2)
-            self.assertEqual(obj.get_val_x3_other_val(user_kw=self.u2), (3, self.u2))
-            self.assertEqual(obj.get_val_x4(test_kw=self.o3), 4)
-            self.assertEqual(obj.get_val_x5_username(user=self.u1), (5, self.u1.username))
+        d = threadlocals.get_thread_locals()
         
         for obj in self.objs:
-            self.assertRaises(PermissionDenied, obj.get_val_x2, obj, user_kw=self.u2)
-            self.assertRaises(PermissionDenied, obj.get_val_x3_other_val, obj, user_kw=self.o3)
-            self.assertRaises(PermissionDenied, obj.get_val_x4, obj, test_kw=self.objs[1])
-            self.assertRaises(PermissionDenied, obj.get_val_x5_username, obj, user=self.u2)
+            d["user_kw"] = self.u1
+            self.assertEqual(obj.get_val_x2(), 2)
+            d["user_kw"] = self.u2
+            self.assertEqual(obj.get_val_x3_other_val(), 3)
+            d["test_kw"] = self.o3
+            self.assertEqual(obj.get_val_x4(), 4)
+            d["user_kw"] = self.u1
+            self.assertEqual(obj.get_val_x5_username(), 5)
+        
+        for obj in self.objs:
+            d["user_kw"] = self.u2
+            self.assertRaises(PermissionDenied, obj.get_val_x2, obj)
+            d["user_kw"] = self.o3
+            self.assertRaises(PermissionDenied, obj.get_val_x3_other_val, obj)
+            d["test_kw"] = self.objs[1]
+            self.assertRaises(PermissionDenied, obj.get_val_x4, obj)
+            d["user_kw"] = self.u2
+            self.assertRaises(PermissionDenied, obj.get_val_x5_username, obj)
 
     def test_delegation(self):
         """
         Tests that permission delegation works correctly.
         """
         
+        d = threadlocals.get_thread_locals()
+        d["user_kw"] = self.u2
+        d["test_kw"] = self.u1
+
         # Test allowed delegation
         self.assertRaises(PermissionDenied, self.objs[0].get_val_x2,
-                          self.objs[0], user_kw=self.u2)
+                          self.objs[0])
         self.assertRaises(PermissionDenied, self.objs[1].get_val_x2,
-                          self.objs[1], user_kw=self.u2)
+                          self.objs[1])
         
         give_permission_to(self.u2, "can_get_x2", self.objs[0],
                            giver=self.u1, delegatable=True)
         
-        self.assertEqual(self.objs[0].get_val_x2(user_kw=self.u2), 2)
+        self.assertEqual(self.objs[0].get_val_x2(), 2)
         self.assertRaises(PermissionDenied, self.objs[1].get_val_x2,
-                          self.objs[1], user_kw=self.u2)
+                          self.objs[1])
 
         give_permission_to(self.u2, "can_get_x2", self.objs[1],
                            giver=self.u1, delegatable=False)
 
-        self.assertEqual(self.objs[1].get_val_x2(user_kw=self.u2), 2)
+        self.assertEqual(self.objs[1].get_val_x2(), 2)
         
         # Test disallowed delegation
         self.assertRaises(PermissionCannotBeDelegated,
@@ -180,16 +193,17 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
                           self.u1, "can_get_x3", self.objs[0],
                           giver=self.u2, delegatable=False)
         
+        d["user_kw"] = self.u1
         self.assertRaises(PermissionDenied, self.objs[0].get_val_x3_other_val,
-                          self.objs[0], user_kw=self.u1)
+                          self.objs[0])
         self.assertRaises(PermissionDenied, self.objs[1].get_val_x3_other_val,
-                          self.objs[1], user_kw=self.u1)
+                          self.objs[1])
         
         # Test cross delegation between types
         give_permission_to(self.u1, "can_get_x4", self.objs[0],
                            giver=self.o3, delegatable=False)
         
-        self.assertEqual(self.objs[0].get_val_x4(test_kw=self.u1), 4)
+        self.assertEqual(self.objs[0].get_val_x4(), 4)
 
         # Test delegation of delegated permission
         self.assertRaises(PermissionCannotBeDelegated,
@@ -237,10 +251,12 @@ class TestRequests(test_mgr.SettingsTestCase):
         """
         self.client.login(username="test2", password="password")
 
-        self.assertRaises(PermissionDenied,
-                          self.client.get,
-                          reverse("test_view_x2",
-                                  kwargs={"obj_id": self.objs[0].id}))
+        self.assertRaises(
+            PermissionDenied,
+            self.client.get,
+            reverse("test_view_x2",
+                    kwargs={"obj_id": self.objs[0].id}),
+            follow=True)
         
     def test_disallowed_redirect(self):
         """

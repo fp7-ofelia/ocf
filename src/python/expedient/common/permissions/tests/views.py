@@ -23,7 +23,7 @@ from django.contrib.csrf.middleware import csrf_exempt
 )
 def test_view_x2(request, obj_id=None):
     obj = get_object_or_404(PermissionTestClass, pk=obj_id)
-    return HttpResponse("%s" % obj.get_val_x2(user_kw=request.user))
+    return HttpResponse("%s" % obj.get_val_x2())
 
 @require_objs_permissions_for_view(
     ["can_add"],
