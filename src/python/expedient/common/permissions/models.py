@@ -134,7 +134,7 @@ class ExpedientPermission(models.Model):
                             blank=True, null=True)
     
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.view)
+        return "perm name: %s, view: %s" % (self.name, self.view)
 
         
 class ObjectPermissionManager(GenericObjectManager):

@@ -63,6 +63,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
     'expedient.common.middleware.sitelockdown.SiteLockDown',
+    'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
 )
 
