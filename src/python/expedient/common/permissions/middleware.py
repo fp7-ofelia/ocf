@@ -143,13 +143,15 @@ class PermissionMiddleware(object):
                     return HttpResponseRedirect(
                         reverse(
                             "permissions_reraise",
-                            exception.perm_name,
-                            ContentType.objects.get_for_model(
-                                exception.target).id,
-                            exception.target.id,
-                            ContentType.objects.get_for_model(
-                                exception.user).id,
-                            exception.user.id,
+                            kwargs=dict(
+                                perm_name=exception.perm_name,
+                                target_ct_id=ContentType.objects.get_for_model(
+                                    exception.target).id,
+                                target_id=exception.target.id,
+                                user_ct_id=ContentType.objects.get_for_model(
+                                    exception.user).id,
+                                user_id=exception.user.id,
+                            ),
                         )
                     )
         return None
