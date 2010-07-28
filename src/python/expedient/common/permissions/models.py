@@ -121,6 +121,8 @@ class ExpedientPermission(models.Model):
     
     @ivar name: The permission's name
     @type name: C{str}
+    @ivar description: Information about the permission.
+    @type description: C{str}
     @ivar view: The full path to the view for the permission
     @type view: C{str}
     @ivar object_permissions: Per-object permissions with this permission name.
@@ -130,11 +132,13 @@ class ExpedientPermission(models.Model):
     objects = ExpedientPermissionManager()
     
     name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, default="")
     view = models.CharField("Permission View", max_length=300,
                             blank=True, null=True)
     
     def __unicode__(self):
-        return "perm name: %s, view: %s" % (self.name, self.view)
+        return "perm name: %s, desc: %s, view: %s" % (
+            self.name, self.description, self.view)
 
         
 class ObjectPermissionManager(GenericObjectManager):
