@@ -104,7 +104,6 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             self.o3, ["can_get_x2", "can_read_val"],
             PermissionTestClass.objects.all())
         
-        self.logger.debug("missing: %s, target: %s" % (missing, target))
         self.assertTrue(target == self.objs[0] and\
                         missing == ExpedientPermission.objects.get(
                             name="can_get_x2"))
@@ -228,7 +227,6 @@ class TestRequests(test_mgr.SettingsTestCase):
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         self.logger = logging.getLogger("TestRequests")
         create_objects(self)
-        self.logger.debug("Done setup")
         
     def test_allowed_request(self):
         """
