@@ -402,6 +402,7 @@ class TestRequests(test_mgr.SettingsTestCase):
         self.assertEqual(PermissionRequest.objects.count(), 1)
         perm_req = PermissionRequest.objects.all()[0]
         self.assertEqual(perm_req.requesting_user, self.u2)
+        self.assertEqual(perm_req.permission_user, self.u2)
         self.assertEqual(perm_req.permission_owner, self.u1)
         self.assertEqual(
             perm_req.requested_permission.target,

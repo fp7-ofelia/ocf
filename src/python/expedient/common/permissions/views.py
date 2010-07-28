@@ -100,6 +100,7 @@ def request_permission(always_redirect_to,
         # process the request
         if request.method == "POST":
             perm_request = PermissionRequest(requesting_user=request.user,
+                                             permission_user=user,
                                              requested_permission=obj_perm)
             form = PermissionRequestForm(user_qs, request.POST,
                                          instance=perm_request)

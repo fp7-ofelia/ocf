@@ -152,7 +152,7 @@ class ObjectPermissionManager(GenericObjectManager):
     
     def get_for_object(self, perm_name, obj):
         """
-        Get the object permission for this object with this name.
+        Get the object permission with name C{perm_name} for object C{obj}.
         
         @param perm_name: name of the permission
         @type perm_name: C{str}
@@ -279,17 +279,21 @@ class PermissionRequest(models.Model):
     A request from a C{auth.models.User} on behalf of a C{PermissionUser} to
     obtain some permission for a particular target.
     """
-    requesting_user = models.ForeignKey(User, related_name="sent_permission_requests")
-    permission_owner = models.ForeignKey(User, related_name="received_permission_requests")
+    requesting_user = models.ForeignKey(
+        User, related_name="sent_permission_requests")
+    permission_user = models.ForeignKey(
+        PermissionUser)
+    permission_owner = models.ForeignKey(
+        User, related_name="received_permission_requests")
     requested_permission = models.ForeignKey(ObjectPermission)
-    message = models.TextField(default="", blank=True, null=True)
+    message = models.TextField(default="", blank=True)
     
-    def allow(self):
+    def allow(self, delegatable=False):
         from utils import give_permission_to
-        give_permission_to(self.requesting_user,
+        give_permission_to(self.permission_user,
                            self.requested_permission.permission,
                            self.requested_permission.target,
-                           self.permission_owner)
+                           self.permission_owner, delegatable=delegatable)
         self.delete()
         
     def deny(self):
