@@ -7,6 +7,17 @@ from expedient.common.permissions.utils import create_permission
 from expedient.common.permissions.views import request_permission
 from django.core.urlresolvers import reverse
 
-create_permission("can_add_aggregate", view=request_permission(reverse("home")))
-create_permission("can_view_aggregate")
-create_permission("can_edit_aggregate")
+create_permission(
+    "can_add_aggregate",
+    description="Owners of this permission can add aggregates to Expedient.",
+    view=request_permission(
+        reverse("home"), template="request_permission.html"),
+)
+create_permission(
+    "can_edit_aggregate",
+    description=\
+        "Owners of this permission can edit or delete "
+        "the related aggregates in Expedient.",
+    view=request_permission(
+        reverse("home"), template="request_permission.html"),
+)
