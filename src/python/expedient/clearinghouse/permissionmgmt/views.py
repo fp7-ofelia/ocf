@@ -117,7 +117,3 @@ def confirm_requests(request):
                 "denied_reqs": denied_reqs,
             }
         )
-
-# TODO: Add the URLs
-# TODO: Add tests
-# TODO: Run tests
