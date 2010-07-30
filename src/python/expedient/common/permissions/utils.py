@@ -4,12 +4,13 @@ Created on Jun 1, 2010
 @author: jnaous
 '''
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.http import Http404
 from expedient.common.permissions.models import \
     ExpedientPermission, PermissionInfo, ObjectPermission, PermissionUser
-from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,\
-    PermissionRegistrationConflict, PermissionDoesNotExist
-from django.http import Http404
+from expedient.common.permissions.exceptions import \
+    PermissionCannotBeDelegated, PermissionRegistrationConflict, \
+    PermissionDoesNotExist
 from expedient.common.permissions.middleware import PermissionMiddleware
 
 def _stringify_func(f):
@@ -134,35 +135,25 @@ def give_permission_to(receiver, permission, obj_or_class,
         except ExpedientPermission.DoesNotExist:
             raise PermissionDoesNotExist(permission)
 
+    # get the object permission
+    obj_perm, _ = get_or_register_permission_for_obj_or_class(obj_or_class, permission)
+
     # Is someone delegating the permission?
     if giver:
         # Is the giver a PermissionUser already?
         if not isinstance(giver, PermissionUser):
-            giver, created = PermissionUser.objects.get_or_create_from_instance(
+            giver, _ = PermissionUser.objects.get_or_create_from_instance(
                 giver,
             )
-            # Just created the PermissionUser, so giver cannot have the
-            # permission to delegate
-            if created:
-                raise PermissionCannotBeDelegated(giver, permission.name)
-        
-        # Check the giver's permissions
-        try:
-            perm_info = giver.permissioninfo_set.all().get(
-                obj_permission__permission=permission,
-                obj_permission__object_type=ContentType.objects.get_for_model(
-                    obj_or_class),
-                obj_permission__object_id=obj_or_class.id,
-                can_delegate=True,
-            )
-            obj_perm = perm_info.obj_permission
-        except PermissionInfo.DoesNotExist:
+
+        # check that the giver can delegate
+        can_give = PermissionUser.objects.filter_for_obj_permission(
+            obj_perm, can_delegate=True).filter(id=giver.id).count() > 0
+            
+        if not can_give:
             raise PermissionCannotBeDelegated(giver, permission.name)
-    else:
-        obj_perm, creatd = ObjectPermission.objects.get_or_create_from_instance(
-            obj_or_class, permission=permission)
     
-    pi, created = PermissionInfo.objects.get_or_create(
+    pi = PermissionInfo.objects.get_or_create(
         obj_permission=obj_perm,
         user=receiver,
         defaults=dict(can_delegate=delegatable),
@@ -211,7 +202,7 @@ def get_queryset(klass, index, filter="pk"):
         @require_obj_permission_for_view(
             ["can_view_obj_detail"],
             get_user_from_req,
-            get_object_from_filter_func(Obj, 1),
+            get_queryset(Obj, 1),
             ["GET"],
         )
         def view_obj_detail(request, obj_id):
