@@ -18,9 +18,10 @@ def _stringify_func(f):
     else:
         return f
 
-def register_permission_for_obj_or_class(obj_or_class, permission):
+def get_or_register_permission_for_obj_or_class(obj_or_class, permission):
     """
-    Add L{ObjectPermission} for a model.
+    Add L{ObjectPermission} for a model if not existing. Return it and whether
+    or not it was created.
     
     @param obj_or_class: the object instance or class which we wish to add 
         the permission for.
@@ -28,8 +29,8 @@ def register_permission_for_obj_or_class(obj_or_class, permission):
     @param permission: the permission's name or the L{ExpedientPermission}
         instance
     @type permission: L{ExpedientPermission} or string
-    @return: The registered object permission.
-    @rtype: L{ObjectPermission}
+    @return: Tuple of (registered object permission, created)
+    @rtype: (L{ObjectPermission}, C{bool})
     """
     
     if not isinstance(obj_or_class, models.Model):
@@ -47,7 +48,7 @@ def register_permission_for_obj_or_class(obj_or_class, permission):
         permission=permission,
     )
 
-def create_permission(name, view=None):
+def create_permission(name, description="", view=None):
     """
     Create a new L{ExpedientPermission}.
     
@@ -75,11 +76,30 @@ def create_permission(name, view=None):
     view = _stringify_func(view)
     # check if the permission is registered with a different view somewhere else
     perm, created = ExpedientPermission.objects.get_or_create(
-        name=name, defaults=dict(view=view))
+        description=description, name=name, defaults=dict(view=view))
     if not created and perm.view != view:
         raise PermissionRegistrationConflict(name, view, perm.view)
     
     return perm
+
+def has_permission(perm_user, target_obj_or_class, perm_name):
+    """
+    Check if the permission user C{perm_user} has the permission C{permission}
+    for target C{target_obj_or_class}.
+    
+    @param perm_user: The object that we want to check has the permission
+    @type perm_user: object (not L{PermissionUser})
+    @param target_obj_or_class: The object that we want to check the
+        permission for using.
+    @type target_obj_or_class: object or class.
+    @param perm_name: The permission that we want to check.
+    @type perm_name: C{str}
+    @return: C{True} if the C{perm_user} has the permission, C{False} otherwise.
+    @rtype: C{bool}
+    """
+    return ExpedientPermission.objects.get_missing_for_target(
+        perm_user, [perm_name], target_obj_or_class) == None
+        
 
 def give_permission_to(receiver, permission, obj_or_class,
                        giver=None, delegatable=False):
@@ -166,6 +186,9 @@ def get_user_from_req(request, *args, **kwargs):
         )
         def view_obj_detail(request, obj_id):
             ...
+            
+    @param request: the request object
+    @type request: C{HttpRequest}
     '''
     return request.user
 

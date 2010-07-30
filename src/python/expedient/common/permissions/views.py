@@ -9,7 +9,7 @@ from expedient.common.permissions.exceptions import PermissionDenied
 from expedient.common.permissions.models import ExpedientPermission,\
     PermissionRequest, PermissionUser
 from expedient.common.permissions.utils import get_object_from_ids,\
-    register_permission_for_obj_or_class
+    get_or_register_permission_for_obj_or_class
 from django.core.urlresolvers import get_callable
 from expedient.common.permissions.forms import PermissionRequestForm
 from django.views.generic import simple, create_update
@@ -83,7 +83,7 @@ def request_permission(always_redirect_to,
     def request_permission_view(request, permission, user,
                                 target_obj_or_class, redirect_to=None):
         # Get the object permission
-        obj_perm = register_permission_for_obj_or_class(
+        obj_perm = get_or_register_permission_for_obj_or_class(
             target_obj_or_class, permission)[0]
         
         # Get the users who can delegate the permission
@@ -99,8 +99,9 @@ def request_permission(always_redirect_to,
         
         # process the request
         if request.method == "POST":
+            perm_user = PermissionUser.objects.get_or_create_from_instance(user)[0]
             perm_request = PermissionRequest(requesting_user=request.user,
-                                             permission_user=user,
+                                             permission_user=perm_user,
                                              requested_permission=obj_perm)
             form = PermissionRequestForm(user_qs, request.POST,
                                          instance=perm_request)

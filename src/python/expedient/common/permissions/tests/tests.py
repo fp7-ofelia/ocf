@@ -17,6 +17,7 @@ from expedient.common.tests import manager as test_mgr
 
 import logging
 from expedient.common.middleware import threadlocals
+from expedient.common.permissions.models import PermissionUser
 
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
@@ -41,10 +42,10 @@ def create_objects(test_case):
         # create permissions
         for perm in ["can_read_val", "can_get_x3", "can_call_protected_url",
                      "can_get_x4", "can_get_x5", "can_set_val"]:
-            create_permission(perm, other_perms_view)
+            create_permission(perm, view=other_perms_view)
         create_permission("can_get_x2")
-        create_permission("can_add", add_perms_view)
-        create_permission("test_request_perm", _request_perm_wrapper)
+        create_permission("can_add", view=add_perms_view)
+        create_permission("test_request_perm", view=_request_perm_wrapper)
         
         # Give permissions to users
         for obj in test_case.objs:
@@ -402,7 +403,9 @@ class TestRequests(test_mgr.SettingsTestCase):
         self.assertEqual(PermissionRequest.objects.count(), 1)
         perm_req = PermissionRequest.objects.all()[0]
         self.assertEqual(perm_req.requesting_user, self.u2)
-        self.assertEqual(perm_req.permission_user, self.u2)
+        self.assertEqual(
+            perm_req.permission_user,
+            PermissionUser.objects.get_or_create_from_instance(self.u2)[0])
         self.assertEqual(perm_req.permission_owner, self.u1)
         self.assertEqual(
             perm_req.requested_permission.target,
