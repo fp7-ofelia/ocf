@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
+from django.db.models import Q
 from expedient.common.utils.managers import GenericObjectManager
 from exceptions import PermissionDoesNotExist
 
@@ -19,7 +20,8 @@ class ExpedientPermissionManager(models.Manager):
         """
         Same as L{get_missing} but accepts a single target instance instead of
         a queryset of targets, and only returns the missing
-        L{ExpedientPermission}.
+        L{ExpedientPermission}. If C{user} is a superuser, always
+        return None.
         
         @param user: The permission user for the targets
         @type user: L{PermissionUser} or a model instance.
@@ -34,7 +36,7 @@ class ExpedientPermissionManager(models.Manager):
         if not isinstance(target, models.Model):
             # assume class
             target = ContentType.objects.get_for_model(target)
-            
+        
         return self.get_missing(
             user, perm_names, target.__class__.objects.filter(pk=target.pk)
         )[0]
@@ -50,7 +52,7 @@ class ExpedientPermissionManager(models.Manager):
         
         One exception is made: if the user is actually a
         C{django.contrib.auth.models.User} instance, then if the user is
-        a superuser, get_missing always returns None.
+        a superuser, get_missing always returns (None, None).
         
         @param user: The permission user for the targets
         @type user: L{PermissionUser} or a model instance.
@@ -224,6 +226,42 @@ class ObjectPermission(models.Model):
             ("permission", "object_type", "object_id"),
         )
     
+class PermissionUserManager(GenericObjectManager):
+    """
+    Extends L{GenericObjectManager} to add useful functions for getting
+    L{PermissionUser}s.
+    """
+    
+    def filter_for_obj_permission(self, obj_permission, can_delegate=False):
+        """
+        Return a queryset filtered for only those who own a permission for
+        a particular object.
+        
+        @param obj_permission: permission we want the users to have
+        @type obj_permission: L{ObjectPermission}
+        @keyword can_delegate: If true then only look for users who can
+            give the permission to others.
+        @type can_delegate: C{bool} default False.
+        """
+        
+        # filter for superusers
+        su_ids = User.objects.filter(
+            is_superuser=True).values_list("id", flat=True)
+        su_q = Q(
+            user_type__id=ContentType.objects.get_for_model(User),
+            user_id__in=su_ids,
+        )
+        
+        # check the permissioninfo
+        pi_q_d = dict(
+            permissioninfo__obj_permission=obj_permission,
+        )
+        if can_delegate:
+            pi_q_d.update(permission_info__can_delegate=True)
+        pi_q = Q(**pi_q_d)
+        
+        return self.filter(su_q | pi_q)
+    
 class PermissionUser(models.Model):
     """
     Links permissions to their users using the C{contenttypes} framework, where
@@ -239,7 +277,7 @@ class PermissionUser(models.Model):
     @type user: varies
     """
     
-    objects = GenericObjectManager("user_type", "user_id")
+    objects = PermissionUserManager("user_type", "user_id")
     
     user_type = models.ForeignKey(ContentType)
     user_id = models.PositiveIntegerField()
