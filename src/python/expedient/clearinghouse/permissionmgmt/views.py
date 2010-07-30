@@ -29,20 +29,26 @@ def permissions_dashboard(request):
         users__user_type=ContentType.objects.get_for_model(User),
         users__user_id=request.user.id)
     
+    def filter_id(id):
+        try:
+            return int(id)
+        except ValueError:
+            pass
+    
     if request.method == "POST":
         # list of approved requests
-        approved_req_ids = set(request.POST.getlist("approved"))
+        approved_req_ids = set(map(filter_id, request.POST.getlist("approved")))
         # list of delegated requests
-        delegatable_req_ids = set(request.POST.getlist("delegate"))
+        delegatable_req_ids = set(map(filter_id, request.POST.getlist("delegate")))
         # list of denied requests
-        denied_req_ids = set(request.POST.getlist("approved"))
+        denied_req_ids = set(map(filter_id, request.POST.getlist("denied")))
         # check that all ids exist
         found_ids = set(
             perm_reqs.filter(
                 Q(pk__in=approved_req_ids) | Q(pk__in=denied_req_ids)
             ).values_list("pk", flat=True))
         
-        for req_id in approved_req_ids + denied_req_ids:
+        for req_id in approved_req_ids.union(denied_req_ids):
             if req_id not in found_ids:
                 raise Http404(
                     "Permission request with ID %s not found." % req_id)
@@ -52,7 +58,7 @@ def permissions_dashboard(request):
         request.session["delegatable_req_ids"] = delegatable_req_ids
         request.session["denied_req_ids"] = denied_req_ids
         
-        return HttpResponseRedirect(reverse(confirm_approvals))
+        return HttpResponseRedirect(reverse(confirm_requests))
     
     else:
         return simple.direct_to_template(
@@ -64,7 +70,7 @@ def permissions_dashboard(request):
             ),
         )
     
-def confirm_approvals(request):
+def confirm_requests(request):
     """Confirm the approval of the permission requests."""
     
     # list of permission requests for this user
@@ -100,7 +106,7 @@ def confirm_approvals(request):
         request.session["delegatable_req_ids"] = delegatable_req_ids
         request.session["denied_req_ids"] = denied_req_ids
 
-        return HttpResponseRedirect(reverse(permissions_dashboard))
+        return HttpResponseRedirect(reverse("home"))
     
     else:
         return direct_to_template(
@@ -111,13 +117,7 @@ def confirm_approvals(request):
                 "denied_reqs": denied_reqs,
             }
         )
-        
-def permission_info(request, perm_id):
-    """Return the permission description."""
-    perm = get_object_or_404(ExpedientPermission, pk=perm_id)
-    return HttpResponse(perm.description)
 
-# TODO: Add dashboard template
 # TODO: Add the URLs
 # TODO: Add tests
 # TODO: Run tests

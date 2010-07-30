@@ -1,9 +1,35 @@
 {% extends "base.html" %}
 
 {% block scripts %}
-<script src="{% url js_media 'jquery.colorbox-min.js' %}"></script>
+<style>
+.tooltip {
+	display:none;
+	background-color:#000;
+	border:1px solid #fff;
+	padding:10px 15px;
+	width:400px;
+	display:none;
+	color:#fff;
+	text-align:left;
+	font-size:12px;
+
+	/* outline radius for mozilla/firefox only */
+	-moz-box-shadow:0 0 10px #000;
+	-webkit-box-shadow:0 0 10px #000;
+}
+</style>
 <script>
-	$(".perm_info").colorbox();
+	$(document).ready(function() {
+		/* add tooltip to permission name */
+		$("a.perm_name").each(function(){
+			id = $(this).attr("id");
+			s = id.split("_");
+			req_id = s[1];
+			$(this).tooltip({
+				tip: "div#tip_"+req_id
+			});			
+		});
+	});
 </script>
 {% endblock %}
 
@@ -13,15 +39,19 @@
 	<ul>
 		{% for req, delegatable in approved_reqs %}
 		<li>
-			Permission <a class="perm_info"
-			href="{% url permissionmgmt_perm_info req.requested_permission.permission.id %}">
-			{{ req.requested_permission.permission.name }}</a>
+			Permission
+			<a class="perm_name" id="name_{{ req.id }}" href="#">
+				{{ req.requested_permission.permission.name }}
+			</a>
 			requested by {{ req.requesting_user }} for object
 			{{ req.requested_permission.target }} will be granted to 
 			{{ req.permission_user }}. {{ req.permission_user }} 
 			{% if delegatable %}<strong>will</strong>{% else %}will
 			<strong>not</strong>{% endif %} be able to further give permission
 			to other objects.
+			<div class="tooltip" id="tip_{{ req.id }}">
+				{{ req.requested_permission.permission.description }}
+			</div>
 		</li>
 		{% endfor %}
 	</ul>
@@ -30,12 +60,16 @@
 	<ul>
 		{% for req in denied_reqs %}
 		<li>
-			Permission <a class="perm_info"
-			href="{% url permissionmgmt_perm_info req.requested_permission.permission.id %}">
-			{{ req.requested_permission.permission.name }}</a>
+			Permission 
+			<a class="perm_name" id="name_{{ req.id }}" href="#">
+				{{ req.requested_permission.permission.name }}
+			</a>
 			requested by {{ req.requesting_user }} for object
 			{{ req.requested_permission.target }} and permission user
 			{{ req.permission_user }} will be denied.
+			<div class="tooltip" id="tip_{{ req.id }}">
+				{{ req.requested_permission.permission.description }}
+			</div>
 		</li>
 		{% endfor %}
 	</ul>
@@ -44,7 +78,7 @@
 	    <div>
 		    <input type="hidden" name="post" value="yes" />
 		    <input type="submit" value="Proceed" />
-			<a href="{% url permissionmgmt_dashboard %}">Cancel</a>
+			<a href="{% url home %}">Cancel</a>
 	    </div>
     </form>
 </div>

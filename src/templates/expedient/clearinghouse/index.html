@@ -1,6 +1,35 @@
 {% extends "base.html" %}
 
 {% block scripts %}
+<style>
+.tooltip {
+	display:none;
+	background-color:#000;
+	border:1px solid #fff;
+	padding:10px 15px;
+	width:400px;
+	display:none;
+	color:#fff;
+	text-align:left;
+	font-size:12px;
+
+	/* outline radius for mozilla/firefox only */
+	-moz-box-shadow:0 0 10px #000;
+	-webkit-box-shadow:0 0 10px #000;
+}
+img#perm_help {
+	width:15px;
+	height:15px;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		/* add tooltip to question mark */
+		$("img#perm_help").tooltip({
+			tip: "div.tooltip"
+		});
+	});
+</script>
 {% endblock scripts %}
 
 {% block messages %}{% endblock %}
@@ -38,6 +67,30 @@
            <p>Your browser does not support iframes.</p>
         </iframe>
     </div>
-
+	
+	<h2>Permission Management <img id="perm_help"
+	src="{% url img_media 'question_mark.png' %}" /></h2>
+	<div class="tooltip">
+		When an Expedient user needs permission to do something, and she does
+		not have that permission, she might be able to request that permission
+		from someone who can give it to her. Below is a list of permissions
+		other users have requested from you. You can approve or deny the
+		requests. If you approve a request, you can also delegate the
+		permission so that the object getting the permission can approve
+		requests for others. BE CAREFUL,
+		however. Once you grant a permission you cannot revoke it.
+		<br /><br />
+		Expedient permissions are per object, and permissions can be given
+		to objects other than users (for example to a slice or a project).
+		Users can request permissions on behalf of other objects.
+	</div>
+	<div class="permissions">
+		<iframe class="dynsized" name="permissions"
+		src="{% url permissionmgmt_dashboard %}"
+		scrolling="no" frameborder="0"
+		width="100%">
+			<p>Your browser does not support iframes.</p>
+		</iframe>
+	</div>
 </div>
 {% endblock content %}

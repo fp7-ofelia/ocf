@@ -103,6 +103,7 @@ INSTALLED_APPS = (
     'expedient.clearinghouse.resources',
     'expedient.clearinghouse.slice',
     'expedient.clearinghouse.users',
+    'expedient.clearinghouse.permissionmgmt',
     'openflow.plugin',
     'geni',
     'geni.planetlab',

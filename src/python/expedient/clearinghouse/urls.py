@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     (r'^planetlab/', include('geni.planetlab.urls')),
     (r'^messages/', include('expedient.common.messaging.urls')),
     (r'^permissions/', include('expedient.common.permissions.urls')),
-    (r'^permissions/', include('expedient.common.permissions.urls')),
+    (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
     (r'^admin/', include(admin.site.urls)),
 
     # TODO: Change to the following after 0.8 of registration is out
