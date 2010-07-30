@@ -14,6 +14,7 @@ from django.core.urlresolvers import get_callable
 from expedient.common.permissions.forms import PermissionRequestForm
 from django.views.generic import simple, create_update
 from django.contrib.auth.models import User
+from expedient.common.messaging.models import DatedMessage
 
 def reraise_permission_denied(request, perm_name=None,
                               target_ct_id=None, target_id=None,
@@ -54,6 +55,7 @@ def redirect_permissions_request(request, perm_name=None,
 
 def request_permission(always_redirect_to,
                        permission_owners_func=None,
+                       extra_context={},
                        template="permissions/get_permission.html"):
     """
     Get a generic view to use for creating PermissionRequests.
@@ -62,6 +64,7 @@ def request_permission(always_redirect_to,
     - C{form}: the form to show the user. By default, this is a
         L{PermissionRequestForm}
     - C{obj_perm}: the L{ObjectPermission} instance requested.
+    - Any extra items defined in C{extra_context}.
     
     The form will show all users that can delegate the requested permission by
     default. To change the shown set, specify C{permission_owners_func} which
@@ -77,6 +80,10 @@ def request_permission(always_redirect_to,
         C{obj_permission} is the requested L{ObjectPermission} instance, and
         C{user} is the object that the permission is being requested for. The
         function should return {django.contrib.auth.models.User} C{QuerySet}.
+    @keyword extra_context: A dictionary of values to add to the template
+        context. By default, this is an empty dictionary. If a value in the
+        dictionary is callable, the generic view will call it just before
+        rendering the template.
     @keyword template: Path of the template to use. By default, this is
         "permissions/get_permission.html".
     """
@@ -90,12 +97,8 @@ def request_permission(always_redirect_to,
         if permission_owners_func:
             user_qs = permission_owners_func(request, obj_perm, user)
         else:
-            user_qs = PermissionUser.objects.get_objects_queryset(
-                User,
-                dict(
-                    permissioninfo__obj_permission=obj_perm,
-                    permissioninfo__can_delegate=True),
-                {})
+            user_qs = PermissionUser.objects.filter_for_obj_permission(
+                obj_perm, can_delegate=True)
         
         # process the request
         if request.method == "POST":
@@ -108,12 +111,20 @@ def request_permission(always_redirect_to,
             if form.is_valid():
                 # Post a permission request for the permission owner
                 perm_request = form.save()
+                DatedMessage.objects.post_message_to_user(
+                    "Sent request for permission %s to user %s" %
+                    (permission, perm_request.permission_owner),
+                    user=request.User, msg_type=DatedMessage.TYPE_SUCCESS)
                 return simple.redirect_to(request, always_redirect_to,
                                           permanent=False)
         else:
             form = PermissionRequestForm(user_qs)
         
+        ec = {"form": form, "obj_perm": obj_perm}
+        ec.update(extra_context)
+        
         return simple.direct_to_template(
             request, template=template,
-            extra_context={"form": form, "obj_perm": obj_perm})
+            extra_context=ec)
+        
     return request_permission_view
