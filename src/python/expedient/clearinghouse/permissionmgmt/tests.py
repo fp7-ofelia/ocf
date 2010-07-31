@@ -5,11 +5,10 @@ Created on Jul 29, 2010
 '''
 from django.test import TestCase
 from django.contrib.auth.models import User
-from expedient.common.permissions.utils import create_permission,\
-    give_permission_to, get_or_register_permission_for_obj_or_class,\
-    has_permission
+from expedient.common.permissions.shortcuts import create_permission,\
+    give_permission_to
 from expedient.common.permissions.models import PermissionRequest,\
-    ObjectPermission, PermissionUser
+    Permittee, ObjectPermission
 from django.core.urlresolvers import reverse
 from expedient.common.tests.client import test_get_and_post_form
 
@@ -22,8 +21,8 @@ class RequestsTests(TestCase):
         self.u2 = User.objects.create_user("user2", "user@user.com", "password")
         
         create_permission("permission1", description="Permission 1 description.")
-        give_permission_to(self.u1, "permission1", self.u1, delegatable=True)
-        give_permission_to(self.u1, "permission1", self.u2, delegatable=True)
+        give_permission_to(self.u1, "permission1", self.u1, can_delegate=True)
+        give_permission_to(self.u1, "permission1", self.u2, can_delegate=True)
         
     def test_req_process(self):
         """
@@ -36,21 +35,21 @@ class RequestsTests(TestCase):
         # "permission1" should not be mentioned anywhere on the page
         self.assertContains(resp, "permission1", 0)
         
-        obj_perm1=get_or_register_permission_for_obj_or_class(
-            self.u1, "permission1"
+        obj_perm1=ObjectPermission.objects.get_or_create_for_object_or_class(
+             "permission1", self.u1,
         )[0]
-        obj_perm2=get_or_register_permission_for_obj_or_class(
-            self.u2, "permission1"
+        obj_perm2=ObjectPermission.objects.get_or_create_for_object_or_class(
+             "permission1", self.u2,
         )[0]
         req1 = PermissionRequest.objects.create(
             requesting_user=self.u2,
-            permission_user=PermissionUser.objects.get_or_create_from_instance(self.u2)[0],
+            permission_user=Permittee.objects.get_or_create_from_instance(self.u2)[0],
             permission_owner=self.u1,
             requested_permission=obj_perm1,
         )
         req2 = PermissionRequest.objects.create(
             requesting_user=self.u2,
-            permission_user=PermissionUser.objects.get_or_create_from_instance(self.u2)[0],
+            permission_user=Permittee.objects.get_or_create_from_instance(self.u2)[0],
             permission_owner=self.u1,
             requested_permission=obj_perm2,
         )

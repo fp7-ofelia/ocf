@@ -3,7 +3,7 @@ Created on Jun 2, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.utils import create_permission
+from expedient.common.permissions.shortcuts import create_permission
 from expedient.common.permissions.views import request_permission
 from django.core.urlresolvers import reverse
 

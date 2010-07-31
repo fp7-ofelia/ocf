@@ -4,26 +4,51 @@ Created on May 31, 2010
 @author: jnaous
 '''
 
-class PermissionUserNotInThreadLocals(Exception):
+class PermissionException(Exception):
     """
-    Raised when the user was not parsed and stored in thread local storage.
-    """
-    def __init__(self, user_kw):
-        self.user_kw = user_kw
-        super(PermissionUserNotInThreadLocals, self).__init__(
-            "Threadlocal storage does not have the user keyword %s. "
-            "This might be caused by not adding a parser to the Threadlocals "
-            "middleware to parse the request for this keyword."
-             % user_kw
-        )
-
-class NonePermissionUserException(Exception):
-    """
-    Raised when the permission user is None.
+    Base class for all exceptions from the permissions application.
     """
     pass
 
-class PermissionRegistrationConflict(Exception):
+class UnexpectedParameterType(PermissionException):
+    """
+    Raised when a function receives an unexpected parameter type.
+    @ivar found: the class that was found.
+    @type found: C{class}
+    @ivar expected: list of expected types.
+    @type expected: C{[class]}
+    @ivar index: position or keyword argument
+    @type index: C{int} or C{str}
+    """
+    def __init__(self, found, expected, index):
+        super(UnexpectedParameterType, self).__init__(
+            "Found type %s as argument %s. Allowed types are %s" %
+            (found, index, expected)
+        )
+        self.found = found
+        self.expected = expected
+        self.index = index
+        
+class PermitteeNotInThreadLocals(PermissionException):
+    """
+    Raised when the permittee was not parsed and stored in thread local storage.
+    """
+    def __init__(self, permittee_kw):
+        self.permittee_kw = permittee_kw
+        super(PermitteeNotInThreadLocals, self).__init__(
+            "Threadlocal storage does not have the permittee keyword %s. "
+            "This might be caused by not adding a parser to the Threadlocals "
+            "middleware to parse the request for this keyword."
+             % permittee_kw
+        )
+
+class NonePermitteeException(PermissionException):
+    """
+    Raised when the permittee is None.
+    """
+    pass
+
+class PermissionRegistrationConflict(PermissionException):
     """
     Raised when a permission is registered with two different views.
     """
@@ -33,20 +58,20 @@ class PermissionRegistrationConflict(Exception):
         message += "again with view %s." % new_view
         super(PermissionRegistrationConflict, self).__init__(message)
 
-class PermissionDenied(Exception):
+class PermissionDenied(PermissionException):
     """
     Raised when a permission is denied/not found.
     """
-    def __init__(self, perm_name, target, user, allow_redirect=True):
-        message = "Permission %s was not found for permission user %s for \
-target object %s" % (perm_name, user, target)
+    def __init__(self, perm_name, target, permittee, allow_redirect=True):
         self.perm_name = perm_name
         self.target = target
-        self.user = user
+        self.permittee = permittee
         self.allow_redirect = allow_redirect
-        super(PermissionDenied, self).__init__(message)
+        super(PermissionDenied, self).__init__(
+            "Permission %s was not found for permittee %s for "
+            "target object %s" % (perm_name, permittee, target))
 
-class PermissionSignatureError(Exception):
+class PermissionSignatureError(PermissionException):
     """
     Raised when a function decorated with one of the require_* decorators
     does not have the right arguments for the call.
@@ -57,13 +82,13 @@ class PermissionSignatureError(Exception):
 missing keyword argument %s.""" % (function.func_name, keyword)
         super(PermissionSignatureError, self).__init__(message)
 
-class PermissionDecoratorUsageError(Exception):
+class PermissionDecoratorUsageError(PermissionException):
     """
     Raised when the decorators are misused.
     """
     pass
 
-class PermissionDoesNotExist(Exception):
+class PermissionDoesNotExist(PermissionException):
     """
     Raised when a permission with a given name does not exist.
     """
@@ -76,9 +101,9 @@ class PermissionDoesNotExist(Exception):
             message += "."
         super(PermissionDoesNotExist, self).__init__(message)
 
-class PermissionCannotBeDelegated(Exception):
+class PermissionCannotBeDelegated(PermissionException):
     """
-    Raised when a permission user tries to give permission to another when
+    Raised when a permittee tries to give permission to another when
     the permission cannot be delegated.
     """
     

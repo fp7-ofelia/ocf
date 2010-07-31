@@ -20,7 +20,7 @@ TEMPLATE_PATH = "expedient/clearinghouse/aggregate"
 
 @require_objs_permissions_for_view(
     perm_names="can_add_aggregate",
-    user_func=get_user_from_req,
+    permittee_func=get_user_from_req,
     target_func=get_queryset_from_class(Aggregate),
     methods=["POST"])
 def list(request, agg_id=None):
@@ -55,7 +55,7 @@ def list(request, agg_id=None):
 
 @require_objs_permissions_for_view(
     perm_names="can_edit_aggregate",
-    user_func=get_user_from_req,
+    permittee_func=get_user_from_req,
     target_func=get_queryset(Aggregate, 1),
     methods=["POST"])
 def delete(request, agg_id):

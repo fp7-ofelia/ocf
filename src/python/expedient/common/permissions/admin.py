@@ -8,5 +8,5 @@ from django.contrib import admin
 
 admin.site.register(models.ExpedientPermission)
 admin.site.register(models.ObjectPermission)
-admin.site.register(models.PermissionInfo)
-admin.site.register(models.PermissionUser)
+admin.site.register(models.PermissionOwnership)
+admin.site.register(models.Permittee)

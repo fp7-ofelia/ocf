@@ -7,110 +7,14 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
-from django.db.models import Q
-from expedient.common.utils.managers import GenericObjectManager
-from exceptions import PermissionDoesNotExist
+from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
+from expedient.common.permissions.managers import ExpedientPermissionManager,\
+    ObjectPermissionManager, PermitteeManager
 
-class ExpedientPermissionManager(models.Manager):
-    """
-    Implements methods for checking for missing permissions.
-    """
-
-    def get_missing_for_target(self, user, perm_names, target):
-        """
-        Same as L{get_missing} but accepts a single target instance instead of
-        a queryset of targets, and only returns the missing
-        L{ExpedientPermission}. If C{user} is a superuser, always
-        return None.
-        
-        @param user: The permission user for the targets
-        @type user: L{PermissionUser} or a model instance.
-        @param perm_names: names of permissions to search for
-        @type perm_names: iterable of C{str}
-        @param target: object whose permissions we are searching for
-        @type target: C{Model}
-        
-        @return: Missing permission.
-        @rtype: L{ExpedientPermission} or None
-        """
-        if not isinstance(target, models.Model):
-            # assume class
-            target = ContentType.objects.get_for_model(target)
-        
-        return self.get_missing(
-            user, perm_names, target.__class__.objects.filter(pk=target.pk)
-        )[0]
-        
-    def get_missing(self, user, perm_names, targets):
-        """
-        This is the method that should be used to check for permissions. All
-        other methods that check permissions are wrappers around this method.
-        
-        Get the first missing permission that the user object does not have for
-        all targets. If the ObjectPermission does not exist for the object, it
-        will be created and saved before returning it.
-        
-        One exception is made: if the user is actually a
-        C{django.contrib.auth.models.User} instance, then if the user is
-        a superuser, get_missing always returns (None, None).
-        
-        @param user: The permission user for the targets
-        @type user: L{PermissionUser} or a model instance.
-        @param perm_names: names of permissions to search for
-        @type perm_names: iterable of C{str}
-        @param targets: objects whose permissions we are searching for
-        @type targets: C{QuerySet}
-        
-        @return: Missing permission and the target for which it is missing or
-            None if nothing is missing.
-        @rtype: tuple (L{ExpedientPermission}, target) or (None, None)
-        """
-        
-        if not isinstance(user, PermissionUser):
-            user, created = \
-                PermissionUser.objects.get_or_create_from_instance(user)
-        
-        # check for superuser
-        if isinstance(user.user, User) and user.user.is_superuser:
-            return (None, None)
-        
-        ct = ContentType.objects.get_for_model(targets.model)
-        ids = targets.values_list("pk", flat=True)
-        
-        obj_perms = ObjectPermission.objects.filter(
-            object_type=ct,
-            object_id__in=ids,
-            permission__name__in=perm_names,
-            users=user,
-        )
-        
-        if obj_perms.count() < len(perm_names) * len(ids):
-            # Check if all perm_names exist.
-            qs = self.filter(name__in=perm_names)
-            if qs.count() < len(set(perm_names)):
-                for name in qs.values_list("name", flat=True):
-                    if name not in perm_names:
-                        raise PermissionDoesNotExist(name)
-            # Find the missing permission
-            for perm_name in perm_names:
-                perm = qs.get(name=perm_name)
-                for id in ids:
-                    try:
-                        ObjectPermission.objects.get(
-                            object_type=ct,
-                            object_id=id,
-                            permission=perm,
-                            users=user,
-                        )
-                    except ObjectPermission.DoesNotExist:
-                        return (perm, targets.get(id=id))
-        else:
-            return (None, None)
-        
 class ExpedientPermission(models.Model):
     """
     This class holds all instances of L{ObjectPermission} that have a particular
-    name. L{ObjectPermission} links users to a particular object.
+    name. L{ObjectPermission} links permittees to a particular object.
     
     A permission may optionally have a view where the browser should be
     redirected if the permission is missing (for example to request the
@@ -143,52 +47,11 @@ class ExpedientPermission(models.Model):
             self.name, self.description, self.view)
 
         
-class ObjectPermissionManager(GenericObjectManager):
-    """
-    Adds some useful methods to the default manager type.
-    """
-    
-    def __init__(self):
-        super(ObjectPermissionManager, self).__init__("object_type",
-                                                      "object_id")
-    
-    def get_for_object(self, perm_name, obj):
-        """
-        Get the object permission with name C{perm_name} for object C{obj}.
-        
-        @param perm_name: name of the permission
-        @type perm_name: C{str}
-        @param obj: object for which to get the permission
-        @type obj: a model.
-        """
-        return self.filter_for_object(obj).get(permission__name=perm_name)
-    
-    def get_permitted_objects(self, klass, perm_names, perm_user):
-        """
-        Get a queryset of C{klass} instances that the permission user
-        C{perm_user} has permissions named by perm_names for.
-        """
-        if not isinstance(perm_user, PermissionUser):
-            perm_user, created = \
-                PermissionUser.objects.get_or_create_from_instance(perm_user)
-            if created:
-                return klass.objects.get_empty_query_set()
-
-        get = lambda(perm_name): \
-            set(ObjectPermission.objects.get_objects_queryset(
-                klass, dict(permission__name=perm_names[0], users=perm_user),
-                {}))
-        
-        objs = get(perm_names[0])
-        for name in perm_names[1:]:
-            objs.intersection_update(get(name))
-            
-        return klass.objects.filter(pk__in=objs)
 
 class ObjectPermission(models.Model):
     """
     Links a permission to its object using the C{contenttypes} framework and
-    to the set of users holding the permission.
+    to the set of permittees holding the permission.
     
     @cvar objects: L{ObjectPermissionManager} for the class.
     
@@ -201,10 +64,10 @@ class ObjectPermission(models.Model):
     @type object_id: positive C{int}
     @ivar target: the object for this target.
     @type target: varies
-    @ivar users: many-to-many relationship to users who hold the object
-        permission
-    @type users: C{ManyToManyField} to L{PermissionUser} through
-        L{PermissionInfo}
+    @ivar permittees: many-to-many relationship to permittees who own
+        the object permission
+    @type permittees: C{ManyToManyField} to L{Permittee} through
+        L{PermissionOwnership}
     """
 
     objects = ObjectPermissionManager()
@@ -215,7 +78,8 @@ class ObjectPermission(models.Model):
     object_id = models.PositiveIntegerField()
     target = GenericForeignKey("object_type", "object_id")
     
-    users = models.ManyToManyField("PermissionUser", through="PermissionInfo")
+    permittees = models.ManyToManyField(
+        "Permittee", through="PermissionOwnership")
     
     def __unicode__(self):
         return u"%s object permission for %s" % (self.permission.name,
@@ -226,112 +90,136 @@ class ObjectPermission(models.Model):
             ("permission", "object_type", "object_id"),
         )
     
-class PermissionUserManager(GenericObjectManager):
-    """
-    Extends L{GenericObjectManager} to add useful functions for getting
-    L{PermissionUser}s.
-    """
+    def give_to(self, receiver, giver=None, can_delegate=False):
+        """
+        Give permission ownership to an object. This method also checks that
+        the action is allowed (the C{giver} can actually give the permission
+        to C{receiver}).
+        
+        @param receiver: The permittee receiving the permission. If not a
+            L{Permittee} instance, one will be created (if not found).
+        @type receiver: L{Permittee} or C{Model} instance.
+        @keyword giver: The permission owner giving the permission. If not a
+            L{Permittee} instance, one will be created (if not found).
+            Defaults to C{None}.
+        @type giver: L{Permittee} or C{Model} instance.
+        @keyword can_delegate: Can the receiver in turn give the permission
+            out? Default is False.
+        @type can_delegate: L{bool}
+        @return: The new C{PermissionOwnership} instance.
+        """
+        # Is someone delegating the permission?
+        if giver:
+            giver = Permittee.objects.get_as_permittee(giver)
     
-    def filter_for_obj_permission(self, obj_permission, can_delegate=False):
-        """
-        Return a queryset filtered for only those who own a permission for
-        a particular object.
+            # check that the giver can give ownership
+            can_give = Permittee.objects.filter_for_obj_permission(
+                self, can_delegate=True).filter(
+                    id=giver.id).count() > 0
+                
+            if not can_give:
+                raise PermissionCannotBeDelegated(
+                    giver, self.permission.name)
         
-        @param obj_permission: permission we want the users to have
-        @type obj_permission: L{ObjectPermission}
-        @keyword can_delegate: If true then only look for users who can
-            give the permission to others.
-        @type can_delegate: C{bool} default False.
-        """
-        
-        # filter for superusers
-        su_ids = User.objects.filter(
-            is_superuser=True).values_list("id", flat=True)
-        su_q = Q(
-            user_type__id=ContentType.objects.get_for_model(User),
-            user_id__in=su_ids,
+        # All is good get or create the permission.
+        po, created = self.get_or_create(
+            obj_permission=self,
+            permittee=receiver,
+            defaults=dict(can_delegate=can_delegate),
         )
         
-        # check the permissioninfo
-        pi_q_d = dict(
-            permissioninfo__obj_permission=obj_permission,
-        )
-        if can_delegate:
-            pi_q_d.update(permission_info__can_delegate=True)
-        pi_q = Q(**pi_q_d)
-        
-        return self.filter(su_q | pi_q)
+        # Don't change the can_delegate option if the permission was already
+        # created unless if it's to enable it. We don't want people
+        # taking each other's delegation capabilities (e.g. from owner)
+        if po.can_delegate != can_delegate and (created or \
+        (not created and can_delegate)):
+            po.can_delegate = can_delegate
+            po.save()
+            
+        return po
     
-class PermissionUser(models.Model):
+    
+class Permittee(models.Model):
     """
-    Links permissions to their users using the C{contenttypes} framework, where
-    users are not necessarily C{django.contrib.auth.models.User} instances.
+    Links permissions to their owners using the C{contenttypes} framework,
+    where permittees are not necessarily C{django.contrib.auth.models.User}
+    instances.
     
     @cvar objects: L{GenericObjectManager} for the class
     
-    @ivar user_type: The C{ContentType} indicating the class of the user.
-    @type user_type: ForeignKey to C{ContentType}
-    @ivar user_id: The id of the user.
-    @type user_id: positive C{int}
-    @ivar user: the object for this user.
-    @type user: varies
+    @ivar object_type: The C{ContentType} indicating the class of the permittee.
+    @type object_type: ForeignKey to C{ContentType}
+    @ivar object_id: The id of the permittee.
+    @type object_id: positive C{int}
+    @ivar object: the object for this permittee.
+    @type object: varies
     """
     
-    objects = PermissionUserManager("user_type", "user_id")
+    objects = PermitteeManager("object_type", "object_id")
     
-    user_type = models.ForeignKey(ContentType)
-    user_id = models.PositiveIntegerField()
-    user = GenericForeignKey("user_type", "user_id")
+    object_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    object = GenericForeignKey("object_type", "object_id")
     
     def __unicode__(self):
-        return u"%s" % self.user
+        return u"%s" % self.object
     
     class Meta:
-        unique_together=(("user_type", "user_id"),)
-
-class PermissionInfo(models.Model):
+        unique_together=(("object_type", "object_id"),)
+        
+class PermissionOwnership(models.Model):
     """
-    Information on what the user model can do with the permission.
+    Information on what the permittee can do with the permission.
     
     @ivar obj_permission: the object permission for this info.
     @type obj_permission: ForeignKey to L{ObjectPermission}
-    @ivar user: the user for this info.
-    @type user: ForeignKey to L{PermissionUser}
-    @ivar can_delegate: Can the user give this permission to someone else?
+    @ivar permittee: the permittee for this info.
+    @type permittee: ForeignKey to L{Permittee}
+    @ivar can_delegate: Can the permittee give this permission to someone else?
     @type can_delegate: C{bool}
     """
     obj_permission = models.ForeignKey(ObjectPermission)
-    user = models.ForeignKey(PermissionUser)
+    permittee = models.ForeignKey(Permittee)
     can_delegate = models.BooleanField()
     
     def __unicode__(self):
         return u"%s - %s: Delegatable is %s" % (self.obj_permission,
-                                                self.user,
+                                                self.permittee,
                                                 self.can_delegate)
     
     class Meta:
-        unique_together=(("obj_permission", "user"),)
+        unique_together=(("obj_permission", "permittee"),)
 
 class PermissionRequest(models.Model):
     """
-    A request from a C{auth.models.User} on behalf of a C{PermissionUser} to
+    A request from a C{auth.models.User} on behalf of a C{Permittee} to
     obtain some permission for a particular target.
+    
+    @ivar requesting_user: the user requesting the permission be given to
+        C{permittee}.
+    @type requesting_user: C{django.contrib.auth.models.User}
+    @ivar permittee: The object that will receive the permission if granted.
+    @type permittee: L{Permittee}
+    @ivar permission_owner: The owner who should grant the permission.
+    @type permission_owner: C{django.contrib.auth.models.User}
+    @ivar requested_permission: The permission requested.
+    @type requested_permission: L{ObjectPermission}
+    @ivar message: a message to the permission owner.
+    @type message: C{str}
     """
     requesting_user = models.ForeignKey(
         User, related_name="sent_permission_requests")
-    permission_user = models.ForeignKey(
-        PermissionUser)
+    permittee = models.ForeignKey(Permittee)
     permission_owner = models.ForeignKey(
         User, related_name="received_permission_requests")
     requested_permission = models.ForeignKey(ObjectPermission)
     message = models.TextField(default="", blank=True)
     
-    def allow(self, delegatable=False):
-        from utils import give_permission_to
-        give_permission_to(self.permission_user,
-                           self.requested_permission.permission,
-                           self.requested_permission.target,
-                           self.permission_owner, delegatable=delegatable)
+    def allow(self, can_delegate=False):
+        self.requested_permission.give_to(
+            self.permittee,
+            giver=self.permission_owner,
+            can_delegate=can_delegate)
         self.delete()
         
     def deny(self):

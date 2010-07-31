@@ -3,168 +3,13 @@ Created on Jun 1, 2010
 
 @author: jnaous
 '''
-from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
-from expedient.common.permissions.models import \
-    ExpedientPermission, PermissionInfo, ObjectPermission, PermissionUser
-from expedient.common.permissions.exceptions import \
-    PermissionCannotBeDelegated, PermissionRegistrationConflict, \
-    PermissionDoesNotExist
 from expedient.common.permissions.middleware import PermissionMiddleware
-
-def _stringify_func(f):
-    if callable(f):
-        return "%s.%s" % (f.__module__, f.__name__)
-    else:
-        return f
-
-def get_or_register_permission_for_obj_or_class(obj_or_class, permission):
-    """
-    Add L{ObjectPermission} for a model if not existing. Return it and whether
-    or not it was created.
-    
-    @param obj_or_class: the object instance or class which we wish to add 
-        the permission for.
-    @type obj_or_class: C{Model} instance or C{class}.
-    @param permission: the permission's name or the L{ExpedientPermission}
-        instance
-    @type permission: L{ExpedientPermission} or string
-    @return: Tuple of (registered object permission, created)
-    @rtype: (L{ObjectPermission}, C{bool})
-    """
-    
-    if not isinstance(obj_or_class, models.Model):
-        # assume it's a model class, so get the contenttype for it.
-        obj_or_class = ContentType.objects.get_for_model(obj_or_class)
-        
-    if not isinstance(permission, ExpedientPermission):
-        try:
-            permission = ExpedientPermission.objects.get(name=permission)
-        except ExpedientPermission.DoesNotExist:
-            raise PermissionDoesNotExist(permission)
-
-    return ObjectPermission.objects.get_or_create_from_instance(
-        obj_or_class,
-        permission=permission,
-    )
-
-def create_permission(name, description="", view=None):
-    """
-    Create a new L{ExpedientPermission}.
-    
-    @param name: The name of the permission. Must be globally unique.
-    @type name: L{str}
-    @keyword view: View to redirect to if a permission is missing. Default None.
-        The view function should have the signature::
-            
-            view(request, permission, user, target_obj_or_class, redirect_to=None)
-        
-        where C{permission} is an L{ExpedientPermission} instance, C{user} is
-        the user object (not necessarily a C{django.contrib.auth.models.User}
-        instance), and C{target_obj_or_class} is the object instance or class
-        that the user does not have the permission C{permission} for.
-        C{redirect_to} is a field used to indicate the original URL that caused
-        the L{PermissionDenied} exception. The view should redirect there
-        when done.
-        
-    @type view: Full import path of the view as L{str} or the view function
-        object itself. Note that the view must be importable by its a path
-        (i.e. cannot use nested functions).
-        
-    @return: the new L{ExpedientPermission}.
-    """
-    view = _stringify_func(view)
-    # check if the permission is registered with a different view somewhere else
-    perm, created = ExpedientPermission.objects.get_or_create(
-        description=description, name=name, defaults=dict(view=view))
-    if not created and perm.view != view:
-        raise PermissionRegistrationConflict(name, view, perm.view)
-    
-    return perm
-
-def has_permission(perm_user, target_obj_or_class, perm_name):
-    """
-    Check if the permission user C{perm_user} has the permission C{permission}
-    for target C{target_obj_or_class}.
-    
-    @param perm_user: The object that we want to check has the permission
-    @type perm_user: object (not L{PermissionUser})
-    @param target_obj_or_class: The object that we want to check the
-        permission for using.
-    @type target_obj_or_class: object or class.
-    @param perm_name: The permission that we want to check.
-    @type perm_name: C{str}
-    @return: C{True} if the C{perm_user} has the permission, C{False} otherwise.
-    @rtype: C{bool}
-    """
-    return ExpedientPermission.objects.get_missing_for_target(
-        perm_user, [perm_name], target_obj_or_class) == None
-        
-
-def give_permission_to(receiver, permission, obj_or_class,
-                       giver=None, delegatable=False):
-    """
-    Gives permission over object or class to a permission user instance.
-    
-    @param receiver: The permission user receiving the permission.
-    @type receiver: object registered as permission user or L{PermissionUser}
-    @param permission: The permission's name or the permission object
-    @type permission: L{str} or L{ExpedientPermission} instance
-    @param obj_or_class: The object or the class to give permission to.
-    @type obj_or_class: model instance or class
-    @keyword giver: The permission user giving the permission.
-    @type giver: object registered as permission user or L{PermissionUser}
-    @keyword delegatable: Can the receiver in turn give the permission out?
-        Default is False.
-    @type delegatable: L{bool}
-    """
-    
-    if not isinstance(obj_or_class, models.Model):
-        # assume it's a model class, so get the contenttype for it.
-        obj_or_class = ContentType.objects.get_for_model(obj_or_class)
-    
-    if not isinstance(receiver, PermissionUser):
-        receiver, created = PermissionUser.objects.get_or_create_from_instance(
-            receiver,
-        )
-        
-    if not isinstance(permission, ExpedientPermission):
-        try:
-            permission = ExpedientPermission.objects.get(name=permission)
-        except ExpedientPermission.DoesNotExist:
-            raise PermissionDoesNotExist(permission)
-
-    # get the object permission
-    obj_perm, _ = get_or_register_permission_for_obj_or_class(obj_or_class, permission)
-
-    # Is someone delegating the permission?
-    if giver:
-        # Is the giver a PermissionUser already?
-        if not isinstance(giver, PermissionUser):
-            giver, _ = PermissionUser.objects.get_or_create_from_instance(
-                giver,
-            )
-
-        # check that the giver can delegate
-        can_give = PermissionUser.objects.filter_for_obj_permission(
-            obj_perm, can_delegate=True).filter(id=giver.id).count() > 0
-            
-        if not can_give:
-            raise PermissionCannotBeDelegated(giver, permission.name)
-    
-    pi = PermissionInfo.objects.get_or_create(
-        obj_permission=obj_perm,
-        user=receiver,
-        defaults=dict(can_delegate=delegatable),
-    )
-    if not created and pi.can_delegate != delegatable:
-        pi.can_delegate = delegatable
-        pi.save()
 
 def get_user_from_req(request, *args, **kwargs):
     '''
-    Get the user profile from the request. This function is helpful when
+    Get the user from the request. This function is helpful when
     using the require_*_permission_for_view decorators.
 
     For example::
@@ -270,10 +115,10 @@ def get_object_from_ids(ct_id, id):
     except ct.model_class().DoesNotExist:
         raise Http404()
 
-def require_objs_permissions_for_url(url, perm_names, user_func,
+def require_objs_permissions_for_url(url, perm_names, permittee_func,
                                      target_func, methods=["GET", "POST"]):
     """
     Convenience wrapper around L{PermissionMiddleware}.
     """
     PermissionMiddleware.add_required_url_permissions(
-        url, perm_names, user_func, target_func, methods)
+        url, perm_names, permittee_func, target_func, methods)

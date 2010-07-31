@@ -95,8 +95,8 @@ def confirm_requests(request):
     if request.method == "POST":
         # check if confirmed and then do actions.
         if request.POST.get("post", "no") == "yes":
-            for req, delegatable in approved_reqs:
-                req.allow(delegatable=delegatable)
+            for req, delegate in approved_reqs:
+                req.allow(can_delegate=delegate)
         
             for req in denied_reqs:
                 req.deny()

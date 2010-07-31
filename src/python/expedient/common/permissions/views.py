@@ -5,32 +5,30 @@ Created on Jun 6, 2010
 '''
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import get_callable
+from django.views.generic import simple
 from expedient.common.permissions.exceptions import PermissionDenied
 from expedient.common.permissions.models import ExpedientPermission,\
-    PermissionRequest, PermissionUser
-from expedient.common.permissions.utils import get_object_from_ids,\
-    get_or_register_permission_for_obj_or_class
-from django.core.urlresolvers import get_callable
+    PermissionRequest, Permittee, ObjectPermission
+from expedient.common.permissions.utils import get_object_from_ids
 from expedient.common.permissions.forms import PermissionRequestForm
-from django.views.generic import simple, create_update
-from django.contrib.auth.models import User
 from expedient.common.messaging.models import DatedMessage
 
 def reraise_permission_denied(request, perm_name=None,
                               target_ct_id=None, target_id=None,
-                              user_ct_id=None, user_id=None):
+                              permittee_ct_id=None, permittee_id=None):
     """
     Raises a PermissionDenied exception for the given parameters.
     """
     target_obj_or_class = get_object_from_ids(target_ct_id, target_id)
-    user = get_object_from_ids(user_ct_id, user_id)
-    raise PermissionDenied(perm_name, target_obj_or_class, user, False)
+    permittee = get_object_from_ids(permittee_ct_id, permittee_id)
+    raise PermissionDenied(perm_name, target_obj_or_class, permittee, False)
 
 def redirect_permissions_request(request, perm_name=None,
                                  target_ct_id=None, target_id=None,
-                                 user_ct_id=None, user_id=None):
+                                 permittee_ct_id=None, permittee_id=None):
     """
-    Gets the target and user objects and passes them along with the 
+    Gets the target and permittee objects and passes them along with the 
     L{ExpedientPermission} object named by C{perm_name} to the view that's
     used by the permission.
     """
@@ -39,9 +37,9 @@ def redirect_permissions_request(request, perm_name=None,
     # Change from ContentType to class
     if type(target_obj_or_class) == ContentType:
         target_obj_or_class = target_obj_or_class.model_class()
-    user = get_object_from_ids(user_ct_id, user_id)
+    permittee = get_object_from_ids(permittee_ct_id, permittee_id)
     if not permission.view:
-        raise PermissionDenied(perm_name, target_obj_or_class, user, False)
+        raise PermissionDenied(perm_name, target_obj_or_class, permittee, False)
     
     view = get_callable(permission.view)
     
@@ -50,7 +48,7 @@ def redirect_permissions_request(request, perm_name=None,
     if not redirect_to or ' ' in redirect_to or "//" in redirect_to:
         redirect_to = None
     
-    return view(request, permission, user, target_obj_or_class,
+    return view(request, permission, permittee, target_obj_or_class,
                 redirect_to=redirect_to)
 
 def request_permission(always_redirect_to,
@@ -74,11 +72,11 @@ def request_permission(always_redirect_to,
         is saved.
     @keyword permission_owners_func: A callable with the following signature::
         
-            permission_owners_func(request, obj_permission, user)
+            permission_owners_func(request, obj_permission, permittee)
             
         Where C{request} is the request object passed to the view,
         C{obj_permission} is the requested L{ObjectPermission} instance, and
-        C{user} is the object that the permission is being requested for. The
+        C{permittee} is the object that the permission is being requested for. The
         function should return {django.contrib.auth.models.User} C{QuerySet}.
     @keyword extra_context: A dictionary of values to add to the template
         context. By default, this is an empty dictionary. If a value in the
@@ -87,24 +85,25 @@ def request_permission(always_redirect_to,
     @keyword template: Path of the template to use. By default, this is
         "permissions/get_permission.html".
     """
-    def request_permission_view(request, permission, user,
+    def request_permission_view(request, permission, permittee,
                                 target_obj_or_class, redirect_to=None):
         # Get the object permission
-        obj_perm = get_or_register_permission_for_obj_or_class(
-            target_obj_or_class, permission)[0]
+        obj_perm = ObjectPermission.objects.get_or_create_for_object_or_class(
+            permission, target_obj_or_class)[0]
         
         # Get the users who can delegate the permission
         if permission_owners_func:
-            user_qs = permission_owners_func(request, obj_perm, user)
+            user_qs = permission_owners_func(request, obj_perm, permittee)
         else:
-            user_qs = PermissionUser.objects.filter_for_obj_permission(
+            user_qs = Permittee.objects.filter_for_obj_permission(
                 obj_perm, can_delegate=True)
         
         # process the request
         if request.method == "POST":
-            perm_user = PermissionUser.objects.get_or_create_from_instance(user)[0]
+            permittee = Permittee.objects.get_or_create_from_instance(
+                permittee)[0]
             perm_request = PermissionRequest(requesting_user=request.user,
-                                             permission_user=perm_user,
+                                             permittee=permittee,
                                              requested_permission=obj_perm)
             form = PermissionRequestForm(user_qs, request.POST,
                                          instance=perm_request)

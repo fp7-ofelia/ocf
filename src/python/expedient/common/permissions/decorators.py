@@ -5,7 +5,6 @@ Created on May 31, 2010
 '''
 import exceptions
 from models import ExpedientPermission
-from django.contrib.contenttypes.models import ContentType
 from expedient.common.middleware.threadlocals import get_thread_locals
 
 class require_obj_permissions_for_method(object):
@@ -14,8 +13,8 @@ class require_obj_permissions_for_method(object):
     
     The decorator requires the following parameters on initialization:
     
-    @param user_kw: the keyword used to store the user object in threadlocals.
-    @type user_kw: C{str}
+    @param permittee_kw: the keyword used to store the permittee object in threadlocals.
+    @type permittee_kw: C{str}
     @param perm_names: a list of permission names that are required.
     @type perm_names: C{list} of C{str}
     
@@ -29,9 +28,9 @@ class require_obj_permissions_for_method(object):
         
     """
     
-    def __init__(self, user_kw, perm_names):
+    def __init__(self, permittee_kw, perm_names):
         self.perm_names = set(perm_names)
-        self.user_kw = user_kw
+        self.permittee_kw = permittee_kw
     
     def __call__(self, f):
         """
@@ -43,21 +42,21 @@ class require_obj_permissions_for_method(object):
             Wrapper for the called method that checks the permissions before
             calling the method.
             """
-            # check if the user exists in the request
+            # check if the permittee exists in the request
             d = get_thread_locals()
             try:
-                user = d[self.user_kw]
+                permittee = d[self.permittee_kw]
             except KeyError:
                 raise exceptions.PermissionUserNotInThreadLocals(
-                    self.user_kw)
-            if not user:
-                raise exceptions.NonePermissionUserException(self.user_kw)
+                    self.permittee_kw)
+            if not permittee:
+                raise exceptions.NonePermissionUserException(self.permittee_kw)
 
             missing = ExpedientPermission.objects.get_missing_for_target(
-                user, self.perm_names, obj)
+                permittee, self.perm_names, obj)
 
             if missing:
-                raise exceptions.PermissionDenied(missing.name, obj, user)
+                raise exceptions.PermissionDenied(missing.name, obj, permittee)
             
             # All is good. Call the function
             return f(obj, *args, **kw)
@@ -66,9 +65,9 @@ class require_obj_permissions_for_method(object):
 
 class require_objs_permissions_for_view(object):
     """
-    Decorator to be used on views. The decorator checks that a permission user
-    has the permissions listed in C{perm_names} for some targets. The user and
-    targets are returned respectively by the C{user_func} and C{target_func}
+    Decorator to be used on views. The decorator checks that a permittee
+    has the permissions listed in C{perm_names} for some targets. The permittee and
+    targets are returned respectively by the C{permittee_func} and C{target_func}
     parameters of the decorator. These should be callables that can take
     the parameters of the decorated function. The decorator also accepts an
     optional fourth parameter C{methods} that is a list of method names
@@ -87,10 +86,10 @@ class require_objs_permissions_for_view(object):
     
     @param perm_names: a list of permission names that are required.
     @type perm_names: L{list} of L{str}
-    @param user_func: a callable that accepts the decorated methods arguments
+    @param permittee_func: a callable that accepts the decorated methods arguments
         and returns a model instance not necessarily a L{PermissionUser}
         instance.
-    @type user_func: callable
+    @type permittee_func: callable
     @param target_func: a callable that accepts the decorated methods arguments
         and returns a C{QuerySet} instance of targets.
     @type target_func: callable
@@ -99,16 +98,16 @@ class require_objs_permissions_for_view(object):
     @type methods: C{list} of C{str}
     """
     
-    def __init__(self, perm_names, user_func, target_func,
+    def __init__(self, perm_names, permittee_func, target_func,
                  methods=["GET", "POST"]):
         self.perm_names = set(perm_names)
-        self.user_func = user_func
+        self.permittee_func = permittee_func
         self.target_func = target_func
         self.methods = methods
         
     def __call__(self, f):
         from middleware import PermissionMiddleware
         PermissionMiddleware.add_required_view_permissions(
-            f, self.perm_names, self.user_func, self.target_func, self.methods,
+            f, self.perm_names, self.permittee_func, self.target_func, self.methods,
         )
         return f
