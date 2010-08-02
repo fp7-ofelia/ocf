@@ -5,10 +5,10 @@ Created on Jun 11, 2010
 '''
 
 from django.conf import settings
-from expedient.common.tests.manager import SettingsTestCase
-from django.core.urlresolvers import reverse
-from expedient.clearinghouse.aggregate.tests.models import DummyAggregate
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from expedient.common.tests.manager import SettingsTestCase
+from expedient.clearinghouse.aggregate.tests.models import DummyAggregate
 
 MOD = "expedient.clearinghouse.aggregate"
 
@@ -24,6 +24,7 @@ class Tests(SettingsTestCase):
         u = User(username="test")
         u.set_password("password")
         u.save()
+        self.u = u
         self.client.login(username="test", password="password")
         
     def test_create(self):
@@ -38,7 +39,8 @@ class Tests(SettingsTestCase):
                 location="Stanford, CA",
             )
         )
-        self.assertRedirects(response, "/")
+        self.assertRedirects(response, "/",
+                             msg_prefix="response was %s" % response)
         self.assertEqual(DummyAggregate.objects.all().count(), 1)
         
     def test_edit(self):
@@ -47,6 +49,7 @@ class Tests(SettingsTestCase):
         """
         DummyAggregate.objects.create(
             name="dummy agg",
+            owner=self.u,
             description="aggregate description",
             location="Stanford, CA",
         )
@@ -58,5 +61,6 @@ class Tests(SettingsTestCase):
                 location="Stanford, CA",
             )
         )
-        self.assertRedirects(response, "/")
+        self.assertRedirects(response, "/",
+                             msg_prefix="response was %s" % response)
         
