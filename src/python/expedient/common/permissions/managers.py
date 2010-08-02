@@ -116,7 +116,7 @@ class ExpedientPermissionManager(models.Manager):
         from expedient.common.permissions.models import Permittee, \
             ObjectPermission
         
-        permitee = Permittee.objects.get_as_permittee(permittee)
+        permittee = Permittee.objects.get_as_permittee(permittee)
         
         # check for superuser
         if isinstance(permittee.object, User) and permittee.object.is_superuser:
@@ -325,19 +325,22 @@ class PermitteeManager(GenericObjectManager):
         """
         
         # filter for superusers
-        su_ids = User.objects.filter(
-            is_superuser=True).values_list("id", flat=True)
-        su_q = Q(
-            user_type__id=ContentType.objects.get_for_model(User).id,
-            user_id__in=su_ids,
-        )
+        su_set = User.objects.filter(
+            is_superuser=True)
+
+        # Make sure that the superusers all have Permittee counterparts
+        su_ids = []
+        for su in su_set:
+            su_ids.append(self.get_as_permittee(su).id)
         
-        # check the permissioninfo
+        su_q = Q(id__in=su_ids)
+        
+        # check the permission ownership
         pi_q_d = dict(
-            permissioninfo__obj_permission=obj_permission,
+            permissionownership__obj_permission=obj_permission,
         )
         if can_delegate:
-            pi_q_d.update(permissioninfo__can_delegate=True)
+            pi_q_d.update(permissionownership__can_delegate=True)
         pi_q = Q(**pi_q_d)
         
         return self.filter(su_q | pi_q)

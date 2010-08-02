@@ -6,7 +6,7 @@ Created on Jul 29, 2010
 from django.test import TestCase
 from django.contrib.auth.models import User
 from expedient.common.permissions.shortcuts import create_permission,\
-    give_permission_to
+    give_permission_to, has_permission
 from expedient.common.permissions.models import PermissionRequest,\
     Permittee, ObjectPermission
 from django.core.urlresolvers import reverse
@@ -21,8 +21,8 @@ class RequestsTests(TestCase):
         self.u2 = User.objects.create_user("user2", "user@user.com", "password")
         
         create_permission("permission1", description="Permission 1 description.")
-        give_permission_to(self.u1, "permission1", self.u1, can_delegate=True)
-        give_permission_to(self.u1, "permission1", self.u2, can_delegate=True)
+        give_permission_to("permission1", self.u1, self.u1, can_delegate=True)
+        give_permission_to("permission1", self.u2, self.u1, can_delegate=True)
         
     def test_req_process(self):
         """
@@ -43,13 +43,13 @@ class RequestsTests(TestCase):
         )[0]
         req1 = PermissionRequest.objects.create(
             requesting_user=self.u2,
-            permission_user=Permittee.objects.get_or_create_from_instance(self.u2)[0],
+            permittee=Permittee.objects.get_or_create_from_instance(self.u2)[0],
             permission_owner=self.u1,
             requested_permission=obj_perm1,
         )
         req2 = PermissionRequest.objects.create(
             requesting_user=self.u2,
-            permission_user=Permittee.objects.get_or_create_from_instance(self.u2)[0],
+            permittee=Permittee.objects.get_or_create_from_instance(self.u2)[0],
             permission_owner=self.u1,
             requested_permission=obj_perm2,
         )

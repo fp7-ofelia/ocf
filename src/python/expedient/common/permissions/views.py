@@ -13,6 +13,7 @@ from expedient.common.permissions.models import ExpedientPermission,\
 from expedient.common.permissions.utils import get_object_from_ids
 from expedient.common.permissions.forms import PermissionRequestForm
 from expedient.common.messaging.models import DatedMessage
+from django.contrib.auth.models import User
 
 def reraise_permission_denied(request, perm_name=None,
                               target_ct_id=None, target_id=None,
@@ -76,8 +77,8 @@ def request_permission(always_redirect_to,
             
         Where C{request} is the request object passed to the view,
         C{obj_permission} is the requested L{ObjectPermission} instance, and
-        C{permittee} is the object that the permission is being requested for. The
-        function should return {django.contrib.auth.models.User} C{QuerySet}.
+        C{permittee} is the object that will own the permission. The
+        function should return a C{django.contrib.auth.models.User} C{QuerySet}.
     @keyword extra_context: A dictionary of values to add to the template
         context. By default, this is an empty dictionary. If a value in the
         dictionary is callable, the generic view will call it just before
@@ -95,9 +96,13 @@ def request_permission(always_redirect_to,
         if permission_owners_func:
             user_qs = permission_owners_func(request, obj_perm, permittee)
         else:
-            user_qs = Permittee.objects.filter_for_obj_permission(
-                obj_perm, can_delegate=True)
-        
+            owners_ids = Permittee.objects.filter_for_obj_permission(
+                obj_perm, can_delegate=True,
+            ).filter(
+                object_type=ContentType.objects.get_for_model(User)
+            ).values_list("object_id", flat=True)
+            user_qs = User.objects.filter(id__in=owners_ids)
+            
         # process the request
         if request.method == "POST":
             permittee = Permittee.objects.get_or_create_from_instance(
@@ -113,7 +118,7 @@ def request_permission(always_redirect_to,
                 DatedMessage.objects.post_message_to_user(
                     "Sent request for permission %s to user %s" %
                     (permission, perm_request.permission_owner),
-                    user=request.User, msg_type=DatedMessage.TYPE_SUCCESS)
+                    user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 return simple.redirect_to(request, always_redirect_to,
                                           permanent=False)
         else:

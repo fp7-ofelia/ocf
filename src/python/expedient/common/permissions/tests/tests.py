@@ -16,6 +16,7 @@ from ..shortcuts import create_permission, give_permission_to
 from views import other_perms_view, add_perms_view
 from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
+from expedient.common.permissions.models import ObjectPermission
 
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
@@ -50,23 +51,24 @@ def create_objects(test_case):
     # Give permissions to users
     for obj in test_case.objs:
         for perm in ["can_read_val", "can_get_x2", "can_get_x5"]:
-            give_permission_to(test_case.u1,
-                               perm,
+            give_permission_to(perm,
                                obj,
+                               test_case.u1,
                                can_delegate=True)
         for perm in ["can_read_val", "can_get_x3"]:
-            give_permission_to(test_case.u2,
-                               perm,
+            give_permission_to(perm,
                                obj,
+                               test_case.u2,
                                can_delegate=False)
         for perm in ["can_get_x4"]:
-            give_permission_to(test_case.o3,
-                               perm,
+            give_permission_to(perm,
                                obj,
+                               test_case.o3,
                                can_delegate=True)
 
-        give_permission_to(test_case.u1, "test_request_perm",
+        give_permission_to("test_request_perm",
                            PermissionTestClass,
+                           test_case.u1,
                            can_delegate=True)
 
 class TestObjectPermissions(test_mgr.SettingsTestCase):
@@ -144,6 +146,31 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             self.objs[0])
         
         self.assertTrue(missing == None)
+        
+    def test_filter_for_obj_permission(self):
+        """
+        Tests that the filter_for_obj_permission returns a list of all users
+        who own the permission.
+        """
+        obj_permission =\
+            ObjectPermission.objects.get_or_create_for_object_or_class(
+                "can_read_val", self.o3)[0]
+        
+        permittees = Permittee.objects.filter_for_obj_permission(
+            obj_permission, can_delegate=False)
+        self.assertEqual(
+            set(permittees),
+            set([Permittee.objects.get_as_permittee(obj) \
+                 for obj in [self.su, self.u1, self.u2]])
+        )
+
+        permittees = Permittee.objects.filter_for_obj_permission(
+            obj_permission, can_delegate=True)
+        self.assertEqual(
+            set(permittees),
+            set([Permittee.objects.get_as_permittee(obj) \
+                 for obj in [self.su, self.u1]])
+        )
 
     def test_obj_method_decorators(self):
         """
@@ -188,14 +215,14 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         self.assertRaises(PermissionDenied, self.objs[1].get_val_x2,
                           self.objs[1])
         
-        give_permission_to(self.u2, "can_get_x2", self.objs[0],
+        give_permission_to("can_get_x2", self.objs[0], self.u2,
                            giver=self.u1, can_delegate=True)
         
         self.assertEqual(self.objs[0].get_val_x2(), 2)
         self.assertRaises(PermissionDenied, self.objs[1].get_val_x2,
                           self.objs[1])
 
-        give_permission_to(self.u2, "can_get_x2", self.objs[1],
+        give_permission_to("can_get_x2", self.objs[1], self.u2,
                            giver=self.u1, can_delegate=False)
 
         self.assertEqual(self.objs[1].get_val_x2(), 2)
@@ -203,7 +230,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         # Test disallowed delegation
         self.assertRaises(PermissionCannotBeDelegated,
                           give_permission_to,
-                          self.u1, "can_get_x3", self.objs[0],
+                          "can_get_x3", self.objs[0], self.u1,
                           giver=self.u2, can_delegate=False)
         
         d["user_kw"] = self.u1
@@ -213,7 +240,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
                           self.objs[1])
         
         # Test cross delegation between types
-        give_permission_to(self.u1, "can_get_x4", self.objs[0],
+        give_permission_to("can_get_x4", self.objs[0], self.u1,
                            giver=self.o3, can_delegate=False)
         
         self.assertEqual(self.objs[0].get_val_x4(), 4)
@@ -221,10 +248,10 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         # Test delegation of delegated permission
         self.assertRaises(PermissionCannotBeDelegated,
                           give_permission_to,
-                          self.u2, "can_get_x4", self.objs[0],
+                          "can_get_x4", self.objs[0], self.u2,
                           giver=self.u1, can_delegate=False)
         
-        give_permission_to(self.o3, "can_get_x2", self.objs[0],
+        give_permission_to("can_get_x2", self.objs[0], self.o3,
                            giver=self.u2, can_delegate=True)
 
 class TestRequests(test_mgr.SettingsTestCase):
@@ -288,8 +315,8 @@ class TestRequests(test_mgr.SettingsTestCase):
             "permissions_url",
             kwargs=dict(
                 perm_name="can_add",
-                user_ct_id=ContentType.objects.get_for_model(User).id,
-                user_id = self.u1.id,
+                permittee_ct_id=ContentType.objects.get_for_model(User).id,
+                permittee_id = self.u1.id,
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
@@ -311,8 +338,8 @@ class TestRequests(test_mgr.SettingsTestCase):
             "permissions_url",
             kwargs=dict(
                 perm_name="can_add",
-                user_ct_id=ContentType.objects.get_for_model(User).id,
-                user_id = self.u1.id,
+                permittee_ct_id=ContentType.objects.get_for_model(User).id,
+                permittee_id = self.u1.id,
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
@@ -341,8 +368,8 @@ class TestRequests(test_mgr.SettingsTestCase):
             "permissions_url",
             kwargs=dict(
                 perm_name="can_set_val",
-                user_ct_id=ContentType.objects.get_for_model(User).id,
-                user_id = self.u1.id,
+                permittee_ct_id=ContentType.objects.get_for_model(User).id,
+                permittee_id = self.u1.id,
                 target_ct_id=ContentType.objects.get_for_model(PermissionTestClass).id,
                 target_id=self.objs[0].id,
             )
@@ -380,8 +407,8 @@ class TestRequests(test_mgr.SettingsTestCase):
             "permissions_url",
             kwargs=dict(
                 perm_name="can_call_protected_url",
-                user_ct_id=ContentType.objects.get_for_model(User).id,
-                user_id = self.u1.id,
+                permittee_ct_id=ContentType.objects.get_for_model(User).id,
+                permittee_id = self.u1.id,
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
@@ -400,8 +427,8 @@ class TestRequests(test_mgr.SettingsTestCase):
             "permissions_url",
             kwargs=dict(
                 perm_name="test_request_perm",
-                user_ct_id=ContentType.objects.get_for_model(User).id,
-                user_id = self.u2.id,
+                permittee_ct_id=ContentType.objects.get_for_model(User).id,
+                permittee_id = self.u2.id,
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
@@ -410,15 +437,15 @@ class TestRequests(test_mgr.SettingsTestCase):
         
         # post a request for the permission
         self.assertEqual(PermissionRequest.objects.count(), 0)
-        response = self.client.post(perm_url, {"permission_owner": 1,
+        response = self.client.post(perm_url, {"permission_owner": self.u1.id,
                                                "message": "hello",})
         self.assertRedirects(response, reverse("test_allowed"))
         self.assertEqual(PermissionRequest.objects.count(), 1)
         perm_req = PermissionRequest.objects.all()[0]
         self.assertEqual(perm_req.requesting_user, self.u2)
         self.assertEqual(
-            perm_req.permission_user,
-            Permittee.objects.get_or_create_from_instance(self.u2)[0])
+            perm_req.permittee,
+            Permittee.objects.get_as_permittee(self.u2))
         self.assertEqual(perm_req.permission_owner, self.u1)
         self.assertEqual(
             perm_req.requested_permission.target,

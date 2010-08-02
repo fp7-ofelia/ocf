@@ -3,31 +3,30 @@ Created on Jul 27, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.models import PermissionRequest,\
-    ObjectPermission, ExpedientPermission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.views.generic import simple
 from django.db.models import Q
 from django.views.generic.simple import direct_to_template
+from expedient.common.permissions.models import PermissionRequest,\
+    ObjectPermission
 
 TEMPLATE_PATH = "permissionmgmt"
 
 def permissions_dashboard(request):
     """
-    Display a list of current requests and buttons to approve/deny. Also
-    display table of user's permissions.
+    Display a list of current requests and buttons to approve/deny.
     """
     
     perm_reqs = PermissionRequest.objects.filter(
         permission_owner=request.user)
     
     my_perms = ObjectPermission.objects.filter(
-        users__user_type=ContentType.objects.get_for_model(User),
-        users__user_id=request.user.id)
+        permittees__object_type=ContentType.objects.get_for_model(User),
+        permittees__object_id=request.user.id)
     
     def filter_id(id):
         try:

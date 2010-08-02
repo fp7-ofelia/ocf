@@ -121,8 +121,10 @@ class ObjectPermission(models.Model):
                 raise PermissionCannotBeDelegated(
                     giver, self.permission.name)
         
+        receiver = Permittee.objects.get_as_permittee(receiver)
+        
         # All is good get or create the permission.
-        po, created = self.get_or_create(
+        po, created = PermissionOwnership.objects.get_or_create(
             obj_permission=self,
             permittee=receiver,
             defaults=dict(can_delegate=can_delegate),

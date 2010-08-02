@@ -12,7 +12,10 @@ def user_parse_func(request):
 threadlocals.add_parser("user_kw", user_parse_func)
 
 def test_parse_func(request):
-    return PermissionTestClass.objects.get(id=1)
+    try:
+        return PermissionTestClass.objects.all()[0]
+    except:
+        return None
 threadlocals.add_parser("test_kw", test_parse_func)
 
 class PermissionTestClass(models.Model):

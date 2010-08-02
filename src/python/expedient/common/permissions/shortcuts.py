@@ -60,8 +60,8 @@ def give_permission_to(permission, obj_or_class, receiver, giver=None, can_deleg
     """
     
     obj_permission =\
-        ObjectPermission.objects.get_for_object_or_class(
-            permission, obj_or_class)
+        ObjectPermission.objects.get_or_create_for_object_or_class(
+            permission, obj_or_class)[0]
         
     return obj_permission.give_to(
         receiver, giver=giver, can_delegate=can_delegate)

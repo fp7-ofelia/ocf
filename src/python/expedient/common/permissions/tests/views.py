@@ -63,7 +63,7 @@ def test_view_update(request, obj_id=None):
 
 def add_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
-        give_permission_to(user, permission, target)
+        give_permission_to(permission, target, user)
         redirect_to = redirect_to or reverse("test_view_crud")
         return HttpResponseRedirect(redirect_to)
     else:
@@ -78,7 +78,7 @@ Do you want to get permissions to create PermissionTestClass instances?
 
 def other_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
-        give_permission_to(user, permission, target)
+        give_permission_to(permission, target, user)
         redirect_to = redirect_to or reverse("test_view_crud")
         return HttpResponseRedirect(redirect_to)
     else:
