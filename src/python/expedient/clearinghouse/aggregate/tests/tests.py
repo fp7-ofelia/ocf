@@ -13,6 +13,7 @@ from expedient.common.middleware import threadlocals
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.exceptions import PermissionDenied
+from expedient.common.tests.client import test_get_and_post_form
 
 MOD = "expedient.clearinghouse.aggregate"
 
@@ -29,8 +30,7 @@ class Tests(SettingsTestCase):
         u.set_password("password")
         u.save()
         self.u = u
-        d = threadlocals.get_thread_locals()
-        d["user"] = u
+        threadlocals.push_frame(user=u)
         self.client.login(username="test", password="password")
         
     def test_disallowed_create(self):
@@ -79,6 +79,34 @@ class Tests(SettingsTestCase):
         self.assertRaises(PermissionDenied, agg.save)
         self.assertRaises(PermissionDenied, agg.delete)
         
+        # Try delete using a post
+        response = test_get_and_post_form(
+            client=self.client,
+            url=agg.get_delete_url(next="/"),
+            params={},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue("/permissions/can_edit_aggregate/" in response["location"])
+
+    def test_allowed_delete(self):
+        """
+        Tests that delete works when given permission.
+        """
+        give_permission_to("can_add_aggregate", Aggregate, self.u)
+        agg = DummyAggregate.objects.create(
+            name="dummy agg",
+            owner=self.u,
+            description="aggregate description",
+            location="Stanford, CA",
+        )
+        give_permission_to("can_edit_aggregate", agg, self.u)
+        response = test_get_and_post_form(
+            client=self.client,
+            url=agg.get_delete_url(next="/"),
+            params={},
+        )
+        self.assertRedirects(response, "/")
+
     def test_allowed_edit(self):
         """
         Tests that we can edit an existing aggregate.
