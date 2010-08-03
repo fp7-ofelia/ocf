@@ -17,6 +17,7 @@ from views import other_perms_view, add_perms_view
 from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
 from expedient.common.permissions.models import ObjectPermission
+from expedient.common.permissions.shortcuts import must_have_permission
 
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
@@ -146,6 +147,18 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             self.objs[0])
         
         self.assertTrue(missing == None)
+        
+    def test_must_have_permission(self):
+        """
+        Tests the must_have_permission shortcut.
+        """
+        self.assertRaises(
+            PermissionDenied,
+            must_have_permission,
+            permittee=self.u1,
+            target_obj_or_class=self.objs[0],
+            perm_name="can_get_x3",
+        )
         
     def test_filter_for_obj_permission(self):
         """
