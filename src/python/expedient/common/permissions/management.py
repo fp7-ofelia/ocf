@@ -26,17 +26,25 @@ def _import_module(name, app_name):
         if not msg.startswith('No module named') or name not in msg:
             raise
 
-def run(sender, **kwargs):
-    if run.installed_permissions:
+def post_syncdb_run(sender, **kwargs):
+    # We need to wait until the permissions application is
+    # installed (syncdb'd)
+    if post_syncdb_run.installed_permissions:
         _import_module("permissions", sender.__name__.split(".models")[0])
+
+    # If the permissions app is was just installed, then import the
+    # permissions of any queued application
     elif sender.__name__.startswith("expedient.common.permissions"):
-        run.installed_permissions = True
-        for mod in run.waiting_for_permissions:
+        post_syncdb_run.installed_permissions = True
+        for mod in post_syncdb_run.waiting_for_permissions:
             _import_module("permissions", mod.__name__.split(".models")[0])
+    
+    # Otherwise, queue this application until the permissions app
+    # is installed
     else:
-        run.waiting_for_permissions.append(sender)
+        post_syncdb_run.waiting_for_permissions.append(sender)
 
-run.waiting_for_permissions = []
-run.installed_permissions = False
+post_syncdb_run.waiting_for_permissions = []
+post_syncdb_run.installed_permissions = False
 
-signals.post_syncdb.connect(run)
+signals.post_syncdb.connect(post_syncdb_run)
