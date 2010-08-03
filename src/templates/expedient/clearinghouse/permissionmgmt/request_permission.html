@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+    <h2>Permission Denied</h2>
+	<div class="info_text">
+		You do not have permission ("{{ obj_perm.permission.name }}") needed
+		to perform this action. If you would like to request this permission
+		from a user who has the authority to give it to you, select a user
+		from the list below and click the "Request" button.
+	</div>
+    <form action="" method="post">{% csrf_token %}
+		<table class="formtable">
+			{{ form.as_table }}
+		</table>
+	    <div>
+		    <input type="submit" value="Request" />
+			<a href="{% url home %}">Cancel</a>
+	    </div>
+    </form>
+</div>
+{% endblock %}
