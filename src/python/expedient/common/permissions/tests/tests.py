@@ -190,7 +190,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         Tests that the L{require_obj_permissions} and
         L{require_obj_permissions_for_user} are correct.
         """
-        
+        threadlocals.push_frame()
         d = threadlocals.get_thread_locals()
         
         for obj in self.objs:
@@ -217,7 +217,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         """
         Tests that permission delegation works correctly.
         """
-        
+        threadlocals.push_frame()
         d = threadlocals.get_thread_locals()
         d["user_kw"] = self.u2
         d["test_kw"] = self.u1
