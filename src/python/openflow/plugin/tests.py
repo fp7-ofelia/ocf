@@ -22,6 +22,8 @@ from django.conf import settings
 from expedient.common.tests.manager import SettingsTestCase
 from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
+from expedient.common.permissions.shortcuts import give_permission_to
+from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -50,6 +52,7 @@ class Tests(SettingsTestCase):
         
         self.test_user = User.objects.create_user(
             "user", "user@user.com", "password")
+        give_permission_to("can_add_aggregate", Aggregate, self.test_user)
         
         for i in range(NUM_DUMMY_OMS):
             om = DummyOM.objects.create()
@@ -170,6 +173,7 @@ class Tests(SettingsTestCase):
         
         iface = OpenFlowInterface.objects.filter(aggregate__pk=i+1)[0]
 
+        threadlocals.push_frame(user=self.test_user)
         self.generic_agg = Aggregate.objects.create(
             name="TestAggregate", owner=self.test_user)
         
