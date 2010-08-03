@@ -6,14 +6,31 @@ try:
 except ImportError:
     from django.utils._threading_local import local
 
-_thread_locals = local()
+class threadlocal(local):
+    d_stack = []
+    
+_thread_locals = threadlocal()
+
+def push_frame(**kw):
+    """
+    Push a new frame on the stack.
+    """
+    _thread_locals.d_stack.append(kw)
+
+def pop_frame():
+    """
+    Pop a frame from the stack.
+    """
+    try:
+        _thread_locals.d_stack.pop()
+    except IndexError:
+        pass
 
 def get_thread_locals():
     """
     Returns the dictionary of all parsed keywords in the request.
     """
-    _thread_locals.d = getattr(_thread_locals, "d", {})
-    return _thread_locals.d
+    return _thread_locals.d_stack[-1]
 
 def add_parser(kw, func):
     """
@@ -65,14 +82,14 @@ class ThreadLocals(object):
 
     def process_request(self, request):
         """Parse request and set keywords"""
-        d = get_thread_locals()
+        d = {}
         for kw, func in self.__parsers.items():
             d[kw] = func(request)
-            
+        push_frame(**d)    
         return None
         
     def process_response(self, request, response):
         """Reset thread locals"""
-        _thread_locals.d = {}
+        pop_frame()
         return response
     
