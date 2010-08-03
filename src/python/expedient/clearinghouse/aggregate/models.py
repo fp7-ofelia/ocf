@@ -113,7 +113,7 @@ No information available.
             return reverse("%s_aggregate_delete" % prefix,
                            kwargs={'agg_id': self.id})+"?next="+next
         except NoReverseMatch:
-            return reverse("aggregate_delete" % prefix,
+            return reverse("aggregate_delete",
                            kwargs={'agg_id': self.id})+"?next="+next
 
     def add_to_project(self, project, next):
