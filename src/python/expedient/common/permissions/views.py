@@ -52,12 +52,17 @@ def redirect_permissions_request(request, perm_name=None,
     return view(request, permission, permittee, target_obj_or_class,
                 redirect_to=redirect_to)
 
-def request_permission(always_redirect_to,
+def request_permission(always_redirect_to=None,
                        permission_owners_func=None,
                        extra_context={},
                        template="permissions/get_permission.html"):
     """
-    Get a generic view to use for creating PermissionRequests.
+    Get a generic view to use for creating PermissionRequests. Because of the
+    way the permissions app stores views, this function will need to
+    be wrapped in another function. For example::
+    
+        def req_perm_wrapper(*args, **kwargs):
+            return request_permission()(*args, **kwargs)
     
     The view's template context will have:
     - C{form}: the form to show the user. By default, this is a
@@ -69,8 +74,9 @@ def request_permission(always_redirect_to,
     default. To change the shown set, specify C{permission_owners_func} which
     should return the set to show.
     
-    @param always_redirect_to: path to redirect to after the permission request
-        is saved.
+    @keyword always_redirect_to: path to redirect to after the permission
+        request is saved. If None, then use the redirect_to parameter given to
+        the view from the permission redirection. Default None.
     @keyword permission_owners_func: A callable with the following signature::
         
             permission_owners_func(request, obj_permission, permittee)
@@ -119,7 +125,8 @@ def request_permission(always_redirect_to,
                     "Sent request for permission %s to user %s" %
                     (permission, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-                return simple.redirect_to(request, always_redirect_to,
+                redirect_to = always_redirect_to or redirect_to
+                return simple.redirect_to(request, redirect_to,
                                           permanent=False)
         else:
             form = PermissionRequestForm(user_qs)
