@@ -102,6 +102,8 @@ class Tests(SettingsTestCase):
                 expected_url=reverse("openflow_aggregate_add_links", args=[i+1]),
             )
             
+        self.assertEqual(OpenFlowAggregate.objects.count(), NUM_DUMMY_OMS)
+            
     def test_static_of_links(self):
         """
         Tests that we can add/delete openflow-to-openflow static links.
