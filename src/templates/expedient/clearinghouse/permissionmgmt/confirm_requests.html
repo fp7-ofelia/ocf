@@ -67,9 +67,9 @@
 			<a class="perm_name" id="name_{{ req.id }}" href="#">
 				{{ req.requested_permission.permission.name }}
 			</a>
-			requested by {{ req.requesting_user }} for object
-			{{ req.requested_permission.target }} and permission user
-			{{ req.permittee }} will be denied.
+			requested by {{ req.requesting_user }} for {{ req.permittee }} to
+			use object
+			{{ req.requested_permission.target }} will be denied.
 			<div class="tooltip" id="tip_{{ req.id }}">
 				{{ req.requested_permission.permission.description }}
 			</div>
