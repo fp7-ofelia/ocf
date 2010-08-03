@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% if create %}Create{% else %}Update{% endif %} {{ name }}.{% endblock title %}
+{% block title %}{% if create %}Add{% else %}Update {{ aggregate.name }}{% endif %}.{% endblock title %}
 
 {% block content %}
 <div class="main">
