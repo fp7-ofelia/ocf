@@ -21,6 +21,7 @@ from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
 import logging
+from expedient.common.permissions.shortcuts import give_permission_to
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -58,6 +59,11 @@ def aggregate_crud(request, agg_id=None):
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
             aggregate.save()
+            # Give the user permission to edit the aggregate
+            # if it was just added.
+            if not agg_id:
+                give_permission_to(
+                    "can_edit_aggregate", aggregate, request.user)
             agg_form.save_m2m()
             err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
             if err:
@@ -132,8 +138,8 @@ def aggregate_add_links(request, agg_id):
                 "Error in settings: "
                 "Could not find model %s in application %s."
                 % (model_name, app))
-        types.append(ContentType.objects.get_for_model(model).id)
-    resource_qs = Resource.objects.filter(content_type__id__in=types)
+        types.append(model)
+    resource_qs = Resource.objects.filter_for_classes(types)
     
     if request.method == "POST":
         new_cnxn_form = OpenFlowStaticConnectionForm(
