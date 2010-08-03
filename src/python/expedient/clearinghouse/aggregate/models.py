@@ -9,7 +9,9 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
-from expedient.common.permissions.shortcuts import must_have_permission
+from expedient.common.permissions.shortcuts import must_have_permission,\
+    give_permission_to
+from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("Aggregate Models")
 
@@ -62,6 +64,12 @@ No information available.
             must_have_permission("user", self, "can_edit_aggregate")
             
         super(Aggregate, self).save(*args, **kwargs)
+        
+        if not pk:
+            # it was just created so give creator edit permissions
+            d = threadlocals.get_thread_locals()
+            give_permission_to(
+                "can_edit_aggregate", self, d["user"], can_delegate=True)
         
     def delete(self, *args, **kwargs):
         """

@@ -30,6 +30,8 @@ class Tests(SettingsTestCase):
         u.set_password("password")
         u.save()
         self.u = u
+        self.su = User.objects.create_superuser(
+            "superuser", "su@su.su", "password")
         threadlocals.push_frame(user=u)
         self.client.login(username="test", password="password")
         
@@ -69,13 +71,15 @@ class Tests(SettingsTestCase):
         """
         Test that we cannot edit or delete without permission.
         """
-        give_permission_to("can_add_aggregate", Aggregate, self.u)
+        threadlocals.push_frame(user=self.su)
         agg = DummyAggregate.objects.create(
             name="dummy agg",
             owner=self.u,
             description="aggregate description",
             location="Stanford, CA",
         )
+        threadlocals.pop_frame()
+        
         self.assertRaises(PermissionDenied, agg.save)
         self.assertRaises(PermissionDenied, agg.delete)
         
@@ -99,7 +103,6 @@ class Tests(SettingsTestCase):
             description="aggregate description",
             location="Stanford, CA",
         )
-        give_permission_to("can_edit_aggregate", agg, self.u)
         response = test_get_and_post_form(
             client=self.client,
             url=agg.get_delete_url(next="/"),
@@ -118,7 +121,6 @@ class Tests(SettingsTestCase):
             description="aggregate description",
             location="Stanford, CA",
         )
-        give_permission_to("can_edit_aggregate", agg, self.u)
         response = self.client.post(
             reverse("tests_aggregate_edit", kwargs={"agg_id": 1}),
             data=dict(
