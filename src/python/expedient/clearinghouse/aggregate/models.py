@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
 from expedient.common.permissions.shortcuts import must_have_permission,\
-    give_permission_to
+    give_permission_to, delete_permission
 from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("Aggregate Models")
@@ -124,21 +124,42 @@ No information available.
             return reverse("aggregate_delete",
                            kwargs={'agg_id': self.id})+"?next="+next
 
+    @classmethod
+    def get_aggregates_url(cls):
+        """Get the URL for aggregates of this type"""
+        ct = ContentType.objects.get_for_model(cls)
+        return reverse("aggregate_info", args=[ct.id])
+
+    @classmethod
+    def get_create_url(cls):
+        """Get the URL to create aggregates of this type"""
+        prefix = cls.get_url_name_prefix()
+        return reverse("%s_aggregate_create" % prefix)
+    
     def add_to_project(self, project, next):
         """
         Gives the aggregate a chance to request additional information for a
         project. This method should return a URL to redirect to where the
         user can create or update the additional information the aggregate
-        needs. When done, the aggregate should add itself to the project's
-        aggregates and then redirect to C{next}.
+        needs. When done, the view at that URL should use the
+        C{give_permission} function to give the project
+        the "can_use_aggregate" permission::
+            
+            from expedient.common.permissions.shortcuts import \
+                give_permission_to
+            
+            give_permission_to("can_use_aggregate", self, project)
         
-        If no extra information is needed, this function can return C{next}, 
-        but it still needs to add the aggregate to the project.
+        and then it should redirect to C{next}.
+        
+        If no extra information is needed, this function can return C{next},
+        instead of a custom URL, but it still needs to give the project the
+        "can_use_aggregate" permission.
         
         Unless overridden in a subclass, this function will look for a url
         with name <app_name>_aggregate_project_add by reversing the name with
         it parameters 'agg_id' and 'proj_id'. It will append '?next=<next>' to
-        the URL if found. Otherwise, it simply adds the aggregate to the
+        the URL if found. Otherwise, it simply gives the permission to the
         project and returns C{next}.
         """
         prefix = self.__class__.get_url_name_prefix()
@@ -147,13 +168,22 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'proj_id': project.id})+"?next="+next
         except NoReverseMatch:
-            project.aggregates.add(self)
+            give_permission_to("can_use_aggregate", self, project)
             return next
         
     def remove_from_project(self, project, next):
         """
-        Similar to L{add_to_project} but does the reverse, removing the
-        aggregate from the project.
+        Similar to L{add_to_project} but does the reverse, deleting the
+        permission from the project using::
+        
+            from expedient.common.permissions.shortcuts import \
+                delete_permission
+                
+            delete_permission("can_use_aggregate", self, project)
+            
+        and then redirecting to C{next}. Additionally, if not overridden,
+        this function stops all slices in the project before removing the
+        aggregate. Subclasses should also stop slices.
         """
         prefix = self.__class__.get_url_name_prefix()
         try:
@@ -167,7 +197,7 @@ No information available.
                     self.as_leaf_class().stop_slice(slice)
                 except:
                     pass
-            project.aggregates.remove(self)
+            delete_permission("can_use_aggregate", self, project)
             return next
         
     def add_to_slice(self, slice, next):
@@ -180,13 +210,14 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next="+next
         except NoReverseMatch:
-            slice.aggregates.add(self)
+            give_permission_to("can_use_aggregate", self, slice)
             return next
 
     def remove_from_slice(self, slice, next):
         """
-        Similar to L{add_to_slice} but does the reverse, removing the
-        aggregate from the slice.
+        Works exactly the same as L{remove_from_project} but for a slice.
+        It stops the slice if not overridden. Subclasses should stop the
+        slice before removing the permission.
         """
         prefix = self.__class__.get_url_name_prefix()
         try:
@@ -198,21 +229,36 @@ No information available.
                 self.as_leaf_class().stop_slice(slice)
             except:
                 pass
-            slice.aggregates.remove(self)
+            delete_permission("can_use_aggregate", self, slice)
             return next
 
-    @classmethod
-    def get_aggregates_url(cls):
-        """Get the URL for aggregates of this type"""
-        ct = ContentType.objects.get_for_model(cls)
-        return reverse("aggregate_info", args=[ct.id])
+    def add_to_user(self, user, next):
+        """
+        Works exactly the same as L{add_to_project} but for a user.
+        """
+        prefix = self.__class__.get_url_name_prefix()
+        try:
+            return reverse("%s_aggregate_user_add" % prefix,
+                           kwargs={'agg_id': self.id,
+                                   'user_id': user.id})+"?next="+next
+        except NoReverseMatch:
+            give_permission_to("can_use_aggregate", self, user)
+            return next
 
-    @classmethod
-    def get_create_url(cls):
-        """Get the URL to create aggregates of this type"""
-        prefix = cls.get_url_name_prefix()
-        return reverse("%s_aggregate_create" % prefix)
-    
+    def remove_from_user(self, user, next):
+        """
+        Works exactly the same as L{remove_from_project} but for a user.
+        Does not stop any slices.
+        """
+        prefix = self.__class__.get_url_name_prefix()
+        try:
+            return reverse("%s_aggregate_user_remove" % prefix,
+                           kwargs={'agg_id': self.id,
+                                   'user_id': user.id})+"?next="+next
+        except NoReverseMatch:
+            delete_permission("can_use_aggregate", self, user)
+            return next
+
     def start_slice(self, slice):
         """Start the slice in the actual resources."""
         raise NotImplementedError()
