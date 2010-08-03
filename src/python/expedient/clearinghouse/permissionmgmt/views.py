@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.views.generic.simple import direct_to_template
 from expedient.common.permissions.models import PermissionRequest,\
     ObjectPermission
+from expedient.common.messaging.models import DatedMessage
 
 TEMPLATE_PATH = "permissionmgmt"
 
@@ -72,13 +73,9 @@ def permissions_dashboard(request):
 def confirm_requests(request):
     """Confirm the approval of the permission requests."""
     
-    # list of permission requests for this user
-    perm_reqs = PermissionRequest.objects.filter(
-        permission_owner=request.user)
-    
-    approved_req_ids = request.session.get("approved_req_ids", [])
-    delegatable_req_ids = request.session.get("delegatable_req_ids", [])
-    denied_req_ids = request.session.get("denied_req_ids", [])
+    approved_req_ids = request.session.setdefault("approved_req_ids", [])
+    delegatable_req_ids = request.session.setdefault("delegatable_req_ids", [])
+    denied_req_ids = request.session.setdefault("denied_req_ids", [])
 
     approved_reqs = []
     for req_id in approved_req_ids:
@@ -96,15 +93,29 @@ def confirm_requests(request):
         if request.POST.get("post", "no") == "yes":
             for req, delegate in approved_reqs:
                 req.allow(can_delegate=delegate)
-        
+                DatedMessage.objects.post_message_to_user(
+                    "Request for permission %s for object %s approved."
+                    % (req.requested_permission.permission.name,
+                       req.requested_permission.target),
+                    user=req.requesting_user,
+                    sender=req.permission_owner,
+                    msg_type=DatedMessage.TYPE_SUCCESS)
+
             for req in denied_reqs:
                 req.deny()
+                DatedMessage.objects.post_message_to_user(
+                    "Request for permission %s for object %s denied."
+                    % (req.requested_permission.permission.name,
+                       req.requested_permission.target),
+                    user=req.requesting_user,
+                    sender=req.permission_owner,
+                    msg_type=DatedMessage.TYPE_WARNING)
                 
         # After this post we will be done with all this information
-        request.session["approved_req_ids"] = approved_req_ids
-        request.session["delegatable_req_ids"] = delegatable_req_ids
-        request.session["denied_req_ids"] = denied_req_ids
-
+        del request.session["approved_req_ids"]
+        del request.session["delegatable_req_ids"]
+        del request.session["denied_req_ids"]
+        
         return HttpResponseRedirect(reverse("home"))
     
     else:
