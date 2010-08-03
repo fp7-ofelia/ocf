@@ -5,7 +5,7 @@ Created on Jul 30, 2010
 '''
 import logging
 from expedient.common.permissions.models import ExpedientPermission,\
-    ObjectPermission
+    ObjectPermission, PermissionOwnership
 from expedient.common.middleware import threadlocals
 from expedient.common.permissions.exceptions import PermitteeNotInThreadLocals,\
     PermissionDenied, NonePermitteeException
@@ -93,7 +93,7 @@ def create_permission(perm_name, description="", view=None):
     
 def give_permission_to(permission, obj_or_class, receiver, giver=None, can_delegate=False):
     """
-    Give reciever the permission name by C{perm_name} over the object or class
+    Give receiver the permission C{permission} over the object or class
     C{obj_or_class}. If C{giver} is specified, then the function checks that
     the giver is allowed to give the permission to the receiver. If
     C{can_delegate} is C{True}, the receiver is given the ability to further
@@ -125,6 +125,25 @@ def give_permission_to(permission, obj_or_class, receiver, giver=None, can_deleg
         receiver, giver=giver, can_delegate=can_delegate)
     
 
+def delete_permission(permission, obj_or_class, owner):
+    """Take permission away from an owner.
+    
+    Remove the permission C{permission} to use object or class
+    C{obj_or_class} from the owner C{owner}. If the owner doesn't
+    have the permission to begin with, nothing happens.
+    
+    @param permission: The name of the permission to remove or its
+        L{ExpedientPermission} instance.
+    @type permission: C{str} or L{ExpedientPermission}.
+    @param obj_or_class: The object or class for which the permission
+        is being removed
+    @type obj_or_class: C{Model} instance or C{class}.
+    @param owner: The permittee currently owning the permission.
+    @type owner: L{Permittee} or C{Model} instance.
+    """
+    PermissionOwnership.objects.delete_ownership(
+        permission, obj_or_class, owner)
+    
 def require_objs_permissions_for_url(url, perm_names, permittee_func,
                                      target_func, methods=["GET", "POST"]):
     """

@@ -9,7 +9,7 @@ from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
 from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
 from expedient.common.permissions.managers import ExpedientPermissionManager,\
-    ObjectPermissionManager, PermitteeManager
+    ObjectPermissionManager, PermitteeManager, PermissionOwnershipManager
 
 class ExpedientPermission(models.Model):
     """
@@ -173,6 +173,8 @@ class PermissionOwnership(models.Model):
     """
     Information on what the permittee can do with the permission.
     
+    @cvar objects: L{PermissionOwnershipManager} for the class
+    
     @ivar obj_permission: the object permission for this info.
     @type obj_permission: ForeignKey to L{ObjectPermission}
     @ivar permittee: the permittee for this info.
@@ -180,6 +182,9 @@ class PermissionOwnership(models.Model):
     @ivar can_delegate: Can the permittee give this permission to someone else?
     @type can_delegate: C{bool}
     """
+    
+    objects = PermissionOwnershipManager()
+    
     obj_permission = models.ForeignKey(ObjectPermission)
     permittee = models.ForeignKey(Permittee)
     can_delegate = models.BooleanField()

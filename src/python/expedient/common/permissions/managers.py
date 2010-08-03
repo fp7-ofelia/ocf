@@ -365,3 +365,65 @@ class PermitteeManager(GenericObjectManager):
             raise UnexpectedParameterType(
                 type(obj), [Permittee, models.Model], "obj")
     
+
+class PermissionOwnershipManager(models.Manager):
+    """Manager for PermissionOwnership model.
+    
+    Adds the delete_ownership and get_ownership methods 
+    to the default manager.
+    """
+    
+    def get_ownership(self, permission, obj_or_class, owner):
+        """Get a PermissionOwnership instance.
+        
+        @param permission: The name of the permission or its
+            L{ExpedientPermission} instance.
+        @type permission: C{str} or L{ExpedientPermission}.
+        @param obj_or_class: The target object or class for the permission.
+        @type obj_or_class: C{Model} instance or C{class}.
+        @param owner: The permittee currently owning the permission.
+        @type owner: L{Permittee} or C{Model} instance.
+        """
+        from expedient.common.permissions.models import Permittee
+        from expedient.common.permissions.models import ObjectPermission
+        from expedient.common.permissions.models import PermissionOwnership
+        
+        try:
+            obj_permission =\
+                ObjectPermission.objects.get_for_object_or_class(
+                    permission, obj_or_class)
+        except ObjectPermission.DoesNotExist:
+            raise PermissionOwnership.DoesNotExist()
+        
+        permittee = Permittee.objects.get_as_permittee(owner)
+        
+        return self.get(
+            obj_permission=obj_permission,
+            permittee=permittee,
+        )
+    
+    def delete_ownership(self, permission, obj_or_class, owner):
+        """Take permission away from an owner.
+        
+        Remove the permission C{permission} to use object or class
+        C{obj_or_class} from the owner C{owner}. If the owner doesn't
+        have the permission to begin with, nothing happens.
+        
+        @param permission: The name of the permission to remove or its
+            L{ExpedientPermission} instance.
+        @type permission: C{str} or L{ExpedientPermission}.
+        @param obj_or_class: The object or class for which the permission
+            is being removed
+        @type obj_or_class: C{Model} instance or C{class}.
+        @param owner: The permittee currently owning the permission.
+        @type owner: L{Permittee} or C{Model} instance.
+        """
+        from expedient.common.permissions.models import PermissionOwnership
+        
+        try:
+            po = self.get_ownership(permission, obj_or_class, owner)
+        except PermissionOwnership.DoesNotExist:
+            return
+        else:
+            po.delete()
+        
