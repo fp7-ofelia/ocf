@@ -106,6 +106,34 @@ class ExtendableMeta(ModelBase):
         new_cls = super(ExtendableMeta, cls).__new__(cls, name, bases, attrs)
         
         return new_cls
+    
+
+class ExtendableManager(models.Manager):
+    """
+    A manager for Extendable objects.
+    """
+
+    def filter_for_class(self, klass):
+        """
+        Return a filtered QuerySet that only has instances whose
+        leaf class is C{klass}.
+        
+        @param klass: The leaf model class of instances we are looking for.
+        @type klass: a class
+        """
+        return self.filter(leaf_name=klass.__name__.lower())
+    
+    def filter_for_classes(self, klasses):
+        """
+        Return a filtered QuerySet that only has instances whose
+        leaf class are in the list C{klasses}.
+        
+        @param klasses: List of leaf model classes of instances we are
+            looking for.
+        @type klasses: list of classes
+        """
+        cls_names = [c.__name__.lower() for c in klasses]
+        return self.filter(leaf_name__in=cls_names)
 
 class Extendable(models.Model):
     '''
@@ -198,7 +226,7 @@ class Extendable(models.Model):
                 }
     '''
     
-    objects = GenericObjectManager("content_type", "object_id")
+    objects = ExtendableManager()
     
     leaf_name = models.CharField(max_length=100, blank=True)
     
