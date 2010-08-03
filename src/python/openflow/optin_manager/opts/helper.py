@@ -42,8 +42,10 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                 fv = FVServerProxy.objects.all()[0]
                 return_ids = fv.proxy.api.changeFlowSpace(fv_args)
             except Exception,e:
-                opted.delete()
-                match_list.delete()
+                for opt in opted:
+                    opt.delete()
+                for match in match_list:
+                    match.delete()
                 tmp.delete()
                 import traceback
                 traceback.print_exc()

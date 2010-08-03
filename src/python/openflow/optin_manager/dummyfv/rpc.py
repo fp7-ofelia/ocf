@@ -30,8 +30,10 @@ def checkUser(func, *args, **kwargs):
                         func.func_name)
     meta = kwargs["request"].META
     if "REMOTE_USER" not in meta:
-        raise Exception("Remote user not authenticated for XML-RPC %s." %\
-                        func.func_name)
+#        raise Exception("Remote user %s not authenticated for XML-RPC %s." %\
+#                        (kwargs['request'].user,func.func_name))
+        # this helps whit unit tests where REMOTE_USER is not in the header
+        meta["REMOTE_USER"] = kwargs["request"].user
     if User.objects.filter(username=meta["REMOTE_USER"]).count() == 0:
         raise Exception("Remote user %s is unknown for call %s." % (
             meta["REMOTE_USER"], func.func_name)
