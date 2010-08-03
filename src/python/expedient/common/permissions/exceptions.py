@@ -4,6 +4,9 @@ Created on May 31, 2010
 @author: jnaous
 '''
 
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+
 class PermissionException(Exception):
     """
     Base class for all exceptions from the permissions application.
@@ -22,7 +25,7 @@ class UnexpectedParameterType(PermissionException):
     """
     def __init__(self, found, expected, index):
         super(UnexpectedParameterType, self).__init__(
-            "Found type %s as argument %s. Allowed types are %s" %
+            "Found type '%s' as argument '%s'. Allowed types are %s" %
             (found, index, expected)
         )
         self.found = found
@@ -36,7 +39,7 @@ class PermitteeNotInThreadLocals(PermissionException):
     def __init__(self, permittee_kw):
         self.permittee_kw = permittee_kw
         super(PermitteeNotInThreadLocals, self).__init__(
-            "Threadlocal storage does not have the permittee keyword %s. "
+            "Threadlocal storage does not have the permittee keyword '%s'. "
             "This might be caused by not adding a parser to the Threadlocals "
             "middleware to parse the request for this keyword."
              % permittee_kw
@@ -63,13 +66,17 @@ class PermissionDenied(PermissionException):
     Raised when a permission is denied/not found.
     """
     def __init__(self, perm_name, target, permittee, allow_redirect=True):
+        from expedient.common.permissions.models import Permittee
+        if not isinstance(target, models.Model):
+            # assume class
+            target = ContentType.objects.get_for_model(target)
         self.perm_name = perm_name
         self.target = target
-        self.permittee = permittee
+        self.permittee = Permittee.objects.get_as_permittee(permittee)
         self.allow_redirect = allow_redirect
         super(PermissionDenied, self).__init__(
-            "Permission %s was not found for permittee %s for "
-            "target object %s" % (perm_name, permittee, target))
+            "Permission '%s' was not found for permittee '%s' for "
+            "target object '%s'" % (perm_name, permittee, target))
 
 class PermissionSignatureError(PermissionException):
     """
@@ -94,9 +101,9 @@ class PermissionDoesNotExist(PermissionException):
     """
     
     def __init__(self, perm_name, target=None):
-        message = "Permission %s has not been created" % perm_name
+        message = "Permission '%s' has not been created" % perm_name
         if target:
-            message += " for target %s." % target
+            message += " for target '%s'." % target
         else:
             message += "."
         super(PermissionDoesNotExist, self).__init__(message)
@@ -108,6 +115,6 @@ class PermissionCannotBeDelegated(PermissionException):
     """
     
     def __init__(self, giver, perm_name):
-        message = "Giver %s cannot delegate permission %s." % (
+        message = "Giver '%s' cannot delegate permission '%s'." % (
             giver, perm_name)
         super(PermissionCannotBeDelegated, self).__init__(message)
