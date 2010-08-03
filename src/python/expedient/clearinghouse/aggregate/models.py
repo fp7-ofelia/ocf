@@ -12,6 +12,7 @@ from expedient.common.extendable.models import Extendable
 from expedient.common.permissions.shortcuts import must_have_permission,\
     give_permission_to, delete_permission
 from expedient.common.middleware import threadlocals
+from expedient.common.permissions.models import Permittee
 
 logger = logging.getLogger("Aggregate Models")
 
@@ -42,12 +43,6 @@ No information available.
         "Available", default=True,
         help_text="Do you want to make this\
  aggregate available for others to use?")
-    owner = models.ForeignKey(User, related_name="owned_aggregate_set")
-    managers = models.ManyToManyField(
-        User, related_name="managed_aggregate_set", blank=True,
-        help_text="Who else should administer this aggregate?")
-    users = models.ManyToManyField(
-        User, related_name="useable_aggregate_set", blank=True)
     
     class Meta:
         verbose_name = "Generic Aggregate"
@@ -78,7 +73,24 @@ No information available.
         must_have_permission("user", self, "can_edit_aggregate")
         super(Aggregate, self).delete(*args, **kwargs)
         
+    def get_managers(self):
+        """Gets the list of users who have the "can_edit_aggregate" permission
+        for this aggregate.
+        
+        @return: a C{QuerySet} of C{User} objects.
+        """
+        return Permittee.objects.filter_for_class_and_permission_name(
+            klass=User,
+            permission="can_edit_aggregate",
+            target_obj_or_class=self,
+        )
+    managers = property(get_managers)
+        
     def check_status(self):
+        """Checks whether the aggregate is available or not.
+        
+        @return: True if the aggregate is available, False otherwise.
+        """
         return self.available
     
     def get_logo_url(self):
