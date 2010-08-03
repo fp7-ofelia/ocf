@@ -35,6 +35,7 @@
 
 {% block content %}
 <div class="main">
+	{% if approved_reqs %}
     <h2>The following permission requests will be approved:</h2>
 	<ul>
 		{% for req, delegatable in approved_reqs %}
@@ -45,7 +46,7 @@
 			</a>
 			requested by {{ req.requesting_user }} for object
 			{{ req.requested_permission.target }} will be granted to 
-			{{ req.permission_user }}. {{ req.permission_user }} 
+			{{ req.permittee }}. {{ req.permittee }} 
 			{% if delegatable %}<strong>will</strong>{% else %}will
 			<strong>not</strong>{% endif %} be able to further give permission
 			to other objects.
@@ -55,7 +56,9 @@
 		</li>
 		{% endfor %}
 	</ul>
+	{% endif %}
 
+	{% if denied_reqs %}
     <h2>The following permission requests will be denied:</h2>
 	<ul>
 		{% for req in denied_reqs %}
@@ -66,13 +69,15 @@
 			</a>
 			requested by {{ req.requesting_user }} for object
 			{{ req.requested_permission.target }} and permission user
-			{{ req.permission_user }} will be denied.
+			{{ req.permittee }} will be denied.
 			<div class="tooltip" id="tip_{{ req.id }}">
 				{{ req.requested_permission.permission.description }}
 			</div>
 		</li>
 		{% endfor %}
 	</ul>
+	{% endif %}
+	
 	<h2>Do you want to proceed?</h2>
     <form action="" method="post">{% csrf_token %}
 	    <div>
