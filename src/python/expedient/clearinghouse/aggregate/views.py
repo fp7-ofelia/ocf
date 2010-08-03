@@ -12,7 +12,10 @@ from expedient.common.messaging.models import DatedMessage
 import logging
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
 from expedient.common.permissions.utils import get_user_from_req, get_queryset,\
-    get_queryset_from_class, get_leaf_queryset
+    get_queryset_from_class, get_leaf_queryset, get_object_from_ids
+from django.contrib.auth.models import User
+from expedient.clearinghouse.project.models import Project
+from expedient.clearinghouse.slice.models import Slice
 
 logger = logging.getLogger("AggregateViews")
 
@@ -59,6 +62,9 @@ def list(request, agg_id=None):
     target_func=get_leaf_queryset(Aggregate, "agg_id"),
     methods=["POST"])
 def delete(request, agg_id):
+    """
+    Display a confirmation page then stop all slices and delete the aggregate.
+    """
     next = request.GET.get("next", None) or reverse("home")
     aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
     # Stop all slices using the aggregate
@@ -81,6 +87,9 @@ def delete(request, agg_id):
     return req
 
 def info(request, ct_id):
+    """
+    Return a page that shows the information on the aggregate.
+    """
     try:
         ct = ContentType.objects.get_for_id(ct_id)
     except:
@@ -91,3 +100,33 @@ def info(request, ct_id):
     return simple.direct_to_template(
         request, template=TEMPLATE_PATH+"/info.html",
         extra_context={"info": info, "type": model._meta.verbose_name})
+
+def get_can_use_permission(request, perm_name, 
+                           target_ct_id, target_id,
+                           permittee_ct_id, permittee_id):
+    """Get the 'can_use_aggregate' permission.
+    
+    For project, slice, or user permittees, call the corresponding
+    add_to_* method of the target aggregate.
+    """
+    aggregate = get_object_from_ids(target_ct_id, target_id)
+    permittee = get_object_from_ids(permittee_ct_id, permittee_id)
+    assert(isinstance(aggregate, Aggregate))
+    assert(
+        isinstance(permittee, User) or
+        isinstance(permittee, Project) or
+        isinstance(permittee, Slice)
+    )
+    assert(perm_name == "can_use_aggregate")
+    
+    next = request.GET.get("next", reverse("home"))
+    
+    if isinstance(permittee, Project):
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_project(permittee, next))
+    elif isinstance(permittee, Slice):
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_slice(permittee, next))
+    else: # isinstance(permittee, User)
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_user(permittee, next))
