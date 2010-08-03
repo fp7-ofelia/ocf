@@ -12,6 +12,7 @@ from expedient.common.tests.client import Browser, test_get_and_post_form
 from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.dummyfv.models import DummyFV
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
+
 logger = logging.getLogger("OMOptsTest")
 
 SCHEME = "test"
