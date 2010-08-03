@@ -28,11 +28,6 @@ def set_clearinghouse(request):
     if (request.method == "POST"):
         form = CHUserForm(request.POST)
         if (form.is_valid()):
-#            same_uname = User.objects.filter(username = 
-#                    request.POST["username"]).exclude(id = ch_id)
-#            if (len(same_uname) > 0):
-#                form._errors["general"] = ErrorList(["Username is not unique"])
-#            else:
             if len(ch_users) == 0:
                 ch_user = User(username=request.POST["username"])
                 ch_user.set_password(request.POST["password1"])

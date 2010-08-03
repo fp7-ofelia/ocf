@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     (r'^$', 'openflow.optin_manager.users.views.index'),
     url(r'^dashboard$', 'openflow.optin_manager.users.views.dashboard', name="dashboard"),
 
+    url(r'^change_profile$', 'openflow.optin_manager.users.views.change_profile', name="change_profile"),
+
     (r'^controls/', include('openflow.optin_manager.controls.urls')),
 
     (r'^opts/', include('openflow.optin_manager.opts.urls')),

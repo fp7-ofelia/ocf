@@ -1,18 +1,51 @@
 from django.shortcuts import render_to_response
 from models import UserProfile
 from django.contrib.auth.decorators import login_required
-from django.http import *
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.views.generic import simple
-from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace, UserOpts
+from openflow.optin_manager.opts.models import UserFlowSpace, UserOpts
 from openflow.optin_manager.admin_manager.models import *
-from openflow.optin_manager.users.models import Priority
+from openflow.optin_manager.users.forms import *
+from django.contrib.auth.forms import PasswordChangeForm
 
 def index(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/dashboard')
     else:
         return HttpResponseRedirect('/accounts/login')
+
+@login_required
+def change_profile(request):
+    if request.method == "GET":
+        user_form = UserForm(instance=request.user)
+        pass_change_form = PasswordChangeForm(request.user)
+    elif request.method == "POST":
+        user_form = UserForm(request.POST, instance=request.user)
+        valid1 = user_form.is_valid()
+        if (request.POST['old_password']!=""):
+            pass_change_form = PasswordChangeForm(request.user, request.POST)
+            valid2 = pass_change_form.is_valid()
+        else:
+            pass_change_form = PasswordChangeForm(request.user)
+            valid2 = True
+            
+        if (valid1 and valid2):
+            user_form.save()
+            if (request.POST['old_password']!=""):
+                pass_change_form.save()
+            
+            return HttpResponseRedirect("/dashboard")
+            
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
+    
+    return simple.direct_to_template(request, 
+        template = 'openflow/optin_manager/users/change_profile.html',
+            extra_context = {
+                'user_form':user_form,
+                'pass_form':pass_change_form,
+            }
+    )
 
 @login_required
 def dashboard(request):
