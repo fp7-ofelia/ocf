@@ -72,6 +72,27 @@ def get_queryset(klass, index, filter="pk"):
     
     return wrapper
 
+def get_leaf_queryset(parent_klass, index, filter="pk"):
+    """
+    Same as L{get_queryset} but also calls the C{as_leaf_class} function
+    on the first element in the queryset and returns a queryset with the
+    returned object's class.
+    """
+    def wrapper(*args, **kwargs):
+        if type(index) == int:
+            arg = args[index]
+        else:
+            arg = kwargs[index]
+            
+        parent_qs = parent_klass.objects.filter(**{filter: arg})
+        parents = list(parent_qs)
+        if parents:
+            ids = [p.id for p in parents]
+            return parents[0].as_leaf_class().\
+                __class__.objects.filter(id__in=ids)
+        return parent_qs
+    return wrapper
+    
 def get_queryset_from_class(klass):
     """
     Returns a function usable as the C{target_func} of the
