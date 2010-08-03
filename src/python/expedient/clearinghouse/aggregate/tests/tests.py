@@ -74,7 +74,6 @@ class Tests(SettingsTestCase):
         threadlocals.push_frame(user=self.su)
         agg = DummyAggregate.objects.create(
             name="dummy agg",
-            owner=self.u,
             description="aggregate description",
             location="Stanford, CA",
         )
@@ -99,7 +98,6 @@ class Tests(SettingsTestCase):
         give_permission_to("can_add_aggregate", Aggregate, self.u)
         agg = DummyAggregate.objects.create(
             name="dummy agg",
-            owner=self.u,
             description="aggregate description",
             location="Stanford, CA",
         )
@@ -117,7 +115,6 @@ class Tests(SettingsTestCase):
         give_permission_to("can_add_aggregate", Aggregate, self.u)
         agg = DummyAggregate.objects.create(
             name="dummy agg",
-            owner=self.u,
             description="aggregate description",
             location="Stanford, CA",
         )
