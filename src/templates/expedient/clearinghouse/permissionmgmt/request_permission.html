@@ -4,8 +4,11 @@
 <div class="main">
     <h2>Permission Denied</h2>
 	<div class="info_text">
-		You do not have permission ("{{ obj_perm.permission.name }}") needed
-		to perform this action. If you would like to request this permission
+		You do not have the permission "{{ obj_perm.permission.name }}" needed
+		to perform this action. The description of this permission is: 
+		"{{ obj_perm.permission.description }}".
+		<br /><br />
+		If you would like to request this permission
 		from a user who has the authority to give it to you, select a user
 		from the list below and click the "Request" button.
 	</div>
