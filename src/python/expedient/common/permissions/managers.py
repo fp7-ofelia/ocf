@@ -291,6 +291,38 @@ class PermitteeManager(GenericObjectManager):
     L{Permittee}s.
     """
     
+    def filter_for_class_and_permission_name(
+        self, klass, permission, target_obj_or_class, can_delegate=False):
+        """
+        Return a queryset filtered for only those who own a permission for
+        a particular object. Further, the returned queryset is of class
+        given by C{klass}.
+        
+        @param klass: The class of the objects in the returned queryset.
+        @type klass: C{class} or C{ContentType}.
+        @param permission: name of the permission or the L{ExpedientPermission}
+            object itself that we want the permittee to have
+        @type permission: C{str} or L{ExpedientPermission}.
+        @param target_obj_or_class: The object or class which we are looking
+            for permissions for.
+        @type target_obj_or_class: a model instance or class.
+        @keyword can_delegate: If true then only look for permittees who can
+            give the permission to others.
+        @type can_delegate: C{bool} default False.
+        """
+        
+        if isinstance(klass, ContentType):
+            ct = klass
+        else:
+            ct = ContentType.objects.get_for_model(klass)
+        
+        ids = self.filter_for_permission_name(
+                permission, target_obj_or_class, can_delegate=can_delegate,
+            ).filter(
+                object_type=ct,
+            ).values_list("object_id", flat=True)
+        return ct.model_class().objects.filter(id__in=ids)
+    
     def filter_for_permission_name(self, permission, target_obj_or_class, can_delegate=False):
         """
         Return a queryset filtered for only those who own a permission for
@@ -298,9 +330,10 @@ class PermitteeManager(GenericObjectManager):
         
         @param permission: name of the permission or the L{ExpedientPermission}
             object itself that we want the permittee to have
-        @type perm_name: C{str} or L{ExpedientPermission}.
+        @type permission: C{str} or L{ExpedientPermission}.
         @param target_obj_or_class: The object or class which we are looking
             for permissions for.
+        @type target_obj_or_class: a model instance or class.
         @keyword can_delegate: If true then only look for permittees who can
             give the permission to others.
         @type can_delegate: C{bool} default False.

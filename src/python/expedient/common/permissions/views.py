@@ -102,12 +102,11 @@ def request_permission(always_redirect_to=None,
         if permission_owners_func:
             user_qs = permission_owners_func(request, obj_perm, permittee)
         else:
-            owners_ids = Permittee.objects.filter_for_obj_permission(
-                obj_perm, can_delegate=True,
-            ).filter(
-                object_type=ContentType.objects.get_for_model(User)
-            ).values_list("object_id", flat=True)
-            user_qs = User.objects.filter(id__in=owners_ids)
+            user_qs = Permittee.objects.filter_for_class_and_permission_name(
+                klass=User,
+                permission=obj_perm.permission,
+                target_obj_or_class=obj_perm.target,
+                can_delegate=True)
             
         # process the request
         if request.method == "POST":

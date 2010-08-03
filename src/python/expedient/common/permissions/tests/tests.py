@@ -18,6 +18,8 @@ from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
 from expedient.common.permissions.models import ObjectPermission
 from expedient.common.permissions.shortcuts import must_have_permission
+from expedient.common.permissions.templatetags.permissions import has_obj_perm,\
+    as_class
 
 def _request_perm_wrapper(*args, **kwargs):
     return request_permission(
@@ -266,6 +268,28 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         
         give_permission_to("can_get_x2", self.objs[0], self.o3,
                            giver=self.u2, can_delegate=True)
+
+    def test_has_obj_perm(self):
+        """Tests that the C{has_obj_perm} template filter works."""
+        
+        permittees = has_obj_perm(self.o3, "can_read_val")
+        self.assertEqual(
+            set(permittees),
+            set([Permittee.objects.get_as_permittee(obj) \
+                 for obj in [self.su, self.u1, self.u2]])
+        )
+        
+    def test_as_class(self):
+        """Tests that the C{as_class} template filter works"""
+        
+        permittees = \
+            as_class(has_obj_perm(self.o3, "can_read_val"), User)
+            
+        self.assertEqual(
+            set(permittees),
+            set([self.su, self.u1, self.u2])
+        )
+        
 
 class TestRequests(test_mgr.SettingsTestCase):
     urls = 'expedient.common.permissions.tests.test_urls'

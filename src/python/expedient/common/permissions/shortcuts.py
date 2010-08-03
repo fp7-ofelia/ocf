@@ -29,6 +29,7 @@ def get_permittee_from_threadlocals(kw):
     
     return permittee
     
+    
 def has_permission(permittee, target_obj_or_class, perm_name):
     """
     Does the object C{permittee} have the permission named by C{perm_name}
