@@ -123,7 +123,7 @@ def request_permission(always_redirect_to=None,
                 perm_request = form.save()
                 DatedMessage.objects.post_message_to_user(
                     "Sent request for permission %s to user %s" %
-                    (permission, perm_request.permission_owner),
+                    (permission.name, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 redirect_to = always_redirect_to or redirect_to
                 return simple.redirect_to(request, redirect_to,
