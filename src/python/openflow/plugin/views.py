@@ -22,10 +22,30 @@ from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
 import logging
 from expedient.common.permissions.shortcuts import give_permission_to
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import get_leaf_queryset,\
+    get_queryset_from_class, get_user_from_req, get_queryset
+from expedient.clearinghouse.aggregate.models import Aggregate
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
 
+@require_objs_permissions_for_view(
+    perm_names=["can_add_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset_from_class(Aggregate),
+    methods=["POST"])    
+def aggregate_create(request):
+    return aggregate_crud(request)
+
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(OpenFlowAggregate, "agg_id"),
+    methods=["POST"])
+def aggregate_edit(request, agg_id):
+    return aggregate_crud(request, agg_id=agg_id)
+    
 def aggregate_crud(request, agg_id=None):
     '''
     Create/update an OpenFlow Aggregate.
@@ -59,11 +79,6 @@ def aggregate_crud(request, agg_id=None):
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
             aggregate.save()
-            # Give the user permission to edit the aggregate
-            # if it was just added.
-            if not agg_id:
-                give_permission_to(
-                    "can_edit_aggregate", aggregate, request.user)
             agg_form.save_m2m()
             err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
             if err:
@@ -106,6 +121,11 @@ def aggregate_crud(request, agg_id=None):
         },
     )
     
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(OpenFlowAggregate, "agg_id"),
+    methods=["POST"])
 def aggregate_add_links(request, agg_id):
     """
     Show page to add static connections to other aggregates.
