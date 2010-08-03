@@ -2,14 +2,15 @@
 @author jnaous
 '''
 
+import logging
 from django.db import models
-from expedient.common.extendable.models import Extendable
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
+from expedient.common.extendable.models import Extendable
+from expedient.common.permissions.shortcuts import must_have_permission
 
-import logging
 logger = logging.getLogger("Aggregate Models")
 
 class Aggregate(Extendable):
@@ -49,6 +50,26 @@ No information available.
     class Meta:
         verbose_name = "Generic Aggregate"
 
+    def save(self, *args, **kwargs):
+        """
+        Override the default save method to enforce permissions.
+        """
+        pk = getattr(self, "pk", None)
+        if not pk:
+            # it's a new instance being created
+            must_have_permission("user", Aggregate, "can_add_aggregate")
+        else:
+            must_have_permission("user", self, "can_edit_aggregate")
+            
+        super(Aggregate, self).save(*args, **kwargs)
+        
+    def delete(self, *args, **kwargs):
+        """
+        Override the default delete method to enforce permissions.
+        """
+        must_have_permission("user", self, "can_edit_aggregate")
+        super(Aggregate, self).delete(*args, **kwargs)
+        
     def check_status(self):
         return self.available
     
