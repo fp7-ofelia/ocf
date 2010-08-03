@@ -3,15 +3,40 @@ Created on Jul 30, 2010
 
 @author: jnaous
 '''
+import logging
 from expedient.common.permissions.models import ExpedientPermission,\
     ObjectPermission
+from expedient.common.middleware import threadlocals
+from expedient.common.permissions.exceptions import PermitteeNotInThreadLocals,\
+    PermissionDenied, NonePermitteeException
+from expedient.common.permissions.middleware import PermissionMiddleware
 
+logger = logging.getLogger("permissions.shortcuts")
+
+def get_permittee_from_threadlocals(kw):
+    """
+    Wrapper to get a permittee keyword from threadlocals and make sure it is
+    usable. 
+    """
+    d = threadlocals.get_thread_locals()
+    logger.debug("Got threadlocals %s" % d)
+    try:
+        permittee = d[kw]
+    except KeyError:
+        raise PermitteeNotInThreadLocals(kw)
+    if not permittee:
+        raise NonePermitteeException(kw)
+    
+    return permittee
+    
 def has_permission(permittee, target_obj_or_class, perm_name):
     """
     Does the object C{permittee} have the permission named by C{perm_name}
     over target object or class C{target_obj_or_class}.
     
-    @param permittee: object that should own the permission.
+    @param permittee: object that should own the permission or the keyword
+        argument for that object that was stored in the threadlocals
+        middleware.
     @type permittee: L{Permittee} or C{Model} instance.
     @param target_obj_or_class: The object or class for whose the permission
         is being checked.
@@ -21,8 +46,41 @@ def has_permission(permittee, target_obj_or_class, perm_name):
     @return: Whether or not the permittee has the permission
     @rtype: C{bool}
     """
+    if isinstance(permittee, str):
+        permittee = get_permittee_from_threadlocals(permittee)
+        
     return ExpedientPermission.objects.get_missing_for_target(
         permittee, [perm_name], target_obj_or_class) == None
+
+
+def must_have_permission(permittee, target_obj_or_class, perm_name, allow_redirect=True):
+    """
+    Does the object C{permittee} have the permission named by C{perm_name}
+    over target object or class C{target_obj_or_class}. If not, then raise
+    a PermissionDenied exception.
+    
+    @param permittee: object that should own the permission or the keyword
+        argument for that object that was stored in the threadlocals
+        middleware.
+    @type permittee: L{Permittee} or C{Model} instance.
+    @param target_obj_or_class: The object or class for whose the permission
+        is being checked.
+    @type target_obj_or_class: C{Model} instance or C{class}.
+    @param perm_name: The name of the permission
+    @type permission: C{str}.
+    @keyword allow_redirect: Should the user be redirected if the permission
+        is denied to the permission's redirection URL? Default True
+    @type allow_redirect: C{bool}
+    @return: Whether or not the permittee has the permission
+    @rtype: C{bool}
+    """
+    if isinstance(permittee, str):
+        permittee = get_permittee_from_threadlocals(permittee)
+        
+    if not has_permission(permittee, target_obj_or_class, perm_name):
+        raise PermissionDenied(
+            perm_name, target_obj_or_class,
+            permittee, allow_redirect=allow_redirect)
 
 def create_permission(perm_name, description="", view=None):
     """
@@ -66,3 +124,11 @@ def give_permission_to(permission, obj_or_class, receiver, giver=None, can_deleg
     return obj_permission.give_to(
         receiver, giver=giver, can_delegate=can_delegate)
     
+
+def require_objs_permissions_for_url(url, perm_names, permittee_func,
+                                     target_func, methods=["GET", "POST"]):
+    """
+    Convenience wrapper around L{PermissionMiddleware}.
+    """
+    PermissionMiddleware.add_required_url_permissions(
+        url, perm_names, permittee_func, target_func, methods)

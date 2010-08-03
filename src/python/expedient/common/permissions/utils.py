@@ -5,7 +5,6 @@ Created on Jun 1, 2010
 '''
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
-from expedient.common.permissions.middleware import PermissionMiddleware
 
 def get_user_from_req(request, *args, **kwargs):
     '''
@@ -114,11 +113,3 @@ def get_object_from_ids(ct_id, id):
         return ct.get_object_for_this_type(pk=id)
     except ct.model_class().DoesNotExist:
         raise Http404()
-
-def require_objs_permissions_for_url(url, perm_names, permittee_func,
-                                     target_func, methods=["GET", "POST"]):
-    """
-    Convenience wrapper around L{PermissionMiddleware}.
-    """
-    PermissionMiddleware.add_required_url_permissions(
-        url, perm_names, permittee_func, target_func, methods)

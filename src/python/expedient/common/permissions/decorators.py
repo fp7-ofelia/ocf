@@ -6,6 +6,7 @@ Created on May 31, 2010
 import exceptions
 from models import ExpedientPermission
 from expedient.common.middleware.threadlocals import get_thread_locals
+from expedient.common.permissions.shortcuts import get_permittee_from_threadlocals
 
 class require_obj_permissions_for_method(object):
     """
@@ -43,14 +44,7 @@ class require_obj_permissions_for_method(object):
             calling the method.
             """
             # check if the permittee exists in the request
-            d = get_thread_locals()
-            try:
-                permittee = d[self.permittee_kw]
-            except KeyError:
-                raise exceptions.PermissionUserNotInThreadLocals(
-                    self.permittee_kw)
-            if not permittee:
-                raise exceptions.NonePermissionUserException(self.permittee_kw)
+            permittee = get_permittee_from_threadlocals(self.permittee_kw)
 
             missing = ExpedientPermission.objects.get_missing_for_target(
                 permittee, self.perm_names, obj)

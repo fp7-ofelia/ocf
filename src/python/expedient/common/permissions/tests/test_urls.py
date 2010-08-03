@@ -7,8 +7,9 @@ from django.conf.urls.defaults import patterns, url, include
 
 from views import test_view_x2, test_view_create, \
     test_view_update, test_protected_url
-from ..utils import require_objs_permissions_for_url, get_user_from_req, \
+from ..utils import get_user_from_req, \
     get_queryset_from_class
+from ..shortcuts import require_objs_permissions_for_url
 from django.core.urlresolvers import reverse
 from models import PermissionTestClass
 
