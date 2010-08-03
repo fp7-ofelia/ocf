@@ -1,6 +1,7 @@
 '''
 @author: jnaous
 '''
+import logging
 from django.views.generic import simple
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
@@ -8,24 +9,21 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.loading import cache
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.resources.models import Resource
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.utils.views import generic_crud
 from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import \
+    get_queryset_from_class, get_user_from_req, get_queryset
+from expedient.clearinghouse.slice.models import Slice
+from expedient.clearinghouse.resources.models import Resource
+from expedient.clearinghouse.aggregate.models import Aggregate
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from models import NonOpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
-import logging
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.utils import get_leaf_queryset,\
-    get_queryset_from_class, get_user_from_req, get_queryset
-from expedient.clearinghouse.aggregate.models import Aggregate
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -64,7 +62,6 @@ def aggregate_crud(request, agg_id=None):
         
     elif request.method == "POST":
         logger.debug("aggregate_crud got post")
-        aggregate = aggregate or OpenFlowAggregate(owner=request.user)
         agg_form = OpenFlowAggregateForm(
             data=request.POST, instance=aggregate)
         client_form = PasswordXMLRPCServerProxyForm(
@@ -115,7 +112,7 @@ def aggregate_crud(request, agg_id=None):
             "available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
-                ("%s OpenFlow Aggregate" % "Update" if agg_id else "Add",
+                ("%s OpenFlow Aggregate" % ("Update" if agg_id else "Add"),
                  request.path),
             )
         },
