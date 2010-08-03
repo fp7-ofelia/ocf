@@ -5,7 +5,6 @@ Created on May 31, 2010
 '''
 import exceptions
 from models import ExpedientPermission
-from expedient.common.middleware.threadlocals import get_thread_locals
 from expedient.common.permissions.shortcuts import get_permittee_from_threadlocals
 
 class require_obj_permissions_for_method(object):
