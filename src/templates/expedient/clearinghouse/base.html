@@ -3,12 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
 		<title>
 			{% block title %}GENI Clearinghouse{% endblock %}
 		</title>
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
 		<script src="{% url js_media 'iframe.js' %}"></script>
 		<!-- simple frame busting -->
 		<script type="text/javascript">
