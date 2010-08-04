@@ -47,10 +47,10 @@ function addTooltipToClass(listClass){
  *     ...
  *     <div class="summarytext summary">list summary...</div>
  *     <div class="summarytooltip summary">
- *         <div class="list val">value1</div>
- *         <div class="list description">Description for value1</div> | 
- *         <div class="list val">value2</div>
- *         <div class="list description">Description for value2</div> | 
+ *         <div class="summary val">value1</div>
+ *         <div class="summary description">Description for value1</div> | 
+ *         <div class="summary val">value2</div>
+ *         <div class="summary description">Description for value2</div> | 
  *         ...
  *     </div>
  *     ...
