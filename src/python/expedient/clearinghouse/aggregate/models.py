@@ -13,6 +13,8 @@ from expedient.common.permissions.shortcuts import must_have_permission,\
     give_permission_to, delete_permission
 from expedient.common.middleware import threadlocals
 from expedient.common.permissions.models import Permittee
+from expedient.common.permissions.utils import permissions_save_override,\
+    permissions_delete_override
 
 logger = logging.getLogger("Aggregate Models")
 
@@ -53,7 +55,9 @@ No information available.
         help_text="Select an optional logo.")
     description = models.TextField(default="")
     location = models.CharField(
-        "Geographic Location", max_length=200, default="")
+        "Geographic Location", max_length=200, default="",
+        help_text="This should be a location that can be found using "
+        "Google Maps")
     available = models.BooleanField(
         "Available", default=True,
         help_text="Do you want to make this\
@@ -62,32 +66,19 @@ No information available.
     class Meta:
         verbose_name = "Generic Aggregate"
 
-    def save(self, *args, **kwargs):
-        """
-        Override the default save method to enforce permissions.
-        """
-        pk = getattr(self, "pk", None)
-        if not pk:
-            # it's a new instance being created
-            must_have_permission("user", Aggregate, "can_add_aggregate")
-        else:
-            must_have_permission("user", self, "can_edit_aggregate")
-            
-        super(Aggregate, self).save(*args, **kwargs)
-        
-        if not pk:
-            # it was just created so give creator edit permissions
-            d = threadlocals.get_thread_locals()
-            give_permission_to(
-                "can_edit_aggregate", self, d["user"], can_delegate=True)
-        
-    def delete(self, *args, **kwargs):
-        """
-        Override the default delete method to enforce permissions.
-        """
-        must_have_permission("user", self, "can_edit_aggregate")
-        super(Aggregate, self).delete(*args, **kwargs)
-        
+    save = permissions_save_override(
+        permittee_kw="user",
+        model_func=lambda: Aggregate,
+        create_perm="can_add_aggregate",
+        edit_perm="can_edit_aggregate",
+        delete_perm="can_edit_aggregate",
+    )
+    delete = permissions_delete_override(
+        permittee_kw="user",
+        model_func=lambda: Aggregate,
+        delete_perm="can_edit_aggregate",
+    )
+    
     def get_managers(self):
         """Gets the list of users who have the "can_edit_aggregate" permission
         for this aggregate.
