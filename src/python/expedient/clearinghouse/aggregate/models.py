@@ -20,8 +20,23 @@ class Aggregate(Extendable):
     '''
     Holds information about an aggregate. Needs to be extended by plugins.
     
-    @param name: human-readable name of the Aggregate
+    @cvar information: Information about the aggregate. Used when displaying
+        information about the type. Should be overriden.
+    
+    @ivar name: human-readable name of the Aggregate
     @type name: L{str}
+    @ivar logo: Logo for the aggregate (an uploaded file).
+    @type logo: C{models.ImageField}
+    @ivar description: Description of this aggregate
+    @type description: Text Field
+    @ivar location: The location of the aggregate.
+    @type location: a string that is understandable by Google Maps.
+    @ivar available: Is the aggregate available for use?
+    @type available: C{bool}
+    @ivar managers: A read-only property that returns a queryset of
+        all user allowed to edit the aggregate (i.e. have the
+        "can_edit_aggregate" for this aggregate).
+    @type managers: C{QuerySet} of C{User}s.
     '''
     
     information = \
