@@ -11,5 +11,4 @@ class ProjectCreateForm(forms.ModelForm):
     Form to create a project with basic information.
     """
     class Meta:
-        exclude = ["owner", "aggregates"]
         model = Project
