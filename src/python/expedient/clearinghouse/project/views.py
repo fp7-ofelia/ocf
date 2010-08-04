@@ -16,9 +16,22 @@ from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
-logger = logging.getLogger("Project Views")
+from expedient.clearinghouse.roles.models import ProjectRole
+from expedient.common.permissions.models import ObjectPermission
+    
+logger = logging.getLogger("project.views")
 
 TEMPLATE_PATH = "project"
+
+DEFAULT_OWNER_PERMISSIONS = [
+    "can_edit_project", "can_delete_project", "can_view_project",
+    "can_add_members", "can_remove_members", "can_create_slices",
+    "can_add_aggregates", "can_remove_aggregates",
+]
+
+DEFAULT_RESEARCHER_PERMISSIONS = [
+    "can_view_project", "can_create_slices",
+]
 
 def list(request):
     '''Show list of projects'''
@@ -87,7 +100,7 @@ def detail(request, proj_id):
     )
 
 @require_objs_permissions_for_view(
-    perm_names=["can_create_projects"],
+    perm_names=["can_create_project"],
     permittee_func=get_user_from_req,
     target_func=get_queryset_from_class(Project),
 )
@@ -95,7 +108,42 @@ def create(request):
     '''Create a new project'''
     
     def post_save(instance, created):
-        instance.members.add(request.user)
+        # Create default roles in the project
+        owner_role = ProjectRole.objects.create(
+            name="owner",
+            description=\
+                "The 'owner' role is a special role that has permission to "
+                "do everything "
+                "in the project and can give the permissions to everyone. "
+                "In addition every time a slice is created, users with "
+                "the 'owner' role get full permissions over those.",
+            project=instance,
+        )
+        for permission in DEFAULT_OWNER_PERMISSIONS:
+            obj_perm = ObjectPermission.objects.\
+                get_or_create_for_object_or_class(
+                    permission, instance)[0]
+            owner_role.obj_permissions.add(obj_perm)
+            
+        researcher_role = ProjectRole.objects.create(
+            name="researcher",
+            description=\
+                "By default the 'researcher' can only create slices and "
+                "delete slices she created. She has full permissions over "
+                "her slices.",
+                project=instance,
+        )
+        for permission in DEFAULT_RESEARCHER_PERMISSIONS:
+            obj_perm = ObjectPermission.objects.\
+                get_or_create_for_object_or_class(
+                    permission, instance)[0]
+            researcher_role.obj_permissions.add(obj_perm)
+        
+        # give the creator of the project an owner role
+        owner_role.give_to_permittee(
+            request.user,
+            can_delegate=True,
+        )
         
     def redirect(instance):
         return reverse("project_detail", args=[instance.id])
@@ -105,7 +153,6 @@ def create(request):
         model=Project,
         form_class=ProjectCreateForm,
         template=TEMPLATE_PATH+"/create_update.html",
-        pre_save=pre_save,
         post_save=post_save,
         redirect=redirect,
         extra_context={
