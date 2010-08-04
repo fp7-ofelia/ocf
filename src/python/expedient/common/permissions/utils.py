@@ -5,6 +5,9 @@ Created on Jun 1, 2010
 '''
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
+from expedient.common.permissions.shortcuts import must_have_permission,\
+    give_permission_to
+from expedient.common.middleware import threadlocals
 
 def get_user_from_req(request, *args, **kwargs):
     '''
@@ -134,3 +137,79 @@ def get_object_from_ids(ct_id, id):
         return ct.get_object_for_this_type(pk=id)
     except ct.model_class().DoesNotExist:
         raise Http404()
+
+def permissions_save_override(permittee_kw, model_func, create_perm, edit_perm, delete_perm):
+    """Get a save function that can be used to enforce create, edit, and
+    delete permissions.
+    
+    For example::
+    
+        class ModelX(models.Model):
+            ...
+            save = permissions_save_override(
+                "user", lambda: ModelX, "can_create", "can_edit", "can_delete")
+            
+    @param permittee_kw: the keyword used to store the permittee in
+        threadlocals
+    @type permittee_kw: C{str}.
+    @param model_func: A callable that returns the the class.
+    @type model_func: C{Model} subclass
+    @param create_perm: The name of the creation permission for the class.
+    @type create_perm: C{str}
+    @param edit_perm: The name of the edit permission for the instance.
+    @type edit_perm: C{str}
+    @param delete_perm: the name of the delete permission for the instance.
+    @type delete_perm: C{str}
+    @return: a save function that can be used to enforce permissions.
+    @rtype: a callable.
+    """
+    def save(self, *args, **kwargs):
+        """
+        Override the default save method to enforce permissions.
+        """
+        pk = getattr(self, "pk", None)
+        if not pk:
+            # it's a new instance being created
+            must_have_permission(permittee_kw, model_func(), create_perm)
+        else:
+            must_have_permission(permittee_kw, self, edit_perm)
+            
+        super(model_func(), self).save(*args, **kwargs)
+        
+        if not pk:
+            # it was just created so give creator edit permissions
+            d = threadlocals.get_thread_locals()
+            give_permission_to(
+                edit_perm, self, d[permittee_kw], can_delegate=True)
+            give_permission_to(
+                delete_perm, self, d[permittee_kw], can_delegate=True)
+    return save
+
+def permissions_delete_override(permittee_kw, model_func, delete_perm):
+    """Get a delete function that can be used to enforce
+    delete permissions.
+    
+    For example::
+    
+        class ModelX(models.Model):
+            ...
+            delete = permissions_delete_override(
+                "user", lambda: ModelX, "can_delete")
+            
+    @param permittee_kw: the keyword used to store the permittee in
+        threadlocals
+    @type permittee_kw: C{str}.
+    @param model_func: A callable that returns the class.
+    @type model_func: C{Model} subclass
+    @param create_perm: The name of the creation permission for the class.
+    @type create_perm: C{str}
+    @param delete_perm: the name of the delete permission for the instance.
+    @type delete_perm: C{str}
+    """
+    def delete(self, *args, **kwargs):
+        """
+        Override the default delete method to enforce permissions.
+        """
+        must_have_permission(permittee_kw, self, delete_perm)
+        super(model_func(), self).delete(*args, **kwargs)
+    return delete
