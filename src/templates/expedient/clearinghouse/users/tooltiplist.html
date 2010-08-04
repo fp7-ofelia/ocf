@@ -1,0 +1,14 @@
+{% for user in users %}
+	{% if forloop.first %}
+	<div class="firstuser val">{{ user.username }}</div>
+	<div class="firstuser description">{% include "users/tooltipdesc.html" %}</div>{% if not forloop.last %},
+	<div class="allusers summarytext">...</div>
+	{% endif %}
+	<div class="allusers summarytooltip">
+	{% endif %}
+		<div class="allusers val">{{ user.username }}</div>
+		<div class="allusers description">{% include "users/tooltipdesc.html" %}</div> | 
+	{% if forloop.last %}
+	</div>
+	{% endif %}
+{% endfor %}
