@@ -16,6 +16,8 @@ class ProjectRole(models.Model):
     @ivar name: The name of the role. Doesn't needs to be unique within a
         project.
     @type name: str, max length=100
+    @ivar description: Information about the role.
+    @type description: TextField
     @ivar project: The project for this role.
     @type project: L{Project}
     @ivar obj_permissions: object permissions that this roles groups.
@@ -25,6 +27,7 @@ class ProjectRole(models.Model):
     """
     
     name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, default="")
     project = models.ForeignKey(Project)
     obj_permissions = models.ManyToManyField(ObjectPermission)
     permittees = models.ManyToManyField(Permittee)
