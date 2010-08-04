@@ -8,21 +8,23 @@ from forms import ProjectCreateForm
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from expedient.clearinghouse.aggregate.forms import AggregateTypeForm
 from expedient.clearinghouse.aggregate.models import Aggregate
-from django.core.exceptions import PermissionDenied
 import logging
 from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
 from django.db.models import Q
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
+    get_queryset_from_class
 logger = logging.getLogger("Project Views")
 
-TEMPLATE_PATH = "expedient/clearinghouse/project"
+TEMPLATE_PATH = "project"
 
 def list(request):
     '''Show list of projects'''
     
-    qs = Project.objects.filter(Q(members=request.user)|Q(owner=request.user))
+    qs = Project.objects.get_for_member(request.user)
+    
     return list_detail.object_list(
         request,
         queryset=qs,
@@ -30,9 +32,25 @@ def list(request):
         template_object_name="project",
     )
 
+@require_objs_permissions_for_view(
+    perm_names=["can_delete_project"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+    methods=["GET", "POST"],
+)
+# TODO: Enable when slice permissions are ready.
+#@require_objs_permissions_for_view(
+#    perm_names=["can_delete_slice"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Slice, "proj_id", filter="project__id"),
+#    methods=["GET", "POST"],
+#)
 def delete(request, proj_id):
     '''Delete the project'''
     project = get_object_or_404(Project, id=proj_id)
+    if request.method == "POST":
+        for s in project.slice_set.all():
+            s.stop(request.user)
     req = create_update.delete_object(
         request,
         model=Project,
@@ -46,6 +64,11 @@ def delete(request, proj_id):
             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
     return req
 
+@require_objs_permissions_for_view(
+    perm_names=["can_view_project"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
 def detail(request, proj_id):
     '''Show information about the project'''
     project = get_object_or_404(Project, id=proj_id)
@@ -63,12 +86,13 @@ def detail(request, proj_id):
         }
     )
 
+@require_objs_permissions_for_view(
+    perm_names=["can_create_projects"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset_from_class(Project),
+)
 def create(request):
     '''Create a new project'''
-    
-    def pre_save(instance, created):
-        instance.owner = request.user
-        logger.debug("called pre_save for creating project")
     
     def post_save(instance, created):
         instance.members.add(request.user)
@@ -92,6 +116,17 @@ def create(request):
         success_msg = lambda instance: "Successfully created project %s." % instance.name,
     )
     
+@require_objs_permissions_for_view(
+    perm_names=["can_view_project"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_project"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+    methods=["POST"],
+)
 def update(request, proj_id, iframe=False):
     '''Update information about a project'''
     
