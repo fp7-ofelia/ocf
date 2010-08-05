@@ -7,11 +7,33 @@ from django.db import models
 from expedient.clearinghouse.project.models import Project
 from expedient.common.permissions.models import ObjectPermission, Permittee,\
     PermissionOwnership
-from expedient.common.permissions.shortcuts import delete_permission
+from django.contrib.auth.models import User
+
+class ProjectRoleManager(models.Manager):
+    """Manager for L{ProjectRole} instances."""
+    
+    def get_users_with_role(self, role_name, project):
+        """Get a C{User} query set for users that have role C{role_name} in
+        project C{project}
+        
+        @param role_name: Name of the project role.
+        @type role_name: C{str}.
+        @param project: project instance.
+        @type project: L{Project}.
+        @return: all users with that role in the project
+        @rtype: C{QuerySet} of C{User} objects.
+        """
+        user_ids = Permittee.objects.filter(
+            projectrole__name=role_name,
+            projectrole__project=project).values_list(
+                "pk", flat=True)
+        return User.objects.filter(pk__in=user_ids)
 
 class ProjectRole(models.Model):
     """Groups object permissions together for easier fine-grained management.
     This role is local to a project.
+    
+    @cvar objects: a L{ProjectRoleManager}.
     
     @ivar name: The name of the role. Doesn't needs to be unique within a
         project.
@@ -25,6 +47,8 @@ class ProjectRole(models.Model):
     @ivar permittees: Set of permittees that have this role.
     @type permittees: C{ManyToManyField} to L{Permittee}.
     """
+    
+    objects = ProjectRoleManager()
     
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, default="")
