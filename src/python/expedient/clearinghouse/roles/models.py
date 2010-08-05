@@ -61,6 +61,10 @@ class ProjectRole(models.Model):
             ("name", "project"),
         )
     
+    def __unicode__(self):
+        return "Role %s for project %s: %s" % (
+            self.name, self.project.name, self.description)
+    
     def give_to_permittee(self, permittee, giver=None, can_delegate=False):
         """Give the role to a permittee. This combines the permittee's
         permissions.
