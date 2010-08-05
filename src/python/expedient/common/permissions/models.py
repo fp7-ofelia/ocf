@@ -147,7 +147,7 @@ class Permittee(models.Model):
     where permittees are not necessarily C{django.contrib.auth.models.User}
     instances.
     
-    @cvar objects: L{GenericObjectManager} for the class
+    @cvar objects: L{PermitteeManager} for the class
     
     @ivar object_type: The C{ContentType} indicating the class of the permittee.
     @type object_type: ForeignKey to C{ContentType}
