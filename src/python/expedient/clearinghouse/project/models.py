@@ -27,7 +27,7 @@ class ProjectManager(models.Manager):
         permittee = Permittee.objects.get_as_permittee(user)
         
         proj_ids = ObjectPermission.objects.filter_for_class(
-            klass=Project, permittee=permittee).values_list(
+            klass=Project, permittees=permittee).values_list(
                 "object_id", flat=True)
         return self.filter(id__in=list(proj_ids))
 
