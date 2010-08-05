@@ -9,19 +9,34 @@
 }
 {% endblock %}
 
+{% block scripts %}
+<script>
+	$(document).ready(function() {
+		addTooltipToClass("project_name");
+		addTooltipToClass("role_desc");
+		$(".permissions").each(function(index) {
+			addTooltipToSummary("role_perms_"+index);
+		});
+	});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="main">
 	<div class="title">
 		<h1>Project {{ project.name }}</h1>
 	</div>
+	
 	<div class="mgmt_actions">
 		<h2>Management Actions:</h2>
     	<p><a href="{% url project_update project.id %}">Edit</a> basic information.</p>
     	<p><a href="{% url project_delete project.id %}">Delete</a> project.</p>
     </div>
+	
     <div class="proj_description">
         {{ project.description }}
     </div>
+	
     <h2>Aggregates</h2>
 	<div class="aggregate_list">
 		{% with project.aggregates.all as aggregate_list %}
@@ -40,6 +55,7 @@
 			onclick="document.location='{% url project_add_agg project.id %}'" />
 	    </div>
 	</div>
+	
 	<h2>Slices</h2>
 	<div class="slice_list">
 		<div class="table_div">
@@ -74,6 +90,63 @@
 		<div class="center">
 	    	<input type="button" value="Create Slice"
 	    	onclick="document.location='{% url slice_create project.id %}'" />
+		</div>
+	</div>
+	
+	<h2>Roles</h2>
+	<div class="role_list">
+		<div class="table_div">
+			<table class="fulltable" id="role_table">
+				<tr class="head">
+		            <th class="name">Name</th>
+					<th class="description">Description</th>
+					<th class="permissions">Permissions</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for role in project.projectrole_set.all %}
+				<tr class="body">
+					<td class="name">{{ role.name }}</td>
+					<td class="description">
+						<div class="role_desc val">{{ role.description|truncatewords:4 }}</div>
+						<div class="role_desc description">{{ role.description }}</div>
+					</td>
+					<td class="permissions">
+						<div class="summarytext role_perms_{{ forloop.counter0 }}">
+							{{ role.obj_permissions.all.count }}</div>
+						<div class="summarytooltip role_perms_{{ forloop.counter0 }}">
+							{% for obj_perm in role.obj_permissions.all %}
+							<div class="val role_perms_{{ forloop.parentloop.counter0 }}">{{ obj_perm.permission.name }}</div>
+							<div class="description role_perms_{{ forloop.parentloop.counter0 }}">
+								<table class="tooltiptable">
+									<tr>
+										<th>Name</th><td>:</td><td>{{ obj_perm.permission.name }}</td>
+									</tr>
+									<tr>
+										<th>Target</th><td>:</td><td>{{ obj_perm.target }}</td>
+									</tr>
+									<tr>
+										<th>Description</th><td>:</td><td>{{ obj_perm.permission.description }}</td>
+									</tr>
+								</table>
+							</div>{% if not forloop.last %} | {% endfor %}
+ 							{% endfor %}
+						</div>
+					</td>
+					<td class="actions">
+						{% comment %}
+						<a href="{% url roles_detail role.id %}">edit</a>{% if role.name != "owner" and role.name != "researcher" %},
+						<a href="{% url roles_delete role.id %}">delete</a>{% endif %}
+						{% endcomment %}
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div class="center">
+			{% comment %}
+	    	<input type="button" value="Create Role"
+	    	onclick="document.location='{% url roles_create project.id %}'" />
+			{% endcomment %}
 		</div>
 	</div>
 </div>
