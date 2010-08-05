@@ -128,9 +128,10 @@ def create(request):
         researcher_role = ProjectRole.objects.create(
             name="researcher",
             description=\
-                "By default the 'researcher' can only create slices and "
-                "delete slices she created. She has full permissions over "
-                "her slices.",
+                "By default users with the 'researcher' role can only "
+                "create slices and "
+                "delete slices they created. They have full permissions over "
+                "their created slices.",
                 project=instance,
         )
         for permission in DEFAULT_RESEARCHER_PERMISSIONS:
@@ -156,9 +157,7 @@ def create(request):
         post_save=post_save,
         redirect=redirect,
         extra_context={
-            "iframe": True,
-            "base": "iframebase.html",
-            "cancel_url": reverse("project_list"),
+            "cancel_url": reverse("home"),
         },
         success_msg = lambda instance: "Successfully created project %s." % instance.name,
     )
@@ -191,9 +190,7 @@ def update(request, proj_id, iframe=False):
         redirect=redirect,
         template_object_name="project",
         extra_context={
-            "iframe": iframe,
-            "base": "iframebase.html" if iframe else "base.html",
-            "cancel_url": reverse("project_list") if iframe else reverse("project_detail", args=[proj_id]),
+            "cancel_url": reverse("home") if iframe else reverse("project_detail", args=[proj_id]),
         },
         success_msg = lambda instance: "Successfully updated project %s." % instance.name,
     )
