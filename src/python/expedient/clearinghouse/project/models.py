@@ -2,11 +2,10 @@
 @author jnaous
 '''
 from django.db import models
-from django.contrib.auth.models import User
-from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.models import Permittee, ObjectPermission
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
+from expedient.clearinghouse.aggregate.models import Aggregate
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -14,17 +13,21 @@ class ProjectManager(models.Manager):
     Add methods to retrieve project querysets.
     """
     
-    def get_for_member(self, member):
-        """Return projects in which C{member} is a member.
+    def get_for_user(self, user):
+        """Return projects for which C{user} has some permission.
         
-        This is a wrapper around the C{get_permitted_object} method of
-        the L{ObjectPermission} manager.
-        
-        @param member: The user whose projects we are looking for.
-        @type member: C{User}.
+        @param user: The user whose projects we are looking for.
+        @type user: C{User}.
         """
-        return ObjectPermission.objects.get_permitted_objects(
-            klass=Project, perm_names=["can_view_project"], permittee=member)
+        if user.is_superuser:
+            return self.all()
+        
+        permittee = Permittee.objects.get_as_permittee(user)
+        
+        proj_ids = ObjectPermission.objects.filter_for_class(
+            klass=Project, permittee=permittee).values_list(
+                "object_id", flat=True)
+        return self.filter(id__in=list(proj_ids))
 
 class Project(models.Model):
     '''
@@ -40,13 +43,12 @@ class Project(models.Model):
         be used by the project (i.e. for which the project has the
         "can_use_aggregate" permission).
     @type aggregates: C{QuerySet} of L{Aggregate}s
-    @ivar members: Read-only property returning all users allowed to view the
-        project (i.e. have the "can_view_project" permission for the project).
-    @type members: C{QuerySet} of C{User}s.
-    @ivar managers: Read-only property returning all users allowed manage
-        the project (i.e. have the "can_manage_project" permission
-        for the project).
-    @type managers: C{QuerySet} of C{User}s.
+    @ivar researchers: Read-only property returning all users that have the
+        'researcher' role for the project.
+    @type researchers: C{QuerySet} of C{User}s.
+    @ivar owners: Read-only property returning all users that have the 'owner'
+        role for the project.
+    @type owners: C{QuerySet} of C{User}s.
     '''
     objects = ProjectManager()
     
@@ -66,7 +68,7 @@ class Project(models.Model):
         delete_perm="can_delete_project",
     )
     
-    def get_aggregates(self):
+    def _get_aggregates(self):
         """Get all aggregates that can be used by the project
         (i.e. for which the project has the "can_use_aggregate" permission).
         """
@@ -75,27 +77,19 @@ class Project(models.Model):
             perm_names=["can_use_aggregate"],
             permittee=self,
         )
-    aggregates=property(get_aggregates)
+    aggregates=property(_get_aggregates)
     
-    def get_members(self):
-        """Get all users who have the "can_view_project" permission for
-        the project"""
-        
-        return Permittee.objects.filter_for_class_and_permission_name(
-            klass=User,
-            permission="can_view_project",
-            target_obj_or_class=self,
-        )
-    members=property(get_members)
+    def _get_researchers(self):
+        """Get all users who have the 'researcher' role for the project"""
+        from expedient.clearinghouse.roles.models import ProjectRole
+        return ProjectRole.objects.get_users_with_role('researcher', self)
+    researchers=property(_get_researchers)
     
-    def get_managers(self):
-        """Return all users who can manage the project"""
-        return Permittee.objects.filter_for_class_and_permission_name(
-            klass=User,
-            permission="can_manage_project",
-            target_obj_or_class=self,
-        )
-    managers=property(get_managers)
+    def _get_owners(self):
+        """Get all users who have the 'owner' role for the project"""
+        from expedient.clearinghouse.roles.models import ProjectRole
+        return ProjectRole.objects.get_users_with_role('owner', self)
+    owners=property(_get_owners)
     
     def __unicode__(self):
         s = u"Project %s members: %s" % (self.name, self.members.all())

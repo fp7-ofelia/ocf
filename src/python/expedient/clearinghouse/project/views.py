@@ -36,7 +36,7 @@ DEFAULT_RESEARCHER_PERMISSIONS = [
 def list(request):
     '''Show list of projects'''
     
-    qs = Project.objects.get_for_member(request.user)
+    qs = Project.objects.get_for_user(request.user)
     
     return list_detail.object_list(
         request,

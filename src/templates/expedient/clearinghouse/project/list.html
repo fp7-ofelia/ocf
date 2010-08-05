@@ -1,4 +1,4 @@
-{% extends "iframebase.html" %}
+{% extends "div_base.html" %}
 {% load ch_extras %}
 
 {% block scripts %}
@@ -10,7 +10,6 @@
 </script>
 {% endblock %}
 
-{% block title %}List Projects{% endblock title %}
 {% block content %}
 <div class="project_list">
 	<div class="table_div">
@@ -18,7 +17,7 @@
 			<tr>
 				<th class="name">Name</th>
                 <th class="owners">Owners</th>
-                <th class="members">Members</th>
+                <th class="researchers">Researchers</th>
                 <th class="slices">Slices</th>
                 <th class="actions">Actions</th>
 			</tr>
@@ -30,8 +29,8 @@
 					{% include "users/tooltiplist.html" %}
 					{% endwith %}
 				</td>
-                <td class="members">
-					{% with project.members.all as users %}
+                <td class="researchers">
+					{% with project.researchers.all as users %}
 					{% include "users/tooltiplist.html" %}
 					{% endwith %}
                 </td>
