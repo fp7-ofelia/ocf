@@ -3,9 +3,13 @@
 
 {% block scripts %}
 <script>
-	{% include "users/tooltip.js" %}
 	$(document).ready(function() {
 		addTooltipToClass("slicecontinue");
+		addTooltipToClass("project_name");
+		$(".project_list tr.body").each(function(index) {
+			addTooltipToSummary("ownersgrp_"+index);
+			addTooltipToSummary("membersgrp_"+index);
+		});
 	});
 </script>
 {% endblock %}
@@ -14,24 +18,31 @@
 <div class="project_list">
 	<div class="table_div">
 		<table class="fulltable" id="projects_table">
-			<tr>
+			<tr class="head">
 				<th class="name">Name</th>
                 <th class="owners">Owners</th>
-                <th class="researchers">Researchers</th>
+                <th class="members">Members</th>
                 <th class="slices">Slices</th>
                 <th class="actions">Actions</th>
 			</tr>
 			{% for project in project_list %}
-			<tr>
-				<td class="name">{{ project.name }}</td>
+			<tr class="body">
+				<td class="name">
+					<div class="val project_name">{{ project.name }}</div>
+					<div class="description project_name">{{ project.description }}</div>
+				</td>
 				<td class="owners">
 					{% with project.owners.all as users %}
+					{% with "ownersgrp_"|cat:forloop.counter0 as tooltip_class %}
 					{% include "users/tooltiplist.html" %}
 					{% endwith %}
+					{% endwith %}
 				</td>
-                <td class="researchers">
-					{% with project.researchers.all as users %}
+                <td class="members">
+					{% with project.members.all as users %}
+					{% with "membersgrp_"|cat:forloop.counter0 as tooltip_class %}
 					{% include "users/tooltiplist.html" %}
+					{% endwith %}
 					{% endwith %}
                 </td>
                 <td class="slices">
