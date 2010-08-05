@@ -6,6 +6,8 @@ from expedient.common.permissions.models import Permittee, ObjectPermission
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
 from expedient.clearinghouse.aggregate.models import Aggregate
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -49,6 +51,9 @@ class Project(models.Model):
     @ivar owners: Read-only property returning all users that have the 'owner'
         role for the project.
     @type owners: C{QuerySet} of C{User}s.
+    @ivar members: Read-only property returning all users that have some
+        permission in the project.
+    @type members: C{QuerySet} of C{User}s.
     '''
     objects = ProjectManager()
     
@@ -91,7 +96,17 @@ class Project(models.Model):
         return ProjectRole.objects.get_users_with_role('owner', self)
     owners=property(_get_owners)
     
+    def _get_members(self):
+        """Get all users who have some permission in the project."""
+        user_ids = Permittee.objects.filter(
+            objectpermission__object_type=
+                ContentType.objects.get_for_model(Project),
+            objectpermission__object_id=self.id,
+        ).values_list("object_id", flat=True)
+        return User.objects.filter(pk__in=list(user_ids))
+    members=property(_get_members)
+    
     def __unicode__(self):
-        s = u"Project %s members: %s" % (self.name, self.members.all())
+        s = u"Project %s" % self.name
         return s
 
