@@ -2,31 +2,24 @@
 
 {% block scripts %}
 <style>
-.tooltip {
-	display:none;
-	background-color:#000;
-	border:1px solid #fff;
-	padding:10px 15px;
-	width:400px;
-	display:none;
-	color:#fff;
-	text-align:left;
-	font-size:12px;
-
-	/* outline radius for mozilla/firefox only */
-	-moz-box-shadow:0 0 10px #000;
-	-webkit-box-shadow:0 0 10px #000;
-}
 img#perm_help {
 	width:15px;
 	height:15px;
+}
+.ajax_div {
+	border: 1px solid #E0E8FF;
 }
 </style>
 <script>
 	$(document).ready(function() {
 		/* add tooltip to question mark */
 		$("img#perm_help").tooltip({
-			tip: "div.tooltip"
+			tip: "div#perm_mgmt_help"
+		});
+		
+		/* get the html for the projects div */
+		$.get('{% url project_list %}', function(data) {
+			$('.projects_div').html(data);
 		});
 	});
 </script>
@@ -59,18 +52,12 @@ img#perm_help {
     </div>
     
     <h2>Projects</h2>
-    <div class="projects">
-        <iframe class="dynsized" name="projects"
-        src="{% url project_list %}"
-        scrolling="no" frameborder="0"
-        width="100%">
-           <p>Your browser does not support iframes.</p>
-        </iframe>
+    <div class="ajax_div projects_div">
     </div>
 	
 	<h2>Permission Management <img id="perm_help"
 	src="{% url img_media 'question_mark.png' %}" /></h2>
-	<div class="tooltip">
+	<div class="tooltip" id="perm_mgmt_help">
 		When an Expedient user needs permission to do something, and she does
 		not have that permission, she might be able to request that permission
 		from someone who can give it to her. Below is a list of permissions

@@ -1,233 +1,3 @@
-body {
-	font-size: 62.5%; /* Resets 1em to 10px */
-	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #EEEEEE;
-	color: #333;
-	text-align: center;
-	margin: 0px;
-	padding: 0px;
-	}
-
-img, div { behavior: url(/media/js/iepngfix.htc) }
-
-#frontpage {
-	width: 1000px;
-	margin: auto;
-	padding: 0 0px;
-	background-color: #eee;
-}
-
-#userauth {
-	height: 12px;
-	font-size: .6em;
-	text-align: right;
-	padding: 5px;
-}
-
-#top {
-	height: 62px;
-	width: 1000px;
-	padding-top: 0;
-	font-size: 1.7em;
-	margin-left: 60px;
-}
-
-
-#top .right img {
-	display: block;
-	float: left;
-	
-}
-
-.blue {
-	background: #001949;
-	padding: 0px;
-	margin: 0px;
-	text-align: center;
-	width: 100%;
-}
-
-.blue2 {
-	background: #001949 url(../img/highlight.png) no-repeat 0 -150px;
-	padding-bottom: 20px;
-	margin-top: 10px;
-	text-align: left;
-	width: 900px;
-	display: inline-block;
-}
-
-.intro {
-	width: 400px;
-	margin-top: 25px;
-	float: none;
-	font-size: 1.6em;
-	color: #a7a7aa;
-	padding-left: 35px;
-	display: inline;
-	text-align: left;
-}
-
-.splash {
-	float: none;
-	padding-bottom: 0;
-	margin-bottom: -20px;
-	margin-right: 50px;
-	display: inline;
-	margin-top: 10px;
-	clear: both;
-	position: relative;
-	top: 10px;
-}
-
-.panel {
-	height: 197px;
-	margin-top: 0px;
-	font-size: 1.7em;
-	color: #d4d5d6;
-	padding: 10px 50px 0px 50px;
-	width: 900px;
-	display: block;
-	margin-bottom: 0;
-	text-align: center;
-}
-
-.left {
-	float: left;
-}
-
-#fptable {
-	margin-left: 60px;	
-}
-
-#fpnews {
-	text-align: left;
-	width: 580px;
-	margin-right: 0;
-	background-color: #fff;
-	color: #555;
-	padding: 20px;
-	border: 1px solid #999;
-	font: 1.2em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
-}
-
-#fpnews h2 {
-	font-size:1.2em;
-	margin:5px 0 0;
-	padding:0;
-}
-
-#fpnews .post {
-	margin-bottom: 25px;
-}
-
-#fpnews .postmetadata {
-	padding-top: 0px;
-}
-
-#newshead {
-	margin-bottom: 20px;
-}
-
-#fpsidebar {	
-	vertical-align: top;
-	text-align: left;
-	width: 200px;
-	margin-left: 0;
-	background-color: #fff;
-	color: #555;
-	padding: 20px;
-	border: 1px solid #999;
-	font: 1em 'Lucida Grande',Verdana,Arial,Sans-Serif;
-	font-size-adjust:none;
-	font-style:normal;
-	font-variant:normal;
-	font-weight:normal;
-	line-height:normal;
-	margin-right: 60px;
-}
-
-#fpsidebar ul {
-	padding-left: 2px;
-}
-
-#fpsidebar ul li:before {
-	content: "\00BB \0020";
-	}
-	
-#fpsidebar ul li, #fpsidebar ul ol li {
-	margin:1px 0 0;
-	padding:0;
-	list-style-image:none;
-	list-style-type:none;
-}
-
-#fpsidebar ul li, #fpsidebar ul ol li  {
-	color:#777777;
-}
-
-#fpsidebar h2 {
-	font-family:'Lucida Grande',Verdana,Sans-Serif;
-	font-size:1.2em;
-	margin:5px 0 0;
-	padding:0;
-}
-
-.rssicon {
-	width: 13px;
-	position: relative;
-	top: 2px;
-}
-
-.newsicon {
-	position: relative;
-	top: 6px;
-}
-
-.subscribe {
-	font-size: 0.9em;
-	
-}
-
-#fpfooter {
-	text-align: center;
-	padding-top: 10px;
-	color: #666;
-	padding: 10px;
-	clear: both;
-}
-
-#fpfooter a {
-	clear: both;
-	top: 5px;
-}
-
-#fpfooter .company {
-	font-size: 1.3em;
-	color: #aaa;
-	top: 5px;
-	clear: both;
-	position: relative;
-	display: inline;
-	border-style: solid;
-}
-
-#main_text {
-	margin-bottom: 10px;
-	background-image: url(../img/home.png);
-	background-repeat: no-repeat;
-	width: 378px;
-	height: 217px;
-}
-
-
-a {
-	color: #bbb;
-}
-
-div.spacer {
-        clear: both;
-}
-
 /*
 Theme Name: OpenFlow
 Theme URI: http://openflowswitch.org
@@ -270,7 +40,6 @@ body {
 
 #headerimg 	{
 	width: 900px;
-		
 	}
 
 #content {
@@ -360,52 +129,6 @@ h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar
 	text-decoration: none;
 	}
 
-.entry p a:visited {
-	}
-
-.commentlist li, #commentform input, #commentform textarea {
-	font: 0.9em 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	}
-
-.commentlist li {
-	font-weight: bold;
-	}
-
-.commentlist li .avatar { 
-	float: right;
-	border: 1px solid #eee;
-	padding: 2px;
-	background: #fff;
-	}
-
-.commentlist cite, .commentlist cite a {
-	font-weight: bold;
-	font-style: normal;
-	font-size: 1.1em;
-	}
-
-.commentlist p {
-	font-weight: normal;
-	line-height: 1.5em;
-	text-transform: none;
-	}
-
-#commentform p {
-	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	}
-
-.commentmetadata {
-	font-weight: normal;
-	}
-
-#sidebar {
-	font: 1em 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	}
-
-small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, strike {
-	color: #777;
-	}
-
 code {
 	font: 1.1em 'Courier New', Courier, Fixed;
 	}
@@ -424,24 +147,6 @@ a, h2 a:hover, h3 a:hover {
 a:hover {
 	color: #36A;
 	text-decoration: underline;
-	}
-
-#wp-calendar #prev a, #wp-calendar #next a {
-	font-size: 9pt;
-	}
-
-#wp-calendar a {
-	text-decoration: none;
-	}
-
-#wp-calendar caption {
-	font: bold 1.3em 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	text-align: center;
-	}
-
-#wp-calendar th {
-	font-style: normal;
-	text-transform: capitalize;
 	}
 /* End Typography & Colors */
 
@@ -473,74 +178,6 @@ body {
 	width: 100%;
 	background-color: #EEEEEE;
 	}
-
-.narrowcolumn {
-	float: left;
-	padding: 0 0 20px 45px;
-	margin: 0px 0 0;
-	width: 520px;
-	}
-	
-#news {
-	
-	width: 340px;
-	margin-right: 0;
-	background-color: #fff;
-	color: #555;
-	padding: 20px;
-	border: 1px solid #999;
-	font: 1.4em "Lucida Sans";
-	float: left;
-	height: 350px;
-	margin-left: 60px;
-}
-
-.widecolumn {
-	padding: 10px 0 20px 0;
-	margin: 2px 0 0 25px;
-	width: 700px;	
-	}
-
-.post {
-	margin: 0 0 40px;
-	text-align: justify;
-	}
-
-.post hr {
-	display: block;
-	}
-
-.widecolumn .post {
-	margin: 0;
-	}
-
-.narrowcolumn .postmetadata {
-	padding-top: 5px;
-	}
-
-.widecolumn .postmetadata {
-	margin: 30px 0;
-	}
-
-.widecolumn .smallattachment {
-	text-align: center;
-	float: left;
-	width: 128px;
-	margin: 5px 5px 5px 0px;
-}
-
-.widecolumn .attachment {
-	text-align: center;
-	margin: 5px 0px;
-}
-
-.postmetadata {
-	clear: both;
-}
-
-.clear {
-	clear: both;
-}
 
 #footer {
 	padding: 0;
@@ -585,11 +222,6 @@ h2.pagetitle {
 h3 {
 	padding: 0;
 	margin: 30px 0 0;
-	}
-
-h3.comments {
-	padding: 0;
-	margin: 40px auto 20px ;
 	}
 /* End Headers */
 
@@ -652,77 +284,14 @@ html>body .entry li {
 	margin: 7px 0 8px 10px;
 	}
 
-.entry ul li:before, #sidebar ul ul li:before {
-	content: "\00BB \0020";
-	}
-
-.entry ol {
-	padding: 0 0 0 35px;
-	margin: 0;
-	}
-
-.entry ol li {
-	margin: 0;
-	padding: 0;
-	}
-
-.postmetadata ul, .postmetadata li {
-	display: inline;
-	list-style-type: none;
-	list-style-image: none;
-	}
-
-#sidebar ul, #sidebar ul ol {
-	margin: 0;
-	padding: 0;
-	}
-
-#sidebar ul li {
-	list-style-type: none;
-	list-style-image: none;
-	margin-bottom: 15px;
-	}
-
-#sidebar ul p, #sidebar ul select {
-	margin: 5px 0 8px;
-	}
-
-#sidebar ul ul, #sidebar ul ol {
-	margin: 5px 0 0 3px;
-	}
-
-#sidebar ul ul ul, #sidebar ul ol {
-	margin: 0 0 0 10px;
-	}
-
 ol li, #sidebar ul ol li {
 	list-style: decimal outside;
-	}
-
-#sidebar ul ul li, #sidebar ul ol li {
-	margin: 1px 0 0;
-	padding: 0;
 	}
 /* End Entry Lists */
 
 
 
 /* Begin Form Elements */
-#searchform {
-	margin: 10px auto;
-	padding: 5px 3px;
-	text-align: center;
-	}
-
-#sidebar #searchform #s {
-	width: 108px;
-	padding: 2px;
-	}
-
-#sidebar #searchsubmit {
-	padding: 1px;
-	}
-
 .entry form { /* This is mainly for password protected posts, makes them look better. */
 	text-align:center;
 	}
@@ -730,116 +299,7 @@ ol li, #sidebar ul ol li {
 select {
 	width: 130px;
 	}
-
-#commentform input {
-	width: 170px;
-	padding: 2px;
-	margin: 5px 5px 1px 0;
-	}
-
-#commentform textarea {
-	width: 100%;
-	padding: 2px;
-	}
-
-#commentform #submit {
-	margin: 0;
-	float: right;
-	}
 /* End Form Elements */
-
-
-
-/* Begin Comments*/
-.alt {
-	margin: 0;
-	padding: 10px;
-	}
-
-.commentlist {
-	padding: 0;
-	text-align: justify;
-	}
-
-.commentlist li {
-	margin: 15px 0 3px;
-	padding: 5px 10px 3px;
-	list-style: none;
-	}
-
-.commentlist p {
-	margin: 10px 5px 10px 0;
-	}
-
-#commentform p {
-	margin: 5px 0;
-	}
-
-.nocomments {
-	text-align: center;
-	margin: 0;
-	padding: 0;
-	}
-
-.commentmetadata {
-	margin: 0;
-	display: block;
-	}
-/* End Comments */
-
-
-
-/* Begin Sidebar */
-#sidebar
-{
-	padding: 20px 0 10px 0;
-	margin-left: 615px;
-	width: 200px;
-	}
-
-#sidebar form {
-	margin: 0;
-	}
-/* End Sidebar */
-
-
-
-/* Begin Calendar */
-#wp-calendar {
-	empty-cells: show;
-	margin: 10px auto 0;
-	width: 155px;
-	}
-
-#wp-calendar #next a {
-	padding-right: 10px;
-	text-align: right;
-	}
-
-#wp-calendar #prev a {
-	padding-left: 10px;
-	text-align: left;
-	}
-
-#wp-calendar a {
-	display: block;
-	}
-
-#wp-calendar caption {
-	text-align: center;
-	width: 100%;
-	}
-
-#wp-calendar td {
-	padding: 3px 0;
-	text-align: center;
-	}
-
-#wp-calendar td.pad:hover { /* Doesn't work in IE */
-	background-color: #fff; }
-/* End Calendar */
-
-
 
 /* Begin Various Tags & Classes */
 acronym, abbr, span.caps {
@@ -885,42 +345,7 @@ a img {
 	}
 /* End Various Tags & Classes*/
 
-/* Captions */
-.aligncenter,
-div.aligncenter {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.wp-caption {
-	border: 1px solid #ddd;
-	text-align: center;
-	background-color: #f3f3f3;
-	padding-top: 4px;
-	margin: 10px;
-	-moz-border-radius: 3px;
-	-khtml-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-}
-
-.wp-caption img {
-	margin: 0;
-	padding: 0;
-	border: 0 none;
-}
-
-.wp-caption p.wp-caption-text {
-	font-size: 11px;
-	line-height: 17px;
-	padding: 0 4px 5px;
-	margin: 0;
-}
-/* End captions */
-
 /* GENI Specific stuff */
-
 div.contact {
     width: 275px;
 }
@@ -929,74 +354,6 @@ div.geni_info {
     width: 400px;
     float: right;
 }
-
-div.announcements {
-    padding: 8px;
-    font-size:12px;
-    border: 2px solid #FCA;
-    margin-bottom:20px;
-}
-
-div.announcements h2 {
-    font-size:13px;
-    margin-top: 0px;
-}
-
-div.announcements p {
-    margin: 0px;
-}
-
-div.functions {
-    width: 335px;
-    border: 1px solid #AAA;
-    padding: 10px;
-    float:left;
-    height:150px;
-}
-div.functions h2 {
-    margin-top: 0px;
-}
-
-div.functions a {
-    font-size:14px;
-}
-
-div.functions p {
-    margin: 11px;
-}
-
-div.stats {
-    width: 345px;
-    border: 1px solid #AAA;   
-    padding: 10px;
-    float:right;
-    height:150px;
-}
-div.stats h2 {
-    margin-top: 0px;
-}
-
-p.error {
-    font-family:courier, "courier new", monospace;
-    font-size:10px;
-    font-spaing
-    color:#000;
-    background-color:#fff;
-}
-
-.errors h2 {
-    margin-top:15px;
-}
-
-div.errors {
-        clear: both;
-        padding-top: 1px;
-}
-
-.errorlist {
-    color: #F00;
-}
-
 /* 
     Table Styles
 */
@@ -1018,71 +375,109 @@ table.formtable_noborder {
 }
 
 	
-table.formtable tbody td ,tbody th {
+table.formtable>tbody>td,table.formtable>tbody>th {
 	padding: 5px 10px;
 	background: #fff;
 	color: #000;
 }
 
-table.formtable_noborder tbody td ,tbody th {
+table.formtable_noborder>tbody>td,table.formtable_noborder>tbody>th {
 	padding: 5px 10px;
 	background: #fff;
 	color: #000;
 }
-	
+
 /* Full Table */
 
 table.fulltable {
 	border-collapse: collapse;
 	border: 1px solid #CCC;
 	margin-bottom:10px;
-	margin-top:5px;
+	margin-top:0px;
 	width: 100%
 }
-table.fulltable thead {
+
+table.fulltable>tbody,table.fulltable>td,table.fulltable>th{
+	text-align: center;
+}
+
+table.fulltable>thead {
 	white-space: nowrap;
 	background: #E0E8FF;
 	font-weight: bold;
 	padding: 3px;
 }
-table.fulltable thead td {
+table.fulltable>thead>td {
     padding: 5px 10px;
 }
-table.fulltable tbody td ,tbody th {
+table.fulltable>tbody>td,table.fulltable>tbody>th {
 	padding: 5px 10px;
 	background: #fff;
 	color: #000;
 }
-table.fulltable tbody th {
+table.fulltable>tbody>tr>th {
 	color: #005;
 	font-weight: normal;
 	font-variant: normal;
 	font-size: 1em;
 }
 
-table.last_errors_table {
+table.msg_table {
     border-spacing: 0px;
     border: 0px;
-    margin: 15px 0px;
+    margin: 0px 0px;
     padding: 0px;
+    width: 100%;
 }
 
-table.last_errors_table td {
+table.msg_table td {
     vertical-align: top;
-    font-family:courier, "courier new", monospace;
+    /*font-family:courier, "courier new", monospace;*/
     padding:4px 6px 4px 6px; 
 }
 
-table.last_errors_table thead td {
+table.msg_table thead td {
 	font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
 }
 
-table.last_errors_table tr th {
+table.msg_table tr th {
 	border-bottom: 1px solid #000;
 }
 
-table.last_errors_table tr td {
+table.msg_table tr td {
 	border-bottom: 1px solid #CCC;
+}
+
+table.msg_table .select_checkbox {
+    width:10px;
+}
+
+table.msg_table .type {
+    width:80px;
+}
+
+table.msg_table .date {
+    width:80px;
+}
+
+table.msg_table .time {
+    width:60px;
+}
+
+table.msg_table td.msg_text {
+    text-align:left;
+}
+
+table.msg_table .error,.warning {
+	color:#9a1b1b;
+}
+
+table.msg_table .error {
+    font-weight:bold;
+}
+
+table.msg_table .success {
+    color:green;
 }
 
 .errtime {
@@ -1117,14 +512,11 @@ iframe {
     border: 1px solid #E0E8FF;
 }
 
-div.actions {
+div.mgmt_actions {
 	border: 1px solid #E0E8FF;
 	float: right;
 }
 
-td.actions {
-	width:40px;
-}
 div.proj_description {
 	height: 100px;
 }
@@ -1136,15 +528,54 @@ div.breadcrumbs {
 	margin-bottom: 10px;
 }
 
+/* creating message */
+div.create_msg_div {
+	position:relative;
+}
+
+div.create_msg {
+	position:relative;
+    top:0;
+    left:0;
+    height:122px;
+}
+
+#type_users_div {
+	position:absolute;
+	top:0;
+	left:0px;
+}
+
+#message_div {
+    position:absolute;
+    top:0;
+    right:0px;
+}
+
+#send_msg_button {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+
+div.form_error_msgs {
+	position:relative;
+	text-align:left;
+}
+
 div.messages {
 /*	float: right; */
 	border: 1px solid #E0E8FF;
 	width: 100%;
-	height: 56px;
+	height: 63px;
 	position: relative;
 	top: -15px;
 	overflow: hidden;
 	font-size: smaller;
+}
+
+div.messages table.msg_table td {
+	border: none;
 }
 
 tr.old_message {
@@ -1167,3 +598,26 @@ table.detail_management_table {
 	width: 100%;
 }
 
+/* OpenFlow stuff */
+table.openflow_create {
+	width:70%;
+	margin-left:15%;
+	margin-right:15%;
+}
+table.openflow_create th {
+    text-align:right;
+}
+table.openflow_create tr {
+    text-align:left;
+}
+table.openflow_create input[type='textarea'], input[type='text'] {
+    width:335px;
+}
+table.openflow_create #id_description {
+	height:75px;
+}
+
+/* projects stuff */
+.projects_div {
+	text-align: center;
+}
