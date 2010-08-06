@@ -39,6 +39,38 @@
         {{ project.description }}
     </div>
 	
+	<h2>Members</h2>
+	<div class="Members">
+		<div class="members">
+			<table class="fulltable" id="members_table">
+				<tr class="head">
+					<th class="username">Username</th>
+					<th class="roles">Roles</th>
+					<th class="actions">Actions</td>
+				</tr>
+				{% for member in project.members_as_permittees.all %}
+				<tr class="body">
+					<td class="username">{{ member.object.username }}</td>
+					<td class="roles">
+						{% for role in member.projectrole_set.all %}
+						<div class="role_desc val">{{ role.name }}</div>
+						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endfor %}
+						{% endfor %}
+					</td>
+					<td class="actions">
+						<a href="{% url project_member_remove %}">remove</a>,
+						<a href="{% url project_member_update %}">update</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	    <div class="center">
+	    	<input type="button" value="Add Members"
+			onclick="document.location='{% url project_members_add project.id %}'" />
+	    </div>
+	</div>
+	
     <h2>Aggregates</h2>
 	<div class="aggregate_list">
 		{% with project.aggregates.all as aggregate_list %}
