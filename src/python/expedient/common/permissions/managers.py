@@ -460,3 +460,27 @@ class PermissionOwnershipManager(models.Manager):
         else:
             po.delete()
         
+    def delete_all_for_target(self, obj_or_class, owner):
+        """Delete all the permissions owned by C{owner} for target C{obj_or_class}
+        
+        @param obj_or_class: The object or class for which the permissions
+            are being removed
+        @type obj_or_class: C{Model} instance or C{class}.
+        @param owner: The permittee currently owning the permissions.
+        @type owner: L{Permittee} or C{Model} instance.
+        """
+        from expedient.common.permissions.models import Permittee
+
+        permittee = Permittee.objects.get_as_permittee(owner)
+        
+        if not isinstance(obj_or_class, models.Model):
+            obj_or_class = ContentType.objects.get_for_model()
+
+        obj_type = ContentType.objects.get_for_model(obj_or_class)
+        
+        self.filter(
+            permittee=permittee,
+            obj_permission__object_type=obj_type,
+            obj_permission__object_id=obj_or_class.id,
+        ).delete()
+        
