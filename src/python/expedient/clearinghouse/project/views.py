@@ -17,7 +17,11 @@ from expedient.common.permissions.decorators import require_objs_permissions_for
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
 from expedient.clearinghouse.roles.models import ProjectRole
-from expedient.common.permissions.models import ObjectPermission
+from expedient.common.permissions.models import ObjectPermission,\
+    PermissionOwnership, Permittee
+from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
     
 logger = logging.getLogger("project.views")
 
@@ -158,6 +162,10 @@ def create(request):
         redirect=redirect,
         extra_context={
             "cancel_url": reverse("home"),
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Create Project", request.path),
+            ),
         },
         success_msg = lambda instance: "Successfully created project %s." % instance.name,
     )
@@ -176,6 +184,8 @@ def create(request):
 def update(request, proj_id, iframe=False):
     '''Update information about a project'''
     
+    project = get_object_or_404(Project, id=proj_id)
+    
     def redirect(instance):
         if iframe:
             return reverse("project_list")
@@ -190,14 +200,20 @@ def update(request, proj_id, iframe=False):
         redirect=redirect,
         template_object_name="project",
         extra_context={
-            "cancel_url": reverse("home") if iframe else reverse("project_detail", args=[proj_id]),
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
+                ("Update Info", request.path),
+            ),
         },
         success_msg = lambda instance: "Successfully updated project %s." % instance.name,
     )
 
-def update_iframe(request, proj_id):
-    return update(request, proj_id, True)
-
+@require_objs_permissions_for_view(
+    perm_names=["can_add_aggregates"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
 def add_aggregate(request, proj_id):
     '''Add/remove aggregates to/from a project'''
     
@@ -237,6 +253,11 @@ def add_aggregate(request, proj_id):
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
+@require_objs_permissions_for_view(
+    perm_names=["can_add_aggregates"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
 def update_aggregate(request, proj_id, agg_id):
     '''Update any info stored at the aggregate'''
     # TODO: This function might actually change the DB. So change to post
@@ -247,7 +268,13 @@ def update_aggregate(request, proj_id, agg_id):
     return HttpResponseRedirect(aggregate.add_to_project(
         project, reverse("project_detail", args=[proj_id])))
 
+@require_objs_permissions_for_view(
+    perm_names=["can_remove_aggregates"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
 def remove_aggregate(request, proj_id, agg_id):
+    """Remove the aggregate from the project"""
     # TODO: This function might actually change the DB. So change to post
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
@@ -255,3 +282,107 @@ def remove_aggregate(request, proj_id, agg_id):
             "id", flat=True)).as_leaf_class()
     return HttpResponseRedirect(aggregate.remove_from_project(
         project, reverse("project_detail", args=[proj_id])))
+
+@require_objs_permissions_for_view(
+    perm_names=["can_add_members"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
+def add_member(request, proj_id):
+    """Add a member to the project"""
+    
+    project = get_object_or_404(Project, id=proj_id)
+    
+    if request.method == "POST":
+        form = AddMemberForm(project=project, giver=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
+
+    else:
+        form = AddMemberForm(project=project, giver=request.user)
+    
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/add_member.html",
+        extra_context={
+            "form": form,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
+                ("Add Member", request.path),
+            ),
+        },
+    )
+    
+@require_objs_permissions_for_view(
+    perm_names=["can_add_members"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
+def update_member(request, proj_id, user_id):
+    """Update a member's roles"""
+    
+    project = get_object_or_404(Project, id=proj_id)
+    member = get_object_or_404(User, id=user_id)
+    
+    if request.method == "POST":
+        form = MemberForm(
+            project=project, user=member,
+            giver=request.user, data=request.POST)
+        
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(
+                reverse("project_detail", args=[proj_id]))
+
+    else:
+        form = MemberForm(
+            project=project, user=member,
+            giver=request.user)
+    
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/update_member.html",
+        extra_context={
+            "form": form,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
+                ("Update Member %s" % member.username, request.path),
+            ),
+        },
+    )
+    
+@require_objs_permissions_for_view(
+    perm_names=["can_remove_members"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+)
+def remove_member(request, proj_id, user_id):
+    """Kick a member out by stripping his roles"""
+    
+    project = get_object_or_404(Project, id=proj_id)
+    member = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        member = Permittee.objects.get_as_permittee(member)
+        # Remove the roles
+        for role in ProjectRole.objects.filter(project=project):
+            role.remove_from_permittee(member)
+        # Remove other permissions
+        PermissionOwnership.objects.delete_all_for_target(project, member)
+        return HttpResponseRedirect(
+            reverse("project_detail", args=[proj_id]))
+    
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/remove_member.html",
+        extra_context={
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
+                ("Remove Member %s" % member.username, request.path),
+            ),
+        },
+    )
