@@ -14,7 +14,7 @@
 			{{ form.as_table }}
 		</table>
 		<input type="submit" value="Save" />
-		<a href='{{ cancel_url }}'>Cancel</a>
+		<a href='{% url project_detail project.id %}'>Cancel</a>
 	</form>
 </div>
 {% endblock content %}
