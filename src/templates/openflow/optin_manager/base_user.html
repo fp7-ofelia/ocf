@@ -13,7 +13,7 @@
 	$(document).ready(function(){
     	$(".menuimg,.submenuimg")
         	.mouseover(function() { 
-	            	var src = $(this).attr("src").replace("dark", "light");
+	            var src = $(this).attr("src").replace("dark", "light");
     	        $(this).attr("src", src);
         	})
         	.mouseout(function() {
@@ -23,18 +23,12 @@
 	});
 
 	$(document).ready(function(){
-		$(".profile_sub_menu").hide();
-		$("#profile")
-			.click(function() {
-				$(".profile_sub_menu").toggle('normal');
-			});
-	});
-
-	$(document).ready(function(){
 		$(".manage_fs_sub_menu").hide();
 		$("#manage_fs")
 			.click(function() {
 				$(".manage_fs_sub_menu").toggle('normal');
+				$(".experiments_sub_menu").hide();
+				$(".profile_sub_menu").hide();
 			});
 	});
 		
@@ -42,14 +36,28 @@
 		$(".experiments_sub_menu").hide();
 		$("#experiments")
 			.click(function() {
+				$(".manage_fs_sub_menu").hide();
 				$(".experiments_sub_menu").toggle('normal');
+				$(".profile_sub_menu").hide();
 			});
 	});
-
+	
+	$(document).ready(function(){
+		$(".profile_sub_menu").hide();
+		$("#profile")
+			.click(function() {
+				$(".manage_fs_sub_menu").hide();
+				$(".experiments_sub_menu").hide();
+				$(".profile_sub_menu").toggle('normal');
+			});
+	});
+	
 	</script>
 
 		{% block scripts %}{% endblock %} 
 	</head>
+	
+	
 	<body>
             <br/>
             <table bgcolor="#EEEEEE" width="800" border="0" align="center" cellpadding="3" cellspacing="0">
@@ -169,8 +177,8 @@
    
   </div>
 
-            <div id="footer">
-                (c) in 2009 by Stanford University. This software is licensed under the GENI License.
-            </div>
-	</body>
+  <div id="footer">
+    (c) in 2009 by Stanford University. This software is licensed under the GENI License.
+  </div>
+</body>
 </html>
