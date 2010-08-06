@@ -13,4 +13,7 @@ urlpatterns = patterns('expedient.clearinghouse.project.views',
     url(r'^aggregates/add/(?P<proj_id>\d+)/$', 'add_aggregate', name="project_add_agg"),
     url(r'^aggregates/update/(?P<proj_id>\d+)/(?P<agg_id>\d+)/$', 'update_aggregate', name="project_update_agg"),
     url(r'^aggregates/remove/(?P<proj_id>\d+)/(?P<agg_id>\d+)/$', 'remove_aggregate', name="project_remove_agg"),
+    url(r'^members/add/(?P<proj_id>\d+)/$', 'add_member', name="project_member_add"),
+    url(r'^members/update/(?P<proj_id>\d+)/(?P<user_id>\d+)/$', 'update_member', name="project_member_update"),
+    url(r'^members/remove/(?P<proj_id>\d+)/(?P<user_id>\d+)/$', 'remove_member', name="project_member_remove"),
 )
