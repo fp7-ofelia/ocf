@@ -30,7 +30,6 @@ function addTooltipToClass(listClass){
 	
 	$("div.val." + listClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />").tooltip({
-			effect: "fade",
 			tip: "div." + listClass + ".description_" + index
 		});
 	});
@@ -90,7 +89,6 @@ function addTooltipToSummary(summaryClass){
 	$("div.summarytext." + summaryClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />");
 		$(this).closest("a").tooltip({
-			effect: "fade",
 			tip: "div.summarytooltip." + summaryClass
 		});
 	});
