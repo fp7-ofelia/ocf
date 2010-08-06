@@ -17,15 +17,8 @@
 			if(top.location != document.location) {
 				top.location = document.location;
 			}
-			$(document).ready(function() {
-				// Set the size of the text inputs in formtable forms
-				$("table.formtable input[type=text]").width("335px");
-			})
 		</script>
-		{% block scripts %}{% endblock %}
-		<style>
-		{% block style %}{% endblock %}
-		</style> 
+		{% block head %}{% endblock %}
 	</head>
 	<body>
 		<br/>

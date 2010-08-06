@@ -3,13 +3,15 @@
 
 {% block title %}Project {{ project.name }}{% endblock title %}
 
-{% block style %}
-.table_div td,th {
-    text-align: center;
-}
-{% endblock %}
-
-{% block scripts %}
+{% block head %}
+<style>
+	.table_div td,th {
+    	text-align: center;
+	}
+	tr.body>td.description {
+		text-align: left;
+	}
+</style>
 <script>
 	$(document).ready(function() {
 		addTooltipToClass("project_name");

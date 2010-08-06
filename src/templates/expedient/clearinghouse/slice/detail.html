@@ -4,16 +4,18 @@
 
 {% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
 
-{% block style %}
-#resources_table {
-    width: 100%;
-}
-#resource_list {
-    width: 100%;
-}
-.table_div td,th {
-    text-align: center;
-}
+{% block head %}
+<style>
+	#resources_table {
+	    width: 100%;
+	}
+	#resource_list {
+	    width: 100%;
+	}
+	.table_div td,th {
+	    text-align: center;
+	}
+</style>
 {% endblock %}
 
 {% block content %}
