@@ -598,25 +598,6 @@ table.detail_management_table {
 	width: 100%;
 }
 
-/* OpenFlow stuff */
-table.openflow_create {
-	width:70%;
-	margin-left:15%;
-	margin-right:15%;
-}
-table.openflow_create th {
-    text-align:right;
-}
-table.openflow_create tr {
-    text-align:left;
-}
-table.openflow_create input[type='textarea'], input[type='text'] {
-    width:335px;
-}
-table.openflow_create #id_description {
-	height:75px;
-}
-
 /* projects stuff */
 .projects_div {
 	text-align: center;
