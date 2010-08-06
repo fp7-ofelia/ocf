@@ -5,12 +5,12 @@ from django.core.urlresolvers import reverse
 import logging
 from django.contrib.auth.models import User
 from openflow.optin_manager.opts.models import UserFlowSpace,\
-        Experiment,ExperimentFLowSpace, UserOpts, OptsFlowSpace
+        Experiment,ExperimentFLowSpace, UserOpts, OptsFlowSpace, MatchStruct
 import random
 from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
 from expedient.common.tests.client import Browser, test_get_and_post_form
-from openflow.optin_manager.users.models import UserProfile
-from openflow.optin_manager.dummyfv.models import DummyFV
+from openflow.optin_manager.users.models import UserProfile, Priority
+from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVRule
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 
 logger = logging.getLogger("OMOptsTest")
@@ -59,8 +59,8 @@ class Tests(SettingsTestCase):
         ufs.save()     
     
         #create an experiment and assign a flowspace to it
-        exp = Experiment.objects.create(slice_id="slice_id", project_name="project name",
-                                  project_desc="project description", slice_name="slice name",
+        exp = Experiment.objects.create(slice_id="slice_id_1", project_name="project name_1",
+                                  project_desc="project description", slice_name="slice name_1",
                                   slice_desc="slice description", controller_url="controller url",
                                   owner_email="owner email", owner_password="owner password") 
         expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
@@ -98,7 +98,10 @@ class Tests(SettingsTestCase):
         logged = self.client.login(username="user",password="password")
         self.assertEqual(logged,True)
         
-    def test_optin(self):
+    def test_user_optin(self):
+        '''
+        Test if a single opt-in is happening correctly
+        '''
         response = test_get_and_post_form(
             self.client,
             reverse("opt_in_experiment"),
@@ -107,17 +110,62 @@ class Tests(SettingsTestCase):
         self.assertContains(response, "successfully")
         uopt = UserOpts.objects.filter(user__username__exact="user")
         self.assertEqual(len(uopt),1)
-        self.assertEqual(uopt[0].experiment.slice_name,"slice name")
+        self.assertEqual(uopt[0].experiment.slice_name,"slice name_1")
         optfs = OptsFlowSpace.objects.filter(opt=uopt[0])
         self.assertEqual(len(optfs),1)
+        self.num_fv_rules = MatchStruct.objects.filter(optfs=optfs[0]).count()
+        actual_fv_rules_count = DummyFVRule.objects.all().count()
+        self.assertEqual(actual_fv_rules_count,self.num_fv_rules)
         self.assertEqual(optfs[0].ip_src_s,max(self.user_ip_src_s,self.exp_ip_src_s))
         self.assertEqual(optfs[0].ip_src_e,min(self.user_ip_src_e,self.exp_ip_src_e))
         self.assertEqual(getattr(optfs[0],"%s_s"%self.user_field_name), self.user_field_s)
         self.assertEqual(getattr(optfs[0],"%s_e"%self.user_field_name), self.user_field_e)
         self.assertEqual(getattr(optfs[0],"%s_s"%self.exp_field_name), self.exp_field_s)
         self.assertEqual(getattr(optfs[0],"%s_e"%self.exp_field_name), self.exp_field_e)     
+     
+    def test_user_optin_invalid(self):
+        '''
+        Test if a single opt-in is happening correctly
+        '''
+        #opt into an experiemnt that doesn't
+        response = test_get_and_post_form(
+            self.client,
+            reverse("opt_in_experiment"),
+            {"experiment":23},
+        )
+        self.assertNotContains(response, "successfully")
+        uopt = UserOpts.objects.filter(user__username__exact="user")
+        self.assertEqual(len(uopt),0)
+        actual_fv_rules_count = DummyFVRule.objects.all().count()
+        self.assertEqual(actual_fv_rules_count,0)
+        
+    def test_user_re_optin(self):
+        '''
+        Test if opting into the same experiment just updates the previous opt and
+        doesn't double opt
+        '''
+        self.test_user_optin()
+        uopt = UserOpts.objects.filter(user__username__exact="user")
+        optfs = OptsFlowSpace.objects.filter(opt=uopt[0])
+        self.assertEqual(len(optfs),1)
+        response = test_get_and_post_form(
+            self.client,
+            reverse("opt_in_experiment"),
+            {"experiment":1},
+        )  
+        self.assertContains(response, "successfully")
+        uopt = UserOpts.objects.filter(user__username__exact="user")
+        self.assertEqual(len(uopt),1)
+        optfs = OptsFlowSpace.objects.filter(opt=uopt[0])
+        self.assertEqual(len(optfs),1)
+        actual_fv_rules_count = DummyFVRule.objects.all().count()
+        self.assertEqual(self.num_fv_rules,actual_fv_rules_count)
         
     def test_optout(self):
+        self.test_user_optin()
+        uopt = UserOpts.objects.filter(user__username__exact="user")
+        optfs = OptsFlowSpace.objects.filter(opt=uopt[0])
+        self.assertEqual(len(optfs),1)
         response = test_get_and_post_form(
             self.client,
             reverse("opt_out_of_experiment"),
@@ -127,4 +175,84 @@ class Tests(SettingsTestCase):
         self.assertEqual(len(uopt),0)
         optfs = OptsFlowSpace.objects.filter(opt__user__username="user")
         self.assertEqual(optfs.count(),0) 
+        
+        
+    def test_user_multiple_opts(self):
+        '''
+        Opt into multiple experiments,change their priorities and then opt all out.
+        at each of the three steps, test internal database to make sure that it is done
+        correctly.
+        '''
+        max_opt = random.randint(5,9)
+        for index in range(2,max_opt):
+        #create a random number of experiments
+            exp = Experiment.objects.create(slice_id="slice_id_%d"%index, project_name="project name_%d"%index,
+                                      project_desc="project description", slice_name="slice name_%d"%index,
+                                      slice_desc="slice description", controller_url="controller url",
+                                      owner_email="owner email", owner_password="owner password") 
+            expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:0%d"%index,
+                                ip_src_s=random.randint(0,0x80000000) & 0xFFFF0000, 
+                                ip_src_e=random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000, 
+                                 )
+            expfs.save() 
+        
+        # opt into all of them
+        for id in range(1,max_opt):
+            response = test_get_and_post_form(
+                self.client,
+                reverse("opt_in_experiment"),
+                {"experiment":id},
+            )
+            self.assertContains(response, "successfully")
+            uopt = UserOpts.objects.filter(user__username__exact="user")
+            self.assertEqual(len(uopt),id)
+            self.assertEqual(uopt[id-1].experiment.slice_name,"slice name_%d"%id)
+            optfs = OptsFlowSpace.objects.filter(opt=uopt[id-1])
+            self.assertEqual(len(optfs),1)
+            
+            
+        # change priority
+        request_post = {}
+        for id in range(1,max_opt):
+            request_post["p_%d"%id] = max_opt - id + 1
+            
+        response = test_get_and_post_form(
+            self.client,
+            reverse("change_priority"),
+            request_post,
+        )
+        self.assertContains(response, "Successfully")
+        for id in range(1,max_opt):
+            uopt = UserOpts.objects.filter(user__username__exact="user",\
+                                    experiment__slice_name="slice name_%d"%id)
+            self.assertEqual(uopt.count(),1,"uopt.count()!=1 for id=%d"%id)
+            self.assertEqual(uopt[0].priority,max_opt - id + 1)
+            optfs = OptsFlowSpace.objects.filter(opt = uopt[0])
+            self.assertEqual(optfs.count(),1)
+            mstr = optfs[0].matchstruct_set.all()
+            self.assertNotEqual(mstr.count(),0)
+            fv_rule = DummyFVRule.objects.filter(match=mstr[0].match,\
+                                                 dpid="00:00:00:00:00:00:0%d"%id)
+            self.assertEqual(fv_rule.count(),1)
+            self.assertEqual(fv_rule[0].priority,mstr[0].priority)
+            
+            
+        #opt out of all of them
+        request_post = {}
+        for id in range(1,max_opt):
+            request_post["%d"%id] = "checked"
+            
+        response = test_get_and_post_form(
+            self.client,
+            reverse("opt_out_of_experiment"),
+            request_post,
+        )
+        uopt = UserOpts.objects.filter(user__username__exact="user")
+        self.assertEqual(len(uopt),0)
+        optfs = OptsFlowSpace.objects.filter(opt__user__username="user")
+        self.assertEqual(optfs.count(),0) 
+        actual_fv_rules_count = DummyFVRule.objects.all().count()
+        self.assertEqual(actual_fv_rules_count,0)
+        
+
         

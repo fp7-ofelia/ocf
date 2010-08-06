@@ -20,7 +20,7 @@ from openflow.optin_manager.opts.helper import update_user_opts
 
 @login_required
 def promote_to_admin(request):
-    profile = request.user.get_profile()
+    profile = UserProfile.get_or_create_profile(request.user)
     if (profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
  
@@ -202,7 +202,7 @@ def resign_admin(request):
     
 @login_required
 def user_reg_fs(request):
-    profile = request.user.get_profile()
+    profile = UserProfile.get_or_create_profile(request.user)
     if (profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     
@@ -304,29 +304,38 @@ def user_reg_fs(request):
 
 
 @login_required
-def approve_user(request,operation,req_id):
+def approve_user(request):
     profile = request.user.get_profile()
     if (not profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     
     if (request.method == "POST"):
-        op_req = RequestedUserFlowSpace.objects.get(id=req_id)
-        if (operation == 1):
-            #update new admin profile
-            op_profile = op_req.user.get_profile()
-            op_profile.max_priority_level = Priority.Strict_User
-            op_profile.save()
+        
+        keys = request.POST.keys()
+        for key in keys:
+            if key.startswith("req_"):
+                try:
+                    req_id = int(key[4:len(key)])
+                    op_req = RequestedUserFlowSpace.objects.get(id=req_id)
+                except Exception,e:
+                    continue
+                
+                decision = request.POST[key]
+                if (decision=="accept"):
+                    op_profile = op_req.user.get_profile()
+                    op_profile.max_priority_level = Priority.Strict_User
+                    op_profile.save()
             
             
-            #copy requested into UserFlowSpace
-            ufs = UserFlowSpace(user=op_req.user, approver=op_req.admin)
-            copy_fs(op_req,ufs)
-            ufs.save()
-            update_user_opts(op_req.user)
+                    #copy requested into UserFlowSpace
+                    ufs = UserFlowSpace(user=op_req.user, approver=op_req.admin)
+                    copy_fs(op_req,ufs)
+                    ufs.save()
+                    op_req.delete()
+                    update_user_opts(op_profile.user)
             
-        op_req.delete()
-    
-            
+                elif (decision=="reject"):
+                    op_req.delete()    
     
     reqs = RequestedUserFlowSpace.objects.filter(admin=request.user)
     return simple.direct_to_template(request, 
@@ -340,7 +349,7 @@ def approve_user(request,operation,req_id):
 import re
 @login_required
 def user_unreg_fs(request):
-    profile = request.user.get_profile()
+    profile = UserProfile.get_or_create_profile(request.user)
     if (profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     

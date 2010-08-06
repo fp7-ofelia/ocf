@@ -4,7 +4,23 @@ from openflow.optin_manager.flowspace.helper import multi_fs_intersect,\
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.users.models import Priority
 
+
 def opt_fs_into_exp(optedFS, exp, user, priority, nice):
+    '''
+    Opt the flowspace specified in optedFS into experiment exp
+    @param optedFS: Flowpscae to be opted into experiment
+    @type: Flowspace object
+    @param exp: Experiment to be opted into
+    @type exp: Experiemnt object
+    @param user: user who is doing the opt-in
+    @type user: User object
+    @param priority: priority for this opt-in
+    @type priority: integer
+    @param nice: strict or nice optin
+    @type nice: boolean
+    @return: return the fv_args and the list of match structs created for this opt
+    @type: [array,array] first array is fv_args, second one match_struct_list
+    '''
     expFS = ExperimentFLowSpace.objects.filter(exp = exp)
     intersected = False
     # add this opt to useropts
@@ -37,49 +53,37 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                     fv_args.append(fv_arg)
                             
                     # If there is any intersection, add them to FV
-    if (intersected):
-            try:
-                fv = FVServerProxy.objects.all()[0]
-                return_ids = fv.proxy.api.changeFlowSpace(fv_args)
-            except Exception,e:
-                for opt in opted:
-                    opt.delete()
-                for match in match_list:
-                    match.delete()
-                tmp.delete()
-                import traceback
-                traceback.print_exc()
-                return str(e)
-            
-            for i in range(0,len(return_ids)):
-                match_list[i].fv_id = return_ids[i]
-                match_list[i].save()
-            return ""
-    else:
-            tmp.delete()
-            return "No flowspace intersection found!"
+    if (not intersected):
+        tmp.delete()
         
+    return [fv_args,match_list]
+        
+
 def opt_fses_outof_exp(fses):
+    '''
+    Opt all flowpsaces in fses (of type optsflowspace) out of their 
+    experiments. 
+    @param fses: array of optsflowspace to be opted out
+    @type fses: array
+    @return: fv arguments to be passed to the fv
+    @type: array
+    '''
     fv_args = []
     for ofs in fses:
         matches = ofs.matchstruct_set.all()
         for match in matches:
             fv_arg={"operation":"REMOVE" , "id":match.fv_id}
             fv_args.append(fv_arg)
+            
+    for ofs in fses:
+        ofs.matchstruct_set.all().delete()
+        ofs.delete()
+    return fv_args
 
-    try:
-        fv = FVServerProxy.objects.all()[0]
-        fv.proxy.api.changeFlowSpace(fv_args)
-        for ofs in fses:
-            ofs.matchstruct_set.all().delete()
-            ofs.delete()
-        return ""
-    except Exception,e:
-        import traceback
-        traceback.print_exc()
-        return str(e) 
     
+
 def update_user_opts(user):
+    error_msg = []
     user_opts = UserOpts.objects.filter(user=user)
     user_fs = UserFlowSpace.objects.filter(user=user)
     for user_opt in user_opts:
@@ -92,13 +96,13 @@ def update_user_opts(user):
             user_opt.delete()
             msg2 = opt_fs_into_exp(user_fs, t_exp, user, t_priority, t_nice)
             if (msg2 == ""):
-                return ""
+                pass
             else:
                 return "couldn't re-opt-in user flowspace in update_user_opts. msg was %s"%msg2
         else:
             return "couldn't opt out user flowspace in update_user_opts. msg was %s"%msg
             
-        
+                
 def update_opts_into_exp(exp):
     '''
     update all the opts into exp and send changes back to FV, 
@@ -162,7 +166,13 @@ def update_opts_into_exp(exp):
     
     return errorlist
 
-def update_match_struct_and_get_fv_args(useropt):
+def update_match_struct_priority_and_get_fv_args(useropt):
+    '''
+    A helper function to update match struct priorities when a useropt priority
+    has been changed.
+    @param useropt: UserOpts object that have new priority value
+    @type useropt: UserOpts
+    '''
     fv_args = [] 
     ofs = useropt.optsflowspace_set.all()
     for fs in ofs:

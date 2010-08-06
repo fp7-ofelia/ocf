@@ -10,11 +10,19 @@ from openflow.optin_manager.flowspace.helper import *
 from openflow.optin_manager.users.models import Priority
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from django.views.generic import simple
-from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp,update_match_struct_and_get_fv_args
+from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp,\
+update_match_struct_priority_and_get_fv_args
+from expedient.common.transactions.nested_transaction import *
+from django.db import transaction
 
 @login_required     
 def change_priority(request):
-    
+    '''
+    The view function to change priorities of previous opt-ins.
+    FOR USER CHANGE PRIORITY:
+    request.POST should have a dictionary of "p_" followed by UserOpts database id as key
+    and the new priority as value
+    '''
     # TODO: make this more user friendly by showing comparative net_admin flowspaces w.r.t. this admin FS
     if request.user.get_profile().is_net_admin:
         error_msg = []
@@ -71,54 +79,63 @@ def change_priority(request):
                             },
                     )
         
-    
+    ##################################
+    #      User Change Priority      #
+    ################################## 
     else: # Not net_admin (User View)
         fv_args = []
         error_msg = []
         max_priority = request.user.get_profile().max_priority_level
         
         keys = request.POST.keys()
-        print keys
         if (request.method == "POST"):
             for key in keys:
                 if key.startswith("p_"):
-                    if (int(request.POST[key]) > max_priority):
-                        error_msg.append("You entered priority %s, which is larger than your maximum(%s)"\
-                             % (request.POST[key], max_priority))
-                        continue
-                    pid = (key[2:len(key)])
+                    try:
+                        pid = int(key[2:len(key)])
+                        new_priority = int(request.POST[key])
+                    except:
+                        error_msg.append("Found invalid pair in request.POST: %s:%s"%(key,request.POST[key]))
+                        break
+                    
+                    if (new_priority > max_priority):
+                        error_msg.append("Priority %s, is larger than your maximum(%s)"\
+                             % (new_priority, max_priority))
+                        break
+ 
                     u = UserOpts.objects.get(pk=pid)
-                    if (u.priority != int(request.POST[key])):
-                        u.priority = int(request.POST[key])
+                    if (u.priority != new_priority):
+                        u.priority = new_priority
                         if (u.priority >= Priority.Nice_User):
                             u.nice = False
                         else:
                             u.nice = True
                         u.save()
-                        new_args = update_match_struct_and_get_fv_args(u)
+                        new_args = update_match_struct_priority_and_get_fv_args(u)
                         fv_args = fv_args + new_args
 
-                    
-            try:
-                fv = FVServerProxy.objects.all()[0]
-            except Exception,e:
-                import traceback
-                traceback.print_exc()
-                error_msg.append("Flowvisor not set: %s"%str(e))
-        
-            try:
-                print "FV_ARGS %s"%fv_args
-                if len(fv_args) > 0:
-                    fv.proxy.api.changeFlowSpace(fv_args)
-                return simple.direct_to_template(request, 
-                    template = 'openflow/optin_manager/opts/change_priority_successful.html', 
-                    extra_context = {}, 
-                )
-            except Exception,e:
-                import traceback
-                traceback.print_exc()
-                error_msg.append("update flowspace priorities failed: %s"%str(e))
-        
+            if len(error_msg) == 0:
+                try:
+                    fv = FVServerProxy.objects.all()[0]
+                    try:
+                        if len(fv_args) > 0:
+                            fv.proxy.api.changeFlowSpace(fv_args)
+                        return simple.direct_to_template(request, 
+                            template = 'openflow/optin_manager/opts/change_priority_successful.html', 
+                            extra_context = {}, 
+                        )
+                    except Exception,e:
+                        import traceback
+                        traceback.print_exc()
+                        transaction.rollback()
+                        error_msg.append("update flowspace priorities failed: %s"%str(e))
+                except Exception,e:
+                    import traceback
+                    traceback.print_exc()
+                    transaction.rollback()
+                    error_msg.append("Flowvisor not set: %s"%str(e))
+            else: #error msg has some content
+                transaction.rollback()
         
         nice_opts = UserOpts.objects.filter(user=request.user,nice=True).order_by('-priority')
         strict_opts = UserOpts.objects.filter(user=request.user,nice=False).order_by('-priority')
@@ -136,11 +153,17 @@ def change_priority(request):
 
 @login_required
 def add_opt_in(request):
-
-
-        
-    profile = request.user.get_profile()
+    '''
+`	The view function for opting in a user or admin flowspace into an experiment
+    FOR USER OPTIN:
+    request.POST should contain:
+    @param experiemnt: database id of the experiment to be opted in
+    ''' 
+    profile = UserProfile.get_or_create_profile(request.user)
     
+    ############################
+    #      Admin Opt-In        #
+    ############################   
     if (profile.is_net_admin):
         all_exps = Experiment.objects.all()
         admin_fs = AdminFlowSpace.objects.filter(user=request.user)
@@ -192,8 +215,13 @@ def add_opt_in(request):
                                                 'experiments':exps,
                                                 'defexp': defexp,
                                         },
-                            )        
-    else: # A user opt-in page
+                            )   
+    ############################
+    #      User Opt-In         #
+    ############################         
+    else: 
+        
+        #find all the experiemnts that have intersection with this user
         all_exps = Experiment.objects.all()
         user_fs = UserFlowSpace.objects.filter(user=request.user)
         exps = []
@@ -203,49 +231,80 @@ def add_opt_in(request):
             if (len(intersection)>0):
                 exps.append(exp)
                 
-        selpri = 1
-        error_msg = ""
+        assigned_priority = 1
+        error_msg = []
         if (request.method == "POST"):
-            #opt in request received; process it
             all_this_user_opts = UserOpts.objects.filter(user=request.user,nice=True)
             for user_opt in all_this_user_opts:
-                if user_opt.priority >= selpri:
-                    selpri = user_opt.priority + 1
+                if user_opt.priority >= assigned_priority:
+                    assigned_priority = user_opt.priority + 1
                     
-            defexp = request.POST['experiment']
-            
+            # check if a valid experiment is selected
+            selecetd_exp_id = request.POST['experiment']
+            try:
+                selexp = Experiment.objects.get(id = selecetd_exp_id)
+            except:
+                error_msg.append("Invalid experiment selected!")
+                
             # check if priority is within allowable range
-            if int(selpri) > profile.max_priority_level:
-                error_msg = "Your maximum priority is %d"%(profile.max_priority_level)
-            else:
-                selexp = Experiment.objects.get(id = defexp)
-                userFS = UserFlowSpace.objects.filter(user = request.user)
-
-                tmp = UserOpts.objects.filter(experiment = selexp)
-                if (len(tmp) > 0):
-                    tmp = tmp[0]
-                    # first delete all previous opts into this experiment
-                    ofses = tmp.optsflowspace_set.all()
-                    error_msg = opt_fses_outof_exp(ofses)
-                    
-                if (error_msg ==""):
-                    tmp.delete()
-                    
-                    opt_msg = opt_fs_into_exp(userFS,selexp,request.user,
-                                        int(selpri),True)
-                    if (opt_msg == ""):
-                        exp_name = "%s:%s"%(selexp.project_name, selexp.slice_name)
-                        return simple.direct_to_template(request, 
-                                            template = 'openflow/optin_manager/opts/opt_in_successful.html', 
-                                            extra_context = {'expname':exp_name,}, 
-                                        )
-                    else:
-                        error_msg = ErrorList([opt_msg])
-              
-                    
-        else: #Not a post request
-            defexp = 0
+            if assigned_priority > profile.max_priority_level:
+                error_msg.append("Your maximum priority is %d"%(profile.max_priority_level))
             
+            if (len(error_msg)==0):
+                userFS = UserFlowSpace.objects.filter(user = request.user)                    
+
+                # check if the user already have opted into this experiment before
+                prev_opts = UserOpts.objects.filter(experiment = selexp)
+                if (prev_opts.count() > 0):
+                    assigned_priority = prev_opts[0].priority
+                    all_prev_opts_fs = []
+                    for a_prev_opt in prev_opts:
+                        a_prev_opt_fses = a_prev_opt.optsflowspace_set.all()
+                        for a_prev_opt_fs in a_prev_opt_fses:
+                            all_prev_opts_fs.append(a_prev_opt_fs)
+                    
+                    # now opt out the flowpsaces and clear flowspace and match_struct entries 
+                    # from the database:
+                    del_fv_args = opt_fses_outof_exp(all_prev_opts_fs)
+                    
+                    # delete all the previous opts into this experiemnt from the database    
+                    prev_opts.delete()
+                else:
+                    print
+                    del_fv_args = []
+                    
+                # Now opt the user into the selected experiemnt
+                [add_fv_args,match_list] = opt_fs_into_exp(userFS,selexp,request.user,
+                                        assigned_priority,True)
+                    
+                try:
+                    fv = FVServerProxy.objects.all()[0]
+                    try:
+                        fv_args = add_fv_args + del_fv_args
+                        if len(fv_args) > 0:
+                            returned_ids = fv.proxy.api.changeFlowSpace(fv_args)
+                            for i in range(len(match_list)):
+                                match_list[i].fv_id = returned_ids[i]
+                                match_list[i].save()
+                        return simple.direct_to_template(request, 
+                            template ="openflow/optin_manager/opts/opt_in_successful.html",
+                            extra_context = {
+                                'expname':"%s:%s"%(selexp.project_name,selexp.slice_name),
+                            },
+                        )
+                    except Exception,e:
+                        import traceback
+                        traceback.print_exc()
+                        transaction.rollback()
+                        error_msg.append("Couldn't opt into the requested experiment, either because the new opt-in failed or OM couldn't opt you out of your previous opt into the same experiment: %s"%str(e))
+                except Exception,e:
+                    import traceback
+                    traceback.print_exc()
+                    transaction.rollback()
+                    error_msg.append("Flowvisor not set: %s"%str(e))
+                              
+
+        # if not a post request, we will start from here            
         if (len(exps)>0):
             exp_exist = True
             first_exp = exps[0].id
@@ -257,8 +316,6 @@ def add_opt_in(request):
                         extra_context = {
                                 'user':request.user,
                                 'experiments':exps,
-                                'defexp': defexp,
-                                'selpri':selpri,
                                 'error_msg':error_msg,
                                 'exp_exist':exp_exist,
                                 'first_exp':first_exp,
@@ -268,6 +325,12 @@ def add_opt_in(request):
     
 @login_required
 def opt_out(request):
+    '''
+    The view function for opt-out. 
+    FOR A USER:
+    the request.POST should contain {UserOpts.id:"checked"} for all the UserOpts
+    to be opted out.
+    '''
     error_msg = []
     profile = request.user.get_profile()
     keys = request.POST.keys()
@@ -282,7 +345,7 @@ def opt_out(request):
                     if error!="":
                         error_msg.append(error)
                 except:
-                    pass
+                    break
 
                     
                     
@@ -302,63 +365,65 @@ def opt_out(request):
                     extra_context = {'allfs':allfs, 'error_msg':error_msg},
                 )
         
-        
-    else: #normal user
+    ############################
+    #      User Opt-Out        #
+    ############################ 
+    else:
         if (request.method == "POST"):
             fv_args = []
             for key in keys:
                 try:
+                    # check all the keys that are integer values and opt them out.
                     int(key)
                     opt = UserOpts.objects.get(id=key)
-                    ofs = OptsFlowSpace.objects.filter(opt=opt)
-                    error = opt_fses_outof_exp(ofs)
-                    if error!="":
-                        error_msg.append(error)
-                    else:
-                        opt.delete()
                 except:
-                    pass
-
-                    
-                    
-            if (len(error_msg) == 0):
-                error_msg = ["Opt Out was Successful"] 
+                    continue
                 
-            # Now make sure the priorities are consequative
-            nice_opts = UserOpts.objects.filter(user = request.user,nice=True).order_by('priority')
-            fv_args = []
-            next_priority = 1
-            for opt in nice_opts:
-                if opt.priority != next_priority:
-                    opt.priority = next_priority
-                    opt.save()
-                    new_args = update_match_struct_and_get_fv_args(opt)
-                    fv_args = fv_args + new_args
-                next_priority = next_priority + 1
-            strict_opts = UserOpts.objects.filter(user = request.user,nice=False).order_by('priority')
-            next_priority = Priority.Nice_User + 1
-            for opt in strict_opts:
-                if opt.priority != next_priority:
-                    opt.priority = next_priority
-                    opt.save()
-                    new_args = update_match_struct_and_get_fv_args(opt)
-                    fv_args = fv_args + new_args
-                next_priority = next_priority + 1
-                
-            try:
-                fv = FVServerProxy.objects.all()[0]
+                ofs = OptsFlowSpace.objects.filter(opt=opt)
+                new_fv_args = opt_fses_outof_exp(ofs)
+                fv_args = fv_args + new_fv_args
+                opt.delete()  
+                  
+            if len(error_msg) == 0:            
+                # Now make sure the priorities are consequative
+                nice_opts = UserOpts.objects.filter(user = request.user,nice=True).order_by('priority')
+                next_priority = 1
+                for opt in nice_opts:
+                    if opt.priority != next_priority:
+                        opt.priority = next_priority
+                        opt.save()
+                        new_args = update_match_struct_priority_and_get_fv_args(opt)
+                        fv_args = fv_args + new_args
+                    next_priority = next_priority + 1
+                strict_opts = UserOpts.objects.filter(user = request.user,nice=False).order_by('priority')
+                next_priority = Priority.Nice_User + 1
+                for opt in strict_opts:
+                    if opt.priority != next_priority:
+                        opt.priority = next_priority
+                        opt.save()
+                        new_args = update_match_struct_priority_and_get_fv_args(opt)
+                        fv_args = fv_args + new_args
+                    next_priority = next_priority + 1
+    
+                print "FV_ARGS FOR OPT OUT: %s"%fv_args
+                    
                 try:
-                    if len(fv_args) > 0:
-                        fv.proxy.api.changeFlowSpace(fv_args)
+                    fv = FVServerProxy.objects.all()[0]
+                    try:
+                        if len(fv_args) > 0:
+                            fv.proxy.api.changeFlowSpace(fv_args)
+                    except Exception,e:
+                        import traceback
+                        traceback.print_exc()
+                        transaction.rollback()
+                        error_msg.append("change flowspace in opt_out view failed: %s"%str(e))
                 except Exception,e:
                     import traceback
                     traceback.print_exc()
-                    error_msg.append("update flowspace priorities in opt_out view failed: %s"%str(e))
-            except Exception,e:
-                import traceback
-                traceback.print_exc()
-                error_msg.append("Flowvisor not set: %s"%str(e))
-        
+                    transaction.rollback()
+                    error_msg.append("Flowvisor not set: %s"%str(e))
+
+                
       
         allopts = UserOpts.objects.filter(user = request.user).order_by('-priority')
             

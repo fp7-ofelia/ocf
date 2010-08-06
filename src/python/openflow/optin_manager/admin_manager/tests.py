@@ -1,23 +1,22 @@
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
+from expedient.common.tests.manager import SettingsTestCase
+from expedient.common.tests.client import test_get_and_post_form
+from django.contrib.auth.models import User
+from openflow.optin_manager.users.models import UserProfile
+from django.core.urlresolvers import reverse
 
-Replace these with more appropriate tests for your application.
-"""
+SCHEME = "test"
+HOST = "testserver"
 
-from django.test import TestCase
-
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.failUnlessEqual(1 + 1, 2)
-
-__test__ = {"doctest": """
-Another way to test that 1 + 1 is equal to 2.
-
->>> 1 + 1 == 2
-True
-"""}
-
+class Tests(SettingsTestCase):
+    
+    def setUp(self):
+        # Create a test admin
+        self.test_admin = User.objects.create_superuser(
+                "admin", "admin@user.com", "password")
+        
+    def test_request_flowspace(self):
+        response = test_get_and_post_form(
+            self.client,
+            reverse("opt_in_experiment"),
+            {"experiment":1},
+        ) 

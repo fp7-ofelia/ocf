@@ -48,7 +48,7 @@ class ExperimentFLowSpace(FlowSpace):
     exp           = models.ForeignKey(Experiment)
     def __unicode__(self):
         fs_desc = super(ExperimentFLowSpace, self).__unicode__()
-        return "dpid; %s , FS: %s"%(self.dpid,fs_desc)   
+        return "dpid: %s , FS: %s"%(self.dpid,fs_desc)   
     
 '''
 UserOpts, OptsFlowSpace stores information about each opt-in
