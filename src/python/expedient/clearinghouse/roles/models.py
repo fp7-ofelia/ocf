@@ -28,6 +28,21 @@ class ProjectRoleManager(models.Manager):
             projectrole__project=project).values_list(
                 "pk", flat=True)
         return User.objects.filter(pk__in=user_ids)
+    
+    def filter_for_can_delegate(self, permittee):
+        """filter for all roles the permittee can fully delegate
+        
+        @param permittee: object to check for delegatable roles.
+        @type permittee: L{Permittee} or C{django.db.models.Model}
+        @return: all project roles the permittee can delegate.
+        @rtype: C{QuerySet} of C{ProjectRole}s.
+        """
+        permittee = Permittee.objects.get_as_permittee(permittee)
+        return self.filter(
+            permittees=permittee,
+            obj_permissions__permissionownership__can_delegate=True,
+            obj_permissions__permissionownership__permittee=permittee,
+        )
 
 class ProjectRole(models.Model):
     """Groups object permissions together for easier fine-grained management.
@@ -62,8 +77,7 @@ class ProjectRole(models.Model):
         )
     
     def __unicode__(self):
-        return "Role %s for project %s: %s" % (
-            self.name, self.project.name, self.description)
+        return self.name
     
     def give_to_permittee(self, permittee, giver=None, can_delegate=False):
         """Give the role to a permittee. This combines the permittee's
