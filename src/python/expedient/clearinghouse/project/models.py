@@ -54,6 +54,9 @@ class Project(models.Model):
     @ivar members: Read-only property returning all users that have some
         permission in the project.
     @type members: C{QuerySet} of C{User}s.
+    @ivar members_as_permittees: Read-only property returning all users
+        that have some permission in the project as Permittee instances.
+    @type members_as_permittees: C{QuerySet} of L{Permittee}s.
     '''
     objects = ProjectManager()
     
@@ -98,13 +101,18 @@ class Project(models.Model):
     
     def _get_members(self):
         """Get all users who have some permission in the project."""
-        user_ids = Permittee.objects.filter(
+        user_ids = self._get_permittees().values_list("object_id", flat=True)
+        return User.objects.filter(pk__in=list(user_ids))
+    members=property(_get_members)
+    
+    def _get_permittees(self):
+        """Get all permittees that have some permission in the project."""
+        return Permittee.objects.filter_for_class(User).filter(
             objectpermission__object_type=
                 ContentType.objects.get_for_model(Project),
             objectpermission__object_id=self.id,
-        ).values_list("object_id", flat=True)
-        return User.objects.filter(pk__in=list(user_ids))
-    members=property(_get_members)
+        )
+    members_as_permittees=property(_get_permittees)
     
     def __unicode__(self):
         s = u"Project %s" % self.name
