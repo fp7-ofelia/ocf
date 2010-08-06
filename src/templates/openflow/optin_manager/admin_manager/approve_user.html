@@ -1,33 +1,31 @@
-{% extends "base.html" %}
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Approve User Flowspace Requests</h1> {% endblock %}
+
 {% block content %}
 <div class="main">
-	<h2>Approve User Flowspace Requests</h2>
-	<div align="right">
-		<a href="/dashboard">Dashboard</a><br/>
-	</div>	
-	
+
+	<form name="input" action="/admin_manager/approve_user" method="post">
+	{% csrf_token %}
 	<table class="formtable">
-	<tr><th>User</th><th>Requested Flowspace</th><th>Action</th></tr>
+	<tr><th>Reject</th><th>Defer</th><th>Accept</th><th>User</th><th>Requested Flowspace</th></tr>
 	{% for req in reqs %}
 	<tr>
+	<td>
+		<input type="radio" name="req_{{req.id}}" value="reject"/>
+	</td>
+	<td>
+		<input type="radio" name="req_{{req.id}}" value="none" checked="yes"/>
+	</td>
+	<td>
+		<input type="radio" name="req_{{req.id}}" value="accept"/>
+	</td>
 	<td>{{req.user}}</td>
 	<td>{{req}}</td>
-	<td><form name="input" 
-			action="/admin_manager/approve_user/{{req.id}}/approve"
-			method="post">{% csrf_token %}
-			<input type="submit" value="Approve"/>
-			</form>
-	</td>
-	<td><form name="input" 
-			action="/admin_manager/approve_user/{{req.id}}/reject"
-			method="post">{% csrf_token %}
-			<input type="submit" value="Reject"/>
-			</form>
-	</td>
-	
 	</tr>
-	
 	{% endfor %}
 	</table>
+	<input type="submit" value="Submit"/>
+	</form>
 	
+</div>
 {% endblock content %}	
