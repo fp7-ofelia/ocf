@@ -16,7 +16,8 @@ from ..shortcuts import create_permission, give_permission_to
 from views import other_perms_view, add_perms_view
 from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
-from expedient.common.permissions.models import ObjectPermission
+from expedient.common.permissions.models import ObjectPermission,\
+    PermissionOwnership
 from expedient.common.permissions.shortcuts import must_have_permission
 from expedient.common.permissions.templatetags.permissions import has_obj_perm,\
     as_class
@@ -290,6 +291,23 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             set([self.su, self.u1, self.u2])
         )
         
+    def test_delete_all_for_target(self):
+        permittee = Permittee.objects.get_as_permittee(self.u1)
+        
+        # get the permissions the permittee has
+        perms_count = ObjectPermission.objects.filter_from_instance(
+            self.objs[0]).filter(permittees=permittee).count()
+            
+        self.assertTrue(perms_count > 0)
+        
+        # now call delete all for target
+        PermissionOwnership.objects.delete_all_for_target(
+            self.objs[0], self.u1)
+        
+        # check they are all gone
+        perms_count = ObjectPermission.objects.filter_from_instance(
+            self.objs[0]).filter(permittees=permittee).count()
+        self.assertEqual(perms_count, 0)
 
 class TestRequests(test_mgr.SettingsTestCase):
     urls = 'expedient.common.permissions.tests.test_urls'
