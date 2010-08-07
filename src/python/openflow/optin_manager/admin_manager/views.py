@@ -309,7 +309,10 @@ def user_reg_fs(request):
             
             #check if any of the pending flowspace requests for this user is a subset of
             #this request. In this case, remove those old requests
-            this_user_req_fs = RequestedUserFlowSpace(user=request.user)
+            this_user_req_fs = RequestedUserFlowSpace.objects.filter(user=request.user)
+            for fs in this_user_req_fs:
+                if singlefs_is_subset_of(fs,fses):
+                    fs.delete()
             
             # save the requested flowspace to database and commit it
             requested_fses = []

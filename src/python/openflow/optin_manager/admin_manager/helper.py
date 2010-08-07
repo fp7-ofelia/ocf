@@ -1,5 +1,5 @@
 from openflow.optin_manager.opts.models import UserFlowSpace, AdminFlowSpace
-from openflow.optin_manager.flowspace.helper import multifs_is_subset_of
+from openflow.optin_manager.flowspace.helper import multifs_is_subset_of, singlefs_is_subset_of
 from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.opts.helper import update_user_opts
 from openflow.optin_manager.flowspace.helper import copy_fs
@@ -7,7 +7,9 @@ from openflow.optin_manager.flowspace.helper import copy_fs
 
 def accept_user_fs_request(fs_request):
     '''
-    accepts a user flowspace request and adds it to user flowpscae
+    accepts a user flowspace request and adds it to user flowpscae.
+    If a previous user flowspace is subset of what is being accepted, replace it
+    with new flowpsace only to avoid duplicate.
     @param fs_request:  flowspace request to be accepted
     @type fs_request: list of RequestedUserFlowSpace
     @return: [fv_args,match_list] to be xmlrpc-called to fv
@@ -15,6 +17,12 @@ def accept_user_fs_request(fs_request):
     '''
     if len(fs_request) == 0:
          return [[],[]]
+     
+    #check which of the previous user flowspaces are a subset of this flowspace
+    ufs = UserFlowSpace.objects.filter(user=fs_request[0].user)
+    for fs in ufs:
+        if (singlefs_is_subset_of(fs,fs_request)):
+            fs.delete()
      
     for single_fs in fs_request:
         user = single_fs.user
