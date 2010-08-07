@@ -38,12 +38,18 @@ class TestModels(SettingsTestCase):
         self.client.logout()
         threadlocals.pop_frame()
         
-    def test_allowed_create(self):
+    def test_allowed_create(self, name="test"):
         """Tests that we can create a project"""
 
         self.client.login(username="superuser", password="password")
         threadlocals.push_frame(user=self.su)
-        
+        p = Project.objects.create(
+            name=name,
+            description="description",
+        )
+        threadlocals.pop_frame()
+        self.client.logout()
+        return p
         
     def test_list(self):
         """
@@ -75,3 +81,12 @@ class TestModels(SettingsTestCase):
         self.assertNotContains(response, "description1", 1)
         d = pq(response.content)
         self.assertEqual(len(d('tr')), 1)
+        
+    def test_get_permittees(self):
+        p1 = self.test_allowed_create()
+        self.test_allowed_create(name="test2")
+        permittees = p1.members_as_permittees
+        self.assertEqual(
+            permittees.count(), 1,
+            "Got permittees %s instead of just %s" % (permittees, self.su)
+        )
