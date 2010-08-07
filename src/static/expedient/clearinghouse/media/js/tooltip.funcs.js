@@ -22,15 +22,15 @@
  * @param {String} listClass
  */
 function addTooltipToClass(listClass){
-	$("div." + listClass).css("display", "inline");
+	$("." + listClass).css("display", "inline");
 	
-	$("div.description." + listClass).hide().addClass(function(index){
+	$(".description." + listClass).hide().addClass(function(index){
 		return "description_" + index;
 	}).addClass("tooltip");
 	
-	$("div.val." + listClass).each(function(index){
+	$(".val." + listClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />").tooltip({
-			tip: "div." + listClass + ".description_" + index
+			tip: "." + listClass + ".description_" + index
 		});
 	});
 	
@@ -59,15 +59,15 @@ function addTooltipToClass(listClass){
  * @param {String} summaryClass
  */
 function addTooltipToSummary(summaryClass){
-	$("div." + summaryClass).css("display", "inline");
+	$("." + summaryClass).css("display", "inline");
 	
 	/* hide the description div and give it a class according to index */
-	$("div.description." + summaryClass).hide().addClass(function(index){
+	$(".description." + summaryClass).hide().addClass(function(index){
 		return "summarydescription_" + index;
 	});
 	
 	/* add a div where the description will be displayed in the tooltip */
-	$("div.summarytooltip." + summaryClass)
+	$(".summarytooltip." + summaryClass)
 		.append("<div class='tooltip_desc " + summaryClass + "' />")
 		.addClass("tooltip")
 		.hide()
@@ -77,7 +77,7 @@ function addTooltipToSummary(summaryClass){
 	 * whenever the mouse goes over a val, change the description in
 	 * the tooltip
 	 */
-	$("div.val." + summaryClass).each(function(index){
+	$(".val." + summaryClass).each(function(index){
 		$(this).mouseenter(function(){
 			$("div.tooltip_desc." + summaryClass)
 				.html($("div." + summaryClass +
@@ -86,10 +86,10 @@ function addTooltipToSummary(summaryClass){
 	});
 	
 	/* Add tooltip */
-	$("div.summarytext." + summaryClass).each(function(index){
+	$(".summarytext." + summaryClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />");
 		$(this).closest("a").tooltip({
-			tip: "div.summarytooltip." + summaryClass
+			tip: ".summarytooltip." + summaryClass
 		});
 	});
 	
