@@ -397,7 +397,7 @@ table.fulltable {
 	width: 100%
 }
 
-table.fulltable>tbody,table.fulltable>td,table.fulltable>th{
+table.fulltable>tbody,table.fulltable>tbody>td,table.fulltable>tbody>th{
 	text-align: center;
 }
 
@@ -407,9 +407,11 @@ table.fulltable>thead {
 	font-weight: bold;
 	padding: 3px;
 }
+
 table.fulltable>thead>td {
     padding: 5px 10px;
 }
+
 table.fulltable>tbody>td,table.fulltable>tbody>th {
 	padding: 5px 10px;
 	background: #fff;
