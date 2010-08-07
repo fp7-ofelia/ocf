@@ -43,15 +43,14 @@ def check_user(func, *args, **kwargs):
         raise Exception("User not authenticated for XML-RPC %s." % func.func_name)
     else:
         kwargs['user'] = kwargs['request'].user
-        return func(*args, **kwargs)
 
-    # Check that the user can actually make the xmlrpc call
-    this_user = kwargs['user']
-    if not this_user.get_profile().is_clearinghouse_user:
-        raise Exception("Remote user %s is not a clearinghouse user" % (
-            this_user.username))
-        
-    return func(*args, **kwargs)
+        # Check that the user can actually make the xmlrpc call
+        this_user = kwargs['user']
+        if not this_user.get_profile().is_clearinghouse_user:
+            raise Exception("Remote user %s is not a clearinghouse user" % (
+                this_user.username))
+            
+        return func(*args, **kwargs)
 
 def _same(val):
         return "%s" % val

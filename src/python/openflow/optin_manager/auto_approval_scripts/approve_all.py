@@ -42,6 +42,3 @@ def approve(request_info):
         return_array[1]["mac_dst_e"] = mac_to_int(request_info["req_mac_addr"])
         
     return return_array
-
-def describe():
-    return "Approve every user flowspace request"
