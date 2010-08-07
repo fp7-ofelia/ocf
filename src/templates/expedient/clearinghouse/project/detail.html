@@ -54,12 +54,12 @@
 					<td class="roles">
 						{% for role in member.projectrole_set.all %}
 						<div class="role_desc val">{{ role.name }}</div>
-						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endfor %}
+						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
 						{% endfor %}
 					</td>
 					<td class="actions">
-						<a href="{% url project_member_remove %}">remove</a>,
-						<a href="{% url project_member_update %}">update</a>
+						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>,
+						<a href="{% url project_member_update project.id member.object_id %}">update</a>
 					</td>
 				</tr>
 				{% endfor %}
@@ -67,7 +67,7 @@
 		</div>
 	    <div class="center">
 	    	<input type="button" value="Add Members"
-			onclick="document.location='{% url project_members_add project.id %}'" />
+			onclick="document.location='{% url project_member_add project.id %}'" />
 	    </div>
 	</div>
 	
@@ -141,7 +141,7 @@
 				<tr class="body">
 					<td class="name">{{ role.name }}</td>
 					<td class="description">
-						<div class="role_desc val">{{ role.description|truncatewords:4 }}</div>
+						<div class="role_desc val">{{ role.description|truncatewords:12 }}</div>
 						<div class="role_desc description">{{ role.description }}</div>
 					</td>
 					<td class="permissions">
