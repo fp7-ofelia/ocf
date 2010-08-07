@@ -23,10 +23,10 @@ class ProjectRoleManager(models.Manager):
         @return: all users with that role in the project
         @rtype: C{QuerySet} of C{User} objects.
         """
-        user_ids = Permittee.objects.filter(
+        user_ids = set(Permittee.objects.filter(
             projectrole__name=role_name,
             projectrole__project=project).values_list(
-                "pk", flat=True)
+                "pk", flat=True))
         return User.objects.filter(pk__in=user_ids)
     
     def filter_for_can_delegate(self, permittee):
@@ -39,10 +39,9 @@ class ProjectRoleManager(models.Manager):
         """
         permittee = Permittee.objects.get_as_permittee(permittee)
         return self.filter(
-            permittees=permittee,
             obj_permissions__permissionownership__can_delegate=True,
             obj_permissions__permissionownership__permittee=permittee,
-        )
+        ).distinct()
 
 class ProjectRole(models.Model):
     """Groups object permissions together for easier fine-grained management.
