@@ -3,6 +3,8 @@ Created on Jun 19, 2010
 
 @author: jnaous
 '''
+import logging
+from pprint import pformat
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
@@ -18,8 +20,6 @@ from models import SliceFlowSpace
 from geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
-import logging
-from pprint import pformat
 logger = logging.getLogger("html_ui_views")
 
 def _update_openflow_resources(request, slice):
@@ -222,13 +222,19 @@ def home(request, slice_id):
         return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
     else:
-        checked_ids = list(slice.resource_set.filter_for_objects(
-            OpenFlowInterface, slice_set=slice).values_list("id", flat=True))
-        checked_ids.extend(slice.resource_set.filter_for_objects(
-            PlanetLabNode, slice_set=slice).values_list("id", flat=True))
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
         logger.debug("Interfaces in slice: %s" % checked_ids)
-        of_aggs = OpenFlowAggregate.objects.filter(slice=slice)
-        pl_aggs = PlanetLabAggregate.objects.filter(slice=slice)
+
+        of_aggs = \
+            slice.aggregates.filter(
+                leaf_name=OpenFlowAggregate.__name__.lower())
+        pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+        
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         

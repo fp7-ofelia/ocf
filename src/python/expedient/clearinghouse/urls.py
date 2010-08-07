@@ -18,7 +18,8 @@ urlpatterns = patterns('',
     (r'^planetlab/', include('geni.planetlab.urls')),
     (r'^messages/', include('expedient.common.messaging.urls')),
     (r'^permissions/', include('expedient.common.permissions.urls')),
-    (r'^permissions/', include('expedient.common.permissions.urls')),
+    (r'^roles/', include('expedient.clearinghouse.roles.urls')),
+    (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
     (r'^admin/', include(admin.site.urls)),
 
     # TODO: Change to the following after 0.8 of registration is out
@@ -38,13 +39,11 @@ def get_static_url(name, path=""):
     static_file_tuple = (
         r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:], path),
         'django.views.static.serve',
-        {'document_root': "%s" % settings.MEDIA_ROOT})
+        {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
     return url(*static_file_tuple, name=name)
 
 urlpatterns += patterns('',
-   # TODO: Serve static content, should be removed in production deployment
-    # serve from another domain to speed up connections (no cookies needed)
-    get_static_url("img_media"),
-    get_static_url("css_media"),
+    get_static_url("img_media", '/img'),
+    get_static_url("css_media", '/css'),
     get_static_url("js_media", "/js"),
 )

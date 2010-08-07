@@ -2,19 +2,8 @@
 @author: jnaous
 '''
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-from django.db.models import signals
 from django.db.models.base import ModelBase
 from expedient.common.utils.managers import GenericObjectManager
-
-def _extendable_post_save(sender, **kwargs):
-    '''Add the content_object if not already present'''
-    if kwargs['instance'].content_object == None:
-        kwargs['instance'].content_object = kwargs['instance']
-        signals.post_save.disconnect(_extendable_post_save, sender)
-        kwargs['instance'].save()
-        signals.post_save.connect(_extendable_post_save, sender)
 
 class ExtendableMeta(ModelBase):
     '''
@@ -116,17 +105,44 @@ class ExtendableMeta(ModelBase):
                 
         new_cls = super(ExtendableMeta, cls).__new__(cls, name, bases, attrs)
         
-        # connect the signal to save the content_object
-        signals.post_save.connect(_extendable_post_save, new_cls)
-        
         return new_cls
+    
+
+class ExtendableManager(models.Manager):
+    """
+    A manager for Extendable objects.
+    """
+
+    def filter_for_class(self, klass):
+        """
+        Return a filtered QuerySet that only has instances whose
+        leaf class is C{klass}.
+        
+        @param klass: The leaf model class of instances we are looking for.
+        @type klass: a class
+        """
+        return self.filter(leaf_name=klass.__name__.lower())
+    
+    def filter_for_classes(self, klasses):
+        """
+        Return a filtered QuerySet that only has instances whose
+        leaf class are in the list C{klasses}.
+        
+        @param klasses: List of leaf model classes of instances we are
+            looking for.
+        @type klasses: list of classes
+        """
+        cls_names = [c.__name__.lower() for c in klasses]
+        return self.filter(leaf_name__in=cls_names)
 
 class Extendable(models.Model):
     '''
     Extendable object.
-    An extendable object uses the L{contenttypes<django.contrib.contenttypes>}
-    framework to enable an instance to be obtained as its class's farthest 
-    descendant. Additionally, fields can be defined that would be added only
+    
+    An extendable object that enables an instance to be obtained as its
+    class's farthest descendant.
+    
+    Additionally, fields can be defined that would be added only
     to a direct subclass. This can be useful to automatically add relationships
     to subclasses so that relationships exist in the subclasses but not in the
     parents, allowing the same field name to be used for different types of
@@ -210,22 +226,19 @@ class Extendable(models.Model):
                 }
     '''
     
-    objects = GenericObjectManager("content_type", "object_id")
+    objects = ExtendableManager()
     
-    content_type = models.ForeignKey(ContentType, editable=False, 
-                                     null=True, blank=True)
-    object_id = models.PositiveIntegerField(editable=False,
-                                            null=True, blank=True)
-    content_object = generic.GenericForeignKey()
+    leaf_name = models.CharField(max_length=100, blank=True)
     
     __metaclass__ = ExtendableMeta
     
     class Meta:
         abstract = True
         
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("leaf_name", self.__class__.__name__.lower())
+        super(Extendable, self).__init__(*args, **kwargs)
+        
     def as_leaf_class(self):
         '''Return this instance as the farthest descendant of its class'''
-        if not self.content_object:
-            self.content_object = self
-            self.save()
-        return self.content_object
+        return getattr(self, self.leaf_name, self)

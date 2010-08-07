@@ -7,12 +7,17 @@
 
 <h2>Welcome to the GENI Clearinghouse!</h2>
 
-<form method="post" action=".">{% csrf_token %}
-  {{ form.as_table }}
-
-  <input type="submit" value="Log in" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</form>
+<div class="login">
+	<form method="post" action=".">{% csrf_token %}
+		<table id="login_table">
+			{{ form.as_table }}
+		</table>
+		<div>
+			<input type="submit" value="Log in" />
+		</div>
+		<input type="hidden" name="next" value="{{ next }}" />
+	</form>
+</div>
 
 <table class="login_password_control">
 	<tr>
@@ -24,5 +29,4 @@
 	   <td><a href="{% url registration_register %}">{% trans "Register" %}</a>!</td>
 	 </tr>
 </table>
-
 {% endblock %}

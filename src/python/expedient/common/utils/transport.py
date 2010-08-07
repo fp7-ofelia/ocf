@@ -12,6 +12,9 @@ import base64
 import logging
 logger = logging.getLogger("TestClientTransport")
 
+class AuthorizationRequired(Exception):
+    pass
+
 class TestClientTransport(xmlrpclib.Transport):
     """Handles connections to XML-RPC server through Django test client"""
     
@@ -37,6 +40,9 @@ class TestClientTransport(xmlrpclib.Transport):
         self.verbose = verbose
         response = self.client.post(handler, request_body, **headers)
         logger.debug("Received response:\n%s" % response)
+        if "WWW-Authenticate" in response:
+            raise AuthorizationRequired(
+                "Authorization required. Got response\n%s" % response)
         res = StringIO(response.content)
         res.seek(0)
         return self.parse_response(res)

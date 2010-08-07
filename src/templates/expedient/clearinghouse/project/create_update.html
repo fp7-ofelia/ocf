@@ -1,22 +1,23 @@
-{% extends base %}
+{% extends "base.html" %}
 {% load ch_extras %}
+{% load breadcrumbs %}
 
 {% block title %}Project {{ project.name }}{% endblock title %}
 
 {% block content %}
-{% if not iframe %}
 <div class="title">
 	<h1>Project {{ project.name }}</h1>
 </div>
-{% endif %}
 
 <div class="project_edit">
 	<form action="" method="POST">{% csrf_token %}
-		<table class="formtable">
+		<table class="formtable_noborder">
 			{{ form.as_table }}
 		</table>
-		<input type="submit" value="Save" />
-		<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>
+		<div class="center">
+			<input type="submit" value="Save" />
+			<a href='{% before_last_link breadcrumbs %}'>Cancel</a>
+		</div>
 	</form>
 </div>
 {% endblock content %}

@@ -22,6 +22,8 @@ from django.conf import settings
 from expedient.common.tests.manager import SettingsTestCase
 from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
+from expedient.common.permissions.shortcuts import give_permission_to
+from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -33,6 +35,10 @@ SCHEME = "test"
 HOST = "testserver"
 
 MOD = "openflow.plugin"
+
+logging.getLogger("OpenflowModelsParsing").setLevel(logging.WARNING)
+logging.getLogger("TestClientTransport").setLevel(logging.WARNING)
+logging.getLogger("rpc4django.views").setLevel(logging.WARNING)
 
 class Tests(SettingsTestCase):
     
@@ -50,6 +56,8 @@ class Tests(SettingsTestCase):
         
         self.test_user = User.objects.create_user(
             "user", "user@user.com", "password")
+        give_permission_to("can_add_aggregate", Aggregate, self.test_user)
+        give_permission_to("can_create_project", Project, self.test_user)
         
         for i in range(NUM_DUMMY_OMS):
             om = DummyOM.objects.create()
@@ -98,6 +106,8 @@ class Tests(SettingsTestCase):
                 response,
                 expected_url=reverse("openflow_aggregate_add_links", args=[i+1]),
             )
+            
+        self.assertEqual(OpenFlowAggregate.objects.count(), NUM_DUMMY_OMS)
             
     def test_static_of_links(self):
         """
@@ -170,8 +180,9 @@ class Tests(SettingsTestCase):
         
         iface = OpenFlowInterface.objects.filter(aggregate__pk=i+1)[0]
 
+        threadlocals.push_frame(user=self.test_user)
         self.generic_agg = Aggregate.objects.create(
-            name="TestAggregate", owner=self.test_user)
+            name="TestAggregate")
         
         self.non_of_rsc = []
         resource = Resource.objects.create(
@@ -253,7 +264,7 @@ class Tests(SettingsTestCase):
             url = reverse("project_add_agg", args=[project.id])
             response = self.client.post(
                 path=url,
-                data={"%s" % i: "Select"},
+                data={"id": i},
             )
             
             self.assertTrue(project.aggregates.count() == i)
@@ -300,7 +311,7 @@ class Tests(SettingsTestCase):
             # post the form to add aggregate to slice
             response = self.client.post(
                 path=slice_add_agg_url,
-                data={"%s" % i: "Select"},
+                data={"id": i},
             )
             
             # should go the openflow special add aggregates page
@@ -351,8 +362,7 @@ class Tests(SettingsTestCase):
             )
         
         # start the slice.
-        for agg in OpenFlowAggregate.objects.all():
-            agg.start_slice(slice)
+        self.client.post(reverse("slice_start", args=[slice.id]))
             
         # check that we get all the switches in the created slice
         for ds in DummyOMSlice.objects.all():

@@ -2,7 +2,7 @@
 
 {% block title %}Messages{% endblock title %}
 
-{% block scripts %}
+{% block head %}
 <script type="text/javascript">
     function gotoall() {
         window.location="{% url messaging_all %}";
@@ -21,7 +21,7 @@
         window.location = "{% url messaging_create %}";
     }
 </script>
-{% endblock scripts %}
+{% endblock %}
 
 {% block content %}
 <div id="messages_div">

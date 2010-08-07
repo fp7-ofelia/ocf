@@ -9,10 +9,16 @@ SRC_DIR = join(dirname(__file__), '../../../')
 # For serving static content - dev version only
 STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
 
-DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = join(SRC_DIR, '../db/expedient/clearinghouse/clearinghouse.db') # Or path to database file if using sqlite3.
-DATABASE_USER = ''             # Not used with sqlite3.
-DATABASE_PASSWORD = ''         # Not used with sqlite3.
+#DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#DATABASE_NAME = join(SRC_DIR, '../db/expedient/clearinghouse/clearinghouse.db') # Or path to database file if using sqlite3.
+#DATABASE_USER = ''             # Not used with sqlite3.
+#DATABASE_PASSWORD = ''         # Not used with sqlite3.
+#DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
+#DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+DATABASE_ENGINE = 'mysql'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_NAME = "bedrock" # Or path to database file if using sqlite3.
+DATABASE_USER = 'django'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'password'         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -59,10 +65,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
     'expedient.common.middleware.sitelockdown.SiteLockDown',
+    'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
 )
 
@@ -98,10 +106,12 @@ INSTALLED_APPS = (
     'expedient.common.messaging',
     'expedient.common.defaultsite',
     'expedient.clearinghouse.aggregate',
+    'expedient.clearinghouse.roles',
     'expedient.clearinghouse.project',
     'expedient.clearinghouse.resources',
     'expedient.clearinghouse.slice',
     'expedient.clearinghouse.users',
+    'expedient.clearinghouse.permissionmgmt',
     'openflow.plugin',
     'geni',
     'geni.planetlab',

@@ -4,16 +4,25 @@
 
 {% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
 
-{% block style %}
-#resources_table {
-    width: 100%;
-}
-#resource_list {
-    width: 100%;
-}
-.table_div td,th {
-    text-align: center;
-}
+{% block head %}
+<style>
+	#resources_table {
+	    width: 100%;
+	}
+	#resource_list {
+	    width: 100%;
+	}
+	.table_div td,th {
+	    text-align: center;
+	}
+</style>
+<script>
+	$(document).ready(function() {
+		$("#aggs_help_img").tooltip({
+			tip: "#aggs_help_div"
+		});
+	});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +31,7 @@
 		<h1>Slice {{ slice.name }} in Project {{ slice.project.name }}</h1>
 	</div>
 	<div class="detail_section">
-		<div class="actions">
+		<div class="mgmt_actions">
 			<h2>Management:</h2>
 			<p>Slice {% if not slice.started %}<strong>not</strong>{% endif %} started.</p>
 			<p>Slice {% if not slice.modified %}<strong>not</strong>{% endif %} modified.</p>
@@ -55,7 +64,18 @@
 	    </div>
     </div>
     <div class="detail_section">
-	    <h2>Aggregates</h2>
+	    <h2>Aggregates
+			<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+		</h2>
+	
+		<div class="tooltip" id="aggs_help_div">
+			Below you can manage and add aggregates in your slice. You can
+			only add resources to your slice from aggregates that have been
+			added to the slice. When you add an aggregate to the slice you
+			might be prompted for additional information that the aggregate
+			needs about your slice.
+		</div>
+
 		<div class="aggregate_list">
 			{% with slice.aggregates.all as aggregate_list %}
 			{% if aggregate_list.count %}

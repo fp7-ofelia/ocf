@@ -10,11 +10,22 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from expedient.common.messaging.models import DatedMessage
 import logging
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import get_user_from_req, get_queryset,\
+    get_queryset_from_class, get_leaf_queryset, get_object_from_ids
+from django.contrib.auth.models import User
+from expedient.clearinghouse.project.models import Project
+from expedient.clearinghouse.slice.models import Slice
 
 logger = logging.getLogger("AggregateViews")
 
 TEMPLATE_PATH = "expedient/clearinghouse/aggregate"
 
+@require_objs_permissions_for_view(
+    perm_names=["can_add_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset_from_class(Aggregate),
+    methods=["POST"])
 def list(request, agg_id=None):
     '''
     Get a list of aggregates. agg_id specifies id to highlight. On POST,
@@ -45,16 +56,24 @@ def list(request, agg_id=None):
         },
     )
 
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_leaf_queryset(Aggregate, "agg_id"),
+    methods=["POST"])
 def delete(request, agg_id):
+    """
+    Display a confirmation page then stop all slices and delete the aggregate.
+    """
     next = request.GET.get("next", None) or reverse("home")
-    aggregate = get_object_or_404(Aggregate, id=agg_id)
+    aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
     # Stop all slices using the aggregate
     for s in aggregate.slice_set.all():
-        aggregate.as_leaf_class().stop_slice(s)
+        aggregate.stop_slice(s)
     # Delete the aggregate.
     req = create_update.delete_object(
         request,
-        model=Aggregate,
+        model=aggregate.__class__,
         post_delete_redirect=next,
         object_id=agg_id,
         extra_context={"next": next},
@@ -68,6 +87,9 @@ def delete(request, agg_id):
     return req
 
 def info(request, ct_id):
+    """
+    Return a page that shows the information on the aggregate.
+    """
     try:
         ct = ContentType.objects.get_for_id(ct_id)
     except:
@@ -78,3 +100,35 @@ def info(request, ct_id):
     return simple.direct_to_template(
         request, template=TEMPLATE_PATH+"/info.html",
         extra_context={"info": info, "type": model._meta.verbose_name})
+
+def get_can_use_permission(request, permission, permittee,
+                           target_obj_or_class, redirect_to=None):
+    """Get the 'can_use_aggregate' permission.
+    
+    For project, slice, or user permittees, call the corresponding
+    add_to_* method of the target aggregate.
+    """
+    assert(isinstance(target_obj_or_class, Aggregate))
+    assert(
+        isinstance(permittee, User) or
+        isinstance(permittee, Project) or
+        isinstance(permittee, Slice)
+    )
+    assert(permission.name == "can_use_aggregate")
+
+    aggregate = target_obj_or_class
+    
+    try:
+        next = request.session["breadcrumbs"][-1][1]
+    except IndexError:
+        next = redirect_to or reverse("home")
+    
+    if isinstance(permittee, Project):
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_project(permittee, next))
+    elif isinstance(permittee, Slice):
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_slice(permittee, next))
+    else: # isinstance(permittee, User)
+        return HttpResponseRedirect(
+            aggregate.as_leaf_class().add_to_user(permittee, next))

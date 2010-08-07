@@ -1,48 +1,48 @@
 {% extends "base.html" %}
 {% load ch_extras %}
 
-{% block style %}
-table.openflow,table.planetlab {
-	width: 100%;
-	border-spacing: 0px;
-	border-collapse: collapse;
-	border: 1px solid #CCC;
-}
-table.openflow .dpid,.ports {
-	border-bottom: 1px solid #000;
-}
-table.connections_table {
-	border-width: 0px;
-	width: 100%;
-} 
-table.openflow td {
-	border-spacing: 0px;
-	padding: 0px;
-	border-collapse: collapse;
-}
-td.select_checkbox {
-	width: 24px;
-}
-table.connections {
-	width: 440px;
-}
-tr.odd {
-	background-color: #ecf4d7;
-}
-td.connected {
-	font-weight: bold;
-}
+{% block head %}
+<style>
+	table.openflow,table.planetlab {
+		width: 100%;
+		border-spacing: 0px;
+		border-collapse: collapse;
+		border: 1px solid #CCC;
+	}
+	table.openflow .dpid,.ports {
+		border-bottom: 1px solid #000;
+	}
+	table.connections_table {
+		border-width: 0px;
+		width: 100%;
+	} 
+	table.openflow td {
+		border-spacing: 0px;
+		padding: 0px;
+		border-collapse: collapse;
+	}
+	td.select_checkbox {
+		width: 24px;
+	}
+	table.connections {
+		width: 440px;
+	}
+	tr.odd {
+		background-color: #ecf4d7;
+	}
+	td.connected {
+		font-weight: bold;
+	}
+	
+	td.port_num {
+		width: 45px;
+	}
+	div.steps {
+		padding: 4px;
+		font-weight: bold;
+	}
+</style>
 
-td.port_num {
-	width: 45px;
-}
-div.steps {
-	padding: 4px;
-	font-weight: bold;
-}
-{% endblock %}
-
-{% block scripts %}
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */

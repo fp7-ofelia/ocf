@@ -191,9 +191,11 @@ class GENIAggregate(Aggregate):
         return self.available
     
     def start_slice(self, slice):
+        super(GENIAggregate, self).start_slice(slice)
         return self._create_sliver(slice)
         
     def stop_slice(self, slice):
+        super(GENIAggregate, self).stop_slice(slice)
         return self._delete_sliver(slice)
     
     def add_to_slice(self, slice, next):

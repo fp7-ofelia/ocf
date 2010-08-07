@@ -1,36 +1,67 @@
-{% extends "iframebase.html" %}
+{% extends "div_base.html" %}
 {% load ch_extras %}
 
-{% block title %}List Projects{% endblock title %}
+{% block head %}
+<script>
+	$(document).ready(function() {
+		addTooltipToClass("slicecontinue");
+		addTooltipToClass("project_name");
+		$(".project_list tr.body").each(function(index) {
+			addTooltipToSummary("ownersgrp_"+index);
+			addTooltipToSummary("membersgrp_"+index);
+		});
+	});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="project_list">
 	<div class="table_div">
 		<table class="fulltable" id="projects_table">
-			<tr>
+			<tr class="head">
 				<th class="name">Name</th>
-                <th class="description">Description</th>
-                <th class="owner">Owner</th>
+                <th class="owners">Owners</th>
                 <th class="members">Members</th>
                 <th class="slices">Slices</th>
                 <th class="actions">Actions</th>
 			</tr>
 			{% for project in project_list %}
-			<tr>
-				<td class="name">{{ project.name }}</td>
-				<td class="description">{{ project.description }}</td>
-                <td class="owner">{{ project.owner.username }}</td>
+			<tr class="body">
+				<td class="name">
+					<div class="val project_name">{{ project.name }}</div>
+					<div class="description project_name">{{ project.description }}</div>
+				</td>
+				<td class="owners">
+					{% with project.owners.all as users %}
+					{% with "ownersgrp_"|cat:forloop.counter0 as tooltip_class %}
+					{% include "users/tooltiplist.html" %}
+					{% endwith %}
+					{% endwith %}
+				</td>
                 <td class="members">
-                	{% for member in projects.members.all %}
-					<a href="mailto:{{ member.email }}">{{ member.username }}</a>{% if not forloop.last %},{% endif %}
-					{% endfor %}
+					{% with project.members.all as users %}
+					{% with "membersgrp_"|cat:forloop.counter0 as tooltip_class %}
+					{% include "users/tooltiplist.html" %}
+					{% endwith %}
+					{% endwith %}
                 </td>
                 <td class="slices">
                 	{% for slice in project.slice_set.all %}
+					{% if forloop.counter < 2 %}
                 	<a href="{% url slice_detail slice.id %}">{{ slice.name }}</a>{% if not forloop.last %},{% endif %}
-                	{% endfor %}
+					{% else %}
+					{% if forloop.counter == 2 %}
+					<div class="val slicecontinue">...</div>
+					<div class="description slicecontinue">
+					{% endif %}
+						<a href="{% url slice_detail slice.id %}">{{ slice.name }}</a>{% if not forloop.last %},{% endif %}
+					{% if forloop.last %}
+					</div>
+					{% endif %}
+					{% endif %}
+					{% endfor %}
                 </td>
 				<td class="actions">
-					<a href="{% url project_iframe_update project.id %}">update</a>,
 					<a href="{% url project_detail project.id %}">details</a>,
 					<a href="{% url project_delete project.id %}">delete</a>
 				</td>

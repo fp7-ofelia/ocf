@@ -26,7 +26,7 @@ class ExpedientPermissionsBackend(object):
         if obj == None:
             return False
     
-        missing, target = ExpedientPermission.objects.get_missing_for_target(
+        missing, _ = ExpedientPermission.objects.get_missing_for_target(
             user_obj, [perm], obj)
         
         return missing == None

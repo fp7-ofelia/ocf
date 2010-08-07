@@ -38,3 +38,8 @@ secret_key.py
 *.0
 *.crt
 *.key
+*.launch
+gcf-x509.*/
+expedient-settings
+deployment_settings.py
+*.db

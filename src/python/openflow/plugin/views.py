@@ -1,6 +1,7 @@
 '''
 @author: jnaous
 '''
+import logging
 from django.views.generic import simple
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
@@ -8,23 +9,43 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.loading import cache
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.resources.models import Resource
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.utils.views import generic_crud
 from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import \
+    get_queryset_from_class, get_user_from_req, get_queryset
+from expedient.clearinghouse.slice.models import Slice
+from expedient.clearinghouse.resources.models import Resource
+from expedient.clearinghouse.aggregate.models import Aggregate
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from models import NonOpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
-import logging
+from expedient.common.permissions.shortcuts import give_permission_to,\
+    must_have_permission
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
 
+@require_objs_permissions_for_view(
+    perm_names=["can_add_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset_from_class(Aggregate),
+    methods=["POST"])    
+def aggregate_create(request):
+    return aggregate_crud(request)
+
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(OpenFlowAggregate, "agg_id"),
+    methods=["POST"])
+def aggregate_edit(request, agg_id):
+    return aggregate_crud(request, agg_id=agg_id)
+    
 def aggregate_crud(request, agg_id=None):
     '''
     Create/update an OpenFlow Aggregate.
@@ -43,7 +64,6 @@ def aggregate_crud(request, agg_id=None):
         
     elif request.method == "POST":
         logger.debug("aggregate_crud got post")
-        aggregate = aggregate or OpenFlowAggregate(owner=request.user)
         agg_form = OpenFlowAggregateForm(
             data=request.POST, instance=aggregate)
         client_form = PasswordXMLRPCServerProxyForm(
@@ -72,6 +92,18 @@ def aggregate_crud(request, agg_id=None):
                 print err
             else:
                 aggregate.save()
+                give_permission_to(
+                    "can_use_aggregate",
+                    aggregate,
+                    request.user,
+                    can_delegate=True
+                )
+                give_permission_to(
+                    "can_edit_aggregate",
+                    aggregate,
+                    request.user,
+                    can_delegate=True
+                )
                 DatedMessage.objects.post_message_to_user(
                     "Successfully created/updated aggregate %s" % aggregate.name,
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
@@ -94,12 +126,17 @@ def aggregate_crud(request, agg_id=None):
             "available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
-                ("%s OpenFlow Aggregate" % "Update" if agg_id else "Add",
+                ("%s OpenFlow Aggregate" % ("Update" if agg_id else "Add"),
                  request.path),
             )
         },
     )
     
+@require_objs_permissions_for_view(
+    perm_names=["can_edit_aggregate"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(OpenFlowAggregate, "agg_id"),
+    methods=["POST"])
 def aggregate_add_links(request, agg_id):
     """
     Show page to add static connections to other aggregates.
@@ -132,8 +169,8 @@ def aggregate_add_links(request, agg_id):
                 "Error in settings: "
                 "Could not find model %s in application %s."
                 % (model_name, app))
-        types.append(ContentType.objects.get_for_model(model).id)
-    resource_qs = Resource.objects.filter(content_type__id__in=types)
+        types.append(model)
+    resource_qs = Resource.objects.filter_for_classes(types)
     
     if request.method == "POST":
         new_cnxn_form = OpenFlowStaticConnectionForm(
@@ -207,7 +244,7 @@ def aggregate_add_links(request, agg_id):
             ),
         },
     )
-    
+
 def aggregate_add_to_slice(request, agg_id, slice_id):
     """
     Add the aggregate to the slice. Check if the slice already has
@@ -216,6 +253,9 @@ def aggregate_add_to_slice(request, agg_id, slice_id):
     
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    must_have_permission(request.user, aggregate, "can_use_aggregate")
+    must_have_permission(slice.project, aggregate, "can_use_aggregate")
     
     next = request.GET.get("next", None)
     
@@ -232,7 +272,7 @@ def aggregate_add_to_slice(request, agg_id, slice_id):
         instance.slice = slice
     
     def post_save(instance, created):
-        slice.aggregates.add(aggregate)
+        give_permission_to("can_use_aggregate", aggregate, slice)
     
     return generic_crud(
         request, id, OpenFlowSliceInfo,

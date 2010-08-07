@@ -5,18 +5,16 @@ Contains views for permissions tests
 
 @author: jnaous
 '''
-from django.shortcuts import get_object_or_404
-from models import PermissionTestClass
-from ..decorators import require_objs_permissions_for_view
-from ..utils import get_user_from_req, get_queryset
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import create_update
 from django.core.urlresolvers import reverse
-from expedient.common.permissions.utils import give_permission_to,\
-    get_queryset_from_class
-from django.contrib.csrf.middleware import csrf_exempt
+from django.shortcuts import get_object_or_404
+from expedient.common.permissions.utils import get_queryset_from_class
+from expedient.common.permissions.utils import get_user_from_req, get_queryset
+from expedient.common.permissions.shortcuts import give_permission_to
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from models import PermissionTestClass
 
-@csrf_exempt
 @require_objs_permissions_for_view(
     ["can_get_x2", "can_read_val"],
     get_user_from_req,
@@ -24,7 +22,7 @@ from django.contrib.csrf.middleware import csrf_exempt
 )
 def test_view_x2(request, obj_id=None):
     obj = get_object_or_404(PermissionTestClass, pk=obj_id)
-    return HttpResponse("%s" % obj.get_val_x2(user_kw=request.user))
+    return HttpResponse("%s" % obj.get_val_x2())
 
 @require_objs_permissions_for_view(
     ["can_add"],
@@ -63,10 +61,9 @@ def test_view_update(request, obj_id=None):
                                    kwargs=dict(obj_id=obj_id)),
     )
 
-@csrf_exempt
 def add_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
-        give_permission_to(user, permission, target)
+        give_permission_to(permission, target, user)
         redirect_to = redirect_to or reverse("test_view_crud")
         return HttpResponseRedirect(redirect_to)
     else:
@@ -79,10 +76,9 @@ Do you want to get permissions to create PermissionTestClass instances?
 </form>
 """ % reverse("test_view_crud"))
 
-@csrf_exempt
 def other_perms_view(request, permission, user, target, redirect_to=None):
     if request.method == "POST":
-        give_permission_to(user, permission, target)
+        give_permission_to(permission, target, user)
         redirect_to = redirect_to or reverse("test_view_crud")
         return HttpResponseRedirect(redirect_to)
     else:
