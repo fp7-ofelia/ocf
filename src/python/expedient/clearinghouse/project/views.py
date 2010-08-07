@@ -161,7 +161,6 @@ def create(request):
         post_save=post_save,
         redirect=redirect,
         extra_context={
-            "cancel_url": reverse("home"),
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Create Project", request.path),
@@ -307,6 +306,7 @@ def add_member(request, proj_id):
         template=TEMPLATE_PATH+"/add_member.html",
         extra_context={
             "form": form,
+            "project": project,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
@@ -346,6 +346,8 @@ def update_member(request, proj_id, user_id):
         template=TEMPLATE_PATH+"/update_member.html",
         extra_context={
             "form": form,
+            "project": project,
+            "member": member,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
@@ -379,6 +381,8 @@ def remove_member(request, proj_id, user_id):
         request,
         template=TEMPLATE_PATH+"/remove_member.html",
         extra_context={
+            "project": project,
+            "member": member,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
