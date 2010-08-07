@@ -111,7 +111,7 @@ class Project(models.Model):
             objectpermission__object_type=
                 ContentType.objects.get_for_model(Project),
             objectpermission__object_id=self.id,
-        )
+        ).distinct()
     members_as_permittees=property(_get_permittees)
     
     def __unicode__(self):
