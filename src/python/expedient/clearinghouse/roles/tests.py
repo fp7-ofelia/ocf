@@ -158,7 +158,20 @@ class TestModels(TestCase):
             self.obj_perm4,
             giver=self.u2
         )
-        
+    
+    def test_filter_for_can_delegate(self):
+        self.role3.give_to_permittee(self.u1, can_delegate=True)
+        # check that the roles u1 can give are there
+        givable_roles = ProjectRole.objects.filter_for_can_delegate(self.u1)
+        self.assertTrue(
+            self.role1 in givable_roles,
+            "Expected role %s in givable roles, instead got %s" % 
+                (self.role1, givable_roles))
+        self.assertTrue(
+            self.role3 in givable_roles,
+            "Expected role %s in givable roles, instead got %s" % 
+                (self.role3, givable_roles))
+    
     def test_remove_permission(self):
         """
         Check that a permission can be removed from a role with and
