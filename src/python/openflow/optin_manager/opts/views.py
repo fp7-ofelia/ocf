@@ -12,7 +12,6 @@ from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from django.views.generic import simple
 from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp,\
 update_match_struct_priority_and_get_fv_args
-from expedient.common.transactions.nested_transaction import *
 from django.db import transaction
 
 @login_required     
