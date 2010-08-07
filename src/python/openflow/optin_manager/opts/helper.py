@@ -19,7 +19,7 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     @param nice: strict or nice optin
     @type nice: boolean
     @return: return the fv_args and the list of match structs created for this opt
-    @type: [array,array] first array is fv_args, second one match_struct_list
+    @type: [list,list] first list is fv_args, second one match_struct_list
     '''
     expFS = ExperimentFLowSpace.objects.filter(exp = exp)
     intersected = False
@@ -83,7 +83,18 @@ def opt_fses_outof_exp(fses):
     
 
 def update_user_opts(user):
-    error_msg = []
+    '''
+    Opt out all the flowspaces opted by user, and re-opt them again into the same experiments
+    with same priorities
+    @param user: a User object whose opt-ins should be updated
+    @type User: User Object
+    @return: [fv_args,match_list] flowvisor args to do the update. the fv_args should be passed to
+    changeFlowSpace xmlrpc call in flowvisor. match list is the match entries for the first
+    arguments in fv_args, so the returned ids from flowvisor should be saved back to them
+    @type: [list, list] 
+    '''
+    fv_args = []
+    match_list = []
     user_opts = UserOpts.objects.filter(user=user)
     user_fs = UserFlowSpace.objects.filter(user=user)
     for user_opt in user_opts:
@@ -91,16 +102,12 @@ def update_user_opts(user):
         t_priority = user_opt.priority
         t_exp = user_opt.experiment
         ofses = OptsFlowSpace.objects.filter(opt = user_opt)
-        msg = opt_fses_outof_exp(ofses)
-        if (msg == ""):
-            user_opt.delete()
-            msg2 = opt_fs_into_exp(user_fs, t_exp, user, t_priority, t_nice)
-            if (msg2 == ""):
-                pass
-            else:
-                return "couldn't re-opt-in user flowspace in update_user_opts. msg was %s"%msg2
-        else:
-            return "couldn't opt out user flowspace in update_user_opts. msg was %s"%msg
+        del_fv_args = opt_fses_outof_exp(ofses)
+        user_opt.delete()
+        [add_fv_args,new_match_list] = opt_fs_into_exp(user_fs, t_exp, user, t_priority, t_nice)
+        fv_args =  add_fv_args + fv_args + del_fv_args
+        match_list = new_match_list + match_list
+    return [fv_args,match_list]
             
                 
 def update_opts_into_exp(exp):

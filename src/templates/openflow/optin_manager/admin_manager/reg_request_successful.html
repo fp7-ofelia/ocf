@@ -8,9 +8,15 @@ window.location="/dashboard"
 {% endblock %}
 {% block content %}
 <div class="main">
-	<b>{{user.username}},</b><br/>
+	{% if approved %}
+	<b>{{user.username}}</b>,
+	Your flowspace registration request has been submitted and automatically approved by admin.<br/>
+	{% else %}
+	<b>{{user.username}}</b>,
+	Your flowspace registration request is submitted successfully and waiting for admin approval.<br/>
+	{% endif %}
+	<br/>
 	<center>
-	Your flowspace registration request submitted successfully and waiting admin approval.<br/>
 	<button type=button onClick="clicked()">OK</button>
 	</center>
 	

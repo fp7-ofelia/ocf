@@ -9,4 +9,5 @@ urlpatterns = patterns('openflow.optin_manager.admin_manager.views',
     url(r'^user_reg_fs$','user_reg_fs', name="user_ref_fs"),
     url(r'^approve_user$', 'approve_user', name="approve_user_reg"),
     url(r'^user_unreg_fs$','user_unreg_fs'),
+    url(r'^set_auto_approve$','set_auto_approve', name="set_auto_approve"),
 )

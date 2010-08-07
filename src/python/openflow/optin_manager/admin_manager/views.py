@@ -1,22 +1,28 @@
 # Create your views here.
+from openflow.optin_manager.settings import AUTO_APPROVAL_MODULES
 from django.contrib.auth.decorators import login_required
 from django.views.generic import simple
-from openflow.optin_manager.opts.models import AdminFlowSpace
 from openflow.optin_manager.users.models import UserProfile, Priority
 from openflow.optin_manager.flowspace.models import FlowSpace
 from openflow.optin_manager.opts.forms import AdminOptInForm
-from openflow.optin_manager.flowspace.helper import \
-    singlefs_is_subset_of, make_flowspace,multi_fs_intersect, copy_fs
+from openflow.optin_manager.flowspace.helper import copy_fs,\
+    singlefs_is_subset_of, make_flowspace,multi_fs_intersect,  multifs_is_subset_of
 from models import *
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from openflow.optin_manager.opts.models import UserFlowSpace, \
     AdminFlowSpace, UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
-from openflow.optin_manager.admin_manager.forms import UserRegForm
+from openflow.optin_manager.admin_manager.forms import UserRegForm, ScriptProxyForm
 from openflow.optin_manager.flowspace.utils import dotted_ip_to_int,\
 mac_to_int
 from django.forms.util import ErrorList
 from openflow.optin_manager.opts.helper import update_user_opts
+from helper import accept_user_fs_request, find_supervisor, convert_dict_to_flowspace
+from django.db import transaction
+import logging
+
+logger = logging.getLogger("SetAutoApproveScriptViews")
 
 @login_required
 def promote_to_admin(request):
@@ -202,17 +208,36 @@ def resign_admin(request):
     
 @login_required
 def user_reg_fs(request):
+    '''
+    The view function to send a flowspace request for admin. 
+    1) Checks if the user already have the requested flowspace or have a pending
+    request for it, and if this is not the case, requests that flowspace
+    2) Then finds out which admin has complete control over the flowspace to approve it
+    3) Then runs an optional script for approving the request. this script is either
+    a local script in the openflow.optin_manager.auto_approve_scripts or is a custom, remote
+    script that is called using XMLRPC call.
+    In either case 
+    4) If the optional script doesn't exist or if it postpones the result, a request will
+    be sent to the admin.
+    
+    request.POST has the following key-value pairs:
+    @param ip_addr: requested IP address for the flowspace in the format of x.x.x.x
+    @type ip_addr: string
+    @param mac_addr: request MAC address for the flowspace in the format of xx:xx:xx:xx:xx:xx
+    @type mac_addr: string 
+    '''
     profile = UserProfile.get_or_create_profile(request.user)
+    
+    #admins can not see this page. redirect them to dashboard
     if (profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     
     if (request.method == "POST"):
         form = UserRegForm(request.POST)
         if (form.is_valid()):
-            # TODO: call admin personalized function here
-            # make flowspace from it:
+
+            # Convert the request into an array of flowspace objects
             fses = []
-            
             if (request.POST['mac_addr'] != "*" and request.POST['ip_addr'] != "0.0.0.0"):
                 fs = FlowSpace()
                 fs.mac_src_s = mac_to_int(request.POST['mac_addr'])
@@ -253,39 +278,134 @@ def user_reg_fs(request):
                                  },
                     )
                 
-
+            # check if the requested flowspace is not already requested or owned by this user:
+            user_fs = UserFlowSpace.objects.filter(user=request.user)
+            req_fs = RequestedUserFlowSpace.objects.filter(user=request.user)
+            owned_and_requested = []
+            for fs in user_fs:
+                owned_and_requested.append(fs)
+            for fs in req_fs:
+                owned_and_requested.append(fs)
+            updated_fses = []
+            for fs in fses:
+                is_subset = singlefs_is_subset_of(fs,owned_and_requested)
+                if (not is_subset):
+                    updated_fses.append(fs)
+            if len(updated_fses)==0:
+                return simple.direct_to_template(request,
+                    template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
+                    extra_context = {
+                        'error_msg':"You have either already owned this flowspace or have a pending request for it",
+                        'form':form,
+                                 },
+                    )
+            else:
+                fses = updated_fses
+                    
+            # Now find out the admin who has the right to approve the request
+            selected_admin = find_supervisor(fses)
+            if (not selected_admin):
+                raise Exception("No admin has full control over the requested flowspace")
             
-            admins_list = UserProfile.objects.filter(is_net_admin=True)
-            intersected_admins = []
-            intersected_supervisors = []
-            for opted_fs in fses:
-                for admin in admins_list:
-                    adminfs = AdminFlowSpace.objects.filter(user=admin.user)
-                    if singlefs_is_subset_of(opted_fs,adminfs):
-                        intersected_admins.append(admin)
-                        intersected_supervisors.append(admin.supervisor)
-                        
-                selected_admin = None
-                for admin in intersected_admins:
-                    if (admin not in intersected_supervisors or admin.supervisor==admin.user):
-                        selected_admin = admin
-                        break
-                if (not selected_admin):
-                    #This shouldn't happen
-                    raise Exception("Could not find an administrator to approve this "
-                                    "request. admins_list: %s, intersected_admins: %s" % 
-                                    (admins_list, intersected_admins))
-                
-                rfs = RequestedUserFlowSpace(
-                            user=request.user, admin=selected_admin.user)
-                copy_fs(opted_fs,rfs)
+            #check if any of the pending flowspace requests for this user is a subset of
+            #this request. In this case, remove those old requests
+            this_user_req_fs = RequestedUserFlowSpace(user=request.user)
+            
+            # save the requested flowspace to database and commit it
+            requested_fses = []
+            for sfs in fses:
+                rfs = RequestedUserFlowSpace(user=request.user,
+                                          admin=selected_admin)
+                copy_fs(sfs,rfs)
                 rfs.save()
-          
+                requested_fses.append(rfs)
+            transaction.commit()
+
+                    
+            # Now run the script specified by the admin for auto-approval
+            script = AdminAutoApproveScript.objects.filter(admin=selected_admin)
+            approved_fs = None
+            if script.count() > 0:  #if Admin specified a script for auto-approval
+                #create the request_info for approve function:
+                request_info = {}
+                if request.POST["mac_addr"] != "*":
+                    request_info["req_mac_addr"] = request.POST["mac_addr"]
+                if request.POST["ip_addr"] != "*":
+                    request_info["req_ip_addr"] = request.POST["ip_addr"]
+                if  "REMOTE_ADDR" in request.META:
+                    request_info["remote_addr"] = request.META['REMOTE_ADDR']
+                request_info["user_last_name"] = request.user.last_name
+                request_info["user_first_name"] = request.user.first_name
+                request_info["user_email"] = request.user.email
+                # run the local or remote auto-approve function
+                if (not script[0].remote) and (script[0].script_name in AUTO_APPROVAL_MODULES.keys()): 
+                    #user uses system auto-approve functions
+                    script_name = AUTO_APPROVAL_MODULES[script[0].script_name]
+                    import_path = "openflow.optin_manager.auto_approval_scripts.%s"%(script_name)
+                    try:
+                        _temp = __import__(import_path,globals(), locals(),['approve'])
+                        approve = _temp.approve
+                        approved_fs = approve(request_info)
+                    except:
+                        import traceback
+                        traceback.print_exc()
+                        pass
+                elif script[0].remote:
+                    try:
+                        proxy = AutoApproveServerProxy.objects.get(admin=selected_admin)
+                        approved_fs = proxy.approve(request_info)
+                    except:
+                        import traceback
+                        traceback.print_exc()
+                        pass
+                    
+                # if auto-approve script has approved something:
+                # 1) convert the approved flowspace to a list of FlowSpace objects
+                # 2) check if the approved flowpsace is a subset of request
+                # 3) add the approved fs to UserFlowSpace and update user opts
+                if (approved_fs != None):
+                    #step 1:convert the approved flowspace to a list of RequestedUserFlowSpace objects
+                    to_be_saved = convert_dict_to_flowspace(approved_fs,RequestedUserFlowSpace)
+                    for fs in to_be_saved:
+                        fs.admin = selected_admin
+                        fs.user = request.user
+                        fs.save()
+                        
+                    # step 2: check if the approved flowpsace is a subset of request
+                    if (multifs_is_subset_of(to_be_saved,fses)):
+                        
+                        # step 3: add the approved fs to UserFlowSpace and update user opts
+                        [fv_args,match_list] = accept_user_fs_request(to_be_saved)
+                        try:
+                            fv = FVServerProxy.objects.all()[0]
+                            if len(fv_args) > 0:
+                                returned_ids = fv.proxy.api.changeFlowSpace(fv_args)
+                                for i in range(len(match_list)):
+                                    match_list[i].fv_id = returned_ids[i]
+                                    match_list[i].save()
+                            for rfs in requested_fses:
+                                rfs.delete()
+                            return simple.direct_to_template(request, 
+                                template = "openflow/optin_manager/admin_manager/reg_request_successful.html",
+                                extra_context = {'user':request.user,
+                                                 'approved':True}
+                            )  
+                        except Exception,e:
+                            import traceback
+                            traceback.print_exc()
+                            transaction.rollback()
+                    else:
+                        logger("the function at %s approved a non-subset of original requested flowpssace"%import_path)
+
+            # if request needs manual approval
             return simple.direct_to_template(request, 
-            template ="openflow/optin_manager/admin_manager/reg_request_successful.html",
-                                extra_context = {'user':request.user}
-                            ) 
-    else:
+            template = "openflow/optin_manager/admin_manager/reg_request_successful.html",
+                    extra_context = {'user':request.user,
+                                     'approved':False,
+                                     }
+            )           
+
+    else: #not a POST request
         form_input = {}
         if "REMOTE_ADDR" in request.META:
             form_input['ip_addr'] = request.META['REMOTE_ADDR']
@@ -349,11 +469,18 @@ def approve_user(request):
 import re
 @login_required
 def user_unreg_fs(request):
+    '''
+    The view function for unregistering  user flowspaces or pending flowspace requests
+    the request.POSt is a dictionary with keys being either pend_<RequestedUserFlowSpace.id>
+    or verif_<UserFlowSpace.id> and "checked" as the corresponding values.
+    '''
     profile = UserProfile.get_or_create_profile(request.user)
     if (profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     
+    error_msg = []
     if (request.method == "POST"):
+        fs_changed = False
         for key in request.POST:
             verified = re.match(r"verif_(?P<id>\d+)",key)
             pending = re.match(r"pend_(?P<id>\d+)",key)
@@ -368,20 +495,112 @@ def user_unreg_fs(request):
             except:
                 continue
             if (status == 1):
-                UserFlowSpace.objects.get(id=int(key_id)).delete()
+                fs_changed = True
+                try:
+                    UserFlowSpace.objects.get(id=int(key_id)).delete()
+                except:
+                    error_msg.append("Invalid id(%s) found in the request.POST for user flowspace."%key_id)
             elif (status == 2):
-                RequestedUserFlowSpace.objects.get(id=int(key_id)).delete()
+                try:
+                    RequestedUserFlowSpace.objects.get(id=int(key_id)).delete()
+                except:
+                    error_msg.append("Invalid id(%s) found in the request.POST for user pending flowspace."%key_id)
 
-        update_user_opts(request.user)
+        if fs_changed:
+            [fv_args, match_list] = update_user_opts(request.user)
+            try:
+                fv = FVServerProxy.objects.all()[0]
+                try:
+                    if len(fv_args) > 0:
+                        returned_ids = fv.proxy.api.changeFlowSpace(fv_args)
+                    for i in range(len(match_list)):
+                        match_list[i].fv_id = returned_ids[i]
+                        match_list[i].save()
+                except Exception,e:
+                    import traceback
+                    traceback.print_exc()
+                    transaction.rollback()
+                    error_msg.append("Couldn't update user opts after deleting the flowspace: %s"%str(e))
+            except Exception,e:
+                import traceback
+                traceback.print_exc()
+                transaction.rollback()
+                error_msg.append("Flowvisor not set: %s"%str(e))
+            
+        
             
     userfs = UserFlowSpace.objects.filter(user=request.user)
     reqfs = RequestedUserFlowSpace.objects.filter(user=request.user)
     return simple.direct_to_template(request, 
-    template = "openflow/optin_manager/admin_manager/user_unreg_fs.html",
-                        extra_context = {
-                                                 'reqfs': reqfs,
-                                                 'userfs': userfs,
-                                                 'user':request.user,
-                                                 },
-                        )        
-            
+            template = "openflow/optin_manager/admin_manager/user_unreg_fs.html",
+            extra_context = {
+                    'reqfs': reqfs,
+                    'userfs': userfs,
+                    'user':request.user,
+                    'error_msg':error_msg,
+               },
+        )   
+         
+@login_required    
+def set_auto_approve(request):
+    '''
+    The view function for setting  user flowspace request auto approval script.
+    request.POSt should have the following kye-value pairs:
+    Key script: the script name
+    if script name is Remote, it should have all the PasswordXMLRPCServerProxy keys. 
+    '''
+    profile = UserProfile.get_or_create_profile(request.user)
+    if (not profile.is_net_admin):
+        return HttpResponseRedirect("/dashboard")
+    
+    script_proxies = AutoApproveServerProxy.objects.filter(admin=request.user)
+    if len(script_proxies)>0:
+        script_proxy = script_proxies[0]
+    else:
+        script_proxy = AutoApproveServerProxy.objects.create(admin=request.user)
+    
+    script = AdminAutoApproveScript.objects.get_or_create(admin=request.user)[0]
+
+    # prepare a list of script options to be set
+    user_script_options = ["Manual"]
+    user_script_options = user_script_options + AUTO_APPROVAL_MODULES.keys()
+    user_script_options.append("Remote")
+    
+    error_msg = []
+    if (request.method == "POST"):
+        if request.POST["script"] not in user_script_options:
+            error_msg.append("Invalid script name %s"%request.POST["script"])
+        elif request.POST["script"] == "Remote":
+            form = ScriptProxyForm(request.POST,instance=script_proxy)
+            if form.is_valid():
+                script.remote = True
+                script.script_name = request.POST["script"]
+                logger.debug("Form is valid")
+                script_proxy = form.save()
+                script.save()
+                return HttpResponseRedirect(reverse("dashboard"))
+
+        else:
+            form = ScriptProxyForm(instance=script_proxy)
+            script.remote = False
+            script.script_name = request.POST["script"]
+            script.save()
+            return HttpResponseRedirect(reverse("dashboard"))
+        
+    else:
+        form = ScriptProxyForm(instance=script_proxy)
+    
+
+    return simple.direct_to_template(request, 
+            template = "openflow/optin_manager/admin_manager/set_auto_approve.html",
+            extra_context = {
+                    'user_script_options':user_script_options,
+                    'error_msg':error_msg,
+                    'form':form,
+                    'current_script':script.script_name,
+               },
+        )       
+    
+    
+    
+    

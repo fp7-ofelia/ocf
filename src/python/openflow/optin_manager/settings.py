@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
+    'expedient.common.middleware.sitelockdown.SiteLockDown',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -128,9 +129,18 @@ BASIC_AUTH_URLS = (
     r'^/dummyfv/.*',
 )
 
-
 # Session cookie names to avoid conflicts
 SESSION_COOKIE_NAME = "om_sessionid"
+
+
+# local modules for auto-approving users's flowspace request
+AUTO_APPROVAL_MODULES = {
+    # "module display name":"module file name",
+    # note: module name shouldn't be "Manual" or "Remote"
+    "Approve all requests":"approve_all",
+    #"Approve sender IP":"approve_sender_ip",             
+}
+
 
 # workaround to allow test:// schemes
 import urlparse
