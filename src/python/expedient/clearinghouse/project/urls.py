@@ -6,7 +6,6 @@ from django.conf.urls.defaults import patterns, url
 urlpatterns = patterns('expedient.clearinghouse.project.views',
     url(r'^list/$', 'list', name='project_list'),
     url(r'^create/$', 'create', name="project_create"),
-    url(r'^update/iframe/(?P<proj_id>\d+)/$', 'update_iframe', name="project_iframe_update"),
     url(r'^update/(?P<proj_id>\d+)/$', 'update', name="project_update"),
     url(r'^detail/(?P<proj_id>\d+)/$', 'detail', name='project_detail'),
     url(r'^delete/(?P<proj_id>\d+)/$', 'delete', name="project_delete"),
