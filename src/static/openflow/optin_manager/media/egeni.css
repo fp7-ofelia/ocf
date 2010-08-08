@@ -457,8 +457,8 @@ body {
 #page {
 	background-color: #FFFFFF;	
 	padding: 10px 0 0 0;
-	width: 900px;
-	height: 600px;
+	width: 1000px;
+	min-height: 600px;
 	margin: auto;
 	border: 1px solid #959596;
 	}
@@ -1171,5 +1171,8 @@ img.submenuimg {
 	height: 300px;
 }
 
+.expdiv {
+	cursor: pointer;
+}
 
 

@@ -427,54 +427,6 @@ class OMTests(TestCase):
         self.assertEqual(optfs.count(),0) 
         self.create_more_exps()  
         
-    def create_more_exps(self):
-        from django.contrib.auth.models import User
-        from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
-
-        # create a second experiemnt        
-        username = "user"
-        password = "password"
-        u = User.objects.create(username=username, is_active=True)
-        u.set_password(password)
-        u.save()
-        self.user_ip_src_s = random.randint(0,0x80000000) & 0xFFFF0000
-        self.user_ip_src_e = random.randint(0x80000000,0xFFFFFFFF) & 0xFFFF0000
-        #assign flowspace to user
-        adm = User.objects.get(username="admin")
-        ufs = UserFlowSpace(user=u, ip_src_s=self.user_ip_src_s,
-                             ip_src_e=self.user_ip_src_e,approver=adm)
-        ufs.save()
-        
-        Experiment.objects.all().delete()
-        ExperimentFLowSpace.objects.all().delete()
-        
-        exp = Experiment.objects.create(slice_id="first_id", project_name="first_project",
-                                  project_desc="project description", slice_name="first slice",
-                                  slice_desc="slice description", controller_url="http://controller.com",
-                                  owner_email="owner email", owner_password="owner password") 
-        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:01",
-                            ip_src_s=0x05866000, 
-                            ip_src_e=0xa0000000, 
-                             )  
-        
-        exp = Experiment.objects.create(slice_id="second_id", project_name="second_project",
-                                  project_desc="project description", slice_name="second slice",
-                                  slice_desc="slice description", controller_url="http://controller.com",
-                                  owner_email="owner email", owner_password="owner password") 
-        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:02",
-                            ip_src_s=0x00123456, 
-                            ip_src_e=0x90123456, 
-                             )  
-        
-        exp = Experiment.objects.create(slice_id="third_id", project_name="third_project",
-                                  project_desc="project description", slice_name="third slice",
-                                  slice_desc="slice description", controller_url="http://controller.com",
-                                  owner_email="owner email", owner_password="owner password") 
-        expfs = ExperimentFLowSpace.objects.create(exp=exp, dpid="00:00:00:00:00:00:03",
-                            ip_src_s=0x00333456, 
-                            ip_src_e=0x95123456, 
-                             ) 
-
 if __name__ == '__main__':
     import unittest
     unittest.main()

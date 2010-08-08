@@ -89,4 +89,5 @@ def convert_dict_to_flowspace(list_of_dics, objectType):
             setattr(new_fs,key,dic[key])
         returned_list.append(new_fs)
     return returned_list
+
     

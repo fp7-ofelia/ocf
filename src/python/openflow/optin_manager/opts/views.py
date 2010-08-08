@@ -14,7 +14,7 @@ from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_ex
 update_match_struct_priority_and_get_fv_args
 from django.db import transaction
 
-@login_required     
+    
 def change_priority(request):
     '''
     The view function to change priorities of previous opt-ins.
@@ -150,7 +150,7 @@ def change_priority(request):
                     )           
               
 
-@login_required
+
 def add_opt_in(request):
     '''
 `	The view function for opting in a user or admin flowspace into an experiment
@@ -322,7 +322,7 @@ def add_opt_in(request):
                     )      
         
     
-@login_required
+
 def opt_out(request):
     '''
     The view function for opt-out. 
@@ -432,7 +432,7 @@ def opt_out(request):
                 )
 
 
-@login_required
+
 def view_experiment(request, exp_id):
     theexp = Experiment.objects.filter(id=exp_id)
     allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
@@ -445,7 +445,7 @@ def view_experiment(request, exp_id):
                                     }, 
                     )
    
-@login_required
+
 def view_experiment_simple(request, exp_id):
     theexp = Experiment.objects.filter(id=exp_id)
     allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
@@ -457,7 +457,7 @@ def view_experiment_simple(request, exp_id):
                                     }, 
                     )
     
-@login_required
+
 def view_experiments(request):
     exps = Experiment.objects.all()
     return simple.direct_to_template(request, 

@@ -315,6 +315,35 @@ def copy_fs(from_fs, to_fs):
         setattr(to_fs, "%s_s"%field, getattr(from_fs,"%s_s"%field))  
         setattr(to_fs, "%s_e"%field, getattr(from_fs,"%s_e"%field))  
     
-
-
+def flowspaces_intersect_and_have_common_nonwildcard(fs1,fs2):
+    '''
+    This is a special purpose function to check if fs1 and f2 not only have intersection
+    but also have at least one common non-wildcarded fields among mac_address, ip_address 
+    or transport_port (source and destination)
+    The use of this function to figure out if two users own the same flowspace. Note that
+    if a user own flowspace ip_src = 192.168.1.2 and anothe user ip_dst=192.168.1.3, their
+    flowpsaces intersect, but this doesn't mean that their owned flowspaces conflict.
+    To have a conflict in flowpsace, they should intersect and at least have one common 
+    non-wildcarded field.
+    @param fs1: A superclass of FlowSpace object
+    @param fs2: A superclass of FlowSpace object
+    @return: True if fs1 and fs2 intersect and have a common non-wildcard field. False
+    otherwise.
+    '''
+    fields = [("mac_src",48),("mac_dst",48),("ip_src",32),("ip_dst",32),("tp_src",16),("tp_dst",16)]
+    intersect = single_fs_intersect(fs1,fs2,FlowSpace)
+    if not intersect:
+        return False
+    
+    for field in fields:
+        start1 = getattr(fs1,"%s_s"%field[0])
+        end1 = getattr(fs1,"%s_e"%field[0])
+        start2 = getattr(fs2,"%s_s"%field[0])
+        end2 = getattr(fs2,"%s_e"%field[0])
+        non_wc1 = (start1 > 0) or (end1 < 2**field[1] - 1)    
+        non_wc2 = (start2 > 0) or (end2 < 2**field[1] - 1) 
+        if (non_wc1 and non_wc2):
+            return True
+        
+    return False
 

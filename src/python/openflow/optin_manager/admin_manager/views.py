@@ -2,11 +2,13 @@
 from openflow.optin_manager.settings import AUTO_APPROVAL_MODULES
 from django.contrib.auth.decorators import login_required
 from django.views.generic import simple
+from django.db.models import Q
 from openflow.optin_manager.users.models import UserProfile, Priority
 from openflow.optin_manager.flowspace.models import FlowSpace
 from openflow.optin_manager.opts.forms import AdminOptInForm
 from openflow.optin_manager.flowspace.helper import copy_fs,\
-    singlefs_is_subset_of, make_flowspace,multi_fs_intersect,  multifs_is_subset_of
+    singlefs_is_subset_of, make_flowspace,multi_fs_intersect,  multifs_is_subset_of,\
+    flowspaces_intersect_and_have_common_nonwildcard
 from models import *
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -24,7 +26,7 @@ import logging
 
 logger = logging.getLogger("SetAutoApproveScriptViews")
 
-@login_required
+
 def promote_to_admin(request):
     profile = UserProfile.get_or_create_profile(request.user)
     if (profile.is_net_admin):
@@ -103,7 +105,7 @@ def promote_to_admin(request):
                                                  },
                         )
     
-@login_required
+
 def approve_admin(request,operation,req_id):
     profile = request.user.get_profile()
     if (not profile.is_net_admin):
@@ -159,7 +161,7 @@ def approve_admin(request,operation,req_id):
                                                  },
                         )   
     
-@login_required
+
 def resign_admin(request):
     profile = request.user.get_profile()
     if (not profile.is_net_admin):
@@ -206,7 +208,7 @@ def resign_admin(request):
                     )     
 
     
-@login_required
+
 def user_reg_fs(request):
     '''
     The view function to send a flowspace request for admin. 
@@ -426,12 +428,22 @@ def user_reg_fs(request):
         )
 
 
-@login_required
+
 def approve_user(request):
+    '''
+    The view function for manually approving a user flowspace request.
+    When preparing data for the templates, it also finds out all the flowspaces
+    (either pending or approved) that have a conflict with each of the flowspace 
+    requests, and generate a warning for the admin.
+    the key-value pairs in request is 
+    @key: req_<request database id>
+    @value: accept/reject/decline
+    '''
     profile = request.user.get_profile()
     if (not profile.is_net_admin):
         return HttpResponseRedirect("/dashboard")
     
+    error_msg = []
     if (request.method == "POST"):
         
         keys = request.POST.keys()
@@ -441,7 +453,7 @@ def approve_user(request):
                     req_id = int(key[4:len(key)])
                     op_req = RequestedUserFlowSpace.objects.get(id=req_id)
                 except Exception,e:
-                    continue
+                    error_msg.append("%s is not a vlid request id!"%key)
                 
                 decision = request.POST[key]
                 if (decision=="accept"):
@@ -449,28 +461,61 @@ def approve_user(request):
                     op_profile.max_priority_level = Priority.Strict_User
                     op_profile.save()
             
-            
-                    #copy requested into UserFlowSpace
-                    ufs = UserFlowSpace(user=op_req.user, approver=op_req.admin)
-                    copy_fs(op_req,ufs)
-                    ufs.save()
-                    op_req.delete()
-                    update_user_opts(op_profile.user)
+                    [fv_args, match_list] = accept_user_fs_request([op_req])
+                    try:
+                        fv = FVServerProxy.objects.all()[0]
+                        if len(fv_args) > 0:
+                            returned_ids = fv.proxy.api.changeFlowSpace(fv_args)
+                            for i in range(len(match_list)):
+                                match_list[i].fv_id = returned_ids[i]
+                                match_list[i].save()
+
+                    except Exception,e:
+                        import traceback
+                        traceback.print_exc()
+                        transaction.rollback()
+                    
             
                 elif (decision=="reject"):
                     op_req.delete()    
     
-    reqs = RequestedUserFlowSpace.objects.filter(admin=request.user)
+    reqs = RequestedUserFlowSpace.objects.filter(admin=request.user).order_by('-user')
+    flowspaces_intersect_and_have_common_nonwildcard
+    # find all the conflicts between reqs themselves and between them and already 
+    # approved flowspaces
+        
+    reqs_and_conflicts = []
+    for req in reqs:
+        new_conflicts = []
+        all_user_fs = UserFlowSpace.objects.filter(~Q(user=req.user))
+        all_user_fs_req = RequestedUserFlowSpace.objects.filter(~Q(user=req.user) & Q(admin=request.user))
+        for fs in all_user_fs:
+            if flowspaces_intersect_and_have_common_nonwildcard(req,fs):
+                new_conflicts.append("Conflict with %s %s (username: %s)'s flowspace approved by %s %s (username: %s): %s "%
+                        (fs.user.first_name,fs.user.last_name,fs.user.username,
+                         fs.approver.first_name, fs.approver.last_name, fs.approver.username,fs)
+                    )
+        for fs in all_user_fs_req:
+            if flowspaces_intersect_and_have_common_nonwildcard(req,fs):
+                new_conflicts.append("Conflict with %s %s (username: %s)'s pending flowspace request: %s "%
+                        (fs.user.first_name,fs.user.last_name,fs.user.username,fs)
+                    )
+                
+        if len(new_conflicts) > 0:
+            reqs_and_conflicts.append({"req":req,"conflicts":new_conflicts})
+        else:
+            reqs_and_conflicts.append({"req":req,"conflicts":0})
+        
     return simple.direct_to_template(request, 
-    template = "openflow/optin_manager/admin_manager/approve_user.html",
-                        extra_context = {
-                                                 'reqs': reqs,
-                                                 'user':request.user,
-                                                 },
-                        )  
+            template = "openflow/optin_manager/admin_manager/approve_user.html",
+            extra_context = {
+                        'reqs': reqs_and_conflicts,
+                        'user':request.user,
+                        'error_msg':error_msg,
+                    },
+        )  
 
 import re
-@login_required
 def user_unreg_fs(request):
     '''
     The view function for unregistering  user flowspaces or pending flowspace requests
@@ -544,7 +589,7 @@ def user_unreg_fs(request):
                },
         )   
          
-@login_required    
+   
 def set_auto_approve(request):
     '''
     The view function for setting  user flowspace request auto approval script.
