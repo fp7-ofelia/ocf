@@ -115,6 +115,20 @@ XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, '../ssl.crt')
 XMLRPC_TIMEOUT = 120
 MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
 
+
+# List of locations that do not need authentication to access.
+SITE_LOCKDOWN_EXCEPTIONS = (
+    r'^/accounts/register/.*$',
+    r'^/accounts/activate/.*$',
+    r'^/admin/.*',
+    r'^/accounts/password/reset/.*$',
+    r'^/img/.*',
+    r'^/css/.*',
+    r'^/static/media/.*',
+    r'.*/xmlrpc/?',
+    r'.*/gapi/?',
+)
+
 # default site
 SITE_ID = 1
 
@@ -138,7 +152,7 @@ AUTO_APPROVAL_MODULES = {
     # "module display name":"module file name",
     # note: module name shouldn't be "Manual" or "Remote"
     "Approve all requests":"approve_all",
-    #"Approve sender IP":"approve_sender_ip",             
+    "Approve sender IP":"approve_sender_ip",             
 }
 
 
