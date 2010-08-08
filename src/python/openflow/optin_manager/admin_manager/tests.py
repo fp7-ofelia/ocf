@@ -3,6 +3,7 @@ from expedient.common.tests.client import test_get_and_post_form
 from django.contrib.auth.models import User
 from openflow.optin_manager.users.models import UserProfile
 from django.core.urlresolvers import reverse
+from openflow.optin_manager.admin_manager.models import AdminAutoApproveScript
 
 SCHEME = "test"
 HOST = "testserver"
@@ -19,6 +20,19 @@ class Tests(SettingsTestCase):
         A single user and a single admin.
         User send a request. test that admin auto approve and manual approve works.
         '''
+        # first set admin to use manual approve:
+        logged = self.client.login(username="admin",password="password")
+        self.assertEqual(logged,True)
+        
+        response = test_get_and_post_form(
+            self.client,
+            reverse("set_auto_approve"),
+            {"script":"Manual"},
+        )
+        script = AdminAutoApproveScript.objects.filter(admin=self.test_admin)
+        self.assertEqual(script.count(),1)
+        self.assertEqual(script[0].script_name,"Manual")
+        self.client.logout()
         
     
     def test_multi_admin(self):
