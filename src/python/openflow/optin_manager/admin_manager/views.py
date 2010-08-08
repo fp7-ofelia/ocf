@@ -1,5 +1,5 @@
 # Create your views here.
-from openflow.optin_manager.settings import AUTO_APPROVAL_MODULES
+from openflow.optin_manager.settings import AUTO_APPROVAL_MODULES, SEND_EMAIL_WHEN_FLWOSPACE_APPROVED
 from django.contrib.auth.decorators import login_required
 from django.views.generic import simple
 from django.db.models import Q
@@ -20,12 +20,12 @@ from openflow.optin_manager.flowspace.utils import dotted_ip_to_int,\
 mac_to_int
 from django.forms.util import ErrorList
 from openflow.optin_manager.opts.helper import update_user_opts
-from helper import accept_user_fs_request, find_supervisor, convert_dict_to_flowspace
+from helper import accept_user_fs_request, find_supervisor, convert_dict_to_flowspace,\
+send_approve_or_reject_emial
 from django.db import transaction
 import logging
 
 logger = logging.getLogger("SetAutoApproveScriptViews")
-
 
 def promote_to_admin(request):
     profile = UserProfile.get_or_create_profile(request.user)
@@ -368,7 +368,7 @@ def user_reg_fs(request):
                 # 1) convert the approved flowspace to a list of FlowSpace objects
                 # 2) check if the approved flowpsace is a subset of request
                 # 3) add the approved fs to UserFlowSpace and update user opts
-                if (approved_fs != None):
+                if (approved_fs != None and len(approved_fs) > 0):
                     #step 1:convert the approved flowspace to a list of RequestedUserFlowSpace objects
                     to_be_saved = convert_dict_to_flowspace(approved_fs,RequestedUserFlowSpace)
                     for fs in to_be_saved:
@@ -390,6 +390,11 @@ def user_reg_fs(request):
                                     match_list[i].save()
                             for rfs in requested_fses:
                                 rfs.delete()
+                                
+                            # send an e-mail if it is set in setting.SEND_EMAIL_WHEN_FLWOSPACE_APPROVED
+                            if (SEND_EMAIL_WHEN_FLWOSPACE_APPROVED):
+                                send_approve_or_reject_emial(to_be_saved,True)
+                                
                             return simple.direct_to_template(request, 
                                 template = "openflow/optin_manager/admin_manager/reg_request_successful.html",
                                 extra_context = {'user':request.user,
@@ -400,7 +405,16 @@ def user_reg_fs(request):
                             traceback.print_exc()
                             transaction.rollback()
                     else:
-                        logger("the function at %s approved a non-subset of original requested flowpssace"%import_path)
+                        logger.debug("the function at %s approved a non-subset of original requested flowpssace"%import_path)
+
+            if (approved_fs != None and len(approved_fs) == 0):
+                return simple.direct_to_template(request,
+                    template = "openflow/optin_manager/admin_manager/user_reg_fs.html",
+                    extra_context = {
+                        'error_msg':"Your flowspace request is automatically rejected by admin. Please try again.",
+                        'form':form,
+                                 },
+                    )
 
             # if request needs manual approval
             return simple.direct_to_template(request, 
@@ -477,7 +491,9 @@ def approve_user(request):
                     
             
                 elif (decision=="reject"):
-                    op_req.delete()    
+                    send_approve_or_reject_emial([op_req],False)
+                    op_req.delete() 
+                       
     
     reqs = RequestedUserFlowSpace.objects.filter(admin=request.user).order_by('-user')
     flowspaces_intersect_and_have_common_nonwildcard

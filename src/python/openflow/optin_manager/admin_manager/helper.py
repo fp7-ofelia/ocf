@@ -3,7 +3,13 @@ from openflow.optin_manager.flowspace.helper import multifs_is_subset_of, single
 from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.opts.helper import update_user_opts
 from openflow.optin_manager.flowspace.helper import copy_fs
+from openflow.optin_manager.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,\
+    SITE_NAME, EMAIL_HOST, EMAIL_PORT
+import smtplib
+from email.MIMEText import MIMEText
+import logging
 
+logger = logging.getLogger("AdminManagerHelper")
 
 def accept_user_fs_request(fs_request):
     '''
@@ -90,4 +96,100 @@ def convert_dict_to_flowspace(list_of_dics, objectType):
         returned_list.append(new_fs)
     return returned_list
 
-    
+import re
+def validateEmail(email):
+    '''
+    Taken from: http://code.activestate.com/recipes/65215-e-mail-address-validation/
+    '''
+    if len(email) > 7:
+        if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
+            return 1
+    return 0
+
+
+def send_mail(to, subject, text):
+    '''
+    Taken from http://kutuma.blogspot.com/2007/08/sending-emails-via-gmail-with-python.html
+    '''
+    logger.debug("sending flowspace approval email to: %s"%to)
+    msg = MIMEText(text)
+
+    msg['From'] = EMAIL_HOST_USER
+    msg['To'] = to
+    msg['Subject'] = subject
+
+    [username,atsign,domain] = EMAIL_HOST_USER.partition("@")
+    if (len(atsign) == 0):
+        return False
+
+    mailServer = smtplib.SMTP(EMAIL_HOST,EMAIL_PORT)
+    mailServer.ehlo()
+    mailServer.starttls()
+    mailServer.ehlo()
+    mailServer.login(username, EMAIL_HOST_PASSWORD)
+    mailServer.sendmail(EMAIL_HOST_USER, to, msg.as_string())
+    # Should be mailServer.quit(), but that crashes...
+    mailServer.close()
+    return True
+
+
+def send_approve_or_reject_emial(approved_fs,approve):
+    if (len(approved_fs)==0):
+        return False
+    if validateEmail(approved_fs[0].user.email):
+        if (approve):
+            text = ""
+            if approved_fs[0].user.first_name != "" or approved_fs[0].user.last_name != "":
+                text = text + "Hi %s %s,\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
+            else:
+                text = text + "Hi there,\n\n"
+                
+            text = text + "Your flowspace requests listed below has been approved.\n"
+            text = text + "You can control these flowspaces and opt them into or out of available experiments:\n\n"
+            text = text + "Flowspaces: \n"
+            for fs in approved_fs:
+                if hasattr(fs,"approver"):
+                    appr = fs.approver
+                elif hasattr(fs,"admin"):
+                    appr = fs.admin
+                else:
+                    return False
+                
+                if appr.first_name != "" or appr.last_name != "":
+                    approver = "%s %s"%(appr.first_name,appr.last_name)
+                else:
+                    approver = "%s"%appr.username
+        
+                text = text + "%s\t apprved by %s\n"%(fs,approver)
+                
+            text = text + "\nRegards,\n%s"%SITE_NAME
+            return send_mail(approved_fs[0].user.email,"Flowspace Request Approved",text)
+        else:
+            text = ""
+            if approved_fs[0].user.first_name != "" or approved_fs[0].user.last_name != "":
+                text = text + "Hi %s %s,\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
+            else:
+                text = text + "Hi there,\n\n"
+                
+            text = text + "Your flowspace requests listed below has been rejected by the admin.\n\n"
+            text = text + "Flowspaces: \n"
+            for fs in approved_fs:
+                if hasattr(fs,"approver"):
+                    appr = fs.approver
+                elif hasattr(fs,"admin"):
+                    appr = fs.admin
+                else:
+                    return False
+                
+                if appr.first_name != "" or appr.last_name != "":
+                    approver = "%s %s"%(appr.first_name,appr.last_name)
+                else:
+                    approver = "%s"%appr.username
+        
+                text = text + "%s\t rejected by %s\n"%(fs,approver)
+                
+            text = text + "\nRegards,\n%s"%SITE_NAME
+            return send_mail(approved_fs[0].user.email,"Flowspace Request Rejected",text)
+ 
+    else:
+        return False

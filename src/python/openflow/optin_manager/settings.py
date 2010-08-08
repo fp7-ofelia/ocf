@@ -151,10 +151,12 @@ SESSION_COOKIE_NAME = "om_sessionid"
 AUTO_APPROVAL_MODULES = {
     # "module display name":"module file name",
     # note: module name shouldn't be "Manual" or "Remote"
-    "Approve all requests":"approve_all",
-    "Approve sender IP":"approve_sender_ip",             
+    "Approve All requests":"approve_all",
+    "Reject All":"reject_all",
+    "Approve Sender IP":"approve_sender_ip",             
 }
 
+SEND_EMAIL_WHEN_FLWOSPACE_APPROVED = True
 
 # workaround to allow test:// schemes
 import urlparse
