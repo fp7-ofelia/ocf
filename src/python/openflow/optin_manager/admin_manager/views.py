@@ -610,7 +610,7 @@ def set_auto_approve(request):
     '''
     The view function for setting  user flowspace request auto approval script.
     request.POSt should have the following kye-value pairs:
-    Key script: the script name
+    @key script: @value: the script name
     if script name is Remote, it should have all the PasswordXMLRPCServerProxy keys. 
     '''
     profile = UserProfile.get_or_create_profile(request.user)
