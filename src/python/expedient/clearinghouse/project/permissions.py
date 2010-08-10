@@ -6,6 +6,7 @@ Created on Aug 3, 2010
 from expedient.common.permissions.shortcuts import create_permission
 from expedient.clearinghouse.permissionmgmt.utils import \
     request_permission_wrapper
+from expedient.clearinghouse.roles.views import make_request
 
 create_permission(
     "can_create_project",
@@ -18,14 +19,14 @@ create_permission(
     "can_edit_project",
     description=\
         "Owners of this permission can edit basic project properties.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
     "can_delete_project",
     description=\
         "Owners of this permission can edit basic project properties.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
@@ -33,7 +34,7 @@ create_permission(
     description=\
         "Owners of this permission can view the project. Without "
         "other permissions, they are non-functional members.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
@@ -41,7 +42,7 @@ create_permission(
     description=\
         "Owners of this permission can add members to "
         "the project and assign to them roles.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
@@ -49,14 +50,14 @@ create_permission(
     description=\
         "Owners of this permission can remove members from "
         "the project.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
     "can_create_slices",
     description=\
         "Owners of this permission can create new slices.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
@@ -64,7 +65,7 @@ create_permission(
     description=\
         "Owners of this permission can add aggregates "
         "to the project.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
 
 create_permission(
@@ -72,5 +73,5 @@ create_permission(
     description=\
         "Owners of this permission can remove aggregates "
         "from the project.",
-    view=request_permission_wrapper,
+    view=make_request,
 )
