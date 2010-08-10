@@ -10,8 +10,10 @@ from expedient.common.middleware import threadlocals
 from expedient.clearinghouse.roles.models import ProjectRole
 from expedient.common.permissions.shortcuts import create_permission,\
     has_permission
-from expedient.common.permissions.models import ObjectPermission
+from expedient.common.permissions.models import ObjectPermission,\
+    PermissionOwnership
 from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
+from expedient.clearinghouse.roles.utils import get_users_for_role
 
 class TestModels(TestCase):
     def setUp(self):
@@ -22,6 +24,8 @@ class TestModels(TestCase):
             "user1", "u@u.com", "password")
         self.u2 = User.objects.create_user(
             "user2", "u@u.com", "password")
+        self.u3 = User.objects.create_user(
+            "user3", "u@u.com", "password")
         
         
         self.client.login(username="superuser", password="password")
@@ -162,7 +166,8 @@ class TestModels(TestCase):
     def test_filter_for_can_delegate(self):
         self.role3.give_to_permittee(self.u1, can_delegate=True)
         # check that the roles u1 can give are there
-        givable_roles = ProjectRole.objects.filter_for_can_delegate(self.u1)
+        givable_roles = ProjectRole.objects.filter_for_can_delegate(
+            self.u1, self.project)
         self.assertTrue(
             self.role1 in givable_roles,
             "Expected role %s in givable roles, instead got %s" % 
@@ -171,7 +176,31 @@ class TestModels(TestCase):
             self.role3 in givable_roles,
             "Expected role %s in givable roles, instead got %s" % 
                 (self.role3, givable_roles))
+        self.assertEqual(givable_roles.count(), 2)
+        
+        # now add a permission to role1 without delegating
+        self.role1.add_permission(self.obj_perm2)
+        
+        # The user shouldn't be able to delegate role1
+        givable_roles = ProjectRole.objects.filter_for_can_delegate(
+            self.u1, self.project)
+        self.assertEqual(givable_roles.count(), 1)
+        self.assertTrue(
+            self.role3 in givable_roles,
+            "Expected role %s in givable roles, instead got %s" % 
+                (self.role3, givable_roles))
     
+        # now add a permission to role3 without delegating
+        self.role3.add_permission(self.obj_perm2)
+        self.assertFalse(
+            PermissionOwnership.objects.get_ownership(
+                "perm2", self.project, self.u1).can_delegate)
+        
+        # The user shouldn't be able to delegate role3
+        givable_roles = ProjectRole.objects.filter_for_can_delegate(
+            self.u1, self.project)
+        self.assertEqual(givable_roles.count(), 0)
+
     def test_remove_permission(self):
         """
         Check that a permission can be removed from a role with and
@@ -197,3 +226,45 @@ class TestModels(TestCase):
         self.role1.remove_permission(self.obj_perm2)
         self.assertTrue(has_permission(self.u1, self.project, "perm2"))
         self.assertTrue(has_permission(self.u2, self.project, "perm2"))
+
+    def test_filter_for_permission(self):
+        """
+        Check that the filter_for_permission method of the
+        L{ProjectRoleManager} works.
+        """
+        roles = ProjectRole.objects.filter_for_permission(
+            "perm1", self.project)
+        self.assertEqual(roles.count(), 2)
+        self.assertTrue(self.role1 in roles)
+        self.assertTrue(self.role3 in roles)
+        
+    def test_get_users_for_role(self):
+        self.role3.give_to_permittee(self.u1, can_delegate=True)
+        self.role3.give_to_permittee(self.u2, can_delegate=False)
+        self.role1.give_to_permittee(self.u3, can_delegate=True)
+        
+        users = get_users_for_role(self.role3, can_delegate=False)
+        self.assertEqual(users.count(), 2)
+        self.assertTrue(self.u1 in users)
+        self.assertTrue(self.u2 in users)
+
+        users = get_users_for_role("role3", can_delegate=False)
+        self.assertEqual(users.count(), 2)
+        self.assertTrue(self.u1 in users)
+        self.assertTrue(self.u2 in users)
+        
+        users = get_users_for_role(self.role3, can_delegate=True)
+        self.assertEqual(users.count(), 1)
+        self.assertTrue(self.u1 in users)
+
+        users = get_users_for_role(self.role1, can_delegate=False)
+        self.assertEqual(users.count(), 3)
+        self.assertTrue(self.u1 in users)
+        self.assertTrue(self.u2 in users)
+        self.assertTrue(self.u3 in users)
+
+        users = get_users_for_role(self.role1, can_delegate=True)
+        self.assertEqual(users.count(), 2)
+        self.assertTrue(self.u1 in users)
+        self.assertTrue(self.u3 in users)
+        
