@@ -10,6 +10,7 @@ from expedient.clearinghouse.roles.models import ProjectRole
 from expedient.common.permissions.models import Permittee
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
+from expedient.common.permissions.shortcuts import has_permission
 
 class ProjectCreateForm(forms.ModelForm):
     """
@@ -39,9 +40,11 @@ class AddMemberForm(forms.Form):
     """
     
     user = forms.ModelChoiceField(
-        User.objects.all(), help_text="Select the new user to add to the project.")
+        User.objects.get_empty_query_set(),
+        help_text="Select the new user to add to the project.")
     roles = RoleModelChoiceField(
-        ProjectRole.objects.all(), widget=forms.CheckboxSelectMultiple,
+        ProjectRole.objects.get_empty_query_set(),
+        widget=forms.CheckboxSelectMultiple,
         help_text="Select the roles that the user should have in this project."
     )
     delegate = forms.BooleanField(required=False,
@@ -62,7 +65,7 @@ class AddMemberForm(forms.Form):
         
         self.fields["roles"].queryset = \
             ProjectRole.objects.filter_for_can_delegate(
-                giver).filter(project=project)
+                giver, project=project)
         
         self.project = project
         self.giver = giver
@@ -112,7 +115,7 @@ class MemberForm(forms.Form):
         
         self.fields["roles"].queryset = \
             ProjectRole.objects.filter_for_can_delegate(
-                giver).filter(project=project)
+                giver, project=project)
     
         permittee = Permittee.objects.get_as_permittee(user)
     
@@ -123,6 +126,23 @@ class MemberForm(forms.Form):
         
         self.user = user
         self.giver = giver
+        self.project = project
+        
+    def clean_roles(self):
+        """
+        Make sure that no roles have been taken out unless the
+        user has the "can_remove_member" permission.
+        """
+        roles = self.cleaned_data["roles"]
+        for role in self.initial_roles:
+            if role not in roles and\
+            not has_permission(self.giver, self.project, "can_remove_member"):
+                raise forms.ValidationError(
+                    "You tried to remove role '%s' from the user, "
+                    "but you do not have permission to remove members "
+                    "so you cannot remove roles from members either." % role.name)
+            
+        return roles
         
     def save(self):
         for r in self.cleaned_data["roles"]:
