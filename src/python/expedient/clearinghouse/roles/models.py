@@ -4,10 +4,13 @@ Created on Aug 3, 2010
 @author: jnaous
 '''
 from django.db import models
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import F, Count
 from expedient.clearinghouse.project.models import Project
 from expedient.common.permissions.models import ObjectPermission, Permittee,\
     PermissionOwnership
-from django.contrib.auth.models import User
+from expedient.common.messaging.models import DatedMessage
 
 class ProjectRoleManager(models.Manager):
     """Manager for L{ProjectRole} instances."""
@@ -29,18 +32,45 @@ class ProjectRoleManager(models.Manager):
                 "pk", flat=True))
         return User.objects.filter(pk__in=user_ids)
     
-    def filter_for_can_delegate(self, permittee):
-        """filter for all roles the permittee can fully delegate
+    def filter_for_can_delegate(self, permittee, project):
+        """filter for all roles the permittee can fully delegate in a project
         
         @param permittee: object to check for delegatable roles.
         @type permittee: L{Permittee} or C{django.db.models.Model}
+        @param project: the project to filter roles for
+        @type project: L{Project}
         @return: all project roles the permittee can delegate.
         @rtype: C{QuerySet} of C{ProjectRole}s.
         """
         permittee = Permittee.objects.get_as_permittee(permittee)
+        
+        # get all the permissions the permittee cannot delegate
+        obj_perms_ids = list(ObjectPermission.objects.exclude(
+            permissionownership__can_delegate=True,
+            permissionownership__permittee=permittee,
+        ).filter(projectrole__project=project).values_list("pk", flat=True))
+        
+        # take out any roles that have a permission the
+        # permittee cannot delegate
+        return self.exclude(obj_permissions__pk__in=obj_perms_ids)
+        
+    def filter_for_permission(self, perm_name, target):
+        """Filter roles that have the permission C{perm_name} for C{target}.
+        
+        @param perm_name: The name of the permission to filter the roles for.
+        @type perm_name: C{str}.
+        @param target: The object that is the target of the permission.
+        @type target: instance of C{Model}. Note this cannot be a C{class}.
+        @return: Only project roles that have the permission for the target.
+        @rtype: C{QuerySet} for C{ProjectRole}.
+        
+        """
+        
         return self.filter(
-            obj_permissions__permissionownership__can_delegate=True,
-            obj_permissions__permissionownership__permittee=permittee,
+            obj_permissions__permission__name=perm_name,
+            obj_permissions__object_type=\
+                ContentType.objects.get_for_model(target.__class__),
+            obj_permissions__object_id=target.pk,
         ).distinct()
 
 class ProjectRole(models.Model):
@@ -99,6 +129,11 @@ class ProjectRole(models.Model):
             obj_perm.give_to(
                 permittee, giver=giver, can_delegate=can_delegate)
 
+    def delete(self):
+        for permittee in self.permittees.all():
+            self.remove_from_permittee(permittee)
+        return super(ProjectRole, self).delete()
+
     def remove_from_permittee(self, permittee):
         """Remove all the permissions in this role from the permittee except
         for ones given by another role."""
@@ -154,3 +189,39 @@ class ProjectRole(models.Model):
             obj_permission=obj_permission,
         ).delete()
         
+class ProjectRoleRequest(models.Model):
+    """A request for a project role"""
+    
+    requester = models.ForeignKey(
+        User, help_text="User requesting the role.",
+        related_name="role_requests_made")
+    requested_role = models.ForeignKey(
+        ProjectRole, help_text="Choose a role to request.")
+    giver = models.ForeignKey(
+        User, help_text="Choose a user to make a request to.",
+        related_name="role_requests_received")
+    message = models.TextField(
+        blank=True, default="",
+        help_text="Add a personalized message to the request.")
+    
+    def approve(self, delegate):
+        self.requested_role.give_to_permittee(
+            self.requester, giver=self.giver, can_delegate=delegate)
+        DatedMessage.objects.post_message_to_users(
+            "'%s' '%s' role '%s' to '%s'" % (
+                self.giver.username,
+                "delegated" if delegate else "gave",
+                self.requested_role.name, self.requester.username),
+            msg_type=DatedMessage.TYPE_SUCCESS,
+            username__in=[self.requester.username, self.giver.username])
+        self.delete()
+        
+    def deny(self):
+        DatedMessage.objects.post_message_to_users(
+            "%s denied giving role %s to %s" % (
+                self.giver.username,
+                self.requested_role.name, self.requester.username),
+            msg_type=DatedMessage.TYPE_WARNING,
+            username__in=[self.requester.username, self.giver.username])
+        self.delete()
+
