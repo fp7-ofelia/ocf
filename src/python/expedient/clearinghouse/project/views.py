@@ -16,7 +16,8 @@ from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
-from expedient.clearinghouse.roles.models import ProjectRole
+from expedient.clearinghouse.roles.models import ProjectRole,\
+    ProjectRoleRequest
 from expedient.common.permissions.models import ObjectPermission,\
     PermissionOwnership, Permittee
 from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
@@ -49,12 +50,6 @@ def list(request):
         template_object_name="project",
     )
 
-@require_objs_permissions_for_view(
-    perm_names=["can_delete_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-    methods=["GET", "POST"],
-)
 # TODO: Enable when slice permissions are ready.
 #@require_objs_permissions_for_view(
 #    perm_names=["can_delete_slice"],
@@ -62,6 +57,12 @@ def list(request):
 #    target_func=get_queryset(Slice, "proj_id", filter="project__id"),
 #    methods=["GET", "POST"],
 #)
+@require_objs_permissions_for_view(
+    perm_names=["can_delete_project"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+    methods=["GET", "POST"],
+)
 def delete(request, proj_id):
     '''Delete the project'''
     project = get_object_or_404(Project, id=proj_id)
@@ -89,6 +90,8 @@ def delete(request, proj_id):
 def detail(request, proj_id):
     '''Show information about the project'''
     project = get_object_or_404(Project, id=proj_id)
+    role_reqs = ProjectRoleRequest.objects.filter(
+        giver=request.user, requested_role__project=project)
     return list_detail.object_detail(
         request,
         Project.objects.all(),
@@ -96,6 +99,7 @@ def detail(request, proj_id):
         template_name=TEMPLATE_PATH+"/detail.html",
         template_object_name="project",
         extra_context={
+            "role_requests": role_reqs,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % project.name, reverse("project_detail", args=[project.id])),
@@ -160,6 +164,7 @@ def create(request):
         template=TEMPLATE_PATH+"/create_update.html",
         post_save=post_save,
         redirect=redirect,
+        template_object_name="project",
         extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
