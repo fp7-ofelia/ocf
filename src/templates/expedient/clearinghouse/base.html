@@ -54,10 +54,18 @@
 					<img src="{% url img_media 'genilogo.png' %}" />
 				</td>
 				<td>
-					<div align="right" style="position: relative; top: 19px;">
+					{% if request.user %}
+					<div class="small" align="right" style="position: relative; top: 12px;">
+						{% if request.user.username %}
+						logged in as <strong>{{ request.user.username }}</strong>
+						{% else %}
+						not logged in
+						{% endif %}
+					</div>
+					{% endif %}
+					<div align="right" style="position: relative; top: 19px; right: -4px;">
  						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
-{% comment %}							href="{% url slice_home %}"><img src="{% url img_media 'slice.png' %}" alt="Slice Control Panel" border="0" /></a><a 
-{% endcomment %}							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
+							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
 							href="/help/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
 							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
 					</div>

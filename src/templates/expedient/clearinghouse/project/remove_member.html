@@ -6,7 +6,7 @@
 {% block content %}
 <div class="main">
 	<div class="title">
-		<h1>Are you sure you want to remove member {{ member.username }} from Project {{ project.name }}</h1>
+		<h1>Are you sure you want to remove member '{{ member.username }}' from project '{{ project.name }}'?</h1>
 	</div>
 	<div class="member_form">
 		<form action="." method="post">{% csrf_token %}

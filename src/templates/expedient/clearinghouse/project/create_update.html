@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ch_extras %}
+{% load breadcrumbs %}
 
 {% block title %}Project {{ project.name }}{% endblock title %}
 
@@ -13,8 +14,10 @@
 		<table class="formtable_noborder">
 			{{ form.as_table }}
 		</table>
-		<input type="submit" value="Save" />
-		<a href='{% url project_detail project.id %}'>Cancel</a>
+		<div class="center">
+			<input type="submit" value="Save" />
+			<a href='{% before_last_link breadcrumbs %}'>Cancel</a>
+		</div>
 	</form>
 </div>
 {% endblock content %}
