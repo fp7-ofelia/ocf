@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     (r'^planetlab/', include('geni.planetlab.urls')),
     (r'^messages/', include('expedient.common.messaging.urls')),
     (r'^permissions/', include('expedient.common.permissions.urls')),
+    (r'^roles/', include('expedient.clearinghouse.roles.urls')),
     (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
     (r'^admin/', include(admin.site.urls)),
 
