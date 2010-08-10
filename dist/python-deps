@@ -1,0 +1,22 @@
+django
+django_extensions
+django_evolution
+django-autoslug
+django-registration
+decorator
+# M2Crypto needs to be manually installed on windows.
+# see http://chandlerproject.org/Projects/MeTooCrypto#Downloads
+# or latest: http://www.lfd.uci.edu/~gohlke/pythonlibs/#m2crypto
+m2crypto
+PIL
+python-dateutil
+# Python-crypto needs to be manually installed on windows.
+# see http://www.voidspace.org.uk/python/modules.shtml#pycrypto
+pycrypto
+paramiko
+django-renderform
+webob
+pyOpenSSL
+# PyQuery requires manual installation of lxml on windows.
+# see http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+pyquery
