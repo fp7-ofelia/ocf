@@ -48,8 +48,10 @@ class PermissionMiddleware(object):
                 },
             )
             
-            # add a "next" field for redirection after permission is obtained.
-            url += "?next=%s" % request.path
+            # add a "from" key to the session for redirection after
+            # permission is obtained for example.
+            request.session["from_url"] = request.path
+            request.session["from_method"] = request.method
             
             return HttpResponseRedirect(url)
         

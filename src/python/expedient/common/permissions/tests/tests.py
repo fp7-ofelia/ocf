@@ -375,8 +375,10 @@ class TestRequests(test_mgr.SettingsTestCase):
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
-        ) + "?next=/tests/test_view_crud/"
+        )
         self.assertRedirects(response, add_perm_url)
+        self.assertEqual(self.client.session['from_url'],
+                         reverse("test_view_crud"))
         
         f = PermissionTestClass.objects.all().count()
         self.assertEqual(f, 2,
@@ -398,7 +400,8 @@ class TestRequests(test_mgr.SettingsTestCase):
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
-        ) + "?next=/tests/test_view_crud/"
+        )
+        self.client.session['from_url'] = reverse("test_view_crud")
         response = self.client.post(add_perm_url)
         self.assertRedirects(response, reverse("test_view_crud"))
         
@@ -428,13 +431,14 @@ class TestRequests(test_mgr.SettingsTestCase):
                 target_ct_id=ContentType.objects.get_for_model(PermissionTestClass).id,
                 target_id=self.objs[0].id,
             )
-        ) + "?next=%s" % view_url
+        )
         
         # try to update: Disallowed
         response = self.client.post(
             view_url,
             {"val": 5})
         self.assertRedirects(response, other_perm_url)
+        self.assertEqual(self.client.session['from_url'], view_url)
         
         # get permission
         response = self.client.post(other_perm_url)
@@ -467,8 +471,10 @@ class TestRequests(test_mgr.SettingsTestCase):
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
-        ) + "?next=%s" % reverse("test_protected_url")
+        )
         self.assertRedirects(response, perm_url)
+        self.assertEqual(
+            self.client.session['from_url'], reverse("test_protected_url"))
         
     def test_request_permission(self):
         """
@@ -487,8 +493,10 @@ class TestRequests(test_mgr.SettingsTestCase):
                 target_ct_id=ContentType.objects.get_for_model(ContentType).id,
                 target_id=ContentType.objects.get_for_model(PermissionTestClass).id,
             )
-        ) + "?next=%s" % reverse("test_request_perm")
+        )
         self.assertRedirects(response, perm_url)
+        self.assertEqual(
+            self.client.session['from_url'], reverse("test_request_perm"))
         
         # post a request for the permission
         self.assertEqual(PermissionRequest.objects.count(), 0)

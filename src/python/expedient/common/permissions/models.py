@@ -13,12 +13,25 @@ from expedient.common.permissions.managers import ExpedientPermissionManager,\
 
 class ExpedientPermission(models.Model):
     """
-    This class holds all instances of L{ObjectPermission} that have a particular
-    name. L{ObjectPermission} links permittees to a particular object.
+    This class holds all instances of L{ObjectPermission} that have a
+    particular name. L{ObjectPermission} links permittees to a particular
+    object.
     
     A permission may optionally have a view where the browser should be
     redirected if the permission is missing (for example to request the
     permission). The view is specified by its full path in C{view}.
+    
+    The signature for the view function should be the following::
+    
+        missing_perm_view(
+                request, permission, permittee, target_obj_or_class,
+                redirect_to=None)
+    
+    - C{permission} is the missing L{ExpedientPermission}.
+    - C{permittee} is the object that needs to exercise the permission.
+    - C{target_obj_or_class} is the object or class whose permission is
+        missing.
+    - C{redirect_to} is the URL from which the request was made.
     
     One limitation of the system right now is that we can only link to objects
     that use a C{PositiveIntegerField} as the object ID.

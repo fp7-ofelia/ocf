@@ -45,7 +45,7 @@ def redirect_permissions_request(request, perm_name=None,
     view = get_callable(permission.view)
     
     # no urls allowed in redirection.
-    redirect_to = request.GET.get("next", '')
+    redirect_to = request.session.get("from_url", '')
     if not redirect_to or ' ' in redirect_to or "//" in redirect_to:
         redirect_to = None
     
@@ -76,7 +76,8 @@ def request_permission(always_redirect_to=None,
     
     @keyword always_redirect_to: path to redirect to after the permission
         request is saved. If None, then use the redirect_to parameter given to
-        the view from the permission redirection. Default None.
+        the view from the permission redirection. Default None. This can also
+        be a callable that takes the request as argument.
     @keyword permission_owners_func: A callable with the following signature::
         
             permission_owners_func(request, obj_permission, permittee)
@@ -124,7 +125,10 @@ def request_permission(always_redirect_to=None,
                     "Sent request for permission %s to user %s" %
                     (permission.name, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-                redirect_to = always_redirect_to or redirect_to
+                if callable(always_redirect_to):
+                    redirect_to = always_redirect_to(request)
+                else:
+                    redirect_to = always_redirect_to or redirect_to
                 return simple.redirect_to(request, redirect_to,
                                           permanent=False)
         else:

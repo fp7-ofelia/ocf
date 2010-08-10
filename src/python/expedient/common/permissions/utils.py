@@ -8,6 +8,7 @@ from django.http import Http404
 from expedient.common.permissions.shortcuts import must_have_permission,\
     give_permission_to
 from expedient.common.middleware import threadlocals
+from expedient.common.permissions.models import ObjectPermission
 
 def get_user_from_req(request, *args, **kwargs):
     '''
@@ -211,5 +212,7 @@ def permissions_delete_override(permittee_kw, model_func, delete_perm):
         Override the default delete method to enforce permissions.
         """
         must_have_permission(permittee_kw, self, delete_perm)
+        # delete all permissions for the object
+        ObjectPermission.objects.filter_from_instance(self).delete()
         super(model_func(), self).delete(*args, **kwargs)
     return delete
