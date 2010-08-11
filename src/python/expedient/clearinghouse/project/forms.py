@@ -8,9 +8,8 @@ from expedient.clearinghouse.project.models import Project
 from django.contrib.auth.models import User
 from expedient.clearinghouse.roles.models import ProjectRole
 from expedient.common.permissions.models import Permittee
-from django.utils.safestring import mark_safe
-from django.utils.html import conditional_escape
 from expedient.common.permissions.shortcuts import has_permission
+from expedient.clearinghouse.roles.forms import RoleModelMultipleChoiceField
 
 class ProjectCreateForm(forms.ModelForm):
     """
@@ -18,15 +17,6 @@ class ProjectCreateForm(forms.ModelForm):
     """
     class Meta:
         model = Project
-
-class RoleModelChoiceField(forms.ModelMultipleChoiceField):
-    def label_from_instance(self, obj):
-        return mark_safe("<span class='val role_desc'>%s</span>" \
-            "<span class='description role_desc'>%s</span>" % (
-                conditional_escape(obj.name),
-                conditional_escape(obj.description)
-            )
-        )
 
 class AddMemberForm(forms.Form):
     """Form to add a member to a project
@@ -42,7 +32,7 @@ class AddMemberForm(forms.Form):
     user = forms.ModelChoiceField(
         User.objects.get_empty_query_set(),
         help_text="Select the new user to add to the project.")
-    roles = RoleModelChoiceField(
+    roles = RoleModelMultipleChoiceField(
         ProjectRole.objects.get_empty_query_set(),
         widget=forms.CheckboxSelectMultiple,
         help_text="Select the roles that the user should have in this project."
@@ -86,7 +76,7 @@ class MemberForm(forms.Form):
     @ivar roles: C{django.forms.ModelMultipleChoiceField} to select roles
     """
     
-    roles = RoleModelChoiceField(
+    roles = RoleModelMultipleChoiceField(
         ProjectRole.objects.all(), widget=forms.CheckboxSelectMultiple,
         help_text="Select the roles that the user should have in this project."
     )
