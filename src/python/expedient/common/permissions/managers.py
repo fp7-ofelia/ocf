@@ -290,14 +290,14 @@ class ObjectPermissionManager(GenericObjectManager):
         def get(perm_name):
             return set(self.get_objects_queryset(
                 klass, dict(
-                    permission__name=perm_names[0], permittees=permittee),
-                {}))
+                    permission__name=perm_name, permittees=permittee),
+                {}).values_list("pk", flat=True))
         
-        objs = get(perm_names[0])
+        obj_ids = get(perm_names[0])
         for name in perm_names[1:]:
-            objs.intersection_update(get(name))
+            obj_ids.intersection_update(get(name))
             
-        return klass.objects.filter(pk__in=objs)
+        return klass.objects.filter(pk__in=obj_ids)
 
 
 class PermitteeManager(GenericObjectManager):
@@ -355,8 +355,12 @@ class PermitteeManager(GenericObjectManager):
         """
         from expedient.common.permissions.models import ObjectPermission
 
-        obj_permission = ObjectPermission.objects.get_for_object_or_class(
-            permission, target_obj_or_class)
+        try:
+            obj_permission = ObjectPermission.objects.get_for_object_or_class(
+                permission, target_obj_or_class)
+        except ObjectPermission.DoesNotExist:
+            return self.filter(pk=-1)
+        
         return self.filter_for_obj_permission(
             obj_permission, can_delegate=can_delegate)
     
