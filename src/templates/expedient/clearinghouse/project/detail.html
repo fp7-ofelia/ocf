@@ -8,9 +8,6 @@
 	.table_div td,th {
     	text-align: center;
 	}
-	tr.body>td.description {
-		text-align: left;
-	}
 </style>
 <script>
 	$(document).ready(function() {
@@ -62,8 +59,10 @@
 					<td class="username">{{ member.object.username }}</td>
 					<td class="roles">
 						{% for role in member.projectrole_set.all %}
+						{% if role.project == project %}
 						<div class="role_desc val">{{ role.name }}</div>
 						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
+						{% endif %}
 						{% endfor %}
 					</td>
 					<td class="actions">
