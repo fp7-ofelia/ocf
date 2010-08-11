@@ -119,7 +119,7 @@ def get_can_use_permission(request, permission, permittee,
     aggregate = target_obj_or_class
     
     try:
-        next = request.session["breadcrumbs"][-1][0]
+        next = request.session["breadcrumbs"][-1][1]
     except IndexError:
         next = redirect_to or reverse("home")
     
