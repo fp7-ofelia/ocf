@@ -94,10 +94,19 @@ class ProjectRole(models.Model):
     
     objects = ProjectRoleManager()
     
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, default="")
+    name = models.CharField(
+        max_length=100,
+        help_text="Enter the name of the role. This should be unique within "
+        "the project.")
+    description = models.TextField(blank=True, default="",
+        help_text="The role's description should help users know what the "
+        "role is meant for and what capabilities the role gives.")
     project = models.ForeignKey(Project)
-    obj_permissions = models.ManyToManyField(ObjectPermission)
+    obj_permissions = models.ManyToManyField(
+        ObjectPermission, verbose_name="Role's permissions",
+        help_text="Select the permissions that users who have role "
+        "should have."
+    )
     permittees = models.ManyToManyField(Permittee)
     
     class Meta:
