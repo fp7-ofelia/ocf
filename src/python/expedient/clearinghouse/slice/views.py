@@ -209,16 +209,14 @@ def add_aggregate(request, slice_id):
     
     elif request.method == "POST":
         # check which submit button was pressed
-        items = request.POST.items()
-        agg_id = -1
-        for i in items:
-            if i[1] == "Select":
-                try:
-                    agg_id = int(i[0]) # there should be only one item
-                except:
-                    raise Http404
+        try:
+            agg_id = int(request.POST.get("id", 0))
+        except ValueError:
+            raise Http404
+
         if agg_id not in aggregate_list.values_list("id", flat=True):
             raise Http404
+
         aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
         return HttpResponseRedirect(aggregate.add_to_slice(
             slice, reverse("slice_add_agg", args=[slice_id])))
