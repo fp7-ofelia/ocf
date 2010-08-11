@@ -30,8 +30,10 @@ TEMPLATE_PATH = "project"
 
 DEFAULT_OWNER_PERMISSIONS = [
     "can_edit_project", "can_delete_project", "can_view_project",
-    "can_add_members", "can_remove_members", "can_create_slices",
+    "can_add_members", "can_remove_members",
+    "can_create_slices", "can_delete_slices",
     "can_add_aggregates", "can_remove_aggregates",
+    "can_create_roles", "can_edit_roles",
 ]
 
 DEFAULT_RESEARCHER_PERMISSIONS = [
@@ -50,13 +52,12 @@ def list(request):
         template_object_name="project",
     )
 
-# TODO: Enable when slice permissions are ready.
-#@require_objs_permissions_for_view(
-#    perm_names=["can_delete_slice"],
-#    permittee_func=get_user_from_req,
-#    target_func=get_queryset(Slice, "proj_id", filter="project__id"),
-#    methods=["GET", "POST"],
-#)
+@require_objs_permissions_for_view(
+    perm_names=["can_delete_slices"],
+    permittee_func=get_user_from_req,
+    target_func=get_queryset(Project, "proj_id"),
+    methods=["GET", "POST"],
+)
 @require_objs_permissions_for_view(
     perm_names=["can_delete_project"],
     permittee_func=get_user_from_req,
