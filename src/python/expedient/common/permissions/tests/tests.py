@@ -308,6 +308,18 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         perms_count = ObjectPermission.objects.filter_from_instance(
             self.objs[0]).filter(permittees=permittee).count()
         self.assertEqual(perms_count, 0)
+        
+    def test_get_permitted_objects(self):
+        permitted = ObjectPermission.objects.get_permitted_objects(
+            klass=PermissionTestClass,
+            perm_names=["can_read_val"],
+            permittee=self.u1
+        )
+        
+        self.assertEqual(permitted.count(), 2)
+        
+        for obj in self.objs:
+            self.assertTrue(obj in permitted)
 
 class TestRequests(test_mgr.SettingsTestCase):
     urls = 'expedient.common.permissions.tests.test_urls'
