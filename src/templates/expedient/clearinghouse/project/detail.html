@@ -167,7 +167,7 @@
 		            <th class="name">Name</th>
 					<th class="description">Description</th>
 					<th class="resources">Size</th>
-					<th class="managers">Managers</th>
+					<th class="owner">Owner</th>
 					<th class="status">Reserved?</th>
 					<th class="actions">Actions</th>
 				</tr>
@@ -176,10 +176,11 @@
 					<td class="name">{{ slice.name }}</td>
 					<td class="description">{{ slice.description }}</td>
 					<td class="resources">{{ slice.resource_set.all.count }}</td>
-					<td class="managers">
-						<strong><a href="mailto:{{ slice.owner.email }}">{{ slice.owner.username }}</a></strong>{% for mgr in slice.managers.all %},
-						<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>
-						{% endfor %}
+					<td class="owner">
+						{% with slice.owner as user %}
+						<div class="val user_desc">{{ user.username }}</div>
+						<div class="description user_desc">{% include "users/tooltipdesc.html" %}</div>
+						{% endwith %}
 			        </td>
 					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
 					<td class="actions">
