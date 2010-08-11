@@ -16,6 +16,10 @@ def get_project(request):
     _, _, kwargs = resolve(request.path)
     if "proj_id" in kwargs:
         return Project.objects.get(id=kwargs["proj_id"])
+    elif "slice_id" in kwargs:
+        return Project.objects.get(slice__id=kwargs["slice_id"])
+    elif "role_id" in kwargs:
+        return Project.objects.get(projectrole__id=kwargs["role_id"])
     else:
         return None
 add_parser("project", get_project)
