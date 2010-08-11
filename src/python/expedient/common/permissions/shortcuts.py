@@ -83,13 +83,13 @@ def must_have_permission(permittee, target_obj_or_class, perm_name, allow_redire
             perm_name, target_obj_or_class,
             permittee, allow_redirect=allow_redirect)
 
-def create_permission(perm_name, description="", view=None):
+def create_permission(perm_name, description="", view=None, force=True):
     """
     Shortcut to create a new permission. See
     L{ExpedientPermissionManager.create_permission}.
     """
     return ExpedientPermission.objects.create_permission(
-        perm_name, description=description, view=view)
+        perm_name, description=description, view=view, force=force)
     
     
 def give_permission_to(permission, obj_or_class, receiver, giver=None, can_delegate=False):
