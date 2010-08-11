@@ -16,6 +16,13 @@
 	    text-align: center;
 	}
 </style>
+<script>
+	$(document).ready(function() {
+		$("#aggs_help_img").tooltip({
+			tip: "#aggs_help_div"
+		});
+	});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -57,7 +64,18 @@
 	    </div>
     </div>
     <div class="detail_section">
-	    <h2>Aggregates</h2>
+	    <h2>Aggregates
+			<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+		</h2>
+	
+		<div class="tooltip" id="aggs_help_div">
+			Below you can manage and add aggregates in your slice. You can
+			only add resources to your slice from aggregates that have been
+			added to the slice. When you add an aggregate to the slice you
+			might be prompted for additional information that the aggregate
+			needs about your slice.
+		</div>
+
 		<div class="aggregate_list">
 			{% with slice.aggregates.all as aggregate_list %}
 			{% if aggregate_list.count %}

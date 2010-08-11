@@ -16,6 +16,7 @@
 	$(document).ready(function() {
 		addTooltipToClass("project_name");
 		addTooltipToClass("role_desc");
+		addTooltipToClass("user_desc");
 		addTooltipToClass("req_msg");
 		addTooltipToClass("req_user");
 		$(".permissions").each(function(index) {
@@ -23,6 +24,9 @@
 		});
 		$("#role_req_help_img").tooltip({
 			tip: "#role_req_help_div"
+		});
+		$("#aggs_help_img").tooltip({
+			tip: "#aggs_help_div"
 		});
 	});
 </script>
@@ -126,7 +130,17 @@
 		</table>
 	</div>
 	
-    <h2>Aggregates</h2>
+    <h2>Aggregates
+		<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+	</h2>
+
+	<div class="tooltip" id="aggs_help_div">
+		Below you can manage and add aggregates in your project. You can
+		only create slices on aggregates that are in the project. When you
+		add an aggregate to the project, you might be prompted for some
+		additional information that the aggregate needs.
+	</div>
+	
 	<div class="aggregate_list">
 		{% with project.aggregates.all as aggregate_list %}
 		{% if aggregate_list.count %}
