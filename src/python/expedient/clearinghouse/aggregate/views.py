@@ -101,25 +101,27 @@ def info(request, ct_id):
         request, template=TEMPLATE_PATH+"/info.html",
         extra_context={"info": info, "type": model._meta.verbose_name})
 
-def get_can_use_permission(request, perm_name, 
-                           target_ct_id, target_id,
-                           permittee_ct_id, permittee_id):
+def get_can_use_permission(request, permission, permittee,
+                           target_obj_or_class, redirect_to=None):
     """Get the 'can_use_aggregate' permission.
     
     For project, slice, or user permittees, call the corresponding
     add_to_* method of the target aggregate.
     """
-    aggregate = get_object_from_ids(target_ct_id, target_id)
-    permittee = get_object_from_ids(permittee_ct_id, permittee_id)
-    assert(isinstance(aggregate, Aggregate))
+    assert(isinstance(target_obj_or_class, Aggregate))
     assert(
         isinstance(permittee, User) or
         isinstance(permittee, Project) or
         isinstance(permittee, Slice)
     )
-    assert(perm_name == "can_use_aggregate")
+    assert(permission.name == "can_use_aggregate")
+
+    aggregate = target_obj_or_class
     
-    next = request.GET.get("next", reverse("home"))
+    try:
+        next = request.session["breadcrumbs"][-1][0]
+    except IndexError:
+        next = redirect_to or reverse("home")
     
     if isinstance(permittee, Project):
         return HttpResponseRedirect(
