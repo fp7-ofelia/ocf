@@ -39,13 +39,11 @@ def get_static_url(name, path=""):
     static_file_tuple = (
         r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:], path),
         'django.views.static.serve',
-        {'document_root': "%s" % settings.MEDIA_ROOT})
+        {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
     return url(*static_file_tuple, name=name)
 
 urlpatterns += patterns('',
-   # TODO: Serve static content, should be removed in production deployment
-    # serve from another domain to speed up connections (no cookies needed)
-    get_static_url("img_media"),
-    get_static_url("css_media"),
+    get_static_url("img_media", '/img'),
+    get_static_url("css_media", '/css'),
     get_static_url("js_media", "/js"),
 )

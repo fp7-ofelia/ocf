@@ -408,12 +408,8 @@ table.fulltable>thead {
 	padding: 3px;
 }
 
-table.fulltable>thead>td {
-    padding: 5px 10px;
-}
-
-table.fulltable>tbody>td,table.fulltable>tbody>th {
-	padding: 5px 10px;
+table.fulltable>tbody>tr>td,table.fulltable>tbody>tr>th {
+	padding: 2px 4px;
 	background: #fff;
 	color: #000;
 }
