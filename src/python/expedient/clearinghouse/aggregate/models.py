@@ -15,6 +15,7 @@ from expedient.common.middleware import threadlocals
 from expedient.common.permissions.models import Permittee
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
+from expedient.common.permissions.decorators import require_obj_permissions_for_method
 
 logger = logging.getLogger("Aggregate Models")
 
@@ -154,6 +155,7 @@ No information available.
         prefix = cls.get_url_name_prefix()
         return reverse("%s_aggregate_create" % prefix)
     
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def add_to_project(self, project, next):
         """
         Gives the aggregate a chance to request additional information for a
@@ -189,6 +191,7 @@ No information available.
             give_permission_to("can_use_aggregate", self, project)
             return next
         
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def remove_from_project(self, project, next):
         """
         Similar to L{add_to_project} but does the reverse, deleting the
@@ -218,6 +221,8 @@ No information available.
             delete_permission("can_use_aggregate", self, project)
             return next
         
+    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def add_to_slice(self, slice, next):
         """
         Works exactly the same as L{add_to_project} but for a slice.
@@ -231,6 +236,8 @@ No information available.
             give_permission_to("can_use_aggregate", self, slice)
             return next
 
+    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def remove_from_slice(self, slice, next):
         """
         Works exactly the same as L{remove_from_project} but for a slice.
@@ -277,11 +284,25 @@ No information available.
             delete_permission("can_use_aggregate", self, user)
             return next
 
+    @require_obj_permissions_for_method("slice", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def start_slice(self, slice):
-        """Start the slice in the actual resources."""
-        raise NotImplementedError()
+        """Start the slice in the actual resources.
+        
+        Subclasses overriding this method should call the parent class
+        to ensure permission checks.
+        """
+        pass
     
+    @require_obj_permissions_for_method("slice", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
+    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def stop_slice(self, slice):
-        """Take out the resource reservation from the aggregates."""
-        raise NotImplementedError()
+        """Take out the resource reservation from the aggregates.
+
+        Subclasses overriding this method should call the parent class
+        to ensure permission checks.
+        """
+        pass
     
