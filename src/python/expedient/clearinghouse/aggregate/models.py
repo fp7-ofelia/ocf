@@ -9,15 +9,14 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
-from expedient.common.permissions.shortcuts import must_have_permission,\
+from expedient.common.permissions.shortcuts import \
     give_permission_to, delete_permission
-from expedient.common.middleware import threadlocals
 from expedient.common.permissions.models import Permittee
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
 from expedient.common.permissions.decorators import require_obj_permissions_for_method
 
-logger = logging.getLogger("Aggregate Models")
+logger = logging.getLogger("aggregate.models")
 
 class Aggregate(Extendable):
     '''
@@ -36,9 +35,13 @@ class Aggregate(Extendable):
     @type location: a string that is understandable by Google Maps.
     @ivar available: Is the aggregate available for use?
     @type available: C{bool}
+    @ivar slice_set: A read-only property that returns a queryset of
+        all slices allowed to use the aggregate (i.e. have the
+        "can_use_aggregate" permission for this aggregate).
+    @type managers: C{QuerySet} of C{Slice}s.
     @ivar managers: A read-only property that returns a queryset of
         all user allowed to edit the aggregate (i.e. have the
-        "can_edit_aggregate" for this aggregate).
+        "can_edit_aggregate" permission for this aggregate).
     @type managers: C{QuerySet} of C{User}s.
     '''
     
@@ -80,7 +83,7 @@ No information available.
         delete_perm="can_edit_aggregate",
     )
     
-    def get_managers(self):
+    def _get_managers(self):
         """Gets the list of users who have the "can_edit_aggregate" permission
         for this aggregate.
         
@@ -91,7 +94,18 @@ No information available.
             permission="can_edit_aggregate",
             target_obj_or_class=self,
         )
-    managers = property(get_managers)
+    managers = property(_get_managers)
+    
+    def _get_slice_set(self):
+        """Gets the list of slices allowed to use the aggregate"""
+        from expedient.clearinghouse.slice.models import Slice
+        return Permittee.objects.filter_for_class_and_permission_name(
+            klass=Slice,
+            permission="can_use_aggregate",
+            target_obj_or_class=self,
+        )
+    slice_set = property(_get_slice_set)
+        
         
     def check_status(self):
         """Checks whether the aggregate is available or not.
@@ -182,6 +196,9 @@ No information available.
         the URL if found. Otherwise, it simply gives the permission to the
         project and returns C{next}.
         """
+        
+        logger.debug("adding aggregate to project")
+        
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_project_add" % prefix,
