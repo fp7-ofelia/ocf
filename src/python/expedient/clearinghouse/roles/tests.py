@@ -33,6 +33,8 @@ class TestModels(TestCase):
 
         self.project = Project.objects.create(
             name="projectX", description="blabla")
+        self.projectY = Project.objects.create(
+            name="projectY", description="blabla")
         
         self.client.logout()
         threadlocals.pop_frame()
@@ -67,6 +69,36 @@ class TestModels(TestCase):
         self.role3.obj_permissions.add(self.obj_perm1)
         self.role3.obj_permissions.add(self.obj_perm3)
         
+        create_permission("permY1")
+        create_permission("permY2")
+        create_permission("permY3")
+        create_permission("permY4")
+        
+        self.obj_permY1 = ObjectPermission.objects.\
+            get_or_create_for_object_or_class("permY1", self.projectY)[0]
+        self.obj_permY2 = ObjectPermission.objects.\
+            get_or_create_for_object_or_class("permY2", self.projectY)[0]
+        self.obj_permY3 = ObjectPermission.objects.\
+            get_or_create_for_object_or_class("permY3", self.projectY)[0]
+        self.obj_permY4 = ObjectPermission.objects.\
+            get_or_create_for_object_or_class("permY4", self.projectY)[0]
+        
+        self.roleY1 = ProjectRole.objects.create(
+            name="roleY1", project=self.projectY,
+        )
+        self.roleY1.obj_permissions.add(self.obj_permY1)
+        
+        self.roleY2 = ProjectRole.objects.create(
+            name="roleY2", project=self.projectY,
+        )
+        self.roleY2.obj_permissions.add(self.obj_permY2)
+
+        self.roleY3 = ProjectRole.objects.create(
+            name="roleY3", project=self.projectY,
+        )
+        self.roleY3.obj_permissions.add(self.obj_permY1)
+        self.roleY3.obj_permissions.add(self.obj_permY3)
+
     def test_give_to_permittee(self):
         # Give the role to a user and check that she gets the permission
         self.role1.give_to_permittee(self.u1)

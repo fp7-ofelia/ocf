@@ -52,7 +52,9 @@ class ProjectRoleManager(models.Manager):
         
         # take out any roles that have a permission the
         # permittee cannot delegate
-        return self.exclude(obj_permissions__pk__in=obj_perms_ids)
+        return self.exclude(
+            obj_permissions__pk__in=obj_perms_ids).filter(
+                project=project)
         
     def filter_for_permission(self, perm_name, target):
         """Filter roles that have the permission C{perm_name} for C{target}.
