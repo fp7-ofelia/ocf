@@ -1,2 +1,6 @@
-<a href="{% url project_update_agg project.id am.id %}">update</a>,
-<a href={% url project_remove_agg project.id am.id %}>remove</a>
+<form method="POST" action="{% url project_update_agg project.id am.id %}">
+	<input type="submit" value="update" />
+</form>,
+<form method="POST" action="{% url project_remove_agg project.id am.id %}">
+	<input type="submit" value="remove" />
+</form>

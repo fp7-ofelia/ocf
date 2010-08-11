@@ -1,2 +1,6 @@
-<a href="{% url slice_update_agg slice.id am.id %}">update</a>,
-<a href={% url slice_remove_agg slice.id am.id %}>remove</a>
+<form method="POST" action="{% url slice_update_agg slice.id am.id %}">
+	<input type="submit" value="update" />
+</form>,
+<form method="POST" action="{% url slice_remove_agg slice.id am.id %}">
+	<input type="submit" value="remove" />
+</form>

@@ -15,6 +15,7 @@ from models import Slice
 from forms import SliceCrudForm
 from django.conf import settings
 import logging
+from expedient.common.permissions.shortcuts import must_have_permission
 
 logger = logging.getLogger("SliceViews")
 
@@ -23,6 +24,8 @@ TEMPLATE_PATH = "expedient/clearinghouse/slice"
 def create(request, proj_id):
     '''Create a slice'''
     project = get_object_or_404(Project, id=proj_id)
+    
+    must_have_permission(request.user, project, "can_create_slices")
     
     def pre_save(instance, created):
         instance.project = project
@@ -45,6 +48,10 @@ def create(request, proj_id):
 
 def update(request, slice_id):
     '''Update a slice's information'''
+    
+    project = get_object_or_404(Project, slice__pk=slice_id)
+    must_have_permission(request.user, project, "can_edit_slices")
+
     return generic_crud(
         request, slice_id, Slice,
         TEMPLATE_PATH+"/create_update.html",
@@ -61,6 +68,9 @@ def delete(request, slice_id):
     '''Delete the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
     project = slice.project
+    
+    must_have_permission(request.user, project, "can_delete_slices")
+
     req = create_update.delete_object(
         request,
         model=Slice,
@@ -77,6 +87,9 @@ def delete(request, slice_id):
 def detail(request, slice_id):
     '''Show information about the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
+
+    must_have_permission(request.user, slice.project, "can_view_project")
+    
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
     
     return list_detail.object_detail(
@@ -98,6 +111,9 @@ def detail(request, slice_id):
 def start(request, slice_id):
     '''Start the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    must_have_permission(request.user, slice.project, "can_start_slices")
+    
     if request.method == "POST":
         try:
             slice.start(request.user)
@@ -113,10 +129,15 @@ def start(request, slice_id):
                 "Successfully started slice %s" % slice.name,
                 request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+    else:
+        return HttpResponseNotAllowed(["POST"])
     
 def stop(request, slice_id):
     '''Stop the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    must_have_permission(request.user, slice.project, "can_stop_slices")
+    
     if request.method == "POST":
         try:
             slice.stop(request.user)
@@ -132,6 +153,8 @@ def stop(request, slice_id):
                 "Successfully stopped slice %s" % slice.name,
                 request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+    else:
+        return HttpResponseNotAllowed(["POST"])
 
 def select_ui_plugin(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
@@ -159,12 +182,13 @@ def select_ui_plugin(request, slice_id):
         },
     )
 
-# TODO: The below functions are pretty much the same as the ones in
-# project.views. We should merge them.
 def add_aggregate(request, slice_id):
     '''Add aggregate to slice'''
     
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    must_have_permission(request.user, slice.project, "can_edit_slices")
+    
     aggregate_list = slice.project.aggregates.exclude(
         id__in=slice.aggregates.values_list("id", flat=True))
     
@@ -203,19 +227,33 @@ def add_aggregate(request, slice_id):
     
 def update_aggregate(request, slice_id, agg_id):
     '''Update any info stored at the aggregate'''
-    # TODO: This function might actually change the DB. So change to post
+    
     slice = get_object_or_404(Slice, id=slice_id)
+
+    must_have_permission(request.user, slice.project, "can_edit_slices")
+    
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-    return HttpResponseRedirect(aggregate.add_to_slice(
-        slice, reverse("slice_detail", args=[slice_id])))
+    
+    if request.method == "POST":
+        return HttpResponseRedirect(aggregate.add_to_slice(
+            slice, reverse("slice_detail", args=[slice_id])))
+    else:
+        return HttpResponseNotAllowed(["POST"])
 
 def remove_aggregate(request, slice_id, agg_id):
-    # TODO: This function might actually change the DB. So change to post
+
     slice = get_object_or_404(Slice, id=slice_id)
+
+    must_have_permission(request.user, slice.project, "can_edit_slices")
+    
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-    return HttpResponseRedirect(aggregate.remove_from_slice(
-        slice, reverse("slice_detail", args=[slice_id])))
+            
+    if request.method == "POST":
+        return HttpResponseRedirect(aggregate.remove_from_slice(
+            slice, reverse("slice_detail", args=[slice_id])))
+    else:
+        return HttpResponseNotAllowed(["POST"])

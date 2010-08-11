@@ -268,13 +268,16 @@ def add_aggregate(request, proj_id):
 )
 def update_aggregate(request, proj_id, agg_id):
     '''Update any info stored at the aggregate'''
-    # TODO: This function might actually change the DB. So change to post
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-    return HttpResponseRedirect(aggregate.add_to_project(
-        project, reverse("project_detail", args=[proj_id])))
+
+    if request.method == "POST":
+        return HttpResponseRedirect(aggregate.add_to_project(
+            project, reverse("project_detail", args=[proj_id])))
+    else:
+        return HttpResponseNotAllowed(["POST"])
 
 @require_objs_permissions_for_view(
     perm_names=["can_remove_aggregates"],
@@ -283,13 +286,16 @@ def update_aggregate(request, proj_id, agg_id):
 )
 def remove_aggregate(request, proj_id, agg_id):
     """Remove the aggregate from the project"""
-    # TODO: This function might actually change the DB. So change to post
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-    return HttpResponseRedirect(aggregate.remove_from_project(
-        project, reverse("project_detail", args=[proj_id])))
+
+    if request.method == "POST":
+        return HttpResponseRedirect(aggregate.remove_from_project(
+            project, reverse("project_detail", args=[proj_id])))
+    else:
+        return HttpResponseNotAllowed(["POST"])
 
 @require_objs_permissions_for_view(
     perm_names=["can_add_members"],
