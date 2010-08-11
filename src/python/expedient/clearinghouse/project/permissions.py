@@ -20,6 +20,7 @@ create_permission(
     description=\
         "Owners of this permission can edit basic project properties.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -27,6 +28,7 @@ create_permission(
     description=\
         "Owners of this permission can edit basic project properties.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -35,6 +37,7 @@ create_permission(
         "Owners of this permission can view the project. Without "
         "other permissions, they are non-functional members.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -43,14 +46,17 @@ create_permission(
         "Owners of this permission can add members to "
         "the project and assign to them roles.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
     "can_remove_members",
     description=\
         "Owners of this permission can remove members from "
-        "the project.",
+        "the project. They can also remove permissions from roles and "
+        "remove roles from users.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -58,6 +64,15 @@ create_permission(
     description=\
         "Owners of this permission can create new slices.",
     view=make_request,
+    force=True,
+)
+
+create_permission(
+    "can_delete_slices",
+    description=\
+        "Owners of this permission can delete existing slices.",
+    view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -66,6 +81,7 @@ create_permission(
         "Owners of this permission can add aggregates "
         "to the project.",
     view=make_request,
+    force=True,
 )
 
 create_permission(
@@ -74,4 +90,23 @@ create_permission(
         "Owners of this permission can remove aggregates "
         "from the project.",
     view=make_request,
+    force=True,
+)
+
+create_permission(
+    "can_create_roles",
+    description=\
+        "Owners of this permission can create roles "
+        "in the project",
+    view=make_request,
+    force=True,
+)
+
+create_permission(
+    "can_edit_roles",
+    description=\
+        "Owners of this permission can modify and delete roles "
+        "in the project",
+    view=make_request,
+    force=True,
 )
