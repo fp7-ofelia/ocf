@@ -28,7 +28,7 @@
 {% block content %}
 <div class="main">
 	<form method="post" action="">{% csrf_token %}
-	<table class="formtable openflow_create">
+	<table class="formtable_noborder openflow_create">
 	{{ agg_form.as_table }}
 	{{ client_form.as_table }}
 	{% if not create %}
@@ -38,13 +38,15 @@
 	</tr>
 	{% endif %}
     </table>
-    {% if create %}
-	<input type="submit" value="Create" />
-	{% else %}
-	<input type="submit" value="Update" />
-	<input type="button" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
-	{% endif %}
-	<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
+	<div class="center">
+	    {% if create %}
+		<input type="submit" value="Create" />
+		{% else %}
+		<input type="submit" value="Update" />
+		<input type="button" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
+		{% endif %}
+		<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
+	</div>
 	</form>
 </div>
 {% endblock content %}
