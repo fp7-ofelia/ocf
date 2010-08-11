@@ -8,6 +8,7 @@ from expedient.common.permissions.utils import permissions_save_override,\
 from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
+from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -80,11 +81,19 @@ class Project(models.Model):
         """Get all aggregates that can be used by the project
         (i.e. for which the project has the "can_use_aggregate" permission).
         """
-        return ObjectPermission.objects.get_permitted_objects(
-            klass=Aggregate,
-            perm_names=["can_use_aggregate"],
-            permittee=self,
-        )
+        # Permissions are given to the leaf classes
+        agg_ids = []
+        agg_classes = get_aggregate_classes()
+        permittee = Permittee.objects.get_as_permittee(self)
+        for agg_class in agg_classes:
+            agg_ids.extend(
+                ObjectPermission.objects.filter_for_class(
+                    agg_class,
+                    permission__name="can_use_aggregate",
+                    permittees=permittee,
+                ).values_list("object_id", flat=True)
+            )
+        return Aggregate.objects.filter(pk__in=agg_ids)
     aggregates=property(_get_aggregates)
     
     def _get_researchers(self):
