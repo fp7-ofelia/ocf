@@ -14,6 +14,9 @@ from expedient.common.permissions.utils import get_object_from_ids
 from expedient.common.permissions.forms import PermissionRequestForm
 from expedient.common.messaging.models import DatedMessage
 from django.contrib.auth.models import User
+import logging
+
+logger = logging.getLogger("permissions.views")
 
 def reraise_permission_denied(request, perm_name=None,
                               target_ct_id=None, target_id=None,
@@ -43,6 +46,8 @@ def redirect_permissions_request(request, perm_name=None,
         raise PermissionDenied(perm_name, target_obj_or_class, permittee, False)
     
     view = get_callable(permission.view)
+    
+    logger.debug("Calling permission view %s" % permission.view)
     
     # no urls allowed in redirection.
     redirect_to = request.session.get("from_url", '')
