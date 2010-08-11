@@ -24,6 +24,8 @@ from models import NonOpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
+from expedient.common.permissions.shortcuts import give_permission_to,\
+    must_have_permission
 
 logger = logging.getLogger("OpenFlow plugin views")
 TEMPLATE_PATH = "openflow/plugin"
@@ -230,7 +232,7 @@ def aggregate_add_links(request, agg_id):
             ),
         },
     )
-    
+
 def aggregate_add_to_slice(request, agg_id, slice_id):
     """
     Add the aggregate to the slice. Check if the slice already has
@@ -239,6 +241,9 @@ def aggregate_add_to_slice(request, agg_id, slice_id):
     
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    must_have_permission(request.user, aggregate, "can_use_aggregate")
+    must_have_permission(slice.project, aggregate, "can_use_aggregate")
     
     next = request.GET.get("next", None)
     
@@ -255,7 +260,7 @@ def aggregate_add_to_slice(request, agg_id, slice_id):
         instance.slice = slice
     
     def post_save(instance, created):
-        slice.aggregates.add(aggregate)
+        give_permission_to("can_use_aggregate", aggregate, slice)
     
     return generic_crud(
         request, id, OpenFlowSliceInfo,
