@@ -8,6 +8,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from models import Permittee, ExpedientPermission
 from exceptions import PermissionDenied
+import logging
+
+logger = logging.getLogger("permissions.middleware")
 
 class PermissionMiddleware(object):
     """
@@ -52,6 +55,8 @@ class PermissionMiddleware(object):
             # permission is obtained for example.
             request.session["from_url"] = request.path
             request.session["from_method"] = request.method
+            
+            logger.debug("Got permission denied. Redirecting to %s" % url)
             
             return HttpResponseRedirect(url)
         
