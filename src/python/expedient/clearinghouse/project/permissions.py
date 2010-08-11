@@ -68,9 +68,33 @@ create_permission(
 )
 
 create_permission(
+    "can_edit_slices",
+    description=\
+        "Owners of this permission can modify existing slices.",
+    view=make_request,
+    force=True,
+)
+
+create_permission(
     "can_delete_slices",
     description=\
         "Owners of this permission can delete existing slices.",
+    view=make_request,
+    force=True,
+)
+
+create_permission(
+    "can_stop_slices",
+    description=\
+        "Owners of this permission can start slices.",
+    view=make_request,
+    force=True,
+)
+
+create_permission(
+    "can_start_slices",
+    description=\
+        "Owners of this permission can stop slices.",
     view=make_request,
     force=True,
 )
