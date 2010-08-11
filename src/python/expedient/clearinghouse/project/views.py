@@ -31,13 +31,16 @@ TEMPLATE_PATH = "project"
 DEFAULT_OWNER_PERMISSIONS = [
     "can_edit_project", "can_delete_project", "can_view_project",
     "can_add_members", "can_remove_members",
-    "can_create_slices", "can_delete_slices",
+    "can_create_slices", "can_edit_slices", "can_delete_slices",
+    "can_start_slices", "can_stop_slices",
     "can_add_aggregates", "can_remove_aggregates",
     "can_create_roles", "can_edit_roles",
 ]
 
 DEFAULT_RESEARCHER_PERMISSIONS = [
-    "can_view_project", "can_create_slices",
+    "can_view_project",
+    "can_create_slices", "can_edit_slices", "can_delete_slices",
+    "can_start_slices", "can_stop_slices",
 ]
 
 def list(request):
