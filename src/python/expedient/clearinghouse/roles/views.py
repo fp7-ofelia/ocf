@@ -3,20 +3,140 @@ Created on Aug 9, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.utils import get_object_from_ids
-from expedient.clearinghouse.roles.models import ProjectRole,\
-    ProjectRoleRequest
-from expedient.clearinghouse.roles.utils import get_users_for_role
-from expedient.common.messaging.models import DatedMessage
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.roles.forms import SelectRoleForm
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from expedient.clearinghouse.roles.models import ProjectRole,\
+    ProjectRoleRequest
+from expedient.clearinghouse.roles.utils import get_users_for_role
+from expedient.common.messaging.models import DatedMessage
+from expedient.clearinghouse.project.models import Project
+from expedient.clearinghouse.roles.forms import SelectRoleForm, ProjectRoleForm
+from expedient.common.utils.views import generic_crud
+from expedient.common.permissions.models import ObjectPermission, Permittee
+from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.utils import get_queryset, get_user_from_req
+from expedient.common.permissions.shortcuts import must_have_permission
 
 TEMPLATE_PATH="roles"
+
+def create(request, proj_id):
+    """Create a new role for a project."""
+    
+    project = get_object_or_404(Project, pk=proj_id)
+    
+    # require permission to proceed
+    must_have_permission(request.user, project, "can_create_roles")
+    
+    obj_permissions = ObjectPermission.objects.filter_from_instance(project)
+    
+    project_url = reverse("project_detail", args=[project.id])
+    
+    def pre_save(instance, created):
+        instance.project = project
+    
+    return generic_crud(
+        request,
+        obj_id=None,
+        model=ProjectRole,
+        template=TEMPLATE_PATH+"/create.html",
+        redirect=lambda instance: project_url,
+        form_class=ProjectRoleForm,
+        pre_save=pre_save,
+        extra_form_params={
+            "obj_permissions": obj_permissions,
+        },
+        extra_context={
+            "project": project,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % project.name,
+                 project_url),
+                ("Create Role", request.path),
+            )
+        }
+    )
+
+def update(request, role_id):
+    """Update the permissions in the role"""
+
+    role = get_object_or_404(ProjectRole, pk=role_id)
+
+    # require permission to proceed
+    must_have_permission(request.user, role.project, "can_edit_roles")
+
+    permittee = Permittee.objects.get_as_permittee(request.user)
+    
+    initial_set = list(role.obj_permissions.values_list("pk", flat=True))
+    
+    # Get the permissions that the user can delegate to others as well
+    # as the ones that are already in the role.
+    obj_permissions = ObjectPermission.objects.filter_from_instance(
+        role.project).filter(
+            Q(permissionownership__permittee=permittee,
+              permissionownership__can_delegate=True) |
+            Q(id__in=initial_set)
+        )
+    
+    project_url = reverse("project_detail", args=[role.project.id])
+
+    return generic_crud(
+        request,
+        obj_id=role_id,
+        model=ProjectRole,
+        template=TEMPLATE_PATH+"/update.html",
+        redirect=lambda instance: project_url,
+        template_object_name="role",
+        form_class=ProjectRoleForm,
+        extra_form_params={
+            "obj_permissions": obj_permissions,
+        },
+        extra_context={
+            "project": role.project,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % role.project.name, project_url),
+                ("Update Role %s" % role.name, request.path),
+            )
+        }
+    )
+
+def delete(request, role_id):
+    """Delete a role"""
+
+    role = get_object_or_404(ProjectRole, pk=role_id)
+    project = role.project
+    
+    # require permission to proceed
+    must_have_permission(request.user, project, "can_edit_roles")
+
+    if role.name == "owner" or role.name == "researcher":
+        return simple.direct_to_template(
+            request,
+            template=TEMPLATE_PATH+"/delete_default.html",
+            extra_context={"role": role})
+    
+    if request.method == "POST":
+        role.delete()
+        return HttpResponseRedirect(
+            reverse("project_detail", args=[project.id]))
+    
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/delete.html",
+        extra_context={
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % role.project.name,
+                 reverse("project_detail", args=[role.project.id])),
+                ("Delete Role %s" % role.name, request.path),
+            ),
+            "role": role},
+    )
 
 def make_request(request, permission, permittee, target_obj_or_class,
                  redirect_to=None):
@@ -27,6 +147,9 @@ def make_request(request, permission, permittee, target_obj_or_class,
     
     @see: L{ExpedientPermission} for information about permission redirection.
     """
+    
+    if permittee != request.user:
+        raise PermissionDenied
     
     assert(isinstance(permittee, User))
     try:
@@ -75,6 +198,9 @@ def make_request(request, permission, permittee, target_obj_or_class,
 def confirm_request(request, proj_id, req_id, allow, delegate):
     project = get_object_or_404(Project, pk=proj_id)
     role_req = get_object_or_404(ProjectRoleRequest, pk=req_id)
+    
+    if request.user != role_req.giver:
+        raise PermissionDenied
 
     allow = int(allow)
     delegate = int(delegate)
