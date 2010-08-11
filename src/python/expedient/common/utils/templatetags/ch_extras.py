@@ -55,4 +55,4 @@ def equals(object1, object2):
 
 @register.filter
 def leaf_class_is(obj, klass):
-    return obj.content_type.model_class() == type(klass)
+    return obj.leaf_name == type(klass).__name__.lower()
