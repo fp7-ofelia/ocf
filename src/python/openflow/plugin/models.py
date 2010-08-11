@@ -257,6 +257,7 @@ production networks, and is currently deployed in several universities.
         return self.available and self.client.is_available()
 
     def start_slice(self, slice):
+        super(OpenFlowAggregate, self).start_slice(slice)
         sw_slivers = self._get_slivers(slice)
         try:
             return self.client.proxy.create_slice(
@@ -273,6 +274,7 @@ production networks, and is currently deployed in several universities.
             raise
 
     def stop_slice(self, slice):
+        super(OpenFlowAggregate, self).start_stop(slice)
         try:
             self.client.proxy.delete_slice(self._get_slice_id(slice))
         except Exception as e:
