@@ -51,7 +51,7 @@
 				<tr class="head">
 					<th class="username">Username</th>
 					<th class="roles">Roles</th>
-					<th class="actions">Actions</td>
+					<th class="actions">Actions</th>
 				</tr>
 				{% for member in project.members_as_permittees.all %}
 				<tr class="body">
@@ -222,20 +222,16 @@
 						</div>
 					</td>
 					<td class="actions">
-						{% comment %}
-						<a href="{% url roles_detail role.id %}">edit</a>{% if role.name != "owner" and role.name != "researcher" %},
+						<a href="{% url roles_update role.id %}">update</a>{% if role.name != "owner" and role.name != "researcher" %},
 						<a href="{% url roles_delete role.id %}">delete</a>{% endif %}
-						{% endcomment %}
 					</td>
 				</tr>
 				{% endfor %}
 			</table>
 		</div>
 		<div class="center">
-			{% comment %}
 	    	<input type="button" value="Create Role"
 	    	onclick="document.location='{% url roles_create project.id %}'" />
-			{% endcomment %}
 		</div>
 	</div>
 </div>
