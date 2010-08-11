@@ -6,7 +6,8 @@ from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.auth.models import User
 from expedient.common.messaging.models import DatedMessage
-from expedient.common.permissions.models import ObjectPermission
+from expedient.common.permissions.models import ObjectPermission, Permittee
+from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
 
 class Slice(models.Model):
     '''
@@ -59,10 +60,17 @@ class Slice(models.Model):
         """Get all aggregates that can be used by the slice
         (i.e. for which the slice has the "can_use_aggregate" permission).
         """
-        return ObjectPermission.objects.get_permitted_objects(
-            klass=Aggregate,
-            perm_names=["can_use_aggregate"],
-            permittee=self,
-        )
+        agg_ids = []
+        agg_classes = get_aggregate_classes()
+        permittee = Permittee.objects.get_as_permittee(self)
+        for agg_class in agg_classes:
+            agg_ids.extend(
+                ObjectPermission.objects.filter_for_class(
+                    agg_class,
+                    permission__name="can_use_aggregate",
+                    permittees=permittee,
+                ).values_list("object_id", flat=True)
+            )
+        return Aggregate.objects.filter(pk__in=agg_ids)
     aggregates=property(_get_aggregates)
     
