@@ -11,6 +11,9 @@ from expedient.common.permissions.exceptions import \
     PermissionRegistrationConflict, PermissionDoesNotExist,\
     UnexpectedParameterType
 from expedient.common.utils.managers import GenericObjectManager
+import logging
+
+logger = logging.getLogger("permissions.managers")
 
 class ExpedientPermissionManager(models.Manager):
     """
@@ -23,7 +26,7 @@ class ExpedientPermissionManager(models.Manager):
         else:
             return f
     
-    def create_permission(self, name, description="", view=None):
+    def create_permission(self, name, description="", view=None, force=False):
         """
         Create a new L{ExpedientPermission}. If permission is already
         registered with a different view, a L{PermissionRegistrationConflict}
@@ -49,17 +52,29 @@ class ExpedientPermissionManager(models.Manager):
         @type view: Full import path of the view as C{str} or the view function
             object itself. Note that the view must be importable by its a path
             (i.e. cannot use nested functions).
-            
+        @keyword force: Force changing the view even if the view was registered
+            with a different function before.
         @return: the new L{ExpedientPermission}.
         """
         view = self._stringify_func(view)
         # check if the permission is registered with a different view
         # somewhere else
         perm, created = self.get_or_create(
-            description=description, name=name, defaults=dict(view=view))
-        if not created and perm.view != view:
-            raise PermissionRegistrationConflict(name, view, perm.view)
+            name=name, defaults=dict(view=view, description=description))
         
+        if not created and perm.description != description:
+            perm.description = description
+            perm.save()
+            
+        if not created and perm.view != view:
+            if force:
+                perm.view = view
+                logger.warning(
+                    "Permission %s was forceably re-registered with view "
+                    "%s instead of %s" % (name, view, perm.view))
+                perm.save()
+            else:
+                raise PermissionRegistrationConflict(name, view, perm.view)
         return perm
 
     def get_missing_for_target(self, permittee, perm_names, target):
