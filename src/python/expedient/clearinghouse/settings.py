@@ -59,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
