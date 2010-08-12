@@ -8,6 +8,8 @@ import sys
 from pprint import pformat
 from os.path import join, dirname
 import time
+import subprocess
+import shlex
 PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
@@ -142,11 +144,25 @@ class GAPITests(TestCase):
         # store the trusted CA dir
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
         
-        # Create the ssl certificates if needed
+        # Recreate the ssl certificates
         cmd = "make -C %s clean" % settings.SSL_DIR
         run_cmd(cmd).wait()
         cmd = "make -C %s" % settings.SSL_DIR
         run_cmd(cmd).wait()
+        
+        # add the certificate to apache's certificate dir
+        try:
+            os.unlink(join(settings.APACHE_CERTS_DIR, "test-ca.crt"))
+        except OSError as e:
+            if "Errno 2" in "%s" % e:
+                pass
+            else:
+                raise
+        os.symlink(
+            os.path.abspath(join(settings.SSL_DIR, "ca.crt")),
+            join(settings.APACHE_CERTS_DIR, "test-ca.crt")
+        )
+        subprocess.call(shlex.split("make -C %s" % settings.APACHE_CERTS_DIR))
         
         # run the CH
         kill_old_procs(settings.GCH_PORT, settings.GAM_PORT)
@@ -159,16 +175,16 @@ class GAPITests(TestCase):
         )
         self.ch_proc = run_cmd(cmd, pause=True)
         
-        # run the AM proxy
-        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
-            join(settings.GCF_DIR, "gam.py"),
-            join(settings.SSL_DIR, "certs"),
-            join(settings.SSL_DIR, "server.crt"),
-            join(settings.SSL_DIR, "server.key"),
-            settings.GAM_PORT,
-            SCHEME + "://%s:%s/openflow/gapi/" % (settings.HOST, settings.CH_PORT),
-        )
-        self.am_proc = run_cmd(cmd, pause=True)
+#        # run the AM proxy
+#        cmd = "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
+#            join(settings.GCF_DIR, "gam.py"),
+#            join(settings.SSL_DIR, "certs"),
+#            join(settings.SSL_DIR, "server.crt"),
+#            join(settings.SSL_DIR, "server.key"),
+#            settings.GAM_PORT,
+#            SCHEME + "://%s:%s/openflow/gapi/" % (settings.HOST, settings.CH_PORT),
+#        )
+#        self.am_proc = run_cmd(cmd, pause=True)
         
         ch_host = "%s:%s" % (settings.HOST, settings.GCH_PORT)
         cert_transport = SafeTransportWithCert(
@@ -178,12 +194,12 @@ class GAPITests(TestCase):
             "https://"+ch_host+"/",
             transport=cert_transport)
         
-        am_host = "%s:%s" % (settings.HOST, settings.GAM_PORT)
+        am_host = "%s:%s" % (settings.HOST, settings.CH_PORT)
         cert_transport = SafeTransportWithCert(
             keyfile=join(settings.SSL_DIR, "experimenter.key"),
             certfile=join(settings.SSL_DIR, "experimenter.crt"))
         self.am_client = xmlrpclib.ServerProxy(
-            "https://"+am_host+"/",
+            "https://"+am_host+"/openflow/gapi/",
             transport=cert_transport)
         
         logger.debug("setup done")
