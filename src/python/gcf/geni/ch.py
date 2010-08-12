@@ -42,7 +42,7 @@ import gcf.sfa.trust.rights as rights
 
 # Substitute eg "openflow//stanford ch"
 #SLICEPUBID_PREFIX = "geni.net//gpo//gcf"
-SLICEPUBID_PREFIX = "openflow//bbn"
+SLICEPUBID_PREFIX = "openflow//stanford"
 SLICE_GID_SUBJ = "gcf.slice"
 
 USER_CRED_LIFE = 8640000
