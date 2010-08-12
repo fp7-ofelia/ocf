@@ -11,6 +11,9 @@ from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
 from expedient.common.permissions.managers import ExpedientPermissionManager,\
     ObjectPermissionManager, PermitteeManager, PermissionOwnershipManager
 
+import logging
+logger = logging.getLogger("permissions.models")
+
 class ExpedientPermission(models.Model):
     """
     This class holds all instances of L{ObjectPermission} that have a
