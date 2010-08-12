@@ -5,11 +5,14 @@ Created on May 17, 2010
 '''
 import sys
 from os.path import join, dirname
+import subprocess
+import shlex
 PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
 from expedient.common.utils.certtransport import SafeTransportWithCert
+from expedient.common.tests.client import Browser
 from openflow.tests import test_settings
 import xmlrpclib, re
 from openflow.tests.helpers import kill_old_procs, parse_rspec
@@ -208,20 +211,51 @@ class FullIntegration(TestCase):
         
         self.om_env.switch_from()
         
-    def prepare_ch(self, proj_dir, ch_host, ch_username, ch_passwd, 
+    def prepare_ch(self, proj_dir, ch_host, ch_port, ch_username, ch_passwd, 
                    om_host, om_port):
         """
         Flush and prepare the CH DB.
         Add the OMs to the CH.
         """
         from os.path import dirname
-        logger.debug("Running prepare_ch script.")
-        self.run_proc_cmd(
-            "python %s/prepare_ch.py %s %s %s %s %s %s" % (
-                dirname(__file__), proj_dir, ch_host, ch_username, ch_passwd, 
-                om_host, om_port,
+        
+        subprocess.call(shlex.split(
+            "python %s/manage.py flush --noinput" % proj_dir))
+        subprocess.call(shlex.split(
+            "python %s/manage.py syncdb --noinput" % proj_dir))
+        subprocess.call(shlex.split(
+            "python %s/manage.py createsuperuser --noinput "
+            "--username=expedient --email=bla@bla.com"  % proj_dir))
+        subprocess.call(shlex.split(
+            "python %s/manage.py set_fake_passwords"
+            " --password=expedient"  % proj_dir))
+
+        browser = Browser()
+        browser.login(
+            SCHEME+"://%s:%s%s" % (
+                ch_host, ch_port, "/accounts/login/"),
+            "expedient", "expedient")
+        response = browser.get_and_post_form(
+            url=SCHEME+"://%s:%s%s" % (
+                ch_host, ch_port, "/openflow/aggregate/create/"),
+            params=dict(
+                name="Test OM",
+                description="TestOM Description",
+                location="Stanford, CA",
+                usage_agreement="Do you agree?",
+                username=ch_username,
+                password=ch_passwd,
+                url=SCHEME+"://%s:%s%s" % (
+                    om_host, om_port, "/xmlrpc/xmlrpc/"),
             ),
-            wait=True,
+            del_params=["verify_certs"],
+        )
+        self.assertTrue(
+            response.geturl() == \
+                SCHEME+"://%s:%s%s" % (
+                    ch_host, ch_port, "/openflow/aggregate/1/links/"),
+            "Did not redirect after create correctly. Response was: %s"
+            % response.read(),
         )
         
     def run_proc_cmd(self, cmd, wait=False):
@@ -238,7 +272,7 @@ class FullIntegration(TestCase):
         else:
             return run_cmd(cmd)
         
-    def run_am_proxy(self, gcf_dir, ssl_dir, am_port):
+    def run_am_proxy(self, gcf_dir, ssl_dir, am_port, ch_host, ch_port):
         """
         Create the ssl certs for the tests.
         Run the AM proxy in a separate process.
@@ -249,10 +283,12 @@ class FullIntegration(TestCase):
         
         # run the am
         self.am_proc = self.run_proc_cmd(
-            "python %s -r %s -c %s -k %s -p %s --debug -H 0.0.0.0" % (
+            "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
                 join(gcf_dir, "gam.py"), join(ssl_dir, "certs"),
                 join(ssl_dir, "server.crt"), join(ssl_dir, "server.key"),
                 am_port,
+                SCHEME + "://%s:%s/openflow/gapi/"
+                % (ch_host, ch_port),
             )
         )
         cert_transport = SafeTransportWithCert(
@@ -306,17 +342,17 @@ class FullIntegration(TestCase):
         Load the configuration for the OM
         Load the configuration for the AM
         """
-        # clear all slices/flowspaces from fvs
-        self.fv_procs = []
-        self.fv_clients = []
-        for flowvisor in test_settings.FLOWVISORS:
-            self.run_flowvisor(flowvisor)
-            
         # Kill stale processes
         kill_old_procs(test_settings.GAM_PORT, test_settings.GCH_PORT)
         
         self.ch_username = "clearinghouse"
         self.ch_passwd = "ch_password"
+
+        # clear all slices/flowspaces from fvs
+        self.fv_procs = []
+        self.fv_clients = []
+        for flowvisor in test_settings.FLOWVISORS:
+            self.run_flowvisor(flowvisor)
         
 #        # run experiment controllers
 #        self.run_nox(
@@ -340,26 +376,28 @@ class FullIntegration(TestCase):
             self.ch_passwd,
         )
         
-        # store the trusted CA dir
-        import os
-        from django.conf import settings as djangosettings
-        self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
-
-        # setup the CH (aka AM)
+        # setup Expedient (aka AM)
         self.prepare_ch(
             test_settings.CH_PROJECT_DIR,
             test_settings.HOST,
+            test_settings.CH_PORT,
             self.ch_username,
             self.ch_passwd,
             test_settings.HOST,
             test_settings.OM_PORT,
         )
-        
+
+        # store the trusted CA dir
+        import os
+        from django.conf import settings as djangosettings
+        self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
+
         # Run the AM proxy for GENI and the GENI clearinghouse
         self.run_geni_ch(
             test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GAM_PORT)
         self.run_am_proxy(
-            test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT)
+            test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GCH_PORT,
+            test_settings.HOST, test_settings.CH_PORT)
         
     def tearDown(self):
         """
@@ -475,6 +513,11 @@ class FullIntegration(TestCase):
         
         return (slice_urn, cred)
 
+    def test_GetVersion(self):
+        ret = wrap_xmlrpc_call(
+            self.am_client.GetVersion, [], {}, test_settings.TIMEOUT)
+        self.assertEqual(ret['geni_api'], 1)
+    
 
     def test_ListResources(self):
         """
@@ -534,16 +577,6 @@ class FullIntegration(TestCase):
         """
         from expedient.common.tests.client import Browser
         
-        # Prepare the CH again and flush its database
-        self.prepare_ch(
-            test_settings.CH_PROJECT_DIR,
-            test_settings.HOST,
-            self.ch_username,
-            self.ch_passwd,
-            test_settings.HOST,
-            test_settings.OM_PORT,
-        )
-        
         #create an experiment through CH
         self.create_sliver_core(fs_randomness=False)
         
@@ -596,16 +629,6 @@ class FullIntegration(TestCase):
         from expedient.common.tests.client import Browser
         from openflow.optin_manager.opts.models import Experiment,ExperimentFLowSpace
         import random
-
-        # Prepare the CH again and flush its database
-        self.prepare_ch(
-            test_settings.CH_PROJECT_DIR,
-            test_settings.HOST,
-            self.ch_username,
-            self.ch_passwd,
-            test_settings.HOST,
-            test_settings.OM_PORT,
-        )
                 
         slices = self.fv_clients[0].api.listSlices()
         self.assertEqual(len(slices), 1) # root
