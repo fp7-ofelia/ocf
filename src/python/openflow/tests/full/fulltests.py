@@ -552,7 +552,6 @@ class FullIntegration(TestCase):
         # Get user to opt in
         logger.debug("Logging into browser")
         b = Browser()
-        b.cookie_setup()
         logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
                             (test_settings.HOST, test_settings.OM_PORT),
                             "user","password")
@@ -637,7 +636,6 @@ class FullIntegration(TestCase):
         # Get user to opt in
         logger.debug("Logging into browser")
         b = Browser()
-        b.cookie_setup()
         logged_in = b.login(SCHEME+"://%s:%s/accounts/login/"%
                             (test_settings.HOST, test_settings.OM_PORT),
                             "user","password")

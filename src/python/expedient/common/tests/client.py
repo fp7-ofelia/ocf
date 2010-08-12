@@ -56,12 +56,9 @@ def test_get_and_post_form(
 
 class Browser(object):
     
-    def cookie_setup(self):
-        """"
-        call at the beginning to set up cookiejar
-        """
+    def __init__(self):
         self.cookiejar = cookielib.CookieJar()
-        
+    
     def get_form_inputs(self, doc):
         return parse_form(doc) 
      
