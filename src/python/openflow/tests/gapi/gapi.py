@@ -91,8 +91,7 @@ class GAPITests(TestCase):
                     usage_agreement="Do you agree?",
                     username=username,
                     password=password,
-                    url="test://localhost:28000"+reverse("dummyom_rpc", args=[om.id]),
-#                    url=get_base_url(reverse("dummyom_rpc", args=[om.id])),
+                    url=get_base_url(reverse("dummyom_rpc", args=[om.id])),
                 ),
                 del_params=["verify_certs"],
             )
