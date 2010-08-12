@@ -121,7 +121,7 @@ class Browser(object):
         f = urllib2.urlopen(url)
         return f
     
-    def get_and_post_form(self, url, params, post_url=None):
+    def get_and_post_form(self, url, params, del_params=[], post_url=None):
         """
         Get the form at 'url', modify named parameters by those in 'params',
         then submit at 'post_url' or 'url' if 'post_url' is unspecified.
@@ -133,6 +133,9 @@ class Browser(object):
         @type params: dict
         @param post_url: (optional) URL to post the form to. If None then port to
             C{url} instead.
+        @keyword del_params: list of parameter names to delete from form. These
+            parameters are not submitted.
+        @type del_params: C{list} of C{str}
         @type post_url: str or None
         @return: response from urllib2.urlopen
         @rtype: file-like object (see L{urllib2.urlopen})
@@ -144,6 +147,10 @@ class Browser(object):
         f = urllib2.urlopen(url)
         form_params = self.get_form_inputs(f.read())
         form_params.update(params)
+
+        for k in del_params:
+            if k in form_params:
+                del form_params[k]
     
         data = urllib.urlencode(form_params)
         req = urllib2.Request(url=post_url, data=data)
