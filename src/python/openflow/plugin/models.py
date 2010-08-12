@@ -416,6 +416,6 @@ class FlowSpaceRule(models.Model):
                                     max_length=5, default="*")
 
 class GAPISlice(models.Model):
-    slice_urn = models.CharField(max_length=500, primary_key=True)
+    slice_urn = models.CharField(max_length=255, primary_key=True)
     switches = models.ManyToManyField(OpenFlowSwitch)
     
