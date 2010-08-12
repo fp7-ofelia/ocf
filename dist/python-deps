@@ -20,3 +20,5 @@ pyOpenSSL
 # PyQuery requires manual installation of lxml on windows.
 # see http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 pyquery
+sphinx
+pygments
