@@ -65,7 +65,10 @@ class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
             exc_type, exc_value, exc_tb = sys.exc_info()
             exc_info = "%s:%s" % (exc_type, exc_value)
             if self.debug:
-                exc_info += ":%s" % exc_tb
+                tb = traceback.extract_tb(exc_tb)
+                tb = traceback.format_list(tb)
+                tb = "".join(tb)
+                exc_info += ":%s" % tb
             response = xmlrpclib.dumps(
                 xmlrpclib.Fault(1, exc_info),
                 encoding=self.encoding, allow_none=self.allow_none,
