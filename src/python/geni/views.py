@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from expedient.common.utils.views import generic_crud
 import logging
 from forms import geni_aggregate_form_factory
+from expedient.common.permissions.shortcuts import give_permission_to
 
 logger = logging.getLogger("GENIViews")
 TEMPLATE_PATH = "geni"
@@ -22,6 +23,18 @@ def aggregate_create(request, agg_model):
     
     def post_save(instance, created):
         instance.update_resources()
+        give_permission_to(
+            "can_use_aggregate",
+            instance,
+            request.user,
+            can_delegate=True
+        )
+        give_permission_to(
+            "can_edit_aggregate",
+            instance,
+            request.user,
+            can_delegate=True
+        )
     
     def success_msg(instance):
         return "Successfully created aggregate %s." % instance.name

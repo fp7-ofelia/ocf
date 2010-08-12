@@ -92,6 +92,18 @@ def aggregate_crud(request, agg_id=None):
                 print err
             else:
                 aggregate.save()
+                give_permission_to(
+                    "can_use_aggregate",
+                    aggregate,
+                    request.user,
+                    can_delegate=True
+                )
+                give_permission_to(
+                    "can_edit_aggregate",
+                    aggregate,
+                    request.user,
+                    can_delegate=True
+                )
                 DatedMessage.objects.post_message_to_user(
                     "Successfully created/updated aggregate %s" % aggregate.name,
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
