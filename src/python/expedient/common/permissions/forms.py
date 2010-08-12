@@ -4,8 +4,7 @@ Created on Jun 10, 2010
 @author: jnaous
 '''
 from django import forms
-from django.contrib.auth.models import User
-from models import PermissionUser, PermissionRequest
+from models import PermissionRequest
 
 class PermissionRequestForm(forms.ModelForm):
     """

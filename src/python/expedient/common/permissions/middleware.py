@@ -6,8 +6,11 @@ Created on Jun 6, 2010
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
-from models import PermissionUser, ExpedientPermission
+from models import Permittee, ExpedientPermission
 from exceptions import PermissionDenied
+import logging
+
+logger = logging.getLogger("permissions.middleware")
 
 class PermissionMiddleware(object):
     """
@@ -32,24 +35,28 @@ class PermissionMiddleware(object):
                 name=exception.perm_name).values_list("view", flat=True)
             if not view[0]: return False
             
-            if isinstance(exception.user, PermissionUser):
-                user = exception.user.user
+            if isinstance(exception.permittee, Permittee):
+                permittee = exception.permittee.object
             else:
-                user = exception.user
-            user_type = ContentType.objects.get_for_model(user)
+                permittee = exception.permittee
+            permittee_type = ContentType.objects.get_for_model(permittee)
             
             url = reverse("permissions_url",
                 kwargs={
                     "perm_name": exception.perm_name,
                     "target_ct_id": target_type.id,
                     "target_id": target.id,
-                    "user_ct_id": user_type.id,
-                    "user_id": user.id,
+                    "permittee_ct_id": permittee_type.id,
+                    "permittee_id": permittee.id,
                 },
             )
             
-            # add a "next" field for redirection after permission is obtained.
-            url += "?next=%s" % request.path
+            # add a "from" key to the session for redirection after
+            # permission is obtained for example.
+            request.session["from_url"] = request.path
+            request.session["from_method"] = request.method
+            
+            logger.debug("Got permission denied. Redirecting to %s" % url)
             
             return HttpResponseRedirect(url)
         
@@ -57,7 +64,7 @@ class PermissionMiddleware(object):
         
     @classmethod
     def add_required_url_permissions(cls, url, perm_names,
-                                     user_func, target_func,
+                                     permittee_func, target_func,
                                      methods=["GET", "POST"]):
         """
         Similar to the decorator L{decorators.require_objs_permissions_for_view} but
@@ -68,10 +75,10 @@ class PermissionMiddleware(object):
         @type url: C{str}
         @param perm_names: a list of permission names that are required.
         @type perm_names: L{list} of L{str}
-        @param user_func: a callable that accepts the url's view's arguments
-            and returns a model instance not necessarily a L{PermissionUser}
+        @param permittee_func: a callable that accepts the url's view's arguments
+            and returns a model instance not necessarily a L{Permittee}
             instance.
-        @type user_func: callable
+        @type permittee_func: callable
         @param target_func: a callable that accepts the url's view's arguments
             and returns a C{QuerySet} instance of targets.
         @type target_func: callable
@@ -80,14 +87,14 @@ class PermissionMiddleware(object):
         @type methods: C{list} of C{str}
         """
         info = dict(perm_names=perm_names,
-                    user_func=user_func,
+                    permittee_func=permittee_func,
                     target_func=target_func,
                     methods=methods)
         cls.__urls.setdefault(url, []).append(info)
         
     @classmethod
     def add_required_view_permissions(cls, view_func, perm_names,
-                                      user_func, target_func,
+                                      permittee_func, target_func,
                                       methods=["GET", "POST"]):
         """
         Add a view to check for required permissions.
@@ -96,10 +103,10 @@ class PermissionMiddleware(object):
         @type url: C{str}
         @param perm_names: a list of permission names that are required.
         @type perm_names: L{list} of L{str}
-        @param user_func: a callable that accepts the view's arguments
-            and returns a model instance not necessarily a L{PermissionUser}
+        @param permittee_func: a callable that accepts the view's arguments
+            and returns a model instance not necessarily a L{Permittee}
             instance.
-        @type user_func: callable
+        @type permittee_func: callable
         @param target_func: a callable that accepts the view's arguments
             and returns a C{QuerySet} instance of targets.
         @type target_func: callable
@@ -108,7 +115,7 @@ class PermissionMiddleware(object):
         @type methods: C{list} of C{str}
         """
         info = dict(perm_names=perm_names,
-                    user_func=user_func,
+                    permittee_func=permittee_func,
                     target_func=target_func,
                     methods=methods)
         cls.__views.setdefault(view_func, []).append(info)
@@ -116,15 +123,17 @@ class PermissionMiddleware(object):
     def _check_view_perms(self, perms_info, request, view_args, view_kwargs):
         """Check if the permissions information in C{perms_info} apply"""
         if request.method in perms_info["methods"]:
-            user = perms_info["user_func"](request, *view_args, **view_kwargs)
+            permittee = perms_info["permittee_func"](request, *view_args, **view_kwargs)
             targets = perms_info["target_func"](request, *view_args,
                                                 **view_kwargs)
 
             missing, target = ExpedientPermission.objects.get_missing(
-                user, perms_info["perm_names"], targets)
+                permittee, perms_info["perm_names"], targets)
                     
             if missing:
-                raise PermissionDenied(missing.name, target, user)
+                exc = PermissionDenied(missing.name, target, permittee)
+                logger.error("Permission Denied %s" % exc)
+                raise exc
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         """
@@ -143,13 +152,15 @@ class PermissionMiddleware(object):
                     return HttpResponseRedirect(
                         reverse(
                             "permissions_reraise",
-                            exception.perm_name,
-                            ContentType.objects.get_for_model(
-                                exception.target).id,
-                            exception.target.id,
-                            ContentType.objects.get_for_model(
-                                exception.user).id,
-                            exception.user.id,
+                            kwargs=dict(
+                                perm_name=exception.perm_name,
+                                target_ct_id=ContentType.objects.get_for_model(
+                                    exception.target).id,
+                                target_id=exception.target.id,
+                                permittee_ct_id=ContentType.objects.get_for_model(
+                                    exception.permittee).id,
+                                permittee_id=exception.permittee.id,
+                            ),
                         )
                     )
         return None

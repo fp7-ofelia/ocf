@@ -84,7 +84,7 @@ class GenericObjectManager(models.Manager):
         they point to, and return a queryset for the class C{klass}.
         """
         obj_ids = self.filter_for_class(
-            klass, **generic_filter_args).values_list("pk", flat=True)
+            klass, **generic_filter_args).values_list(self.fk_field, flat=True)
         return klass.objects.filter(pk__in=obj_ids, **object_filter_args)
         
     def filter_for_objects(self, klass, **object_filter_args):

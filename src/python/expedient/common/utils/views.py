@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.common.messaging.models import DatedMessage
 
 def generic_crud(request, obj_id, model, template, redirect,
-                 extra_context={}, form_class=None,
+                 extra_context={}, form_class=None, extra_form_params={},
                  template_object_name="object", pre_save=None,
                  post_save=None, success_msg=None):
     """
@@ -26,7 +26,10 @@ def generic_crud(request, obj_id, model, template, redirect,
     @param redirect: callable that takes the created/saved instance as argument
         and returns a URL to redirect to.
     @keyword extra_context: dict of fields to add to the template context.
-    @keyword form_class: the form class to use for the object (ModelForm subclass)
+    @keyword form_class: the form class to use for the object
+        (ModelForm subclass)
+    @keyword extra_form_params: dict of additional keyword parameters to pass
+        to the form.
     @keyword template_object_name: name of the object field in the template
         context. This is only available when updating.
     @keyword pre_save: function to call before saving the object instantiated
@@ -47,9 +50,9 @@ def generic_crud(request, obj_id, model, template, redirect,
         instance = None
         
     if request.method == "GET":
-        form = form_class(instance=instance)
+        form = form_class(instance=instance, **extra_form_params)
     elif request.method == "POST":
-        form = form_class(request.POST, instance=instance)
+        form = form_class(request.POST, instance=instance, **extra_form_params)
         if form.is_valid():
             instance = form.save(commit=False)
             if pre_save: pre_save(instance, obj_id == None)

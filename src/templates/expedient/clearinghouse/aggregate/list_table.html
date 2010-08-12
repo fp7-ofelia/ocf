@@ -1,4 +1,5 @@
 {% load ch_extras %}
+{% load permissions %}
 
 <div class="table_div">
 	<table class="fulltable" id="aggregates_table">
@@ -41,8 +42,8 @@
 			{% endif %}
 			<td class="resources">{{ am.resource_set.count }}</td>
 			<td class="managers">
-				<strong><a href="mailto:{{ am.owner.email }}">{{ am.owner.username }}</a></strong>{% for mgr in am.managers.all %},
-				<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>
+				{% for mgr in am.managers.all %}
+				<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>{% if not forloop.last %},{% endif %}
 				{% endfor %}
 	        </td>
 			<td class="status">{% if am.check_status %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>

@@ -179,7 +179,6 @@ def xmlrpc_wrap_register_topology_callback(username, password, om_url,url,cookie
     
 def http_wrap_opt_in(username, password, url, project_name, slice_name, priority):
     b = Browser()
-    b.cookie_setup()
     
     #log in first
     log_in_url = "%s/accounts/login/"%url
@@ -205,7 +204,6 @@ def http_wrap_opt_in(username, password, url, project_name, slice_name, priority
     
 def http_wrap_opt_out(username, password, url, project_name, slice_name):
     b = Browser()
-    b.cookie_setup()
     
     #log in first
     log_in_url = "%s/accounts/login/"%url

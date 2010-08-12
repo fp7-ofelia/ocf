@@ -17,7 +17,7 @@ class OpenFlowAggregateForm(forms.ModelForm):
 
     class Meta:
         model = OpenFlowAggregate
-        exclude = ['client', 'owner', 'users']
+        exclude = ['client', 'owner', 'users', "leaf_name"]
 
 class OpenFlowSliceInfoForm(forms.ModelForm):
     class Meta:

@@ -8,7 +8,7 @@ import rspec as rspec_mod
 from openflow.plugin.models import OpenFlowAggregate, GAPISlice, OpenFlowSwitch
 import logging
 
-logger = logging.getLogger("OpenFlowGAPI")
+logger = logging.getLogger("openflow.plugin.gapi")
 
 CREDENTIALS_TYPE = 'array' # of strings
 OPTIONS_TYPE = 'struct'
@@ -32,6 +32,7 @@ def ping(str, **kwargs):
 
 @rpcmethod(signature=[VERSION_TYPE], url_name="openflow_gapi")
 def GetVersion(**kwargs):
+    logger.debug("Called GetVersion")
     return dict(geni_api=1)
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],

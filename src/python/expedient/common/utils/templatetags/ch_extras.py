@@ -4,6 +4,10 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 @register.filter
+def cat(obj1, obj2):
+    return "%s%s" % (obj1, obj2)
+
+@register.filter
 def check_in_set(value, arg):
     '''returns "checked" if the value is in QuerySet arg else ""'''
     
@@ -51,4 +55,4 @@ def equals(object1, object2):
 
 @register.filter
 def leaf_class_is(obj, klass):
-    return obj.content_type.model_class() == type(klass)
+    return obj.leaf_name == type(klass).__name__.lower()

@@ -27,6 +27,7 @@ class BreadcrumbsNode(template.Node):
             session["breadcrumbs"] = trail
         else:
             trail = session.setdefault("breadcrumbs", [])
+            context["breadcrumbs"] = trail
         return get_links(trail)
     
 @register.tag
@@ -36,3 +37,11 @@ def breadcrumbs(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError, "%r tag takes no arguments" % token.contents.split()[0]
     return BreadcrumbsNode()
+
+@register.simple_tag
+def last_link(trail):
+    return trail[-1][1]
+
+@register.simple_tag
+def before_last_link(trail):
+    return trail[-2][1]

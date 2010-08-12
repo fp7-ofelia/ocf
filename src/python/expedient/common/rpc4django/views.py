@@ -251,7 +251,7 @@ def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
         for obj in dir(app):
             method = getattr(app, obj)
             if callable(method) and \
-               getattr(method, 'is_rpcmethod', False):
+               getattr(method, 'is_rpcmethod', False) == True:
                 # if this method is callable and it has the rpcmethod
                 # decorator, add it to the dispatcher
                 if method.url_name not in dispatchers:

@@ -25,7 +25,8 @@ class DatedMessageManager(models.Manager):
         m = self.create(
             msg_text=msg_text, type=msg_type, sender=sender,
         )
-        m.users.add(users=User.objects.filter(**kwargs))
+        for user in User.objects.filter(**kwargs):
+            m.users.add(user)
         
     def post_message_to_user(self, msg_text, user,
                              sender=None, msg_type='announcement'):

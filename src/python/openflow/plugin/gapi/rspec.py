@@ -16,6 +16,7 @@ LINKS_TAG = "links"
 LINK_TAG = "link"
 SWITCHES_TAG = "switches"
 SWITCH_TAG = "switch"
+PORT_NUM_TAG = "port_num"
 PORT_TAG = "port"
 
 URN = "urn"
@@ -309,7 +310,7 @@ def parse_slice(resv_rspec):
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
             </switches>
-            <port from="1" to="4" />
+            <port_num from="1" to="4" />
             <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
             <dl_dst from="*" to="*" />
             <dl_type from="0x800" to="0x800" />
@@ -375,16 +376,12 @@ def _resv_parse_slivers(root):
 #        print "parsing fs %s" % et.tostring(flowspace_elem)
         fs = {}
         # get a dict of the flowspace rule
-        for tag in PORT_TAG, DL_SRC_TAG, DL_DST_TAG,\
+        for tag in PORT_NUM_TAG, DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
         TP_SRC_TAG, TP_DST_TAG:
             from_key = "%s_start" % tag
             to_key = "%s_end" % tag
             field_elem = flowspace_elem.find(tag)
-            if tag == "port":
-                # TODO: fix screw up...
-                from_key = "port_num_start"
-                to_key = "port_num_end"
             if field_elem != None:
                 fs[from_key] = field_elem.get("from")
                 fs[to_key] = field_elem.get("to")

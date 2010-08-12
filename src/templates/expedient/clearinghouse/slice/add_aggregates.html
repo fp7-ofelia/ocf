@@ -10,7 +10,7 @@
 	</div>
 	<div class="aggregate_list">
 		{% if aggregate_list.count %}
-			{% with "slice/agg_add_actions.html" as action_template %}
+			{% with "project/agg_add_actions.html" as action_template %}
 				{% include "aggregate/list_table.html" %}
 			{% endwith %}
 		{% else %}

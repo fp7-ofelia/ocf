@@ -7,6 +7,10 @@ import xmlrpclib
 from xmlrpclib import Fault
 from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
 import traceback
+from django.conf import settings
+import logging
+
+logger = logging.getLogger("rpc4django.xmlrpcdispatcher")
 
 class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
     """
@@ -22,7 +26,7 @@ class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
         self.instance = None
         self.allow_none = True
         self.encoding = None
-
+        self.debug = getattr(settings, "DEBUG", False)
     
     def dispatch(self, data, **kwargs):
         """
@@ -50,17 +54,22 @@ class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
                                        allow_none=self.allow_none, 
                                        encoding=self.encoding)
         except Fault, fault:
+            logger.warn("Got fault when processing method %s" % method)
             traceback.print_exc()
             response = xmlrpclib.dumps(fault, allow_none=self.allow_none,
                                        encoding=self.encoding)
         except:
             # report exception back to server
+            logger.error("Got exception when processing method %s" % method)
             traceback.print_exc()
             exc_type, exc_value, exc_tb = sys.exc_info()
+            exc_info = "%s:%s" % (exc_type, exc_value)
+            if self.debug:
+                exc_info += ":%s" % exc_tb
             response = xmlrpclib.dumps(
-                xmlrpclib.Fault(1, "%s:%s" % (exc_type, exc_value)),
+                xmlrpclib.Fault(1, exc_info),
                 encoding=self.encoding, allow_none=self.allow_none,
-                )
+            )
 
         return response
     
