@@ -145,7 +145,7 @@ class Flowspace(object):
             "nw_proto": (same, 8),
             "tp_src": (same, 16),
             "tp_dst": (same, 16),
-            "port": (same, 2),
+            "port_num": (same, 2),
         }
         
         # select some of the attributes
@@ -205,7 +205,7 @@ class Flowspace(object):
     
     def get_full_attrs(self):
         attr_names = ["dl_src", "dl_dst", "dl_type", "vlan_id", "nw_src",
-                      "nw_dst", "nw_proto", "tp_src", "tp_dst", "port"]
+                      "nw_dst", "nw_proto", "tp_src", "tp_dst", "port_num"]
 
         # make the local attrs dict full with _start and _end
         temp = {}
@@ -219,7 +219,8 @@ class Flowspace(object):
         return temp
     
     def compare_to_sliver_fs(self, sliver_fs):
-        return self.get_full_attrs() == sliver_fs
+        full = self.get_full_attrs()
+        return full == sliver_fs
 
 def parse_rspec(rspec):
     """
