@@ -5,7 +5,9 @@ Created on May 11, 2010
 '''
 
 import sys
+from pprint import pformat
 from os.path import join, dirname
+import time
 PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
@@ -17,16 +19,24 @@ from openflow.tests.helpers import parse_rspec, create_random_resv, \
 from expedient.common.utils.certtransport import SafeTransportWithCert
 from expedient.common.tests.commands import call_env_command, Env
 
+ch_env = Env(settings.CH_PROJECT_DIR)
+ch_env.switch_to()
+
 if settings.SHOW_PROCESSES_IN_XTERM:
     from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
 else:
     from expedient.common.tests.utils import run_cmd
 from expedient.common.tests.utils import wrap_xmlrpc_call, drop_to_shell
+from expedient.common.tests.client import Browser
 
 import logging
-logger = logging.getLogger("gapi_test")
+logger = logging.getLogger("openflow.tests.gapi")
 
 SCHEME = "https" if settings.USE_HTTPS else "http"
+
+def get_base_url(path):
+    return SCHEME + "://%s:%s%s%s" % (
+        settings.HOST, settings.CH_PORT, settings.PREFIX, path)
 
 class GAPITests(TestCase):
     """
@@ -55,46 +65,50 @@ class GAPITests(TestCase):
     def setup_dummy_oms(self):
         from openflow.dummyom.models import DummyOM
         from django.contrib.auth.models import User
-        from openflow.plugin.models import OpenFlowAggregate
-        from expedient.common.xmlrpc_serverproxy.models import\
-            PasswordXMLRPCServerProxy
+        from django.core.urlresolvers import reverse
         
         for i in range(settings.NUM_DUMMY_OMS):
+            # Create the OM user
+            username = "clearinghouse%s" % i
+            password = "clearinghouse"
+            User.objects.create_user(
+                username=username, email="email@email.com", password=password)
+
+            # Create the Dummy OM to which we will connect
             om = DummyOM.objects.create()
             om.populate_links(settings.NUM_SWITCHES_PER_AGG, 
                               settings.NUM_LINKS_PER_AGG/2)
-            username = "clearinghouse%s" % i
-            password = "clearinghouse"
-            u = User.objects.create(username=username)
-            u.set_password(password)
-            u.save()
-    
-            # Add the aggregate to the CH
-            url = SCHEME + "://%s:%s/%sdummyom/%s/xmlrpc/" % (
-                settings.HOST, settings.CH_PORT, settings.PREFIX, om.id)
             
-            proxy = PasswordXMLRPCServerProxy.objects.create(
-                username=username, password=password,
-                url=url, verify_certs=False,
+            logger.debug("Creating OpenFlow Aggregate %s" % (i+1))
+            
+            # Add the dummy OM aggregate to Expedient
+            response = self.browser.get_and_post_form(
+                url=get_base_url(reverse("openflow_aggregate_create")),
+                params=dict(
+                    name="DummyOM %s" % i,
+                    description="DummyOM Description",
+                    location="Stanford, CA",
+                    usage_agreement="Do you agree?",
+                    username=username,
+                    password=password,
+                    url="test://localhost:28000"+reverse("dummyom_rpc", args=[om.id]),
+#                    url=get_base_url(reverse("dummyom_rpc", args=[om.id])),
+                ),
+                del_params=["verify_certs"],
             )
-    
-            # test availability
-            if not proxy.is_available():
-                raise Exception("Problem: Proxy not available")
-    
-            # Add aggregate
-            of_agg = OpenFlowAggregate.objects.create(
-                name=username,
-                description="hello",
-                location="America",
-                client=proxy,
-                owner=u,
+            self.assertEqual(
+                response.geturl(),
+                get_base_url(
+                    reverse("openflow_aggregate_add_links", args=[i+1])),
+                "Did not redirect after create correctly. Response was: %s"
+                % response.read(),
             )
-    
-            err = of_agg.setup_new_aggregate(
-                "%s://%s/" % (SCHEME, settings.HOST))
-            if err:
-                raise Exception("Error setting up aggregate: %s" % err)
+        
+    def create_users(self):
+        from django.contrib.auth.models import User
+        
+        User.objects.create_superuser(
+            "expedient", "email@email.com", "expedient")
         
     def setUp(self):
         """
@@ -105,17 +119,28 @@ class GAPITests(TestCase):
         
         import time, httplib, os
         
+        call_env_command(settings.CH_PROJECT_DIR, "flush", interactive=False)
+        call_env_command(settings.CH_PROJECT_DIR, "syncdb", interactive=False)
+
         logger.debug("setup started")
         
-        call_env_command(settings.CH_PROJECT_DIR, "flush", interactive=False)
+        # now we can import django stuff
+        from django.core.urlresolvers import reverse
+        from django.conf import settings as djangosettings
+        from openflow.plugin.models import OpenFlowAggregate
+
+        self.assertEqual(OpenFlowAggregate.objects.all().count(), 0)
+
+        self.create_users()
         
-        self.ch_env = Env(settings.CH_PROJECT_DIR)
-        self.ch_env.switch_to()
+        self.browser = Browser()
+        self.browser.login(get_base_url(reverse("auth_login")),
+                           username="expedient",
+                           password="expedient")
         
         self.setup_dummy_oms()
         
         # store the trusted CA dir
-        from django.conf import settings as djangosettings
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
         
         # Create the ssl certificates if needed
@@ -355,8 +380,6 @@ class GAPITests(TestCase):
                         "Slice not deleted in the OMs")
          
     def test_parse_slice(self):
-        from openflow.plugin.models import GAPISlice
-        from openflow.dummyom.models import DummyOMSlice
         from openflow.plugin.gapi.rspec import parse_slice
         
         # get the resources
@@ -378,7 +401,7 @@ class GAPITests(TestCase):
            slice_name="Crazy Load Balancer",
            slice_desc="Does this and that...",
            ctrl_url="tcp:controller.stanford.edu:6633")
-        resv_rspec, flowspaces = create_random_resv(20, self.switches, **vals)
+        resv_rspec, flowspaces = create_random_resv(2, self.switches, **vals)
         
         project_name, project_desc, slice_name, slice_desc,\
         controller_url, email, password, agg_slivers = parse_slice(resv_rspec)
@@ -408,26 +431,31 @@ class GAPITests(TestCase):
                 fs_set_found = sliver['flowspace']
                 
                 # make sure that all the parsed flowspace was requested
-                found = False
                 for fs_found in fs_set_found:
+                    found = False
                     for fs_req in fs_set_requested:
                         if fs_req.compare_to_sliver_fs(fs_found):
                             found = True
                             break
-                self.assertTrue(found, 
-                    "Didn't request flowspace %s for dpid %s" %\
-                    (fs_found, sliver['datapath_id']))
+                    self.assertTrue(found,
+                        "Didn't request flowspace %s for dpid %s\n" %\
+                        (pformat(fs_found), sliver['datapath_id']) +
+                        "Flowspaces parsed:\n%s\nFlowspaces requested:\n%s"
+                        % (pformat(fs_set_found),
+                           pformat( [f.get_full_attrs()
+                                     for f in fs_set_requested]))
+                    )
                     
                 # make sure that all requested flowspace was parsed
-                found = False
                 for fs_req in fs_set_requested:
+                    found = False
                     for fs_found in fs_set_found:
                         if fs_req.compare_to_sliver_fs(fs_found):
                             found = True
                             break
-                self.assertTrue(found,
-                    "Didn't find requested flowspace %s for dpid %s" %\
-                    (fs_found, sliver['datapath_id']))
+                    self.assertTrue(found,
+                        "Didn't find requested flowspace %s for dpid %s" %\
+                        (fs_found, sliver['datapath_id']))
                     
         # Check that each dpid is used only once
         self.assertTrue(len(found_dpids) == len(set(found_dpids)),
