@@ -3,6 +3,8 @@ Created on Jun 19, 2010
 
 @author: jnaous
 '''
+import logging
+from pprint import pformat
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
@@ -18,9 +20,6 @@ from models import SliceFlowSpace
 from geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
-import logging
-from pprint import pformat
-from django.contrib.contenttypes.models import ContentType
 logger = logging.getLogger("html_ui_views")
 
 def _update_openflow_resources(request, slice):
