@@ -131,7 +131,9 @@ class PermissionMiddleware(object):
                 permittee, perms_info["perm_names"], targets)
                     
             if missing:
-                raise PermissionDenied(missing.name, target, permittee)
+                exc = PermissionDenied(missing.name, target, permittee)
+                logger.error("Permission Denied %s" % exc)
+                raise exc
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         """
