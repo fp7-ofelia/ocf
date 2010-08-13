@@ -7,6 +7,8 @@ import logging
 import re
 from django.contrib.auth.backends import RemoteUserBackend
 from django.conf import settings
+from expedient.common.permissions.shortcuts import give_permission_to
+from django.contrib.auth.models import User
 
 logger = logging.getLogger("geni.backends")
 
@@ -30,4 +32,14 @@ class GENIRemoteUserBackend(RemoteUserBackend):
             return username
         else:
             return username
+
+class MagicWordBackend(object):
+    """Authenticates users if the magic word "MagicWord" is given as credentials"""
     
+    MAGIC_WORD = "MagicWord"
+    
+    def authenticate(self, magicword=None, user=None):
+        if magicword == self.MAGIC_WORD:
+            return user
+        else:
+            return None
