@@ -71,7 +71,7 @@ def delete(request, slice_id):
     
     must_have_permission(request.user, project, "can_delete_slices")
 
-    slice.stop()
+    slice.stop(request.user)
 
     req = create_update.delete_object(
         request,
