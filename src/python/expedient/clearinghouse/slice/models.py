@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from expedient.common.messaging.models import DatedMessage
 from expedient.common.permissions.models import ObjectPermission, Permittee
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
+import logging
+
+logger = logging.getLogger("slice.models")
 
 class Slice(models.Model):
     '''
@@ -41,7 +44,9 @@ class Slice(models.Model):
         """
         Should be an idempotent operation on the aggregates.
         """
+        logger.debug("Called start_slice on %s: %s" % (self, self.name))
         for agg in self.aggregates.all():
+            logger.debug("starting slice on agg %s" % agg.name)
             agg.as_leaf_class().start_slice(self)
         self.started = True
         self.modified = False
