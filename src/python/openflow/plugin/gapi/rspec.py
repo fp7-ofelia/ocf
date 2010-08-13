@@ -36,9 +36,20 @@ port_re = re.compile(PORT_URN_REGEX)
 
 class BadURNError(Exception):
     def __init__(self, urn):
+        self.urn = urn
         super(Exception, self).__init__(
             "Unknown or badly formatted URN '%s'." % urn)
     
+class UnknownObject(Exception):
+    def __init__(self, klass, id, tag):
+        self.klass = klass
+        self.id = id
+        self.tag = tag
+        super(Exception, self).__init__(
+            "Could not find the %s object with id %s of element tag %s in the"
+            " database." % (klass, id, tag)
+        )
+        
 
 def _dpid_to_urn(dpid):
     """
@@ -109,9 +120,7 @@ def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     
     switches = OpenFlowSwitch.objects.filter(aggregate=aggregate)
 
-    if slice_urn:
-        switches = switches.filter(gapislice__slice_urn=slice_urn)
-    elif available != None:
+    if available != None:
         switches = switches.filter(available=available)
 
     for switch in switches:
@@ -120,13 +129,18 @@ def _add_switches_node(parent_elem, aggregate, slice_urn, available):
                 URN: _dpid_to_urn(switch.datapath_id),
             },
         )
-        _add_ports(switch_elem, switch)
+        _add_ports(switch_elem, switch, slice_urn)
         
     return switches_elem
 
-def _add_ports(switch_elem, switch):
+def _add_ports(switch_elem, switch, slice_urn):
     """Add the ports tags for the switch"""
-    for iface in switch.openflowinterface_set.all():
+    
+    ifaces = switch.openflowinterface_set.all()
+    if slice_urn:
+        ifaces = ifaces.filter(slice_set__gapislice__slice_urn=slice_urn)
+        
+    for iface in ifaces:
         et.SubElement(
             switch_elem, PORT_TAG, {
                 URN: _port_to_urn(switch.datapath_id, iface.port_num),
@@ -283,9 +297,9 @@ def parse_slice(resv_rspec):
     '''
     Parses the reservation RSpec and returns a tuple:
     (project_name, project_desc, slice_name, slice_desc, 
-    controller_url, email, password, agg_slivers) where slivers
-    is a list of (aggregate, slivers) tuples, and slivers is a dict suitable
-    for use in the create_slice xml-rpc call of the opt-in manager.
+    controller_url, email, password, slivers) where slivers
+    is a dict mapping OpenFlowInterface instances to a flowspace
+    dict for reservation on them.
     
     The reservation rspec looks like the following:
     
@@ -333,6 +347,11 @@ def parse_slice(resv_rspec):
     Any missing fields from the flowspace mean wildcard. All '*' means any
     value.
     
+    The available fields are::
+        
+        dl_src, dl_dst, dl_type, vlan_id, nw_src,
+        nw_dst, nw_proto, tp_src, tp_dst
+    
     All integers can by specified as hex or decimal.
     '''
     
@@ -341,10 +360,10 @@ def parse_slice(resv_rspec):
     email, password = _resv_parse_user(root)
     slice_name, slice_desc, controller_url = _resv_parse_slice(root)
     project_name, project_desc = _resv_parse_project(root)
-    agg_slivers = _resv_parse_slivers(root)
+    slivers = _resv_parse_slivers(root)
     
     return (project_name, project_desc, slice_name, slice_desc, 
-            controller_url, email, password, agg_slivers)
+            controller_url, email, password, slivers)
 
 def _resv_parse_user(root):
     '''parse the user tag from the root Element'''
@@ -362,21 +381,20 @@ def _resv_parse_project(root):
     return (proj_elem.get(NAME), proj_elem.get(DESCRIPTION))
 
 def _resv_parse_slivers(root):
-    '''Return a list of tuples (aggregate, slivers) where aggregate is
-    an OpenFlowAggregate instance and slivers is a list of dicts suitable for
-    use in the create_slice xml-rpc call of the OM'''
+    '''Return a list of slivers where slivers is a list of dicts
+    mapping OpenFlowInterfaces to a flowspace dict.'''
     
-    from openflow.plugin.models import OpenFlowSwitch
+    from openflow.plugin.models import OpenFlowInterface
     
     flowspace_elems = root.findall(".//%s" % FLOWSPACE_TAG)
     
-    dpid_fs_map = {}
+    port_fs_map = {}
     
     for flowspace_elem in flowspace_elems:
 #        print "parsing fs %s" % et.tostring(flowspace_elem)
         fs = {}
         # get a dict of the flowspace rule
-        for tag in PORT_NUM_TAG, DL_SRC_TAG, DL_DST_TAG,\
+        for tag in DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
         TP_SRC_TAG, TP_DST_TAG:
             from_key = "%s_start" % tag
@@ -389,27 +407,33 @@ def _resv_parse_slivers(root):
                 fs[from_key] = WILDCARD
                 fs[to_key] = WILDCARD
         
-        # now for each switch, add a mapping from the dpid to the fs
+        field_elem = flowspace_elem.find(PORT_NUM_TAG)
+        if field_elem != None:
+            port_num_start = field_elem.get("from")
+            port_num_end = field_elem.get("to")
+        else:
+            port_num_start = WILDCARD
+            port_num_end = WILDCARD
+        
+        if port_num_start == WILDCARD:
+            port_num_start = 0
+        else:
+            port_num_start = int(port_num_start)
+
+        if port_num_end == WILDCARD:
+            port_num_end = 2**32-1
+        else:
+            port_num_end = int(port_num_end)
+        
+        # for each switch, get the list of ports that are applicable to it.
         for switch_elem in flowspace_elem.find(SWITCHES_TAG).findall(SWITCH_TAG):
             dpid = _urn_to_dpid(switch_elem.get(URN))
-            if dpid not in dpid_fs_map:
-                dpid_fs_map[dpid] = []
-            dpid_fs_map[dpid].append(fs)
+            ifaces = OpenFlowInterface.objects.filter(
+                switch__datapath_id=dpid,
+                port_num__gte=port_num_start,
+                port_num__lte=port_num_end,
+            )
+            for iface in ifaces:
+                port_fs_map.setdefault(iface, []).append(fs)
         
-    datapaths = dpid_fs_map.keys()
-    # get a list of all the available datapaths
-    qs = OpenFlowSwitch.objects.filter(
-        datapath_id__in=datapaths).select_related(
-            "aggregate")
-    
-    # This is a map from aggregate pk to a tuple (openflow_aggregate, list of slivers)
-    # each sliver is a list of dicts as described in the OM's create_slice call
-    agg_slivers_map = {}
-    for dp in qs:
-        if dp.aggregate.pk not in agg_slivers_map:
-            agg_slivers_map[dp.aggregate.pk] = (dp.aggregate.as_leaf_class(), [])
-        agg_slivers_map[dp.aggregate.pk][1].append(
-            {'datapath_id': dp.datapath_id,
-             'flowspace': dpid_fs_map[dp.datapath_id]})
-        
-    return agg_slivers_map.values()
+    return port_fs_map
