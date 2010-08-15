@@ -372,7 +372,7 @@ class GAPITests(TestCase):
         """
         Tests that we can create a sliver.
         """
-        from openflow.plugin.models import GAPISlice
+        from expedient.clearinghouse.slice.models import Slice
         from openflow.dummyom.models import DummyOMSlice
         
         # get the resources
@@ -393,8 +393,10 @@ class GAPITests(TestCase):
         # delete the sliver
         self.assertTrue(self.am_client.DeleteSliver(slice_urn, cred))
         
+        time.sleep(5)
+        
         # Make sure it is gone from the CH and the OMs
-        self.assertTrue(GAPISlice.objects.all().count() == 0,
+        self.assertTrue(Slice.objects.all().count() == 0,
                         "Slice not deleted in the Clearinghouse")
         self.assertTrue(DummyOMSlice.objects.all().count() == 0,
                         "Slice not deleted in the OMs")
