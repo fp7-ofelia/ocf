@@ -257,7 +257,7 @@ def DeleteSliver(slice_urn, credentials, **kwargs):
     slice = get_slice(slice_urn)
     client = Client()
     fake_login(client, kwargs["request"].user)
-    resp = client.post(reverse("slice_delete", args=[slice.id]))
+    client.post(reverse("slice_delete", args=[slice.id]))
     return True
 
 @require_creds(True)
