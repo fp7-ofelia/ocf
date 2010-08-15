@@ -4,16 +4,24 @@ Created on Dec 3, 2009
 @author: jnaous
 '''
 
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
 from expedient.clearinghouse import users
-from expedient.clearinghouse.users import forms
 from django.views.generic import create_update, simple
 from django.contrib import auth
+from expedient.common.permissions.shortcuts import must_have_permission,\
+    give_permission_to
+from registration import views as registration_views
+from expedient.clearinghouse.users.forms import FullRegistrationForm
+from registration.models import RegistrationProfile
+from django.conf import settings
+from django.contrib.auth.models import User
 
 def home(request):
     '''show list of users and form for adding users'''
+    
+    must_have_permission(request.user, User, "can_manage_users")
     
     user_list = auth.models.User.objects.all()
     
@@ -54,12 +62,12 @@ def home(request):
     )
 
 def detail(request, user_id=None):
-    # TODO: This needs a lot of security. Users should not be able to change
-    #       all the stuff in their profiles
     if user_id == None:
         user = request.user
     else:
         user = get_object_or_404(auth.models.User, pk=user_id)
+
+    must_have_permission(request.user, user, "can_edit_user")
     
     profile = users.models.UserProfile.get_or_create_profile(user)
     
@@ -73,17 +81,21 @@ def detail(request, user_id=None):
         userprofile_form = users.forms.UserProfileForm(instance=profile)
         
     elif request.method == "POST":
-        if user_id == None:
-            pwd_form = users.forms.PasswordChangeFormDisabled(user, request.POST)
+        if request.POST.get("change_pwd", False):
+            data = request.POST
         else:
-            pwd_form = users.forms.AdminPasswordChangeFormDisabled(user, request.POST)
+            data = None
+        if user_id == None:
+            pwd_form = users.forms.PasswordChangeFormDisabled(user, data)
+        else:
+            pwd_form = users.forms.AdminPasswordChangeFormDisabled(user, data)
         user_form = users.forms.UserForm(request.POST, instance=user)
         userprofile_form = users.forms.UserProfileForm(request.POST, instance=profile)
         if user_form.is_valid() and userprofile_form.is_valid():
             user = user_form.save()
             userprofile_form = users.forms.UserProfileForm(request.POST, instance=profile)
             userprofile_form.save()
-            if "change_pwd" in request.POST and pwd_form.is_valid():
+            if request.POST.get("change_pwd", False) and pwd_form.is_valid():
                 pwd_form.save()
                 return HttpResponseRedirect(reverse("users_saved", args=(user.id,)))
             elif "change_pwd" not in request.POST:
@@ -125,6 +137,8 @@ def saved(request, user_id):
     )
 
 def delete(request, user_id):
+    user = get_object_or_404(auth.models.User, pk=user_id)
+    must_have_permission(request.user, user, "can_edit_user")
     return create_update.delete_object(
         request,
         auth.models.User,
@@ -132,3 +146,25 @@ def delete(request, user_id):
         user_id,
         template_name="expedient/clearinghouse/users/confirm_delete.html",
     )
+
+def register(request):
+    return registration_views.register(
+        request,
+        form_class=FullRegistrationForm)
+
+def activate(request, activation_key):
+    template_name = 'registration/activate.html'
+    activation_key = activation_key.lower() # Normalize before trying anything with it.
+    account = RegistrationProfile.objects.activate_user(activation_key)
+    if account:
+        give_permission_to(
+            "can_edit_user", account, account, can_delegate=True)
+    return simple.direct_to_template(
+        request,
+        template=template_name,
+        extra_context={
+            'account': account,
+            'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
+        },
+    )
+
