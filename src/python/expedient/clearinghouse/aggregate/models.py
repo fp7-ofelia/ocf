@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 
 import logging
@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
 from expedient.common.permissions.shortcuts import \
-    give_permission_to, delete_permission
+    give_permission_to, delete_permission, must_have_permission
 from expedient.common.permissions.models import Permittee
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
@@ -38,7 +38,7 @@ class Aggregate(Extendable):
     @ivar slice_set: A read-only property that returns a queryset of
         all slices allowed to use the aggregate (i.e. have the
         "can_use_aggregate" permission for this aggregate).
-    @type managers: C{QuerySet} of C{Slice}s.
+    @type slice_set: C{QuerySet} of C{Slice}s.
     @ivar managers: A read-only property that returns a queryset of
         all user allowed to edit the aggregate (i.e. have the
         "can_edit_aggregate" permission for this aggregate).
@@ -85,9 +85,7 @@ No information available.
     
     def _get_managers(self):
         """Gets the list of users who have the "can_edit_aggregate" permission
-        for this aggregate.
-        
-        @return: a C{QuerySet} of C{User} objects.
+        for this aggregate as a C{QuerySet} of C{User} objects.
         """
         return Permittee.objects.filter_for_class_and_permission_name(
             klass=User,
