@@ -13,7 +13,7 @@ In this tutorial you will do the following:
 Create a Project
 ----------------
 
-Go to the Expedient site, and click on the "Register" link. Fill-in your
+Go to the Expedient site, and click on the :guilabel:`Register` link. Fill-in your
 username, email, and password. An email will be sent to you to activate your
 account. Once activated, log into your account.
 
@@ -35,16 +35,16 @@ members with different roles. Roles give users permissions to do various
 actions in the project such as changing the project's information, adding
 users to the project, or creating slices.
 
-Click on the "Create" button in the Projects section. You will most likely
+Click on the :guilabel:`Create` button in the Projects section. You will most likely
 encounter a "Permission Denied" page. You will need to request the permission
 from someone who can allow you to create a project. Most likely, this would be
-an administrator. So select a user to make the request to ("Permission
-Owner"), add a message that helps the administrator make a decision to allow
-you to create a project, and click "Request".
+an administrator. So select a user to make the request to (:guilabel:`Permission
+Owner`), add a message that helps the administrator make a decision to allow
+you to create a project, and click :guilabel:`Request`.
 
 Once your administrator approves the request, you can go back to the homepage
 and try to create the project again. Choose a simple descriptive short name,
-add a description for the project, and click "Save".
+add a description for the project, and click :guilabel:`Save`.
 
 You will be redirected to the project's detail page where you can manage the
 project.
@@ -72,17 +72,17 @@ Each new project gets two default roles: "researcher" and "owner". The
 Add a Member
 ............
 
-Let's start by adding another member to the project. Click on "Add Members" in
+Let's start by adding another member to the project. Click on :guilabel:`Add Members` in
 the "Members" section. Select another user you want in the project, select
-"researcher" role, and click on "Add". The delegate checkbox can be used to
+:guilabel:`researcher` role, and click on :guilabel:`Add`. The delegate checkbox can be used to
 allow the user to give the roles you give him to others. 
 
 Add Aggregates
 ..............
 
-Now we should add aggregates to the project. Click on "Add Aggregates". You
+Now we should add aggregates to the project. Click on :guilabel:`Add Aggregates`. You
 will see a list of the aggregates that are available in Expedient. Click the
-"Select" button for
+:guilabel:`Select` button for
 the ones you would like to use (choose at least one OpenFlow Aggregate and one
 PlanetLab Aggregate). Some other types of aggregates might require additional
 steps before an aggregate is added to the project.
@@ -93,11 +93,11 @@ steps before an aggregate is added to the project.
 Create a Slice
 --------------
 
-Now let's create a slice. Click on "Create Slice" in the "Slices"
-section. Fill the form and click "Save". The page you see is your slice's
+Now let's create a slice. Click on :guilabel:`Create Slice` in the "Slices"
+section. Fill the form and click :guilabel:`Save`. The page you see is your slice's
 detail page.
 
-The "Management" box on the right allows you to edit basic information about
+The :guilabel:`Management` box on the right allows you to edit basic information about
 the slice, as well as start and stop the slice.
 
 
@@ -113,26 +113,26 @@ controller for your slice. All OpenFlow aggregates that you add will use the
 same information, although it may be requested multiple times. So if you
 change it for one, you also change it for all.
 
-Click "Done".
+Click :guilabel:`Done`.
 
 Add Resources
 .............
 
 To add resources to the slice, you will need to use a "User Interface
 Plugin". Each such plugin specializes in some subset of resources. Click on
-"Manage Resources" to select a plugin to add OpenFlow and PlanetLab resources.
-Click on "Open" for the "HTML Table UI" plugin.
+:guilabel:`Manage Resources` to select a plugin to add OpenFlow and PlanetLab resources.
+Click on :guilabel:`Open` for the :guilabel:`HTML Table UI` plugin.
 
 Here you'll see information about the PlanetLab and OpenFlow resources that
 are available for the slice. To select a tree from all the resources present,
-click on "Select Tree". When you are done selecting the resources you want in
-the slice, click "Next".
+click on :guilabel:`Select Tree`. When you are done selecting the resources you want in
+the slice, click :guilabel:`Next`.
 
 Select FlowSpace
 ................
 
 Select the flowspace that you want the controller to receive by specifying it
-here. Click "Save" and then "Next" when done.
+here. Click :guilabel:`Save` and then :guilabel:`Next` when done.
 
 Download RSA keys
 .................
@@ -141,17 +141,17 @@ Expedient generates an RSA key and uses it to create the PlanetLab slice for
 you. Here you can download the provate key that you can use to login to your
 PlanetLab nodes. Use the given login username to login to the PlanetLab nodes.
 
-When you are done, click "Done" to go back to the detail page. You can always
+When you are done, click :guilabel:`Done` to go back to the detail page. You can always
 come back here later to edit your slice.
 
 Start the Slice
 ...............
 
 At this point nothing has been created at the actual resource aggregates
-themselves. To start your slice, click on "Start Slice".
+themselves. To start your slice, click on :guilabel:`Start Slice`.
 
 Stop the Slice
 ..............
 
-Click "Stop Slice" to free the resources associated with your slice at the
+Click :guilabel:`Stop Slice` to free the resources associated with your slice at the
 resource aggregates.
