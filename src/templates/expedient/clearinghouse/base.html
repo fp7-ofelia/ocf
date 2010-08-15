@@ -67,6 +67,7 @@
 		<div id="page">
 			<div id="content">
 				{% block messages %}
+				{% if messages %}
 				<div class="messages">
 					<table class="msg_table">
 						{% for msg in messages %}
@@ -76,6 +77,7 @@
 						{% endfor %}
 					</table>
 				</div>
+				{% endif %}
 				{% endblock %}
 				<div class="breadcrumbs">{% breadcrumbs %}</div>
 				{% block content %}{% endblock %}

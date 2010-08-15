@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 from django.db import models
 from expedient.common.extendable.models import Extendable

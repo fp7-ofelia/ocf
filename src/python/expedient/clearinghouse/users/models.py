@@ -11,14 +11,14 @@ class UserProfile(models.Model):
     '''
     Additional information about a user.
     
-    @param user: the user to whom this UserProfile belongs
+    @ivar user: the user to whom this UserProfile belongs
     @type user: L{auth.models.User}
-    @param affiliation: The organization to which the user is affiliated
+    @ivar affiliation: The organization to which the user is affiliated
     @type affiliation: L{str}
     '''
 
     user                   = models.ForeignKey(auth.models.User, unique=True)
-    affiliation            = models.CharField(max_length=200, default="")
+    affiliation            = models.CharField(max_length=100, default="")
 
     def __unicode__(self):
         try:
@@ -34,8 +34,8 @@ class UserProfile(models.Model):
         @param user: the User whose UserProfile to get or create
         @type user: L{auth.models.User}
         
-        @return user_profile: user's profile
-        @rtype user_profile: L{UserProfile} 
+        @return: user's profile
+        @rtype: L{UserProfile} 
         '''
         
         try:

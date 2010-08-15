@@ -29,14 +29,9 @@
             {{ userprofile_form.as_table }}
             </table>
             <input type="submit" value="Save User">
-            <button type="button" class="delete button" onclick="parent.location='{% url users_delete user.id %}'" value="Delete">Delete</button>
+            <a href="{% url users_delete user.id %}">Delete</a>
+			<a href="{% url home %}">Cancel</a>
         </form>
-    </div>
-    <div class="slices">
-        <h2>Current Slices:</h2>
-        {% comment %}
-        {% include "slice/slice_list.html" %}
-        {% endcomment %}
     </div>
 </div>
 {% endblock %}

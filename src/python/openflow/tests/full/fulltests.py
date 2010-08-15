@@ -180,7 +180,7 @@ class FullIntegration(TestCase):
         profile.is_net_admin = True
         profile.supervisor = adm
         profile.max_priority_level = 7000
-        profile.save()      
+        profile.save()
         AdminFlowSpace.objects.create(user=adm)
         
         # assign flowspace to user
@@ -282,20 +282,20 @@ class FullIntegration(TestCase):
         self.run_proc_cmd("make -C %s" % ssl_dir).wait()
         
         # run the am
-        self.am_proc = self.run_proc_cmd(
-            "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
-                join(gcf_dir, "gam.py"), join(ssl_dir, "certs"),
-                join(ssl_dir, "server.crt"), join(ssl_dir, "server.key"),
-                am_port,
-                SCHEME + "://%s:%s/openflow/gapi/"
-                % (ch_host, ch_port),
-            )
-        )
+#        self.am_proc = self.run_proc_cmd(
+#            "python %s -r %s -c %s -k %s -p %s -u %s --debug -H 0.0.0.0" % (
+#                join(gcf_dir, "gam.py"), join(ssl_dir, "certs"),
+#                join(ssl_dir, "server.crt"), join(ssl_dir, "server.key"),
+#                am_port,
+#                SCHEME + "://%s:%s/openflow/gapi/"
+#                % (ch_host, ch_port),
+#            )
+#        )
         cert_transport = SafeTransportWithCert(
             keyfile=join(ssl_dir, "experimenter.key"),
             certfile=join(ssl_dir, "experimenter.crt"))
         self.am_client = xmlrpclib.ServerProxy(
-            "https://%s:%s/" % (test_settings.HOST, am_port),
+            "https://%s:%s/openflow/gapi/" % (test_settings.HOST, am_port),
             transport=cert_transport)
         
     def run_geni_ch(self, gcf_dir, ssl_dir, ch_port):

@@ -4,6 +4,9 @@ Created on Jun 15, 2010
 @author: jnaous
 '''
 from django.contrib.auth.backends import RemoteUserBackend
+import logging
+
+logger = logging.getLogger("backends.remoteuser")
 
 class NoCreateRemoteUserBackend(RemoteUserBackend):
     """

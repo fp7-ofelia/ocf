@@ -96,11 +96,10 @@ class PermissionMiddleware(object):
     def add_required_view_permissions(cls, view_func, perm_names,
                                       permittee_func, target_func,
                                       methods=["GET", "POST"]):
-        """
-        Add a view to check for required permissions.
+        """Add permission requirements to a view function.
         
-        @param url: The url for which permissions are to be enforced.
-        @type url: C{str}
+        @param view_func: The view function to add permission requirements to.
+        @type view_func: callable.
         @param perm_names: a list of permission names that are required.
         @type perm_names: L{list} of L{str}
         @param permittee_func: a callable that accepts the view's arguments

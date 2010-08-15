@@ -15,10 +15,10 @@ STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
 #DATABASE_PASSWORD = ''         # Not used with sqlite3.
 #DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 #DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
-DATABASE_ENGINE = 'mysql'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = "bedrock" # Or path to database file if using sqlite3.
-DATABASE_USER = 'django'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'password'         # Not used with sqlite3.
+DATABASE_ENGINE = 'mysql'      # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_NAME = "expedient"    # Or path to database file if using sqlite3.
+DATABASE_USER = 'expedient'    # Not used with sqlite3.
+DATABASE_PASSWORD = 'password' # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -61,11 +61,11 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
@@ -76,7 +76,9 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
+#    'django.contrib.backends.RemoteUserBackend',
+#    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
+    'geni.backends.GENIRemoteUserBackend',
 )
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
@@ -174,7 +176,6 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/css/.*',
     r'^/static/media/.*',
     r'.*/xmlrpc/?',
-    r'.*/gapi/?',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -241,3 +242,5 @@ if DEBUG:
     loggingconf.set_up(logging.DEBUG)
 else:
     loggingconf.set_up(logging.INFO)
+
+DEBUG_PROPAGATE_EXCEPTIONS = True

@@ -14,9 +14,10 @@ from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
 from django.db.models import signals
 from django.contrib.sites.models import Site
-import xmlrpclib
 import logging
 from expedient.common.utils import create_or_update
+from expedient.clearinghouse.slice.models import Slice
+
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
 
@@ -274,7 +275,7 @@ production networks, and is currently deployed in several universities.
             raise
 
     def stop_slice(self, slice):
-        super(OpenFlowAggregate, self).start_stop(slice)
+        super(OpenFlowAggregate, self).stop_slice(slice)
         try:
             self.client.proxy.delete_slice(self._get_slice_id(slice))
         except Exception as e:
@@ -416,6 +417,6 @@ class FlowSpaceRule(models.Model):
                                     max_length=5, default="*")
 
 class GAPISlice(models.Model):
-    slice_urn = models.CharField(max_length=255, primary_key=True)
-    switches = models.ManyToManyField(OpenFlowSwitch)
+    slice = models.OneToOneField(Slice)
+    slice_urn = models.CharField(max_length=255, unique=True)
     

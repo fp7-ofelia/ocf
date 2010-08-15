@@ -280,11 +280,6 @@ class TestModels(TestCase):
         self.assertTrue(self.u1 in users)
         self.assertTrue(self.u2 in users)
 
-        users = get_users_for_role("role3", can_delegate=False)
-        self.assertEqual(users.count(), 2)
-        self.assertTrue(self.u1 in users)
-        self.assertTrue(self.u2 in users)
-        
         users = get_users_for_role(self.role3, can_delegate=True)
         self.assertEqual(users.count(), 1)
         self.assertTrue(self.u1 in users)

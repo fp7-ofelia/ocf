@@ -18,8 +18,6 @@ from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.roles.forms import SelectRoleForm, ProjectRoleForm
 from expedient.common.utils.views import generic_crud
 from expedient.common.permissions.models import ObjectPermission, Permittee
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.utils import get_queryset, get_user_from_req
 from expedient.common.permissions.shortcuts import must_have_permission
 
 TEMPLATE_PATH="roles"
@@ -164,7 +162,7 @@ def make_request(request, permission, permittee, target_obj_or_class,
     # for each role get the users that can delegate it
     roles_to_users = {}
     for r in roles:
-        givers = get_users_for_role(r.name, can_delegate=True)
+        givers = get_users_for_role(r, can_delegate=True)
         roles_to_users[r.id] = givers
 
     if request.method == "POST":

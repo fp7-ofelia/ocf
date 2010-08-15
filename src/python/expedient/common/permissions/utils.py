@@ -202,8 +202,6 @@ def permissions_delete_override(permittee_kw, model_func, delete_perm):
     @type permittee_kw: C{str}.
     @param model_func: A callable that returns the class.
     @type model_func: C{Model} subclass
-    @param create_perm: The name of the creation permission for the class.
-    @type create_perm: C{str}
     @param delete_perm: the name of the delete permission for the instance.
     @type delete_perm: C{str}
     """

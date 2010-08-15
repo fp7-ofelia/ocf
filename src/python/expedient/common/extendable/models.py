@@ -155,31 +155,31 @@ class Extendable(models.Model):
     
     Adding fields is done by adding an C{Extend} inner class. Three fields can
     be used in the C{Extend} inner class:
-    1. C{fields}: This is a L{dict} that describes what the fields to be added
-        in the subclass are. The format is as follows ::
+        1. C{fields}: This is a L{dict} that describes what the fields to be added
+            in the subclass are. The format is as follows ::
+            
+            {field_name : (field_class, args, kwargs, repl_args, repl_kwargs)}
+            
+                - C{field_name}: name of the field to add to subclass
+                - C{field_class}: class of the field e.g. ManyToManyField
+                - C{args}: a list of pos args with which to init field_class
+                - C{kwargs}: a list of keyword args with which to init field_class
+                - C{repl_args}: either None or a list with the same length as 
+                    C{args} that specifies which arguments can be overridden, and
+                    what keyword to use to replace that argument.
+                - C{repl_kwargs}: either None or a dict that specifies which kwargs
+                    can be overridden by subclasses and what keyword to use for the
+                    override.
         
-        {field_name : (field_class, args, kwargs, repl_args, repl_kwargs)}
+        2. C{mandatory}: C{iterable} of keywords that subclasses must replace.
         
-            - C{field_name}: name of the field to add to subclass
-            - C{field_class}: class of the field e.g. ManyToManyField
-            - C{args}: a list of pos args with which to init field_class
-            - C{kwargs}: a list of keyword args with which to init field_class
-            - C{repl_args}: either None or a list with the same length as 
-                C{args} that specifies which arguments can be overridden, and
-                what keyword to use to replace that argument.
-            - C{repl_kwargs}: either None or a dict that specifies which kwargs
-                can be overridden by subclasses and what keyword to use for the
-                override.
-    
-    2. C{mandatory}: C{iterable} of keywords that subclasses must replace.
-    
-    3. C{replacements}: L{dict} that specifies the replacements to use in the
-        subclass using the keywords defined in the C{repl_args} and 
-        C{repl_kwargs} in a parent's C{Extend.fields} values.
-        
-    4. C{redelegate}: C{iterable} of field names from C{fields} in a
-        parent's C{Extend} inner class that specifies which fields should not
-        be added in this class but its subclass.
+        3. C{replacements}: L{dict} that specifies the replacements to use in the
+            subclass using the keywords defined in the C{repl_args} and 
+            C{repl_kwargs} in a parent's C{Extend.fields} values.
+            
+        4. C{redelegate}: C{iterable} of field names from C{fields} in a
+            parent's C{Extend} inner class that specifies which fields should not
+            be added in this class but its subclass.
 
     Using the C{mandatory} field in a child class of C{Exendable} forces 
     grandchildren of to specify replacements for particular keywords.

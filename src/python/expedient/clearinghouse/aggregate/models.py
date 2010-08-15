@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 
 import logging
@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
 from expedient.common.permissions.shortcuts import \
-    give_permission_to, delete_permission
+    give_permission_to, delete_permission, must_have_permission
 from expedient.common.permissions.models import Permittee
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
@@ -38,7 +38,7 @@ class Aggregate(Extendable):
     @ivar slice_set: A read-only property that returns a queryset of
         all slices allowed to use the aggregate (i.e. have the
         "can_use_aggregate" permission for this aggregate).
-    @type managers: C{QuerySet} of C{Slice}s.
+    @type slice_set: C{QuerySet} of C{Slice}s.
     @ivar managers: A read-only property that returns a queryset of
         all user allowed to edit the aggregate (i.e. have the
         "can_edit_aggregate" permission for this aggregate).
@@ -85,9 +85,7 @@ No information available.
     
     def _get_managers(self):
         """Gets the list of users who have the "can_edit_aggregate" permission
-        for this aggregate.
-        
-        @return: a C{QuerySet} of C{User} objects.
+        for this aggregate as a C{QuerySet} of C{User} objects.
         """
         return Permittee.objects.filter_for_class_and_permission_name(
             klass=User,
@@ -169,7 +167,6 @@ No information available.
         prefix = cls.get_url_name_prefix()
         return reverse("%s_aggregate_create" % prefix)
     
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def add_to_project(self, project, next):
         """
         Gives the aggregate a chance to request additional information for a
@@ -182,7 +179,7 @@ No information available.
             from expedient.common.permissions.shortcuts import \
                 give_permission_to
             
-            give_permission_to("can_use_aggregate", self, project)
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), project)
         
         and then it should redirect to C{next}.
         
@@ -199,16 +196,18 @@ No information available.
         
         logger.debug("adding aggregate to project")
         
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_project_add" % prefix,
                            kwargs={'agg_id': self.id,
                                    'proj_id': project.id})+"?next="+next
         except NoReverseMatch:
-            give_permission_to("can_use_aggregate", self, project)
+            logger.debug("Giving permission to use aggregate to %s" % project)
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), project)
             return next
         
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def remove_from_project(self, project, next):
         """
         Similar to L{add_to_project} but does the reverse, deleting the
@@ -217,12 +216,14 @@ No information available.
             from expedient.common.permissions.shortcuts import \
                 delete_permission
                 
-            delete_permission("can_use_aggregate", self, project)
+            delete_permission("can_use_aggregate", self.as_leaf_class(), project)
             
         and then redirecting to C{next}. Additionally, if not overridden,
         this function stops all slices in the project before removing the
         aggregate. Subclasses should also stop slices.
         """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_project_remove" % prefix,
@@ -235,32 +236,34 @@ No information available.
                     self.as_leaf_class().stop_slice(slice)
                 except:
                     pass
-            delete_permission("can_use_aggregate", self, project)
+            delete_permission("can_use_aggregate", self.as_leaf_class(), project)
             return next
         
-    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def add_to_slice(self, slice, next):
         """
         Works exactly the same as L{add_to_project} but for a slice.
         """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+        
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_slice_add" % prefix,
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next="+next
         except NoReverseMatch:
-            give_permission_to("can_use_aggregate", self, slice)
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
-    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def remove_from_slice(self, slice, next):
         """
         Works exactly the same as L{remove_from_project} but for a slice.
         It stops the slice if not overridden. Subclasses should stop the
         slice before removing the permission.
         """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_slice_remove" % prefix,
@@ -271,7 +274,7 @@ No information available.
                 self.as_leaf_class().stop_slice(slice)
             except:
                 pass
-            delete_permission("can_use_aggregate", self, slice)
+            delete_permission("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
     def add_to_user(self, user, next):
@@ -284,7 +287,7 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'user_id': user.id})+"?next="+next
         except NoReverseMatch:
-            give_permission_to("can_use_aggregate", self, user)
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), user)
             return next
 
     def remove_from_user(self, user, next):
@@ -298,28 +301,28 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'user_id': user.id})+"?next="+next
         except NoReverseMatch:
-            delete_permission("can_use_aggregate", self, user)
+            delete_permission("can_use_aggregate", self.as_leaf_class(), user)
             return next
 
-    @require_obj_permissions_for_method("slice", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def start_slice(self, slice):
         """Start the slice in the actual resources.
         
         Subclasses overriding this method should call the parent class
         to ensure permission checks.
         """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("slice", self.as_leaf_class(), "can_use_aggregate")
         pass
     
-    @require_obj_permissions_for_method("slice", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("project", ["can_use_aggregate"])
-    @require_obj_permissions_for_method("user", ["can_use_aggregate"])
     def stop_slice(self, slice):
         """Take out the resource reservation from the aggregates.
 
         Subclasses overriding this method should call the parent class
         to ensure permission checks.
         """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("slice", self.as_leaf_class(), "can_use_aggregate")
         pass
     

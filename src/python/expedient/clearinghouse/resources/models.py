@@ -11,10 +11,16 @@ class Resource(Extendable):
     '''
     Generic model of a resource.
     
-    @param aggregate: The L{Aggregate} that controls/owns this resource
-    @type aggregate: L{models.ForeignKey} to L{Aggregate}
-    @param name: A human-readable name for the resource
+    @ivar name: A human-readable name for the resource
     @type name: L{str}
+    @ivar available: Is the resources available?
+    @type available: C{bool}
+    @ivar status_change_timestamp: The time when C{available} changed.
+    @type status_change_timestamp: L{datetime.datetime}
+    @ivar aggregate: The L{Aggregate} that controls/owns this resource
+    @type aggregate: L{models.ForeignKey} to L{Aggregate}
+    @ivar slice_set: The set of slices this resource is in
+    @type slice_set: a L{models.ManyToManyField} to L{Slice}.
     '''
     
     name = models.CharField(max_length=200)
@@ -36,6 +42,11 @@ class Resource(Extendable):
 class Sliver(Extendable):
     '''
     Information on the reservation of a particular resource for a slice.
+    
+    @ivar resource: The resource the sliver is part of.
+    @type resource: L{Resource}
+    @ivar slice: The slice the slice is part of.
+    @type slice: L{Slice}
     '''
     
     resource = models.ForeignKey(

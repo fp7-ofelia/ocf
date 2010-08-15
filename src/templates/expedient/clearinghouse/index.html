@@ -16,6 +16,9 @@ img#perm_help {
 		$("img#perm_help").tooltip({
 			tip: "div#perm_mgmt_help"
 		});
+		$("img#users_help").tooltip({
+			tip: "div#user_mgmt_help"
+		});
 		
 		/* get the html for the projects div */
 		$.get('{% url project_list %}', function(data) {
@@ -56,7 +59,7 @@ img#perm_help {
     </div>
 	
 	<h2>Permission Management <img id="perm_help"
-	src="{% url img_media 'question_mark.png' %}" /></h2>
+	src="{% url img_media 'question_mark_15x15.png' %}" /></h2>
 	<div class="tooltip" id="perm_mgmt_help">
 		When an Expedient user needs permission to do something, and she does
 		not have that permission, she might be able to request that permission
@@ -78,6 +81,14 @@ img#perm_help {
 		width="100%">
 			<p>Your browser does not support iframes.</p>
 		</iframe>
+	</div>
+	
+	<h2><a href="{% url users_home %}">Manage Users</a> <img id="users_help"
+	src="{% url img_media 'question_mark_15x15.png' %}" /></h2>
+	<div class="tooltip" id="user_mgmt_help">
+		Click on the link to manage users on Expedient. You will need to have
+		the "can_manage_users" permission to be able to access this
+		functionality.
 	</div>
 </div>
 {% endblock content %}

@@ -30,16 +30,17 @@ class ExpedientPermission(models.Model):
                 request, permission, permittee, target_obj_or_class,
                 redirect_to=None)
     
-    - C{permission} is the missing L{ExpedientPermission}.
-    - C{permittee} is the object that needs to exercise the permission.
-    - C{target_obj_or_class} is the object or class whose permission is
-        missing.
-    - C{redirect_to} is the URL from which the request was made.
+        - C{permission} is the missing L{ExpedientPermission}.
+        - C{permittee} is the object that needs to exercise the permission.
+        - C{target_obj_or_class} is the object or class whose permission is
+            missing.
+        - C{redirect_to} is the URL from which the request was made.
     
     One limitation of the system right now is that we can only link to objects
     that use a C{PositiveIntegerField} as the object ID.
     
     @cvar objects: a L{ExpedientPermissionManager} instance.
+    @type objects: L{ExpedientPermissionManager}
     
     @ivar name: The permission's name
     @type name: C{str}

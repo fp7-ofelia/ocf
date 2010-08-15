@@ -4,6 +4,7 @@
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
+from django.views.generic.simple import direct_to_template
 
 admin.autodiscover()
 
@@ -24,6 +25,16 @@ urlpatterns = patterns('',
 
     # TODO: Change to the following after 0.8 of registration is out
     # (r'^accounts/', include('registration.backends.default.urls')),
+    url(r'^accounts/register/$',
+        'expedient.clearinghouse.users.views.register',
+        name='registration_register'),
+    url(r'^accounts/activate/(?P<activation_key>\w+)/$',
+        'expedient.clearinghouse.users.views.activate',
+        name='registration_activate'),
+    url(r'^accounts/register/complete/$',
+        direct_to_template,
+        {'template': 'registration/registration_complete.html'},
+        name='registration_complete'),
     (r'^accounts/', include('registration.urls')),
 
     # TODO: Remove after testing

@@ -46,7 +46,10 @@
 				<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>{% if not forloop.last %},{% endif %}
 				{% endfor %}
 	        </td>
-			<td class="status">{% if am.check_status %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+			<td class="status">
+				<img class="am-status-img" id="status_{{ am.id }}"
+				src="{% url img_media 'status-question-small.jpg' %}">
+			</td>
 			<td class="actions">
 				{% include action_template %}
 			</td>
@@ -55,3 +58,18 @@
 		{% endfor %}
 	</table>
 </div>
+
+<script>
+	function get_status(am_id, url) {
+		$.ajax({
+			url: url,
+			success: function(data) {
+				$('img#status_'+am_id).attr("src", data);
+			}
+		});
+	}
+	{% for generic_am in aggregate_list %}
+	get_status({{ generic_am.id }}, "{% url aggregate_status_img generic_am.id %}");
+	{% endfor %}
+</script>
+

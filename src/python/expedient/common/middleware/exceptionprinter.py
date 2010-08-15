@@ -12,4 +12,3 @@ class ExceptionPrinter(object):
     def process_exception(self, request, exception):
         logger.error("Got exception %s of type %s"
                      % (exception, type(exception)))
-        
