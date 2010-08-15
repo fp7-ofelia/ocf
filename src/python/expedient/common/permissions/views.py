@@ -70,10 +70,10 @@ def request_permission(always_redirect_to=None,
             return request_permission()(*args, **kwargs)
     
     The view's template context will have:
-    - C{form}: the form to show the user. By default, this is a
-        L{PermissionRequestForm}
-    - C{obj_perm}: the L{ObjectPermission} instance requested.
-    - Any extra items defined in C{extra_context}.
+        - C{form}: the form to show the user. By default, this is a
+            L{PermissionRequestForm}
+        - C{obj_perm}: the L{ObjectPermission} instance requested.
+        - Any extra items defined in C{extra_context}.
     
     The form will show all users that can delegate the requested permission by
     default. To change the shown set, specify C{permission_owners_func} which

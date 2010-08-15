@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 from django.views.generic import list_detail, create_update, simple
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404

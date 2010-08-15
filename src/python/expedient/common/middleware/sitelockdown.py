@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 from django.conf import settings
 from django.http import HttpResponseRedirect

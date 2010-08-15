@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 try:
     from threading import local

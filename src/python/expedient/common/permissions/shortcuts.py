@@ -43,7 +43,7 @@ def has_permission(permittee, target_obj_or_class, perm_name):
         is being checked.
     @type target_obj_or_class: C{Model} instance or C{class}.
     @param perm_name: The name of the permission
-    @type permission: C{str}.
+    @type perm_name: C{str}.
     @return: Whether or not the permittee has the permission
     @rtype: C{bool}
     """
@@ -68,7 +68,7 @@ def must_have_permission(permittee, target_obj_or_class, perm_name, allow_redire
         is being checked.
     @type target_obj_or_class: C{Model} instance or C{class}.
     @param perm_name: The name of the permission
-    @type permission: C{str}.
+    @type perm_name: C{str}.
     @keyword allow_redirect: Should the user be redirected if the permission
         is denied to the permission's redirection URL? Default True
     @type allow_redirect: C{bool}

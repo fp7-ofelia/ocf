@@ -68,14 +68,14 @@ class require_objs_permissions_for_view(object):
     
     For example::
     
-    @require_objs_permissions_for_view(
-        ["can_delete_comment"],
-        lambda(request, blog_id, comment_id): get_object_or_404(Blog, pk=blog_id),
-        lambda(request, blog_id, comment_id): Comment.objects.filter(pk=comment_id),
-        ["POST"],
-    )
-    def delete_blog_comment(request, blog_id, comment_id):
-        ...
+        @require_objs_permissions_for_view(
+            ["can_delete_comment"],
+            lambda(request, blog_id, comment_id): get_object_or_404(Blog, pk=blog_id),
+            lambda(request, blog_id, comment_id): Comment.objects.filter(pk=comment_id),
+            ["POST"],
+        )
+        def delete_blog_comment(request, blog_id, comment_id):
+            ...
     
     @param perm_names: a list of permission names that are required.
     @type perm_names: L{list} of L{str}

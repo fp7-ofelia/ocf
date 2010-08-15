@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 from django.conf.urls.defaults import patterns, url
 

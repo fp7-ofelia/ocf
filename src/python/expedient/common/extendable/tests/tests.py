@@ -1,5 +1,5 @@
 '''
-@author jnaous
+@author: jnaous
 '''
 from expedient.common.tests.manager import SettingsTestCase
 from models import OtherModel, OtherModelRel, TestChild, TestOtherChild, \
