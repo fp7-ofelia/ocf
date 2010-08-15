@@ -2,7 +2,8 @@
 @author: jnaous
 '''
 from django.views.generic import list_detail, create_update, simple
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404,\
+    HttpResponse
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.aggregate.forms import AggregateTypeForm
 from django.core.urlresolvers import reverse
@@ -16,6 +17,7 @@ from expedient.common.permissions.utils import get_user_from_req, get_queryset,\
 from django.contrib.auth.models import User
 from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.slice.models import Slice
+import traceback
 
 logger = logging.getLogger("AggregateViews")
 
@@ -132,3 +134,21 @@ def get_can_use_permission(request, permission, permittee,
     else: # isinstance(permittee, User)
         return HttpResponseRedirect(
             aggregate.as_leaf_class().add_to_user(permittee, next))
+
+def status_img_url(request, agg_id):
+    """Get the url for the status image of the aggregate"""
+    
+    aggregate = get_object_or_404(Aggregate, pk=agg_id)
+    
+    success = HttpResponse(reverse("img_media", args=["active.png"]))
+    fail = HttpResponse(reverse("img_media", args=["inactive.png"]))
+    
+    try:
+        if aggregate.check_status():
+            return success
+        else:
+            return fail
+    except:
+        traceback.print_exc()
+        return fail
+        
