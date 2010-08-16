@@ -96,6 +96,45 @@ Manual Installation
 
 So you wanna do it the difficult way? Alright.
 
+Dependencies
+............
+
+The libraries that Expedient depends on are mostly included in
+the package. Here are the other packages you will need:
+
+* make
+* gcc
+* python
+* apache >= 2.0.0
+* apache-mod_ssl
+* apache-mod_wsgi
+* apache-mod_macro
+* openssl
+
+Building
+........
+
+To start building, just run::
+
+    $ cd <expedient-dir>
+    $ make
+    $ make install
+
+Replace :file:`<expedient-dir>` with the path to your expedient
+directory. The make above is just a wrapper around the build systems
+of the included libraries, and so you might get errors for missing
+packages for those.
+
+Connecting to Apache
+....................
+
+The package includes Apache configuration files to help you use
+Expedient through Apache with mod_wsgi. You will need to include the
+following files in your Apache config file (usually
+:file:`/etc/apache/httpd.conf`):
+
+* :file:`<expedient-dir>/src/config/expedient/common/vhost-macros.conf`
+* :file:`<expedient-dir>/src/config/expedient/clearinghouse/vhost-clearinghouse.conf`
 
 
 .. _VMware Player: http://www.vmware.com/support/product-support/player/
