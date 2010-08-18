@@ -151,8 +151,9 @@ class ExpedientPermissionManager(models.Manager):
             # Check if all perm_names exist.
             qs = self.filter(name__in=perm_names)
             if qs.count() < len(set(perm_names)):
-                for name in qs.values_list("name", flat=True):
-                    if name not in perm_names:
+                found = list(qs.values_list("name", flat=True))
+                for name in perm_names:
+                    if name not in found:
                         raise PermissionDoesNotExist(name)
             # Find the missing permission
             for perm_name in perm_names:
