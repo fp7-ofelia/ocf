@@ -78,7 +78,7 @@ Player, but don't start it yet.
 
 #. In a terminal, run::
 
-       $ setup-site
+       $ setup-site.sh
 
    This command propagates the settings in :file:`expedient-settings` to the
    rest of the installation. Be sure to run the command every time the
