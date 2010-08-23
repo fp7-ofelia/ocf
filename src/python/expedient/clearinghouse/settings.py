@@ -11,11 +11,14 @@ from expedient.clearinghouse.defaultsettings.database import *
 from expedient.clearinghouse.defaultsettings.admins import *
 from expedient.clearinghouse.defaultsettings.email import *
 from expedient.clearinghouse.defaultsettings.expedient import *
+from expedient.clearinghouse.defaultsettings.logging import *
 from expedient.clearinghouse.defaultsettings.gcf import *
 from expedient.clearinghouse.defaultsettings.messaging import *
 from expedient.clearinghouse.defaultsettings.openflow import *
 from expedient.clearinghouse.defaultsettings.site import *
 from expedient.clearinghouse.defaultsettings.xmlrpc import *
+from expedient.clearinghouse.defaultsettings.openflowtests import *
+from expedient.clearinghouse.defaultsettings.tests import *
 # Add new default settings here
 
 # Import the list of required variables
@@ -46,6 +49,6 @@ for item in REQUIRED_SETTINGS:
 from expedient.common import loggingconf
 import logging
 if DEBUG:
-    loggingconf.set_up(logging.DEBUG)
+    loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
-    loggingconf.set_up(logging.INFO)
+    loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
