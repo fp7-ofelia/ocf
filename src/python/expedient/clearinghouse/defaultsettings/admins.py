@@ -9,3 +9,6 @@ ADMINS = ()
 
 MANAGERS = ()
 '''See Django documentation.'''
+
+ROOT_USERNAME = "expedient"
+ROOT_PASSWORD = "expedient"
