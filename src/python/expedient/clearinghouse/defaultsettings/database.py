@@ -17,7 +17,7 @@ Options are 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = "expedient"
 '''Name of the database to use or path to database file if using sqlite3..'''
 
-DATABASE_USER = 'expedient'
+DATABASE_USER = 'root'
 '''Database username. Not used with sqlite3.'''
 
 DATABASE_PASSWORD = 'password'
