@@ -101,6 +101,7 @@ INSTALLED_APPS = (
     'expedient.common.xmlrpc_serverproxy',
     'expedient.common.messaging',
     'expedient.common.defaultsite',
+    'expedient.clearinghouse.commands',
     'expedient.clearinghouse.aggregate',
     'expedient.clearinghouse.roles',
     'expedient.clearinghouse.project',
