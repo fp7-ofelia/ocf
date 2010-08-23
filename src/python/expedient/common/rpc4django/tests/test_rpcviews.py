@@ -26,7 +26,8 @@ class TestRPCViews(SettingsTestCase):
                 'django.middleware.csrf.CsrfViewMiddleware',
                 'django.contrib.sessions.middleware.SessionMiddleware',
                 'django.contrib.auth.middleware.AuthenticationMiddleware',
-            )
+            ),
+            DEBUG_PROPAGATE_EXCEPTIONS=False,
         )
         self.rpc_path = reverse("serve_rpc_request")
         self.ns_rpc_path = reverse("my_url_name")
