@@ -4,7 +4,7 @@ Created on Aug 19, 2010
 
 @author: jnaous
 '''
-import sys
+import sys, traceback
 
 from expedient.clearinghouse.defaultsettings.django import *
 from expedient.clearinghouse.defaultsettings.database import *
@@ -31,6 +31,17 @@ for item in REQUIRED_SETTINGS:
     for var in item[1]:
         delattr(_this_mod, var)
         
+# Try getting importing the secret key from a secret_key module
+try:
+    from expedient.clearinghouse.secret_key import SECRET_KEY
+except ImportError:
+    traceback.print_exc()
+    print(
+        "Error importing secret_key module. Using default insecure key."
+        "Please run the 'create_secret_key' manage.py command to create "
+        "a new secret key."
+    )
+
 # Now import the local settings
 from expedient.clearinghouse.localsettings import *
 
