@@ -7,7 +7,6 @@ Created on Aug 19, 2010
 
 REQUIRED_SETTINGS = [
     ("admins", ["ADMINS", "MANAGERS"]),
-    ("django", ["SECRET_KEY"]),
     ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
     ("gcf", ["GCF_URN_PREFIX"]),
     ("site", ["SITE_DOMAIN"]),
