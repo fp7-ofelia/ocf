@@ -8,6 +8,7 @@ PAPER         =
 BUILDDIR      = build
 SRCDIR        = ../../python
 EXPEDIENTDIR  = $(SRCDIR)/expedient
+OPENFLOWDIR   = $(SRCDIR)/openflow/plugin
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -134,7 +135,8 @@ doctest:
 apidocs:
 	PYTHONPATH=$(SRCDIR) \
 	DJANGO_SETTINGS_MODULE=expedient.clearinghouse.settings \
-	epydoc -v --html $(EXPEDIENTDIR) -o $(BUILDDIR)/html/api --name Expedient \
+	epydoc -v --html -o $(BUILDDIR)/html/api --name Expedient \
 	--url http://yuba.stanford.edu/~jnaous/expedient/ \
-	--graph classtree
+	--graph classtree \
+	$(EXPEDIENTDIR) $(OPENFLOWDIR)
 
