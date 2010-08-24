@@ -106,6 +106,9 @@ class PermissionDoesNotExist(PermissionException):
             message += " for target '%s'." % target
         else:
             message += "."
+        message += " If you already have a line to create the permission in " \
+            "a permissions.py file, then you might have not run syncdb to " \
+            "create the permission."
         super(PermissionDoesNotExist, self).__init__(message)
 
 class PermissionCannotBeDelegated(PermissionException):

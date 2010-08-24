@@ -35,8 +35,8 @@ Contents:
    :maxdepth: 2
    
    user/index
+   admin/index
 ..   developer/index
-..   admin/index
 
 
 Indices and tables

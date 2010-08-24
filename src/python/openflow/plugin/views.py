@@ -34,7 +34,7 @@ TEMPLATE_PATH = "openflow/plugin"
     perm_names=["can_add_aggregate"],
     permittee_func=get_user_from_req,
     target_func=get_queryset_from_class(Aggregate),
-    methods=["POST"])    
+    methods=["POST", "GET"])
 def aggregate_create(request):
     return aggregate_crud(request)
 
@@ -42,7 +42,7 @@ def aggregate_create(request):
     perm_names=["can_edit_aggregate"],
     permittee_func=get_user_from_req,
     target_func=get_queryset(OpenFlowAggregate, "agg_id"),
-    methods=["POST"])
+    methods=["POST", "GET"])
 def aggregate_edit(request, agg_id):
     return aggregate_crud(request, agg_id=agg_id)
     

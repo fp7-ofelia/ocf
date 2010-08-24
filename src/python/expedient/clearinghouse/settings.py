@@ -1,246 +1,65 @@
-'''
+'''Pull all the default settings and then all overrides.
+
+Created on Aug 19, 2010
+
 @author: jnaous
 '''
-# Django settings for clearinghouse project.
-from os.path import dirname, join
+import sys, traceback
 
-SRC_DIR = join(dirname(__file__), '../../../')
+from expedient.clearinghouse.defaultsettings.django import *
+from expedient.clearinghouse.defaultsettings.database import *
+from expedient.clearinghouse.defaultsettings.admins import *
+from expedient.clearinghouse.defaultsettings.email import *
+from expedient.clearinghouse.defaultsettings.expedient import *
+from expedient.clearinghouse.defaultsettings.logging import *
+from expedient.clearinghouse.defaultsettings.gcf import *
+from expedient.clearinghouse.defaultsettings.messaging import *
+from expedient.clearinghouse.defaultsettings.openflow import *
+from expedient.clearinghouse.defaultsettings.site import *
+from expedient.clearinghouse.defaultsettings.xmlrpc import *
+from expedient.clearinghouse.defaultsettings.openflowtests import *
+from expedient.clearinghouse.defaultsettings.tests import *
+# Add new default settings here
 
-# For serving static content - dev version only
-STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
+# Import the list of required variables
+from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
 
-#DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-#DATABASE_NAME = join(SRC_DIR, '../db/expedient/clearinghouse/clearinghouse.db') # Or path to database file if using sqlite3.
-#DATABASE_USER = ''             # Not used with sqlite3.
-#DATABASE_PASSWORD = ''         # Not used with sqlite3.
-#DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-#DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
-DATABASE_ENGINE = 'mysql'      # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = "expedient"    # Or path to database file if using sqlite3.
-DATABASE_USER = 'expedient'    # Not used with sqlite3.
-DATABASE_PASSWORD = 'password' # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+# Delete all the default required settings
+_modname = globals()['__name__']
+_this_mod = sys.modules[_modname]
+for item in REQUIRED_SETTINGS:
+    for var in item[1]:
+        delattr(_this_mod, var)
+        
+# Try getting importing the secret key from a secret_key module
+try:
+    from expedient.clearinghouse.secret_key import SECRET_KEY
+except ImportError:
+    traceback.print_exc()
+    print(
+        "Error importing secret_key module. Using default insecure key."
+        "Please run the 'create_secret_key' manage.py command to create "
+        "a new secret key."
+    )
 
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+# Now import the local settings
+from expedient.clearinghouse.localsettings import *
 
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
-USE_I18N = True
-
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = join(STATIC_DOC_ROOT, "media")
-
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static/media'
-
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/admin/media/'
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '6=egu-&rx7a+h%yjlt=lny=s+uz0$a_p8je=3q!+-^4w^zxkb8'
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-)
-
-MIDDLEWARE_CLASSES = (
-    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.RemoteUserMiddleware',
-    'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
-    'expedient.common.middleware.sitelockdown.SiteLockDown',
-    'expedient.common.middleware.threadlocals.ThreadLocals',
-    'expedient.common.permissions.middleware.PermissionMiddleware',
-)
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-#    'django.contrib.backends.RemoteUserBackend',
-#    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
-    'geni.backends.GENIRemoteUserBackend',
-)
-
-ROOT_URLCONF = 'expedient.clearinghouse.urls'
-
-TEMPLATE_DIRS = (
-    join(SRC_DIR, 'templates'),
-    join(SRC_DIR, 'templates/expedient/clearinghouse'),
-    join(SRC_DIR, 'templates/expedient/common'),
-)
-
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.admin',
-    'django_extensions',
-    'django_evolution',
-    'autoslug',
-    'registration',
-    'expedient.common.permissions',
-    'expedient.common.breadcrumbs',
-    'expedient.common.rpc4django',
-    'expedient.common.utils',
-    'expedient.common.extendable',
-    'expedient.common.xmlrpc_serverproxy',
-    'expedient.common.messaging',
-    'expedient.common.defaultsite',
-    'expedient.clearinghouse.aggregate',
-    'expedient.clearinghouse.roles',
-    'expedient.clearinghouse.project',
-    'expedient.clearinghouse.resources',
-    'expedient.clearinghouse.slice',
-    'expedient.clearinghouse.users',
-    'expedient.clearinghouse.permissionmgmt',
-    'openflow.plugin',
-    'geni',
-    'geni.planetlab',
-    'expedient.ui.html',
-###### For Testing #######################
-    'openflow.dummyom',
-)
-
-LOGIN_REDIRECT_URL = '/'
-
-AUTH_PROFILE_MODULE = "users.UserProfile"
-
-DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
-EMAIL_SUBJECT_PREFIX = '[GENI-Clearinghouse] '
-
-# Registration App settings
-ACCOUNT_ACTIVATION_DAYS = 3
-
-# XML-RPC settings
-XMLRPC_TRUSTED_CA_PATH = join(SRC_DIR, '../ssl.crt')
-XMLRPC_TIMEOUT = 120
-MY_CA = join(XMLRPC_TRUSTED_CA_PATH, 'ca.crt')
-
-# default site
-SITE_ID = 1
-SITE_NAME = "Expedient Clearinghouse"
-SITE_DOMAIN = "clearinghouse.geni.org"
-
-# Messaging settings
-NUM_LATEST_MSGS = 10
-NUM_CONTEXT_MSGS = 3
-
-# Aggregate app settings
-AGGREGATE_LOGOS_DIR = "aggregate_logos/"
-
-# Openflow GAPI settings
-OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+openflow:stanford"
-OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+openflow:stanford+am+authority"
-
-# Which types of non-OpenFlow resources do OpenFlow Interface connect to? 
-OPENFLOW_OTHER_RESOURCES = (
-    ("geni.planetlab", "PlanetLabNode"),
-)
-
-DEBUG = True
-
-# For Testing
-# URLs that accept HTTP Basic Authentication.
-BASIC_AUTH_URLS = (
-    r'^/dummyom/.*',
-)
-
-# List of locations that do not need authentication to access.
-SITE_LOCKDOWN_EXCEPTIONS = (
-    r'^/accounts/register/.*$',
-    r'^/accounts/activate/.*$',
-    r'^/admin/.*',
-    r'^/accounts/password/reset/.*$',
-    r'^/img/.*',
-    r'^/css/.*',
-    r'^/static/media/.*',
-    r'.*/xmlrpc/?',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    'django.core.context_processors.request',
-    'expedient.common.messaging.context_processors.messaging',
-)
-
-# Installed UI Plugins
-UI_PLUGINS = (
-    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
-)
-
-# Installed Aggregate Models
-AGGREGATE_PLUGINS = (
-    ('openflow.plugin.models.OpenFlowAggregate'),
-    ('geni.planetlab.models.PlanetLabAggregate'),
-)
-
-# What is the scheme to use when sending urls? 
-DOMAIN_SCHEME = "https"
-
-# Location of GENI x509 certs and keys
-GCF_X509_CERT_DIR = join(SRC_DIR, "../gcf-x509.crt")
-GCF_X509_KEY_DIR = join(SRC_DIR, "../gcf-x509.key")
-GCF_X509_CRED_DIR = join(SRC_DIR, "../gcf-x509.cred")
-
-GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")
-GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.key")
-
-GCF_X509_CA_CERT = join(GCF_X509_CERT_DIR, "ca.crt")
-GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.key")
-
-GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
-
-# The domain name in URNs. This must not have any spaces or illegal characters
-# not allowed in URNs or you will get cryptic errors.
-GCF_URN_PREFIX = "expedient:stanford"
-
-# Latest version of the GENI API
-CURRENT_GAPI_VERSION = 1
-
-# get custom install info
-from deployment_settings import *
-
-TEMPLATE_DEBUG = DEBUG
-MANAGERS = ADMINS
-
-# Session cookie names to avoid conflicts
-SESSION_COOKIE_NAME = "ch_sessionid"
-
-# workaround to allow test:// schemes
-import urlparse
-urlparse.uses_netloc.append("test")
-urlparse.uses_fragment.append("test")
+# check that all the required settings are set
+for item in REQUIRED_SETTINGS:
+    for var in item[1]:
+        if not hasattr(_this_mod, var):
+            raise Exception(
+                "Missing required setting %s. See the "
+                "documentation for this setting at "
+                "expedient.clearinghouse.defaultsettings.%s"
+                % (var, item[0])
+            )
 
 # Logging
 from expedient.common import loggingconf
 import logging
 if DEBUG:
-    loggingconf.set_up(logging.DEBUG)
+    loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
-    loggingconf.set_up(logging.INFO)
-
-DEBUG_PROPAGATE_EXCEPTIONS = True
+    loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
