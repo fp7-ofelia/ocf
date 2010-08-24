@@ -78,7 +78,7 @@ Player, but don't start it yet.
 
 #. In a terminal, run::
 
-       $ setup-site
+       $ setup-site.sh
 
    This command propagates the settings in :file:`expedient-settings` to the
    rest of the installation. Be sure to run the command every time the
@@ -125,8 +125,12 @@ directory. The make above is just a wrapper around the build systems
 of the included libraries, and so you might get errors for missing
 packages for those.
 
-Connecting to Apache
-....................
+Configuration
+.............
+
+At this point, you are not yet ready to start using Expedient. You
+need to configure Apache to talk to the Expedient Django application,
+and you need to edit your Expedient settings.
 
 The package includes Apache configuration files to help you use
 Expedient through Apache with mod_wsgi. You will need to include the
@@ -136,6 +140,22 @@ following files in your Apache config file (usually
 * :file:`<expedient-dir>/src/config/expedient/common/vhost-macros.conf`
 * :file:`<expedient-dir>/src/config/expedient/clearinghouse/vhost-clearinghouse.conf`
 
+Make sure that the :file:`vhost-macros.conf` file is included before
+:file:`vhost-clearinghouse.conf`. Then edit the installed
+:file:`vhost-clearinghouse.conf` file and replace the line::
+
+    Use SimpleSSLWSGIVHost 443 expedient/clearinghouse /home/expedient/expedient
+
+with::
+
+    Use SimpleSSLWSGIVHost 443 expedient/clearinghouse <expedient-dir>
+
+If your Apache configuration does not already have a ``Listen 443``
+directive somewhere, then uncomment it from the
+:file:`vhost-clearinghouse.conf` file. You can also change the port
+that Expedient is running on by changing the ``443`` number to the new
+port number you want to use. Don't forget to make sure there's a
+``Listen`` directive for the new port.
 
 .. _VMware Player: http://www.vmware.com/support/product-support/player/
 .. _here: http://yuba.stanford.edu/~jnaous/expedient/expedient-vm-latest.tar.gz
