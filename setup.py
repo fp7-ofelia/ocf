@@ -5,11 +5,25 @@ Created on Aug 23, 2010
 
 @author: jnaous
 '''
+import sys
+sys.path.append("src/python")
+
+from ez_setup import use_setuptools
+use_setuptools()
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test
+
+def run_tests(*args):
+    import subprocess, shlex
+    subprocess.call(shlex.split(
+        "python src/python/expedient/clearinghouse/manage.py test_expedient"
+    ))
+
+test.run_tests = run_tests
 
 setup(
-    name="Expedient",
+    name="expedient",
     version="0.2.0",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
