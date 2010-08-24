@@ -6,6 +6,7 @@
 from os.path import dirname, join
 
 SRC_DIR = join(dirname(__file__), '../../../../')
+PROJ_DIR = join(dirname(__file__), '../')
 
 # For serving static content - dev version only
 STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
