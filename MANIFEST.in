@@ -1,4 +1,5 @@
 recursive-include bin *
+recursive-include db *
 recursive-include src/python *.html *.js
 recursive-include src/config *
 recursive-include src/doc *
@@ -11,3 +12,4 @@ exclude src/python/expedient/clearinghouse/localsettings.py
 exclude src/python/expedient/clearinghouse/secret_key.py
 exclude src/python/openflow/optin_manager/localsettings.py
 exclude src/python/openflow/optin_manager/secret_key.py
+recursive-exclude db .dirholder
