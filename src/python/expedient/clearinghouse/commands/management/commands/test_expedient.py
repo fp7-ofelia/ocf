@@ -1,4 +1,8 @@
 """A command to run the tests specified in settings.TEST_APPS
+
+Created on Aug 22, 2010
+
+@author: jnaous
 """
 from django.core.management.base import NoArgsCommand
 from django.core.management import call_command
