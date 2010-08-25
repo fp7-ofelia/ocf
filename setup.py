@@ -49,7 +49,14 @@ def get_data_files():
     data_files = []
     for f in found:
         if f:
-            data_files.append((os.path.dirname(strip_src(f)), [f]))
+            data_files.append((
+                os.path.join(
+                    "share/expedient",
+                    os.path.dirname(strip_src(f))
+                ),
+                [f],
+            ))
+            
     return data_files
 
 def run_tests(*args):
@@ -62,7 +69,7 @@ test.run_tests = run_tests
 
 setup(
     name="expedient",
-    version="0.2.0",
+    version="0.2.1",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
     author_email="jnaous@stanford.edu",
