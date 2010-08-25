@@ -4,12 +4,52 @@
 '''
 # Django settings for clearinghouse project.
 from os.path import dirname, join
+import pkg_resources
 
-SRC_DIR = join(dirname(__file__), '../../../../')
-PROJ_DIR = join(dirname(__file__), '../')
+try:
+    from localsettings import SRC_DIR as location
+except ImportError:
+    location = pkg_resources.resource_filename(
+        pkg_resources.Requirement.parse("expedient"), "")
+    # TODO: Hack!
+    if location.endswith("src/python"):
+        location = location[:-7]
 
-# For serving static content - dev version only
-STATIC_DOC_ROOT = join(SRC_DIR, 'static/expedient/clearinghouse')
+SRC_DIR = location
+'''Base location of non-python source files.'''
+
+try:
+    from localsettings import CONF_DIR as location
+except ImportError:
+    # TODO: Hack!
+    if SRC_DIR.endswith(".egg"):
+        location = "/etc/expedient"
+    else:
+        location = pkg_resources.resource_filename(
+            "expedient.clearinghouse", "")
+        
+CONF_DIR = location
+'''Location of local Expedient configuration files.
+
+Example: /etc/expedient/
+
+'''
+
+try:
+    from localsettings import STATIC_DOC_ROOT as location
+except ImportError:
+    # TODO: Hack!
+    if SRC_DIR.endswith(".egg"):
+        location = "/srv/www/expedient"
+    else:
+        location = join(SRC_DIR, 'static', 'expedient', 'clearinghouse')
+
+STATIC_DOC_ROOT = location
+'''Location of static content.
+
+Example: /srv/www/expedient/
+
+'''
 
 TIME_ZONE = 'America/Los_Angeles'
 '''Local time zone for this installation.
@@ -22,17 +62,17 @@ system time zone.
 
 '''
 
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
+'''Language code for this installation. All choices can be found here:
+http://www.i18nguy.com/unicode/language-identifiers.html'''
 
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
-USE_I18N = True
+USE_I18N = False
+'''If you set this to False, Django will make some optimizations so as not
+to load the internationalization machinery.'''
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = join(STATIC_DOC_ROOT, "media")
+'''Absolute path to the directory that holds media.
+Example: "/home/media/media.lawrence.com/"'''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
