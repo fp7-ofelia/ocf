@@ -32,26 +32,27 @@ def strip_src(f):
     if f and f.startswith("src/"):
         return f[4:]
 
-DATA_DIRS = ["src/config", "src/doc", "src/static",
-             "src/templates", "src/wsgi"]
+DATA_DIRS = [
+    ("src/config", "share/expedient"),
+    ("src/doc", "share/expedient"),
+    ("src/static", "share/expedient"),
+    ("src/templates", "share/expedient"),
+    ("src/wsgi", "share/expedient"),
+]
 
 EXTENSIONS = [".html", ".js", ".css", ".wsgi", ".rst", ".png", ".jpg",
              ".htm", ".pxm", ".conf"]
 
 
 def get_data_files():
-    found = []
+    data_files = []
     # get all the non-python files
     for d in DATA_DIRS:
-        found.extend(get_files(d, *EXTENSIONS))
-    
-    # return a list of tuples (dir, [file])
-    data_files = []
-    for f in found:
-        if f:
+        found = get_files(d[0], *EXTENSIONS)
+        for f in found:
             data_files.append((
                 os.path.join(
-                    "share/expedient",
+                    d[1],
                     os.path.dirname(strip_src(f))
                 ),
                 [f],
@@ -91,7 +92,7 @@ setup(
         'django-renderform',
         'webob',
         'pyOpenSSL',
-        'PyMySQL',
+        'MySQL-python>=1.2.1p2',
         'pyquery',
     ],
     extras_require={
@@ -103,6 +104,7 @@ setup(
     entry_points={
         "console_scripts": [
             "manage_expedient = expedient.clearinghouse.manage:main",
+            "bootstrap_expedient = expedient.clearinghouse.commands.utils:bootstrap_local_settings",
         ],
     },
 )
