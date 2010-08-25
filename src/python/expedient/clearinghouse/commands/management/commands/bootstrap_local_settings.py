@@ -9,6 +9,7 @@ import pkg_resources
 import os
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
+from expedient.clearinghouse.commands.utils import bootstrap_local_settings
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
@@ -25,19 +26,5 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         conf_dir = os.path.abspath(options.get('path', settings.CONF_DIR))
-        loc = os.path.join(conf_dir, "localsettings.py")
-        pkg_resources.ensure_directory(loc)
-        if os.access(loc, os.F_OK):
-            print "ERROR: Found localsettings already. "\
-                "Cowardly refusing to overwrite."
-            return
-        print "Creating skeleton localsettings.py file. in %s" % conf_dir
-        f = open(loc, mode="w")
-        # write the conf dir location
-        f.write("CONF_DIR = '%s'\n" % conf_dir)
-        for item in settings.REQUIRED_SETTINGS:
-            for var in item[1]:
-                f.write("%s = None\n" % var)
-        f.close()
-        print "Done."
+        bootstrap_local_settings(conf_dir=conf_dir)
         
