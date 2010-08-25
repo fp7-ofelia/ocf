@@ -14,7 +14,7 @@ from setuptools.command.test import test
 def get_files(path, *extensions):
     """Recursively get all files"""
     found = []
-                
+    
     for dirpath, dirnames, filenames in os.walk(path):
         def get_path(f):
             if extensions:
@@ -70,7 +70,7 @@ test.run_tests = run_tests
 
 setup(
     name="expedient",
-    version="0.2.1",
+    version="0.2.2",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
     author_email="jnaous@stanford.edu",
@@ -103,8 +103,9 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            "manage_expedient = expedient.clearinghouse.manage:main",
-            "bootstrap_expedient = expedient.clearinghouse.commands.utils:bootstrap_local_settings",
+            "expedient_manage = expedient.clearinghouse.manage:main",
+            "expedient_bootstrap_localsettings = expedient.clearinghouse.commands.utils:bootstrap_local_settings",
+            "expedient_bootstrap_mysql = expedient.clearinghouse.commands.utils:bootstrap_expedient_mysql",
         ],
     },
 )
