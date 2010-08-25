@@ -33,7 +33,7 @@ for item in REQUIRED_SETTINGS:
         
 # Try getting importing the secret key from a secret_key module
 try:
-    from expedient.clearinghouse.secret_key import SECRET_KEY
+    from secret_key import SECRET_KEY
 except ImportError:
     traceback.print_exc()
     print(
@@ -43,7 +43,7 @@ except ImportError:
     )
 
 # Now import the local settings
-from expedient.clearinghouse.localsettings import *
+from localsettings import *
 
 # check that all the required settings are set
 for item in REQUIRED_SETTINGS:
