@@ -5,11 +5,52 @@ Created on Aug 23, 2010
 
 @author: jnaous
 '''
-import sys
+import sys, glob, os
 sys.path.append("src/python")
 
 from setuptools import setup, find_packages
 from setuptools.command.test import test
+
+def get_files(path, *extensions):
+    """Recursively get all files"""
+    found = []
+                
+    for dirpath, dirnames, filenames in os.walk(path):
+        def get_path(f):
+            if extensions:
+                matches = False
+                for ext in extensions:
+                    if f.endswith(ext):
+                        matches = True
+                if not matches:
+                    return
+            return os.path.join(dirpath, f)
+        found.extend(filter(None, map(get_path, filenames)))
+    return found
+
+def strip_src(f):
+    if f and f.startswith("src/"):
+        return f[4:]
+
+DATA_DIRS = ["src/config", "src/doc", "src/static",
+             "src/templates", "src/wsgi"]
+
+EXTENSIONS = [".html", ".js", ".css", ".wsgi", ".rst", ".png", ".jpg",
+             ".htm", ".pxm", ".conf"]
+
+
+def get_data_files():
+    found = []
+    # get all the non-python files
+    for d in DATA_DIRS:
+        found.extend(get_files(d, *EXTENSIONS))
+    
+    # return a list of tuples (dir, [file])
+    data_files = []
+    for f in found:
+        if f:
+            data_files.append((os.path.dirname(strip_src(f)), [f]))
+    return data_files
 
 def run_tests(*args):
     import subprocess, shlex
@@ -50,8 +91,11 @@ setup(
         "docs": ["Sphinx", "pygments", "epydoc"],
     },
     include_package_data=True,
-    package_data={
-        "": ["/src/static", "/src/templates", "/src/wsgi"],
-    },
+    data_files=get_data_files(),
     zip_safe=False,
+    entry_points={
+        "console_scripts": [
+            "manage_expedient = expedient.clearinghouse.manage:main",
+        ],
+    },
 )
