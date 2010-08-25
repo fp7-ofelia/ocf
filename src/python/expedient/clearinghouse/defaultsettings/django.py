@@ -14,6 +14,8 @@ except ImportError:
     # TODO: Hack!
     if location.endswith("src/python"):
         location = location[:-7]
+    else:
+        location = location + "/share/expedient"
 
 SRC_DIR = location
 '''Base location of non-python source files.'''
@@ -22,11 +24,7 @@ try:
     from localsettings import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
-    if SRC_DIR.endswith(".egg"):
-        location = "/etc/expedient"
-    else:
-        location = pkg_resources.resource_filename(
-            "expedient.clearinghouse", "")
+    location = "/etc/expedient"
         
 CONF_DIR = location
 '''Location of local Expedient configuration files.
@@ -38,11 +36,7 @@ Example: /etc/expedient/
 try:
     from localsettings import STATIC_DOC_ROOT as location
 except ImportError:
-    # TODO: Hack!
-    if SRC_DIR.endswith(".egg"):
-        location = "/srv/www/expedient"
-    else:
-        location = join(SRC_DIR, 'static', 'expedient', 'clearinghouse')
+    location = "/srv/www/expedient"
 
 STATIC_DOC_ROOT = location
 '''Location of static content.
