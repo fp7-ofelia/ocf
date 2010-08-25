@@ -15,7 +15,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         print "Generating new key in secret_key.py..."
         key = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-        f = open(os.path.join(settings.PROJ_DIR, "secret_key.py"), mode="w")
+        f = open(os.path.join(settings.CONF_DIR, "secret_key.py"), mode="w")
         f.write("SECRET_KEY = '%s'\n" % key)
         f.close()
         print "Done."
