@@ -4,8 +4,8 @@ Created on Aug 19, 2010
 
 @author: jnaous
 '''
-from os.path import join, dirname
-_SRC_DIR = join(dirname(__file__), '../../../../')
+from os.path import join
+from django import CONF_DIR
 
 GCF_URN_PREFIX = "expedient:stanford"
 '''The domain name used in URNs when creating certificates mainly.
@@ -19,13 +19,13 @@ URNs or you will get cryptic errors.
 '''
 
 # Location of GENI x509 certs and keys
-GCF_X509_CERT_DIR = join(_SRC_DIR, "../gcf-x509.crt")
+GCF_X509_CERT_DIR = join(CONF_DIR, "gcf-x509.crt")
 '''The location of certificates used by expedient for the GCF.'''
 
-GCF_X509_KEY_DIR = join(_SRC_DIR, "../gcf-x509.key")
+GCF_X509_KEY_DIR = join(CONF_DIR, "gcf-x509.key")
 '''The location of keys used by expedient for the GCF.'''
 
-GCF_X509_CRED_DIR = join(_SRC_DIR, "../gcf-x509.cred")
+GCF_X509_CRED_DIR = join(CONF_DIR, "gcf-x509.cred")
 '''The location of credentials used by expedient for the GCF.'''
 
 GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")

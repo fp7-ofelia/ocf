@@ -39,7 +39,7 @@ except ImportError:
     print(
         "Error importing secret_key module. Using default insecure key."
         "Please run the 'create_secret_key' manage.py command to create "
-        "a new secret key."
+        "a new secret key. Do this only after setting up your local settings."
     )
 
 # Now import the local settings
