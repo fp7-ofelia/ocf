@@ -23,7 +23,6 @@ def post_syncdb_run(sender, **kwargs):
         post_syncdb_run, "perms_installed", False)
 
     app = sender.__name__.split(".models")[0]
-    print app
 
     # installed!
     if app == "expedient.common.permissions":
