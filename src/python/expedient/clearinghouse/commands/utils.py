@@ -55,7 +55,9 @@ def create_user(root_username, root_password, username, password, db_name, host)
         """
         CREATE DATABASE %s;
         GRANT ALL on %s.* TO '%s'@'%s' IDENTIFIED BY '%s';
-        """ % (db_name, db_name, username, host, password)
+        GRANT ALL on test_%s.* TO '%s'@'%s';
+        """ % (db_name, db_name, username, host, password,
+               db_name, db_name, username, host)
     )
     cursor.close()
     
