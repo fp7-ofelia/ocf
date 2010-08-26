@@ -28,11 +28,12 @@ from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
 try:
     from secret_key import SECRET_KEY
 except ImportError:
-    traceback.print_exc()
     print(
         "Error importing secret_key module. Using default insecure key."
         "Please run the 'create_secret_key' manage.py command to create "
         "a new secret key. Do this only after setting up your local settings."
+        " If you are not yet running the production server, you can ignore "
+        "this error."
     )
 
 # Now import the local settings
@@ -70,6 +71,8 @@ except ImportError as e:
             "directory to your PYTHONPATH. Proceeding with missing "
             "required settings."
         )
+    else:
+        raise
 
 # Logging
 from expedient.common import loggingconf
