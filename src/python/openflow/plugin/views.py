@@ -199,8 +199,7 @@ def aggregate_add_links(request, agg_id):
             if new_other_cnxn_form.is_valid():
                 cnxn = new_other_cnxn_form.save()
                 DatedMessage.objects.post_message_to_user(
-                    "Added static connection %s to OpenFlow aggregate %s"
-                        % (cnxn, aggregate.name),
+                    "Added static connection %s" % cnxn,
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 return HttpResponseRedirect(request.path)
             
