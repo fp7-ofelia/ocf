@@ -41,7 +41,7 @@ DATA_DIRS = [
 ]
 
 EXTENSIONS = [".html", ".js", ".css", ".wsgi", ".rst", ".png", ".jpg",
-             ".htm", ".pxm", ".conf"]
+             ".htm", ".pxm", ".conf", ".txt", ".xml"]
 
 
 def get_data_files():
