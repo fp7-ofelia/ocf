@@ -1,14 +1,16 @@
-'''
+'''Information on administrators and login in info.
+
 Created on Aug 19, 2010
 
 @author: jnaous
 '''
 
 ADMINS = ()
-'''See Django documentation.'''
+'''Should be a list of tuples [(<admin full name>, <admin email>)]'''
 
 MANAGERS = ()
-'''See Django documentation.'''
+'''Same as L{ADMINS}'''
 
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
+ROOT_EMAIL    = "expedient@expedient.com"
