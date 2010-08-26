@@ -6,7 +6,7 @@ Views Tests
 
 import unittest
 import xmlrpclib
-from rpc4django.jsonrpcdispatcher import json, JSONRPC_SERVICE_ERROR
+from expedient.common.rpc4django.jsonrpcdispatcher import json, JSONRPC_SERVICE_ERROR
 from expedient.common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 
