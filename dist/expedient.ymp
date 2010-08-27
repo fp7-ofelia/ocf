@@ -43,7 +43,21 @@ official released RCs from the download mirrors.
         <name>Packman Repository</name>
         <summary>Packman package repository for openSUSE 11.1</summary>
         <description>Latest versions and additional packages in the most popular 3rd party repository</description>
-        <url>http://packman.mirrors.skynet.be/pub/packman/suse/11.1</url>
+        <url>http://packman.inode.at/suse/11.1</url>
+      </repository>
+      <repository recommended="true">
+        <name>Apache:Modules</name>
+        <summary>This project contains third-party modules for the Apache HTTP server.</summary>
+        <description>
+This project contains third-party modules for the Apache HTTP server.
+
+Please note that modules may be built for two targets: for the distro Apache,
+and for the (possibly newer) one which is in the 'Apache' buildservice project.
+
+Please note that PHP and Subversion are located in a project of their own.
+
+</description>
+        <url>http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.1/</url>
       </repository>
     </repositories>
     <software>
@@ -77,7 +91,7 @@ the Apache server.</description>
         <name>Packman Repository</name>
         <summary>Packman package repository for openSUSE 11.2</summary>
         <description>Latest versions and additional packages in the most popular 3rd party repository</description>
-        <url>http://packman.mirrors.skynet.be/pub/packman/suse/11.2</url>
+        <url>http://packman.inode.at/suse/11.2</url>
       </repository>
       <repository recommended="true">
         <name>home:jnaous:expedient</name>
@@ -117,6 +131,20 @@ official released RCs from the download mirrors.
 </description>
         <url>http://download.opensuse.org/distribution/11.2/repo/oss/</url>
       </repository>
+      <repository recommended="true">
+        <name>Apache:Modules</name>
+        <summary>This project contains third-party modules for the Apache HTTP server.</summary>
+        <description>
+This project contains third-party modules for the Apache HTTP server.
+
+Please note that modules may be built for two targets: for the distro Apache,
+and for the (possibly newer) one which is in the 'Apache' buildservice project.
+
+Please note that PHP and Subversion are located in a project of their own.
+
+</description>
+        <url>http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.2/</url>
+      </repository>
     </repositories>
     <software>
       <item>
@@ -149,7 +177,7 @@ the Apache server.</description>
         <name>Packman Repository</name>
         <summary>Packman package repository for openSUSE 11.3</summary>
         <description>Latest versions and additional packages in the most popular 3rd party repository</description>
-        <url>http://packman.mirrors.skynet.be/pub/packman/suse/11.3</url>
+        <url>http://packman.inode.at/suse/11.3</url>
       </repository>
       <repository recommended="true">
         <name>home:jnaous:expedient</name>
@@ -188,6 +216,20 @@ rpm and iso file downloads are disabled by intention, please use our
 official released RCs from the download mirrors.
 </description>
         <url>http://download.opensuse.org/distribution/11.3/repo/oss/</url>
+      </repository>
+      <repository recommended="true">
+        <name>Apache:Modules</name>
+        <summary>This project contains third-party modules for the Apache HTTP server.</summary>
+        <description>
+This project contains third-party modules for the Apache HTTP server.
+
+Please note that modules may be built for two targets: for the distro Apache,
+and for the (possibly newer) one which is in the 'Apache' buildservice project.
+
+Please note that PHP and Subversion are located in a project of their own.
+
+</description>
+        <url>http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.3/</url>
       </repository>
     </repositories>
     <software>
