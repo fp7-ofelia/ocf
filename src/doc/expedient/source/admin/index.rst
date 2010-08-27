@@ -198,6 +198,13 @@ You can run the internal tests by executing::
 
     $ PYTHONPATH=/etc/expedient expedient_manage test_expedient
 
+Caveat: Some of those tests will fail (in particular rpc4django tests). This
+is a known bug. You can run those tests separately with::
+
+    $ PYTHONPATH=/etc/expedient expedient_manage test rpc4django
+
+They should pass then.
+
 .. _admin-git-install:
 
 Install From Git
