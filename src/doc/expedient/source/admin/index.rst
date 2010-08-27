@@ -189,8 +189,8 @@ ports you want to allow. Then restart the firewall::
 You can completely disable the firewall::
 
     $ sudo /sbin/rcSuSEfirewall2 stop
-    $ sudo /sbin/insserv -r SuSEfirewall2_install
     $ sudo /sbin/insserv -r SuSEfirewall2_setup
+    $ sudo /sbin/insserv -r SuSEfirewall2_init
 
 Test that you can login and register new users.
 
