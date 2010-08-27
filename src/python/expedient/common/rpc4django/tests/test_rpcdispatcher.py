@@ -13,6 +13,8 @@ from xml.dom.minidom import parseString
 from expedient.common.rpc4django.rpcdispatcher import *
 from expedient.common.rpc4django.jsonrpcdispatcher import *
 
+from django.conf import settings
+
 BINARY_STRING = '\x97\xd2\xab\xc8\xfc\x98\xad'
 
 # tests both the class and the decorator
@@ -138,24 +140,6 @@ class TestRPCDispatcher(unittest.TestCase):
         self.assertTrue(jsondict['error'] is None)
         self.assertEqual(jsondict['id'], 1)
         self.assertEqual(jsondict['result'], 3)
-        
-    def test_register_methods(self):
-        self.d.register_rpcmethods(['rpc4django.tests.testmod'])
-        
-        jsontxt = '{"params":[3,1],"method":"subtract","id":1}'
-        resp = self.d.jsondispatch(jsontxt)
-        jsondict = json.loads(resp)
-        self.assertTrue(jsondict['error'] is None)
-        self.assertEqual(jsondict['id'], 1)
-        self.assertEqual(jsondict['result'], 2)
-        
-        jsontxt = '{"params":[3,2],"method":"power","id":99}'
-        resp = self.d.jsondispatch(jsontxt)
-        jsondict = json.loads(resp)
-        self.assertTrue(jsondict['error'] is None)
-        self.assertEqual(jsondict['id'], 99)
-        self.assertEqual(jsondict['result'], 9)
-        
         
     def test_kwargs(self):
         self.d.register_method(self.kwargstest)
