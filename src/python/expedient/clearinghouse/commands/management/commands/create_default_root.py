@@ -15,12 +15,13 @@ class Command(NoArgsCommand):
         "the 'defaultsettings.admins' module documentation. If the user " \
         "already exists, the user's password will be reset, and the user " \
         "will be promoted to superuser." % (
-            settings.ROOT_USERNAME, settings.ROOT_PASSWORD)
+            settings.ROOT_USERNAME, settings.ROOT_PASSWORD,
+            settings.ROOT_EMAIL)
 
     def handle_noargs(self, **options):
         try:
             u = User.objects.get(username=settings.ROOT_USERNAME)
-        except User.objects.DoesNotExist:
+        except User.DoesNotExist:
             User.objects.create_superuser(
                 settings.ROOT_USERNAME,
                 settings.ROOT_EMAIL,

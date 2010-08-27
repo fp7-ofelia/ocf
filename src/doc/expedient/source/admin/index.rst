@@ -35,14 +35,22 @@ Setup Repositories and Install RPMs
 ...................................
 
 There are prebuilt OpenSuSE 11.1, 11.2, and 11.3 packages
-available. To use these, you will need to add the repository
+available. 
+
+You can install them either using the single click wizard `1-Click Install`_
+and skip to :ref:`admin-rpm-install-configure` or manually. If the 1-Click
+installer does not start, execute the following in a terminal::
+
+    $ sudo /sbin/OCICLI http://yuba.stanford.edu/~jnaous/expedient/expedient.ymp
+
+To install manually, you will need to add the repositories
 using zypper and then install the packages. You will also need
 to install Apache and MySQL. To add the required repositories::
 
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.X python
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/home:/jnaous:/expedient/openSUSE_11.X expedient
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.X/ Apache:Modules
-    $ sudo zypper addrepo -f --repo http://packman.inode.at/suse/11.X/packman.repo
+    $ sudo zypper addrepo -f http://packman.inode.at/suse/11.X packman
 
 Replace the X with the minor version for the OpenSuSE version you're using.
 
@@ -50,6 +58,8 @@ Then install expedient, apache, and mysql, accepting the prompts to import the
 GPG keys for the repos (option ``a``) and install the packages::
 
     $ sudo zypper install python-expedient expedient-servers
+
+.. _1-Click Install: data:text/x-suse-ymu,http://yuba.stanford.edu/~jnaous/expedient/expedient.ymp
 
 .. _admin-rpm-install-configure:
 
