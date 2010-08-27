@@ -13,8 +13,6 @@ from xml.dom.minidom import parseString
 from expedient.common.rpc4django.rpcdispatcher import *
 from expedient.common.rpc4django.jsonrpcdispatcher import *
 
-from django.conf import settings
-
 BINARY_STRING = '\x97\xd2\xab\xc8\xfc\x98\xad'
 
 # tests both the class and the decorator
