@@ -9,7 +9,6 @@ It also contains a decorator to mark methods as rpc methods.
 '''
 
 import inspect
-import platform
 import pydoc
 import xmlrpclib
 from xmlrpclib import Fault
