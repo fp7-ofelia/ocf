@@ -57,9 +57,9 @@ Configure Local Settings
 ........................
 
 Next we'll need to configure the local settings. Open
-:file:`/etc/expedient/localsettings.py` as root::
+:file:`/etc/expedient/localsettings.py`::
 
-    # <your favorite editor> /etc/expedient/localsettings.py
+    $ sudo <your favorite editor> /etc/expedient/localsettings.py
 
 You can see more information on the settings at `defaultsettings
 documentation`_. Below is a list of the settings that need to be changed:
@@ -88,7 +88,7 @@ documentation`_. Below is a list of the settings that need to be changed:
   use. Default should be fine for a new database installation.
 * ``DATABASE_PASSWORD``: Set this to the password for the database user.
 
-Now to make sure that the syntax is correct, do the following:
+Now to make sure that the syntax is correct, do the following::
 
     $ PYTHONPATH=/etc/expedient python -c "import localsettings"
 
@@ -153,7 +153,7 @@ Add Apache to start on reboot::
 
 Now generate SSL certificates. Make sure you read the help for
 :command:`gensslcert` if you need to customize the generated SSL
-certificates (for example, to change the used common name).
+certificates (for example, to change the used common name)::
 
     $ sudo gensslcert
 
@@ -171,7 +171,7 @@ Create a secret key for the server, and setup the database::
 
 Don't forget to open the ports in your firewall. You can do that by editing
 the ``FW_SERVICES_EXT_TCP`` variable and include port ``443`` and any other
-ports you want to allow. Then restart the firewall:
+ports you want to allow. Then restart the firewall::
 
     $ sudo /sbin/rcSuSEfirewall2 restart
 
