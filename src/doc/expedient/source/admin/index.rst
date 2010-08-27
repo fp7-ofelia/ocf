@@ -48,6 +48,7 @@ using zypper and then install the packages. You will also need
 to install Apache and MySQL. To add the required repositories::
 
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/python/openSUSE_11.X python
+    $ sudo zypper addrepo -f http://download.opensuse.org/repositories/devel:/languages:/perl/openSUSE_11.X perl
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/home:/jnaous:/expedient/openSUSE_11.X expedient
     $ sudo zypper addrepo -f http://download.opensuse.org/repositories/Apache:/Modules/openSUSE_11.X/ Apache:Modules
     $ sudo zypper addrepo -f http://packman.inode.at/suse/11.X packman
