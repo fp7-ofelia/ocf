@@ -75,29 +75,33 @@ Next we'll need to configure the local settings. Open
 You can see more information on the settings at `defaultsettings
 documentation`_. Below is a list of the settings that need to be changed:
 
-* ``ADMINS``: Set this to ``[("<admin's full name>", "<admin's email>")]``
+* ``ADMINS``: Set this to ``[("<admin's full name>", "<admin's
+  email>")]``. See admins_.
 * ``EMAIL_HOST``: Set this to the hostname of your smtp
   server. e.g. ``"smtp.gmail.com"``. You need check the other email settings
-  for the defaults.
+  for the defaults. See email_.
 * ``DEFAULT_FROM_EMAIL``: Set this to the email address you want users to see when
-  they receive mail from Expedient. e.g. ``"no-reply@geni.net"``
+  they receive mail from
+  Expedient. e.g. ``"no-reply@geni.net"``. See email_
 * ``GCF_URN_PREFIX``: Set this to ``"expedient:<your_organization>"``. Replace
   ``<your_organization>`` with one alphanumeric word. Do not use special
-  characters. e.g. ``"expedient:stanford"``.
+  characters. e.g. ``"expedient:stanford"``. See gcf_.
 * ``SITE_DOMAIN``: Set this to the fully-qualified domain name of the Expedient
-  server. e.g. ``"expedient.stanford.edu"``
+  server. e.g. ``"expedient.stanford.edu"``. See site_.
 * ``OPENFLOW_GAPI_RSC_URN_PREFIX``: Set this to
   ``"urn:publicid:IDB+expedient:<your_organization>:openflow"``. e.g. 
-  ``"urn:publicid:IDB+expedient:stanford:openflow"``
+  ``"urn:publicid:IDB+expedient:stanford:openflow"``. See openflow_.
 * ``SITE_IP_ADDR``: Used for testing. Set to your Expedient host's IP
-  address. e.g. ``"192.168.1.1"``
+  address. e.g. ``"192.168.1.1"``. See openflowtests_.
 * ``MININET_VMS``: Used for testing. Set to ``[("<IP address of the mininet VM>",
   ssh port num)]``. e.g. ``[("192.168.1.2", 22)]``. This will only be needed if you
   want to run the full OpenFlow tests. For more information, see
-  :ref:`openflow-tests`.
+  :ref:`openflow-tests` and openflowtests_.
 * ``DATABASE_USER``: Set this to the user name for the database that you want to
-  use. Default should be fine for a new database installation.
-* ``DATABASE_PASSWORD``: Set this to the password for the database user.
+  use. Default should be fine for a new database
+  installation. See database_.
+* ``DATABASE_PASSWORD``: Set this to the password for the
+  database user. See database_.
 
 Now to make sure that the syntax is correct, do the following::
 
@@ -106,6 +110,20 @@ Now to make sure that the syntax is correct, do the following::
 If you get errors, go back to localsettings.py and fix them.
 
 .. _defaultsettings documentation: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+
+.. _admins: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.admins-module.html
+
+.. _email: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.email-module.html
+
+.. _gcf: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.gcf-module.html
+
+.. _site: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.site-module.html
+
+.. _openflow: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.openflow-module.html
+
+.. _openflowtests: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.openflowtests-module.html
+
+.. _database: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.database-module.html
 
 .. _admin-rpm-install-database:
 
@@ -166,6 +184,7 @@ Now generate SSL certificates. Make sure you read the help for
 :command:`gensslcert` if you need to customize the generated SSL
 certificates (for example, to change the used common name)::
 
+    $ gensslcert -h
     $ sudo gensslcert
 
 .. _admin-rpm-install-finalize:
@@ -181,8 +200,9 @@ Create a secret key for the server, and setup the database::
     $ sudo /etc/init.d/apache2 restart
 
 Don't forget to open the ports in your firewall. You can do that by editing
-the ``FW_SERVICES_EXT_TCP`` variable and include port ``443`` and any other
-ports you want to allow. Then restart the firewall::
+the ``FW_SERVICES_EXT_TCP`` variable in
+:file:`/etc/sysconfig/SuSEfirewall2` and include port
+``443``. Then restart the firewall::
 
     $ sudo /sbin/rcSuSEfirewall2 restart
 
@@ -198,7 +218,7 @@ You can run the internal tests by executing::
 
     $ PYTHONPATH=/etc/expedient expedient_manage test_expedient
 
-Caveat: Some of those tests will fail (in particular rpc4django tests). This
+Caveat: 8 of those tests will fail (some of the rpc4django tests). This
 is a known bug. You can run those tests separately with::
 
     $ PYTHONPATH=/etc/expedient expedient_manage test rpc4django
@@ -305,33 +325,55 @@ You will need to do the following:
 For step 2 above, you can use an Expedient function::
 
     $ cd expedient/src/python
-    $  --rootpassword <your_mysql_root_password>
+    $ python
+    >>> from expedient.clearinghouse import settings
+    >>> from expedient.clearinghouse.commands.utils import create_user
+    >>> create_user(<root username>, <root password>,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_NAME,
+        settings.DATABASE_HOST or "localhost")
 
-You will get an error about the server's secret key which you can ignore for
-now.
+Replace ``<root username>`` and ``<root password>`` with your
+database's root username and password. This will probably be
+different than your OS's root username and password.
+
+You might get an error about the server's secret key which you
+can ignore for now.
 
 .. _admin-git-install-apache:
 
 Configure Apache
 ................
 
-Now you need to configure Apache. The instructions here assume you have not
-configured Apache before, and this is a new installation on OpenSuSE::
+Now you need to configure Apache. The instructions here assume
+you have Apache installed and configured. Enable ``mod_wsgi`` and
+``mod_ssl`` according to your OS. On OpenSuSE, you can do::
 
     $ sudo /usr/sbin/a2enmod wsgi
     $ sudo /usr/sbin/a2enmod ssl
     $ sudo /usr/sbin/a2enflag SSL
-    $ sudo ln -s /etc/expedient/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
 
-Add Apache to start on reboot::
+Next you will need to edit a configuration file. As root, open
+:file:`expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf`.
 
-    $ sudo /sbin/insserv apache2
+Replace ``443`` with the port you want to use for Apache (note
+you will need to make sure that port is enabled through the
+firewall), and replace ``/home/expedient/expedient`` with the
+path to your checked out Expedient tree.
 
-Now generate SSL certificates. Make sure you read the help for
-:command:`gensslcert` if you need to customize the generated SSL
-certificates (for example, to change the used common name)::
+Edit
+:file:`expedient/src/config/expedient/common/apache/vhost-macros.conf`
+and replace the ``user=...`` on line 24 with ``user=<your username``.
 
-    $ sudo gensslcert
+Then you will need to include the following files in your
+:file:`httpd.conf` in order:
+
+* :file:`expedient/src/config/expedient/common/apache/vhost-macros.conf`
+* :file:`expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf`
+
+Make sure you have SSL working on Apache with certificates. You
+can generate certificates on OpenSuSE using the
+:command:`gensslcert` command.
 
 .. _admin-rpm-install-finalize:
 
@@ -340,12 +382,15 @@ Finalize the Setup
 
 Create a secret key for the server, and setup the database::
 
-    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_secret_key
-    $ sudo PYTHONPATH=/etc/expedient expedient_manage syncdb --noinput
-    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_default_root
-    $ sudo /etc/init.d/apache2 restart
+    $ cd expedient/src/python
+    $ python expedient/clearinghouse/manage.py create_secret_key
+    $ python expedient/clearinghouse/manage.py syncdb --noinput
+    $ python expedient/clearinghouse/manage.py create_default_root
 
-Don't forget to open the ports in your firewall. You can do that by editing
+Then restart Apache.
+
+Don't forget to open the ports in your firewall. On OpenSuSE, you
+can do that by editing
 the ``FW_SERVICES_EXT_TCP`` variable and include port ``443`` and any other
 ports you want to allow. Then restart the firewall::
 
@@ -361,4 +406,11 @@ Test that you can login and register new users.
 
 You can run the internal tests by executing::
 
-    $ PYTHONPATH=/etc/expedient expedient_manage test_expedient
+    $ python expedient/clearinghouse/manage.py test_expedient
+
+Caveat: 8 of those tests will fail (some of the rpc4django tests). This
+is a known bug. You can run those tests separately with::
+
+    $ python expedient/clearinghouse/manage.py test rpc4django
+
+They should pass then.
