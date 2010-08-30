@@ -124,7 +124,7 @@ Initial MySQL Setup
 
 If you have not previously initialized MySQL and setup the root password, type::
 
-    $ mysql_secure_installation
+    $ sudo mysql_secure_installation
 
 You will be prompted for a password. Use None (i.e. just press Enter). Follow
 the prompts to create a root password and setup your server (you can just
@@ -212,4 +212,153 @@ Install From Git
 
 Installing from Git is the best way to create a development environment.
 
-!!UNDER CONSTRUCTION!!
+#. :ref:`admin-git-install-repo`
+#. :ref:`admin-git-install-dependencies`
+#. :ref:`admin-git-install-configure`
+#. :ref:`admin-git-install-database`
+#. :ref:`admin-git-install-apache`
+#. :ref:`admin-git-install-finalize`
+
+.. _admin-git-install-repo:
+
+Checkout the Repository
+.......................
+
+For read-only access::
+
+    $ git clone git://openflow.org/expedient
+
+For read-write access, you'll need to have your public key added to gitosis, then::
+
+    $ git clone git@openflow.org/expedient
+
+Install Package Dependencies
+............................
+
+Expedient depends on the following non-Python packages:
+
+* python >= 2.6
+* xmlsec1
+* libxmlsec1-openssl-devel
+
+If you want to use
+
+Expedient also depends on the following Python packages:
+
+* setuptools
+* django >= 1.2, < 1.3
+* django_extensions
+* django_evolution
+* django-autoslug
+* django-registration >= 0.7, < 0.8
+* decorator
+* m2crypto
+* PIL
+* python-dateutil
+* pycrypto
+* paramiko
+* django-renderform
+* webob
+* pyOpenSSL
+* pyquery
+* sphinx
+* pygments
+* libxslt-python
+* ZSI
+* MySQL-python >= 1.2.1p2
+
+If you install ``setuptools``, and you have their dependencies
+installed, you can install all of these packages using ::
+
+    $ sudo easy_install <python-package>
+
+Configure Local Settings
+........................
+
+Run the following command to create a skeleton :file:`localsetting.py` file::
+
+    $ cd expedient/src/python
+    $ python expedient/clearinghouse/manage.py bootstrap_local_settings
+
+Then edit the newly-created :file:`expedient/clearinghouse/localsettings.py` using your favorite editor.
+
+Take a look at the settings under ``defaultssettings``_ to
+understand all the available settings. The created settings in
+:file:`localsettings.py` are the minimal ones required.
+
+.. _``defaultsettings``: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+
+Configure a MySQL Database
+..........................
+
+If you have not installed or configured MySQL on your installation
+before, you'll need to do so now. Since this part of the manual
+is distro agnostic, you'll need to review your distro's
+documentation for installing MySQL.
+
+You will need to do the following:
+
+#. Install MySQL somewhere and make sure it can be accessed from
+ the Expedient host.
+#. Configure MySQL to allow Expedient to create its users and databases.
+
+For step 2 above, you can use an Expedient function::
+
+    $ cd expedient/src/python
+    $  --rootpassword <your_mysql_root_password>
+
+You will get an error about the server's secret key which you can ignore for
+now.
+
+.. _admin-git-install-apache:
+
+Configure Apache
+................
+
+Now you need to configure Apache. The instructions here assume you have not
+configured Apache before, and this is a new installation on OpenSuSE::
+
+    $ sudo /usr/sbin/a2enmod wsgi
+    $ sudo /usr/sbin/a2enmod ssl
+    $ sudo /usr/sbin/a2enflag SSL
+    $ sudo ln -s /etc/expedient/apache/vhost-clearinghouse.conf /etc/apache2/vhosts.d/
+
+Add Apache to start on reboot::
+
+    $ sudo /sbin/insserv apache2
+
+Now generate SSL certificates. Make sure you read the help for
+:command:`gensslcert` if you need to customize the generated SSL
+certificates (for example, to change the used common name)::
+
+    $ sudo gensslcert
+
+.. _admin-rpm-install-finalize:
+
+Finalize the Setup
+..................
+
+Create a secret key for the server, and setup the database::
+
+    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_secret_key
+    $ sudo PYTHONPATH=/etc/expedient expedient_manage syncdb --noinput
+    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_default_root
+    $ sudo /etc/init.d/apache2 restart
+
+Don't forget to open the ports in your firewall. You can do that by editing
+the ``FW_SERVICES_EXT_TCP`` variable and include port ``443`` and any other
+ports you want to allow. Then restart the firewall::
+
+    $ sudo /sbin/rcSuSEfirewall2 restart
+
+You can completely disable the firewall::
+
+    $ sudo /sbin/rcSuSEfirewall2 stop
+    $ sudo /sbin/insserv -r SuSEfirewall2_setup
+    $ sudo /sbin/insserv -r SuSEfirewall2_init
+
+Test that you can login and register new users.
+
+You can run the internal tests by executing::
+
+    $ PYTHONPATH=/etc/expedient expedient_manage test_expedient
