@@ -294,11 +294,11 @@ Run the following command to create a skeleton :file:`localsetting.py` file::
 
 Then edit the newly-created :file:`expedient/clearinghouse/localsettings.py` using your favorite editor.
 
-Take a look at the settings under ``defaultssettings``_ to
+Take a look at the settings under defaultsettings_ to
 understand all the available settings. The created settings in
 :file:`localsettings.py` are the minimal ones required.
 
-.. _``defaultsettings``: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+.. _defaultsettings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
 
 Configure a MySQL Database
 ..........................
@@ -311,7 +311,7 @@ documentation for installing MySQL.
 You will need to do the following:
 
 #. Install MySQL somewhere and make sure it can be accessed from
- the Expedient host.
+   the Expedient host.
 #. Configure MySQL to allow Expedient to create its users and databases.
 
 For step 2 above, you can use an Expedient function::
@@ -367,7 +367,7 @@ Make sure you have SSL working on Apache with certificates. You
 can generate certificates on OpenSuSE using the
 :command:`gensslcert` command.
 
-.. _admin-rpm-install-finalize:
+.. _admin-git-install-finalize:
 
 Finalize the Setup
 ..................
