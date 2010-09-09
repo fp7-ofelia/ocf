@@ -45,8 +45,6 @@ PRIVS_MAP = dict(
     SliverStatus=('getsliceresources',),
 )
 
-cred_verifier = None
-
 def fake_login(client, user):
     engine = import_module(settings.SESSION_ENGINE)
 
@@ -103,8 +101,7 @@ def require_creds(use_slice_urn):
             slice_urn = None
             credentials = args[0]
             
-        if not cred_verifier:
-            cred_verifier = CredentialVerifier(settings.GCF_X509_CERT_DIR)
+        cred_verifier = CredentialVerifier(settings.GCF_X509_CERT_DIR)
             
         cred_verifier.verify_from_strings(
             client_cert, credentials,
