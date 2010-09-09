@@ -19,15 +19,15 @@ add new types of resources to Expedient.
 
 There are a few things you can do next.
 
-+----------------------------+---------------------------------+-----------------------------+
-| For Users                  | For Developers                  | For Administrators          |
-+============================+=================================+=============================+
-| #. :ref:`user-tutorial`    | #. :ref:`developer-tutorial`    | #. :ref:`admin-install`     |
-| #. :ref:`user-manual`      | #. :ref:`developer-manual`      | #. :ref:`admin-tutorial`    |
-| #. :ref:`user-agg-plugins` | #. :ref:`developer-agg-plugins` | #. :ref:`admin-manual`      |
-| #. :ref:`user-ui-plugins`  | #. :ref:`developer-ui-plugins`  | #. :ref:`admin-agg-plugins` |
-|                            | #. `API Documentation`_         | #. :ref:`admin-ui-plugins`  |
-+----------------------------+---------------------------------+-----------------------------+
+.. +----------------------------+---------------------------------+-----------------------------+
+.. | For Users                  | For Developers                  | For Administrators          |
+.. +============================+=================================+=============================+
+.. | #. :ref:`user-tutorial`    | #. :ref:`developer-tutorial`    | #. :ref:`admin-install`     |
+.. | #. :ref:`user-manual`      | #. :ref:`developer-manual`      | #. :ref:`admin-tutorial`    |
+.. | #. :ref:`user-agg-plugins` | #. :ref:`developer-agg-plugins` | #. :ref:`admin-manual`      |
+.. | #. :ref:`user-ui-plugins`  | #. :ref:`developer-ui-plugins`  | #. :ref:`admin-agg-plugins` |
+.. |                            | #. `API Documentation`_         | #. :ref:`admin-ui-plugins`  |
+.. +----------------------------+---------------------------------+-----------------------------+
 
 Contents:
 
