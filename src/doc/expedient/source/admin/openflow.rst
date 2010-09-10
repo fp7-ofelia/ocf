@@ -50,7 +50,8 @@ You will be taken to a form:
 * :guilabel:`Max Password Age` sets the maximum age of the password before it
   is automatically changed to a randomly generated one.
 * :guilabel:`Server URL` is the URL of the Opt-In Manager's XML RPC
-  interface. This is of the form ``https://<optin_manager.host>:<port>/xmlrpc/xmlrpc/``.
+  interface. This is of the form
+  ``https://<optin_manager.host>:<port>/xmlrpc/xmlrpc/``. The trailing slash is important.
 * :guilabel:`Verify Certificates` should currently remain unchecked. Later
   versions will use this boolean to decide whether or not to verify the
   certificate chain coming back from the Opt-In Manager.
@@ -91,5 +92,6 @@ work (a mere rename is sufficient).
 
 The XMLRPC URL for the GENI API is of the form
 ``https://<expedient.host>:<port>/openflow/gapi/``.
+The trailing slash is important.
 
 .. _settings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.gcf-module.html
