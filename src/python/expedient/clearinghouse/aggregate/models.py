@@ -322,7 +322,5 @@ No information available.
         to ensure permission checks.
         """
         must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
-        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
-        must_have_permission("slice", self.as_leaf_class(), "can_use_aggregate")
         pass
     
