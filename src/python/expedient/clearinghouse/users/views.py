@@ -42,7 +42,7 @@ def home(request):
             user_form = users.forms.UserForm(request.POST, instance=user)
             user = user_form.save()
             # now store the user profile
-            up = users.models.UserProfile(user=user, created_by=request.user)
+            up = users.models.UserProfile(user=user)
             userprofile_form = users.forms.UserProfileForm(request.POST, instance=up)
             userprofile_form.save()
             return HttpResponseRedirect(reverse("users_saved", args=(user.id,)))
