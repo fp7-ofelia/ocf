@@ -144,7 +144,7 @@ def status_img_url(request, agg_id):
     fail = HttpResponse(reverse("img_media", args=["inactive.png"]))
     
     try:
-        if aggregate.check_status():
+        if aggregate.as_leaf_class().check_status():
             return success
         else:
             return fail
