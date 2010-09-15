@@ -73,12 +73,19 @@ class PasswordXMLRPCServerProxy(models.Model):
     password = models.CharField(
         max_length=get_max_password_len(),
         help_text="Password to use to access the remote server.")
-    max_password_age = models.IntegerField(
-        'Max Password age (days)', default=60)
+    max_password_age = models.PositiveIntegerField(
+        'Max Password age (days)', default=0,
+        help_text="If this is set to non-zero, the password "\
+            "will automatically be changed once the password ages past the "\
+            "maximum. The new password is then randomly generated.")
     password_timestamp = models.DateTimeField(auto_now_add=True)
     url = models.CharField("Server URL", max_length=1024)
     
-    verify_certs = models.BooleanField("Verify Certificates?", default=False)
+    verify_certs = models.BooleanField(
+        "Verify Certificates?", default=False,
+        help_text="Disabling this check will still verify that the "\
+            "certificate itself is well-formed. In particular, the "\
+            "server's hostname must match the certificate's Common Name.")
     
     def _reset_proxy(self):
         parsed = urlparse(self.url.lower())
