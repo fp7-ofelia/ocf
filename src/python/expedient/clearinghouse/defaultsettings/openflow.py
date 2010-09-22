@@ -14,7 +14,7 @@ replacing "stanford" with your site's name.
 
 '''
 
-OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+expedient:stanford:openflow+am+authority"
+OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+expedient:stanford:openflow+authority+am"
 '''The URN used as the name of the OpenFlow Aggregate Manager.
 
 You will need to override this for your particular deployment (mainly by
