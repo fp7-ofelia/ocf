@@ -73,18 +73,17 @@ def delete(request, proj_id):
     if request.method == "POST":
         for s in project.slice_set.all():
             s.stop(request.user)
-    req = create_update.delete_object(
-        request,
-        model=Project,
-        post_delete_redirect=reverse('home'),
-        object_id=proj_id,
-        template_name=TEMPLATE_PATH+"/confirm_delete.html",
-    )
-    if req.status_code == HttpResponseRedirect.status_code:
+        project.delete()
         DatedMessage.objects.post_message_to_user(
             "Successfully deleted project %s" % project.name,
             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-    return req
+        return HttpResponseRedirect(reverse("home"))
+    else:
+        return simple.direct_to_template(
+            request,
+            template=TEMPLATE_PATH+"/confirm_delete.html",
+            extra_context={"object": project},
+        )
 
 @require_objs_permissions_for_view(
     perm_names=["can_view_project"],

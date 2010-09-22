@@ -71,20 +71,21 @@ def delete(request, slice_id):
     
     must_have_permission(request.user, project, "can_delete_slices")
 
-    slice.stop(request.user)
-
-    req = create_update.delete_object(
-        request,
-        model=Slice,
-        post_delete_redirect=reverse('project_detail', args=[project.id]),
-        object_id=slice_id,
-        template_name=TEMPLATE_PATH+"/confirm_delete.html",
-    )
-    if req.status_code == HttpResponseRedirect.status_code:
+    if request.method == "POST":
+        stop(request, slice_id)
+        slice.delete()
         DatedMessage.objects.post_message_to_user(
             "Successfully deleted slice %s" % slice.name,
             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-    return req
+        return HttpResponseRedirect(
+            reverse('project_detail', args=[project.id]))
+
+    else:
+        return simple.direct_to_template(
+            request,
+            template=TEMPLATE_PATH+"/confirm_delete.html",
+            extra_context={"object": slice},
+        )
 
 def detail(request, slice_id):
     '''Show information about the slice'''
