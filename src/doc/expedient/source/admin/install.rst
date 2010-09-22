@@ -81,8 +81,8 @@ documentation`_. Below is a list of the settings that need to be changed:
 * ``SITE_DOMAIN``: Set this to the fully-qualified domain name of the Expedient
   server. e.g. ``"expedient.stanford.edu"``. See site_.
 * ``OPENFLOW_GAPI_RSC_URN_PREFIX``: Set this to
-  ``"urn:publicid:IDB+expedient:<your_organization>:openflow"``. e.g. 
-  ``"urn:publicid:IDB+expedient:stanford:openflow"``. See openflow_.
+  ``"urn:publicid:IDN+expedient:<your_organization>:openflow"``. e.g. 
+  ``"urn:publicid:IDN+expedient:stanford:openflow"``. See openflow_.
 * ``SITE_IP_ADDR``: Used for testing. Set to your Expedient host's IP
   address. e.g. ``"192.168.1.1"``. See openflowtests_.
 * ``MININET_VMS``: Used for testing. Set to ``[("<IP address of the mininet VM>",
