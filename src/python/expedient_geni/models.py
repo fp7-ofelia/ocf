@@ -219,14 +219,21 @@ class GENIAggregate(Aggregate):
     #####################################################################
     
     def _to_rspec(self, slice):
-        """
-        Change this slice into an rspec for this aggregates
+        """Change this slice into an rspec for this aggregates
+        
+        Transform the slice into a reservation RSpec to be used with this
+        aggregate.
+        
+        @param slice: The slice to change into a reservation RSpec
+        @type slice: L{expedient.clearinghouse.slice.models.Slice}
         """
         raise NotImplementedError()
     
     def update_resources(self):
-        """
-        Parse the rspec and update resources in the database.
+        """Parse the rspec and update resources in the database.
+        
+        Pull the rspec from the aggregate and parse it into resources stored
+        in the database.
         """
         raise NotImplementedError()
     
