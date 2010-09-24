@@ -39,4 +39,20 @@ class LimitedIntegerField(models.IntegerField):
                     }
         defaults.update(kwargs)
         return super(LimitedIntegerField, self).formfield(**defaults)
+
+class IPNetworkField(models.CharField):
+    """
+    A field that accepts either IP address or IP prefixes (192.168.0.0/16).
+    """
+    empty_strings_allowed = False
+    description = "IP address or prefix"
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 18
+        super(IPNetworkField, self).__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': formfields.IPNetworkField}
+        defaults.update(kwargs)
+        return super(IPNetworkField, self).formfield(**defaults)
     
