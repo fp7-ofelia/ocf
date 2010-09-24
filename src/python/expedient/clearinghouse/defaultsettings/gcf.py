@@ -34,15 +34,11 @@ GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")
 GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.key")
 '''The absolute path of the Clearinghouse key for Expedient.'''
 
-GCF_X509_CA_CERT = join(GCF_X509_CERT_DIR, "ca.crt")
-'''The absolute path of the Certificate Authority certificate for Expedient.'''
-
-GCF_X509_CA_KEY = join(GCF_X509_KEY_DIR, "ca.key")
-'''The absolute path of the Certificate Authority key for Expedient.'''
-
 GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
 '''The default slice's full credentials.'''
 
 CURRENT_GAPI_VERSION = 1
 '''The latest version of the GENI API'''
 
+GCF_X509_USER_CERT_FNAME_PREFIX = "user_x509_"
+'''The prefix to prepend to the filenames of saved user certificates.'''
