@@ -18,7 +18,8 @@ from models import PermissionTestClass
 from expedient.common.tests import manager as test_mgr
 from expedient.common.permissions.models import ObjectPermission,\
     PermissionOwnership
-from expedient.common.permissions.shortcuts import must_have_permission
+from expedient.common.permissions.shortcuts import must_have_permission,\
+    has_permission
 from expedient.common.permissions.templatetags.permissions import has_obj_perm,\
     as_class
 
@@ -162,6 +163,27 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             target_obj_or_class=self.objs[0],
             perm_name="can_get_x3",
         )
+
+    def test_get_missing_permittee_same_as_target(self):
+        """
+        Tests that a permittee always has all permissions on itself.
+        """
+        missing = ExpedientPermission.objects.get_missing(
+            self.u1, ["can_get_x2", "can_read_val"],
+            User.objects.filter(id__in=[self.u1.id]))
+        self.assertTrue(missing == (None, None))        
+
+        give_permission_to("can_get_x2", self.u2, self.u1)
+        give_permission_to("can_read_val", self.u2, self.u1)
+        missing = ExpedientPermission.objects.get_missing(
+            self.u1, ["can_get_x2", "can_read_val"],
+            User.objects.filter(id__in=[self.u1.id, self.u2.id]))
+        self.assertTrue(missing == (None, None))       
+
+        missing = ExpedientPermission.objects.get_missing(
+            self.o3, ["can_get_x2", "can_read_val"],
+            PermissionTestClass.objects.filter(id__in=[self.o3.id]))
+        self.assertTrue(missing == (None, None))    
         
     def test_filter_for_obj_permission(self):
         """

@@ -83,6 +83,7 @@ class ExpedientPermissionManager(models.Manager):
         a queryset of targets, and only returns the missing
         L{ExpedientPermission}. If C{permittee} is a
         C{django.contrib.auth.models.User} instance and is a superuser, always
+        return None. Also if the target is the same as the permittee, always
         return None.
         
         @param permittee: The object exercising the permission on the target
@@ -113,9 +114,10 @@ class ExpedientPermissionManager(models.Manager):
         have for all targets. If the ObjectPermission does not exist
         for the object, it will be created and saved before returning it.
         
-        One exception is made: if the permittee is actually a
+        Two exceptions are made: if the permittee is actually a
         C{django.contrib.auth.models.User} instance, then if the user is
-        a superuser, C{get_missing} always returns (None, None).
+        a superuser, C{get_missing} always returns (None, None).  And if the
+        C{target} is the same as the C{permittee}, always return (None, None).
         
         @param permittee: The object exercising the permission on the targets
         @type permittee: L{Permittee} or other model instance.
@@ -167,7 +169,16 @@ class ExpedientPermissionManager(models.Manager):
                             permittees=permittee,
                         )
                     except ObjectPermission.DoesNotExist:
+                        # allow permittee == target
+                        if ct == permittee.object_type and \
+                        id == permittee.object_id:
+                            continue
                         return (perm, targets.get(id=id))
+            
+            # If we reach here then the missing permission must have been
+            # the case where permittee == target
+            return (None, None)
+            
         else:
             return (None, None)
         
