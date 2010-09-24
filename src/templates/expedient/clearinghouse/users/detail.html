@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+
+{% endblock %}
+
 {% block content %}
 <script type="text/javascript">
     function togglePwd() {
@@ -13,6 +17,12 @@
 	        document.getElementById("id_old_password").disabled = !document.getElementById("id_old_password").disabled;
         }
     }
+	$(document).ready(function() {
+		/* add tooltips */
+		$("a#geni_user_cert_link").tooltip({
+			tip: "div#cert_mgmt_help"
+		});
+	});
 </script>
 <div class="main">
     <h1>User {{ user.username }}</h1>
@@ -31,6 +41,15 @@
             <input type="submit" value="Save User">
             <a href="{% url users_delete user.id %}">Delete</a>
 			<a href="{% url home %}">Cancel</a>
+			<a id="geni_user_cert_link" href="{% url geni_user_cert user.id %}">Manage GCF Certificate</a>
+			<div class="tooltip" id="cert_mgmt_help">
+				Click to manage the user's GENI Control Framework certificate.
+				<br /><br />
+				This certificate can be used to log into Expedient without
+				typing a password and for creating slices through interfaces
+				other than Expedient's Web interface. This includes the
+				PlanetLab interface and GPO's omni client.
+			</div>
         </form>
     </div>
 </div>
