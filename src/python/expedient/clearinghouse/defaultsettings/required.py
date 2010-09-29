@@ -8,9 +8,8 @@ Created on Aug 19, 2010
 REQUIRED_SETTINGS = [
     ("admins", ["ADMINS", "MANAGERS"]),
     ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
-    ("gcf", ["GCF_URN_PREFIX"]),
+    ("gcf", ["GCF_BASE_NAME"]),
     ("site", ["SITE_DOMAIN"]),
-    ("openflow", ["OPENFLOW_GAPI_RSC_URN_PREFIX", "OPENFLOW_GAPI_AM_URN"]),
     ("openflowtests", ["SITE_IP_ADDR", "MININET_VMS"]),
 ]
 '''Required settings that should be overridden for each deployment.
