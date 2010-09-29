@@ -35,7 +35,7 @@
     Known Issues:
     - Opt-in manager flowspace delegation is work-in-progress.
     - Opt-in manager has no simple way to connect to the flowvisor.
-    - Opt-in manager has no simple way to add a Clearinghouse user.
+    - Opt-in manager has no simple way to add an Expedient user.
     - Need to enable certificate verification by default for 
       PasswordXMLRPCServerProxy
     - Permissions need to be enforced.
@@ -47,8 +47,8 @@
 
 06-02-2010: 0.0.2-alpha1
     Changes:
-    - Added permissions to the Clearinghouse
-    - Added CSRF protection to Clearinghouse and Opt-In Manager
+    - Added permissions to Expedient
+    - Added CSRF protection to Expedient and Opt-In Manager
     - Fixed password change to random password bug in 
       PasswordXMLRPCServerProxy
     - Fixed installing certificates
