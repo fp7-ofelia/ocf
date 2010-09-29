@@ -244,6 +244,8 @@ For read-write access, you'll need to have your public key added to gitosis, the
 
     $ git clone git@openflow.org/expedient
 
+.. _admin-git-install-dependencies:
+
 Install Package Dependencies
 ............................
 
@@ -284,21 +286,26 @@ installed, you can install all of these packages using ::
 
     $ sudo easy_install <python-package>
 
+.. _admin-git-install-configure:
+
 Configure Local Settings
 ........................
 
 Run the following command to create a skeleton :file:`localsetting.py` file::
 
     $ cd expedient/src/python
-    $ python expedient/clearinghouse/manage.py bootstrap_local_settings
+    $ PYTHONPATH=. python expedient/clearinghouse/bootstrap_local_settings.py expedient/clearinghouse/
 
 Then edit the newly-created :file:`expedient/clearinghouse/localsettings.py` using your favorite editor.
 
 Take a look at the settings under defaultsettings_ to
 understand all the available settings. The created settings in
-:file:`localsettings.py` are the minimal ones required.
+:file:`localsettings.py` are the minimal ones required, and they
+need to be set.
 
 .. _defaultsettings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+
+.. _admin-git-install-database:
 
 Configure a MySQL Database
 ..........................
@@ -314,18 +321,20 @@ You will need to do the following:
    the Expedient host.
 #. Configure MySQL to allow Expedient to create its users and databases.
 
+For step 1 above on an OpenSuSE installation, look at :ref:`_admin-rpm-install-database`
+
 For step 2 above, you can use an Expedient function::
 
     $ cd expedient/src/python
     $ python
     >>> from expedient.clearinghouse import settings
     >>> from expedient.clearinghouse.commands.utils import create_user
-    >>> create_user(<root username>, <root password>,
+    >>> create_user(<DB root username>, <DB root password>,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
         settings.DATABASE_NAME,
         settings.DATABASE_HOST or "localhost")
 
-Replace ``<root username>`` and ``<root password>`` with your
+Replace ``<DB root username>`` and ``<DB root password>`` with your
 database's root username and password. This will probably be
 different than your OS's root username and password.
 
@@ -366,6 +375,9 @@ Then you will need to include the following files in your
 Make sure you have SSL working on Apache with certificates. You
 can generate certificates on OpenSuSE using the
 :command:`gensslcert` command.
+
+Note that for most testing, you won't actually use Apache, but would use
+Django's internal testing webserver.
 
 .. _admin-git-install-finalize:
 
