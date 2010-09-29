@@ -2,7 +2,6 @@
 @author: jnaous
 '''
 from django.conf.urls.defaults import patterns, url
-from expedient.common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns('expedient_geni.views',
     url(r'^certs/manage/(?P<user_id>\d+)/$', 'user_cert_manage', name='gcf_cert_manage'),
