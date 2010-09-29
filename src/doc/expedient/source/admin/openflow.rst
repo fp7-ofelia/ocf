@@ -42,10 +42,10 @@ You will be taken to a form:
   available for users.
 * :guilabel:`Usage Agreement` is currently not used, but in later versions
   the plugin will require users to agree to it before using the aggregate.
-* :guilabel:`Username` is the username that has been set for the clearinghouse
+* :guilabel:`Username` is the username that has been set for Expedient
   in the Opt-In manager, using the :guilabel:`Set Clearinghouse` button in the
   Opt-In manager.
-* :guilabel:`Password` is the password that has been set for the clearinghouse
+* :guilabel:`Password` is the password that has been set for Expedient
   in the Opt-In manager.
 * :guilabel:`Max Password Age` sets the maximum age of the password before it
   is automatically changed to a randomly generated one.
