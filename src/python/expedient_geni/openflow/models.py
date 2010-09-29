@@ -41,9 +41,9 @@ A PlanetLab Aggregate exposed through the GENI API.
         
         root = et.fromstring(rspec)
 
-        # TODO: write the templates for the cert management
         # TODO: write up the GENI API OF aggregate
         # TODO: fix the html flowspace editing to allow ranges.
         # TODO: fix the cred creation for slices
         # TODO: fix the cert creation for the CH
         # TODO: add the CH API
+        
