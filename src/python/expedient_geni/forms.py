@@ -12,7 +12,7 @@ from sfa.trust.gid import GID
 from sfa.trust.certificate import Keypair
 from expedient_geni.utils import get_user_key_fname, get_user_cert_fname
 
-logger = logging.getLogger("GENIForms")
+logger = logging.getLogger("expedient_geni.forms")
 
 def _clean_x_file_factory(name):
     """Factory to create functions that check file size"""
