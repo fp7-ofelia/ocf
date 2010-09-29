@@ -2,15 +2,19 @@
 
 @author: jnaous
 '''
-# Django settings for clearinghouse project.
-from os.path import dirname, join
+# Django settings for Expedient project.
+import os
 import pkg_resources
 
 try:
     from localsettings import SRC_DIR as location
 except ImportError:
-    location = pkg_resources.resource_filename(
-        pkg_resources.Requirement.parse("expedient"), "")
+    try:
+        location = os.path.abspath(pkg_resources.resource_filename(
+            pkg_resources.Requirement.parse("expedient"), ""))
+    except pkg_resources.DistributionNotFound:
+        location = os.path.abspath(
+            pkg_resources.resource_filename("expedient", ".."))
     # TODO: Hack!
     if location.endswith("src/python"):
         location = location[:-7]
@@ -36,7 +40,7 @@ Example: /etc/expedient/
 try:
     from localsettings import STATIC_DOC_ROOT as location
 except ImportError:
-    location = "/srv/www/expedient"
+    location = os.path.join(SRC_DIR, "static", "expedient", "clearinghouse")
 
 STATIC_DOC_ROOT = location
 '''Location of static content.
@@ -64,7 +68,7 @@ USE_I18N = False
 '''If you set this to False, Django will make some optimizations so as not
 to load the internationalization machinery.'''
 
-MEDIA_ROOT = join(STATIC_DOC_ROOT, "media")
+MEDIA_ROOT = os.path.join(STATIC_DOC_ROOT, "media")
 '''Absolute path to the directory that holds media.
 Example: "/home/media/media.lawrence.com/"'''
 
@@ -107,15 +111,15 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'geni.backends.GENIRemoteUserBackend',
+    'expedient_geni.backends.GENIRemoteUserBackend',
 )
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
 TEMPLATE_DIRS = (
-    join(SRC_DIR, 'templates'),
-    join(SRC_DIR, 'templates/expedient/clearinghouse'),
-    join(SRC_DIR, 'templates/expedient/common'),
+    os.path.join(SRC_DIR, 'templates'),
+    os.path.join(SRC_DIR, 'templates/expedient/clearinghouse'),
+    os.path.join(SRC_DIR, 'templates/expedient/common'),
 )
 
 INSTALLED_APPS = (
@@ -145,8 +149,8 @@ INSTALLED_APPS = (
     'expedient.clearinghouse.users',
     'expedient.clearinghouse.permissionmgmt',
     'openflow.plugin',
-    'geni',
-    'geni.planetlab',
+    'expedient_geni',
+    'expedient_geni.planetlab',
     'expedient.ui.html',
 ###### For Testing #######################
     'openflow.dummyom',
