@@ -1,6 +1,6 @@
 					.contents()
 					.filter(function() {
-						return this.nodeType == Node.TEXT_NODE;
+						return this.nodeType == Node.TEXT_NODE && $(this).text().length > 1;
 					})
 					.each(function(index) {
 						text = $(this).text();
