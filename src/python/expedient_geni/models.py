@@ -86,8 +86,8 @@ class GENISliceInfo(models.Model):
         name = parts[-1]
         prefix = parts[1]
         base = prefix.partition(":")[2]
-        return base+"_"+name
-    
+        return base+"_"+name    
+
 class GENIAggregate(Aggregate):
     """
     Implements a generic GCF-based aggregate manager to simplify adding
