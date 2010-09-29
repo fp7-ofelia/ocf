@@ -357,7 +357,7 @@ you have Apache installed and configured. Enable ``mod_wsgi`` and
 Next you will need to edit a configuration file. As root, open
 :file:`expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf`.
 
-Replace ``443`` with the port you want to use for Apache (note
+In line 3, replace ``443`` with the port you want to use for Apache (note
 you will need to make sure that port is enabled through the
 firewall), and replace ``/home/expedient/expedient`` with the
 path to your checked out Expedient tree.
@@ -372,9 +372,18 @@ Then you will need to include the following files in your
 * :file:`expedient/src/config/expedient/common/apache/vhost-macros.conf`
 * :file:`expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf`
 
+On OpenSuSE, you can do that by::
+
+	$ sudo ln -s expedient/src/config/expedient/common/apache/vhost-macros.conf \
+	  /etc/apache2/conf.d
+	$ sudo ln -s expedient/src/config/expedient/common/apache/vhost-macros.conf \
+	  /etc/apache2/vhosts.d
+
 Make sure you have SSL working on Apache with certificates. You
 can generate certificates on OpenSuSE using the
-:command:`gensslcert` command.
+:command:`gensslcert` command. You will need to make sure that the Common Name
+in the certificate produced is the fully qualified domain name of your server.
+Type :command:`gensslcert -h` for options.
 
 Note that for most testing, you won't actually use Apache, but would use
 Django's internal testing webserver.
