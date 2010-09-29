@@ -6,24 +6,17 @@ Created on Aug 19, 2010
 '''
 
 # Settings for the GENI API interface
-OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+expedient:stanford:openflow"
-'''The prefix appended to the URN of OpenFlow resources exposed through the GENI-API.
+OPENFLOW_GCF_BASE_SUFFIX = "openflow"
+'''The suffix appended to the URN of OpenFlow resources exposed through the GENI-API.
 
-You will need to override this for your particular deployment (mainly by
-replacing "stanford" with your site's name.
-
-'''
-
-OPENFLOW_GAPI_AM_URN = "urn:publicid:IDN+expedient:stanford:openflow+authority+am"
-'''The URN used as the name of the OpenFlow Aggregate Manager.
-
-You will need to override this for your particular deployment (mainly by
-replacing "stanford" with your site's name.
+This gets concatenated with 
+L{expedient.clearinghouse.defaultsettings.gcf.GCF_BASE_NAME} to produce
+the full HRN used for the URNs. Default is "openflow".
 
 '''
 
 OPENFLOW_OTHER_RESOURCES = (
-    ("geni.planetlab", "PlanetLabNode"),
+    ("expedient_geni.planetlab", "PlanetLabNode"),
 )
 '''Which types of non-OpenFlow resources do OpenFlow Interface connect to?
 
