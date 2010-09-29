@@ -7,7 +7,7 @@ Created on Aug 19, 2010
 from os.path import join
 from django import CONF_DIR
 
-GCF_URN_PREFIX = "expedient:stanford"
+GCF_BASE_NAME = "stanford//expedient"
 '''The domain name used in URNs when creating certificates mainly.
 
 You will need to override this for your deployment to change "stanford"
@@ -15,6 +15,16 @@ to your site's name.
 
 This must not have any spaces or illegal characters not allowed in
 URNs or you will get cryptic errors.
+
+This should look something like "stanford//expedient"
+
+'''
+
+GCF_URN_AM_SUFFIX = "authority+am"
+'''The suffix of the GCF AM URN.
+
+This gets appended to the URN prefix obtained from the L{GCF_BASE_NAME}.
+Default (and required by convention) is "authority+am".
 
 '''
 
@@ -42,3 +52,6 @@ CURRENT_GAPI_VERSION = 1
 
 GCF_X509_USER_CERT_FNAME_PREFIX = "user_x509_"
 '''The prefix to prepend to the filenames of saved user certificates.'''
+
+GCF_MAX_UPLOADED_PEM_FILE_SIZE = 1024*1024
+'''Maximum size of uploaded certificate or key files in bytes.'''
