@@ -19,6 +19,7 @@ def bootstrap_local_settings(conf_dir=CONF_DIR):
     @keyword conf_dir: location of the localsettings.py file. Defaults
         to CONF_DIR.
     """
+    conf_dir = os.path.abspath(conf_dir)
     loc = os.path.join(conf_dir, "localsettings.py")
     pkg_resources.ensure_directory(loc)
     if os.access(loc, os.F_OK):
