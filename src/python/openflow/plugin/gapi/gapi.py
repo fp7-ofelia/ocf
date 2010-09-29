@@ -10,7 +10,7 @@ from openflow.plugin.models import GAPISlice,\
     OpenFlowSliceInfo, OpenFlowInterfaceSliver,\
     FlowSpaceRule
 import logging
-from gcf.geni import CredentialVerifier
+from geni import CredentialVerifier
 from django.conf import settings
 from django.test import Client
 from decorator import decorator
