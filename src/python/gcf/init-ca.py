@@ -27,7 +27,7 @@
 Create a certificate authority and some basic certs and keys.
 
 A CA is created, as well as certificates and keys for two authorities:
-a clearinghouse and an aggregate manager. Finally, a user cert and
+a Expedient and an aggregate manager. Finally, a user cert and
 key is created for a user (named Alice by default). Options allow
 controlling which certs are created.
 """
@@ -132,7 +132,7 @@ def make_ca_cert(dir):
     return (ca_cert, ca_key)
 
 def make_ch_cert(dir, ca_cert, ca_key):
-    '''Make a cert for the clearinghouse signed by given CA saved to 
+    '''Make a cert for Expedient signed by given CA saved to 
     given directory and returned.'''
     (ch_gid, ch_keys) = create_cert(GCF_CERT_PREFIX, AUTHORITY_CERT_TYPE,CH_CERT_SUBJ, ca_key, ca_cert, True)
     ch_gid.save_to_file(os.path.join(dir, CH_CERT_FILE))
