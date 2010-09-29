@@ -40,7 +40,7 @@ class OMTests(TestCase):
         from openflow.optin_manager.users.models import UserProfile
         from django.contrib.auth.models import User 
 
-        # Create the clearinghouse user
+        # Create the Expedient user
         username = "clearinghouse"
         password = "password"
         u = User.objects.create(username=username)
@@ -48,7 +48,7 @@ class OMTests(TestCase):
         u.save()
         
         profile = UserProfile.get_or_create_profile(u) 
-        profile.is_clearinghouse_user = True
+        profile.is_Expedient_user = True
         profile.save()
         self.om_client = xmlrpclib.ServerProxy(
             SCHEME + "://%s:%s@%s:%s/xmlrpc/xmlrpc/" % (
@@ -163,7 +163,7 @@ class OMTests(TestCase):
         
     def test_change_password(self):
         """
-        Tests that the Clearinghouse password can be changed correctly.
+        Tests that the Expedient password can be changed correctly.
         """
         from django.contrib.auth.models import User
         wrap_xmlrpc_call(

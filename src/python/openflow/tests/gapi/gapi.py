@@ -43,7 +43,7 @@ def get_base_url(path):
 class GAPITests(TestCase):
     """
     Test the GENI API interface. This assumes that Apache is currently running
-    the clearinghouse over SSL. The clearinghouse will be contacting itself as
+    Expedient over SSL. Expedient will be contacting itself as
     the dummy Opt-in Managers. Assumes all certificates and keys in ssl dir.
     """
 
@@ -115,7 +115,7 @@ class GAPITests(TestCase):
         """
         Load the DB fixtures for the AM (running using Apache).
         Create an xml-rpc client to talk to the AM Proxy through GAPI.
-        Run the test clearinghouse, and create client to talk to it.
+        Run the test Expedient, and create client to talk to it.
         """
         
         import time, httplib, os
@@ -397,7 +397,7 @@ class GAPITests(TestCase):
         
         # Make sure it is gone from the CH and the OMs
         self.assertTrue(Slice.objects.all().count() == 0,
-                        "Slice not deleted in the Clearinghouse")
+                        "Slice not deleted in Expedient")
         self.assertTrue(DummyOMSlice.objects.all().count() == 0,
                         "Slice not deleted in the OMs")
          

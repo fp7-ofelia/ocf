@@ -142,7 +142,7 @@ class FullIntegration(TestCase):
         from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace
         import random
         
-        # Create the clearinghouse user
+        # Create the Expedient user
         u = User.objects.create(username=ch_username)
         u.set_password(ch_passwd)
         u.save()
@@ -392,7 +392,7 @@ class FullIntegration(TestCase):
         from django.conf import settings as djangosettings
         self.before = os.listdir(djangosettings.XMLRPC_TRUSTED_CA_PATH)
 
-        # Run the AM proxy for GENI and the GENI clearinghouse
+        # Run the AM proxy for GENI and Expedient
         self.run_geni_ch(
             test_settings.GCF_DIR, test_settings.SSL_DIR, test_settings.GAM_PORT)
         self.run_am_proxy(
