@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from expedient.common.messaging.models import DatedMessage
 from expedient_geni.forms import UploadCertForm
 
-logger = logging.getLogger("GENIViews")
+logger = logging.getLogger("expedient_geni.views")
 TEMPLATE_PATH = "expedient_geni"
 
 def aggregate_create(request, agg_model):
@@ -128,7 +128,7 @@ def user_cert_generate(request, user_id):
     if request.method == "POST":
         create_x509_cert(urn, cert_fname, key_fname)
         DatedMessage.objects.post_message_to_user(
-            "GCF Certificate for user %s successfully created.",
+            "GCF Certificate for user %s successfully created." % user.username,
             user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse(user_cert_manage, args=[user.id]))
     
