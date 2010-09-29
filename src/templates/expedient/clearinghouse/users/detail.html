@@ -39,9 +39,9 @@
             {{ userprofile_form.as_table }}
             </table>
             <input type="submit" value="Save User">
-            <a href="{% url users_delete user.id %}">Delete</a>
+            <a href="{% url users_delete user.id %}">Delete</a> |
+			<a id="geni_user_cert_link" href="{% url gcf_cert_manage user.id %}">Certificates</a> |
 			<a href="{% url home %}">Cancel</a>
-			<a id="geni_user_cert_link" href="{% url geni_user_cert user.id %}">Manage GCF Certificate</a>
 			<div class="tooltip" id="cert_mgmt_help">
 				Click to manage the user's GENI Control Framework certificate.
 				<br /><br />
