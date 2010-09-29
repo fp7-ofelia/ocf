@@ -67,3 +67,18 @@ def create_x509_cert(urn, cert_fname, key_fname):
     cert.save_to_file(cert_fname)
     keys.save_to_file(key_fname)
     
+def read_cert_from_file(cert_fname):
+    """Read a GCF certificate from a file.
+    
+    Read the certificate from a file and put it into a C{sfa.trust.gid.GID}
+    object. The returned certificate is already decoded.
+    
+    @param cert_fname: The filename to read the cert from
+    @type cert_fname: C{str}
+    @return: The certificate stored in the file at C{cert_fname}
+    @rtype: C{sfa.trust.gid.GID}
+    """
+    
+    cert = GID(filename=cert_fname)
+    cert.decode()
+    return cert

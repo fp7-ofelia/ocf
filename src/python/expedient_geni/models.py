@@ -10,7 +10,7 @@ from expedient.common.utils import certtransport
 from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
-from geni import management
+from expedient_geni import management
 
 SSH_KEY_SIZE = 2048
 

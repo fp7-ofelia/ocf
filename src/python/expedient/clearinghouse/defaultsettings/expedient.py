@@ -51,7 +51,7 @@ This is a list of 3-tuples:
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = (
     'openflow.plugin.models.OpenFlowAggregate',
-    'geni.planetlab.models.PlanetLabAggregate',
+    'expedient_geni.planetlab.models.PlanetLabAggregate',
 )
 '''List of aggregate plugins that are enabled in Expedient.
 

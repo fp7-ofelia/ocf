@@ -10,7 +10,7 @@ from django.conf import settings
 from expedient.common.permissions.shortcuts import give_permission_to
 from django.contrib.auth.models import User
 
-logger = logging.getLogger("geni.backends")
+logger = logging.getLogger("expedient_geni.backends")
 
 urn_matcher = re.compile(r"(?P<prefix>.*)\+(?P<role>.*)\+(?P<name>.*)")
 

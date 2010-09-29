@@ -17,7 +17,7 @@ from expedient.common.messaging.models import DatedMessage
 from django.forms.models import inlineformset_factory
 from django.core.urlresolvers import reverse
 from models import SliceFlowSpace
-from geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
+from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
 logger = logging.getLogger("html_ui_views")
