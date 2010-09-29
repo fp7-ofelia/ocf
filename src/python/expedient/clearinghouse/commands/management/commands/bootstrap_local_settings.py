@@ -23,7 +23,8 @@ class Command(NoArgsCommand):
             ),
     )
     help = "Bootstrap a localsettings.py file"
-
+    requires_model_validation = False
+    
     def handle_noargs(self, **options):
         conf_dir = os.path.abspath(options.get('path', settings.CONF_DIR))
         bootstrap_local_settings(conf_dir=conf_dir)
