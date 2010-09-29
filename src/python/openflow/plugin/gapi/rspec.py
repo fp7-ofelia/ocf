@@ -9,6 +9,10 @@ Contains functions to transform to and from RSpecs
 from xml.etree import cElementTree as et
 from django.conf import settings
 import re
+from expedient.clearinghouse.users.models import UserProfile
+from openflow.plugin.models import OpenFlowInterfaceSliver
+from sfa.util.namespace import hrn_to_urn
+from geni.util.urn_util import publicid_to_urn
 
 RSPEC_TAG = "rspec"
 NETWORK_TAG = "network"
@@ -27,12 +31,22 @@ LOCATION = "location"
 NAME = "name"
 FLOWVISOR_URL = "flowvisor_url"
 
+OPENFLOW_GAPI_RSC_URN_PREFIX = publicid_to_urn(
+    "IDN %s//%s" % (settings.GCF_BASE_NAME, settings.OPENFLOW_GCF_BASE_SUFFIX)
+)
+
 SWITCH_URN_REGEX = r"^%s\+switch:(?P<dpid>[\d:a-fA-F]+)$" % \
-    settings.OPENFLOW_GAPI_RSC_URN_PREFIX.replace("+", r"\+")
+    OPENFLOW_GAPI_RSC_URN_PREFIX.replace("+", r"\+")
 PORT_URN_REGEX = r"%s\+port:(?P<port>\d+)$" % SWITCH_URN_REGEX[:-1]
 
 switch_re = re.compile(SWITCH_URN_REGEX)
 port_re = re.compile(PORT_URN_REGEX)
+
+EXTERNAL_SWITCH_URN_REGEX = r"^(?P<prefix>.*)\+switch:(?P<dpid>[:a-fA-F\d]+)$"
+EXTERNAL_PORT_URN_REGEX = r"%s\+port:(?P<port>\d+)$" % EXTERNAL_SWITCH_URN_REGEX[:-1]
+
+external_switch_re = re.compile(EXTERNAL_SWITCH_URN_REGEX)
+external_port_re = re.compile(EXTERNAL_PORT_URN_REGEX)
 
 class BadURNError(Exception):
     def __init__(self, urn):
@@ -55,7 +69,7 @@ def _dpid_to_urn(dpid):
     """
     Change the dpid into a URN.
     """
-    return "%s+switch:%s" % (settings.OPENFLOW_GAPI_RSC_URN_PREFIX, dpid)
+    return "%s+switch:%s" % (OPENFLOW_GAPI_RSC_URN_PREFIX, dpid)
 
 def _urn_to_dpid(urn):
     """
@@ -177,92 +191,92 @@ def get_resources(slice_urn, geni_available):
     Under the rspec there is a list of C{<network>} elements with the following
     attributes:
     
-    - C{location}: location
-    - C{name}: name of the aggregate/network
-    - C{flowvisor_url}: currently not implemented
+        - C{location}: location
+        - C{name}: name of the aggregate/network
+        - C{flowvisor_url}: currently not implemented
     
     Under each C{<network>} there are exactly two nodes: C{<links>} and
     C{<nodes>}.
     
     C{<links>} has a list of C{<link>} nodes with the following attributes:
     
-    - C{src_urn}: identifier for the src port
-    - C{dst_urn}: identifier for the dst port
+        - C{src_urn}: identifier for the src port
+        - C{dst_urn}: identifier for the dst port
     
     Currently no other attributes are defined through there may be more later.
     
     C{<switches>} has a list of C{<switch>} nodes with the following attributes:
     
-    - C{urn}: urn prefix for a switch:datapathid
+        - C{urn}: urn prefix for a switch:datapathid
     
     Currently no other attributes are defined through there may be more later.
     
     For example::
     
-    <rspec>
-        <network name="Stanford" location="Stanford, CA, USA">
-            <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0 />
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1 />
-                </switch>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0 />
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1 />
-                </switch>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0 />
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1 />
-                </switch>
-            </switches>
-            <links>
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
-                />
-            </links>
-        </network>
-        <network name="Princeton" location="USA">
-            <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:3">
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0 />
-                </switch>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:4">
-                    <port urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0 />
-                </switch>
-            </switches>
-            <links>
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
-                />
-                <link
-                 src_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
-                 dst_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
-                />
-            </links>
-        </network>
-    </rspec>
+        <rspec>
+            <network name="Stanford" location="Stanford, CA, USA">
+                <switches>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0 />
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1 />
+                    </switch>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0 />
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1 />
+                    </switch>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0 />
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1 />
+                    </switch>
+                </switches>
+                <links>
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
+                    />
+                </links>
+            </network>
+            <network name="Princeton" location="USA">
+                <switches>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:3">
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0 />
+                    </switch>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:4">
+                        <port urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0 />
+                    </switch>
+                </switches>
+                <links>
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
+                    />
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
+                     dst_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
+                    />
+                </links>
+            </network>
+        </rspec>
     
     specifies a triangular graph at the Stanford network and a single link
     at the Princeton network
@@ -273,7 +287,9 @@ def get_resources(slice_urn, geni_available):
 
 RESV_RSPEC_TAG="resv_rspec"
 USER_TAG="user"
-FULLNAME="fullname"
+FIRSTNAME="firstname"
+LASTNAME="lastname"
+AFFILIATION="affiliation"
 EMAIL="email"
 PASSWORD="password"
 PROJECT_TAG="project"
@@ -296,53 +312,55 @@ WILDCARD="*"
 def parse_slice(resv_rspec):
     '''
     Parses the reservation RSpec and returns a tuple:
-    (project_name, project_desc, slice_name, slice_desc, 
-    controller_url, email, password, slivers) where slivers
+    C{(project_name, project_desc, slice_name, slice_desc, 
+    controller_url, firstname, lastname, affiliation, email, password,
+    slivers)} where C{slivers}
     is a dict mapping OpenFlowInterface instances to a flowspace
     dict for reservation on them.
     
-    The reservation rspec looks like the following:
+    The reservation rspec looks like the following::
     
-    <resv_rspec>
-        <user
-            firstname="John"
-            lastname="Doe"
-            email="john.doe@geni.net"
-            password="slice_pass"
-        />
-        <project
-            name="Stanford Networking Group"
-            description="Internet performance research to ..."
-        />
-        <slice
-            name="Crazy Load Balancer"
-            description="Does this and that..."
-            controller_url="tcp:controller.stanford.edu:6633"
-        />
-        <flowspace>
-            <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
-            </switches>
-            <port_num from="1" to="4" />
-            <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
-            <dl_dst from="*" to="*" />
-            <dl_type from="0x800" to="0x800" />
-            <vlan_id from="15" to="20" />
-            <nw_src from="192.168.3.0" to="192.168.3.255" />
-            <nw_dst from="192.168.3.0" to="192.168.3.255" />
-            <nw_proto from="17" to="17" />
-            <tp_src from="100" to="100" />
-            <tp_dst from="100" to="*" />
-        </flowspace>
-        <flowspace>
-            <switches>
-                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
-            </switches>
-            <tp_src from="100" to="100" />
-            <tp_dst from="100" to="*" />
-        </flowspace>
-    </resv_rspec>
+        <resv_rspec>
+            <user
+                firstname="John"
+                lastname="Doe"
+                affiliation="Stanford"
+                email="john.doe@geni.net"
+                password="slice_pass"
+            />
+            <project
+                name="Stanford Networking Group"
+                description="Internet performance research to ..."
+            />
+            <slice
+                name="Crazy Load Balancer"
+                description="Does this and that..."
+                controller_url="tcp:controller.stanford.edu:6633"
+            />
+            <flowspace>
+                <switches>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
+                </switches>
+                <port_num from="1" to="4" />
+                <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
+                <dl_dst from="*" to="*" />
+                <dl_type from="0x800" to="0x800" />
+                <vlan_id from="15" to="20" />
+                <nw_src from="192.168.3.0" to="192.168.3.255" />
+                <nw_dst from="192.168.3.0" to="192.168.3.255" />
+                <nw_proto from="17" to="17" />
+                <tp_src from="100" to="100" />
+                <tp_dst from="100" to="*" />
+            </flowspace>
+            <flowspace>
+                <switches>
+                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
+                </switches>
+                <tp_src from="100" to="100" />
+                <tp_dst from="100" to="*" />
+            </flowspace>
+        </resv_rspec>
     
     Any missing fields from the flowspace mean wildcard. All '*' means any
     value.
@@ -357,18 +375,22 @@ def parse_slice(resv_rspec):
     
     # Parse the rspec
     root = et.fromstring(resv_rspec)
-    email, password = _resv_parse_user(root)
+    firstname, lastname, affiliation, email, password = \
+        _resv_parse_user(root)
     slice_name, slice_desc, controller_url = _resv_parse_slice(root)
     project_name, project_desc = _resv_parse_project(root)
     slivers = _resv_parse_slivers(root)
     
     return (project_name, project_desc, slice_name, slice_desc, 
-            controller_url, email, password, slivers)
+            controller_url, firstname, lastname, affiliation,
+            email, password, slivers)
 
 def _resv_parse_user(root):
     '''parse the user tag from the root Element'''
     user_elem = root.find(USER_TAG)
-    return (user_elem.get(EMAIL), user_elem.get(PASSWORD))
+    return (user_elem.get(FIRSTNAME), user_elem.get(LASTNAME),
+            user_elem.get(AFFILIATION),
+            user_elem.get(EMAIL), user_elem.get(PASSWORD))
 
 def _resv_parse_slice(root):
     slice_elem = root.find(SLICE_TAG)
@@ -437,3 +459,89 @@ def _resv_parse_slivers(root):
                 port_fs_map.setdefault(iface, []).append(fs)
         
     return port_fs_map
+
+def create_resv_rspec(user, slice, aggregate=None):
+    """Create a reservation rspec from the set of interface slivers.
+    
+    @param user: The user making the reservation.
+    @type user: L{django.contrib.auth.models.User}
+    @param slice: The slice to use in the reservation.
+    @type slice: L{expedient.clearinghouse.slice.models.Slice}
+    @keyword aggregate: If not None, only get the resv rspec for the
+        specified aggregate. DDefault is None.
+    @type aggregate: None or L{openflow.plugin.models.OpenFlowAggregate}
+    
+    @return: an OpenFlow reservation RSpec for the wanted slivers.
+    @rtype: C{str}
+    """
+    
+    root = et.Element(RESV_RSPEC_TAG)
+    
+    # add the user info
+    et.SubElement(
+        root, USER_TAG, {
+            FIRSTNAME: user.firstname,
+            LASTNAME: user.lastname,
+            AFFILIATION: UserProfile.get_or_create_profile(user).affiliation,
+            EMAIL: user.email,
+            PASSWORD: slice.openflowsliceinfo.password,
+        }
+    )
+    
+    # add the project info
+    et.SubElement(
+        root, PROJECT_TAG, {
+            NAME: slice.project.name,
+            DESCRIPTION: slice.project.description,
+        }
+    )
+    
+    # add the slice info
+    et.SubElement(
+        root, SLICE_TAG, {
+            NAME: slice.name,
+            DESCRIPTION: slice.description,
+            CONTROLLER: slice.openflowsliceinfo.controller_url
+        }
+    )
+    
+    iface_sliver_qs = OpenFlowInterfaceSliver.objects.filter(
+        slice=slice)
+    if aggregate:
+        iface_sliver_qs = iface_sliver_qs.filter(
+            resource__aggregate__id=aggregate.id)
+        
+    # add the slivers
+    for sliver in iface_sliver_qs:
+        for flowspace in sliver.flowspacerule_set.all():
+            iface = sliver.resource.as_leaf_class()
+            fs_elem = et.SubElement(root, FLOWSPACE_TAG)
+            switches_elem = et.SubElement(fs_elem, SWITCHES_TAG)
+            et.SubElement(
+                switches_elem, SWITCH_TAG, {
+                    URN: iface.switch,
+                }
+            )
+            et.SubElement(
+                fs_elem, PORT_NUM_TAG, {
+                    "from": iface.port_num,
+                    "to": iface.port_num,
+                }
+            )
+            for tag in DL_SRC_TAG, DL_DST_TAG,\
+            DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
+            TP_SRC_TAG, TP_DST_TAG:
+                et.SubElement(
+                    fs_elem, tag, {
+                        "from": getattr(flowspace, "%s_start" % tag),
+                        "to": getattr(flowspace, "%s_end" % tag),
+                    }
+                )
+    
+    return et.tostring(root)
+
+def parse_external_rspec(rspec):
+    """Parse the given rspec and create dicts of the requested objects.
+    
+    
+    """
