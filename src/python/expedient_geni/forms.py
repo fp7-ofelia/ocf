@@ -8,10 +8,77 @@ from models import GENIAggregate
 import logging
 import traceback
 from django.conf import settings
+from sfa.trust.gid import GID
+from sfa.trust.certificate import Keypair
+from expedient_geni.utils import get_user_key_fname, get_user_cert_fname
 
 logger = logging.getLogger("GENIForms")
 
+def _clean_x_file_factory(name):
+    """Factory to create functions that check file size"""
+    def clean_x_file(self):
+        if self.cleaned_data["%s_file" % name].size > \
+        settings.GCF_MAX_UPLOADED_PEM_FILE_SIZE:
+            raise forms.ValidationError(
+                "File exceeds maximum file size of %s bytes."
+                % settings.GCF_MAX_UPLOADED_PEM_FILE_SIZE)
+        return self.cleaned_data["%s_file" % name]
+    return clean_x_file
 
+class UploadCertForm(forms.Form):
+    """Form to upload a certificate and its corresponding key."""
+    
+    key_file = forms.FileField(
+        help_text="Select the file that contains the key for the "\
+            "certificate to upload.")
+    cert_file = forms.FileField(
+        help_text="Select the file that contains the "\
+            "certificate to upload. The certificate must be signed "\
+            "with the uploaded key.")
+    
+    clean_key_file = _clean_x_file_factory("key")
+    clean_cert_file = _clean_x_file_factory("cert")
+            
+    def clean(self):
+        """Check that the cert file is signed by the key file and is trusted."""
+        
+        self.key = Keypair(self.cleaned_data["key_file"].read())
+        self.cert = GID(self.cleaned_data["cert_file"].read())
+        
+        try:
+            self.cert.verify(self.key)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            raise forms.ValidationError(
+                "Could not verify that the certificate was "
+                "signed by the uploaded key. The error was: %s" % e)
+
+        try:
+            self.cert.verify_chain(settings.GCF_X509_CERT_DIR)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            raise forms.ValidationError(
+                "Could not verify that the uploaded certificate is "
+                "trusted. This could be because none of the certificate's "
+                "ancestors have been installed as trusted. The error was: "
+                "%s" % e
+            )
+
+        return self.cleaned_data
+    
+    def save(self, user):
+        """Write the key and cert into files.
+        
+        @param user: the user to save the cert and key for.
+        @type user: C{django.contrib.auth.models.User}
+        """
+        
+        key_fname = get_user_key_fname(user)
+        cert_fname = get_user_cert_fname(user)
+        
+        self.key.save_to_file(key_fname)
+        self.cert.save_to_file(cert_fname)
+    
 def geni_aggregate_form_factory(agg_model):
     class GENIAggregateForm(forms.ModelForm):
         class Meta:
