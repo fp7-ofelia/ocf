@@ -255,9 +255,13 @@ def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
            url_name="openflow_gapi")
 def DeleteSliver(slice_urn, credentials, **kwargs):
     slice = get_slice(slice_urn)
+    project = slice.project
     client = Client()
     fake_login(client, kwargs["request"].user)
     client.post(reverse("slice_delete", args=[slice.id]))
+    # delete the project if there are no more slices in it
+    if Slice.objects.filter(project=project).count() == 0:
+        client.post(reverse("project_delete", args=[project.id]))
     return True
 
 @require_creds(True)
