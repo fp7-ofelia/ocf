@@ -50,19 +50,40 @@ def get_user_urn(user):
     @rtype: C{str}
     """
     
-    return URN(settings.GCF_BASE_NAME, "user", user.username).urn_string()
+    return URN(
+        str(settings.GCF_BASE_NAME), str("user"), str(user.username)
+    ).urn_string()
 
-def create_x509_cert(urn, cert_fname, key_fname):
+def get_ch_urn():
+    """Get the URN for Expedient as a clearinghouse.
+    
+    @return: The URN
+    @rtype: C{str}
+    """
+    
+    return URN(
+        settings.GCF_BASE_NAME, "authority", "sa",
+    ).urn_string()
+
+def create_x509_cert(urn, cert_fname, key_fname, is_self_signed=False):
     """Create a GCF certificate and store it in a file.
     
     @param urn: The urn to use in the cert.
     @param cert_fname: The filename to store the cert in.
     @param key_fname: The filename to store the certificate key in.
+    @param is_self_signed: should the certificate be self-signed? Otherwise
+        it will be signed by Expedient's CH certificate. Default False.
     """
-    cert, keys = create_cert(
-        urn,
-        settings.GCF_X509_CH_KEY,
-        filename=settings.GCF_X509_CH_CERT)
+    if is_self_signed:
+        cert, keys = create_cert(
+            urn,
+        )
+    else:
+        cert, keys = create_cert(
+            urn,
+            issuer_key=settings.GCF_X509_CH_KEY,
+            issuer_cert=settings.GCF_X509_CH_CERT
+        )
     
     cert.save_to_file(cert_fname)
     keys.save_to_file(key_fname)
