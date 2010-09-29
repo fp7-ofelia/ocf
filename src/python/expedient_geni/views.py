@@ -13,9 +13,10 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.views.generic import simple
 from expedient_geni.utils import get_user_cert_fname, get_user_urn,\
-    get_user_key_fname, create_x509_cert
-from django.http import HttpResponseRedirect
+    get_user_key_fname, create_x509_cert, read_cert_from_file
+from django.http import HttpResponseRedirect, HttpResponse
 from expedient.common.messaging.models import DatedMessage
+from expedient_geni.forms import UploadCertForm
 
 logger = logging.getLogger("GENIViews")
 TEMPLATE_PATH = "expedient_geni"
@@ -95,14 +96,17 @@ def user_cert_manage(request, user_id):
     
     cert_fname = get_user_cert_fname(user)
     if not os.access(cert_fname, os.F_OK):
-        cert_fname = None
+        cert = None
+        
+    else:
+        cert = read_cert_from_file(cert_fname)
     
     return simple.direct_to_template(
         request,
         template=TEMPLATE_PATH+"/user_cert_manage.html",
         extra_context={
             "user": user,
-            "cert_fname": cert_fname,
+            "cert": cert,
         },
     )
 
@@ -130,9 +134,65 @@ def user_cert_generate(request, user_id):
     
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/user_cert_create.html",
+        template=TEMPLATE_PATH+"/user_cert_generate.html",
         extra_context={
             "user": user,
         },
     )
-        
+    
+def user_cert_download(request, user_id):
+    """Download a GCF certificate."""
+    
+    user = get_object_or_404(User, pk=user_id)
+    
+    must_have_permission(request.user, user, "can_download_certs")
+    
+    cert_fname = get_user_cert_fname(user)
+    
+    response = HttpResponse(open(cert_fname,'r').read(),
+                            mimetype='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % cert_fname
+    return response
+    
+def user_key_download(request, user_id):
+    """Download a GCF key."""
+    
+    user = get_object_or_404(User, pk=user_id)
+    
+    must_have_permission(request.user, user, "can_download_certs")
+    
+    key_fname = get_user_key_fname(user)
+    
+    response = HttpResponse(open(key_fname,'r').read(),
+                            mimetype='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % key_fname
+    return response
+            
+def user_cert_upload(request, user_id):
+    """Upload a key and certificate"""
+    
+    user = get_object_or_404(User, pk=user_id)
+    
+    must_have_permission(request.user, user, "can_change_certs")
+
+    if request.method == "POST":
+        form = UploadCertForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save(user)
+            DatedMessage.objects.post_message_to_user(
+                "Successfully uploaded GCF certificate and key for user %s.",
+                user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+            return HttpResponseRedirect(
+                reverse("user_cert_manage", args=[user_id])
+            )
+    else:
+        form = UploadCertForm()
+
+    return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/user_cert_upload.html",
+        extra_context={
+            "user": user,
+            "form": form,
+        }
+    )
