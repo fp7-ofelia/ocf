@@ -9,6 +9,7 @@ import logging
 from django.db.models import signals
 import uuid
 from geni.util.urn_util import publicid_to_urn
+from expedient_geni.utils import get_ch_urn, create_x509_cert
 
 SLICE_GID_SUBJ = "gcf.slice"
 SLICE_CRED_LIFETIME = 360000000
@@ -23,26 +24,9 @@ def create_expedient_certs():
     """
     Create the expedient certificate and keys for use in GENI API.
     """
-    # workaround the '-' in the filename :(
-    gcf = __import__("gcf.init-ca")
-    initca = getattr(gcf, "init-ca")
-
-    ca_cert, ca_key = initca.create_cert(
-        GCF_URN_PREFIX,
-        initca.AUTHORITY_CERT_TYPE,
-        initca.CA_CERT_SUBJ)
-    
-    ch_cert, ch_key = initca.create_cert(
-        GCF_URN_PREFIX,
-        initca.AUTHORITY_CERT_TYPE,
-        initca.CH_CERT_SUBJ,
-        ca_key, ca_cert, True)
-    
-    ca_cert.save_to_file(settings.GCF_X509_CA_CERT)
-    ca_key.save_to_file(settings.GCF_X509_CA_KEY)
-    
-    ch_cert.save_to_file(settings.GCF_X509_CH_CERT)
-    ch_key.save_to_file(settings.GCF_X509_CH_KEY)
+    urn = get_ch_urn()
+    create_x509_cert(
+        urn, settings.GCF_X509_CH_CERT, settings.GCF_X509_CH_KEY, True)
 
 def create_slice_urn():
     """
@@ -140,11 +124,11 @@ def check_and_create_auth(sender, **kwargs):
         _mkdirs(settings.GCF_X509_KEY_DIR)
         create_expedient_certs()
     
-    if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
-        logger.info("Creating GENI API null slice credentials.")
-        _mkdirs(settings.GCF_X509_CRED_DIR)
-        create_null_slice_cred()
+#    if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
+#        logger.info("Creating GENI API null slice credentials.")
+#        _mkdirs(settings.GCF_X509_CRED_DIR)
+#        create_null_slice_cred()
         
 
 # Request to run check_and_create_auth after syncdb
-#signals.post_syncdb.connect(check_and_create_auth)
+signals.post_syncdb.connect(check_and_create_auth)
