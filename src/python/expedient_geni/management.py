@@ -8,11 +8,16 @@ import os
 import logging
 from django.db.models import signals
 import uuid
+from geni.util.urn_util import publicid_to_urn
 
 SLICE_GID_SUBJ = "gcf.slice"
 SLICE_CRED_LIFETIME = 360000000
 
 logger = logging.getLogger("geni-syncdb")
+
+GCF_URN_PREFIX = publicid_to_urn(
+    "IDN %s" % settings.GCF_BASE_NAME
+)
 
 def create_expedient_certs():
     """
@@ -23,12 +28,12 @@ def create_expedient_certs():
     initca = getattr(gcf, "init-ca")
 
     ca_cert, ca_key = initca.create_cert(
-        settings.GCF_URN_PREFIX,
+        GCF_URN_PREFIX,
         initca.AUTHORITY_CERT_TYPE,
         initca.CA_CERT_SUBJ)
     
     ch_cert, ch_key = initca.create_cert(
-        settings.GCF_URN_PREFIX,
+        GCF_URN_PREFIX,
         initca.AUTHORITY_CERT_TYPE,
         initca.CH_CERT_SUBJ,
         ca_key, ca_cert, True)
@@ -142,4 +147,4 @@ def check_and_create_auth(sender, **kwargs):
         
 
 # Request to run check_and_create_auth after syncdb
-signals.post_syncdb.connect(check_and_create_auth)
+#signals.post_syncdb.connect(check_and_create_auth)
