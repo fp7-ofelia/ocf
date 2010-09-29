@@ -5,7 +5,7 @@ Created on Jul 4, 2010
 '''
 from django.db import models
 from expedient.clearinghouse.resources.models import Resource, Sliver
-from geni.models import GENIAggregate, GENISliceInfo
+from expedient_geni.models import GENIAggregate, GENISliceInfo
 from xml.etree import cElementTree as et
 import calendar
 from exceptions import RSpecParsingException, NameConflictException
