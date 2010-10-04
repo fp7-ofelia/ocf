@@ -18,10 +18,10 @@ class AuthorizationRequired(Exception):
 class TestClientTransport(xmlrpclib.Transport):
     """Handles connections to XML-RPC server through Django test client"""
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, defaults={}, *args, **kwargs):
         from django.test.client import Client
         xmlrpclib.Transport.__init__(self, *args, **kwargs)
-        self.client = Client()
+        self.client = Client(**defaults)
 
     def add_auth(self, host, headers):
         """
