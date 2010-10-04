@@ -123,7 +123,7 @@ def user_cert_generate(request, user_id):
     
     cert_fname = get_user_cert_fname(user)
     key_fname = get_user_key_fname(user)
-    urn = get_user_urn(user)
+    urn = get_user_urn(user.username)
 
     if request.method == "POST":
         create_x509_cert(urn, cert_fname, key_fname)
@@ -176,7 +176,9 @@ def user_cert_upload(request, user_id):
     must_have_permission(request.user, user, "can_change_certs")
 
     if request.method == "POST":
-        form = UploadCertForm(request.POST, request.FILES)
+        logger.debug(request)
+        logger.debug(request.FILES)
+        form = UploadCertForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save(user)
             DatedMessage.objects.post_message_to_user(
@@ -196,3 +198,6 @@ def user_cert_upload(request, user_id):
             "form": form,
         }
     )
+
+def download_resv_rspec(request, slice_id):
+    """Download the reservation rspec for a slice"""
