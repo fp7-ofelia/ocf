@@ -120,7 +120,8 @@ def check_and_create_auth(sender, **kwargs):
     if not os.access(settings.GCF_X509_CH_CERT, os.R_OK) or\
     not os.access(settings.GCF_X509_CH_KEY, os.R_OK):
         logger.info("Creating GENI API certificate and key.")
-        _mkdirs(settings.GCF_X509_CERT_DIR)
+        _mkdirs(settings.GCF_X509_TRUSTED_CERT_DIR)
+        _mkdirs(settings.GCF_X509_USER_CERT_DIR)
         _mkdirs(settings.GCF_X509_KEY_DIR)
         create_expedient_certs()
     
