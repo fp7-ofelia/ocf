@@ -113,11 +113,12 @@ def _get_root_node(slice_urn, available):
     
     root = et.Element(RSPEC_TAG, {"type": "openflow"})
     aggregates = Aggregate.objects.filter_for_classes(
-        [OpenFlowAggregate, GCFOpenFlowAggregate]).filter(
+        [OpenFlowAggregate]).filter(
             available=True).exclude(
                 name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
     for aggregate in aggregates:
-        _add_aggregate_node(root, aggregate, slice_urn, available)
+        _add_aggregate_node(
+            root, aggregate.as_leaf_class(), slice_urn, available)
     return root
 
 def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):
@@ -566,8 +567,8 @@ def parse_external_rspec(rspec):
     link_elems = root.findall(".//%s" % LINK_TAG)
     links = []
     for link_elem in link_elems:
-        src_urn = link_elem[SRC_URN]
-        dst_urn = link_elem[DST_URN]
+        src_urn = link_elem.get(SRC_URN)
+        dst_urn = link_elem.get(DST_URN)
         src_dpid, src_port = _urn_to_port(src_urn)
         dst_dpid, dst_port = _urn_to_port(dst_urn)
         links.append((src_dpid, src_port, dst_dpid, dst_port))
