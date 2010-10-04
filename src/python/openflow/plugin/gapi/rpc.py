@@ -79,10 +79,8 @@ def GetVersion(**kwargs):
            url_name="openflow_gapi")
 @require_creds(False)
 def ListResources(credentials, options, **kwargs):
-    import base64, zlib
-
     logger.debug("Called ListResources")
-    return gapi.ListResources(credentials, options)
+    return gapi.ListResources(options, kwargs["request"].user)
 
 @require_creds(True)
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
@@ -90,7 +88,7 @@ def ListResources(credentials, options, **kwargs):
 def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     logger.debug("Called CreateSliver")
     try:
-        return gapi.CreateSliver(slice_urn, credentials, rspec, kwargs["request"].user)
+        return gapi.CreateSliver(slice_urn, rspec, kwargs["request"].user)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
     
@@ -100,7 +98,7 @@ def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
 def DeleteSliver(slice_urn, credentials, **kwargs):
     logger.debug("Called DeleteSliver")
     try:
-        return gapi.DeleteSliver(slice_urn, credentials, kwargs["request"].user)
+        return gapi.DeleteSliver(slice_urn, kwargs["request"].user)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
 
@@ -110,7 +108,7 @@ def DeleteSliver(slice_urn, credentials, **kwargs):
 def SliverStatus(slice_urn, credentials, **kwargs):
     logger.debug("Called SliverStatus")
     try:
-        return gapi.SliverStatus(slice_urn, credentials)
+        return gapi.SliverStatus(slice_urn)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
         
@@ -120,7 +118,7 @@ def SliverStatus(slice_urn, credentials, **kwargs):
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
     logger.debug("Called RenewSliver")
     try:
-        return gapi.RenewSliver(slice_urn, credentials, expiration_time)
+        return gapi.RenewSliver(slice_urn, expiration_time)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
     
@@ -130,6 +128,6 @@ def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
 def Shutdown(slice_urn, credentials, **kwargs):
     logger.debug("Called Shutdown")
     try:
-        return gapi.Shutdown(slice_urn, credentials, kwargs["request"].user)
+        return gapi.Shutdown(slice_urn, kwargs["request"].user)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
