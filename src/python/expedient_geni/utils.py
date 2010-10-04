@@ -191,7 +191,8 @@ def get_trusted_cert_filenames():
     for f in filenames:
         if f.endswith(".crt") and os.path.isfile(f):
             trusted_certs.append(f)
-        
+    
+    return trusted_certs
     
 def create_slice_credential(user_gid, slice_gid):
     '''Create a Slice credential object for this user_gid (object) on given slice gid (object)
