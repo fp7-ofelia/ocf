@@ -4,12 +4,13 @@ Created on Jul 12, 2010
 @author: jnaous
 '''
 
+from xml.etree import ElementTree as et
 from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch,\
     DummyCallBackProxy
 from django.contrib.auth.models import User
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
     OpenFlowInterfaceSliver, FlowSpaceRule, OpenFlowConnection,\
-    NonOpenFlowConnection
+    NonOpenFlowConnection, OpenFlowSwitch, OpenFlowSliceInfo
 from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 import logging
 from django.core.urlresolvers import reverse
@@ -24,6 +25,15 @@ from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.middleware import threadlocals
+from openflow.plugin.gapi import gapi, rspec
+from expedient_geni.utils import create_x509_cert, get_user_urn, get_slice_urn
+from expedient_geni import clearinghouse
+from expedient.clearinghouse.users.models import UserProfile
+import random
+from sfa.trust import credential
+from expedient_geni.models import GENISliceInfo
+import xmlrpclib
+from expedient.common.utils.transport import TestClientTransport
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -82,7 +92,25 @@ class Tests(SettingsTestCase):
             proxy.delete()
             
         self.client.login(username="user", password="password")
-            
+        
+        # create user cert/keys
+        self.user_urn = get_user_urn(self.test_user.username)
+        self.user_cert, self.user_key = create_x509_cert(self.user_urn)
+        
+        # get slice creds
+        self.slice_cred = clearinghouse.CreateSlice(
+            self.user_cert.save_to_string())
+        self.slice_gid = credential.Credential(
+            string=self.slice_cred).get_gid_object()
+        
+        # xmlrpc client
+        self.rpc = xmlrpclib.ServerProxy(
+            "http://testserver" + reverse("openflow_gapi"),
+            transport=TestClientTransport(
+                defaults={"REMOTE_USER": self.user_cert.save_to_string()},
+            ),
+        )
+        
     def test_create_aggregates(self):
         """
         Test that we can create an OpenFlow Aggregate using the create view.
@@ -378,3 +406,239 @@ class Tests(SettingsTestCase):
                 self.assertEqual(
                     len(fs), 2*DummyOMSwitch.objects.get(dpid=dpid).nPorts)
             
+    def test_gapi_GetVersion(self):
+        self.assertEqual(self.rpc.GetVersion()["geni_api"], 1)
+        
+    def test_gapi_ListResources(self, zipped=False):
+        # add aggregates
+        self.test_create_aggregates()
+        
+        # get the rspec for the added resources
+        options = dict(geni_compressed=zipped, geni_available=True)
+        rspec = self.rpc.ListResources(self.slice_cred, options)
+        
+        logger.debug("Got advertisement RSpec:\n %s" % rspec)
+        
+        if zipped:
+            import zlib, base64
+            rspec = zlib.decompress(base64.b64decode(rspec))
+            
+        # parse the rspec and check the switches/links
+        switches, links = rspec.parse_external_rspec(rspec)
+        
+        # verify that all switches are listed
+        dpids_actual = set(OpenFlowSwitch.objects.values_list(
+            "datapath_id", flat=True))
+        dpids_found = set(switches.keys())
+        self.assertEqual(dpids_found, dpids_actual)
+        
+        # verify the ports for each switch
+        for dpid in dpids_actual:
+            ports_actual = set(OpenFlowInterface.objects.filter(
+                switch__datapath_id=dpid).values_list(
+                    "port_num", flat=True))
+            ports_found = set(switches[dpid])
+            self.assertEqual(ports_found, ports_actual)
+            
+        # verify the links
+        links_actual = set(OpenFlowConnection.objects.values_list(
+            "src_iface__switch__datapath_id", "src_iface__port_num",
+            "dst_iface__switch__datapath_id", "dst_iface__port_num",
+        ))
+        links_found = set(links)
+        self.assertEquals(links_found, links_actual)
+        
+        
+    def test_gapi_ZippedListResources(self):
+        self.test_gapi_ListResources(zipped=True)
+        
+    def test_gapi_changed_ListResources(self):
+        self.test_gapi_ListResources()
+        for s in OpenFlowSwitch.objects.all()[:5]:
+            s.delete()
+        self.test_gapi_ListResources()
+        
+    def test_gapi_CreateSliver(self,
+        proj_name = "test project",
+        proj_desc = "test project description",
+        slice_name = "test slice",
+        slice_desc = "test slice description",
+        username = "gapi_user",
+        firstname = "gapi",
+        lastname = "user",
+        password = "password",
+        affiliation = "Stanford",
+        email = "gapi_user@expedient.stanford.edu",
+        controller_url = "tcp:bla.com:6633",
+        fs1 = dict(
+            dl_src=("11:22:33:44:55:66", "11:22:33:44:55:77"),
+            dl_dst=("11:22:33:44:55:66", None),
+            dl_type=(1234, 1236),
+            vlan_id=(None, 4455),
+            nw_src=("123.123.132.123", "222.222.222.222"),
+            nw_proto=(4,4),
+            tp_src=(123,123),
+        ),
+        fs2 = dict(
+            dl_dst=("11:22:33:44:55:66", None),
+            dl_type=(1234, 1236),
+            vlan_id=(4455, 4455),
+            nw_src=("123.123.132.123", "222.222.222.222"),
+        ),
+    ):
+        # create the project
+        project = Project.objects.create(
+            name=proj_name, description=proj_desc)
+        slice = Slice.objects.create(
+            project=project, name=slice_name, description=slice_desc)
+        user = User.objects.create(
+            username=username, firstname=firstname, lastname=lastname,
+            email=email,
+        )
+        UserProfile.objects.create(
+            user=user, affiliation=affiliation)
+        
+        # select ports and switches
+        random.seed(0)
+        fs1_switches = random.sample(list(OpenFlowSwitch.objects.all()), 10)
+        fs1_ports = random.sample(list(OpenFlowInterface.objects.all()), 10)
+        fs2_switches = random.sample(list(OpenFlowSwitch.objects.all()), 10)
+        fs2_ports = random.sample(list(OpenFlowInterface.objects.all()), 10)
+        
+        def create_slivers(fs, ports):
+            slivers = []
+            for p in ports:
+                slivers.append(OpenFlowInterfaceSliver.objects.create(
+                    slice=slice, resource=p))
+                kw = {}
+                for k, r in fs.items():
+                    if r[0]: kw[k+"_start"] = r[0]
+                    if r[1]: kw[k+"_end"] = r[1]
+                    
+            rule = FlowSpaceRule.objects.create(**kw)
+            for s in slivers:
+                rule.slivers.add(s)
+                
+            return rule
+        
+        # create the slivers for the slice
+        r1 = create_slivers(fs1, fs1_ports)
+        r2 = create_slivers(fs2, fs2_ports)
+        
+        OpenFlowSliceInfo.objects.create(
+            slice=slice, password=password, controller_url=controller_url)
+        
+        # get the rspec
+        resv_rspec = rspec.create_resv_rspec(user, slice)
+        
+        # add the full switches to the rspec
+        root = et.fromstring(rspec)
+        fs_elems = root.findall(".//%s" % rspec.FLOWSPACE_TAG)
+        
+        # get the rspec with ports instead of switches
+        expected_resv_rspec = rspec.create_resv_rspec(user, slice)
+        
+        def add_switches(elem, switches):
+            for s in switches:
+                et.SubElement(
+                    elem, rspec.SWITCH_TAG, {
+                        rspec.URN: rspec._dpid_to_urn(s.datapath_id),
+                    },
+                )
+                
+        add_switches(fs_elems[0], fs1_switches)
+        add_switches(fs_elems[1], fs1_switches)
+        
+        # delete created state
+        project.delete()
+        user.delete()
+        r1.delete()
+        r2.delete()
+        
+        # create the slice using gapi
+        ret_rspec = self.rpc.CreateSliver(
+            self.slice_gid.get_urn(),
+            self.slice_cred,
+            resv_rspec,
+            users={})
+        
+        self.assertEqual(ret_rspec, expected_resv_rspec)
+        
+        # check that the created state is what is expected
+        self.assertEqual(
+            GENISliceInfo.objects.all()[0].slice_urn, self.slice_gid.get_urn())
+        
+        project = Project.objects.all()[0]
+        self.assertEqual(project.name, proj_name)
+        self.assertEqual(project.description, proj_desc)
+        
+        slice = Slice.objects.all()[0]
+        self.assertEqual(slice.name, slice_name)
+        self.assertEqual(slice.description, slice_desc)
+        self.assertEqual(slice.project, project)
+        
+        user = User.objects.get(username=username)
+        self.assertEqual(user.firstname, firstname)
+        self.assertEqual(user.lastname, lastname)
+        self.assertEqual(user.email, email)
+        
+        user_profile= UserProfile.objects.all()[0]
+        self.assertEqual(user_profile.affiliation, affiliation)
+        self.assertEqual(user, user)
+        
+        r1 = FlowSpaceRule.objects.all()[0]
+        r2 = FlowSpaceRule.objects.all()[1]
+        
+        def verif_rule(r, fs):
+            for field in "dl_src", "dl_dst", "dl_type", \
+            "vlan_id", "nw_src", "nw_dst", "nw_proto", \
+            "tp_src", "tp_dst":
+                if field in fs:
+                    self.assertEqual(fs[field][0], getattr(r, field+"_start"))
+                    self.assertEqual(fs[field][1], getattr(r, field+"_end"))
+                else:
+                    self.assertEqual(None, getattr(r, field+"_start"))
+                    self.assertEqual(None, getattr(r, field+"_end"))
+        
+        verif_rule(r1, fs1)
+        verif_rule(r2, fs2)
+        
+        # check the slivers in rules: make sure each rule has all the
+        # the interfaces it is supposed to have.
+        def verif_slivers(r, ports, switches):
+            all_ports = []
+            all_ports.extend(ports)
+            
+            for s in switches:
+                all_ports.extend(OpenFlowInterface.objects.filter(switch=s))
+                
+            all_ports = set(all_ports)
+            
+            # check number of interfaces
+            self.assertEqual(all_ports, r.slivers.count())
+            
+            # check slivers
+            for sliver in r.slivers.all():
+                self.assertTrue(sliver.resource.as_leaf_class() in all_ports)
+                
+        verif_slivers(r1, fs1_ports, fs1_switches)
+        verif_slivers(r2, fs2_ports, fs2_switches)
+        
+        return ret_rspec
+        
+    def test_gapi_DeleteSliver(self):
+        self.test_gapi_CreateSliver()
+        self.rpc.DeleteSliver(self.slice_gid.get_urn())
+        self.assertEqual(Slice.objects.count(), 0)
+        self.assertEqual(GENISliceInfo.objects.count(), 0)
+        self.assertEqual(Project.objects.count(), 0)
+        self.assertEqual(OpenFlowInterfaceSliver.objects.count(), 0)
+        self.assertEqual(FlowSpaceRule.objects.count(), 0)
+        
+    def test_gapi_slice_ListResources(self):
+        expected_rspec = self.test_gapi_CreateSliver()
+        ret_rspec = self.rpc.ListResources(
+            self.slice_cred, {"geni_slice_urn": self.slice_gid.get_urn()})
+        self.assertEqual(ret_rspec, expected_rspec)
+        
+    
