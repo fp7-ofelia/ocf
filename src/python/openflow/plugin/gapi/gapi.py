@@ -3,17 +3,13 @@ Created on Apr 20, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
-import xmlrpclib
 import rspec as rspec_mod
-from openflow.plugin.models import GAPISlice,\
+from openflow.plugin.models import \
     OpenFlowSliceInfo, OpenFlowInterfaceSliver,\
     FlowSpaceRule
 import logging
-from geni import CredentialVerifier
 from django.conf import settings
 from django.test import Client
-from decorator import decorator
 from expedient.common.tests.client import test_get_and_post_form
 from expedient.clearinghouse.project.models import Project
 from django.core.urlresolvers import reverse
@@ -23,27 +19,11 @@ from expedient.common.utils import create_or_update
 from django.utils.importlib import import_module
 from django.http import HttpRequest
 from django.contrib.auth import login
+from expedient.clearinghouse.aggregate.models import Aggregate
+from expedient.clearinghouse.users.models import UserProfile
+from expedient_geni.models import GENISliceInfo
 
-logger = logging.getLogger("openflow.plugin.gapi")
-
-# Parameter Types
-CREDENTIALS_TYPE = 'array' # of strings
-OPTIONS_TYPE = 'struct'
-RSPEC_TYPE = 'string'
-VERSION_TYPE = 'struct'
-URN_TYPE = 'string'
-SUCCESS_TYPE = 'boolean'
-STATUS_TYPE = 'struct'
-TIME_TYPE = 'string'
-
-# SFA permissions mapping
-PRIVS_MAP = dict(
-    ListResources=(),
-    RenewSliver=('renewsliver',),
-    CreateSliver=('createsliver',),
-    DeleteSliver=('deleteslice',),
-    SliverStatus=('getsliceresources',),
-)
+logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
 def fake_login(client, user):
     engine = import_module(settings.SESSION_ENGINE)
@@ -71,64 +51,16 @@ def fake_login(client, user):
     }
     client.cookies[session_cookie].update(cookie_data)
 
-
-def no_such_slice(slice_urn):
-    "Raise a no such slice exception."
-    fault_code = 'No such slice.'
-    fault_string = 'The slice named by %s does not exist' % (slice_urn)
-    raise xmlrpclib.Fault(fault_code, fault_string)
-
 def get_slice(slice_urn):
     # get the slice
-    try:
-        slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
+    slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
     return slice
-
-def require_creds(use_slice_urn):
-    """Decorator to verify credentials"""
-    def require_creds(func, *args, **kw):
-        
-        logger.debug("Checking creds")
-        
-        client_cert = kw["request"].META["SSL_CLIENT_CERT"]
-
-        if use_slice_urn:
-            slice_urn = args[0]
-            credentials = args[1]
-        else:
-            slice_urn = None
-            credentials = args[0]
-            
-        cred_verifier = CredentialVerifier(settings.GCF_X509_CERT_DIR)
-            
-        cred_verifier.verify_from_strings(
-            client_cert, credentials,
-            slice_urn, PRIVS_MAP[func.func_name])
-
-        logger.debug("Creds pass")
-        
-        return func(*args, **kw)
-        
-    return decorator(require_creds)
     
-@rpcmethod(signature=['string', 'string'], url_name="openflow_gapi")
-def ping(str, **kwargs):
-    return "PONG: %s" % str
-
-@rpcmethod(signature=[VERSION_TYPE], url_name="openflow_gapi")
-def GetVersion(**kwargs):
-    logger.debug("Called GetVersion")
+def GetVersion():
     return dict(geni_api=1)
 
-@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
-           url_name="openflow_gapi")
-@require_creds(False)
-def ListResources(credentials, options, **kwargs):
+def ListResources(options, user):
     import base64, zlib
-
-    logger.debug("Called ListResources")
 
     if not options:
         options = dict()
@@ -137,9 +69,10 @@ def ListResources(credentials, options, **kwargs):
     geni_available = options.pop('geni_available', True)
 
     if slice_urn:
-        get_slice(slice_urn)
-
-    result = rspec_mod.get_resources(slice_urn, geni_available)
+        slice = get_slice(slice_urn)
+        result = rspec_mod.create_resv_rspec(user, slice)
+    else:
+        result = rspec_mod.get_resources(slice_urn, geni_available)
 
     # Optionally compress the result
     if 'geni_compressed' in options and options['geni_compressed']:
@@ -148,52 +81,61 @@ def ListResources(credentials, options, **kwargs):
 
     return result
 
-@require_creds(True)
-@rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
-           url_name="openflow_gapi")
-def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
+def CreateSliver(slice_urn, rspec, user):
 
-    logger.debug("Called CreateSliver")
-
-    project_name, project_desc, slice_name, slice_desc,\
-    controller_url, email, password, slivers \
-        = rspec_mod.parse_slice(rspec)
+    (project_name, project_desc, slice_name, slice_desc, 
+    controller_url, firstname, lastname, affiliation,
+    email, password, slivers) = rspec_mod.parse_slice(rspec)
 
     logger.debug("Parsed Rspec")
 
-    user = kwargs['request'].user
     give_permission_to("can_create_project", Project, user)
 
     client = Client()
     fake_login(client, user)
     
-    logger.debug("Creating/updating project")
+    user.firstname = firstname
+    user.lastname = lastname
+    profile = UserProfile.get_or_create_profile(user)
+    profile.affiliation = affiliation
+    user.save()
+    profile.save()
     
-    # check if the project exists create otherwise
+    # Check if the slice exists
     try:
-        project = Project.objects.get(name=project_name)
-        project.description = project_desc
-        project.save()
-    except Project.DoesNotExist:
-        test_get_and_post_form(
-            client, url=reverse("project_create"),
-            params={"name": project_name, "description": project_desc}
-        )
-        project = Project.objects.get(name=project_name)
-
-    logger.debug("Creating/updating slice")
-
-    # get or create slice in the project
-    try:
-        slice = Slice.objects.get(name=slice_name)
+        slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
+        # update the slice info
         slice.description = slice_desc
+        slice.name = slice_name
         slice.save()
+        # update the project info
+        slice.project.name = project_name
+        slice.project.description = project_desc
+        slice.project.save()
     except Slice.DoesNotExist:
+        # Check if the project exists
+        try:
+            project = Project.objects.get(name=project_name)
+            # update the project info
+            logger.debug("Updating project")
+            project.description = project_desc
+            project.save()
+        except Project.DoesNotExist:
+            # create the project
+            logger.debug("Creating project")
+            test_get_and_post_form(
+                client, url=reverse("project_create"),
+                params={"name": project_name, "description": project_desc}
+            )
+            project = Project.objects.get(name=project_name)
+        
+        # create the slice
+        logger.debug("Creating slice")
         test_get_and_post_form(
             client, url=reverse("slice_create", args=[project.id]),
             params={"name": slice_name, "description": slice_desc}
         )
-        slice = Slice.objects.get(name=slice_name)
+        slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
 
     logger.debug("Creating/updating slice info")
     
@@ -204,34 +146,42 @@ def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
         new_attrs={
             "controller_url": controller_url,
             "password": password,
+            "email": email,
         },
     )
     
     logger.debug("creating gapislice")
 
     # store a pointer to this slice using the slice_urn
-    GAPISlice.objects.get_or_create(slice_urn=slice_urn, slice=slice)
+    GENISliceInfo.objects.get_or_create(slice_urn=slice_urn, slice=slice)
     
     logger.debug("adding resources")
 
     sliver_ids = []
-    for iface, fs_set in slivers.items():
+    
+    # delete all flowspace in the slice
+    FlowSpaceRule.objects.filter(slivers__slice=slice).delete()
+    
+    # add the new flowspace
+    for fs_dict, iface_qs in slivers:
         # give the user, project, slice permission to use the aggregate
-        aggregate = iface.aggregate.as_leaf_class()
-        give_permission_to("can_use_aggregate", aggregate, user)
-        give_permission_to("can_use_aggregate", aggregate, project)
-        give_permission_to("can_use_aggregate", aggregate, slice)
+        aggregate_ids = list(iface_qs.values_list("aggregate", flat=True))
+        for agg_id in aggregate_ids:
+            aggregate = Aggregate.objects.get(id=agg_id).as_leaf_class()
+            give_permission_to("can_use_aggregate", aggregate, user)
+            give_permission_to("can_use_aggregate", aggregate, project)
+            give_permission_to("can_use_aggregate", aggregate, slice)
+
+        # Create flowspace
+        fs = FlowSpaceRule.objects.create(**fs_dict)
 
         # make sure all the selected interfaces are added
-        sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
-            slice=slice, resource=iface)
-        sliver_ids.append(sliver.id)
+        for iface in iface_qs:
+            sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
+                slice=slice, resource=iface)
+            sliver_ids.append(sliver.id)
+            fs.slivers.add(sliver)
         
-        # delete and recreate the flowspace again
-        FlowSpaceRule.objects.filter(sliver=sliver).delete()
-        for fs in fs_set:
-            FlowSpaceRule.objects.create(sliver=sliver, **fs)
-    
     logger.debug("Deleting old resources")
 
     # Delete all removed interfaces
@@ -240,34 +190,26 @@ def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     logger.debug("Starting the slice %s %s" % (slice, slice.name))
     
     # make the reservation
-    # TODO: concat all the responses
     client.post(reverse("slice_start", args=[slice.id]))
     
     logger.debug("Done creating sliver")
 
     client.logout()
 
-    # TODO: get the actual reserved things
-    return rspec
+    return rspec_mod.create_resv_rspec(user, slice)
 
-@require_creds(True)
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
-def DeleteSliver(slice_urn, credentials, **kwargs):
+def DeleteSliver(slice_urn, user):
     slice = get_slice(slice_urn)
     project = slice.project
     client = Client()
-    fake_login(client, kwargs["request"].user)
+    fake_login(client, user)
     client.post(reverse("slice_delete", args=[slice.id]))
     # delete the project if there are no more slices in it
     if Slice.objects.filter(project=project).count() == 0:
         client.post(reverse("project_delete", args=[project.id]))
     return True
 
-@require_creds(True)
-@rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
-def SliverStatus(slice_urn, credentials, **kwargs):
+def SliverStatus(slice_urn):
     retval = {
         'geni_urn': slice_urn,
         'geni_status': 'ready',
@@ -294,21 +236,15 @@ def SliverStatus(slice_urn, credentials, **kwargs):
         })
     return retval
 
-@require_creds(True)
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE],
-           url_name="openflow_gapi")
-def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
+def RenewSliver(slice_urn, expiration_time):
     get_slice(slice_urn)
     return True
 
-@require_creds(True)
-@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
-def Shutdown(slice_urn, credentials, **kwargs):
+def Shutdown(slice_urn, user):
     slice = get_slice(slice_urn)
 
     client = Client()
-    fake_login(client, kwargs["request"].user)
+    fake_login(client, user)
     client.post(reverse("slice_stop", args=[slice.id]))
 
     return True
