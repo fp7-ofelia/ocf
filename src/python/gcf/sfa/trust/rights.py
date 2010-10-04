@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 # IN THE WORK.
 #----------------------------------------------------------------------
+
+
 ##
 # This Module implements rights and lists of rights for the SFA. Rights
 # are implemented by two classes:

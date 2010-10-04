@@ -34,8 +34,8 @@
 # This module exports two classes: Keypair and Certificate.
 ##
 #
-### $Id: certificate.py 18182 2010-06-02 20:42:30Z tmack $
-### $URL: http://svn.planet-lab.org/svn/sfa/trunk/sfa/trust/certificate.py $
+### $Id$
+### $URL$
 #
 
 import os
@@ -51,7 +51,7 @@ from gcf.sfa.util.namespace import urn_to_hrn
 from gcf.sfa.util.faults import *
 
 def convert_public_key(key):
-    keyconvert_path = "/usr/bin/keyconvert"
+    keyconvert_path = "/usr/bin/keyconvert.py"
     if not os.path.isfile(keyconvert_path):
         raise IOError, "Could not find keyconvert in %s" % keyconvert_path
 
@@ -298,9 +298,21 @@ class Certificate:
 
         string = string.strip()
 
+        # if the string has no BEGIN C... then wrap in begin/end
+        # old behavior was to wrap if it didnt _start_ with BEGIN
+        # if the string does not start with BEGIN
+        # then ignore everything before the begin
 
-        if not string.startswith('-----'):
+#        if not string.startswith('-----'):
+        if string.count('-----BEGIN CERTIFICATE') == 0:
             string = '-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----' % string
+            logger.debug("Wrapping string for cert in BEGIN/END")
+
+        beg = string.find('-----BEGIN CERTIFICATE')
+        if beg > 0:
+            # skipping over non cert beginning
+            logger.debug("Skipping non PEM start of cert from string ('%s ...\n... %s'). Skipping to char #%d", string[:25], string[beg-15:beg], beg)
+            string = string[beg:]
 
         parts = []
 
@@ -575,18 +587,20 @@ class Certificate:
         # Verify a chain of certificates. Each certificate must be signed by
         # the public key contained in it's parent. The chain is recursed
         # until a certificate is found that is signed by a trusted root.
-        # TODO: verify expiration time
-        #print "====Verify Chain====="
+
+        # verify expiration time
+        if self.cert.has_expired():
+            raise CertExpired(self.get_subject(), "client cert")   
+        
         # if this cert is signed by a trusted_cert, then we are set
         for trusted_cert in trusted_certs:
-            #print "***************"
-            # TODO: verify expiration of trusted_cert ?
-            #print "CLIENT CERT", self.dump()
-            #print "TRUSTED CERT", trusted_cert.dump()
-            #print "Client is signed by Trusted?", self.is_signed_by_cert(trusted_cert)
             if self.is_signed_by_cert(trusted_cert):
                 logger.debug("Cert %s signed by trusted cert %s", self.get_subject(), trusted_cert.get_subject())
-                return trusted_cert
+                # verify expiration of trusted_cert ?
+                if not trusted_cert.cert.has_expired():
+                    return trusted_cert
+                else:
+                    logger.debug("Trusted cert %s is expired", trusted_cert.get_subject())       
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:

@@ -20,15 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 # IN THE WORK.
 #----------------------------------------------------------------------
+
 import logging
 import os
 
 #SFA access log initialization
 TMPDIR = os.getenv("TMPDIR", "/tmp")
-#SFA_HTTPD_ACCESS_LOGFILE = TMPDIR + "/" + 'sfa_httpd_access.log'
-SFA_HTTPD_ACCESS_LOGFILE='/dev/null'
-#SFA_ACCESS_LOGFILE='/var/log/sfa_access.log'
-SFA_ACCESS_LOGFILE='/dev/null'
+SFA_HTTPD_ACCESS_LOGFILE = TMPDIR + "/" + 'sfa_httpd_access.log'
+SFA_ACCESS_LOGFILE='/var/log/sfa_access.log'
 logger=logging.getLogger('sfa')
 logger.setLevel(logging.INFO)
 
