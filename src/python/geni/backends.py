@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 
 logger = logging.getLogger("geni.backends")
 
-urn_matcher = re.compile(URN_PREFIX+"+"+r"(?P<prefix>.*)\+(?P<role>.*)\+(?P<name>.*)")
+urn_matcher = re.compile(URN_PREFIX+"\+"+r"(?P<prefix>.*)\+(?P<role>.*)\+(?P<name>.*)")
 
 def urn_to_username(urn):
     """Create a valid username from a URN.
@@ -51,7 +51,7 @@ def urn_to_username(urn):
         
     name = m.group("name")
     if len(name) > 100:
-        name =name[:100]
+        name = name[:100]
         
     username = name + "@" + auth
     
@@ -81,8 +81,8 @@ class GENIRemoteUserBackend(RemoteUserBackend):
             logger.warn(traceback.format_exc())
             return username
         
-        m = urn_matcher.search(urn_str)
-        username = 
+        username = urn_to_username(urn_str)
+        
         return username
 
 class MagicWordBackend(object):
