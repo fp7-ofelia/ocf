@@ -15,7 +15,7 @@ from autoslug.fields import AutoSlugField
 from django.db.models import signals
 from django.contrib.sites.models import Site
 import logging
-from expedient.common.utils import create_or_update
+from expedient.common.utils import create_or_update, modelfields
 from expedient.clearinghouse.slice.models import Slice
 
 logger = logging.getLogger("OpenflowModels")
@@ -91,8 +91,7 @@ production networks, and is currently deployed in several universities.
         # switches already in the DB.
         current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
         
-        active_switch_ids = []
-        active_iface_ids = []
+        switches = {}
         for switch_info in active_switches_raw:
             dpid, info = switch_info
             
@@ -101,49 +100,10 @@ production networks, and is currently deployed in several universities.
             # turn into port numbers
             ports = [int(p) for p in portstrs if p != ""]
             
-            # find the switch with the dpid if it exists and create/update it
-            switch, created = create_or_update(
-                OpenFlowSwitch,
-                filter_attrs=dict(
-                    datapath_id=dpid,
-                ),
-                new_attrs=dict(
-                    aggregate=self,
-                    name=dpid,
-                    available=True,
-                    status_change_timestamp=datetime.now(), 
-                )
-            )
-            active_switch_ids.append(switch.id)
+            switches[dpid] = ports
             
-            for port in ports:
-                # update the interfaces for this switch
-                iface, created = create_or_update(
-                    OpenFlowInterface,
-                    filter_attrs=dict(
-                        switch__datapath_id=dpid,
-                        port_num=port,
-                    ),
-                    new_attrs=dict(
-                        aggregate=self,
-                        name="Port %s" % port,
-                        switch=switch,
-                        available=True,
-                        status_change_timestamp=datetime.now(), 
-                    ),
-                )
-                parse_logger.debug("Added interface %s:%s" % (dpid, port))
-                active_iface_ids.append(iface.id)
-                
-        # make all inactive switches and interfaces unavailable.
-        OpenFlowInterface.objects.filter(
-            aggregate=self).exclude(id__in=active_iface_ids).update(
-                available=False, status_change_timestamp=datetime.now())
-            
-        OpenFlowSwitch.objects.filter(
-            aggregate=self).exclude(id__in=active_switch_ids).update(
-                available=False, status_change_timestamp=datetime.now())
-        
+        create_or_update_switches(self, switches)            
+
     def parse_links(self, active_links_raw):
         '''
         Get the available links and update the network connections.
@@ -374,49 +334,106 @@ signals.post_save.connect(OpenFlowInterfaceSliver.check_save,
                           OpenFlowInterfaceSliver)
 
 class FlowSpaceRule(models.Model):
-    sliver = models.ForeignKey(OpenFlowInterfaceSliver)
+    slivers = models.ManyToManyField(
+        OpenFlowInterfaceSliver,
+        help_text="Select the interfaces to apply the flowspace rule to.",
+    )
 
-    dl_src_start = models.CharField('Link layer source address range start',
-                                    max_length=17, default="*")
-    dl_dst_start = models.CharField('Link layer destination address range start',
-                                    max_length=17, default="*")
-    dl_type_start = models.CharField('Link layer type range start',
-                                     max_length=5, default="*")
-    vlan_id_start = models.CharField('VLAN ID range start',
-                                     max_length=4, default="*")
-    nw_src_start = models.CharField('Network source address range start',
-                                    max_length=18, default="*")
-    nw_dst_start = models.CharField('Network destination address range start',
-                                    max_length=18, default="*")
-    nw_proto_start = models.CharField('Network protocol range start',
-                                      max_length=3, default="*")
-    tp_src_start = models.CharField('Transport source port range start',
-                                    max_length=5, default="*")
-    tp_dst_start = models.CharField('Transport destination port range start',
-                                    max_length=5, default="*")
+    dl_src_start = modelfields.MACAddressField(
+        'Link layer source address range start', null=True, blank=True)
+    dl_dst_start = modelfields.MACAddressField(
+        'Link layer destination address range start', null=True, blank=True)
+    dl_type_start = modelfields.LimitedIntegerField(
+        'Link layer type range start',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
+    vlan_id_start = modelfields.LimitedIntegerField(
+        'VLAN ID range start',
+        max_value=2**12-1, min_value=0, blank=True, null=True)
+    nw_src_start = models.IPAddressField(
+        'Network source address range start', blank=True, null=True)
+    nw_dst_start = models.IPAddressField(
+        'Network destination address range start', blank=True, null=True)
+    nw_proto_start = modelfields.LimitedIntegerField(
+        'Network protocol range start',
+        max_value=2**8-1, min_value=0, blank=True, null=True)
+    tp_src_start = modelfields.LimitedIntegerField(
+        'Transport source port range start',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
+    tp_dst_start = modelfields.LimitedIntegerField(
+        'Transport destination port range start',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
     
-    dl_src_end = models.CharField('Link Layer Source Address Range End',
-                                  max_length=17, default="*")
-    dl_src_end = models.CharField('Link layer source address range end',
-                                    max_length=17, default="*")
-    dl_dst_end = models.CharField('Link layer destination address range end',
-                                    max_length=17, default="*")
-    dl_type_end = models.CharField('Link layer type range end',
-                                     max_length=5, default="*")
-    vlan_id_end = models.CharField('VLAN ID range end',
-                                     max_length=4, default="*")
-    nw_src_end = models.CharField('Network source address range end',
-                                    max_length=18, default="*")
-    nw_dst_end = models.CharField('Network destination address range end',
-                                    max_length=18, default="*")
-    nw_proto_end = models.CharField('Network protocol range end',
-                                      max_length=3, default="*")
-    tp_src_end = models.CharField('Transport source port range end',
-                                    max_length=5, default="*")
-    tp_dst_end = models.CharField('Transport destination port range end',
-                                    max_length=5, default="*")
+    dl_src_end = modelfields.MACAddressField(
+        'Link layer source address range end', null=True, blank=True)
+    dl_dst_end = modelfields.MACAddressField(
+        'Link layer destination address range end', null=True, blank=True)
+    dl_type_end = modelfields.LimitedIntegerField(
+        'Link layer type range end',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
+    vlan_id_end = modelfields.LimitedIntegerField(
+        'VLAN ID range end',
+        max_value=2**12-1, min_value=0, blank=True, null=True)
+    nw_src_end = models.IPAddressField(
+        'Network source address range end', blank=True, null=True)
+    nw_dst_end = models.IPAddressField(
+        'Network destination address range end', blank=True, null=True)
+    nw_proto_end = modelfields.LimitedIntegerField(
+        'Network protocol range end',
+        max_value=2**8-1, min_value=0, blank=True, null=True)
+    tp_src_end = modelfields.LimitedIntegerField(
+        'Transport source port range end',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
+    tp_dst_end = modelfields.LimitedIntegerField(
+        'Transport destination port range end',
+        max_value=2**16-1, min_value=0, blank=True, null=True)
 
-class GAPISlice(models.Model):
-    slice = models.OneToOneField(Slice)
-    slice_urn = models.CharField(max_length=255, unique=True)
+def create_or_update_switches(aggregate, switches):
+    """Create or update the switch in aggregate C{aggregate} with switches in C{switches}.
     
+    C{switches} is a dict mapping datapath ids to list of ports.
+    
+    """
+
+    active_switch_ids = []
+    active_iface_ids = []
+    for dpid, ports in switches.items():
+        switch, _ = create_or_update(
+            OpenFlowSwitch,
+            filter_attrs=dict(
+                datapath_id=dpid,
+            ),
+            new_attrs=dict(
+                aggregate=aggregate,
+                name=dpid,
+                available=True,
+                status_change_timestamp=datetime.now(), 
+            )
+        )
+        active_switch_ids.append(switch.id)
+        
+        for port in ports:
+            # update the interfaces for this switch
+            iface, _ = create_or_update(
+                OpenFlowInterface,
+                filter_attrs=dict(
+                    switch__datapath_id=dpid,
+                    port_num=port,
+                ),
+                new_attrs=dict(
+                    aggregate=aggregate,
+                    name="Port %s" % port,
+                    switch=switch,
+                    available=True,
+                    status_change_timestamp=datetime.now(), 
+                ),
+            )
+            active_iface_ids.append(iface.id)
+            
+    # make all inactive switches and interfaces unavailable.
+    OpenFlowInterface.objects.filter(
+        aggregate=aggregate).exclude(id__in=active_iface_ids).update(
+            available=False, status_change_timestamp=datetime.now())
+        
+    OpenFlowSwitch.objects.filter(
+        aggregate=aggregate).exclude(id__in=active_switch_ids).update(
+            available=False, status_change_timestamp=datetime.now())    
