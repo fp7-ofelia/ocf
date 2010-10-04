@@ -44,9 +44,13 @@ class XMLRPCDispatcher(SimpleXMLRPCDispatcher):
             
             try:
                 response = self._dispatch(method, params, **kwargs)
-            except TypeError:
-                # Catch unexpected keyword argument error
-                response = self._dispatch(method, params)
+            except TypeError as e:
+                # XXX: Hack!
+                if "unexpected keyword" in "%s" % e:
+                    # Catch unexpected keyword argument error
+                    response = self._dispatch(method, params)
+                else:
+                    raise
             
             # wrap response in a singleton tuple
             response = (response,)
