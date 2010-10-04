@@ -7,6 +7,8 @@ Created on Aug 19, 2010
 from os.path import join
 from django import CONF_DIR
 
+from localsettings import *
+
 GCF_BASE_NAME = "stanford//expedient"
 '''The domain name used in URNs when creating certificates mainly.
 
@@ -29,8 +31,11 @@ Default (and required by convention) is "authority+am".
 '''
 
 # Location of GENI x509 certs and keys
-GCF_X509_CERT_DIR = join(CONF_DIR, "gcf-x509.crt")
-'''The location of certificates used by expedient for the GCF.'''
+GCF_X509_TRUSTED_CERT_DIR = join(CONF_DIR, "gcf-x509-trusted.crt")
+'''The location of trusted root certificates used by expedient for the GCF.'''
+
+GCF_X509_USER_CERT_DIR = join(CONF_DIR, "gcf-x509-user.crt")
+'''The location of saved user certificates used by expedient for the GCF.'''
 
 GCF_X509_KEY_DIR = join(CONF_DIR, "gcf-x509.key")
 '''The location of keys used by expedient for the GCF.'''
@@ -38,11 +43,13 @@ GCF_X509_KEY_DIR = join(CONF_DIR, "gcf-x509.key")
 GCF_X509_CRED_DIR = join(CONF_DIR, "gcf-x509.cred")
 '''The location of credentials used by expedient for the GCF.'''
 
-GCF_X509_CH_CERT = join(GCF_X509_CERT_DIR, "ch.crt")
-'''The absolute path of the Clearinghouse certificate for Expedient.'''
+from localsettings import *
+
+GCF_X509_CH_CERT = join(GCF_X509_TRUSTED_CERT_DIR, "ch.crt")
+'''The absolute path of the clearinghouse certificate for Expedient.'''
 
 GCF_X509_CH_KEY = join(GCF_X509_KEY_DIR, "ch.key")
-'''The absolute path of the Clearinghouse key for Expedient.'''
+'''The absolute path of the clearinghouse key for Expedient.'''
 
 GCF_NULL_SLICE_CRED = join(GCF_X509_CRED_DIR, "ch.cred")
 '''The default slice's full credentials.'''
@@ -55,3 +62,9 @@ GCF_X509_USER_CERT_FNAME_PREFIX = "user_x509_"
 
 GCF_MAX_UPLOADED_PEM_FILE_SIZE = 1024*1024
 '''Maximum size of uploaded certificate or key files in bytes.'''
+
+GCF_SLICE_CRED_LIFE = 360000
+'''Slice credential lifetime for credentials generated through the CH API in seconds.'''
+
+GCF_USER_CRED_LIFE = 864000
+'''User credential lifetime for credentials generated through the CH API in seconds.'''
