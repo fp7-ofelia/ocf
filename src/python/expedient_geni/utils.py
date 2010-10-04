@@ -4,11 +4,13 @@ Created on Sep 13, 2010
 @author: jnaous
 '''
 import os
+import re
 from django.conf import settings
 from geni.util.urn_util import URN
 from geni.util.cert_util import create_cert
-from sfa.trust.certificate import Keypair
 from sfa.trust.gid import GID
+from django.core.urlresolvers import reverse
+from geni.util import cred_util
 
 def get_user_cert_fname(user):
     """Get the filename of the user's GCF x509 certificate.
@@ -21,7 +23,7 @@ def get_user_cert_fname(user):
     """
     
     return os.path.join(
-        settings.GCF_X509_CERT_DIR,
+        settings.GCF_X509_USER_CERT_DIR,
         settings.GCF_X509_USER_CERT_FNAME_PREFIX + user.username + ".crt"
     )
     
@@ -40,18 +42,18 @@ def get_user_key_fname(user):
         settings.GCF_X509_USER_CERT_FNAME_PREFIX + user.username + ".key"
     )
 
-def get_user_urn(user):
+def get_user_urn(username):
     """Get a user's URN
     
-    @param user: The user whose URN we want.
-    @type user: L{django.contrib.auth.models.User}
+    @param username: The username of the user whose URN we want.
+    @type username: C{str}
     
     @return: The URN
     @rtype: C{str}
     """
     
     return URN(
-        str(settings.GCF_BASE_NAME), str("user"), str(user.username)
+        str(settings.GCF_BASE_NAME), str("user"), str(username)
     ).urn_string()
 
 def get_ch_urn():
@@ -65,14 +67,36 @@ def get_ch_urn():
         settings.GCF_BASE_NAME, "authority", "sa",
     ).urn_string()
 
-def create_x509_cert(urn, cert_fname, key_fname, is_self_signed=False):
+def get_slice_urn(name):
+    """Get the URN for a slice with name C{name}.
+    
+    @param name: Name of the slice. Must be unique.
+    @type name: C{str}
+    @return: a slice URN
+    @rtype: C{str}
+    
+    """
+    return URN(
+        settings.GCF_BASE_NAME, "slice", name,
+    ).urn_string()
+
+def create_x509_cert(urn, cert_fname=None, key_fname=None, is_self_signed=False):
     """Create a GCF certificate and store it in a file.
     
     @param urn: The urn to use in the cert.
-    @param cert_fname: The filename to store the cert in.
-    @param key_fname: The filename to store the certificate key in.
-    @param is_self_signed: should the certificate be self-signed? Otherwise
+    @type urn: C{str}
+    @keyword cert_fname: The filename to store the cert in.
+        If None (default), then don't store.
+    @type cert_fname: C{str}
+    @keyword key_fname: The filename to store the certificate key in.
+        If None (default), then don't store.
+    @type key_fname: C{str}
+    @keyword is_self_signed: should the certificate be self-signed? Otherwise
         it will be signed by Expedient's CH certificate. Default False.
+    @type is_self_signed: C{bool}
+    @return: tuple (cert, keys)
+    @rtype: (C{sfa.trust.gid.GID}, C{sfa.trust.certificate.Keypair})
+    
     """
     if is_self_signed:
         cert, keys = create_cert(
@@ -85,8 +109,10 @@ def create_x509_cert(urn, cert_fname, key_fname, is_self_signed=False):
             issuer_cert=settings.GCF_X509_CH_CERT
         )
     
-    cert.save_to_file(cert_fname)
-    keys.save_to_file(key_fname)
+    if cert_fname: cert.save_to_file(cert_fname)
+    if key_fname: keys.save_to_file(key_fname)
+    
+    return cert, keys
     
 def read_cert_from_file(cert_fname):
     """Read a GCF certificate from a file.
@@ -103,3 +129,98 @@ def read_cert_from_file(cert_fname):
     cert = GID(filename=cert_fname)
     cert.decode()
     return cert
+
+def describe_ui_plugin(slice):
+    """Describes the UI plugin according to L{expedient.clearinghouse.defaultsettings.expedient.UI_PLUGINS}."""
+    return ("GCF RSpec Plugin",
+            "Allows the user to modify the slice by uploading"
+            " RSpecs or to download an RSpec of the slice.",
+            reverse("gcf_rspec_ui", slice.id))
+    
+def urn_to_username(urn):
+    """Create a valid username from a URN.
+    
+    This creates the username by taking the authority part of
+    the URN, and the name part of the URN and joining them with "@".
+    
+    Any characters other than letters, digits, '@', '-', '_', '+', and '.'
+    are replace with '_'.
+    
+    e.g. "urn:publicid:IDN+stanford:expedient%26+user+jnaous" becomes 
+    "jnaous@expedient_26.stanford"
+    
+    The authority part of the URN is truncated to 155 characters, and the
+    name part is truncated to 100 characters.
+    
+    @param urn: a urn to turn into a username
+    @type urn: C{str}
+    @return: a valid username
+    @rtype: C{str}
+    """
+    
+    invalid_chars_re = re.compile(r"[^\w@+.-]")
+    
+    urn = URN(urn=str(urn))
+    auth = urn.getAuthority()
+    auth = auth.split(":")
+    auth.reverse()
+    auth = ".".join(auth)
+    if len(auth) > 150:
+        auth = auth[:150]
+        
+    name = urn.getName()
+    if len(name) > 100:
+        name =name[:100]
+        
+    username = name + "@" + auth
+    
+    # replace all invalid chars with _
+    username = invalid_chars_re.sub("_", username)
+    
+    assert(len(username) <= 30)
+    
+    return username
+    
+def get_trusted_cert_filenames():
+    """Return list of paths to files containing trusted certs."""
+
+    filenames = os.listdir(settings.GCF_X509_TRUSTED_CERT_DIR)
+    filenames = [os.path.join(settings.GCF_X509_TRUSTED_CERT_DIR, f) \
+                 for f in filenames]
+    trusted_certs = []
+    for f in filenames:
+        if f.endswith(".crt") and os.path.isfile(f):
+            trusted_certs.append(f)
+        
+    
+def create_slice_credential(user_gid, slice_gid):
+    '''Create a Slice credential object for this user_gid (object) on given slice gid (object)
+    
+    @param user_gid: The user's cert
+    @type user_gid: C{sfa.trust.gid.GID}
+    @param slice_gid: The slice's gid
+    @type slice_gid: C{sfa.trust.gid.GID}
+    '''
+    
+    return cred_util.create_credential(
+        user_gid, slice_gid, settings.GCF_SLICE_CRED_LIFE,
+        'slice',
+        settings.GCF_X509_CH_KEY, settings.GCF_X509_CH_CERT,
+        get_trusted_cert_filenames(),
+    )
+
+def create_user_credential(user_gid):
+    '''Create a user credential object for this user_gid
+    
+    @param user_gid: The user's cert
+    @type user_gid: C{sfa.trust.gid.GID}
+    @param slice_gid: The slice's gid
+    @type slice_gid: C{sfa.trust.gid.GID}
+    '''
+    
+    return cred_util.create_credential(
+        user_gid, user_gid, settings.GCF_USER_CRED_LIFE,
+        'user',
+        settings.GCF_X509_CH_KEY, settings.GCF_X509_CH_CERT,
+        get_trusted_cert_filenames(),
+    )
