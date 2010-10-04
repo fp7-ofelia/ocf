@@ -269,7 +269,7 @@ def flowspace(request, slice_id):
     slivers = OpenFlowInterfaceSliver.objects.filter(slice=slice)
     
     def formfield_callback():
-        
+        pass
     # create a formset to handle all flowspaces
     FSFormSet = modelformset_factory(
         model=FlowSpaceRule, )
