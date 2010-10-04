@@ -5,7 +5,7 @@
 {% block content %}
 <div class="main">
 	<form method="post" action="">{% csrf_token %}
-	<table class="formtable">
+	<table enctype="multipart/form-data" class="formtable">
 	{{ form.as_table }}
 	{% if not create %}
 	<tr>

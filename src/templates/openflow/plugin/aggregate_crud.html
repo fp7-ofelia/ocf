@@ -27,7 +27,7 @@
 
 {% block content %}
 <div class="main">
-	<form method="post" action="">{% csrf_token %}
+	<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
 	<table class="formtable_noborder openflow_create">
 	{{ agg_form.as_table }}
 	{{ client_form.as_table }}
