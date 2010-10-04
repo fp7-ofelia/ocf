@@ -8,11 +8,12 @@ Contains functions to transform to and from RSpecs
 
 from xml.etree import cElementTree as et
 from django.conf import settings
+from django.db.models import Q
 import re
 from expedient.clearinghouse.users.models import UserProfile
-from openflow.plugin.models import OpenFlowInterfaceSliver
-from sfa.util.namespace import hrn_to_urn
+from openflow.plugin.models import OpenFlowSwitch, FlowSpaceRule
 from geni.util.urn_util import publicid_to_urn
+from expedient.clearinghouse.aggregate.models import Aggregate
 
 RSPEC_TAG = "rspec"
 NETWORK_TAG = "network"
@@ -49,10 +50,14 @@ external_switch_re = re.compile(EXTERNAL_SWITCH_URN_REGEX)
 external_port_re = re.compile(EXTERNAL_PORT_URN_REGEX)
 
 class BadURNError(Exception):
-    def __init__(self, urn):
+    def __init__(self, urn, error = None):
         self.urn = urn
+        if error:
+            msg = " Error was: %s" % error
+        else:
+            msg = ""
         super(Exception, self).__init__(
-            "Unknown or badly formatted URN '%s'." % urn)
+            "Unknown or badly formatted URN '%s'.%s" % (urn, msg))
     
 class UnknownObject(Exception):
     def __init__(self, klass, id, tag):
@@ -102,11 +107,15 @@ def _urn_to_port(urn):
 
 def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''
+    # break circular dependecies by putting imports inside function
     from openflow.plugin.models import OpenFlowAggregate
-    root = et.Element(RSPEC_TAG)
-    aggregates = OpenFlowAggregate.objects.filter(
-        available=True).exclude(
-            name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
+    from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+    
+    root = et.Element(RSPEC_TAG, {"type": "openflow"})
+    aggregates = Aggregate.objects.filter_for_classes(
+        [OpenFlowAggregate, GCFOpenFlowAggregate]).filter(
+            available=True).exclude(
+                name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
     for aggregate in aggregates:
         _add_aggregate_node(root, aggregate, slice_urn, available)
     return root
@@ -128,7 +137,6 @@ def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):
 
 def _add_switches_node(parent_elem, aggregate, slice_urn, available):
     '''Add the switches tag and all switches'''
-    from openflow.plugin.models import OpenFlowSwitch
     
     switches_elem = et.SubElement(parent_elem, SWITCHES_TAG)
     
@@ -213,7 +221,7 @@ def get_resources(slice_urn, geni_available):
     
     For example::
     
-        <rspec>
+        <rspec type="openflow">
             <network name="Stanford" location="Stanford, CA, USA">
                 <switches>
                     <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
@@ -318,6 +326,10 @@ def parse_slice(resv_rspec):
     is a dict mapping OpenFlowInterface instances to a flowspace
     dict for reservation on them.
     
+    In the flowspace definition, specifying a "switch" element adds all
+    interfaces on that switch. Otherwise, specifying ports adds only that
+    port on the switch.
+    
     The reservation rspec looks like the following::
     
         <resv_rspec>
@@ -338,27 +350,23 @@ def parse_slice(resv_rspec):
                 controller_url="tcp:controller.stanford.edu:6633"
             />
             <flowspace>
-                <switches>
-                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
-                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
-                </switches>
-                <port_num from="1" to="4" />
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" />
+                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1 />
+                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:2 />
+                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:3 />
                 <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
-                <dl_dst from="*" to="*" />
                 <dl_type from="0x800" to="0x800" />
                 <vlan_id from="15" to="20" />
                 <nw_src from="192.168.3.0" to="192.168.3.255" />
                 <nw_dst from="192.168.3.0" to="192.168.3.255" />
                 <nw_proto from="17" to="17" />
                 <tp_src from="100" to="100" />
-                <tp_dst from="100" to="*" />
+                <tp_dst from="100" />
             </flowspace>
             <flowspace>
-                <switches>
-                    <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
-                </switches>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1" />
                 <tp_src from="100" to="100" />
-                <tp_dst from="100" to="*" />
+                <tp_dst from="100" />
             </flowspace>
         </resv_rspec>
     
@@ -403,18 +411,18 @@ def _resv_parse_project(root):
     return (proj_elem.get(NAME), proj_elem.get(DESCRIPTION))
 
 def _resv_parse_slivers(root):
-    '''Return a list of slivers where slivers is a list of dicts
-    mapping OpenFlowInterfaces to a flowspace dict.'''
+    '''Return a list of slivers where slivers is a list of tuples
+    of (flowspace dict, OpenFlowInterface queryset).'''
     
     from openflow.plugin.models import OpenFlowInterface
     
     flowspace_elems = root.findall(".//%s" % FLOWSPACE_TAG)
     
-    port_fs_map = {}
+    port_fs_map = []
     
     for flowspace_elem in flowspace_elems:
-#        print "parsing fs %s" % et.tostring(flowspace_elem)
         fs = {}
+        
         # get a dict of the flowspace rule
         for tag in DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
@@ -423,40 +431,28 @@ def _resv_parse_slivers(root):
             to_key = "%s_end" % tag
             field_elem = flowspace_elem.find(tag)
             if field_elem != None:
-                fs[from_key] = field_elem.get("from")
-                fs[to_key] = field_elem.get("to")
-            else:
-                fs[from_key] = WILDCARD
-                fs[to_key] = WILDCARD
+                fs[from_key] = field_elem.get("from", None)
+                fs[to_key] = field_elem.get("to", None)
         
-        field_elem = flowspace_elem.find(PORT_NUM_TAG)
-        if field_elem != None:
-            port_num_start = field_elem.get("from")
-            port_num_end = field_elem.get("to")
-        else:
-            port_num_start = WILDCARD
-            port_num_end = WILDCARD
-        
-        if port_num_start == WILDCARD:
-            port_num_start = 0
-        else:
-            port_num_start = int(port_num_start)
-
-        if port_num_end == WILDCARD:
-            port_num_end = 2**32-1
-        else:
-            port_num_end = int(port_num_end)
-        
-        # for each switch, get the list of ports that are applicable to it.
-        for switch_elem in flowspace_elem.find(SWITCHES_TAG).findall(SWITCH_TAG):
-            dpid = _urn_to_dpid(switch_elem.get(URN))
-            ifaces = OpenFlowInterface.objects.filter(
-                switch__datapath_id=dpid,
-                port_num__gte=port_num_start,
-                port_num__lte=port_num_end,
-            )
-            for iface in ifaces:
-                port_fs_map.setdefault(iface, []).append(fs)
+        # now get the interfaces
+        interface_q = None
+        switch_elems = flowspace_elem.findall(".//%s" % SWITCH_TAG)
+        for switch_elem in switch_elems:
+            # get the switch
+            dpid = _urn_to_dpid(switch_elem["urn"])
+            # get the interfaces
+            new_q = Q(switch__datapath_id=dpid)
+            interface_q = interface_q | new_q if interface_q else new_q
+            
+        port_elems = flowspace_elem.findall(".//%s" % PORT_TAG)
+        for port_elem in port_elems:
+            # get the switch and port
+            dpid, port_num = _urn_to_port(port_elem["urn"])
+            # get the interfaces
+            new_q = Q(switch__datapath_id=dpid, port_num=port_num)
+            interface_q = interface_q | new_q if interface_q else new_q
+            
+        port_fs_map.append(fs, OpenFlowInterface.objects.filter(interface_q))
         
     return port_fs_map
 
@@ -505,43 +501,75 @@ def create_resv_rspec(user, slice, aggregate=None):
         }
     )
     
-    iface_sliver_qs = OpenFlowInterfaceSliver.objects.filter(
-        slice=slice)
+    flowspace_qs = FlowSpaceRule.objects.filter(slivers__slice=slice)
     if aggregate:
-        iface_sliver_qs = iface_sliver_qs.filter(
-            resource__aggregate__id=aggregate.id)
+        flowspace_qs = flowspace_qs.filter(
+            slivers__aggregate__id=aggregate.id)
         
-    # add the slivers
-    for sliver in iface_sliver_qs:
-        for flowspace in sliver.flowspacerule_set.all():
+    # add the flowspace
+    for fs in flowspace_qs:
+        fs_elem = et.SubElement(root, FLOWSPACE_TAG)
+        for sliver in fs.slivers:
             iface = sliver.resource.as_leaf_class()
-            fs_elem = et.SubElement(root, FLOWSPACE_TAG)
-            switches_elem = et.SubElement(fs_elem, SWITCHES_TAG)
             et.SubElement(
-                switches_elem, SWITCH_TAG, {
-                    URN: iface.switch,
+                fs_elem, PORT_TAG, {
+                    URN: _port_to_urn(iface.switch.datapath_id, iface.port_num)
                 }
             )
+        for tag in DL_SRC_TAG, DL_DST_TAG,\
+        DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
+        TP_SRC_TAG, TP_DST_TAG:
             et.SubElement(
-                fs_elem, PORT_NUM_TAG, {
-                    "from": iface.port_num,
-                    "to": iface.port_num,
+                fs_elem, tag, {
+                    "from": getattr(fs, "%s_start" % tag),
+                    "to": getattr(fs, "%s_end" % tag),
                 }
             )
-            for tag in DL_SRC_TAG, DL_DST_TAG,\
-            DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
-            TP_SRC_TAG, TP_DST_TAG:
-                et.SubElement(
-                    fs_elem, tag, {
-                        "from": getattr(flowspace, "%s_start" % tag),
-                        "to": getattr(flowspace, "%s_end" % tag),
-                    }
-                )
     
     return et.tostring(root)
 
 def parse_external_rspec(rspec):
-    """Parse the given rspec and create dicts of the requested objects.
+    """Parse the given rspec and create dicts of the given switches.
     
+    Parses the RSpec and creates a dict mapping switches to the ports they
+    have. It also creates a list of (dpid, port, dpid, port) describing the
+    links.
     
+    @param rspec: The advertisement RSpec
+    @type rspec: XML C{str}
+    @return: tuple of a dict mapping datapath ID strings to list of port
+        numbers and a list of (src dpid, src port num, dst dpid, dst port num)
+        describing the links.
+    @rtype: (C{dict} mapping C{str} to C{list} of C{int},
+        C{list} of (C{str}, C{int}, C{str}, C{int}))
     """
+    
+    root = et.fromstring(rspec)
+    
+    switch_elems = root.findall(".//%s" % SWITCH_TAG)
+    switches = {}
+    for switch_elem in switch_elems:
+        urn = switch_elem.get(URN)
+        dpid = _urn_to_dpid(urn)
+        switches[dpid] = []
+    
+    port_elems = root.findall(".//%s" % PORT_TAG)
+    for port_elem in port_elems:
+        urn = port_elem.get(URN)
+        dpid, port = _urn_to_port(urn)
+        try:
+            switches[dpid].append(port)
+        except KeyError:
+            raise Exception("No switch with datapath ID %s found"
+                            " for port with URN %s" % (dpid, urn))
+        
+    link_elems = root.findall(".//%s" % LINK_TAG)
+    links = []
+    for link_elem in link_elems:
+        src_urn = link_elem[SRC_URN]
+        dst_urn = link_elem[DST_URN]
+        src_dpid, src_port = _urn_to_port(src_urn)
+        dst_dpid, dst_port = _urn_to_port(dst_urn)
+        links.append((src_dpid, src_port, dst_dpid, dst_port))
+        
+    return switches, links
