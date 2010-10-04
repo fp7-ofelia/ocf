@@ -17,6 +17,7 @@ logger = logging.getLogger("expedient_geni.forms")
 def _clean_x_file_factory(name):
     """Factory to create functions that check file size"""
     def clean_x_file(self):
+        logger.debug("Checking file lengths")
         if self.cleaned_data["%s_file" % name].size > \
         settings.GCF_MAX_UPLOADED_PEM_FILE_SIZE:
             raise forms.ValidationError(
@@ -41,28 +42,29 @@ class UploadCertForm(forms.Form):
             
     def clean(self):
         """Check that the cert file is signed by the key file and is trusted."""
-        
-        self.key = Keypair(self.cleaned_data["key_file"].read())
-        self.cert = GID(self.cleaned_data["cert_file"].read())
-        
-        try:
-            self.cert.verify(self.key)
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            raise forms.ValidationError(
-                "Could not verify that the certificate was "
-                "signed by the uploaded key. The error was: %s" % e)
-
-        try:
-            self.cert.verify_chain(settings.GCF_X509_CERT_DIR)
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            raise forms.ValidationError(
-                "Could not verify that the uploaded certificate is "
-                "trusted. This could be because none of the certificate's "
-                "ancestors have been installed as trusted. The error was: "
-                "%s" % e
-            )
+        logger.debug("cleaned_data %s" % self.cleaned_data)
+        if self.files:
+            self.key = Keypair(self.files["key_file"].read())
+            self.cert = GID(self.files["cert_file"].read())
+            
+            try:
+                self.cert.verify(self.key)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                raise forms.ValidationError(
+                    "Could not verify that the certificate was "
+                    "signed by the uploaded key. The error was: %s" % e)
+    
+            try:
+                self.cert.verify_chain(settings.GCF_X509_TRUSTED_CERT_DIR)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                raise forms.ValidationError(
+                    "Could not verify that the uploaded certificate is "
+                    "trusted. This could be because none of the certificate's "
+                    "ancestors have been installed as trusted. The error was: "
+                    "%s" % e
+                )
 
         return self.cleaned_data
     
