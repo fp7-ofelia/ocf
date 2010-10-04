@@ -14,7 +14,7 @@ from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponse
 from expedient.common.messaging.models import DatedMessage
-from django.forms.models import inlineformset_factory
+from django.forms.models import inlineformset_factory, modelformset_factory
 from django.core.urlresolvers import reverse
 from models import SliceFlowSpace
 from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
@@ -268,8 +268,11 @@ def flowspace(request, slice_id):
     
     slivers = OpenFlowInterfaceSliver.objects.filter(slice=slice)
     
+    def formfield_callback():
+        
     # create a formset to handle all flowspaces
-    FSFormSet = inlineformset_factory(Slice, SliceFlowSpace)
+    FSFormSet = modelformset_factory(
+        model=FlowSpaceRule, )
     if request.method == "POST":
         logger.debug("Got post for flowspace")
         formset = FSFormSet(request.POST, instance=slice)
