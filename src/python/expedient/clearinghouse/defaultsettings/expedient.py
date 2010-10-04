@@ -34,7 +34,7 @@ UI_PLUGINS = (
 
 This is a list of 3-tuples:
 
-    #. The first element is the absolute path to a callable the describes
+    #. The first element is the absolute path to a callable that describes
        the plugin. It should take as input an
        L{expedient.clearinghouse.slice.models.Slice} instance and return a
        tuple (plugin name, plugin description, url to go to for access)
@@ -52,6 +52,7 @@ This is a list of 3-tuples:
 AGGREGATE_PLUGINS = (
     'openflow.plugin.models.OpenFlowAggregate',
     'expedient_geni.planetlab.models.PlanetLabAggregate',
+    'expedient_geni.gopenflow.models.GCFOpenFlowAggregate',
 )
 '''List of aggregate plugins that are enabled in Expedient.
 
