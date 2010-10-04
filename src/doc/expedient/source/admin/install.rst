@@ -326,7 +326,7 @@ For step 1 above on an OpenSuSE installation, look at :ref:`_admin-rpm-install-d
 For step 2 above, you can use an Expedient function::
 
     $ cd expedient/src/python
-    $ python
+    $ PYTHONPATH=.:expedient/clearinghouse python
     >>> from expedient.clearinghouse import settings
     >>> from expedient.clearinghouse.commands.utils import create_user
     >>> create_user(<DB root username>, <DB root password>,
@@ -354,7 +354,7 @@ you have Apache installed and configured. Enable ``mod_wsgi`` and
     $ sudo /usr/sbin/a2enmod ssl
     $ sudo /usr/sbin/a2enflag SSL
 
-Next you will need to edit a configuration file. As root, open
+Next you will need to edit a configuration file. Open
 :file:`expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf`.
 
 In line 3, replace ``443`` with the port you want to use for Apache (note
