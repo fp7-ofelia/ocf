@@ -66,12 +66,11 @@ class GENISliceInfo(models.Model):
         self.ssh_public_key = \
             "ssh-rsa %s auto-generated Expedient key" % (key. get_base64())
         
-        
     def generate_slice_cred(self):
         """
         Create credentials to use for the slice.
         """
-        from gcf.sfa.trust import gid
+        from sfa.trust import gid
         slice_gid, keys = management.create_slice_gid(self.slice_urn)
         user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
         cred = management.create_slice_credential(user_gid, slice_gid)
