@@ -8,7 +8,7 @@
 	<h2>If you proceed you will overwrite any existing previous
 	certificate and keys. You will not be able to access slices
 	that you have previously created.</h2>
-	<form method="POST" action=".">{% csrf_token %}
+	<form enctype="multipart/form-data" method="POST" action=".">{% csrf_token %}
 		<table class="formtable">
 			{{ form.as_table }}
 		</table>
