@@ -25,8 +25,8 @@ from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.middleware import threadlocals
-from openflow.plugin.gapi import gapi, rspec
-from expedient_geni.utils import create_x509_cert, get_user_urn, get_slice_urn
+from openflow.plugin.gapi import rspec as rspec_mod
+from expedient_geni.utils import create_x509_cert, get_user_urn
 from expedient_geni import clearinghouse
 from expedient.clearinghouse.users.models import UserProfile
 import random
@@ -107,7 +107,10 @@ class Tests(SettingsTestCase):
         self.rpc = xmlrpclib.ServerProxy(
             "http://testserver" + reverse("openflow_gapi"),
             transport=TestClientTransport(
-                defaults={"REMOTE_USER": self.user_cert.save_to_string()},
+                defaults={
+                    "REMOTE_USER": self.user_cert.save_to_string(),
+                    "SSL_CLIENT_CERT": self.user_cert.save_to_string(),
+                },
             ),
         )
         
@@ -415,7 +418,7 @@ class Tests(SettingsTestCase):
         
         # get the rspec for the added resources
         options = dict(geni_compressed=zipped, geni_available=True)
-        rspec = self.rpc.ListResources(self.slice_cred, options)
+        rspec = self.rpc.ListResources([self.slice_cred], options)
         
         logger.debug("Got advertisement RSpec:\n %s" % rspec)
         
@@ -424,7 +427,7 @@ class Tests(SettingsTestCase):
             rspec = zlib.decompress(base64.b64decode(rspec))
             
         # parse the rspec and check the switches/links
-        switches, links = rspec.parse_external_rspec(rspec)
+        switches, links = rspec_mod.parse_external_rspec(rspec)
         
         # verify that all switches are listed
         dpids_actual = set(OpenFlowSwitch.objects.values_list(
@@ -529,20 +532,20 @@ class Tests(SettingsTestCase):
             slice=slice, password=password, controller_url=controller_url)
         
         # get the rspec
-        resv_rspec = rspec.create_resv_rspec(user, slice)
+        resv_rspec = rspec_mod.create_resv_rspec(user, slice)
         
         # add the full switches to the rspec
-        root = et.fromstring(rspec)
-        fs_elems = root.findall(".//%s" % rspec.FLOWSPACE_TAG)
+        root = et.fromstring(resv_rspec)
+        fs_elems = root.findall(".//%s" % rspec_mod.FLOWSPACE_TAG)
         
         # get the rspec with ports instead of switches
-        expected_resv_rspec = rspec.create_resv_rspec(user, slice)
+        expected_resv_rspec = rspec_mod.create_resv_rspec(user, slice)
         
         def add_switches(elem, switches):
             for s in switches:
                 et.SubElement(
-                    elem, rspec.SWITCH_TAG, {
-                        rspec.URN: rspec._dpid_to_urn(s.datapath_id),
+                    elem, rspec_mod.SWITCH_TAG, {
+                        rspec_mod.URN: rspec_mod._dpid_to_urn(s.datapath_id),
                     },
                 )
                 
@@ -558,7 +561,7 @@ class Tests(SettingsTestCase):
         # create the slice using gapi
         ret_rspec = self.rpc.CreateSliver(
             self.slice_gid.get_urn(),
-            self.slice_cred,
+            [self.slice_cred],
             resv_rspec,
             users={})
         
@@ -628,7 +631,7 @@ class Tests(SettingsTestCase):
         
     def test_gapi_DeleteSliver(self):
         self.test_gapi_CreateSliver()
-        self.rpc.DeleteSliver(self.slice_gid.get_urn())
+        self.rpc.DeleteSliver(self.slice_gid.get_urn(), [self.slice_cred])
         self.assertEqual(Slice.objects.count(), 0)
         self.assertEqual(GENISliceInfo.objects.count(), 0)
         self.assertEqual(Project.objects.count(), 0)
