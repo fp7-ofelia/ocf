@@ -5,7 +5,6 @@ from django.db import models
 from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.auth.models import User
-from expedient.common.messaging.models import DatedMessage
 from expedient.common.permissions.models import ObjectPermission, Permittee
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
 import logging
