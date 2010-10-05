@@ -199,8 +199,9 @@ production networks, and is currently deployed in several universities.
                     fsd = {"port_num_start": iface.port_num,
                            "port_num_end": iface.port_num}
                     for f in fs._meta.fields:
-                        if f.name != "sliver":
-                            fsd[f.name] = getattr(fs, f.name)
+                        if f.name != "slivers":
+                            v = getattr(fs, f.name)
+                            fsd[f.name] = v if v is not None else "*"
                     d['flowspace'].append(fsd)
             sw_slivers.append(d)
             
@@ -230,8 +231,8 @@ production networks, and is currently deployed in several universities.
                 slice.openflowsliceinfo.password, sw_slivers)
         except Exception as ret_exception:
             import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
-            traceback.print_exc()
+            logger.info("XML RPC call to aggregate %s failed." % self.name)
+            logger.error(traceback.format_exc())
             raise
 
     def stop_slice(self, slice):
