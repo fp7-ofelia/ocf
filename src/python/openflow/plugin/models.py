@@ -17,6 +17,7 @@ from django.contrib.sites.models import Site
 import logging
 from expedient.common.utils import create_or_update, modelfields
 from expedient.clearinghouse.slice.models import Slice
+from django.db.models.aggregates import Count
 
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
@@ -437,4 +438,13 @@ def create_or_update_switches(aggregate, switches):
         
     OpenFlowSwitch.objects.filter(
         aggregate=aggregate).exclude(id__in=active_switch_ids).update(
-            available=False, status_change_timestamp=datetime.now())    
+            available=False, status_change_timestamp=datetime.now())
+        
+# when a slice is deleted, make sure all its flowspace is deleted too
+def delete_empty_flowspace(sender, **kwargs):
+    FlowSpaceRule.objects.annotate(
+        num_slivers=Count("slivers")).filter(
+            num_slivers=0).delete()
+
+signals.post_delete.connect(delete_empty_flowspace, Slice)        
+
