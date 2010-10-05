@@ -5,9 +5,7 @@ Created on Dec 3, 2009
 '''
 
 from django.db import models
-from django.contrib import auth
-
-auth.models.User._meta.get_field_by_name('username')[0].max_length=255
+from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     '''
@@ -19,7 +17,7 @@ class UserProfile(models.Model):
     @type affiliation: L{str}
     '''
 
-    user                   = models.ForeignKey(auth.models.User, unique=True)
+    user                   = models.ForeignKey(User, unique=True)
     affiliation            = models.CharField(max_length=100, default="")
 
     def __unicode__(self):
