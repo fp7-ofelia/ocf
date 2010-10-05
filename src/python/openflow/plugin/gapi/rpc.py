@@ -86,7 +86,7 @@ def ListResources(credentials, options, **kwargs):
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
            url_name="openflow_gapi")
 def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
-    logger.debug("Called CreateSliver")
+    logger.debug("Called CreateSliver for user %s" % kwargs["request"].user)
     try:
         return gapi.CreateSliver(slice_urn, rspec, kwargs["request"].user)
     except Slice.DoesNotExist:
