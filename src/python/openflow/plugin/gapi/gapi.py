@@ -22,7 +22,7 @@ logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
 def get_slice(slice_urn):
     # get the slice
-    slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
+    slice = Slice.objects.get(geni_slice_info__slice_urn=slice_urn)
     return slice
     
 def GetVersion():
