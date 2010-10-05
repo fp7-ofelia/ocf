@@ -8,16 +8,15 @@ from openflow.plugin.models import \
     OpenFlowSliceInfo, OpenFlowInterfaceSliver,\
     FlowSpaceRule
 import logging
-from django.test import Client
-from expedient.common.tests.client import test_get_and_post_form
 from expedient.clearinghouse.project.models import Project
-from django.core.urlresolvers import reverse
 from expedient.clearinghouse.slice.models import Slice
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.utils import create_or_update
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.users.models import UserProfile
 from expedient_geni.models import GENISliceInfo
+from expedient.clearinghouse.project.views import create_project_roles
+from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
@@ -52,7 +51,6 @@ def ListResources(options, user):
     return result
 
 def CreateSliver(slice_urn, rspec, user):
-
     (project_name, project_desc, slice_name, slice_desc, 
     controller_url, firstname, lastname, affiliation,
     email, password, slivers) = rspec_mod.parse_slice(rspec)
@@ -61,11 +59,9 @@ def CreateSliver(slice_urn, rspec, user):
 
     give_permission_to("can_create_project", Project, user)
 
-    client = Client()
-    fake_login(client, user)
-    
-    user.firstname = firstname
-    user.lastname = lastname
+    user.first_name = firstname
+    user.last_name = lastname
+    user.email = email
     profile = UserProfile.get_or_create_profile(user)
     profile.affiliation = affiliation
     user.save()
@@ -73,7 +69,7 @@ def CreateSliver(slice_urn, rspec, user):
     
     # Check if the slice exists
     try:
-        slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
+        slice = Slice.objects.get(geni_slice_info__slice_urn=slice_urn)
         # update the slice info
         slice.description = slice_desc
         slice.name = slice_name
@@ -93,19 +89,20 @@ def CreateSliver(slice_urn, rspec, user):
         except Project.DoesNotExist:
             # create the project
             logger.debug("Creating project")
-            test_get_and_post_form(
-                client, url=reverse("project_create"),
-                params={"name": project_name, "description": project_desc}
+            project = Project.objects.create(
+                name=project_name,
+                description=project_desc,
             )
-            project = Project.objects.get(name=project_name)
+            create_project_roles(project, user)
         
         # create the slice
         logger.debug("Creating slice")
-        test_get_and_post_form(
-            client, url=reverse("slice_create", args=[project.id]),
-            params={"name": slice_name, "description": slice_desc}
+        slice = Slice.objects.create(
+            name=slice_name,
+            description=slice_desc,
+            project=project,
+            owner=user,
         )
-        slice = Slice.objects.get(gapislice__slice_urn=slice_urn)
 
     logger.debug("Creating/updating slice info")
     
@@ -116,7 +113,6 @@ def CreateSliver(slice_urn, rspec, user):
         new_attrs={
             "controller_url": controller_url,
             "password": password,
-            "email": email,
         },
     )
     
@@ -143,6 +139,7 @@ def CreateSliver(slice_urn, rspec, user):
             give_permission_to("can_use_aggregate", aggregate, slice)
 
         # Create flowspace
+        logger.debug("Creating flowspace %s" % fs_dict)
         fs = FlowSpaceRule.objects.create(**fs_dict)
 
         # make sure all the selected interfaces are added
@@ -160,23 +157,25 @@ def CreateSliver(slice_urn, rspec, user):
     logger.debug("Starting the slice %s %s" % (slice, slice.name))
     
     # make the reservation
-    client.post(reverse("slice_start", args=[slice.id]))
-    
+    tl = threadlocals.get_thread_locals()
+    tl["project"] = project
+    tl["slice"] = slice
+    slice.start(user)
     logger.debug("Done creating sliver")
-
-    client.logout()
 
     return rspec_mod.create_resv_rspec(user, slice)
 
 def DeleteSliver(slice_urn, user):
     slice = get_slice(slice_urn)
     project = slice.project
-    client = Client()
-    fake_login(client, user)
-    client.post(reverse("slice_delete", args=[slice.id]))
+    tl = threadlocals.get_thread_locals()
+    tl["project"] = project
+    tl["slice"] = slice
+    slice.stop(user)
+    slice.delete()
     # delete the project if there are no more slices in it
     if Slice.objects.filter(project=project).count() == 0:
-        client.post(reverse("project_delete", args=[project.id]))
+        project.delete()
     return True
 
 def SliverStatus(slice_urn):
@@ -212,9 +211,8 @@ def RenewSliver(slice_urn, expiration_time):
 
 def Shutdown(slice_urn, user):
     slice = get_slice(slice_urn)
-
-    client = Client()
-    fake_login(client, user)
-    client.post(reverse("slice_stop", args=[slice.id]))
-
+    tl = threadlocals.get_thread_locals()
+    tl["project"] = slice.project
+    tl["slice"] = slice
+    slice.stop(user)
     return True
