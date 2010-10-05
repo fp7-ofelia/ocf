@@ -4,9 +4,9 @@ Created on Jul 12, 2010
 @author: jnaous
 '''
 
-from xml.etree import ElementTree as et
-from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch,\
-    DummyCallBackProxy
+from lxml import objectify
+from lxml import etree as et
+from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch
 from django.contrib.auth.models import User
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
     OpenFlowInterfaceSliver, FlowSpaceRule, OpenFlowConnection,\
@@ -19,7 +19,6 @@ from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.slice.models import Slice
 from base64 import b64decode
 import pickle
-from django.conf import settings
 from expedient.common.tests.manager import SettingsTestCase
 from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -34,6 +33,7 @@ from sfa.trust import credential
 from expedient_geni.models import GENISliceInfo
 import xmlrpclib
 from expedient.common.utils.transport import TestClientTransport
+from expedient.common.utils import create_or_update
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -63,9 +63,11 @@ class Tests(SettingsTestCase):
             ),
             DEBUG_PROPAGATE_EXCEPTIONS=True,
         )
-        
+        self.su = User.objects.create_superuser(
+            "superuser", "bla@bla.com", "password")
+        self.test_user_password = "password"
         self.test_user = User.objects.create_user(
-            "user", "user@user.com", "password")
+            "test_user", "user@user.com", self.test_user_password)
         give_permission_to("can_add_aggregate", Aggregate, self.test_user)
         give_permission_to("can_create_project", Project, self.test_user)
         
@@ -91,8 +93,6 @@ class Tests(SettingsTestCase):
 
             proxy.delete()
             
-        self.client.login(username="user", password="password")
-        
         # create user cert/keys
         self.user_urn = get_user_urn(self.test_user.username)
         self.user_cert, self.user_key = create_x509_cert(self.user_urn)
@@ -118,6 +118,9 @@ class Tests(SettingsTestCase):
         """
         Test that we can create an OpenFlow Aggregate using the create view.
         """
+        self.client.login(
+            username=self.test_user.username, password=self.test_user_password)
+        
         for i in range(NUM_DUMMY_OMS):
             response = test_get_and_post_form(
                 self.client, reverse("openflow_aggregate_create"),
@@ -415,6 +418,7 @@ class Tests(SettingsTestCase):
     def test_gapi_ListResources(self, zipped=False):
         # add aggregates
         self.test_create_aggregates()
+        self.client.logout()
         
         # get the rspec for the added resources
         options = dict(geni_compressed=zipped, geni_available=True)
@@ -466,7 +470,7 @@ class Tests(SettingsTestCase):
         proj_desc = "test project description",
         slice_name = "test slice",
         slice_desc = "test slice description",
-        username = "gapi_user",
+        username = "test_user",
         firstname = "gapi",
         lastname = "user",
         password = "password",
@@ -474,6 +478,12 @@ class Tests(SettingsTestCase):
         email = "gapi_user@expedient.stanford.edu",
         controller_url = "tcp:bla.com:6633",
         fs1 = dict(
+            dl_dst=("11:22:33:44:55:66", None),
+            dl_type=(1234, 1236),
+            vlan_id=(4455, 4455),
+            nw_src=("123.123.132.123", "222.222.222.222"),
+        ),
+        fs2 = dict(
             dl_src=("11:22:33:44:55:66", "11:22:33:44:55:77"),
             dl_dst=("11:22:33:44:55:66", None),
             dl_type=(1234, 1236),
@@ -482,24 +492,38 @@ class Tests(SettingsTestCase):
             nw_proto=(4,4),
             tp_src=(123,123),
         ),
-        fs2 = dict(
-            dl_dst=("11:22:33:44:55:66", None),
-            dl_type=(1234, 1236),
-            vlan_id=(4455, 4455),
-            nw_src=("123.123.132.123", "222.222.222.222"),
-        ),
     ):
-        # create the project
-        project = Project.objects.create(
-            name=proj_name, description=proj_desc)
-        slice = Slice.objects.create(
-            project=project, name=slice_name, description=slice_desc)
-        user = User.objects.create(
-            username=username, firstname=firstname, lastname=lastname,
-            email=email,
+        
+        # add the aggregates
+        self.test_create_aggregates()
+        self.client.logout()
+    
+        # setup threadlocals
+        tl = threadlocals.get_thread_locals()
+        tl["user"] = self.su
+        
+        # create the info
+        user, _ = create_or_update(
+            model=User,
+            filter_attrs={"username": username},
+            new_attrs={
+                "first_name": firstname,
+                "last_name": lastname,
+                "email": email,
+            }
         )
         UserProfile.objects.create(
             user=user, affiliation=affiliation)
+
+        project = Project.objects.create(
+            name=proj_name, description=proj_desc)
+
+        slice = Slice.objects.create(
+            project=project,
+            name=slice_name,
+            description=slice_desc,
+            owner=user,
+        )
         
         # select ports and switches
         random.seed(0)
@@ -508,7 +532,7 @@ class Tests(SettingsTestCase):
         fs2_switches = random.sample(list(OpenFlowSwitch.objects.all()), 10)
         fs2_ports = random.sample(list(OpenFlowInterface.objects.all()), 10)
         
-        def create_slivers(fs, ports):
+        def create_port_slivers(fs, ports):
             slivers = []
             for p in ports:
                 slivers.append(OpenFlowInterfaceSliver.objects.create(
@@ -525,21 +549,18 @@ class Tests(SettingsTestCase):
             return rule
         
         # create the slivers for the slice
-        r1 = create_slivers(fs1, fs1_ports)
-        r2 = create_slivers(fs2, fs2_ports)
+        r1 = create_port_slivers(fs1, fs1_ports)
+        r2 = create_port_slivers(fs2, fs2_ports)
         
         OpenFlowSliceInfo.objects.create(
             slice=slice, password=password, controller_url=controller_url)
         
-        # get the rspec
+        # get the rspec using only the ports
         resv_rspec = rspec_mod.create_resv_rspec(user, slice)
         
-        # add the full switches to the rspec
+        # add the full switches to the reservation rspec
         root = et.fromstring(resv_rspec)
         fs_elems = root.findall(".//%s" % rspec_mod.FLOWSPACE_TAG)
-        
-        # get the rspec with ports instead of switches
-        expected_resv_rspec = rspec_mod.create_resv_rspec(user, slice)
         
         def add_switches(elem, switches):
             for s in switches:
@@ -550,7 +571,24 @@ class Tests(SettingsTestCase):
                 )
                 
         add_switches(fs_elems[0], fs1_switches)
-        add_switches(fs_elems[1], fs1_switches)
+        add_switches(fs_elems[1], fs2_switches)
+        
+        resv_rspec = et.tostring(root)
+        
+        # Now add the switches into the slice and get the expected rspec
+        # that will be returned
+        def add_switch_slivers(rule, switches):
+            for s in switches:
+                ports = OpenFlowInterface.objects.filter(switch=s)
+                for p in ports:
+                    sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
+                        slice=slice, resource=p)
+                    rule.slivers.add(sliver)
+        
+        add_switch_slivers(r1, fs1_switches)
+        add_switch_slivers(r2, fs2_switches)
+        
+        expected_resv_rspec = rspec_mod.create_resv_rspec(user, slice)
         
         # delete created state
         project.delete()
@@ -563,9 +601,39 @@ class Tests(SettingsTestCase):
             self.slice_gid.get_urn(),
             [self.slice_cred],
             resv_rspec,
-            users={})
+            {},
+        )
         
-        self.assertEqual(ret_rspec, expected_resv_rspec)
+        def order_rspec(rspec):
+            # order the flowspace and switch elements in the rspec
+            root = et.fromstring(rspec)
+            
+            # sort the flowspace by its xml's length
+            fs_elems = root.findall(".//flowspace")
+            for elem in fs_elems:
+                root.remove(elem)
+            fs_elems = sorted(fs_elems, key=lambda fs:len(et.tostring(fs)))
+            
+            # then within each flowspace, sort the ports by their urn
+            for fs_elem in fs_elems:
+                port_elems = fs_elem.findall(".//port")
+                for port_elem in port_elems:
+                    fs_elem.remove(port_elem)
+                port_elems = sorted(port_elems, key=lambda port:port.get("urn"))
+                for port_elem in port_elems:
+                    fs_elem.append(port_elem)
+                root.append(fs_elem)
+            
+            return et.tostring(root)
+            
+        ret = order_rspec(ret_rspec)
+        exp = order_rspec(expected_resv_rspec)
+            
+        self.assertEqual(
+            ret,
+            exp,
+            "Expected:\n%s \nFound:\n%s" % (exp, ret),
+        )
         
         # check that the created state is what is expected
         self.assertEqual(
@@ -581,8 +649,8 @@ class Tests(SettingsTestCase):
         self.assertEqual(slice.project, project)
         
         user = User.objects.get(username=username)
-        self.assertEqual(user.firstname, firstname)
-        self.assertEqual(user.lastname, lastname)
+        self.assertEqual(user.first_name, firstname)
+        self.assertEqual(user.last_name, lastname)
         self.assertEqual(user.email, email)
         
         user_profile= UserProfile.objects.all()[0]
@@ -616,9 +684,9 @@ class Tests(SettingsTestCase):
                 all_ports.extend(OpenFlowInterface.objects.filter(switch=s))
                 
             all_ports = set(all_ports)
-            
+                
             # check number of interfaces
-            self.assertEqual(all_ports, r.slivers.count())
+            self.assertEqual(len(all_ports), r.slivers.count())
             
             # check slivers
             for sliver in r.slivers.all():
