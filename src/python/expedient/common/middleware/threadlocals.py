@@ -7,7 +7,7 @@ except ImportError:
     from django.utils._threading_local import local
 
 class threadlocal(local):
-    d_stack = []
+    d_stack = [{}]
     
 _thread_locals = threadlocal()
 
