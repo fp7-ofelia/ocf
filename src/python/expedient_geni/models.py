@@ -11,6 +11,7 @@ from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
 from expedient_geni import management
+from expedient_geni.utils import create_slice_urn
 
 SSH_KEY_SIZE = 2048
 
@@ -42,7 +43,7 @@ class GENISliceInfo(models.Model):
         "Slice credentials", editable=False, blank=True, null=True)
     
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("slice_urn", management.create_slice_urn())
+        kwargs.setdefault("slice_urn", create_slice_urn())
         super(GENISliceInfo, self).__init__(*args, **kwargs)
         
     def generate_ssh_keys(self, password=None):
