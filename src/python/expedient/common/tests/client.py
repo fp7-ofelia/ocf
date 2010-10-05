@@ -7,6 +7,45 @@ Contains functions to login and manage forms.
 '''
 import urllib, urllib2, cookielib
 
+def fake_login(client, user):
+    """Setup the client to appear logged in even if it isn't.
+    
+    @param client: The client to setup
+    @type client: C{django.test.Client}
+    @param user: The user to log the client in as.
+    @type user: C{django.contrib.auth.models.User}
+    """
+     
+    from django.conf import settings
+    from django.utils.importlib import import_module
+    from django.http import HttpRequest
+    from django.contrib.auth import login
+    
+    engine = import_module(settings.SESSION_ENGINE)
+
+    # Create a fake request to store login details.
+    request = HttpRequest()
+    if client.session:
+        request.session = client.session
+    else:
+        request.session = engine.SessionStore()
+    login(request, user)
+
+    # Save the session values.
+    request.session.save()
+
+    # Set the cookie to represent the session.
+    session_cookie = settings.SESSION_COOKIE_NAME
+    client.cookies[session_cookie] = request.session.session_key
+    cookie_data = {
+        'max-age': None,
+        'path': '/',
+        'domain': settings.SESSION_COOKIE_DOMAIN,
+        'secure': settings.SESSION_COOKIE_SECURE or None,
+        'expires': None,
+    }
+    client.cookies[session_cookie].update(cookie_data)    
+
 def parse_form(doc):
     """
     parse the doc (a string), and return a dictionary of
