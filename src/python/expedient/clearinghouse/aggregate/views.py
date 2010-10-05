@@ -149,6 +149,6 @@ def status_img_url(request, agg_id):
         else:
             return fail
     except:
-        traceback.print_exc()
+        logger.error(traceback.format_exc())
         return fail
         
