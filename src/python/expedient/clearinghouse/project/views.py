@@ -110,6 +110,45 @@ def detail(request, proj_id):
         }
     )
 
+def create_project_roles(project, user):
+    """Create the default roles in a project."""
+    owner_role = ProjectRole.objects.create(
+        name="owner",
+        description=\
+            "The 'owner' role is a special role that has permission to "
+            "do everything "
+            "in the project and can give the permissions to everyone. "
+            "In addition every time a slice is created, users with "
+            "the 'owner' role get full permissions over those.",
+        project=project,
+    )
+    for permission in DEFAULT_OWNER_PERMISSIONS:
+        obj_perm = ObjectPermission.objects.\
+            get_or_create_for_object_or_class(
+                permission, project)[0]
+        owner_role.obj_permissions.add(obj_perm)
+        
+    researcher_role = ProjectRole.objects.create(
+        name="researcher",
+        description=\
+            "By default users with the 'researcher' role can only "
+            "create slices and "
+            "delete slices they created. They have full permissions over "
+            "their created slices.",
+            project=project,
+    )
+    for permission in DEFAULT_RESEARCHER_PERMISSIONS:
+        obj_perm = ObjectPermission.objects.\
+            get_or_create_for_object_or_class(
+                permission, project)[0]
+        researcher_role.obj_permissions.add(obj_perm)
+    
+    # give the creator of the project an owner role
+    owner_role.give_to_permittee(
+        user,
+        can_delegate=True,
+    )
+
 @require_objs_permissions_for_view(
     perm_names=["can_create_project"],
     permittee_func=get_user_from_req,
@@ -120,42 +159,7 @@ def create(request):
     
     def post_save(instance, created):
         # Create default roles in the project
-        owner_role = ProjectRole.objects.create(
-            name="owner",
-            description=\
-                "The 'owner' role is a special role that has permission to "
-                "do everything "
-                "in the project and can give the permissions to everyone. "
-                "In addition every time a slice is created, users with "
-                "the 'owner' role get full permissions over those.",
-            project=instance,
-        )
-        for permission in DEFAULT_OWNER_PERMISSIONS:
-            obj_perm = ObjectPermission.objects.\
-                get_or_create_for_object_or_class(
-                    permission, instance)[0]
-            owner_role.obj_permissions.add(obj_perm)
-            
-        researcher_role = ProjectRole.objects.create(
-            name="researcher",
-            description=\
-                "By default users with the 'researcher' role can only "
-                "create slices and "
-                "delete slices they created. They have full permissions over "
-                "their created slices.",
-                project=instance,
-        )
-        for permission in DEFAULT_RESEARCHER_PERMISSIONS:
-            obj_perm = ObjectPermission.objects.\
-                get_or_create_for_object_or_class(
-                    permission, instance)[0]
-            researcher_role.obj_permissions.add(obj_perm)
-        
-        # give the creator of the project an owner role
-        owner_role.give_to_permittee(
-            request.user,
-            can_delegate=True,
-        )
+        create_project_roles(instance, request.user)
         
     def redirect(instance):
         return reverse("project_detail", args=[instance.id])
