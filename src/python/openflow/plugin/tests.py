@@ -386,14 +386,14 @@ class Tests(SettingsTestCase):
             sliver = OpenFlowInterfaceSliver.objects.create(
                 slice=slice, resource=iface)
             # Add FlowSpace
-            FlowSpaceRule.objects.create(
-                sliver=sliver,
+            fs = FlowSpaceRule.objects.create(
                 nw_src_start="0.0.0.0",
             )
-            FlowSpaceRule.objects.create(
-                sliver=sliver,
+            fs.slivers.add(sliver)
+            fs = FlowSpaceRule.objects.create(
                 nw_dst_start="0.0.0.0",
             )
+            fs.slivers.add(sliver)
         
         # start the slice.
         self.client.post(reverse("slice_start", args=[slice.id]))
@@ -415,10 +415,11 @@ class Tests(SettingsTestCase):
     def test_gapi_GetVersion(self):
         self.assertEqual(self.rpc.GetVersion()["geni_api"], 1)
         
-    def test_gapi_ListResources(self, zipped=False):
+    def test_gapi_ListResources(self, create=True, zipped=False):
         # add aggregates
-        self.test_create_aggregates()
-        self.client.logout()
+        if create:
+            self.test_create_aggregates()
+            self.client.logout()
         
         # get the rspec for the added resources
         options = dict(geni_compressed=zipped, geni_available=True)
@@ -463,7 +464,7 @@ class Tests(SettingsTestCase):
         self.test_gapi_ListResources()
         for s in OpenFlowSwitch.objects.all()[:5]:
             s.delete()
-        self.test_gapi_ListResources()
+        self.test_gapi_ListResources(create=False)
         
     def test_gapi_CreateSliver(self,
         proj_name = "test project",
@@ -493,6 +494,9 @@ class Tests(SettingsTestCase):
             tp_src=(123,123),
         ),
     ):
+        # IMPORTANT: If you change fs1 and fs2, make sure that
+        # the rspec for fs1 is shorter than that for fs2 since
+        # the test needs to order them by length.
         
         # add the aggregates
         self.test_create_aggregates()
@@ -684,7 +688,7 @@ class Tests(SettingsTestCase):
                 all_ports.extend(OpenFlowInterface.objects.filter(switch=s))
                 
             all_ports = set(all_ports)
-                
+            
             # check number of interfaces
             self.assertEqual(len(all_ports), r.slivers.count())
             
@@ -709,7 +713,7 @@ class Tests(SettingsTestCase):
     def test_gapi_slice_ListResources(self):
         expected_rspec = self.test_gapi_CreateSliver()
         ret_rspec = self.rpc.ListResources(
-            self.slice_cred, {"geni_slice_urn": self.slice_gid.get_urn()})
+            [self.slice_cred], {"geni_slice_urn": self.slice_gid.get_urn()})
         self.assertEqual(ret_rspec, expected_rspec)
         
     
