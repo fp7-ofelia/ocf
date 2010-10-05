@@ -6,7 +6,7 @@ Contains functions to transform to and from RSpecs
 @author: jnaous
 '''
 
-from xml.etree import cElementTree as et
+from xml.etree import ElementTree as et
 from django.conf import settings
 from django.db.models import Q
 import re
@@ -440,7 +440,7 @@ def _resv_parse_slivers(root):
         switch_elems = flowspace_elem.findall(".//%s" % SWITCH_TAG)
         for switch_elem in switch_elems:
             # get the switch
-            dpid = _urn_to_dpid(switch_elem["urn"])
+            dpid = _urn_to_dpid(switch_elem.get("urn"))
             # get the interfaces
             new_q = Q(switch__datapath_id=dpid)
             interface_q = interface_q | new_q if interface_q else new_q
@@ -448,12 +448,12 @@ def _resv_parse_slivers(root):
         port_elems = flowspace_elem.findall(".//%s" % PORT_TAG)
         for port_elem in port_elems:
             # get the switch and port
-            dpid, port_num = _urn_to_port(port_elem["urn"])
+            dpid, port_num = _urn_to_port(port_elem.get("urn"))
             # get the interfaces
             new_q = Q(switch__datapath_id=dpid, port_num=port_num)
             interface_q = interface_q | new_q if interface_q else new_q
             
-        port_fs_map.append(fs, OpenFlowInterface.objects.filter(interface_q))
+        port_fs_map.append((fs, OpenFlowInterface.objects.filter(interface_q)))
         
     return port_fs_map
 
@@ -477,8 +477,8 @@ def create_resv_rspec(user, slice, aggregate=None):
     # add the user info
     et.SubElement(
         root, USER_TAG, {
-            FIRSTNAME: user.firstname,
-            LASTNAME: user.lastname,
+            FIRSTNAME: user.first_name,
+            LASTNAME: user.last_name,
             AFFILIATION: UserProfile.get_or_create_profile(user).affiliation,
             EMAIL: user.email,
             PASSWORD: slice.openflowsliceinfo.password,
@@ -502,7 +502,8 @@ def create_resv_rspec(user, slice, aggregate=None):
         }
     )
     
-    flowspace_qs = FlowSpaceRule.objects.filter(slivers__slice=slice)
+    flowspace_qs = FlowSpaceRule.objects.filter(
+        slivers__slice=slice).distinct()
     if aggregate:
         flowspace_qs = flowspace_qs.filter(
             slivers__aggregate__id=aggregate.id)
@@ -510,21 +511,26 @@ def create_resv_rspec(user, slice, aggregate=None):
     # add the flowspace
     for fs in flowspace_qs:
         fs_elem = et.SubElement(root, FLOWSPACE_TAG)
-        for sliver in fs.slivers:
+        for sliver in fs.slivers.all():
             iface = sliver.resource.as_leaf_class()
             et.SubElement(
                 fs_elem, PORT_TAG, {
                     URN: _port_to_urn(iface.switch.datapath_id, iface.port_num)
                 }
             )
+            
         for tag in DL_SRC_TAG, DL_DST_TAG,\
         DL_TYPE_TAG, VLAN_ID_TAG, NW_SRC_TAG, NW_DST_TAG, NW_PROTO_TAG,\
         TP_SRC_TAG, TP_DST_TAG:
+            f = getattr(fs, "%s_start" % tag)
+            t = getattr(fs, "%s_end" % tag)
+            d = {}
+            if f is not None:
+                d["from"] =  str(f)
+            if t is not None: 
+                d["to"] = str(t)
             et.SubElement(
-                fs_elem, tag, {
-                    "from": getattr(fs, "%s_start" % tag),
-                    "to": getattr(fs, "%s_end" % tag),
-                }
+                fs_elem, tag, d,
             )
     
     return et.tostring(root)
