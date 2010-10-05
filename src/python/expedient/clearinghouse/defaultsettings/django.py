@@ -123,6 +123,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'expedient.clearinghouse.firstapp',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
