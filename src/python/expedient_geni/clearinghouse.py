@@ -32,10 +32,9 @@ Created on Oct 2, 2010
 #----------------------------------------------------------------------
 
 import logging
-import uuid
 from geni.util.urn_util import URN
 from expedient_geni.utils import get_slice_urn, create_x509_cert,\
-    create_slice_credential, create_user_credential
+    create_slice_credential, create_user_credential, create_slice_urn
 import traceback
 from sfa.trust import gid
 
@@ -66,8 +65,7 @@ def CreateSlice(user_cert, urn_req=None):
             
     else:
         # Generate a unique URN for the slice
-        slice_name = uuid.uuid4().__str__()[4:12]
-        urn_req = get_slice_urn(slice_name)
+        urn_req = create_slice_urn()
         
     try:
         slice_gid = create_x509_cert(urn_req)[0]

@@ -11,6 +11,7 @@ from geni.util.cert_util import create_cert
 from sfa.trust.gid import GID
 from django.core.urlresolvers import reverse
 from geni.util import cred_util
+import uuid
 
 def get_user_cert_fname(user):
     """Get the filename of the user's GCF x509 certificate.
@@ -79,6 +80,10 @@ def get_slice_urn(name):
     return URN(
         settings.GCF_BASE_NAME, "slice", name,
     ).urn_string()
+
+def create_slice_urn():
+    """Create a urn for the slice."""
+    return get_slice_urn(uuid.uuid4().__str__()[4:12])
 
 def create_x509_cert(urn, cert_fname=None, key_fname=None, is_self_signed=False):
     """Create a GCF certificate and store it in a file.
