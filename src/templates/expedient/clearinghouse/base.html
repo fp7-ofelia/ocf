@@ -25,7 +25,10 @@
 				$("table.formtable_noborder>tbody>tr," +
 				"table.formtable>tbody>tr")
 					.prepend("<td />");
-				
+				$("table.formtable_noborder>thead>tr," +
+				"table.formtable>thead>tr")
+					.prepend("<td />");
+
 				/* find help text and replace with image and tooltip */
 				$("table.formtable_noborder>tbody>tr>td:nth-child(3)")
 {% include "fixformtable.js" %}
