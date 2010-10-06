@@ -19,6 +19,7 @@ from django.core.urlresolvers import reverse
 from models import SliceFlowSpace
 from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
+from django import forms
 
 logger = logging.getLogger("html_ui_views")
 
@@ -266,41 +267,30 @@ def flowspace(request, slice_id):
     """
     slice = get_object_or_404(Slice, id=slice_id)
     
-    slivers = OpenFlowInterfaceSliver.objects.filter(slice=slice)
+    class SliverMultipleChoiceField(forms.ModelMultipleChoiceField):
+        def label_from_instance(self, obj):
+            return "%s" % obj.resource.as_leaf_class()
     
-    def formfield_callback():
-        pass
+    def formfield_callback(f):
+        if f.name == "slivers":
+            return SliverMultipleChoiceField(
+                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+        else:
+            return f.formfield()
+    
     # create a formset to handle all flowspaces
     FSFormSet = modelformset_factory(
-        model=FlowSpaceRule, )
+        model=FlowSpaceRule, formfield_callback=formfield_callback)
+    
     if request.method == "POST":
         logger.debug("Got post for flowspace")
-        formset = FSFormSet(request.POST, instance=slice)
+        formset = FSFormSet(
+            request.POST,
+            queryset=FlowSpaceRule.objects.filter(slivers__slice=slice),
+        )
         if formset.is_valid():
             logger.debug("Flowspace valid")
-            formset = formset.save()
-            
-            # Update the Flowspace for the slivers
-            for fs in FlowSpaceRule.objects.filter(sliver__slice=slice):
-                fs.delete()
-                
-            slivers = OpenFlowInterfaceSliver.objects.filter(slice=slice)
-            for fs in SliceFlowSpace.objects.filter(slice=slice):
-                # get the wanted attributes into a dict
-                d = {}
-                for f in SliceFlowSpace._meta.fields:
-                    logger.debug("Doing field %s" % f.name)
-                    if f.name != "slice" and f.name != "id":
-                        val = getattr(fs, f.name)
-                        if val == None or val == "": val = "*"
-                        d[f.name+"_start"] = "%s" % val
-                        d[f.name+"_end"] = "%s" % val
-                        
-                logger.debug("Saved flowspace %s" % d)
-                # now create fs for all the slivers
-                for s in slivers:
-                    d["sliver"] = s
-                    FlowSpaceRule.objects.create(**d)
+            formset.save()
             
             DatedMessage.objects.post_message_to_user(
                 "Successfully set flowspace for slice %s" % slice.name,
@@ -309,13 +299,14 @@ def flowspace(request, slice_id):
             
             slice.modified = True
             slice.save()
-        
             return HttpResponseRedirect(request.path)
         else:
             logger.debug("Flowspace invalid: %s" % formset)
     
     elif request.method == "GET":
-        formset = FSFormSet(instance=slice)
+        formset = FSFormSet(
+            queryset=FlowSpaceRule.objects.filter(slivers__slice=slice),
+        )
     
     else:
         return HttpResponseNotAllowed("GET", "POST")

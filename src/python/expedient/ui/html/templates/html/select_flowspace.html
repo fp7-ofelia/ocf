@@ -48,31 +48,128 @@
 	<br />
 	
     <form class="form" id='flowspace_formset' method="POST" action="">{% csrf_token %}
-        <div class="flowspace">
-            <div id="flowspacedivid" >
-	            {{ fsformset.management_form }}
-				{% for form in fsformset.forms %}
-					{% for hidden in form.hidden_fields %}
-						{{ hidden }}
-					{% endfor %}
-				{% endfor %}
-				<table border="1" class="fulltable">
-					<thead>
-		                <tr>
-			                {% for field in fsformset.forms.0.visible_fields %}
-		                    <th><strong>{{ field.label_tag }}</strong></th>
-			                {% endfor %}
-		                </tr>
-					</thead>
-	                {% for form in fsformset.forms %}
-	                <tr>
-		                {% for field in form.visible_fields %}
-                        <td>{{ field.errors }} {{ field }}</td>
-	                    {% endfor %}
-	                </tr>
-	                {% endfor %}
-	            </table>
-            </div>
+    	{{ fsformset.management_form }}
+		{% for form in fsformset.forms %}
+			{% for hidden in form.hidden_fields %}
+				{{ hidden }}
+			{% endfor %}
+		{% endfor %}
+		<div class="center">
+	    	<table class="formtable external">
+	    		{% for form in fsformset.forms %}
+	    		<thead>
+	    			<tr><th>Field</th><th>From</th><th>To</th></tr>
+	    		</thead>
+	    		<tbody>
+		            <tr>
+		            	<th><strong>MAC Source</strong></th>
+		            	<td>
+		            		{{ form.dl_src_start.errors }}
+		            		{{ form.dl_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_src_end.errors }}
+		            		{{ form.dl_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>MAC Destination</strong></th>
+		            	<td>
+		            		{{ form.dl_dst_start.errors }}
+		            		{{ form.dl_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_dst_end.errors }}
+		            		{{ form.dl_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>Ethernet Type</strong></th>
+		            	<td>
+		            		{{ form.dl_type_start.errors }}
+		            		{{ form.dl_type_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_type_end.errors }}
+		            		{{ form.dl_type_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>VLAN ID</strong></th>
+		            	<td>
+		            		{{ form.vlan_id_start.errors }}
+		            		{{ form.vlan_id_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.vlan_id_end.errors }}
+		            		{{ form.vlan_id_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Source</strong></th>
+		            	<td>
+		            		{{ form.nw_src_start.errors }}
+		            		{{ form.nw_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_src_end.errors }}
+		            		{{ form.nw_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Destination</strong></th>
+		            	<td>
+		            		{{ form.nw_dst_start.errors }}
+		            		{{ form.nw_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_dst_end.errors }}
+		            		{{ form.nw_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Protocol</strong></th>
+		            	<td>
+		            		{{ form.nw_proto_start.errors }}
+		            		{{ form.nw_proto_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_proto_end.errors }}
+		            		{{ form.nw_proto_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>TCP/UDP Source</strong></th>
+		            	<td>
+		            		{{ form.tp_src_start.errors }}
+		            		{{ form.tp_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.tp_src_end.errors }}
+		            		{{ form.tp_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>TCP/UDP Destination</strong></th>
+		            	<td>
+		            		{{ form.tp_dst_start.errors }}
+		            		{{ form.tp_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.tp_dst_end.errors }}
+		            		{{ form.tp_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>Ports</strong></th>
+		            	<td COLSPAN="2">
+		            		{{ form.slivers.errors }}
+		            		{{ form.slivers }}
+		            	</td>
+		            </tr>
+		        </tbody>
+		        {% endfor %}
+	        </table>
 			<br/>
             <input id='submit' type="submit" value="Save" />
 			<span class="next_link">
