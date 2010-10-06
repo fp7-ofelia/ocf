@@ -446,5 +446,12 @@ def delete_empty_flowspace(sender, **kwargs):
         num_slivers=Count("slivers")).filter(
             num_slivers=0).delete()
 
+def check_fs_change(sender, **kwargs):
+    if kwargs["action"] == "post_remove" or kwargs["action"] == "post_clear":
+        delete_empty_flowspace(sender, **kwargs)
+
 signals.post_delete.connect(delete_empty_flowspace, Slice)        
+signals.post_delete.connect(delete_empty_flowspace, OpenFlowInterfaceSliver)        
+signals.m2m_changed.connect(
+    check_fs_change, FlowSpaceRule.slivers.through)        
 
