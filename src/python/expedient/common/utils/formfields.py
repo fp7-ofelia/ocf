@@ -3,8 +3,32 @@ Created on Jul 17, 2010
 
 @author: jnaous
 '''
+import logging
 from django import forms
+from django import core
+from django.utils import formats
 from expedient.common.utils import validators
+import traceback
+
+logger = logging.getLogger("common.utils.formfields")
+
+class DecOrHexIntegerField(forms.IntegerField):
+    def to_python(self, value):
+        """
+        Validates that int() can be called on the input. Returns the result
+        of int(). Returns None for empty values.
+        """
+        
+        try:
+            value = super(DecOrHexIntegerField, self).to_python(value)
+        except core.exceptions.ValidationError:
+            try:
+                value = int(str(value), 0)
+            except (ValueError, TypeError):
+                raise core.exceptions.ValidationError(
+                    self.error_messages['invalid'])
+        
+        return value
 
 class MACAddressField(forms.CharField):
     """

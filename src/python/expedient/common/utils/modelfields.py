@@ -3,9 +3,11 @@ Created on Jul 18, 2010
 
 @author: jnaous
 '''
+import logging
 from django.db import models
-from django import forms
 import formfields
+
+logger = logging.getLogger("common.utils.modelfields")
 
 class MACAddressField(models.CharField):
     """
@@ -33,13 +35,13 @@ class LimitedIntegerField(models.IntegerField):
         super(LimitedIntegerField, self).__init__(*args, **kwargs)
         
     def formfield(self, **kwargs):
-        defaults = {'form_class': forms.IntegerField,
+        defaults = {'form_class': formfields.DecOrHexIntegerField,
                     'max_value': self.max_value,
                     'min_value': self.min_value,
                     }
         defaults.update(kwargs)
         return super(LimitedIntegerField, self).formfield(**defaults)
-
+    
 class IPNetworkField(models.CharField):
     """
     A field that accepts either IP address or IP prefixes (192.168.0.0/16).
