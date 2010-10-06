@@ -50,6 +50,28 @@ logging.getLogger("OpenflowModelsParsing").setLevel(logging.WARNING)
 logging.getLogger("TestClientTransport").setLevel(logging.WARNING)
 logging.getLogger("rpc4django.views").setLevel(logging.WARNING)
 
+def order_rspec(rspec):
+    # order the flowspace and switch elements in the rspec
+    root = et.fromstring(rspec)
+    
+    # sort the flowspace by its xml's length
+    fs_elems = root.findall(".//flowspace")
+    for elem in fs_elems:
+        root.remove(elem)
+    fs_elems = sorted(fs_elems, key=lambda fs:len(et.tostring(fs)))
+    
+    # then within each flowspace, sort the ports by their urn
+    for fs_elem in fs_elems:
+        port_elems = fs_elem.findall(".//port")
+        for port_elem in port_elems:
+            fs_elem.remove(port_elem)
+        port_elems = sorted(port_elems, key=lambda port:port.get("urn"))
+        for port_elem in port_elems:
+            fs_elem.append(port_elem)
+        root.append(fs_elem)
+    
+    return et.tostring(root)
+
 class Tests(SettingsTestCase):
     
     def setUp(self):
@@ -493,14 +515,17 @@ class Tests(SettingsTestCase):
             nw_proto=(4,4),
             tp_src=(123,123),
         ),
+        slice=None,
+        create_aggregates=True,
     ):
         # IMPORTANT: If you change fs1 and fs2, make sure that
         # the rspec for fs1 is shorter than that for fs2 since
         # the test needs to order them by length.
         
         # add the aggregates
-        self.test_create_aggregates()
-        self.client.logout()
+        if create_aggregates:
+            self.test_create_aggregates()
+            self.client.logout()
     
         # setup threadlocals
         tl = threadlocals.get_thread_locals()
@@ -516,18 +541,32 @@ class Tests(SettingsTestCase):
                 "email": email,
             }
         )
-        UserProfile.objects.create(
-            user=user, affiliation=affiliation)
-
-        project = Project.objects.create(
-            name=proj_name, description=proj_desc)
-
-        slice = Slice.objects.create(
-            project=project,
-            name=slice_name,
-            description=slice_desc,
-            owner=user,
+        create_or_update(UserProfile,
+            filter_attrs={
+                "user": user,
+            },
+            new_attrs={
+                "affiliation":affiliation,
+            }
         )
+        
+        if slice:
+            project = slice.project
+            project.name = proj_name
+            project.description = proj_desc
+            project.save()
+        else:
+            project = Project.objects.create(
+                name=proj_name, description=proj_desc,
+            )
+
+        if not slice:
+            slice = Slice.objects.create(
+                project=project,
+                name=slice_name,
+                description=slice_desc,
+                owner=user,
+            )
         
         # select ports and switches
         random.seed(0)
@@ -535,6 +574,11 @@ class Tests(SettingsTestCase):
         fs1_ports = random.sample(list(OpenFlowInterface.objects.all()), 10)
         fs2_switches = random.sample(list(OpenFlowSwitch.objects.all()), 10)
         fs2_ports = random.sample(list(OpenFlowInterface.objects.all()), 10)
+        
+        if slice:
+            OpenFlowInterfaceSliver.objects.filter(
+                slice=slice).delete()
+            FlowSpaceRule.objects.filter(slivers__slice=slice).delete()
         
         def create_port_slivers(fs, ports):
             slivers = []
@@ -556,8 +600,10 @@ class Tests(SettingsTestCase):
         r1 = create_port_slivers(fs1, fs1_ports)
         r2 = create_port_slivers(fs2, fs2_ports)
         
-        OpenFlowSliceInfo.objects.create(
-            slice=slice, password=password, controller_url=controller_url)
+        create_or_update(OpenFlowSliceInfo,
+            filter_attrs=dict(slice=slice),
+            new_attrs=dict(password=password, controller_url=controller_url),
+        )
         
         # get the rspec using only the ports
         resv_rspec = rspec_mod.create_resv_rspec(user, slice)
@@ -608,28 +654,6 @@ class Tests(SettingsTestCase):
             {},
         )
         
-        def order_rspec(rspec):
-            # order the flowspace and switch elements in the rspec
-            root = et.fromstring(rspec)
-            
-            # sort the flowspace by its xml's length
-            fs_elems = root.findall(".//flowspace")
-            for elem in fs_elems:
-                root.remove(elem)
-            fs_elems = sorted(fs_elems, key=lambda fs:len(et.tostring(fs)))
-            
-            # then within each flowspace, sort the ports by their urn
-            for fs_elem in fs_elems:
-                port_elems = fs_elem.findall(".//port")
-                for port_elem in port_elems:
-                    fs_elem.remove(port_elem)
-                port_elems = sorted(port_elems, key=lambda port:port.get("urn"))
-                for port_elem in port_elems:
-                    fs_elem.append(port_elem)
-                root.append(fs_elem)
-            
-            return et.tostring(root)
-            
         ret = order_rspec(ret_rspec)
         exp = order_rspec(expected_resv_rspec)
             
@@ -716,4 +740,63 @@ class Tests(SettingsTestCase):
             [self.slice_cred], {"geni_slice_urn": self.slice_gid.get_urn()})
         self.assertEqual(ret_rspec, expected_rspec)
         
-    
+    def test_gapi_project_name_change_CreateSliver(self):
+        resv_rspec = self.test_gapi_CreateSliver()
+        new_proj_name = "new project name"
+        root = et.fromstring(resv_rspec)
+        
+        # change the project name
+        elem = root.find(".//project")
+        elem.set("name", new_proj_name)
+        resv_rspec = et.tostring(root)
+        
+        ret_rspec = self.rpc.CreateSliver(
+            self.slice_gid.get_urn(),
+            [self.slice_cred],
+            resv_rspec,
+            {},
+        )
+
+        self.assertEqual(Project.objects.count(), 1)
+        self.assertEqual(Slice.objects.count(), 1)
+        self.assertEqual(Project.objects.all()[0].name, new_proj_name)
+        
+        exp = order_rspec(resv_rspec)
+        ret = order_rspec(ret_rspec)
+
+        self.assertEqual(
+            ret,
+            exp,
+            "Expected:\n%s \nFound:\n%s" % (exp, ret),
+        )
+        
+    def test_gapi_slice_name_change_CreateSliver(self):
+        resv_rspec = self.test_gapi_CreateSliver()
+        new_slice_name = "new slice name"
+        root = et.fromstring(resv_rspec)
+        
+        # change the project name
+        elem = root.find(".//slice")
+        elem.set("name", new_slice_name)
+        resv_rspec = et.tostring(root)
+        
+        ret_rspec = self.rpc.CreateSliver(
+            self.slice_gid.get_urn(),
+            [self.slice_cred],
+            resv_rspec,
+            {},
+        )
+
+        self.assertEqual(Project.objects.count(), 1)
+        self.assertEqual(Slice.objects.count(), 1)
+        self.assertEqual(Slice.objects.all()[0].name, new_slice_name)
+        
+        exp = order_rspec(resv_rspec)
+        ret = order_rspec(ret_rspec)
+
+        self.assertEqual(
+            ret,
+            exp,
+            "Expected:\n%s \nFound:\n%s" % (exp, ret),
+        )
+        
