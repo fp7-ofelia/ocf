@@ -78,6 +78,7 @@ def CreateSliver(slice_urn, rspec, user):
         slice.project.name = project_name
         slice.project.description = project_desc
         slice.project.save()
+        project = slice.project
     except Slice.DoesNotExist:
         # Check if the project exists
         try:
