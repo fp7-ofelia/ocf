@@ -81,10 +81,10 @@ installed wherever Apache stores its trusted certificate list for Expedient's vh
 Apache that verifies that the certificate chain for incoming users are
 correct.
 
-These certificates are installed wherever the ``GCF_X509_CERT_DIR`` (see
+These certificates are installed wherever the ``GCF_X509_TRUSTED_CERT_DIR`` (see
 settings_) in your :file:`localsettings.py` points. For a default OpenSuSE RPM
 install, this would be
-:file:`/etc/expedient/gcf-x509.crt`. Copy the new certificate there, and then you
+:file:`/etc/expedient/gcf-x509-trusted.crt`. Copy the new certificate there, and then you
 will need to run :command:`make` in that directory. You will also need to
 restart Apache. *IMPORTANT*: The Makefile assumes that the certificates you
 add all have a ``.crt`` extension. Only certificate files with that extension
