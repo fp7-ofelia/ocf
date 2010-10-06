@@ -243,7 +243,12 @@ vis.render();
 <input type="button" name="select_tree_button" value="Select Tree" />
 {% endif %}
 
-<h1>1. Select PlanetLab Aggregates</h1>
+<br />
+<br />
+
+{% if planetlab_aggs %}
+<h1>Select PlanetLab Nodes</h1>
+{% endif %}
 
 {% for agg in planetlab_aggs %}
 <h2>PlanetLab Aggregate {{ agg.name }}</h2>
@@ -290,7 +295,9 @@ at {{ agg.location }}.
 </div>
 {% endfor %}
 
-<h1>2. Select OpenFlow Resources</h1>
+{% if openflow_aggs %}
+<h1>Select OpenFlow Resources</h1>
+{% endif %}
 
 {% for agg in openflow_aggs %}
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
