@@ -442,12 +442,15 @@ def create_or_update_switches(aggregate, switches):
         
 # when a slice is deleted, make sure all its flowspace is deleted too
 def delete_empty_flowspace(sender, **kwargs):
-    FlowSpaceRule.objects.annotate(
+    empty_fs = FlowSpaceRule.objects.annotate(
         num_slivers=Count("slivers")).filter(
-            num_slivers=0).delete()
+            num_slivers=0)
+    logger.debug("Deleting %s flowspaces" % empty_fs.count())
+    empty_fs.delete()
 
 def check_fs_change(sender, **kwargs):
-    if kwargs["action"] == "post_remove" or kwargs["action"] == "post_clear":
+    if kwargs["action"] == "post_remove":
+        logger.debug("m2m changed with %s" % kwargs["action"])
         delete_empty_flowspace(sender, **kwargs)
 
 signals.post_delete.connect(delete_empty_flowspace, Slice)        
