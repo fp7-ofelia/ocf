@@ -270,6 +270,9 @@ def flowspace(request, slice_id):
     class SliverMultipleChoiceField(forms.ModelMultipleChoiceField):
         def label_from_instance(self, obj):
             return "%s" % obj.resource.as_leaf_class()
+        
+        def widget_attrs(self, widget):
+            return {"class": "wide"}
     
     def formfield_callback(f):
         if f.name == "slivers":
@@ -280,16 +283,19 @@ def flowspace(request, slice_id):
     
     # create a formset to handle all flowspaces
     FSFormSet = modelformset_factory(
-        model=FlowSpaceRule, formfield_callback=formfield_callback)
+        model=FlowSpaceRule,
+        formfield_callback=formfield_callback,
+        can_delete=True,
+        extra=2,
+    )
     
     if request.method == "POST":
-        logger.debug("Got post for flowspace")
         formset = FSFormSet(
             request.POST,
-            queryset=FlowSpaceRule.objects.filter(slivers__slice=slice),
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
         )
         if formset.is_valid():
-            logger.debug("Flowspace valid")
             formset.save()
             
             DatedMessage.objects.post_message_to_user(
@@ -300,16 +306,17 @@ def flowspace(request, slice_id):
             slice.modified = True
             slice.save()
             return HttpResponseRedirect(request.path)
-        else:
-            logger.debug("Flowspace invalid: %s" % formset)
     
     elif request.method == "GET":
         formset = FSFormSet(
-            queryset=FlowSpaceRule.objects.filter(slivers__slice=slice),
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
         )
     
     else:
         return HttpResponseNotAllowed("GET", "POST")
+        
+    done = PlanetLabSliver.objects.filter(slice=slice).count() == 0
         
     return simple.direct_to_template(
         request,
@@ -317,6 +324,7 @@ def flowspace(request, slice_id):
         extra_context={
             "slice": slice,
             "fsformset": formset,
+            "done": done,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

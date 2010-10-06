@@ -5,6 +5,7 @@
 <script>
 	$(document).ready(function() {
 		$("table.fulltable td").css("padding", "1px 1px 1px 1px");
+		$("input[type=text]").css("width", "280px");
 	})
 </script>
 <style>
@@ -17,6 +18,13 @@
 	}
 	span.next_link {
 		font-weight: bold;
+	}
+	select.wide {
+		width: 600px;
+	}
+	div.errors {
+		font-weight: bold;
+		color: #a70000;
 	}
 </style>
 {% endblock %}
@@ -33,15 +41,18 @@
     <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
     
 	<div class="help_text">
-	Each row of the table describes a class of traffic you would like your
-	controller to receive. For example, if you want to receive all incoming and
-	outgoing port 80 traffic, then you will need two rows. In the first, you
-	would set the "L4 Dst" field to 80. In the second, you would set the "L4
-	Src" field to 80.
-	<br />
-	<br />
-	Empty rows are unused. If you need more space, you can click "Save", and
-	additional empty rows will be displayed.
+	<p>Each table below describes a class of traffic you would like your
+	controller to receive. Each field is specified as
+	a range. Empty cells mean any value. The tables are OR'ed together
+	to produce a rule.</p>
+
+	<p>For example, if you want to receive all incoming and
+	outgoing port 80 traffic, then you will need two tables. In the first, you
+	would set the "TCP/UDP Destination" field to 80. In the second,
+	you would set the "TCP/UDP Source" field to 80.</p>
+
+	<p>Empty tables are unused. If you need more space, you can click "Save",
+	and additional empty tables will be displayed.</p>
 	</div>
 
 	<br />
@@ -55,8 +66,10 @@
 			{% endfor %}
 		{% endfor %}
 		<div class="center">
-	    	<table class="formtable external">
-	    		{% for form in fsformset.forms %}
+	   		{% for form in fsformset.forms %}
+			<h2>Flowspace {{ forloop.counter }} ({% if form.initial %}saved{% else %}unsaved{% endif %})</h2>
+			<div class="errors">{{ form.non_field_errors }}</div>
+	    	<table class="fulltable formtable external">
 	    		<thead>
 	    			<tr><th>Field</th><th>From</th><th>To</th></tr>
 	    		</thead>
@@ -167,13 +180,24 @@
 		            		{{ form.slivers }}
 		            	</td>
 		            </tr>
+					<tr>
+						<th><strong>Delete?</strong></th>
+						<td COLSPAN="2">
+							{{ form.DELETE }}
+						</td>
+					</tr>
 		        </tbody>
-		        {% endfor %}
 	        </table>
 			<br/>
+	        {% endfor %}
             <input id='submit' type="submit" value="Save" />
 			<span class="next_link">
+				| <a href="{% url html_plugin_flowspace slice.id %}">Clear</a> | 
+				{% if done %}
+				<a href="{% url slice_detail slice.id %}">Done</a>
+				{% else %}
 				<a href="{% url html_plugin_sshkeys slice.id %}">Next</a>
+				{% endif %}
 			</span>
         </div>
     </form>
