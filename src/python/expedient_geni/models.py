@@ -50,7 +50,7 @@ class GENISliceInfo(models.Model):
     def __init__(self, *args, **kwargs):
         urn = kwargs.setdefault("slice_urn", create_slice_urn())
         kwargs.setdefault(
-            "slice_gid", create_x509_cert(urn).save_to_string())
+            "slice_gid", create_x509_cert(urn)[0].save_to_string())
         super(GENISliceInfo, self).__init__(*args, **kwargs)
         
     def generate_ssh_keys(self, password=None):
