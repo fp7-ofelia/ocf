@@ -107,6 +107,7 @@ MIDDLEWARE_CLASSES = (
     'expedient.common.middleware.sitelockdown.SiteLockDown',
     'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
+    'expedient_geni.middleware.CreateUserGID',
 )
 
 AUTHENTICATION_BACKENDS = (
