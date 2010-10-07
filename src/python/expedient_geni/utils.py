@@ -167,7 +167,7 @@ def urn_to_username(urn):
     
     urn = URN(urn=str(urn))
     auth = urn.getAuthority()
-    auth = auth.split(":")
+    auth = auth.split("//")
     auth.reverse()
     auth = ".".join(auth)
     if len(auth) > 150:
@@ -182,7 +182,7 @@ def urn_to_username(urn):
     # replace all invalid chars with _
     username = invalid_chars_re.sub("_", username)
     
-    assert(len(username) <= 30)
+    assert(len(username) <= 255)
     
     return username
     
@@ -235,7 +235,7 @@ def get_or_create_user_cert(user):
     cert_fname = get_user_cert_fname(user)
     key_fname = get_user_key_fname(user)
     urn = get_user_urn(user.username)
-    if not os.access(cert_fname, os.F_OK):
+    if not os.access(cert_fname, os.R_OK):
         cert, _ = create_x509_cert(urn, cert_fname, key_fname)
     else:
         cert = read_cert_from_file(cert_fname)
