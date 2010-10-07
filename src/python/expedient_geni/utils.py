@@ -220,8 +220,6 @@ def create_user_credential(user_gid):
     
     @param user_gid: The user's cert
     @type user_gid: C{sfa.trust.gid.GID}
-    @param slice_gid: The slice's gid
-    @type slice_gid: C{sfa.trust.gid.GID}
     '''
     
     return cred_util.create_credential(
@@ -230,3 +228,15 @@ def create_user_credential(user_gid):
         settings.GCF_X509_CH_KEY, settings.GCF_X509_CH_CERT,
         get_trusted_cert_filenames(),
     )
+
+def get_or_create_user_cert(user):
+    """Get the user's cert, creating it if it doesn't exist."""
+    
+    cert_fname = get_user_cert_fname(user)
+    key_fname = get_user_key_fname(user)
+    urn = get_user_urn(user.username)
+    if not os.access(cert_fname, os.F_OK):
+        cert, _ = create_x509_cert(urn, cert_fname, key_fname)
+    else:
+        cert = read_cert_from_file(cert_fname)
+    return cert
