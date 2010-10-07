@@ -164,12 +164,12 @@ def select_ui_plugin(request, slice_id):
     
     plugins_info = getattr(settings, "UI_PLUGINS", [])
     
-    logger.debug("select_ui_plugin plugins_info %s" % plugins_info)
+    logger.debug("select_ui_plugin plugins_info %s" % (plugins_info,))
     
     # plugin functions should return (name, description, url)
     plugins = [get_callable(plugin[0])(slice) for plugin in plugins_info]
 
-    logger.debug("select_ui_plugin plugins %s" % plugins)
+    logger.debug("select_ui_plugin plugins %s" % (plugins,) )
     
     return simple.direct_to_template(
         request,

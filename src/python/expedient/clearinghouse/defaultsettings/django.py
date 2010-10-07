@@ -153,6 +153,7 @@ INSTALLED_APPS = (
     'expedient_geni',
     'expedient_geni.planetlab',
     'expedient.ui.html',
+    'expedient.ui.rspec',
 ###### For Testing #######################
     'openflow.dummyom',
 )
