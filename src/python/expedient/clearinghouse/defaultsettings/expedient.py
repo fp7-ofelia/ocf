@@ -29,6 +29,7 @@ be logged in to access.'''
 
 UI_PLUGINS = (
     ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
+    ('expedient.ui.rspec.plugin', 'rspec_mgr', 'expedient.ui.rspec.urls'),
 )
 '''List of UI plugins that are enabled in Expedient.
 
@@ -43,20 +44,29 @@ This is a list of 3-tuples:
        accessing the plugin. This should be unique across all plugins and
        applications.
        
-    #. The third element is the absolute path to the file that should be
+    #. The third element is the absolute path to the module that should be
        included in URLConf and that contains all the plugin's URLs.
 
 '''
 
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = (
-    'openflow.plugin.models.OpenFlowAggregate',
-    'expedient_geni.planetlab.models.PlanetLabAggregate',
-    'expedient_geni.gopenflow.models.GCFOpenFlowAggregate',
+    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
+    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
+    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
 )
 '''List of aggregate plugins that are enabled in Expedient.
 
-This is a list of the absolute paths to the plugin's Aggregate class.
+This is a list of 3-tuples:
+
+    #. The first element is the absolute path to the Aggregate class.
+       
+    #. The second element is the prefix that is prepended to all urls for
+       accessing the plugin. This should be unique across all plugins and
+       applications.
+       
+    #. The third element is the absolute path to the module that should be
+       included in URLConf and that contains all the plugin's URLs.
 
 '''
 

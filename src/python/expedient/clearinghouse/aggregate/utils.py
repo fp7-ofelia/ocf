@@ -11,7 +11,8 @@ def get_aggregate_classes():
     Get the list of modules that are the aggregate classes
     of aggregate plugins.
     """
-    agg_plugin_names = getattr(settings, "AGGREGATE_PLUGINS", [])
+    agg_plugins = getattr(settings, "AGGREGATE_PLUGINS", [])
+    agg_plugin_names = [agg[0] for agg in agg_plugins]
     if hasattr(get_aggregate_classes, "l"):
         return get_aggregate_classes.l
     l = []

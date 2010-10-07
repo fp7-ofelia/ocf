@@ -25,7 +25,10 @@ def common_setup(self):
         INSTALLED_APPS=settings.INSTALLED_APPS + \
         ["expedient.clearinghouse.aggregate.tests"],
         AGGREGATE_PLUGINS=settings.AGGREGATE_PLUGINS + \
-            ("expedient.clearinghouse.aggregate.tests.models.DummyAggregate",),
+            (("expedient.clearinghouse.aggregate.tests.models.DummyAggregate",
+              "dummy_agg",
+              "expedient.clearinghouse.aggregate.tests.urls"),
+            ),
         DEBUG_PROPAGATE_EXCEPTIONS=True,
     )
     try:

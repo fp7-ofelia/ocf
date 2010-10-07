@@ -15,9 +15,7 @@ urlpatterns = patterns('',
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
     (r'^project/', include('expedient.clearinghouse.project.urls')),
     (r'^slice/', include('expedient.clearinghouse.slice.urls')),
-    (r'^openflow/', include('openflow.plugin.urls')),
     (r'^expedient_geni/', include('expedient_geni.urls')),
-    (r'^planetlab/', include('expedient_geni.planetlab.urls')),
     (r'^messages/', include('expedient.common.messaging.urls')),
     (r'^permissions/', include('expedient.common.permissions.urls')),
     (r'^roles/', include('expedient.clearinghouse.roles.urls')),
@@ -45,6 +43,9 @@ urlpatterns = patterns('',
 
 # Add the plugin URLs:
 for plugin in getattr(settings, "UI_PLUGINS", []):
+    urlpatterns += patterns('', (r'%s/' % plugin[1], include(plugin[2])))
+
+for plugin in getattr(settings, "AGGREGATE_PLUGINS", []):
     urlpatterns += patterns('', (r'%s/' % plugin[1], include(plugin[2])))
 
 def get_static_url(name, path=""):
