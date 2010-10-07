@@ -4,6 +4,7 @@ Created on Apr 26, 2010
 @author: jnaous
 '''
 
+import re
 from django.db import models
 from expedient.clearinghouse.resources import models as resource_models
 from expedient.clearinghouse.slice import models as slice_models
@@ -18,6 +19,7 @@ import logging
 from expedient.common.utils import create_or_update, modelfields
 from expedient.clearinghouse.slice.models import Slice
 from django.db.models.aggregates import Count
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
@@ -25,10 +27,33 @@ parse_logger = logging.getLogger("OpenflowModelsParsing")
 def as_is_slugify(value):
     return value
 
+cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(\w+):(?P<port>\d+)$")
+def validate_controller_url(value):
+    def error():
+        raise ValidationError(
+            u"Invalid controller URL. The format is "
+            "tcp:<hostname>:<port> or ssl:<hostname>:<port>. Port must "
+            "be less than %s" % (2**16),
+            code="invalid",
+        )
+
+    m = cntrlr_url_re.match(value)
+    if m:
+        port = m.group("port")
+        if not port:
+            error()
+        else:
+            port = int(port)
+            if port > 2**16-1:
+                error()
+    else:
+        error()
+    
 class OpenFlowSliceInfo(models.Model):
     slice = models.OneToOneField(slice_models.Slice)
     controller_url = models.CharField(
         "OpenFlow controller URL", max_length=100,
+        validators=[validate_controller_url],
         help_text="e.g. tcp:beirut.stanford.edu:6633")
     # TODO: It is not a good idea to store the password in the clear.
     password = models.CharField(
