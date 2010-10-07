@@ -19,6 +19,8 @@ from django.core.urlresolvers import reverse
 from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 from django import forms
+from django.db.models import Q
+from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
 
 logger = logging.getLogger("html_ui_views")
 
@@ -228,9 +230,10 @@ def home(request, slice_id):
             slice_set=slice).values_list("id", flat=True))
         logger.debug("Interfaces in slice: %s" % checked_ids)
 
+        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
         of_aggs = \
-            slice.aggregates.filter(
-                leaf_name=OpenFlowAggregate.__name__.lower())
+            slice.aggregates.filter(aggs_filter)
         pl_aggs = \
             slice.aggregates.filter(
                 leaf_name=PlanetLabAggregate.__name__.lower())
