@@ -11,7 +11,8 @@ from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
 from expedient_geni import management
-from expedient_geni.utils import create_slice_urn
+from expedient_geni.utils import create_slice_urn, create_x509_cert
+from django.db.models import signals
 
 SSH_KEY_SIZE = 2048
 
@@ -67,26 +68,24 @@ class GENISliceInfo(models.Model):
         self.ssh_public_key = \
             "ssh-rsa %s auto-generated Expedient key" % (key. get_base64())
         
-    def generate_slice_cred(self):
-        """
-        Create credentials to use for the slice.
-        """
-        from sfa.trust import gid
-        slice_gid, keys = management.create_slice_gid(self.slice_urn)
-        user_gid = gid.GID(filename=settings.GCF_X509_CH_CERT)
-        cred = management.create_slice_credential(user_gid, slice_gid)
-        self.slice_cred = cred.save_to_string()
-        
     def login_username(self):
         """
         Get the PlanetLab login username from the slice URN.
         """
-        
         parts = self.slice_urn.split("+")
         name = parts[-1]
         prefix = parts[1]
         base = prefix.partition(":")[2]
-        return base+"_"+name    
+        return base+"_"+name
+
+def _add_geni_slice_info(sender, instance=None, created=None, **kwargs):
+    """Called to create a slice info for a new Slice instance.
+    
+    Mainly so that all slices have a slice_urn associated.
+    """
+    if created: GENISliceInfo.objects.create(slice=instance)
+    
+signals.post_save.connect(_add_geni_slice_info, Slice)
 
 class GENIAggregate(Aggregate):
     """
