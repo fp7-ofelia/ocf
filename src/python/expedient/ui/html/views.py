@@ -14,9 +14,8 @@ from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponse
 from expedient.common.messaging.models import DatedMessage
-from django.forms.models import inlineformset_factory, modelformset_factory
+from django.forms.models import modelformset_factory
 from django.core.urlresolvers import reverse
-from models import SliceFlowSpace
 from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 from django import forms
