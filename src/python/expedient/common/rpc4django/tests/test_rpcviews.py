@@ -7,6 +7,7 @@ Views Tests
 import unittest
 import xmlrpclib
 from expedient.common.rpc4django.jsonrpcdispatcher import json, JSONRPC_SERVICE_ERROR
+from expedient.common.rpc4django import views
 from expedient.common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 
@@ -29,6 +30,15 @@ class TestRPCViews(SettingsTestCase):
             ),
             DEBUG_PROPAGATE_EXCEPTIONS=False,
         )
+        
+        views._register_rpcmethods(
+            [
+                "expedient.common.rpc4django",
+                "expedient.common.rpc4django.tests.testmod",
+            ],
+            restrict_introspection=False,
+            dispatchers=views.dispatchers)
+        
         self.rpc_path = reverse("serve_rpc_request")
         self.ns_rpc_path = reverse("my_url_name")
         

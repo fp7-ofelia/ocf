@@ -15,7 +15,7 @@ TEST_APPS = [
     'extendable',
     'messaging',
     'permissions',
-# TODO:    'rpc4django',
+    'rpc4django',
     'plugin',
 ]
 '''List of tests to run using the django test command.'''
