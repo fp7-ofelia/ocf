@@ -500,7 +500,7 @@ class Tests(SettingsTestCase):
             "src_iface__switch__datapath_id", "src_iface__port_num",
             "dst_iface__switch__datapath_id", "dst_iface__port_num",
         ))
-        links_found = set(links)
+        links_found = set([l[:-1] for l in links])
         self.assertEquals(links_found, links_actual)
         
         
