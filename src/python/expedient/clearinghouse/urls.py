@@ -43,10 +43,10 @@ urlpatterns = patterns('',
 
 # Add the plugin URLs:
 for plugin in getattr(settings, "UI_PLUGINS", []):
-    urlpatterns += patterns('', (r'%s/' % plugin[1], include(plugin[2])))
+    urlpatterns += patterns('', (r'^%s/' % plugin[1], include(plugin[2])))
 
 for plugin in getattr(settings, "AGGREGATE_PLUGINS", []):
-    urlpatterns += patterns('', (r'%s/' % plugin[1], include(plugin[2])))
+    urlpatterns += patterns('', (r'^%s/' % plugin[1], include(plugin[2])))
 
 def get_static_url(name, path=""):
     static_file_tuple = (
