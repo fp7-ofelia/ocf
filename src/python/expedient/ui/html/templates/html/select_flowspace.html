@@ -69,7 +69,7 @@
 	   		{% for form in fsformset.forms %}
 			<h2>Flowspace {{ forloop.counter }} ({% if form.initial %}saved{% else %}unsaved{% endif %})</h2>
 			<div class="errors">{{ form.non_field_errors }}</div>
-	    	<table class="fulltable formtable external">
+	    	<table class="fulltable formtable {% if form.initial %}saved{% endif %}">
 	    		<thead>
 	    			<tr><th>Field</th><th>From</th><th>To</th></tr>
 	    		</thead>
