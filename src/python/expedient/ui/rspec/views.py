@@ -7,7 +7,7 @@ Created on Oct 6, 2010
 from expedient.clearinghouse.slice.models import Slice
 from django.shortcuts import get_object_or_404
 from expedient.ui.rspec.forms import UploadRSpecForm
-from openflow.plugin.gapi.rspec import parse_external_rspec, create_resv_rspec
+from openflow.plugin.gapi.rspec import create_resv_rspec
 from openflow.plugin.gapi import gapi, rspec
 from expedient_geni.models import GENISliceInfo
 from expedient.common.messaging.models import DatedMessage

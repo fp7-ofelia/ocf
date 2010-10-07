@@ -3,7 +3,11 @@
 '''
 from django.db import models
 from django.db.models.base import ModelBase
-from expedient.common.utils.managers import GenericObjectManager
+from django.utils.importlib import import_module
+from expedient.common.tests.utils import drop_to_shell
+import logging
+
+logger = logging.getLogger("extendable.models")
 
 class ExtendableMeta(ModelBase):
     '''
@@ -229,19 +233,34 @@ class Extendable(models.Model):
     objects = ExtendableManager()
     
     leaf_name = models.CharField(max_length=100, blank=True)
+    module_name = models.CharField(max_length=100, blank=True)
     
     __metaclass__ = ExtendableMeta
     
     class Meta:
         abstract = True
         
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("leaf_name", self.__class__.__name__.lower())
-        super(Extendable, self).__init__(*args, **kwargs)
+#    def __init__(self, *args, **kwargs):
+#        logger.debug(
+#            "initial: %s: %s" %
+#            (kwargs.get("leaf_name", -1), kwargs.get("module_name", -1)))
+#        kwargs.setdefault("leaf_name", self.__class__.__name__)
+#        kwargs.setdefault("module_name", self.__class__.__module__)
+#        logger.debug(
+#            "initing with %s: %s" % 
+#            (kwargs.get("leaf_name", -1), kwargs.get("module_name", -1)))
+#        super(Extendable, self).__init__(*args, **kwargs)
         
     def as_leaf_class(self):
         '''Return this instance as the farthest descendant of its class'''
-        if self.leaf_name == self.__class__.__name__.lower():
+        if self.leaf_name == self.__class__.__name__ and self.module_name == self.__class__.__module__:
             return self
         else:
-            return getattr(self, self.leaf_name)
+            try:
+                mod = import_module(self.module_name)
+            except ImportError:
+                logger.debug("init import error.")
+                drop_to_shell(local=locals())
+                raise
+            klass = getattr(mod, self.leaf_name)
+            return klass.objects.get(pk=self.pk)
