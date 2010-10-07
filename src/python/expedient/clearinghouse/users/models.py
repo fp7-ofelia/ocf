@@ -7,6 +7,8 @@ Created on Dec 3, 2009
 from django.db import models
 from django.contrib.auth.models import User
 
+auth.models.User._meta.get_field_by_name('username')[0].max_length=255
+
 class UserProfile(models.Model):
     '''
     Additional information about a user.
