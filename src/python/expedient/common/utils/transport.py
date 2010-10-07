@@ -10,6 +10,7 @@ import xmlrpclib
 import urlparse
 import base64
 import logging
+
 logger = logging.getLogger("TestClientTransport")
 
 class AuthorizationRequired(Exception):
