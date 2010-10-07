@@ -3,8 +3,8 @@ Created on Jul 12, 2010
 
 @author: jnaous
 '''
-
-from lxml import objectify
+        
+from pyquery import PyQuery as pq
 from lxml import etree as et
 from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch
 from django.contrib.auth.models import User
@@ -403,23 +403,23 @@ class Tests(SettingsTestCase):
         
         slice = Slice.objects.all()[0]
         
+        # Add FlowSpace
+        fs1 = FlowSpaceRule.objects.create(
+            nw_src_start="0.0.0.0",
+        )
+        fs2 = FlowSpaceRule.objects.create(
+            nw_dst_start="0.0.0.0",
+        )
         # Add all interfaces using slivers.
         for iface in OpenFlowInterface.objects.all():
             sliver = OpenFlowInterfaceSliver.objects.create(
                 slice=slice, resource=iface)
-            # Add FlowSpace
-            fs = FlowSpaceRule.objects.create(
-                nw_src_start="0.0.0.0",
-            )
-            fs.slivers.add(sliver)
-            fs = FlowSpaceRule.objects.create(
-                nw_dst_start="0.0.0.0",
-            )
-            fs.slivers.add(sliver)
+            fs1.slivers.add(sliver)
+            fs2.slivers.add(sliver)
         
         # start the slice.
         self.client.post(reverse("slice_start", args=[slice.id]))
-            
+
         # check that we get all the switches in the created slice
         for ds in DummyOMSlice.objects.all():
             dpids = ds.om.dummyomswitch_set.all().values_list("dpid", flat=True)
@@ -434,6 +434,31 @@ class Tests(SettingsTestCase):
                 self.assertEqual(
                     len(fs), 2*DummyOMSwitch.objects.get(dpid=dpid).nPorts)
             
+    def test_gapi_existing_slice(self):
+        """Check that a slice created through the web or some other way is
+        available through the gapi interface."""
+        
+        self.test_start_slice()
+        
+        slice = Slice.objects.all()[0]
+        
+        urn = GENISliceInfo.objects.all()[0].slice_urn
+        rspec = self.rpc.ListResources(
+            [self.slice_cred], {"geni_slice_urn": urn})
+        
+        # check that the returned rspec matches the created slice
+        root = et.fromstring(rspec)
+        ports = set([et.tostring(e) for e in root.findall(".//port")])
+        num_ports = len(ports)
+        
+        num_slivers = OpenFlowInterfaceSliver.objects.filter(
+            slice=slice).distinct().count()
+        
+        self.assertEqual(num_ports, num_slivers)
+        
+        flowspace = root.findall(".//flowspace")
+        self.assertEqual(len(flowspace), 2)
+    
     def test_gapi_GetVersion(self):
         self.assertEqual(self.rpc.GetVersion()["geni_api"], 1)
         
@@ -799,4 +824,36 @@ class Tests(SettingsTestCase):
             exp,
             "Expected:\n%s \nFound:\n%s" % (exp, ret),
         )
+        
+    def test_gapi_html_ui(self):
+        """Test that we can see details of a slice created through the
+         gapi interface in the HTML UI plugin."""
+        
+        rspec = self.test_gapi_CreateSliver()
+        slice = Slice.objects.all()[0]
+        
+        # get the number of expected ports
+        root = et.fromstring(rspec)
+        ports = set([et.tostring(e) for e in root.findall(".//port")])
+        num_ports = len(ports)
+        
+        # check the select resources page
+        self.client.login(
+            username=self.su, password="password")
+        resp = self.client.get(reverse("html_plugin_home", args=[slice.id]))
+        self.assertEqual(resp.status_code, 200)
+        d = pq(resp.content, parser="html")
+        checked = d(":checked")
+        
+        self.assertEqual(len(checked), num_ports)
+        
+        # check the select flowspace page
+        resp = self.client.get(
+            reverse("html_plugin_flowspace", args=[slice.id]))
+        self.assertEqual(resp.status_code, 200)
+        d = pq(resp.content, parser="html")
+        tables = d("table.saved")
+        self.assertEqual(2, len(tables))
+        
+        
         
