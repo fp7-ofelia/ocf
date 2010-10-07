@@ -78,13 +78,12 @@ def create_objects(test_case):
 
 class TestObjectPermissions(test_mgr.SettingsTestCase):
     def setUp(self):
-        self.settings_manager.set(INSTALLED_APPS=(
-            'django.contrib.auth',
-            'django.contrib.contenttypes',
-            'django.contrib.sessions',
-            'expedient.common.permissions',
-            'expedient.common.permissions.tests',
-        ))
+        from django.conf import settings
+        self.settings_manager.set(
+            INSTALLED_APPS=settings.INSTALLED_APPS + [
+                'expedient.common.permissions.tests',
+            ],
+        )
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         self.logger = logging.getLogger("TestObjectPermissions")
         create_objects(self)
@@ -112,7 +111,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             self.o3, ["can_get_x2", "can_read_val"],
             PermissionTestClass.objects.all())
         
-        self.assertTrue(target == self.objs[0] and\
+        self.assertTrue(target == self.objs[1] and\
                         missing == ExpedientPermission.objects.get(
                             name="can_get_x2"))
         
@@ -141,7 +140,12 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         self.assertTrue(missing == None)
 
         missing = ExpedientPermission.objects.get_missing_for_target(
-            self.o3, ["can_get_x2", "can_read_val"], self.objs[0])
+            self.o3, ["can_get_x2", "can_read_val"], self.o3)
+
+        self.assertTrue(missing == None)
+
+        missing = ExpedientPermission.objects.get_missing_for_target(
+            self.o3, ["can_get_x2", "can_read_val"], self.objs[1])
         
         self.assertTrue(
             missing == ExpedientPermission.objects.get(name="can_get_x2"))
@@ -232,9 +236,9 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             d["user_kw"] = self.u2
             self.assertRaises(PermissionDenied, obj.get_val_x2, obj)
             d["user_kw"] = self.o3
-            self.assertRaises(PermissionDenied, obj.get_val_x3_other_val, obj)
+            if obj != self.o3: self.assertRaises(PermissionDenied, obj.get_val_x3_other_val)
             d["test_kw"] = self.objs[1]
-            self.assertRaises(PermissionDenied, obj.get_val_x4, obj)
+            if obj != self.objs[1]: self.assertRaises(PermissionDenied, obj.get_val_x4)
             d["user_kw"] = self.u2
             self.assertRaises(PermissionDenied, obj.get_val_x5_username, obj)
 
