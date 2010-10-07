@@ -333,7 +333,7 @@ def parse_slice(resv_rspec):
     
     The reservation rspec looks like the following::
     
-        <resv_rspec>
+        <resv_rspec type="openflow">
             <user
                 firstname="John"
                 lastname="Doe"
@@ -472,7 +472,7 @@ def create_resv_rspec(user, slice, aggregate=None):
     @rtype: C{str}
     """
     
-    root = et.Element(RESV_RSPEC_TAG)
+    root = et.Element(RESV_RSPEC_TAG, {"type": "openflow"})
     
     # add the user info
     et.SubElement(
