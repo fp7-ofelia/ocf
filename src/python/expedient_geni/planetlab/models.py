@@ -79,16 +79,10 @@ A PlanetLab Aggregate exposed through the GENI API.
         
         return et.tostring(root)
     
-    def update_resources(self):
+    def _from_rspec(self, rspec):
         """
-        See L{GENIAggregate._list_resources}.
+        See L{GENIAggregate._from_rspec}.
         """
-        rspec = self.proxy.ListResources(
-            [self.get_am_cred()],
-            {"geni_compressed": False, "geni_available": True})
-        
-        logger.debug("Got rspec:\n%s" % rspec)
-        
         root = et.fromstring(rspec)
         
         # get all planet lab nodes in the rspec.

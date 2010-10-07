@@ -11,10 +11,16 @@ from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
 from expedient_geni.utils import create_slice_urn, create_x509_cert,\
-    create_slice_credential, get_or_create_user_cert
+    create_slice_credential, get_or_create_user_cert, get_user_key_fname,\
+    get_user_cert_fname
 from django.db.models import signals
 import logging
 import traceback
+from urlparse import urlparse
+from expedient.common.utils.transport import TestClientTransport
+import os
+from sfa.trust.certificate import Keypair
+from sfa.trust.gid import GID
 
 logger = logging.getLogger("expedient_geni.models")
 
@@ -39,13 +45,12 @@ class GENISliceInfo(models.Model):
     """
     slice = models.OneToOneField(
         Slice, related_name="geni_slice_info")
-    slice_urn = models.CharField(max_length=1024)
+    slice_urn = models.CharField(max_length=256)
+    slice_gid = models.TextField("Slice's GID", editable=False)
     ssh_public_key = models.TextField(
         "Slice's SSH public key", editable=False, blank=True, null=True)
     ssh_private_key = models.TextField(
         "Slice's SSH private key", editable=False, blank=True, null=True)
-    slice_gid = models.TextField(
-        "Slice's GID", editable=False, blank=True, null=True)
     
     def __init__(self, *args, **kwargs):
         urn = kwargs.setdefault("slice_urn", create_slice_urn())
@@ -102,24 +107,39 @@ class GENIAggregate(Aggregate):
     
     class URLNotDefined(Exception): pass
     
-    def __getattr__(self, name):
-        if name == "proxy":
-            try:
-                u = self.url
-            except AttributeError:
-                raise self.URLNotDefined("URL not set.")
-            
-            if not u:
-                raise self.URLNotDefined("URL not set.")
-            
-            transp = certtransport.SafeTransportWithCert(
-                keyfile=settings.GCF_X509_CH_KEY,
-                certfile=settings.GCF_X509_CH_CERT)
-    
-            self.proxy = xmlrpclib.ServerProxy(u, transport=transp)
-            return self.proxy
+    def _get_client(self, cert_fname, key_fname):
+        try:
+            u = self.url
+        except AttributeError:
+            raise self.URLNotDefined("URL not set.")
+        if not u:
+            raise self.URLNotDefined("URL not set.")
+        
+        parsed = urlparse(u.lower())
+        if parsed.scheme == "test":
+            user_cert = GID(filename=cert_fname).save_to_string()
+            transport = TestClientTransport(defaults={
+                "REMOTE_USER": user_cert, "SSL_CLIENT_CERT": user_cert})
+            proxy = xmlrpclib.ServerProxy(
+                u.lower().replace("test://", "http://"),
+                transport=transport,
+            )
         else:
-            raise AttributeError, name
+            transport = certtransport.SafeTransportWithCert(
+                keyfile=key_fname,
+                certfile=cert_fname)
+            proxy = xmlrpclib.ServerProxy(u, transport=transport)
+        return proxy
+        
+    def get_user_client(self, user):
+        """Get a client to talk to the aggregate as the user."""
+        return self._get_client(
+            get_user_cert_fname(user), get_user_key_fname(user))
+    
+    def get_expedient_client(self):
+        """Get a client to talk to the aggregate as Expedient."""
+        return self._get_client(
+            settings.GCF_X509_CH_CERT, settings.GCF_X509_CH_KEY)
     
     @classmethod
     def get_am_cred(cls):
@@ -145,9 +165,10 @@ class GENIAggregate(Aggregate):
         # Get the user's cert
         user_cert = get_or_create_user_cert(slice.owner)
         slice_cred = create_slice_credential(user_cert, info.slice_cert)
+        proxy = self.get_user_client(slice.owner)
         
         try:
-            reserved = self.proxy.CreateSliver(
+            reserved = proxy.CreateSliver(
                 info.slice_urn, [slice_cred], rspec,
                 [dict(name=settings.GCF_URN_PREFIX,
                       urn="urn:publicid:IDN+%s+%s+%s" % (
@@ -170,9 +191,10 @@ class GENIAggregate(Aggregate):
         # Get the user's cert
         user_cert = get_or_create_user_cert(slice.owner)
         slice_cred = create_slice_credential(user_cert, info.slice_cert)
+        proxy = self.get_user_client(slice.owner)
 
         try:
-            ret = self.proxy.DeleteSliver(
+            ret = proxy.DeleteSliver(
                 info.slice_urn, [slice_cred])
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -193,8 +215,9 @@ class GENIAggregate(Aggregate):
     #####################################################################
 
     def check_status(self):
+        proxy = self.get_expedient_client()
         try:
-            ver = self.proxy.GetVersion()
+            ver = proxy.GetVersion()
         except Exception as e:
             logger.error(traceback.format_exc())
             return False
@@ -212,17 +235,32 @@ class GENIAggregate(Aggregate):
         """
         Make sure that there's only one GENI slice info.
         """
-        info, created = GENISliceInfo.objects.get_or_create(
+        super(GENIAggregate, self).add_to_slice(slice, next)
+        
+        info, _ = GENISliceInfo.objects.get_or_create(
             slice=slice,
         )
-        if created:
+        if not info.ssh_private_key:
             info.generate_ssh_keys()
-            info.generate_slice_cred()
             info.save()
-            
-        slice.aggregates.add(self)
-            
+        
         return next
+
+    def update_resources(self):
+        """Parse the rspec and update resources in the database.
+        
+        Pull the rspec from the aggregate and parse it into resources stored
+        in the database.
+        """
+        proxy = self.get_expedient_client()
+        rspec = proxy.ListResources(
+            [self.get_am_cred()],
+            {"geni_compressed": False, "geni_available": True})
+        
+        logger.debug("Got rspec:\n%s" % rspec)
+
+        self._from_rspec(rspec)
+        
 
     #####################################################################
     # Subclasses must override the below functions                      #
@@ -239,11 +277,11 @@ class GENIAggregate(Aggregate):
         """
         raise NotImplementedError()
     
-    def update_resources(self):
+    def _from_rspec(self, rspec):
         """Parse the rspec and update resources in the database.
         
-        Pull the rspec from the aggregate and parse it into resources stored
-        in the database.
+        @param rspec: The rspec describing the remote resources.
+        @type rspec: XML C{str}
         """
         raise NotImplementedError()
     

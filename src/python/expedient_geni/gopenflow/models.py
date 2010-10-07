@@ -32,17 +32,10 @@ An OpenFlow Aggregate exposed through the GENI API.
         user = threadlocals.get_thread_locals()["user"]
         return create_resv_rspec(user, slice, aggregate=self)
     
-    def update_resources(self):
+    def _from_rspec(self, rspec):
         """
-        See L{GENIAggregate.update_resources}.
+        See L{GENIAggregate._from_rspec}.
         """
-        
-        rspec = self.proxy.ListResources(
-            [self.get_am_cred()],
-            {"geni_compressed": False, "geni_available": True})
-        
-        logger.debug("Got rspec:\n%s" % rspec)
-        
         switches, links = parse_external_rspec(rspec)
         
         create_or_update_switches(switches)
