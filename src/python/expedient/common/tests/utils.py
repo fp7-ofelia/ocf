@@ -5,7 +5,19 @@ Created on Jun 16, 2010
 '''
 
 import logging
+from urlparse import urlunparse, urlparse
 logger = logging.getLogger("test_utils")
+
+def test_to_http(url):
+    """return a url with "test" scheme replaced by "http".
+    
+    @param url: the url to edit
+    @return: A url string
+    """
+    l = list(urlparse(url))
+    if l[0].lower() == "test":
+        l[0] = "http"
+    return urlunparse(l)
 
 def run_cmd_in_xterm(cmd, pause=False):
     """
