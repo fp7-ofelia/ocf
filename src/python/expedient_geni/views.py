@@ -198,6 +198,3 @@ def user_cert_upload(request, user_id):
             "form": form,
         }
     )
-
-def download_resv_rspec(request, slice_id):
-    """Download the reservation rspec for a slice"""
