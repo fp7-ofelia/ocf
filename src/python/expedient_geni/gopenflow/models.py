@@ -6,14 +6,14 @@ Created on Sep 13, 2010
 import logging
 from expedient_geni.models import GENIAggregate
 from openflow.plugin.models import \
-    create_or_update_switches, create_or_update_links
+    create_or_update_switches, create_or_update_links, get_raw_topology
 from openflow.plugin.gapi.rspec import create_resv_rspec, parse_external_rspec
 from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("gopenflow.models")
 
 class GCFOpenFlowAggregate(GENIAggregate):
-    """A PlanetLab Aggregate exposed through the GENI API."""
+    """An OpenFlow Aggregate exposed through the GENI API."""
     information = \
 """
 An OpenFlow Aggregate exposed through the GENI API.
@@ -38,6 +38,8 @@ An OpenFlow Aggregate exposed through the GENI API.
         """
         switches, links = parse_external_rspec(rspec)
         
-        create_or_update_switches(switches)
-        create_or_update_links(links)
+        create_or_update_switches(self, switches)
+        create_or_update_links(self, links)
         
+    def get_raw_topology(self):
+        return get_raw_topology(self)
