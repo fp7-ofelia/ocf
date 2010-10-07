@@ -14,6 +14,7 @@ from expedient.clearinghouse.users.models import UserProfile
 from openflow.plugin.models import OpenFlowSwitch, FlowSpaceRule
 from geni.util.urn_util import publicid_to_urn
 from expedient.clearinghouse.aggregate.models import Aggregate
+from expedient.common.tests.utils import drop_to_shell
 
 RSPEC_TAG = "rspec"
 NETWORK_TAG = "network"
@@ -116,9 +117,11 @@ def _get_root_node(slice_urn, available):
         [OpenFlowAggregate, GCFOpenFlowAggregate]).filter(
             available=True).exclude(
                 name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
+    
     for aggregate in aggregates:
+        aggregate = aggregate.as_leaf_class()
         _add_aggregate_node(
-            root, aggregate.as_leaf_class(), slice_urn, available)
+            root, aggregate, slice_urn, available)
     return root
 
 def _add_aggregate_node(parent_elem, aggregate, slice_urn, available):

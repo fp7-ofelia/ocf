@@ -241,4 +241,7 @@ class Extendable(models.Model):
         
     def as_leaf_class(self):
         '''Return this instance as the farthest descendant of its class'''
-        return getattr(self, self.leaf_name, self)
+        if self.leaf_name == self.__class__.__name__.lower():
+            return self
+        else:
+            return getattr(self, self.leaf_name)

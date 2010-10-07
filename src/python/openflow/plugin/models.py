@@ -101,14 +101,7 @@ production networks, and is currently deployed in several universities.
         '''
         Get the topology for this aggregate as a set of links.
         '''
-        links = set()
-        for iface in OpenFlowInterface.objects.filter(
-        aggregate=self).select_related("switch", "ingress_neighbors__switch"):
-            for in_ngbr in iface.ingress_neighbors.all():
-                links.add((iface.switch.datapath_id, iface.port_num,
-                           in_ngbr.switch.datapath_id, in_ngbr.port_num))
-
-        return links
+        return get_raw_topology(self)
 
     def parse_switches(self, active_switches_raw):
         '''
@@ -476,6 +469,17 @@ def create_or_update_links(aggregate, links):
             # don't delete active connections
             id__in=active_cnxn_ids).delete()
     
+def get_raw_topology(aggregate):
+    """Get the openflow toplogy as a set of links in the aggregate."""
+    links = set()
+    for iface in OpenFlowInterface.objects.filter(
+    aggregate=aggregate).select_related("switch", "ingress_neighbors__switch"):
+        for in_ngbr in iface.ingress_neighbors.all():
+            links.add((iface.switch.datapath_id, iface.port_num,
+                       in_ngbr.switch.datapath_id, in_ngbr.port_num))
+
+    return links
+
         
 # when a slice is deleted, make sure all its flowspace is deleted too
 def delete_empty_flowspace(sender, **kwargs):
