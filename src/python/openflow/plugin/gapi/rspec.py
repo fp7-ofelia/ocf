@@ -113,7 +113,7 @@ def _get_root_node(slice_urn, available):
     
     root = et.Element(RSPEC_TAG, {"type": "openflow"})
     aggregates = Aggregate.objects.filter_for_classes(
-        [OpenFlowAggregate]).filter(
+        [OpenFlowAggregate, GCFOpenFlowAggregate]).filter(
             available=True).exclude(
                 name__in=getattr(settings, "OPENFLOW_GAPI_FILTERED_AGGS", []))
     for aggregate in aggregates:
@@ -160,8 +160,6 @@ def _add_ports(switch_elem, switch, slice_urn):
     """Add the ports tags for the switch"""
     
     ifaces = switch.openflowinterface_set.all()
-    if slice_urn:
-        ifaces = ifaces.filter(slice_set__gapislice__slice_urn=slice_urn)
         
     for iface in ifaces:
         et.SubElement(
@@ -545,10 +543,11 @@ def parse_external_rspec(rspec):
     @param rspec: The advertisement RSpec
     @type rspec: XML C{str}
     @return: tuple of a dict mapping datapath ID strings to list of port
-        numbers and a list of (src dpid, src port num, dst dpid, dst port num)
+        numbers and a list of
+        (src dpid, src port num, dst dpid, dst port num, attrs)
         describing the links.
     @rtype: (C{dict} mapping C{str} to C{list} of C{int},
-        C{list} of (C{str}, C{int}, C{str}, C{int}))
+        C{list} of (C{str}, C{int}, C{str}, C{int}, C{dict}))
     """
     
     root = et.fromstring(rspec)
@@ -577,6 +576,6 @@ def parse_external_rspec(rspec):
         dst_urn = link_elem.get(DST_URN)
         src_dpid, src_port = _urn_to_port(src_urn)
         dst_dpid, dst_port = _urn_to_port(dst_urn)
-        links.append((src_dpid, src_port, dst_dpid, dst_port))
+        links.append((src_dpid, src_port, dst_dpid, dst_port, {}))
         
     return switches, links
