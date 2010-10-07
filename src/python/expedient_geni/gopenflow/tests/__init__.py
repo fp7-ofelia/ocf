@@ -30,6 +30,9 @@ class Tests(SettingsTestCase):
             INSTALLED_APPS=settings.INSTALLED_APPS + [MOD + ".tests"],
             DEBUG_PROPAGATE_EXCEPTIONS=True,
         )
+        
+        logger.debug("Updating RPC dispatchers.")
+        
         rpc4django_views._register_rpcmethods(
             [MOD + ".tests"],
             restrict_introspection=False,
@@ -68,15 +71,16 @@ class Tests(SettingsTestCase):
         #tl["test_client_transport_defaults"]["REMOTE_USER"] = 
         
     def test_add_aggregate(self):
-        test_get_and_post_form(
+        resp = test_get_and_post_form(
             self.client, reverse("gopenflow_aggregate_create"),
             dict(
                 name="DummyOM",
                 description="DummyOF Description",
                 location="Stanford, CA",
-                url="test://testserver:80/"+reverse("dummy_gopenflow"),
+                url="test://testserver:80"+reverse("dummy_gopenflow"),
             )
         )
+        self.assertRedirects(resp, reverse("home"), msg_prefix="response was %s" % resp)
         self.assertEqual(self.of.adv_rspec, gapi.ListResources({}, None))
         
     def test_reserve_sliver(self):
