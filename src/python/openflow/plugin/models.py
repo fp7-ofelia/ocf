@@ -134,45 +134,7 @@ production networks, and is currently deployed in several universities.
         '''
         Get the available links and update the network connections.
         '''
-        active_cnxn_ids = []
-        # Create any missing connections.
-        for src_dpid, src_port, dst_dpid, dst_port, attrs in active_links_raw:
-            parse_logger.debug("parsing link %s:%s - %s:%s" % (
-                src_dpid, src_port, dst_dpid, dst_port))
-            try:
-                src_iface = OpenFlowInterface.objects.get(
-                    switch__datapath_id=src_dpid,
-                    port_num=src_port,
-                )
-            except OpenFlowInterface.DoesNotExist:
-                logger.warn("Tried to add connection for non-existing source\
- interface %s:%s" % (src_dpid, src_port))
-                continue
-
-            try:
-                dst_iface = OpenFlowInterface.objects.get(
-                    switch__datapath_id=dst_dpid,
-                    port_num=dst_port,
-                )
-            except OpenFlowInterface.DoesNotExist:
-                logger.warn("Tried to add connection for non-existing dest\
- interface %s:%s" % (dst_dpid, dst_port))
-                continue
-
-            cnxn, created = OpenFlowConnection.objects.get_or_create(
-                src_iface=src_iface,
-                dst_iface=dst_iface,
-            )
-            active_cnxn_ids.append(cnxn.id)
-            
-        # Delete old connections.
-        OpenFlowConnection.objects.filter(
-            # Make sure all the connections we delete have both end points in
-            # the aggregate.
-            src_iface__switch__aggregate=self,
-            dst_iface__switch__aggregate=self).exclude(
-                # don't delete active connections
-                id__in=active_cnxn_ids).delete()
+        create_or_update_links(self, active_links_raw)
         
     def update_topology(self):
         '''
@@ -415,7 +377,7 @@ class FlowSpaceRule(models.Model):
         max_value=2**16-1, min_value=0, blank=True, null=True)
 
 def create_or_update_switches(aggregate, switches):
-    """Create or update the switch in aggregate C{aggregate} with switches in C{switches}.
+    """Create or update the switches in aggregate C{aggregate} with switches in C{switches}.
     
     C{switches} is a dict mapping datapath ids to list of ports.
     
@@ -464,6 +426,56 @@ def create_or_update_switches(aggregate, switches):
     OpenFlowSwitch.objects.filter(
         aggregate=aggregate).exclude(id__in=active_switch_ids).update(
             available=False, status_change_timestamp=datetime.now())
+
+def create_or_update_links(aggregate, links):
+    """Create or update the links in aggregate C{aggregate}.
+    
+    @param aggregate: the aggregate with openflow links and switches.
+    @param links: a tuple (src dpid, src port, dst dpid, dst port, attrs)
+    
+    """
+    active_cnxn_ids = []
+    # Create any missing connections.
+    for src_dpid, src_port, dst_dpid, dst_port, attrs in links:
+        parse_logger.debug("parsing link %s:%s - %s:%s" % (
+            src_dpid, src_port, dst_dpid, dst_port))
+        try:
+            src_iface = OpenFlowInterface.objects.get(
+                switch__datapath_id=src_dpid,
+                port_num=src_port,
+            )
+        except OpenFlowInterface.DoesNotExist:
+            logger.warn(
+                "Tried to add connection for non-existing source "
+                "interface %s:%s" % (src_dpid, src_port))
+            continue
+
+        try:
+            dst_iface = OpenFlowInterface.objects.get(
+                switch__datapath_id=dst_dpid,
+                port_num=dst_port,
+            )
+        except OpenFlowInterface.DoesNotExist:
+            logger.warn(
+                "Tried to add connection for non-existing destination "
+                "interface %s:%s" % (dst_dpid, dst_port))
+            continue
+
+        cnxn, _ = OpenFlowConnection.objects.get_or_create(
+            src_iface=src_iface,
+            dst_iface=dst_iface,
+        )
+        active_cnxn_ids.append(cnxn.id)
+        
+    # Delete old connections.
+    OpenFlowConnection.objects.filter(
+        # Make sure all the connections we delete have both end points in
+        # the aggregate.
+        src_iface__switch__aggregate=aggregate,
+        dst_iface__switch__aggregate=aggregate).exclude(
+            # don't delete active connections
+            id__in=active_cnxn_ids).delete()
+    
         
 # when a slice is deleted, make sure all its flowspace is deleted too
 def delete_empty_flowspace(sender, **kwargs):
