@@ -38,6 +38,7 @@ from sfa.trust.credential_legacy import CredentialLegacy
 from sfa.trust.rights import *
 from sfa.trust.gid import *
 from sfa.util.faults import *
+
 from sfa.util.sfalogging import logger
 from dateutil.parser import parse
 

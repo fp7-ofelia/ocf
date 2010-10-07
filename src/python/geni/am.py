@@ -322,12 +322,6 @@ class ReferenceAggregateManager(object):
         elif 'geni_available' in options and options['geni_available']:
             result = ('<rspec type="GCF">' + ''.join([x.toxml() for x in self._resources])
                       + '</rspec>')
-            # To make this AM return a fixed RSpec do:
-            # rspecfile = open('/tmp/sample-of-ad-rspec.xml')
-            # result = ''
-            # for line in rspecfile:
-            #     result += line
-            # rspecfile.close()
         else:
             all_resources = list()
             all_resources.extend(self._resources)
@@ -337,12 +331,6 @@ class ReferenceAggregateManager(object):
                       + '</rspec>')
 
 #        self.logger.debug('Returning resource list %s', result)
-            # To make this AM return a fixed RSpec do:
-            # rspecfile = open('/tmp/sample-of-ad-rspec.xml')
-            # result = ''
-            # for line in rspecfile:
-            #     result += line
-            # rspecfile.close()
 
         # Optionally compress the result
         if 'geni_compressed' in options and options['geni_compressed']:

@@ -36,7 +36,9 @@ from copy import deepcopy
 import sys
 
 def can_translate(rspec):
-    return '<rspec type="openflow">' in rspec
+    if rspec.startswith('<rspec>') and 'openflow' in rspec and '<switches>' in rspec:
+        return True
+    return False
 
 
 def rspec_to_omnispec(urn, rspec):
@@ -54,7 +56,6 @@ def rspec_to_omnispec(urn, rspec):
             urn = switch.get('urn')
             # switchname = "stanford_network:switch:00:00:00:23:01:35:a5:5d"
             switchname = net_name + ':' + urn.split('+')[1]
-            switchname += ':' + urn.split('+')[2].split(':')[1]
             s = OmniResource(switchname, "OpenFlow Switch" ,'switch') 
 
             options=['dl_src', 'dl_dst', 'dl_type', 'vlan_id', 'nw_src',\
@@ -91,14 +92,6 @@ def rspec_to_omnispec(urn, rspec):
     return ospec
 
 def omnispec_to_rspec(omnispec, filter_allocated):
-    # Todo: 
-    # - combine flowspaces where they are identical for multiple ports/switches
-    # If you reserved all the ports, just list the switch
-    # else do not list the switch and just list the ports (which we now do always)
-    # - Take ports out of options for code cleanup
-    # - Clean up how you split a switch between flowspaces
-    # - Allow a flowspace in the ospec that spans switches
-    
     # Load up information about all the resources
     user = {}
     project = {}
@@ -139,17 +132,6 @@ def omnispec_to_rspec(omnispec, filter_allocated):
             
             # Okay, consider this switch part of a flowspace
             flowspace = {}
-
-            # To let a user describe diff flowspace for
-            # diff ports on a switch, they have to 
-            # copy the resource def for that switch
-            # and then edit the urn to something unique
-            # so it looks like a unique ospec resource.
-            # Then here we need to re extract the switch URN
-            partInd = urn.find('+part:')
-            if partInd > 0:
-#                print "URN was %s and will be %s" % (urn, urn[:partInd])
-                urn = urn[:partInd]
             flowspace['switch'] = urn
             
             flowspace['options'] = []
@@ -160,17 +142,11 @@ def omnispec_to_rspec(omnispec, filter_allocated):
                 vfrom = vfrom.strip().replace("from=",'')
                 vto = vto.strip().replace("to=",'')
                 flowspace['options'].append((key,vfrom,vto))
-
-            # Add an option for each port listed as part of this flowspace.
-            # Ideally we'd notice if this is all ports on the switch and just list the switch
-            # itself.
-            # Note that you must list ports explicitly in the ospec or you get nothing
+                
             for port in ports:                
-                # Create an option named 'port' with 'from' port urn and to '*'
-                # where the 'to' will be dropped below cause it is '*' (ugly)
-                # and the 'from' attrib will be renamed as 'urn' (uglier)
-                flowspace['options'].append(("port", flowspace['switch'] + '+port:' + port.split(':')[-1], '*'))
-            flowspaces.append(flowspace)
+                curspace = deepcopy(flowspace)
+                curspace['options'].append(('port_num', port.split(':')[-1], port.split(':')[-1]))
+                flowspaces.append(curspace)
 
 
 
@@ -184,62 +160,16 @@ def omnispec_to_rspec(omnispec, filter_allocated):
     ET.SubElement(root, 'slice', name=slice['slice_name'],\
                             description=slice['slice_description'],\
                             controller_url=slice['controller_url'])
-
-    # Now write out each flowspace (which is per set of ports on a single switch)
+    
     for flowspace in flowspaces:
         urn = flowspace['switch']
         flow = ET.SubElement(root, 'flowspace')
-
-        # If we write out all the ports, then we don't need to write out the switch
-        # More particularly, I think writing the switch and a subset of the port
-        # gives you all the ports, which is wrong if the user only wanted some ports.
-        # So since we currently never suppress writing out ports,
-        # we can suppress the switch
-        # Note it will be an error to list no ports
-        # The _right_ thing is to notice if this is all ports for the switch,
-        # in which case we should just list the switch. Else just list the ports.
-#        ET.SubElement(flow, 'switch', urn=urn)
-
-        # UGLY: Ensure ports are written before other options
-        # Clearly ports should not be stored in 'options' any more...
-
-        # Now the port 'options'. 
+        switches = ET.SubElement(flow, 'switches')
+        ET.SubElement(switches, 'switch', urn=urn)
         for (name,vfrom,vto) in flowspace['options']:
-            if name != "port":
-                continue
-            # If vfrom and vto are * then skip this row
-            if vfrom == "*" and vto == "*":
-                continue 
             opt = ET.SubElement(flow, name)
-            # If only 1 is * then skip just the one
-            if vfrom != "*": 
-                # Ugly! The 'port' option has
-                # only a urn tag not a from
-                if name == "port":
-                    opt.attrib['urn'] = vfrom
-                else:
-                    opt.attrib['from'] = vfrom
-            if vto != "*": 
-                opt.attrib['to'] = vto
-
-        # Now the non-port 'options'. Note that 1 is the port in question
-        for (name,vfrom,vto) in flowspace['options']:
-            # If vfrom and vto are * then skip this row
-            if name == "port":
-                continue
-            if vfrom == "*" and vto == "*":
-                continue 
-            opt = ET.SubElement(flow, name)
-            # If only 1 is * then skip just the one
-            if vfrom != "*": 
-                # Ugly! The 'port' option has
-                # only a urn tag not a from
-                if name == "port":
-                    opt.attrib['urn'] = vfrom
-                else:
-                    opt.attrib['from'] = vfrom
-            if vto != "*": 
-                opt.attrib['to'] = vto
+            opt.attrib['from'] = vfrom
+            opt.attrib['to'] = vto
             
     xml = ET.tostring(root)
     return xml
@@ -278,69 +208,55 @@ def set_dpid_port(ports,dpid, port):
                 ports['dpid'][port]=True
     
 
-##### Example OpenFlow advertisement rspec from expedient
+##### Example OpenFlow rspec from expedient
 '''
-<rspec type="openflow">
+<rspec>
     <network name="Stanford" location="Stanford, CA, USA">
         <switches>
-            <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" >
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1" />
-            </switch>
+            <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" />
             <switch urn="urn:publicid:IDN+openflow:stanford+switch:1" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1" />
             <switch urn="urn:publicid:IDN+openflow:stanford+switch:2" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:2" />
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:3" />
-            </switch>
         </switches>
         <links>
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:0
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:0
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:0
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:0+port:1
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:1+port:1
             />
-        </links>
-    </network>
-    <network name="Princeton" location="USA">
-        <switches>
-            <switch urn="urn:publicid:IDN+openflow:stanford+switch:3" >
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0" />
-            </switch>
-            <switch urn="urn:publicid:IDN+openflow:stanford+switch:4" >
-                <port urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0" />
-            </switch>
-        </switches>
-        <links>
+            </links>
+            </network>
+            <network name="Princeton" location="USA">
+            <switches>
+            <switch urn="urn:publicid:IDN+openflow:stanford+switch:3" />
+            <switch urn="urn:publicid:IDN+openflow:stanford+switch:4" />
+            </switches>
+            <links>
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
             />
             <link
-            src_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0"
-            dst_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0"
+            src_urn="urn:publicid:IDN+openflow:stanford+switch:4+port:0
+            dst_urn="urn:publicid:IDN+openflow:stanford+switch:3+port:0
             />
         </links>
     </network>
@@ -350,146 +266,6 @@ specifies a triangular graph at the Stanford network and a single link
 at the Princeton network
 '''
 
-#### Omnispec translation of above Ad RSpec:
-'''
-{
-    "http://localhost:8001": {
-        "urn": "urn:publicid:IDN+geni:gpo:gcf+am1+authority+am", 
-        "type": "rspec_of", 
-        "resources": {
-            "urn:publicid:IDN+openflow:stanford+switch:2": {
-                "name": "Stanford:openflow:stanford:2", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "switch", 
-                "options": {
-                    "dl_type": "from=*, to=*", 
-                    "port:1": "switch:1 port:1", 
-                    "port:0": "switch:0 port:1", 
-                    "port:3": "switch:* port:*", 
-                    "nw_dst": "from=*, to=*", 
-                    "port:2": "switch:* port:*", 
-                    "dl_src": "from=*, to=*", 
-                    "nw_proto": "from=*, to=*", 
-                    "tp_dst": "from=*, to=*", 
-                    "tp_src": "from=*, to=*", 
-                    "dl_dst": "from=*, to=*", 
-                    "nw_src": "from=*, to=*", 
-                    "vlan_id": "from=*, to=*"
-                }, 
-                "description": "OpenFlow Switch"
-            }, 
-            "urn:publicid:IDN+openflow:stanford+switch:3": {
-                "name": "Princeton:openflow:stanford:3", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "switch", 
-                "options": {
-                    "dl_type": "from=*, to=*", 
-                    "port:0": "switch:4 port:0", 
-                    "nw_dst": "from=*, to=*", 
-                    "dl_src": "from=*, to=*", 
-                    "nw_proto": "from=*, to=*", 
-                    "tp_dst": "from=*, to=*", 
-                    "tp_src": "from=*, to=*", 
-                    "dl_dst": "from=*, to=*", 
-                    "nw_src": "from=*, to=*", 
-                    "vlan_id": "from=*, to=*"
-                }, 
-                "description": "OpenFlow Switch"
-            }, 
-            "urn:publicid:IDN+openflow:stanford+switch:0": {
-                "name": "Stanford:openflow:stanford:0", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "switch", 
-                "options": {
-                    "dl_type": "from=*, to=*", 
-                    "port:1": "switch:2 port:0", 
-                    "port:0": "switch:1 port:0", 
-                    "nw_dst": "from=*, to=*", 
-                    "dl_src": "from=*, to=*", 
-                    "nw_proto": "from=*, to=*", 
-                    "tp_dst": "from=*, to=*", 
-                    "tp_src": "from=*, to=*", 
-                    "dl_dst": "from=*, to=*", 
-                    "nw_src": "from=*, to=*", 
-                    "vlan_id": "from=*, to=*"
-                }, 
-                "description": "OpenFlow Switch"
-            }, 
-            "urn:publicid:IDN+openflow:stanford+switch:1": {
-                "name": "Stanford:openflow:stanford:1", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "switch", 
-                "options": {
-                    "dl_type": "from=*, to=*", 
-                    "port:1": "switch:2 port:1", 
-                    "port:0": "switch:0 port:0", 
-                    "nw_dst": "from=*, to=*", 
-                    "dl_src": "from=*, to=*", 
-                    "nw_proto": "from=*, to=*", 
-                    "tp_dst": "from=*, to=*", 
-                    "tp_src": "from=*, to=*", 
-                    "dl_dst": "from=*, to=*", 
-                    "nw_src": "from=*, to=*", 
-                    "vlan_id": "from=*, to=*"
-                }, 
-                "description": "OpenFlow Switch"
-            }, 
-            "urn:publicid:IDN+openflow:stanford+user+sliceinfo": {
-                "name": "sliceinfo", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "user", 
-                "options": {
-                    "project_description": "Internet performance research to ...", 
-                    "controller_url": "tcp:unknown:6633", 
-                    "slice_name": "Crazy Load Balancing Experiment", 
-                    "firstname": "John", 
-                    "lastname": "Doe", 
-                    "project_name": "Stanford Networking Group", 
-                    "fv_password": "slice_pass", 
-                    "slice_description": "Does crazy load balancing and plate spinning", 
-                    "email": "jdoe@geni.net"
-                }, 
-                "description": "Slice information for FlowVisor Access"
-            }, 
-            "urn:publicid:IDN+openflow:stanford+switch:4": {
-                "name": "Princeton:openflow:stanford:4", 
-                "misc": {}, 
-                "allocate": false, 
-                "allocated": false, 
-                "type": "switch", 
-                "options": {
-                    "dl_type": "from=*, to=*", 
-                    "port:0": "switch:3 port:0", 
-                    "nw_dst": "from=*, to=*", 
-                    "dl_src": "from=*, to=*", 
-                    "nw_proto": "from=*, to=*", 
-                    "tp_dst": "from=*, to=*", 
-                    "tp_src": "from=*, to=*", 
-                    "dl_dst": "from=*, to=*", 
-                    "nw_src": "from=*, to=*", 
-                    "vlan_id": "from=*, to=*"
-                }, 
-                "description": "OpenFlow Switch"
-            }
-        }
-    }
-}
-
-- Note that the port entries indicate the network topology. EG switch 4 port 0
-is listed as "port:0": "switch:3 port:0", indicating that the port is connected to
-switch 3 port 0
-
-'''
 
 ##### Example reservation back to OpenFlow/Expedient
 '''
@@ -518,181 +294,32 @@ switch 3 port 0
             controller_url="tcp:controller.stanford.edu:6633"
         />
         <flowspace>
-            <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
-            <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:1">
-            <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:2">
-            <port urn="urn:publicid:IDN+openflow:stanford+switch:2+port:3">
+            <switches>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:2">
+            </switches>
+            <port from="1" to="4" />
             <dl_src from="22:33:44:55:66:77" to="22:33:44:55:66:77" />
+            <dl_dst from="*" to="*" />
             <dl_type from="0x800" to="0x800" />
             <vlan_id from="15" to="20" />
             <nw_src from="192.168.3.0" to="192.168.3.255" />
             <nw_dst from="192.168.3.0" to="192.168.3.255" />
             <nw_proto from="17" to="17" />
             <tp_src from="100" to="100" />
-            <tp_dst from="100" />
+            <tp_dst from="100" to="*" />
         </flowspace>
         <flowspace>
-            <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
+            <switches>
+                <switch urn="urn:publicid:IDN+openflow:stanford+switch:1">
+            </switches>
             <tp_src from="100" to="100" />
-            <tp_dst from="100" />
+            <tp_dst from="100" to="*" />
         </flowspace>
     </resv_rspec>
     
-    Including a switch means all ports on that switch.
-    OF stack will union your list of switches/ports/flowspaces as needed.
-    So if you list both a switch AND some of its ports, then all ports on the switch
-    are included. 
-
-    Any missing fields from the flowspace mean wildcard. "*" should
-    not be written - leave it out.
-        
+    Any missing fields from the flowspace mean wildcard. All '*' means any
+    value.
+    
     All integers can be specified as hex or decimal.
     '''
-#### Example OmniSpec that turns into the above reservation RSpec (approx)
-'''
-    "http://localhost:8001": {
-        "urn": "urn:publicid:IDN+geni:gpo:gcf+am1+authority+am",
-        "type": "rspec_of",
-        "resources": {
-            "urn:publicid:IDN+openflow:stanford+switch:2": {
-                "name": "Stanford:openflow:stanford:2",
-                "misc": {},
-                "allocate": true,
-                "allocated": false,
-                "type": "switch",
-                "options": {
-                    "dl_type": "from=0x800, to=0x800",
-                    "port:1": "switch:1 port:1",
-                    "port:3": "switch:* port:*",
-                    "port:2": "switch:* port:*",
-                    "nw_dst": "from=192.168.3.0, to=192.168.3.255",
-                    "dl_src": "from=22:33:44:55:66:77, to=22:33:44:55:66:77",
-                    "nw_proto": "from=17, to=17",
-                    "tp_dst": "from=100, to=*",
-                    "tp_src": "from=100, to=100",
-                    "dl_dst": "from=*, to=*",
-                    "nw_src": "from=192.168.3.0, to=192.168.3.255",
-                    "vlan_id": "from=15, to=20"
-                },
-                "description": "OpenFlow Switch"
-            },
-            "urn:publicid:IDN+openflow:stanford+switch:3": {
-                "name": "Princeton:openflow:stanford:3",
-                "misc": {},
-                "allocate": false,
-                "allocated": false,
-                "type": "switch",
-                "options": {
-                    "dl_type": "from=*, to=*",
-                    "port:0": "switch:4 port:0",
-                    "nw_dst": "from=*, to=*",
-                    "dl_src": "from=*, to=*",
-                    "nw_proto": "from=*, to=*",
-                    "tp_dst": "from=*, to=*",
-                    "tp_src": "from=*, to=*",
-                    "dl_dst": "from=*, to=*",
-                    "nw_src": "from=*, to=*",
-                    "vlan_id": "from=*, to=*"
-                },
-                "description": "OpenFlow Switch"
-            },
-            "urn:publicid:IDN+openflow:stanford+switch:0": {
-                "name": "Stanford:openflow:stanford:0",
-                "misc": {},
-                "allocate": true,
-                "allocated": false,
-                "type": "switch",
-                "options": {
-                    "dl_type": "from=0x800, to=0x800",
-                    "port:1": "switch:2 port:0",
-                    "port:0": "switch:1 port:0",
-                    "nw_dst": "from=192.168.3.0, to=192.168.3.255",
-                    "dl_src": "from=22:33:44:55:66:77, to=22:33:44:55:66:77",
-                    "nw_proto": "from=17, to=17",
-                    "tp_dst": "from=100, to=*",
-                    "tp_src": "from=100, to=100",
-                    "dl_dst": "from=*, to=*",
-                    "nw_src": "from=192.168.3.0, to=192.168.3.255",
-                    "vlan_id": "from=15, to=20"
-                },
-                "description": "OpenFlow Switch"
-            },
-            "urn:publicid:IDN+openflow:stanford+switch:1": {
-                "name": "Stanford:openflow:stanford:1",
-                "misc": {},
-                "allocate": true,
-                "allocated": false,
-                "type": "switch",
-                "options": {
-                    "dl_type": "from=*, to=*",
-                    "port:1": "switch:2 port:1",
-                    "port:0": "switch:0 port:0",
-                    "nw_dst": "from=*, to=*",
-                    "dl_src": "from=*, to=*",
-                    "nw_proto": "from=*, to=*",
-                    "tp_dst": "from=100, to=*",
-                    "tp_src": "from=100, to=100",
-                    "dl_dst": "from=*, to=*",
-                    "nw_src": "from=*, to=*",
-                    "vlan_id": "from=*, to=*"
-                },
-                "description": "OpenFlow Switch"
-            },
-            "urn:publicid:IDN+openflow:stanford+user+sliceinfo": {
-                "name": "sliceinfo",
-                "misc": {},
-                "allocate": false,
-                "allocated": false,
-                "type": "user",
-                "options": {
-                    "project_description": "Internet performance research to ...",
-                    "controller_url": "tcp:controller.stanford.edu:6633",
-                    "slice_name": "Crazy Load Balancer",
-                    "firstname": "John",
-                    "lastname": "Doe",
-                    "project_name": "Stanford Networking Group",
-                    "fv_password": "slice_pass",
-                    "slice_description": "Does this and that...",
-                    "email": "john.doe@geni.net"
-                },
-                "description": "Slice information for FlowVisor Access"
-            },
-            "urn:publicid:IDN+openflow:stanford+switch:4": {
-                "name": "Princeton:openflow:stanford:4",
-                "misc": {},
-                "allocate": false,
-                "allocated": false,
-                "type": "switch",
-                "options": {
-                    "dl_type": "from=*, to=*",
-                    "port:0": "switch:3 port:0",
-                    "nw_dst": "from=*, to=*",
-                    "dl_src": "from=*, to=*",
-                    "nw_proto": "from=*, to=*",
-                    "tp_dst": "from=*, to=*",
-                    "tp_src": "from=*, to=*",
-                    "dl_dst": "from=*, to=*",
-                    "nw_src": "from=*, to=*",
-                    "vlan_id": "from=*, to=*"
-                },
-                "description": "OpenFlow Switch"
-            }
-        }
-    }
-}
-
-Some notes on making reservations using Omnispecs:
-- Mark allocate: true for all switches you want part of
-- Remove any port: options that you do not want included as part of your reservation
-- Be sure to fill out the sliceinfo section with your experiment, project, user info
----- particularly your controller hostname and port
-- You must list at least 1 port per resource section
-- If you want the same flowspace across 2 switches, you must duplicate the settings for each
-switch/resource
-- If you want to split a switch, with some ports in 1 flowspace and some in another,
-then you must duplicate the resource section for that switch, and change
-the URN (first line) of the resource (for at least parts 2+) to be [orig urn]+part:<unique ID>. EG
-     .....+switch:1, and ...+switch:1+part:2, and ....+switch:1+part:ComplexFinalBit
-Then, as usual, delete the ports to be excluded from each flowspace, set the appropriate options
-
-'''
