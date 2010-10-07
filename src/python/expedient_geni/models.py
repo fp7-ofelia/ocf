@@ -10,9 +10,13 @@ from expedient.common.utils import certtransport
 from django.conf import settings
 import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
-from expedient_geni import management
-from expedient_geni.utils import create_slice_urn, create_x509_cert
+from expedient_geni.utils import create_slice_urn, create_x509_cert,\
+    create_slice_credential, get_or_create_user_cert
 from django.db.models import signals
+import logging
+import traceback
+
+logger = logging.getLogger("expedient_geni.models")
 
 SSH_KEY_SIZE = 2048
 
@@ -40,11 +44,13 @@ class GENISliceInfo(models.Model):
         "Slice's SSH public key", editable=False, blank=True, null=True)
     ssh_private_key = models.TextField(
         "Slice's SSH private key", editable=False, blank=True, null=True)
-    slice_cred = models.TextField(
-        "Slice credentials", editable=False, blank=True, null=True)
+    slice_gid = models.TextField(
+        "Slice's GID", editable=False, blank=True, null=True)
     
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("slice_urn", create_slice_urn())
+        urn = kwargs.setdefault("slice_urn", create_slice_urn())
+        kwargs.setdefault(
+            "slice_gid", create_x509_cert(urn).save_to_string())
         super(GENISliceInfo, self).__init__(*args, **kwargs)
         
     def generate_ssh_keys(self, password=None):
@@ -136,9 +142,13 @@ class GENIAggregate(Aggregate):
         rspec = self.as_leaf_class()._to_rspec(slice)
         info = slice.geni_slice_info
         
+        # Get the user's cert
+        user_cert = get_or_create_user_cert(slice.owner)
+        slice_cred = create_slice_credential(user_cert, info.slice_cert)
+        
         try:
             reserved = self.proxy.CreateSliver(
-                info.slice_urn, [info.slice_cred], rspec,
+                info.slice_urn, [slice_cred], rspec,
                 [dict(name=settings.GCF_URN_PREFIX,
                       urn="urn:publicid:IDN+%s+%s+%s" % (
                             settings.GCF_URN_PREFIX, "authority", "ch"),
@@ -146,8 +156,7 @@ class GENIAggregate(Aggregate):
                  ]
             )
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.error(traceback.format_exc())
             raise Exception("Error creating sliver: %s" % e)
     
         # TODO: parse reserved slice to see errors and such
@@ -158,12 +167,15 @@ class GENIAggregate(Aggregate):
         Stop and delete slice at the aggregate.
         """
         info = slice.geni_slice_info
+        # Get the user's cert
+        user_cert = get_or_create_user_cert(slice.owner)
+        slice_cred = create_slice_credential(user_cert, info.slice_cert)
+
         try:
             ret = self.proxy.DeleteSliver(
-                info.slice_urn, [info.slice_cred])
+                info.slice_urn, [slice_cred])
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.error(traceback.format_exc())
             raise Exception("Error deleting sliver: %s" % e)
     
         return ret
@@ -184,8 +196,7 @@ class GENIAggregate(Aggregate):
         try:
             ver = self.proxy.GetVersion()
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.error(traceback.format_exc())
             return False
         return self.available
     
