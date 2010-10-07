@@ -5,7 +5,7 @@ Created on Jun 2, 2010
 '''
 import logging
 
-def set_up(default_level, exception_levels):
+def set_up(default_level, exception_levels=[]):
     """Setup logging for the system.
     @param default_level: The default logging level for all loggers.
     @param exception_level: a list of tuples (logger name, logging level)
