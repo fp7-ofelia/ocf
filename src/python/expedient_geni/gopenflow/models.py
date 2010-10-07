@@ -4,13 +4,11 @@ Created on Sep 13, 2010
 @author: jnaous
 '''
 import logging
-from datetime import datetime
 from expedient_geni.models import GENIAggregate
-from openflow.plugin.models import OpenFlowInterface, OpenFlowSwitch,\
-    create_or_update_switches
+from openflow.plugin.models import \
+    create_or_update_switches, create_or_update_links
 from openflow.plugin.gapi.rspec import create_resv_rspec, parse_external_rspec
 from expedient.common.middleware import threadlocals
-from expedient.common.utils import create_or_update
 
 logger = logging.getLogger("gopenflow.models")
 
@@ -18,7 +16,7 @@ class GCFOpenFlowAggregate(GENIAggregate):
     """A PlanetLab Aggregate exposed through the GENI API."""
     information = \
 """
-A PlanetLab Aggregate exposed through the GENI API.
+An OpenFlow Aggregate exposed through the GENI API.
 """
 
     class Meta:
@@ -45,7 +43,8 @@ A PlanetLab Aggregate exposed through the GENI API.
         
         logger.debug("Got rspec:\n%s" % rspec)
         
-        switches = parse_external_rspec(rspec)
+        switches, links = parse_external_rspec(rspec)
         
         create_or_update_switches(switches)
+        create_or_update_links(links)
         
