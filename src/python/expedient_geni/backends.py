@@ -23,8 +23,6 @@ class GENIRemoteUserBackend(RemoteUserBackend):
             # The username field should be the full certificate
             gid = GID(string=username)
             
-            logger.debug("Getting username from %s" % gid.dump())
-            
             # extract the URN in the subjectAltName
             urn_str = gid.get_urn()
             
