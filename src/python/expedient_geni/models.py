@@ -21,6 +21,7 @@ from expedient.common.utils.transport import TestClientTransport
 import os
 from sfa.trust.certificate import Keypair
 from sfa.trust.gid import GID
+from expedient.common.tests.utils import test_to_http
 
 logger = logging.getLogger("expedient_geni.models")
 
@@ -121,7 +122,7 @@ class GENIAggregate(Aggregate):
             transport = TestClientTransport(defaults={
                 "REMOTE_USER": user_cert, "SSL_CLIENT_CERT": user_cert})
             proxy = xmlrpclib.ServerProxy(
-                u.lower().replace("test://", "http://"),
+                test_to_http(u),
                 transport=transport,
             )
         else:

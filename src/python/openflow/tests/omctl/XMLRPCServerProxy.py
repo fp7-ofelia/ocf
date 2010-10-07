@@ -12,6 +12,7 @@ import time
 from expedient.common.utils.transport import TestClientTransport
 from urlparse import urlparse
 import xmlrpclib
+from expedient.common.tests.utils import test_to_http
 
 def get_max_password_len():
     # M2Crypto does not like it when header fields are large. Creates bad
@@ -74,7 +75,7 @@ class PasswordXMLRPCServerProxy:
         # This scheme is used for debugging and looping back
         if parsed.scheme == "test":
             self.proxy = BasicAuthServerProxy(
-                self.url.lower().replace("test", "http"),
+                test_to_http(self.url),
                 username=self.username,
                 password=self.password,
                 transport=TestClientTransport())
