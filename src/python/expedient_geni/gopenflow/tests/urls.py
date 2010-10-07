@@ -1,7 +1,7 @@
 '''
 @author: jnaous
 '''
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import *
 from expedient.common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns("",

@@ -1,7 +1,7 @@
 '''
 @author: jnaous
 '''
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import *
 from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
 
 urlpatterns = patterns('',
