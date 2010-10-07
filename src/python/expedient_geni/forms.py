@@ -85,7 +85,7 @@ def geni_aggregate_form_factory(agg_model):
     class GENIAggregateForm(forms.ModelForm):
         class Meta:
             model = agg_model
-            exclude = ['owner', 'users']
+            exclude = ['owner', 'users', 'leaf_name']
             
         def clean(self):
             """
