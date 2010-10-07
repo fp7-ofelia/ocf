@@ -22,10 +22,14 @@ class GENIRemoteUserBackend(RemoteUserBackend):
         try:
             # The username field should be the full certificate
             gid = GID(string=username)
+            
             logger.debug("Getting username from %s" % gid.dump())
             
             # extract the URN in the subjectAltName
             urn_str = gid.get_urn()
+            
+            logger.debug("URN: %s" % urn_str)
+            
         except:
             logger.warn("Failed to get certificate from username.")
             logger.warn(traceback.format_exc())
@@ -42,6 +46,9 @@ class GENIRemoteUserBackend(RemoteUserBackend):
             username = urn.getName()
         else:
             username = urn_to_username(urn.urn_string())
+            
+        logger.debug("Returning username %s" % username)
+        
         return username
 
 class MagicWordBackend(object):
