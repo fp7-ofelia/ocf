@@ -69,7 +69,7 @@ def CreateSliver(slice_urn, rspec, user):
     
     # Check if the slice exists
     try:
-        slice = Slice.objects.get(geni_slice_info__slice_urn=slice_urn)
+        slice = get_slice(slice_urn)
         # update the slice info
         slice.description = slice_desc
         slice.name = slice_name
@@ -120,7 +120,15 @@ def CreateSliver(slice_urn, rspec, user):
     logger.debug("creating gapislice")
 
     # store a pointer to this slice using the slice_urn
-    GENISliceInfo.objects.get_or_create(slice_urn=slice_urn, slice=slice)
+    create_or_update(
+        GENISliceInfo,
+        filter_attrs={
+            "slice": slice,
+        },
+        new_attrs={
+            "slice_urn": slice_urn,
+        },
+    )
     
     logger.debug("adding resources")
 
