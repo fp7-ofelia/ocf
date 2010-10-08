@@ -75,14 +75,11 @@ documentation`_. Below is a list of the settings that need to be changed:
 * ``DEFAULT_FROM_EMAIL``: Set this to the email address you want users to see when
   they receive mail from
   Expedient. e.g. ``"no-reply@geni.net"``. See email_
-* ``GCF_URN_PREFIX``: Set this to ``"expedient:<your_organization>"``. Replace
+* ``GCF_BASE_NAME``: Set this to ``"<your_organization>//expedient"``. Replace
   ``<your_organization>`` with one alphanumeric word. Do not use special
   characters. e.g. ``"expedient:stanford"``. See gcf_.
 * ``SITE_DOMAIN``: Set this to the fully-qualified domain name of the Expedient
   server. e.g. ``"expedient.stanford.edu"``. See site_.
-* ``OPENFLOW_GAPI_RSC_URN_PREFIX``: Set this to
-  ``"urn:publicid:IDN+expedient:<your_organization>:openflow"``. e.g. 
-  ``"urn:publicid:IDN+expedient:stanford:openflow"``. See openflow_.
 * ``SITE_IP_ADDR``: Used for testing. Set to your Expedient host's IP
   address. e.g. ``"192.168.1.1"``. See openflowtests_.
 * ``MININET_VMS``: Used for testing. Set to ``[("<IP address of the mininet VM>",
