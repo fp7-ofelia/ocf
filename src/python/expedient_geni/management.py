@@ -45,18 +45,19 @@ def check_and_create_auth(sender, **kwargs):
     create them if not.
     """
     
+    _mkdirs(settings.GCF_X509_TRUSTED_CERT_DIR)
+    _mkdirs(settings.GCF_X509_USER_CERT_DIR)
+    _mkdirs(settings.GCF_X509_KEY_DIR)
+    _mkdirs(settings.GCF_X509_CRED_DIR)
+    
     if not os.access(settings.GCF_X509_CH_CERT, os.R_OK) or\
     not os.access(settings.GCF_X509_CH_KEY, os.R_OK):
         logger.info("Creating GENI API certificate and key.")
-        _mkdirs(settings.GCF_X509_TRUSTED_CERT_DIR)
-        _mkdirs(settings.GCF_X509_USER_CERT_DIR)
-        _mkdirs(settings.GCF_X509_KEY_DIR)
         create_expedient_certs()
     
     if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
         logger.info("Creating GENI API null slice credentials.")
-        _mkdirs(settings.GCF_X509_CRED_DIR)
         create_null_slice_cred()
-
+        
 # Request to run check_and_create_auth after syncdb
 signals.post_syncdb.connect(check_and_create_auth)
