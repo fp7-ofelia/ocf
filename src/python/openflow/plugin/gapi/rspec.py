@@ -507,7 +507,7 @@ def create_resv_rspec(user, slice, aggregate=None):
         slivers__slice=slice).distinct()
     if aggregate:
         flowspace_qs = flowspace_qs.filter(
-            slivers__aggregate__id=aggregate.id)
+            slivers__resource__aggregate__id=aggregate.id).distinct()
         
     # add the flowspace
     for fs in flowspace_qs:
