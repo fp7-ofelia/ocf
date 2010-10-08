@@ -149,10 +149,11 @@ class GENIAggregate(Aggregate):
         
         @return: GENI credential string.
         """
-        f = open(settings.GCF_NULL_SLICE_CRED)
-        am_cred = f.read()
-        f.close()
-        return am_cred
+        slice_urn = create_slice_urn()
+        slice_gid, _ = create_x509_cert(slice_urn) 
+        user_gid = GID(filename=settings.GCF_X509_CH_CERT)
+        ucred = create_slice_credential(user_gid, slice_gid)
+        return ucred.save_to_string()
     
     def _create_sliver(self, slice):
         """

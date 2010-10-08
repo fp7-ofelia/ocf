@@ -55,9 +55,9 @@ def check_and_create_auth(sender, **kwargs):
         logger.info("Creating GENI API certificate and key.")
         create_expedient_certs()
     
-    if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
-        logger.info("Creating GENI API null slice credentials.")
-        create_null_slice_cred()
+#    if not os.access(settings.GCF_NULL_SLICE_CRED, os.R_OK):
+#        logger.info("Creating GENI API null slice credentials.")
+#        create_null_slice_cred()
         
 # Request to run check_and_create_auth after syncdb
 signals.post_syncdb.connect(check_and_create_auth)
