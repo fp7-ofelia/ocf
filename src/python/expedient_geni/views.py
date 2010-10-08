@@ -176,8 +176,6 @@ def user_cert_upload(request, user_id):
     must_have_permission(request.user, user, "can_change_certs")
 
     if request.method == "POST":
-        logger.debug(request)
-        logger.debug(request.FILES)
         form = UploadCertForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             form.save(user)
@@ -185,7 +183,7 @@ def user_cert_upload(request, user_id):
                 "Successfully uploaded GCF certificate and key for user %s.",
                 user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
             return HttpResponseRedirect(
-                reverse("user_cert_manage", args=[user_id])
+                reverse("gcf_cert_manage", args=[user_id])
             )
     else:
         form = UploadCertForm()
