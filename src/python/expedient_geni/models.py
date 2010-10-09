@@ -12,7 +12,7 @@ import xmlrpclib
 from expedient.clearinghouse.slice.models import Slice
 from expedient_geni.utils import create_slice_urn, create_x509_cert,\
     create_slice_credential, get_or_create_user_cert, get_user_key_fname,\
-    get_user_cert_fname
+    get_user_cert_fname, get_ch_urn
 from django.db.models import signals
 import logging
 import traceback
@@ -21,7 +21,8 @@ from expedient.common.utils.transport import TestClientTransport
 import os
 from sfa.trust.certificate import Keypair
 from sfa.trust.gid import GID
-from expedient.common.tests.utils import test_to_http
+from expedient.common.tests.utils import test_to_http, drop_to_shell
+from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("expedient_geni.models")
 
@@ -36,13 +37,14 @@ class GENISliceInfo(models.Model):
     @ivar slice_urn: the slice's unique resource name. This will be
         automatically created in the __init__ function if not given.
     @type slice_urn: a string.
+    @ivar slice_gid: the slice's certificate. This will be
+        automatically created in the __init__ function if not given.
+    @type slice_gid: a string.
     @ivar ssh_public_key: Public ssh key in base64. Can be None.
     @type ssh_public_key: string or None.
     @ivar ssh_private_key: Private ssh key in base64, possibly encrypted.
         See L{generate_ssh_keys}. Can be None.
     @type ssh_private_key: string or None.
-    @ivar slice_cred: Credentials to use for the slice
-    @type slice_cred: string
     """
     slice = models.OneToOneField(
         Slice, related_name="geni_slice_info")
@@ -149,31 +151,39 @@ class GENIAggregate(Aggregate):
         
         @return: GENI credential string.
         """
-        f = open(settings.GCF_NULL_SLICE_CRED)
-        am_cred = f.read()
-        f.close()
-        return am_cred
+        slice_urn = create_slice_urn()
+        slice_gid, _ = create_x509_cert(slice_urn) 
+        user_gid = GID(filename=settings.GCF_X509_CH_CERT)
+        ucred = create_slice_credential(user_gid, slice_gid)
+        return ucred.save_to_string()
     
+    def get_slice_cred(self, slice, user):
+        info = slice.geni_slice_info
+        user_cert = get_or_create_user_cert(user)
+        return create_slice_credential(
+            user_cert, GID(string=str(info.slice_gid))
+        ).save_to_string()
+        
     def _create_sliver(self, slice):
         """
         Corresponds to the CreateSliver call of the GENI aggregate API.
         Creates a sliver on the aggregate from this slice.
         """
+        logger.debug("Called GENIAggregate._create_sliver")
+
+        user = threadlocals.get_thread_locals()["user"]
         
         rspec = self.as_leaf_class()._to_rspec(slice)
-        info = slice.geni_slice_info
-        
-        # Get the user's cert
-        user_cert = get_or_create_user_cert(slice.owner)
-        slice_cred = create_slice_credential(user_cert, info.slice_cert)
-        proxy = self.get_user_client(slice.owner)
-        
+        info = GENISliceInfo.objects.get(slice=slice)
+
+        slice_cred = self.get_slice_cred(slice, user)
+        proxy = self.get_user_client(user)
+
         try:
             reserved = proxy.CreateSliver(
                 info.slice_urn, [slice_cred], rspec,
-                [dict(name=settings.GCF_URN_PREFIX,
-                      urn="urn:publicid:IDN+%s+%s+%s" % (
-                            settings.GCF_URN_PREFIX, "authority", "ch"),
+                [dict(name=settings.GCF_BASE_NAME,
+                      urn=get_ch_urn(),
                       keys=[info.ssh_public_key])
                  ]
             )
@@ -188,11 +198,11 @@ class GENIAggregate(Aggregate):
         Corresponds to the DeleteSliver call of the GENI aggregate API.
         Stop and delete slice at the aggregate.
         """
-        info = slice.geni_slice_info
+        user = threadlocals.get_thread_locals()["user"]
+        info = GENISliceInfo.objects.get(slice=slice)
         # Get the user's cert
-        user_cert = get_or_create_user_cert(slice.owner)
-        slice_cred = create_slice_credential(user_cert, info.slice_cert)
-        proxy = self.get_user_client(slice.owner)
+        slice_cred = self.get_slice_cred(slice, user)
+        proxy = self.get_user_client(user)
 
         try:
             ret = proxy.DeleteSliver(
@@ -241,7 +251,8 @@ class GENIAggregate(Aggregate):
         info, _ = GENISliceInfo.objects.get_or_create(
             slice=slice,
         )
-        if not info.ssh_private_key:
+        
+        if not info.ssh_private_key or not info.ssh_public_key:
             info.generate_ssh_keys()
             info.save()
         

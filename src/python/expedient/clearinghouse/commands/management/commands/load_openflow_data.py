@@ -4,6 +4,7 @@ Created on Oct 7, 2010
 @author: jnaous
 '''
 
+import re
 from django.core.management.base import NoArgsCommand
 from expedient.clearinghouse.project.models import Project
 try:
@@ -16,7 +17,7 @@ from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterfaceSliver,\
 from optparse import make_option
 from django.test import Client
 from expedient.common.tests.client import test_get_and_post_form
-from django.core.urlresolvers import reverse, resolve
+from django.core.urlresolvers import reverse
 from urlparse import urlsplit, urlunsplit
 from expedient.clearinghouse.project.views import create_project_roles
 from django.contrib.auth.models import User
@@ -25,7 +26,7 @@ from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.middleware import threadlocals
 
 def assert_redirection(response, expected_url):
-    assert(response.code == 302)
+    assert(response.status_code == 302)
     
     url = response['Location']
     
@@ -82,12 +83,15 @@ class Command(NoArgsCommand):
         do_slices = options.get("load_slices")
         start_slices = options.get("start_slices")
         
-        data = load(filename)
+        f = open(filename)
+        data = load(f)
+        f.close()
         
         client = Client()
         client.login(username=username, password=password)
 
         user = User.objects.get(username=username)
+        threadlocals.get_thread_locals()["user"] = user
 
         if do_aggs:
             for agg_dict in data["aggregates"]:
@@ -96,18 +100,19 @@ class Command(NoArgsCommand):
                     agg_dict,
                 )
                 
-                assert_redirection(
-                    resp,
-                    reverse("openflow_aggregate_add_links", args=[i+1]))
-        
+                assert(resp.status_code == 302)
+                assert(
+                    re.search(
+                        r"/openflow/aggregate/\d+/links/$",
+                        resp["Location"]))
         if do_slices:
             for project_dict in data["projects"]:
-                
                 project = Project.objects.create(
                     name=project_dict["name"],
                     description=project_dict["description"],
                 )
                 create_project_roles(project, user)
+                threadlocals.get_thread_locals()["project"] = project
                 
                 # add aggregates to project
                 for aggregate in OpenFlowAggregate.objects.all():
@@ -136,12 +141,12 @@ class Command(NoArgsCommand):
                     # add slivers
                     slivers = []
                     for dpid, port in slice_dict["ifaces"]:
-                        sliver = OpenFlowInterfaceSliver.objects.get_or_create(
+                        sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
                             slice=slice,
                             resource=OpenFlowInterface.objects.get(
                                 port_num=port, switch__datapath_id=dpid),
                         )
-                        sliver.append(slivers)
+                        slivers.append(sliver)
                         
                     # add flowspace
                     for sfs_dict in slice_dict["sfs"]:

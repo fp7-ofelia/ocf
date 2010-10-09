@@ -114,6 +114,8 @@ def create_x509_cert(urn, cert_fname=None, key_fname=None, is_self_signed=False)
             issuer_cert=settings.GCF_X509_CH_CERT
         )
     
+    cert.decode()
+    
     if cert_fname: cert.save_to_file(cert_fname)
     if key_fname: keys.save_to_file(key_fname)
     

@@ -70,7 +70,7 @@ test.run_tests = run_tests
 
 setup(
     name="expedient",
-    version="0.3.0",
+    version="0.3.1",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
     author_email="jnaous@stanford.edu",

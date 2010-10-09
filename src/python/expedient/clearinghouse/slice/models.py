@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from expedient.common.permissions.models import ObjectPermission, Permittee
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
 import logging
+from django.db.models import signals
 
 logger = logging.getLogger("slice.models")
 
@@ -78,3 +79,9 @@ class Slice(models.Model):
         return Aggregate.objects.filter(pk__in=agg_ids)
     aggregates=property(_get_aggregates)
     
+def stop_slice_before_delete(sender, **kwargs):
+    try:
+        kwargs["instance"].stop()
+    except:
+        pass
+signals.pre_delete.connect(stop_slice_before_delete, Slice)

@@ -10,7 +10,8 @@ import traceback
 from django.conf import settings
 from sfa.trust.gid import GID
 from sfa.trust.certificate import Keypair
-from expedient_geni.utils import get_user_key_fname, get_user_cert_fname
+from expedient_geni.utils import get_user_key_fname, get_user_cert_fname,\
+    get_trusted_cert_filenames
 
 logger = logging.getLogger("expedient_geni.forms")
 
@@ -44,19 +45,19 @@ class UploadCertForm(forms.Form):
         """Check that the cert file is signed by the key file and is trusted."""
         logger.debug("cleaned_data %s" % self.cleaned_data)
         if self.files:
-            self.key = Keypair(self.files["key_file"].read())
-            self.cert = GID(self.files["cert_file"].read())
+            self.key = Keypair(string=self.files["key_file"].read())
+            self.cert = GID(string=self.files["cert_file"].read())
             
-            try:
-                self.cert.verify(self.key)
-            except Exception as e:
-                logger.error(traceback.format_exc())
+            cert_pubkey = self.cert.get_pubkey().get_pubkey_string()
+            if cert_pubkey != self.key.get_pubkey_string():
                 raise forms.ValidationError(
-                    "Could not verify that the certificate was "
-                    "signed by the uploaded key. The error was: %s" % e)
+                    "Error: The certificate was not signed "
+                    "by the uploaded key. Please use a key "
+                    "that matches the certificate.")
     
             try:
-                self.cert.verify_chain(settings.GCF_X509_TRUSTED_CERT_DIR)
+                certs = [GID(filename=f) for f in get_trusted_cert_filenames()]
+                self.cert.verify_chain(certs)
             except Exception as e:
                 logger.error(traceback.format_exc())
                 raise forms.ValidationError(
