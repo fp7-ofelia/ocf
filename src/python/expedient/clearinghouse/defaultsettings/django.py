@@ -68,7 +68,10 @@ USE_I18N = False
 '''If you set this to False, Django will make some optimizations so as not
 to load the internationalization machinery.'''
 
-from localsettings import *
+try:
+    from localsettings import *
+except ImportError:
+    pass
 
 MEDIA_ROOT = os.path.join(STATIC_DOC_ROOT, "media")
 '''Absolute path to the directory that holds media.
@@ -119,7 +122,10 @@ AUTHENTICATION_BACKENDS = (
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
-from localsettings import *
+try:
+    from localsettings import *
+except ImportError:
+    pass
 
 TEMPLATE_DIRS = (
     os.path.join(SRC_DIR, 'templates'),
@@ -188,7 +194,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 DEBUG = True
 '''Enable/Disable debugging mode. See Django docs on this setting.'''
 
-from localsettings import *
+try:
+    from localsettings import *
+except ImportError:
+    pass
 
 TEMPLATE_DEBUG = DEBUG
 '''See Django documentation.'''

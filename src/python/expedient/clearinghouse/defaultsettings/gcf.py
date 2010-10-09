@@ -7,7 +7,10 @@ Created on Aug 19, 2010
 from os.path import join
 from django import CONF_DIR
 
-from localsettings import *
+try:
+    from localsettings import *
+except ImportError:
+    pass
 
 GCF_BASE_NAME = "stanford//expedient"
 '''The domain name used in URNs when creating certificates mainly.
@@ -43,7 +46,10 @@ GCF_X509_KEY_DIR = join(CONF_DIR, "gcf-x509.key")
 GCF_X509_CRED_DIR = join(CONF_DIR, "gcf-x509.cred")
 '''The location of credentials used by expedient for the GCF.'''
 
-from localsettings import *
+try:
+    from localsettings import *
+except ImportError:
+    pass
 
 GCF_X509_CH_CERT = join(GCF_X509_TRUSTED_CERT_DIR, "ch.crt")
 '''The absolute path of the clearinghouse certificate for Expedient.'''
