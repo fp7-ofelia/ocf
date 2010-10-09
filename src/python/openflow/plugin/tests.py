@@ -841,10 +841,15 @@ class Tests(SettingsTestCase):
         self.client.login(
             username=self.su, password="password")
         resp = self.client.get(reverse("html_plugin_home", args=[slice.id]))
+
         self.assertEqual(resp.status_code, 200)
         d = pq(resp.content, parser="html")
         checked = d(":checked")
         
+        self.assertEqual(
+            OpenFlowSwitch.objects.count(),
+            NUM_SWITCHES_PER_AGG*NUM_DUMMY_OMS)
+        self.assertEqual(num_ports, OpenFlowInterfaceSliver.objects.count())
         self.assertEqual(len(checked), num_ports)
         
         # check the select flowspace page
