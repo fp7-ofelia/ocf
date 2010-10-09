@@ -164,17 +164,12 @@ def _get_tree_ports(of_aggs, pl_aggs):
     
     # For each connection in the network
     for cnxn in of_cnxn_qs:
-        logger.debug("clusters: %s" % pformat(clusters))
-        logger.debug("tree: %s" % tree)
         # check if the endpoints' switches are in the same cluster
         a = cnxn.src_iface.switch.id
         b = cnxn.dst_iface.switch.id
-        logger.debug("Checking cnxn %s from %s to %s" % (cnxn, a, b))
         if a in clusters and b in clusters and clusters[a] == clusters[b]:
             continue
         # if not, then add the connection to the tree
-        logger.debug("Adding cnxn %s-%s to tree" % (
-            cnxn.src_iface.id, cnxn.dst_iface.id))
         tree.add(cnxn.src_iface.id)
         tree.add(cnxn.dst_iface.id)
         if a not in clusters:
@@ -184,7 +179,6 @@ def _get_tree_ports(of_aggs, pl_aggs):
         
         # merge the two clusters together
         merged_cluster = clusters[a] | clusters[b]
-        logger.debug("merged cluster: %s" % merged_cluster)
         
         for x in merged_cluster:
             clusters[x] = merged_cluster
@@ -220,7 +214,6 @@ def home(request, slice_id):
         slice.modified = True
         slice.save()
         
-        logger.debug("Done adding resources")
         return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
     else:
@@ -228,7 +221,6 @@ def home(request, slice_id):
             slice_set=slice).values_list("id", flat=True))
         checked_ids.extend(PlanetLabNode.objects.filter(
             slice_set=slice).values_list("id", flat=True))
-        logger.debug("Interfaces in slice: %s" % checked_ids)
 
         aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
                        Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
