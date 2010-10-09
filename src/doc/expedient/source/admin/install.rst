@@ -421,9 +421,4 @@ You can run the internal tests by executing::
 
     $ python expedient/clearinghouse/manage.py test_expedient
 
-Caveat: 8 of those tests will fail (some of the rpc4django tests). This
-is a known bug. You can run those tests separately with::
-
-    $ python expedient/clearinghouse/manage.py test rpc4django
-
-They should pass then.
+You should get an `OK` at the end if all tests pass.
