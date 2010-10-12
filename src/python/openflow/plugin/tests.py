@@ -581,8 +581,9 @@ class Tests(SettingsTestCase):
             project.description = proj_desc
             project.save()
         else:
-            project = Project.objects.create(
-                name=proj_name, description=proj_desc,
+            project, _ = create_or_update(Project,
+                filter_attrs=dict(name=proj_name),
+                new_attrs=dict(description=proj_desc),
             )
 
         if not slice:
@@ -768,7 +769,7 @@ class Tests(SettingsTestCase):
     def test_gapi_duplicate_slice_name(self):
         """Check that a slice with different urn but same name raises DuplicateSliceNameException."""
         
-        self.test_gapi_CreateSliver()
+        resv_rspec = self.test_gapi_CreateSliver()
         
         # get new credentials with new urn
         self.slice_cred = clearinghouse.CreateSlice(
@@ -776,11 +777,39 @@ class Tests(SettingsTestCase):
         self.slice_gid = credential.Credential(
             string=self.slice_cred).get_gid_object()
         
-        self.assertRaises(
-            DuplicateSliceNameException,
-            self.test_gapi_CreateSliver,
-        )
+        # same slice different urn with same project name
+        try:
+            self.rpc.CreateSliver(
+                self.slice_gid.get_urn(),
+                [self.slice_cred],
+                resv_rspec,
+                {},
+            )
+        except xmlrpclib.Fault as e:
+            self.assertEqual(e.faultCode, "Duplicate slice name.")
+        else:
+            self.fail("Did not generate expected fault.")
     
+        # same slice different urn with different project name
+        root = et.fromstring(resv_rspec)
+        
+        # change the project name
+        elem = root.find(".//project")
+        elem.set("name", "new proj name")
+        resv_rspec = et.tostring(root)
+
+        try:
+            self.rpc.CreateSliver(
+                self.slice_gid.get_urn(),
+                [self.slice_cred],
+                resv_rspec,
+                {},
+            )
+        except xmlrpclib.Fault as e:
+            self.assertEqual(e.faultCode, "Duplicate slice name.")
+        else:
+            self.fail("Did not generate expected fault.")
+
     def test_gapi_project_name_change_CreateSliver(self):
         resv_rspec = self.test_gapi_CreateSliver()
         new_proj_name = "new project name"

@@ -21,7 +21,7 @@ from django.db.utils import IntegrityError
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
-class OpenFlowGAPIException(): pass
+class OpenFlowGAPIException(Exception): pass
 
 class DuplicateSliceNameException(OpenFlowGAPIException):
     def __init__(self, slice_name):
