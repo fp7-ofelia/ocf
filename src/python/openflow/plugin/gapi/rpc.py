@@ -11,6 +11,7 @@ from django.conf import settings
 from decorator import decorator
 from openflow.plugin.gapi import gapi
 from expedient.clearinghouse.slice.models import Slice
+from openflow.plugin.gapi.gapi import DuplicateSliceNameException
 
 logger = logging.getLogger("openflow.plugin.gapi.rpc")
 
@@ -37,6 +38,13 @@ def no_such_slice(slice_urn):
     "Raise a no such slice exception."
     fault_code = 'No such slice.'
     fault_string = 'The slice named by %s does not exist' % (slice_urn)
+    raise xmlrpclib.Fault(fault_code, fault_string)
+
+def duplicate_slice_name(slice_name):
+    "Raise duplicate slice name exception."
+    fault_code = "Duplicate slice name."
+    fault_string = "The slice name is already in use. Please choose a" \
+        " different slice name."
     raise xmlrpclib.Fault(fault_code, fault_string)
 
 def require_creds(use_slice_urn):
@@ -91,6 +99,8 @@ def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
         return gapi.CreateSliver(slice_urn, rspec, kwargs["request"].user)
     except Slice.DoesNotExist:
         no_such_slice(slice_urn)
+    except DuplicateSliceNameException as e:
+        duplicate_slice_name(e.slice_name)
     
 @require_creds(True)
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],

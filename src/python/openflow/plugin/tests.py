@@ -34,6 +34,7 @@ from expedient_geni.models import GENISliceInfo
 import xmlrpclib
 from expedient.common.utils.transport import TestClientTransport
 from expedient.common.utils import create_or_update
+from openflow.plugin.gapi.gapi import DuplicateSliceNameException
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -435,8 +436,7 @@ class Tests(SettingsTestCase):
                     len(fs), 2*DummyOMSwitch.objects.get(dpid=dpid).nPorts)
             
     def test_gapi_existing_slice(self):
-        """Check that a slice created through the web or some other way is
-        available through the gapi interface."""
+        """Check that a slice created through the web or some other way is available through the gapi interface."""
         
         self.test_start_slice()
         
@@ -765,6 +765,22 @@ class Tests(SettingsTestCase):
             [self.slice_cred], {"geni_slice_urn": self.slice_gid.get_urn()})
         self.assertEqual(ret_rspec, expected_rspec)
         
+    def test_gapi_duplicate_slice_name(self):
+        """Check that a slice with different urn but same name raises DuplicateSliceNameException."""
+        
+        self.test_gapi_CreateSliver()
+        
+        # get new credentials with new urn
+        self.slice_cred = clearinghouse.CreateSlice(
+            self.user_cert.save_to_string())
+        self.slice_gid = credential.Credential(
+            string=self.slice_cred).get_gid_object()
+        
+        self.assertRaises(
+            DuplicateSliceNameException,
+            self.test_gapi_CreateSliver,
+        )
+    
     def test_gapi_project_name_change_CreateSliver(self):
         resv_rspec = self.test_gapi_CreateSliver()
         new_proj_name = "new project name"

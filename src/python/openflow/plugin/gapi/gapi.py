@@ -17,8 +17,19 @@ from expedient.clearinghouse.users.models import UserProfile
 from expedient_geni.models import GENISliceInfo
 from expedient.clearinghouse.project.views import create_project_roles
 from expedient.common.middleware import threadlocals
+from django.db.utils import IntegrityError
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
+
+class OpenFlowGAPIException(): pass
+
+class DuplicateSliceNameException(OpenFlowGAPIException):
+    def __init__(self, slice_name):
+        self.slice_name = slice_name
+        super(DuplicateSliceNameException, self).__init__(
+            "Slice name '%s' is already associated with a different project."
+            % slice_name
+        )
 
 def get_slice(slice_urn):
     # get the slice
@@ -98,12 +109,16 @@ def CreateSliver(slice_urn, rspec, user):
         
         # create the slice
         logger.debug("Creating slice")
-        slice = Slice.objects.create(
-            name=slice_name,
-            description=slice_desc,
-            project=project,
-            owner=user,
-        )
+        
+        try:
+            slice = Slice.objects.create(
+                name=slice_name,
+                description=slice_desc,
+                project=project,
+                owner=user,
+            )
+        except IntegrityError:
+            raise DuplicateSliceNameException(slice_name)
 
     logger.debug("Creating/updating slice info")
     
