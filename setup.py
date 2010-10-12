@@ -70,7 +70,7 @@ test.run_tests = run_tests
 
 setup(
     name="expedient",
-    version="0.3.1",
+    version="0.3.3",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
     author_email="jnaous@stanford.edu",
@@ -92,6 +92,7 @@ setup(
         'django-renderform',
         'webob',
         'pyOpenSSL',
+        'lxml',
         'MySQL-python>=1.2.1p2',
         'pyquery',
     ],
