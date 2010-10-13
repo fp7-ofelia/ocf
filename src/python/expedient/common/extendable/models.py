@@ -247,7 +247,7 @@ class Extendable(models.Model):
         
     def as_leaf_class(self):
         '''Return this instance as the farthest descendant of its class'''
-        if self.leaf_name == self.__class__.__name__ and self.module_name == self.__class__.__module__:
+        if self.is_instance_of(self.__class__):
             return self
         else:
             try:
@@ -258,3 +258,9 @@ class Extendable(models.Model):
                 raise
             klass = getattr(mod, self.leaf_name)
             return klass.objects.get(pk=self.pk)
+
+    def is_instance_of(self, klass):
+        """Is the object an instance of the passed class C{klass}?"""
+        
+        return self.leaf_name == klass.__name__ and self.module_name == klass.__module__
+    
