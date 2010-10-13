@@ -21,12 +21,15 @@ from expedient_geni.forms import UploadCertForm
 logger = logging.getLogger("expedient_geni.views")
 TEMPLATE_PATH = "expedient_geni"
 
-def aggregate_create(request, agg_model):
+def aggregate_create(request, agg_model,
+                     redirect=lambda inst: reverse("home")):
     '''
     Create a GENI Aggregate.
     
     @param request: The request.
     @param model: The child subclass for the aggregate.
+    @keyword redirect: Function that takes the created instance and returns
+        a url to redirect to.
     '''
     
     def pre_save(instance, created):
@@ -63,13 +66,16 @@ def aggregate_create(request, agg_model):
         },
         success_msg=success_msg)
     
-def aggregate_edit(request, agg_id, agg_model):
+def aggregate_edit(request, agg_id, agg_model,
+                     redirect=lambda inst: reverse("home")):
     """
     Update a GENI Aggregate.
     
     @param request: The request object
     @param agg_id: the aggregate id
     @param agg_model: the GENI Aggregate subclass.
+    @keyword redirect: Function that takes the created instance and returns
+        a url to redirect to.
     """
     
     def success_msg(instance):
@@ -79,7 +85,7 @@ def aggregate_edit(request, agg_id, agg_model):
         request, obj_id=agg_id, model=agg_model,
         template=TEMPLATE_PATH+"/aggregate_crud.html",
         template_object_name="aggregate",
-        redirect=lambda instance:reverse("home"),
+        redirect=redirect,
         form_class=geni_aggregate_form_factory(agg_model),
         success_msg=success_msg)
 
