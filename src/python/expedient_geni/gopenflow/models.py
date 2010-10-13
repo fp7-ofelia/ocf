@@ -58,5 +58,5 @@ An OpenFlow Aggregate exposed through the GENI API.
                 'agg_id': self.id,
                 'slice_id': slice.id,
             },
-        )+"?next="+next
+        )+"?next=%s" % next
     

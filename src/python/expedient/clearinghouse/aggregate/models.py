@@ -150,10 +150,10 @@ No information available.
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_delete" % prefix,
-                           kwargs={'agg_id': self.id})+"?next="+next
+                           kwargs={'agg_id': self.id})+"?next=%s" % next
         except NoReverseMatch:
             return reverse("aggregate_delete",
-                           kwargs={'agg_id': self.id})+"?next="+next
+                           kwargs={'agg_id': self.id})+"?next=%s" % next
 
     @classmethod
     def get_aggregates_url(cls):
@@ -202,7 +202,7 @@ No information available.
         try:
             return reverse("%s_aggregate_project_add" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'proj_id': project.id})+"?next="+next
+                                   'proj_id': project.id})+"?next=%s" % next
         except NoReverseMatch:
             logger.debug("Giving permission to use aggregate to %s" % project)
             give_permission_to("can_use_aggregate", self.as_leaf_class(), project)
@@ -228,7 +228,7 @@ No information available.
         try:
             return reverse("%s_aggregate_project_remove" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'proj_id': project.id})+"?next="+next
+                                   'proj_id': project.id})+"?next=%s" % next
         except NoReverseMatch:
             # Stop all the slices in the project for this aggregate.
             for slice in project.slice_set.all():
@@ -250,7 +250,7 @@ No information available.
         try:
             return reverse("%s_aggregate_slice_add" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'slice_id': slice.id})+"?next="+next
+                                   'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
             give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
@@ -268,7 +268,7 @@ No information available.
         try:
             return reverse("%s_aggregate_slice_remove" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'slice_id': slice.id})+"?next="+next
+                                   'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
             try:
                 self.as_leaf_class().stop_slice(slice)
@@ -285,7 +285,7 @@ No information available.
         try:
             return reverse("%s_aggregate_user_add" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'user_id': user.id})+"?next="+next
+                                   'user_id': user.id})+"?next=%s" % next
         except NoReverseMatch:
             give_permission_to("can_use_aggregate", self.as_leaf_class(), user)
             return next
@@ -299,7 +299,7 @@ No information available.
         try:
             return reverse("%s_aggregate_user_remove" % prefix,
                            kwargs={'agg_id': self.id,
-                                   'user_id': user.id})+"?next="+next
+                                   'user_id': user.id})+"?next=%s" % next
         except NoReverseMatch:
             delete_permission("can_use_aggregate", self.as_leaf_class(), user)
             return next
