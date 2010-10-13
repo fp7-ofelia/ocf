@@ -56,7 +56,7 @@ def aggregate_create(request, agg_model,
     return generic_crud(
         request, obj_id=None, model=agg_model,
         template=TEMPLATE_PATH+"/aggregate_crud.html",
-        redirect=lambda instance:reverse("home"),
+        redirect=redirect,
         form_class=geni_aggregate_form_factory(agg_model),
         pre_save=pre_save,
         post_save=post_save,
