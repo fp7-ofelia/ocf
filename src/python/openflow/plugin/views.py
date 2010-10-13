@@ -132,16 +132,30 @@ def aggregate_crud(request, agg_id=None):
         },
     )
     
-@require_objs_permissions_for_view(
-    perm_names=["can_edit_aggregate"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(OpenFlowAggregate, "agg_id"),
-    methods=["POST"])
 def aggregate_add_links(request, agg_id):
     """
     Show page to add static connections to other aggregates.
     """
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
+    
+    return handle_add_links(
+        request, aggregate,
+        extra_context={
+            "breadcrumbs": (
+                ('Home', reverse("home")),
+                ("Update OpenFlow Aggregate", reverse("openflow_aggregate_edit", args=[agg_id])),
+                ("Edit Static Links", reverse("openflow_aggregate_add_links", args=[agg_id])),
+            ),
+        }
+    )
+    
+def handle_add_links(request, aggregate,
+                     template=TEMPLATE_PATH+"/aggregate_add_links.html",
+                     extra_context={}):
+    """Perform the actual request."""
+
+    must_have_permission(
+        request.user, aggregate, "can_edit_aggregate")
     
     # Get the queryset of all openflow connections to/from this aggregate
     of_iface_filter = (
@@ -228,20 +242,17 @@ def aggregate_add_links(request, agg_id):
         else:
             existing_links_form = None
 
+    ctx = {
+        "existing_links_form": existing_links_form,
+        "new_connection_form": new_cnxn_form.as_table(),
+        "new_other_connection_form": new_other_cnxn_form.as_table(),
+        "aggregate": aggregate,
+    }
+    ctx.update(**extra_context)
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/aggregate_add_links.html",
-        extra_context={
-            "existing_links_form": existing_links_form,
-            "new_connection_form": new_cnxn_form.as_table(),
-            "new_other_connection_form": new_other_cnxn_form.as_table(),
-            "aggregate": aggregate,
-            "breadcrumbs": (
-                ('Home', reverse("home")),
-                ("Update OpenFlow Aggregate", reverse("openflow_aggregate_edit", args=[agg_id])),
-                ("Edit Static Links", reverse("openflow_aggregate_add_links", args=[agg_id])),
-            ),
-        },
+        template=template,
+        extra_context=ctx,
     )
 
 def aggregate_add_to_slice(request, agg_id, slice_id):
@@ -252,6 +263,11 @@ def aggregate_add_to_slice(request, agg_id, slice_id):
     
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
     slice = get_object_or_404(Slice, id=slice_id)
+    
+    return handle_add_to_slice(request, aggregate, slice)
+    
+def handle_add_to_slice(request, aggregate, slice):
+    """Perform that actual add_to_slice request."""
     
     must_have_permission(request.user, aggregate, "can_use_aggregate")
     must_have_permission(slice.project, aggregate, "can_use_aggregate")
