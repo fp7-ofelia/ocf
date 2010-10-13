@@ -18,10 +18,8 @@ import logging
 import traceback
 from urlparse import urlparse
 from expedient.common.utils.transport import TestClientTransport
-import os
-from sfa.trust.certificate import Keypair
 from sfa.trust.gid import GID
-from expedient.common.tests.utils import test_to_http, drop_to_shell
+from expedient.common.tests.utils import test_to_http
 from expedient.common.middleware import threadlocals
 
 logger = logging.getLogger("expedient_geni.models")
@@ -180,7 +178,7 @@ class GENIAggregate(Aggregate):
         proxy = self.get_user_client(user)
 
         try:
-            reserved = proxy.CreateSliver(
+            _ = proxy.CreateSliver(
                 info.slice_urn, [slice_cred], rspec,
                 [dict(name=settings.GCF_BASE_NAME,
                       urn=get_ch_urn(),
