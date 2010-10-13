@@ -3,12 +3,14 @@
 {% block title %}{% if create %}Create{% else %}Update{% endif %} Aggregate.{% endblock title %}
 
 {% block head %}
+{% if not create %}
 <script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
 <script>
 	$(document).ready(function() {
-		get_status({{ object.id }}, "{% url aggregate_status_img object.id %}");
+		get_status({{ aggregate.id }}, "{% url aggregate_status_img aggregate.id %}");
 	});
 </script>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -20,7 +22,7 @@
 	<tr>
 		<th>Current status:</th>
 		<td class="status">
-			<img class="am-status-img" id="status_{{ object.id }}"
+			<img class="am-status-img" id="status_{{ aggregate.id }}"
 			src="{% url img_media 'status-question-small.jpg' %}">
 		</td>
 	</tr>
