@@ -81,7 +81,7 @@ def _urn_to_dpid(urn):
     """
     Change from a switch URN to a dpid.
     """
-    m = switch_re.search(urn)
+    m = external_switch_re.search(urn)
     
     if not m:
         raise BadURNError(urn)
@@ -100,7 +100,7 @@ def _urn_to_port(urn):
     Get the dpid and port from a urn specifiying a port.
     """
 
-    m = port_re.search(urn)
+    m = external_port_re.search(urn)
     if not m:
         raise BadURNError(urn)
     

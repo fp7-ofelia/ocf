@@ -8,6 +8,7 @@ from pyquery import PyQuery as pq
 from lxml import etree as et
 from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch
 from django.contrib.auth.models import User
+from django.conf import settings
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
     OpenFlowInterfaceSliver, FlowSpaceRule, OpenFlowConnection,\
     NonOpenFlowConnection, OpenFlowSwitch, OpenFlowSliceInfo
@@ -34,7 +35,7 @@ from expedient_geni.models import GENISliceInfo
 import xmlrpclib
 from expedient.common.utils.transport import TestClientTransport
 from expedient.common.utils import create_or_update
-from openflow.plugin.gapi.gapi import DuplicateSliceNameException
+from geni.util.urn_util import publicid_to_urn
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -905,5 +906,20 @@ class Tests(SettingsTestCase):
         tables = d("table.saved")
         self.assertEqual(2, len(tables))
         
+    def test_external_rspec(self):
+        self.test_create_aggregates()
+        adv_rspec = rspec_mod.get_resources(None, None)
         
+        d1 = rspec_mod.parse_external_rspec(adv_rspec)
         
+        # replace all the urn prefixes with external ones
+        test_prefix = publicid_to_urn(
+            "IDN %s//%s" % ("test//test", settings.OPENFLOW_GCF_BASE_SUFFIX)
+        )
+        adv_rspec2 = adv_rspec.replace(
+            rspec_mod.OPENFLOW_GAPI_RSC_URN_PREFIX, test_prefix)
+
+        d2 = rspec_mod.parse_external_rspec(adv_rspec2)
+        
+        self.assertEqual(d1, d2)
+
