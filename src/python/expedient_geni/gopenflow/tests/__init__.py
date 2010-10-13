@@ -98,9 +98,12 @@ class Tests(SettingsTestCase):
                 url="test://testserver:80"+reverse("dummy_gopenflow"),
             )
         )
+        self.assertEqual(GCFOpenFlowAggregate.objects.count(), 1)
         self.assertRedirects(
             resp,
-            expected_url=reverse("gopenflow_aggregate_add_links", args=[1]),
+            expected_url=reverse(
+                "gopenflow_aggregate_add_links",
+                args=[GCFOpenFlowAggregate.objects.all()[0].id]),
         )
         exp_switches, exp_links = parse_external_rspec(self.of.adv_rspec)
         
