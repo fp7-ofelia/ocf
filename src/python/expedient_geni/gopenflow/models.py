@@ -9,6 +9,8 @@ from openflow.plugin.models import \
     create_or_update_switches, create_or_update_links, get_raw_topology
 from openflow.plugin.gapi.rspec import create_resv_rspec, parse_external_rspec
 from expedient.common.middleware import threadlocals
+from expedient.common.permissions.shortcuts import must_have_permission
+from django.core.urlresolvers import reverse
 
 logger = logging.getLogger("gopenflow.models")
 
@@ -43,3 +45,18 @@ An OpenFlow Aggregate exposed through the GENI API.
         
     def get_raw_topology(self):
         return get_raw_topology(self)
+    
+    def add_to_slice(self, slice, next):
+        """Override the add_to_slice method to define the controller.
+        
+        See L{Aggregate.add_to_slice}.
+        """
+        
+        return reverse(
+            "gopenflow_aggregate_slice_add",
+            kwargs={
+                'agg_id': self.id,
+                'slice_id': slice.id,
+            },
+        )+"?next="+next
+    
