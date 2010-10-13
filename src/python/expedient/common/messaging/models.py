@@ -21,9 +21,9 @@ class DatedMessageManager(models.Manager):
         @type msg_type: One of DatedMessage.TYPE_*
         @param kwargs: filter arguments (e.g. username='dumbuser')
         '''
-        
+        max_length = DatedMessage._meta.get_field("msg_text").max_length
         m = self.create(
-            msg_text=msg_text, type=msg_type, sender=sender,
+            msg_text=msg_text[:max_length], type=msg_type, sender=sender,
         )
         for user in User.objects.filter(**kwargs):
             m.users.add(user)
@@ -43,13 +43,15 @@ class DatedMessageManager(models.Manager):
             Defaults to DatedMessage.TYPE_ANNOUNCE
         @type msg_type: One of DatedMessage.TYPE_*
         '''
+
+        max_length = DatedMessage._meta.get_field("msg_text").max_length
         
         if type(user) == User:
             rcvr = user
         else:
             rcvr = User.objects.get(username=user)
             
-        m = self.create(msg_text=msg_text, type=msg_type, sender=sender)
+        m = self.create(msg_text=msg_text[:max_length], type=msg_type, sender=sender)
         m.users.add(rcvr)
         
     def delete_messages_for_user(self, msgs, user):
@@ -96,7 +98,7 @@ class DatedMessage(models.Model):
                                     editable=False)
     users = models.ManyToManyField(User, related_name="messages",
                                    verbose_name="Recipients")
-    msg_text = models.TextField("Message")
+    msg_text = models.CharField("Message", max_length=200)
     sender = models.ForeignKey(User, related_name="sent_messages",
                                editable=False, null=True, blank=True)
     
