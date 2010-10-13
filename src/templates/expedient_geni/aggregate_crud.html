@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}{% if create %}Create{% else %}Update{% endif %} {{ name }}.{% endblock title %}
+{% block title %}{% if create %}Create{% else %}Update{% endif %} Aggregate.{% endblock title %}
+
+{% block head %}
+<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
+<script>
+	$(document).ready(function() {
+		get_status({{ object.id }}, "{% url aggregate_status_img object.id %}");
+	});
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="main">
@@ -10,7 +19,10 @@
 	{% if not create %}
 	<tr>
 		<th>Current status:</th>
-		<td class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+		<td class="status">
+			<img class="am-status-img" id="status_{{ object.id }}"
+			src="{% url img_media 'status-question-small.jpg' %}">
+		</td>
 	</tr>
 	{% endif %}
     </table>
