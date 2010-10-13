@@ -117,7 +117,9 @@ class Tests(SettingsTestCase):
             self.links_to_set(exp_links))
         
     def test_reserve_sliver(self):
+        
         self.test_add_aggregate()
+        
         proj_name = "test project"
         proj_desc = "test project description"
         slice_name = "test slice"
@@ -145,6 +147,8 @@ class Tests(SettingsTestCase):
             tp_src=(123,123),
         )
         
+        agg = GCFOpenFlowAggregate.objects.all()[0]
+        
         # setup threadlocals
         tl = threadlocals.get_thread_locals()
         tl["user"] = self.su
@@ -154,7 +158,18 @@ class Tests(SettingsTestCase):
         )
         tl["project"] = project
 
-        GCFOpenFlowAggregate.objects.all()[0].add_to_project(project, None)
+        url = reverse("project_add_agg", args=[project.id])
+        response = self.client.post(
+            path=url,
+            data={"id": agg.id},
+        )
+        
+        self.assertTrue(project.aggregates.count() == 1)
+        
+        self.assertRedirects(
+            response,
+            url,
+        )
         
         slice = Slice.objects.create(
             project=project,
@@ -170,7 +185,47 @@ class Tests(SettingsTestCase):
         info.ssh_public_key = "def"
         info.save()
         
-        GCFOpenFlowAggregate.objects.all()[0].add_to_slice(slice, None)
+        slice_add_agg_url = reverse("slice_add_agg", args=[slice.id])
+
+        # add aggregate to slice
+        gopenflow_aggregate_slice_add_url = reverse(
+            "gopenflow_aggregate_slice_add",
+            kwargs={
+                "agg_id": agg.id,
+                "slice_id": slice.id,
+            }
+        )
+
+        # post the form to add aggregate to slice
+        response = self.client.post(
+            path=slice_add_agg_url,
+            data={"id": agg.id},
+        )
+        
+        # should go the openflow special add aggregates page
+        self.assertRedirects(
+            response,
+            gopenflow_aggregate_slice_add_url+ "?next=" + slice_add_agg_url,
+        )
+    
+        # Set the slice info
+        response = test_get_and_post_form(
+            self.client,
+            gopenflow_aggregate_slice_add_url+ "?next=" + slice_add_agg_url,
+            params=dict(
+                controller_url="tcp:blabla:6633",
+                password="password",
+            )
+        )
+        
+        self.assertRedirects(
+            response,
+            slice_add_agg_url,
+        )
+        
+        self.assertEqual(
+            slice.aggregates.count(), 1,
+            "Did not add aggregate to slice.")
         
         # select ports and switches
         random.seed(0)
