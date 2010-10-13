@@ -116,7 +116,7 @@ class DatedMessage(models.Model):
 
 def clean_messages(sender, **kwargs):
     '''
-    If there are no more users for this messages, delete it from
+    If there are no more users for this message, delete it from
     the database.
     '''
     if kwargs['created'] == False:
