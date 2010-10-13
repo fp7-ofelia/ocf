@@ -98,8 +98,10 @@ class Tests(SettingsTestCase):
                 url="test://testserver:80"+reverse("dummy_gopenflow"),
             )
         )
-        self.assertRedirects(resp, reverse("home"), 
-                             msg_prefix="response was %s" % resp)
+        self.assertRedirects(
+            resp,
+            expected_url=reverse("gopenflow_aggregate_add_links", args=[1]),
+        )
         exp_switches, exp_links = parse_external_rspec(self.of.adv_rspec)
         
         new_rspec = gapi.ListResources({}, None)
