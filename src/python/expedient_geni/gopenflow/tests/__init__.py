@@ -205,7 +205,7 @@ class Tests(SettingsTestCase):
         # should go the openflow special add aggregates page
         self.assertRedirects(
             response,
-            gopenflow_aggregate_slice_add_url+ "?next=" + slice_add_agg_url,
+            gopenflow_aggregate_slice_add_url + "?next=" + slice_add_agg_url,
         )
     
         # Set the slice info
