@@ -141,12 +141,15 @@ class Command(NoArgsCommand):
                     # add slivers
                     slivers = []
                     for dpid, port in slice_dict["ifaces"]:
-                        sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
-                            slice=slice,
-                            resource=OpenFlowInterface.objects.get(
-                                port_num=port, switch__datapath_id=dpid),
-                        )
-                        slivers.append(sliver)
+                        try:
+                            sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
+                                slice=slice,
+                                resource=OpenFlowInterface.objects.get(
+                                    port_num=port, switch__datapath_id=dpid),
+                            )
+                            slivers.append(sliver)
+                        except OpenFlowInterfaceSliver.DoesNotExist:
+                            continue
                         
                     # add flowspace
                     for sfs_dict in slice_dict["sfs"]:
