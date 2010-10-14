@@ -526,13 +526,14 @@ def create_resv_rspec(user, slice, aggregate=None):
             f = getattr(fs, "%s_start" % tag)
             t = getattr(fs, "%s_end" % tag)
             d = {}
-            if f is not None:
+            if f is not None and f != "":
                 d["from"] =  str(f)
-            if t is not None: 
+            if t is not None and t != "": 
                 d["to"] = str(t)
-            et.SubElement(
-                fs_elem, tag, d,
-            )
+            if d:
+                et.SubElement(
+                    fs_elem, tag, d,
+                )
     
     return et.tostring(root)
 
