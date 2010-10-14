@@ -148,7 +148,7 @@ class Command(NoArgsCommand):
                                     port_num=port, switch__datapath_id=dpid),
                             )
                             slivers.append(sliver)
-                        except OpenFlowInterfaceSliver.DoesNotExist:
+                        except OpenFlowInterface.DoesNotExist:
                             continue
                         
                     # add flowspace
