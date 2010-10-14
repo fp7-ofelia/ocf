@@ -4,7 +4,7 @@ Created on Sep 13, 2010
 @author: jnaous
 '''
 import logging
-from expedient_geni.models import GENIAggregate
+from expedient_geni.models import GENIAggregate, GENISliceInfo
 from openflow.plugin.models import \
     create_or_update_switches, create_or_update_links, get_raw_topology
 from openflow.plugin.gapi.rspec import create_resv_rspec, parse_external_rspec
@@ -51,6 +51,14 @@ An OpenFlow Aggregate exposed through the GENI API.
         
         See L{Aggregate.add_to_slice}.
         """
+        
+        info, _ = GENISliceInfo.objects.get_or_create(
+            slice=slice,
+        )
+        
+        if not info.ssh_private_key or not info.ssh_public_key:
+            info.generate_ssh_keys()
+            info.save()
         
         return reverse(
             "gopenflow_aggregate_slice_add",
