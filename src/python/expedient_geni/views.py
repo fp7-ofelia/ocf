@@ -81,11 +81,15 @@ def aggregate_edit(request, agg_id, agg_model,
     def success_msg(instance):
         return "Successfully updated aggregate %s." % instance.name
     
+    def post_save(instance, created):
+        instance.update_resources()
+    
     return generic_crud(
         request, obj_id=agg_id, model=agg_model,
         template=TEMPLATE_PATH+"/aggregate_crud.html",
         template_object_name="aggregate",
         redirect=redirect,
+        post_save=post_save,
         form_class=geni_aggregate_form_factory(agg_model),
         success_msg=success_msg)
 
