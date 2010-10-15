@@ -8,6 +8,7 @@ import re
 from django.core.management.base import NoArgsCommand
 from expedient.clearinghouse.project.models import Project
 from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from expedient_geni.models import GENISliceInfo
 try:
     from json import load
 except ImportError:
@@ -139,6 +140,14 @@ class Command(NoArgsCommand):
                         controller_url=slice_dict["controller_url"],
                         password=slice_dict["password"],
                     )
+
+                    info, _ = GENISliceInfo.objects.get_or_create(
+                        slice=slice,
+                    )
+                    
+                    if not info.ssh_private_key or not info.ssh_public_key:
+                        info.generate_ssh_keys()
+                        info.save()
                     
                     # add aggregates to slices
                     for aggregate in OpenFlowAggregate.objects.all():
