@@ -4,6 +4,7 @@ Created on Jul 4, 2010
 @author: jnaous
 '''
 
+import re
 from django.db import models
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.utils import certtransport
@@ -86,8 +87,9 @@ class GENISliceInfo(models.Model):
         """
         parts = self.slice_urn.split("+")
         name = parts[-1]
+        name = re.sub(r"[^0-9a-z_]", "", name)
         prefix = parts[1]
-        base = prefix.partition(":")[2]
+        base = prefix.split(":")[-1]
         return base+"_"+name
 
 def _add_geni_slice_info(sender, instance=None, created=None, **kwargs):
