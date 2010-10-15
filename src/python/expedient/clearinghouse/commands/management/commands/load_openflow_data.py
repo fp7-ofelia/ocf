@@ -125,6 +125,10 @@ class Command(NoArgsCommand):
                 for aggregate in OpenFlowAggregate.objects.all():
                     give_permission_to("can_use_aggregate", aggregate, user)
                     give_permission_to("can_use_aggregate", aggregate, project)
+
+                for aggregate in GCFOpenFlowAggregate.objects.all():
+                    give_permission_to("can_use_aggregate", aggregate, user)
+                    give_permission_to("can_use_aggregate", aggregate, project)
                 
                 # add slices to project
                 for slice_dict in project_dict["slices"]:
