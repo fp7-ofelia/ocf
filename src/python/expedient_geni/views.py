@@ -98,7 +98,7 @@ def user_cert_manage(request, user_id):
     
     user = get_object_or_404(User, pk=user_id)
     
-    must_have_permission(request.user, user, "can_change_certs")
+    must_have_permission(request.user, user, "can_change_user_cert")
     
     cert_fname = get_user_cert_fname(user)
     if not os.access(cert_fname, os.F_OK):
@@ -125,7 +125,7 @@ def user_cert_generate(request, user_id):
     
     user = get_object_or_404(User, pk=user_id)
     
-    must_have_permission(request.user, user, "can_change_certs")
+    must_have_permission(request.user, user, "can_change_user_cert")
     
     cert_fname = get_user_cert_fname(user)
     key_fname = get_user_key_fname(user)
@@ -179,7 +179,7 @@ def user_cert_upload(request, user_id):
     
     user = get_object_or_404(User, pk=user_id)
     
-    must_have_permission(request.user, user, "can_change_certs")
+    must_have_permission(request.user, user, "can_change_user_cert")
 
     if request.method == "POST":
         form = UploadCertForm(data=request.POST, files=request.FILES)
