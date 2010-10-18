@@ -32,6 +32,7 @@ PRIVS_MAP = dict(
     CreateSliver=('createsliver',),
     DeleteSliver=('deleteslice',),
     SliverStatus=('getsliceresources',),
+    Shutdown=('shutdown',),
 )
 
 def no_such_slice(slice_urn):

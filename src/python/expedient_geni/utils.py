@@ -208,6 +208,8 @@ def create_slice_credential(user_gid, slice_gid):
     @type user_gid: C{sfa.trust.gid.GID}
     @param slice_gid: The slice's gid
     @type slice_gid: C{sfa.trust.gid.GID}
+    @return: The credential
+    @rtype: C{sfa.trust.credential.Credential}
     '''
     
     return cred_util.create_credential(
@@ -222,6 +224,8 @@ def create_user_credential(user_gid):
     
     @param user_gid: The user's cert
     @type user_gid: C{sfa.trust.gid.GID}
+    @return: The credential
+    @rtype: C{sfa.trust.credential.Credential}
     '''
     
     return cred_util.create_credential(

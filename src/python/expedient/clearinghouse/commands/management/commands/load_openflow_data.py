@@ -7,6 +7,8 @@ Created on Oct 7, 2010
 import re
 from django.core.management.base import NoArgsCommand
 from expedient.clearinghouse.project.models import Project
+from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from expedient_geni.models import GENISliceInfo
 try:
     from json import load
 except ImportError:
@@ -71,6 +73,10 @@ class Command(NoArgsCommand):
             '--start_slices', action='store_true', dest='start_slices',
             help='Start the slices after creating them? Default is False',
         ),
+        make_option(
+            '--append', action='store_true', dest='append',
+            help='Add the information to the slice or replace?',
+        ),
     )
 
     def handle_noargs(self, **options):
@@ -82,6 +88,7 @@ class Command(NoArgsCommand):
         do_aggs = options.get("load_aggs")
         do_slices = options.get("load_slices")
         start_slices = options.get("start_slices")
+        append = options.get("append")
         
         f = open(filename)
         data = load(f)
@@ -107,7 +114,7 @@ class Command(NoArgsCommand):
                         resp["Location"]))
         if do_slices:
             for project_dict in data["projects"]:
-                project = Project.objects.create(
+                project, _ = Project.objects.get_or_create(
                     name=project_dict["name"],
                     description=project_dict["description"],
                 )
@@ -116,6 +123,10 @@ class Command(NoArgsCommand):
                 
                 # add aggregates to project
                 for aggregate in OpenFlowAggregate.objects.all():
+                    give_permission_to("can_use_aggregate", aggregate, user)
+                    give_permission_to("can_use_aggregate", aggregate, project)
+
+                for aggregate in GCFOpenFlowAggregate.objects.all():
                     give_permission_to("can_use_aggregate", aggregate, user)
                     give_permission_to("can_use_aggregate", aggregate, project)
                 
@@ -133,20 +144,34 @@ class Command(NoArgsCommand):
                         controller_url=slice_dict["controller_url"],
                         password=slice_dict["password"],
                     )
+
+                    info, _ = GENISliceInfo.objects.get_or_create(
+                        slice=slice,
+                    )
+                    
+                    if not info.ssh_private_key or not info.ssh_public_key:
+                        info.generate_ssh_keys()
+                        info.save()
                     
                     # add aggregates to slices
                     for aggregate in OpenFlowAggregate.objects.all():
+                        give_permission_to("can_use_aggregate", aggregate, slice)
+
+                    for aggregate in GCFOpenFlowAggregate.objects.all():
                         give_permission_to("can_use_aggregate", aggregate, slice)
                     
                     # add slivers
                     slivers = []
                     for dpid, port in slice_dict["ifaces"]:
-                        sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
-                            slice=slice,
-                            resource=OpenFlowInterface.objects.get(
-                                port_num=port, switch__datapath_id=dpid),
-                        )
-                        slivers.append(sliver)
+                        try:
+                            sliver, _ = OpenFlowInterfaceSliver.objects.get_or_create(
+                                slice=slice,
+                                resource=OpenFlowInterface.objects.get(
+                                    port_num=port, switch__datapath_id=dpid),
+                            )
+                            slivers.append(sliver)
+                        except OpenFlowInterface.DoesNotExist:
+                            continue
                         
                     # add flowspace
                     for sfs_dict in slice_dict["sfs"]:

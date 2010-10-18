@@ -59,15 +59,8 @@
 	</table>
 </div>
 
+<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
 <script>
-	function get_status(am_id, url) {
-		$.ajax({
-			url: url,
-			success: function(data) {
-				$('img#status_'+am_id).attr("src", data);
-			}
-		});
-	}
 	{% for generic_am in aggregate_list %}
 	get_status({{ generic_am.id }}, "{% url aggregate_status_img generic_am.id %}");
 	{% endfor %}
