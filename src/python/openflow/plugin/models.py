@@ -27,7 +27,7 @@ parse_logger = logging.getLogger("OpenflowModelsParsing")
 def as_is_slugify(value):
     return value
 
-cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(\w+):(?P<port>\d+)$")
+cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]):(?P<port>\d+)$")
 def validate_controller_url(value):
     def error():
         raise ValidationError(
