@@ -318,18 +318,12 @@ You will need to do the following:
    the Expedient host.
 #. Configure MySQL to allow Expedient to create its users and databases.
 
-For step 1 above on an OpenSuSE installation, look at :ref:`_admin-rpm-install-database`
+For step 1 above on an OpenSuSE installation, look at :ref:`admin-rpm-install-database`
 
 For step 2 above, you can use an Expedient function::
 
     $ cd expedient/src/python
-    $ PYTHONPATH=.:expedient/clearinghouse python
-    >>> from expedient.clearinghouse import settings
-    >>> from expedient.clearinghouse.commands.utils import create_user
-    >>> create_user(<DB root username>, <DB root password>,
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-        settings.DATABASE_NAME,
-        settings.DATABASE_HOST or "localhost")
+    $ PYTHONPATH=.:expedient/clearinghouse python -c 'from expedient.clearinghouse import settings; from expedient.clearinghouse.commands.utils import create_user; create_user("<DB root username>", "<DB root password>", settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME, settings.DATABASE_HOST or "localhost")'
 
 Replace ``<DB root username>`` and ``<DB root password>`` with your
 database's root username and password. This will probably be
