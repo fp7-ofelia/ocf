@@ -82,7 +82,10 @@ def _get_nodes_links(of_aggs, pl_aggs):
     
     for i, agg in enumerate(of_aggs):
         agg_ids.append(agg.pk)
-        switches = OpenFlowSwitch.objects.filter(aggregate__pk=agg.pk)
+        switches = OpenFlowSwitch.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict(
@@ -91,7 +94,10 @@ def _get_nodes_links(of_aggs, pl_aggs):
     
     for i, agg in enumerate(pl_aggs):
         agg_ids.append(agg.pk)
-        pl_nodes = PlanetLabNode.objects.filter(aggregate__pk=agg.pk)
+        pl_nodes = PlanetLabNode.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
@@ -101,11 +107,15 @@ def _get_nodes_links(of_aggs, pl_aggs):
     # get all connections with both interfaces in wanted aggregates
     of_cnxn_qs = OpenFlowConnection.objects.filter(
         src_iface__aggregate__id__in=agg_ids,
+        src_iface__available=True,
         dst_iface__aggregate__id__in=agg_ids,
+        dst_iface__available=True,
     )
     non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
         of_iface__aggregate__id__in=agg_ids,
         resource__id__in=id_to_idx.keys(),
+        of_iface__available=True,
+        resource__available=True,
     )
     
     for cnxn in of_cnxn_qs:
@@ -159,7 +169,9 @@ def _get_tree_ports(of_aggs, pl_aggs):
     # Get the set of all openflow connections in network
     of_cnxn_qs = OpenFlowConnection.objects.filter(
         src_iface__aggregate__id__in=of_agg_ids,
+        src_iface__available=True,
         dst_iface__aggregate__id__in=of_agg_ids,
+        dst_iface__available=True,
     )
     
     # For each connection in the network
@@ -186,7 +198,9 @@ def _get_tree_ports(of_aggs, pl_aggs):
     # get the set of non openflow connections in the aggregates
     non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
         of_iface__aggregate__id__in=of_agg_ids,
+        of_iface__available=True,
         resource__aggregate__id__in=pl_agg_ids,
+        resource__available=True,
     )
 
     # add the ports that are connected to the planetlab nodes
@@ -194,7 +208,10 @@ def _get_tree_ports(of_aggs, pl_aggs):
     tree.update(iface_ids)
     tree.update(
         PlanetLabNode.objects.filter(
-            aggregate__id__in=pl_agg_ids).values_list("id", flat=True))
+            aggregate__id__in=pl_agg_ids,
+            available=True,
+        ).values_list("id", flat=True),
+    )
     
     # return the list of interface ids
     return list(tree)
