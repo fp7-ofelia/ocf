@@ -261,7 +261,7 @@ at {{ agg.location }}.
       <th class="connections">Connections</th>
     </tr>
     {% for rsc in agg.resource_set.all %}
-    {% if rsc|leaf_class_is:planetlab_node_class %}
+    {% if rsc.available and rsc|leaf_class_is:planetlab_node_class %}
     {% with rsc.as_leaf_class as node %}
     <tr class="body planetlab {% cycle 'odd' 'even' %}">
       <td class="select_checkbox">
@@ -309,7 +309,7 @@ at {{ agg.location }}.
       <th class="ports">Connections (Port and Remote Port)</th>
     </tr>
     {% for rsc in agg.resource_set.all %}
-    {% if rsc|leaf_class_is:ofswitch_class %}
+    {% if rsc.available and rsc|leaf_class_is:ofswitch_class %}
     {% with rsc.as_leaf_class as switch %}
     <tr class="body openflow">
       <td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
