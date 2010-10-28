@@ -182,7 +182,7 @@ production networks, and is currently deployed in several universities.
                     for f in fs._meta.fields:
                         if f.name != "slivers":
                             v = getattr(fs, f.name)
-                            if v is not None and v is not "":
+                            if v is not None and v != "":
                                 fsd[f.name] = v
                             else:
                                 fsd[f.name] = "*"
