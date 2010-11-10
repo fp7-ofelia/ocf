@@ -221,6 +221,21 @@ class GENIAggregate(Aggregate):
         # TODO: fill up
         raise NotImplementedError()
         
+    def update_resources(self):
+        """Parse the rspec and update resources in the database.
+        
+        Pull the rspec from the aggregate and parse it into resources stored
+        in the database.
+        """
+        proxy = self.get_expedient_client()
+        rspec = proxy.ListResources(
+            [self.get_am_cred()],
+            {"geni_compressed": False, "geni_available": True})
+        
+        logger.debug("Got rspec:\n%s" % rspec)
+
+        self._from_rspec(rspec)
+        
     #####################################################################
     # Overrides from expedient.clearinghouse.aggregate.models.Aggregate #
     #####################################################################
@@ -257,22 +272,6 @@ class GENIAggregate(Aggregate):
             info.save()
         
         return next
-
-    def update_resources(self):
-        """Parse the rspec and update resources in the database.
-        
-        Pull the rspec from the aggregate and parse it into resources stored
-        in the database.
-        """
-        proxy = self.get_expedient_client()
-        rspec = proxy.ListResources(
-            [self.get_am_cred()],
-            {"geni_compressed": False, "geni_available": True})
-        
-        logger.debug("Got rspec:\n%s" % rspec)
-
-        self._from_rspec(rspec)
-        
 
     #####################################################################
     # Subclasses must override the below functions                      #
