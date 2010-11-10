@@ -36,7 +36,7 @@ Contents:
    
    user/index
    admin/index
-..   developer/index
+   developer/index
 
 
 Indices and tables

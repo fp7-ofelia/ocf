@@ -82,13 +82,15 @@ Apache that verifies that the certificate chain for incoming users are
 correct.
 
 These certificates are installed wherever the ``GCF_X509_TRUSTED_CERT_DIR`` (see
-settings_) in your :file:`localsettings.py` points. For a default OpenSuSE RPM
+settings_) in your :file:`localsettings.py` points. For a default
 install, this would be
-:file:`/etc/expedient/gcf-x509-trusted.crt`. Copy the new certificate there, and then you
-will need to run :command:`make` in that directory. You will also need to
+:file:`/etc/expedient/gcf-x509-trusted.crt`. Copy the new certificate
+there. The next step is to link that certificate using its hash in the
+``SSLCACertificatePath`` setting of your apache vhost file. In a default
+package install, you can do this by running :command:`make` in :file:`/etc/expedient/apache/ca-certs`. You will also need to
 restart Apache. *IMPORTANT*: The Makefile assumes that the certificates you
 add all have a ``.crt`` extension. Only certificate files with that extension
-work (a mere rename is sufficient).
+work (a rename is sufficient).
 
 The XMLRPC URL for the GENI API is of the form
 ``https://<expedient.host>:<port>/openflow/gapi/``.

@@ -3,7 +3,8 @@
 Installing Expedient
 ====================
 
-There are currently two ways to install Expedient:
+There are currently two ways to install Expedient. If you're developing just a
+plugin, you can use the RPM install method:
 
 * :ref:`admin-rpm-install`
 * :ref:`admin-git-install`
