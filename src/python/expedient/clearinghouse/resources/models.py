@@ -33,6 +33,11 @@ class Resource(Extendable):
         Slice, through="Sliver", verbose_name="Slices this resource is used in")
     
     def update_timestamp(self):
+        """Set the resource's status change timestamp to now.
+        
+        This method does not save the object, so the object still
+        needs to be manually saved.
+        """
         self.status_change_timestamp = datetime.now()
     
     def __unicode__(self):
