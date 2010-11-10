@@ -78,8 +78,8 @@ class SSHAggregate(Aggregate):
         " access. Once approved, users get SSH access to all" \
         " machines using a public key they provide."
 
+    admin_username = models.CharField(max_length=255)
     private_key = models.TextField()
-    username = models.CharField(max_length=255)
 
     add_user_command = models.TextField(
         default="sudo useradd -m %(username)s",

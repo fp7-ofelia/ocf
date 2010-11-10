@@ -164,13 +164,13 @@ used for creating a user (:func:`add_user_command`), deleting a user
 creating or deleting users:
 
 .. literalinclude:: ssh_models.py
-   :lines: 87-111
+   :lines: 84-108
 
 We have also defined some helper functions to add and delete users from
 particular server (:func:`add_user` and :func:`del_user`).
 
 .. literalinclude:: ssh_models.py
-   :lines: 138,154-162,175
+   :lines: 135,151-159,172
 
 These functions use the private method :func:`_op_user`. Note that in case of
 error, we post a message to the user:
@@ -188,7 +188,7 @@ The :func:`check_status` method overrides the :class:`Aggregate` class's
 aggregate are up by calling their :func:`is_alive` method.
 
 .. literalinclude:: ssh_models.py
-   :lines: 177-181
+   :lines: 174-178
 
 At a minimum any child that inherits from Aggregate_ must override
 `start_slice`_ and `stop_slice`_ methods. Our :class:`SSHAggregate` class does
@@ -252,6 +252,24 @@ since we don't rollback changes in case of errors.
 .. literalinclude:: ssh_models.py
    :lines: 205-213
 
+Relationships
+.............
+
+Below we show a summary of the relationships between slices, resources, aggregates, and slivers.
+
+.. image:: slice-aggregate-resource-relationships.png
+   :align: center
+   :width: 300
+
+Each aggregate is connected to a number of resources. Each slice
+is also related to a number of resources through a sliver. In our
+example, an :class:`SSHAggregate` consists of a number of
+:class:`SSHServer`s. A slice can have a number of
+:class:`SSHServerSliver`s that are each part of an
+:class:`SSHServer`.
+
+
+
 .. _`Resource`: ../api/expedient.clearinghouse.resources.models.Resource-class.html
 .. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
 .. _`Sliver`: ../api/expedient.clearinghouse.resources.models.Sliver-class.html
@@ -261,3 +279,28 @@ since we don't rollback changes in case of errors.
 .. _threadlocals: ../api/expedient.common.middleware.threadlocals-module.html
 .. _messaging: ../api/expedient.common.messaging-module.html
 .. _`post_message_to_current_user`: ../api/expedient.clearinghouse.utils-module.html#post_message_to_current_user
+
+Writing Views and Templates
+---------------------------
+
+The next step is writing some views and HTML templates for
+managing the SSH aggregate in Expedient. This includes pages for
+adding the aggregate to Expedient, editing it, and deleting it.
+
+Add Aggregate View
+..................
+
+This is the page that the user gets redirected to when she wants
+to add an SSH aggregate to Expedient. First, we should sketch out
+what it looks like::
+
+                    +--------------+
+    Admin Username: |              |
+                    +--------------+
+
+                    +-----------------------+
+    Private Key   : |                       |
+                    +-----------------------+
+
+    
+    
