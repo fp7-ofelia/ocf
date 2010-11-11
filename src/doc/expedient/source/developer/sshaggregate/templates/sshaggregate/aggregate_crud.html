@@ -1,0 +1,28 @@
+{% extends "sshaggregate_base.html" %}
+
+{% block title %}Add/Update SSH Aggregate.{% endblock title %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	{% if aggregate %}
+	<h1>Update aggregate {{ aggregate.name }}</h1>
+	{% else %}
+	<h1>Add aggregate</h1>
+	{% endif %}
+	<form method="post" action="">{% csrf_token %}
+		<table class="formtable_noborder">
+		{{ formset.as_table }}
+	    </table>
+		<div class="center">
+			<input type="submit" value="Next" /> | 
+			{% if aggregate %}
+			<a href="{% url aggregate_delete aggregate.pk %}">Delete</a> |
+			{% endif %} 
+			<a href="{% url home %}">Cancel</a>
+		</div>
+	</form>
+</div>
+{% endblock content %}
