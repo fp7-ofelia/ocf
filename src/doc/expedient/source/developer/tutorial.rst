@@ -292,12 +292,13 @@ Writing Views and Templates
 
 The next step is writing some views and HTML templates for
 managing the SSH aggregate in Expedient. This includes pages for
-adding the aggregate to Expedient, editing it, and deleting it.
+adding the aggregate to Expedient or editing it.
 
-Add Aggregate View
-..................
+Views
+.....
 
-This is the page that the user gets redirected to when she wants
+The add/edit aggregate view is the page that the user gets
+redirected to when she wants
 to add an SSH aggregate to Expedient. There will be two steps for adding an
 aggregate. In the first, we store information about the aggregate as a
 whole. Below, we sketch out what it looks like. We recommend you always sketch
@@ -347,7 +348,73 @@ entered in the previous step::
                    | Save | | Done | Cancel
                    +------+ +------+
 
-These are our two views. Now, create the file :file:`sshaggregate/views.py`
+These are our two views. We will use a very similar view for
+updating aggregates. In fact, we will use the same view with a
+minor change: The information about the aggregate would already
+be preloaded into the tables. Now, create the file
+:file:`sshaggregate/views.py` 
 and modify it to look like the following::
 
 .. literalinclude:: views.py
+
+The :func:`aggregate_crud` function uses the `generic_crud`_
+generic view to add or update existing
+aggregates. :func:`generic_crud` simplifies many of the
+operations that are needed  for creating or updating database
+objects. Take a look at `generic_crud`_'s documentation before
+continuing.
+
+The :func:`aggregate_add_servers` view uses model formsets. See
+the Django documentation about `modelformset_factory`_. It
+is a convenient way to create and modify a number of objects:
+
+.. literalinclude:: views.py
+   :lines: 32
+
+Finally when returning a response we should use one of Django's
+`generic views`_ because they use `RequestContext`_ when
+generating the context for templates. This allows us to use
+context processors to add more variables into template contexts,
+one of which is the messages that you see at the top of each page:
+
+.. literalinclude:: views.py
+   :lines: 49-51
+
+.. _`generic_crud`: ../api/expedient.common.utils.views-module.html#generic_crud
+.. _`generic views`: http://docs.djangoproject.com/en/dev/ref/generic-views/
+.. _`modelformset_factory`: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#model-formsets
+.. _`RequestContext`: http://docs.djangoproject.com/en/dev/ref/templates/api/#subclassing-context-requestcontext
+
+Templates
+.........
+
+We need three templates:
+
+* :file:`sshaggregate/templates/sshaggregate/sshaggregate_base.html`
+* :file:`sshaggregate/templates/sshaggregate/aggregate_crud.html`
+* :file:`sshaggregate/templates/sshaggregate/aggregate_add_servers.html`
+
+There is quite a bit that happens behind the scenes in templates,
+and there are is a base template that you should use for creating
+your own templates. It is a good practice to create a base
+template for each plugin or django app from which all other
+templates in the plugin or app inherit. Here the base template is
+called :file:`sshaggregate_base.html`.
+
+Edit :file:`sshaggregate_base.html` to look like
+the following:
+
+.. literalinclude:: sshaggregate_base.html
+
+The base right now includes only one line specifying that it
+extends the :file:`base.html` template that is used as the base
+template for all the templates in Expedient. The base template
+has a few style headers and some javascript code that does magic
+like changing help text in tables that have the ``formtable``
+class into a question mark. You will see it in action here.
+
+Next edit the :file:`aggregate_crud.html` file to look like the
+following:
+
+.. literalinclude:: aggregate_crud.html
+
