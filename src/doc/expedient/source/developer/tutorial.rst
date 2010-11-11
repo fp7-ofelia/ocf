@@ -57,7 +57,7 @@ model, the resources' models, and any additional info that needs to be stored.
 
 Edit the :file:`sshaggregate/models.py` so it looks like this:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
     
 Let's go through the code section by section. We use paramiko in order to
 communicate with our SSH servers over SSH. Paramiko is a python SSH
@@ -71,7 +71,7 @@ extends `Resource`_ class. The `Resource`_ class defines a few common fields
 and operations for resources. All resources that can be reserved must inherit
 from the `Resource`_ class:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 13
 
 Most importantly, the resource is related to an
@@ -82,13 +82,13 @@ In the :class:`SSHServer` class, we just define
 some extra fields and functions. An :class:`SSHServer` instance has an IP
 Address and an SSH port number:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 14-24
 
 We also define two extra functions:
 :func:`is_alive` and :func:`exec_command`.
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 26,31-42,57-64
 
 The :func:`is_alive` function pings the server and checks that it is up, while
@@ -114,7 +114,7 @@ slice later.
 In our example, we don't have any per sliver information, so our
 :class:`SSHServerSliver` is empty:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 69
 
 We could have also not created the class at
@@ -128,7 +128,7 @@ Some types of resources might require some per-slice info. In our example,
 creating a slice requires a public key for the user, so the SSHSliceInfo class
 will store that required information:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 71-73
 
 SSHAggregate
@@ -139,7 +139,7 @@ generic `Aggregate`_ class. The `Aggregate`_ class defines some
 functions and fields that are shared among all aggregate classes. Aggregate
 plugins must always define an Aggregate_ class child.
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 75
 
 The :class:`SSHAggregate` class overrides the ``information`` field that
@@ -147,14 +147,14 @@ contains information about the aggregate and describes the aggregate
 type. This field is used in the information page that describes the aggregate
 type:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 76-79
 
 It also adds a ``private_key`` and a ``username`` fields that are used to
 login to the servers for administering them. These must be the same for all
 servers in the aggregate:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 81-85
 
 We also have three additional fields that specify the commands that should be
@@ -163,19 +163,19 @@ used for creating a user (:func:`add_user_command`), deleting a user
 (:func:`add_pubkey_command`). These commands will be executed in an SSH shell when
 creating or deleting users:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 84-108
 
 We have also defined some helper functions to add and delete users from
 particular server (:func:`add_user` and :func:`del_user`).
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 135,151-159,172
 
 These functions use the private method :func:`_op_user`. Note that in case of
 error, we post a message to the user:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 127-132
 
 This uses the messaging_ module and a utility function
@@ -187,7 +187,7 @@ The :func:`check_status` method overrides the :class:`Aggregate` class's
 :func:`check_status` method to also make sure that all the servers in the
 aggregate are up by calling their :func:`is_alive` method.
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 174-178
 
 At a minimum any child that inherits from Aggregate_ must override
@@ -198,17 +198,17 @@ The :func:`start_slice` method calls the parent class's :func:`start_slice`
 method because the parent class has some permission checking that we would
 rather not copy or redo:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 183-184
 
 It then gets needed information about the slice:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 183
 
 And the current user:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 184
 
 This line uses the threadlocals_ middleware that parses a request and stores
@@ -218,7 +218,7 @@ try to minimize using it.
 
 Then we get the slivers in the slice that are for resources in the aggregate:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 185,186
 
 Note that we don't just do ``resource__aggregate=self`` because that the
@@ -229,7 +229,7 @@ compare them using ids. We could have instead done
 Now we add the user to the server pointed to by each sliver, keeping track of
 our successes for rollback in case of error:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 188-189
 
 The :class:`SSHServerSliver`'s parent class has a pointer to the generic
@@ -237,19 +237,19 @@ resource. To obtain the leaf child that the sliver is pointing to, we need to
 use a special function. Otherwise, ``sliver.resource`` returns an object of
 type generic Resource_:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 191
 
 Then we add the user, paying attention to roll back the changes in case of
 errors:
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 193-203
 
 :func:`stop_slice` is very similar to :func:`start_slice` but a bit simpler
 since we don't rollback changes in case of errors.
 
-.. literalinclude:: ssh_models.py
+.. literalinclude:: models.py
    :lines: 205-213
 
 Relationships
@@ -268,7 +268,13 @@ example, an :class:`SSHAggregate` consists of a number of
 :class:`SSHServerSliver`s that are each part of an
 :class:`SSHServer`.
 
+Documenting Code
+................
 
+You'll notice that the code we wrote uses something very similar to javadoc
+for documenting our methods and classes. We use Epydoc_ for documenting code
+and automatically generating API docs from the code. Feel free to use whatever
+you like, but please document your code thoroughly.
 
 .. _`Resource`: ../api/expedient.clearinghouse.resources.models.Resource-class.html
 .. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
@@ -279,6 +285,7 @@ example, an :class:`SSHAggregate` consists of a number of
 .. _threadlocals: ../api/expedient.common.middleware.threadlocals-module.html
 .. _messaging: ../api/expedient.common.messaging-module.html
 .. _`post_message_to_current_user`: ../api/expedient.clearinghouse.utils-module.html#post_message_to_current_user
+.. _Epydoc: http://epydoc.sourceforge.net/
 
 Writing Views and Templates
 ---------------------------
@@ -291,16 +298,56 @@ Add Aggregate View
 ..................
 
 This is the page that the user gets redirected to when she wants
-to add an SSH aggregate to Expedient. First, we should sketch out
-what it looks like::
+to add an SSH aggregate to Expedient. There will be two steps for adding an
+aggregate. In the first, we store information about the aggregate as a
+whole. Below, we sketch out what it looks like. We recommend you always sketch
+out what your views will look like before writing them::
 
-                    +--------------+
-    Admin Username: |              |
-                    +--------------+
+                                 +-------------------------+
+    Admin Username:              |                         |
+                                 +-------------------------+
+                                 +-------------------------+
+    Private Key:                 |                         |
+                                 +-------------------------+
+                                 +-------------------------+
+    Add user command:            |                         |
+                                 +-------------------------+
+                                 +-------------------------+
+    Del user command:            |                         |
+                                 +-------------------------+
+                                 +-------------------------+
+    Add pubkey user command:     |                         |
+                                 +-------------------------+
 
-                    +-----------------------+
-    Private Key   : |                       |
-                    +-----------------------+
+                       +------+
+                       | Next |  Cancel
+                       +------+
 
-    
-    
+The next view is where the user specifies the SSH servers to add to this
+aggregate. All these servers can be administered using the same information
+entered in the previous step::
+
+    Add all servers that can be administered using the same information
+    here. You can click save to get more rows once you fill the existing
+    ones.
+
+    +------------------------------------------------------+
+    |                       Servers                        |
+    +---------------------------+--------------------------+
+    |     IP Address            |     SSH Port Number      |
+    +---------------------------+--------------------------+
+    |                           |                          |
+    +---------------------------+--------------------------+
+    |                           |                          |
+    +---------------------------+--------------------------+
+    |                           |                          |
+    +---------------------------+--------------------------+
+
+                   +------+ +------+
+                   | Save | | Done | Cancel
+                   +------+ +------+
+
+These are our two views. Now, create the file :file:`sshaggregate/views.py`
+and modify it to look like the following::
+
+.. literalinclude:: views.py
