@@ -29,7 +29,7 @@ def generic_crud(request, obj_id, model, template, redirect,
     @keyword form_class: the form class to use for the object
         (ModelForm subclass)
     @keyword extra_form_params: dict of additional keyword parameters to pass
-        to the form.
+        to the form when init'ing the form instance.
     @keyword template_object_name: name of the object field in the template
         context. This is only available when updating.
     @keyword pre_save: function to call before saving the object instantiated
