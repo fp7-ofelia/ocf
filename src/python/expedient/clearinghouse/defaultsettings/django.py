@@ -95,12 +95,12 @@ This needs to be overridden.
 '''
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
+TEMPLATE_LOADERS = [
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
-)
+]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
@@ -113,12 +113,12 @@ MIDDLEWARE_CLASSES = (
     'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
     'expedient_geni.middleware.CreateUserGID',
-)
+]
 
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'expedient_geni.backends.GENIRemoteUserBackend',
-)
+]
 
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
@@ -127,13 +127,13 @@ try:
 except ImportError:
     pass
 
-TEMPLATE_DIRS = (
+TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates'),
     os.path.join(SRC_DIR, 'templates/expedient/clearinghouse'),
     os.path.join(SRC_DIR, 'templates/expedient/common'),
-)
+]
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'expedient.clearinghouse.firstapp',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -168,7 +168,7 @@ INSTALLED_APPS = (
     'expedient.ui.rspec',
 ###### For Testing #######################
     'openflow.dummyom',
-)
+]
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -180,14 +180,14 @@ ACCOUNT_ACTIVATION_DAYS = 3
 AGGREGATE_LOGOS_DIR = "aggregate_logos/"
 '''Directory relative to MEDIA_ROOT where all aggregate logos are uploaded.'''
 
-TEMPLATE_CONTEXT_PROCESSORS = (
+TEMPLATE_CONTEXT_PROCESSORS = [
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     'django.core.context_processors.request',
     'expedient.common.messaging.context_processors.messaging',
-)
+]
 '''See Django documentation.'''
 
 # Enable debugging?
