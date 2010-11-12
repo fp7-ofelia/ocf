@@ -57,7 +57,7 @@ model, the resources' models, and any additional info that needs to be stored.
 
 Edit the :file:`sshaggregate/models.py` so it looks like this:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
     
 Let's go through the code section by section. We use paramiko in order to
 communicate with our SSH servers over SSH. Paramiko is a python SSH
@@ -71,7 +71,7 @@ extends `Resource`_ class. The `Resource`_ class defines a few common fields
 and operations for resources. All resources that can be reserved must inherit
 from the `Resource`_ class:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 13
 
 Most importantly, the resource is related to an
@@ -82,13 +82,13 @@ In the :class:`SSHServer` class, we just define
 some extra fields and functions. An :class:`SSHServer` instance has an IP
 Address and an SSH port number:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 14-24
 
 We also define two extra functions:
 :func:`is_alive` and :func:`exec_command`.
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 26,31-42,57-64
 
 The :func:`is_alive` function pings the server and checks that it is up, while
@@ -114,7 +114,7 @@ slice later.
 In our example, we don't have any per sliver information, so our
 :class:`SSHServerSliver` is empty:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 69
 
 We could have also not created the class at
@@ -128,7 +128,7 @@ Some types of resources might require some per-slice info. In our example,
 creating a slice requires a public key for the user, so the SSHSliceInfo class
 will store that required information:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 71-73
 
 SSHAggregate
@@ -139,7 +139,7 @@ generic `Aggregate`_ class. The `Aggregate`_ class defines some
 functions and fields that are shared among all aggregate classes. Aggregate
 plugins must always define an Aggregate_ class child.
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 75
 
 The :class:`SSHAggregate` class overrides the ``information`` field that
@@ -147,35 +147,38 @@ contains information about the aggregate and describes the aggregate
 type. This field is used in the information page that describes the aggregate
 type:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 76-79
 
 It also adds a ``private_key`` and a ``username`` fields that are used to
 login to the servers for administering them. These must be the same for all
 servers in the aggregate:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 81-85
 
 We also have three additional fields that specify the commands that should be
 used for creating a user (:func:`add_user_command`), deleting a user
 (:func:`del_user_command`), and adding a public key to a user
 (:func:`add_pubkey_command`). These commands will be executed in an SSH shell when
-creating or deleting users:
+creating or deleting users. Make sure that SSH servers you add
+allow you to execute these commands non-interactively
+(i.e. either login as root or give no-password sudo access to the
+commands for the user logging in to execute the commands) :
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 84-108
 
 We have also defined some helper functions to add and delete users from
 particular server (:func:`add_user` and :func:`del_user`).
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 135,151-159,172
 
 These functions use the private method :func:`_op_user`. Note that in case of
 error, we post a message to the user:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 127-132
 
 This uses the messaging_ module and a utility function
@@ -187,7 +190,7 @@ The :func:`check_status` method overrides the :class:`Aggregate` class's
 :func:`check_status` method to also make sure that all the servers in the
 aggregate are up by calling their :func:`is_alive` method.
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 174-178
 
 At a minimum any child that inherits from Aggregate_ must override
@@ -198,27 +201,22 @@ The :func:`start_slice` method calls the parent class's :func:`start_slice`
 method because the parent class has some permission checking that we would
 rather not copy or redo:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 183-184
 
 It then gets needed information about the slice:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 183
 
-And the current user:
+And the owner of the slice whose username will be used:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 184
-
-This line uses the threadlocals_ middleware that parses a request and stores
-information about the request in local thread storage. Even though this is
-usually not considered good practice, it simplifies much of the code. However,
-try to minimize using it.
 
 Then we get the slivers in the slice that are for resources in the aggregate:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 185,186
 
 Note that we don't just do ``resource__aggregate=self`` because that the
@@ -229,7 +227,7 @@ compare them using ids. We could have instead done
 Now we add the user to the server pointed to by each sliver, keeping track of
 our successes for rollback in case of error:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 188-189
 
 The :class:`SSHServerSliver`'s parent class has a pointer to the generic
@@ -237,19 +235,19 @@ resource. To obtain the leaf child that the sliver is pointing to, we need to
 use a special function. Otherwise, ``sliver.resource`` returns an object of
 type generic Resource_:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 191
 
 Then we add the user, paying attention to roll back the changes in case of
 errors:
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 193-203
 
 :func:`stop_slice` is very similar to :func:`start_slice` but a bit simpler
 since we don't rollback changes in case of errors.
 
-.. literalinclude:: models.py
+.. literalinclude:: sshaggregate/models.py
    :lines: 205-213
 
 Relationships
@@ -277,7 +275,6 @@ and automatically generating API docs from the code. Feel free to use whatever
 you like, but please document your code thoroughly.
 
 .. _`Resource`: ../api/expedient.clearinghouse.resources.models.Resource-class.html
-.. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
 .. _`Sliver`: ../api/expedient.clearinghouse.resources.models.Sliver-class.html
 .. _`Slice`: ../api/expedient.clearinghouse.slice.models.Slice-class.html
 .. _`start_slice`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html#start_slice
@@ -321,7 +318,7 @@ out what your views will look like before writing them::
                                  +-------------------------+
 
                        +------+
-                       | Next |  Cancel
+                       | Next | | Cancel
                        +------+
 
 The next view is where the user specifies the SSH servers to add to this
@@ -332,21 +329,39 @@ entered in the previous step::
     here. You can click save to get more rows once you fill the existing
     ones.
 
-    +------------------------------------------------------+
-    |                       Servers                        |
-    +---------------------------+--------------------------+
-    |     IP Address            |     SSH Port Number      |
-    +---------------------------+--------------------------+
-    |                           |                          |
-    +---------------------------+--------------------------+
-    |                           |                          |
-    +---------------------------+--------------------------+
-    |                           |                          |
-    +---------------------------+--------------------------+
+    +--------------------------------------------------------+
+    |                             +-------------------------+|
+    |Name:                        |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |IP Address:                  |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |SSH Port:                    |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |Delete:                      |                         ||
+    |                             +-------------------------+|
+    +--------------------------------------------------------+
+    
+    +--------------------------------------------------------+
+    |                             +-------------------------+|
+    |Name:                        |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |IP Address:                  |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |SSH Port:                    |                         ||
+    |                             +-------------------------+|
+    |                             +-------------------------+|
+    |Delete:                      |                         ||
+    |                             +-------------------------+|
+    +--------------------------------------------------------+
 
-                   +------+ +------+
-                   | Save | | Done | Cancel
-                   +------+ +------+
+                       +------+ 
+                       | Save | | Home
+                       +------+ 
 
 These are our two views. We will use a very similar view for
 updating aggregates. In fact, we will use the same view with a
@@ -355,7 +370,7 @@ be preloaded into the tables. Now, create the file
 :file:`sshaggregate/views.py` 
 and modify it to look like the following::
 
-.. literalinclude:: views.py
+.. literalinclude:: sshaggregate/views.py
 
 The :func:`aggregate_crud` function uses the `generic_crud`_
 generic view to add or update existing
@@ -368,7 +383,7 @@ The :func:`aggregate_add_servers` view uses model formsets. See
 the Django documentation about `modelformset_factory`_. It
 is a convenient way to create and modify a number of objects:
 
-.. literalinclude:: views.py
+.. literalinclude:: sshaggregate/views.py
    :lines: 32
 
 Finally when returning a response we should use one of Django's
@@ -377,7 +392,7 @@ generating the context for templates. This allows us to use
 context processors to add more variables into template contexts,
 one of which is the messages that you see at the top of each page:
 
-.. literalinclude:: views.py
+.. literalinclude:: sshaggregate/views.py
    :lines: 49-51
 
 .. _`generic_crud`: ../api/expedient.common.utils.views-module.html#generic_crud
@@ -404,7 +419,7 @@ called :file:`sshaggregate_base.html`.
 Edit :file:`sshaggregate_base.html` to look like
 the following:
 
-.. literalinclude:: sshaggregate_base.html
+.. literalinclude:: sshaggregate/templates/sshaggregate/sshaggregate_base.html
 
 The base right now includes only one line specifying that it
 extends the :file:`base.html` template that is used as the base
@@ -416,5 +431,155 @@ class into a question mark. You will see it in action here.
 Next edit the :file:`aggregate_crud.html` file to look like the
 following:
 
-.. literalinclude:: aggregate_crud.html
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+
+Let's go through the file. We want our template to extend our
+plugin's base template:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 1
+
+Expedient's base template :file:`base.html` has a number of
+blocks that can be extended.
+
+* ``title``: Gets used as the page's title.
+* ``head``: Any code in this block is added to the ``<head>``
+  element in the html document. You can use this space to add
+  javascript or css style blocks.
+* ``content``: This is where you should put your template's
+  body.
+
+We set the title:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 3
+
+There's nothing in the head:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 5-6
+
+Then our content start:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 8-9
+
+We specified that the template object name is ``aggregate`` when
+we used the :func:`generic_crud` function. So if it is specified
+in the template, it means that the template is being used to
+update an existing instance:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 10-11
+
+Otherwise, we are creating a new instance:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 12-14
+
+We then add the form to get the info about the aggregate:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_crud.html
+   :lines: 15-28
+
+Note that we use the ``{% csrf_token %}`` tag because Django's
+CSRF protection is enabled. Also note that we give the table in
+the form the ``formtable_noborder`` class which defines some css
+settings and lets javascript do its magic in moving help text
+into balloon tips.
+
+Next, create the
+:file:`sshaggregate/templates/sshaggregate/aggregate_add_servers.html`
+and edit it to look like the following:
+
+.. literalinclude:: sshaggregate/templates/sshaggregate/aggregate_add_servers.html
+
+This is similar to :file:`aggregate_crud.html`, so we won't go
+through it in detail.
+
+Connecting to Expedient
+-----------------------
+
+To add the plugin to Expedient, there are a few things we need to
+do:
+
+#. Write the URLs
+#. Modify Expedient settings to include the plugin
+
+Write the URLs
+..............
+
+Create the file :file:`sshaggregate/urls.py` and edit it to look
+like the following:
+
+.. literalinclude:: sshaggregate/urls.py
+
+We need three urls:
+
+* Creating the aggregate
+* Updating the aggregate
+* Adding/removing servers from the aggregate
+
+The Aggregate_ class by default expects the create and
+update urls to have a particular format:
+``<app_name>_aggregate_create`` and
+``<app_name>_aggregate_update``. If the plugin specified an
+additional URL ``<app_name>_aggregate_delete``, the user would be
+redirected to that URL when requesting to delete the aggregate
+instead of the default deletion confirmation page.
+
+Note that for both the create and update, we use the same
+:func:`aggregate_crud` function. In the create url, it will be
+called with no arguments, while in the edit url, it will be
+called with the ``agg_id`` argument.
+
+Update Settings
+...............
+
+First, we need to add the plugin to the list of installed
+apps. Edit your :file:`localsettings.py` file to do
+so. Eventually, if the plugin makes it into the Expedient
+distribution, the settings that you modify here will be added to
+the default settings. We will need to edit two settings.
+
+INSTALLED_APPS
+^^^^^^^^^^^^^^
+
+Add the following line to your :file:`localsettings.py`::
+
+    from expedient.clearinghouse.defaultsettings.django import INSTALLED_APPS
+    INSTALLED_APPS += [
+        'sshaggregate',
+    ]
+
+AGGREGATE_PLUGINS
+^^^^^^^^^^^^^^^^^
+
+The `AGGREGATE_PLUGINS`_ setting describes the aggregate plugins
+that are installed. See the `AGGREGATE_PLUGINS`_ setting
+documentation for more information
+
+    from expedient.clearinghouse.defaultsettings.expedient import AGGREGATE_PLUGINS
+    AGGREGATE_PLUGINS += [
+        ('sshaggregate.models.SSHAggregate', 'sshaggregate', 'sshaggregate.urls'),
+    ]
+
+.. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
+.. _`AGGREGATE_PLUGINS`: ../api/expedient.clearinghouse.defaultsettings.expedient-module.html#AGGREGATE_PLUGINS
+
+Testing
+-------
+
+Now, you will need to test your plugin to make everything
+works. The first phase of testing is going to be manual
+prelimiary testing to make sure that the plugin works
+well. Before you do so, make sure that you have performed a
+``manage.py syncdb`` on the running Expedient instance that you
+will use. Here we will cover automated testing.
+
+Django has extensive facilities for testing that come in quite
+handy. Create the :file:`sshaggregate/tests.py` and edit it to
+look like the following:
+
+.. literalinclude:: sshaggregate/tests.py
 
