@@ -29,19 +29,26 @@ def aggregate_add_servers(request, agg_id):
     
     agg = get_object_or_404(SSHAggregate, id=agg_id)
     servers = SSHServer.objects.filter(aggregate__id=agg_id)
-    ServerFormSet = modelformset_factory(SSHServer, can_delete=True, extra=3)
+    ServerFormSet = modelformset_factory(
+        SSHServer, can_delete=True, extra=3,
+        fields=["name", "ip_address", "ssh_port"],
+    )
 
     if request.method == "POST":
         formset = ServerFormSet(
             request.POST, queryset=servers)
         if formset.is_valid():
-            formset.save()
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.aggregate = agg
+                instance.save()
+            formset.save_m2m()
             post_message_to_current_user(
                 "Successfully added/updated servers "\
                 "to aggregate %s" % agg.name,
                 msg_type=DatedMessage.TYPE_SUCCESS)
             
-            return HttpResponseRedirect(reverse("home"))
+            return HttpResponseRedirect(request.path)
         
     else:
         formset = ServerFormSet(queryset=servers)
