@@ -78,6 +78,9 @@ class SSHAggregate(Aggregate):
         " access. Once approved, users get SSH access to all" \
         " machines using a public key they provide."
 
+    class Meta:
+        verbose_name = "SSH Aggregate"
+
     admin_username = models.CharField(max_length=255)
     private_key = models.TextField()
 
@@ -181,7 +184,7 @@ class SSHAggregate(Aggregate):
         super(SSHAggregate, self).start_slice(slice)
         
         slice_info = SSHSliceInfo.objects.get(slice=slice)
-        user = threadlocals.get_thread_locals()["user"]
+        user = slice.owner
         slivers = SSHServerSliver.objects.filter(
             slice=slice, resource__aggregate_id=self.id)
 
