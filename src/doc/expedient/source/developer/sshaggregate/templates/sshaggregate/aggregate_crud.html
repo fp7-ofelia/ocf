@@ -1,4 +1,4 @@
-{% extends "sshaggregate_base.html" %}
+{% extends "sshaggregate/sshaggregate_base.html" %}
 
 {% block title %}Add/Update SSH Aggregate.{% endblock title %}
 
@@ -14,7 +14,7 @@
 	{% endif %}
 	<form method="post" action="">{% csrf_token %}
 		<table class="formtable_noborder">
-		{{ formset.as_table }}
+		{{ form.as_table }}
 	    </table>
 		<div class="center">
 			<input type="submit" value="Next" /> | 
