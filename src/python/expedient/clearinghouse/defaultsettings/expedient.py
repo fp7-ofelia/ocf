@@ -5,16 +5,16 @@ Created on Aug 19, 2010
 @author: jnaous
 '''
 
-BASIC_AUTH_URLS = (
+BASIC_AUTH_URLS = [
     r'^/dummyom/.*',
-)
+]
 '''List of URL regular expressions that accept HTTP Basic Authentication.
 
 This is used to enable some tests to work.
 
 '''
 
-SITE_LOCKDOWN_EXCEPTIONS = (
+SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/register/.*$',
     r'^/accounts/activate/.*$',
     r'^/admin/.*',
@@ -23,14 +23,14 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/css/.*',
     r'^/static/media/.*',
     r'.*/xmlrpc/?',
-)
+]
 '''List of URL regular expressions that do not require the user to
 be logged in to access.'''
 
-UI_PLUGINS = (
+UI_PLUGINS = [
     ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
     ('expedient.ui.rspec.plugin', 'rspec_mgr', 'expedient.ui.rspec.urls'),
-)
+]
 '''List of UI plugins that are enabled in Expedient.
 
 This is a list of 3-tuples:
@@ -50,11 +50,11 @@ This is a list of 3-tuples:
 '''
 
 # Installed Aggregate Models
-AGGREGATE_PLUGINS = (
+AGGREGATE_PLUGINS = [
     ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
     ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
     ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
-)
+]
 '''List of aggregate plugins that are enabled in Expedient.
 
 This is a list of 3-tuples:
