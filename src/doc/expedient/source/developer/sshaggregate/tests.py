@@ -80,7 +80,7 @@ class Tests(TestCase):
         
         self.assertRedirects(
             response, reverse(aggregate_add_servers, args=[1]),
-            "Response was %s" % response.content)
+            msg_prefix="Response was %s" % response)
         self.assertEqual(SSHServer.objects.count(), 1)
         
     def test_create_delete_slice(self):
