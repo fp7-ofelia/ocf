@@ -148,14 +148,23 @@ type. This field is used in the information page that describes the aggregate
 type:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 76-79
+   :start-after: # SSHAggregate information field
+   :end-before: # SSHAggregate end information field
 
-It also adds a ``private_key`` and a ``username`` fields that are used to
+We have modified the verbose name used in for aggregate to make it easier to
+understand what the class is:
+
+.. literalinclude:: sshaggregate/models.py
+   :start-after: # SSHAggregate meta
+   :end-before: # SSHAggregate end meta
+
+It also adds a ``private_key`` and an ``admin_username`` fields that are used to
 login to the servers for administering them. These must be the same for all
 servers in the aggregate:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 81-85
+   :start-after: # SSHAggregate required fields
+   :end-before: # SSHAggregate end required fields
 
 We also have three additional fields that specify the commands that should be
 used for creating a user (:func:`add_user_command`), deleting a user
@@ -167,19 +176,24 @@ allow you to execute these commands non-interactively
 commands for the user logging in to execute the commands) :
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 84-108
+   :start-after: # SSHAggregate optional fields
+   :end-before: # SSHAggregate end optional fields
 
 We have also defined some helper functions to add and delete users from
 particular server (:func:`add_user` and :func:`del_user`).
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 135,151-159,172
+   :pyobject: SSHAggregate.add_user
+
+.. literalinclude:: sshaggregate/models.py
+   :pyobject: SSHAggregate.del_user
 
 These functions use the private method :func:`_op_user`. Note that in case of
 error, we post a message to the user:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 127-132
+   :start-after: # msg example
+   :end-before: # end msg example
 
 This uses the messaging_ module and a utility function
 `post_message_to_current_user`_ to post a message to the user indicating an
@@ -191,33 +205,41 @@ The :func:`check_status` method overrides the :class:`Aggregate` class's
 aggregate are up by calling their :func:`is_alive` method.
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 174-178
+   :pyobject: SSHAggregate.check_status
 
 At a minimum any child that inherits from Aggregate_ must override
 `start_slice`_ and `stop_slice`_ methods. Our :class:`SSHAggregate` class does
-that too.
+that too:
+
+.. literalinclude:: sshaggregate/models.py
+   :start-after: # start_slice func
+   :end-before: # start_slice call super
 
 The :func:`start_slice` method calls the parent class's :func:`start_slice`
 method because the parent class has some permission checking that we would
 rather not copy or redo:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 183-184
+   :start-after: # start_slice call super
+   :end-before: # start_slice end call super
 
 It then gets needed information about the slice:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 183
+   :start-after: # start_slice get info
+   :end-before: # start_slice get user
 
 And the owner of the slice whose username will be used:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 184
+   :start-after: # start_slice get user
+   :end-before: # start_slice get slivers
 
 Then we get the slivers in the slice that are for resources in the aggregate:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 185,186
+   :start-after: # start_slice get slivers
+   :end-before: # start_slice end info
 
 Note that we don't just do ``resource__aggregate=self`` because that the
 resource is related to :class:`SSHAggregate`'s parent class. So we need to
@@ -228,7 +250,8 @@ Now we add the user to the server pointed to by each sliver, keeping track of
 our successes for rollback in case of error:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 188-189
+   :start-after: # start_slice loop
+   :end-before: # Execute the command
 
 The :class:`SSHServerSliver`'s parent class has a pointer to the generic
 resource. To obtain the leaf child that the sliver is pointing to, we need to
@@ -236,19 +259,21 @@ use a special function. Otherwise, ``sliver.resource`` returns an object of
 type generic Resource_:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 191
+   :start-after: # Execute the command
+   :end-before: # start_slice add user
 
 Then we add the user, paying attention to roll back the changes in case of
 errors:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 193-203
+   :start-after: # start_slice add user
+   :end-before: # start_slice end loop
 
 :func:`stop_slice` is very similar to :func:`start_slice` but a bit simpler
 since we don't rollback changes in case of errors.
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 205-213
+   :pyobject: SSHAggregate.stop_slice
 
 Relationships
 .............
@@ -262,9 +287,9 @@ Below we show a summary of the relationships between slices, resources, aggregat
 Each aggregate is connected to a number of resources. Each slice
 is also related to a number of resources through a sliver. In our
 example, an :class:`SSHAggregate` consists of a number of
-:class:`SSHServer`s. A slice can have a number of
-:class:`SSHServerSliver`s that are each part of an
-:class:`SSHServer`.
+:class:`SSHServer` instances. A slice can have a number of
+:class:`SSHServerSliver` instances that are each part of an
+:class:`SSHServer` instance.
 
 Documenting Code
 ................
@@ -368,7 +393,7 @@ updating aggregates. In fact, we will use the same view with a
 minor change: The information about the aggregate would already
 be preloaded into the tables. Now, create the file
 :file:`sshaggregate/views.py` 
-and modify it to look like the following::
+and modify it to look like the following:
 
 .. literalinclude:: sshaggregate/views.py
 
@@ -393,7 +418,7 @@ context processors to add more variables into template contexts,
 one of which is the messages that you see at the top of each page:
 
 .. literalinclude:: sshaggregate/views.py
-   :lines: 49-51
+   :lines: 56-58
 
 .. _`generic_crud`: ../api/expedient.common.utils.views-module.html#generic_crud
 .. _`generic views`: http://docs.djangoproject.com/en/dev/ref/generic-views/
@@ -557,7 +582,7 @@ AGGREGATE_PLUGINS
 
 The `AGGREGATE_PLUGINS`_ setting describes the aggregate plugins
 that are installed. See the `AGGREGATE_PLUGINS`_ setting
-documentation for more information
+documentation for more information::
 
     from expedient.clearinghouse.defaultsettings.expedient import AGGREGATE_PLUGINS
     AGGREGATE_PLUGINS += [
