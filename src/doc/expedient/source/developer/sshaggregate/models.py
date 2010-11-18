@@ -57,8 +57,8 @@ class SSHServer(Resource):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(
-            self.ip_address,
-            port=self.port,
+            str(self.ip_address),
+            port=int(self.ssh_port),
             **connection_info
         )
         return client.exec_command(command)
@@ -125,8 +125,8 @@ class SSHAggregate(Aggregate):
         cmd = cmd + "; echo $?"
         _, stdout, _ = server.exec_command(
             cmd,
-            username=self.username,
-            pkey=self.private_key,
+            username=str(self.admin_username),
+            pkey=str(self.private_key),
         )
         
         lines = stdout.readlines()
@@ -202,7 +202,7 @@ class SSHAggregate(Aggregate):
         user = slice.owner
         # start_slice get slivers
         slivers = SSHServerSliver.objects.filter(
-            slice=slice, resource__aggregate_id=self.id)
+            slice=slice, resource__aggregate__id=self.id)
         # start_slice end info
         
         # start_slice loop
