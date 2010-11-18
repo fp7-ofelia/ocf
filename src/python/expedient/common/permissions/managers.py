@@ -20,6 +20,24 @@ class ExpedientPermissionManager(models.Manager):
     Implements methods for checking for missing permissions.
     """
     
+    _enabled = True
+    
+    def enable_checks(self):
+        """Enable permission checks."""
+        self._enabled = True
+        
+    def disable_checks(self):
+        """Disable permission checks."""
+        self._enabled = False
+    
+    def are_checks_enabled(self):
+        """Are permission checks enabled?
+        
+        @return: True if yes, False otherwise.
+        """
+        
+        return self._enabled
+    
     def _stringify_func(self, f):
         if callable(f):
             return "%s.%s" % (f.__module__, f.__name__)
@@ -130,6 +148,9 @@ class ExpedientPermissionManager(models.Manager):
             None if nothing is missing.
         @rtype: tuple (L{ExpedientPermission}, target) or (None, None)
         """
+        if not self.are_checks_enabled():
+            return (None, None)
+        
         from expedient.common.permissions.models import Permittee, \
             ObjectPermission
         

@@ -18,6 +18,10 @@ def get_permittee_from_threadlocals(kw):
     Wrapper to get a permittee keyword from threadlocals and make sure it is
     usable. 
     """
+    # Just skip if perm checks are disabled
+    if not ExpedientPermission.objects.are_checks_enabled():
+        return None
+    
     d = threadlocals.get_thread_locals()
     logger.debug("Got threadlocals %s" % d)
     try:
