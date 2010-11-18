@@ -88,7 +88,7 @@ def test_get_and_post_form(
     """
     post_url = post_url or url
     resp = client.get(url)
-    logger.debug("Response received using get: \n%s" % pformat(resp))
+    logger.debug("Response received using get: \n%s" % resp)
     form_params = parse_form(resp.content)
     logger.debug("Form params received: \n%s" % pformat(form_params))
     form_params.update(params)
