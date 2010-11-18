@@ -7,8 +7,9 @@ import logging
 
 def set_up(default_level, exception_levels=[]):
     """Setup logging for the system.
+    
     @param default_level: The default logging level for all loggers.
-    @param exception_level: a list of tuples (logger name, logging level)
+    @param exception_levels: a list of tuples (logger name, logging level)
         to set the logging levels for particular loggers.
     """
     if not hasattr(logging, "setup_done"):
