@@ -36,7 +36,25 @@ try:
 except IOError:
     # This is usually a permissions error becaue the file is
     # owned by root, but httpd is trying to access it.
-    logfile=logging.FileHandler(SFA_HTTPD_ACCESS_LOGFILE)
+    try:
+        logfile = logging.FileHandler(SFA_HTTPD_ACCESS_LOGFILE)
+    except IOError as e:
+        if e.errno != 13:
+            raise
+        
+        logfile = None
+        i = 1
+        while i < 10 and not logfile:
+            tmp_fname = SFA_HTTPD_ACCESS_LOGFILE + ".%s" % i
+            try:
+                logfile = logging.FileHandler(tmp_fname)
+                break
+            except IOError as e:
+                if e.errno != 13:
+                    raise
+            i = i + 1
+        if i < 10:
+            SFA_HTTPD_ACCESS_LOGFILE = tmp_fname
     
 formatter = logging.Formatter("%(asctime)s - %(message)s")
 logfile.setFormatter(formatter)
