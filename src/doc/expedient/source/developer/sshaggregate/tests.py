@@ -7,6 +7,7 @@ from expedient.clearinghouse.project.models import Project
 from expedient.common.tests.client import test_get_and_post_form
 from sshaggregate.views import aggregate_add_servers, aggregate_crud
 from sshaggregate.models import *
+from expedient.common.tests.utils import drop_to_shell
 
 class Tests(TestCase):
     
@@ -72,16 +73,15 @@ class Tests(TestCase):
             self.client,
             url=next_url,
             params={
+                "form-0-name": "localhost",
                 "form-0-ip_address": "127.0.0.1",
                 "form-0-ssh_port": "22",
-                "form-0-resource_ptr": "1",
             },
         )
         
-        print response
         self.assertRedirects(
             response, reverse(aggregate_add_servers, args=[1]),
-            "Response was %s" % response)
+            "Response was %s" % response.content)
         self.assertEqual(SSHServer.objects.count(), 1)
         
     def test_create_delete_slice(self):
