@@ -6,6 +6,9 @@ Contains functions to login and manage forms.
 @author: jnaous
 '''
 import urllib, urllib2, cookielib
+import logging
+from pprint import pformat
+logger = logging.getLogger("expedient.common.tests.client")
 
 def fake_login(client, user):
     """Setup the client to appear logged in even if it isn't.
@@ -85,12 +88,18 @@ def test_get_and_post_form(
     """
     post_url = post_url or url
     resp = client.get(url)
+    logger.debug("Response received using get: \n%s" % pformat(resp))
     form_params = parse_form(resp.content)
+    logger.debug("Form params received: \n%s" % pformat(form_params))
     form_params.update(params)
     for k in del_params:
         if k in form_params:
             del form_params[k]
+    for k, v in form_params.items():
+        if v == None:
+            del form_params[k]
     resp = client.post(post_url, form_params)
+    logger.debug("Posting back using params \n%s" % pformat(form_params))
     return resp
 
 class Browser(object):
