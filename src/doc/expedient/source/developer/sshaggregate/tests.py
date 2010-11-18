@@ -6,8 +6,7 @@ from expedient.common.permissions.models import ExpedientPermission
 from expedient.clearinghouse.project.models import Project
 from expedient.common.tests.client import test_get_and_post_form
 from sshaggregate.views import aggregate_add_servers, aggregate_crud
-from sshaggregate.models import *
-from expedient.common.tests.utils import drop_to_shell
+from sshaggregate.models import SSHAggregate, SSHServer
 
 class Tests(TestCase):
     

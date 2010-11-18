@@ -592,6 +592,15 @@ documentation for more information::
 .. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
 .. _`AGGREGATE_PLUGINS`: ../api/expedient.clearinghouse.defaultsettings.expedient-module.html#AGGREGATE_PLUGINS
 
+Default Settings
+^^^^^^^^^^^^^^^^
+
+All the settings you put in the :file:`localsettings.py` appear in Django's :mod:`settings` module. So if your application has some default settings that you would like to add, you will need to add a line similar to::
+
+    from sshaggregate.defaultsettings import *
+
+at the top of the :file:`localsettings.py` file.
+
 Testing
 -------
 

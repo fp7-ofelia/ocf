@@ -19,7 +19,6 @@ from expedient.clearinghouse.defaultsettings.site import *
 from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
-# Add new default settings here
 
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
@@ -40,7 +39,7 @@ except ImportError:
 try:
     # do the import here to check that the path exists before doing anything
     from localsettings import *
-
+    
     # Delete all the default required settings
     _modname = globals()['__name__']
     _this_mod = sys.modules[_modname]
