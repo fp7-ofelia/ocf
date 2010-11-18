@@ -47,11 +47,11 @@ FLOWVISORS = [
 
 This should be a list of dicts with the following keys:
 
-    * C{of_port}: The openflow port number the Flowvisor will use.
-    * C{xmlrpc_port}: The port number for XMLRPC calls to the Flowvisor.
-    * C{username}: The username to use for accessing the xmlrpc calls.
-    * C{password}: The password to use for accessing the xmlrpc calls.
-    * C{path}: The location of the flowvisor config file.
+    - C{of_port}: The openflow port number the Flowvisor will use.
+    - C{xmlrpc_port}: The port number for XMLRPC calls to the Flowvisor.
+    - C{username}: The username to use for accessing the xmlrpc calls.
+    - C{password}: The password to use for accessing the xmlrpc calls.
+    - C{path}: The location of the flowvisor config file.
 
 '''
 

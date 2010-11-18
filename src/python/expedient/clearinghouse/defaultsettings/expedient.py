@@ -35,17 +35,17 @@ UI_PLUGINS = [
 
 This is a list of 3-tuples:
 
-    #. The first element is the absolute path to a callable that describes
-       the plugin. It should take as input an
-       L{expedient.clearinghouse.slice.models.Slice} instance and return a
-       tuple (plugin name, plugin description, url to go to for access)
+    1. The first element is the absolute path to a callable that describes
+        the plugin. It should take as input an
+        L{expedient.clearinghouse.slice.models.Slice} instance and return a
+        tuple (plugin name, plugin description, url to go to for access)
        
-    #. The second element is the prefix that is prepended to all urls for
-       accessing the plugin. This should be unique across all plugins and
-       applications.
+    2. The second element is the prefix that is prepended to all urls for
+        accessing the plugin. This should be unique across all plugins and
+        applications.
        
-    #. The third element is the absolute path to the module that should be
-       included in URLConf and that contains all the plugin's URLs.
+    3. The third element is the absolute path to the module that should be
+        included in URLConf and that contains all the plugin's URLs.
 
 '''
 
@@ -59,13 +59,13 @@ AGGREGATE_PLUGINS = [
 
 This is a list of 3-tuples:
 
-    #. The first element is the absolute path to the Aggregate class.
+    1. The first element is the absolute path to the Aggregate class.
        
-    #. The second element is the prefix that is prepended to all urls for
+    2. The second element is the prefix that is prepended to all urls for
        accessing the plugin. This should be unique across all plugins and
        applications.
-       
-    #. The third element is the absolute path to the module that should be
+      
+    3. The third element is the absolute path to the module that should be
        included in URLConf and that contains all the plugin's URLs.
 
 '''
