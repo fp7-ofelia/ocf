@@ -73,17 +73,24 @@ class SSHSliceInfo(models.Model):
     public_key = models.TextField()
     
 class SSHAggregate(Aggregate):
+    # SSHAggregate information field
     information = "An aggregate of SSH servers that are controlled" \
         " by a single administrator, to which users can request" \
         " access. Once approved, users get SSH access to all" \
         " machines using a public key they provide."
-
+    # SSHAggregate end information field
+    
+    # SSHAggregate meta
     class Meta:
         verbose_name = "SSH Aggregate"
-
+    # SSHAggregate end meta
+    
+    # SSHAggregate required fields
     admin_username = models.CharField(max_length=255)
     private_key = models.TextField()
-
+    # SSHAggregate end required fields
+    
+    # SSHAggregate optional fields
     add_user_command = models.TextField(
         default="sudo useradd -m %(username)s",
         help_text="Specify the command to create a new user. " \
@@ -109,6 +116,7 @@ class SSHAggregate(Aggregate):
             " The command should return non-zero on failure " \
             " and 0 on success.",
     )
+    # SSHAggregate end optional fields
     
     def _op_user(self, op, server, cmd_subs, quiet=False):
         """common code for adding/removing users."""
@@ -127,12 +135,14 @@ class SSHAggregate(Aggregate):
         if ret != 0:
             error = "".join(lines[:-1])
             if not quiet:
+                # msg example
                 msg = "Failed to %s user on %s. Output was:\n%s" \
                     % (op, server, error),
                 post_message_to_current_user(
                     msg,
                     msg_type=DatedMessage.TYPE_ERROR,
                 )
+                # end msg example
             raise Exception(msg)
 
     def add_user(self, server, username, pubkey, quiet=False):
@@ -180,19 +190,27 @@ class SSHAggregate(Aggregate):
             SSHServer.objects.filter(aggregate__id=self.id),
     )
     
+    # start_slice func
     def start_slice(self, slice):
+        # start_slice call super
         super(SSHAggregate, self).start_slice(slice)
+        # start_slice end call super
         
+        # start_slice get info
         slice_info = SSHSliceInfo.objects.get(slice=slice)
+        # start_slice get user
         user = slice.owner
+        # start_slice get slivers
         slivers = SSHServerSliver.objects.filter(
             slice=slice, resource__aggregate_id=self.id)
-
+        # start_slice end info
+        
+        # start_slice loop
         succeeded = []
         for sliver in slivers:
             # Execute the command on the server and get status
             server = sliver.resource.as_leaf_class()
-            
+            # start_slice add user
             try:
                 self.add_user(server, user.username, slice_info.public_key)
             except:
@@ -204,6 +222,7 @@ class SSHAggregate(Aggregate):
                 raise
             
             succeeded.append(server)
+            # start_slice end loop
             
     def stop_slice(self, slice):
         super(SSHAggregate, self).start_slice(slice)
