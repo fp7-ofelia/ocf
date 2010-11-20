@@ -79,7 +79,7 @@ class GENISliceInfo(models.Model):
         output.close()
         
         self.ssh_public_key = \
-            "ssh-rsa %s auto-generated Expedient key" % (key. get_base64())
+            "ssh-rsa %s auto-generated Expedient key" % (key.get_base64())
         
     def login_username(self):
         """
