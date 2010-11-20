@@ -72,7 +72,8 @@ and operations for resources. All resources that can be reserved must inherit
 from the `Resource`_ class:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 13
+   :start-after: # SSHServer class
+   :end-before: # SSHServer fields
 
 Most importantly, the resource is related to an
 `Aggregate`_ by a foreign key relationship. Take a look at the `Resource`_
@@ -83,13 +84,17 @@ some extra fields and functions. An :class:`SSHServer` instance has an IP
 Address and an SSH port number:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 14-24
+   :start-after: # SSHServer fields
+   :end-before: # end
 
 We also define two extra functions:
 :func:`is_alive` and :func:`exec_command`.
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 26,31-42,57-64
+   :pyobject: SSHServer.is_alive
+   
+.. literalinclude:: sshaggregate/models.py
+   :pyobject: SSHServer.exec_command
 
 The :func:`is_alive` function pings the server and checks that it is up, while
 the :func:`exec_command` function executes a command on the server using
@@ -115,7 +120,7 @@ In our example, we don't have any per sliver information, so our
 :class:`SSHServerSliver` is empty:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 69
+   :pyobject: SSHServerSliver
 
 We could have also not created the class at
 all, but it makes our code clearer. Take a look at the `Sliver`_ and `Slice`_ classes
@@ -129,7 +134,7 @@ creating a slice requires a public key for the user, so the SSHSliceInfo class
 will store that required information:
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 71-73
+   :pyobject: SSHSliceInfo
 
 SSHAggregate
 ............
@@ -140,7 +145,8 @@ functions and fields that are shared among all aggregate classes. Aggregate
 plugins must always define an Aggregate_ class child.
 
 .. literalinclude:: sshaggregate/models.py
-   :lines: 75
+   :start-after: # SSHAggregate class
+   :end-before: # SSHAggregate information field
 
 The :class:`SSHAggregate` class overrides the ``information`` field that
 contains information about the aggregate and describes the aggregate
@@ -595,7 +601,9 @@ documentation for more information::
 Default Settings
 ^^^^^^^^^^^^^^^^
 
-All the settings you put in the :file:`localsettings.py` appear in Django's :mod:`settings` module. So if your application has some default settings that you would like to add, you will need to add a line similar to::
+All the settings you put in the :file:`localsettings.py` appear in Django's
+:mod:`settings` module. So if your application has some default settings that
+you would like to add, you will need to add a line similar to::
 
     from sshaggregate.defaultsettings import *
 
@@ -611,9 +619,251 @@ well. Before you do so, make sure that you have performed a
 ``manage.py syncdb`` on the running Expedient instance that you
 will use. Here we will cover automated testing.
 
+The importance of automated testing cannot be stressed enough. Anytime you
+make a change, you will need to run the tests, and nothing makes your job of
+fixing bugs and adding new features as easy as automated tests.
 Django has extensive facilities for testing that come in quite
 handy. Create the :file:`sshaggregate/tests.py` and edit it to
 look like the following:
 
 .. literalinclude:: sshaggregate/tests.py
 
+The tests that we have written test two things:
+
+* Adding an SSH aggregate to Expedient
+* Creating and deleting a slice
+
+This is not a comprehensive test suite, and your tests should include more
+exhaustive testing. The test class does the following. It first sets up the
+environment by creating an SSH key for the user running the test, adding it to
+the user's authorized keys, and using the user as the admin for the
+aggregate. The tests can now SSH into localhost using the created key.
+
+When adding an aggregate the test suite uses custom commands for creating
+users, deleting users, and adding a public key to a user's account. Instead of
+these commands actually doing what they are supposed to do, we do the
+following. When creating a user, we write the user's username into a temprary
+file and we write the user's public key into another file. Then we check that
+the commands executed correctly and that these files were written as
+expected. Similarly, when deleting a user, we write the user's username into a
+temporary file and we check that the file was written as expected.
+So let's go through the test code section by section.
+
+First, we create a class that inherits from the :class:`django.test.TestCase`:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Tests class
+   :end-before: # start constants
+
+Expedient also provides a different class you can inherit from,
+`expedient.common.tests.manager.SettingsTestCase`_. This test case allows you
+to easily change settings in the test case to, for example, add new
+django apps that are used in testing. Take a look at
+`expedient.clearinghouse.aggregate.tests.tests`_ for an example on how it is
+used.
+
+Next, we define some constants that are used in testing. These are the names
+of the temporary files used and information about the temporary SSH key
+created for the tests:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # start constants
+   :end-before: # end
+
+Next, we define a method to create an SSH key and add it to the current user's
+:file:`authorized_keys` file. This function uses :mod:`paramiko` to generate a
+key.
+
+.. literalinclude:: sshaggregate/tests.py
+   :pyobject: Tests.create_test_ssh_key
+
+Note that we've given the key a special comment that we can use to
+delete the key in the :func:`delete_test_ssh_key` method:
+
+.. literalinclude:: sshaggregate/tests.py
+   :pyobject: Tests.delete_test_ssh_key
+
+The :func:`setUp` function first creates a local user:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # create local user
+   :end-before: # end
+
+We chose to create a superuser because it bypasses some of the security
+restrictions built into Expedient. You might want to do the testing with a
+regular user instead. Then we disable permission checking in Expedient:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # disable permissions
+   :end-before: # end
+
+This disables most of the permission checks that Expedient performs. In more
+exhaustive testing, you will want to keep permissions enabled. Then we create
+an ssh key to ssh into localhost:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # create ssh key
+   :end-before: # end
+
+And finally we log in as the user we just created so we can use Django's test
+client to make html requests:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # login user
+   :end-before: # end
+
+The :func:`tearDown` function does many of :func:`setUp`'s operations
+in reverse:
+
+.. literalinclude:: sshaggregate/tests.py
+   :pyobject: Tests.tearDown
+
+Adding Aggregates
+.................
+
+The first test checks that we can add an aggregate:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # add aggregate tests
+   :end-before: # end
+
+Make sure that nothing is in Expedient already:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # check nothing is there
+   :end-before: # end
+
+Get the private key that we created as a string to use in adding the
+aggregate:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # get private key as string
+   :end-before: # end
+
+Then we add the aggregate using an html post request using django's
+client. Note that here we use a custom function `test_get_and_post_form`_ that
+gets a form, and fills in some of the parameters. We use this function to save
+some of the trouble of having to add fields with existing defaults or for
+fields that are arriving from the server with custom values. After we do the
+post request, we check that the aggregate has indeed been added.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Add the aggregate
+   :end-before: # end
+
+Note the custom commands we have used to add a user, delete a user, and add a
+public key to a user. We also need to check that after adding the aggregate we
+were redirected to the page where we add servers:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # where do we go next?
+   :end-before: # end
+
+Now we add the localhost as a server in the aggregate:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Add the localhost as a server
+   :end-before: # end
+
+And finally we check that the server was added correctly:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # check that localhost added
+   :end-before: # end
+
+Creating and Deleting Slices
+............................
+
+Next we check that functionality of our aggregate.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # slice tests
+   :end-before: # end
+
+We call the previous function to add the aggregate to Expedient first.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Add the aggregate
+   :end-before: # end
+
+Then we create a project.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Create the project
+   :end-before: # end
+
+We add the aggregate to the project, and we check that the project now has the
+aggregate:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Add the aggregate to the project
+   :end-before: # end
+
+Then we create the slice:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Create the slice
+   :end-before: # end
+
+We add the aggregate to the slice, and check that the addition worked.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Add the aggregate to the slice
+   :end-before: # end
+
+Now, if you recall, slices are composed of slivers. To tell Expedient that we
+want an SSHServer from a particular aggregate in our slice, we need to a
+create a sliver for that resource. We do this by creating an
+:class:`SSHServerSliver` instance:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Create a sliver
+   :end-before: # end
+
+Next we add more information about the slice using the :class:`SSHSliceInfo`
+class:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Create the SSHSliceInfo
+   :end-before: # end
+
+Now we can start the slice:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Start the slice
+   :end-before: # end
+
+Now we need to check that the command to add users was executed correctly on
+the localhost. We do this by checking that the username was written correctly
+to the temporary file.
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Check that the add command was executed correctly
+   :end-before: # end
+
+We do a similar check to see that the public key for the user was added:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # check that the add pub key command executed correctly
+   :end-before: # end
+
+Next, we stop the slice:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Stop the slice
+   :end-before: # end
+
+And we make sure that the command executed correctly:
+
+.. literalinclude:: sshaggregate/tests.py
+   :start-after: # Check that the del user command executed correctly
+   :end-before: # end
+
+And that's it. You now have a basic test suite that you can run. To run the
+test, you need to make sure that :mod:`sshaggregate` is in your
+PYTHONPATH. Then you can use the :command:`test` management command to run the
+:mod:`sshaggregate` test suite.
+
+.. _`expedient.common.tests.manager.SettingsTestCase`: ../api/expedient.common.tests.manager.SettingsTestCase-class.html
+.. _`expedient.clearinghouse.aggregate.tests.tests`: ../api/expedient.clearinghouse.aggregate.tests.tests-module.html
+.. _`test_get_and_post_form`: ../api/expedient.common.tests.client-module.html#test_get_and_post_form

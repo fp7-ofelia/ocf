@@ -1,7 +1,9 @@
 import shlex, subprocess
+from StringIO import StringIO
 from django.db import models
 from django.db.models.fields import IPAddressField
 import paramiko
+from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.resources.models import Resource, Sliver
 from expedient.common.utils.modelfields import LimitedIntegerField
@@ -10,7 +12,9 @@ from expedient.clearinghouse.utils import post_message_to_current_user
 from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
 
+# SSHServer class
 class SSHServer(Resource):
+    # SSHServer fields
     ip_address = IPAddressField(
         "IP address",
         help_text="Specify the server's IP address.",
@@ -22,6 +26,7 @@ class SSHServer(Resource):
         default=22,
         help_text="Specify the SSH port number to use."
     )
+    # end
 
     def is_alive(self):
         """Ping the server and check if it's alive.
@@ -48,10 +53,9 @@ class SSHServer(Resource):
         @type username: C{str}
         @keyword connection_info: A dict of other info to pass to
             C{paramiko.SSHClient.exec_command}.
-        @return: A (stdin, stdout, stderr) tuple that is three file-like
-            objects.
-        @rtype: tuple(C{paramiko.ChannelFile}, C{paramiko.ChannelFile},
-            C{paramiko.ChannelFile})
+        @return: A (out, err) tuple that is the output read on the
+            stdout and stderr channels.
+        @rtype: C{tuple(str, str)}
         """
 
         client = paramiko.SSHClient()
@@ -61,7 +65,11 @@ class SSHServer(Resource):
             port=int(self.ssh_port),
             **connection_info
         )
-        return client.exec_command(command)
+        _, sout, serr = client.exec_command(command)
+        o = sout.read()
+        e = serr.read()
+        client.close()
+        return o, e
     
     def __unicode__(self):
         return u"SSH server at IP %s" % self.ip_address
@@ -72,6 +80,7 @@ class SSHSliceInfo(models.Model):
     slice = models.OneToOneField(Slice)
     public_key = models.TextField()
     
+# SSHAggregate class
 class SSHAggregate(Aggregate):
     # SSHAggregate information field
     information = "An aggregate of SSH servers that are controlled" \
@@ -92,14 +101,14 @@ class SSHAggregate(Aggregate):
     
     # SSHAggregate optional fields
     add_user_command = models.TextField(
-        default="sudo useradd -m %(username)s",
+        default="sh -c 'sudo useradd -m %(username)s'",
         help_text="Specify the command to create a new user. " \
             "'%(username)s' will be replaced by the user's " \
             " username. The command should return non-zero on failure " \
             " and 0 on success.",
     )
     del_user_command = models.TextField(
-        default="sudo userdel -r -f %(username)s",
+        default="sh -c 'sudo userdel -r -f %(username)s'",
         help_text="Specify the command to delete an existing user. " \
             "'%(username)s' will be replaced by the user's " \
             " username. The command should return non-zero on failure " \
@@ -108,8 +117,8 @@ class SSHAggregate(Aggregate):
     add_pubkey_user_command = models.TextField(
         default="sudo -u %(username)s mkdir /home/%(username)s/.ssh; "
             "sudo -u %(username)s chmod 700 /home/%(username)s/.ssh; "
-            "sudo -u %(username)s echo %(pubkey)s >> "
-            "/home/%(username)s/.ssh/authorized_keys",
+            "sh -c 'sudo -u %(username)s echo %(pubkey)s >> "
+            "/home/%(username)s/.ssh/authorized_keys'",
         help_text="Specify the command to add a public key to a user's " \
             "account. '%(username)s' will be replaced by the user's " \
             " username and '%(pubkey)s' will be replaced by the public key." \
@@ -121,16 +130,20 @@ class SSHAggregate(Aggregate):
     def _op_user(self, op, server, cmd_subs, quiet=False):
         """common code for adding/removing users."""
         
+        pkey_f = StringIO(self.private_key)
+        pkey = RSAKey.from_private_key(pkey_f)
+        pkey_f.close()
+        
         cmd = getattr(self, "%s_user_command" % op) % cmd_subs
         cmd = cmd + "; echo $?"
-        _, stdout, _ = server.exec_command(
+        out, err = server.exec_command(
             cmd,
             username=str(self.admin_username),
-            pkey=str(self.private_key),
+            pkey=pkey,
         )
         
-        lines = stdout.readlines()
-        ret = int(lines[-1].strip())
+        lines = out.strip().split("\n")
+        ret = int(lines[-1])
         
         if ret != 0:
             error = "".join(lines[:-1])
