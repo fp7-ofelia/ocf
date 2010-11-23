@@ -1,0 +1,6 @@
+<form method="POST" action="{% url project_update_agg project.id am.id %}">{% csrf_token %}
+	<input type="submit" value="update" />
+</form>
+<form method="POST" action="{% url project_remove_agg project.id am.id %}">{% csrf_token %}
+	<input type="submit" value="remove" />
+</form>
