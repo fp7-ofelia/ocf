@@ -50,7 +50,7 @@ FQHOSTNAME=`cat /etc/HOSTNAME`
        ST=unknown
         L=unknown
         U="web server"
-	O="SuSE Linux Web Server"
+	O="Debian"
        CN=$FQHOSTNAME
     email=webmaster@$FQHOSTNAME
    CAdays=$((365 * 6))
@@ -126,7 +126,8 @@ EOT
 echo;myecho creating CA request/certificate ...
 $openssl req -config $HOME/.mkcert.cfg -new -x509 -days $CAdays -key $sslkeydir/${name}ca.key -out $sslcrtdir/${name}ca.crt || myexit $LINENO $?
 
-cp -pv $sslcrtdir/${name}ca.crt $r/srv/www/htdocs/$(echo $name | tr 'a-z' 'A-Z')CA.crt
+#cp -pv $sslcrtdir/${name}ca.crt $r/srv/www/$(echo $name | tr 'a-z' 'A-Z')CA.crt
+cp -pv $sslcrtdir/${name}ca.crt $r/var/www/$(echo $name | tr 'a-z' 'A-Z')CA.crt
 
 #
 # Server CERT
