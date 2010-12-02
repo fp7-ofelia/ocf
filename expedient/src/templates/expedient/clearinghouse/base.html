@@ -1,0 +1,93 @@
+{% load breadcrumbs %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+
+		<title>
+			{% block title %}Expedient{% endblock %}
+		</title>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+		<script src="{% url js_media 'iframe.js' %}"></script>
+		<!-- simple frame busting -->
+		<script type="text/javascript">
+			if(top.location != document.location) {
+				top.location = document.location;
+			}
+			/**
+			 * Move the help text in formtable classes to a new separate column.
+			 */
+			$(document).ready(function() {
+				/* add a column at the beginning for the help icons */
+				$("table.formtable_noborder>tbody>tr," +
+				"table.formtable>tbody>tr")
+					.prepend("<td />");
+				$("table.formtable_noborder>thead>tr," +
+				"table.formtable>thead>tr")
+					.prepend("<td />");
+
+				/* find help text and replace with image and tooltip */
+				$("table.formtable_noborder>tbody>tr>td:nth-child(3)")
+{% include "fixformtable.js" %}
+				;
+
+				$("table.formtable>tbody>tr>td:nth-child(3)")
+{% include "fixformtable.js" %}
+				;
+			});
+		</script>
+		{% block head %}{% endblock %}
+	</head>
+	<body>
+		<br/>
+		<table bgcolor="#EEEEEE" width="800" border="0" align="center" cellpadding="3" cellspacing="0">
+			<tr>
+				<td align="left">
+					<img src="{% url img_media 'genilogo.png' %}" />
+				</td>
+				<td>
+					{% if request.user %}
+					<div class="small" align="right" style="position: relative; top: 12px;">
+						{% if request.user.username %}
+						logged in as <strong>{{ request.user.username }}</strong>
+						{% else %}
+						not logged in
+						{% endif %}
+					</div>
+					{% endif %}
+					<div align="right" style="position: relative; top: 19px; right: -4px;">
+ 						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
+							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
+							href="/help/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
+							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div id="page">
+			<div id="content">
+				{% block messages %}
+				{% if messages %}
+				<div class="messages">
+					<table class="msg_table">
+						{% for msg in messages %}
+						<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
+							<td>{{ msg.msg_text }}</td>
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+				{% endif %}
+				{% endblock %}
+				<div class="breadcrumbs">{% breadcrumbs %}</div>
+				{% block content %}{% endblock %}
+			</div>
+		</div>
+		<div id="footer">
+			(c) in 2010 by Stanford University. This software is licensed under the GENI License.
+		</div>
+	</body>
+</html>
