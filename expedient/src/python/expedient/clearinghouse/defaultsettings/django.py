@@ -29,7 +29,8 @@ try:
 except ImportError:
     # TODO: Hack!
     location = "/etc/expedient"
-        
+    #location = " /home/leo/ofelia-git/expedient/src/python/expedient/clearinghouse"     
+   
 CONF_DIR = location
 '''Location of local Expedient configuration files.
 
