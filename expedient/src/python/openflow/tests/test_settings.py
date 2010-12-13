@@ -17,7 +17,7 @@ FLOWVISOR_DIR = join(PYTHON_DIR, "../../../flowvisor")
 USE_RANDOM = False
 
 # Address and ports of the expedient clearinghouse and opt-in manager
-HOST = 'jadsm.site'
+HOST = 'debian.i2cat'
 OM_PORT = 8443
 CH_PORT = 443
 

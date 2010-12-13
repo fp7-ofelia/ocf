@@ -1,0 +1,18 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Detail information for experiment {{exp.project_name}} : {{exp.slice_name}}</h1> {% endblock %}
+
+{% block content %}
+<div class="main">
+</div>
+	<b>Project Name: </b>{{exp.project_name}}<br/>
+	<b>Project Description: </b>{{exp.project_desc}}<br/>
+	<b>Slice Name: </b>{{exp.slice_name}}<br/>
+	<b>Slice Description: </b>{{exp.slice_desc}}<br/>
+	<b>Slice ID: </b>{{exp.slice_id}}<br/>
+	<b>Owner Contact: </b>{{exp.owner_email}}<br/>
+	<b>FlowSpace: </b><br/>{% for fs in allfs %}{{fs}}<br/>{% endfor %}<br/>
+	<a href="{{back}}">back</a>
+</div>
+
+
+{% endblock content %}

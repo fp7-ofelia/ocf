@@ -1,0 +1,21 @@
+<html>
+<body>
+
+	<h3>Added Rule Details:</h3>
+	<b>FlowSpace:</b>
+	<br/>
+	{% for fs in opt_fs %}
+	{{fs}}<br/>
+	{% endfor %}
+	
+	<h3>Slice Info:</h3>
+	<b>Project Name: </b>{{opt.experiment.project_name}}<br/>
+	<b>Project Description: </b>{{opt.experiment.project_desc}}<br/>
+	<b>Slice Name: </b>{{opt.experiment.slice_name}}<br/>
+	<b>Slice Description: </b>{{opt.experiment.slice_desc}}<br/>
+	<b>Slice ID: </b>{{opt.experiment.slice_id}}<br/>
+	<b>Owner Contact: </b>{{opt.experiment.owner_email}}<br/>
+	<b>FlowSpace: </b><br/>{% for fs in allfs %}{{fs}}<br/>{% endfor %}<br/>
+
+</body>
+</html>

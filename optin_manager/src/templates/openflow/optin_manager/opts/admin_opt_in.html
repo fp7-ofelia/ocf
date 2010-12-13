@@ -1,0 +1,124 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Add Admin Rule</h1> {% endblock %}
+{% block scripts %}
+<style>
+  select {
+    width: 400px;
+  }
+  iframe {
+  	width: 600px;
+  	height: 200px;
+  }
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#expsel").
+		change(function(){
+			var addr = "/opts/experiment_simple/"
+			var sel_value = $(this).val()
+			addr = addr+sel_value
+			$("#exp_iframe").attr('src',addr)
+		});
+});
+
+</script>
+{% endblock %}
+{% block content %}
+<div class="main">
+	{% for msg in error_msg %}
+	<p><font color="red">{{msg}}</font></p>
+	{% endfor %}
+	{{form.non_field_errors}}
+	<form name="input" action="/opts/opt_in" method="post">{% csrf_token %}
+		<b>Experiment:</b><br/>
+		<select name="experiment" id="expsel">
+			{% for exp in experiments %}
+			<option value="{{exp.id}}">
+			{{exp.project_name}}:{{exp.slice_name}}
+			</option>
+			{% endfor %}
+		</select>
+		<br/>
+		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe">
+		</iframe>
+		<br/><br/>
+		<label> <b>FlowSpace to Opt-In: </b></label>
+		<br/>
+		<table class="formtable">
+		<tr><th>Field</th><th>[From Value,To Value]</th></tr>
+		<tr>
+		<td>
+			<label for="id_mac_from">Source MAC address {{form.errors.mac_from_s}}{{form.errors.mac_from_e}}</label>
+		</td><td>
+			{{form.mac_from_s}}-{{form.mac_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label for="id_mac_to">Destination MAC address {{form.errors.mac_to_s}}{{form.errors.mac_to_e}}</label>
+		</td><td>
+			{{form.mac_to_s}}-{{form.mac_to_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Ethernet Types {{form.errors.eth_type_s}}{{form.errors.eth_type_e}}</label>
+		</td><td>
+			{{form.eth_type_s}} - {{form.eth_type_e}}
+		</td>
+		</tr><tr>
+		</tr><tr>
+		<td>
+			<label>VLAN Range {{form.errors.vlan_id_s}}{{form.errors.vlan_id_s}}</label>
+		</td><td>
+			{{form.vlan_id_s}} - {{form.vlan_id_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Source IP Address {{form.errors.ip_from_s}}{{form.errors.ip_from_e}}</label>
+		</td><td>
+			{{form.ip_from_s}} - {{form.ip_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Destination IP Address {{form.errors.ip_to_s}}{{form.errors.ip_to_e}}</label>
+		</td><td>
+			{{form.ip_to_s}} - {{form.ip_to_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>IP Protocol Range {{form.errors.ip_proto_s}}{{form.errors.ip_proto_e}}</label>
+		</td><td>
+			{{form.ip_proto_s}} - {{form.ip_proto_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Transport Source Port Range {{form.errors.tp_from_s}}{{form.errors.tp_from_e}}</label>
+		</td><td>
+			{{form.tp_from_s}} - {{form.tp_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Transport Destination Port Range {{form.errors.tp_to_s}}{{form.errors.tp_to_e}}</label>
+		</td><td>
+			{{form.tp_to_s}} - {{form.tp_to_e}}
+		</td>
+		</tr>
+		</table>
+		<input type="submit" value="Add Rule"/>
+		<br/>
+		<br/>
+
+	</form>
+	
+	<br/>
+	<br/>
+	<b>Upload Rules from a File: </b>(<a href="{% url img_media 'sample_rules.txt' %}">download</a> sample file)<br/><br/>
+	<form name="input" action="/opts/opt_in_from_file" method="post" enctype="multipart/form-data">{% csrf_token %}
+		{{upload_form.as_table}}
+		<br/><br/>
+		<input type="submit" value="Add Rules"/>
+	</form>
+	
+</div>
+
+{% endblock content %}

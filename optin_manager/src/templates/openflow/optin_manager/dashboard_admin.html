@@ -1,0 +1,42 @@
+{% extends "base_admin.html" %}
+
+{% block pagehead %}<h1>{{ user.username }} - Admin Dashboard </h1> {% endblock %}
+{% block scripts %}
+<style>
+	table.formtable {
+		width: 600px;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<div class="main">
+
+    	<b>Administrative Tasks:<br/></b>
+    	<table class="formtable">
+    	<tr><td>Pending User Flowspace requests: <a href="/admin_manager/approve_user">{{num_user_reqs}}</a></td><tr/>
+    	<tr><td>Pending Admin Flowspace requests: <a href="/admin_manager/approve_admin">{{num_admin_reqs}}</a></td><tr/>
+    	<tr><td>Pending Promote to Admin requests: <a href="/admin_manager/approve_admin">{{num_admin_promotes}}</a></td><tr/>
+    	</table>
+    	<br/>
+    	<br/>
+    	<b>Owned Flowspaces:</b>
+    	<table class="formtable">
+    	{% for fs in adminfs %}
+    		<tr><td>{{fs}}</td></tr>
+    	{% endfor %}
+    	</table>
+    	<br/>
+    	<br/>
+    	<b>Administrative Rules:<br/></b>
+    	<table class="formtable">
+    		<tr><th>Experiment</th><th>Opted FlowSpace</th></tr>
+    		{% for fs in optsfs %}
+    		<tr><td>{{fs.opt.experiment.project_name}} : {{fs.opt.experiment.slice_name}}</td>
+    			<td>{{fs}}</td>
+    		</tr>
+    		{% endfor %}
+    	</table>
+
+</div>
+{% endblock content %}
+

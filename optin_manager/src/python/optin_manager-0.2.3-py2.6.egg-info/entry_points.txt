@@ -1,0 +1,5 @@
+[console_scripts]
+om_bootstrap_mysql = openflow.optin_manager.commands.utils:bootstrap_optin_manager_mysql
+om_manage = openflow.optin_manager.manage:main
+om_bootstrap_localsettings = openflow.optin_manager.commands.utils:bootstrap_local_settings
+

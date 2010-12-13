@@ -1,0 +1,16 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>View List of All Experiments</h1> {% endblock %}
+{% block content %}
+<div class="main">
+
+	<table class="formtable">
+	<tr><th>Slice ID</th><th>Project</th><th>Slice</th></tr>
+	{% for exp in exps %}
+	<tr><td><a href="/opts/experiment/{{exp.id}}">{{exp.slice_id}}</a></td>
+		<td>{{exp.project_name}}</td><td>{{exp.slice_name}}</td></tr>
+	{% endfor %}
+	</table>
+
+</div>
+
+{% endblock content %}

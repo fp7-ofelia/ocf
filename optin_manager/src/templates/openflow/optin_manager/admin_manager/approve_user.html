@@ -1,0 +1,75 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Approve User Flowspace Requests</h1> {% endblock %}
+	
+{% block scripts %}
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script type="text/javascript">
+
+
+	
+	$(document).ready(function(){
+		$(".infodiv")
+			.each( function() {
+				var element = this;
+				$(element).hide();
+			});
+		$(".expdiv")
+			.click(function() {
+				var info_id = $(this).attr("id").replace("expdiv", "infodiv");
+				$("#"+info_id).toggle();
+				if ($(this).text() == "[Conflicts...]") {
+					$(this).html("[<font color='red'>Colapse...</font>]");
+				} else {
+					$(this).html("[<font color='red'>Conflicts...</font>]");
+				}
+			});
+	});
+
+	</script>
+{% endblock %}
+	
+{% block content %}
+<div class="main">
+	
+	{% for error in error_msg %}
+	<p><font color="red">{{error}}</font></p>
+	{% endfor %}
+	
+	<form name="input" action="/admin_manager/approve_user" method="post">
+	{% csrf_token %}
+	<table class="formtable">
+	<tr><th>Reject</th><th>Defer</th><th>Accept</th><th>User</th><th>Requested Flowspace</th></tr>
+	{% for req in reqs %}
+	<tr>
+	<td>
+		<input type="radio" name="req_{{req.req.id}}" value="reject"/>
+	</td>
+	<td>
+		<input type="radio" name="req_{{req.req.id}}" value="none" checked="yes"/>
+	</td>
+	<td>
+		<input type="radio" name="req_{{req.req.id}}" value="accept"/>
+	</td>
+	<td>{{req.req.user}}</td>
+	<td>{{req.req}}
+	{% if req.conflicts != 0 %}
+	
+	<div id="expdiv_{{req.req.id}}" class="expdiv">[<font color="red">Conflicts...</font>]</div>
+	<div id="infodiv_{{req.req.id}}" class="infodiv">
+	<font color="red">
+	{% for conflict in req.conflicts %}
+	<br/>
+	{{conflict}}
+	{% endfor %}
+	</font>
+	</div>
+	</td>
+	</tr>
+	{% endif %}
+	{% endfor %}
+	</table>
+	<input type="submit" value="Submit"/>
+	</form>
+	
+</div>
+{% endblock content %}	
