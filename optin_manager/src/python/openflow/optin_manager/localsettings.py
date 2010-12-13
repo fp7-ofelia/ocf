@@ -11,8 +11,13 @@ ADMINS = [
 
 MANAGERS = ADMINS
 
-EMAIL_HOST = "smtp.gmail.com"
+#EMAIL_HOST = "smtp.gmail.com"
 DEFAULT_FROM_EMAIL = "no-reply@gmail.com"
+EMAIL_USE_TLS=True
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_HOST_USER='i2catopenflow@gmail.com'
+EMAIL_HOST_PASSWORD="expedient"
+EMAIL_PORT=587 
 
 #SITE_DOMAIN = "expedient.r1"
 SITE_DOMAIN = "OfeliaSDKR1"
