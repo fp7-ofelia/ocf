@@ -38,3 +38,4 @@ secret_key.py
 gcf-x509.*/
 *.db
 build/
+localsettings.py
