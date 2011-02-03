@@ -43,8 +43,8 @@ img#perm_help {
 		   <p>Your browser does not support iframes.</p>
 		</iframe>
     </div>
-    
-    <h2>Aggregates</h2>
+   <!-- 
+    <h2>Aggregate Managers selected</h2>
     <div class="aggregates">
         <iframe class="dynsized" name="aggregates"
         src="{% url aggregate_all %}"
@@ -53,10 +53,12 @@ img#perm_help {
            <p>Your browser does not support iframes.</p>
         </iframe>
     </div>
-    
+    -->
     <h2>Projects</h2>
     <div class="ajax_div projects_div">
     </div>
+	
+	{% if isSuperUser %}
 	
 	<h2>Permission Management <img id="perm_help"
 	src="{% url img_media 'question_mark_15x15.png' %}" /></h2>
@@ -74,6 +76,8 @@ img#perm_help {
 		to objects other than users (for example to a slice or a project).
 		Users can request permissions on behalf of other objects.
 	</div>
+	
+
 	<div class="permissions">
 		<iframe class="dynsized" name="permissions"
 		src="{% url permissionmgmt_dashboard %}"
@@ -90,5 +94,7 @@ img#perm_help {
 		the "can_manage_users" permission to be able to access this
 		functionality.
 	</div>
+
+	{% endif %}
 </div>
 {% endblock content %}

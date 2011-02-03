@@ -28,7 +28,7 @@
 			{% for project in project_list %}
 			<tr class="body">
 				<td class="name">
-					<div class="val project_name">{{ project.name }}</div>
+					<div class="project_name val"><a href="{% url project_detail project.id %}">{{ project.name }}</a></div>
 					<div class="description project_name">{{ project.description }}</div>
 				</td>
 				<td class="owners">
