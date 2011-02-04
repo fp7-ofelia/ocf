@@ -1,0 +1,613 @@
+/*
+Theme Name: OpenFlow
+Theme URI: http://openflowswitch.org
+Description: Styling for the OpenFlow site
+Version: 1.0
+Author: Billy Ray and Guido Appenzeller
+Author URI: http://guido.appenzeller.net
+Tags: openflow
+
+  OpenFlow theme for the OpenFlow Web site
+  (c) by Guido Appenzeller and Stanford University
+
+*/
+
+/* Fix for IE6 */
+
+img, div { behavior: url(/media/js/iepngfix.htc) }
+
+/* Begin Typography & Colors */
+
+body {
+	font-size: 62.5%; /* Resets 1em to 10px */
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+	background-color: #CCDDDD;
+	color: #333;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
+	}
+
+#page {
+	background-color: white;
+	border: 1px solid #959596;
+	text-align: left;
+	}
+
+#header {
+	background-color: #CCDDDD;
+	}
+
+#headerimg 	{
+	width: 900px;
+	}
+
+#content {
+	font-size: 1.2em;
+	padding-top: 20px;
+	padding-left:30px;
+	padding-right:30px;
+	padding-bottom:30px;
+	}
+
+.widecolumn .entry p {
+	font-size: 1.05em;
+	}
+
+.narrowcolumn .entry, .widecolumn .entry {
+	line-height: 1.4em;
+	}
+
+.widecolumn {
+	line-height: 1.6em;
+	}
+
+.narrowcolumn .postmetadata {
+	text-align: left;
+	font-size: 0.9em;
+	}
+
+.alt {
+	background-color: #f8f8f8;
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+	}
+
+#footer {	
+	border: none;
+	}
+
+small {
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 0.9em;
+	line-height: 1.5em;
+	}
+
+h1, h2, h3 {
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;	
+	color: #005;	
+	font-weight:bold;
+	
+	}
+
+h1 {
+	font-size: 1.5em;
+	text-align: left;
+	}
+
+#headerimg .description {
+	font-size: 1.2em;
+	text-align: center;
+	}
+
+h2 {
+	font-size: 1.2em;
+	}
+
+h2.pagetitle {
+	font-size: 1.3em;
+	}
+
+#sidebar h2 {
+	font-family: 'Lucida Grande', Verdana, Sans-Serif;
+	font-size: 1.2em;
+	}
+
+h3 {
+	font-size: 1.3em;
+	}
+
+h1, h1 a, h1 a:hover, h1 a:visited, #headerimg .description {
+	text-decoration: none;
+	}
+
+h2, h2 a, h2 a:visited, h3, h3 a, h3 a:visited {
+	color: #000055;
+	}
+
+h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar h2, #wp-calendar caption, cite {
+	text-decoration: none;
+	}
+
+code {
+	font: 1.1em 'Courier New', Courier, Fixed;
+	}
+
+acronym, abbr, span.caps
+{
+	font-size: 0.9em;
+	letter-spacing: .07em;
+	}
+
+a, h2 a:hover, h3 a:hover {
+	color: #259;
+	text-decoration: none;
+	}
+
+a:hover {
+	color: #36A;
+	text-decoration: underline;
+	}
+/* End Typography & Colors */
+
+
+
+/* Begin Structure */
+body {	
+	padding: 0;
+	}
+
+#page {
+	background-color: #FFFFFF;	
+	padding: 10px 0 0 0;
+	width: 800px;
+	margin: auto;
+	border: 1px solid #959596;
+	}
+
+#header {
+	
+	margin: 0 0 0 1px;
+	padding: 0;	
+	width: 800px;
+	background-color: #CCDDCC;
+	}
+
+#headerimg {
+	margin: 0;	
+	width: 100%;
+	background-color: #EEEEEE;
+	}
+
+#footer {
+	padding: 0;
+	margin: 0 auto;
+	width: 760px;
+	clear: both;
+	}
+
+#footer p {
+	margin: 0;
+	padding: 20px 0;
+	text-align: center;
+	}
+/* End Structure */
+
+
+
+/*	Begin Headers */
+h1 {
+	padding-top: 0px;
+	padding-bottom: 5px;
+	margin: 0px 0px 25px 0px;
+	border-width: 0px 0px 1px 0px;
+	border-style: solid;
+	border-color: #CCC;
+	}
+
+h2 {
+	margin: 15px 0 5px;
+	}
+
+h2.pagetitle {
+	margin-top: 30px;
+	text-align: center;
+}
+
+#sidebar h2 {
+	margin: 5px 0 0;
+	padding: 0;
+	}
+
+h3 {
+	padding: 0;
+	margin: 30px 0 0;
+	}
+/* End Headers */
+
+
+
+/* Begin Images */
+p img {
+	padding: 0;
+	max-width: 100%;
+	}
+
+/*	Using 'class="alignright"' on an image will (who would've
+	thought?!) align the image to the right. And using 'class="centered',
+	will of course center the image. This is much better than using
+	align="center", being much more futureproof (and valid) */
+
+img.centered {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	}
+
+img.alignright {
+	padding: 4px;
+	margin: 0 0 2px 7px;
+	display: inline;
+	}
+
+img.alignleft {
+	padding: 4px;
+	margin: 0 7px 2px 0;
+	display: inline;
+	}
+
+.alignright {
+	float: right;
+	}
+
+.alignleft {
+	float: left
+	}
+/* End Images */
+
+
+
+/* Begin Lists
+
+	Special stylized non-IE bullets
+	Do not work in Internet Explorer, which merely default to normal bullets. */
+
+html>body .entry ul {
+	margin-left: 0px;
+	padding: 0 0 0 30px;
+	list-style: none;
+	padding-left: 10px;
+	text-indent: -10px;
+	}
+
+html>body .entry li {
+	margin: 7px 0 8px 10px;
+	}
+
+ol li, #sidebar ul ol li {
+	list-style: decimal outside;
+	}
+/* End Entry Lists */
+
+
+
+/* Begin Form Elements */
+.entry form { /* This is mainly for password protected posts, makes them look better. */
+	text-align:center;
+	}
+
+select {
+	width: 130px;
+	}
+/* End Form Elements */
+
+/* Begin Various Tags & Classes */
+acronym, abbr, span.caps {
+	cursor: help;
+	}
+
+acronym, abbr {
+	border-bottom: 1px dashed #999;
+	}
+
+blockquote {
+	margin: 15px 30px 0 10px;
+	padding-left: 20px;
+	border-left: 5px solid #ddd;
+	}
+
+blockquote cite {
+	margin: 5px 0 0;
+	display: block;
+	}
+
+.center {
+	text-align: center;
+	}
+
+.hidden {
+	display: none;
+	}
+
+hr {
+	display: none;
+	}
+
+a img {
+	border: none;
+	}
+
+.navigation {
+	display: block;
+	text-align: center;
+	margin-top: 10px;
+	margin-bottom: 60px;
+	}
+/* End Various Tags & Classes*/
+
+/* GENI Specific stuff */
+div.contact {
+    width: 275px;
+}
+
+div.geni_info {
+    width: 400px;
+    float: right;
+}
+/* 
+    Table Styles
+*/
+
+/* Table for Forms */
+
+table.formtable {
+	border-collapse: collapse;
+	border: 1px solid #CCC;
+	margin-bottom:10px;
+	margin-top:5px;
+}
+
+table.formtable_noborder {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:10px;
+	margin-top:5px;
+}
+
+	
+table.formtable>tbody>td,table.formtable>tbody>th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+
+table.formtable_noborder>tbody>td,table.formtable_noborder>tbody>th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+
+/* Full Table */
+
+table.fulltable {
+	border-collapse: collapse;
+	border: 1px solid #CCC;
+	margin-bottom:10px;
+	margin-top:0px;
+	width: 100%
+}
+
+table.fulltable>tbody,table.fulltable>tbody>td,table.fulltable>tbody>th{
+	text-align: center;
+}
+
+table.fulltable>thead {
+	white-space: nowrap;
+	background: #E0E8FF;
+	font-weight: bold;
+	padding: 3px;
+}
+
+table.fulltable>tbody>tr>td,table.fulltable>tbody>tr>th {
+	padding: 2px 4px;
+	background: #fff;
+	color: #000;
+}
+table.fulltable>tbody>tr>th {
+	color: #005;
+	font-weight: normal;
+	font-variant: normal;
+	font-size: 1em;
+}
+
+table.msg_table {
+    border-spacing: 0px;
+    border: 0px;
+    margin: 0px 0px;
+    padding: 0px;
+    width: 100%;
+}
+
+table.msg_table td {
+    vertical-align: top;
+    /*font-family:courier, "courier new", monospace;*/
+    padding:4px 6px 4px 6px; 
+}
+
+table.msg_table thead td {
+	font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
+}
+
+table.msg_table tr th {
+	border-bottom: 1px solid #000;
+}
+
+table.msg_table tr td {
+	border-bottom: 1px solid #CCC;
+}
+
+table.msg_table .select_checkbox {
+    width:10px;
+}
+
+table.msg_table .type {
+    width:80px;
+}
+
+table.msg_table .date {
+    width:80px;
+}
+
+table.msg_table .time {
+    width:60px;
+}
+
+table.msg_table td.msg_text {
+    text-align:left;
+}
+
+table.msg_table .error,.warning {
+	color:#9a1b1b;
+}
+
+table.msg_table .error {
+    font-weight:bold;
+}
+
+table.msg_table .success {
+    color:green;
+}
+
+.errtime {
+    color: #00A;
+}
+
+.errdate {
+}
+
+table.flowspacetable select {
+    width: 70px;
+}
+
+table.flowspacetable input {
+    width: 55px;
+}
+
+table.flowspacetable tr th {
+    padding: 2px 5px;
+}
+
+table.flowspacetable tr td {
+    padding: 1px 1px;
+}
+
+table.fulltable tbody td.logocol {
+    padding: 0px;
+}
+
+/* iframes */
+iframe {
+    border: 1px solid #E0E8FF;
+}
+
+div.mgmt_actions {
+	border: 1px solid #E0E8FF;
+	float: right;
+}
+
+div.proj_description {
+	height: 100px;
+}
+div.slice_description {
+	height: 170px;
+}
+
+div.breadcrumbs {
+	margin-bottom: 10px;
+}
+
+/* creating message */
+div.create_msg_div {
+	position:relative;
+}
+
+div.create_msg {
+	position:relative;
+    top:0;
+    left:0;
+    height:122px;
+}
+
+#type_users_div {
+	position:absolute;
+	top:0;
+	left:0px;
+}
+
+#message_div {
+    position:absolute;
+    top:0;
+    right:0px;
+}
+
+#send_msg_button {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+
+div.form_error_msgs {
+	position:relative;
+	text-align:left;
+}
+
+div.messages {
+/*	float: right; */
+	border: 1px solid #E0E8FF;
+	width: 100%;
+	height: 63px;
+	position: relative;
+	top: -15px;
+	overflow: hidden;
+	font-size: smaller;
+}
+
+div.messages_more {
+	text-align:right;
+	font-size:12px;
+	margin:0px;
+	
+}
+div.messages table.msg_table td {
+	border: none;
+	padding-top:2px;
+	padding-bottom:1px;
+	padding-left:8px;
+	padding-right:8px;
+	margin:0px;
+}
+
+tr.old_message {
+	opacity: 0.4;
+}
+
+tr.error,.warning {
+	color:#9a1b1b;
+}
+
+tr.success {
+	color:green;
+}
+
+tr.error {
+    font-weight:bold;
+}
+
+table.detail_management_table {
+	width: 100%;
+}
+
+/* projects stuff */
+.projects_div {
+	text-align: center;
+}
