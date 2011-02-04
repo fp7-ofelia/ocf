@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     'expedient.common.defaultsite',
     'expedient.clearinghouse.commands',
     'expedient.clearinghouse.aggregate',
+    'expedient.clearinghouse.messagecenter',
     'expedient.clearinghouse.roles',
     'expedient.clearinghouse.project',
     'expedient.clearinghouse.resources',
