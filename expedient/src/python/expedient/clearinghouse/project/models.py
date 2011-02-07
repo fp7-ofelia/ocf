@@ -93,7 +93,9 @@ class Project(models.Model):
                     permittees=permittee,
                 ).values_list("object_id", flat=True)
             )
-        return Aggregate.objects.filter(pk__in=agg_ids)
+	#XXX: MARC did this
+        #return Aggregate.objects.filter(pk__in=agg_ids)
+        return Aggregate.objects
     aggregates=property(_get_aggregates)
     
     def _get_researchers(self):

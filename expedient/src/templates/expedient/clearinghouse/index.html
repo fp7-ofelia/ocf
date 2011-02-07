@@ -34,7 +34,7 @@ img#perm_help {
 <div class="main">
 	<h1>Welcome to Expedient {{ request.user.username }}!</h1>
     
-    <h2>Messages</h2>
+<!--<h2>Messages</h2>
     <div class="messaging">
 		<iframe class="dynsized" name="latest_msgs"
 		src="{% url messaging_latest %}"
@@ -43,22 +43,44 @@ img#perm_help {
 		   <p>Your browser does not support iframes.</p>
 		</iframe>
     </div>
-   <!-- 
-    <h2>Aggregate Managers selected</h2>
-    <div class="aggregates">
-        <iframe class="dynsized" name="aggregates"
-        src="{% url aggregate_all %}"
-        scrolling="no" frameborder="0"
-        width="100%">
-           <p>Your browser does not support iframes.</p>
-        </iframe>
-    </div>
-    -->
+   -->
+
+	{% if messages %}
+	<h2>Messages (Logs)</h2>
+	<br>
+	<div>
+		<div class="messages">
+			<table class="msg_table">
+				{% for msg in messages %}
+				<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
+					<td>{{ msg.msg_text }}</td>
+				</tr>
+				{% endfor %}
+				<tr>
+			</table>
+			<div class="messages_more"><a href="{% url messaging_center %}">Show more...</a></div>
+		</div>
+	</div>
+	{% endif %}
+
+	 
     <h2>Projects</h2>
     <div class="ajax_div projects_div">
     </div>
-	
+    
+
 	{% if isSuperUser %}
+	<br>
+	<br>
+	<h1>Admininstration</h1>	
+
+	<h2>Island Aggregate Managers</h2>
+	    <div class="aggregates">
+	        <iframe class="dynsized" name="aggregates" src="{% url aggregate_all %}" scrolling="no" frameborder="0" width="100%">
+	           <p>Your browser does not support iframes.</p>
+        	</iframe>
+    	     </div>
+
 	
 	<h2>Permission Management <img id="perm_help"
 	src="{% url img_media 'question_mark_15x15.png' %}" /></h2>
