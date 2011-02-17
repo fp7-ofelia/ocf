@@ -50,8 +50,11 @@ def manage_user_fs(request):
         first_user = 0
     else:
         exist = True
-        first_user = all_users[0].user.id
-        
+        try:
+            first_user = all_users[0].user.id
+        except:
+            first_user = 0
+    
     return simple.direct_to_template(request, 
         template ="openflow/optin_manager/admin_manager/manage_user_fs.html",
             extra_context = {

@@ -50,6 +50,8 @@ class Aggregate(Extendable):
 No information available.
 """
     
+    update_caption = u"update"
+    
     name = models.CharField(
         max_length=200, unique=True,
         help_text="Use a unique name for this aggregate.")
