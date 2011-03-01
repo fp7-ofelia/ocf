@@ -40,8 +40,14 @@ def breadcrumbs(parser, token):
 
 @register.simple_tag
 def last_link(trail):
-    return trail[-1][1]
+    try:
+        return trail[-1][1]
+    except IndexError:
+        return "/"
 
 @register.simple_tag
 def before_last_link(trail):
-    return trail[-2][1]
+    try:
+        return trail[-2][1]
+    except IndexError:
+        return "/"

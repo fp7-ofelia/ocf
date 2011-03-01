@@ -4,10 +4,14 @@
 '''
 # Django settings for Expedient project.
 import os
+import sys
 import pkg_resources
+from utils import append_to_local_setting
 
 try:
     from localsettings import SRC_DIR as location
+    #sys.path.append("/home/user/ofelia-git/expedient/src/python/")
+    sys.path.append(location)
 except ImportError:
     try:
         location = os.path.abspath(pkg_resources.resource_filename(
@@ -29,8 +33,7 @@ try:
 except ImportError:
     # TODO: Hack!
     location = "/etc/expedient"
-    #location = " /home/user/ofelia-git/expedient/src/python/expedient/clearinghouse"     
-   
+
 CONF_DIR = location
 '''Location of local Expedient configuration files.
 
@@ -100,9 +103,11 @@ TEMPLATE_LOADERS = [
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
 ]
+append_to_local_setting(
+    "TEMPLATE_LOADERS", TEMPLATE_LOADERS, globals())
 
 MIDDLEWARE_CLASSES = [
-    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
+#    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,36 +120,40 @@ MIDDLEWARE_CLASSES = [
     'expedient.common.permissions.middleware.PermissionMiddleware',
     'expedient_geni.middleware.CreateUserGID',
 ]
+append_to_local_setting(
+    "MIDDLEWARE_CLASSES", MIDDLEWARE_CLASSES, globals(), at_start=True,
+)
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'expedient_geni.backends.GENIRemoteUserBackend',
 ]
-
+append_to_local_setting(
+    "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
+)
+    
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
-
-try:
-    from localsettings import *
-except ImportError:
-    pass
 
 TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates'),
     os.path.join(SRC_DIR, 'templates/expedient/clearinghouse'),
     os.path.join(SRC_DIR, 'templates/expedient/common'),
 ]
+append_to_local_setting(
+    "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),
+)
 
 INSTALLED_APPS = [
-    'expedient.clearinghouse.firstapp',
+    'expedient.clearinghouse.firstapp', # Must remain first!
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
-    'django_evolution',
     'autoslug',
     'registration',
+    'expedient.common.timer',
     'expedient.common.permissions',
     'expedient.common.breadcrumbs',
     'expedient.common.rpc4django',
@@ -155,7 +164,6 @@ INSTALLED_APPS = [
     'expedient.common.defaultsite',
     'expedient.clearinghouse.commands',
     'expedient.clearinghouse.aggregate',
-    'expedient.clearinghouse.messagecenter',
     'expedient.clearinghouse.roles',
     'expedient.clearinghouse.project',
     'expedient.clearinghouse.resources',
@@ -171,6 +179,9 @@ INSTALLED_APPS = [
 ###### For Testing #######################
     'openflow.dummyom',
 ]
+append_to_local_setting(
+    "INSTALLED_APPS", INSTALLED_APPS, globals(), at_start=True,
+)
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -190,6 +201,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.request',
     'expedient.common.messaging.context_processors.messaging',
 ]
+append_to_local_setting(
+    "TEMPLATE_CONTEXT_PROCESSORS", TEMPLATE_CONTEXT_PROCESSORS, globals())
 '''See Django documentation.'''
 
 # Enable debugging?

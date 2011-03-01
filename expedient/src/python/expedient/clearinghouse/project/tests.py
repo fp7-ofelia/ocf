@@ -14,53 +14,45 @@ from expedient.common.middleware import threadlocals
 from expedient.common.permissions.shortcuts import give_permission_to,\
     has_permission
 from django.conf import settings
-from expedient.clearinghouse.aggregate.tests.models import DummyAggregate
+from expedient.clearinghouse.aggregate.tests.models import DummyAggregate,\
+    DummyResource, DummySliceEvent
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
+from expedient.common.tests.client import test_get_and_post_form
+from expedient.clearinghouse.slice.models import Slice
+from expedient.clearinghouse.resources.models import Sliver
+from expedient.clearinghouse.roles.models import ProjectRole
+from expedient.clearinghouse.utils import add_dummy_agg_to_test_settings,\
+    start_test_slice
 
 logger = logging.getLogger("ProjectTests")
 
 def common_setup(self):
     # Add the Aggregate test application
-    self.settings_manager.set(
-        INSTALLED_APPS=settings.INSTALLED_APPS + \
-        ["expedient.clearinghouse.aggregate.tests"],
-        AGGREGATE_PLUGINS=settings.AGGREGATE_PLUGINS + \
-            (("expedient.clearinghouse.aggregate.tests.models.DummyAggregate",
-              "dummy_agg",
-              "expedient.clearinghouse.aggregate.tests.urls"),
-            ),
-        DEBUG_PROPAGATE_EXCEPTIONS=True,
-    )
-    try:
-        del get_aggregate_classes.l
-    except AttributeError:
-        pass
-    
-    """Create users and aggregates"""
-    self.su = User.objects.create_superuser(
-        "superuser", "su@su.com", "password")
-    self.u1 = User.objects.create_user(
-        "user1", "u@u.com", "password")
-    self.u2 = User.objects.create_user(
-        "user2", "u@u.com", "password")
-    
-    self.client.login(username="superuser", password="password")
-    threadlocals.push_frame(user=self.su)
-    
-    self.agg1 = DummyAggregate.objects.create(
-        name="Agg1",
-    )
-    self.agg2 = DummyAggregate.objects.create(
-        name="Agg2",
-    )
-    
-    self.client.logout()
-    threadlocals.pop_frame()
+    add_dummy_agg_to_test_settings(self)
     
 class TestModels(SettingsTestCase):
     def setUp(self):
         common_setup(self)
         
+        self.su = User.objects.create_superuser(
+            "superuser", "su@su.com", "password")
+        
+        self.client.login(username="superuser", password="password")
+        threadlocals.push_frame(user=self.su)
+        
+        self.agg1 = DummyAggregate.objects.create(
+            name="Agg1",
+        )
+        self.agg1.create_resources()
+        
+        self.agg2 = DummyAggregate.objects.create(
+            name="Agg2",
+        )
+        self.agg2.create_resources()
+        
+        self.client.logout()
+        threadlocals.pop_frame()
+            
     def test_allowed_create(self, name="test"):
         """Tests that we can create a project"""
 
@@ -96,40 +88,37 @@ class TestModels(SettingsTestCase):
 class TestRequests(SettingsTestCase):
     def setUp(self):
         common_setup(self)
-
-    def test_list(self):
-        """
-        Create a few projects and check the get.
-        """
-        pass
-#        l = []
-#        members = User.objects.all()[0:2]
-#        self.client.login(username="superuser", password="password")
-#        threadlocals.push_frame(user=self.su)
-#        for p in xrange(3):
-#            
-#        threadlocals.pop_frame()
-#        self.client.logout()
-#        
-#        # check that the members see 3 projects    
-#        for i, m in enumerate(members):
-#            self.client.login(username=m.username, password="password")
-#            response = self.client.get(reverse("project_list"))
-#            self.assertContains(response, "project0", 1)
-#            self.assertContains(response, "description0", 1)
-#            self.assertContains(response, "project1", 1)
-#            self.assertContains(response, "description1", 1)
-#            d = pq(response.content)
-#            self.assertEqual(len(d('tr')), 4) # including headers
-#        
-#        # check that a nonmember doesn't see any projects
-#        self.client.login(username=m.username, password="password")
-#        response = self.client.get(reverse("project_list"))
-#        self.assertNotContains(response, "project0", 1)
-#        self.assertNotContains(response, "description0", 1)
-#        self.assertNotContains(response, "project1", 1)
-#        self.assertNotContains(response, "description1", 1)
-#        d = pq(response.content)
-#        self.assertEqual(len(d('tr')), 1)
         
-    
+    def test_full(self):
+        """
+        Test that a project with a started slice can be deleted.
+        """
+        
+        start_test_slice(self)
+        
+        slice_name = "%s" % self.slice
+        
+        self.client.login(
+            username=self.u2.username, password="password")
+        threadlocals.push_frame(user=self.u2)
+
+        # delete the project. This should delete all the slivers
+        # and resources, and delete the slice. It should also stop
+        # the slice (which creates a DummySliceEvent)
+        response = test_get_and_post_form(
+            client=self.client,
+            url=self.project.get_delete_url(),
+            params={},
+        )
+        self.assertRedirects(response, "/")
+
+        self.assertEqual(
+            DummySliceEvent.objects.filter(
+                slice=slice_name, status="stopped").count(), 2)
+        self.assertEqual(Sliver.objects.count(), 0)
+        self.assertEqual(Project.objects.count(), 0)
+        
+        self.client.logout()
+        threadlocals.pop_frame()
+        
+        

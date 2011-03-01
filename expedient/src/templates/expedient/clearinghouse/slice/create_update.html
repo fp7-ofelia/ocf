@@ -3,6 +3,10 @@
 
 {% block title %}{{ title }}{% endblock title %}
 
+{% block head %}
+{{ form.media }}
+{% endblock head %}
+
 {% block content %}
 <div class="title">
 	<h1>{% if slice %}Update{% else %}Create{% endif %} Slice in Project

@@ -70,7 +70,7 @@ test.run_tests = run_tests
 
 setup(
     name="expedient",
-    version="0.3.4.13",
+    version="4.0.0",
     description="Modular pluggable platform to manage GENI",
     author="Jad Naous",
     author_email="jnaous@stanford.edu",
@@ -80,7 +80,6 @@ setup(
     install_requires=[
         'django>=1.2.0,<1.3',
         'django_extensions',
-        'django_evolution',
         'django-autoslug',
         'django-registration>=0.7,<0.8',
         'decorator',

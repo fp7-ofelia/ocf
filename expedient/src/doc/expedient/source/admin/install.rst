@@ -21,6 +21,7 @@ You will need to do the following:
 #. :ref:`admin-rpm-install-database`
 #. :ref:`admin-rpm-install-apache`
 #. :ref:`admin-rpm-install-finalize`
+#. :ref:`admin-rpm-add-cron`
 
 .. _admin-rpm-install-repos:
 
@@ -215,6 +216,17 @@ is a known bug. You can run those tests separately with::
 
 They should pass then.
 
+.. _admin-rpm-add-cron:
+
+Add Expedient Cron Job:
+.......................
+
+The last thing you need to do is add a cron job that will call::
+
+    PYTHONPATH=/etc/expedient expedient_manage run_timer_jobs
+
+every 15 or 30 minutes, depending on the timer resolution you prefer.
+
 .. _admin-git-install:
 
 Install From Git
@@ -284,6 +296,46 @@ installed, you can install all of these packages using ::
 
     $ sudo easy_install <python-package>
 
+Notes on Installing on Windows with Cygwin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Cygwin is a little bit annoying because it is not exactly
+a Linux environment. Make sure you install the following packages
+using your Cygwin's setup.exe before installing the above dependencies:
+
+* gcc
+* gcc-g++
+* swig
+* python
+* libxml2
+* libxml2-devel
+* libxslt
+* libxlst-devel
+* python-libxml2
+* python-libxslt
+* python-paramiko
+* python-crypto
+
+You will also need to install MySQL on the machine before continuing
+and making sure mysql-config is on the path (this can be done by
+simply selecting the option to add the executables to the PATH
+environment variable during the MySQL installaion).
+
+Open the cygwin bash command prompt, and execute the following:
+
+    $ cd /usr
+    $ find -name '*.dll' > /tmp/dll.list
+
+Exit the Cygwin environment, close all cygwin processes (reboot is
+preferred), then open the windows command prompt using the
+:command:`cmd` command. Execute the following:
+
+    > cd <path to cygwin>\bin
+    > ash
+    $ TMP=/tmp ./rebaseall -T /tmp/dll.list -v
+
+Once done, you can proceed with installing the dependencies.
+
 .. _admin-git-install-configure:
 
 Configure Local Settings
@@ -339,11 +391,13 @@ Configure Apache
 ................
 
 Now you need to configure Apache. The instructions here assume
-you have Apache installed and configured. Enable ``mod_wsgi`` and
-``mod_ssl`` according to your OS. On OpenSuSE, you can do::
+you have Apache installed and configured. Enable ``mod_macro``,
+``mod_wsgi`` and ``mod_ssl`` according to your OS (you might need
+to install them first). On OpenSuSE, you can do::
 
     $ sudo /usr/sbin/a2enmod wsgi
     $ sudo /usr/sbin/a2enmod ssl
+    $ sudo /usr/sbin/a2enmod macro
     $ sudo /usr/sbin/a2enflag SSL
 
 Next you will need to edit a configuration file. Open
@@ -368,7 +422,7 @@ On OpenSuSE, you can do that by::
 
 	$ sudo ln -s expedient/src/config/expedient/common/apache/vhost-macros.conf \
 	  /etc/apache2/conf.d
-	$ sudo ln -s expedient/src/config/expedient/common/apache/vhost-macros.conf \
+	$ sudo ln -s expedient/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf \
 	  /etc/apache2/vhosts.d
 
 Make sure you have SSL working on Apache with certificates. You
@@ -414,3 +468,5 @@ You can run the internal tests by executing::
     $ python expedient/clearinghouse/manage.py test_expedient
 
 You should get an `OK` at the end if all tests pass.
+
+See :ref:`admin-rpm-add-cron` for one last step.

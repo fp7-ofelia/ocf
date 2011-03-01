@@ -93,8 +93,7 @@ class Project(models.Model):
                     permittees=permittee,
                 ).values_list("object_id", flat=True)
             )
-	#XXX: MARC did this
-        #return Aggregate.objects.filter(pk__in=agg_ids)
+        #TODO: marc comented this return Aggregate.objects.filter(pk__in=agg_ids)
         return Aggregate.objects
     aggregates=property(_get_aggregates)
     
@@ -129,3 +128,61 @@ class Project(models.Model):
         s = u"Project %s" % self.name
         return s
 
+    @classmethod
+    @models.permalink
+    def get_create_url(cls):
+        "Returns the URL to create projects"
+        return ("project_create",)
+    
+    @models.permalink
+    def get_update_url(self):
+        "Returns the URL to update project info"
+        return ("project_update", (), {"proj_id": self.id})
+
+    @models.permalink
+    def get_detail_url(self):
+        "Returns the URL for the project detail page"
+        return ("project_detail", (), {"proj_id": self.id})
+    
+    @models.permalink
+    def get_delete_url(self):
+        "Returns the URL to delete a project"
+        return ("project_delete", (), {"proj_id": self.id})
+    
+    @models.permalink
+    def get_agg_add_url(self):
+        "Returns the URL to add an aggregate to a project"
+        return ("project_add_agg", (), {"proj_id": self.id})
+
+    @models.permalink
+    def get_agg_update_url(self, aggregate):
+        "Returns URL to update an aggregate's info related to the project"
+        return ("project_update_agg", (), {
+            "proj_id": self.id,
+            "agg_id": aggregate.id})
+    
+    @models.permalink
+    def get_agg_remove_url(self, aggregate):
+        "Returns URL to remove aggregate from project"
+        return ("project_remove_agg", (), {
+            "proj_id": self.id,
+            "agg_id": aggregate.id})
+    
+    @models.permalink
+    def get_member_add_url(self):
+        return ("project_member_add", (), {
+            "proj_id": self.id})
+    
+    @models.permalink
+    def get_member_update_url(self, user):
+        return ("project_member_update", (), {
+            "proj_id": self.id,
+            "user_id": user.id})
+
+    @models.permalink
+    def get_member_remove_url(self, user):
+        return ("project_member_remove", (), {
+            "proj_id": self.id,
+            "user_id": user.id})
+    
+    

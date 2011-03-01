@@ -3,7 +3,8 @@ Created on Jul 12, 2010
 
 @author: jnaous
 '''
-        
+from datetime import datetime, timedelta
+import time        
 from pyquery import PyQuery as pq
 from lxml import etree as et
 from openflow.dummyom.models import DummyOM, DummyOMSlice, DummyOMSwitch
@@ -15,7 +16,7 @@ from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
 from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 import logging
 from django.core.urlresolvers import reverse
-from expedient.common.tests.client import test_get_and_post_form
+from expedient.common.tests.client import test_get_and_post_form, parse_form
 from expedient.clearinghouse.project.models import Project
 from expedient.clearinghouse.slice.models import Slice
 from base64 import b64decode
@@ -36,6 +37,7 @@ import xmlrpclib
 from expedient.common.utils.transport import TestClientTransport
 from expedient.common.utils import create_or_update
 from geni.util.urn_util import publicid_to_urn
+from xmlrpclib import Fault
 
 logger = logging.getLogger("OpenFlowPluginTests")
 
@@ -51,6 +53,12 @@ MOD = "openflow.plugin"
 logging.getLogger("OpenflowModelsParsing").setLevel(logging.WARNING)
 logging.getLogger("TestClientTransport").setLevel(logging.WARNING)
 logging.getLogger("rpc4django.views").setLevel(logging.WARNING)
+
+def get_form_options(doc):
+    """Return the values of all option tags"""
+    d = pq(doc, parser="html")
+    options = d("option")
+    return [option.attrib["value"] for option in options]
 
 def order_rspec(rspec):
     # order the flowspace and switch elements in the rspec
@@ -174,18 +182,29 @@ class Tests(SettingsTestCase):
         
         self.test_create_aggregates()
         
-        i = 0
-        url = reverse("openflow_aggregate_add_links", args=[i+1])
+        url = reverse("openflow_aggregate_add_links", args=[1])
         
-        local_iface = OpenFlowInterface.objects.filter(aggregate__pk=i+1)[0]
-        remote_iface = OpenFlowInterface.objects.filter(aggregate__pk=i+2)[0]
+        local_iface = OpenFlowInterface.objects.filter(aggregate__pk=1)[0]
+        remote_iface = OpenFlowInterface.objects.filter(aggregate__pk=2)[0]
         
+        disabled_iface = OpenFlowInterface.objects.filter(aggregate__pk=1)[1]
+        disabled_iface.available = False
+        disabled_iface.save()
+        
+        # check that there are no links already
         self.assertEqual(
             OpenFlowConnection.objects.filter(
                 src_iface=local_iface, dst_iface=remote_iface).count(), 0)
         self.assertEqual(
             OpenFlowConnection.objects.filter(
                 dst_iface=local_iface, src_iface=remote_iface).count(), 0)
+        
+        # check that disabled interfaces are not present and enabled ones are.
+        response = self.client.get(url)
+        opt_values = get_form_options(response.content)
+        self.assertFalse(disabled_iface.id in opt_values)
+        self.assertFalse(local_iface.id in opt_values)
+        self.assertFalse(remote_iface.id in opt_values)
         
         response = test_get_and_post_form(
             self.client, url,
@@ -200,11 +219,33 @@ class Tests(SettingsTestCase):
             expected_url=url,
         )
         
+        # check that the new connection shows up
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='of_connections']")
+        self.assertEqual(len(cnxns), 2)
+        
         to_link = OpenFlowConnection.objects.get(
             src_iface=local_iface, dst_iface=remote_iface)
         from_link = OpenFlowConnection.objects.get(
             dst_iface=local_iface, src_iface=remote_iface)
         
+        # disable an interface to see if the connection still shows
+        local_iface.available = False
+        local_iface.save()
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='of_connections']")
+        self.assertEqual(len(cnxns), 0)
+        
+        # reenable the interface to see if the connection shows back up
+        local_iface.available = True
+        local_iface.save()
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='of_connections']")
+        self.assertEqual(len(cnxns), 2)
+
         # test delete
         response = test_get_and_post_form(
             self.client, url,
@@ -267,7 +308,29 @@ class Tests(SettingsTestCase):
         
         cnxn = NonOpenFlowConnection.objects.get(
             of_iface=iface, resource=resource)
+
+        # check that the new connection shows up
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='non_of_connections']")
+        self.assertEqual(len(cnxns), 1)
         
+        # disable an interface to see if the connection still shows
+        iface.available = False
+        iface.save()
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='non_of_connections']")
+        self.assertEqual(len(cnxns), 0)
+        
+        # reenable the interface to see if the connection shows back up
+        iface.available = True
+        iface.save()
+        response = self.client.get(url)
+        d = pq(response.content, parser="html")
+        cnxns = d("input[name='non_of_connections']")
+        self.assertEqual(len(cnxns), 1)
+
         # test delete
         response = test_get_and_post_form(
             self.client, url,
@@ -331,13 +394,16 @@ class Tests(SettingsTestCase):
                 response,
                 url,
             )
-        
+    
     def test_add_to_slice(self):
         """
         Add the aggregate to a slice.
         """
         self.test_add_to_project()
         
+        expiration = datetime.now() \
+            + timedelta(days=settings.MAX_SLICE_LIFE - 2)
+
         # create slice
         response = test_get_and_post_form(
             self.client,
@@ -345,6 +411,8 @@ class Tests(SettingsTestCase):
             params=dict(
                 name="slice",
                 description="description",
+                expiration_date_0="%s" % expiration.date(),
+                expiration_date_1=expiration.time().strftime("%H:%m:%S"),
             ),
         )
         
@@ -542,6 +610,7 @@ class Tests(SettingsTestCase):
             tp_src=(123,123),
         ),
         slice=None,
+        expiration=datetime.now() + timedelta(days=1),
         create_aggregates=True,
     ):
         # IMPORTANT: If you change fs1 and fs2, make sure that
@@ -593,6 +662,7 @@ class Tests(SettingsTestCase):
                 name=slice_name,
                 description=slice_desc,
                 owner=user,
+                expiration_date=expiration,
             )
         
         # select ports and switches
@@ -702,6 +772,10 @@ class Tests(SettingsTestCase):
         self.assertEqual(slice.name, slice_name)
         self.assertEqual(slice.description, slice_desc)
         self.assertEqual(slice.project, project)
+        self.assertEqual(
+            long(time.mktime(slice.expiration_date.timetuple())),
+            long(time.mktime(expiration.timetuple())),
+        )
         
         user = User.objects.get(username=username)
         self.assertEqual(user.first_name, firstname)
@@ -751,6 +825,34 @@ class Tests(SettingsTestCase):
         verif_slivers(r2, fs2_ports, fs2_switches)
         
         return ret_rspec
+        
+    def test_gapi_expired_CreateSliver(self):
+        try:
+            self.test_gapi_CreateSliver(
+                expiration=datetime.now() - timedelta(days=1),
+            )
+        except Fault:
+            pass
+        else:
+            self.fail("Did not raise a Fault for expired slice.")
+            
+    def test_gapi_RenewSliver(self):
+        self.test_gapi_CreateSliver()
+        
+        d = datetime.now() + timedelta(days=10)
+
+        ret_rspec = self.rpc.RenewSliver(
+            self.slice_gid.get_urn(),
+            [self.slice_cred],
+            d.strftime("%Y-%m-%dT%H:%M:%S"),
+        )
+        
+        slice = Slice.objects.all()[0]
+        
+        self.assertEqual(
+            long(time.mktime(slice.expiration_date.timetuple())),
+            long(time.mktime(d.timetuple())),
+        )
         
     def test_gapi_DeleteSliver(self):
         self.test_gapi_CreateSliver()

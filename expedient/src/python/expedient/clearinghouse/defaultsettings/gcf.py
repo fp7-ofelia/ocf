@@ -74,3 +74,6 @@ GCF_SLICE_CRED_LIFE = 360000
 
 GCF_USER_CRED_LIFE = 864000
 '''User credential lifetime for credentials generated through the CH API in seconds.'''
+
+GENI_AGGREGATE_UPDATE_PERIOD = 15*60
+'''Every how many seconds should a GENIAggregate get updated?'''

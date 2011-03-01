@@ -8,7 +8,7 @@
 		<title>
 			{% block title %}Expedient{% endblock %}
 		</title>
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
 		<script src="{% url js_media 'iframe.js' %}"></script>
@@ -61,7 +61,7 @@
 					<div align="right" style="position: relative; top: 19px; right: -4px;">
  						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
 							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
-							href="/help/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
+							href="http://yuba.stanford.edu/~jnaous/expedient/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
 							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
 					</div>
 				</td>
@@ -79,7 +79,6 @@
 						</tr>
 						{% endfor %}
 					</table>
-					<div class="messages_more"><a href="{% url messaging_center %}">Show more...</a></div>
 				</div>
 				{% endif %}
 				{% endblock %}

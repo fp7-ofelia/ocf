@@ -18,6 +18,9 @@ from expedient_geni.models import GENISliceInfo
 from expedient.clearinghouse.project.views import create_project_roles
 from expedient.common.middleware import threadlocals
 from django.db.utils import IntegrityError
+from datetime import datetime, timedelta
+from django.conf import settings
+import dateutil
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
@@ -62,11 +65,13 @@ def ListResources(options, user):
     return result
 
 def CreateSliver(slice_urn, rspec, user):
-    (project_name, project_desc, slice_name, slice_desc, 
+    (project_name, project_desc, slice_name, slice_desc, slice_expiry,
     controller_url, firstname, lastname, affiliation,
     email, password, slivers) = rspec_mod.parse_slice(rspec)
 
     logger.debug("Parsed Rspec")
+    
+    slice_expiry = datetime.fromtimestamp(slice_expiry)
 
     give_permission_to("can_create_project", Project, user)
 
@@ -84,6 +89,7 @@ def CreateSliver(slice_urn, rspec, user):
         # update the slice info
         slice.description = slice_desc
         slice.name = slice_name
+        slice.expiration_date = slice_expiry
         slice.save()
         # update the project info
         slice.project.name = project_name
@@ -116,6 +122,7 @@ def CreateSliver(slice_urn, rspec, user):
                 description=slice_desc,
                 project=project,
                 owner=user,
+                expiration_date = slice_expiry,
             )
         except IntegrityError:
             raise DuplicateSliceNameException(slice_name)
@@ -230,7 +237,10 @@ def SliverStatus(slice_urn):
     return retval
 
 def RenewSliver(slice_urn, expiration_time):
-    get_slice(slice_urn)
+    slice = get_slice(slice_urn)
+    new_expiration_date = dateutil.parser.parse(str(expiration_time))
+    slice.expiration_date = new_expiration_date
+    slice.save()
     return True
 
 def Shutdown(slice_urn, user):

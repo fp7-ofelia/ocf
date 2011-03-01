@@ -131,7 +131,7 @@ class PermissionMiddleware(object):
                     
             if missing:
                 exc = PermissionDenied(missing.name, target, permittee)
-                logger.error("Permission Denied %s" % exc)
+                logger.info("Permission Denied %s" % exc)
                 raise exc
 
     def process_view(self, request, view_func, view_args, view_kwargs):

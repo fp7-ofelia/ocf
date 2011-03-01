@@ -6,7 +6,7 @@
 Welcome to Expedient's documentation!
 #####################################
 
-|Expedient|_ is a pluggable GENI_ control framework that strives to provide a
+|Expedient|_ is a pluggable GENI_ control framework platform that strives to provide a
 rich and intuitive user interface for experimenters to create and run
 experiments and an easy development environment for developers to add new
 types of resources and new user interfaces.
@@ -38,6 +38,7 @@ Contents:
    admin/index
    developer/index
 
+Automatically generated API can be found here: `API Documentation`_
 
 Indices and tables
 ##################

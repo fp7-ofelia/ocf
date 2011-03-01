@@ -37,6 +37,8 @@ from expedient_geni.utils import get_slice_urn, create_x509_cert,\
     create_slice_credential, create_user_credential, create_slice_urn
 import traceback
 from sfa.trust import gid
+from expedient_geni.backends import get_username_from_cert
+from django.contrib.auth.models import User
 
 logger = logging.getLogger("expedient_geni.clearinghouse")
 
@@ -48,6 +50,15 @@ def GetVersion():
     return {"geni_api": 1}
 
 def CreateSlice(user_cert, urn_req=None):
+    
+    # Is this user allowed to create a slice?
+    # first get the user with this cert
+    username = get_username_from_cert(user_cert)
+    try:
+        User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Exception("Unknown user %s." % username)
+    
     if urn_req:
         # check the requested URN
         urn = URN(urn=urn_req)
@@ -111,7 +122,13 @@ def CreateUserCredential(user_gid):
     '''Return string representation of a user credential
     issued by this CH with caller/object this user_gid (string)
     with user privileges'''
-    # FIXME: Validate arg - non empty, my user
+
+    username = get_username_from_cert(user_gid)
+    try:
+        User.objects.get(username=username)
+    except User.DoesNotExist:
+        raise Exception("Unknown user %s." % username)
+
     user_gid = gid.GID(string=user_gid)
     logger.info("Called CreateUserCredential for GID %s" % user_gid.get_hrn())
     try:

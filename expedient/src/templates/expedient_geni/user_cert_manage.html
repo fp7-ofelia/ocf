@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="main">
-	<h1>Manage user {{ user.username }}'s GENI certificate</h1>
+	<h1>Manage user {{ curr_user.username }}'s GENI certificate</h1>
 	{% if cert %}
 	<table class="formtable">
 		<tr>
@@ -36,14 +36,14 @@
 	{% endif %}
 	<div class="center">
 		{% if cert %}
-		<a href="{% url gcf_cert_download user.id %}">Download Cert</a> |
-		<a href="{% url gcf_key_download user.id %}">Download Keys</a> |
-		<a href="{% url gcf_cert_generate user.id %}">Regenerate</a> |
+		<a href="{% url gcf_cert_download curr_user.pk %}">Download Cert</a> |
+		<a href="{% url gcf_key_download curr_user.pk %}">Download Keys</a> |
+		<a href="{% url gcf_cert_generate curr_user.pk %}">Regenerate</a> |
 		{% else %}
-		<a href="{% url gcf_cert_generate user.id %}">Generate</a> |
+		<a href="{% url gcf_cert_generate curr_user.pk %}">Generate</a> |
 		{% endif %}
-		<a href="{% url gcf_cert_upload user.id %}">Upload Cert and Key</a> | 
-		<a href="{% url users_detail user.id %}">Go Back</a>
+		<a href="{% url gcf_cert_upload curr_user.pk %}">Upload Cert and Key</a> | 
+		<a href="{% url users_detail curr_user.pk %}">Go Back</a>
 	</div>
 </div>
 {% endblock content %}

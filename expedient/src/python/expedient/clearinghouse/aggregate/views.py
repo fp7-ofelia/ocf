@@ -62,7 +62,7 @@ def list(request, agg_id=None):
     perm_names=["can_edit_aggregate"],
     permittee_func=get_user_from_req,
     target_func=get_leaf_queryset(Aggregate, "agg_id"),
-    methods=["POST"])
+    methods=["GET", "POST"])
 def delete(request, agg_id):
     """
     Display a confirmation page then stop all slices and delete the aggregate.
@@ -70,8 +70,9 @@ def delete(request, agg_id):
     next = request.GET.get("next", None) or reverse("home")
     aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
     # Stop all slices using the aggregate
-    for s in aggregate.slice_set.all():
-        aggregate.stop_slice(s)
+    if request.method == "POST":
+        for s in aggregate.slice_set.all():
+            aggregate.stop_slice(s)
     # Delete the aggregate.
     req = create_update.delete_object(
         request,

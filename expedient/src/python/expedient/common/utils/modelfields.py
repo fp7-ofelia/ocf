@@ -6,6 +6,7 @@ Created on Jul 18, 2010
 import logging
 from django.db import models
 import formfields
+from expedient.common.utils.formfields import validate_datetime
 
 logger = logging.getLogger("common.utils.modelfields")
 
@@ -58,3 +59,26 @@ class IPNetworkField(models.CharField):
         defaults.update(kwargs)
         return super(IPNetworkField, self).formfield(**defaults)
     
+class LimitedDateTimeField(models.DateTimeField):
+    """A date time field that is limited between a min and max."""
+    
+    description = "Date and time"
+    
+    def __init__(self, max_date=None, min_date=None, *args, **kwargs):
+        self.max_date = max_date
+        self.min_date = min_date
+        super(LimitedDateTimeField, self).__init__(*args, **kwargs)
+
+    def validate(self, value, model_instance):
+        super(LimitedDateTimeField, self).validate(value, model_instance)
+        validate_datetime(value, self.min_date, self.max_date)
+    
+    def formfield(self, **kwargs):
+        defaults = {
+            "form_class": formfields.LimitedSplitDateTimeField,
+            "max_date": self.max_date,
+            "min_date": self.min_date,
+        }
+        defaults.update(kwargs)
+        return super(LimitedDateTimeField, self).formfield(**defaults)
+

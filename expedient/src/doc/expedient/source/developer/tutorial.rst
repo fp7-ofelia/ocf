@@ -573,13 +573,29 @@ so. Eventually, if the plugin makes it into the Expedient
 distribution, the settings that you modify here will be added to
 the default settings. We will need to edit two settings.
 
+Default Settings
+^^^^^^^^^^^^^^^^
+
+All the settings you put in the :file:`localsettings.py` appear in Django's
+:mod:`settings` module. So if your application has some default settings that
+you would like to add, you will need to add a line similar to::
+
+    from sshaggregate.defaultsettings import *
+
+at the top of the :file:`localsettings.py` file. 
+
+You can append additional list items to almost all of the default
+settings that are lists. Below we show an example of how this is
+done for `INSTALLED_APPS`_ and `AGGREGATE_PLUGINS`_. If
+you add an `EXTRA_` at the beginning of the name, the list you
+specify next is appended to the setting's list value.
+
 INSTALLED_APPS
 ^^^^^^^^^^^^^^
 
 Add the following line to your :file:`localsettings.py`::
 
-    from expedient.clearinghouse.defaultsettings.django import INSTALLED_APPS
-    INSTALLED_APPS += [
+    EXTRA_INSTALLED_APPS = [
         'sshaggregate',
     ]
 
@@ -590,24 +606,12 @@ The `AGGREGATE_PLUGINS`_ setting describes the aggregate plugins
 that are installed. See the `AGGREGATE_PLUGINS`_ setting
 documentation for more information::
 
-    from expedient.clearinghouse.defaultsettings.expedient import AGGREGATE_PLUGINS
-    AGGREGATE_PLUGINS += [
+    EXTRA_AGGREGATE_PLUGINS = [
         ('sshaggregate.models.SSHAggregate', 'sshaggregate', 'sshaggregate.urls'),
     ]
 
 .. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
 .. _`AGGREGATE_PLUGINS`: ../api/expedient.clearinghouse.defaultsettings.expedient-module.html#AGGREGATE_PLUGINS
-
-Default Settings
-^^^^^^^^^^^^^^^^
-
-All the settings you put in the :file:`localsettings.py` appear in Django's
-:mod:`settings` module. So if your application has some default settings that
-you would like to add, you will need to add a line similar to::
-
-    from sshaggregate.defaultsettings import *
-
-at the top of the :file:`localsettings.py` file.
 
 Testing
 -------

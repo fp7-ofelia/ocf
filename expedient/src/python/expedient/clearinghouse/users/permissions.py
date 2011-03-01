@@ -19,6 +19,6 @@ def run():
         "can_manage_users",
         description=\
             "Owners of this permission can view/modify/delete users in the"
-            "user management page.",
+            " user management page.",
         view=request_permission_wrapper,
     )
