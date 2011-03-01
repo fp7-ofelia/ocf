@@ -124,8 +124,7 @@ class Slice(models.Model):
                     permittees=permittee,
                 ).values_list("object_id", flat=True)
             )
-        #TODO: Marc commented thisreturn Aggregate.objects.filter(pk__in=agg_ids)
-        return Aggregate.objects
+        return Aggregate.objects.filter(pk__in=agg_ids)
     aggregates=property(_get_aggregates)
     
     @classmethod
