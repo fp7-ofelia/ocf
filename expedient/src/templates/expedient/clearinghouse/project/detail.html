@@ -143,21 +143,12 @@
 	<div class="aggregate_list">
 		{% with project.aggregates.all as aggregate_list %}
 		{% if aggregate_list.count %}
-			{% with "project/agg_list_actions.html" as action_template %}
-				{% include "aggregate/list_table.html" %}
-			{% endwith %}
+			{% include "project/project_simple_agg_list.html" %}
 		{% else %}
-			This project has no aggregates added to it. To be able to
-			create slices that can reserve resources on aggregates, you will
-			need to add aggregates to the project.
+			This system does not provide any aggregates. Please contact the island manager to inquire about the island status.
 		{% endif %}
 		{% endwith %}
-	    <div class="center">
-	    	<input type="button" value="Add Aggregates"
-			onclick="document.location='{% url project_add_agg project.id %}'" />
-	    </div>
-	</div>
-	
+	</div>	
 	<h2>Slices</h2>
 	<div class="slice_list">
 		<div class="table_div">

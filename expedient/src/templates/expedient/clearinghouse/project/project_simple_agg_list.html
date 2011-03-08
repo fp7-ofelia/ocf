@@ -1,0 +1,64 @@
+{% load ch_extras %}
+{% load permissions %}
+<!-- stolen from aggregate list_table.html -->
+<div class="table_div">
+	<table class="fulltable" id="aggregates_table">
+		<tr>
+			<th class="logo">Logo</th>
+            <th class="name">Name</th>
+            <th class="type">Type</th>
+			<th class="location">Location</th>
+			{% if not condensed %}
+			<th class="description">Description</th>
+			{% endif %}
+			<th class="resources">Size</th>
+			<th class="owners">Managers</th>
+			<th class="status">Status</th>
+		</tr>
+		{% for generic_am in aggregate_list %}
+		{% with generic_am.as_leaf_class as am %}
+		{% if highlight_id and generic_am.id == highlight_id %}
+		<tr class=highlight>
+		{% else %}
+		<tr>
+        {% endif %}
+			<td class="logo">{{ am.get_logo_url }}</td>
+			<td class="name">{{ am.name }}</td>
+			<td class="type">
+				{% with am.get_aggregates_url as the_url %}
+				{% if the_url %}
+				<a href="{{ the_url }}">
+				{% endif %}
+				{{ am|get_meta_field:"verbose_name" }}
+				{% if the_url %}
+				</a>
+				{% endif %}
+				{% endwith %}
+			</td>
+			<td class="location">{{ am.location }}</td>
+			{% if not condensed %}
+			<td class="description">{{ am.description }}</td>
+			{% endif %}
+			<td class="resources">{{ am.resource_set.count }}</td>
+			<td class="managers">
+				{% for mgr in am.managers.all %}
+				<a href="mailto:{{ mgr.email }}">{{ mgr.username }}</a>{% if not forloop.last %},{% endif %}
+				{% endfor %}
+	        </td>
+			<td class="status">
+				<img class="am-status-img" id="status_{{ am.id }}"
+				src="{% url img_media 'status-question-small.jpg' %}">
+			</td>
+		</tr>
+		{% endwith %}
+		{% endfor %}
+	</table>
+</div>
+
+<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
+<script>
+	{% for generic_am in aggregate_list %}
+	get_status({{ generic_am.id }}, "{% url aggregate_status_img generic_am.id %}");
+	{% endfor %}
+</script>
+
