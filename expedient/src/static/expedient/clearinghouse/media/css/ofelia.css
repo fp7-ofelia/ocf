@@ -21,7 +21,7 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 body {
 	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #CCDDDD;
+	background-color: #8ccdf8;
 	color: #333;
 	text-align: center;
 	margin: 0px;

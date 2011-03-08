@@ -1,7 +1,7 @@
 body {
 	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #EEEEEE;
+	background-color: #8ccdf8;
 	color: #333;
 	text-align: center;
 	margin: 0px;
@@ -14,7 +14,7 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 	width: 1000px;
 	margin: auto;
 	padding: 0 0px;
-	background-color: #eee;
+	background-color: #CDD;
 }
 
 #userauth {
@@ -251,7 +251,7 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 body {
 	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #EEEEEE;
+	background-color: #8ccdf8;
 	color: #333;
 	text-align: center;
 	margin: 0px;
@@ -266,7 +266,7 @@ body {
 	
 
 #header {
-	background-color: #EEEEEE;
+	background-color: #8ccdf8;
 	}
 
 #headerimg 	{

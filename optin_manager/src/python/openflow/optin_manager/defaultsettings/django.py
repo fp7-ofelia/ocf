@@ -26,7 +26,7 @@ try:
 except ImportError:
     # TODO: Hack!
     location = "/etc/optin_manager"
-    location = "/home/user/ofelia-git/optin_manager/src/python/openflow/optin_manager"
+    location = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager"
         
 CONF_DIR = location
 '''Location of local Expedient configuration files.
