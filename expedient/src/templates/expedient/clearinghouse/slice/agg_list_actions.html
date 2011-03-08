@@ -2,6 +2,3 @@
 <form method="POST" action="{% url slice_update_agg slice.id am.id %}">{% csrf_token %}
 	<input type="submit" value="set controller" />
 </form>
-<form method="POST" action="{% url slice_remove_agg slice.id am.id %}">{% csrf_token %}
-	<input type="submit" value="remove" />
-</form>
