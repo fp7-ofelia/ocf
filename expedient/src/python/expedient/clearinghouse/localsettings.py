@@ -1,5 +1,5 @@
-CONF_DIR = '/home/user/ofelia-git/expedient/src/python/expedient/clearinghouse'
-SRC_DIR = '/home/user/ofelia-git/expedient/src'
+CONF_DIR = '/opt/ofelia/expedient/src/python/expedient/clearinghouse'
+SRC_DIR = '/opt/ofelia/expedient/src'
 
 
 ROOT_USERNAME = "expedient"

@@ -4,6 +4,7 @@ Created on Feb 14, 2011
 @author: jnaous
 '''
 import sys
+sys.path.append("/opt/ofelia/expedient/src/python/expedient/clearinghouse/")
 
 def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     """Set or update a setting by adding items to it.
