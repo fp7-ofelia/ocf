@@ -10,8 +10,6 @@ from utils import append_to_local_setting
 
 try:
     from localsettings import SRC_DIR as location
-    #sys.path.append("/home/user/ofelia-git/expedient/src/python/")
-    sys.path.append(location)
 except ImportError:
     try:
         location = os.path.abspath(pkg_resources.resource_filename(
