@@ -1211,14 +1211,6 @@ img.submenuimg {
 }
 
 
-tr.even{
-    background-color: #CEF6F5;
-}
-
-tr.odd{
-    background-color: #E0F8E0;
-}
-
 table.servers{
     width: 100%; 
     border-spacing: 0px;
@@ -1231,8 +1223,17 @@ table.servers td{
 }
 
 table.servers th {
-    text-align:left;
-    background-color: #CEF6F5;
+    padding : 2px;
+    background-color: #8ED6EA;
+}
+
+
+table.servers tr.even{
+    background-color: #A6DEEE;
+}
+
+table.servers tr.odd{
+    background-color: #C0E7F3;
 }
 
 #Menu
