@@ -4,28 +4,25 @@ Created on Jun 11, 2010
 @author: jnaous
 '''
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from expedient.common.tests.manager import SettingsTestCase
-from expedient.clearinghouse.aggregate.tests.models import DummyAggregate
+from expedient.clearinghouse.aggregate.tests.models import DummyAggregate,\
+    DummyResource, DummySliceEvent
 from expedient.common.middleware import threadlocals
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.exceptions import PermissionDenied
 from expedient.common.tests.client import test_get_and_post_form
-
-MOD = "expedient.clearinghouse.aggregate"
+from expedient.clearinghouse.resources.models import Sliver
+from expedient.clearinghouse.utils import start_test_slice,\
+    add_dummy_agg_to_test_settings
 
 class Tests(SettingsTestCase):
-    urls = MOD + ".tests.urls"
-    
     def setUp(self):
         # Add the test application
-        self.settings_manager.set(
-            INSTALLED_APPS=settings.INSTALLED_APPS + [MOD + ".tests"],
-            DEBUG_PROPAGATE_EXCEPTIONS=True,
-        )
+        add_dummy_agg_to_test_settings(self)
+        
         u = User(username="test")
         u.set_password("password")
         u.save()
@@ -34,6 +31,9 @@ class Tests(SettingsTestCase):
             "superuser", "su@su.su", "password")
         threadlocals.push_frame(user=u)
         self.client.login(username="test", password="password")
+        
+    def tearDown(self):
+        threadlocals.pop_frame()
         
     def test_disallowed_create(self):
         """
@@ -107,6 +107,31 @@ class Tests(SettingsTestCase):
             params={},
         )
         self.assertRedirects(response, "/")
+        
+    def test_allowed_delete_with_started_slice(self):
+        '''
+        Tests that we can delete an aggregate that is in a started slice.
+        '''
+        
+        start_test_slice(self)
+        
+        self.client.login(username=self.u1.username, password="password")
+        threadlocals.push_frame(user=self.u1)
+
+        # delete the aggregate. This should delete all the slivers
+        # and resources, and create a DummySliceEvent to that effect.
+        response = test_get_and_post_form(
+            client=self.client,
+            url=self.agg1.get_delete_url(next="/"),
+            params={},
+        )
+        self.assertRedirects(response, "/")
+        
+        self.assertEqual(DummyAggregate.objects.count(), 1)
+        self.assertEqual(Sliver.objects.count(), 3)
+        self.assertEqual(
+            DummySliceEvent.objects.filter(
+                slice="%s" % self.slice, status="stopped").count(), 1)
 
     def test_allowed_edit(self):
         """

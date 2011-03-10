@@ -165,11 +165,15 @@ def handle_add_links(request, aggregate,
         (     Q(dst_iface__aggregate__id=aggregate.id)
               & ~Q(src_iface__aggregate__id=aggregate.id)  )
     )
-    of_cnxn_qs = OpenFlowConnection.objects.filter(of_iface_filter)
+    of_cnxn_qs = OpenFlowConnection.objects.filter(
+        of_iface_filter).filter(
+            src_iface__available=True, dst_iface__available=True)
 
     # Get the queryset of all non-openflow connections to aggregate
     non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
-        of_iface__aggregate__id=aggregate.id)
+        of_iface__aggregate__id=aggregate.id,
+        of_iface__available=True,
+    )
     
     # get the set of resources openflow interfaces connect to
     types = []

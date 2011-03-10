@@ -88,7 +88,9 @@ $(document).ready(function(){
 <div class="steps center">
 	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
+{% if planetlab_aggs %}
 	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
+{% endif %}
 </div>
 
 <h1>Topology</h1>

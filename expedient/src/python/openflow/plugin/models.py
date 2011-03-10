@@ -6,6 +6,7 @@ Created on Apr 26, 2010
 
 import re
 from django.db import models
+from django.conf import settings
 from expedient.clearinghouse.resources import models as resource_models
 from expedient.clearinghouse.slice import models as slice_models
 from expedient.clearinghouse.aggregate import models as aggregate_models
@@ -20,6 +21,7 @@ from expedient.common.utils import create_or_update, modelfields
 from expedient.clearinghouse.slice.models import Slice
 from django.db.models.aggregates import Count
 from django.core.exceptions import ValidationError
+from expedient.common.timer.models import Job
 
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
@@ -93,6 +95,12 @@ production networks, and is currently deployed in several universities.
             logger.info("XML RPC call failed to aggregate %s" % self.name)
             traceback.print_exc()
             return str(ret_exception)
+
+        # schedule a job to automatically update resources
+        Job.objects.schedule(
+            settings.OPENFLOW_TOPOLOGY_UPDATE_PERIOD,
+            self.update_topology(),
+        )
 
         err = self.update_topology()
         if err: return err

@@ -115,7 +115,7 @@ def user_cert_manage(request, user_id):
         request,
         template=TEMPLATE_PATH+"/user_cert_manage.html",
         extra_context={
-            "user": user,
+            "curr_user": user,
             "cert": cert,
         },
     )
@@ -146,7 +146,7 @@ def user_cert_generate(request, user_id):
         request,
         template=TEMPLATE_PATH+"/user_cert_generate.html",
         extra_context={
-            "user": user,
+            "curr_user": user,
         },
     )
     
@@ -202,7 +202,7 @@ def user_cert_upload(request, user_id):
         request,
         template=TEMPLATE_PATH+"/user_cert_upload.html",
         extra_context={
-            "user": user,
+            "curr_user": user,
             "form": form,
         }
     )

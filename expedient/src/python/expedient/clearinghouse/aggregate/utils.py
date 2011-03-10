@@ -12,10 +12,11 @@ def get_aggregate_classes():
     of aggregate plugins.
     """
     agg_plugins = getattr(settings, "AGGREGATE_PLUGINS", [])
-    agg_plugin_names = [agg[0] for agg in agg_plugins]
     if hasattr(get_aggregate_classes, "l"):
-        return get_aggregate_classes.l
+        if len(get_aggregate_classes.l) == len(agg_plugins):
+            return get_aggregate_classes.l
     l = []
+    agg_plugin_names = [agg[0] for agg in agg_plugins]
     for n in agg_plugin_names:
         mod, _, name = n.rpartition(".")
         mod = __import__(mod, fromlist=[name])

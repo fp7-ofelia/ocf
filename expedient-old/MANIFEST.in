@@ -1,0 +1,9 @@
+exclude src/python/expedient/clearinghouse/localsettings.py
+exclude src/python/expedient/clearinghouse/secret_key.py
+exclude src/python/openflow/optin_manager/localsettings.py
+exclude src/python/openflow/optin_manager/secret_key.py
+recursive-exclude src/doc/expedient/build *.*
+recursive-exclude src/python/openflow/tests/manual_test *.*
+recursive-exclude src/python/openflow/tests/om *.*
+recursive-exclude src/python/openflow/tests/omctl *.*
+

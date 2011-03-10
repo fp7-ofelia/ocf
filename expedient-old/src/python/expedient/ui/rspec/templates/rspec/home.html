@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block head %}
+<style>
+	span.next_link {
+		font-weight: bold;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>OpenFlow RSpec Manager</h1>
+
+<h2>Slice {{ slice.name }} with URN {{ slice_urn }}</h2>
+
+<p>Here you can upload a reservation RSpec to modify your slice or
+you can download the advertisement RSpec available in this Expedient or
+download the reservation RSpec for the current slice.</p>
+
+<div class="main">
+	<form enctype="multipart/form-data" action="" method="POST">{% csrf_token %}
+		<table class="formtable">
+			{{ form.as_table }}
+		</table>
+		<input type="submit" value="Upload Reservation" />
+		<span class="next_link">
+			| <a href="{% url rspec_download_resv slice.id %}">Download Reservation</a> 
+			| <a href="{% url rspec_download_adv %}">Download Advertisement</a>
+			| <a href="{% url slice_detail slice.id %}">Done</a>
+		</span>
+	</form>
+</div>
+{% endblock content %}

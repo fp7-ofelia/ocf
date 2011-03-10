@@ -2,13 +2,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'ofelia.css' %}" />
 		<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
 		<title>
 			{% block title %}Expedient{% endblock %}
 		</title>
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
 		<script src="{% url js_media 'iframe.js' %}"></script>
@@ -43,10 +43,10 @@
 	</head>
 	<body>
 		<br/>
-		<table bgcolor="#EEEEEE" width="800" border="0" align="center" cellpadding="3" cellspacing="0">
+		<table width="800" border="0" align="center" cellpadding="3" cellspacing="0">
 			<tr>
 				<td align="left">
-					<img src="{% url img_media 'genilogo.png' %}" />
+					<img src="{% url img_media 'ofelia.png' %}" />
 				</td>
 				<td>
 					{% if request.user %}
@@ -61,7 +61,7 @@
 					<div align="right" style="position: relative; top: 19px; right: -4px;">
  						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
 							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
-							href="/help/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
+							href="http://yuba.stanford.edu/~jnaous/expedient/"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
 							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
 					</div>
 				</td>
@@ -87,7 +87,7 @@
 			</div>
 		</div>
 		<div id="footer">
-			(c) in 2010 by Stanford University. This software is licensed under the GENI License.
+			&copy; 2011 <a href="http://www.fp7-ofelia.eu/" target="_blank">OFELIA EU-Project</a> &mdash; Expedient was adapted from software gracefully provided by Stanford University.
 		</div>
 	</body>
 </html>

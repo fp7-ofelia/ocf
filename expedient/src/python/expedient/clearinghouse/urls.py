@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     (r'^permissions/', include('expedient.common.permissions.urls')),
     (r'^roles/', include('expedient.clearinghouse.roles.urls')),
     (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
+    (r'^messagecenter/',include('expedient.clearinghouse.messagecenter.urls')),
     (r'^admin/', include(admin.site.urls)),
 
     # TODO: Change to the following after 0.8 of registration is out
@@ -59,4 +60,5 @@ urlpatterns += patterns('',
     get_static_url("img_media", '/img'),
     get_static_url("css_media", '/css'),
     get_static_url("js_media", "/js"),
+    get_static_url("root_media"),
 )

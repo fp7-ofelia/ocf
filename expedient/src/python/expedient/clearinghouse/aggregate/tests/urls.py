@@ -7,6 +7,5 @@ from django.conf.urls.defaults import patterns, url, include
 
 urlpatterns = patterns('expedient.clearinghouse.aggregate.tests.views',
     url(r'^tests/create/$', 'create', name='tests_aggregate_create'), 
-    url(r'^tests/edit/(?P<agg_id>\d+)/$', 'edit', name='tests_aggregate_edit'), 
-    url(r'^', include("expedient.clearinghouse.urls")),
+    url(r'^tests/edit/(?P<agg_id>\d+)/$', 'edit', name='tests_aggregate_edit'),
 )

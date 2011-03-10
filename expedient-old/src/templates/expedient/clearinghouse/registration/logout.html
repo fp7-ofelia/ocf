@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block messages %}{% endblock %}
+
+{% block content %}
+<div class="main">
+<h2>{% trans "Logged out" %}</h2>
+<p><a href="{% url auth_login %}">{% trans "Log in again" %}</a></p>
+</div>
+{% endblock %}

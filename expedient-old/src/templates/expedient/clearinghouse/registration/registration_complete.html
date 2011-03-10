@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block messages %}{% endblock %}
+
+{% block content %}
+<h2>Email Sent</h2>
+<p>{% trans "You are now registered. Activation email sent. Please click the link in the email to activate your account and log in." %}</p>
+{% endblock %}

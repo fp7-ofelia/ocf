@@ -22,6 +22,8 @@ from expedient.common.utils.transport import TestClientTransport
 from sfa.trust.gid import GID
 from expedient.common.tests.utils import test_to_http
 from expedient.common.middleware import threadlocals
+from expedient.common.timer.models import Job
+from expedient.common.timer.exceptions import JobAlreadyScheduled
 
 logger = logging.getLogger("expedient_geni.models")
 
@@ -236,6 +238,15 @@ class GENIAggregate(Aggregate):
 
         self._from_rspec(rspec)
         
+        try:
+            Job.objects.schedule(
+                settings.GENI_AGGREGATE_UPDATE_PERIOD,
+                self.update_resources,
+            )
+        except JobAlreadyScheduled:
+            pass
+            
+        
     #####################################################################
     # Overrides from expedient.clearinghouse.aggregate.models.Aggregate #
     #####################################################################
@@ -295,4 +306,4 @@ class GENIAggregate(Aggregate):
         @type rspec: XML C{str}
         """
         raise NotImplementedError()
-    
+

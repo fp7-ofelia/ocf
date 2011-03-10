@@ -6,9 +6,8 @@ Created on Jul 17, 2010
 import logging
 from django import forms
 from django import core
-from django.utils import formats
 from expedient.common.utils import validators
-import traceback
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger("common.utils.formfields")
 
@@ -49,3 +48,31 @@ class IPNetworkField(forms.CharField):
         'invalid': u'Enter a valid IP address in "w.x.y.z[/l]" format.',
     }
     default_validators = [validators.validate_ip_prefix]
+
+class LimitedSplitDateTimeField(forms.SplitDateTimeField):
+    """Adds limits to the default SplitDateTimeField"""
+    
+    def validate(self, value):
+        validate_datetime(value, self.min_date, self.max_date)
+    
+    def __init__(self, max_date=None, min_date=None, *args, **kwargs):
+        self.max_date = max_date
+        self.min_date = min_date
+        super(LimitedSplitDateTimeField, self).__init__(*args, **kwargs)
+        
+def validate_datetime(value, min_date, max_date):
+    max_date = max_date() if callable(max_date) else max_date
+    min_date = min_date() if callable(min_date) else min_date
+    
+    if max_date and value > max_date:
+        raise ValidationError(
+            "The entered date is too late. "
+            "Maximum is %s" % max_date)
+
+    if min_date and value < min_date:
+        raise ValidationError(
+            "The entered date is too early. "
+            "Minumum is %s" % min_date)
+
+    
+    

@@ -10,11 +10,13 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from expedient.common.extendable.models import Extendable
 from expedient.common.permissions.shortcuts import \
-    give_permission_to, delete_permission, must_have_permission
+    give_permission_to, delete_permission, must_have_permission, has_permission,\
+    get_permittee_from_threadlocals
 from expedient.common.permissions.models import Permittee
 from expedient.common.permissions.utils import permissions_save_override,\
     permissions_delete_override
 from expedient.common.permissions.decorators import require_obj_permissions_for_method
+from expedient.common.permissions.exceptions import PermissionDenied
 
 logger = logging.getLogger("aggregate.models")
 
@@ -50,6 +52,8 @@ class Aggregate(Extendable):
 No information available.
 """
     
+    update_caption = u"update"
+    
     name = models.CharField(
         max_length=200, unique=True,
         help_text="Use a unique name for this aggregate.")
@@ -82,6 +86,9 @@ No information available.
         model_func=lambda: Aggregate,
         delete_perm="can_edit_aggregate",
     )
+    
+    def __unicode__(self):
+        return u'Aggregate %s' % self.name
     
     def _get_managers(self):
         """Gets the list of users who have the "can_edit_aggregate" permission
@@ -321,6 +328,15 @@ No information available.
         Subclasses overriding this method should call the parent class
         to ensure permission checks.
         """
-        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        user = get_permittee_from_threadlocals("user")
+        can_use = has_permission(
+            user, self.as_leaf_class(), "can_use_aggregate")
+        can_edit = has_permission(
+            user, self.as_leaf_class(), "can_edit_aggregate")
+        if not can_use and not can_edit:
+            raise PermissionDenied(
+                "can_use_aggregate",
+                self.as_leaf_class(),
+                user, allow_redirect=False)
         pass
     

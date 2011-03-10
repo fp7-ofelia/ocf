@@ -58,6 +58,10 @@ def home(request):
             'pwd_form': pwd_form,
             'user_form': user_form,
             'userprofile_form': userprofile_form,
+            'breadcrumbs': (
+                ("Home", reverse("home")),
+                ("Manage users", request.path),
+            )
         },
     )
 
@@ -112,7 +116,7 @@ def detail(request, user_id=None):
         request,
         template='expedient/clearinghouse/users/detail.html',
         extra_context={
-            'user': user,
+            'curr_user': user,
             'slices': slice_set,
             'pwd_form': pwd_form,
             'user_form': user_form,
@@ -127,12 +131,12 @@ def detail(request, user_id=None):
 
 def saved(request, user_id):
     user = get_object_or_404(auth.models.User, pk=user_id)
-
+    print user.id
     return simple.direct_to_template(
         request,
         template='expedient/clearinghouse/users/saved.html',
         extra_context={
-            'user': user,
+            'curr_user': user,
         },
     )
 

@@ -1,5 +1,5 @@
-CONF_DIR = '/home/user/ofelia-git/optin_manager/src/python/openflow/optin_manager' #'/etc/optin_manager'
-SRC_DIR = '/home/user/ofelia-git/optin_manager/src' #'/usr/share/optin_manager'
+CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager' #'/etc/optin_manager'
+SRC_DIR = '/opt/ofelia/optin_manager/src' #'/usr/share/optin_manager'
 
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"

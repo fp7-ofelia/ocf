@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block messages %}{% endblock %}
+
+{% block content %}
+{% if account %}
+<h2>{% trans "Account successfully activated" %}</h2>
+<p><a href="{% url auth_login %}">{% trans "Log in" %}</a></p>
+
+{% else %}	
+<h2>{% trans "Account activation failed." %}</h2>
+<p>{% trans "Please register again " %}<a href="{% url registration_register %}">{% trans "here" %}</a></p>
+
+{% endif %}
+
+{% endblock %}

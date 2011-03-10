@@ -4,6 +4,7 @@ Created on Aug 19, 2010
 
 @author: jnaous
 '''
+from utils import append_to_local_setting
 
 BASIC_AUTH_URLS = [
     r'^/dummyom/.*',
@@ -13,6 +14,7 @@ BASIC_AUTH_URLS = [
 This is used to enable some tests to work.
 
 '''
+append_to_local_setting("BASIC_AUTH_URLS", BASIC_AUTH_URLS, globals())
 
 SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/register/.*$',
@@ -26,6 +28,11 @@ SITE_LOCKDOWN_EXCEPTIONS = [
 ]
 '''List of URL regular expressions that do not require the user to
 be logged in to access.'''
+append_to_local_setting(
+    "SITE_LOCKDOWN_EXCEPTIONS",
+    SITE_LOCKDOWN_EXCEPTIONS,
+    globals(),
+)
 
 UI_PLUGINS = [
     ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
@@ -48,6 +55,7 @@ This is a list of 3-tuples:
         included in URLConf and that contains all the plugin's URLs.
 
 '''
+append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = [
@@ -69,6 +77,30 @@ This is a list of 3-tuples:
        included in URLConf and that contains all the plugin's URLs.
 
 '''
+append_to_local_setting("AGGREGATE_PLUGINS", AGGREGATE_PLUGINS, globals())
+
+SLICE_EXPIRATION_CHECK_INTERVAL = 3600
+'''How often should we check for expired slices?
+
+This indicates how often to check for expired slices and stop
+them. The given time is in seconds.
+
+The accuracy will depend on how often the expedient cron job runs.
+
+'''
+
+SLICE_EXPIRATION_NOTIFICATION_TIME = 3600*24
+'''How much earlier should we send an email about slices almost expiring?
+
+This indicates when to send emails to slice owners that their slices
+are about to expire. Time is in seconds.
+
+The accuracy will depend on how often the expedient cron job runs.
+
+'''
+
+MAX_SLICE_LIFE = 30
+'''Maximum life of a slice without renewing in days'''
 
 # What is the scheme to use when sending urls? 
 DOMAIN_SCHEME = "https"

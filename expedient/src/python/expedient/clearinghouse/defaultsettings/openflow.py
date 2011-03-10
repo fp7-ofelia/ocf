@@ -31,3 +31,8 @@ This should be a list of the *names* of the aggregates that you do not want
 to be shown in the ListResource GENI-API call.
 
 '''
+
+OPENFLOW_TOPOLOGY_UPDATE_PERIOD = 5*60
+'''Every how many seconds should an OpenFlow Aggregate update its topology?
+
+'''

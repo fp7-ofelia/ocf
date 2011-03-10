@@ -1,4 +1,5 @@
-def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
+from django.db import transaction
+def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[], using=None):
     '''
     If an object is found matching filter attrs, then update
     the object with new_attrs else create the object with filter_attrs and
@@ -11,25 +12,31 @@ def create_or_update(model, filter_attrs, new_attrs={}, skip_attrs=[]):
     try:
         obj = model.objects.get(**filter_attrs)
     except model.DoesNotExist:
+        create_attrs = filter_attrs.copy()
         # remove fields that aren't to be changed
         for k in skip_attrs:
-            del filter_attrs[k]
+            del create_attrs[k]
         # remove entries that use related fields
-        for k in filter_attrs.keys():
+        for k in create_attrs.keys():
             if "__" in k:
-                del filter_attrs[k]
-        filter_attrs.update(new_attrs)
+                del create_attrs[k]
+        create_attrs.update(new_attrs)
         try:
-            obj = model.objects.create(**filter_attrs)
-        except IntegrityError:
-            import traceback
-            traceback.print_exc()
-            raise
+            obj = model(**create_attrs)
+            sid = transaction.savepoint(using=using)
+            obj.save(force_insert=True, using=using)
+            transaction.savepoint_commit(sid, using=using)
+            return (obj, True)
+        except IntegrityError, e:
+            transaction.savepoint_rollback(sid, using=using)
+            try:
+                obj = model.objects.get(**filter_attrs)
+                return (obj, False)
+            except model.DoesNotExist:
+                raise e
         
-        created = True
     else:
-        created = False
         for k, v in new_attrs.items():
             setattr(obj, k, v)
             obj.save()
-    return (obj, created)
+        return (obj, False)

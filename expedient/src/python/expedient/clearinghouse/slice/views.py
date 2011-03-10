@@ -236,7 +236,7 @@ def update_aggregate(request, slice_id, agg_id):
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-    
+
     if request.method == "POST":
         return HttpResponseRedirect(aggregate.add_to_slice(
             slice, reverse("slice_detail", args=[slice_id])))

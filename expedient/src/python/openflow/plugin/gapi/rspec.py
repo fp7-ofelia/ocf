@@ -15,6 +15,7 @@ from openflow.plugin.models import OpenFlowSwitch, FlowSpaceRule
 from geni.util.urn_util import publicid_to_urn
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.tests.utils import drop_to_shell
+import time
 
 RSPEC_TAG = "rspec"
 NETWORK_TAG = "network"
@@ -24,6 +25,10 @@ SWITCHES_TAG = "switches"
 SWITCH_TAG = "switch"
 PORT_NUM_TAG = "port_num"
 PORT_TAG = "port"
+
+VERSION = "version"
+
+CURRENT_ADV_VERSION = "2"
 
 URN = "urn"
 SRC_URN = "src_urn"
@@ -112,7 +117,9 @@ def _get_root_node(slice_urn, available):
     from openflow.plugin.models import OpenFlowAggregate
     from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
     
-    root = et.Element(RSPEC_TAG, {"type": "openflow"})
+    root = et.Element(
+        RSPEC_TAG, {
+            "type": "openflow", VERSION: CURRENT_ADV_VERSION})
     aggregates = Aggregate.objects.filter_for_classes(
         [OpenFlowAggregate, GCFOpenFlowAggregate]).filter(
             available=True).exclude(
@@ -223,7 +230,7 @@ def get_resources(slice_urn, geni_available):
     
     For example::
     
-        <rspec type="openflow">
+        <rspec type="openflow" version="2">
             <network name="Stanford" location="Stanford, CA, USA">
                 <switches>
                     <switch urn="urn:publicid:IDN+openflow:stanford+switch:0">
@@ -318,6 +325,9 @@ NW_PROTO_TAG="nw_proto"
 TP_SRC_TAG="tp_src"
 TP_DST_TAG="tp_dst"
 WILDCARD="*"
+EXPIRY="expiry"
+
+CURRENT_RESV_VERSION="2"
 
 def parse_slice(resv_rspec):
     '''
@@ -334,7 +344,7 @@ def parse_slice(resv_rspec):
     
     The reservation rspec looks like the following::
     
-        <resv_rspec type="openflow">
+        <resv_rspec type="openflow" version="2">
             <user
                 firstname="John"
                 lastname="Doe"
@@ -350,6 +360,7 @@ def parse_slice(resv_rspec):
                 name="Crazy Load Balancer"
                 description="Does this and that..."
                 controller_url="tcp:controller.stanford.edu:6633"
+                expiry="1298020775"
             />
             <flowspace>
                 <switch urn="urn:publicid:IDN+openflow:stanford+switch:0" />
@@ -385,13 +396,21 @@ def parse_slice(resv_rspec):
     
     # Parse the rspec
     root = et.fromstring(resv_rspec)
+    version = root.get(VERSION, "unknown")
+    if version != CURRENT_RESV_VERSION:
+        raise Exception(
+            "Can only parse reservation rspecs"
+            " version 2. Given rspec version "
+            "is %s" % version)
+    
     firstname, lastname, affiliation, email, password = \
         _resv_parse_user(root)
-    slice_name, slice_desc, controller_url = _resv_parse_slice(root)
+    slice_name, slice_desc, slice_expiry, controller_url = _resv_parse_slice(root)
     project_name, project_desc = _resv_parse_project(root)
     slivers = _resv_parse_slivers(root)
     
-    return (project_name, project_desc, slice_name, slice_desc, 
+    return (project_name, project_desc, slice_name, slice_desc,
+            slice_expiry, 
             controller_url, firstname, lastname, affiliation,
             email, password, slivers)
 
@@ -406,6 +425,7 @@ def _resv_parse_slice(root):
     slice_elem = root.find(SLICE_TAG)
     return (slice_elem.get(NAME),
             slice_elem.get(DESCRIPTION),
+            long(slice_elem.get(EXPIRY)),
             slice_elem.get(CONTROLLER))
     
 def _resv_parse_project(root):
@@ -473,7 +493,8 @@ def create_resv_rspec(user, slice, aggregate=None):
     @rtype: C{str}
     """
     
-    root = et.Element(RESV_RSPEC_TAG, {"type": "openflow"})
+    root = et.Element(
+        RESV_RSPEC_TAG, {"type": "openflow", VERSION: CURRENT_RESV_VERSION})
     
     # add the user info
     et.SubElement(
@@ -499,7 +520,8 @@ def create_resv_rspec(user, slice, aggregate=None):
         root, SLICE_TAG, {
             NAME: slice.name,
             DESCRIPTION: slice.description,
-            CONTROLLER: slice.openflowsliceinfo.controller_url
+            EXPIRY: "%s" % long(time.mktime(slice.expiration_date.timetuple())),
+            CONTROLLER: slice.openflowsliceinfo.controller_url,
         }
     )
     
