@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec>
+    <query>
+        <provisioning>
+            <action type="hardStop" id="4cac0113-4658-426d-bf26-42d97284f03a">
+                <virtual-machine>
+                    <name>testlockers</name>
+                    <uuid>3317c577-53af-4692-9a42-d2b6d73e25a0</uuid>
+                    <project-id>1</project-id>
+                    <slice-id>1787e222-9b31-4257-b1ff-aa6836b68625</slice-id>
+                    <virtualization-type>xen</virtualization-type>
+                    <xen-configuration>
+                        <hd-setup-type>file-image</hd-setup-type>
+                    </xen-configuration>
+                </virtual-machine>
+            </action>
+        </provisioning>
+    </query>
+</rspec>
+

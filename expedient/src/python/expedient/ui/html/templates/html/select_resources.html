@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ch_extras %}
+
 {% block head %}
 <style>
 	table.openflow,table.planetlab {
@@ -41,11 +42,7 @@
 		font-weight: bold;
 	}
 </style>
-<style>
-<!--
-.tab { margin-left: 40px; }
--->
-</style> 
+
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
@@ -91,7 +88,9 @@ $(document).ready(function(){
 <div class="steps center">
 	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
+{% if planetlab_aggs %}
 	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
+{% endif %}
 </div>
 
 <h1>Topology</h1>
@@ -103,7 +102,6 @@ $(document).ready(function(){
 function get_node_type(d) {
 	var of_groups_len = {{ openflow_aggs.count }};
 	var pl_groups_len = {{ planetlab_aggs.count }};
-	
 	
 	if(d.group < of_groups_len) {
 		return "openflow";
@@ -177,7 +175,7 @@ $("#selected_node_info").hide()
 
 force.node.add(pv.Image)
 	.url(function (d) {
-		type = get_node_type(dvt_servers = VTServer);
+		type = get_node_type(d);
 		if(type == "openflow") {
 			return "{% url img_media 'switch-tiny.png' %}";
 		} else if(type == "planetlab") {
@@ -271,9 +269,7 @@ at {{ agg.location }}.
       <td class="select_checkbox">
 	<input type="checkbox" name="selected_nodes"
 	       value="{{ node.id }}" id="rsc_id_{{ node.id }}"
-	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"<style>
-<!-- p.Normal {margin:0cm;} -->
-</style>
+	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
 	       {% if node.id in checked_ids %}checked{% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
@@ -300,7 +296,6 @@ at {{ agg.location }}.
   </table>
 </div>
 {% endfor %}
-
 
 {% if openflow_aggs %}
 <h1>Select OpenFlow Resources</h1>
@@ -367,7 +362,7 @@ at {{ agg.location }}.
   <p>There are no OpenFlow aggregates in the slice. </p>
   {% endfor %}
 
-  {% if openflow_aggs or planetlab_aggs%}
+  {% if openflow_aggs or planetlab_aggs %}
   <input type="submit" value="Next" />
   <input type="button" name="clear_button" value="Clear" />
   <input type="button" name="select_all_button" value="Select All" />
@@ -375,12 +370,9 @@ at {{ agg.location }}.
   {% endif %}
 </form>
 
-
-
-
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
-	
+
 {% if virt_aggs %}
 <h1>Virtualized servers resources</h1>
 {% endif %}
@@ -425,8 +417,8 @@ at {{ agg.location }}.
         <td>
             {{ server.freeCpu }}
         </td>
-          <td>
-            {{ rsc.freeMemory  }}
+        <td>
+            {{ server.memory }}
         </td>
         <td>
             {{ server.freeDiscSpace }}
@@ -443,7 +435,7 @@ at {{ agg.location }}.
             <th>Mgmt IP</th>
             <th style="text-align:center">Actions</th>
             </tr>
-            
+
             {% for vm in virtualmachines %}
                 {% if server.name == vm.serverID%}
                 <tr class = "{% cycle 'odd' 'even' %}">
@@ -461,7 +453,7 @@ at {{ agg.location }}.
                     {{ vm.memory }}
                   </td>
                     <td>
-                       {% for iface in vm.ifaces.all %} 
+                       {% for iface in vm.ifaces.all %}
                             {% if iface.isMgmt == 1 %}
                                 {{iface.ip}}
                             {% endif %}
@@ -494,17 +486,17 @@ at {{ agg.location }}.
     </table>
     <br/>
     <div id="create_server">
-        Create a new virtual machine in server: 
+        Create a new virtual machine in server:
         <select name = "server_id" >
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
             <option value="{{server.id}}">{{server.name}}</option>
         {% endwith %}
         {% endfor %}
-        
-        </select> 
+
+        </select>
         <input type="submit" name = "create_vms" value="Create VM" />
-        
+
     </div>
     {% else %}
     <div id="no_servers">
@@ -514,5 +506,6 @@ at {{ agg.location }}.
 {% endfor %}
 
 </form>
+
 
 {% endblock content %}

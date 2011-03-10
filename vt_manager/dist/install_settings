@@ -1,0 +1,11 @@
+VERSION="x.y.z"
+
+BASE="/srv/www/expedient"
+CLEARINGHOUSE="expedient/clearinghouse"
+COMMON="expedient/common"
+OPTIN_MANAGER="openflow/optin_manager"
+
+# Set the hostname
+FQDN=`hostname -f`
+CH_FQDN=$FQDN:443
+OM_FQDN=$FQDN:8443

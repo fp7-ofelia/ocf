@@ -1,0 +1,98 @@
+{% extends "servers/servers_base.html" %}
+
+{% block pagehead %}<h1>Add/Update VTServer.:</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    {% if server %}
+    <table class="separator-table">
+    </table>
+    {% else %}
+    {% endif %}
+    <form method="post" action="">{% csrf_token %}
+        <table class="separator-table">
+            <tr><td class="separator">General parameters</td></tr>
+        </table>
+        <table class="separator-table">
+            <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
+        {% for field in form %}
+           {% if field.name == "virtTech" %}
+                <tr><td>&nbsp;</td></tr>
+           {% endif %}
+           {% if field.name == "ipRange" %}
+                </tr>
+                </table>
+                <table class="separator-table">
+                        <tr><td class="separator">Networking parameters for VMs</td></tr>
+                </table>
+                <div id="separator" style="width:100%;padding-left:40px;">        
+                    <table class="formtable_noborder">
+           {% endif %}
+           <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+        {% endfor %}
+                    </table>    
+            </div>
+             
+        </table>
+        <div class="center">
+            <input type="submit" value="Save" /> | 
+            {% if server %}
+            <a href="{% url delete_server server.id %}">Delete</a> |
+            {% endif %} 
+            <a href="{% url dashboard %}">Cancel</a>
+        </div>
+    </form> 
+   {% if server %} 
+    <h1>VMs in {{ server.name }}</h1>
+    {% if not server.vms.all %}
+        {{ server.name }} has no VMs at the moment
+    {% else %}    
+    <table class="servers">
+        <tr>
+            <th> Name</th>
+            <th> Memory</th>
+            <th> OS Type</th>
+            <th> OS Version</th>
+            <th> OS Dist</th>
+            <th> Project</th>
+            <th> Slice</th>
+            <th> Status</th>
+            <th> Actions </th>
+        </tr>
+        {% for vm in server.vms.all %}
+          <tr class = "{% cycle 'odd' 'even' %}">
+            <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
+            <td> {{vm.memory}}</td>
+            <td> {{vm.operatingSystemType }}</td>
+            <td> {{vm.operatingSystemVersion }}</td>
+            <td> {{vm.operatingSystemDistribution }}</td>
+            <td> {{vm.project }}</td>
+            <td> {{vm.sliceId }}</td>
+            <td> {{vm.state }}</td>
+            <td>
+                {% if vm.state == "running" %}
+                <a href="{% url action_vm server.id vm.id "stop" %}">Stop</a> | <a href="{% url action_vm server.id vm.id "reboot"%}">Reboot</a>
+                {% endif %}
+                {% if vm.state == "stopped" %}
+                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
+                {% endif %}
+                {% if vm.state == "created (stopped)" %}
+                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
+                {% endif %}
+                {% if vm.state == "failed" %}
+                <a href="{% url action_vm server.id vm.id "check_status" %}">Check status</a> 
+                {% endif %}
+
+            </td>
+        </tr>
+        {% endfor %}
+     </table>   
+     {% endif %}
+     {% endif %}
+
+</div>
+{% endblock content %}
+

@@ -8,7 +8,7 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.auth.models import User
 from expedient.common.permissions.models import ObjectPermission, Permittee
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
-import logging
+import logging, uuid
 from django.db.models import signals
 from expedient.common.messaging.models import DatedMessage
 import traceback
@@ -54,6 +54,7 @@ class Slice(models.Model):
     owner = models.ForeignKey(User, related_name="owned_slices")
     started = models.BooleanField(default=False, editable=False)
     modified = models.BooleanField(default=False, editable=False)
+    uuid = models.CharField(max_length=200, default = uuid.uuid4(), unique=True, editable =False)
     expiration_date = LimitedDateTimeField(
         default=datetime.now,
         help_text="Enter a date and time. The date should be in the"

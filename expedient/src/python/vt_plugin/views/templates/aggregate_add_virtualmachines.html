@@ -1,0 +1,25 @@
+{% extends "vt_plugin_base.html" %}
+
+{% block title %}Add Virtual Machines in Server {{ server_name }}.{% endblock title %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<h1>Create a new Virtual Machine in Server {{ server_name }}</h1>
+	
+	<form method="post" action="">{% csrf_token %}
+    	{{ formset.management_form }}
+		{% for form in formset.forms %}
+            <table class="separator-table">
+            {{form.as_table}}
+            </table>
+        {% endfor %}
+		<div class="center"> 
+			<input type="submit" name = "create_new_vms" value="Done" /> |
+			<a href="{% url html_plugin_home slice.id %}">Cancel</a>
+		</div>
+	</form>
+</div>
+{% endblock content %}

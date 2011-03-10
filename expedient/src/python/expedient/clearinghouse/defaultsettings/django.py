@@ -8,6 +8,8 @@ import sys
 import pkg_resources
 from utils import append_to_local_setting
 
+sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/python')
+
 try:
     from localsettings import SRC_DIR as location
 except ImportError:
@@ -175,6 +177,8 @@ INSTALLED_APPS = [
     'expedient_geni.gopenflow',
     'expedient.ui.html',
     'expedient.ui.rspec',
+    'vt_plugin',
+    'vt_plugin.communication',
 ###### For Testing #######################
     'openflow.dummyom',
 ]

@@ -255,12 +255,12 @@ def _register_rpcmethods(apps, restrict_introspection=False, dispatchers={}):
                 # if this method is callable and it has the rpcmethod
                 # decorator, add it to the dispatcher
                 if method.url_name not in dispatchers:
-                    logger.debug("Registered URL name '%s'" % method.url_name)
+                    #logger.debug("Registered URL name '%s'" % method.url_name)
                     dispatchers[method.url_name] = RPCDispatcher(
                         method.url_name, restrict_introspection)
-                logger.debug(
-                    "Registered method '%s' to URL name '%s'"
-                    % (method.external_name, method.url_name))
+                #logger.debug(
+                #    "Registered method '%s' to URL name '%s'"
+                #    % (method.external_name, method.url_name))
                 dispatchers[method.url_name].register_method(
                     method, method.external_name)
             elif isinstance(method, types.ModuleType):

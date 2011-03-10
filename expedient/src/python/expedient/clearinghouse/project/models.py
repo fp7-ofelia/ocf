@@ -9,6 +9,7 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
+import uuid
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -63,7 +64,8 @@ class Project(models.Model):
     
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    
+    uuid = models.CharField(max_length=200, default = uuid.uuid4(), unique=True, editable =False)    
+
     save = permissions_save_override(
         permittee_kw="user",
         model_func=lambda: Project,

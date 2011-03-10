@@ -5,34 +5,29 @@ Created on Jun 19, 2010
 '''
 import logging
 from pprint import pformat
-
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
-    HttpResponse
-from django.forms.models import modelformset_factory
-from django.core.urlresolvers import reverse
-from django import forms
-from django.db.models import Q
-from django.views.generic.create_update import get_model_and_form_class
-
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
-from expedient.clearinghouse.utils import post_message_to_current_user
-from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
-    PlanetLabAggregate
-from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.project.models import Project
-
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
-import copy
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
+    HttpResponse
+from expedient.common.messaging.models import DatedMessage
+from django.forms.models import modelformset_factory
+from django.core.urlresolvers import reverse
+from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
+    PlanetLabAggregate
+from django import forms
+from django.db.models import Q
+from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+
+#VT_PLUGIN
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
 from vt_plugin.controller.vtAggregateController.vtAggregateController import askForAggregateResources
 from vt_manager.communication.utils.XmlUtils import XmlHelper
 from vt_plugin.utils.Translator import Translator
-import xmlrpclib, uuid
+import xmlrpclib, uuid, copy
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 
@@ -235,7 +230,7 @@ def home(request, slice_id):
     Display the list of planetlab and openflow aggregates and their resources.
     On submit, create slivers and make reservation.
     """
-
+    
     slice = get_object_or_404(Slice, id=slice_id)
     if request.method == "POST":
         
@@ -253,32 +248,24 @@ def home(request, slice_id):
         checked_ids.extend(PlanetLabNode.objects.filter(
             slice_set=slice).values_list("id", flat=True))
 
-
         aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
-                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))        
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
         of_aggs = \
             slice.aggregates.filter(aggs_filter)
         pl_aggs = \
             slice.aggregates.filter(
                 leaf_name=PlanetLabAggregate.__name__.lower())
-        #getting all the vt aggregates that belong to the slice
-        #vt_aggs will also include the information of the resources that belong to them
-        #in this case, all the Vt servers
+
         vt_aggs = \
             slice.aggregates.filter(
                 leaf_name=VtPlugin.__name__.lower())
 
-        #asking for resources in all VT aggregates and saving them into data base
-        #if vm already exists in database it will refresh their information
         for agg in vt_aggs:
-            print "HTML-->HOME-->list resources"
-            vtPlugin = agg.as_leaf_class()        
+            vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin)
-            
-        #getting VMs that belong to slice with slice_uuid
-        slice_uuid = slice.uuid
-        vm = VM.objects.filter(sliceId=slice_uuid)
-        
+       
+        vm = VM.objects.filter(sliceId=slice.uuid)        
+ 
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
@@ -291,7 +278,7 @@ def home(request, slice_id):
                 "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,
-                "virt_aggs": vt_aggs, 
+                "virt_aggs": vt_aggs,
                 "slice": slice,
                 "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,
@@ -425,4 +412,3 @@ def sshkey_file(request, slice_id, type):
     response = HttpResponse(data, mimetype="application/x-download")
     response["Content-Disposition"] = 'attachment;filename=%s' % filename
     return response
-

@@ -1,0 +1,61 @@
+{% extends "servers/servers_base.html" %}
+
+{% block pagehead %}<h1> VM : {{ vm.name }} <i>({{vm.state }})</i></h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+
+    <table class="separator-table">
+    </table>
+
+    <table class="separator-table">
+            <tr><td class="separator">General parameters</td></tr>
+        </table>
+    <table class="separator-table">
+
+        <tr><th> Name:</th><td>{{ vm.name }}</td></tr>
+        <tr><th> State:</th><td>{{ vm.state }}</td></tr>
+        <tr><th> UUID:</th><td>{{ vm.uuid }}</td></tr>
+        <tr><th> Project</th><td> {{vm.project }}</td>
+        <tr><th> Slice</th><td> {{vm.sliceId }}</td>
+
+        <tr><th> Memory :</th><td> {{vm.memory}}</td>
+        <tr><th> OS Type :</th><td> {{vm.operatingSystemType }}</td>
+        <tr><th> OS Version :</th><td> {{vm.operatingSystemVersion }}</td>
+        <tr><th> OS Dist :</th><td> {{vm.operatingSystemDistribution }}</td>
+    </table>
+
+        <table class="separator-table">
+            <tr><td class="separator">Virtualization parameters</td></tr>
+        </table>
+        <table class="separator-table">
+        <tr><th> Virtualization Technology :</th><td> {{vm.virtTech }}</td>
+        <tr><th> Virtualization Setup Type :</th><td> {{vm.virtualizationSetupType }}</td>
+        <tr><th> HD Setup Type :</th><td> {{vm.hdSetupType }}</td>
+        <tr><th> HD Origin Path :</th><td> {{vm.hdOriginPath }}</td>
+        </table>
+
+        <table class="separator-table">
+            <tr><td class="separator">Interfaces</td></tr>
+        </table>
+    
+        <table class="separator-table">
+        {% for mac in vm.macs.all %}
+            <tr><th> Interface name :</th><td> {{mac.ifaceName }}</td> {% if mac.isMgmt == 1 %}<th>Management</th> {% endif%}</tr>
+            {% if vm.ips.get.ifaceName = mac.ifaceName %}
+                <tr><th> IP :</th><td> {{ vm.ips.all.0.ip}}</td></tr>
+            {% endif %}
+            <tr><th> MAC :</th><td> {{mac.mac }}</td></tr>
+        {% endfor %}
+        </table>
+     
+</div>
+
+<div class="center"> 
+    <a href="{% url dashboard  %}">Home</a> 
+</div>
+{% endblock content %}
+

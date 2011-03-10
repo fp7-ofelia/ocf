@@ -611,3 +611,95 @@ table.detail_management_table {
 .projects_div {
 	text-align: center;
 }
+
+/*  UI add ons */
+.separator-table{
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+.separator{
+    color:#666666;
+    margin:0px;
+    padding:0px;
+    border-bottom: 1px solid #999999;
+}
+
+#indented-div{
+    width:100%;
+    padding-left:40px;
+}
+
+
+table.vms tr.even{
+    background-color: #CEF6F5;
+}
+
+table.vms tr.odd{
+    background-color: #E0F8E0;
+}
+
+table.servers{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+}
+
+table.servers td{
+    padding : 2px;
+}
+
+table.vms th {
+    background-color: #CEF6F5;
+}
+
+table.vms{
+    width: 95%;
+    float:right;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+    margin-bottom:25px;
+}
+
+table.vms td{
+    padding : 2px;
+}
+
+table.servers th {
+    padding : 2px;
+    background-color: #8ED6EA;
+}
+
+
+table.servers tr.even{
+    background-color: #A6DEEE;
+}
+
+table.servers tr.odd{
+    background-color: #C0E7F3;
+}
+
+/*AM location*/
+
+#am_location{
+    color: #999999;
+    font-size:11px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+#create_server{
+    color: #000000;
+    font-size:12px;
+    margin-bottom: 45px;
+}
+#no_servers{
+    padding-left: 30px;
+    margin-bottom: 45px;
+    color:#999999;
+    font-size:12px;
+    font-style:italic;
+}
+
