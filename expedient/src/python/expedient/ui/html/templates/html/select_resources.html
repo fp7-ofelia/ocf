@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load ch_extras %}
-
 {% block head %}
 <style>
 	table.openflow,table.planetlab {
@@ -42,7 +41,11 @@
 		font-weight: bold;
 	}
 </style>
-
+<style>
+<!--
+.tab { margin-left: 40px; }
+-->
+</style> 
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
@@ -88,9 +91,7 @@ $(document).ready(function(){
 <div class="steps center">
 	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
-{% if planetlab_aggs %}
 	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
-{% endif %}
 </div>
 
 <h1>Topology</h1>
@@ -102,6 +103,7 @@ $(document).ready(function(){
 function get_node_type(d) {
 	var of_groups_len = {{ openflow_aggs.count }};
 	var pl_groups_len = {{ planetlab_aggs.count }};
+	
 	
 	if(d.group < of_groups_len) {
 		return "openflow";
@@ -175,7 +177,7 @@ $("#selected_node_info").hide()
 
 force.node.add(pv.Image)
 	.url(function (d) {
-		type = get_node_type(d);
+		type = get_node_type(dvt_servers = VTServer);
 		if(type == "openflow") {
 			return "{% url img_media 'switch-tiny.png' %}";
 		} else if(type == "planetlab") {
@@ -269,7 +271,9 @@ at {{ agg.location }}.
       <td class="select_checkbox">
 	<input type="checkbox" name="selected_nodes"
 	       value="{{ node.id }}" id="rsc_id_{{ node.id }}"
-	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
+	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"<style>
+<!-- p.Normal {margin:0cm;} -->
+</style>
 	       {% if node.id in checked_ids %}checked{% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
@@ -296,6 +300,7 @@ at {{ agg.location }}.
   </table>
 </div>
 {% endfor %}
+
 
 {% if openflow_aggs %}
 <h1>Select OpenFlow Resources</h1>
@@ -362,11 +367,152 @@ at {{ agg.location }}.
   <p>There are no OpenFlow aggregates in the slice. </p>
   {% endfor %}
 
-  {% if openflow_aggs or planetlab_aggs %}
+  {% if openflow_aggs or planetlab_aggs%}
   <input type="submit" value="Next" />
   <input type="button" name="clear_button" value="Clear" />
   <input type="button" name="select_all_button" value="Select All" />
   <input type="button" name="select_tree_button" value="Select Tree" />
   {% endif %}
 </form>
+
+
+
+
+<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
+
+	
+{% if virt_aggs %}
+<h1>Virtualized servers resources</h1>
+{% endif %}
+
+{% for agg in virt_aggs %}
+
+    <div>
+    <h2>VT Aggregate Manager {{ agg.name }}</h2>
+    <div id="am_location">
+        Aggregate physical location: <b>{{ agg.location }}</b>.
+    </div>
+    {% if agg.resource_set.all %}
+
+    {% for rsc in agg.resource_set.all %}
+    {% with rsc.as_leaf_class as server %}
+       <table class="servers">
+    <tr>
+      <th>Server Name</th>
+      <th>Virt. Tech.</th>
+      <th>Operating System</th>
+      <th>CPU</th>
+      <th>Memory</th>
+      <th>Disc</th>
+    </tr>
+
+
+       <tr class = "odd">
+      <!--  <td>
+        <input type = "radio" name = "server_id" value = "{{server.id}}" checked/>
+        </td>-->
+        <td>
+            {{ server.name }}
+        </td>
+        </td>
+        <td>
+            {{ server.virtTech  }}
+        </td>
+          <td>
+            {{ server.operatingSystemType }}
+            {{server.operatingSystemDistribution}} ({{server.operatingSystemVersion}})
+        </td>
+        <td>
+            {{ server.freeCpu }}
+        </td>
+          <td>
+            {{ rsc.freeMemory  }}
+        </td>
+        <td>
+            {{ server.freeDiscSpace }}
+        </td>
+        </tr>
+        </table>
+            {% if server.vms.all%}
+        <table class="vms">
+            <tr class="header">
+            <th>VM Name</th>
+            <th>State</th>
+            <th>OS</th>
+            <th>Memory</th>
+            <th>Mgmt IP</th>
+            <th style="text-align:center">Actions</th>
+            </tr>
+            
+            {% for vm in virtualmachines %}
+                {% if server.name == vm.serverID%}
+                <tr class = "{% cycle 'odd' 'even' %}">
+                  <td>
+                    {{ vm.name }}
+                  </td>
+                  <td>
+                    {{ vm.state }}
+                  </td>
+                   <td>
+                    {{ vm.operatingSystemType }}
+                     {{vm.operatingSystemDistribution}} ({{vm.operatingSystemVersion}})
+                  </td>
+                  <td>
+                    {{ vm.memory }}
+                  </td>
+                    <td>
+                       {% for iface in vm.ifaces.all %} 
+                            {% if iface.isMgmt == 1 %}
+                                {{iface.ip}}
+                            {% endif %}
+                       {% endfor %}
+                    </td>
+              <td style="text-align:center">
+                    {% if vm.state == "running" %}
+                        <a href="{% url manage_vm slice.id vm.id "reboot"%}">Reboot</a> |
+                        <a href="{% url manage_vm slice.id vm.id "stop"%}">Stop</a>
+                    {% endif %}
+                    {% if  vm.state == "created (stopped)"%}
+                        <a href="{% url manage_vm slice.id vm.id "start"%}">Start</a> |
+                        <a href="{% url manage_vm slice.id vm.id "delete"%}">Delete</a>
+                    {% endif %}
+                    {% if vm.state == "stopped"%}
+                        <a href="{% url manage_vm slice.id vm.id "start"%}">Start</a> |
+                        <a href="{% url manage_vm slice.id vm.id "delete"%}">Delete</a>
+                    {% endif %}
+                </td>
+                </tr>
+            {%endif%}
+            {% endfor %}
+           </table>
+            {% endif %}
+
+
+
+    {% endwith %}
+    {% endfor %}
+    </table>
+    <br/>
+    <div id="create_server">
+        Create a new virtual machine in server: 
+        <select name = "server_id" >
+        {% for rsc in agg.resource_set.all %}
+        {% with rsc.as_leaf_class as server %}
+            <option value="{{server.id}}">{{server.name}}</option>
+        {% endwith %}
+        {% endfor %}
+        
+        </select> 
+        <input type="submit" name = "create_vms" value="Create VM" />
+        
+    </div>
+    {% else %}
+    <div id="no_servers">
+        The aggregate manager does not contain any server yet, or this Expedient instance has not enough privileges to access current servers...
+    </div>
+    {% endif %}
+{% endfor %}
+
+</form>
+
 {% endblock content %}

@@ -136,6 +136,7 @@ TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates'),
     os.path.join(SRC_DIR, 'templates/expedient/clearinghouse'),
     os.path.join(SRC_DIR, 'templates/expedient/common'),
+    os.path.join(SRC_DIR, 'python/vt_plugin/views/templates'),
 ]
 append_to_local_setting(
     "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),

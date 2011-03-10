@@ -6,9 +6,18 @@ Created on Aug 19, 2010
 '''
 from utils import append_to_local_setting
 
+#ORIGINAL
+#BASIC_AUTH_URLS = [
+#    r'^/dummyom/.*',
+#]
+
+#VT_AM
 BASIC_AUTH_URLS = [
     r'^/dummyom/.*',
+    #r'^/xmlrpc/vt_am/.*'
+    r'^/vt_plugin/xmlrpc/vt_am.*'
 ]
+
 '''List of URL regular expressions that accept HTTP Basic Authentication.
 
 This is used to enable some tests to work.
@@ -23,8 +32,9 @@ SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/password/reset/.*$',
     r'^/img/.*',
     r'^/css/.*',
-    r'^/static/media/.*',
-    r'.*/xmlrpc/?',
+#ORIGINA NOT COMMENTED
+#    r'^/static/media/.*',
+#    r'.*/xmlrpc/?',
 ]
 '''List of URL regular expressions that do not require the user to
 be logged in to access.'''
@@ -62,6 +72,7 @@ AGGREGATE_PLUGINS = [
     ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
     ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
     ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
 ]
 '''List of aggregate plugins that are enabled in Expedient.
 
@@ -83,8 +94,7 @@ SLICE_EXPIRATION_CHECK_INTERVAL = 3600
 '''How often should we check for expired slices?
 
 This indicates how often to check for expired slices and stop
-them. The given time is in seconds.
-
+them. The given time is in seconds
 The accuracy will depend on how often the expedient cron job runs.
 
 '''
