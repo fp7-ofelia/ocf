@@ -10,6 +10,10 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'expedient.clearinghouse.views.home', name='home'),
+    url(r'^help/$',
+        direct_to_template,
+        {'template': 'help/index.html'},
+        name='help'),
     
     (r'^users/', include('expedient.clearinghouse.users.urls')),
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),

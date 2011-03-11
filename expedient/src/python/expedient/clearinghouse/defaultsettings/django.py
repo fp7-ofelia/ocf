@@ -12,6 +12,8 @@ sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/pyt
 
 try:
     from localsettings import SRC_DIR as location
+    #sys.path.append("/home/user/ofelia-git/expedient/src/python/")
+    sys.path.append(location)
 except ImportError:
     try:
         location = os.path.abspath(pkg_resources.resource_filename(
