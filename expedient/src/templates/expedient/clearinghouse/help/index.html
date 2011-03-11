@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load breadcrumbs %}
+
+{% block title %}Help{% endblock %}
+
+{% block content %}
+<div class="main">
+<!--	<h1>Contents</h1>
+	<ol>
+		<li>Introduction</li>
+		<li>Disclaimer</li>
+		<li>Overview</li>
+		<li>Users &amp; Permissions</li>
+		<li>Projects</li>
+		<li>OpenFlow Aggregates</li>
+		<li>Slices</li>
+	</ol>-->
+	<h1>Introduction</h1>
+	Expedient is a part of OFELIA's control framework. It enables experimenters to create and run experiments within the OFELIA federation. Through the user interface of Expedient, the user can deploy experiments, which include virtual machines, switch configurations and other resources. The control framework handles the separation of the experiments and the monitoring. Hence the user can fully concentrate on his/her research. 
+	<h2>The OFELIA project</h2>
+	The aim of the OFELIA project is to create a unique experimental facility that allows researchers to not only experiment on a test network but to control the network itself precisely and dynamically. To achieve this, the OFELIA facility is based on OpenFlow, which allows to virtualize and control the network environment through secure and standardized interfaces. OFELIA will provide high-performance OpenFlow equipment and a comprehensive control framework to enable experiments.
+	OFELIA’s consists of federated / interconnected islands. A set of five islands creates a diverse OpenFlow infrastructure that allows experimentation on multi-layer and multi-technology networks provided by the different islands. The facility extend all the way from standard Ethernet to optical and wireless transmission and also includes an emulation wall for scalability tests comprising thousands of nodes.
+	<h2>Expedient</h2>
+	Expedient was adopted from Stanford's implementation of <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">Expedient</a>. OFELIA's implementation has been adapted and optimized to accommodate the project’s goals. The software can automatically deploy virtual machines and handle the configuration of OpenFlow switches. Additionally, Expedient includes a comprehensive user and role management for projects and resources.
+	<h2>Disclaimer</h2>
+	Expedient is currently under heavy development. Hence, the screenshots depicted and the workflow shown may differ from the actual software. Furthermore, the software may contain minor bugs or inconveniences. Please contact <a href="mailto:info@fp7-ofelia.eu">info@fp7-ofelia.eu</a> if you have trouble using OFELIA’s controll framework.
+	<h2>Concepts</h2>
+	Expedient is loosely based on the principles of the <a href="http://www.geni.net/">GENI project</a>. Hence, some concepts were adapted
+	<h3>Project and slices</h3>
+	A project is an organizational entity, which groups multiple experiments and users. An experiment is called slice and consists of resources to be used and the associated configuration. Additionally, a slice encapsulates the state of an experiment (e.g. started, stopped, etc.).
+	<h3>Aggregates and slivers</h3>
+	For managing resources within a project, Expedient uses so called Aggregate Managers (AM). An aggregate manager handles the interaction with a specific resource type. Hence, there is an AM for virtual machines and one for the OpenFlow switch configuration.
+	When starting a slice each AM is responsible for deploying (starting and configuring) its assigned resources. By doing so, the AM typically creates so called slivers. A sliver is a running resource which has been instantiated by a resource provider. Example: A user has specified the need for 2 virtual machines in a slice. When starting the slice, Expedient instructs the aggregate manager to start to virtual machines. Thereafter, the AM connects to the hypervisor and instructs it to create two virtual machine instances. These two machines are instantiated resources, hence they are called slivers.
+	<h3>Users and roles</h3>
+	A user is a client to the OFELIA control framework. The system stores name, email, password for each client. This data is used to authenticate the person operating the software. Each user has roles associated to him/her. A role specifies the permissions for a project or experiment. E.g., a user may be <em>owner</em> of a project and may hence perform more actions than a user having <em>researcher</em> privileges.
+
+	<h2>Opt-In Manager</h2>
+	Expedient works closely with the Opt-In Manager. Opt-In Manager offers a GUI and acts as aggregate manager. Expedient is responsible for managing users, projects and slices with their resources. In order to cleanly separate OpenFlow experiments and their traffic from each other, it is necessary to dissect the flow space. When starting a slice Expedient sends a request to the Opt-In Manager. This request contains details for the desired flow space. The Opt-In Manager saves this request. When accessing the Opt-In Manager through its own GUI, island responsibles may subsequently approve this request. After approval, the software will then handle the assignment of the flow space.
+	
+</div>
+{% endblock %}
