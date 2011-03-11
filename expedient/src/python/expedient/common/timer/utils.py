@@ -8,4 +8,5 @@ def stringify_func(f):
     if callable(f):
         return "%s.%s" % (f.__module__, f.__name__)
     else:
+        print "NOT CALLABLE: " + str(f)
         return f

@@ -27,8 +27,8 @@ class JobNotScheduled(TimerException):
     @type callable: Callable.
     """
     
-    def __init__(self, callable):
+    def __init__(self, callable_func):
         super(JobNotScheduled, self).__init__(
-            "Job for callable '%s' not found." % stringify_func(callable),
+            "Job for callable '%s' not found." % stringify_func(callable_func),
         )
-        self.callable = callable
+        self.callable_func = callable_func

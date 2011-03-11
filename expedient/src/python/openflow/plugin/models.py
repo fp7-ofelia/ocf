@@ -22,6 +22,7 @@ from expedient.clearinghouse.slice.models import Slice
 from django.db.models.aggregates import Count
 from django.core.exceptions import ValidationError
 from expedient.common.timer.models import Job
+from expedient.common.timer.exceptions import JobAlreadyScheduled
 
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
@@ -97,10 +98,13 @@ production networks, and is currently deployed in several universities.
             return str(ret_exception)
 
         # schedule a job to automatically update resources
-        Job.objects.schedule(
-            settings.OPENFLOW_TOPOLOGY_UPDATE_PERIOD,
-            self.update_topology(),
-        )
+        try:
+            Job.objects.schedule(
+                settings.OPENFLOW_TOPOLOGY_UPDATE_PERIOD,
+                self.update_topology,
+            )
+        except JobAlreadyScheduled:
+            pass
 
         err = self.update_topology()
         if err: return err
