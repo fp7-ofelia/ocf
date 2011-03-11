@@ -4,17 +4,71 @@
 {% block title %}Help{% endblock %}
 
 {% block content %}
+<script type="text/javascript" charset="utf-8">
+
+	function add_headline(parent_list, headline, order) {
+		var li = document.createElement('div');
+		var toca = document.createElement('a');
+		var heada = document.createElement('a');
+		toca.innerHTML = order + ' ' + headline.innerHTML;
+		toca.href='#toc' + order;
+		heada.name='toc' + order;
+		headline.parentNode.insertBefore(heada, headline);
+		headline.innerHTML = order + ' ' + headline.innerHTML;
+
+		li.appendChild(toca);
+		parent_list.appendChild(li);
+	}
+
+	function copy_node_list(nodes) {
+		res = []
+		for (var i=0; i < nodes.length; i++) {
+			res.push(nodes[i]);
+		}
+		return res;
+	}
+	
+	function get_order_string(orders, level) {
+		res = '';
+		for (var i=1; i <= level; i++) {
+			res += orders[i-1].toString() + '.';
+		}
+		return res;
+	}
+	// cleanup necessary. this script does not respect if a head type has been skipped. E.g.: <h1/>...<h3/>
+	function setup_toc() {
+		var toc = document.getElementById('toc');
+
+		var elms = copy_node_list(document.getElementsByTagName('*')); // needs to be copied, since the DOM tree changes while iterating
+		var orders = [1,1,1];
+		var last_level = 1;
+		for (var i=0; i < elms.length; i++) {
+			tagname = elms[i].tagName.toLowerCase();
+			if ((tagname == 'h1') || (tagname == 'h2') || (tagname == 'h3')) {
+				var level = parseInt(tagname.substring(1,2));
+				if (level > last_level) { // level has changed to a sub level
+					orders[level-1] = 1;
+					orders[last_level-1] -= 1;
+				}
+				if (level < last_level) { // level has changed to a super level
+					orders[level-1] += 1;
+
+				}
+				var orderstring = get_order_string(orders, level);
+				add_headline(toc, elms[i], orderstring);
+				orders[level-1] += 1;
+				last_level = level;
+			}
+		}
+		toc.appendChild(parent_list);
+	}
+	window.onload = setup_toc;
+</script>
+
+
 <div class="main">
-<!--	<h1>Contents</h1>
-	<ol>
-		<li>Introduction</li>
-		<li>Disclaimer</li>
-		<li>Overview</li>
-		<li>Users &amp; Permissions</li>
-		<li>Projects</li>
-		<li>OpenFlow Aggregates</li>
-		<li>Slices</li>
-	</ol>-->
+	<h1>Contents</h1>
+	<div id="toc"></div><br/><br/>
 	<h1>Introduction</h1>
 	Expedient is a part of OFELIA's control framework. It enables experimenters to create and run experiments within the OFELIA federation. Through the user interface of Expedient, the user can deploy experiments, which include virtual machines, switch configurations and other resources. The control framework handles the separation of the experiments and the monitoring. Hence the user can fully concentrate on his/her research. 
 	<h2>The OFELIA project</h2>
