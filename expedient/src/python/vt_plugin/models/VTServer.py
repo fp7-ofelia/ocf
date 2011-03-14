@@ -26,9 +26,7 @@ class VTServer(Resource):
         """Meta Class for your model."""
         app_label = 'vt_plugin'
 
-    #From Machine
-   # uuid = models.CharField(max_length = 1024, default="", editable = False)
-    #name = models.CharField(max_length = 1024, default="", verbose_name = "Name")
+    uuid = models.CharField(max_length = 1024, default="", editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)
     #url = models.URLField(verify_exists = False, verbose_name = "Url of the Server")
     virtTech = models.CharField(max_length = 1024, default="", verbose_name = "Virtualization Technology")    

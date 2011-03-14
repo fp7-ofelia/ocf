@@ -37,7 +37,7 @@ def listResources(serverName = 'None', projectName = 'None', sliceName ='None'):
         servers = VTServer.objects.all()
     
     if not servers:
-        logging.error("No VTServers available")
+        logging.debug("No VTServers available")
         infoRspec.response.information.resources.server.pop()
         return XmlHelper.craftXmlClass(infoRspec)
     sIndex = 0
@@ -47,17 +47,18 @@ def listResources(serverName = 'None', projectName = 'None', sliceName ='None'):
         if(sIndex != 0):
             newServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
             infoRspec.response.information.resources.server.append(newServer)
-
+        
         Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
         if (projectName is not 'None'):
-            vms = VM.objects.filter(serverID = server.name, project = projectName) 
+            vms = VM.objects.filter(serverID = server.uuid, projectId = projectId) 
         else:
-            vms = VM.objects.filter(serverID = server.name)
+            vms = VM.objects.filter(serverID = server.uuid)
         if not vms:
-            logging.error("No VMs available")
-            infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+            logging.debug("No VMs available")
+            if infoRspec.response.information.resources.server[sIndex].virtual_machine:
+                infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
         elif (sliceName is not 'None'):
-            vms = vms.filter(sliceId = sliceName)
+            vms = vms.filter(sliceId = sliceId)
             if not vms:
                 logging.error("No VMs available")
                 infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
@@ -71,7 +72,7 @@ def listResources(serverName = 'None', projectName = 'None', sliceName ='None'):
         sIndex = sIndex + 1
         
     logging.debug(infoRspec)
-    return XmlHelper.craftXmlClass(infoRspec)
+    return  XmlHelper.craftXmlClass(infoRspec)
     
 
  

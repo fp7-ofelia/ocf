@@ -264,7 +264,7 @@ def home(request, slice_id):
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin)
        
-        vm = VM.objects.filter(sliceId=slice.uuid)        
+#        vm = VM.objects.filter(sliceId=slice.uuid)        
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
@@ -283,7 +283,7 @@ def home(request, slice_id):
                 "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,
                 "planetlab_node_class": PlanetLabNode,
-                "virtualmachines": vm,
+#                "virtualmachines": vm,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

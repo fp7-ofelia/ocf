@@ -51,7 +51,7 @@ class ProvisioningDispatcher():
 
                 try:
                     VMmodel = Translator.VMtoModel(action.virtual_machine, threading.currentThread().callBackURL, save="save" )
-                    Server = VTServer.objects.get(name = VMmodel.getServerID() )
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
                     actionModel.save()
@@ -86,7 +86,7 @@ class ProvisioningDispatcher():
                         logging.error(e)
                         return
                 
-                AGENT_URL = VTServer.objects.get(name = VMmodel.getServerID() ).getAgentURL()
+                AGENT_URL = VTServer.objects.get(uuid = VMmodel.getServerID() ).getAgentURL()
                 PLUGIN_URL = VMmodel.getCallBackURL()
 
                 if Action.objects.filter(uuid = actionModel.uuid):
@@ -127,7 +127,7 @@ class ProvisioningDispatcher():
                         print e
                         return
                 
-                AGENT_URL = VTServer.objects.get(name = VMmodel.getServerID() ).getAgentURL()
+                AGENT_URL = VTServer.objects.get(uuid = VMmodel.getServerID() ).getAgentURL()
                 PLUGIN_URL = VMmodel.getCallBackURL()
 
                 if Action.objects.filter(uuid = actionModel.uuid):
@@ -171,8 +171,8 @@ class ProvisioningDispatcher():
         for iface in VMxmlClass.xen_configuration.interfaces.interface:
             if iface.ismgmt is True:
                 iface.name = 'eth'+str(ethIndex)
-                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.name, iface.name, True)
-                iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.name, iface.name, True)
+                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
+                iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
                 iface.ip = iptemp.ip
                 iface.mask = iptemp.mask
                 iface.gw = iptemp.gw
@@ -183,7 +183,7 @@ class ProvisioningDispatcher():
                 print "[DEBUG] Management Interface set"
             else:
                 iface.name = 'eth'+str(ethIndex)
-                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.name, iface.name)
+                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name)
                 print "[DEBUG] Non Management Interface set"
             ethIndex = ethIndex + 1
         #Relate the Macs created with the VMmodel

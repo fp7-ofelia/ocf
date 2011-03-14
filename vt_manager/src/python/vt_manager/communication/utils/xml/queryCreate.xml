@@ -6,9 +6,11 @@
 			<virtual-machine>
 				<name>LeoTest</name>
 				<uuid>LeoUUID</uuid>
-				<project-id>project1</project-id>
-				<slice-id>slice1</slice-id>
-				<operating-system-type>GNU/Linux</operating-system-type>
+				<project-id>NONE</project-id>
+                <project-name>NONE</project-name>
+                <slice-id>NONE</slice-id>
+                <slice-name>NONE</slice-name>
+                <operating-system-type>GNU/Linux</operating-system-type>
 				<operating-system-version>5.0</operating-system-version>
 				<operating-system-distribution>Debian</operating-system-distribution>
 				<virtualization-type>xen</virtualization-type>

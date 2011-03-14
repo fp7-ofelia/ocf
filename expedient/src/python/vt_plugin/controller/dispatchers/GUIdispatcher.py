@@ -38,7 +38,7 @@ def virtualmachine_crud(request, slice_id, server_id):
     """Show a page that allows user to add VMs to the VT server."""
 
     serv = get_object_or_404(VTServer, id = server_id)
-    server_name = serv.name
+    #server_name = serv.name
     slice = get_object_or_404(Slice, id = slice_id)
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
@@ -55,7 +55,7 @@ def virtualmachine_crud(request, slice_id, server_id):
             if formset.is_valid():
                 instances = formset.save(commit=False)
                 #create virtualmachines from received formulary
-                VMcontroller.processVMCreation(instances, server_name, slice)
+                VMcontroller.processVMCreation(instances, serv.uuid, slice)
 
             return HttpResponseRedirect(reverse("html_plugin_home",
                                                 args=[slice_id]))
@@ -65,7 +65,7 @@ def virtualmachine_crud(request, slice_id, server_id):
     return simple.direct_to_template(
         request, template="aggregate_add_virtualmachines.html",
         extra_context={"virtual_machines": virtualmachines,
-                        "server_name":server_name, "formset": formset,"slice":slice,
+                        "server_name":serv.name, "formset": formset,"slice":slice,
                         "breadcrumbs": (
                                         ("Home", reverse("home")),
                                         ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),

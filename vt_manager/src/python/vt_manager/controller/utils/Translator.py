@@ -11,8 +11,10 @@ class Translator():
         VMmodel.setCallBackURL(callBackURL)
         VMmodel.setName(VMxmlClass.name)
         VMmodel.setUUID(VMxmlClass.uuid)
-        VMmodel.setProject(VMxmlClass.project_id)
+        VMmodel.setProjectId(VMxmlClass.project_id)
         VMmodel.setSliceId(VMxmlClass.slice_id)
+        VMmodel.setProjectName(VMxmlClass.project_name)
+        VMmodel.setSliceName(VMxmlClass.slice_name)
         VMmodel.setOStype(VMxmlClass.operating_system_type)
         VMmodel.setOSversion(VMxmlClass.operating_system_version)
         VMmodel.setOSdist(VMxmlClass.operating_system_distribution)
@@ -56,10 +58,24 @@ class Translator():
     @staticmethod
     def VMmodelToClass(VMmodel, VMxmlClass):
 
+        #statusTable = {
+        #                'created (stopped)':'CREATED',
+        #                'running':'STARTED',
+        #                'stopped':'STOPPED',
+        #                'on queue':'ONQUEUE',
+        #                'starting...':'ONQUEUE',
+        #                'stopping...':'ONQUEUE',
+        #                'creating...':'ONQUEUE',
+        #                'deleting...':'ONQUEUE',
+        #                'rebooting...':'ONQUEUE',
+        #              }
+
         VMxmlClass.name = VMmodel.getName()
         VMxmlClass.uuid = VMmodel.getUUID()
-        VMxmlClass.project_id = VMmodel.getProject()
+        VMxmlClass.project_id = VMmodel.getProjectId()
         VMxmlClass.slice_id = VMmodel.getSliceId()
+        VMxmlClass.project_name = VMmodel.getProjectName()
+        VMxmlClass.slice_name = VMmodel.getSliceName()
         VMxmlClass.operating_system_type = VMmodel.getOStype()
         VMxmlClass.operating_system_version = VMmodel.getOSversion()
         VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
@@ -69,10 +85,12 @@ class Translator():
         VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
         VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
         VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-        
+        #VMxmlClass.status=statusTable.get(VMmodel.state)
+             
         ifaceIndex = 0
         macs = VMmodel.macs.all()
         for mac in macs:
+            print "ENTRA EN MACS"
             if(ifaceIndex != 0):
                 newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
                 VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
@@ -100,8 +118,10 @@ class Translator():
         action.id = uuid.uuid4()
         action.virtual_machine.name = vm.getName()
         action.virtual_machine.uuid = vm.getUUID()
-        action.virtual_machine.project_id = vm.getProject()
+        action.virtual_machine.project_id = vm.getProjectId()
         action.virtual_machine.slice_id = vm.getSliceId()
+        action.virtual_machine.project_name = vm.getProjectName()
+        action.virtual_machine.slice_name = vm.getSliceName()
         action.virtual_machine.virtualization_type = vm.getVirtTech()
         action.virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
                 

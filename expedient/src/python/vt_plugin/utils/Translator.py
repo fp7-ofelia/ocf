@@ -9,17 +9,29 @@ class Translator():
 
     @staticmethod
     def VMtoModel(VMxmlClass, save = "noSave"):
+
+       # statusTable = {
+       #                 'CREATED':'created (stopped)',
+       #                 'STARTED':'running',
+       #                 'STOPPED':'stopped',
+       #                 'ONQUEUE':'on queue',
+       # }
+
         #search in database if VMxmlClass already exists
         if VM.objects.filter(uuid = VMxmlClass.uuid).exists():
             VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)            
         else:
             VMmodel = VM()
             VMmodel.setState("on queue")
-            
+            #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id
+
+        #VMmodel.setState(statusTable.get(VMxmlClass.status))    
         VMmodel.setName(VMxmlClass.name)
         VMmodel.setUUID(VMxmlClass.uuid)
-        VMmodel.setProject(VMxmlClass.project_id)
+        VMmodel.setProjectId(VMxmlClass.project_id)
+        VMmodel.setProjectName(VMxmlClass.project_name)
         VMmodel.setSliceId(VMxmlClass.slice_id)
+        VMmodel.setSliceName(VMxmlClass.slice_name)
         VMmodel.setOStype(VMxmlClass.operating_system_type)
         VMmodel.setOSversion(VMxmlClass.operating_system_version)
         VMmodel.setOSdist(VMxmlClass.operating_system_distribution)
@@ -44,8 +56,10 @@ class Translator():
 
         VMxmlClass.name = VMmodel.getName()
         VMxmlClass.uuid = VMmodel.getUUID()
-        VMxmlClass.project_id = VMmodel.getProject()
+        VMxmlClass.project_id = VMmodel.getProjectId()
+        VMxmlClass.project_name = VMmodel.getProjectName()
         VMxmlClass.slice_id = VMmodel.getSliceId()
+        VMxmlClass.slice_name = VMmodel.getSliceName()
         VMxmlClass.operating_system_type = VMmodel.getOStype()
         VMxmlClass.operating_system_version = VMmodel.getOSversion()
         VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
@@ -112,8 +126,10 @@ class Translator():
         action.id = uuid.uuid4()
         action.virtual_machine.name = vm.getName()
         action.virtual_machine.uuid = vm.getUUID()
-        action.virtual_machine.project_id = vm.getProject()
+        action.virtual_machine.project_id = vm.getProjectId()
+        action.virtual_machine.project_name = vm.getProjectName()
         action.virtual_machine.slice_id = vm.getSliceId()
+        action.virtual_machine.slice_name = vm.getSliceName()
         action.virtual_machine.virtualization_type = vm.getVirtTech()
         action.virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
 

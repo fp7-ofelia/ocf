@@ -13,23 +13,23 @@ class VMcontroller():
     "manages creation of VMs from the input of a given VM formulary"
     
     @staticmethod
-    def processVMCreation(instances, server_name, slice):
+    def processVMCreation(instances, server_id, slice):
         
-        slice_uuid = slice.uuid
         rspec = XmlHelper.getSimpleActionQuery()
         actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
         rspec.query.provisioning.action.pop()
         for instance in instances:
-            print "VIRTUAL MACHINE CRUD: POST --> DONE"
             instance.uuid = uuid.uuid4()
-            instance.serverID = server_name
-            instance.sliceId = slice_uuid
+            instance.serverID = server_id
+            instance.sliceId = slice.uuid
+            instance.sliceName= slice.name
 
             #assign same virt technology as the server where vm created
-            s = VTServer.objects.get(name = server_name)
+            s = VTServer.objects.get(uuid = server_id)
             instance.virtTech = s.virtTech
-            instance.project = slice.project_id
+            instance.projectId = slice.project.uuid
+            instance.projectName = slice.project.name
             instance.hdOriginPath = "default/test/lenny"
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 

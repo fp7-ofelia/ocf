@@ -115,11 +115,18 @@
 						<td class="Description">{{ resource }}</td>
 					</tr>
 					{% endfor %}
+                    {% for vm in vmsn_home_list %}
+                    <tr class="body">
+                        <td class="name">{{ vm.name }}</td>
+                        <td class="type">Virtual Machine</td>
+                        <td class="Description">{{vm.state}}</td>
+                    </tr>
+                    {% endfor %}
 				</table>
 			</div>
 			<div class="center">
 		    	<input type="button" value="Manage Slice Resources"
-		    	onclick='document.location="{% url slice_manage_resources slice.id %}"' />
+		    	onclick='document.location="{% url html_plugin_home slice.id %}"' />
 			</div>
 		</div>
 	</div>

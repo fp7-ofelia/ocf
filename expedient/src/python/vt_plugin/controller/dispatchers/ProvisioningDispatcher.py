@@ -47,7 +47,7 @@ class ProvisioningDispatcher():
                     #(to be created) and the server modifications in local database
                     #first we translate the VM action into a VM model
                     VMmodel = Translator.VMtoModel(action.virtual_machine, "save")
-                    Server = VTServer.objects.get(name = VMmodel.getServerID() )
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
                     actionModel.save()
@@ -90,7 +90,7 @@ class ProvisioningDispatcher():
                     actionModel.save()
                 
                 print "PROVISIONING DISPATCHER--> ACTION DELETE"
-                Server = VTServer.objects.get(name = VMmodel.getServerID() )
+                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                 client = Server.aggregate.as_leaf_class().client
                 ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
 
@@ -124,7 +124,7 @@ class ProvisioningDispatcher():
                     actionModel.save()
                 print "PROVISIONING DISPATCHER --> START, STOP, REBOOT START"
                 
-                Server = VTServer.objects.get(name = VMmodel.getServerID() )
+                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                 client = Server.aggregate.as_leaf_class().client
                 ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
 

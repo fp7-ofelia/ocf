@@ -86,7 +86,7 @@ $(document).ready(function(){
 
 {% block content %}
 <div class="steps center">
-	1. <a href="{% url html_plugin_home slice.id %}">Select PlanetLab and OpenFlow Resources</a>
+	1. <a href="{% url html_plugin_home slice.id %}">Select Host and OpenFlow Resources</a>
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
 {% if planetlab_aggs %}
 	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
@@ -387,6 +387,7 @@ at {{ agg.location }}.
     {% if agg.resource_set.all %}
 
     {% for rsc in agg.resource_set.all %}
+    {% if rsc.leaf_name == 'VTServer' %}
     {% with rsc.as_leaf_class as server %}
        <table class="servers">
     <tr>
@@ -436,8 +437,10 @@ at {{ agg.location }}.
             <th style="text-align:center">Actions</th>
             </tr>
 
-            {% for vm in virtualmachines %}
-                {% if server.name == vm.serverID%}
+            {% for rsc in agg.resource_set.all %}
+            {% if rsc.leaf_name == 'VM' %}            
+            {% with rsc.as_leaf_class as vm %}
+                {% if server.uuid == vm.serverID%}
                 <tr class = "{% cycle 'odd' 'even' %}">
                   <td>
                     {{ vm.name }}
@@ -475,6 +478,8 @@ at {{ agg.location }}.
                 </td>
                 </tr>
             {%endif%}
+            {% endwith%}
+            {% endif %}
             {% endfor %}
            </table>
             {% endif %}
@@ -482,6 +487,7 @@ at {{ agg.location }}.
 
 
     {% endwith %}
+    {% endif %}
     {% endfor %}
     </table>
     <br/>

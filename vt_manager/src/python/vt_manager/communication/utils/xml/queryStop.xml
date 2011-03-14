@@ -7,8 +7,10 @@
 			<name>LeoTest</name>
 			<uuid>LeoUUID</uuid>
 			<project-id>project1</project-id>
-			<slice-id>slice1</slice-id>
-			<virtualization-type>xen</virtualization-type>
+            <project-name>projectname</project-name>
+            <slice-id>slice1</slice-id>
+            <slice-name>slicename</slice-name>
+            <virtualization-type>xen</virtualization-type>
 			<xen-configuration>
 				<hd-setup-type>file-image</hd-setup-type>
 			</xen-configuration>

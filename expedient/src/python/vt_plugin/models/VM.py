@@ -12,6 +12,7 @@ from expedient.clearinghouse.utils import post_message_to_current_user
 from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
 from vt_plugin.models import *
+from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
@@ -26,13 +27,13 @@ VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('logical volumes','Logical Volumes'),
                       )
 
-class VM(models.Model):
+class VM(Resource):
     
     '''
     virtual machine class
     '''
 
-    name = models.CharField(max_length = 1024, default="")
+    #name = models.CharField(max_length = 1024, default="")
     uuid = models.CharField(max_length = 1024, default="")
     memory = models.IntegerField(blank = True, null=True)
     
@@ -43,8 +44,10 @@ class VM(models.Model):
     operatingSystemDistribution = models.CharField(max_length = 512, default="")
 
 
-    project = models.CharField(max_length = 1024, default="")
+    projectId = models.CharField(max_length = 1024, default="")
+    projectName = models.CharField(max_length = 1024, default="")
     sliceId = models.CharField(max_length = 1024, default="")
+    sliceName = models.CharField(max_length = 1024, default="")
 #    ipControl = models.IPAddressField(blank = True, null=True)
 #    gw = models.IPAddressField(blank = True, null=True)
 #    dns1 = models.IPAddressField(blank = True, null=True)
@@ -119,20 +122,33 @@ class VM(models.Model):
     def getServerID(self):
         return self.serverID
 
-    def setProject(self,project):
-        if not isinstance(project,str):
-            project = str(project)
-        self.project = project
+    def setProjectId(self,projectId):
+        if not isinstance(projectId,str):
+            projectId = str(projectId)
+        self.projectId = projectId
 
-    def getProject(self):
-        return self.project
+    def getProjectId(self):
+        return self.projectId
 
+    def setProjectName(self,projectName):
+        if not isinstance(projectName,str):
+            projectName = str(projectName)
+        self.projectName = projectName
+
+    def getProjectName(self):
+        return self.projectName
 
     def setSliceId(self, value):
         self.sliceId = value
 
     def getSliceId(self):
         return self.sliceId
+
+    def setSliceName(self, value):
+        self.sliceName = value
+
+    def getSliceName(self):
+        return self.sliceName    
 
     def setState(self,state):
         possibleStats = ('running', 'created (stopped)', 'stopped', 'unknown', 'failed', 'on queue', 'starting...', 'stopping...', 'creating...','deleting...','rebooting...')

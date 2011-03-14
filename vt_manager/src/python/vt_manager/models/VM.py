@@ -24,8 +24,10 @@ class VM(models.Model):
     operatingSystemDistribution = models.CharField(max_length = 512, default="")
 
     callBackURL = models.URLField()
-    project = models.CharField(max_length = 1024, default="")
+    projectId = models.CharField(max_length = 1024, default="")
+    projectName = models.CharField(max_length = 1024, default="")
     sliceId = models.CharField(max_length = 1024, default="")
+    sliceName = models.CharField(max_length = 1024, default="")
     expedientId = models.IntegerField(blank = True, null=True)
     state = models.CharField(max_length = 24, default="")
     serverID = models.CharField(max_length = 1024, default="")    
@@ -36,7 +38,7 @@ class VM(models.Model):
     ips = models.ManyToManyField('Ip', blank = True, null = True)
 
     def setMacs(self):
-        macs = Mac.objects.filter(vmID = self.name)
+        macs = Mac.objects.filter(vmID = self.uuid)
         for mac in macs:
             self.macs.add(mac)
 
@@ -44,7 +46,7 @@ class VM(models.Model):
         return self.macs
 
     def setIPs(self):
-        ips = Ip.objects.filter(vmID = self.name)
+        ips = Ip.objects.filter(vmID = self.uuid)
         for ip in ips:
             self.ips.add(ip)
 
@@ -52,19 +54,34 @@ class VM(models.Model):
         return self.macs
 
 
-    def setProject(self,project):
-        if not isinstance(project,str):
-            project = str(project)
-        self.project = project
+    def setProjectId(self,projectId):
+        if not isinstance(projectId,str):
+            projectId = str(projectId)
+        self.projectId = projectId
 
-    def getProject(self):
-        return self.project
+    def getProjectId(self):
+        return self.projectId
+
+    def setProjectName(self,projectName):
+        if not isinstance(projectName,str):
+            projectName = str(projectName)
+        self.projectName = projectName
+
+    def getProjectName(self):
+        return self.projectName
 
     def setSliceId(self, value):
         self.sliceId = value
 
     def getSliceId(self):
         return self.sliceId 
+
+    def setSliceName(self, value):
+        self.sliceName = value
+
+    def getSliceName(self):
+        return self.sliceName
+
     def setExpedientId(self,expedientId):
         if not isinstance(expedientId,int):
             expedientId = int(expedientId)

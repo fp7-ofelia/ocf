@@ -54,7 +54,7 @@ class IPallocator():
     def acquire(serverID, projectID, amID, sliceID, vmID, ifaceName, isMgmt):
         
         try:
-            server = VTServer.objects.get(name = serverID)
+            server = VTServer.objects.get(uuid = serverID)
         except Exception as e:
             print "[EXCEPTION]  No Server with name %s" % serverID
             print e

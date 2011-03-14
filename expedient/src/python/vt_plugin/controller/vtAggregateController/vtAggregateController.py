@@ -95,6 +95,8 @@ def askForAggregateResources(vtPlugin):
         return
     try:
         rspec = client.listResources()
+        print "RSPEC"
+        print rspec
     except Exception as e:
         print "Can't retrieve resources"
         print e

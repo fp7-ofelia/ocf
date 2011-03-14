@@ -18,7 +18,7 @@ class Ip(models.Model):
     gw = models.IPAddressField(blank = True, null=True)
     dns1 = models.IPAddressField(blank = True, null=True)
     dns2 = models.IPAddressField(blank = True, null=True)
-    vmID = models.CharField(max_length = 512, default="")
+    vmID = models.CharField(max_length = 1024, default="")
     serverID = models.CharField(max_length = 1024, default="")
     isMgmt = models.BooleanField()    
     ifaceName = models.CharField(max_length = 512, default="")    

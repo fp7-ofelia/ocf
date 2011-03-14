@@ -15,6 +15,6 @@ urlpatterns = patterns('expedient.clearinghouse.slice.views',
     url(r'^aggregates/add/(?P<slice_id>\d+)/$', 'add_aggregate', name="slice_add_agg"),
     url(r'^aggregates/update/(?P<slice_id>\d+)/(?P<agg_id>\d+)/$', 'update_aggregate', name="slice_update_agg"),
     url(r'^aggregates/remove/(?P<slice_id>\d+)/(?P<agg_id>\d+)/$', 'remove_aggregate', name="slice_remove_agg"),
-    url(r'^resources/(?P<slice_id>\d+)/$', 'select_ui_plugin', name="slice_manage_resources"),    
+    #url(r'^resources/(?P<slice_id>\d+)/$', 'select_ui_plugin', name="slice_manage_resources"),    
 )
 

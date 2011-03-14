@@ -6,8 +6,10 @@
         <virtual-machine>
             <name>LeoTest</name>
             <uuid>LeoUUID</uuid>
-            <project-id>project1</project-id>
-            <slice-id>slice1</slice-id>
+            <project-id>NONE</project-id>
+            <project-name>NONE</project-name>
+            <slice-id>NONE</slice-id>
+            <slice-name>NONE</slice-name>
             <virtualization-type>xen</virtualization-type>
             <xen-configuration>
                 <hd-setup-type>file-image</hd-setup-type>

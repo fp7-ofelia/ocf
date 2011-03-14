@@ -16,7 +16,7 @@ class Mac(models.Model):
     AMslotID = models.IntegerField()
     HostID = models.IntegerField()
     mac = models.CharField(max_length = 17, default="")
-    vmID = models.CharField(max_length = 512, default="")
+    vmID = models.CharField(max_length = 1024, default="")
     isMgmt = models.BooleanField()
     ifaceName = models.CharField(max_length = 512, default="") 
 
