@@ -70,11 +70,8 @@
 		<xs:sequence>
 			<xs:element name="name" type="xs:string" use="required" />
 			<xs:element name="uuid" type="xs:string" use="required" />
-			<xs:element name="status" type="vm-status-type" />
 			<xs:element name="project-id" type="xs:string" use="required" />
-			<xs:element name="project-name" type="xs:string" use="required" />
 			<xs:element name="slice-id" type="xs:string" use="required" />
-			<xs:element name="slice-name" type="xs:string" use="required" />
 			<xs:element name="operating-system-type" type="os-type-type" use="required" />
 			<xs:element name="operating-system-version" type="os-type-type" />
 			<xs:element name="operating-system-distribution" type="os-distro-type" />
@@ -86,17 +83,6 @@
 			</xs:choice>
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:simpleType name="vm-status-type">
-		<xs:restriction base="xs:string">
-			<!-- Action is pending -->
-			<xs:enumeration value="ONQUEUE" />
-			<xs:enumeration value="CREATED" />
-			<xs:enumeration value="STARTED" />
-			<xs:enumeration value="STOPPED" />
-		</xs:restriction>
-	</xs:simpleType>
-
 
 	<xs:simpleType name="os-type-type">
 		<xs:restriction base="xs:string">

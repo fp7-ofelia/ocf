@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Mon Mar 14 09:55:25 2011 by generateDS.py version 2.3b.
+# Generated Wed Feb 23 16:17:05 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -106,8 +106,8 @@ supermod.action_type.subclass = action_typeSub
 
 
 class virtual_machine_typeSub(supermod.virtual_machine_type):
-    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
-        super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, server_id, virtualization_type, xen_configuration, )
+    def __init__(self, name=None, uuid=None, project_id=None, slice_id=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
+        super(virtual_machine_typeSub, self).__init__(name, uuid, project_id, slice_id, operating_system_type, operating_system_version, operating_system_distribution, server_id, virtualization_type, xen_configuration, )
 supermod.virtual_machine_type.subclass = virtual_machine_typeSub
 # end class virtual_machine_typeSub
 

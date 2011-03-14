@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Mon Mar 14 09:55:25 2011 by generateDS.py version 2.3b.
+# Generated Wed Feb 23 16:17:05 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -699,14 +699,11 @@ class action_type(GeneratedsSuper):
 class virtual_machine_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
+    def __init__(self, name=None, uuid=None, project_id=None, slice_id=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
         self.name = name
         self.uuid = uuid
-        self.status = status
         self.project_id = project_id
-        self.project_name = project_name
         self.slice_id = slice_id
-        self.slice_name = slice_name
         self.operating_system_type = operating_system_type
         self.operating_system_version = operating_system_version
         self.operating_system_distribution = operating_system_distribution
@@ -723,16 +720,10 @@ class virtual_machine_type(GeneratedsSuper):
     def set_name(self, name): self.name = name
     def get_uuid(self): return self.uuid
     def set_uuid(self, uuid): self.uuid = uuid
-    def get_status(self): return self.status
-    def set_status(self, status): self.status = status
     def get_project_id(self): return self.project_id
     def set_project_id(self, project_id): self.project_id = project_id
-    def get_project_name(self): return self.project_name
-    def set_project_name(self, project_name): self.project_name = project_name
     def get_slice_id(self): return self.slice_id
     def set_slice_id(self, slice_id): self.slice_id = slice_id
-    def get_slice_name(self): return self.slice_name
-    def set_slice_name(self, slice_name): self.slice_name = slice_name
     def get_operating_system_type(self): return self.operating_system_type
     def set_operating_system_type(self, operating_system_type): self.operating_system_type = operating_system_type
     def get_operating_system_version(self): return self.operating_system_version
@@ -765,21 +756,12 @@ class virtual_machine_type(GeneratedsSuper):
         if self.uuid is not None:
             showIndent(outfile, level)
             outfile.write('<%suuid>%s</%suuid>\n' % (namespace_, self.gds_format_string(quote_xml(self.uuid).encode(ExternalEncoding), input_name='uuid'), namespace_))
-        if self.status is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sstatus>%s</%sstatus>\n' % (namespace_, self.gds_format_string(quote_xml(self.status).encode(ExternalEncoding), input_name='status'), namespace_))
         if self.project_id is not None:
             showIndent(outfile, level)
             outfile.write('<%sproject-id>%s</%sproject-id>\n' % (namespace_, self.gds_format_string(quote_xml(self.project_id).encode(ExternalEncoding), input_name='project-id'), namespace_))
-        if self.project_name is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sproject-name>%s</%sproject-name>\n' % (namespace_, self.gds_format_string(quote_xml(self.project_name).encode(ExternalEncoding), input_name='project-name'), namespace_))
         if self.slice_id is not None:
             showIndent(outfile, level)
             outfile.write('<%sslice-id>%s</%sslice-id>\n' % (namespace_, self.gds_format_string(quote_xml(self.slice_id).encode(ExternalEncoding), input_name='slice-id'), namespace_))
-        if self.slice_name is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sslice-name>%s</%sslice-name>\n' % (namespace_, self.gds_format_string(quote_xml(self.slice_name).encode(ExternalEncoding), input_name='slice-name'), namespace_))
         if self.operating_system_type is not None:
             showIndent(outfile, level)
             outfile.write('<%soperating-system-type>%s</%soperating-system-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_type).encode(ExternalEncoding), input_name='operating-system-type'), namespace_))
@@ -801,11 +783,8 @@ class virtual_machine_type(GeneratedsSuper):
         if (
             self.name is not None or
             self.uuid is not None or
-            self.status is not None or
             self.project_id is not None or
-            self.project_name is not None or
             self.slice_id is not None or
-            self.slice_name is not None or
             self.operating_system_type is not None or
             self.operating_system_version is not None or
             self.operating_system_distribution is not None or
@@ -830,21 +809,12 @@ class virtual_machine_type(GeneratedsSuper):
         if self.uuid is not None:
             showIndent(outfile, level)
             outfile.write('uuid=%s,\n' % quote_python(self.uuid).encode(ExternalEncoding))
-        if self.status is not None:
-            showIndent(outfile, level)
-            outfile.write('status=%s,\n' % quote_python(self.status).encode(ExternalEncoding))
         if self.project_id is not None:
             showIndent(outfile, level)
             outfile.write('project_id=%s,\n' % quote_python(self.project_id).encode(ExternalEncoding))
-        if self.project_name is not None:
-            showIndent(outfile, level)
-            outfile.write('project_name=%s,\n' % quote_python(self.project_name).encode(ExternalEncoding))
         if self.slice_id is not None:
             showIndent(outfile, level)
             outfile.write('slice_id=%s,\n' % quote_python(self.slice_id).encode(ExternalEncoding))
-        if self.slice_name is not None:
-            showIndent(outfile, level)
-            outfile.write('slice_name=%s,\n' % quote_python(self.slice_name).encode(ExternalEncoding))
         if self.operating_system_type is not None:
             showIndent(outfile, level)
             outfile.write('operating_system_type=%s,\n' % quote_python(self.operating_system_type).encode(ExternalEncoding))
@@ -880,21 +850,12 @@ class virtual_machine_type(GeneratedsSuper):
         elif nodeName_ == 'uuid':
             uuid_ = child_.text
             self.uuid = uuid_
-        elif nodeName_ == 'status':
-            status_ = child_.text
-            self.status = status_
         elif nodeName_ == 'project-id':
             project_id_ = child_.text
             self.project_id = project_id_
-        elif nodeName_ == 'project-name':
-            project_name_ = child_.text
-            self.project_name = project_name_
         elif nodeName_ == 'slice-id':
             slice_id_ = child_.text
             self.slice_id = slice_id_
-        elif nodeName_ == 'slice-name':
-            slice_name_ = child_.text
-            self.slice_name = slice_name_
         elif nodeName_ == 'operating-system-type':
             operating_system_type_ = child_.text
             self.operating_system_type = operating_system_type_
