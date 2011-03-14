@@ -3,94 +3,91 @@
 
 {% block head %}
 <style>
-	table.openflow,table.planetlab {
-		width: 100%;
-		border-spacing: 0px;
-		border-collapse: collapse;
-		border: 1px solid #CCC;
-	}
-	table.openflow .dpid,.ports {
-		border-bottom: 1px solid #000;
-	}
-	table.connections_table {
-		border-width: 0px;
-		width: 100%;
-	} 
-	table.openflow td {
-		border-spacing: 0px;
-		padding: 0px;
-		border-collapse: collapse;
-	}
-	td.select_checkbox {
-		width: 24px;
-	}
-	table.connections {
-		width: 440px;
-	}
-	tr.odd {
-		background-color: #ecf4d7;
-	}
-	td.connected {
-		font-weight: bold;
-	}
-	
-	td.port_num {
-		width: 45px;
-	}
-	div.steps {
-		padding: 4px;
-		font-weight: bold;
-	}
+    table.openflow,table.planetlab {
+        width: 100%;
+        border-spacing: 0px;
+        border-collapse: collapse;
+        border: 1px solid #CCC;
+    }
+    table.openflow .dpid,.ports {
+        border-bottom: 1px solid #000;
+    }
+    table.connections_table {
+        border-width: 0px;
+        width: 100%;
+    } 
+    table.openflow td {
+        border-spacing: 0px;
+        padding: 0px;
+        border-collapse: collapse;
+    }
+    td.select_checkbox {
+        width: 24px;
+    }
+    table.connections {
+        width: 440px;
+    }
+    tr.odd {
+        background-color: #ecf4d7;
+    }
+    td.connected {
+        font-weight: bold;
+    }
+    
+    td.port_num {
+        width: 45px;
+    }
+    div.steps {
+        padding: 4px;
+        font-weight: bold;
+    }
 </style>
 
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
 $(document).ready(function(){
-	$(":checkbox[name=selected_ifaces]:checked").each(function(){
-		iface_id = $(this).attr("value");
-		$(".neighbor_"+iface_id).addClass("connected");
-		$(".iface_"+iface_id).addClass("connected");
-	});
-	$(":checkbox[name=selected_ifaces]").click(function (){
-		iface_id = $(this).attr("value");
-		$(".iface_"+iface_id).toggleClass("connected");
-		$(".neighbor_"+iface_id).toggleClass("connected");
-		vis.render();
-	});
-	$(":checkbox[name=selected_nodes]:checked").each(function(){
-		node_id = $(this).attr("value");
-		$(".neighbor_rsc_"+node_id).addClass("connected");
-		$(".rsc_"+node_id).addClass("connected");
-	});
-	$(":checkbox[name=selected_nodes]").click(function (){
-		node_id = $(this).attr("value");
-		$(".rsc_"+node_id).toggleClass("connected");
-		$(".neighbor_rsc_"+node_id).toggleClass("connected");
-		vis.render();
-	});
-	$("input[name=clear_button]").click(function (){
-		$(":checked").click();
-	});
-	$("input[name=select_all_button]").click(function (){
-		$(":checkbox:not(:checked)").click();
-	});
-	
-	$("input[name=select_tree_button]").click(function (){
-		$(":checked").click();
-		$(":checkbox.in_tree").click();
-	});
+    $(":checkbox[name=selected_ifaces]:checked").each(function(){
+        iface_id = $(this).attr("value");
+        $(".neighbor_"+iface_id).addClass("connected");
+        $(".iface_"+iface_id).addClass("connected");
+    });
+    $(":checkbox[name=selected_ifaces]").click(function (){
+        iface_id = $(this).attr("value");
+        $(".iface_"+iface_id).toggleClass("connected");
+        $(".neighbor_"+iface_id).toggleClass("connected");
+        vis.render();
+    });
+    $(":checkbox[name=selected_nodes]:checked").each(function(){
+        node_id = $(this).attr("value");
+        $(".neighbor_rsc_"+node_id).addClass("connected");
+        $(".rsc_"+node_id).addClass("connected");
+    });
+    $(":checkbox[name=selected_nodes]").click(function (){
+        node_id = $(this).attr("value");
+        $(".rsc_"+node_id).toggleClass("connected");
+        $(".neighbor_rsc_"+node_id).toggleClass("connected");
+        vis.render();
+    });
+    $("input[name=clear_button]").click(function (){
+        $(":checked").click();
+    });
+    $("input[name=select_all_button]").click(function (){
+        $(":checkbox:not(:checked)").click();
+    });
+    
+    $("input[name=select_tree_button]").click(function (){
+        $(":checked").click();
+        $(":checkbox.in_tree").click();
+    });
 })
 </script>
 {% endblock %}
 
 {% block content %}
 <div class="steps center">
-	1. <a href="{% url html_plugin_home slice.id %}">Select Host and OpenFlow Resources</a>
-	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
-{% if planetlab_aggs %}
-	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
-{% endif %}
+    1. <a href="{% url html_plugin_home slice.id %}">Select Host and OpenFlow Resources</a>
+    2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
 </div>
 
 <h1>Topology</h1>
@@ -100,44 +97,50 @@ $(document).ready(function(){
 <script type="text/javascript+protovis">
 
 function get_node_type(d) {
-	var of_groups_len = {{ openflow_aggs.count }};
-	var pl_groups_len = {{ planetlab_aggs.count }};
-	
-	if(d.group < of_groups_len) {
-		return "openflow";
-	} else if(d.group < of_groups_len + pl_groups_len) {
-		return "planetlab";
-	} else {
-		return "unknown";
-	}
+    var of_groups_len = {{ openflow_aggs.count }};
+    var pl_groups_len = {{ planetlab_aggs.count }};
+    
+    if(d.group < of_groups_len) {
+        return "openflow";
+    } else if(d.group < of_groups_len + pl_groups_len) {
+        return "planetlab";
+    } else {
+        return "unknown";
+    }
 }
-	
+    
 var data = {
-	nodes: [
-		{% for node in protovis_nodes %}
-		{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
-		{% endfor %}
-	],
-	links: [
-		{% for link in protovis_links %}
-		{source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
-		{% endfor %}
-	],
+    nodes: [
+        {% for node in protovis_nodes %}
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    links: [
+        {% for link in protovis_links %}
+        {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
 }
 
 var w = 740,
     h = 400,
     colors = pv.Colors.category20();
 
-var vis = new pv.Panel()
+var vis;
+
+
+function create(){
+
+vis = new pv.Panel().canvas('target') 
     .width(w)
     .height(h)
-    .fillStyle("white")
-    .event("mousedown", pv.Behavior.pan())
-    .event("mousewheel", pv.Behavior.zoom(5));
+    .fillStyle("white");
+//    .event("mousedown", pv.Behavior.pan())
+  //  .event("mousewheel", pv.Behavior.zoom(5));
+
 
 var force = vis.add(pv.Layout.Force)
-	.bound(true)
+    .bound(true)
     .nodes(data.nodes)
     .links(data.links);
 
@@ -146,17 +149,17 @@ force.chargeConstant(-400);
 force.chargeTheta(0.2);
 
 force.link.add(pv.Line)
-	.strokeStyle(function(d, p) {
-		/* if any resources on the link are selected */
-		rsc_ids = p.value.split("-");
-		if($(":checkbox#"+rsc_ids[0]+":checked").length) {
-			return "red";
-		}
-		if($(":checkbox#"+rsc_ids[1]+":checked").length) {
-			return "red";
-		}
-		return "black";
-	});
+    .strokeStyle(function(d, p) {
+        /* if any resources on the link are selected */
+        rsc_ids = p.value.split("-");
+        if($(":checkbox#"+rsc_ids[0]+":checked").length) {
+            return "red";
+        }
+        if($(":checkbox#"+rsc_ids[1]+":checked").length) {
+            return "red";
+        }
+        return "black";
+    });
 
 // force.label.add(pv.Label);
 
@@ -174,71 +177,116 @@ force.node.add(pv.Dot)
 $("#selected_node_info").hide()
 
 force.node.add(pv.Image)
-	.url(function (d) {
-		type = get_node_type(d);
-		if(type == "openflow") {
-			return "{% url img_media 'switch-tiny.png' %}";
-		} else if(type == "planetlab") {
-			return "{% url img_media 'host-tiny.png' %}";
-		} else {
-			return "{% url img_media 'inactive.png' %}";
-		}
-	})
-	.def("i", -1)
-	.width(20)
-	.height(20)
-	.fillStyle(function(d) {
-		/* mouseover */
-		if (this.i() == this.index) {
-			return "brown";
-		}
-		return colors(d.group);
-	})
+    .url(function (d) {
+        type = get_node_type(d);
+        if(type == "openflow") {
+            return "{% url img_media 'switch-tiny.png' %}";
+        } else if(type == "planetlab") {
+            return "{% url img_media 'host-tiny.png' %}";
+        } else if(type == "vtserver") {
+            return "{% url img_media 'server-tiny.png' %}";
+        } else {
+            return "{% url img_media 'inactive.png' %}";
+        }
+    })
+    .def("i", -1)
+    .width(20)
+    .height(20)
+    .fillStyle(function(d) {
+        /* mouseover */
+        if (this.i() == this.index) {
+            return "brown";
+        }
+        return colors(d.group);
+    })
     .strokeStyle(function(d) {
-		/* if any ports are selected */
-		if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
-			return "red";
-		}
-		return this.fillStyle().darker();
-	})
-	.cursor("pointer")
-	.title(function(d) d.nodeName)
+        /* if any ports are selected */
+        if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
+            return "red";
+        }
+        return this.fillStyle().darker();
+    })
+    .cursor("pointer")
+    .title(function(d) d.nodeName)
     .event("mousedown", pv.Behavior.drag())
-	.event("mouseover", function(d) {
-		/* display info on the selected node in the div */ 
-		type = get_node_type(d);
-		desc = "Unknown"
-		if(type == "openflow") {
-			desc = "OpenFlow switch";
-		} else if(type == "planetlab") {
-			desc = "PlanetLab node";
-		}
-		$("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
-		$("#selected_node_info").show();
-		/* store the info about the selected node and highlight it */
-		this.i(this.index);
-	})
-	.event("mouseout", function() this.i(-1))
-	.event("click", function(d) {
-		/* if all are selected then unselect all */
-		selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length
-		all_len = $(":checkbox:.node_id_"+d.nodeValue).length
-		if(selected_len == all_len) {
-			$(":checkbox:checked.node_id_"+d.nodeValue).click();
-		}
-		/* else, select all */
-		else {
-			$(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
-		}
-	})
+    .event("mouseover", function(d) {
+        /* display info on the selected node in the div */ 
+        type = get_node_type(d);
+        desc = "Unknown"
+        if(type == "openflow") {
+            desc = "OpenFlow switch";
+        } else if(type == "planetlab") {
+            desc = "PlanetLab node";
+        } else if(type == "vtserver") {
+            desc = "Virtualized server";
+        }
+    
+        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
+        $("#selected_node_info").show();
+        /* store the info about the selected node and highlight it */
+        this.i(this.index);
+    })
+    .event("mouseout", function() this.i(-1))
+    .event("click", function(d) {
+        /* if all are selected then unselect all */
+        selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length
+        all_len = $(":checkbox:.node_id_"+d.nodeValue).length
+        if(selected_len == all_len) {
+            $(":checkbox:checked.node_id_"+d.nodeValue).click();
+        }
+        /* else, select all */
+        else {
+            $(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
+        }
+    })
     .event("drag", force);
 
 vis.render();
+
+}
+
+//Zooming routines
+
+cur_zoom = 1;
+
+
+function zoomIn(zoom) {
+        cur_zoom = cur_zoom + zoom;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
+        vis.render();
+}
+
+function zoomOut(zoom) {
+    if(cur_zoom-zoom >0)
+            cur_zoom = cur_zoom - zoom;
+    else
+        return;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
+        vis.render();
+}
+
+function zoomReset() {
+    cur_zoom=1;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
+    vis.render();
+}
+
+create();
 
 </script>
 
 <form action="" method="POST">{% csrf_token %}
 {% if openflow_aggs or planetlab_aggs %}
+<div id="target">
+</div>
+<div style="width:100%;text-align:right;margin-bottom:20px;">
+    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
+    <input type="button" value="Zoom Out" onClick="zoomOut(0.5)">
+    <input type="button" value="Reset" onClick="zoomReset()">
+</div>
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
 <input type="button" name="select_all_button" value="Select All" />
@@ -267,27 +315,27 @@ at {{ agg.location }}.
     {% with rsc.as_leaf_class as node %}
     <tr class="body planetlab {% cycle 'odd' 'even' %}">
       <td class="select_checkbox">
-	<input type="checkbox" name="selected_nodes"
-	       value="{{ node.id }}" id="rsc_id_{{ node.id }}"
-	       class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
-	       {% if node.id in checked_ids %}checked{% endif %} />
+    <input type="checkbox" name="selected_nodes"
+           value="{{ node.id }}" id="rsc_id_{{ node.id }}"
+           class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
+           {% if node.id in checked_ids %}checked{% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
       <td class="connections">
-	<table class="connections">
-	  {% for cnxn in rsc.openflow_connections.all %}
-	  {% with cnxn.of_iface as neighbor %}
-	  <tr>
-	    <td class="neighbor neighbor_{{ neighbor.id }}">
-	      Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
-		{{ neighbor.switch.datapath_id }}</a>
-	      at port <a href="#iface_{{ neighbor.id }}">
-		{{ neighbor.port_num }}</a>
-	    </td>
-	  </tr>
-	  {% endwith %}
-	  {% endfor %}
-	</table>
+    <table class="connections">
+      {% for cnxn in rsc.openflow_connections.all %}
+      {% with cnxn.of_iface as neighbor %}
+      <tr>
+        <td class="neighbor neighbor_{{ neighbor.id }}">
+          Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
+        {{ neighbor.switch.datapath_id }}</a>
+          at port <a href="#iface_{{ neighbor.id }}">
+        {{ neighbor.port_num }}</a>
+        </td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </table>
       </td>
     </tr>
     {% endwith %}
@@ -316,41 +364,41 @@ at {{ agg.location }}.
     <tr class="body openflow">
       <td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
       <td class="ports">
-	<table class="connections_table">
-	  {% for iface in switch.openflowinterface_set.all %}
-	  <tr class="body {% cycle 'odd' 'even' %}">
-	    <td class="select_checkbox">
-	      <input type="checkbox" name="selected_ifaces" 
-	      value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
-	      class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
-	      {% if iface.id in checked_ids %}checked{% endif %} />
-	    </td>
-	    <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
-	    <td class="connections">
-	      <table class="connections">
-		{% for cnxn in iface.nonopenflow_connections.all %}
-		<tr>
-		  <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
-		    Connected to <a href="#rsc_{{ cnxn.resource.id }}">
-		      {{ cnxn.resource.as_leaf_class }}</a>.
-		  </td>
-		</tr>
-		{% endfor %}
-		{% for neighbor in iface.ingress_neighbors.all %}
-		<tr>
-		  <td class="neighbor neighbor_{{ neighbor.id }}">
-		    Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
-		      {{ neighbor.switch.datapath_id }}</a>
-		    at port <a href="#iface_{{ neighbor.id }}">
-		      {{ neighbor.port_num }}</a>.
-		  </td>
-		</tr>
-		{% endfor %}
-	      </table>
-	    </td>
-	  </tr>
-	  {% endfor %}
-	</table>
+    <table class="connections_table">
+      {% for iface in switch.openflowinterface_set.all %}
+      <tr class="body {% cycle 'odd' 'even' %}">
+        <td class="select_checkbox">
+          <input type="checkbox" name="selected_ifaces" 
+          value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
+          class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
+          {% if iface.id in checked_ids %}checked{% endif %} />
+        </td>
+        <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
+        <td class="connections">
+          <table class="connections">
+        {% for cnxn in iface.nonopenflow_connections.all %}
+        <tr>
+          <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
+            Connected to <a href="#rsc_{{ cnxn.resource.id }}">
+              {{ cnxn.resource.as_leaf_class }}</a>.
+          </td>
+        </tr>
+        {% endfor %}
+        {% for neighbor in iface.ingress_neighbors.all %}
+        <tr>
+          <td class="neighbor neighbor_{{ neighbor.id }}">
+            Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
+              {{ neighbor.switch.datapath_id }}</a>
+            at port <a href="#iface_{{ neighbor.id }}">
+              {{ neighbor.port_num }}</a>.
+          </td>
+        </tr>
+        {% endfor %}
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
       </td>
     </tr>
     {% endwith %}
@@ -371,7 +419,6 @@ at {{ agg.location }}.
 </form>
 
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
-
 
 {% if virt_aggs %}
 <h1>Virtualized servers resources</h1>
