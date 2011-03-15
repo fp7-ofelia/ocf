@@ -4,6 +4,7 @@ from vt_plugin.models.Action import Action
 import copy, uuid
 from datetime import datetime
 from expedient.clearinghouse.aggregate.models import Aggregate
+from vt_plugin.models import VTServer
 
 class Translator():
 
@@ -41,8 +42,8 @@ class Translator():
         VMmodel.setHDoriginPath(VMxmlClass.xen_configuration.hd_origin_path) 
         VMmodel.setVirtualizationSetupType(VMxmlClass.xen_configuration.virtualization_setup_type)
         VMmodel.setMemory(VMxmlClass.xen_configuration.memory_mb)
-        
-        
+        VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id    
+            
         #TODO: hablar con leo sobre incluir una variable disc_image para las vms...
         VMmodel.disc_image = 'Default'
         
