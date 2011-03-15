@@ -90,7 +90,6 @@ class Translator():
         ifaceIndex = 0
         macs = VMmodel.macs.all()
         for mac in macs:
-            print "ENTRA EN MACS"
             if(ifaceIndex != 0):
                 newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
                 VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
