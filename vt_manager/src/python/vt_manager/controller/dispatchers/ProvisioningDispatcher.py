@@ -12,6 +12,7 @@ from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.controller.utils.Translator import Translator
 import xmlrpclib, threading, logging
+from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
 
 class ProvisioningDispatcher():
     @staticmethod
@@ -172,9 +173,7 @@ class ProvisioningDispatcher():
             if iface.ismgmt is True:
                 iface.name = 'eth'+str(ethIndex)
                 iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
-		print "MAC ok"
                 iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
-		print "IP ok"
                 iface.ip = iptemp.ip
                 iface.mask = iptemp.mask
                 iface.gw = iptemp.gw
@@ -225,8 +224,8 @@ class ProvisioningDispatcher():
     def connectAndSendAgent(AGENT_URL, action):
         try:
             agent = xmlrpclib.Server(AGENT_URL)
-            print "[DEBUG] Sending ActionQuery to Agent"
-            agent.send("https://expedient:expedient@147.83.206.92:8445/xmlrpc/agent",1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
+            print "[DEBUG] Sending ActionQuery to Agent in https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL
+            agent.send("https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
             print "[EXCEPTION] Exception connecting to Agent"
             print e

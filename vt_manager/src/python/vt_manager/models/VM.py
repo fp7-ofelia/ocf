@@ -47,10 +47,7 @@ class VM(models.Model):
         return self.macs
 
     def setIPs(self):
-	print "IP in"
-	print Ip
         ips = Ip.objects.filter(vmID = self.uuid)
-        print "IP out"
 	for ip in ips:
             self.ips.add(ip)
 	
