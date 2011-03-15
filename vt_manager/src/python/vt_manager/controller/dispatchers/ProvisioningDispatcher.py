@@ -172,14 +172,21 @@ class ProvisioningDispatcher():
             if iface.ismgmt is True:
                 iface.name = 'eth'+str(ethIndex)
                 iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
+		print "MAC ok"
                 iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
+		print "IP ok"
                 iface.ip = iptemp.ip
                 iface.mask = iptemp.mask
                 iface.gw = iptemp.gw
                 iface.dns1 = iptemp.dns1
                 iface.dns2 = iptemp.dns2
                 #Relate the IPs created with the VMmodel
-                VMmodel.setIPs()
+		try:
+         	       VMmodel.setIPs()
+		except Exception as e:
+			print e
+			raise e
+
                 print "[DEBUG] Management Interface set"
             else:
                 iface.name = 'eth'+str(ethIndex)

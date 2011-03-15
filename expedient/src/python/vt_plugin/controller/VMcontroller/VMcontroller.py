@@ -30,6 +30,7 @@ class VMcontroller():
             instance.virtTech = s.virtTech
             instance.projectId = slice.project.uuid
             instance.projectName = slice.project.name
+	    instance.aggregate_id = s.aggregate_id
             instance.hdOriginPath = "default/test/lenny"
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 

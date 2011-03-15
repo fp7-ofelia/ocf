@@ -6,7 +6,7 @@ ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
 
 ADMINS = [
-    ("expedient", ROOT_EMAIL),
+    ("i2cat OFELIA Admin", ROOT_EMAIL),
 ]
 
 MANAGERS = ADMINS
@@ -20,12 +20,14 @@ EMAIL_HOST_PASSWORD="expedient"
 EMAIL_PORT=587 
 
 #SITE_DOMAIN = "expedient.r1"
-SITE_DOMAIN = "OfeliaSDKR1"
+SITE_DOMAIN = "Expedient"
 
-SITE_IP_ADDR = "192.168.254.193"
+SITE_IP_ADDR = "172.16.1.150"
 MININET_VMS = [
     ("84.88.41.12", 22),
 ]
 
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
+DATABASE_USER = "control"
+DATABASE_PASSWORD = "982jkewHFHdfbk429fr"
+DATABASE_HOST = "172.16.1.151"
+DATABASE_NAME = "optin8746756"

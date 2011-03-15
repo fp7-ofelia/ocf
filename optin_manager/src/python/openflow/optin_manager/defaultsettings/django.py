@@ -6,6 +6,9 @@ Created on Sep 2, 2010
 # Django settings for OM project.
 from os.path import dirname, join
 import pkg_resources
+import sys, os
+
+sys.path.append(os.path.dirname(__file__)+'/../../../../../../expedient/src/python')
 
 try:
     from localsettings import SRC_DIR as location

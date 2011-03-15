@@ -66,7 +66,10 @@ for filename in os.listdir(model_dir):
       continue
     # Found a model, bring into the module namespace.
     exec "%s = item" % name
-    model_names.append(name)
+    try:
+	model_names.index(name)
+    except Exception as e:
+    	model_names.append(name)
 
 # Hide everything other than the classes from other modules.
 __all__ = model_names

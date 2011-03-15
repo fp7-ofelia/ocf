@@ -7,7 +7,7 @@ ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
 
 ADMINS = [
-    ("i2CAT Openflow Admin", ROOT_EMAIL),
+    ("i2cat OFELIA Admin", ROOT_EMAIL),
 ]
 
 MANAGERS = ADMINS
@@ -30,4 +30,3 @@ MININET_VMS = [
 
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"
-

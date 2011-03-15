@@ -543,7 +543,9 @@ at {{ agg.location }}.
         <select name = "server_id" >
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
+	{% if rsc.leaf_name == 'VTServer' %}
             <option value="{{server.id}}">{{server.name}}</option>
+	{% endif %}
         {% endwith %}
         {% endfor %}
 

@@ -3,7 +3,8 @@ from django.contrib import auth
 from datetime import datetime
 #from common.sfa.trust.gid import *
 from vt_manager.models.faults import *
-from vt_manager.models import Mac, Ip
+from vt_manager.models.Mac import Mac
+from vt_manager.models.Ip import Ip 
 
 #TODO When an exception is raised because a wrong value, delete any previous value saved in that variable???
 
@@ -46,10 +47,13 @@ class VM(models.Model):
         return self.macs
 
     def setIPs(self):
+	print "IP in"
+	print Ip
         ips = Ip.objects.filter(vmID = self.uuid)
-        for ip in ips:
+        print "IP out"
+	for ip in ips:
             self.ips.add(ip)
-
+	
     def getIPs(self):
         return self.macs
 

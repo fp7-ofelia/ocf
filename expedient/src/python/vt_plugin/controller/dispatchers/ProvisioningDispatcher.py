@@ -134,7 +134,7 @@ class ProvisioningDispatcher():
         try:
             vt_manager = xmlrpclib.Server(URL)
             print "Sending ActionQuery to VT Manager\n"
-            vt_manager.send("https://expedient:expedient@192.168.254.193/vt_plugin/xmlrpc/vt_am/", XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
+            vt_manager.send("https://expedient:expedient@172.16.1.150/vt_plugin/xmlrpc/vt_am/", XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
             print "Exception connecting to VT Manager"
             print e

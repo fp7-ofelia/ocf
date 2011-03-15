@@ -2,7 +2,7 @@ from django.db import models
 #from django.db.models import SET_NULL
 from datetime import datetime
 from vt_manager.models.faults import *
-from vt_manager.models import VM
+from vt_manager.models.VM import VM
 
 class Action(models.Model):
     """Class to store actions"""
