@@ -31,17 +31,18 @@ class VMcontroller():
             instance.projectId = slice.project.uuid
             instance.projectName = slice.project.name
 	    instance.aggregate_id = s.aggregate_id
-            instance.hdOriginPath = "default/test/lenny"
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 
-            if instance.disc_image == 'default':
+            if instance.disc_image == 'test':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-            else:
+		instance.hdOriginPath = "default/test/lenny"
+	    if instance.disc_image == 'default':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
+		instance.hdOriginPath = "default/squeeze"
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()
