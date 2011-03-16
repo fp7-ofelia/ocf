@@ -16,7 +16,7 @@ from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
-                        ('other','Other'),
+                        ('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('file-image','File Image'),
