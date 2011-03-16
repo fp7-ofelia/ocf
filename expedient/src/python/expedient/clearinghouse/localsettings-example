@@ -5,7 +5,6 @@ SRC_DIR = '/opt/ofelia/expedient/src'
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
-VTPLUGIN_URL  = "expedient_ip/vt_plugin/xmlrpc/vt_am/"
 
 ADMINS = [
     ("i2cat OFELIA Admin", ROOT_EMAIL),
