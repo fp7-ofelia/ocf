@@ -7,8 +7,9 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib
 import threading
+from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR
 
-PLUGIN_URL = 'https://expedient:expedient@192.168.254.193:8445/xmlrpc/agent'
+PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
 
 class ProvisioningDispatcher():
     
@@ -134,7 +135,7 @@ class ProvisioningDispatcher():
         try:
             vt_manager = xmlrpclib.Server(URL)
             print "Sending ActionQuery to VT Manager\n"
-            vt_manager.send("https://expedient:expedient@172.16.1.150/vt_plugin/xmlrpc/vt_am/", XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
+            vt_manager.send(PLUGIN_URL, XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
             print "Exception connecting to VT Manager"
             print e

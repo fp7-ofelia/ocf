@@ -14,6 +14,7 @@ from os.path import dirname, join
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
+VTAM_URL = "vt_manager_ip:vt_manager_port/xmlrpc/agent" #this should be someting like "192.168.254.1:8445/xmlrpc/agent"
 
 ADMINS = [
     ("expedient", ROOT_EMAIL),

@@ -43,4 +43,3 @@ vt_manager/src/python/vt_manager/settings.py
 expedient/src/python/expedient/clearinghouse/localsettings.py
 optin_manager/src/python/openflow/optin_manager/localsettings.py
 vt_manager/src/python/agent/settings.py
-testfile
