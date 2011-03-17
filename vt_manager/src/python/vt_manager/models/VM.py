@@ -3,8 +3,9 @@ from django.contrib import auth
 from datetime import datetime
 #from common.sfa.trust.gid import *
 from vt_manager.models.faults import *
-from vt_manager.models.Mac import Mac
-from vt_manager.models.Ip import Ip 
+from vt_manager.models import Mac, Ip
+#from vt_manager.models.Mac import Mac
+#from vt_manager.models.Ip import Ip 
 
 #TODO When an exception is raised because a wrong value, delete any previous value saved in that variable???
 

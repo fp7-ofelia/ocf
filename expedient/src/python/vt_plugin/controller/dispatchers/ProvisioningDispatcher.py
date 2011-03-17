@@ -7,10 +7,9 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib
 import threading
-from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD, VTPLUGIN_URL
+from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR
 
-
-PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+VTPLUGIN_URL
+PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
 
 class ProvisioningDispatcher():
     
