@@ -3,13 +3,12 @@ import re
 import types
 import unittest
 
-##ORIGINAL CODE
-PACKAGE = 'vt_manager.models.subdir'
 MODEL_RE = r"^.*.py$"
 
 # Search through every file inside this package.
 model_names = []
 model_dir = os.path.dirname( __file__)
+PACKAGE = 'vt_manager.'+model_dir[model_dir.index('models'):].replace('/','.')
 for filename in os.listdir(model_dir):
   if os.path.isdir(model_dir + "/" + filename):
     exec "from %s import %s" % (PACKAGE, filename)

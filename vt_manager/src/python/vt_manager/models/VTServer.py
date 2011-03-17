@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib import auth
 #from common.sfa.trust.gid import *
 import uuid
-from vt_manager.models.VM import VM
+#from vt_manager.models.VM import VM
+from vt_manager.models import *
 
 class VTServer(models.Model):
     """Virtualization Server class"""
