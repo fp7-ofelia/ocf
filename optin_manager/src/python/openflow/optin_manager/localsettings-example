@@ -27,5 +27,8 @@ MININET_VMS = [
     ("84.88.41.12", 22),
 ]
 
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
+#If HOST is not specified (line is commented), localhost is used
+DATABASE_HOST = "changeme"
+DATABASE_NAME = "changeme"
+DATABASE_USER = "changeme"
+DATABASE_PASSWORD = "changeme"
