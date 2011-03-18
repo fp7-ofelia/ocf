@@ -4,7 +4,8 @@ import sys
 sys.path.append(join(dirname(__file__), "../.."))
 
 from django.core.management import execute_manager
-import openflow.optin_manager.settings as settings
+#import openflow.optin_manager.settings as settings
+import settings as settings
 
 
 def main():
