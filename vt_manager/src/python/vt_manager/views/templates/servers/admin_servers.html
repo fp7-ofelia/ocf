@@ -15,8 +15,8 @@
         <tr class="header" >
         <th>Name</th>
         <th>Operating System</th>
-        <th>Version</th>
         <th>Distribution</th>
+        <th>Version</th>
         <th>Virtualization Type</th>
         </tr> 
         {% for server in servers_ids %}
@@ -28,10 +28,10 @@
                 {{ server.operatingSystemType }}
                 </td>
                 <td>
-                {{ server.operatingSystemVersion }}
+                {{ server.operatingSystemDistribution }}
                 </td>
                 <td>
-                {{ server.operatingSystemDistribution }}
+                {{ server.operatingSystemVersion }}
                 </td>
                 <td>
                 {{ server.virtTech }}

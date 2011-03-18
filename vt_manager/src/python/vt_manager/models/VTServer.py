@@ -39,8 +39,8 @@ class VTServer(models.Model):
 
     name = models.CharField(max_length = 511, default="", verbose_name = "Name")
     operatingSystemType = models.CharField(choices = OS_TYPE_CHOICES,max_length = 512, verbose_name = "OS Type")
+    operatingSystemDistribution = models.CharField(choices = OS_DIST_CHOICES,max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(choices = OS_VERSION_CHOICES,max_length = 512, verbose_name = "OS Version")
-    operatingSystemDistribution = models.CharField(choices = OS_DIST_CHOICES,max_length = 512, verbose_name = "OS Distribution")   
     virtTech = models.CharField(choices = VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology")
     agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent")
     url = models.URLField(verify_exists = False, verbose_name = "URL of the Server")
