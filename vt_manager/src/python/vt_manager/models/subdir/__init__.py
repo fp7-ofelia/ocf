@@ -2,6 +2,7 @@ import os
 import re
 import types
 import unittest
+import random
 
 MODEL_RE = r"^.*.py$"
 
@@ -9,7 +10,13 @@ MODEL_RE = r"^.*.py$"
 model_names = []
 model_dir = os.path.dirname( __file__)
 PACKAGE = 'vt_manager.'+model_dir[model_dir.index('models'):].replace('/','.')
-for filename in os.listdir(model_dir):
+dircontent =  os.listdir(model_dir)
+try:
+    random.shuffle(dircontent)
+except:
+    pass
+for filename in dircontent:
+#for filename in os.listdir(model_dir):
   if os.path.isdir(model_dir + "/" + filename):
     exec "from %s import %s" % (PACKAGE, filename)
   if not re.match(MODEL_RE, filename) or filename == "__init__.py":
