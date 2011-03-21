@@ -6,7 +6,7 @@ import vt_manager.models
 for i in range(0,100):
     for mod in sys.modules:
         if mod.startswith('vt_manager.models'):
-            print mod
+            #print mod
             del mod
 
     import vt_manager.models 
