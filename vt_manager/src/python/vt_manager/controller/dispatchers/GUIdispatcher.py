@@ -40,7 +40,7 @@ def servers_crud(request, server_id=None):
         model=VTServer,
         template_object_name="server",
         template="servers/servers_crud.html",
-        redirect = lambda inst: '/dashboard'
+        redirect = lambda inst: '/servers/admin/'
     )
 
 

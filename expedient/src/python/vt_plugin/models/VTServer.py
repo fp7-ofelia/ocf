@@ -35,8 +35,8 @@ class VTServer(Resource):
     freeMemory = models.IntegerField(blank = True, null=True, editable = False)
     freeCpu = models.DecimalField(max_digits=3, decimal_places=2,blank = True, null=True, editable = False)
     operatingSystemType = models.CharField(max_length = 512, verbose_name = "OS Type")
+    operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(max_length = 512, verbose_name = "OS Version")
-    operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution") 
     
     #aggregate_id = models.IntegerField()
 

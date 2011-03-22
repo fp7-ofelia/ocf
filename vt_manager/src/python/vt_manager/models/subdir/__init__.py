@@ -2,15 +2,21 @@ import os
 import re
 import types
 import unittest
+import random
 
-##ORIGINAL CODE
-PACKAGE = 'vt_manager.models.subdir'
 MODEL_RE = r"^.*.py$"
 
 # Search through every file inside this package.
 model_names = []
 model_dir = os.path.dirname( __file__)
-for filename in os.listdir(model_dir):
+PACKAGE = 'vt_manager.'+model_dir[model_dir.index('models'):].replace('/','.')
+dircontent =  os.listdir(model_dir)
+#try:
+#    random.shuffle(dircontent)
+#except:
+#    pass
+for filename in dircontent:
+#for filename in os.listdir(model_dir):
   if os.path.isdir(model_dir + "/" + filename):
     exec "from %s import %s" % (PACKAGE, filename)
   if not re.match(MODEL_RE, filename) or filename == "__init__.py":
