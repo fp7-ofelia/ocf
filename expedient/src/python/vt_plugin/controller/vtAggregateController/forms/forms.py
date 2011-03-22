@@ -17,7 +17,8 @@ class VTAggregateForm(forms.ModelForm):
 
     class Meta:
         model = VtPlugin
-        exclude = ['client', 'owner', 'users', "leaf_name"]
+        #exclude = ['client', 'owner', 'users', "leaf_name"]
+        exclude = ['client', 'owner', 'users', 'available']
 
 class xmlrpcServerProxyForm(forms.ModelForm):
     '''

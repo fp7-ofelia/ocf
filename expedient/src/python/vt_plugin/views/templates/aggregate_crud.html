@@ -31,12 +31,16 @@
 	<table class="formtable_noborder openflow_create">
 	{{ agg_form.as_table }}
 	{{ client_form.as_table }}
-	{% if not create %}
+
+	<!--
+	{% if not create %}	
 	<tr>
 		<th>Current status:</th>
 		<td class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
-	</tr>
+	</tr>	
 	{% endif %}
+	-->
+	
     </table>
 	<div class="center">
 	    {% if create %}
