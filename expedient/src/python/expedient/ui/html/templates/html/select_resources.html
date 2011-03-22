@@ -92,7 +92,6 @@ $(document).ready(function(){
 
 <h1>Topology</h1>
 
-<div id="selected_node_info"></div>
 
 <script type="text/javascript+protovis">
 
@@ -104,7 +103,9 @@ function get_node_type(d) {
         return "openflow";
     } else if(d.group < of_groups_len + pl_groups_len) {
         return "planetlab";
-    } else {
+    } else if (d.group=="10"){
+	return "Server"
+    }else{
         return "unknown";
     }
 }
@@ -119,6 +120,7 @@ var data = {
         {% for link in protovis_links %}
         {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
         {% endfor %}
+	
     ],
 }
 
@@ -135,8 +137,6 @@ vis = new pv.Panel().canvas('target')
     .width(w)
     .height(h)
     .fillStyle("white");
-//    .event("mousedown", pv.Behavior.pan())
-  //  .event("mousewheel", pv.Behavior.zoom(5));
 
 
 var force = vis.add(pv.Layout.Force)
@@ -145,7 +145,7 @@ var force = vis.add(pv.Layout.Force)
     .links(data.links);
 
 force.springLength(80);
-force.chargeConstant(-400);
+force.chargeConstant(0.2);
 force.chargeTheta(0.2);
 
 force.link.add(pv.Line)
@@ -153,15 +153,15 @@ force.link.add(pv.Line)
         /* if any resources on the link are selected */
         rsc_ids = p.value.split("-");
         if($(":checkbox#"+rsc_ids[0]+":checked").length) {
-            return "red";
+            return "#990000";
         }
         if($(":checkbox#"+rsc_ids[1]+":checked").length) {
-            return "red";
+            return "#990000";
         }
         return "black";
     });
 
-// force.label.add(pv.Label);
+force.label.add(pv.Label);
 
 /*
 force.node.add(pv.Dot)
@@ -174,7 +174,7 @@ force.node.add(pv.Dot)
     .event("drag", force);
 */
 
-$("#selected_node_info").hide()
+//$("#selected_node_info").hide()
 
 force.node.add(pv.Image)
     .url(function (d) {
@@ -197,12 +197,15 @@ force.node.add(pv.Image)
         if (this.i() == this.index) {
             return "brown";
         }
-        return colors(d.group);
+	if(get_node_type(d)=="openflow")
+	        return "#999999"; 
+	else
+		return "#CCCCCC";
     })
     .strokeStyle(function(d) {
         /* if any ports are selected */
         if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
-            return "red";
+            return "#990000";
         }
         return this.fillStyle().darker();
     })
@@ -280,12 +283,19 @@ create();
 
 <form action="" method="POST">{% csrf_token %}
 {% if openflow_aggs or planetlab_aggs %}
+<div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
+<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;"></div>
 <div id="target">
 </div>
-<div style="width:100%;text-align:right;margin-bottom:20px;">
-    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
+<div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+<!--    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
     <input type="button" value="Zoom Out" onClick="zoomOut(0.5)">
     <input type="button" value="Reset" onClick="zoomReset()">
+-->
+   <a href="#" onClick="zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   <a href="#" onClick="zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="#" onClick="zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+</div>
 </div>
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
