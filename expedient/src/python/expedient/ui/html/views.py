@@ -8,6 +8,7 @@ from pprint import pformat
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.slice.models import Slice
+from expedient.clearinghouse.project.models import Project
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
@@ -21,6 +22,7 @@ from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
 from django import forms
 from django.db.models import Q
 from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from vt_plugin.models import resourcesHash
 
 #VT_PLUGIN
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
@@ -262,7 +264,7 @@ def home(request, slice_id):
 
         for agg in vt_aggs:
             vtPlugin = agg.as_leaf_class()
-            askForAggregateResources(vtPlugin)
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  

@@ -74,15 +74,10 @@ class Translator():
     def ServerClassToModel(sClass, agg_id):
         #search in database if sClass already exists
         if VTServer.objects.filter(name = sClass.name).exists():
-            print "sClass.name = %s" %sClass.name
-            print "SERVER YA EXISTEEEEEE"
             sModel = VTServer.objects.get(name=sClass.name)
         else:
-            print "sClass.name = %s" %sClass.name
-            print "SERVER NO EXISTEEEEEE!!!!!"
             sModel = VTServer()
         sModel = VTServer()
-        print "AFTER INSTANTIATION"
         #sModel.aggregate_id = agg_id
         sModel.name=sClass.name
         sModel.aggregate = Aggregate.objects.get(id = agg_id)
@@ -98,7 +93,6 @@ class Translator():
         sModel.setVirtTech(sClass.virtualization_type)
         sModel.setVMs()        
         sModel.save()
-        print "SERVER SALVADO"
         return sModel
 
     @staticmethod
