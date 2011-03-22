@@ -40,6 +40,29 @@ def aggregate_crud(request, agg_id=None):
             client = client_form.save()
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
+            
+            #check if virtualization aggregate manager is available
+            try:
+                print 'DIRECCION: '+'https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]
+                temp_client = xmlrpclib.Server('https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:])                
+                print 'aggregate_crud --> server instance OK'
+            except Exception as e:
+                print 'aggregate_crud --> server instance KO'
+                print "Can't connect to server"
+                print e
+                return
+                
+            #TODO: finish check by calling the (yet not implemented) "ping" function in VT_AM
+            #meanwhile we check connection through listResources service call
+            try:
+                rspec = temp_client.listResources()
+                aggregate.available = True
+                print "aggregate_crud --> connection OK ; aggregate.available = True"
+            except Exception as e:
+                aggregate.available = False
+                print "aggregate_crud --> connection OK; aggregate.available = False"                                            
+
+            
             aggregate.save()
             agg_form.save_m2m()
             aggregate.save()
@@ -72,7 +95,7 @@ def aggregate_crud(request, agg_id=None):
             "client_form": client_form,
             "create": not agg_id,
             "aggregate": aggregate,
-            "available": available,
+            #"available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
                 ("%s Virtualization Aggregate" % ("Update" if agg_id else "Add"),
