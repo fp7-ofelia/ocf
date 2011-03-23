@@ -81,7 +81,7 @@ def _update_planetlab_resources(request, slice):
 
 
 
-def _get_nodes_links(of_aggs, pl_aggs):
+def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
     Get nodes and links usable by protovis.
     """
@@ -90,7 +90,8 @@ def _get_nodes_links(of_aggs, pl_aggs):
     
     id_to_idx = {}
     agg_ids = []
-    
+   
+    #Openflow devices 
     for i, agg in enumerate(of_aggs):
         agg_ids.append(agg.pk)
         switches = OpenFlowSwitch.objects.filter(
@@ -103,6 +104,7 @@ def _get_nodes_links(of_aggs, pl_aggs):
                 name=s.name, value=s.id, group=i)
             )
     
+    #Planelab nodes 
     for i, agg in enumerate(pl_aggs):
         agg_ids.append(agg.pk)
         pl_nodes = PlanetLabNode.objects.filter(
@@ -114,7 +116,27 @@ def _get_nodes_links(of_aggs, pl_aggs):
             nodes.append(dict(
                 name=n.name, value=n.id, group=i+len(of_aggs))
             )
-            
+
+
+    #VT-AM nodes 
+    for i, agg in enumerate(vt_aggs):
+        agg_ids.append(agg.pk)
+#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
+        vt_servers = VTServer.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+
+    for n in vt_servers:
+            #id_to_idx[n.id] = len(nodes)
+        #print "afegeixo"+n['name']
+        print "afegeixo"+n.name
+        nodes.append(dict(
+                name=n.name, value=n.id, group=i+len(of_aggs)+len(pl_aggs))
+                #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+            )   
+
+
     # get all connections with both interfaces in wanted aggregates
     of_cnxn_qs = OpenFlowConnection.objects.filter(
         src_iface__aggregate__id__in=agg_ids,
@@ -161,6 +183,8 @@ def _get_nodes_links(of_aggs, pl_aggs):
         )
         
     return (nodes, links)
+
+
 
 def _get_tree_ports(of_aggs, pl_aggs):
     """Implements Kruskal's algorihm to find a min spanning tree"""
@@ -268,7 +292,7 @@ def home(request, slice_id):
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
-        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs)
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
         return simple.direct_to_template(
@@ -280,7 +304,7 @@ def home(request, slice_id):
                 "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,
-                "virt_aggs": vt_aggs,
+                "vt_aggs": vt_aggs,
                 "slice": slice,
                 "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,

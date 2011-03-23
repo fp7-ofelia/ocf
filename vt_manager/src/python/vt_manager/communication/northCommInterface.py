@@ -25,54 +25,68 @@ def send(callBackUrl, xml):
     return
 
 @rpcmethod(url_name="plugin")
-def listResources(serverName = 'None', projectName = 'None', sliceName ='None'):
+def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='None'):
 
     logging.debug("Enter listResources")
     infoRspec = XmlHelper.getSimpleInformation()
-    #cleanInfoRspec
-    
-    if serverName is not 'None':
-        servers = VTServer.objects.filter(name = serverName)
+     
+    try:
+        rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
+    except:
+        rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject.save()
+
+    if hashV == rHashObject.hashValue:
+        return hashV, ''
+
     else:
-        servers = VTServer.objects.all()
-    
-    if not servers:
-        logging.debug("No VTServers available")
-        infoRspec.response.information.resources.server.pop()
-        return XmlHelper.craftXmlClass(infoRspec)
-    sIndex = 0
-    vIndex = 0
-    for server in servers:
-        #add Server 
-        if(sIndex != 0):
-            newServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
-            infoRspec.response.information.resources.server.append(newServer)
-        
-        Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
-        if (projectName is not 'None'):
-            vms = VM.objects.filter(serverID = server.uuid, projectId = projectId) 
+
+        if serverUUID != 'None':
+            servers = VTServer.objects.filter(uuid = serverUUID)
         else:
-            vms = VM.objects.filter(serverID = server.uuid)
-        if not vms:
-            logging.debug("No VMs available")
-            if infoRspec.response.information.resources.server[sIndex].virtual_machine:
-                infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
-        elif (sliceName is not 'None'):
-            vms = vms.filter(sliceId = sliceId)
-            if not vms:
-                logging.error("No VMs available")
-                infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
-        for vm in vms:
-            if (vIndex != 0):
-                newVM = copy.deepcopy(infoRspec.response.information.resources.server[sIndex].virtual_machine[0])
-                infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
-            
-            Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
-            vIndex = vIndex + 1
-        sIndex = sIndex + 1
+            servers = VTServer.objects.all()
         
-    logging.debug(infoRspec)
-    return  XmlHelper.craftXmlClass(infoRspec)
+        if not servers:
+            logging.debug("No VTServers available")
+            infoRspec.response.information.resources.server.pop()
+            listR = XmlHelper.craftXmlClass(infoRspec)
+            hashV = hash(listR)
+
+        sIndex = 0
+        vIndex = 0
+        for server in servers:
+            #add Server 
+            if(sIndex != 0):
+                newServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
+                infoRspec.response.information.resources.server.append(newServer)
+            
+            Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
+            if (projectUUID is not 'None'):
+                vms = VM.objects.filter(serverID = server.uuid, projectId = projectUUID) 
+            else:
+                vms = VM.objects.filter(serverID = server.uuid)
+            if not vms:
+                logging.debug("No VMs available")
+                if infoRspec.response.information.resources.server[sIndex].virtual_machine:
+                    infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+            elif (slicetUUID is not 'None'):
+                vms = vms.filter(sliceId = sliceUUID)
+                if not vms:
+                    logging.error("No VMs available")
+                    infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+            for vm in vms:
+                if (vIndex != 0):
+                    newVM = copy.deepcopy(infoRspec.response.information.resources.server[sIndex].virtual_machine[0])
+                    infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
+                
+                Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
+                vIndex = vIndex + 1
+            sIndex = sIndex + 1
+            
+        logging.debug(infoRspec)
+        listR =   XmlHelper.craftXmlClass(infoRspec)
+        hashV = hash(listR)
+        return hashV, listR
     
 
  

@@ -92,23 +92,11 @@ $(document).ready(function(){
 
 <h1>Topology</h1>
 
-<div id="selected_node_info"></div>
 
 <script type="text/javascript+protovis">
 
-function get_node_type(d) {
-    var of_groups_len = {{ openflow_aggs.count }};
-    var pl_groups_len = {{ planetlab_aggs.count }};
-    
-    if(d.group < of_groups_len) {
-        return "openflow";
-    } else if(d.group < of_groups_len + pl_groups_len) {
-        return "planetlab";
-    } else {
-        return "unknown";
-    }
-}
-    
+
+/* ProtoVIS data */    
 var data = {
     nodes: [
         {% for node in protovis_nodes %}
@@ -119,116 +107,31 @@ var data = {
         {% for link in protovis_links %}
         {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
         {% endfor %}
+	
     ],
 }
 
-var w = 740,
-    h = 400,
-    colors = pv.Colors.category20();
+/* Useful functions*/
 
-var vis;
-
-
-function create(){
-
-vis = new pv.Panel().canvas('target') 
-    .width(w)
-    .height(h)
-    .fillStyle("white");
-//    .event("mousedown", pv.Behavior.pan())
-  //  .event("mousewheel", pv.Behavior.zoom(5));
-
-
-var force = vis.add(pv.Layout.Force)
-    .bound(true)
-    .nodes(data.nodes)
-    .links(data.links);
-
-force.springLength(80);
-force.chargeConstant(-400);
-force.chargeTheta(0.2);
-
-force.link.add(pv.Line)
-    .strokeStyle(function(d, p) {
-        /* if any resources on the link are selected */
-        rsc_ids = p.value.split("-");
-        if($(":checkbox#"+rsc_ids[0]+":checked").length) {
-            return "red";
-        }
-        if($(":checkbox#"+rsc_ids[1]+":checked").length) {
-            return "red";
-        }
-        return "black";
-    });
-
-// force.label.add(pv.Label);
-
-/*
-force.node.add(pv.Dot)
-    .size(function(d) (50))
-    .fillStyle(function(d) d.fix ? "brown" : colors(d.group))
-    .strokeStyle(function() this.fillStyle().darker())
-    .lineWidth(1)
-    .title(function(d) d.nodeName)
-    .event("mousedown", pv.Behavior.drag())
-    .event("drag", force);
-*/
-
-$("#selected_node_info").hide()
-
-force.node.add(pv.Image)
-    .url(function (d) {
-        type = get_node_type(d);
-        if(type == "openflow") {
-            return "{% url img_media 'switch-tiny.png' %}";
-        } else if(type == "planetlab") {
-            return "{% url img_media 'host-tiny.png' %}";
-        } else if(type == "vtserver") {
-            return "{% url img_media 'server-tiny.png' %}";
-        } else {
-            return "{% url img_media 'inactive.png' %}";
-        }
-    })
-    .def("i", -1)
-    .width(20)
-    .height(20)
-    .fillStyle(function(d) {
-        /* mouseover */
-        if (this.i() == this.index) {
-            return "brown";
-        }
-        return colors(d.group);
-    })
-    .strokeStyle(function(d) {
-        /* if any ports are selected */
-        if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
-            return "red";
-        }
-        return this.fillStyle().darker();
-    })
-    .cursor("pointer")
-    .title(function(d) d.nodeName)
-    .event("mousedown", pv.Behavior.drag())
-    .event("mouseover", function(d) {
-        /* display info on the selected node in the div */ 
-        type = get_node_type(d);
-        desc = "Unknown"
-        if(type == "openflow") {
-            desc = "OpenFlow switch";
-        } else if(type == "planetlab") {
-            desc = "PlanetLab node";
-        } else if(type == "vtserver") {
-            desc = "Virtualized server";
-        }
+function get_node_type(d) {
+    var of_groups_len = {{ openflow_aggs.count }};
+    var pl_groups_len = {{ planetlab_aggs.count }};
+    var vt_aggs_len = {{ vt_aggs.count }};
     
-        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
-        $("#selected_node_info").show();
-        /* store the info about the selected node and highlight it */
-        this.i(this.index);
-    })
-    .event("mouseout", function() this.i(-1))
-    .event("click", function(d) {
-        /* if all are selected then unselect all */
+    if(d.group < of_groups_len) {
+        return "openflow";
+    } else if(d.group < of_groups_len + pl_groups_len) {
+        return "planetlab";
+    } else if (d.group <(of_groups_len + pl_groups_len+vt_aggs_len)){
+	return "vtserver"
+    }else{
+        return "unknown";
+    }
+}
+
+/* On Click event functions */
+function clickSwitchOrLink(d){
+	 /* if all are selected then unselect all */
         selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length
         all_len = $(":checkbox:.node_id_"+d.nodeValue).length
         if(selected_len == all_len) {
@@ -238,17 +141,15 @@ force.node.add(pv.Image)
         else {
             $(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
         }
-    })
-    .event("drag", force);
+}
 
-vis.render();
+function clickServer(d){
 
 }
 
-//Zooming routines
+/* Zooming routines */
 
 cur_zoom = 1;
-
 
 function zoomIn(zoom) {
         cur_zoom = cur_zoom + zoom;
@@ -274,18 +175,147 @@ cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
     vis.render();
 }
 
-create();
+
+/* Instansiation General parameters*/
+var w = 740,
+    h = 400,
+    colors = pv.Colors.category20();
+
+var vis;
+vis = new pv.Panel().canvas('target') 
+    .width(w)
+    .height(h)
+    .fillStyle("white");
+
+
+var force = vis.add(pv.Layout.Force)
+    .bound(true)
+    .nodes(data.nodes)
+    .links(data.links)
+	.iterations(90);
+
+force.springLength(100);
+force.chargeConstant(0.1);
+force.chargeTheta(0.9);
+
+force.link.add(pv.Line)
+    .strokeStyle(function(d, p) {
+        /* if any resources on the link are selected */
+        rsc_ids = p.value.split("-");
+        if($(":checkbox#"+rsc_ids[0]+":checked").length) {
+            return "#990000";
+        }
+        if($(":checkbox#"+rsc_ids[1]+":checked").length) {
+            return "#990000";
+        }
+        return "black";
+    });
+
+//force.label.add(pv.Label);
+	//.top();
+
+/*
+force.node.add(pv.Dot)
+    .size(function(d) (50))
+    .fillStyle(function(d) d.fix ? "brown" : colors(d.group))
+    .strokeStyle(function() this.fillStyle().darker())
+    .lineWidth(1)
+    .title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+    .event("drag", force);
+*/
+
+//$("#selected_node_info").hide()
+
+force.node.add(pv.Image)
+    .url(function (d) {
+        type = get_node_type(d);
+        if(type == "openflow") {
+            return "{% url img_media 'switch-tiny.png' %}";
+        } else if(type == "planetlab") {
+            return "{% url img_media 'host-tiny.png' %}";
+        } else if(type == "vtserver") {
+            return "{% url img_media 'server-tiny.png' %}";
+        } else {
+            return "{% url img_media 'inactive.png' %}";
+        }
+    })
+    .def("i", -1)
+    .width(20)
+    .height(20)
+    .fillStyle(function(d) {
+        /* mouseover */
+        if (this.i() == this.index) {
+            return "brown";
+        }
+	if(get_node_type(d)=="openflow")
+	        return "#999999"; 
+	else
+		return "#CCCCCC";
+    })
+    .strokeStyle(function(d) {
+        /* if any ports are selected */
+        if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
+            return "#990000";
+        }
+        return this.fillStyle().darker();
+    })
+    .cursor("pointer")
+//    .title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+    .event("mouseover", function(d) {
+        /* display info on the selected node in the div */ 
+        type = get_node_type(d);
+        desc = "Unknown"
+        if(type == "openflow") {
+            desc = "OpenFlow switch";
+        } else if(type == "planetlab") {
+            desc = "PlanetLab node";
+        } else if(type == "vtserver") {
+            desc = "Virtualized server";
+        }
+    
+        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
+        $("#selected_node_info").show();
+        /* store the info about the selected node and highlight it */
+        this.i(this.index);
+    })
+    .event("mouseout", function() this.i(-1))
+    .event("click", function(d) {
+       	type = get_node_type(d);
+        if(type == "openflow") {
+	    clickSwitchOrLink(d);
+        } else if(type == "planetlab") {
+            return; 
+        } else if(type == "vtserver") {
+            clickServer(d); 
+        }
+    
+
+    })
+    .event("drag", force)
+    .anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
+
+vis.render();
+
 
 </script>
 
 <form action="" method="POST">{% csrf_token %}
 {% if openflow_aggs or planetlab_aggs %}
+<div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
+<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;"></div>
 <div id="target">
 </div>
-<div style="width:100%;text-align:right;margin-bottom:20px;">
-    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
+<div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+<!--    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
     <input type="button" value="Zoom Out" onClick="zoomOut(0.5)">
     <input type="button" value="Reset" onClick="zoomReset()">
+-->
+   <a href="#" onClick="zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   <a href="#" onClick="zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="#" onClick="zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+</div>
 </div>
 <input type="submit" value="Next" />
 <input type="button" name="clear_button" value="Clear" />
@@ -302,7 +332,9 @@ create();
 
 {% for agg in planetlab_aggs %}
 <h2>PlanetLab Aggregate {{ agg.name }}</h2>
-at {{ agg.location }}.
+<div id="am_location">
+	Aggregate physical location: <b>{{ agg.location }}.</b>
+</div>
 <div class="planetlab">
   <table class="planetlab">
     <tr class="header">
@@ -351,7 +383,9 @@ at {{ agg.location }}.
 
 {% for agg in openflow_aggs %}
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
-at {{ agg.location }}.
+<div id="am_location">
+Aggregate physical location: <b>{{ agg.location }}.</b>
+</div >
 <div class="openflow">
   <table class="openflow">
     <tr class="header">
@@ -420,11 +454,11 @@ at {{ agg.location }}.
 
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
-{% if virt_aggs %}
+{% if vt_aggs %}
 <h1>Virtualized servers resources</h1>
 {% endif %}
 
-{% for agg in virt_aggs %}
+{% for agg in vt_aggs %}
 
     <div>
     <h2>VT Aggregate Manager {{ agg.name }}</h2>
@@ -540,7 +574,7 @@ at {{ agg.location }}.
     <br/>
     <div id="create_server">
         Create a new virtual machine in server:
-        <select name = "server_id" >
+        <select name = "server_id" id="server_id_agg_{{agg.id}}">
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
         {% if rsc.leaf_name == 'VTServer' %}
@@ -548,9 +582,8 @@ at {{ agg.location }}.
         {% endif %}
         {% endwith %}
         {% endfor %}
-
         </select>
-        <input type="submit" name = "create_vms" value="Create VM" />
+        <input type="submit" name = "create_vms"  id="create_vms_agg_{{agg.id}}" value="Create VM" />
 
     </div>
     {% else %}
