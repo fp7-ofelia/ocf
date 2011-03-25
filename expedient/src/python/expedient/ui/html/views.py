@@ -35,6 +35,10 @@ from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 
 logger = logging.getLogger("html_ui_views")
 
+'''
+Update resources
+'''
+
 def _update_openflow_resources(request, slice):
     """
     Process the request to add/remove openflow resources from slice.
@@ -80,6 +84,10 @@ def _update_planetlab_resources(request, slice):
     to_del.delete()
 
 
+
+'''
+Node and links functions 
+'''
 
 def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
@@ -250,8 +258,13 @@ def _get_tree_ports(of_aggs, pl_aggs):
     
     # return the list of interface ids
     return list(tree)
-    
-def home(request, slice_id):
+
+
+'''
+Home and allocation view functions
+'''
+
+def bookOpenflow(request, slice_id):
     """
     Display the list of planetlab and openflow aggregates and their resources.
     On submit, create slivers and make reservation.
@@ -314,7 +327,75 @@ def home(request, slice_id):
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
+                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    ("Allocate Openflow and PlanetLab resources", reverse("html_plugin_bookOpenflow", args=[slice_id])),
+                )
+            },
+        )
+ 
+
+def home(request, slice_id):
+    """
+    Display the list of all the resources  
+    """
+    
+    slice = get_object_or_404(Slice, id=slice_id)
+    if request.method == "POST":
+        
+        _update_openflow_resources(request, slice)
+        _update_planetlab_resources(request, slice)
+        
+        slice.modified = True
+        slice.save()
+        
+        return HttpResponseRedirect(reverse("html_plugin_flowspace",
+                                            args=[slice_id]))
+    else:
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+
+        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+        of_aggs = \
+            slice.aggregates.filter(aggs_filter)
+        pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+
+        vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+
+        for agg in vt_aggs:
+            vtPlugin = agg.as_leaf_class()
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+       
+#        vm = VM.objects.filter(sliceId=slice.uuid)        
+ 
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
+        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+        
+        return simple.direct_to_template(
+            request,
+            template="html/show_resources.html",
+            extra_context={
+                "protovis_nodes": protovis_nodes,
+                "protovis_links": protovis_links,
+                "tree_rsc_ids": tree_rsc_ids,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
+                "vt_aggs": vt_aggs,
+                "slice": slice,
+                "checked_ids": checked_ids,
+                "ofswitch_class": OpenFlowSwitch,
+                "planetlab_node_class": PlanetLabNode,
+                "breadcrumbs": (
+                    ("Home", reverse("home")),
+                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
                 )
             },
         )
