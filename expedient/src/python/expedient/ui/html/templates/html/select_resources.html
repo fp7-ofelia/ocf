@@ -156,16 +156,18 @@ function zoomIn(zoom) {
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
         vis.render();
+	return false;
 }
 
 function zoomOut(zoom) {
     if(cur_zoom-zoom >0)
             cur_zoom = cur_zoom - zoom;
     else
-        return;
+	return false;
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
-        vis.render();
+    vis.render();
+    return false;
 }
 
 function zoomReset() {
@@ -173,6 +175,7 @@ function zoomReset() {
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
     vis.render();
+    return false;
 }
 
 

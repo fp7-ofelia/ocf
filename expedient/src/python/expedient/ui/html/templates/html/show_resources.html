@@ -106,16 +106,18 @@ function zoomIn(zoom) {
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
         vis.render();
+        return false;
 }
 
 function zoomOut(zoom) {
     if(cur_zoom-zoom >0)
             cur_zoom = cur_zoom - zoom;
     else
-        return;
+        return false;
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
         vis.render();
+        return false;
 }
 
 function zoomReset() {
@@ -123,6 +125,7 @@ function zoomReset() {
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
     vis.render();
+    return false;
 }
 
 
@@ -249,9 +252,9 @@ vis.render();
     <input type="button" value="Zoom Out" onClick="zoomOut(0.5)">
     <input type="button" value="Reset" onClick="zoomReset()">
 -->
-   <a href="#" onClick="zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-   <a href="#" onClick="zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
-   <a href="#" onClick="zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="#" onClick="return zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   <a href="#" onClick="return zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="#" onClick="return zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
 </div>
 </div>
 {% endif %}
