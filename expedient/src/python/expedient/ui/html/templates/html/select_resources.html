@@ -142,7 +142,8 @@ vis = new pv.Panel().canvas('target')
 var force = vis.add(pv.Layout.Force)
     .bound(true)
     .nodes(data.nodes)
-    .links(data.links);
+    .links(data.links)
+    .iterations(90);
 
 force.springLength(80);
 force.chargeConstant(0.2);
@@ -430,11 +431,11 @@ at {{ agg.location }}.
 
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
-{% if virt_aggs %}
+{% if vt_aggs %}
 <h1>Virtualized servers resources</h1>
 {% endif %}
 
-{% for agg in virt_aggs %}
+{% for agg in vt_aggs %}
 
     <div>
     <h2>VT Aggregate Manager {{ agg.name }}</h2>
