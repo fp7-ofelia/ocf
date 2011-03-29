@@ -76,11 +76,14 @@ class Slice(models.Model):
             raise Exception("Slice expired. Update slice expiration time.")
         logger.debug("Called start_slice on %s: %s" % (self, self.name))
         aggs = enumerate(self.aggregates.all())
+	print "AGGS"
+	print aggs
         for i, agg in aggs:
             logger.debug("starting slice on agg %s" % agg.name)
             try:
                 agg.as_leaf_class().start_slice(self)
             except Exception, e:
+		print e
                 logger.error("Error starting slice on agg %s" % agg.name)
                 # try to stop slice on all previously started aggregates
                 for j in xrange(i):
