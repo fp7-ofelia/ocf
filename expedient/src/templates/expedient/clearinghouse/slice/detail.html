@@ -66,38 +66,38 @@
 	    </div>
     </div>
     <div class="detail_section">
-	    <h2>Aggregates
-			<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-		</h2>
-	
-		<div class="tooltip" id="aggs_help_div">
-			Below you can manage and add aggregates in your slice. You can
-			only add resources to your slice from aggregates that have been
-			added to the slice. When you add an aggregate to the slice you
-			might be prompted for additional information that the aggregate
-			needs about your slice.
-		</div>
+            <h2>Aggregates
+                        <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+                </h2>
 
-		<div class="aggregate_list">
-			{% with slice.aggregates.all as aggregate_list %}
-			{% if aggregate_list.count %}
-				{% with "slice/agg_list_actions.html" as action_template %}
-					{% include "aggregate/list_table.html" %}
-				{% endwith %}
-			{% else %}
-			<p>
-				This slice has no aggregates added to it. To be able to 
-				reserve resources on aggregates, you will need to add aggregates to
-				the slice.
-			</p>
-			{% endif %}
-			{% endwith %}
-		    <!--<div class="center">
-		    	<input type="button" value="Add Aggregates"
-		    	onclick='document.location="{% url slice_add_agg slice.id %}"' />
-		    </div>-->
-		</div>
-	</div>
+                <div class="tooltip" id="aggs_help_div">
+                        Below you can manage and add aggregates in your slice. You can
+                        only add resources to your slice from aggregates that have been
+                        added to the slice. When you add an aggregate to the slice you
+                        might be prompted for additional information that the aggregate
+                        needs about your slice.
+                </div>
+
+                <div class="aggregate_list">
+                        {% with slice.aggregates.all as aggregate_list %}
+                        {% if aggregate_list.count %}
+                                {% with "slice/agg_list_actions.html" as action_template %}
+                                        {% include "aggregate/list_table.html" %}
+                                {% endwith %}
+                        {% else %}
+                        <p>
+                                This slice has no aggregates added to it. To be able to
+                                reserve resources on aggregates, you will need to add aggregates to
+                                the slice.
+                        </p>
+                        {% endif %}
+                        {% endwith %}
+                    <div class="center">
+                        <input type="button" value="Add Aggregates"
+                        onclick='document.location="{% url slice_add_agg slice.id %}"' />
+                    </div>
+                </div>
+        </div>
 	<div class="detail_section">
 		<h2>Resources in the slice</h2>
 		<div class="resource_list">

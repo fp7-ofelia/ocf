@@ -95,8 +95,9 @@ class Project(models.Model):
                     permittees=permittee,
                 ).values_list("object_id", flat=True)
             )
-        #TODO: marc comented this return Aggregate.objects.filter(pk__in=agg_ids)
-        return Aggregate.objects
+        #TODO: marc comented this 
+	return Aggregate.objects.filter(pk__in=agg_ids)
+        #return Aggregate.objects
     aggregates=property(_get_aggregates)
     
     def _get_researchers(self):
