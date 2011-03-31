@@ -86,7 +86,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
     nodes = []
     links = []
-    
+    vt_servers=[] #Jose F. Mingorance-Puga, 31 March 2011
+
     id_to_idx = {}
     agg_ids = []
    
@@ -126,14 +127,15 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
             available=True,
         )
 
+
     for n in vt_servers:
             #id_to_idx[n.id] = len(nodes)
         #print "afegeixo"+n['name']
         print "afegeixo"+n.name
         nodes.append(dict(
-                name=n.name, value=n.id, group=i+len(of_aggs)+len(pl_aggs))
+            name=n.name, value=n.id, group=i+len(of_aggs)+len(pl_aggs))
                 #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            )   
+        )   
 
 
     # get all connections with both interfaces in wanted aggregates
