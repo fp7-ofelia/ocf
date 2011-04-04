@@ -33,7 +33,7 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
     try:
         rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
     except:
-        rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject = resourcesHash(hashValue = -1, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
 
     if hashV == rHashObject.hashValue:

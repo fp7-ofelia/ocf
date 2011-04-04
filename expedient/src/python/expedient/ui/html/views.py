@@ -160,16 +160,19 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     )
     
     for cnxn in of_cnxn_qs:
-        links.append(
-            dict(
-                src=id_to_idx[cnxn.src_iface.switch.id],
-                target=id_to_idx[cnxn.dst_iface.switch.id],
-                value="rsc_id_%s-rsc_id_%s" % (
-                    cnxn.src_iface.id, cnxn.dst_iface.id
-                ),
+        #XXX: change me
+        try:
+            links.append(
+                dict(
+                    src=id_to_idx[cnxn.src_iface.switch.id],
+                    target=id_to_idx[cnxn.dst_iface.switch.id],
+                   value="rsc_id_%s-rsc_id_%s" % (
+                        cnxn.src_iface.id, cnxn.dst_iface.id
+                    ),
+                )
             )
-        )
-    
+        except:
+            pass
     for cnxn in non_of_cnxn_qs:
         links.append(
             dict(
