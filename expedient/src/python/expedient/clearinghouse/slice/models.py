@@ -81,6 +81,7 @@ class Slice(models.Model):
             try:
                 agg.as_leaf_class().start_slice(self)
             except Exception, e:
+		print e
                 logger.error("Error starting slice on agg %s" % agg.name)
                 # try to stop slice on all previously started aggregates
                 for j in xrange(i):
@@ -114,20 +115,20 @@ class Slice(models.Model):
         """Get all aggregates that can be used by the slice
         (i.e. for which the slice has the "can_use_aggregate" permission).
         """
-#        agg_ids = []
-#        agg_classes = get_aggregate_classes()
-#        permittee = Permittee.objects.get_as_permittee(self)
-#        for agg_class in agg_classes:
-#            agg_ids.extend(
-#                ObjectPermission.objects.filter_for_class(
-#                    agg_class,
-#                    permission__name="can_use_aggregate",
-#                    permittees=permittee,
-#                ).values_list("object_id", flat=True)
-#            )
-#        return Aggregate.objects.filter(pk__in=agg_ids)
-        return Aggregate.objects
+        agg_ids = []
+        agg_classes = get_aggregate_classes()
+        permittee = Permittee.objects.get_as_permittee(self)
+        for agg_class in agg_classes:
+            agg_ids.extend(
+                ObjectPermission.objects.filter_for_class(
+                    agg_class,
+                    permission__name="can_use_aggregate",
+                    permittees=permittee,
+                ).values_list("object_id", flat=True)
+            )
+        return Aggregate.objects.filter(pk__in=agg_ids)
     aggregates=property(_get_aggregates)
+#        return Aggregate.objects
     
     @classmethod
     @models.permalink

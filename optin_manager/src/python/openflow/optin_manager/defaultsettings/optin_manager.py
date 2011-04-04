@@ -5,7 +5,7 @@ Created on Sep 2, 2010
 '''
 
 BASIC_AUTH_URLS = (
-    r'^/xmlrpc/xmlrpc.*',
+    #r'^/xmlrpc/xmlrpc.*',
     ### for testing
     r'^/dummyfv/.*',
 )
