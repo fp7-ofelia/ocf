@@ -2,72 +2,17 @@
 
 {% block pagehead %}<h1>Add/Update VTServer.:</h1>{% endblock pagehead %}
 
-
 {% block head %}
-
 {% endblock %}
 
 {% block content %}
-
-<script language="javascript">
-
-function addHtmlInDiv(div,html){
-    container=document.getElementById(div);
-    container.innerHTML = container.innerHTML+html;
-}
-
-function generateInputHtml(caption,name,id){
-    return caption + ': <input name="'+name+'" id="'+id+'" type="text" /> ';
-}
-    
-function addInterface() {
-    /* 
-    //Create an input type dynamically.
-    //var div = document.getElementById("datainterfaces");
-    var element1 = document.createElement("input");
-    var element2 = document.createElement("input");
-    var element3 = document.createElement("input");
-    div.innerHTML(div.innerHTML+
-                    '<input name="ifaceName"'++'"'+''+'/>'+
-    //Assign different attributes to the element.
-    element1.setAttribute("id", "id_ifaceName" );
-    element1.setAttribute("type", "text");
-    element1.setAttribute("name", "ifaceName");
-    
-    element2.setAttribute("id", "id_datapathID" );
-    element2.setAttribute("type", "text");
-    element2.setAttribute("name", "switchID");
-
-    element3.setAttribute("id", "id_port" );
-    element3.setAttribute("type", "text");
-    element3.setAttribute("name", "port");
-
-    var newForm = document.getElementById("formPlace");
- 
-    //Append the element in page (in span).
-    newForm.appendChild(element1);
-    newForm.appendChild(element2);
-    newForm.appendChild(element3);
-    */ 
-    addHtmlInDiv("formPlace","<br/>"); 
-    addHtmlInDiv("formPlace",generateInputHtml("Interface name","ifaceName","id_ifaceName"));
-    addHtmlInDiv("formPlace",generateInputHtml("Switch ID","switchID","id_switchID"));
-    addHtmlInDiv("formPlace",generateInputHtml("Switch port","port","id_port"));
-}
-</script>
-
-
 <div class="main">
     {% if server %}
-
     <table class="separator-table">
     </table>
     {% else %}
     {% endif %}
-
-
     <form method="post" action="">{% csrf_token %}
-
         <table class="separator-table">
             <tr><td class="separator">General parameters</td></tr>
         </table>
@@ -90,22 +35,7 @@ function addInterface() {
         {% endfor %}
                     </table>    
             </div>
-                     <tr>
-
-             <table class="separator-table">
-                        <tr><td class="separator">Server Interfaces</td></tr>
-                </table>
-           <div id="datainterfaces">
-           {% for ifaceform in ifaceforms%}
-                {{ifaceform}}
-            {% endfor %}
-            </br>
-            <span id="formPlace">&nbsp;</span>
-            <INPUT type="button" value="Add" onclick="addInterface()"/> 
-        
-           </div>
-        </tr>
- 
+             
         </table>
         <div class="center">
             <input type="submit" value="Save" /> | 
@@ -158,7 +88,7 @@ function addInterface() {
 
             </td>
         </tr>
-       {% endfor %}
+        {% endfor %}
      </table>   
      {% endif %}
      {% endif %}

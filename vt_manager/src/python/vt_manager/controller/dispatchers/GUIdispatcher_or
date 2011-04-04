@@ -3,7 +3,7 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views.generic import simple
-#from vt_manager.common.utils.views import generic_crud
+from vt_manager.common.utils.views import generic_crud
 from vt_manager.common.messaging.models import DatedMessage
 from vt_manager.models import VTServer
 from django.views.generic import list_detail, create_update, simple
@@ -43,7 +43,6 @@ def servers_crud(request, server_id=None):
         redirect = lambda inst: '/servers/admin/'
     )
 
-
 from django.shortcuts import get_object_or_404
 from django.views.generic.create_update import get_model_and_form_class
 from django.views.generic import simple
@@ -54,50 +53,48 @@ def server_generic_crud(request, obj_id, model, template, redirect,
                  extra_context={}, form_class=None,
                  template_object_name="object", pre_save=None,
                  post_save=None, success_msg=None):
-
-    ifaceforms = []
+    """
+    Generic way to create/update a bit more advanced than the django's generic
+    views. The context will contain the form as C{form}, the object when
+    updating as the value in C{template_object_name} which defaults to
+    "object", and anything specified in C{extra_context}.
+    
+    @param request: The request object
+    @param obj_id: The object's id to update or None if creating an object
+    @param model: The model class
+    @param template: the name of the template to use
+    @param redirect: callable that takes the created/saved instance as argument
+        and returns a URL to redirect to.
+    @keyword extra_context: dict of fields to add to the template context.
+    @keyword form_class: the form class to use for the object (ModelForm subclass)
+    @keyword template_object_name: name of the object field in the template
+        context. This is only available when updating.
+    @keyword pre_save: function to call before saving the object instantiated
+        from the form. Called with arguments (C{instance}, C{created}).
+    @keyword post_save: function to call after saving the object instantiated
+        from the form but before calling m2m_save() on it. Called with argument
+        (C{instance}, C{created}).
+    @keyword success_msg: callable that should take instance as parameter and
+        return a string to be put in a success DatedMessage and sent to the
+        user on success. 
+    """
+    
     model, form_class = get_model_and_form_class(model, form_class)
-    modelIface, form_classIface = get_model_and_form_class(VTServerIface, None)
-    print modelIface
-    print form_classIface
+
     if obj_id != None:
         instance = get_object_or_404(model, pk=obj_id)
     else:
         instance = None
-
+        
     if request.method == "GET":
         form = form_class(instance=instance)
-        if instance != None:
-            for iface in instance.ifaces.all():
-                ifaceforms.append(form_classIface(instance = iface))
-        else:
-            ifaceforms.append(form_classIface(instance = None)) 
     elif request.method == "POST":
-        postData =  request.POST.copy()
         form = form_class(request.POST, instance=instance)
-        if instance != "VOLVER A PONER None EN TODO CASO" :
-            #for iface in instance.ifaces.all():
-            for i in range(0,len(request.POST.getlist('ifaceName'))):
-                ifaceforms.append(form_classIface({'ifaceName': request.POST.getlist('ifaceName')[i], 'switchID': request.POST.getlist('switchID')[i], 'port': request.POST.getlist('port')[i]}, instance = None))
-        else:
-            ifaceforms.append(form_classIface(request.POST, instance = None))
         if form.is_valid():
             instance = form.save(commit=False)
             if pre_save: pre_save(instance, obj_id == None)
             instance.save()
             if post_save: post_save(instance, obj_id == None)
-            for ifaceform in ifaceforms:
-                if ifaceform.is_valid():
-                    ifaceTemp = ifaceform.save(commit= False)
-                    if instance.ifaces.filter(ifaceName = ifaceTemp.ifaceName):
-                        ifaceTemp2 = instance.ifaces.get(ifaceName = ifaceTemp.ifaceName) 
-                        ifaceTemp2.ifaceName = ifaceTemp.ifaceName
-                        ifaceTemp2.port = ifaceTemp.port
-                        ifaceTemp2.switchID = ifaceTemp.switchID
-                        ifaceTemp2.save() 
-                    else:
-                        iface = ifaceform.save(commit=True)
-                        instance.ifaces.add(iface)
             form.save_m2m()
             if success_msg:
                 DatedMessage.objects.post_message_to_user(
@@ -107,7 +104,7 @@ def server_generic_crud(request, obj_id, model, template, redirect,
     else:
         return HttpResponseNotAllowed("GET", "POST")
 
-    context = {"form": form, "ifaceforms": ifaceforms}
+    context = {"form": form}
     context.update(extra_context)
     if obj_id != None: context[template_object_name] = instance
 
@@ -116,7 +113,6 @@ def server_generic_crud(request, obj_id, model, template, redirect,
         template=template,
         extra_context=context,
         form=form,
-        ifaceforms = ifaceforms,
     )
 
 

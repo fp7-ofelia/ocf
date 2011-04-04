@@ -57,6 +57,8 @@ class VTServer(models.Model):
     freeMemory = models.IntegerField(blank = True, null=True, editable = False)
     freeCpu = models.DecimalField(max_digits=3, decimal_places=2,blank = True, null=True, editable = False)
 
+    ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
+
     def setName(self, name):
         self.name = name
 

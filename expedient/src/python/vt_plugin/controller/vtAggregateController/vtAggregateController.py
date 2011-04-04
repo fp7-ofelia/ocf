@@ -108,8 +108,10 @@ def aggregate_crud(request, agg_id=None):
 def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None', sliceUUID = 'None'):
 
     "asks the VT AM for all the resources under it."
-
+    print "ASKING RESOURCES"
     try:
+        print "connecting to"
+        print 'https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:]
         client = xmlrpclib.Server('https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:])
     except Exception as e:
         print "Can't connect to server"
@@ -121,7 +123,7 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
     except:
         rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
-
+    print "AA"
     try:
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
     except Exception as e:
@@ -146,6 +148,6 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
             for vm in server.virtual_machine:
                 Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
             Translator.ServerClassToModel(server, vtPlugin.id)
-    
+        print "LIST RESOURCES OK" 
         return xmlClass
     
