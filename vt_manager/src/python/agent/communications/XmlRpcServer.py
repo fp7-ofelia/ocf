@@ -98,7 +98,7 @@ class XmlRpcServer():
     		    callBackFunction(callBackUrl,amId,xml)
 		    return ""
         
-		def ping(self, challenge) 
+		def ping(self, challenge): 
 		    return challenge
         
 	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)
