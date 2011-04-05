@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Mon Mar 14 09:55:25 2011 by generateDS.py version 2.3b.
+# Generated Tue Apr  5 17:34:06 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -70,27 +70,6 @@ ExternalEncoding = 'ascii'
 # Data representation classes
 #
 
-class rspecSub(supermod.rspec):
-    def __init__(self, query=None, response=None):
-        super(rspecSub, self).__init__(query, response, )
-supermod.rspec.subclass = rspecSub
-# end class rspecSub
-
-
-class querySub(supermod.query):
-    def __init__(self, provisioning=None):
-        super(querySub, self).__init__(provisioning, )
-supermod.query.subclass = querySub
-# end class querySub
-
-
-class responseSub(supermod.response):
-    def __init__(self, provisioning=None, information=None):
-        super(responseSub, self).__init__(provisioning, information, )
-supermod.response.subclass = responseSub
-# end class responseSub
-
-
 class provisioning_typeSub(supermod.provisioning_type):
     def __init__(self, action=None):
         super(provisioning_typeSub, self).__init__(action, )
@@ -127,8 +106,8 @@ supermod.interfaces_type.subclass = interfaces_typeSub
 
 
 class interface_typeSub(supermod.interface_type):
-    def __init__(self, ismgmt=None, name=None, mac=None, ip=None, mask=None, gw=None, dns1=None, dns2=None):
-        super(interface_typeSub, self).__init__(ismgmt, name, mac, ip, mask, gw, dns1, dns2, )
+    def __init__(self, ismgmt=None, name=None, mac=None, ip=None, mask=None, gw=None, dns1=None, dns2=None, switch_id=None, switch_port=None):
+        super(interface_typeSub, self).__init__(ismgmt, name, mac, ip, mask, gw, dns1, dns2, switch_id, switch_port, )
 supermod.interface_type.subclass = interface_typeSub
 # end class interface_typeSub
 
@@ -161,6 +140,27 @@ supermod.server_status_type.subclass = server_status_typeSub
 # end class server_status_typeSub
 
 
+class rspecSub(supermod.rspec):
+    def __init__(self, query=None, response=None):
+        super(rspecSub, self).__init__(query, response, )
+supermod.rspec.subclass = rspecSub
+# end class rspecSub
+
+
+class querySub(supermod.query):
+    def __init__(self, provisioning=None):
+        super(querySub, self).__init__(provisioning, )
+supermod.query.subclass = querySub
+# end class querySub
+
+
+class responseSub(supermod.response):
+    def __init__(self, provisioning=None, information=None):
+        super(responseSub, self).__init__(provisioning, information, )
+supermod.response.subclass = responseSub
+# end class responseSub
+
+
 
 def get_root_tag(node):
     tag = supermod.Tag_pattern_.match(node.tag).groups()[-1]
@@ -175,15 +175,15 @@ def parse(inFilename):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'rspec'
-        rootClass = supermod.rspec
+        rootTag = 'provisioning-type'
+        rootClass = supermod.provisioning_type
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -194,15 +194,15 @@ def parseString(inString):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'rspec'
-        rootClass = supermod.rspec
+        rootTag = 'provisioning-type'
+        rootClass = supermod.provisioning_type
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -211,17 +211,17 @@ def parseLiteral(inFilename):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'rspec'
-        rootClass = supermod.rspec
+        rootTag = 'provisioning-type'
+        rootClass = supermod.provisioning_type
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('#from ??? import *\n\n')
-##     sys.stdout.write('import ??? as model_\n\n')
-##     sys.stdout.write('rootObj = model_.rspec(\n')
-##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-##     sys.stdout.write(')\n')
+    sys.stdout.write('#from ??? import *\n\n')
+    sys.stdout.write('import ??? as model_\n\n')
+    sys.stdout.write('rootObj = model_.provisioning_type(\n')
+    rootObj.exportLiteral(sys.stdout, 0, name_="provisioning_type")
+    sys.stdout.write(')\n')
     return rootObj
 
 
