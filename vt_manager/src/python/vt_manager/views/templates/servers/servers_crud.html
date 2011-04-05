@@ -21,38 +21,10 @@ function generateInputHtml(caption,name,id){
 }
     
 function addInterface() {
-    /* 
-    //Create an input type dynamically.
-    //var div = document.getElementById("datainterfaces");
-    var element1 = document.createElement("input");
-    var element2 = document.createElement("input");
-    var element3 = document.createElement("input");
-    div.innerHTML(div.innerHTML+
-                    '<input name="ifaceName"'++'"'+''+'/>'+
-    //Assign different attributes to the element.
-    element1.setAttribute("id", "id_ifaceName" );
-    element1.setAttribute("type", "text");
-    element1.setAttribute("name", "ifaceName");
-    
-    element2.setAttribute("id", "id_datapathID" );
-    element2.setAttribute("type", "text");
-    element2.setAttribute("name", "switchID");
-
-    element3.setAttribute("id", "id_port" );
-    element3.setAttribute("type", "text");
-    element3.setAttribute("name", "port");
-
-    var newForm = document.getElementById("formPlace");
- 
-    //Append the element in page (in span).
-    newForm.appendChild(element1);
-    newForm.appendChild(element2);
-    newForm.appendChild(element3);
-    */ 
-    addHtmlInDiv("formPlace","<br/>"); 
-    addHtmlInDiv("formPlace",generateInputHtml("Interface name","ifaceName","id_ifaceName"));
-    addHtmlInDiv("formPlace",generateInputHtml("Switch ID","switchID","id_switchID"));
-    addHtmlInDiv("formPlace",generateInputHtml("Switch port","port","id_port"));
+    addHtmlInDiv("datainterfaces","<br/>"); 
+    addHtmlInDiv("datainterfaces",generateInputHtml("Interface name","ifaceName","id_ifaceName"));
+    addHtmlInDiv("datainterfaces",generateInputHtml("Switch ID","switchID","id_switchID"));
+    addHtmlInDiv("datainterfaces",generateInputHtml("Switch port","port","id_port"));
 }
 </script>
 
@@ -97,10 +69,10 @@ function addInterface() {
                 </table>
            <div id="datainterfaces">
            {% for ifaceform in ifaceforms%}
-                {{ifaceform}}
+                <br>{{ifaceform.as_table}}</br>
             {% endfor %}
             </br>
-            <span id="formPlace">&nbsp;</span>
+            <!--<span id="formPlace">&nbsp;</span>-->
             <INPUT type="button" value="Add" onclick="addInterface()"/> 
         
            </div>
