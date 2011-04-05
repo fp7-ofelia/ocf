@@ -58,6 +58,7 @@ class VTServer(models.Model):
     freeCpu = models.DecimalField(max_digits=3, decimal_places=2,blank = True, null=True, editable = False)
 
     ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
+    available = models.BooleanField(default=1)
 
     def setName(self, name):
         self.name = name
@@ -170,3 +171,10 @@ class VTServer(models.Model):
         vms = VM.objects.filter(serverID = self.name)
         for vm in vms:
             self.vms.add(vm)
+
+    def setAvailable(self,av):
+        self.available = av
+
+    def getAvailable(self):
+        return self.available
+

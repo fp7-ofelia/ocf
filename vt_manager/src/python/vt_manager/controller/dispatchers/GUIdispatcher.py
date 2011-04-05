@@ -1,19 +1,23 @@
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple
 #from vt_manager.common.utils.views import generic_crud
 from vt_manager.common.messaging.models import DatedMessage
 from vt_manager.models import VTServer
-from django.views.generic import list_detail, create_update, simple
+from django.views.generic import list_detail, simple
+from django.views.generic.create_update import apply_extra_context
 from vt_manager.models import *
 from vt_manager.communication.utils.XmlUtils import XmlHelper
 from vt_manager.controller.dispatchers.ProvisioningDispatcher import *
 from vt_manager.controller.utils.Translator import *
-import uuid
-import time
-import logging
+import uuid, time, logging
+from django.template import loader, RequestContext
+from django.core.xheaders import populate_xheaders
+from django.contrib import messages
+from django.utils.translation import ugettext
+
 
 def userIsIslandManager(request):
 
@@ -140,6 +144,36 @@ def delete_server(request, server_id):
     """
     Display a confirmation page (NOT IMLPEMENTED YET: then stop all slices) and delete the aggregate.
     """
+    def delete_VTServer_object(request, model, post_delete_redirect, object_id=None,
+        template_name=None,
+        template_loader=loader, extra_context=None, login_required=False,
+        context_processors=None, template_object_name='object'):
+
+        if extra_context is None: extra_context = {}
+        if login_required and not request.user.is_authenticated():
+            return redirect_to_login(request.path)
+
+        obj = get_object_or_404(model, id= object_id)
+        if request.method == 'POST':
+            for iface in obj.ifaces.all():
+                iface.delete()
+            obj.delete()
+            msg = ugettext("The %(verbose_name)s was deleted.") %\
+                                        {"verbose_name": model._meta.verbose_name}
+            messages.success(request, msg, fail_silently=True)
+            return HttpResponseRedirect(post_delete_redirect)
+        else:
+            if not template_name:
+                template_name = "%s/%s_confirm_delete.html" % (model._meta.app_label, model._meta.object_name.lower())
+            t = template_loader.get_template(template_name)
+            c = RequestContext(request, {
+                template_object_name: obj,
+            }, context_processors)
+            apply_extra_context(extra_context, c)
+            response = HttpResponse(t.render(c))
+            populate_xheaders(request, response, model, getattr(obj, obj._meta.pk.attname))
+            return response
+
     if (not request.user.is_superuser):
         
         return simple.direct_to_template(request,
@@ -148,8 +182,7 @@ def delete_server(request, server_id):
                         )
  
     next = reverse("admin_servers")
-    server = get_object_or_404(VTServer, id=server_id)
-    req = create_update.delete_object(
+    req = delete_VTServer_object(
         request,
         model=VTServer,
         post_delete_redirect=next,
@@ -158,6 +191,7 @@ def delete_server(request, server_id):
         template_name="servers/delete_server.html",
     )
     return req
+
 
 def action_vm(request, server_id, vm_id, action):
 
