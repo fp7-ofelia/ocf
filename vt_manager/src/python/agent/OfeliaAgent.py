@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys
+import sys,os
 import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
 from communications.XmlRpcServer import XmlRpcServer
@@ -22,7 +22,7 @@ def usage():
 	
 ''' Argument checking '''
 def checkArgs():
-	if(len(sys.argv) != 1): #one
+	if len(sys.argv) > 2 :
 		raise Exception("Illegal number of arguments\n\n"+usage())
 
 
@@ -36,6 +36,20 @@ def redirectStdinStderr():
 def restoreStdinStderr():
 	sys.stdout = sys.__stdout__
 	sys.stdout = sys.__stderr__	
+
+''' Deamonizes execution '''
+def forkAndExitFather():
+
+	child_pid = os.fork()
+
+    	if child_pid == 0:
+		#redirectStdinStderr()
+        	return	
+    	else:
+		fp = open('/var/run/OfeliaAgent.pid', 'w')
+        	fp.write(str(child_pid))
+        	fp.flush()
+         	sys.exit()	
 
 
 def processXmlQuery(notificationCallBackUrl,amId,xml):
@@ -55,19 +69,21 @@ def processXmlQuery(notificationCallBackUrl,amId,xml):
 	if(rspecValue.query.provisioning != None):
 		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspecValue.query.provisioning,notificationCallBackUrl)
 
+
 '''Main routine, opening the XML-RPC server'''
 def main():
 
-	#Check arguments
-	#checkArgs()
+	checkArgs()
 
-	#Redirect stderr and stdout
-	#redirectStdinStderr()
+	#If -b is passed, demonize it 
+	if len(sys.argv) == 2 and sys.argv[1] == "-b" :
+		forkAndExitFather()
 
 	#XXX: testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
 	#Engage XMLRPC
+	
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
 
 	#restore stderr and stdout
