@@ -193,6 +193,7 @@
 				<xs:element name="operating-system-version" type="os-type-type" />
 				<xs:element name="operating-system-distribution" type="os-distro-type" />
 				<xs:element name="virtualization-type" type="virtualization-type"  use="required" />
+				<xs:element name="interfaces" type="interfaces-type" />
 				<xs:element name="virtual-machine" type="virtual-machine-type" maxOccurs="unbounded"/>
 				<xs:element name="status" type="server-status-type"/>
 			</xs:sequence>
