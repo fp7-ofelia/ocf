@@ -82,7 +82,15 @@ def server_generic_crud(request, obj_id, model, template, redirect,
         if instance != "VOLVER A PONER None EN TODO CASO" :
             #for iface in instance.ifaces.all():
             for i in range(0,len(request.POST.getlist('ifaceName'))):
-                ifaceforms.append(form_classIface({'ifaceName': request.POST.getlist('ifaceName')[i], 'switchID': request.POST.getlist('switchID')[i], 'port': request.POST.getlist('port')[i]}, instance = None))
+                ifaceforms.append(form_classIface(
+                                                    {
+                                                    'ifaceName': request.POST.getlist('ifaceName')[i], 
+                                                    'switchID': request.POST.getlist('switchID')[i], 
+                                                    'port': request.POST.getlist('port')[i]
+                                                    }, 
+                                                    instance = None
+                                                )
+                                )
         else:
             ifaceforms.append(form_classIface(request.POST, instance = None))
         if form.is_valid():
@@ -142,7 +150,7 @@ def admin_servers(request):
 
 def delete_server(request, server_id):
     """
-    Display a confirmation page (NOT IMLPEMENTED YET: then stop all slices) and delete the aggregate.
+    Display a confirmation page and delete the server.
     """
     def delete_VTServer_object(request, model, post_delete_redirect, object_id=None,
         template_name=None,
