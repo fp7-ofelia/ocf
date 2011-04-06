@@ -150,15 +150,9 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
                 Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
             Translator.ServerClassToModel(server, vtPlugin.id)
             serversInAggregate.append(server.uuid)
-        print "LIST RESOURCES OK"
-        print "IN AGGREGATE"
-        print serversInAggregate 
         serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
-        print serversInExpedient
         for s in serversInExpedient:
-            print s
             if s not in serversInAggregate:
-                print "GOING TO DELETE"
                 delServer = VTServer.objects.get(uuid = s)
                 for vm in delServer.vms.all():
                     for vmIface in vm.ifaces.all():

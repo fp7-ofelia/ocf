@@ -60,7 +60,6 @@ class Translator():
             if ifaceIndex != 0:
                 newInterface = copy.deepcopy(sClass.interfaces.interface[0])
                 sClass.interfaces.append(newInterface)
-            print sClass.interfaces.interface[ifaceIndex]
             sClass.interfaces.interface[ifaceIndex].name = iface.ifaceName   
             sClass.interfaces.interface[ifaceIndex].switch_id= iface.switchID   
             sClass.interfaces.interface[ifaceIndex].switch_port = iface.port  

@@ -1,6 +1,6 @@
 from threading import Thread
 from vt_manager.models import *
-from vt_manager.communications.XmlRpcClient import XmlRpcClient
+from vt_manager.communication.XmlRpcClient import XmlRpcClient
 
 '''
 author:msune
@@ -16,7 +16,7 @@ class AgentMonitoringThread(Thread):
 	Make sure Agent is up and running
 	and updates status
 	'''
-	def __updateAgentStatus(server):
+	def __updateAgentStatus(self, server):
 		try:
 			XmlRpcClient.call(server.getAgentUrl(),"ping")
 			server.setAvailable(True)
@@ -26,8 +26,8 @@ class AgentMonitoringThread(Thread):
 		
 	@staticmethod
 	def monitorAgentInNewThread(param):
-		thread = ServerMonitoringThread()	
-		thread.startMethod(servmethod,param)
+		thread = AgentMonitoringThread()	
+		thread.startMethod(param)
 		return thread
 
 	def startMethod(self,param):

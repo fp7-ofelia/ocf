@@ -1,8 +1,8 @@
 from vt_manager.models import *
 import uuid
-import AgentMonitoringThread
+from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
 import time
-from threading import *
+import threading
 from vt_manager.settings import MONITORING_INTERVAL 
 
 '''
