@@ -53,8 +53,18 @@ class Translator():
         sClass.operating_system_type = sModel.getOStype()
         sClass.operating_system_distribution = sModel.getOSdist()
         sClass.operating_system_version = sModel.getOSversion()
-        sClass.virtualization_type = sModel.getVirtTech()    
-        
+        sClass.virtualization_type = sModel.getVirtTech()
+        ifaces = sModel.ifaces.all()
+        ifaceIndex = 0
+        for iface in ifaces:
+            if ifaceIndex != 0:
+                newInterface = copy.deepcopy(sClass.interfaces.interface[0])
+                sClass.interfaces.append(newInterface)
+            sClass.interfaces.interface[ifaceIndex].name = iface.ifaceName   
+            sClass.interfaces.interface[ifaceIndex].switch_id= iface.switchID   
+            sClass.interfaces.interface[ifaceIndex].switch_port = iface.port  
+            ifaceIndex = ifaceIndex + 1       
+ 
     @staticmethod
     def VMmodelToClass(VMmodel, VMxmlClass):
 

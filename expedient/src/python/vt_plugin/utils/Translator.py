@@ -91,6 +91,17 @@ class Translator():
         sModel.setOSdist(sClass.operating_system_distribution)
         sModel.setOSversion(sClass.operating_system_version)
         sModel.setVirtTech(sClass.virtualization_type)
+        for iface in sClass.interfaces:
+            if sModel.ifaces.filter(ifaceName = iface.name):
+                ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+            else:
+                ifaceModel = VTServerIface()
+            ifaceModel.ifaceName = iface.name
+            ifaceModel.switchID = iface.switch_id
+            ifaceModel.port = iface.switch_port
+            ifaceModel.save()
+            if not sModel.ifaces.filter(ifaceName = iface.name):
+                sModel.ifaces.add(ifaceModel)
         sModel.setVMs()        
         sModel.save()
         return sModel

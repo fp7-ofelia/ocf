@@ -38,7 +38,7 @@ class VTServer(Resource):
     operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(max_length = 512, verbose_name = "OS Version")
     
-    #aggregate_id = models.IntegerField()
+    ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
 
 
     '''
@@ -118,6 +118,11 @@ class VTServer(Resource):
         for vm in vms:
             self.vms.add(vm)
     
+    def setAvailable(self,av):
+        self.available = av
+
+    def getAvailable(self):
+        return self.available
 
         
         
