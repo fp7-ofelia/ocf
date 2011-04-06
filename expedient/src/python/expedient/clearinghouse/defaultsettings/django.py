@@ -156,6 +156,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'autoslug',
     'registration',
+    'django_evolution',
     'expedient.common.timer',
     'expedient.common.permissions',
     'expedient.common.breadcrumbs',

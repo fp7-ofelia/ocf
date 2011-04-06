@@ -99,7 +99,8 @@ class XmlRpcServer():
 		    return ""
         
 		def ping(self, challenge): 
-		    return challenge
+		    print "PINGUEANDO"
+            return challenge
         
 	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)
 	    server = ServerClass(server_address, HandlerClass)    

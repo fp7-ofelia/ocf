@@ -117,6 +117,7 @@ INSTALLED_APPS = (
     'expedient.common.xmlrpc_serverproxy',
     'expedient.common.defaultsite',
     'registration',
+    'django_evolution',
     'openflow.optin_manager.commands',
     'openflow.optin_manager.users',
     'openflow.optin_manager.flowspace',
