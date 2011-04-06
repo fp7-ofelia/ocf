@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue Apr  5 17:48:11 2011 by generateDS.py version 2.3b.
+# Generated Wed Apr  6 09:39:52 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -127,8 +127,8 @@ supermod.resources_type.subclass = resources_typeSub
 
 
 class server_typeSub(supermod.server_type):
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, virtual_machine=None, status=None):
-        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, virtual_machine, status, )
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machine=None, status=None):
+        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machine, status, )
 supermod.server_type.subclass = server_typeSub
 # end class server_typeSub
 
