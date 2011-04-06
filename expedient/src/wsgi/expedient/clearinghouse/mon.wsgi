@@ -11,4 +11,5 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 
 sys.path.append(PYTHON_DIR)
 
-print "EEEEEEEEEEEEEEEEEEEEOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
+from expedient.clearinghouse.monitoring.BackgroundMonitor import BackgroundMonitor
+BackgroundMonitor.monitor()

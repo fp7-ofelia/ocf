@@ -11,25 +11,24 @@ Monitoring thread implementation
 '''
 
 class BackgroundMonitor():
-	
-	'''
-	Updates server status
-	'''
-	@staticmethod
-	def __monitorServers():
-			
-		for server in VTServer.objects.all():
-			AgentMonitoringThread.monitorAgentInNewThread(server)				
-		#Wait for threads
-		for thread in threading.enumerate():
-			if thread is not threading.currentThread():
-				thread.join()
+    
+    '''
+    Updates server status
+    '''
+    @staticmethod
+    def __monitorServers():
 
-	@staticmethod
-	def monitor(): 
-		
-		#Main monitoring loop
-		while True:
-			BackgroundMonitor.__monitorServers()	
-			time.sleep(MONITORING_INTERVAL)					
-		
+        for server in VTServer.objects.all():
+            print "MONITORING "+str(server.name)
+            AgentMonitoringThread.monitorAgentInNewThread(server)
+        #Wait for threads
+        for thread in threading.enumerate():
+            if thread is not threading.currentThread():
+                thread.join()
+
+    @staticmethod
+    def monitor():
+        while True:
+            print "MONITORING..."
+            BackgroundMonitor.__monitorServers()
+            time.sleep(MONITORING_INTERVAL)	

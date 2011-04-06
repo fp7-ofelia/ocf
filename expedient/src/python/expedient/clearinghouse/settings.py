@@ -80,3 +80,5 @@ if DEBUG:
     loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
     loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
+
+MONITORING_INTERVAL = 120

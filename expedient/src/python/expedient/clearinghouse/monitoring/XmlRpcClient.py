@@ -14,9 +14,10 @@ class XmlRpcClient():
     def callRPCMethod(url,methodName,*params):
 
         try:
-            print "XMLRPCCLIENT IN VTMANAGER CALLING AGENT PING"
-            agent = xmlrpclib.Server(url)
-            getattr(agent,methodName)(params)
+            aggregate= xmlrpclib.Server(url)
+            print "PARAMS"
+            print params
+            getattr(aggregate,methodName)(params)
         except Exception as e:
             print "XMLRPC Client error: "
             print e 
