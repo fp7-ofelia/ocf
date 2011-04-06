@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xs:schema targetNamespace="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema targetNamespace="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 <!-- Types -->
-
 	<xs:complexType name="provisioning-type">
 		<xs:sequence>
 			<xs:element name="action" type="action-type" maxOccurs="unbounded" />
@@ -48,18 +47,18 @@
 
 	<xs:complexType name="virtual-machine-type">
 		<xs:sequence>
-			<xs:element name="name" type="xs:string" use="required" />
-			<xs:element name="uuid" type="xs:string" use="required" />
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" /> 
+			<xs:element name="uuid" type="xs:string"  minOccurs="1" maxOccurs="1"/>
 			<xs:element name="status" type="vm-status-type" />
-			<xs:element name="project-id" type="xs:string" use="required" />
-			<xs:element name="project-name" type="xs:string" use="required" />
-			<xs:element name="slice-id" type="xs:string" use="required" />
-			<xs:element name="slice-name" type="xs:string" use="required" />
-			<xs:element name="operating-system-type" type="os-type-type" use="required" />
+			<xs:element name="project-id" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+			<xs:element name="project-name" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+			<xs:element name="slice-id" type="xs:string"  minOccurs="1" maxOccurs="1" />
+			<xs:element name="slice-name" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+			<xs:element name="operating-system-type" type="os-type-type"  minOccurs="1" maxOccurs="1" />
 			<xs:element name="operating-system-version" type="os-type-type" />
 			<xs:element name="operating-system-distribution" type="os-distro-type" />
-			<xs:element name="server-id" type="xs:string"  use="required" />
-			<xs:element name="virtualization-type" type="virtualization-type"  use="required" />
+			<xs:element name="server-id" type="xs:string" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="virtualization-type" type="virtualization-type"   minOccurs="1" maxOccurs="1" />
 			<xs:choice>
 				<xs:element name="xen-configuration" type="xen-configuration" />
 				<!-- Add Other config types here -->
@@ -147,7 +146,6 @@
 	</xs:complexType>
 
 	<xs:complexType name="interface-type">
-		<xs:complexContent>
 			<xs:sequence>
 				<xs:element name="name" type="xs:string" />
 				<xs:element name="mac" type="xs:string" />
@@ -161,7 +159,6 @@
 				<xs:element name="switch-port" type="xs:string" />
 			</xs:sequence>
 			<xs:attribute name="ismgmt" type="xs:boolean" />
-		</xs:complexContent>
 	</xs:complexType>
 
 <!-- RESPONSE -->
@@ -186,13 +183,13 @@
 		<!--Server resource -->
 		<xs:complexType name="server-type">
 			<xs:sequence>
-				<xs:element name="name" type="xs:string" use="required" />
-				<xs:element name="id" type="xs:string" use="required" />
-				<xs:element name="uuid" type="xs:string" use="required" />
-				<xs:element name="operating-system-type" type="os-type-type" use="required" />
+				<xs:element name="name" type="xs:string"   minOccurs="1" maxOccurs="1" />
+				<xs:element name="id" type="xs:string"   minOccurs="1" maxOccurs="1" />
+				<xs:element name="uuid" type="xs:string" minOccurs="1" maxOccurs="1" />
+				<xs:element name="operating-system-type" type="os-type-type" />
 				<xs:element name="operating-system-version" type="os-type-type" />
 				<xs:element name="operating-system-distribution" type="os-distro-type" />
-				<xs:element name="virtualization-type" type="virtualization-type"  use="required" />
+				<xs:element name="virtualization-type" type="virtualization-type"   minOccurs="1" maxOccurs="1" />
 				<xs:element name="interfaces" type="interfaces-type" />
 				<xs:element name="virtual-machine" type="virtual-machine-type" maxOccurs="unbounded"/>
 				<xs:element name="status" type="server-status-type"/>
