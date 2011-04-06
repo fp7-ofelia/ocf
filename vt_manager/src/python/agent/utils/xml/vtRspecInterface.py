@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Tue Apr  5 17:48:11 2011 by generateDS.py version 2.3b.
+# Generated Wed Apr  6 09:39:52 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -1213,7 +1213,7 @@ class resources_type(GeneratedsSuper):
 class server_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, virtual_machine=None, status=None):
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machine=None, status=None):
         self.name = name
         self.id = id
         self.uuid = uuid
@@ -1221,6 +1221,7 @@ class server_type(GeneratedsSuper):
         self.operating_system_version = operating_system_version
         self.operating_system_distribution = operating_system_distribution
         self.virtualization_type = virtualization_type
+        self.interfaces = interfaces
         if virtual_machine is None:
             self.virtual_machine = []
         else:
@@ -1246,6 +1247,8 @@ class server_type(GeneratedsSuper):
     def set_operating_system_distribution(self, operating_system_distribution): self.operating_system_distribution = operating_system_distribution
     def get_virtualization_type(self): return self.virtualization_type
     def set_virtualization_type(self, virtualization_type): self.virtualization_type = virtualization_type
+    def get_interfaces(self): return self.interfaces
+    def set_interfaces(self, interfaces): self.interfaces = interfaces
     def get_virtual_machine(self): return self.virtual_machine
     def set_virtual_machine(self, virtual_machine): self.virtual_machine = virtual_machine
     def add_virtual_machine(self, value): self.virtual_machine.append(value)
@@ -1287,6 +1290,8 @@ class server_type(GeneratedsSuper):
         if self.virtualization_type is not None:
             showIndent(outfile, level)
             outfile.write('<%svirtualization-type>%s</%svirtualization-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_type).encode(ExternalEncoding), input_name='virtualization-type'), namespace_))
+        if self.interfaces:
+            self.interfaces.export(outfile, level, namespace_, name_='interfaces', )
         for virtual_machine_ in self.virtual_machine:
             virtual_machine_.export(outfile, level, namespace_, name_='virtual-machine')
         if self.status:
@@ -1300,6 +1305,7 @@ class server_type(GeneratedsSuper):
             self.operating_system_version is not None or
             self.operating_system_distribution is not None or
             self.virtualization_type is not None or
+            self.interfaces is not None or
             self.virtual_machine or
             self.status is not None
             ):
@@ -1335,6 +1341,12 @@ class server_type(GeneratedsSuper):
         if self.virtualization_type is not None:
             showIndent(outfile, level)
             outfile.write('virtualization_type=%s,\n' % quote_python(self.virtualization_type).encode(ExternalEncoding))
+        if self.interfaces is not None:
+            showIndent(outfile, level)
+            outfile.write('interfaces=model_.interfaces_type(\n')
+            self.interfaces.exportLiteral(outfile, level, name_='interfaces')
+            showIndent(outfile, level)
+            outfile.write('),\n')
         showIndent(outfile, level)
         outfile.write('virtual_machine=[\n')
         level += 1
@@ -1382,6 +1394,10 @@ class server_type(GeneratedsSuper):
         elif nodeName_ == 'virtualization-type':
             virtualization_type_ = child_.text
             self.virtualization_type = virtualization_type_
+        elif nodeName_ == 'interfaces': 
+            obj_ = interfaces_type.factory()
+            obj_.build(child_)
+            self.set_interfaces(obj_)
         elif nodeName_ == 'virtual-machine': 
             obj_ = virtual_machine_type.factory()
             obj_.build(child_)
