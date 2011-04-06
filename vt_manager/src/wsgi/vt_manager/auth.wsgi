@@ -9,7 +9,7 @@ sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings'
 
-sys.path.append(PYTHON_DIR)
+sys.path.insert(0, PYTHON_DIR)
 
 
 from django.contrib.auth.models import User
