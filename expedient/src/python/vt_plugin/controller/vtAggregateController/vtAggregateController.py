@@ -109,6 +109,7 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
 
     "asks the VT AM for all the resources under it."
     print "ASKING RESOURCES"
+    serversInAggregate = []
     try:
         print "connecting to"
         print 'https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:]
@@ -123,7 +124,6 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
     except:
         rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
-    print "AA"
     try:
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
     except Exception as e:
@@ -139,7 +139,6 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         rHashObject.hashValue = hashV
         rHashObject.save() 
         try:
-            print "GOING TO PASR RSPEC"
             xmlClass = XmlHelper.parseXmlString(rspec)
         except Exception as e:
             print "Can't parse rspec"
@@ -149,8 +148,24 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         for server in xmlClass.response.information.resources.server:
             for vm in server.virtual_machine:
                 Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
-            print "PRE CALLING SERVERCLASSTOMODEL"
             Translator.ServerClassToModel(server, vtPlugin.id)
-        print "LIST RESOURCES OK" 
+            serversInAggregate.append(server.uuid)
+        print "LIST RESOURCES OK"
+        print "IN AGGREGATE"
+        print serversInAggregate 
+        serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
+        print serversInExpedient
+        for s in serversInExpedient:
+            print s
+            if s not in serversInAggregate:
+                print "GOING TO DELETE"
+                delServer = VTServer.objects.get(uuid = s)
+                for vm in delServer.vms.all():
+                    for vmIface in vm.ifaces.all():
+                        vmIface.delete()
+                    vm.delete()
+                for sIface in delServer.ifaces.all():
+                    sIface.delete()
+                delServer.delete()
         return xmlClass
     

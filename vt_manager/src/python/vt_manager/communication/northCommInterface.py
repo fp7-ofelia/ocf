@@ -69,7 +69,7 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 logging.debug("No VMs available")
                 if infoRspec.response.information.resources.server[sIndex].virtual_machine:
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
-            elif (slicetUUID is not 'None'):
+            elif (sliceUUID is not 'None'):
                 vms = vms.filter(sliceId = sliceUUID)
                 if not vms:
                     logging.error("No VMs available")
