@@ -30,4 +30,5 @@ def check_password(environ, user, password):
         else: 
             return False
     finally: 
-        db.connection.close() 
+        #db.connection.close() 
+        pass

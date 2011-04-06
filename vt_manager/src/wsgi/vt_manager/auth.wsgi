@@ -11,11 +11,11 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings'
 
 sys.path.insert(0, PYTHON_DIR)
 
-
 from django.contrib.auth.models import User
 from django import db
 
 def check_password(environ, user, password):
+    print "entering check_password"
     db.reset_queries() 
 
     kwargs = {'username': user, 'is_active': True}
@@ -31,4 +31,5 @@ def check_password(environ, user, password):
         else: 
             return False
     finally: 
-        db.connection.close() 
+        #db.connection.close() 
+        pass
