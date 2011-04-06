@@ -1,10 +1,9 @@
 from vt_plugin.models import *
-from vt_plugin.models.VTServer import VTServer
 from vt_plugin.models.Action import Action
 import copy, uuid
 from datetime import datetime
 from expedient.clearinghouse.aggregate.models import Aggregate
-from vt_plugin.models import VTServer
+from vt_plugin.models import VTServer, VTServerIface
 
 class Translator():
 
@@ -73,38 +72,44 @@ class Translator():
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
         #search in database if sClass already exists
+        newServer = 0
         if VTServer.objects.filter(name = sClass.name).exists():
             sModel = VTServer.objects.get(name=sClass.name)
         else:
+            newServer = 1
             sModel = VTServer()
-        sModel = VTServer()
+       
         #sModel.aggregate_id = agg_id
         sModel.name=sClass.name
         sModel.aggregate = Aggregate.objects.get(id = agg_id)
         sModel.status_change_timestamp = datetime.now()
         sModel.available = True      
         sModel.id = sClass.id
-        
-        
-        sModel.setUUID(sClass.uuid)        
-        sModel.setOStype(sClass.operating_system_type)
-        sModel.setOSdist(sClass.operating_system_distribution)
-        sModel.setOSversion(sClass.operating_system_version)
-        sModel.setVirtTech(sClass.virtualization_type)
-        for iface in sClass.interfaces:
-            if sModel.ifaces.filter(ifaceName = iface.name):
-                ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
-            else:
-                ifaceModel = VTServerIface()
-            ifaceModel.ifaceName = iface.name
-            ifaceModel.switchID = iface.switch_id
-            ifaceModel.port = iface.switch_port
-            ifaceModel.save()
-            if not sModel.ifaces.filter(ifaceName = iface.name):
-                sModel.ifaces.add(ifaceModel)
-        sModel.setVMs()        
-        sModel.save()
-        return sModel
+        sModel.save()   
+        try:
+            sModel.setUUID(sClass.uuid)        
+            sModel.setOStype(sClass.operating_system_type)
+            sModel.setOSdist(sClass.operating_system_distribution)
+            sModel.setOSversion(sClass.operating_system_version)
+            sModel.setVirtTech(sClass.virtualization_type)
+            for iface in sClass.interfaces.interface:
+                if sModel.ifaces.filter(ifaceName = iface.name):
+                    ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+                else:
+                    ifaceModel = VTServerIface()
+                ifaceModel.ifaceName = iface.name
+                ifaceModel.switchID = iface.switch_id
+                ifaceModel.port = iface.switch_port
+                ifaceModel.save()
+                if not sModel.ifaces.filter(ifaceName = iface.name):
+                    sModel.ifaces.add(ifaceModel)
+            sModel.setVMs()        
+            sModel.save()
+            return sModel
+        except:
+            print "Error tranlating Server Class to Model"
+            if newServer:
+                sModel.delete()
 
     @staticmethod
     def ActionToModel(action, hyperaction, save = "noSave"):#, callBackUrl):

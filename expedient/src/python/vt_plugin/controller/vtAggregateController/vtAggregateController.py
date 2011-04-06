@@ -133,11 +133,13 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
     print rspec
 
     if hashV == rHashObject.hashValue:
+        print "Same HASH, no changes in resources"
         return
     else:
         rHashObject.hashValue = hashV
         rHashObject.save() 
         try:
+            print "GOING TO PASR RSPEC"
             xmlClass = XmlHelper.parseXmlString(rspec)
         except Exception as e:
             print "Can't parse rspec"
@@ -147,6 +149,7 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         for server in xmlClass.response.information.resources.server:
             for vm in server.virtual_machine:
                 Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
+            print "PRE CALLING SERVERCLASSTOMODEL"
             Translator.ServerClassToModel(server, vtPlugin.id)
         print "LIST RESOURCES OK" 
         return xmlClass
