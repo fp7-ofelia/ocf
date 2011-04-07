@@ -59,11 +59,17 @@ class Translator():
         for iface in ifaces:
             if ifaceIndex != 0:
                 newInterface = copy.deepcopy(sClass.interfaces.interface[0])
-                sClass.interfaces.append(newInterface)
+                sClass.interfaces.interface.append(newInterface)
             sClass.interfaces.interface[ifaceIndex].name = iface.ifaceName   
             sClass.interfaces.interface[ifaceIndex].switch_id= iface.switchID   
             sClass.interfaces.interface[ifaceIndex].switch_port = iface.port  
             ifaceIndex = ifaceIndex + 1       
+        mgmtInterface = copy.deepcopy(sClass.interfaces.interface[0])
+        mgmtInterface.name = "NONE"
+        mgmtInterface.switch_id= sModel.getVmMgmtIface() 
+        mgmtInterface.switch_port = "NONE"
+        mgmtInterface.ismgmt = True
+        sClass.interfaces.interface.append(mgmtInterface)
  
     @staticmethod
     def VMmodelToClass(VMmodel, VMxmlClass):
@@ -111,6 +117,7 @@ class Translator():
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = VMmodel.ips.get().gw
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = VMmodel.ips.get().dns1
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = VMmodel.ips.get().dns2
+                #VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
             else:
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
