@@ -49,7 +49,7 @@ class VTServer(models.Model):
     gw = models.IPAddressField(verbose_name = "Gateway")
     dns1 = models.IPAddressField(verbose_name = "DNS 1")
     dns2 =  models.IPAddressField(verbose_name = "DNS 2")
-
+    vmBridgeIface = models.CharField(max_length = 1024, default = "", verbose_name = "Bridge Interface Name for VMs")
     uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)
     vms = models.ManyToManyField('VM', blank = True, null = True, editable = False)

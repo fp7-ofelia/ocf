@@ -12,4 +12,16 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 sys.path.append(PYTHON_DIR)
 
 from expedient.clearinghouse.monitoring.BackgroundMonitor import BackgroundMonitor
+#from django.contrib.auth.models import User
+#from django.contrib.auth import authenticate
+#from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD
+#try:
+#    monUser = User.objects.get(first_name = 'monitor')
+#except:
+#    monUser = User.objects.create_user('monitor', 'monitor@gmail.com', 'monitor')
+#    monUser.is_superuser = True
+#    monUser.save()
+#
+#user = authenticate(username='monitor', password='monitor')
+#user = authenticate(username=ROOT_USERNAME, password=ROOT_PASSWORD)
 BackgroundMonitor.monitor()

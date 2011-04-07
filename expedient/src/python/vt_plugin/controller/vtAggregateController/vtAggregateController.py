@@ -125,7 +125,9 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
+        print "hash dado "+str(rHashObject.hashValue)
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
+        print "HASH RECIBIDO " + str(hashV)
     except Exception as e:
         print "Can't retrieve resources"
         print e

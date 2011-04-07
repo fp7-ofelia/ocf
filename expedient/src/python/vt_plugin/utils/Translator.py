@@ -92,6 +92,7 @@ class Translator():
             sModel.setOSdist(sClass.operating_system_distribution)
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
+            #sModel.vmBridgeIface = sClass.
             for iface in sClass.interfaces.interface:
                 if sModel.ifaces.filter(ifaceName = iface.name):
                     ifaceModel = sModel.ifaces.get(ifaceName = iface.name)

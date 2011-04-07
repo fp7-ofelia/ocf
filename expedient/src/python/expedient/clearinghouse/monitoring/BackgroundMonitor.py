@@ -20,8 +20,8 @@ class BackgroundMonitor():
     def __monitorAggregates():
 
         for aggregate in Aggregate.objects.all():
-            aggregate = aggregate.as_leaf_class()
-            if isinstance(aggregate, VtPlugin):
+            #aggregate = aggregate.as_leaf_class()
+            if isinstance(aggregate.as_leaf_class(), VtPlugin):
                 AggregateMonitoringThread.monitorAggregateInNewThread(aggregate)
         #Wait for threads
         for thread in threading.enumerate():
