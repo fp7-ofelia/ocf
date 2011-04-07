@@ -2,6 +2,7 @@ import shlex, subprocess
 from StringIO import StringIO
 from django.db import models
 from django.db.models.fields import IPAddressField
+from django.core.exceptions import ValidationError
 import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -15,17 +16,54 @@ from vt_plugin.models import *
 from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
-                        ('default','Default'),
-                        ('test','Test'),
+                        ('Default','Default'),
+                        ('Test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
-                        ('file-image','File Image'),
-                        ('other','Other'),
+                        ('FileImage','File Image'),
+                        ('LV','Logical Volume'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
-                        ('paravirtualization','Paravirtualization'),
-                        ('logical volumes','Logical Volumes'),
+                        ('Paravirtualization','Paravirtualization'),
+                        ('HVM','HVM'),
                       )
+
+
+def validate_memory(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: memory has to be higher than 128Mb",
+        )
+
+    if value < 128:
+        error()
+
+def validate_discImage(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only test image available",
+        )
+
+    if value != "Test":
+        error()
+        
+def validate_hdSetupType(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only File Image supported",
+        )
+
+    if value != "FileImage":
+        error()
+
+def validate_virtualizationSetupType(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only Paravirtualization supported",
+        )
+
+    if value != "Paravirtualization":
+        error()
 
 class VM(Resource):
     
@@ -35,7 +73,7 @@ class VM(Resource):
 
     #name = models.CharField(max_length = 1024, default="")
     uuid = models.CharField(max_length = 1024, default="")
-    memory = models.IntegerField(blank = True, null=True)
+    memory = models.IntegerField(blank = True, null=True, validators=[validate_memory])
     
   #  cpuNumber = models.IntegerField(blank = True, null=True)
     virtTech = models.CharField(max_length = 10, default="")
@@ -58,14 +96,17 @@ class VM(Resource):
 
     #serverID = models.CharField(max_length = 1024, default="")    
     #hdSetupType = models.CharField(max_length = 1024, default="")
-    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES)
+    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES, validators=[validate_hdSetupType], 
+                                   verbose_name = "HD Setup Type")
     hdOriginPath = models.CharField(max_length = 1024, default="")    
     #virtualizationSetupType = models.CharField(max_length = 1024, default="")
-    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES)
+    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
+                                               validators=[validate_virtualizationSetupType],verbose_name = "Virtualization Setup Type")
 #    macs = models.ManyToManyField('Mac', blank = True, null = True)#, on_delete=models.SET_NULL)
     ifaces = models.ManyToManyField('iFace', blank = True, null = True)
     
-    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES)
+    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage],
+                                  verbose_name = "Disc Image")
     
     class Meta:
         """Meta Class for your model."""

@@ -37,6 +37,7 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     """Show a page that allows user to add VMs to the VT server."""
 
+    print "VIRTUALMACHINE_CRUD"
     serv = get_object_or_404(VTServer, id = server_id)
     #server_name = serv.name
     slice = get_object_or_404(Slice, id = slice_id)
@@ -52,12 +53,14 @@ def virtualmachine_crud(request, slice_id, server_id):
             # "Done" pressed ==> send xml to AM
             formset = VMFormSet(
                 request.POST, queryset=virtualmachines)
+            print "VIRTUALMACHINE_CRUD BEFORE IS_VALID"
             if formset.is_valid():
+                print "VIRTUALMACHINE_CRUD AFTER IS_VALID"
                 instances = formset.save(commit=False)
                 #create virtualmachines from received formulary
                 VMcontroller.processVMCreation(instances, serv.uuid, slice)
 
-            return HttpResponseRedirect(reverse("html_plugin_home",
+                return HttpResponseRedirect(reverse("html_plugin_home",
                                                 args=[slice_id]))
     else:
         formset = VMFormSet(queryset=VM.objects.none())
