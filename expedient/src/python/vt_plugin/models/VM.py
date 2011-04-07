@@ -21,7 +21,7 @@ DISC_IMAGE_CHOICES = (
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('FileImage','File Image'),
-                        ('LV','LV'),
+                        ('LV','Logical Volume'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('Paravirtualization','Paravirtualization'),
@@ -47,7 +47,7 @@ def validate_discImage(value):
     if value != "Test":
         error()
         
-def validate_hd_setup_type(value):
+def validate_hdSetupType(value):
     def error():
         raise ValidationError(
             "Invalid input: only File Image supported",
@@ -56,7 +56,7 @@ def validate_hd_setup_type(value):
     if value != "FileImage":
         error()
 
-def validate_virtualization_setup_type(value):
+def validate_virtualizationSetupType(value):
     def error():
         raise ValidationError(
             "Invalid input: only Paravirtualization supported",
@@ -95,16 +95,18 @@ class VM(Resource):
     serverID = models.CharField(max_length = 1024, default="")
 
     #serverID = models.CharField(max_length = 1024, default="")    
-    #hd_setup_type = models.CharField(max_length = 1024, default="")
-    hd_setup_type = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES, validators=[validate_hd_setup_type])
+    #hdSetupType = models.CharField(max_length = 1024, default="")
+    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES, validators=[validate_hdSetupType], 
+                                   verbose_name = "HD Setup Type")
     hdOriginPath = models.CharField(max_length = 1024, default="")    
     #virtualizationSetupType = models.CharField(max_length = 1024, default="")
-    virtualization_setup_type = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
-                                               validators=[validate_virtualization_setup_type])
+    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
+                                               validators=[validate_virtualizationSetupType],verbose_name = "Virtualization Setup Type")
 #    macs = models.ManyToManyField('Mac', blank = True, null = True)#, on_delete=models.SET_NULL)
     ifaces = models.ManyToManyField('iFace', blank = True, null = True)
     
-    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage])
+    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage],
+                                  verbose_name = "Disc Image")
     
     class Meta:
         """Meta Class for your model."""
@@ -228,11 +230,11 @@ class VM(Resource):
         elif type is "dns2":
             return self.dns2
 
-    def set_hd_setup_type(self, value):
-        self.hd_setup_type = value
+    def setHDsetupType(self, value):
+        self.hdSetupType = value
 
-    def get_hd_setup_type(self):
-        return self.hd_setup_type
+    def getHDsetupType(self):
+        return self.hdSetupType
 
     def setHDoriginPath(self, value):
         self.hdOriginPath = value
@@ -240,11 +242,11 @@ class VM(Resource):
     def getHDoriginPath(self):
         return self.hdOriginPath
 
-    def set_virtualization_setup_type(self, value):
-        self.virtualization_setup_type = value
+    def setVirtualizationSetupType(self, value):
+        self.virtualizationSetupType = value
 
-    def get_virtualization_setup_type(self):
-        return self.virtualization_setup_type
+    def getVirtualizationSetupType(self):
+        return self.virtualizationSetupType
 
     def delete(self):
         self.action_set.clear()

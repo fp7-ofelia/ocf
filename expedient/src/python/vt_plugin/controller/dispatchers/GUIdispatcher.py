@@ -45,7 +45,7 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     VMFormSet = modelformset_factory(
         VM, can_delete=False, 
-        fields=["name", "memory","disc_image", "hd_setup_type", "virtualization_setup_type"],
+        fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
     )
 
     if request.method == "POST":
