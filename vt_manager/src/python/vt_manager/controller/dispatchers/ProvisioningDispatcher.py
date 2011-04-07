@@ -180,20 +180,21 @@ class ProvisioningDispatcher():
                 iface.dns1 = iptemp.dns1
                 iface.dns2 = iptemp.dns2
                 #Relate the IPs created with the VMmodel
-		try:
+		        try:
          	       VMmodel.setIPs()
-		except Exception as e:
-			print e
-			raise e
+		        except Exception as e:
+			        print e
+			        raise e
 
                 print "[DEBUG] Management Interface set"
             else:
-                iface.name = 'eth'+str(ethIndex)
+                iface.name = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.'eth'+str(ethIndex)
                 iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name)
                 print "[DEBUG] Non Management Interface set"
             ethIndex = ethIndex + 1
         #Relate the Macs created with the VMmodel
         VMmodel.setMacs()
+
 
     @staticmethod
     def checkVMisPresent(action):

@@ -37,7 +37,7 @@ class VTServer(Resource):
     operatingSystemType = models.CharField(max_length = 512, verbose_name = "OS Type")
     operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(max_length = 512, verbose_name = "OS Version")
-    
+    vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Bridge Mgmt Interface for VMs")
     ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
 
 
@@ -124,5 +124,9 @@ class VTServer(Resource):
     def getAvailable(self):
         return self.available
 
-        
-        
+    def setVmMgmtIface(self, ifaceName):
+        self.vmMgmtIface = ifaceName        
+
+    def getVmMgmtIface(self):
+        return self.vmMgmtIface
+

@@ -87,6 +87,9 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
         listR =   XmlHelper.craftXmlClass(infoRspec)
         hashV = hash(listR)
         return hashV, listR
-    
 
+@rpcmethod(url_name="plugin")    
+def ping(challenge):
+    print "PINGING"
+    return challenge
  
