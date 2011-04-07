@@ -2,6 +2,7 @@ import shlex, subprocess
 from StringIO import StringIO
 from django.db import models
 from django.db.models.fields import IPAddressField
+from django.core.exceptions import ValidationError
 import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -15,17 +16,54 @@ from vt_plugin.models import *
 from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
-                        ('default','Default'),
-                        ('test','Test'),
+                        ('Default','Default'),
+                        ('Test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
-                        ('file-image','File Image'),
-                        ('other','Other'),
+                        ('FileImage','File Image'),
+                        ('LV','LV'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
-                        ('paravirtualization','Paravirtualization'),
-                        ('logical volumes','Logical Volumes'),
+                        ('Paravirtualization','Paravirtualization'),
+                        ('HVM','HVM'),
                       )
+
+
+def validate_memory(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: memory has to be higher than 128Mb",
+        )
+
+    if value < 128:
+        error()
+
+def validate_discImage(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only test image available",
+        )
+
+    if value != "Test":
+        error()
+        
+def validate_hd_setup_type(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only File Image supported",
+        )
+
+    if value != "FileImage":
+        error()
+
+def validate_virtualization_setup_type(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only Paravirtualization supported",
+        )
+
+    if value != "Paravirtualization":
+        error()
 
 class VM(Resource):
     
@@ -35,7 +73,7 @@ class VM(Resource):
 
     #name = models.CharField(max_length = 1024, default="")
     uuid = models.CharField(max_length = 1024, default="")
-    memory = models.IntegerField(blank = True, null=True)
+    memory = models.IntegerField(blank = True, null=True, validators=[validate_memory])
     
   #  cpuNumber = models.IntegerField(blank = True, null=True)
     virtTech = models.CharField(max_length = 10, default="")
@@ -57,15 +95,16 @@ class VM(Resource):
     serverID = models.CharField(max_length = 1024, default="")
 
     #serverID = models.CharField(max_length = 1024, default="")    
-    #hdSetupType = models.CharField(max_length = 1024, default="")
-    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES)
+    #hd_setup_type = models.CharField(max_length = 1024, default="")
+    hd_setup_type = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES, validators=[validate_hd_setup_type])
     hdOriginPath = models.CharField(max_length = 1024, default="")    
     #virtualizationSetupType = models.CharField(max_length = 1024, default="")
-    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES)
+    virtualization_setup_type = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
+                                               validators=[validate_virtualization_setup_type])
 #    macs = models.ManyToManyField('Mac', blank = True, null = True)#, on_delete=models.SET_NULL)
     ifaces = models.ManyToManyField('iFace', blank = True, null = True)
     
-    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES)
+    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage])
     
     class Meta:
         """Meta Class for your model."""
@@ -189,11 +228,11 @@ class VM(Resource):
         elif type is "dns2":
             return self.dns2
 
-    def setHDsetupType(self, value):
-        self.hdSetupType = value
+    def set_hd_setup_type(self, value):
+        self.hd_setup_type = value
 
-    def getHDsetupType(self):
-        return self.hdSetupType
+    def get_hd_setup_type(self):
+        return self.hd_setup_type
 
     def setHDoriginPath(self, value):
         self.hdOriginPath = value
@@ -201,11 +240,11 @@ class VM(Resource):
     def getHDoriginPath(self):
         return self.hdOriginPath
 
-    def setVirtualizationSetupType(self, value):
-        self.virtualizationSetupType = value
+    def set_virtualization_setup_type(self, value):
+        self.virtualization_setup_type = value
 
-    def getVirtualizationSetupType(self):
-        return self.virtualizationSetupType
+    def get_virtualization_setup_type(self):
+        return self.virtualization_setup_type
 
     def delete(self):
         self.action_set.clear()
