@@ -41,26 +41,25 @@ def aggregate_crud(request, agg_id=None):
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
             
-            #check if virtualization aggregate manager is available
-            try:
-                print 'DIRECCION: '+'https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]
-                temp_client = xmlrpclib.Server('https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:])                
-                print 'aggregate_crud --> server instance OK'
-            except Exception as e:
-                print 'aggregate_crud --> server instance KO'
-                print "Can't connect to server"
-                print e
-                return
-                
-            #TODO: finish check by calling the (yet not implemented) "ping" function in VT_AM
-            #meanwhile we check connection through listResources service call
-            try:
-                rspec = temp_client.listResources()
-                aggregate.available = True
-                print "aggregate_crud --> connection OK ; aggregate.available = True"
-            except Exception as e:
-                aggregate.available = False
-                print "aggregate_crud --> connection OK; aggregate.available = False"                                            
+#            #check if virtualization aggregate manager is available
+#            try:
+#                print 'DIRECCION: '+'https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]
+#                temp_client = xmlrpclib.Server('https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]) 
+#            except Exception as e:
+#                print "Can't connect to server"
+#                print e
+#                return
+#                
+#            #TODO: finish check by calling the (yet not implemented) "ping" function in VT_AM
+#            #meanwhile we check connection through listResources service call
+#            #XXX: It is never going to work since listResurces requires parameters
+#            try:
+#                rspec = temp_client.listResources()
+#                aggregate.available = True
+#                print "aggregate_crud --> connection OK ; aggregate.available = True"
+#            except Exception as e:
+#                aggregate.available = False
+#                print "aggregate_crud --> connection OK; aggregate.available = False"                                            
 
             
             aggregate.save()
@@ -108,7 +107,6 @@ def aggregate_crud(request, agg_id=None):
 def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None', sliceUUID = 'None'):
 
     "asks the VT AM for all the resources under it."
-    print "ASKING RESOURCES"
     serversInAggregate = []
     try:
         print "connecting to"
@@ -125,9 +123,7 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
-        print "hash dado "+str(rHashObject.hashValue)
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
-        print "HASH RECIBIDO " + str(hashV)
     except Exception as e:
         print "Can't retrieve resources"
         print e

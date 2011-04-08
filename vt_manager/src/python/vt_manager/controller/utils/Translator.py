@@ -103,9 +103,9 @@ class Translator():
         VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
         #VMxmlClass.status=statusTable.get(VMmodel.state)
              
-        ifaceIndex = 0
+       
         macs = VMmodel.macs.all()
-        for mac in macs:
+        for ifaceIndex, mac in enumerate(macs):
             if(ifaceIndex != 0):
                 newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
                 VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
@@ -117,7 +117,7 @@ class Translator():
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = VMmodel.ips.get().gw
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = VMmodel.ips.get().dns1
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = VMmodel.ips.get().dns2
-                #VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
             else:
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
@@ -125,8 +125,9 @@ class Translator():
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = None
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = None
                 VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()[ifaceIndex].ifaceName
             VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mac = mac.mac
-            ifaceIndex = ifaceIndex + 1
+      
 
 
     @staticmethod

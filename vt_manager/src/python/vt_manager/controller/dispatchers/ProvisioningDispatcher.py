@@ -11,7 +11,7 @@ from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.controller.utils.Translator import Translator
-import xmlrpclib, threading, logging
+import xmlrpclib, threading, logging, copy
 from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
 
 class ProvisioningDispatcher():
@@ -166,35 +166,69 @@ class ProvisioningDispatcher():
     #            dispatcher.deleteVM(action.id,vm)
 
 
+#    @staticmethod
+#    def setVMinterfaces(VMmodel, VMxmlClass):
+#        ethIndex = 0
+#        for iface in VMxmlClass.xen_configuration.interfaces.interface:
+#            if iface.ismgmt is True:
+#                iface.name = 'eth'+str(ethIndex)
+#                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
+#                iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
+#                iface.ip = iptemp.ip
+#                iface.mask = iptemp.mask
+#                iface.gw = iptemp.gw
+#                iface.dns1 = iptemp.dns1
+#                iface.dns2 = iptemp.dns2
+#                #Relate the IPs created with the VMmodel
+#		        try:
+#         	       VMmodel.setIPs()
+#		        except Exception as e:
+#			        print e
+#			        raise e
+#
+#                print "[DEBUG] Management Interface set"
+#            else:
+#                iface.name = 'eth'+str(ethIndex)
+#                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name)
+#                print "[DEBUG] Non Management Interface set"
+#            ethIndex = ethIndex + 1
+#        #Relate the Macs created with the VMmodel
+#        VMmodel.setMacs()
+
     @staticmethod
     def setVMinterfaces(VMmodel, VMxmlClass):
-        ethIndex = 0
-        for iface in VMxmlClass.xen_configuration.interfaces.interface:
-            if iface.ismgmt is True:
-                iface.name = 'eth'+str(ethIndex)
-                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
-                iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name, True)
-                iface.ip = iptemp.ip
-                iface.mask = iptemp.mask
-                iface.gw = iptemp.gw
-                iface.dns1 = iptemp.dns1
-                iface.dns2 = iptemp.dns2
-                #Relate the IPs created with the VMmodel
-		        try:
-         	       VMmodel.setIPs()
-		        except Exception as e:
-			        print e
-			        raise e
-
-                print "[DEBUG] Management Interface set"
+        #Data interfaces
+        for i, ServerIface in enumerate(VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()):
+            if i != 0:
+                newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+                VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
             else:
-                iface.name = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.'eth'+str(ethIndex)
-                iface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, iface.name)
-                print "[DEBUG] Non Management Interface set"
-            ethIndex = ethIndex + 1
-        #Relate the Macs created with the VMmodel
-        VMmodel.setMacs()
+                newInterface = VMxmlClass.xen_configuration.interfaces.interface[0]
 
+            newInterface.name = 'eth'+str(i+1)
+            newInterface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name)
+            newInterface.switch_id = ServerIface.ifaceName
+        #Mgmt Interface
+        newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+        VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
+        newInterface.ismgmt = True
+        newInterface.name = 'eth0'
+        newInterface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name, True)
+        newInterface.switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
+        iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name, True)
+        newInterface.ip = iptemp.ip
+        newInterface.mask = iptemp.mask
+        newInterface.gw = iptemp.gw
+        newInterface.dns1 = iptemp.dns1
+        newInterface.dns2 = iptemp.dns2
+        #Relate the IPs created with the VMmodel
+        try:
+            VMmodel.setIPs()
+        except Exception as e:
+            print e
+            raise e
+
+        VMmodel.setMacs()
 
     @staticmethod
     def checkVMisPresent(action):
@@ -236,7 +270,6 @@ class ProvisioningDispatcher():
     def connectAndSendPlugin(url, status,id, description):
         try:
             plugin = xmlrpclib.Server(url)
-            print plugin.system.listMethods()
             print "[DEBUG] Sending ONGOING/FAILED response to Plugin\n"
             plugin.sendAsync(XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(status,id, description)))
         except Exception as e:

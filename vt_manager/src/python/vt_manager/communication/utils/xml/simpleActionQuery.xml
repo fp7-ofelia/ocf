@@ -28,11 +28,8 @@
 						<gw>NONE</gw>
 						<dns1>NONE</dns1>
 						<dns2>NONE</dns2>
+                        <switch-id>NONE</switch-id>
 					</interface>
-                    <interface>
-                        <name>NONE</name>
-                        <mac>NONE</mac>
-                    </interface>
 				</interfaces>
 			</xen-configuration>
 		</virtual-machine>	
