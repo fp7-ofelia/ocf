@@ -16,16 +16,16 @@ from vt_plugin.models import *
 from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
-                        ('Default','Default'),
-                        ('Test','Test'),
+                        ('default','Default'),
+                        ('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
-                        ('FileImage','File Image'),
-                        ('LV','Logical Volume'),
+                        ('file-image','File Image'),
+                        ('logical-volume-image','Logical Volume'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
-                        ('Paravirtualization','Paravirtualization'),
-                        ('HVM','HVM'),
+                        ('paravirtualization','Paravirtualization'),
+                        ('hvm','HVM'),
                       )
 
 
@@ -44,7 +44,7 @@ def validate_discImage(value):
             "Invalid input: only test image available",
         )
 
-    if value != "Test":
+    if value not in ["test", "default"]:
         error()
         
 def validate_hdSetupType(value):
@@ -53,7 +53,7 @@ def validate_hdSetupType(value):
             "Invalid input: only File Image supported",
         )
 
-    if value != "FileImage":
+    if value != "file-image":
         error()
 
 def validate_virtualizationSetupType(value):
@@ -62,7 +62,7 @@ def validate_virtualizationSetupType(value):
             "Invalid input: only Paravirtualization supported",
         )
 
-    if value != "Paravirtualization":
+    if value != "paravirtualization":
         error()
 
 class VM(Resource):

@@ -33,7 +33,7 @@ class VMcontroller():
 	    instance.aggregate_id = s.aggregate_id
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 
-            if instance.disc_image == 'Test':
+            if instance.disc_image == 'test':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
