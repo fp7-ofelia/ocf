@@ -263,4 +263,10 @@ class Extendable(models.Model):
         """Is the object an instance of the passed class C{klass}?"""
         
         return self.leaf_name == klass.__name__ and self.module_name == klass.__module__
+   
+    '''
+	Bypasses authentication limitations
+    ''' 
+    def straightSave(self):
+	super(Extendable, self).save()	
     

@@ -21,8 +21,9 @@ class BackgroundMonitor():
 
         for aggregate in Aggregate.objects.all():
             #aggregate = aggregate.as_leaf_class()
-            if isinstance(aggregate.as_leaf_class(), VtPlugin):
-                AggregateMonitoringThread.monitorAggregateInNewThread(aggregate)
+	    print "I am going to monitor: "+aggregate.name
+            AggregateMonitoringThread.monitorAggregateInNewThread(aggregate)
+
         #Wait for threads
         for thread in threading.enumerate():
             if thread is not threading.currentThread():

@@ -15,8 +15,6 @@ class XmlRpcClient():
 
         try:
             aggregate= xmlrpclib.Server(url)
-            print "PARAMS"
-            print params
             getattr(aggregate,methodName)(params)
         except Exception as e:
             print "XMLRPC Client error: "

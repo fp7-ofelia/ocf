@@ -19,26 +19,21 @@ class AggregateMonitoringThread(Thread):
 
 
     def __updateAggregateStatus(self, aggregate):
-        from django.contrib.auth.models import User
-        from django.contrib.auth import authenticate
-        from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD
-        user = authenticate(username=ROOT_USERNAME, password=ROOT_PASSWORD)
-        kw = user
-        if user is not None:
-            print "USER AUTHENTICATED"
+	print "MONITORING >>>> "+aggregate.name
         try:
             agg = aggregate.as_leaf_class()
             XmlRpcClient.callRPCMethod('https://'+agg.client.username+':'+agg.client.password+'@'+agg.client.url[8:],"ping", "hello")
-            print "VOY A PONE' TRU"
+            print "Aggregate "+aggregate.name+" is alive"
             aggregate.available = True
             #aggregate.save(permittee_kw = user.first_name)
-            agg.save()
+            aggregate.straightSave()
         except Exception as e:
             #If fails for some reason mark as unreachable
             print e
             aggregate.available = False
             #aggregate.save(permittee_kw = user.first_name)
-            agg.save()
+            print "Aggregate "+aggregate.name+" is DEAD!"
+            aggregate.straightSave()
 		
     @staticmethod
     def monitorAggregateInNewThread(param):
