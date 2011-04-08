@@ -204,7 +204,7 @@ class ProvisioningDispatcher():
                 VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
             else:
                 newInterface = VMxmlClass.xen_configuration.interfaces.interface[0]
-
+            newInterface.ismgmt = False
             newInterface.name = 'eth'+str(i+1)
             newInterface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name)
             newInterface.switch_id = ServerIface.ifaceName
@@ -260,6 +260,8 @@ class ProvisioningDispatcher():
         try:
             agent = xmlrpclib.Server(AGENT_URL)
             print "[DEBUG] Sending ActionQuery to Agent in https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL
+            print "XMLTOPLUGIN"
+            print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
             agent.send("https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
             print "[EXCEPTION] Exception connecting to Agent"

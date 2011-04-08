@@ -83,8 +83,6 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 vIndex = vIndex + 1
             sIndex = sIndex + 1
         
-        print "XMLinLISTRESOURCES"    
-        print infoRspec
         listR =   XmlHelper.craftXmlClass(infoRspec)
         hashV = hash(listR)
         return hashV, listR
