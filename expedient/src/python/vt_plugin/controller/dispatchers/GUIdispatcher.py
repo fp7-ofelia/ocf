@@ -70,9 +70,12 @@ def virtualmachine_crud(request, slice_id, server_id):
         extra_context={"virtual_machines": virtualmachines,
                         "server_name":serv.name, "formset": formset,"slice":slice,
                         "breadcrumbs": (
-                                        ("Home", reverse("home")),
-                                        ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
-            ),
+                    ("Home", reverse("home")),
+                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    ("Create VM in Server %s" %serv.name, reverse("virtualmachine_crud", args=[slice_id, server_id])), 
+                )
         })
 
 
