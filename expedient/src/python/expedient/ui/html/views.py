@@ -99,7 +99,9 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     id_to_idx = {}
     agg_ids = []
    
-    #Openflow devices 
+    #Openflow devices
+    #XXX: botch
+    openflowSwitches = dict() 
     for i, agg in enumerate(of_aggs):
         agg_ids.append(agg.pk)
         switches = OpenFlowSwitch.objects.filter(
@@ -111,6 +113,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
             nodes.append(dict(
                 name=s.name, value=s.id, group=i)
             )
+	    openflowSwitches[s.datapath_id] = len(nodes)-1
     
     #Planelab nodes 
     for i, agg in enumerate(pl_aggs):
@@ -125,22 +128,6 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                 name=n.name, value=n.id, group=i+len(of_aggs))
             )
 
-
-    #VT-AM nodes 
-    for i, agg in enumerate(vt_aggs):
-        agg_ids.append(agg.pk)
-#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
-        vt_servers = VTServer.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-
-        for n in vt_servers:
-            #id_to_idx[n.id] = len(nodes)
-            nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
-                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            )   
 
 
     # get all connections with both interfaces in wanted aggregates
@@ -190,7 +177,40 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                 ),
             )
         )
-        
+
+    #VT-AM nodes 
+    for i, agg in enumerate(vt_aggs):
+        agg_ids.append(agg.pk)
+#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
+        vt_servers = VTServer.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+
+
+
+        for n in vt_servers:
+            #id_to_idx[n.id] = len(nodes)
+            nodes.append(dict(
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
+                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+            )   
+       	    for inter in n.ifaces.all():
+		#first check datapathId exists.
+		try:
+			sId= openflowSwitches[inter.switchID]
+		except:
+			continue
+		links.append(
+	            dict(
+               		target=1,
+	                src=len(nodes)-1,
+			value=inter.ifaceName+":"+str(inter.port)
+               		),
+        	)
+ 
+
+
     return (nodes, links)
 
 
