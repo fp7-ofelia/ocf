@@ -105,7 +105,7 @@ function addInterface() {
             <th> Actions </th>
         </tr>
         {% for vm in server.vms.all %}
-<!--            {% with vm.projectName as pName %} 
+<!--           {% with vm.projectName as pName %} 
             {% with vm.sliceName as sName %}
             {{vmProjects}}{{pName}}{{vmProjects.pName}}-->
           <tr class = "{% cycle 'odd' 'even' %}">
@@ -133,8 +133,8 @@ function addInterface() {
 
             </td>
         </tr>
-        {% endwith%}
-        {% endwith%}
+<!--        {% endwith%}
+        {% endwith%}-->
        {% endfor %}
      </table>   
      {% endif %}
