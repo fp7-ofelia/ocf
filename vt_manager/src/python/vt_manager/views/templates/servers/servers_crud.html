@@ -105,9 +105,9 @@ function addInterface() {
             <th> Actions </th>
         </tr>
         {% for vm in server.vms.all %}
-            {% with vm.projectName as pName %} 
+<!--            {% with vm.projectName as pName %} 
             {% with vm.sliceName as sName %}
-            {{vmProjects}}{{pName}}{{vmProjects}}
+            {{vmProjects}}{{pName}}{{vmProjects.pName}}-->
           <tr class = "{% cycle 'odd' 'even' %}">
             <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
             <td> {{vm.memory}}</td>
