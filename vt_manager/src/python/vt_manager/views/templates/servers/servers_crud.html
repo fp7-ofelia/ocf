@@ -105,14 +105,17 @@ function addInterface() {
             <th> Actions </th>
         </tr>
         {% for vm in server.vms.all %}
+            {% with vm.projectName as pName %} 
+            {% with vm.sliceName as sName %}
+            {{vmProjects}}{{pName}}{{vmProjects}}
           <tr class = "{% cycle 'odd' 'even' %}">
             <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
             <td> {{vm.memory}}</td>
             <td> {{vm.operatingSystemType }}</td>
             <td> {{vm.operatingSystemDistribution }}</td>
             <td> {{vm.operatingSystemVersion }}</td>
-            <td> {{vm.projectName }}</td>
-            <td> {{vm.sliceName }}</td>
+            <td> <span title = {{vmPojects.pName}}>{{vm.projectName }}</span></td>
+            <td alt = {{vmSlices.sName}}> {{vm.sliceName }}</td>
             <td> {{vm.state }}</td>
             <td>
                 {% if vm.state == "running" %}
@@ -130,6 +133,8 @@ function addInterface() {
 
             </td>
         </tr>
+        {% endwith%}
+        {% endwith%}
        {% endfor %}
      </table>   
      {% endif %}

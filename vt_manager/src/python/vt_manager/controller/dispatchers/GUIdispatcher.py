@@ -3,7 +3,6 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple
-#from vt_manager.common.utils.views import generic_crud
 from vt_manager.common.messaging.models import DatedMessage
 from vt_manager.models import VTServer
 from django.views.generic import list_detail, simple
@@ -17,7 +16,6 @@ from django.template import loader, RequestContext
 from django.core.xheaders import populate_xheaders
 from django.contrib import messages
 from django.utils.translation import ugettext
-
 
 def userIsIslandManager(request):
 
@@ -37,11 +35,22 @@ def servers_crud(request, server_id=None):
                             template = 'not_admin.html',
                             extra_context = {'user':request.user},
                         )
-
+    vmProjects = {}
+    vmSlices = {}
+    server = VTServer.objects.get(id = server_id)
+    for vm in server.vms.all():
+        if vm.projectName not in vmProjects:
+            vmProjects[vm.projectName] = vm.projectId
+        if vm.projectName not in vmProjects:
+            vmSlices[vm.sliceName] = vm.sliceId
+    print "PRUEBA"
+    print vmProjects['Test']
+            
     return server_generic_crud(
         request,
         obj_id=server_id,
         model=VTServer,
+        extra_context = {'vmProjects': vmProjects, 'vmSlices': vmSlices},
         template_object_name="server",
         template="servers/servers_crud.html",
         redirect = lambda inst: '/servers/admin/'
@@ -79,7 +88,7 @@ def server_generic_crud(request, obj_id, model, template, redirect,
     elif request.method == "POST":
         postData =  request.POST.copy()
         form = form_class(request.POST, instance=instance)
-        if instance != "VOLVER A PONER None EN TODO CASO" :
+        if instance != None :
             #for iface in instance.ifaces.all():
             for i in range(0,len(request.POST.getlist('ifaceName'))):
                 ifaceforms.append(form_classIface(
