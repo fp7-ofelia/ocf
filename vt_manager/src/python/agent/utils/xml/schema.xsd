@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema targetNamespace="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+<!-- Elements -->
+	<xs:element name="rspec">
+		<xs:complexType>
+		    	<xs:choice>
+				<xs:element name="query">
+					<xs:complexType>
+		    				<xs:choice>
+							<xs:element name="provisioning" type="provisioning-type"/>
+							<!-- TODO: implement Monitoring and Info hierarchies -->
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="response">
+					<xs:complexType>
+	    					<xs:choice>
+							<xs:element name="provisioning" type="provisioning-type"/>
+							<xs:element name="information" type="information-type"/>
+							<!-- TODO: implement Monitoring and Info hierarchies -->
+		    				</xs:choice>
+					</xs:complexType>
+				</xs:element>
+	    		</xs:choice>
+		</xs:complexType>
+	</xs:element>
+
 <!-- Types -->
 	<xs:complexType name="provisioning-type">
 		<xs:sequence>
@@ -199,30 +225,4 @@
 			<xs:complexType name="server-status-type">
 			</xs:complexType>
 
-<!-- Elements -->
-	<xs:element name="rspec">
-		<xs:complexType>
-		    	<xs:choice>
-				<xs:element name="query">
-					<xs:complexType>
-		    				<xs:choice>
-							<xs:element name="provisioning" type="provisioning-type"/>
-							<!-- TODO: implement Monitoring and Info hierarchies -->
-						</xs:choice>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="response">
-					<xs:complexType>
-	    					<xs:choice>
-							<xs:element name="provisioning" type="provisioning-type"/>
-							<xs:element name="information" type="information-type"/>
-							<!-- TODO: implement Monitoring and Info hierarchies -->
-		    				</xs:choice>
-					</xs:complexType>
-				</xs:element>
-	    		</xs:choice>
-		</xs:complexType>
-	</xs:element>
-
-<!-- QUERY -->
 </xs:schema>

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Wed Apr  6 10:27:28 2011 by generateDS.py version 2.3b.
+# Generated Mon Apr 11 17:58:57 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -276,6 +276,233 @@ def _cast(typ, value):
 #
 # Data representation classes.
 #
+
+class rspec(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, query=None, response=None):
+        self.query = query
+        self.response = response
+    def factory(*args_, **kwargs_):
+        if rspec.subclass:
+            return rspec.subclass(*args_, **kwargs_)
+        else:
+            return rspec(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_query(self): return self.query
+    def set_query(self, query): self.query = query
+    def get_response(self): return self.response
+    def set_response(self, response): self.response = response
+    def export(self, outfile, level, namespace_='', name_='rspec', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='rspec')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='rspec'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='rspec'):
+        if self.query:
+            self.query.export(outfile, level, namespace_, name_='query', )
+        if self.response:
+            self.response.export(outfile, level, namespace_, name_='response', )
+    def hasContent_(self):
+        if (
+            self.query is not None or
+            self.response is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='rspec'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.query is not None:
+            showIndent(outfile, level)
+            outfile.write('query=model_.query(\n')
+            self.query.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.response is not None:
+            showIndent(outfile, level)
+            outfile.write('response=model_.response(\n')
+            self.response.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'query': 
+            obj_ = query.factory()
+            obj_.build(child_)
+            self.set_query(obj_)
+        elif nodeName_ == 'response': 
+            obj_ = response.factory()
+            obj_.build(child_)
+            self.set_response(obj_)
+# end class rspec
+
+
+class query(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, provisioning=None):
+        self.provisioning = provisioning
+    def factory(*args_, **kwargs_):
+        if query.subclass:
+            return query.subclass(*args_, **kwargs_)
+        else:
+            return query(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_provisioning(self): return self.provisioning
+    def set_provisioning(self, provisioning): self.provisioning = provisioning
+    def export(self, outfile, level, namespace_='', name_='query', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='query')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='query'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='query'):
+        if self.provisioning:
+            self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
+    def hasContent_(self):
+        if (
+            self.provisioning is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='query'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.provisioning is not None:
+            showIndent(outfile, level)
+            outfile.write('provisioning=model_.provisioning_type(\n')
+            self.provisioning.exportLiteral(outfile, level, name_='provisioning')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'provisioning': 
+            obj_ = provisioning_type.factory()
+            obj_.build(child_)
+            self.set_provisioning(obj_)
+# end class query
+
+
+class response(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, provisioning=None, information=None):
+        self.provisioning = provisioning
+        self.information = information
+    def factory(*args_, **kwargs_):
+        if response.subclass:
+            return response.subclass(*args_, **kwargs_)
+        else:
+            return response(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_provisioning(self): return self.provisioning
+    def set_provisioning(self, provisioning): self.provisioning = provisioning
+    def get_information(self): return self.information
+    def set_information(self, information): self.information = information
+    def export(self, outfile, level, namespace_='', name_='response', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='response')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='response'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='response'):
+        if self.provisioning:
+            self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
+        if self.information:
+            self.information.export(outfile, level, namespace_, name_='information', )
+    def hasContent_(self):
+        if (
+            self.provisioning is not None or
+            self.information is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='response'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.provisioning is not None:
+            showIndent(outfile, level)
+            outfile.write('provisioning=model_.provisioning_type(\n')
+            self.provisioning.exportLiteral(outfile, level, name_='provisioning')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.information is not None:
+            showIndent(outfile, level)
+            outfile.write('information=model_.information_type(\n')
+            self.information.exportLiteral(outfile, level, name_='information')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'provisioning': 
+            obj_ = provisioning_type.factory()
+            obj_.build(child_)
+            self.set_provisioning(obj_)
+        elif nodeName_ == 'information': 
+            obj_ = information_type.factory()
+            obj_.build(child_)
+            self.set_information(obj_)
+# end class response
+
 
 class provisioning_type(GeneratedsSuper):
     subclass = None
@@ -1468,233 +1695,6 @@ class server_status_type(GeneratedsSuper):
 # end class server_status_type
 
 
-class rspec(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, query=None, response=None):
-        self.query = query
-        self.response = response
-    def factory(*args_, **kwargs_):
-        if rspec.subclass:
-            return rspec.subclass(*args_, **kwargs_)
-        else:
-            return rspec(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_query(self): return self.query
-    def set_query(self, query): self.query = query
-    def get_response(self): return self.response
-    def set_response(self, response): self.response = response
-    def export(self, outfile, level, namespace_='', name_='rspec', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='rspec')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='rspec'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='rspec'):
-        if self.query:
-            self.query.export(outfile, level, namespace_, name_='query', )
-        if self.response:
-            self.response.export(outfile, level, namespace_, name_='response', )
-    def hasContent_(self):
-        if (
-            self.query is not None or
-            self.response is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='rspec'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.query is not None:
-            showIndent(outfile, level)
-            outfile.write('query=model_.query(\n')
-            self.query.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.response is not None:
-            showIndent(outfile, level)
-            outfile.write('response=model_.response(\n')
-            self.response.exportLiteral(outfile, level)
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'query': 
-            obj_ = query.factory()
-            obj_.build(child_)
-            self.set_query(obj_)
-        elif nodeName_ == 'response': 
-            obj_ = response.factory()
-            obj_.build(child_)
-            self.set_response(obj_)
-# end class rspec
-
-
-class query(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, provisioning=None):
-        self.provisioning = provisioning
-    def factory(*args_, **kwargs_):
-        if query.subclass:
-            return query.subclass(*args_, **kwargs_)
-        else:
-            return query(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_provisioning(self): return self.provisioning
-    def set_provisioning(self, provisioning): self.provisioning = provisioning
-    def export(self, outfile, level, namespace_='', name_='query', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='query')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='query'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='query'):
-        if self.provisioning:
-            self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
-    def hasContent_(self):
-        if (
-            self.provisioning is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='query'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.provisioning is not None:
-            showIndent(outfile, level)
-            outfile.write('provisioning=model_.provisioning_type(\n')
-            self.provisioning.exportLiteral(outfile, level, name_='provisioning')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'provisioning': 
-            obj_ = provisioning_type.factory()
-            obj_.build(child_)
-            self.set_provisioning(obj_)
-# end class query
-
-
-class response(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, provisioning=None, information=None):
-        self.provisioning = provisioning
-        self.information = information
-    def factory(*args_, **kwargs_):
-        if response.subclass:
-            return response.subclass(*args_, **kwargs_)
-        else:
-            return response(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_provisioning(self): return self.provisioning
-    def set_provisioning(self, provisioning): self.provisioning = provisioning
-    def get_information(self): return self.information
-    def set_information(self, information): self.information = information
-    def export(self, outfile, level, namespace_='', name_='response', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='response')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='response'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='response'):
-        if self.provisioning:
-            self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
-        if self.information:
-            self.information.export(outfile, level, namespace_, name_='information', )
-    def hasContent_(self):
-        if (
-            self.provisioning is not None or
-            self.information is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='response'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.provisioning is not None:
-            showIndent(outfile, level)
-            outfile.write('provisioning=model_.provisioning_type(\n')
-            self.provisioning.exportLiteral(outfile, level, name_='provisioning')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.information is not None:
-            showIndent(outfile, level)
-            outfile.write('information=model_.information_type(\n')
-            self.information.exportLiteral(outfile, level, name_='information')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'provisioning': 
-            obj_ = provisioning_type.factory()
-            obj_.build(child_)
-            self.set_provisioning(obj_)
-        elif nodeName_ == 'information': 
-            obj_ = information_type.factory()
-            obj_.build(child_)
-            self.set_information(obj_)
-# end class response
-
-
 USAGE_TEXT = """
 Usage: python <Parser>.py [ -s ] <in_xml_file>
 """
@@ -1715,8 +1715,8 @@ def parse(inFileName):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'provisioning-type'
-        rootClass = provisioning_type
+        rootTag = 'rspec'
+        rootClass = rspec
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -1733,14 +1733,14 @@ def parseString(inString):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'provisioning-type'
-        rootClass = provisioning_type
+        rootTag = 'rspec'
+        rootClass = rspec
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
     sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_="provisioning-type",
+    rootObj.export(sys.stdout, 0, name_="rspec",
         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
@@ -1750,8 +1750,8 @@ def parseLiteral(inFileName):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'provisioning-type'
-        rootClass = provisioning_type
+        rootTag = 'rspec'
+        rootClass = rspec
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
