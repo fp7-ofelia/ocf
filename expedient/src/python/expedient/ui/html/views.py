@@ -138,7 +138,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         for n in vt_servers:
             #id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                    name=n.name, value=n.id, group=i+len(of_aggs)+len(pl_aggs))
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
                     #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
             )   
 
