@@ -8,6 +8,14 @@ from vt_plugin.models import VTServer, VTServerIface
 class Translator():
 
     @staticmethod
+    def _isInteger(x):
+	try:
+		y = int(x)
+		return True
+	except:
+		return False
+
+    @staticmethod
     def VMtoModel(VMxmlClass, save = "noSave"):
 
        # statusTable = {
@@ -102,15 +110,17 @@ class Translator():
                         ifaceModel = VTServerIface()
                     ifaceModel.ifaceName = iface.name
                     ifaceModel.switchID = iface.switch_id
-                    ifaceModel.port = iface.switch_port
+		    if Translator._isInteger(iface.switch_port):
+                    	ifaceModel.port = iface.switch_port
                     ifaceModel.save()
                     if not sModel.ifaces.filter(ifaceName = iface.name):
                         sModel.ifaces.add(ifaceModel)
             sModel.setVMs()        
             sModel.save()
             return sModel
-        except:
+        except Exception as e:
             print "Error tranlating Server Class to Model"
+	    print e
             if newServer:
                 sModel.delete()
 
