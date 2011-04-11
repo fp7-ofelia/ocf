@@ -37,14 +37,16 @@ def servers_crud(request, server_id=None):
                         )
     vmProjects = {}
     vmSlices = {}
-    server = VTServer.objects.get(id = server_id)
-    for vm in server.vms.all():
-        if vm.projectName not in vmProjects:
-            vmProjects[vm.projectName] = vm.projectId
-        if vm.projectName not in vmProjects:
-            vmSlices[vm.sliceName] = vm.sliceId
-    print "PRUEBA"
-    print vmProjects['Test']
+    try: 
+        server = VTServer.objects.get(id = server_id)
+        for vm in server.vms.all():
+            if vm.projectName not in vmProjects:
+                vmProjects[vm.projectName] = vm.projectId
+            if vm.projectName not in vmProjects:
+                vmSlices[vm.sliceName] = vm.sliceId
+    except:
+        pass
+
             
     return server_generic_crud(
         request,

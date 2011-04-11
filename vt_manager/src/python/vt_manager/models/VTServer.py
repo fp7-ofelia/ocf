@@ -48,7 +48,7 @@ class VTServer(models.Model):
     mask = models.IPAddressField(verbose_name = "Subnet mask")
     gw = models.IPAddressField(verbose_name = "Gateway")
     dns1 = models.IPAddressField(verbose_name = "DNS 1")
-    dns2 =  models.IPAddressField(verbose_name = "DNS 2")
+    dns2 =  models.IPAddressField(verbose_name = "DNS 2", blank = True, null = True)
     vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Bridge Mgmt Interface for VMs")
     uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)
