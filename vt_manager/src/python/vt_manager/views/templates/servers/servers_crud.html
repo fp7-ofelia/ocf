@@ -1,5 +1,5 @@
 {% extends "servers/servers_base.html" %}
-
+{% load accessDict %}
 {% block pagehead %}<h1>Add/Update VTServer.:</h1>{% endblock pagehead %}
 
 
@@ -72,7 +72,6 @@ function addInterface() {
                 <br>{{ifaceform.as_table}}</br>
             {% endfor %}
             </br>
-            <!--<span id="formPlace">&nbsp;</span>-->
             <INPUT type="button" value="Add" onclick="addInterface()"/> 
         
            </div>
@@ -105,17 +104,14 @@ function addInterface() {
             <th> Actions </th>
         </tr>
         {% for vm in server.vms.all %}
-<!--           {% with vm.projectName as pName %} 
-            {% with vm.sliceName as sName %}
-            {{vmProjects}}{{pName}}{{vmProjects.pName}}-->
           <tr class = "{% cycle 'odd' 'even' %}">
             <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
             <td> {{vm.memory}}</td>
             <td> {{vm.operatingSystemType }}</td>
             <td> {{vm.operatingSystemDistribution }}</td>
             <td> {{vm.operatingSystemVersion }}</td>
-            <td> <span title = {{vmPojects.pName}}>{{vm.projectName }}</span></td>
-            <td alt = {{vmSlices.sName}}> {{vm.sliceName }}</td>
+            <td> <span title = "uuid: {{vmProjects|dictKeyLookup:vm.projectName}}">{{vm.projectName }}</span></td>
+            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
             <td> {{vm.state }}</td>
             <td>
                 {% if vm.state == "running" %}
@@ -133,8 +129,6 @@ function addInterface() {
 
             </td>
         </tr>
-<!--        {% endwith%}
-        {% endwith%}-->
        {% endfor %}
      </table>   
      {% endif %}
