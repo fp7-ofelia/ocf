@@ -55,15 +55,13 @@ class Translator():
         sClass.operating_system_version = sModel.getOSversion()
         sClass.virtualization_type = sModel.getVirtTech()
         ifaces = sModel.ifaces.all()
-        ifaceIndex = 0
-        for iface in ifaces:
+        for ifaceIndex, iface in enumerate(ifaces):
             if ifaceIndex != 0:
                 newInterface = copy.deepcopy(sClass.interfaces.interface[0])
                 sClass.interfaces.interface.append(newInterface)
             sClass.interfaces.interface[ifaceIndex].name = iface.ifaceName   
             sClass.interfaces.interface[ifaceIndex].switch_id= iface.switchID   
             sClass.interfaces.interface[ifaceIndex].switch_port = iface.port  
-            ifaceIndex = ifaceIndex + 1       
         mgmtInterface = copy.deepcopy(sClass.interfaces.interface[0])
         mgmtInterface.name = "NONE"
         mgmtInterface.switch_id= sModel.getVmMgmtIface() 

@@ -52,12 +52,12 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
             listR = XmlHelper.craftXmlClass(infoRspec)
             hashV = hash(listR)
 
-        sIndex = 0
-        vIndex = 0
-        for server in servers:
+        for sIndex, server in enumerate(servers):
             #add Server 
+            if(sIndex == 0):
+                baseServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
             if(sIndex != 0):
-                newServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
+                newServer = copy.deepcopy(baseServer)
                 infoRspec.response.information.resources.server.append(newServer)
             
             Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
@@ -74,16 +74,15 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 if not vms:
                     logging.error("No VMs available")
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
-            for vm in vms:
+            for vIndex, vm in enumerate(vms):
                 if (vIndex != 0):
                     newVM = copy.deepcopy(infoRspec.response.information.resources.server[sIndex].virtual_machine[0])
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
                 
                 Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
-                vIndex = vIndex + 1
-            sIndex = sIndex + 1
         
         listR =   XmlHelper.craftXmlClass(infoRspec)
+        print listR
         hashV = hash(listR)
         return hashV, listR
 

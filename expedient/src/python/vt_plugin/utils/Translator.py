@@ -161,7 +161,6 @@ class Translator():
         for iface in VMclass.xen_configuration.interfaces.interface:
             if VMmodel.ifaces.filter(name = iface.name):
                 ifaceModel = VMmodel.ifaces.get(name = iface.name)
-                print "NEW INTERFACE"
             else:
                 ifaceModel = iFace()
             ifaceModel.name = iface.name
@@ -170,17 +169,13 @@ class Translator():
             else:
                 ifaceModel.isMgmt = False
             ifaceModel.mac = iface.mac
-            print "SWITCHY"
-            print iface.switch_id
             ifaceModel.bridgeIface = iface.switch_id
-            print ifaceModel.bridgeIface
             if iface.ismgmt:
                 ifaceModel.ip = iface.ip
                 ifaceModel.gw = iface.gw
                 ifaceModel.mask = iface.mask
                 ifaceModel.dns1 = iface.dns1
                 ifaceModel.dns2 = iface.dns2
-            print "VA A SALVAR IFACEMODEL EN EXPEDIENT"
             ifaceModel.save()
             VMmodel.ifaces.add(ifaceModel)
             VMmodel.save()
