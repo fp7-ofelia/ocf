@@ -43,13 +43,14 @@ class VTServer(models.Model):
     operatingSystemVersion = models.CharField(choices = OS_VERSION_CHOICES,max_length = 512, verbose_name = "OS Version")
     virtTech = models.CharField(choices = VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology")
     agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent")
-    url = models.URLField(verify_exists = False, verbose_name = "URL of the Server")
+    url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
+    available = models.BooleanField(default=1)
     ipRange = models.IPAddressField(verbose_name = "VM IP range")#, help_text = "Range of IP to provide to the VMs")
     mask = models.IPAddressField(verbose_name = "Subnet mask")
     gw = models.IPAddressField(verbose_name = "Gateway")
     dns1 = models.IPAddressField(verbose_name = "DNS 1")
     dns2 =  models.IPAddressField(verbose_name = "DNS 2", blank = True, null = True)
-    vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Bridge Mgmt Interface for VMs")
+    vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Server Mgmt Bridge")
     uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)
     vms = models.ManyToManyField('VM', blank = True, null = True, editable = False)
@@ -58,7 +59,6 @@ class VTServer(models.Model):
     freeCpu = models.DecimalField(max_digits=3, decimal_places=2,blank = True, null=True, editable = False)
 
     ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
-    available = models.BooleanField(default=1)
 
     def setName(self, name):
         self.name = name
