@@ -203,7 +203,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
 			continue
 		links.append(
 	            dict(
-               		target=1,
+               		target=sId,
 	                src=len(nodes)-1,
 			value=inter.ifaceName+":"+str(inter.port)
                		),
