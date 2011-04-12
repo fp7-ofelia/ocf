@@ -42,7 +42,7 @@ def servers_crud(request, server_id=None):
         for vm in server.vms.all():
             if vm.projectName not in vmProjects:
                 vmProjects[vm.projectName] = vm.projectId
-            if vm.projectName not in vmProjects:
+            if vm.sliceName not in vmSlices:
                 vmSlices[vm.sliceName] = vm.sliceId
     except:
         pass
