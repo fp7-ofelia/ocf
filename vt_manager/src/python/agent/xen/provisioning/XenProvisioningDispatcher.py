@@ -43,6 +43,7 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
+			HdManager.umount(vm,pathToMountPoint)
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
 			#TODO improve this trace
 			print e
