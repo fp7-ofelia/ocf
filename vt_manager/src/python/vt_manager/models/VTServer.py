@@ -4,6 +4,7 @@ from django.contrib import auth
 import uuid
 #from vt_manager.models.VM import VM
 from vt_manager.models import *
+from vt_manager.settings import ISLAND_NETMASK, ISLAND_IP_RANGE, ISLAND_GW, ISLAND_DNS1, ISLAND_DNS2
 
 class VTServer(models.Model):
     """Virtualization Server class"""
@@ -27,7 +28,7 @@ class VTServer(models.Model):
     )
 
     OS_TYPE_CHOICES = (
-        ('Windows', 'Windos'),
+        ('Windows', 'Windows'),
         ('GNU/Linux', 'GNU/Linux'),
         ('Other', 'Other'),
     )
@@ -36,7 +37,7 @@ class VTServer(models.Model):
         """Meta Class for your model."""
         app_label = 'vt_manager'
     
-
+    available = models.BooleanField(default=1)
     name = models.CharField(max_length = 511, default="", verbose_name = "Name")
     operatingSystemType = models.CharField(choices = OS_TYPE_CHOICES,max_length = 512, verbose_name = "OS Type")
     operatingSystemDistribution = models.CharField(choices = OS_DIST_CHOICES,max_length = 512, verbose_name = "OS Distribution")
@@ -44,12 +45,11 @@ class VTServer(models.Model):
     virtTech = models.CharField(choices = VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology")
     agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent")
     url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
-    available = models.BooleanField(default=1)
-    ipRange = models.IPAddressField(verbose_name = "VM IP range")#, help_text = "Range of IP to provide to the VMs")
-    mask = models.IPAddressField(verbose_name = "Subnet mask")
-    gw = models.IPAddressField(verbose_name = "Gateway")
-    dns1 = models.IPAddressField(verbose_name = "DNS 1")
-    dns2 =  models.IPAddressField(verbose_name = "DNS 2", blank = True, null = True)
+    ipRange = models.IPAddressField(default = ISLAND_IP_RANGE, verbose_name = "VM IP range", editable = False)
+    mask = models.IPAddressField(default = ISLAND_NETMASK, verbose_name = "Subnet mask", editable = False)
+    gw = models.IPAddressField(default= ISLAND_GW , verbose_name = "Gateway", editable = False)
+    dns1 = models.IPAddressField(default = ISLAND_DNS1, verbose_name = "DNS 1", editable = False)
+    dns2 =  models.IPAddressField(default = ISLAND_DNS2, verbose_name = "DNS 2", blank = True, null = True, editable = False)
     vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Server Mgmt Bridge")
     uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)

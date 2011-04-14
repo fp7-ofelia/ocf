@@ -82,7 +82,6 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
         
         listR =   XmlHelper.craftXmlClass(infoRspec)
-        print listR
         hashV = hash(listR)
         return hashV, listR
 

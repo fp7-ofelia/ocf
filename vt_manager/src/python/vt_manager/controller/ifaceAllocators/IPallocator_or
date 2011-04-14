@@ -10,7 +10,7 @@ class IPallocator():
 
     MIN_HOST = 1
     AM_ID_BITS = 4 
-    HOST_ID_BITS = 32
+    HOST_ID_BITS = 28
     
 
     @staticmethod
@@ -61,10 +61,6 @@ class IPallocator():
             return       
 
         ip = Ip()
-
-        #XXX: This attribute is not used any more, should be removed
-        ip.setAMslotID(IPallocator.MIN_HOST)
-
         ip.setProjectID(projectID)
         ip.setSliceID(sliceID)
         ip.setAMid(amID)
@@ -72,29 +68,15 @@ class IPallocator():
         ip.setServerID(serverID)
         ip.ifaceName = ifaceName
         ip.isMgmt = isMgmt
+        IPallocator.setSlots(ip, projectID, amID, sliceID, vmID)
+        ip.setIp(IPallocator.ipString(server.ipRange, ip.AMslotID, ip.hostID))
+
         ip.gw = server.getGW()
         ip.mask = server.getMask()
         ip.dns1 = server.getDNS1()
-        ip.dns2 = server.getDNS2() 
-
-        IPallocatorMutex.acquire()
-        if not Ip.objects.all():
-            ip.setHostID(IPallocator.MIN_HOST)
-        
-        else:
-        #from the MIN_HOST to the MAX present, look for one is free
-            for i in range(IPallocator.MIN_HOST, max(Ip.objects.values('hostID'))['hostID']+1):
-                if not Ip.objects.filter(hostID = i):
-                    ip.setHostID(i)
-                    break
-            #if the index i is equal to the max host, it is because there was none free, so host should be the following
-            if i == max(Ip.objects.values('hostID'))['hostID'] :
-                ip.setHostID(i+1)
-
-
-        ip.setIp(IPallocator.ipString(server.ipRange, server.getMask(), ip.hostID))
+        ip.dns2 = server.getDNS2()
+        print "%s %s %s %s" %(ip.gw,ip.mask,ip.dns1,ip.dns2)
         ip.save()
-        IPallocatorMutex.release()
         return ip
 
     @staticmethod
@@ -109,28 +91,16 @@ class IPallocator():
 
 
     @staticmethod
-    def ipString(serverRange, netmask, hostID):
-        
-        n = str(netmask)
-        n = n.split('.')
-        netmaskBits = 0
-        for i, nm in enumerate(n):
-            if n[3-i] != '0':
-                nb = MACallocator.Denary2Binary(int(n[3-i]), 8)
-                for j, nbb in enumerate(nb):
-                    if str(nb[7-j]) != '0':
-                        lastBits = 8-j
-                        break
-                netmaskBits = lastBits + (3-i)*8
-                break
+    def ipString(serverRange, AMslotID, hostID):
+
         s = str(serverRange)
         s = s.split('.')
         prefix = ''
         for p in s:
             if p is not '0':
                 prefix = prefix + MACallocator.Denary2Binary(int(p) ,8)         
-        prefix = prefix[:netmaskBits]
-        add = prefix + MACallocator.Denary2Binary(hostID, 32 - netmaskBits)
+        
+        add = prefix + MACallocator.Denary2Binary(AMslotID, IPallocator.AM_ID_BITS) + MACallocator.Denary2Binary(hostID, IPallocator.HOST_ID_BITS - len(prefix))
         add2 = []
         for i in range(4):
             add2.append(add[i*8:i*8+8])          
