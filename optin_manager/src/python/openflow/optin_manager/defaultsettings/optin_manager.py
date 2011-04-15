@@ -5,7 +5,7 @@ Created on Sep 2, 2010
 '''
 
 BASIC_AUTH_URLS = (
-    #r'^/xmlrpc/xmlrpc.*',
+    r'^/xmlrpc/xmlrpc.*',
     ### for testing
     r'^/dummyfv/.*',
 )
@@ -19,7 +19,7 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
-    r'.*/xmlrpc/?',
+    #r'.*/xmlrpc/?',
 )
 
 DOMAIN_SCHEME = "https"

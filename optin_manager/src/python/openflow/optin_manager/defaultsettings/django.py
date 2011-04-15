@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
+    'django_evolution',
     'expedient.common.rpc4django',
     'expedient.common.xmlrpc_serverproxy',
     'expedient.common.defaultsite',
