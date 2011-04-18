@@ -3,7 +3,9 @@ import os
 import jinja2 
 
 from xen.provisioning.HdManager import HdManager
-from settings import OXA_DEBIANCONF_XEN_SERVER_KERNEL,OXA_DEBIANCONF_XEN_SERVER_INITRD,OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION
+from settings import OXA_DEBIANCONF_XEN_SERVER_KERNEL,OXA_DEBIANCONF_XEN_SERVER_INITRD,OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION
+
+#Linux HOSTNAME Location
 
 class DebianVMConfigurator:
 
@@ -16,15 +18,24 @@ class DebianVMConfigurator:
 		for inter in vm.xen_configuration.interfaces.interface  :
 			if inter.ismgmt:
 				#is a mgmt interface
-				iFile.write(
-				"auto "+inter.name+"\n"+
-				"iface "+inter.name+" inet static\n"+
-				"\taddress "+inter.ip +"\n"+
-				"\tnetmask "+inter.mask+"\n"+
-				"\tgateway "+inter.gw+"\n"+
-				"\tdns-nameservers "+inter.dns1+" "+inter.dns2+"\n\n"
-				) 
+				interfaceString = "auto "+inter.name+"\n"+\
+				"iface "+inter.name+" inet static\n"+\
+				"\taddress "+inter.ip +"\n"+\
+				"\tnetmask "+inter.mask+"\n"
+
+				if inter.gw != None and inter.gw != "":
+					interfaceString +="\tgateway "+inter.gw+"\n"
+
+				if inter.dns1 != None and inter.dns1 != "":
+					interfaceString+="\tdns-nameservers "+inter.dns1
+
+					if inter.dns2 != None and inter.dns2 != "":
+						interfaceString+=" "+inter.dns2
+				interfaceString +="\n\n"
+
+				iFile.write(interfaceString)			 
 			else:
+				#is a data interface
 				iFile.write("auto "+inter.name)
 
 	@staticmethod
@@ -32,6 +43,10 @@ class DebianVMConfigurator:
 		for inter in vm.xen_configuration.interfaces.interface:
 			uFile.write('SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="'+inter.mac+'", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="'+inter.name+'"\n')
 
+	@staticmethod
+	def __configureHostname(vm,hFile):
+		hFile.write(vm.name)		
+	
 	
 	@staticmethod
 	def __createParavirtualizationFileHdConfigFile(vm,env):
@@ -73,6 +88,13 @@ class DebianVMConfigurator:
 	def configureLDAPSettings(vm,path):
 		pass
 
+	@staticmethod
+	def configureHostname(vm,path):
+		try:
+			DebianVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
+		except Exception as e:
+			print "Could not configure hostname; execution continues;"+str(e)
+			pass
 
 	@staticmethod
 	def createVmConfigurationFile(vm):
