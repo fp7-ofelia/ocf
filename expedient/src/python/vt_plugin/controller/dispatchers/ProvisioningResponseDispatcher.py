@@ -55,13 +55,16 @@ class ProvisioningResponseDispatcher():
                     elif actionModel.type == 'delete':
                         actionModel.vm.delete()
                 elif actionModel.status == 'FAILED':
-                    if actionModel.vm.getState() == 'starting...':
+                    print "SIQUEFAILED"
+                    print actionModel.vm.getState()
+                    if actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
-                    elif actionModel.vm.getState() == 'stopping...':
+                    elif actionModel.type == 'hardStop':
                         actionModel.vm.setState('running')
-                    elif actionModel.vm.getState() == 'rebooting...':
+                    elif actionModel.type == 'reboot':
                         actionModel.vm.setState('stopped')
-                    elif actionModel.vm.getState() == 'creating...':
+                    elif actionModel.type == 'create':
+                        print "ERROR CREATING"
 	                DatedMessage.objects.post_message_to_user(
                             "%s" % actionModel.description,
                             actionModel.callBackUrl, msg_type=DatedMessage.TYPE_ERROR,

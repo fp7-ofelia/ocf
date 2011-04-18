@@ -243,9 +243,10 @@ class ProvisioningDispatcher():
             print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
             agent.send("https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
-            print "[EXCEPTION] Exception connecting to Agent"
-            print e
-            return
+            #print "[EXCEPTION] Exception connecting to Agent"
+            #print e
+            #return
+            raise Exception
 
     @staticmethod
     def connectAndSendPlugin(url, status,id, description):
@@ -268,7 +269,7 @@ class ProvisioningDispatcher():
 	for ip in ips:
             vm.ips.remove(ip)
             ip.delete()
-        macs = vm.masc.all()
+        macs = vm.macs.all()
         for mac in macs:
             vm.macs.remove(mac)
             mac.delete()    
