@@ -159,6 +159,7 @@ class ProvisioningDispatcher():
                     ProvisioningDispatcher.connectAndSendAgent(AGENT_URL, action)
                 except Exception as e:
                     print "Could not connect to Agent"
+                    ProvisioningDispatcher.connectAndSendPlugin( PLUGIN_URL, "FAILED", action.id, "Could not connect to Agent")
 
         print "[DEBUG] PROVISIONING FINISHED..."
 
@@ -227,7 +228,6 @@ class ProvisioningDispatcher():
                 raise Exception
             except Exception as e:
                 #raise e
-                print "Action already exists"
                 print e
                 return
         else:
@@ -239,12 +239,11 @@ class ProvisioningDispatcher():
         try:
             agent = xmlrpclib.Server(AGENT_URL)
             print "[DEBUG] Sending ActionQuery to Agent in https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL
-            print "XMLTOPLUGIN"
             print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
             agent.send("https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
-            #print "[EXCEPTION] Exception connecting to Agent"
-            #print e
+            print "[EXCEPTION] Exception connecting to Agent"
+            print e
             #return
             raise Exception
 

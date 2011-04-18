@@ -56,8 +56,6 @@ class ProvisioningResponseDispatcher():
                     elif actionModel.type == 'delete':
                         actionModel.vm.delete()
                 elif actionModel.status == 'FAILED':
-                    print "SIQUEFAILED"
-                    print actionModel.vm.getState()
                     if actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
@@ -68,9 +66,8 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
                     elif actionModel.type == 'create':
-                        print "ERROR CREATING"
                         DatedMessage.objects.post_message_to_user(
-                            "%s. VM not created." % actionModel.description,
+                            "%s. VM %s not created." % (actionModel.description,actionModel.vm.name),
                             actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
                         )
                         ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTServer.objects.get(uuid = actionModel.vm.serverID))

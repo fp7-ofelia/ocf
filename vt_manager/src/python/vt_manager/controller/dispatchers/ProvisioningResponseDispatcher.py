@@ -38,7 +38,7 @@ class ProvisioningResponseDispatcher():
                 action.virtual_machine = tempVMclass
 
                 actionModel.save()
-                
+                failedOnCreate = 0 
                 if actionModel.status == 'SUCCESS':
                     if actionModel.type == 'create':
                         actionModel.vm.setState('created (stopped)')
@@ -72,15 +72,15 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('rebooting...')
                         actionModel.vm.save()
                 elif actionModel.status == 'FAILED':
-                    if actionModel.vm.getState() == 'starting...':
+                    if  actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
-                    elif actionModel.vm.getState() == 'stopping...':
+                    elif actionModel.type == 'hardStop':
                         actionModel.vm.setState('running')
-                    elif actionModel.vm.getState() == 'rebooting...':
+                    elif actionModel.type == 'reboot':
                         actionModel.vm.setState('stopped')
-                    elif actionModel.vm.getState() == 'creating...':
+                    elif actionModel.type == 'create':
                         actionModel.vm.setState('failed')
-			failedOnCreate = 1
+                        failedOnCreate = 1
                     else:
                         actionModel.vm.setState('failed')
                     actionModel.vm.save()

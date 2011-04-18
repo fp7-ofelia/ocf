@@ -109,8 +109,6 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
     "asks the VT AM for all the resources under it."
     serversInAggregate = []
     try:
-        print "connecting to"
-        print 'https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:]
         client = xmlrpclib.Server('https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:])
     except Exception as e:
         print "Can't connect to server"
@@ -123,7 +121,6 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         rHashObject = resourcesHash(hashValue = '0', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
-	print "HASHVALUE: %s	projectUUID: %s		sliceUUID: %s" %(str(rHashObject.hashValue),projectUUID, sliceUUID)
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
 	print hashV
     except Exception as e:
