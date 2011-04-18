@@ -2,6 +2,7 @@ from vt_manager.communication.utils.XmlUtils import *#XmlUtils
 from vt_manager.communication.utils.XmlUtils import XmlHelper
 import os
 import sys
+from expedient.common.messaging.models import DatedMessage
 from vt_plugin.models import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
@@ -51,10 +52,17 @@ class ProvisioningDispatcher():
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
+		    actionModel.callBackUrl=threading.currentThread().requestUser
                     actionModel.save()
                 except Exception as e:
                     print "Not possible to translate to VM model\n"
                     print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Not possible to translate VM %s to a proper app model" % VMmodel.name,
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+                    #VMmodel.delete()
+                    ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
                     return
                 
                 #finally we connect to the client server (in this case the VT AM)
@@ -91,9 +99,20 @@ class ProvisioningDispatcher():
                     actionModel.save()
                 
                 print "PROVISIONING DISPATCHER--> ACTION DELETE"
-                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
-                client = Server.aggregate.as_leaf_class().client
-                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
+                try:	
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    client = Server.aggregate.as_leaf_class().client
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
+                except:
+                    print "Could not connect to AM"
+                    print e
+                    print "Could not connect to AM"
+                    print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Could not connect to AM",
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+
 
             #elif actionModel.type == "start":
             else:
@@ -124,10 +143,19 @@ class ProvisioningDispatcher():
                     actionModel.vm = VMmodel
                     actionModel.save()
                 print "PROVISIONING DISPATCHER --> START, STOP, REBOOT START"
-                
-                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
-                client = Server.aggregate.as_leaf_class().client
-                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+               
+		try: 
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    client = Server.aggregate.as_leaf_class().client
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+                except:
+                    print "Could not connect to AM"
+                    print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Could not connect to AM",
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+
 
     @staticmethod
     def connectAndSend(URL, action):
@@ -140,3 +168,21 @@ class ProvisioningDispatcher():
             print "Exception connecting to VT Manager"
             print e
             return
+
+    @staticmethod
+    def cleanWhenFail(vm , server = None):
+        try:
+            server.vms.remove(vm)
+        except:
+            pass
+        ifaces = vm.ifaces.all()
+        for iface in ifaces:
+            vm.ifaces.remove(iface)
+            iface.delete()
+        try:
+            #super(Resource).delete()
+            vm.delete()
+        except Exception as e:
+            print "Could not clean VM after fail, probably wrong data is in the database"
+            print e
+

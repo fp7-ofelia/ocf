@@ -72,7 +72,17 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('rebooting...')
                         actionModel.vm.save()
                 elif actionModel.status == 'FAILED':
-                    actionModel.vm.setState('failed')
+                    if actionModel.vm.getState() == 'starting...':
+                        actionModel.vm.setState('stopped')
+                    elif actionModel.vm.getState() == 'stopping...':
+                        actionModel.vm.setState('running')
+                    elif actionModel.vm.getState() == 'rebooting...':
+                        actionModel.vm.setState('stopped')
+                    elif actionModel.vm.getState() == 'creating...':
+                        actionModel.vm.setState('failed')
+			failedOnCreate = 1
+                    else:
+                        actionModel.vm.setState('failed')
                     actionModel.vm.save()
                 else:
                     actionModel.vm.setState('unknown')
@@ -82,18 +92,17 @@ class ProvisioningResponseDispatcher():
             else:
                 try:
                     ProvisioningDispatcher.connectAndSendPlugin(actionModel.vm.getCallBackURL(), "FAILED", action.id, "Received response for an action in wrong state")
-                    raise Exception
                 except Exception as e:
                     logging.error("Received response for an action in wrong state\n%s",e)
                     return
 
             try:
                  logging.debug("Sending response to Plugin in sendAsync")
-                 print "Sending response to Plugin in sendAsync"
                  plugin = xmlrpclib.Server(actionModel.vm.getCallBackURL())
                  logging.debug("callBackURL = %s", actionModel.vm.getCallBackURL())
-                 print "callBackURL = %s" % actionModel.vm.getCallBackURL()
                  plugin.sendAsync(XmlHelper.craftXmlClass(rspec))
+                 if failedOnCreate == 1:
+                     ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTSever.objects.get(uuid = actionModel.vm.serverID))
             except Exception as e:
                 logging.error("Could not connect to Plugin in sendAsync\n%s",e)
                 return

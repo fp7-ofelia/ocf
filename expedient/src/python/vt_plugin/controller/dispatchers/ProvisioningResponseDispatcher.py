@@ -55,8 +55,23 @@ class ProvisioningResponseDispatcher():
                     elif actionModel.type == 'delete':
                         actionModel.vm.delete()
                 elif actionModel.status == 'FAILED':
-                    actionModel.vm.setState('failed')
+                    if actionModel.vm.getState() == 'starting...':
+                        actionModel.vm.setState('stopped')
+                    elif actionModel.vm.getState() == 'stopping...':
+                        actionModel.vm.setState('running')
+                    elif actionModel.vm.getState() == 'rebooting...':
+                        actionModel.vm.setState('stopped')
+                    elif actionModel.vm.getState() == 'creating...':
+	                DatedMessage.objects.post_message_to_user(
+                            "%s" % actionModel.description,
+                            actionModel.callBackUrl, msg_type=DatedMessage.TYPE_ERROR,
+                        )
+                        ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTSever.objects.get(uuid = actionModel.vm.serverID))
+
+                    else:
+                        actionModel.vm.setState('failed')
                     actionModel.vm.save()
+
                 elif actionModel.status == 'ONGOING':
                     if actionModel.type == 'create':
                         actionModel.vm.setState('creating...')

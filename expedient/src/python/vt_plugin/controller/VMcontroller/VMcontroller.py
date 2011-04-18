@@ -13,7 +13,7 @@ class VMcontroller():
     "manages creation of VMs from the input of a given VM formulary"
     
     @staticmethod
-    def processVMCreation(instances, server_id, slice):
+    def processVMCreation(instances, server_id, slice, requestUser):
         
         rspec = XmlHelper.getSimpleActionQuery()
         actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
@@ -49,4 +49,4 @@ class VMcontroller():
             Translator.VMmodelToClass(instance, actionClass.virtual_machine)
             rspec.query.provisioning.action.append(actionClass)
         
-        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning)
+        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)

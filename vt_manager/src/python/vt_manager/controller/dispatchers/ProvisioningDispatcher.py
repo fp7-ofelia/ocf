@@ -69,9 +69,12 @@ class ProvisioningDispatcher():
                     logging.error("Not possible to set VM interfaces\n")
                     logging.error(e)
                     return
- 
-                ProvisioningDispatcher.connectAndSendAgent(Server.agentURL, action)
-                
+                try:
+                    ProvisioningDispatcher.connectAndSendAgent(Server.agentURL, action)
+                except Exception as e:
+                    print "Could not connect to Agent"
+                    ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Could not connect to agent")
+                    ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
             
             ### PROVISIONING DELETE ###
           
@@ -151,8 +154,11 @@ class ProvisioningDispatcher():
                 else:
                     actionModel.vm = VMmodel
                     actionModel.save()
-            
-                ProvisioningDispatcher.connectAndSendAgent(AGENT_URL, action)
+                
+                try:        
+                    ProvisioningDispatcher.connectAndSendAgent(AGENT_URL, action)
+                except Exception as e:
+                    print "Could not connect to Agent"
 
         print "[DEBUG] PROVISIONING FINISHED..."
 
@@ -197,9 +203,11 @@ class ProvisioningDispatcher():
             VMmodel.setIPs()
         except Exception as e:
             print e
-            raise e
+        try:
+            VMmodel.setMacs()
+        except Exception as e:
+            print e
 
-        VMmodel.setMacs()
 
     @staticmethod
     def checkVMisPresent(action):
@@ -250,3 +258,22 @@ class ProvisioningDispatcher():
             print e
             return
 
+    @staticmethod
+    def cleanWhenFail(vm , server = None):
+        try:
+	    server.vms.remove(vm)
+        except:
+            pass
+	ips = vm.ips.all()
+	for ip in ips:
+            vm.ips.remove(ip)
+            ip.delete()
+        macs = vm.masc.all()
+        for mac in macs:
+            vm.macs.remove(mac)
+            mac.delete()    
+        try:
+            vm.delete()
+        except Exception as e:
+            print "Could not clean VM after fail, probably wrong data is in the database"
+            print e
