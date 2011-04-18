@@ -186,9 +186,7 @@ class ProvisioningDispatcher():
         newInterface.name = 'eth0'
         newInterface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name, True)
         newInterface.switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
-        print "ENTRO"
         iptemp = IPallocator.acquire(VMxmlClass.server_id, VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name, True)
-        print "SALGO"
         newInterface.ip = iptemp.ip
         newInterface.mask = iptemp.mask
         newInterface.gw = iptemp.gw

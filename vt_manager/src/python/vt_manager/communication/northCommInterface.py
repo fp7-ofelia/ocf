@@ -33,7 +33,7 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
     try:
         rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
     except:
-        rHashObject = resourcesHash(hashValue = -1, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject = resourcesHash(hashValue = '-1', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
 
     if hashV == rHashObject.hashValue:
@@ -82,7 +82,7 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
         
         listR =   XmlHelper.craftXmlClass(infoRspec)
-        hashV = hash(listR)
+        hashV = str(hash(listR))
         return hashV, listR
 
 @rpcmethod(url_name="plugin")    

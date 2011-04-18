@@ -120,10 +120,12 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
     try:
         rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
     except:
-        rHashObject = resourcesHash(hashValue = 0, serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject = resourcesHash(hashValue = '0', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
+	print "HASHVALUE: %s	projectUUID: %s		sliceUUID: %s" %(str(rHashObject.hashValue),projectUUID, sliceUUID)
         hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
+	print hashV
     except Exception as e:
         print "Can't retrieve resources"
         print e
@@ -134,6 +136,7 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         print "Same HASH, no changes in resources"
         return
     else:
+	print hashV
         rHashObject.hashValue = hashV
         rHashObject.save() 
         try:
