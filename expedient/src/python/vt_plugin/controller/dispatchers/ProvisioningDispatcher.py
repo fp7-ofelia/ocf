@@ -52,7 +52,7 @@ class ProvisioningDispatcher():
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
-		    actionModel.callBackUrl=threading.currentThread().requestUser
+                    actionModel.requestUser = threading.currentThread().requestUser
                     actionModel.save()
                 except Exception as e:
                     print "Not possible to translate to VM model\n"
@@ -104,8 +104,6 @@ class ProvisioningDispatcher():
                     client = Server.aggregate.as_leaf_class().client
                     ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
                 except:
-                    print "Could not connect to AM"
-                    print e
                     print "Could not connect to AM"
                     print e
                     DatedMessage.objects.post_message_to_user(

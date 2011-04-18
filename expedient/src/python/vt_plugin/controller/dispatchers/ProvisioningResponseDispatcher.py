@@ -6,6 +6,7 @@ from vt_plugin.models import *
 from vt_manager.communication.utils.XmlUtils import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
+from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 
 class ProvisioningResponseDispatcher():
 
@@ -59,21 +60,24 @@ class ProvisioningResponseDispatcher():
                     print actionModel.vm.getState()
                     if actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
+                        actionModel.vm.save()
                     elif actionModel.type == 'hardStop':
                         actionModel.vm.setState('running')
+                        actionModel.vm.save()
                     elif actionModel.type == 'reboot':
                         actionModel.vm.setState('stopped')
+                        actionModel.vm.save()
                     elif actionModel.type == 'create':
                         print "ERROR CREATING"
-	                DatedMessage.objects.post_message_to_user(
-                            "%s" % actionModel.description,
-                            actionModel.callBackUrl, msg_type=DatedMessage.TYPE_ERROR,
+                        DatedMessage.objects.post_message_to_user(
+                            "%s. VM not created." % actionModel.description,
+                            actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
                         )
-                        ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTSever.objects.get(uuid = actionModel.vm.serverID))
+                        ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTServer.objects.get(uuid = actionModel.vm.serverID))
 
                     else:
                         actionModel.vm.setState('failed')
-                    actionModel.vm.save()
+                        actionModel.vm.save()
 
                 elif actionModel.status == 'ONGOING':
                     if actionModel.type == 'create':
