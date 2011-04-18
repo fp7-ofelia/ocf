@@ -27,6 +27,12 @@ class VMConfigurator:
 		configurator = VMConfigurator.__getConfiguratorByOsType(vm.operating_system_type,vm.operating_system_distribution)
 		configurator.configureLDAPSettings(vm,path)
 
+	@staticmethod
+	def __configureHostname(vm,path):
+		configurator = VMConfigurator.__getConfiguratorByOsType(vm.operating_system_type,vm.operating_system_distribution)
+		configurator.configureHostname(vm,path)
+
+
 	##Public methods
 	@staticmethod
 	def configureVm(vm,pathToMountPoint):
@@ -37,6 +43,9 @@ class VMConfigurator:
 		#Configure LDAP settings 
 		VMConfigurator.__configureLDAPSettings(vm,pathToMountPoint)
 		print "Authentication configured successfully..."
+	
+		#Configure Hostname
+		VMConfigurator.__configureHostname(vm,pathToMountPoint)
 					
 	@staticmethod
 	def createVmConfigurationFile(vm):
