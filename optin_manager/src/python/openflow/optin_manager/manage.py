@@ -2,6 +2,8 @@
 from os.path import dirname, join
 import sys
 sys.path.append(join(dirname(__file__), "../.."))
+sys.path.append(join(dirname(__file__), "../../../../../expedient/src/python"))
+
 
 from django.core.management import execute_manager
 import openflow.optin_manager.settings as settings
