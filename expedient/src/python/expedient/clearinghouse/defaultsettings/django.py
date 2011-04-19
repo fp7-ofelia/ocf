@@ -7,6 +7,8 @@ import os
 import sys
 import pkg_resources
 from utils import append_to_local_setting
+import ldap
+from django_auth_ldap.config import LDAPSearch, GroupOfUniqueNamesType
 
 sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/python')
 
@@ -128,11 +130,66 @@ append_to_local_setting(
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
     'expedient_geni.backends.GENIRemoteUserBackend',
 ]
 append_to_local_setting(
     "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
 )
+
+######################################################################
+#LDAP
+######################################################################
+
+# Baseline configuration.
+AUTH_LDAP_SERVER_URI = "ldap://10.216.4.2:389"
+
+AUTH_LDAP_BIND_DN = "cn=admin,dc=fp7-ofelia,dc=eu"
+AUTH_LDAP_BIND_PASSWORD = "ailefo"
+AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=fp7-ofelia,dc=eu",
+    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+
+# or perhaps:
+# AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=users,dc=example,dc=com"
+
+# Set up the basic group parameters.
+#AUTH_LDAP_GROUP_SEARCH = LDAPSearch("cn=i2cat,ou=groups,dc=fp7-ofelia,dc=eu",
+#    ldap.SCOPE_SUBTREE, "(objectClass=groupOfNames)"
+#)
+#AUTH_LDAP_GROUP_TYPE = GroupOfUniqueNamesType(name_attr="cn")
+
+# Only users in this group can log in.
+#AUTH_LDAP_REQUIRE_GROUP = "cn=i2cat,ou=groups,dc=fp7-ofelia,dc=eu"
+
+# Populate the Django user from the LDAP directory.
+AUTH_LDAP_USER_ATTR_MAP = {
+    "first_name": "givenName",
+    "last_name": "sn",
+    "email": "mail"
+}
+
+#AUTH_LDAP_PROFILE_ATTR_MAP = {
+#    "employee_number": "employeeNumber"
+#}
+
+#AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+#    "is_active": "cn=active,ou=django,ou=groups,dc=example,dc=com",
+#    "is_staff": "cn=staff,ou=django,ou=groups,dc=example,dc=com",
+#    "is_superuser": "cn=superuser,ou=django,ou=groups,dc=example,dc=com"
+#}
+
+# This is the default, but I like to be explicit.
+AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+# Use LDAP group membership to calculate group permissions.
+#AUTH_LDAP_FIND_GROUP_PERMS = True
+AUTH_LDAP_FIND_GROUP_PERMS = False
+
+# Cache group memberships for an hour to minimize LDAP traffic
+AUTH_LDAP_CACHE_GROUPS = True
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+
+######################################################################
     
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
@@ -145,6 +202,7 @@ TEMPLATE_DIRS = [
 append_to_local_setting(
     "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),
 )
+
 
 INSTALLED_APPS = [
     'expedient.clearinghouse.firstapp', # Must remain first!
