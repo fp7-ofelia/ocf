@@ -19,7 +19,6 @@ class BackgroundMonitor():
     def __monitorServers():
 
         for server in VTServer.objects.all():
-            print "MONITORING "+str(server.name)
             AgentMonitoringThread.monitorAgentInNewThread(server)
         #Wait for threads
         for thread in threading.enumerate():
@@ -29,6 +28,6 @@ class BackgroundMonitor():
     @staticmethod
     def monitor():
         while True:
-            print "MONITORING..."
+            print "Monitoring Servers Thread starting..."
             BackgroundMonitor.__monitorServers()
             time.sleep(MONITORING_INTERVAL)	
