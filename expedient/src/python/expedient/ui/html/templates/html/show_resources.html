@@ -301,7 +301,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     {% endfor %}
     </table>
     <br/>
-    <div id="create_server">
+    <div id="create_server" style="clear:both;"> 
         Create a new virtual machine in server:
         <select name = "server_id" id="server_id_agg_{{agg.id}}">
         {% for rsc in agg.resource_set.all %}
