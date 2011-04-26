@@ -250,7 +250,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
             {% for rsc in agg.resource_set.all %}
             {% if rsc.leaf_name == 'VM' %}            
             {% with rsc.as_leaf_class as vm %}
-                {% if server.uuid == vm.serverID%}
+                {% if server.uuid == vm.serverID and vm.sliceId == slice.uuid%}
                 <tr class = "{% cycle 'odd' 'even' %}">
                   <td>
                     {{ vm.name }}
