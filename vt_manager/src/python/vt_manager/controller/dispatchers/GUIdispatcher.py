@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple
 from vt_manager.common.messaging.models import DatedMessage
-from vt_manager.models import VTServer
+from vt_manager.models import VTServer, VTServerNetworkingSettings
 from django.views.generic import list_detail, simple
 from django.views.generic.create_update import apply_extra_context
 from vt_manager.models import *
@@ -16,6 +16,7 @@ from django.template import loader, RequestContext
 from django.core.xheaders import populate_xheaders
 from django.contrib import messages
 from django.utils.translation import ugettext
+from vt_manager.common.utils.views import generic_crud
 
 def userIsIslandManager(request):
 
@@ -92,6 +93,8 @@ def server_generic_crud(request, obj_id, model, template, redirect,
         form = form_class(request.POST, instance=instance)
         if instance != None :
             #for iface in instance.ifaces.all():
+
+
             for i in range(0,len(request.POST.getlist('ifaceName'))):
                 ifaceforms.append(form_classIface(
                                                     {
@@ -122,6 +125,16 @@ def server_generic_crud(request, obj_id, model, template, redirect,
                         iface = ifaceform.save(commit=True)
                         instance.ifaces.add(iface)
             form.save_m2m()
+            try:
+                settings = VTServerNetworkingSettings.objects.all()[0]
+                instance.ipRange = settings.ipRange
+                instance.mask = settings.mask
+                instance.gw = settings.gw
+                instance.dns1  = settings.dns1
+                instance.dns2  = settings.dns2
+                instance.save()
+            except Exception:
+                print "VTServers Networking Settings not yet configured"
             if success_msg:
                 DatedMessage.objects.post_message_to_user(
                     success_msg(instance), request.user,
@@ -246,3 +259,67 @@ def action_vm(request, server_id, vm_id, action):
         #TODO: Very ugly way to wait until the responses arrived and the state of teh VM is refreshed without having to reload the page
         time.sleep(3)
         return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
+
+def servers_net_settings(request):
+    """Show a page for the user to add/edit the Netoworking settings for a VTServer """
+
+    if (not request.user.is_superuser):
+
+        return simple.direct_to_template(request,
+                            template = 'not_admin.html',
+                            extra_context = {'user':request.user},
+                        )
+    settings = VTServerNetworkingSettings.objects.all()
+
+    if len(settings) == 0:
+        settings_id = None 
+    elif len(settings) == 1:
+        settings_id = settings[0].id
+    else:
+        for i,s in enumerate(settings):
+            if i != 0:
+                s.delete()
+        settings_id = settings[0].id
+
+    return generic_crud(
+        request,
+        obj_id=settings_id,
+        model=VTServerNetworkingSettings,
+        template_object_name="settings",
+        template="servers/servers_net.html",
+        redirect = lambda inst: '/servers/net/update/'
+    )
+
+def servers_net_update(request):
+
+    if (not request.user.is_superuser): 
+
+        return simple.direct_to_template(request,
+               template = 'not_admin.html',
+               extra_context = {'user':request.user},
+               )
+
+    settings = VTServerNetworkingSettings.objects.all()
+    if len(settings) == 0:
+        try: 
+            raise Exception("No Settings to update")
+        except:
+            pass
+
+    elif len(settings) == 1:
+        settings = settings[0]
+    else:
+        for i,s in enumerate(settings):
+            if i != 0:
+                s.delete()
+        settings = settings[0]
+
+    for server in VTServer.objects.all():
+        server.ipRange = settings.ipRange
+        server.mask = settings.mask
+        server.gw = settings.gw
+        server.dns1  = settings.dns1
+        server.dns2  = settings.dns2   
+        server.save() 
+
+    return HttpResponseRedirect('/servers/admin/')

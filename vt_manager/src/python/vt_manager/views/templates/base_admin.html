@@ -64,7 +64,17 @@
 		{% block pagehead %}{% endblock %}
 		
     	<table align="right" class="menutable">
-    
+   
+
+       <tr>
+            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+            <a href="/servers/net/">
+                    Servers' Network Settings
+<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+            </a>
+            </td>
+        </tr>
+ 
         <tr> 
             <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
             <a href="/servers/admin/">

@@ -4,7 +4,6 @@ from django.contrib import auth
 import uuid
 #from vt_manager.models.VM import VM
 from vt_manager.models import *
-from vt_manager.settings import ISLAND_NETMASK, ISLAND_IP_RANGE, ISLAND_GW, ISLAND_DNS1, ISLAND_DNS2
 
 class VTServer(models.Model):
     """Virtualization Server class"""
@@ -45,11 +44,11 @@ class VTServer(models.Model):
     virtTech = models.CharField(choices = VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology")
     agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent")
     url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
-    ipRange = models.IPAddressField(default = ISLAND_IP_RANGE, verbose_name = "VM IP range", editable = False)
-    mask = models.IPAddressField(default = ISLAND_NETMASK, verbose_name = "Subnet mask", editable = False)
-    gw = models.IPAddressField(default= ISLAND_GW , verbose_name = "Gateway", editable = False)
-    dns1 = models.IPAddressField(default = ISLAND_DNS1, verbose_name = "DNS 1", editable = False)
-    dns2 =  models.IPAddressField(default = ISLAND_DNS2, verbose_name = "DNS 2", blank = True, null = True, editable = False)
+    ipRange = models.IPAddressField(default = "", verbose_name = "VM IP range", editable = False, blank = True)
+    mask = models.IPAddressField(default = "", verbose_name = "Subnet mask", editable = False, blank = True)
+    gw = models.IPAddressField(default= "", verbose_name = "Gateway", editable = False, blank = True)
+    dns1 = models.IPAddressField(default = "", verbose_name = "DNS 1", editable = False, blank = True)
+    dns2 =  models.IPAddressField(default = "", verbose_name = "DNS 2", blank = True, null = True, editable = False)
     vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Server Mgmt Bridge")
     uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)

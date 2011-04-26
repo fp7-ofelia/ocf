@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     url(r'^dashboard$', 'vt_manager.controller.users.urlHandlers.dashboard', name="dashboard"),
     url(r'^change_profile$', 'vt_manager.controller.users.urlHandlers.change_profile', name="change_profile"),
 
+    url(r'^servers/net/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_net_settings', name='servers_net_settings'),
+    url(r'^servers/net/update/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_net_update', name='servers_net_update'),
     url(r'^servers/add/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_crud', name='servers_create'),
     url(r'^servers/(?P<server_id>\d+)/edit/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_crud', name='edit_server'),
     url(r'^servers/admin/$', 'vt_manager.controller.dispatchers.GUIdispatcher.admin_servers', name='admin_servers'),
