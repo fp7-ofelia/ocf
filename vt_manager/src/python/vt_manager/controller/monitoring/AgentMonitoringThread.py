@@ -18,13 +18,13 @@ class AgentMonitoringThread(Thread):
 	'''
 	def __updateAgentStatus(self, server):
 		try:
-			print "LLALA"
 			XmlRpcClient.callRPCMethod(server.getAgentURL(),"ping", "hola")
 			server.setAvailable(True)
 			server.save()
+                        print "Ping Agent on server %s" % server.name
 		except Exception as e:
 			#If fails for some reason mark as unreachable
-			print "HAY EXCEPCION"
+			print "Could not reach server %s. Will be set as not available "
 			print e
 			server.setAvailable(False)
 			server.save()

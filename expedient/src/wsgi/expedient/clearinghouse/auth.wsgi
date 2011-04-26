@@ -9,7 +9,9 @@ sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 
-sys.path.append(PYTHON_DIR)
+# changed 19.04.2011, ak, tr
+#sys.path.append(PYTHON_DIR)
+sys.path.insert(0, PYTHON_DIR)
 
 from django.contrib.auth.models import User
 from django import db

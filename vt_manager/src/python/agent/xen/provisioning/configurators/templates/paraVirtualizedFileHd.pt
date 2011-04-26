@@ -40,7 +40,7 @@ uuid = '{{ vm.uuid }}'
 dhcp='off'
 ##Interfaces 
 
-vif = [{% for interface in vm.xen_configuration.interfaces.interface %}' mac={{ interface.mac }}, bridge={%if interface.ismgmt%}eth2{%else%}eth1{%endif%} ',{% endfor %}]
+vif = [{% for interface in vm.xen_configuration.interfaces.interface %}' mac={{ interface.mac }}, bridge={{interface.switch_id}} ',{% endfor %}]
 
 #
 #  Behaviour

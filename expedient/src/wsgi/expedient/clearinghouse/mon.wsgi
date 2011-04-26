@@ -9,7 +9,8 @@ sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 
-sys.path.append(PYTHON_DIR)
+#sys.path.append(PYTHON_DIR)
+sys.path.insert(0,PYTHON_DIR)
 
 from expedient.clearinghouse.monitoring.BackgroundMonitor import BackgroundMonitor
 #from django.contrib.auth.models import User
