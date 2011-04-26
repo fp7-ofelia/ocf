@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib import auth
-#from common.sfa.trust.gid import *
+import re
 import uuid
 #from vt_manager.models.VM import VM
 from vt_manager.models import *
+from django.core.exceptions import ValidationError
 
 class VTServer(models.Model):
     """Virtualization Server class"""
@@ -35,6 +36,27 @@ class VTServer(models.Model):
     class Meta:
         """Meta Class for your model."""
         app_label = 'vt_manager'
+
+
+    def validate_agentURL(value):
+        def error():
+            raise ValidationError(
+                "Invalid URL of the Server Agent. Format should be \"https://ip:port\"",
+                code="invalid",
+            )
+        cntrlr_url_re = re.compile("https://(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(?P<port>\d*)")
+        m = cntrlr_url_re.match(value)
+        if m:
+            port = m.group("port")
+            if not port:
+                error()
+            else:
+                port = int(port)
+                if port > 2**16-1:
+                    error()
+        else:
+            error()
+
     
     available = models.BooleanField(default=1)
     name = models.CharField(max_length = 511, default="", verbose_name = "Name")
@@ -42,7 +64,7 @@ class VTServer(models.Model):
     operatingSystemDistribution = models.CharField(choices = OS_DIST_CHOICES,max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(choices = OS_VERSION_CHOICES,max_length = 512, verbose_name = "OS Version")
     virtTech = models.CharField(choices = VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology")
-    agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent")
+    agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validate_agentURL])
     url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
     ipRange = models.IPAddressField(default = "", verbose_name = "VM IP range", editable = False, blank = True)
     mask = models.IPAddressField(default = "", verbose_name = "Subnet mask", editable = False, blank = True)

@@ -19,6 +19,7 @@ import xmlrpclib, uuid
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 from vt_plugin.controller.VMcontroller.VMcontroller import *
+from vt_plugin.utils.ServiceThread import *
 
 def goto_create_vm(request, slice_id):
     """Show a page that allows user to add SSH s to the aggregate."""
@@ -90,7 +91,8 @@ def manage_vm(request, slice_id, vm_id, action_type):
      
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
 
-    ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
+    #ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
+    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
 
     #set VM state to on queue
     vm.state = "on queue"

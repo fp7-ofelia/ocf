@@ -7,6 +7,7 @@ from vt_manager.communication.utils.XmlUtils import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
+from expedient.common.messaging.models import DatedMessage
 
 class ProvisioningResponseDispatcher():
 
@@ -55,6 +56,11 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.save()
                     elif actionModel.type == 'delete':
                         actionModel.vm.delete()
+                    DatedMessage.objects.post_message_to_user(
+                            "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                            actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
+                        )
+
                 elif actionModel.status == 'FAILED':
                     if actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
@@ -71,10 +77,14 @@ class ProvisioningResponseDispatcher():
                             actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
                         )
                         ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTServer.objects.get(uuid = actionModel.vm.serverID))
-
                     else:
                         actionModel.vm.setState('failed')
                         actionModel.vm.save()
+
+                    DatedMessage.objects.post_message_to_user(
+                            "Action %s on VM %s failed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                            actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                        )
 
                 elif actionModel.status == 'ONGOING':
                     if actionModel.type == 'create':
@@ -92,9 +102,19 @@ class ProvisioningResponseDispatcher():
                     elif actionModel.type == 'reboot':
                         actionModel.vm.setState('rebooting...')
                         actionModel.vm.save()
+
+                    DatedMessage.objects.post_message_to_user(
+                            "Action %s on VM %s is in process." % (actionModel.type, actionModel.vm.name),
+                            actionModel.requestUser, msg_type=DatedMessage.TYPE_INFO,
+                        )
                 else:                    
                     actionModel.vm.setState('unknown')
                     actionModel.vm.save()
+                
+                    DatedMessage.objects.post_message_to_user(
+                            "Action %s on VM %s is in unknown status..." % (actionModel.type, actionModel.vm.name),
+                            actionModel.requestUser, msg_type=DatedMessage.TYPE_INFO,
+                        )
 
                 return "Done Response"
 

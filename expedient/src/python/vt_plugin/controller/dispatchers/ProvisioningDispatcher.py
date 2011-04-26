@@ -28,7 +28,7 @@ class ProvisioningDispatcher():
             #translate action to actionModel
             actionModel = Translator.ActionToModel(action,"provisioning")
             print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
-
+            actionModel.requestUser = threading.currentThread().requestUser
             if actionModel.type == "create":
                 
                 if Action.objects.filter (uuid = actionModel.uuid):
@@ -52,7 +52,7 @@ class ProvisioningDispatcher():
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
-                    actionModel.requestUser = threading.currentThread().requestUser
+                    #actionModel.requestUser = threading.currentThread().requestUser
                     actionModel.save()
                 except Exception as e:
                     print "Not possible to translate to VM model\n"

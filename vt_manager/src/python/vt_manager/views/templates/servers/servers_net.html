@@ -17,7 +17,8 @@
         <div class = "center">
         <table class="separator-table">
         {% for field in form %}
-           <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+           <tr><th colspan ="2">{{field.errors}}</th></tr>
+            <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
         {% endfor %}
         </table>    
         </div>
