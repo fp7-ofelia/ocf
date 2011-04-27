@@ -91,8 +91,10 @@ class Translator():
         sModel.name=sClass.name
         sModel.aggregate = Aggregate.objects.get(id = agg_id)
         sModel.status_change_timestamp = datetime.now()
-        sModel.available = True      
-        sModel.id = sClass.id
+        sModel.available = True     
+        #XXX: The id field of the server in the xml is probably unnecessary,
+        #for sure this line has to be deleted since sModel.id is a resource.id and can override other resources 
+        #sModel.id = sClass.id
         sModel.save()   
         try:
             sModel.setUUID(sClass.uuid)        

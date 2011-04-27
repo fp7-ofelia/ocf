@@ -48,6 +48,8 @@ class Translator():
     @staticmethod
     def ServerModelToClass(sModel, sClass ):
         sClass.name = sModel.getName()
+        #XXX: Possibly this line should not be here. In the corresponding ClassToModel in the pluggin it is commented anyway. But maybe 
+        #this parameter should be remove from the xml
         sClass.id = sModel.id
         sClass.uuid = sModel.getUUID()
         sClass.operating_system_type = sModel.getOStype()
