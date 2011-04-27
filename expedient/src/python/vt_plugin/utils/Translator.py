@@ -3,7 +3,8 @@ from vt_plugin.models.Action import Action
 import copy, uuid
 from datetime import datetime
 from expedient.clearinghouse.aggregate.models import Aggregate
-from vt_plugin.models import VTServer, VTServerIface
+from vt_plugin.models.VTServer import VTServer
+from vt_plugin.models.VTServerIface import VTServerIface
 
 class Translator():
 
