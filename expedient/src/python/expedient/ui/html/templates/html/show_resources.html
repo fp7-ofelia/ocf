@@ -116,7 +116,7 @@
 <div id="am_location">
 Aggregate physical location: <b>{{ agg.location }}.</b>
 </div >
-<div class="openflow">
+<!--<div class="openflow">
   <table class="openflow">
     <tr class="header">
       <th class="dpid">Datapath ID</th>
@@ -169,6 +169,9 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     {% endif %}
     {% endfor %}
   </table>
+</div>-->
+<div style="text-align:center">
+	TODO: show Openflow allocated flowspaces
 </div>
 {% empty %}
   <p>There are no OpenFlow aggregates in the slice. </p>
