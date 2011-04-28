@@ -8,12 +8,12 @@
 {% endblock %}
 
 {% block content %}
+<script src = "http://code.jquery.com/jquery-git.js"></script>
 
 <script language="javascript">
 
-function addHtmlInDiv(div,html){
-    container=document.getElementById(div);
-    container.innerHTML += html;
+function addHtmlInDiv(place,html){
+    $(place).append(html);
 }
 
 function generateInputHtml(caption,name,id){
@@ -21,10 +21,10 @@ function generateInputHtml(caption,name,id){
 }
     
 function addInterface() {
-    addHtmlInDiv("datainterfaces","<br/>"); 
-    addHtmlInDiv("datainterfaces",generateInputHtml("Interface name","ifaceName","id_ifaceName"));
-    addHtmlInDiv("datainterfaces",generateInputHtml("Switch ID","switchID","id_switchID"));
-    addHtmlInDiv("datainterfaces",generateInputHtml("Switch port","port","id_port"));
+    addHtmlInDiv('.datainterfaces',"<br/>"); 
+    addHtmlInDiv('.datainterfaces',generateInputHtml("Interface name","ifaceName","id_ifaceName"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml("Switch ID","switchID","id_switchID"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml("Switch port","port","id_port"));
 }
 </script>
 
@@ -53,11 +53,13 @@ function addInterface() {
                 </tr>
                 </table>
                 <table class="separator-table">
+                        <tr><th colspan ="2">{{field.errors}}</th></tr>
                         <tr><td class="separator">Management Interface parameters</td></tr>
                 </table>
                 <div id="separator" style= "width:100%; padding-left:40px; ">        
                     <table class="formtable_noborder">
            {% endif %}
+           <tr><th colspan ="2">{{field.errors}}</th></tr>
            <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
         {% endfor %}
                     </table>    
@@ -67,8 +69,9 @@ function addInterface() {
              <table class="separator-table">
                         <tr><td class="separator">Server Data Interfaces</td></tr>
                 </table>
-           <div id="datainterfaces">
+           <div class="datainterfaces">
            {% for ifaceform in ifaceforms%}
+                {{ ifaceform.errors }}
                 <br>{{ifaceform.as_table}}</br>
             {% endfor %}
             </br>

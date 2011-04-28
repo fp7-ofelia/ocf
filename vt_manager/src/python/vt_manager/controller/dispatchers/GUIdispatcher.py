@@ -90,20 +90,20 @@ def server_generic_crud(request, obj_id, model, template, redirect,
     elif request.method == "POST":
         postData =  request.POST.copy()
         form = form_class(request.POST, instance=instance)
-        if instance != None :
+#         if instance != None :
             #for iface in instance.ifaces.all():
-            for i in range(0,len(request.POST.getlist('ifaceName'))):
-                ifaceforms.append(form_classIface(
-                                                    {
-                                                    'ifaceName': request.POST.getlist('ifaceName')[i], 
-                                                    'switchID': request.POST.getlist('switchID')[i], 
-                                                    'port': request.POST.getlist('port')[i]
-                                                    }, 
-                                                    instance = None
-                                                )
-                                )
-        else:
-            ifaceforms.append(form_classIface(request.POST, instance = None))
+        for i in range(0,len(request.POST.getlist('ifaceName'))):
+            ifaceforms.append(form_classIface(
+                                                {
+                                                'ifaceName': request.POST.getlist('ifaceName')[i], 
+                                                'switchID': request.POST.getlist('switchID')[i], 
+                                                'port': request.POST.getlist('port')[i]
+                                                }, 
+                                                instance = None
+                                            )
+                            )
+#        else:
+#            ifaceforms.append(form_classIface(request.POST, instance = None))
         if form.is_valid():
             instance = form.save(commit=False)
             if pre_save: pre_save(instance, obj_id == None)
