@@ -8,6 +8,7 @@ class resourcesHash(models.Model):
 
     #hashValue = models.IntegerField()
     hashValue = models.CharField(max_length = 1024, default="")
-    serverUUID = models.CharField(max_length = 1024, default="")
+    #serverUUID = models.CharField(max_length = 1024, default="")
+    vtamID = models.IntegerField()
     projectUUID = models.CharField(max_length = 1024, default="")
     sliceUUID = models.CharField(max_length = 1024, default="")

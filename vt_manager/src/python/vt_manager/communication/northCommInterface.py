@@ -25,33 +25,19 @@ def send(callBackUrl, xml):
     return
 
 @rpcmethod(url_name="plugin")
-def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='None'):
+def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 
     logging.debug("Enter listResources")
     infoRspec = XmlHelper.getSimpleInformation()
-     
-    try:
-        rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
-    except:
-        rHashObject = resourcesHash(hashValue = '-1', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
-        rHashObject.save()
+    servers = VTServer.objects.all()
 
-    if hashV == rHashObject.hashValue:
-        return hashV, ''
+    if not servers:
+        logging.debug("No VTServers available")
+        infoRspec.response.information.resources.server.pop()
+        resourcesString = XmlHelper.craftXmlClass(infoRspec)
+        localHashValue = str(hash(resourcesString))
 
     else:
-
-        if serverUUID != 'None':
-            servers = VTServer.objects.filter(uuid = serverUUID)
-        else:
-            servers = VTServer.objects.all()
-        
-        if not servers:
-            logging.debug("No VTServers available")
-            infoRspec.response.information.resources.server.pop()
-            listR = XmlHelper.craftXmlClass(infoRspec)
-            hashV = hash(listR)
-
         for sIndex, server in enumerate(servers):
             #add Server 
             if(sIndex == 0):
@@ -59,10 +45,10 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
             if(sIndex != 0):
                 newServer = copy.deepcopy(baseServer)
                 infoRspec.response.information.resources.server.append(newServer)
-            
+
             Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
             if (projectUUID is not 'None'):
-                vms = VM.objects.filter(serverID = server.uuid, projectId = projectUUID) 
+                vms = VM.objects.filter(serverID = server.uuid, projectId = projectUUID)
             else:
                 vms = VM.objects.filter(serverID = server.uuid)
             if not vms:
@@ -78,12 +64,69 @@ def listResources(hashV, serverUUID = 'None', projectUUID = 'None', sliceUUID ='
                 if (vIndex != 0):
                     newVM = copy.deepcopy(infoRspec.response.information.resources.server[sIndex].virtual_machine[0])
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
-                
+
                 Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
-        
-        listR =   XmlHelper.craftXmlClass(infoRspec)
-        hashV = str(hash(listR))
-        return hashV, listR
+
+        resourcesString =   XmlHelper.craftXmlClass(infoRspec)
+        localHashValue = str(hash(resourcesString))
+    
+    try:
+        rHashObject =  resourcesHash.objects.get(projectUUID = projectUUID, sliceUUID = sliceUUID)
+        rHashObject.hashValue = localHashValue
+        rHashObject.save()
+    except:
+        rHashObject = resourcesHash(hashValue = localHashValue, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject.save()
+    
+    if remoteHashValue == rHashObject.hashValue:
+        return localHashValue, ''
+    else:
+        return localHashValue, resourcesString
+
+#    else:
+#        infoRspec = XmlHelper.getSimpleInformation()
+#        servers = VTServer.objects.all()
+#        
+#        if not servers:
+#            logging.debug("No VTServers available")
+#            infoRspec.response.information.resources.server.pop()
+#            listR = XmlHelper.craftXmlClass(infoRspec)
+#            hashV = hash(listR)
+#
+#        for sIndex, server in enumerate(servers):
+#            #add Server 
+#            if(sIndex == 0):
+#                baseServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
+#            if(sIndex != 0):
+#                newServer = copy.deepcopy(baseServer)
+#                infoRspec.response.information.resources.server.append(newServer)
+#            
+#            Translator.ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
+#            if (projectUUID is not 'None'):
+#                vms = VM.objects.filter(serverID = server.uuid, projectId = projectUUID) 
+#            else:
+#                vms = VM.objects.filter(serverID = server.uuid)
+#            if not vms:
+#                logging.debug("No VMs available")
+#                if infoRspec.response.information.resources.server[sIndex].virtual_machine:
+#                    infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+#            elif (sliceUUID is not 'None'):
+#                vms = vms.filter(sliceId = sliceUUID)
+#                if not vms:
+#                    logging.error("No VMs available")
+#                    infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+#            for vIndex, vm in enumerate(vms):
+#                if (vIndex != 0):
+#                    newVM = copy.deepcopy(infoRspec.response.information.resources.server[sIndex].virtual_machine[0])
+#                    infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
+#                
+#                Translator.VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
+#        
+#        listR =   XmlHelper.craftXmlClass(infoRspec)
+#        hashV = str(hash(listR))
+#        rHashObject.hashValue = hashV
+#        rHashObject.save()
+#        return hashV, listR
 
 @rpcmethod(url_name="plugin")    
 def ping(challenge):

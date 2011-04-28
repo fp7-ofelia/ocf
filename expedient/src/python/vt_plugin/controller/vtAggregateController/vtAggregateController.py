@@ -104,7 +104,7 @@ def aggregate_crud(request, agg_id=None):
     )
         
 
-def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None', sliceUUID = 'None'):
+def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None'):
 
     "asks the VT AM for all the resources under it."
     serversInAggregate = []
@@ -116,28 +116,28 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         return
     
     try:
-        rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
+        rHashObject =  resourcesHash.objects.get(vtamID = vtPlugin.id, projectUUID = projectUUID, sliceUUID = sliceUUID)
     except:
-        rHashObject = resourcesHash(hashValue = '0', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject = resourcesHash(hashValue = '0', vtamID = vtPlugin.id, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
-        hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
-	print hashV
+        remoteHashValue ,resourcesString = client.listResources(rHashObject.hashValue, projectUUID, sliceUUID)
+	print remoteHashValue
     except Exception as e:
         print "Can't retrieve resources"
         print e
         return
-    print rspec
+    print resourcesString
 
-    if hashV == rHashObject.hashValue:
+    if remoteHashValue == rHashObject.hashValue:
         print "Same HASH, no changes in resources"
         return
     else:
-	print hashV
-        rHashObject.hashValue = hashV
+	print remoteHashValue
+        rHashObject.hashValue = remoteHashValue
         rHashObject.save() 
         try:
-            xmlClass = XmlHelper.parseXmlString(rspec)
+            xmlClass = XmlHelper.parseXmlString(resourcesString)
         except Exception as e:
             print "Can't parse rspec"
             print e
