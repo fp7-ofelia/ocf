@@ -11,7 +11,14 @@
 {% block content %}
 <div class="main">
 
-	Welcome to the Virtualization Aggregate Manager!
+    <b>Welcome to the Virtualization Aggregate Manager!<br/><br/></b>
+
+    <b>Servers added :<br/></b>
+    <table class="formtable">
+    {% for server in servers%}
+        <tr><td>{{server.name}} => VMs : <a href="{% url edit_server server.id %}">{{server.vms.all|length }}</a></td><tr/>
+    {% endfor %}
+    </table>
 
 </div>
 {% endblock content %}

@@ -50,11 +50,11 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
                     elif actionModel.type == 'delete':
-                        for mac in actionModel.vm.macs.all() :
-                            MACallocator.release(mac)
-                        for ip in actionModel.vm.ips.all() :
-                            IPallocator.release(ip)
-                        actionModel.vm.delete()
+                        #for mac in actionModel.vm.macs.all() :
+                        #    MACallocator.release(mac)
+                        #for ip in actionModel.vm.ips.all() :
+                        #    IPallocator.release(ip)
+                        actionModel.vm.completeDelete()
                 elif actionModel.status == 'ONGOING':
                     if actionModel.type == 'create':
                         actionModel.vm.setState('creating...')

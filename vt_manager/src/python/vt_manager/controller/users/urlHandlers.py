@@ -77,9 +77,12 @@ def dashboard(request):
                         )
     else: #Admin
         
+        servers = VTServer.objects.all()
+            
         return simple.direct_to_template(request, 
                             template = 'dashboard_admin.html',
                             extra_context = {
                                    'user': request.user,
+                                   'servers' : servers,
                             },
                         )

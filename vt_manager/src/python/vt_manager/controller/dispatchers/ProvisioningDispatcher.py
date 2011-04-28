@@ -58,6 +58,8 @@ class ProvisioningDispatcher():
                     actionModel.save()
                 except Exception as e:
                     ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Not possible to create VM")
+                    Server.vms.remove(VMmodel)
+                    VMmodel.completeDelete()
                     logging.error("Not possible to translate to VM model\n")
                     logging.error(e)
                     return
@@ -66,6 +68,8 @@ class ProvisioningDispatcher():
                     ProvisioningDispatcher.setVMinterfaces(VMmodel, action.virtual_machine)
                 except Exception as e:
                     ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Could not set VM interfaces")
+                    Server.vms.remove(VMmodel)
+                    VMmodel.completeDelete()
                     logging.error("Not possible to set VM interfaces\n")
                     logging.error(e)
                     return
@@ -74,7 +78,13 @@ class ProvisioningDispatcher():
                 except Exception as e:
                     print "Could not connect to Agent"
                     ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Could not connect to agent")
-                    ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                    #ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                    try:
+                        Server.vms.remove(VMmodel)
+                        VMmodel.completeDelete()
+                    except Exception as e:
+                        print "Could not clean VM after fail, probably wrong data is in the database"
+                        print e
             
             ### PROVISIONING DELETE ###
           
@@ -264,8 +274,8 @@ class ProvisioningDispatcher():
 	    server.vms.remove(vm)
         except:
             pass
-	ips = vm.ips.all()
-	for ip in ips:
+        ips = vm.ips.all()
+        for ip in ips:
             vm.ips.remove(ip)
             ip.delete()
         macs = vm.macs.all()

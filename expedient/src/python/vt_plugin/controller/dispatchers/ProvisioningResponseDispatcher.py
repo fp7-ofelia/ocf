@@ -55,7 +55,7 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
                     elif actionModel.type == 'delete':
-                        actionModel.vm.delete()
+                        actionModel.vm.completeDelete()
                     DatedMessage.objects.post_message_to_user(
                             "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
                             actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,

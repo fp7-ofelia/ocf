@@ -251,3 +251,11 @@ class VM(Resource):
     def delete(self):
         self.action_set.clear()
         super(VM, self).delete()
+
+    def completeDelete(self):
+        self.action_set.clear()
+        for iface in self.ifaces.all():
+            self.ifaces.remove(iface)
+            iface.delete()
+        super(VM, self).delete()
+

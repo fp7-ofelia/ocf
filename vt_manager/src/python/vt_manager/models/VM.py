@@ -6,7 +6,8 @@ from vt_manager.models.faults import *
 #from vt_manager.models import Mac, Ip
 from vt_manager.models.Mac import Mac
 from vt_manager.models.Ip import Ip 
-
+from vt_manager.controller.ifaceAllocators.IPallocator import IPallocator
+from vt_manager.controller.ifaceAllocators.MacAllocator import MACallocator
 #TODO When an exception is raised because a wrong value, delete any previous value saved in that variable???
 
 class VM(models.Model):
@@ -194,4 +195,14 @@ class VM(models.Model):
 
     def delete(self):
         self.action_set.clear()
+        super(VM, self).delete()
+
+    def completeDelete(self):
+        self.action_set.clear()
+        for mac in self.macs.all():
+            self.macs.remove(mac)
+            MACallocator.release(mac)
+        for ip in self.ips.all():
+            self.ips.remove(ip)
+            IPallocator.release(ip)
         super(VM, self).delete()

@@ -62,7 +62,9 @@ class ProvisioningDispatcher():
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
                     )
                     #VMmodel.delete()
-                    ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                     #ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                    Server.vms.remove(VMmodel)
+                    VMmodel.completeDelete()
                     return
                 
                 #finally we connect to the client server (in this case the VT AM)

@@ -2,7 +2,8 @@ import thread
 from django.db import models
 import time
 from vt_manager.controller.ifaceAllocators.MacAllocator import MACallocator
-from vt_manager.models import Ip, VTServer
+from vt_manager.models.Ip import Ip
+from vt_manager.models.VTServer import VTServer
 
 IPallocatorMutex = thread.allocate_lock()
 
