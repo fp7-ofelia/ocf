@@ -189,10 +189,11 @@ def delete_server(request, server_id):
         if request.method == 'POST':
             #XXX: The vms should be really deleted from the server, not just from the VTAM database
             for vm in obj.vms.all():
-                #vm.delete()
+                obj.vms.remove(vm)
                 vm.completeDelete()
 
             for iface in obj.ifaces.all():
+                obj.ifaces.remove(iface)
                 iface.delete()
             obj.delete()
             msg = ugettext("The %(verbose_name)s was deleted.") %\

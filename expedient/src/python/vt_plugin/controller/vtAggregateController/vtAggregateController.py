@@ -130,11 +130,12 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         for s in serversInExpedient:
             if s not in serversInAggregate:
                 delServer = VTServer.objects.get(uuid = s)
-                for vm in delServer.vms.all():
-                    delServer.vms.remove(vm)
-                    vm.completeDelete()
-                for sIface in delServer.ifaces.all():
-                    sIface.delete()
-                delServer.delete()
+                #for vm in delServer.vms.all():
+                #    delServer.vms.remove(vm)
+                #    vm.completeDelete()
+                #for sIface in delServer.ifaces.all():
+                #    sIface.delete()
+                #delServer.delete()
+                delServer.completeDelete()
         return xmlClass
     
