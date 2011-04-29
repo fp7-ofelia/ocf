@@ -74,11 +74,15 @@ class ProvisioningDispatcher():
                     logging.error(e)
                     return
                 try:
-                    ProvisioningDispatcher.connectAndSendAgent(Server.agentURL, action)
+                    if not Server.available:
+                        print "SERVER NOT AVAILABLE"
+                        raise Exception ("Server not available")
+                    else:
+                        print "SERVER AVAILBLE"
+                        ProvisioningDispatcher.connectAndSendAgent(Server.agentURL, action)
                 except Exception as e:
                     print "Could not connect to Agent"
-                    ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Could not connect to agent")
-                    #ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                    ProvisioningDispatcher.connectAndSendPlugin(threading.currentThread().callBackURL, "FAILED", action.id, "Could not connect to agent. "+str(e))
                     try:
                         Server.vms.remove(VMmodel)
                         VMmodel.completeDelete()
