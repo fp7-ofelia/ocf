@@ -13,25 +13,22 @@
 
 <script language="javascript">
 
-function addHtmlInDiv2(place,html){
+function addHtmlInDiv(place,html){
     $(place).append(html);
 }
 
-function addHtmlInDiv(div,html){
-    container=document.getElementById(div);
-    container.innerHTML += html;
-}
 
-function generateInputHtml(caption,name,id){
-    return caption + ':<input name="'+name+'" id="'+id+'" type="text" /> ';
+function generateInputHtml(caption,name,id, type){
+    return '<th>'+caption+'</th><td> <input name="'+name+'" id="'+id+'" type="'+type+'" />';
 }
     
 function addInterface() {
-    //addHtmlInDiv2("datainterfaces","<br/>"); 
-    //addHtmlInDiv2("datainterfaces",generateInputHtml("Interface name","ifaceName","id_ifaceName"));
-    //addHtmlInDiv2("datainterfaces",generateInputHtml("Switch ID","switchID","id_switchID"));
-    //addHtmlInDiv2("datainterfaces",generateInputHtml("Switch port","port","id_port"));
-    addHtmlInDiv2('.datainterfaces',"<br/>"+generateInputHtml("Interface name","ifaceName","id_ifaceName")+generateInputHtml("Switch ID","switchID","id_switchID")+generateInputHtml("Switch port","port","id_port"));
+    addHtmlInDiv('.datainterfaces',"<tr>"); 
+    addHtmlInDiv('.datainterfaces',generateInputHtml(" Interface name:","ifaceName","id_ifaceName","text"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml(" Switch ID:","switchID","id_switchID","text"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml(" Switch port:","port","id_port","text"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml("","idForm","id_idForm","hidden"));
+    addHtmlInDiv('.datainterfaces',"</tr>"); 
 }
 </script>
 
@@ -74,14 +71,34 @@ function addInterface() {
                <table class="separator-table">
                         <tr><td class="separator">Server Data Interfaces</td></tr>
                 </table>
-           <div class="datainterfaces">
+           <div >
+            <table class="datainterfaces">
+            {% if ifaceforms|length > 0 %}
+            <tr><td/><td/><td/><td/><td/><td/><td>Delete</td></tr>
+            {% else %}
+            <tr> All the Server Data Interfaces has been deleted, add the convenient ones </tr>
+            {% endif %}
            {% for ifaceform in ifaceforms%}
-                {{ ifaceform.errors }}
-                <br>{{ifaceform.as_table}}</br>
+                <tr>
+                {{ ifaceform.fields_hidden}}
+                {% for field in ifaceform %}
+                    {%if field.name == "idForm" %}
+                        {{field.as_hidden }}
+                    {% endif %}
+                    {%if field.name == "port" %} 
+                    <th> {{ field.label_tag }}:</th><td> {{ field }}</td><td><input type="checkbox" name="delIface" value={{ifaceform.instance.id}}></td>
+                    {% endif%}
+                    {% if field.name != "idForm" and field.name != "port" %}
+                    <th> {{ field.label_tag }}:</th><td> {{ field }}</td>
+                    {% endif %}
+                {% endfor %}
+                </tr>
             {% endfor %}
+            </table>
             </br>
-            <INPUT type="button" value="Add" onclick="addInterface()"/> 
-        
+            <div align="right">
+            <INPUT type="button" value="Add Interface" onclick="addInterface()"/> 
+            </div>
            </div>
         </tr>
  

@@ -74,8 +74,6 @@ def server_generic_crud(request, obj_id, model, template, redirect,
     ifaceforms = []
     model, form_class = get_model_and_form_class(model, form_class)
     modelIface, form_classIface = get_model_and_form_class(VTServerIface, None)
-    print modelIface
-    print form_classIface
     if obj_id != None:
         instance = get_object_or_404(model, pk=obj_id)
     else:
@@ -90,23 +88,21 @@ def server_generic_crud(request, obj_id, model, template, redirect,
             ifaceforms.append(form_classIface(instance = None)) 
     elif request.method == "POST":
         postData =  request.POST.copy()
+        print postData
         form = form_class(request.POST, instance=instance)
-        #if instance != None :
-            #for iface in instance.ifaces.all():
-
-
         for i in range(0,len(request.POST.getlist('ifaceName'))):
-            ifaceforms.append(form_classIface(
-                                                {
-                                                'ifaceName': request.POST.getlist('ifaceName')[i], 
-                                                'switchID': request.POST.getlist('switchID')[i], 
-                                                'port': request.POST.getlist('port')[i]
-                                                }, 
-                                                instance = None
-                                            )
-                            )
-        #else:
-        #    ifaceforms.append(form_classIface(request.POST, instance = None))
+            if not (request.POST.getlist('ifaceName')[i] == '' and request.POST.getlist('switchID')[i] == '' and request.POST.getlist('port')[i] == ''):
+                ifaceforms.append(form_classIface(
+                                                    {
+                                                    'ifaceName': request.POST.getlist('ifaceName')[i], 
+                                                    'switchID': request.POST.getlist('switchID')[i], 
+                                                    'port': request.POST.getlist('port')[i],
+                                                    'idForm' : request.POST.getlist('idForm')[i]
+                                                    }, 
+                                                    instance = None
+                                                )
+                                )
+
         if form.is_valid():
             instance = form.save(commit=False)
             if pre_save: pre_save(instance, obj_id == None)
@@ -114,15 +110,25 @@ def server_generic_crud(request, obj_id, model, template, redirect,
             if post_save: post_save(instance, obj_id == None)
             for ifaceform in ifaceforms:
                 if ifaceform.is_valid():
+                    print ifaceform.initial
                     ifaceTemp = ifaceform.save(commit= False)
-                    if instance.ifaces.filter(ifaceName = ifaceTemp.ifaceName):
-                        ifaceTemp2 = instance.ifaces.get(ifaceName = ifaceTemp.ifaceName) 
-                        ifaceTemp2.ifaceName = ifaceTemp.ifaceName
-                        ifaceTemp2.port = ifaceTemp.port
-                        ifaceTemp2.switchID = ifaceTemp.switchID
-                        ifaceTemp2.save() 
+                    #if instance.ifaces.filter(ifaceName = ifaceTemp.ifaceName):
+                    if instance.ifaces.filter(id = ifaceTemp.idForm):
+                        #ifaceTemp2 = instance.ifaces.get(ifaceName = ifaceTemp.ifaceName) 
+                        ifaceTemp2 = instance.ifaces.get(id = ifaceTemp.idForm) 
+                        index = str(ifaceTemp2.id)
+                        if index in request.POST.getlist('delIface'):
+                            instance.ifaces.remove(ifaceTemp2)
+                            ifaceTemp2.delete()
+                        else:
+                            ifaceTemp2.ifaceName = ifaceTemp.ifaceName
+                            ifaceTemp2.port = ifaceTemp.port
+                            ifaceTemp2.switchID = ifaceTemp.switchID
+                            ifaceTemp2.save() 
                     else:
                         iface = ifaceform.save(commit=True)
+                        iface.idForm = iface.id
+                        iface.save()
                         instance.ifaces.add(iface)
             form.save_m2m()
             try:
