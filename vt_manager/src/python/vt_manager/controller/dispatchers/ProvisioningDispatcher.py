@@ -190,9 +190,11 @@ class ProvisioningDispatcher():
     @staticmethod
     def setVMinterfaces(VMmodel, VMxmlClass):
         #Data interfaces
+        baseInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+        print "IFACES TOTAL: %d" % len(VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all())
         for i, ServerIface in enumerate(VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()):
             if i != 0:
-                newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+                newInterface = copy.deepcopy(baseInterface)
                 VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
             else:
                 newInterface = VMxmlClass.xen_configuration.interfaces.interface[0]
@@ -201,7 +203,7 @@ class ProvisioningDispatcher():
             newInterface.mac = MACallocator.acquire(VMxmlClass.project_id, 1, VMxmlClass.slice_id, VMxmlClass.uuid, newInterface.name)
             newInterface.switch_id = ServerIface.ifaceName
         #Mgmt Interface
-        newInterface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+        newInterface = copy.deepcopy(baseInterface)
         VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
         newInterface.ismgmt = True
         newInterface.name = 'eth0'

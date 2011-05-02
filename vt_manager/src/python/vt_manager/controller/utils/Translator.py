@@ -95,20 +95,26 @@ class Translator():
         for interface in serverDataIfaces:
             print "SERVER IFACE: %s" %interface.ifaceName 
         for ifaceIndex, serverDataIface in enumerate(serverDataIfaces):
-            mac = macs.get(ifaceName = serverDataIface.ifaceName)
-            print "Copiando %s" %mac.ifaceName
-            if (ifaceIndex != 0):
-                newInterface = copy.deepcopy(baseIface)
-                VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].name = mac.ifaceName
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mask = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = None
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = serverDataIfaces[ifaceIndex].ifaceName
-            VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mac = mac.mac
+            try:
+                #XXX: This way of calling the MACs comes from the setVMinterfaces, considering that the interfaces in the VM will be always eth0,1,...
+                # maybe this should be changed
+                mac = macs.get(ifaceName = 'eth'+str(ifaceIndex+1))
+                print "Copiando %s" %mac.ifaceName
+                if (ifaceIndex != 0):
+                    newInterface = copy.deepcopy(baseIface)
+                    VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].name = mac.ifaceName
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mask = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = None
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = serverDataIfaces[ifaceIndex].ifaceName
+                VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mac = mac.mac
+            except:
+                print "[Warning]: There is not corresponding MAC in the VM for a Server's dataIface"
+                pass
 
         #MGMT IFACE
         print "mgmt IFACE en VM %s" %VMmodel.name
