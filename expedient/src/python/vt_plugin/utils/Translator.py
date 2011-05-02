@@ -101,6 +101,7 @@ class Translator():
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
             for iface in sClass.interfaces.interface:
+                print "IFACE CLASS: %s" %iface.name
                 if iface.ismgmt is True:
                     sModel.setVmMgmtIface(iface.switch_id)
                 else:
