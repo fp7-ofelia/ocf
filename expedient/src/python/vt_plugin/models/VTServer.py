@@ -14,6 +14,7 @@ from expedient.clearinghouse.slice.models import Slice
 from vt_manager.communication.utils.XmlUtils import XmlHelper 
 #from vt_manager.models import Action, VTServer
 from vt_plugin.models import *
+from vt_plugin.models.VM import VM
 
 
 class VTServer(Resource):
@@ -112,7 +113,7 @@ class VTServer(Resource):
         return self.operatingSystemDistribution
 
     def setVMs(self):
-        vms = VM.objects.filter(serverID = name)
+        vms = VM.objects.filter(serverID = self.name)
         for vm in vms:
             self.vms.add(vm)
     
