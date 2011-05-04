@@ -36,11 +36,11 @@ def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
         infoRspec.response.information.resources.server.pop()
         resourcesString = XmlHelper.craftXmlClass(infoRspec)
         localHashValue = str(hash(resourcesString))
-
+        baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
     else:
         for sIndex, server in enumerate(servers):
             #add Server
-            newVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0]) 
+            #newVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0]) 
             if(sIndex == 0):
                 baseServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
             if(sIndex != 0):
@@ -63,8 +63,8 @@ def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
             for vIndex, vm in enumerate(vms):
                 print "LENGTH FIRST %d" %len(infoRspec.response.information.resources.server[sIndex].virtual_machine)
-                if(vIndex == 0):
-                    baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
+                #if(vIndex == 0):
+                #    baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
                 if (vIndex != 0):
                     newVM = copy.deepcopy(baseVM)
                     infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
