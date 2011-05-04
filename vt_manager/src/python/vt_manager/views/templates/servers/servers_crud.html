@@ -19,16 +19,16 @@ function addHtmlInDiv(place,html){
 
 
 function generateInputHtml(caption,name,id, type){
-    return '<th>'+caption+'</th><td> <input name="'+name+'" id="'+id+'" type="'+type+'" />';
+    return '<th>'+caption+'</th><td> <input name="'+name+'" id="'+id+'" type="'+type+'" /></td>';
 }
     
 function addInterface() {
     addHtmlInDiv('.datainterfaces',"<tr>"); 
-    addHtmlInDiv('.datainterfaces',generateInputHtml(" Interface name:","ifaceName","id_ifaceName","text"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml(" Interface Name:","ifaceName","id_ifaceName","text"));
     addHtmlInDiv('.datainterfaces',generateInputHtml(" Switch ID:","switchID","id_switchID","text"));
-    addHtmlInDiv('.datainterfaces',generateInputHtml(" Switch port:","port","id_port","text"));
+    addHtmlInDiv('.datainterfaces',generateInputHtml(" Switch Port:","port","id_port","text"));
     addHtmlInDiv('.datainterfaces',generateInputHtml("","idForm","id_idForm","hidden"));
-    addHtmlInDiv('.datainterfaces',"</tr>"); 
+    addHtmlInDiv('.datainterfaces',"</tr>");
 }
 </script>
 
@@ -72,7 +72,8 @@ function addInterface() {
                         <tr><td class="separator">Server Data Interfaces</td></tr>
                 </table>
            <div >
-            <table class="datainterfaces">
+            <table>
+            <tbody class="datainterfaces">
             {% if ifaceforms|length > 0 %}
             <tr><td/><td/><td/><td/><td/><td/><td>Delete</td></tr>
             {% else %}
@@ -94,6 +95,7 @@ function addInterface() {
                 {% endfor %}
                 </tr>
             {% endfor %}
+            </tbody>
             </table>
             </br>
             <div align="right">
