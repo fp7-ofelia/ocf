@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue May 10 12:39:41 2011 by generateDS.py version 2.3b.
+# Generated Tue May 10 18:47:47 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -78,15 +78,15 @@ supermod.rspec.subclass = rspecSub
 
 
 class querySub(supermod.query):
-    def __init__(self, provisioning=None):
-        super(querySub, self).__init__(provisioning, )
+    def __init__(self, provisioning=None, monitoring=None):
+        super(querySub, self).__init__(provisioning, monitoring, )
 supermod.query.subclass = querySub
 # end class querySub
 
 
 class responseSub(supermod.response):
-    def __init__(self, provisioning=None, information=None):
-        super(responseSub, self).__init__(provisioning, information, )
+    def __init__(self, provisioning=None, monitoring=None):
+        super(responseSub, self).__init__(provisioning, monitoring, )
 supermod.response.subclass = responseSub
 # end class responseSub
 
@@ -98,16 +98,16 @@ supermod.provisioning_type.subclass = provisioning_typeSub
 # end class provisioning_typeSub
 
 
-class action_typeSub(supermod.action_type):
+class provisioning_action_typeSub(supermod.provisioning_action_type):
     def __init__(self, type_=None, id=None, virtual_machine=None, status=None, description=None):
-        super(action_typeSub, self).__init__(type_, id, virtual_machine, status, description, )
-supermod.action_type.subclass = action_typeSub
-# end class action_typeSub
+        super(provisioning_action_typeSub, self).__init__(type_, id, virtual_machine, status, description, )
+supermod.provisioning_action_type.subclass = provisioning_action_typeSub
+# end class provisioning_action_typeSub
 
 
 class virtual_machine_typeSub(supermod.virtual_machine_type):
-    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
-        super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, server_id, virtualization_type, xen_configuration, )
+    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, xen_configuration=None):
+        super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, xen_configuration, )
 supermod.virtual_machine_type.subclass = virtual_machine_typeSub
 # end class virtual_machine_typeSub
 
@@ -147,23 +147,23 @@ supermod.user_type.subclass = user_typeSub
 # end class user_typeSub
 
 
-class information_typeSub(supermod.information_type):
-    def __init__(self, resources=None):
-        super(information_typeSub, self).__init__(resources, )
-supermod.information_type.subclass = information_typeSub
-# end class information_typeSub
+class monitoring_typeSub(supermod.monitoring_type):
+    def __init__(self, action=None):
+        super(monitoring_typeSub, self).__init__(action, )
+supermod.monitoring_type.subclass = monitoring_typeSub
+# end class monitoring_typeSub
 
 
-class resources_typeSub(supermod.resources_type):
-    def __init__(self, server=None):
-        super(resources_typeSub, self).__init__(server, )
-supermod.resources_type.subclass = resources_typeSub
-# end class resources_typeSub
+class monitoring_action_typeSub(supermod.monitoring_action_type):
+    def __init__(self, type_=None, id=None, server=None, status=None, description=None):
+        super(monitoring_action_typeSub, self).__init__(type_, id, server, status, description, )
+supermod.monitoring_action_type.subclass = monitoring_action_typeSub
+# end class monitoring_action_typeSub
 
 
 class server_typeSub(supermod.server_type):
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machine=None, status=None):
-        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machine, status, )
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
+        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machines, status, )
 supermod.server_type.subclass = server_typeSub
 # end class server_typeSub
 

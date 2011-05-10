@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Tue May 10 12:39:40 2011 by generateDS.py version 2.3b.
+# Generated Tue May 10 18:47:47 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -361,8 +361,9 @@ class rspec(GeneratedsSuper):
 class query(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, provisioning=None):
+    def __init__(self, provisioning=None, monitoring=None):
         self.provisioning = provisioning
+        self.monitoring = monitoring
     def factory(*args_, **kwargs_):
         if query.subclass:
             return query.subclass(*args_, **kwargs_)
@@ -371,6 +372,8 @@ class query(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_provisioning(self): return self.provisioning
     def set_provisioning(self, provisioning): self.provisioning = provisioning
+    def get_monitoring(self): return self.monitoring
+    def set_monitoring(self, monitoring): self.monitoring = monitoring
     def export(self, outfile, level, namespace_='', name_='query', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
@@ -387,9 +390,12 @@ class query(GeneratedsSuper):
     def exportChildren(self, outfile, level, namespace_='', name_='query'):
         if self.provisioning:
             self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
+        if self.monitoring:
+            self.monitoring.export(outfile, level, namespace_, name_='monitoring', )
     def hasContent_(self):
         if (
-            self.provisioning is not None
+            self.provisioning is not None or
+            self.monitoring is not None
             ):
             return True
         else:
@@ -408,6 +414,12 @@ class query(GeneratedsSuper):
             self.provisioning.exportLiteral(outfile, level, name_='provisioning')
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.monitoring is not None:
+            showIndent(outfile, level)
+            outfile.write('monitoring=model_.monitoring_type(\n')
+            self.monitoring.exportLiteral(outfile, level, name_='monitoring')
+            showIndent(outfile, level)
+            outfile.write('),\n')
     def build(self, node):
         self.buildAttributes(node, node.attrib, [])
         for child in node:
@@ -420,15 +432,19 @@ class query(GeneratedsSuper):
             obj_ = provisioning_type.factory()
             obj_.build(child_)
             self.set_provisioning(obj_)
+        elif nodeName_ == 'monitoring': 
+            obj_ = monitoring_type.factory()
+            obj_.build(child_)
+            self.set_monitoring(obj_)
 # end class query
 
 
 class response(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, provisioning=None, information=None):
+    def __init__(self, provisioning=None, monitoring=None):
         self.provisioning = provisioning
-        self.information = information
+        self.monitoring = monitoring
     def factory(*args_, **kwargs_):
         if response.subclass:
             return response.subclass(*args_, **kwargs_)
@@ -437,8 +453,8 @@ class response(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_provisioning(self): return self.provisioning
     def set_provisioning(self, provisioning): self.provisioning = provisioning
-    def get_information(self): return self.information
-    def set_information(self, information): self.information = information
+    def get_monitoring(self): return self.monitoring
+    def set_monitoring(self, monitoring): self.monitoring = monitoring
     def export(self, outfile, level, namespace_='', name_='response', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
@@ -455,12 +471,12 @@ class response(GeneratedsSuper):
     def exportChildren(self, outfile, level, namespace_='', name_='response'):
         if self.provisioning:
             self.provisioning.export(outfile, level, namespace_, name_='provisioning', )
-        if self.information:
-            self.information.export(outfile, level, namespace_, name_='information', )
+        if self.monitoring:
+            self.monitoring.export(outfile, level, namespace_, name_='monitoring', )
     def hasContent_(self):
         if (
             self.provisioning is not None or
-            self.information is not None
+            self.monitoring is not None
             ):
             return True
         else:
@@ -479,10 +495,10 @@ class response(GeneratedsSuper):
             self.provisioning.exportLiteral(outfile, level, name_='provisioning')
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.information is not None:
+        if self.monitoring is not None:
             showIndent(outfile, level)
-            outfile.write('information=model_.information_type(\n')
-            self.information.exportLiteral(outfile, level, name_='information')
+            outfile.write('monitoring=model_.monitoring_type(\n')
+            self.monitoring.exportLiteral(outfile, level, name_='monitoring')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -497,10 +513,10 @@ class response(GeneratedsSuper):
             obj_ = provisioning_type.factory()
             obj_.build(child_)
             self.set_provisioning(obj_)
-        elif nodeName_ == 'information': 
-            obj_ = information_type.factory()
+        elif nodeName_ == 'monitoring': 
+            obj_ = monitoring_type.factory()
             obj_.build(child_)
-            self.set_information(obj_)
+            self.set_monitoring(obj_)
 # end class response
 
 
@@ -558,8 +574,8 @@ class provisioning_type(GeneratedsSuper):
         level += 1
         for action_ in self.action:
             showIndent(outfile, level)
-            outfile.write('model_.action_type(\n')
-            action_.exportLiteral(outfile, level, name_='action-type')
+            outfile.write('model_.provisioning_action_type(\n')
+            action_.exportLiteral(outfile, level, name_='provisioning-action-type')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -574,13 +590,13 @@ class provisioning_type(GeneratedsSuper):
         pass
     def buildChildren(self, child_, nodeName_, from_subclass=False):
         if nodeName_ == 'action': 
-            obj_ = action_type.factory()
+            obj_ = provisioning_action_type.factory()
             obj_.build(child_)
             self.action.append(obj_)
 # end class provisioning_type
 
 
-class action_type(GeneratedsSuper):
+class provisioning_action_type(GeneratedsSuper):
     subclass = None
     superclass = None
     def __init__(self, type_=None, id=None, virtual_machine=None, status=None, description=None):
@@ -590,10 +606,10 @@ class action_type(GeneratedsSuper):
         self.status = status
         self.description = description
     def factory(*args_, **kwargs_):
-        if action_type.subclass:
-            return action_type.subclass(*args_, **kwargs_)
+        if provisioning_action_type.subclass:
+            return provisioning_action_type.subclass(*args_, **kwargs_)
         else:
-            return action_type(*args_, **kwargs_)
+            return provisioning_action_type(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_virtual_machine(self): return self.virtual_machine
     def set_virtual_machine(self, virtual_machine): self.virtual_machine = virtual_machine
@@ -605,10 +621,10 @@ class action_type(GeneratedsSuper):
     def set_type(self, type_): self.type_ = type_
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    def export(self, outfile, level, namespace_='', name_='action-type', namespacedef_=''):
+    def export(self, outfile, level, namespace_='', name_='provisioning-action-type', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='action-type')
+        self.exportAttributes(outfile, level, [], namespace_, name_='provisioning-action-type')
         if self.hasContent_():
             outfile.write('>\n')
             self.exportChildren(outfile, level + 1, namespace_, name_)
@@ -616,14 +632,14 @@ class action_type(GeneratedsSuper):
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
             outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='action-type'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='provisioning-action-type'):
         if self.type_ is not None and 'type_' not in already_processed:
             already_processed.append('type_')
             outfile.write(' type=%s' % (quote_attrib(self.type_), ))
         if self.id is not None and 'id' not in already_processed:
             already_processed.append('id')
             outfile.write(' id=%s' % (self.gds_format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='action-type'):
+    def exportChildren(self, outfile, level, namespace_='', name_='provisioning-action-type'):
         if self.virtual_machine:
             self.virtual_machine.export(outfile, level, namespace_, name_='virtual-machine', )
         if self.status is not None:
@@ -641,7 +657,7 @@ class action_type(GeneratedsSuper):
             return True
         else:
             return False
-    def exportLiteral(self, outfile, level, name_='action-type'):
+    def exportLiteral(self, outfile, level, name_='provisioning-action-type'):
         level += 1
         self.exportLiteralAttributes(outfile, level, [], name_)
         if self.hasContent_():
@@ -693,13 +709,13 @@ class action_type(GeneratedsSuper):
         elif nodeName_ == 'description':
             description_ = child_.text
             self.description = description_
-# end class action_type
+# end class provisioning_action_type
 
 
 class virtual_machine_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
+    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, xen_configuration=None):
         self.name = name
         self.uuid = uuid
         self.status = status
@@ -710,7 +726,6 @@ class virtual_machine_type(GeneratedsSuper):
         self.operating_system_type = operating_system_type
         self.operating_system_version = operating_system_version
         self.operating_system_distribution = operating_system_distribution
-        self.server_id = server_id
         self.virtualization_type = virtualization_type
         self.xen_configuration = xen_configuration
     def factory(*args_, **kwargs_):
@@ -739,8 +754,6 @@ class virtual_machine_type(GeneratedsSuper):
     def set_operating_system_version(self, operating_system_version): self.operating_system_version = operating_system_version
     def get_operating_system_distribution(self): return self.operating_system_distribution
     def set_operating_system_distribution(self, operating_system_distribution): self.operating_system_distribution = operating_system_distribution
-    def get_server_id(self): return self.server_id
-    def set_server_id(self, server_id): self.server_id = server_id
     def get_virtualization_type(self): return self.virtualization_type
     def set_virtualization_type(self, virtualization_type): self.virtualization_type = virtualization_type
     def get_xen_configuration(self): return self.xen_configuration
@@ -789,9 +802,6 @@ class virtual_machine_type(GeneratedsSuper):
         if self.operating_system_distribution is not None:
             showIndent(outfile, level)
             outfile.write('<%soperating-system-distribution>%s</%soperating-system-distribution>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_distribution).encode(ExternalEncoding), input_name='operating-system-distribution'), namespace_))
-        if self.server_id is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sserver-id>%s</%sserver-id>\n' % (namespace_, self.gds_format_string(quote_xml(self.server_id).encode(ExternalEncoding), input_name='server-id'), namespace_))
         if self.virtualization_type is not None:
             showIndent(outfile, level)
             outfile.write('<%svirtualization-type>%s</%svirtualization-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_type).encode(ExternalEncoding), input_name='virtualization-type'), namespace_))
@@ -809,7 +819,6 @@ class virtual_machine_type(GeneratedsSuper):
             self.operating_system_type is not None or
             self.operating_system_version is not None or
             self.operating_system_distribution is not None or
-            self.server_id is not None or
             self.virtualization_type is not None or
             self.xen_configuration is not None
             ):
@@ -854,9 +863,6 @@ class virtual_machine_type(GeneratedsSuper):
         if self.operating_system_distribution is not None:
             showIndent(outfile, level)
             outfile.write('operating_system_distribution=%s,\n' % quote_python(self.operating_system_distribution).encode(ExternalEncoding))
-        if self.server_id is not None:
-            showIndent(outfile, level)
-            outfile.write('server_id=%s,\n' % quote_python(self.server_id).encode(ExternalEncoding))
         if self.virtualization_type is not None:
             showIndent(outfile, level)
             outfile.write('virtualization_type=%s,\n' % quote_python(self.virtualization_type).encode(ExternalEncoding))
@@ -904,9 +910,6 @@ class virtual_machine_type(GeneratedsSuper):
         elif nodeName_ == 'operating-system-distribution':
             operating_system_distribution_ = child_.text
             self.operating_system_distribution = operating_system_distribution_
-        elif nodeName_ == 'server-id':
-            server_id_ = child_.text
-            self.server_id = server_id_
         elif nodeName_ == 'virtualization-type':
             virtualization_type_ = child_.text
             self.virtualization_type = virtualization_type_
@@ -1493,23 +1496,28 @@ class user_type(GeneratedsSuper):
 # end class user_type
 
 
-class information_type(GeneratedsSuper):
+class monitoring_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, resources=None):
-        self.resources = resources
-    def factory(*args_, **kwargs_):
-        if information_type.subclass:
-            return information_type.subclass(*args_, **kwargs_)
+    def __init__(self, action=None):
+        if action is None:
+            self.action = []
         else:
-            return information_type(*args_, **kwargs_)
+            self.action = action
+    def factory(*args_, **kwargs_):
+        if monitoring_type.subclass:
+            return monitoring_type.subclass(*args_, **kwargs_)
+        else:
+            return monitoring_type(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_resources(self): return self.resources
-    def set_resources(self, resources): self.resources = resources
-    def export(self, outfile, level, namespace_='', name_='information-type', namespacedef_=''):
+    def get_action(self): return self.action
+    def set_action(self, action): self.action = action
+    def add_action(self, value): self.action.append(value)
+    def insert_action(self, index, value): self.action[index] = value
+    def export(self, outfile, level, namespace_='', name_='monitoring-type', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='information-type')
+        self.exportAttributes(outfile, level, [], namespace_, name_='monitoring-type')
         if self.hasContent_():
             outfile.write('>\n')
             self.exportChildren(outfile, level + 1, namespace_, name_)
@@ -1517,89 +1525,19 @@ class information_type(GeneratedsSuper):
             outfile.write('</%s%s>\n' % (namespace_, name_))
         else:
             outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='information-type'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='monitoring-type'):
         pass
-    def exportChildren(self, outfile, level, namespace_='', name_='information-type'):
-        if self.resources:
-            self.resources.export(outfile, level, namespace_, name_='resources', )
+    def exportChildren(self, outfile, level, namespace_='', name_='monitoring-type'):
+        for action_ in self.action:
+            action_.export(outfile, level, namespace_, name_='action')
     def hasContent_(self):
         if (
-            self.resources is not None
+            self.action
             ):
             return True
         else:
             return False
-    def exportLiteral(self, outfile, level, name_='information-type'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.resources is not None:
-            showIndent(outfile, level)
-            outfile.write('resources=model_.resources_type(\n')
-            self.resources.exportLiteral(outfile, level, name_='resources')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'resources': 
-            obj_ = resources_type.factory()
-            obj_.build(child_)
-            self.set_resources(obj_)
-# end class information_type
-
-
-class resources_type(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, server=None):
-        if server is None:
-            self.server = []
-        else:
-            self.server = server
-    def factory(*args_, **kwargs_):
-        if resources_type.subclass:
-            return resources_type.subclass(*args_, **kwargs_)
-        else:
-            return resources_type(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_server(self): return self.server
-    def set_server(self, server): self.server = server
-    def add_server(self, value): self.server.append(value)
-    def insert_server(self, index, value): self.server[index] = value
-    def export(self, outfile, level, namespace_='', name_='resources-type', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='resources-type')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='resources-type'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='resources-type'):
-        for server_ in self.server:
-            server_.export(outfile, level, namespace_, name_='server')
-    def hasContent_(self):
-        if (
-            self.server
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='resources-type'):
+    def exportLiteral(self, outfile, level, name_='monitoring-type'):
         level += 1
         self.exportLiteralAttributes(outfile, level, [], name_)
         if self.hasContent_():
@@ -1608,12 +1546,12 @@ class resources_type(GeneratedsSuper):
         pass
     def exportLiteralChildren(self, outfile, level, name_):
         showIndent(outfile, level)
-        outfile.write('server=[\n')
+        outfile.write('action=[\n')
         level += 1
-        for server_ in self.server:
+        for action_ in self.action:
             showIndent(outfile, level)
-            outfile.write('model_.server_type(\n')
-            server_.exportLiteral(outfile, level, name_='server-type')
+            outfile.write('model_.monitoring_action_type(\n')
+            action_.exportLiteral(outfile, level, name_='monitoring-action-type')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -1627,17 +1565,133 @@ class resources_type(GeneratedsSuper):
     def buildAttributes(self, node, attrs, already_processed):
         pass
     def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'action': 
+            obj_ = monitoring_action_type.factory()
+            obj_.build(child_)
+            self.action.append(obj_)
+# end class monitoring_type
+
+
+class monitoring_action_type(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, type_=None, id=None, server=None, status=None, description=None):
+        self.type_ = _cast(None, type_)
+        self.id = _cast(None, id)
+        self.server = server
+        self.status = status
+        self.description = description
+    def factory(*args_, **kwargs_):
+        if monitoring_action_type.subclass:
+            return monitoring_action_type.subclass(*args_, **kwargs_)
+        else:
+            return monitoring_action_type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_server(self): return self.server
+    def set_server(self, server): self.server = server
+    def get_status(self): return self.status
+    def set_status(self, status): self.status = status
+    def get_description(self): return self.description
+    def set_description(self, description): self.description = description
+    def get_type(self): return self.type_
+    def set_type(self, type_): self.type_ = type_
+    def get_id(self): return self.id
+    def set_id(self, id): self.id = id
+    def export(self, outfile, level, namespace_='', name_='monitoring-action-type', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='monitoring-action-type')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='monitoring-action-type'):
+        if self.type_ is not None and 'type_' not in already_processed:
+            already_processed.append('type_')
+            outfile.write(' type=%s' % (quote_attrib(self.type_), ))
+        if self.id is not None and 'id' not in already_processed:
+            already_processed.append('id')
+            outfile.write(' id=%s' % (self.gds_format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='monitoring-action-type'):
+        if self.server:
+            self.server.export(outfile, level, namespace_, name_='server', )
+        if self.status is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sstatus>%s</%sstatus>\n' % (namespace_, self.gds_format_string(quote_xml(self.status).encode(ExternalEncoding), input_name='status'), namespace_))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sdescription>%s</%sdescription>\n' % (namespace_, self.gds_format_string(quote_xml(self.description).encode(ExternalEncoding), input_name='description'), namespace_))
+    def hasContent_(self):
+        if (
+            self.server is not None or
+            self.status is not None or
+            self.description is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='monitoring-action-type'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.type_ is not None and 'type_' not in already_processed:
+            already_processed.append('type_')
+            showIndent(outfile, level)
+            outfile.write('type_ = %s,\n' % (self.type_,))
+        if self.id is not None and 'id' not in already_processed:
+            already_processed.append('id')
+            showIndent(outfile, level)
+            outfile.write('id = "%s",\n' % (self.id,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.server is not None:
+            showIndent(outfile, level)
+            outfile.write('server=model_.server_type(\n')
+            self.server.exportLiteral(outfile, level, name_='server')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.status is not None:
+            showIndent(outfile, level)
+            outfile.write('status=%s,\n' % quote_python(self.status).encode(ExternalEncoding))
+        if self.description is not None:
+            showIndent(outfile, level)
+            outfile.write('description=%s,\n' % quote_python(self.description).encode(ExternalEncoding))
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = attrs.get('type')
+        if value is not None and 'type' not in already_processed:
+            already_processed.append('type')
+            self.type_ = value
+        value = attrs.get('id')
+        if value is not None and 'id' not in already_processed:
+            already_processed.append('id')
+            self.id = value
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
         if nodeName_ == 'server': 
             obj_ = server_type.factory()
             obj_.build(child_)
-            self.server.append(obj_)
-# end class resources_type
+            self.set_server(obj_)
+        elif nodeName_ == 'status':
+            status_ = child_.text
+            self.status = status_
+        elif nodeName_ == 'description':
+            description_ = child_.text
+            self.description = description_
+# end class monitoring_action_type
 
 
 class server_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machine=None, status=None):
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
         self.name = name
         self.id = id
         self.uuid = uuid
@@ -1646,10 +1700,10 @@ class server_type(GeneratedsSuper):
         self.operating_system_distribution = operating_system_distribution
         self.virtualization_type = virtualization_type
         self.interfaces = interfaces
-        if virtual_machine is None:
-            self.virtual_machine = []
+        if virtual_machines is None:
+            self.virtual_machines = []
         else:
-            self.virtual_machine = virtual_machine
+            self.virtual_machines = virtual_machines
         self.status = status
     def factory(*args_, **kwargs_):
         if server_type.subclass:
@@ -1673,10 +1727,10 @@ class server_type(GeneratedsSuper):
     def set_virtualization_type(self, virtualization_type): self.virtualization_type = virtualization_type
     def get_interfaces(self): return self.interfaces
     def set_interfaces(self, interfaces): self.interfaces = interfaces
-    def get_virtual_machine(self): return self.virtual_machine
-    def set_virtual_machine(self, virtual_machine): self.virtual_machine = virtual_machine
-    def add_virtual_machine(self, value): self.virtual_machine.append(value)
-    def insert_virtual_machine(self, index, value): self.virtual_machine[index] = value
+    def get_virtual_machines(self): return self.virtual_machines
+    def set_virtual_machines(self, virtual_machines): self.virtual_machines = virtual_machines
+    def add_virtual_machines(self, value): self.virtual_machines.append(value)
+    def insert_virtual_machines(self, index, value): self.virtual_machines[index] = value
     def get_status(self): return self.status
     def set_status(self, status): self.status = status
     def export(self, outfile, level, namespace_='', name_='server-type', namespacedef_=''):
@@ -1716,8 +1770,8 @@ class server_type(GeneratedsSuper):
             outfile.write('<%svirtualization-type>%s</%svirtualization-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_type).encode(ExternalEncoding), input_name='virtualization-type'), namespace_))
         if self.interfaces:
             self.interfaces.export(outfile, level, namespace_, name_='interfaces', )
-        for virtual_machine_ in self.virtual_machine:
-            virtual_machine_.export(outfile, level, namespace_, name_='virtual-machine')
+        for virtual_machines_ in self.virtual_machines:
+            virtual_machines_.export(outfile, level, namespace_, name_='virtual-machines')
         if self.status:
             self.status.export(outfile, level, namespace_, name_='status', )
     def hasContent_(self):
@@ -1730,7 +1784,7 @@ class server_type(GeneratedsSuper):
             self.operating_system_distribution is not None or
             self.virtualization_type is not None or
             self.interfaces is not None or
-            self.virtual_machine or
+            self.virtual_machines or
             self.status is not None
             ):
             return True
@@ -1772,12 +1826,12 @@ class server_type(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('),\n')
         showIndent(outfile, level)
-        outfile.write('virtual_machine=[\n')
+        outfile.write('virtual_machines=[\n')
         level += 1
-        for virtual_machine_ in self.virtual_machine:
+        for virtual_machines_ in self.virtual_machines:
             showIndent(outfile, level)
             outfile.write('model_.virtual_machine_type(\n')
-            virtual_machine_.exportLiteral(outfile, level, name_='virtual-machine-type')
+            virtual_machines_.exportLiteral(outfile, level, name_='virtual-machine-type')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -1822,10 +1876,10 @@ class server_type(GeneratedsSuper):
             obj_ = interfaces_type.factory()
             obj_.build(child_)
             self.set_interfaces(obj_)
-        elif nodeName_ == 'virtual-machine': 
+        elif nodeName_ == 'virtual-machines': 
             obj_ = virtual_machine_type.factory()
             obj_.build(child_)
-            self.virtual_machine.append(obj_)
+            self.virtual_machines.append(obj_)
         elif nodeName_ == 'status': 
             obj_ = server_status_type.factory()
             obj_.build(child_)
@@ -1975,13 +2029,13 @@ if __name__ == '__main__':
 
 
 __all__ = [
-    "action-type",
-    "information-type",
     "interface-type",
     "interfaces-type",
+    "monitoring-action-type",
+    "monitoring-type",
+    "provisioning-action-type",
     "provisioning-type",
     "query",
-    "resources-type",
     "response",
     "rspec",
     "server-status-type",

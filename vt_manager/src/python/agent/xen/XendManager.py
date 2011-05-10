@@ -29,7 +29,13 @@ class XendManager(object):
 	@staticmethod
 	def __getConnection():
 		return libvirt.open(None)
-		
+	
+	@staticmethod
+	def __getDomainByVmName(conn,name):
+		return conn.lookupByName(name)	
+
+
+	#Monitoring	
 	@staticmethod
 	def isVmRunning(name):
 		conn = XendManager.__getROConnection() 
@@ -40,9 +46,25 @@ class XendManager(object):
 			return False
 
 	@staticmethod
-	def __getDomainByVmName(conn,name):
-		return conn.lookupByName(name)	
+	def retrieveActiveDomainsByUUID():
+		conn = XendManager.__getROConnection()
+ 
+		domainIds = conn.listDomainsID()
+		doms = list()
 
+		for dId in domainIds:
+			#Skip domain0
+			if dId == 0:
+				continue
+	
+			domain = conn.lookupByID(dId)
+			doms.append(domain.UUIDString())
+
+		return doms 
+
+		
+
+	#Provisioning routines
 	@staticmethod
 	def startDomain(vm):
 		#Getting connection
