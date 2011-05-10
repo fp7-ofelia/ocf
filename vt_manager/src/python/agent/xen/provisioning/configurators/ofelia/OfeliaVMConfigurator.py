@@ -5,9 +5,8 @@ import jinja2
 from xen.provisioning.HdManager import HdManager
 from settings import OXA_DEBIANCONF_XEN_SERVER_KERNEL,OXA_DEBIANCONF_XEN_SERVER_INITRD,OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION
 
-#Linux HOSTNAME Location
 
-class DebianVMConfigurator:
+class OfeliaVMConfigurator:
 
 	''' Private methods '''
 	@staticmethod
@@ -65,7 +64,14 @@ class DebianVMConfigurator:
 		cfile = open(HdManager.getConfigFilePath(vm),'w')
 		cfile.write(output)
 
+
+
 	''' Public methods '''
+
+	@staticmethod
+	def getIdentifier():
+		return	OfeliaVMConfigurator.__name__ 
+
 	@staticmethod
 	def configureNetworking(vm,path):
 		#Configure interfaces and udev settings	
@@ -78,8 +84,8 @@ class DebianVMConfigurator:
 			except Exception as e:
 				pass
 
-			DebianVMConfigurator.__configureInterfacesFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,'w'))
-			DebianVMConfigurator.__configureUdevFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureInterfacesFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureUdevFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION,'w'))
 		except Exception as e:
 			print e
 			raise Exception("Could not configure interfaces or Udev file")
@@ -91,7 +97,7 @@ class DebianVMConfigurator:
 	@staticmethod
 	def configureHostname(vm,path):
 		try:
-			DebianVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
 		except Exception as e:
 			print "Could not configure hostname; execution continues;"+str(e)
 			pass
@@ -105,7 +111,7 @@ class DebianVMConfigurator:
 		env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dirs))
 
 		if vm.xen_configuration.hd_setup_type == "file-image" and vm.xen_configuration.virtualization_setup_type == "paravirtualization" :
-			DebianVMConfigurator.__createParavirtualizationFileHdConfigFile(vm,env)
+			OfeliaVMConfigurator.__createParavirtualizationFileHdConfigFile(vm,env)
 		else:
 			raise Exception("type of file or type of virtualization not supported for the creation of xen vm configuration file")	
-		
+	

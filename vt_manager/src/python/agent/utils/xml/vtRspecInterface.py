@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Mon Apr 11 17:58:57 2011 by generateDS.py version 2.3b.
+# Generated Tue May 10 12:39:40 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -920,12 +920,15 @@ class virtual_machine_type(GeneratedsSuper):
 class xen_configuration(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, hd_setup_type=None, hd_origin_path=None, virtualization_setup_type=None, memory_mb=None, interfaces=None):
+    def __init__(self, hd_setup_type=None, hd_size_gb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
         self.hd_setup_type = hd_setup_type
+        self.hd_size_gb = hd_size_gb
         self.hd_origin_path = hd_origin_path
+        self.configurator = configurator
         self.virtualization_setup_type = virtualization_setup_type
         self.memory_mb = memory_mb
         self.interfaces = interfaces
+        self.users = users
     def factory(*args_, **kwargs_):
         if xen_configuration.subclass:
             return xen_configuration.subclass(*args_, **kwargs_)
@@ -934,14 +937,20 @@ class xen_configuration(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_hd_setup_type(self): return self.hd_setup_type
     def set_hd_setup_type(self, hd_setup_type): self.hd_setup_type = hd_setup_type
+    def get_hd_size_gb(self): return self.hd_size_gb
+    def set_hd_size_gb(self, hd_size_gb): self.hd_size_gb = hd_size_gb
     def get_hd_origin_path(self): return self.hd_origin_path
     def set_hd_origin_path(self, hd_origin_path): self.hd_origin_path = hd_origin_path
+    def get_configurator(self): return self.configurator
+    def set_configurator(self, configurator): self.configurator = configurator
     def get_virtualization_setup_type(self): return self.virtualization_setup_type
     def set_virtualization_setup_type(self, virtualization_setup_type): self.virtualization_setup_type = virtualization_setup_type
     def get_memory_mb(self): return self.memory_mb
     def set_memory_mb(self, memory_mb): self.memory_mb = memory_mb
     def get_interfaces(self): return self.interfaces
     def set_interfaces(self, interfaces): self.interfaces = interfaces
+    def get_users(self): return self.users
+    def set_users(self, users): self.users = users
     def export(self, outfile, level, namespace_='', name_='xen-configuration', namespacedef_=''):
         showIndent(outfile, level)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
@@ -959,9 +968,15 @@ class xen_configuration(GeneratedsSuper):
         if self.hd_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('<%shd-setup-type>%s</%shd-setup-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.hd_setup_type).encode(ExternalEncoding), input_name='hd-setup-type'), namespace_))
+        if self.hd_size_gb is not None:
+            showIndent(outfile, level)
+            outfile.write('<%shd-size-gb>%s</%shd-size-gb>\n' % (namespace_, self.gds_format_integer(self.hd_size_gb, input_name='hd-size-gb'), namespace_))
         if self.hd_origin_path is not None:
             showIndent(outfile, level)
             outfile.write('<%shd-origin-path>%s</%shd-origin-path>\n' % (namespace_, self.gds_format_string(quote_xml(self.hd_origin_path).encode(ExternalEncoding), input_name='hd-origin-path'), namespace_))
+        if self.configurator is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sconfigurator>%s</%sconfigurator>\n' % (namespace_, self.gds_format_string(quote_xml(self.configurator).encode(ExternalEncoding), input_name='configurator'), namespace_))
         if self.virtualization_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('<%svirtualization-setup-type>%s</%svirtualization-setup-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_setup_type).encode(ExternalEncoding), input_name='virtualization-setup-type'), namespace_))
@@ -970,13 +985,18 @@ class xen_configuration(GeneratedsSuper):
             outfile.write('<%smemory-mb>%s</%smemory-mb>\n' % (namespace_, self.gds_format_integer(self.memory_mb, input_name='memory-mb'), namespace_))
         if self.interfaces:
             self.interfaces.export(outfile, level, namespace_, name_='interfaces', )
+        if self.users:
+            self.users.export(outfile, level, namespace_, name_='users', )
     def hasContent_(self):
         if (
             self.hd_setup_type is not None or
+            self.hd_size_gb is not None or
             self.hd_origin_path is not None or
+            self.configurator is not None or
             self.virtualization_setup_type is not None or
             self.memory_mb is not None or
-            self.interfaces is not None
+            self.interfaces is not None or
+            self.users is not None
             ):
             return True
         else:
@@ -992,9 +1012,15 @@ class xen_configuration(GeneratedsSuper):
         if self.hd_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('hd_setup_type=%s,\n' % quote_python(self.hd_setup_type).encode(ExternalEncoding))
+        if self.hd_size_gb is not None:
+            showIndent(outfile, level)
+            outfile.write('hd_size_gb=%d,\n' % self.hd_size_gb)
         if self.hd_origin_path is not None:
             showIndent(outfile, level)
             outfile.write('hd_origin_path=%s,\n' % quote_python(self.hd_origin_path).encode(ExternalEncoding))
+        if self.configurator is not None:
+            showIndent(outfile, level)
+            outfile.write('configurator=%s,\n' % quote_python(self.configurator).encode(ExternalEncoding))
         if self.virtualization_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('virtualization_setup_type=%s,\n' % quote_python(self.virtualization_setup_type).encode(ExternalEncoding))
@@ -1005,6 +1031,12 @@ class xen_configuration(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('interfaces=model_.interfaces_type(\n')
             self.interfaces.exportLiteral(outfile, level, name_='interfaces')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.users is not None:
+            showIndent(outfile, level)
+            outfile.write('users=model_.users_type(\n')
+            self.users.exportLiteral(outfile, level, name_='users')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -1018,9 +1050,19 @@ class xen_configuration(GeneratedsSuper):
         if nodeName_ == 'hd-setup-type':
             hd_setup_type_ = child_.text
             self.hd_setup_type = hd_setup_type_
+        elif nodeName_ == 'hd-size-gb':
+            sval_ = child_.text
+            try:
+                ival_ = int(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires integer: %s' % exp)
+            self.hd_size_gb = ival_
         elif nodeName_ == 'hd-origin-path':
             hd_origin_path_ = child_.text
             self.hd_origin_path = hd_origin_path_
+        elif nodeName_ == 'configurator':
+            configurator_ = child_.text
+            self.configurator = configurator_
         elif nodeName_ == 'virtualization-setup-type':
             virtualization_setup_type_ = child_.text
             self.virtualization_setup_type = virtualization_setup_type_
@@ -1035,6 +1077,10 @@ class xen_configuration(GeneratedsSuper):
             obj_ = interfaces_type.factory()
             obj_.build(child_)
             self.set_interfaces(obj_)
+        elif nodeName_ == 'users': 
+            obj_ = users_type.factory()
+            obj_.build(child_)
+            self.set_users(obj_)
 # end class xen_configuration
 
 
@@ -1294,6 +1340,157 @@ class interface_type(GeneratedsSuper):
             switch_port_ = child_.text
             self.switch_port = switch_port_
 # end class interface_type
+
+
+class users_type(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, user=None):
+        if user is None:
+            self.user = []
+        else:
+            self.user = user
+    def factory(*args_, **kwargs_):
+        if users_type.subclass:
+            return users_type.subclass(*args_, **kwargs_)
+        else:
+            return users_type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_user(self): return self.user
+    def set_user(self, user): self.user = user
+    def add_user(self, value): self.user.append(value)
+    def insert_user(self, index, value): self.user[index] = value
+    def export(self, outfile, level, namespace_='', name_='users-type', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='users-type')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='users-type'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='users-type'):
+        for user_ in self.user:
+            user_.export(outfile, level, namespace_, name_='user')
+    def hasContent_(self):
+        if (
+            self.user
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='users-type'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        showIndent(outfile, level)
+        outfile.write('user=[\n')
+        level += 1
+        for user_ in self.user:
+            showIndent(outfile, level)
+            outfile.write('model_.user_type(\n')
+            user_.exportLiteral(outfile, level, name_='user-type')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'user': 
+            obj_ = user_type.factory()
+            obj_.build(child_)
+            self.user.append(obj_)
+# end class users_type
+
+
+class user_type(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, name=None, password=None):
+        self.name = name
+        self.password = password
+    def factory(*args_, **kwargs_):
+        if user_type.subclass:
+            return user_type.subclass(*args_, **kwargs_)
+        else:
+            return user_type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_password(self): return self.password
+    def set_password(self, password): self.password = password
+    def export(self, outfile, level, namespace_='', name_='user-type', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='user-type')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='user-type'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='user-type'):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sname>%s</%sname>\n' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_))
+        if self.password is not None:
+            showIndent(outfile, level)
+            outfile.write('<%spassword>%s</%spassword>\n' % (namespace_, self.gds_format_string(quote_xml(self.password).encode(ExternalEncoding), input_name='password'), namespace_))
+    def hasContent_(self):
+        if (
+            self.name is not None or
+            self.password is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='user-type'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+        if self.password is not None:
+            showIndent(outfile, level)
+            outfile.write('password=%s,\n' % quote_python(self.password).encode(ExternalEncoding))
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'name':
+            name_ = child_.text
+            self.name = name_
+        elif nodeName_ == 'password':
+            password_ = child_.text
+            self.password = password_
+# end class user_type
 
 
 class information_type(GeneratedsSuper):
@@ -1721,9 +1918,9 @@ def parse(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag, 
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag, 
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -1739,9 +1936,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_="rspec",
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_="rspec",
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -1756,11 +1953,11 @@ def parseLiteral(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from vtRspecInterface import *\n\n')
-    sys.stdout.write('import vtRspecInterface as model_\n\n')
-    sys.stdout.write('rootObj = model_.rootTag(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from vtRspecInterface import *\n\n')
+##     sys.stdout.write('import vtRspecInterface as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rootTag(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
+##     sys.stdout.write(')\n')
     return rootObj
 
 
@@ -1789,6 +1986,8 @@ __all__ = [
     "rspec",
     "server-status-type",
     "server-type",
+    "user-type",
+    "users-type",
     "virtual-machine-type",
     "xen-configuration"
     ]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Mon Apr 11 17:58:57 2011 by generateDS.py version 2.3b.
+# Generated Tue May 10 12:39:41 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -113,8 +113,8 @@ supermod.virtual_machine_type.subclass = virtual_machine_typeSub
 
 
 class xen_configurationSub(supermod.xen_configuration):
-    def __init__(self, hd_setup_type=None, hd_origin_path=None, virtualization_setup_type=None, memory_mb=None, interfaces=None):
-        super(xen_configurationSub, self).__init__(hd_setup_type, hd_origin_path, virtualization_setup_type, memory_mb, interfaces, )
+    def __init__(self, hd_setup_type=None, hd_size_gb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
+        super(xen_configurationSub, self).__init__(hd_setup_type, hd_size_gb, hd_origin_path, configurator, virtualization_setup_type, memory_mb, interfaces, users, )
 supermod.xen_configuration.subclass = xen_configurationSub
 # end class xen_configurationSub
 
@@ -131,6 +131,20 @@ class interface_typeSub(supermod.interface_type):
         super(interface_typeSub, self).__init__(ismgmt, name, mac, ip, mask, gw, dns1, dns2, switch_id, switch_port, )
 supermod.interface_type.subclass = interface_typeSub
 # end class interface_typeSub
+
+
+class users_typeSub(supermod.users_type):
+    def __init__(self, user=None):
+        super(users_typeSub, self).__init__(user, )
+supermod.users_type.subclass = users_typeSub
+# end class users_typeSub
+
+
+class user_typeSub(supermod.user_type):
+    def __init__(self, name=None, password=None):
+        super(user_typeSub, self).__init__(name, password, )
+supermod.user_type.subclass = user_typeSub
+# end class user_typeSub
 
 
 class information_typeSub(supermod.information_type):
@@ -181,9 +195,9 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -200,9 +214,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -217,11 +231,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from ??? import *\n\n')
-    sys.stdout.write('import ??? as model_\n\n')
-    sys.stdout.write('rootObj = model_.rspec(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from ??? import *\n\n')
+##     sys.stdout.write('import ??? as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rspec(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
+##     sys.stdout.write(')\n')
     return rootObj
 
 

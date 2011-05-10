@@ -3,6 +3,7 @@ import sys
 import shutil
 import subprocess
 import libvirt
+import time
 
 from xen.provisioning.HdManager import HdManager
 
@@ -15,6 +16,11 @@ OXA_XEN_STOP_STEP_SECONDS=20
 OXA_XEN_STOP_MAX_SECONDS=200
 
 class XendManager(object):
+
+	#Shell util
+	@staticmethod
+	def sanitize_arg(arg):
+		return arg.replace('\\','\\\\').replace('\'','\\\'').replace(' ','\ ') 
 	
 	@staticmethod
 	def __getROConnection():
@@ -40,7 +46,7 @@ class XendManager(object):
 	@staticmethod
 	def startDomain(vm):
 		#Getting connection
-		subprocess.call(['/usr/sbin/xm','create',HdManager.getConfigFilePath(vm)])
+		subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
 		if not XendManager.isVmRunning(vm.name):
 			#TODO: add more info to exception
 			raise Exception("Could not start VM")
@@ -57,9 +63,12 @@ class XendManager(object):
 			if not XendManager.isVmRunning(vm.name):
 				return	
 			waitTime +=OXA_XEN_STOP_STEP_SECONDS
+			time.sleep(OXA_XEN_STOP_STEP_SECONDS)
 
 		#Let's behave impatiently
 		dom.destroy()
+		
+		time.sleep(OXA_XEN_STOP_STEP_SECONDS)
 	
 		if XendManager.isVmRunning(vm.name):
 			raise Exception("Could not stop domain")

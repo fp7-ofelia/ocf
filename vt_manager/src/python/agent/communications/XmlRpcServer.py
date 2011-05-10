@@ -95,7 +95,7 @@ class XmlRpcServer():
 		    if password != referencePassword: 
 			raise Exception("Password mismatch")
 
-    		    callBackFunction(callBackUrl,amId,xml)
+    		    callBackFunction(callBackUrl,xml)
 		    return ""
         
 		def ping(self, challenge): 

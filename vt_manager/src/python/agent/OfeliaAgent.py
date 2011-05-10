@@ -29,8 +29,15 @@ def checkArgs():
 
 ''' Redirect stdout and stderr '''
 def redirectStdinStderr():
-	sys.stdout = open(OXA_LOG+"output.log",'a')
-	sys.stderr = open(OXA_LOG+"error.log",'a')
+	output = open(OXA_LOG+"output.log",'a+',0)
+	error = open(OXA_LOG+"error.log",'a+',0)
+
+	sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+	sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
+	os.dup2(output.fileno(), sys.stdout.fileno())
+	os.dup2(error.fileno(), sys.stderr.fileno())
+	
 
 ''' Restore stdout and stderr '''
 def restoreStdinStderr():
@@ -43,7 +50,8 @@ def forkAndExitFather():
 	child_pid = os.fork()
 
     	if child_pid == 0:
-		#redirectStdinStderr()
+		#Redirect stdout and stderr to log files
+		redirectStdinStderr()
         	return	
     	else:
 		fp = open('/var/run/OfeliaAgent.pid', 'w')
@@ -52,7 +60,7 @@ def forkAndExitFather():
          	sys.exit()	
 
 
-def processXmlQuery(notificationCallBackUrl,amId,xml):
+def processXmlQuery(notificationCallBackUrl,xml):
 
 	#TODO:Authentication
 			
@@ -82,12 +90,10 @@ def main():
 	#XXX: testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
-	#Engage XMLRPC
-	
+
+	#Engage XMLRPC	
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
 
-	#restore stderr and stdout
-	#restoreStdinStderr()
 	
 	#testing
 	#processXmlQuery(sys.argv[1])
