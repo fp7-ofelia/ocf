@@ -9,7 +9,7 @@ class XmlRpcClient:
 	@staticmethod
 	def __craftProvisioningResponseXml(actionId,status,description):
 	
-		rspec = XmlUtils.getProvisioningEmptyResponseObject()
+		rspec = XmlUtils.getEmptyProvisioningResponseObject()
 		
 		rspec.response.provisioning.action[0].id = actionId
 		rspec.response.provisioning.action[0].status = status
@@ -21,7 +21,7 @@ class XmlRpcClient:
 	def sendAsyncProvisioningActionStatus(actionId,status,description):
 		server = xmlrpclib.Server(threading.current_thread().callBackURL)
 		print XmlRpcClient.__craftProvisioningResponseXml(actionId,status,description)
-		server.sendAsync(XmlRpcClient.__craftResponseXml(actionId,status,description))
+		server.sendAsync(XmlRpcClient.__craftProvisioningResponseXml(actionId,status,description))
 
 	##Monitoring
 	@staticmethod

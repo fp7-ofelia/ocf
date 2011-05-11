@@ -14,6 +14,8 @@ from xen.provisioning.HdManager import HdManager
 '''
 OXA_XEN_STOP_STEP_SECONDS=20
 OXA_XEN_STOP_MAX_SECONDS=200
+OXA_XEN_REBOOT_WAIT_TIME=20
+OXA_XEN_CREATE_WAIT_TIME=2
 
 class XendManager(object):
 
@@ -68,13 +70,27 @@ class XendManager(object):
 	@staticmethod
 	def startDomain(vm):
 		#Getting connection
-		subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+		conn = XendManager.__getConnection()
+
+		xmlConf = conn.domainXMLFromNative('xen-xm', open(HdManager.getConfigFilePath(vm),'r').read(), 0) 
+
+		conn.createXML(xmlConf,0)	
+
+		#Old way
+		#subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+		
+		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
+
 		if not XendManager.isVmRunning(vm.name):
 			#TODO: add more info to exception
 			raise Exception("Could not start VM")
 
 	@staticmethod
 	def stopDomain(vm):
+		#If is not running skip
+		if not XendManager.isVmRunning(vm.name):
+			return	
+
 		dom = XendManager.__getDomainByVmName(XendManager.__getConnection(),vm.name)
 		
 		#Attemp to be smart and let S.O. halt himself
@@ -99,6 +115,11 @@ class XendManager(object):
 	def rebootDomain(vm):
 		dom = XendManager.__getDomainByVmName(XendManager.__getConnection(),vm.name)
 		dom.reboot(0)
+		time.sleep(OXA_XEN_REBOOT_WAIT_TIME)
+		if not XendManager.isVmRunning(vm.name):
+			raise Exception("Could not reboot domain (maybe rebooted before MINIMUM_RESTART_TIME?). Domain will remain in stop state")
+
+		
 
 	''' XXX: To be implemented '''	
 	@staticmethod
