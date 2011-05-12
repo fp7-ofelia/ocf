@@ -8,6 +8,7 @@
             <th style="text-align:center">Actions</th>
             </tr>
             {% for vm in server.vms.all %}
+            {% if vm.sliceId == slice.uuid %}
                 <tr class = "{% cycle 'odd' 'even' %}">
                   <td>
                     {{ vm.name }}
@@ -47,6 +48,7 @@
                     </div>
                 </td>
                 </tr>
+            {% endif %}
             {% endfor %}
            </table>
 
