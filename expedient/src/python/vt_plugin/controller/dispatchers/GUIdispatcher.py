@@ -30,8 +30,8 @@ def goto_create_vm(request, slice_id):
             server_id=request.POST['server_id']
             return HttpResponseRedirect(reverse("virtualmachine_crud",
                                                 args=[slice_id,server_id]))
-        #TODO: implement "Delete VM" checkbutton
-
+        else:
+            return HttpResponseRedirect("/")
 
 #TODO: put the plugin code in plugin package!!!
 def virtualmachine_crud(request, slice_id, server_id):
@@ -82,8 +82,6 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
     "Manages the actions executed over VMs at url manage resources."
 
-#    #manage virtual machines
-#    VM_Manager.manageVM(slice_id, vm_id, action_type)
 
     vm = VM.objects.get(id = vm_id)
 
@@ -91,7 +89,6 @@ def manage_vm(request, slice_id, vm_id, action_type):
      
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
 
-    #ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
 
     #set VM state to on queue
@@ -99,5 +96,44 @@ def manage_vm(request, slice_id, vm_id, action_type):
     vm.save()
 
     #go to manage resources again
-    return HttpResponseRedirect(reverse("html_plugin_home",
-                                        args=[slice_id]))
+    return HttpResponseRedirect(reverse("html_plugin_home",args=[slice_id]))
+
+
+def check_vms_status(request, slice_id):
+    from django.utils import simplejson
+    vmsStatus = {}
+    vmsActionsHtmlCodes = {}
+    slice = get_object_or_404(Slice, id=slice_id)
+    vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+    for agg in vt_aggs:
+        for server in agg.resource_set.all():
+            if server.leaf_name == 'VTServer':
+                for vm in server.as_leaf_class().vms.all():
+                    vmsStatus[str(vm.id)]= vm.state
+                    if vm.state == "running":
+                        actionsHtmlCode =\
+                        "<div>\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/reboot/\">Reboot</a> |\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/stop/\">Stop</a>\
+                        </div>"
+                    elif  vm.state == "created (stopped)" :
+                        actionsHtmlCode =\
+                        "<div>\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/start/\">Start</a> |\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/delete/\">Delete</a>\
+                        </div>"
+                    elif vm.state == "stopped" :
+                        actionsHtmlCode =\
+                        "<div>\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/start/\">Start</a> |\
+                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/delete/\">Delete</a>\
+                        </div>"
+                    else:
+                        actionsHtmlCode = "<div></div>"
+                    vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
+        
+    data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes,})
+    response = HttpResponse(data)
+    return response

@@ -8,7 +8,7 @@ from vt_manager.models.Mac import Mac
 from vt_manager.models.Ip import Ip 
 from vt_manager.controller.ifaceAllocators.IPallocator import IPallocator
 from vt_manager.controller.ifaceAllocators.MacAllocator import MACallocator
-#TODO When an exception is raised because a wrong value, delete any previous value saved in that variable???
+import re
 
 class VM(models.Model):
     """VM data model class"""
@@ -39,7 +39,7 @@ class VM(models.Model):
     virtualizationSetupType = models.CharField(max_length = 1024, default="")
     macs = models.ManyToManyField('Mac', blank = True, null = True)#, on_delete=models.SET_NULL) 
     ips = models.ManyToManyField('Ip', blank = True, null = True)
-
+    
     def setMacs(self):
         macs = Mac.objects.filter(vmID = self.uuid)
         for mac in macs:
@@ -140,7 +140,22 @@ class VM(models.Model):
         pass
 
     def setName(self, name):
-        self.name = name
+
+        def validate_name(value):
+            def error():
+                raise ValidationError(
+                    "Invalid input: VM name should not contain blank spaces",
+                    code="invalid",
+                )
+            cntrlr_name_re = re.compile("^[\S]*$")
+            m = cntrlr_name_re.match(value)
+            if not m:
+                error()
+        try:
+            validate_name(name)
+            self.name = name
+        except Exception as e:
+            raise e
 
     def getName(self):
         return self.name

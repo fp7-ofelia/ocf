@@ -42,8 +42,36 @@
         font-weight: bold;
     }
 </style>
-
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
+
+<script>
+    function updateVMactions(data,index){
+        $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
+    }
+</script>
+
+<script>
+    function updateVMstatus(){
+        $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
+            
+            $.each(data.status, function(index,value){
+                    $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
+                    //alert(index + ':'+value);
+                    updateVMactions(data,index);
+                }
+           ); 
+
+        });
+    }
+    
+</script>
+<script>
+    var timer = setInterval(function(){
+    updateVMstatus(); 
+    },3000);
+
+</script>
 {% endblock %}
 
 {% block content %}
@@ -236,64 +264,11 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
         </td>
         </tr>
         </table>
+            <div id = "vms_table">
             {% if server.vms.all%}
-        <table class="vms">
-            <tr class="header">
-            <th>VM Name</th>
-            <th>State</th>
-            <th>OS</th>
-            <th>Memory</th>
-            <th>Mgmt IP</th>
-            <th style="text-align:center">Actions</th>
-            </tr>
-
-            {% for rsc in agg.resource_set.all %}
-            {% if rsc.leaf_name == 'VM' %}            
-            {% with rsc.as_leaf_class as vm %}
-                {% if server.uuid == vm.serverID%}
-                <tr class = "{% cycle 'odd' 'even' %}">
-                  <td>
-                    {{ vm.name }}
-                  </td>
-                  <td>
-                    {{ vm.state }}
-                  </td>
-                   <td>
-                    {{ vm.operatingSystemType }}
-                     {{vm.operatingSystemDistribution}} ({{vm.operatingSystemVersion}})
-                  </td>
-                  <td>
-                    {{ vm.memory }}
-                  </td>
-                    <td>
-                       {% for iface in vm.ifaces.all %}
-                            {% if iface.isMgmt == 1 %}
-                                {{iface.ip}}
-                            {% endif %}
-                       {% endfor %}
-                    </td>
-              <td style="text-align:center">
-                    {% if vm.state == "running" %}
-                        <a href="{% url manage_vm slice.id vm.id "reboot"%}">Reboot</a> |
-                        <a href="{% url manage_vm slice.id vm.id "stop"%}">Stop</a>
-                    {% endif %}
-                    {% if  vm.state == "created (stopped)"%}
-                        <a href="{% url manage_vm slice.id vm.id "start"%}">Start</a> |
-                        <a href="{% url manage_vm slice.id vm.id "delete"%}">Delete</a>
-                    {% endif %}
-                    {% if vm.state == "stopped"%}
-                        <a href="{% url manage_vm slice.id vm.id "start"%}">Start</a> |
-                        <a href="{% url manage_vm slice.id vm.id "delete"%}">Delete</a>
-                    {% endif %}
-                </td>
-                </tr>
-            {%endif%}
-            {% endwith%}
+            {% include "html/list_vms.html" %}
             {% endif %}
-            {% endfor %}
-           </table>
-            {% endif %}
-
+            </div>
 
 
     {% endwith %}

@@ -540,3 +540,4 @@ def sshkey_file(request, slice_id, type):
     response = HttpResponse(data, mimetype="application/x-download")
     response["Content-Disposition"] = 'attachment;filename=%s' % filename
     return response
+

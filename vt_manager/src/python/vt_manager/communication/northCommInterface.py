@@ -30,13 +30,12 @@ def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
     logging.debug("Enter listResources")
     infoRspec = XmlHelper.getSimpleInformation()
     servers = VTServer.objects.all()
-
+    baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
     if not servers:
         logging.debug("No VTServers available")
         infoRspec.response.information.resources.server.pop()
         resourcesString = XmlHelper.craftXmlClass(infoRspec)
         localHashValue = str(hash(resourcesString))
-        baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
     else:
         for sIndex, server in enumerate(servers):
             #add Server
