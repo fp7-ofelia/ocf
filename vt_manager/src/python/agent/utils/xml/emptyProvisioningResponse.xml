@@ -2,8 +2,8 @@
 <rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
 <response>
 	<provisioning>
-		<action id="testid">
-			<status>FAILED</status>
+		<action id="">
+			<status></status>
 			<description></description>
 		</action>
 	</provisioning>

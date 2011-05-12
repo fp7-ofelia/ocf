@@ -1,54 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xs:schema targetNamespace="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<!--
 
-<!-- Elements -->
+ROOT ELEMENT
+
+-->
+
+<xs:schema targetNamespace="http://www.fp7-ofelia.eu/CF/vt_am/rspec"
+	xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+
+	<!-- Elements -->
 	<xs:element name="rspec">
 		<xs:complexType>
-		    	<xs:choice>
+			<xs:choice>
 				<xs:element name="query">
 					<xs:complexType>
-		    				<xs:choice>
-							<xs:element name="provisioning" type="provisioning-type"/>
-							<!-- TODO: implement Monitoring and Info hierarchies -->
+						<xs:choice>
+							<xs:element name="provisioning" type="provisioning-type" />
+							<xs:element name="monitoring" type="monitoring-type" />
+							<!-- TODO: implement other hierarchies -->
 						</xs:choice>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="response">
 					<xs:complexType>
-	    					<xs:choice>
-							<xs:element name="provisioning" type="provisioning-type"/>
-							<xs:element name="information" type="information-type"/>
-							<!-- TODO: implement Monitoring and Info hierarchies -->
-		    				</xs:choice>
+						<xs:choice>
+							<xs:element name="provisioning" type="provisioning-type" />
+							<xs:element name="monitoring" type="monitoring-type" />
+							<!-- TODO: implement other hierarchies -->
+						</xs:choice>
 					</xs:complexType>
 				</xs:element>
-	    		</xs:choice>
+			</xs:choice>
 		</xs:complexType>
 	</xs:element>
 
-<!-- Types -->
+
+<!--
+
+PROVISIONING
+
+-->
+	<!-- Types -->
 	<xs:complexType name="provisioning-type">
 		<xs:sequence>
-			<xs:element name="action" type="action-type" maxOccurs="unbounded" />
+			<xs:element name="action" type="provisioning-action-type" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="action-type">
+	<xs:complexType name="provisioning-action-type">
 		<xs:sequence>
 			<!-- TODO this with a choice or restriction -->
 			<xs:element name="virtual-machine" type="virtual-machine-type" />
-	
-			<!-- Only used in response -->	
+
+			<!-- Only used in response -->
 			<xs:element name="status" type="action-status-types" />
 			<xs:element name="description" type="xs:string" />
 		</xs:sequence>
-		<xs:attribute name="type" type="action-types" />
+		<xs:attribute name="type" type="provisioning-action-types" />
 		<!-- Defined to avoid id overlapping issues -->
 		<xs:attribute name="id" type="xs:string" />
 	</xs:complexType>
 
-	<xs:simpleType name="action-types">
+	<xs:simpleType name="provisioning-action-types">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="create" />
 			<xs:enumeration value="modify" />
@@ -66,25 +81,27 @@
 			<xs:enumeration value="UNKNOWN" />
 			<xs:enumeration value="ONGOING" />
 			<xs:enumeration value="SUCCESS" />
-			<xs:enumeration value="FAIL" />
+			<xs:enumeration value="FAILED" />
 			<!-- Add Other statusType here -->
 		</xs:restriction>
 	</xs:simpleType>
 
 	<xs:complexType name="virtual-machine-type">
 		<xs:sequence>
-			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" /> 
-			<xs:element name="uuid" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+			<xs:element name="name" type="xs:string" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="uuid" type="xs:string" minOccurs="1"
+				maxOccurs="1" />
 			<xs:element name="status" type="vm-status-type" />
-			<xs:element name="project-id" type="xs:string"  minOccurs="1" maxOccurs="1"/>
-			<xs:element name="project-name" type="xs:string"  minOccurs="1" maxOccurs="1"/>
-			<xs:element name="slice-id" type="xs:string"  minOccurs="1" maxOccurs="1" />
-			<xs:element name="slice-name" type="xs:string"  minOccurs="1" maxOccurs="1"/>
-			<xs:element name="operating-system-type" type="os-type-type"  minOccurs="1" maxOccurs="1" />
+			<xs:element name="project-id" type="xs:string" />
+			<xs:element name="project-name" type="xs:string" />
+			<xs:element name="slice-id" type="xs:string" />
+			<xs:element name="slice-name" type="xs:string" />
+			<xs:element name="operating-system-type" type="os-type-type" />
 			<xs:element name="operating-system-version" type="os-type-type" />
 			<xs:element name="operating-system-distribution" type="os-distro-type" />
-			<xs:element name="server-id" type="xs:string" minOccurs="1" maxOccurs="1"/>
-			<xs:element name="virtualization-type" type="virtualization-type"   minOccurs="1" maxOccurs="1" />
+			<!--<xs:element name="server-id" type="xs:string" minOccurs="1" maxOccurs="1" />-->
+			<xs:element name="virtualization-type" type="virtualization-type" /> 
 			<xs:choice>
 				<xs:element name="xen-configuration" type="xen-configuration" />
 				<!-- Add Other config types here -->
@@ -123,7 +140,7 @@
 			<xs:enumeration value="FreeBSD" />
 			<xs:enumeration value="OpenBSD" />
 			<xs:enumeration value="NetBSD" />
-			
+
 			<!-- Add Other types here -->
 		</xs:restriction>
 	</xs:simpleType>
@@ -142,13 +159,16 @@
 	<xs:complexType name="xen-configuration">
 		<xs:sequence>
 			<xs:element name="hd-setup-type" type="xen-hd-setup-type" />
+			<xs:element name="hd-size-gb" type="xs:integer" />
 			<xs:element name="hd-origin-path" type="xs:string" />
-			<xs:element name="virtualization-setup-type" type="xen-virtualization-setup-type" />		
+			<xs:element name="configurator" type="xs:string" />
+			<xs:element name="virtualization-setup-type" type="xen-virtualization-setup-type" />
 			<xs:element name="memory-mb" type="xs:integer" />
 			<xs:element name="interfaces" type="interfaces-type" />
+			<xs:element name="users" type="users-type" />
 		</xs:sequence>
 	</xs:complexType>
-	
+
 	<xs:simpleType name="xen-virtualization-setup-type">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="paravirtualization" />
@@ -156,7 +176,7 @@
 			<!-- Add Other types here -->
 		</xs:restriction>
 	</xs:simpleType>
-	
+
 	<xs:simpleType name="xen-hd-setup-type">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="file-image" />
@@ -164,65 +184,100 @@
 			<!-- Add Other types here -->
 		</xs:restriction>
 	</xs:simpleType>
-	
+
 	<xs:complexType name="interfaces-type">
 		<xs:sequence>
-			<xs:element name="interface" type="interface-type" maxOccurs="unbounded" />
+			<xs:element name="interface" type="interface-type"
+				maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="interface-type">
-			<xs:sequence>
-				<xs:element name="name" type="xs:string" />
-				<xs:element name="mac" type="xs:string" />
-				<xs:element name="ip" type="xs:string" />
-				<xs:element name="mask" type="xs:string" />
-				<xs:element name="gw" type="xs:string" />
-				<xs:element name="dns1" type="xs:string" />
-				<xs:element name="dns2" type="xs:string" />
-				<!-- Interface connection -->
-				<xs:element name="switch-id" type="xs:string" />
-				<xs:element name="switch-port" type="xs:string" />
-			</xs:sequence>
-			<xs:attribute name="ismgmt" type="xs:boolean" />
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="mac" type="xs:string" />
+			<xs:element name="ip" type="xs:string" />
+			<xs:element name="mask" type="xs:string" />
+			<xs:element name="gw" type="xs:string" />
+			<xs:element name="dns1" type="xs:string" />
+			<xs:element name="dns2" type="xs:string" />
+			<!-- Interface connection -->
+			<xs:element name="switch-id" type="xs:string" />
+			<xs:element name="switch-port" type="xs:string" />
+		</xs:sequence>
+		<xs:attribute name="ismgmt" type="xs:boolean" />
 	</xs:complexType>
 
-<!-- RESPONSE -->
 
-<!-- information -->
-	<xs:complexType name="information-type">
+	<xs:complexType name="users-type">
 		<xs:sequence>
-			<!-- Action information -->
-			<xs:element name="resources" type="resources-type" />
+			<xs:element name="user" type="user-type" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="user-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="password" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 
-	<!-- Resources -->
-	
-	<xs:complexType name="resources-type">
+
+<!--
+
+MONITORING
+
+-->
+	<xs:complexType name="monitoring-type">
 		<xs:sequence>
-			<xs:element name="server" type="server-type" maxOccurs="unbounded" />
+			<xs:element name="action" type="monitoring-action-type" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Actions -->
+	<xs:complexType name="monitoring-action-type">
+		<xs:sequence>
+			<xs:element name="server" type="server-type" maxOccurs="1" />
+
+			<!-- Only used in response -->
+			<xs:element name="status" type="action-status-types" />
+			<xs:element name="description" type="xs:string" />
+	
 			<!-- Add more resource types here -->
 		</xs:sequence>
+		<xs:attribute name="type" type="monitoring-action-types" />
+		<!-- Defined to avoid id overlapping issues -->
+		<xs:attribute name="id" type="xs:string" />
 	</xs:complexType>
-	
-		<!--Server resource -->
-		<xs:complexType name="server-type">
-			<xs:sequence>
-				<xs:element name="name" type="xs:string"   minOccurs="1" maxOccurs="1" />
-				<xs:element name="id" type="xs:string"   minOccurs="1" maxOccurs="1" />
-				<xs:element name="uuid" type="xs:string" minOccurs="1" maxOccurs="1" />
-				<xs:element name="operating-system-type" type="os-type-type" />
-				<xs:element name="operating-system-version" type="os-type-type" />
-				<xs:element name="operating-system-distribution" type="os-distro-type" />
-				<xs:element name="virtualization-type" type="virtualization-type"   minOccurs="1" maxOccurs="1" />
-				<xs:element name="interfaces" type="interfaces-type" />
-				<xs:element name="virtual-machine" type="virtual-machine-type" maxOccurs="unbounded"/>
-				<xs:element name="status" type="server-status-type"/>
-			</xs:sequence>
-		</xs:complexType>
-			<!-- Server status -->
-			<xs:complexType name="server-status-type">
-			</xs:complexType>
+
+	<xs:simpleType name="monitoring-action-types">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="listActiveVMs" />
+			<!-- Add Other actionType here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<!--Server Type -->
+	<xs:complexType name="server-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="id" type="xs:string" minOccurs="1"	maxOccurs="1" />
+			<xs:element name="uuid" type="xs:string" minOccurs="1"	maxOccurs="1" />
+			<xs:element name="operating-system-type" type="os-type-type" />
+			<xs:element name="operating-system-version" type="os-type-type" />
+			<xs:element name="operating-system-distribution" type="os-distro-type" />
+			<xs:element name="virtualization-type" type="virtualization-type"
+				minOccurs="1" maxOccurs="1" />
+			<xs:element name="interfaces" type="interfaces-type" />
+			<xs:element name="virtual-machines" type="virtual-machine-type"
+				maxOccurs="unbounded" />
+			<xs:element name="status" type="server-status-type" />
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Server status -->
+	<xs:complexType name="server-status-type">
+	</xs:complexType>
 
 </xs:schema>
+
