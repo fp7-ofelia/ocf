@@ -1,5 +1,5 @@
-     <table class="vms">
-            <tr class="header">
+     <table id ="table_vms_list" class="vms">
+            <tr id="table_vms_list_header", class="header">
             <th>VM Name</th>
             <th>State</th>
             <th>OS</th>
@@ -9,7 +9,7 @@
             </tr>
             {% for vm in server.vms.all %}
             {% if server.uuid == vm.serverID and vm.sliceId == slice.uuid %}
-                <tr class = "{% cycle 'odd' 'even' %}">
+                <tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
                   <td>
                     {{ vm.name }}
                   </td>

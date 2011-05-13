@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue May 10 18:47:47 2011 by generateDS.py version 2.3b.
+# Generated Fri May 13 14:02:50 2011 by generateDS.py version 2.4c.
 #
 
 import sys
@@ -78,15 +78,15 @@ supermod.rspec.subclass = rspecSub
 
 
 class querySub(supermod.query):
-    def __init__(self, provisioning=None, monitoring=None):
-        super(querySub, self).__init__(provisioning, monitoring, )
+    def __init__(self, provisioning=None, monitoring=None, information=None):
+        super(querySub, self).__init__(provisioning, monitoring, information, )
 supermod.query.subclass = querySub
 # end class querySub
 
 
 class responseSub(supermod.response):
-    def __init__(self, provisioning=None, monitoring=None):
-        super(responseSub, self).__init__(provisioning, monitoring, )
+    def __init__(self, provisioning=None, monitoring=None, information=None):
+        super(responseSub, self).__init__(provisioning, monitoring, information, )
 supermod.response.subclass = responseSub
 # end class responseSub
 
@@ -106,8 +106,8 @@ supermod.provisioning_action_type.subclass = provisioning_action_typeSub
 
 
 class virtual_machine_typeSub(supermod.virtual_machine_type):
-    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, xen_configuration=None):
-        super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, xen_configuration, )
+    def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
+        super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, server_id, virtualization_type, xen_configuration, )
 supermod.virtual_machine_type.subclass = virtual_machine_typeSub
 # end class virtual_machine_typeSub
 
@@ -175,6 +175,34 @@ supermod.server_status_type.subclass = server_status_typeSub
 # end class server_status_typeSub
 
 
+class information_typeSub(supermod.information_type):
+    def __init__(self, resources=None):
+        super(information_typeSub, self).__init__(resources, )
+supermod.information_type.subclass = information_typeSub
+# end class information_typeSub
+
+
+class resources_typeSub(supermod.resources_type):
+    def __init__(self, server=None):
+        super(resources_typeSub, self).__init__(server, )
+supermod.resources_type.subclass = resources_typeSub
+# end class resources_typeSub
+
+
+class server_information_typeSub(supermod.server_information_type):
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machine=None, status=None):
+        super(server_information_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machine, status, )
+supermod.server_information_type.subclass = server_information_typeSub
+# end class server_information_typeSub
+
+
+class server_information_status_typeSub(supermod.server_information_status_type):
+    def __init__(self, valueOf_=None):
+        super(server_information_status_typeSub, self).__init__(valueOf_, )
+supermod.server_information_status_type.subclass = server_information_status_typeSub
+# end class server_information_status_typeSub
+
+
 
 def get_root_tag(node):
     tag = supermod.Tag_pattern_.match(node.tag).groups()[-1]
@@ -195,9 +223,9 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -214,9 +242,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -231,11 +259,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('#from ??? import *\n\n')
-##     sys.stdout.write('import ??? as model_\n\n')
-##     sys.stdout.write('rootObj = model_.rspec(\n')
-##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-##     sys.stdout.write(')\n')
+    sys.stdout.write('#from ??? import *\n\n')
+    sys.stdout.write('import ??? as model_\n\n')
+    sys.stdout.write('rootObj = model_.rspec(\n')
+    rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
+    sys.stdout.write(')\n')
     return rootObj
 
 

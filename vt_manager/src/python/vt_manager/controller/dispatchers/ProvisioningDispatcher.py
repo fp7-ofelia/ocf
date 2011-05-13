@@ -49,7 +49,6 @@ class ProvisioningDispatcher():
                         return
                 else:
                     actionModel.save()
-
                 try:
                     VMmodel = Translator.VMtoModel(action.virtual_machine, threading.currentThread().callBackURL, save="save" )
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )

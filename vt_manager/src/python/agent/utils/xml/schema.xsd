@@ -19,6 +19,7 @@ ROOT ELEMENT
 						<xs:choice>
 							<xs:element name="provisioning" type="provisioning-type" />
 							<xs:element name="monitoring" type="monitoring-type" />
+							<xs:element name="information" type="nformation-type" />
 							<!-- TODO: implement other hierarchies -->
 						</xs:choice>
 					</xs:complexType>
@@ -28,6 +29,7 @@ ROOT ELEMENT
 						<xs:choice>
 							<xs:element name="provisioning" type="provisioning-type" />
 							<xs:element name="monitoring" type="monitoring-type" />
+							<xs:element name="information" type="information-type" />
 							<!-- TODO: implement other hierarchies -->
 						</xs:choice>
 					</xs:complexType>
@@ -100,7 +102,7 @@ PROVISIONING
 			<xs:element name="operating-system-type" type="os-type-type" />
 			<xs:element name="operating-system-version" type="os-type-type" />
 			<xs:element name="operating-system-distribution" type="os-distro-type" />
-			<!--<xs:element name="server-id" type="xs:string" minOccurs="1" maxOccurs="1" />-->
+			<xs:element name="server-id" type="xs:string" minOccurs="1" maxOccurs="1" />
 			<xs:element name="virtualization-type" type="virtualization-type" /> 
 			<xs:choice>
 				<xs:element name="xen-configuration" type="xen-configuration" />
@@ -278,6 +280,51 @@ MONITORING
 	<!-- Server status -->
 	<xs:complexType name="server-status-type">
 	</xs:complexType>
+
+<!--
+
+INFORMATION
+
+-->       
+
+    <xs:complexType name="information-type">
+                <xs:sequence>
+                        <!-- Action information -->
+                        <xs:element name="resources" type="resources-type" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <!-- Resources -->
+
+        <xs:complexType name="resources-type">
+                <xs:sequence>
+                        <xs:element name="server" type="server-information-type" maxOccurs="unbounded" />
+                        <!-- Add more resource types here -->
+                </xs:sequence>
+        </xs:complexType>
+
+                <!--Server resource -->
+                <xs:complexType name="server-information-type">
+                        <xs:sequence>
+                                <xs:element name="name" type="xs:string"   minOccurs="1" maxOccurs="1" />
+                                <xs:element name="id" type="xs:string"   minOccurs="1" maxOccurs="1" />
+                                <xs:element name="uuid" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                <xs:element name="operating-system-type" type="os-type-type" />
+                                <xs:element name="operating-system-version" type="os-type-type" />
+                                <xs:element name="operating-system-distribution" type="os-distro-type" />
+                                <xs:element name="virtualization-type" type="virtualization-type"   minOccurs="1" maxOccurs="1" />
+                                <xs:element name="interfaces" type="interfaces-type" />
+                                <xs:element name="virtual-machine" type="virtual-machine-type" maxOccurs="unbounded"/>
+                                <xs:element name="status" type="server-information-status-type"/>
+                        </xs:sequence>
+                </xs:complexType>
+                        <!-- Server status -->
+                        <xs:complexType name="server-information-status-type">
+                        </xs:complexType>
+
+
+
+
 
 </xs:schema>
 
