@@ -73,12 +73,13 @@ class XendManager(object):
 		conn = XendManager.__getConnection()
 
 		xmlConf = conn.domainXMLFromNative('xen-xm', open(HdManager.getConfigFilePath(vm),'r').read(), 0) 
-
-		conn.createXML(xmlConf,0)	
-
-		#Old way
-		#subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
-		
+		try:
+			#Try first using libvirt call
+			conn.createXML(xmlConf,0)	
+		except Exception as e:
+			#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
+			subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+			
 		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
 
 		if not XendManager.isVmRunning(vm.name):
