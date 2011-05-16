@@ -1,5 +1,5 @@
      <table id ="table_vms_list" class="vms">
-            <tr id="table_vms_list_header", class="header">
+            <tr id="table_vms_list_header" class="header">
             <th>VM Name</th>
             <th>State</th>
             <th>OS</th>
@@ -24,12 +24,14 @@
                   <td>
                     {{ vm.memory }}
                   </td>
-                    <td>
+                    <td id = td_vm_ip{{vm.id}}>
+                       <div>
                        {% for iface in vm.ifaces.all %}
                             {% if iface.isMgmt == 1 %}
                                 {{iface.ip}}
                             {% endif %}
                        {% endfor %}
+                       </div>
                     </td>
               <td id = td_vm_actions{{vm.id}} style="text-align:center">
                     <div>

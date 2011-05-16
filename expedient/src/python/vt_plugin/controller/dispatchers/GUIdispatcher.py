@@ -103,6 +103,7 @@ def check_vms_status(request, slice_id):
     from django.utils import simplejson
     vmsStatus = {}
     vmsActionsHtmlCodes = {}
+    vmsIP = {}
     slice = get_object_or_404(Slice, id=slice_id)
     vt_aggs = \
             slice.aggregates.filter(
@@ -133,7 +134,11 @@ def check_vms_status(request, slice_id):
                     else:
                         actionsHtmlCode = "<div></div>"
                     vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
+                    try:
+                        vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip
+                    except:
+                        pass
         
-    data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes,})
+    data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes, 'ips': vmsIP,})
     response = HttpResponse(data)
     return response

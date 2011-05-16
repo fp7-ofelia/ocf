@@ -46,8 +46,9 @@
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 
 <script>
-    function updateVMactions(data,index){
+    function updateVMparams(data,index){
         $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
+        $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");
     }
 </script>
 
@@ -57,12 +58,18 @@
             
            $.each(data.status, function(index,value){
                     $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
-                    updateVMactions(data,index);
+                    updateVMparams(data,index);
                 }
-           ); 
-           $.each(("#table_vms_list").child(), function(tr_index, tr_table){
-                //if (tr_table.id == 
-                //buscar en los data.vms y si no esta la tr_id, se borra
+           );
+           var vms_table = document.getElementById('table_vms_list');
+           $.each($("#table_vms_list tr"), function(tr_index, tr_table){
+                var vmIdValue = tr_table.id.substring(5);
+                if (tr_table.id != 'table_vms_list_header'){
+                    var vmIdValue = tr_table.id.substring(5);
+                    if (!data.status[vmIdValue]) {
+                            $("#tr_vm"+vmIdValue).remove();
+                    }
+                }
             }
            );
         });
