@@ -59,6 +59,7 @@ class XenDriver(VTDriver):
 						instance.getOSDistribution(),
 						instance.getOSVersion(),
 						instance.getAgentURL(),
+						instance.getAgentPassword(),
 						save = True)
 		elif len(server)==0:
 			return XenServer.constructor(instance.getName(),
@@ -66,6 +67,7 @@ class XenDriver(VTDriver):
 								instance.getOSDistribution(),
 								instance.getOSVersion(),
 								instance.getAgentURL(),
+								instance.getAgentPassword(),
 								save=True)
 		else:
 			raise Exception("Trying to create a server failed")

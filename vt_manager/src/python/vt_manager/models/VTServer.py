@@ -51,7 +51,7 @@ class VTServer(models.Model):
 
 	''' Agent fields'''
 	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper])
-	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password",editable=True)
+	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password")
 
 	url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
     
@@ -175,6 +175,11 @@ class VTServer(models.Model):
 		self.autoSave()
 	def getEnabled(self):
 		return self.enabled
+	def getAgentPassword(self):
+		return self.agentPassword
+	def setAgentPassword(self, password):
+		self.agentPassword = password
+		self.autoSave()
 
 	#Destroy
 	def destroy(self):

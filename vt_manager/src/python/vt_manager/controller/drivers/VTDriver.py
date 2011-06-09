@@ -71,17 +71,9 @@ class VTDriver():
 	def crudDataBridgeFromInstance(server,ifaces, ifacesToDelete):
 		serverIfaces = server.getNetworkInterfaces().filter(isMgmt = False)
 		for newIface in ifaces:
-			print "[LEODEBUG] CRUDING IFACES"
-			print "Name: "+str(newIface.name)+" id: "+str(newIface.id)
-			print serverIfaces.filter(id = newIface.id)
-			if serverIfaces.filter(id = newIface.id):
-				for merda in serverIfaces.filter(id = newIface.id):
-					print merda.id
-			if not serverIfaces.filter(id = newIface.id):
-				print "add"
+			if newIface.id == None:# or not serverIfaces.filter(id = newIface.id):
 				server.addDataBridge(newIface.getName(),"",newIface.getSwitchID(),newIface.getPort())
 			else:
-				print "update"
 				server.updateDataBridge(newIface)
 		for id in ifacesToDelete:
 			if id != '':
