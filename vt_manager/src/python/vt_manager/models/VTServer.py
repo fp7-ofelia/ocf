@@ -51,6 +51,8 @@ class VTServer(models.Model):
 
 	''' Agent fields'''
 	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper])
+	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password")
+
 	url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
     
 	''' Network interfaces'''
