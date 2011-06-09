@@ -1,0 +1,50 @@
+{% extends "servers/servers_base.html" %}
+
+{% block pagehead %}<h1>Admin VTServers</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+     
+    <div> Select the VTServer you want to update/delete</div>
+    <br/>
+    <div style="width:730px"> 
+    <table class ="servers">
+        <tr class="header" >
+        <th>Name</th>
+        <th>Operating System</th>
+        <th>Distribution</th>
+        <th>Version</th>
+        <th>Virtualization Type</th>
+        </tr> 
+        {% for server in servers_ids %}
+            <tr class="{% cycle 'odd' 'even' %}">
+                <td>
+                <a href="{% url edit_server server.id %}">{{ server.getName }}</a>
+                </td>
+                <td>
+                {{ server.operatingSystemType }}
+                </td>
+                <td>
+                {{ server.operatingSystemDistribution }}
+                </td>
+                <td>
+                {{ server.operatingSystemVersion }}
+                </td>
+                <td>
+                {{ server.virtTech }}
+                </td>
+             </tr>
+        {% endfor %}
+    </table>
+    </div>
+    <br/>
+    <div class="center">
+        <a href="{% url servers_create %}">Add</a> |
+        <a href="{% url dashboard  %}">Home</a>
+    </div>
+</div>
+{% endblock content %}
+

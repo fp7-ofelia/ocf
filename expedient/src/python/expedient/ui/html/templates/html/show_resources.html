@@ -55,7 +55,6 @@
 <script>
     function updateVMstatus(){
         $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
-            
            $.each(data.status, function(index,value){
                     $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
                     updateVMparams(data,index);
@@ -286,7 +285,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     {% endfor %}
     </table>
     <br/>
-    <div id="create_server">
+    <div id="create_server" style="clear:both;">
         Create a new virtual machine in server:
         <select name = "server_id" id="server_id_agg_{{agg.id}}">
         {% for rsc in agg.resource_set.all %}

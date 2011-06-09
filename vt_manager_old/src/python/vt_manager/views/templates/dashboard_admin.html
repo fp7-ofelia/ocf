@@ -1,0 +1,25 @@
+{% extends "base_admin.html" %}
+
+{% block pagehead %}<h1>{{ user.username }} - Admin Dashboard </h1> {% endblock %}
+{% block scripts %}
+<style>
+	table.formtable {
+		width: 600px;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<div class="main">
+
+    <b>Welcome to the Virtualization Aggregate Manager!<br/><br/></b>
+
+    <b>Servers added :<br/></b>
+    <table class="formtable">
+    {% for server in servers%}
+        <tr><td>{{server.name}} => VMs : <a href="{% url edit_server server.id %}">{{server.vms.all|length }}</a></td><tr/>
+    {% endfor %}
+    </table>
+
+</div>
+{% endblock content %}
+

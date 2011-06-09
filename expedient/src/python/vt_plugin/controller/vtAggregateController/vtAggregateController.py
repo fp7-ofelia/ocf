@@ -112,6 +112,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         return
     else:
 	print remoteHashValue
+        oldHashValue = rHashObject.hashValue
         rHashObject.hashValue = remoteHashValue
         rHashObject.save() 
         try:
@@ -120,22 +121,26 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             print "Can't parse rspec"
             print e
             return
-    
-        for server in xmlClass.response.information.resources.server:
-            for vm in server.virtual_machine:
-                Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
-            Translator.ServerClassToModel(server, vtPlugin.id)
-            serversInAggregate.append(server.uuid)
-        serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
-        for s in serversInExpedient:
-            if s not in serversInAggregate:
-                delServer = VTServer.objects.get(uuid = s)
-                #for vm in delServer.vms.all():
-                #    delServer.vms.remove(vm)
-                #    vm.completeDelete()
-                #for sIface in delServer.ifaces.all():
-                #    sIface.delete()
-                #delServer.delete()
-                delServer.completeDelete()
-        return xmlClass
+
+        try:
+            for server in xmlClass.response.information.resources.servers:
+                for vm in server.virtual_machines:
+                    Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
+                Translator.ServerClassToModel(server, vtPlugin.id)
+                serversInAggregate.append(server.uuid)
+            serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
+            for s in serversInExpedient:
+                if s not in serversInAggregate:
+                    delServer = VTServer.objects.get(uuid = s)
+                    #for vm in delServer.vms.all():
+                    #    delServer.vms.remove(vm)
+                    #    vm.completeDelete()
+                    #for sIface in delServer.ifaces.all():
+                    #    sIface.delete()
+                    #delServer.delete()
+                    delServer.completeDelete()
+            return xmlClass
+        except:
+            rHashObject.hashValue = oldHashValue
+            rHashObject.save()
     

@@ -79,6 +79,7 @@ class Translator():
 
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
+		#TODO: This is wrong, if a server changes its name this will create a new one instead of updating it
         #search in database if sClass already exists
         newServer = 0
         if VTServer.objects.filter(name = sClass.name).exists():
@@ -102,22 +103,24 @@ class Translator():
             sModel.setOSdist(sClass.operating_system_distribution)
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
-            for iface in sClass.interfaces.interface:
-                print "IFACE CLASS: %s" %iface.name
-                if iface.ismgmt is True:
-                    sModel.setVmMgmtIface(iface.switch_id)
-                else:
-                    if sModel.ifaces.filter(ifaceName = iface.name):
-                        ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+            #for iface in sClass.interfaces.interface:
+            if sClass.interfaces:
+                for iface in sClass.interfaces.interface:
+                    print "IFACE CLASS: %s" %iface.name
+                    if iface.ismgmt is True:
+                        sModel.setVmMgmtIface(iface.name)
                     else:
-                        ifaceModel = VTServerIface()
-                    ifaceModel.ifaceName = iface.name
-                    ifaceModel.switchID = iface.switch_id
-		    if Translator._isInteger(iface.switch_port):
-                    	ifaceModel.port = iface.switch_port
-                    ifaceModel.save()
-                    if not sModel.ifaces.filter(ifaceName = iface.name):
-                        sModel.ifaces.add(ifaceModel)
+                        if sModel.ifaces.filter(ifaceName = iface.name):
+                            ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+                        else:
+                            ifaceModel = VTServerIface()
+                        ifaceModel.ifaceName = iface.name
+                        ifaceModel.switchID = iface.switch_id
+    		    if Translator._isInteger(iface.switch_port):
+                       	ifaceModel.port = iface.switch_port
+                        ifaceModel.save()
+                        if not sModel.ifaces.filter(ifaceName = iface.name):
+                            sModel.ifaces.add(ifaceModel)
             sModel.setVMs()        
             sModel.save()
             return sModel

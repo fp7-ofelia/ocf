@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
+<query>
+<provisioning>
+	<action type="hardStop" id="teststop">
+		<virtual-machine>
+			<name>LeoTest</name>
+			<uuid>LeoUUID</uuid>
+			<project-id>project1</project-id>
+            <project-name>projectname</project-name>
+            <slice-id>slice1</slice-id>
+            <slice-name>slicename</slice-name>
+            <virtualization-type>xen</virtualization-type>
+			<xen-configuration>
+				<hd-setup-type>file-image</hd-setup-type>
+			</xen-configuration>
+		</virtual-machine>
+	</action>
+</provisioning>
+</query>
+</rspec>

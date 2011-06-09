@@ -1,0 +1,150 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Networking dashboard</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    <div>
+<!--	This is the networking dashboard. -->
+
+	<h2>Ip4 Range summary</h2>
+	<table>
+		<tr>
+			<td style="vertical-align:middle">
+				<table class="formtableBold" style="width:140px;height:85px">
+					<tr>
+						<td align="center"> 
+							<b>Overall status</b>
+							<font class="smallInfo"><br/>(only globals)</font>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align:center">
+							<span id="statusMacs"></span>
+							<script>
+								createProgressBar("#statusMacs",{{MacRange.getAllocatedGlobalNumberOfSlots}},{{MacRange.getGlobalNumberOfSlots}},false)	
+							</script>		
+							<br>
+							<font class="smallInfo" style="text-decoration:italic">{{MacRange.getAllocatedGlobalNumberOfSlots}}/{{MacRange.getGlobalNumberOfSlots}}</font>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+			<td>
+	
+	{% for mac in macRanges %}
+				<table class="formtable" style="width:140px;height:85px">
+					<tr>
+						<th align="center">				<a href="{% url showMacRange mac.id %}">{{mac.name}}</a>
+						{% if mac.isGlobal %}
+							<font class="smallInfo"><br/>(global)</font>
+						{% endif %}
+						</th>
+					</tr>
+					<tr>
+						<td align="center">
+						<span id="status{{mac.id}}"></span>
+			<script>
+				createProgressBar("#status{{mac.id}}",{{mac.macs.all.count}},{{mac.getNumberOfSlots}},false)	
+			</script>	
+							<br/><font class="smallInfo" style="text-decoration:italic">{{mac.macs.all.count}}/{{mac.getNumberOfSlots}}</font>
+		
+	
+						</td>
+					</tr>
+				</table>
+    {% endfor %}
+			<table class="formtable" style="width:140px;height:85px">
+					<tr>
+						<th align="center">				<a href="{% url macRanges %}">Manage MAC ranges</a>
+						</th>
+					</tr>
+					<tr>
+						<td align="center">				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
+
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+	</table>
+		
+	<h2>Ethernet Range summary</h2>
+	<table>
+		<tr>
+			<td style="vertical-align:middle">
+				<table class="formtableBold" style="width:140px;height:85px">
+					<tr>
+						<td align="center"> 
+							<b>Overall status</b>
+							<font class="smallInfo"><br/>(only globals)</font>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align:center">
+							<span id="statusIps"></span>
+							<script>
+								createProgressBar("#statusIps",{{Ip4Range.getAllocatedGlobalNumberOfSlots}},{{Ip4Range.getGlobalNumberOfSlots}},false)	
+							</script>		
+							<br>
+							<font class="smallInfo" style="text-decoration:italic">{{Ip4Range.getAllocatedGlobalNumberOfSlots}}/{{Ip4Range.getGlobalNumberOfSlots}}</font>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+			<td>
+	{% for ip4 in ip4Ranges %}
+				<table class="formtable" style="width:140px;height:85px">
+					<tr>
+						<th align="center">				<a href="{% url showIp4Range ip4.id %}">{{ip4.name}}</a>
+						{% if ip4.isGlobal %}
+							<font class="smallInfo"><br/>(global)</font>
+						{% endif %}
+						</th>
+					</tr>
+					<tr>
+						<td align="center">
+						<span id="status{{ip4.id}}"></span>
+			<script>
+				createProgressBar("#status{{ip4.id}}",{{ip4.ips.all.count}},{{ip4.getNumberOfSlots}},false)	
+			</script>	
+							<br/><font class="smallInfo" style="text-decoration:italic">{{ip4.ips.all.count}}/{{ip4.getNumberOfSlots}}</font>
+		
+	
+						</td>
+					</tr>
+				</table>
+    {% endfor %}
+	<table class="formtable" style="width:140px;height:85px">
+					<tr>
+						<th align="center">
+							<a href="{% url ip4Ranges %}">Manage Ip4 ranges</a>
+						</th>
+					</tr>
+					<tr>
+						<td align="center">				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
+
+						</td>
+					</tr>
+				</table>
+
+			</td>
+		</tr>
+	</table>
+
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url ip4Ranges %}">Ip4 ranges</a> |
+        	<a href="{% url macRanges %}">Ethernet ranges</a> |
+		<a href="{% url dashboard  %}">Dashboard</a>
+	</div>
+    </div>
+</div>
+{% endblock content %}
+

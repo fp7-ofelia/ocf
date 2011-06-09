@@ -7,44 +7,17 @@
 			{% block title %}OFELIA Virtualization Manager{% endblock %}
 		</title>
 		
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-	<script type="text/javascript">
+	<!-- JQUERY -->	
+	<script src = {% url js_media 'jquery.min.js' %}></script>
+	<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+	<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+	<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+	<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
+	<script src = {% url js_media 'jquery.progressbar.min2.js'%}></script>
+	<script type="text/javascript" src="{% url js_media 'utils.js' %}"></script>
 
-	$(document).ready(function(){
-    	$(".menuimg,.submenuimg")
-        	.mouseover(function() { 
-	            var src = $(this).attr("src").replace("dark", "light");
-    	        $(this).attr("src", src);
-        	})
-        	.mouseout(function() {
-            	var src = $(this).attr("src").replace("light", "dark");
-            	$(this).attr("src", src);
-       	 	});
-	});
+	<link rel="stylesheet" href= {% url fancybox 'jquery.fancybox-1.3.4.css'%} type="text/css" media="screen" />
 
-
-	$(document).ready(function(){
-		$(".experiments_sub_menu").hide();
-		$("#experiments")
-			.click(function() {
-				$(".fs_req_sub_menu").hide();
-				$(".admin_fs_sub_menu").hide();
-				$(".experiments_sub_menu").toggle('normal');
-				$(".profile_sub_menu").hide();
-				$(".website_sub_menu").hide();
-			});
-	});
-
-	$(document).ready(function(){
-		$(".profile_sub_menu").hide();
-		$("#profile")
-			.click(function() {
-				$(".profile_sub_menu").toggle('normal');
-			});
-	});
-
-	</script>
-		
 		{% block scripts %}{% endblock %} 
 	</head>
 	
@@ -58,97 +31,87 @@
     	    	    </td>
                 </tr>
                 </table>
-                </div>
-                        <div id="page">
-		<div id="content">
-		{% block pagehead %}{% endblock %}
+            </div>
+            <div id="page">
 		
-    	<table align="right" class="menutable">
-   
-
-       <tr>
-            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
-            <a href="/servers/net/">
-                    Servers' Network Settings
-<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-            </a>
-            </td>
-        </tr>
- 
-        <tr> 
-            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
-            <a href="/servers/admin/">
-                    Administrate Servers
-<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-            </a>
-            </td>
-        </tr>
-        <tr><td><br></td></tr>
-        <tr><td><br></td></tr>
-        <tr> 
-            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
-            <a href="/dashboard">
-                    Dashboard 
-<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-            </a>
-            </td>
-        </tr>
-         <tr>
-            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
-            <a href="/change_profile">
-                    Change profile 
-<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-            </a>
-            </td>
-        </tr>
-         <tr>
-            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
-            <a href="/accounts/logout/">
-                    Logout
-<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-            </a>
-            </td>
-        </tr>
- 
-<!--    	<tr class="profile_main_menu">
-    		<td>
-    		<img src="{% url img_media 'profile_dark.png' %}" class="menuimg" id="profile"/>
-    		</td>
-    	</tr>
-    		<tr class="profile_sub_menu">
-    			<td>
-    			<a href="/change_profile">
-    			<img src="{% url img_media 'edit_profile_dark.png' %}" class="submenuimg" />
-    			</a>
-    			</td>
-    		</tr>
-
-    	<tr class="dashboard_main_menu">
-    		<td>
-    		<a href="/dashboard">
-    		<img src="{% url img_media 'dashboard_dark.png' %}" class="menuimg"/>
-    		</a>
-    		</td>
-    	</tr>	
-    		
-    	<tr class="logout_main_menu">
-    		<td>
-    		<a href="/accounts/logout">
-    		<img src="{% url img_media 'logout_dark.png' %}" class="menuimg"/>
-    		</a>
-    		</td>
-    	</tr>
--->
-    	</table>
-        {% block content %}{% endblock %}
+		<div id="content">
+			{% block pagehead %}
+				
+			{% endblock %}
+			<div style="float:right">
+    			<table align="right" class="menutable">
+		        <tr> 
+		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+			            <a href="/servers/admin/">
+			                    Administrate Servers
+				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+		            </td>
+		        </tr>
+		       	<tr>
+		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+			            <a href="{% url networkingDashboard %}">
+			                    Network Settings
+				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+			    </td>
+			</tr>
+			{% if  section = "networking" %}
+			<tr>
+				<td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
+			            <a href="{% url ip4Ranges %}">
+			                    IP4 ranges
+					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+			<tr>	
+	        	    <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
+			            <a href="{% url macRanges %}">
+			                    Ethernet ranges
+					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+			   </td>
+		        </tr>
+			{% endif %} 
+		
+		        <tr><td><br></td></tr>
+		        <tr><td><br></td></tr>
+		        <tr> 
+		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+			            <a href="/dashboard">
+			                    Dashboard 
+				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+		            </td>
+		        </tr>
+		        <tr>
+		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+			            <a href="/change_profile">
+			                    Change profile 
+				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+		            </td>
+		        </tr>
+		         <tr>
+			     <td class="button" style="background:url({% url img_media 'base_dark.png' %});" height="38px" width="60px" >
+        			    <a href="/accounts/logout/">
+			                    Logout
+				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
+			            </a>
+		            </td>
+		        </tr>
+	    	</table>
 		</div>
-    </div>
+		<div id="leftContent">
+			{% block content %}{% endblock %}
+		</div>
+		</div>
+    	</div>
 
-            <div id="footer">
+        <div id="footer">
             	&copy; 2011 <a href="http://www.fp7-ofelia.eu/" target="_blank">OFELIA FP7-Project</a> &amp; Stanford University. <br/>
 			 OFELIA is funded by the EU in the 7th framework program and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
 			Expedient was adapted from <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">software</a> gracefully provided by Stanford University.<br/><br/>
 		
-		</div>
+	</div>
 	</body>
 </html>

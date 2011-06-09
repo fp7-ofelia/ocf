@@ -1,10 +1,10 @@
 from threading import Thread
-from vt_manager.models import *
+from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
-
+from vt_manager.controller.monitoring.VMMonitor import VMMonitor
 '''
-author:msune
-Agent monitoring thread
+	author:msune
+	Agent monitoring thread
 '''
 
 class AgentMonitoringThread(Thread):
@@ -18,13 +18,18 @@ class AgentMonitoringThread(Thread):
 	'''
 	def __updateAgentStatus(self, server):
 		try:
+                        print "Pinging Agent on server %s" % server.name
 			XmlRpcClient.callRPCMethod(server.getAgentURL(),"ping", "hola")
-			server.setAvailable(True)
-			server.save()
-                        print "Ping Agent on server %s" % server.name
+			#Server is up
+                        print "Ping Agent on server %s was SUCCESSFUL!" % server.name
+			if server.available == False:
+				#
+				VMMonitor.updateVMs(server)
+				server.setAvailable(True)
+				server.save()
 		except Exception as e:
 			#If fails for some reason mark as unreachable
-			print "Could not reach server %s. Will be set as not available "
+			print "Could not reach server %s. Will be set as unavailable "
 			print e
 			server.setAvailable(False)
 			server.save()
