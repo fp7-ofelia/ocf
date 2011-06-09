@@ -77,7 +77,7 @@ class VTDriver():
 			if serverIfaces.filter(id = newIface.id):
 				for merda in serverIfaces.filter(id = newIface.id):
 					print merda.id
-			if not serverIfaces.filter(id = newIface.id):
+			if not newIface.id==None and not serverIfaces.filter(id = newIface.id):
 				print "add"
 				server.addDataBridge(newIface.getName(),"",newIface.getSwitchID(),newIface.getPort())
 			else:

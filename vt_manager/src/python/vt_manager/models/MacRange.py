@@ -36,7 +36,7 @@ class MacRange(models.Model):
     	nextAvailableMac = models.CharField(verbose_name="Next Available Mac Address",max_length = 17, default="",editable=False)
 
 	#Statistics
-	numberOfSlots = models.IntegerField(blank = True, null=True, editable = False)
+	numberOfSlots = models.FloatField(blank = True, null=True, editable = False)
 
 	#Defines soft or hard state of the range 
 	doSave = True

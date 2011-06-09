@@ -18,9 +18,9 @@ function createProgressBar(div,slotsUsed,slotsAvailable,showtext){
 			boxImage:'/static/media/images/progressbar.gif',
 			barImage: {
 				0:  '/static/media/images/progressbg_black.gif',
-				20:  '/static/media/images/progressbg_green.gif',
-				45:  '/static/media/images/progressbg_orange.gif',
-				80:  '/static/media/images/progressbg_red.gif',
+				(slotsAvailable*0.2):  '/static/media/images/progressbg_green.gif',
+				(slotsAvailable*0.45):  '/static/media/images/progressbg_orange.gif',
+				(slotsAvailable*0.8):  '/static/media/images/progressbg_red.gif',
 			},
 		}
 	);
