@@ -40,7 +40,7 @@ class XenServer(VTServer):
 	'''Constructors'''
 	
 	@staticmethod
-	def constructor(name,osType,osDistribution,osVersion,agentUrl,save=True):
+	def constructor(name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
 		self = XenServer()
 		try:
 			self.setName(name)
@@ -49,6 +49,7 @@ class XenServer(VTServer):
 			self.setOSDistribution(osDistribution)
 			self.setOSVersion(osVersion)
 			self.setAgentURL(agentUrl)
+			self.setAgentPassword(agentPassword)
 		
 			self.doSave = save
 			if save:
@@ -60,7 +61,7 @@ class XenServer(VTServer):
 			raise e
 
 	'''Updater'''
-	def updateServer(self,name,osType,osDistribution,osVersion,agentUrl,save=True):
+	def updateServer(self,name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
 		try:
 			self.setName(name)
 			self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
@@ -68,6 +69,7 @@ class XenServer(VTServer):
 			self.setOSDistribution(osDistribution)
 			self.setOSVersion(osVersion)
 			self.setAgentURL(agentUrl)
+			self.setAgentPassword(agentPassword)
 			
 			self.doSave = save
 			if save:
