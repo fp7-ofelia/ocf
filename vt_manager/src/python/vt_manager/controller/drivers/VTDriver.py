@@ -1,4 +1,4 @@
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import os
 import sys
 from vt_manager.models import *
@@ -6,7 +6,6 @@ from vt_manager.controller import *
 from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
-from vt_manager.controller.utils.Translator import Translator
 import xmlrpclib, threading, logging, copy
 from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
 from vt_manager.utils.HttpUtils import HttpUtils
@@ -131,7 +130,8 @@ class VTDriver():
 		try:
 			from vt_manager.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 			rspec = XmlHelper.getSimpleActionSpecificQuery(action)
-			Translator.PopulateNewAction(rspec.query.provisioning.action[0], VTDriver.getVMbyId(vmId))
+			#MARC XXX
+			#Translator.PopulateNewAction(rspec.query.provisioning.action[0], VTDriver.getVMbyId(vmId))
 			ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
 		except Exception as e:
 			logging.error(e)

@@ -90,7 +90,11 @@
 	
 	
 	<div class="center" style="padding-top:40px;">
-        	<a href="{% url createIp4Range "add" %}">Create range</a> |
+        	<a href="{% url createIp4Range "add" %}">Create range</a> |			<form action="{% url manageIp4Range "delete" range.id %}" method="POST" name="deleteForm">
+				{% csrf_token %}
+				<a href="#" onClick="if(confirmSubmit('Are you sure you want to delete range {{range.name}}?')){document.forms['deleteForm'].submit();}">Delete</a> |
+		</form>
+	
 		<a href="{% url ip4Ranges %}">Back</a>
 	</div>
 </div>

@@ -1,12 +1,11 @@
-from vt_manager.controller.dispatchers.Dispatcher import Dispatcher
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.models.Action import Action
-from vt_manager.controller.utils.Translator import Translator
+from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 from django.db import transaction
 import xmlrpclib, threading, logging, copy
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 
-class ProvisioningDispatcher(Dispatcher):
+class ProvisioningDispatcher():
   
 	def __init__(self):
 		self.Dispatcher.__init__(self)

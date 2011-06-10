@@ -7,9 +7,7 @@ from vt_manager.common.messaging.models import DatedMessage
 from django.views.generic import list_detail, simple
 from django.views.generic.create_update import apply_extra_context
 from vt_manager.models import *
-from vt_manager.communication.utils.XmlUtils import XmlHelper
-from vt_manager.controller.dispatchers.ProvisioningDispatcher import *
-from vt_manager.controller.utils.Translator import *
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import uuid, time, logging
 from django.template import loader, RequestContext
 from django.core.xheaders import populate_xheaders
