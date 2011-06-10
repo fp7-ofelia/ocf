@@ -19,6 +19,7 @@ from vt_manager.utils.HttpUtils import HttpUtils
 from vt_manager.models.NetworkInterface import NetworkInterface
 from vt_manager.models.MacRange import MacRange
 from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm
+from vt_manager.controller.dispatchers.forms.ServerForm import ServerForm
 from django.db import transaction
 
 def userIsIslandManager(request):
@@ -64,7 +65,8 @@ def servers_crud(request, server_id=None):
 		server = None
 	
 	if request.method == "GET":
-		serverForm = serverFormClass(instance=server)
+		#serverForm = serverFormClass(instance=server)
+		serverForm = ServerForm(instance=server, prefix ="server")
 
 		if server  != None:
 			print "[LEODEBUG] GET con server (edit)"
@@ -89,7 +91,8 @@ def servers_crud(request, server_id=None):
 	elif request.method == "POST":
 		print "[LEODEBUG]"
 		print request.POST
-		serverForm = serverFormClass(request.POST, instance=server)
+		#serverForm = serverFormClass(request.POST, instance=server)
+		serverForm = ServerForm(request.POST, instance=server, prefix ="server")
 		ifaceformset = IfaceFormSetClass(request.POST)
 		mgmtIfaceForm = MgmtBridgeForm(request.POST, prefix ="mgmtBridge")
 		
