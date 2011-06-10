@@ -12,7 +12,9 @@ body {
 	margin: 0px;
 	padding: 0px;
 	}
-
+html form {
+	display: inline; margin: 0;
+}
 #fancypage {
     background-color: #FFFFFF;
     padding: 10px 0 0 0;
