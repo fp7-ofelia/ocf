@@ -12,7 +12,7 @@ import copy
 from threading import Thread
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
-from vt_manager.controller.xmlrpc.utils.Translator import Translator
+from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 
 @rpcmethod(url_name="plugin")
 #def send(callBackUrl, expID, xml):

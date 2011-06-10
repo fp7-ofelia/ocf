@@ -12,35 +12,35 @@ urlpatterns = patterns('',
     ##Main entry point
     url(r'^dashboard$', 'vt_manager.controller.users.urlHandlers.dashboard', name="dashboard"),
     (r'^$', 'vt_manager.controller.users.urlHandlers.index'),
-#    url(r'^servers/net/update/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_net_update', name='servers_net_update'),
+#    url(r'^servers/net/update/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_net_update', name='servers_net_update'),
     
     ##Server management
-    url(r'^servers/add/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_crud', name='servers_create'),
-    url(r'^servers/(?P<server_id>\d+)/edit/$', 'vt_manager.controller.dispatchers.GUIdispatcher.servers_crud', name='edit_server'),
-    url(r'^servers/admin/$', 'vt_manager.controller.dispatchers.GUIdispatcher.admin_servers', name='admin_servers'),
-    url(r'^servers/(?P<server_id>\d+)/delete/$', 'vt_manager.controller.dispatchers.GUIdispatcher.delete_server', name='delete_server'),
-    url(r'^servers/(?P<server_id>\d+)/virtual_machines/(?P<vm_id>\d+)/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.action_vm', name='action_vm'),
-    url(r'^servers/(?P<server_id>\d+)/subscribeEthernetRanges/$', 'vt_manager.controller.dispatchers.GUIdispatcher.subscribeEthernetRanges', name='subscribeEthernetRanges'),
-    url(r'^servers/(?P<server_id>\d+)/subscribeIp4Ranges/$', 'vt_manager.controller.dispatchers.GUIdispatcher.subscribeIp4Ranges', name='subscribeIp4Ranges'),
+    url(r'^servers/add/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_crud', name='servers_create'),
+    url(r'^servers/(?P<server_id>\d+)/edit/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_crud', name='edit_server'),
+    url(r'^servers/admin/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.admin_servers', name='admin_servers'),
+    url(r'^servers/(?P<server_id>\d+)/delete/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.delete_server', name='delete_server'),
+    url(r'^servers/(?P<server_id>\d+)/virtual_machines/(?P<vm_id>\d+)/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.action_vm', name='action_vm'),
+    url(r'^servers/(?P<server_id>\d+)/subscribeEthernetRanges/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.subscribeEthernetRanges', name='subscribeEthernetRanges'),
+    url(r'^servers/(?P<server_id>\d+)/subscribeIp4Ranges/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.subscribeIp4Ranges', name='subscribeIp4Ranges'),
 
     ##Networking
-    url(r'^networking/$', 'vt_manager.controller.dispatchers.GUIdispatcher.networkingDashboard', name='networkingDashboard'),
+    url(r'^networking/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.networkingDashboard', name='networkingDashboard'),
 
     #Ip4
-    url(r'^networking/ip4/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='ip4Ranges'),
-    url(r'^networking/ip4/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='showIp4Range'),
-    url(r'^networking/ip4/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='createIp4Range'),
-    url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='manageIp4Range'),
-    url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/(?P<ip4Id>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='manageIp4RangeExcluded'),
+    url(r'^networking/ip4/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageIp4', name='ip4Ranges'),
+    url(r'^networking/ip4/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageIp4', name='showIp4Range'),
+    url(r'^networking/ip4/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageIp4', name='createIp4Range'),
+    url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageIp4', name='manageIp4Range'),
+    url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/(?P<ip4Id>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageIp4', name='manageIp4RangeExcluded'),
 
 
 
     #Ethernet
-    url(r'^networking/ethernet/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='macRanges'),
-    url(r'^networking/ethernet/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='showMacRange'),
-    url(r'^networking/ethernet/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='createMacRange'),
-    url(r'^networking/ethernet/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='manageMacRange'),
-    url(r'^networking/ethernet/(?P<action>\w+)/(?P<rangeId>\d+)/(?P<macId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='manageMacRangeExcluded'),
+    url(r'^networking/ethernet/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='macRanges'),
+    url(r'^networking/ethernet/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='showMacRange'),
+    url(r'^networking/ethernet/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='createMacRange'),
+    url(r'^networking/ethernet/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='manageMacRange'),
+    url(r'^networking/ethernet/(?P<action>\w+)/(?P<rangeId>\d+)/(?P<macId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='manageMacRangeExcluded'),
 
 
     #User mgmt 

@@ -1,6 +1,6 @@
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.models.Action import Action
-from vt_manager.controller.xmlrpc.utils.Translator import Translator
+from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 from django.db import transaction
 import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
