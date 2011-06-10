@@ -2,6 +2,10 @@ from threading import Thread
 from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.communication.utils.XmlHelper import XmlHelper
+from vt_manager.controller.actions.ActionController import ActionController
+from vt_manager.models.Action import Action
+
+from vt_manager.settings import *
 
 '''
 	author:msune
@@ -15,12 +19,13 @@ class VMMonitor():
 		#Recover from the client the list of active VMs
 		obj = XmlHelper.getListActiveVMsQuery()
 	
-		#Add id and server 
-		obj.query.monitoring.action.id = "fff"
-		obj.query.monitoring.action.server.virtualization_type = server.getid = server.getVirtTech() 
-		print XmlHelper.craftXml(obj)
-		return 	
-		XmlRpcClient.callRPCMethod(server.getAgentURL(),"send", "hola")
+		#Create new Action 
+		action = ActionController.createNewAction(Action.MONITORING_SERVER_VMS_TYPE,Action.ONGOING_STATUS,server.getUUID(),"") 
+
+			
+		obj.query.monitoring.action[0].id = action.getUUID() 
+		obj.query.monitoring.action[0].server.virtualization_type = server.getid = server.getVirtTech() 
+		XmlRpcClient.callRPCMethod(server.getAgentURL(),"send","https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,0,server.agentPassword,XmlHelper.craftXmlClass(obj))
 		
 		
 
