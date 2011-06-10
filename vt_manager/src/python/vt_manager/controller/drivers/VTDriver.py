@@ -1,4 +1,4 @@
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import os
 import sys
 from vt_manager.models import *

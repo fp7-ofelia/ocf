@@ -29,7 +29,6 @@ urlpatterns = patterns('',
     #Ip4
     url(r'^networking/ip4/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='ip4Ranges'),
     url(r'^networking/ip4/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='showIp4Range'),
-    url(r'^networking/ip4/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='showIp4Range'),
     url(r'^networking/ip4/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='createIp4Range'),
     url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='manageIp4Range'),
     url(r'^networking/ip4/(?P<action>\w+)/(?P<rangeId>\d+)/(?P<ip4Id>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageIp4', name='manageIp4RangeExcluded'),
@@ -38,7 +37,6 @@ urlpatterns = patterns('',
 
     #Ethernet
     url(r'^networking/ethernet/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='macRanges'),
-    url(r'^networking/ethernet/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='showMacRange'),
     url(r'^networking/ethernet/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='showMacRange'),
     url(r'^networking/ethernet/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='createMacRange'),
     url(r'^networking/ethernet/(?P<action>\w+)/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.GUIdispatcher.manageEthernet', name='manageMacRange'),

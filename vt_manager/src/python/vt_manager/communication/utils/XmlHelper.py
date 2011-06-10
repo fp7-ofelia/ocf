@@ -104,6 +104,12 @@ class XmlHelper(object):
         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/simpleListResources.xml','r').read())
         return simpleRspec
 
+    @staticmethod
+    def getListActiveVMsQuery():
+        simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/listActiveVMsQuery.xml','r').read())
+        return simpleRspec
+
+
 
     @staticmethod
     def craftSimpleActionQuery(SimpleRspec, status, description):

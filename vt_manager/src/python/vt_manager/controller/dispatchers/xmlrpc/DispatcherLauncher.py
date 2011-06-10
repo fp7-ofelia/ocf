@@ -3,7 +3,7 @@ import os
 import sys                                                                    
 from vt_manager.models import *                                               
 from vt_manager.controller import *                                           
-from vt_manager.controller.dispatchers.ProvisioningDispatcher import *
+from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import *
 from vt_manager.communication.utils import *                                  
 from vt_manager.utils.ServiceThread import *                                      
 from vt_manager.common.rpc4django import rpcmethod                                       

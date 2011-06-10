@@ -3,8 +3,8 @@ import os, logging
 import sys
 from vt_manager.models import *
 from vt_manager.controller import *
-from vt_manager.controller.dispatchers.DispatcherLauncher import *
-from vt_manager.communication.utils.XmlUtils import *
+from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import *
+from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
@@ -12,7 +12,7 @@ import copy
 from threading import Thread
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
-from vt_manager.controller.utils.Translator import Translator
+from vt_manager.controller.xmlrpc.utils.Translator import Translator
 
 @rpcmethod(url_name="plugin")
 #def send(callBackUrl, expID, xml):

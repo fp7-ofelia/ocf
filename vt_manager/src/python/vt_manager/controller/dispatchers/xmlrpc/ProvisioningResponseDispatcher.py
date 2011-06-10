@@ -1,10 +1,8 @@
-from vt_manager.communication.utils.XmlUtils import *
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.Action import Action
 from vt_manager.models.VirtualMachine import VirtualMachine
-from vt_manager.controller.dispatchers.Dispatcher import Dispatcher
-#from vt_manager.controller.drivers.VTDriver import VTDriver
 
-class ProvisioningResponseDispatcher(Dispatcher):
+class ProvisioningResponseDispatcher():
 
 	'''
 	Handles the Agent responses when action status changes
@@ -45,13 +43,13 @@ class ProvisioningResponseDispatcher(Dispatcher):
 				controller = VTDriver.getDriver(vm.getVirtType())
 				failedOnCreate = 0
 				if actionModel.getStatus() == Action.ACTION_STATUS_SUCCESS_TYPE:
-					__updateVMafterSUCCESS(actionModel, vm, controller)
+					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm, controller)
 
 				elif actionModel.getStatus() == Action.ACTION_STATUS_ONGOING_TYPE:
-					__updateVMafterONGOING(actionModel, vm)
+					ProvisioningResponseDispatcher.__updateVMafterONGOING(actionModel, vm)
 
 				elif actionModel.getStatus() == Action.ACTION_STATUS_FAILED_TYPE:
-					__updateVMafterFAILED(actionModel, vm, controller)
+					ProvisioningResponseDispatcher.__updateVMafterFAILED(actionModel, vm, controller)
 
 				else:
 					vm.setState(VirtualMachine.UNKNOWN_STATE)
@@ -78,7 +76,7 @@ class ProvisioningResponseDispatcher(Dispatcher):
 					logging.error(e)
 					return
 
-
+	@staticmethod
 	def __updateVMafterSUCCESS(actionModel, vm, controller):
 		if actionModel.getType() == Action.ACTION_TYPE_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATED_STATE)
@@ -89,6 +87,7 @@ class ProvisioningResponseDispatcher(Dispatcher):
 		elif actionModel.getType() == Action.ACTION_TYPE_DELETE_TYPE:
 			controller.deleteVM(vm)
 
+	@staticmethod
 	def __updateVMafterONGOING(actionModel, vm):
 		if actionModel.getType() == Action.ACTION_TYPE_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATING_STATE)
@@ -101,6 +100,7 @@ class ProvisioningResponseDispatcher(Dispatcher):
 		elif actionModel.getType() == Action.ACTION_TYPE_REBOOT_TYPE:
 			vm.setState(VirtualMachine.REBOOTING_STATE)
 
+	@staticmethod
 	def __updateVMafterFAILED(actionModel, vm, controller):
 		if  actionModel.getType() == Action.ACTION_TYPE_START_TYPE:
 			vm.setState(VirtualMachine.STOPPED_STATE)
