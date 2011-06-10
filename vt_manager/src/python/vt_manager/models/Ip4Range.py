@@ -41,7 +41,7 @@ class Ip4Range(models.Model):
 	nextAvailableIp = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp],editable=False,verbose_name="Next available Ip4 slot")
 
 	#Statistics
-	numberOfSlots = models.FloatField(blank = True, null=True, editable = False)
+	numberOfSlots = models.BigIntegerField(blank = True, null=True, editable = False)
 
 	#Mutex
 	mutex = None 
