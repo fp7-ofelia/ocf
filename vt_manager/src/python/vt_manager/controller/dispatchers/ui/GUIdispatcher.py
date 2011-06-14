@@ -69,7 +69,6 @@ def servers_crud(request, server_id=None):
 		serverForm = ServerForm(instance=server, prefix ="server")
 
 		if server  != None:
-			print "[LEODEBUG] GET con server (edit)"
 			mgmt = server.getNetworkInterfaces().filter(isMgmt = True)
 			if mgmt:
 				mgmt = mgmt.get()
@@ -85,12 +84,9 @@ def servers_crud(request, server_id=None):
 		else:
 			mgmtIfaceForm = MgmtBridgeForm(prefix ="mgmtBridge")
 			ifaceformset = IfaceFormSetClass(queryset= NetworkInterface.objects.none())
-			print ifaceformset
 			
 
 	elif request.method == "POST":
-		print "[LEODEBUG]"
-		print request.POST
 		#serverForm = serverFormClass(request.POST, instance=server)
 		serverForm = ServerForm(request.POST, instance=server, prefix ="server")
 		ifaceformset = IfaceFormSetClass(request.POST)
@@ -120,7 +116,6 @@ def servers_crud(request, server_id=None):
 		request,
 		template="servers/servers_crud.html",
 		extra_context=context,
-		#form=form,
 	)
 
 
@@ -194,8 +189,6 @@ def action_vm(request, server_id, vm_id, action):
 
 
 def subscribeEthernetRanges(request, server_id):
-	print "[LEODEBUG] EL SeRVER ID"
-	print server_id
 	if (not request.user.is_superuser):
 		return simple.direct_to_template(request,
 					template = 'not_admin.html',
@@ -215,8 +208,6 @@ def subscribeEthernetRanges(request, server_id):
 				extra_context = {'server': server, 'macRanges':macRanges},
 		)
 	elif request.method=='POST':
-		print "[LEODEBUG]: POSTTT"
-		print request.POST
 		VTDriver.manageEthernetRanges(request,server,macRanges)
 		return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
 	else:
@@ -224,8 +215,6 @@ def subscribeEthernetRanges(request, server_id):
 
 
 def subscribeIp4Ranges(request, server_id):
-	print "[LEODEBUG] EL SeRVER ID"
-	print server_id
 	if (not request.user.is_superuser):
 		return simple.direct_to_template(request,
 					template = 'not_admin.html',
@@ -245,79 +234,10 @@ def subscribeIp4Ranges(request, server_id):
 				extra_context = {'server': server, 'ipRanges':ipRanges},
 		)
 	elif request.method=='POST':
-		print "[LEODEBUG]: POSTTT"
-		print request.POST
 		VTDriver.manageIp4Ranges(request,server,ipRanges)
 		return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
-def servers_net_settings(request):
-	pass
-#    """Show a page for the user to add/edit the Netoworking settings for a VTServer """
-#
-#    if (not request.user.is_superuser):
-#
-#        return simple.direct_to_template(request,
-#                            template = 'not_admin.html',
-#                            extra_context = {'user':request.user},
-#                        )
-#    settings = VTServerNetworkingSettings.objects.all()
-#
-#    if len(settings) == 0:
-#        settings_id = None 
-#    elif len(settings) == 1:
-#        settings_id = settings[0].id
-#    else:
-#        for i,s in enumerate(settings):
-#            if i != 0:
-#                s.delete()
-#        settings_id = settings[0].id
-#
-#    return generic_crud(
-#        request,
-#        obj_id=settings_id,
-#        model=VTServerNetworkingSettings,
-#        template_object_name="settings",
-#        template="servers/servers_net.html",
-#        redirect = lambda inst: '/servers/net/update/'
-#    )
-
-def servers_net_update(request):
-	pass
-#    if (not request.user.is_superuser): 
-#
-#        return simple.direct_to_template(request,
-#               template = 'not_admin.html',
-#               extra_context = {'user':request.user},
-#               )
-#
-#    settings = VTServerNetworkingSettings.objects.all()
-#    if len(settings) == 0:
-#        try: 
-#            raise Exception("No Settings to update")
-#        except:
-#            pass
-#
-#    elif len(settings) == 1:
-#        settings = settings[0]
-#    else:
-#        for i,s in enumerate(settings):
-#            if i != 0:
-#                s.delete()
-#        settings = settings[0]
-#
-#    for server in VTServer.objects.all():
-#        server.ipRange = settings.ipRange
-#        server.mask = settings.mask
-#        server.gw = settings.gw
-#        server.dns1  = settings.dns1
-#        server.dns2  = settings.dns2   
-#        server.save() 
-#
-#    return HttpResponseRedirect('/servers/admin/')
-
-
-
 
 '''
 Networking point of entry
