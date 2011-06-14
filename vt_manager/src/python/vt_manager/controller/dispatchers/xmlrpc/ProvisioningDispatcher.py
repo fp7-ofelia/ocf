@@ -32,7 +32,7 @@ class ProvisioningDispatcher():
 			
 			#PROVISIONING CREATE
 			print "[LEODEBUG] action.getType()"
-			if actionModel.getType() == Action.ACTION_TYPE_CREATE_TYPE:
+			if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 				print "[LEODEBUG] createVM"
 				ProvisioningDispatcher.__createVM(controller, actionModel, action)
 				print "[LEODEBUG] post createVM"
@@ -59,7 +59,7 @@ class ProvisioningDispatcher():
 			Server, VMmodel = controller.getServerAndCreateVM(action)
 			print "[LEODEBUG] step2"
 			#XXX:Change action Model
-			actionModel.vmUUID = VMmodel.getUUID()
+			actionModel.objectUUID = VMmodel.getUUID()
 			print "[LEODEBUG] step3"
 			actionModel.save()
 			print "[LEODEBUG] step4"
