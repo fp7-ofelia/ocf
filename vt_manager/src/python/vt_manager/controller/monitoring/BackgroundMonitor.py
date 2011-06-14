@@ -1,4 +1,4 @@
-from vt_manager.models import *
+from vt_manager.models.VTServer import VTServer
 import uuid
 from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
 import time
