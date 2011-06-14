@@ -1,0 +1,40 @@
+<rspec>
+    <query>
+        <provisioning>
+            <action type="create" id="f6a1f8c9-c054-4eff-a49d-227d0d87b837">
+                <virtual-machine>
+                    <name>vm1</name>
+                    <uuid>018ec7e0-f2f6-45b2-9a09-acb60a85b741</uuid>
+                    <project-id>f78b2a08-6126-4e25-b654-576d68cd644b</project-id>
+                    <project-name>project</project-name>
+                    <slice-id>449e237a-cb77-41c4-8f0c-337eafdaf5a3</slice-id>
+                    <slice-name>test</slice-name>
+                    <operating-system-type>GNU/Linux</operating-system-type>
+                    <operating-system-version>6.0</operating-system-version>
+                    <operating-system-distribution>Debian</operating-system-distribution>
+                    <server-id>0fc2f6a1-1918-455a-9c0e-1c36f49bab87</server-id>
+                    <virtualization-type>xen</virtualization-type>
+                    <xen-configuration>
+                        <hd-setup-type>file-image</hd-setup-type>
+                        <hd-origin-path>default/squeeze</hd-origin-path>
+                        <virtualization-setup-type>paravirtualization</virtualization-setup-type>
+                        <memory-mb>256</memory-mb>
+                        <interfaces>
+                            <interface ismgmt="true">
+                                <name>NONE</name>
+                                <mac>NONE</mac>
+                                <ip>NONE</ip>
+                                <mask>NONE</mask>
+                                <gw>NONE</gw>
+                                <dns1>NONE</dns1>
+                                <dns2>NONE</dns2>
+                                <switch-id>NONE</switch-id>
+                            </interface>
+                        </interfaces>
+                    </xen-configuration>
+                </virtual-machine>
+            </action>
+       </provisioning>
+    </query>
+</rspec>
+

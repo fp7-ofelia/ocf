@@ -44,9 +44,10 @@ class Translator():
 		osDist = VMxmlClass.operating_system_distribution
 		memory = VMxmlClass.xen_configuration.memory_mb
 		callBackUrl = callBackURL
-				
-		return (name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,save)
-
+		hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
+		hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path
+		virtSetupType = VMxmlClass.xen_configuration.virtualization_setup_type
+		return name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,None,None,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save
 
 	@staticmethod
 	def ActionToModel(action, hyperaction, save = "noSave" ):
@@ -103,15 +104,15 @@ class Translator():
 		VMxmlClass.operating_system_type = VMmodel.getOSType()
 		VMxmlClass.operating_system_version = VMmodel.getOSVersion()
 		VMxmlClass.operating_system_distribution = VMmodel.getOSDistribution()
-		VMxmlClass.virtualization_type = VMmodel.getVirtTech()
-		VMxmlClass.server_id = VMmodel.getServerID()
-		VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHDsetupType()
-		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
+		#VMxmlClass.virtualization_type = VMmodel.getVirtTech()
+		#VMxmlClass.server_id = VMmodel.getServerID()
+		VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHdSetupType()
+		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHdOriginPath()
 		VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
 		VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
 		             
 		#XXX: It is important the order the ifaces are scanned. It should be first the dataIfaces and then the mgmt one.
-		macs = VMmodel.macs.all()
+		vmInterfaces = VMmodel.networkInterfaces.all()
 		serverDataIfaces = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()
 		baseIface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
 		for interface in serverDataIfaces:

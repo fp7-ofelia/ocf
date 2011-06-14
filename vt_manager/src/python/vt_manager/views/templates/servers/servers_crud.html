@@ -156,7 +156,8 @@ function adding(row){
 
 
 	<div> 
-   		{% if server %} 
+   		{% if server %}
+			{% with server.getChildObject as server %} 
     		<h1>VMs in {{ server.name }}</h1>
     		{% if not server.vms.all %}
         		{{ server.name }} has no VMs at the moment
@@ -202,6 +203,7 @@ function adding(row){
 	       {% endfor %}
 	    	 </table>   
      		{% endif %}
+			{% endwith %}
      	{% endif %}
 	</div>
 

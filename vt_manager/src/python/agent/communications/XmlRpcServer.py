@@ -90,7 +90,7 @@ class XmlRpcServer():
             
 		def send(self, callBackUrl,amId,password,xml):
 		    #FIXME: XXX: use certificates instead of password based authentication
-		    if password != XMRPC_SERVER_PASSWORD:
+		    if password != XMLRPC_SERVER_PASSWORD:
 			raise Exception("Password mismatch")
 
     		    callBackFunction(callBackUrl,xml)

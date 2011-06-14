@@ -3,6 +3,8 @@ from vt_manager.models.XenServer import XenServer
 from vt_manager.models.XenVM import XenVM
 from vt_manager.models.VTServer import VTServer
 from vt_manager.utils.HttpUtils import HttpUtils
+from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
+import threading
 
 class XenDriver(VTDriver):
 
@@ -14,6 +16,7 @@ class XenDriver(VTDriver):
 
 	@staticmethod
 	def getInstance():
+		print "getInstance"
 		return XenDriver()
 
 	def deleteVM(vm):
@@ -25,8 +28,8 @@ class XenDriver(VTDriver):
 	def getServerAndCreateVM(self,action):
        
 		try: 
-			Server = self.ServerClass.objects.get(uuid = action.virtual_machine.server_id )
-			VMmodel = Server.createVM(Translator.xenVMtoModel(action.virtual_machine,threading.currentThread().callBackURL, save = True))
+			Server = XenServer.objects.get(uuid = action.virtual_machine.server_id )
+			VMmodel = Server.createVM(*Translator.xenVMtoModel(action.virtual_machine,threading.currentThread().callBackURL, save = True))
 			return Server, VMmodel
 		except:
 			raise

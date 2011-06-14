@@ -46,11 +46,15 @@ def servers_crud(request, server_id=None):
 	vmSlices = {}
 	try:
 		for vm in VTDriver.getVMsInServer(VTDriver.getServerById(server_id)):
+			print "[LEODEBUG] VM PROJECTNAME"
+			print vm.projectName
 			if vm.projectName not in vmProjects:
 				vmProjects[vm.projectName] = vm.projectId
 			if vm.sliceName not in vmSlices:
 				vmSlices[vm.sliceName] = vm.sliceId
 	except Exception as e:
+		print "lA QUE LO PARIO"
+		print e
 		pass
 
 	

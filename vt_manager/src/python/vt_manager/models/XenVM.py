@@ -64,7 +64,7 @@ class XenVM(VirtualMachine):
 			self.setOSVersion(osVersion)
 			self.setOSDistribution(osDist)
 			self.setMemory(memory)
-			self.setDiscSpaceGB(numberOfCPUs)
+			self.setDiscSpaceGB(discSpaceGB)
 			self.setNumberOfCPUs(numberOfCPUs)
 			self.setCallBackURL(callBackUrl)
 			self.setState(self.CREATED_STATE)

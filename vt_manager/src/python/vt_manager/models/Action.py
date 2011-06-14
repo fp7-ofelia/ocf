@@ -4,6 +4,7 @@ from datetime import datetime
 from vt_manager.models.faults import *
 #from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.models.XenVM import XenVM
+import logging
 
 class Action(models.Model):
 	"""Class to store actions"""
@@ -43,12 +44,12 @@ class Action(models.Model):
 	vmUUID = models.CharField(max_length = 512, default="", blank =  True, null = True)
 
 	def checkActionIsPresentAndUnique(self):
-		if self.objects.filter (uuid = self.uuid).count() != 0:
+		if Action.objects.filter (uuid = self.uuid).count() != 0:
 			logging.error("Action with the same uuid already exists")
 			raise Exception("Action with the same uuid already exists")
 	
 	def getAndCheckActionByUUID(self, uuid):
-		actions = self.objects.filter (uuid = uuid)
+		actions = Action.objects.filter (uuid = uuid)
 		if actions.count() ==  1:
 			return actions[0]
 		elif actions.count() == 0:

@@ -23,7 +23,7 @@ class XmlRpcClient():
 	def callRPCMethod(url,methodName,*params):
 		try:
 			server = xmlrpclib.Server(url)
-			getattr(server,methodName)(params)
+			getattr(server,methodName)(*params)
 		except Exception as e:
 			print "XMLRPC Client error: can't connect to method %s at %s" % (methodName, url)
 			print e 

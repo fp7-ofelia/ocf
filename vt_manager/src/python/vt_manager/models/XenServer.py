@@ -110,6 +110,7 @@ class XenServer(VTServer):
 			vm = XenVM.create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save)
 			self.vms.add(vm)	
 			self.autoSave()
+			return vm
 
 
 	def deleteVM(self,vm):

@@ -94,6 +94,7 @@ class VTDriver():
 		except:
 			raise Exception("Server does not exist or id not unique")
 
+	@staticmethod
 	def getVMsInServer(server):
 		try:
 			return server.vms.all()
