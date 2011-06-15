@@ -47,12 +47,11 @@ class XmlRpcClient:
 		server.name = serverInfo.name
 		server.id = serverInfo.id
 		server.uuid = serverInfo.uuid
-	
-		for uuid in vms:
+		
+		for dom in vms:
 			vm = virtual_machine_type()
-			vm.uuid = uuid
-			server.virtual_machines.append(vm)	
-	
+			vm.uuid = dom[0]
+			vm.name = dom[1]
 		return XmlCrafter.craftXML(rspec) 
 
 
@@ -60,7 +59,7 @@ class XmlRpcClient:
 	def sendAsyncMonitoringActionStatus(actionId,status,description):
 		server = xmlrpclib.Server(threading.current_thread().callBackURL)
 		print XmlRpcClient.__craftMonitoringResponseXml(actionId,status,description)
-		server.sendAsync(XmlRpcClient.__craftResponseXml(actionId,status,description))
+		server.sendAsync(XmlRpcClient.__craftMonitoringResponseXml(actionId,status,description))
 
 	@staticmethod
 	def sendAsyncMonitoringActiveVMsInfo(actionId,status,vms,serverInfo):

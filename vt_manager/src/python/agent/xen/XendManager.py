@@ -60,7 +60,7 @@ class XendManager(object):
 				continue
 	
 			domain = conn.lookupByID(dId)
-			doms.append(domain.UUIDString())
+			doms.append((domain.UUIDString(),domain.name()))
 
 		return doms 
 
