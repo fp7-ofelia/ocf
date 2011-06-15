@@ -67,15 +67,15 @@ class XenVM(VirtualMachine):
 			self.setDiscSpaceGB(discSpaceGB)
 			self.setNumberOfCPUs(numberOfCPUs)
 			self.setCallBackURL(callBackUrl)
-			self.setState(self.CREATED_STATE)
+			self.setState(self.UNKNOWN_STATE)
 			for interface in interfaces:
 				self.networkInterfaces.add(interface)
 			#self.server = server
 	
 			#Xen parameters
-			hdSetupType =hdSetupType
-			hdOriginPath = hdOriginPath
-			virtualizationSetupType = virtSetupType
+			self.hdSetupType =hdSetupType
+			self.hdOriginPath = hdOriginPath
+			self.virtualizationSetupType = virtSetupType
 	
 			self.doSave = save
 			if save:	
@@ -101,6 +101,7 @@ class XenVM(VirtualMachine):
 	@staticmethod
 	def validateHdSetupType(hdType):
 		if value not in HD_SETUP_TYPE_CHOICES:
+			print "[LEODEBUG] INVALID HD SETUP TYPE"
 			raise Exception("Invalid HD Setup type")	
 	def setHdSetupType(self,hdType):
 		validateHdSetupType(hdType)

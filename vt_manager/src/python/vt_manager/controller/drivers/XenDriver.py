@@ -19,7 +19,7 @@ class XenDriver(VTDriver):
 		print "getInstance"
 		return XenDriver()
 
-	def deleteVM(vm):
+	def deleteVM(self, vm):
 		try:
 			vm.Server.get().deleteVM(vm)
 		except:

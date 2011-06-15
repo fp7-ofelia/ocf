@@ -11,6 +11,9 @@ from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
 from vt_manager.models.VirtualMachine import VirtualMachine
+from vt_manager.controller.actions.ActionController import ActionController
+from vt_manager.utils.ServiceThread import *
+
 class VTDriver():
 
 
@@ -105,9 +108,10 @@ class VTDriver():
 	def getInstance():
 		raise Exception("Driver Class cannot be instantiated")
 	
-	def getVMbyUUID(self,uuid):
+	@staticmethod	
+	def getVMbyUUID(uuid):
 		try:
-			self.VMclass.objects.get(uuid = uuid)
+			return VirtualMachine.objects.get(uuid = uuid).getChildObject()
 		except:
 			raise
 
@@ -178,8 +182,9 @@ class VTDriver():
 
 	@staticmethod
 	def PropagateActionToProvisioningDispatcher(vm_id, action):
+		from vt_manager.communication.utils.XmlHelper import XmlHelper
 		from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
-		vm = VirtualMachine.objects.get(id=vm_id).getAsObjectChild()
+		vm = VirtualMachine.objects.get(id=vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action)
-		Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
-		DispatcherLauncher.processXmlQuery(rspec)
+		ActionController.PopulateNewAction(rspec.query.provisioning.action[0], vm)
+		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)

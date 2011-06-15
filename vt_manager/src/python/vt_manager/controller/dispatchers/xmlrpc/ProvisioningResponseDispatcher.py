@@ -1,8 +1,10 @@
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.Action import Action
 from vt_manager.models.VirtualMachine import VirtualMachine
+from vt_manager.controller.drivers.VTDriver import VTDriver
 import logging
-
+from vt_manager.communication.XmlRpcClient import XmlRpcClient
+from vt_manager.controller.actions.ActionController import ActionController
 class ProvisioningResponseDispatcher():
 
 	'''
@@ -15,7 +17,7 @@ class ProvisioningResponseDispatcher():
 		for action in rspec.response.provisioning.action:
 
 			try:
-				actionModel = Action.getAndCheckActionByUUID(action.id)
+				actionModel = ActionController.getAction(action.id)
 			except Exception as e:
 				logging.error("No action in DB with the incoming uuid\n%s", e)
 				return
@@ -28,29 +30,28 @@ class ProvisioningResponseDispatcher():
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
 				actionModel.status = action.status
 				actionModel.description = action.description
-
+				actionModel.save()
 				#XXX: Check what is this for 18/5/11 Leo
 				#
 				#Complete information required for the Plugin: action type and VM
-				action.type_ = actionModel.getType()
-				tempVMclass = XmlHelper.getProcessingResponse('dummy', 'dummy', 'dummy').response.provisioning.action[0].virtual_machine
-				#tempVMclass.uuid = vm.uuid
-				tempVMclass.uuid = actionModel.getObjectUUID()
-				action.virtual_machine = tempVMclass
-				actionModel.save()
+				ActionController.completeActionRspec(action, actionModel)
+#				action.type_ = actionModel.getType()
+#				tempVMclass = XmlHelper.getProcessingResponse('dummy', 'dummy', 'dummy').response.provisioning.action[0].virtual_machine
+#				#tempVMclass.uuid = vm.uuid
+#				tempVMclass.uuid = actionModel.getObjectUUID()
+#				action.virtual_machine = tempVMclass
 
 				#XXX:Implement this method or some other doing this job
-				vm = VirtualMachines.getVMbyUUID(actionModel.getVMuuid())
-				controller = VTDriver.getDriver(vm.getVirtType())
+				vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
 				failedOnCreate = 0
 				if actionModel.getStatus() == Action.SUCCESS_STATUS:
-					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm, controller)
+					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm)
 
 				elif actionModel.getStatus() == Action.ONGOING_STATUS:
 					ProvisioningResponseDispatcher.__updateVMafterONGOING(actionModel, vm)
 
 				elif actionModel.getStatus() == Action.FAILED_STATUS:
-					ProvisioningResponseDispatcher.__updateVMafterFAILED(actionModel, vm, controller)
+					failedOnCreate = ProvisioningResponseDispatcher.__updateVMafterFAILED(actionModel, vm)
 
 				else:
 					vm.setState(VirtualMachine.UNKNOWN_STATE)
@@ -73,11 +74,10 @@ class ProvisioningResponseDispatcher():
 					logging.error("Received response for an action in wrong state\n")
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action.id, "Received response for an action in wrong state"))
 				except Exception as e:
-					#__connectAndSendPlugin Failed
 					logging.error(e)
 					return
-
-	def __updateVMafterSUCCESS(actionModel, vm, controller):
+	@staticmethod
+	def __updateVMafterSUCCESS(actionModel, vm):
 		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATED_STATE)
 		elif actionModel.getType() == Action.PROVISIONING_VM_START_TYPE or actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
@@ -85,8 +85,10 @@ class ProvisioningResponseDispatcher():
 		elif actionModel.getType() == Action.PROVISIONING_VM_STOP_TYPE:
 			vm.setState(VirtualMachine.STOPPED_STATE)
 		elif actionModel.getType() == Action.PROVISIONING_VM_DELETE_TYPE:
+			controller = VTDriver.getDriver(vm.Server.get().getVirtTech())
 			controller.deleteVM(vm)
-
+	
+	@staticmethod
 	def __updateVMafterONGOING(actionModel, vm):
 		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATING_STATE)
@@ -99,7 +101,8 @@ class ProvisioningResponseDispatcher():
 		elif actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
 			vm.setState(VirtualMachine.REBOOTING_STATE)
 
-	def __updateVMafterFAILED(actionModel, vm, controller):
+	@staticmethod
+	def __updateVMafterFAILED(actionModel, vm):
 		if  actionModel.getType() == Action.PROVISIONING_VM_START_TYPE:
 			vm.setState(VirtualMachine.STOPPED_STATE)
 		elif actionModel.getType() == Action.PROVISIONING_VM_STOP_TYPE:
@@ -108,5 +111,6 @@ class ProvisioningResponseDispatcher():
 			vm.setState(VirtualMachine.STOPPED_STATE)
 		elif actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 			failedOnCreate = 1	#VM is deleted after sending response to the Plugin because callBackUrl is required
+			return failedOnCreate
 		else:
 			vm.setState(VirtualMachine.FAILED_STATE)

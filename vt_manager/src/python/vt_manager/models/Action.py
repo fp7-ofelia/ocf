@@ -75,12 +75,14 @@ class Action(models.Model):
 	description = models.CharField(max_length = 2048, default="", blank =True, null =True)
 	objectUUID = models.CharField(max_length = 512, default="", blank =  True, null = True)
 
+
 	def checkActionIsPresentAndUnique(self):
 		if Action.objects.filter (uuid = self.uuid).count() != 0:
 			logging.error("Action with the same uuid already exists")
 			raise Exception("Action with the same uuid already exists")
 	
-	def getAndCheckActionByUUID(self, uuid):
+	@staticmethod	
+	def getAndCheckActionByUUID(uuid):
 		actions = Action.objects.filter (uuid = uuid)
 		if actions.count() ==  1:
 			return actions[0]

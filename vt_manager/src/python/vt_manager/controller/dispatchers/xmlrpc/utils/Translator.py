@@ -45,6 +45,8 @@ class Translator():
 		memory = VMxmlClass.xen_configuration.memory_mb
 		callBackUrl = callBackURL
 		hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
+		print "[LEODEBUG] HD SETUP TYPE EN TRANSLATOR"
+		print VMxmlClass.xen_configuration.hd_setup_type
 		hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path
 		virtSetupType = VMxmlClass.xen_configuration.virtualization_setup_type
 		return name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,None,None,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save
@@ -159,15 +161,3 @@ class Translator():
 		newInterface.mac = mgmtMac.mac
 		#VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
 
-	@staticmethod
-	def PopulateNewAction(action, vm):
-		action.id = uuid.uuid4()
-		action.virtual_machine.name = vm.getName()
-		action.virtual_machine.uuid = vm.getUUID()
-		action.virtual_machine.project_id = vm.getProjectId()
-		action.virtual_machine.slice_id = vm.getSliceId()
-		action.virtual_machine.project_name = vm.getProjectName()
-		action.virtual_machine.slice_name = vm.getSliceName()
-		action.virtual_machine.virtualization_type = vm.getVirtTech()
-		action.virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
-		                

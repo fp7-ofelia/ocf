@@ -22,20 +22,15 @@ class ProvisioningDispatcher():
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 			
 			try:
-				print "[LEODEBUG] aca llega"
 				print action.virtual_machine.virtualization_type
 				controller = VTDriver.getDriver(action.virtual_machine.virtualization_type)
 			except Exception as e:
-				print "[LEODEBUG] NO CONTROLLER"
 				logging.error(e)
 				raise e
 			
 			#PROVISIONING CREATE
-			print "[LEODEBUG] action.getType()"
 			if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-				print "[LEODEBUG] createVM"
 				ProvisioningDispatcher.__createVM(controller, actionModel, action)
-				print "[LEODEBUG] post createVM"
 			#PROVISIONING DELETE, START, STOP, REBOOT
  
 			else :
@@ -55,20 +50,14 @@ class ProvisioningDispatcher():
 				logging.error("The requested action do not pass the Aggregate Manager Policies")
 				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
-			print "[LEODEBUG] step1"	
 			Server, VMmodel = controller.getServerAndCreateVM(action)
-			print "[LEODEBUG] step2"
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
-			print "[LEODEBUG] step3"
 			actionModel.save()
-			print "[LEODEBUG] step4"
 
 			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
-			print "[LEODEBUG] Despues del sendAgent"
 		except Exception as e:
-			print "[LEODEBUG] en la excepcion"
-			#XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action.id, str(e)))
+			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action.id, str(e)))
 			raise e 
 
 	@staticmethod
@@ -77,9 +66,10 @@ class ProvisioningDispatcher():
 		try:
 
 			actionModel.checkActionIsPresentAndUnique()
-
+			print "[LEODEBUG] LLEGA "
 			VMmodel =  controller.getVMbyUUID(action.virtual_machine.uuid)
-
+			print "[LEODEBUG] VMmodel "
+			print VMmodel 
 			if not VMmodel:
 				logging.error("VM with uuid %s not found\n" % action.virtual_machine.uuid)
 				raise Exception("VM with uuid %s not found\n" % action.virtual_machine.uuid)
@@ -89,10 +79,11 @@ class ProvisioningDispatcher():
 				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
 			#XXX:Change action Model
-			actionModel.setVMuuid(VMmodel.getUUID())
+			actionModel.setObjectUUID(VMmodel.getUUID())
 			actionModel.save()
-			ProvisioningDispatcher.prefijo__connectAndSendAgent(VMmodel.getServer().getAgentURL(), action)
+			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
-			ProvisioningDispatcher.prefijo__connectAndSendPlugin(threading.currentThread().callBackURL, XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action.id, str(e)))
-			raise e
+			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
+			raise e 
+
 
