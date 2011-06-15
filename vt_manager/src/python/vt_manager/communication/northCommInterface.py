@@ -26,7 +26,7 @@ def send(callBackUrl, xml):
 		return
 	print "[LEODEBUG] XML"
 	print xml
-	ServiceThread.startMethodInNewThread(DispatcherLaucher.processXmlQuery ,rspec, url = callBackUrl)
+	ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery ,rspec, url = callBackUrl)
 	return
 
 #@rpcmethod(url_name="plugin")
