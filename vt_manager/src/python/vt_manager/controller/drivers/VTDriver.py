@@ -10,7 +10,8 @@ import xmlrpclib, threading, logging, copy
 from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
-
+from vt_manager.controller.dispatcher.xmlrpc.DispatcherLauncher import DispatcherLauncher
+from vt_manager.models.VirtualMachine import VirtualMachine
 class VTDriver():
 
 
@@ -175,3 +176,10 @@ class VTDriver():
 					server.subscribeToIp4Range(ipRange)
 				except Exception as e:
 					pass
+
+	@staticmethod
+	def PropagateActionToProvisioningDispatcher(vm_id, action):
+		vm = VirtualMachine.objects.get(id=vm_id).getAsObjectChild()
+		rspec = XmlHelper.getSimpleActionSpecificQuery(action)
+		Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
+		DispatcherLauncher.processXmlQuery(rspec)

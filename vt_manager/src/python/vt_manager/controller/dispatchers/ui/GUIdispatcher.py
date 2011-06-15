@@ -183,7 +183,7 @@ def action_vm(request, server_id, vm_id, action):
 		)
 
 	else:
-		VTDriver.PropagateAction(vm_id, action)
+		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, action)
 		#vm = VM.objects.get(id = vm_id)
 		#rspec = XmlHelper.getSimpleActionSpecificQuery(action)
 		#Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
