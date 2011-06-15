@@ -77,7 +77,6 @@ class ProvisioningResponseDispatcher():
 					logging.error(e)
 					return
 
-	@staticmethod
 	def __updateVMafterSUCCESS(actionModel, vm, controller):
 		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATED_STATE)
@@ -88,7 +87,6 @@ class ProvisioningResponseDispatcher():
 		elif actionModel.getType() == Action.PROVISIONING_VM_DELETE_TYPE:
 			controller.deleteVM(vm)
 
-	@staticmethod
 	def __updateVMafterONGOING(actionModel, vm):
 		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 			vm.setState(VirtualMachine.CREATING_STATE)
@@ -101,7 +99,6 @@ class ProvisioningResponseDispatcher():
 		elif actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
 			vm.setState(VirtualMachine.REBOOTING_STATE)
 
-	@staticmethod
 	def __updateVMafterFAILED(actionModel, vm, controller):
 		if  actionModel.getType() == Action.PROVISIONING_VM_START_TYPE:
 			vm.setState(VirtualMachine.STOPPED_STATE)

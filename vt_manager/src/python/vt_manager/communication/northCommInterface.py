@@ -3,7 +3,7 @@ import os, logging
 import sys
 from vt_manager.models import *
 from vt_manager.controller import *
-from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import *
+from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
@@ -26,7 +26,7 @@ def send(callBackUrl, xml):
 		return
 	print "[LEODEBUG] XML"
 	print xml
-	ServiceThread.startMethodInNewThread(processXmlQuery ,rspec, url = callBackUrl)
+	ServiceThread.startMethodInNewThread(DispatcherLaucher.processXmlQuery ,rspec, url = callBackUrl)
 	return
 
 #@rpcmethod(url_name="plugin")

@@ -10,11 +10,19 @@ from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *                                               
 import threading                                                                             
 
-def processXmlQuery(rspec):
+class DispatcherLauncher():
+	
+	@staticmethod
+	def processXmlResponse(rspec):
+		if(rspec.response.provisioning != None):
+			ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.procesResponse, rspec)
+
+	@staticmethod
+	def processXmlQuery(rspec):
     
-    print "[DEBUG] Processing XML query in preocessXmlQuery()"
-    #check if provisioning / monitoring / etc
-    if(rspec.query.provisioning != None):
-        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
+		print "[DEBUG] Processing XML query in preocessXmlQuery()"
+		#check if provisioning / monitoring / etc
+		if(rspec.query.provisioning != None):
+			ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
     
     
