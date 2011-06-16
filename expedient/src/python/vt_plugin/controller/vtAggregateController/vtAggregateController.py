@@ -121,12 +121,19 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             print "Can't parse rspec"
             print e
             return
-
+        print "[LEODEBUG] EMPIEZA"
         try:
-            for server in xmlClass.response.information.resources.servers:
-                for vm in server.virtual_machines:
-                    Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
+            for server in xmlClass.response.information.resources.server:
+                print "[LEODEBUG] Server: "+str(server.name)
+                for vm in server.virtual_machine:
+                    print "[LEODEBUG] VM: "+str(vm.name)
+                    VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
+                    print "[LEODEBUG] DEBERIA HABER UNA VM"
+                    print "[LEODEBUG] " +str(VMmodel.name)
+                    Translator.PopulateNewVMifaces(vm, VMmodel)
+                    print "[LEODEBUG] DEBERIA HABER CONFIGURADO IFACES"
                 Translator.ServerClassToModel(server, vtPlugin.id)
+                print "[LEODEBUG] DEBERIA HABER UN SERVER"
                 serversInAggregate.append(server.uuid)
             serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
             for s in serversInExpedient:
@@ -140,7 +147,9 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
                     #delServer.delete()
                     delServer.completeDelete()
             return xmlClass
-        except:
+        except Exception as e:
+            print "[LEODEBUG] LA QUE LO PARIO"
+            print e
             rHashObject.hashValue = oldHashValue
             rHashObject.save()
     

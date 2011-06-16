@@ -113,7 +113,7 @@ class VTServer(Resource):
         return self.operatingSystemDistribution
 
     def setVMs(self):
-        vms = VM.objects.filter(serverID = self.name)
+        vms = VM.objects.filter(serverID = self.uuid)
         for vm in vms:
             self.vms.add(vm)
     

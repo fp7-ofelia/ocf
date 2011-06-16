@@ -49,8 +49,9 @@ class ProvisioningDispatcher():
                     #after saving action, we proceed to save the virtualmachines 
                     #(to be created) and the server modifications in local database
                     #first we translate the VM action into a VM model
-                    VMmodel = Translator.VMtoModel(action.virtual_machine, "save")
-                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    Server = VTServer.objects.get(uuid =  action.virtual_machine.server_id)
+                    VMmodel = Translator.VMtoModel(action.virtual_machine, Server.aggregate_id, "save")
+                    #Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
                     #actionModel.requestUser = threading.currentThread().requestUser
