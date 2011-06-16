@@ -186,5 +186,5 @@ class VTDriver():
 		from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
 		vm = VirtualMachine.objects.get(id=vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action)
-		ActionController.PopulateNewAction(rspec.query.provisioning.action[0], vm)
+		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
 		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)

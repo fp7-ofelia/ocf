@@ -12,7 +12,7 @@
                     <operating-system-type>GNU/Linux</operating-system-type>
                     <operating-system-version>6.0</operating-system-version>
                     <operating-system-distribution>Debian</operating-system-distribution>
-                    <server-id>0fc2f6a1-1918-455a-9c0e-1c36f49bab87</server-id>
+                    <server-id>2a9b9a7c-20bd-4e19-ae42-d74278ea8966</server-id>
                     <virtualization-type>xen</virtualization-type>
                     <xen-configuration>
                         <hd-setup-type>file-image</hd-setup-type>

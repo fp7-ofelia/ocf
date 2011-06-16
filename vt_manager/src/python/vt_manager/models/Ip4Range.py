@@ -37,7 +37,7 @@ class Ip4Range(models.Model):
 	dns2 = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp])
     
 	#Pool of ips both assigned and excluded (particular case of assignment)
-	ips = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False)
+	ips = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False, related_name = "Ip4Range")
 	nextAvailableIp = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp],editable=False,verbose_name="Next available Ip4 slot")
 
 	#Statistics

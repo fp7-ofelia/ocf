@@ -7,6 +7,7 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.settings import ROOT_USERNAME,ROOT_PASSWORD,VTAM_URL
+from vt_manager.controller.actions.ActionController import ActionController
 class ProvisioningDispatcher():
   
 	def __init__(self):
@@ -51,13 +52,18 @@ class ProvisioningDispatcher():
 				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
 			Server, VMmodel = controller.getServerAndCreateVM(action)
+			ActionController.PopulateNetworkingParams(action, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()
 
+			print "[LEODEBUG] XMLRPC EOEOEOEOE"
+			print Server.getAgentURL()
+			print "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL
+			print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
 			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
-			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action.id, str(e)))
+			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
 			raise e 
 
 	@staticmethod

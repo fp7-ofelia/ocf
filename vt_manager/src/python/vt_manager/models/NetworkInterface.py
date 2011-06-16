@@ -25,12 +25,12 @@ class NetworkInterface(models.Model):
 	'''Generic parameters'''
 	name = models.CharField(max_length = 128, default="", verbose_name = "Interface Name") #check if bank = True and null = True are required
 	mac = models.ForeignKey('MacSlot', blank = True, null = False, editable = False, verbose_name = "Mac address",validators=[EthernetUtils.checkValidMac],related_name="interface")
-	ip4s = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False, verbose_name = "IP4 addresses")
+	ip4s = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False, verbose_name = "IP4 addresses", related_name = "Interface")
 	isMgmt = models.BooleanField(verbose_name="Mgmt interface",default=0, editable = False)
 	isBridge = models.BooleanField(verbose_name="bridge interface",default=0, editable = False)
 
 	'''Interfaces connectivy'''
-	connectedTo =  models.ManyToManyField('NetworkInterface', blank = True, null = False, editable = False, verbose_name = "Interfaces connected")
+	connectedTo =  models.ManyToManyField('NetworkInterface', blank = True, null = False, editable = False, verbose_name = "Interfaces connected", related_name= "serverBridge")
 
 	'''Physical connection details for bridged interfaces'''	
 	switchID = models.CharField(max_length = 128, default="", blank = True, null=True, verbose_name = "Switch ID",validators=[checkBlank])
