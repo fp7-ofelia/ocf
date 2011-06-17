@@ -28,7 +28,7 @@ class InformationDispatcher():
 					newServer = copy.deepcopy(baseServer)
 					infoRspec.response.information.resources.server.append(newServer)
 	
-					InformationDispatcher.__ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
+				InformationDispatcher.__ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
 				if (projectUUID is not 'None'):
 					vms = server.getVMs(projectId = projectUUID)
 				else:
@@ -102,7 +102,7 @@ class InformationDispatcher():
 		VMxmlClass.operating_system_version = VMmodel.getOSVersion()
 		VMxmlClass.operating_system_distribution = VMmodel.getOSDistribution()
 		VMxmlClass.virtualization_type = VMmodel.Server.get().getVirtTech()
-		VMxmlClass.server_id = VMmodel.Server.get().uuid
+		VMxmlClass.server_id = VMmodel.Server.get().getUUID()
 		VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHdSetupType()
 		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHdOriginPath()
 		VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()

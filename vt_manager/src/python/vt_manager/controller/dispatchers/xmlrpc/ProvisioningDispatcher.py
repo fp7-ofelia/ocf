@@ -56,10 +56,6 @@ class ProvisioningDispatcher():
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()
 
-			print "[LEODEBUG] XMLRPC EOEOEOEOE"
-			print Server.getAgentURL()
-			print "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL
-			print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
 			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
 			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
@@ -71,10 +67,7 @@ class ProvisioningDispatcher():
 		try:
 
 			actionModel.checkActionIsPresentAndUnique()
-			print "[LEODEBUG] LLEGA "
 			VMmodel =  controller.getVMbyUUID(action.virtual_machine.uuid)
-			print "[LEODEBUG] VMmodel "
-			print VMmodel 
 			if not VMmodel:
 				logging.error("VM with uuid %s not found\n" % action.virtual_machine.uuid)
 				raise Exception("VM with uuid %s not found\n" % action.virtual_machine.uuid)
