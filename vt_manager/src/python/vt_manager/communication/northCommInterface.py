@@ -12,7 +12,6 @@ import copy
 from threading import Thread
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
-from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 
 @rpcmethod(url_name="plugin")
 #def send(callBackUrl, expID, xml):
@@ -24,8 +23,6 @@ def send(callBackUrl, xml):
 		logging.error("send() could not parse\n")
 		logging.error(e)
 		return
-	print "[LEODEBUG] XML"
-	print xml
 	ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery ,rspec, url = callBackUrl)
 	return
 
@@ -38,9 +35,6 @@ def ping(challenge):
 def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 	
 	v,s = getattr (DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
-	print "[LEODEBUG] RESULTADOS"
-	print v
-	print s
 	return v,s
 
 	

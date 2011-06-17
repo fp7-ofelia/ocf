@@ -3,7 +3,6 @@ from vt_manager.models.XenServer import XenServer
 from vt_manager.models.XenVM import XenVM
 from vt_manager.models.VTServer import VTServer
 from vt_manager.utils.HttpUtils import HttpUtils
-from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 import threading
 
 class XenDriver(VTDriver):
@@ -29,7 +28,7 @@ class XenDriver(VTDriver):
        
 		try: 
 			Server = XenServer.objects.get(uuid = action.virtual_machine.server_id )
-			VMmodel = Server.createVM(*Translator.xenVMtoModel(action.virtual_machine,threading.currentThread().callBackURL, save = True))
+			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.virtual_machine,threading.currentThread().callBackURL, save = True))
 			return Server, VMmodel
 		except:
 			raise
@@ -74,3 +73,22 @@ class XenDriver(VTDriver):
 								save=True)
 		else:
 			raise Exception("Trying to create a server failed")
+
+	@staticmethod
+	def xenVMtoModel(VMxmlClass, callBackURL, save):
+		name = VMxmlClass.name
+		uuid = VMxmlClass.uuid
+		projectId = VMxmlClass.project_id
+		projectName = VMxmlClass.project_name
+		sliceId = VMxmlClass.slice_id
+		sliceName = VMxmlClass.slice_name
+		osType = VMxmlClass.operating_system_type
+		osVersion = VMxmlClass.operating_system_version
+		osDist = VMxmlClass.operating_system_distribution
+		memory = VMxmlClass.xen_configuration.memory_mb
+		callBackUrl = callBackURL
+		hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
+		hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path
+		virtSetupType = VMxmlClass.xen_configuration.virtualization_setup_type
+		return name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,None,None,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save
+

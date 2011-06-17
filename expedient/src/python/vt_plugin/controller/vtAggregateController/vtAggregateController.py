@@ -100,12 +100,11 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         rHashObject.save()
     try:
         remoteHashValue ,resourcesString = client.listResources(rHashObject.hashValue, projectUUID, sliceUUID)
-	print remoteHashValue
+        print remoteHashValue
     except Exception as e:
         print "Can't retrieve resources"
         print e
         return
-    print resourcesString
 
     if remoteHashValue == rHashObject.hashValue:
         print "Same HASH, no changes in resources"
@@ -121,35 +120,20 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             print "Can't parse rspec"
             print e
             return
-        print "[LEODEBUG] EMPIEZA"
         try:
             for server in xmlClass.response.information.resources.server:
-                print "[LEODEBUG] Server: "+str(server.name)
                 for vm in server.virtual_machine:
-                    print "[LEODEBUG] VM: "+str(vm.name)
                     VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
-                    print "[LEODEBUG] DEBERIA HABER UNA VM"
-                    print "[LEODEBUG] " +str(VMmodel.name)
                     Translator.PopulateNewVMifaces(vm, VMmodel)
-                    print "[LEODEBUG] DEBERIA HABER CONFIGURADO IFACES"
                 Translator.ServerClassToModel(server, vtPlugin.id)
-                print "[LEODEBUG] DEBERIA HABER UN SERVER"
                 serversInAggregate.append(server.uuid)
             serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
             for s in serversInExpedient:
                 if s not in serversInAggregate:
-                    print "[LEODEBUG] DELETE SERVER"
                     delServer = VTServer.objects.get(uuid = s)
-                    #for vm in delServer.vms.all():
-                    #    delServer.vms.remove(vm)
-                    #    vm.completeDelete()
-                    #for sIface in delServer.ifaces.all():
-                    #    sIface.delete()
-                    #delServer.delete()
                     delServer.completeDelete()
             return xmlClass
         except Exception as e:
-            print "[LEODEBUG] LA QUE LO PARIO"
             print e
             rHashObject.hashValue = oldHashValue
             rHashObject.save()

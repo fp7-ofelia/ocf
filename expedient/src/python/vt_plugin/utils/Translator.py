@@ -56,7 +56,6 @@ class Translator():
         
         if save is "save":
             VMmodel.save()
-        print "[LEODEBUG] VM TRADUCIDA" + str(VMmodel.name)
         return VMmodel    
 
         
@@ -79,7 +78,6 @@ class Translator():
             VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
             VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
         except Exception as e:
-			print "[LEODEBUG] VMmodelToClass"
 			print e
 			return
     @staticmethod
@@ -126,13 +124,10 @@ class Translator():
                         ifaceModel.save()
                         if not sModel.ifaces.filter(ifaceName = iface.name):
                             sModel.ifaces.add(ifaceModel)
-            print "[LEODEBUG] ]before"
             sModel.setVMs()        
-            print "AFTER"
             sModel.save()
             return sModel
         except Exception as e:
-            print "[LEODEBUG] ACA ESTA EL FALLO WATSON"
             print e
             print "Error tranlating Server Class to Model"
             if newServer:
@@ -153,7 +148,6 @@ class Translator():
 
         actionModel.uuid = action.id
         if save is "save":
-            print "TRANSLATOR SAVING..."
             actionModel.save()
         return actionModel
 

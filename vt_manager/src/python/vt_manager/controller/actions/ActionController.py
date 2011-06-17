@@ -36,45 +36,43 @@ class ActionController():
 		action.virtual_machine.slice_id = vm.getSliceId()
 		action.virtual_machine.project_name = vm.getProjectName()
 		action.virtual_machine.slice_name = vm.getSliceName()
+		#XXX:CHECK IF IT IS NEEDED
 		#action.virtual_machine.virtualization_type = vm.Server.get().getVirtTech()
 		action.virtual_machine.xen_configuration.hd_setup_type = vm.getHdSetupType()
 
 	@staticmethod
 	def PopulateNetworkingParams(actionIfaces, vm):
-		print "POPULATING NETWORKKING IN VMHITHIN ACTION"
 		#actionIfaces = action.virtual_machine.xen_configuration.interfaces.interface
-		print "actionIfaces"
 		baseIface = copy.deepcopy(actionIfaces[0])
-		print "baseIface"
 		actionIfaces.pop()
-		print "pop() empty actionIfaces"
 		for index, vmIface in enumerate(vm.networkInterfaces.all()):
 			currentIface = copy.deepcopy(baseIface)
-			print "currentIface"+ str(vmIface.name)
 			currentIface.ismgmt = vmIface.isMgmt
-			print "isMgmt"+str(vmIface.isMgmt)
 			currentIface.name = "eth"+str(index)
-			print "name"+ "eth"+str(index)
 			currentIface.mac = vmIface.mac.mac
-			print "mac "+str(vmIface.mac.mac)
 			#XXX: ip4s are many, but xml only accepts one
 			if vmIface.ip4s.all():
 				currentIface.ip = vmIface.ip4s.all()[0].ip
-				print "ip "+str(vmIface.ip4s.all()[0].ip)
 				currentIface.mask = vmIface.ip4s.all()[0].Ip4Range.get().netMask
-				print "netmask " +str(vmIface.ip4s.all()[0].Ip4Range.get().netMask)
 				currentIface.gw = vmIface.ip4s.all()[0].Ip4Range.get().gw
-				print "gw"
 				currentIface.dns1 = vmIface.ip4s.all()[0].Ip4Range.get().dns1
-				print "dns1"
 				currentIface.dns2 = vmIface.ip4s.all()[0].Ip4Range.get().dns2
-				print "dns2"
-			print vmIface.serverBridge.all()
 			currentIface.switch_id = vmIface.serverBridge.all()[0].name
-			print "switch-id"
 			actionIfaces.append(currentIface)
 		
-						
+	@staticmethod
+	def ActionToModel(action, hyperaction, save = "noSave" ):
+		actionModel = Action()
+		actionModel.hyperaction = hyperaction
+		if not action.status:
+			actionModel.status = 'QUEUED'
+		else:
+			actionModel.status = action.status
+		actionModel.type = action.type_
+		actionModel.uuid = action.id
+		if save is "save":
+			actionModel.save()
+		return actionModel						
 
 
 

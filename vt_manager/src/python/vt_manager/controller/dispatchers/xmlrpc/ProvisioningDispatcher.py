@@ -1,6 +1,5 @@
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.models.Action import Action
-from vt_manager.controller.dispatchers.xmlrpc.utils.Translator import Translator
 from django.db import transaction
 import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
@@ -18,7 +17,7 @@ class ProvisioningDispatcher():
 
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
-			actionModel = Translator.ActionToModel(action,"provisioning")
+			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 			
 			try:

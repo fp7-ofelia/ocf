@@ -30,8 +30,6 @@ class ProvisioningDispatcher():
             print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
             actionModel.requestUser = threading.currentThread().requestUser
             if actionModel.type == "create":
-                print "[LEODEBUG] RSPEC"
-                print provisioning              
                 if Action.objects.filter (uuid = actionModel.uuid):
                     #if action already exists we raise exception. It shouldn't exist because it is create action!
                     try:
