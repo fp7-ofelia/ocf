@@ -3,7 +3,7 @@ from vt_manager.models import *
 from vt_manager.models.Action import Action
 import copy
 import uuid
-from vt_manager.controller.actions.ActionController import ActionController
+
 class Translator():
 
 #    @staticmethod
@@ -96,7 +96,7 @@ class Translator():
  
 	@staticmethod
 	def VMmodelToClass(VMmodel, VMxmlClass):
-		from vt_manager.models.VTServer import VTServer
+
 		VMxmlClass.name = VMmodel.getName()
 		VMxmlClass.uuid = VMmodel.getUUID()
 		VMxmlClass.project_id = VMmodel.getProjectId()
@@ -107,60 +107,57 @@ class Translator():
 		VMxmlClass.operating_system_version = VMmodel.getOSVersion()
 		VMxmlClass.operating_system_distribution = VMmodel.getOSDistribution()
 		#VMxmlClass.virtualization_type = VMmodel.getVirtTech()
-		VMxmlClass.virtualization_type = VMmodel.Server.get().getVirtTech()
-		VMxmlClass.server_id = VMmodel.Server.get().getUUID()
 		#VMxmlClass.server_id = VMmodel.getServerID()
 		VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHdSetupType()
 		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHdOriginPath()
 		VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
 		VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-		
-		ActionController.PopulateNetworkingParams(VMxmlClass.xen_configuration.interfaces.interface, VMmodel)		             
-#		#XXX: It is important the order the ifaces are scanned. It should be first the dataIfaces and then the mgmt one.
-#		vmInterfaces = VMmodel.networkInterfaces.all()
-#		serverDataIfaces = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()
-#		baseIface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
-#		for interface in serverDataIfaces:
-#			print "SERVER IFACE: %s" %interface.ifaceName 
-#		for ifaceIndex, serverDataIface in enumerate(serverDataIfaces):
-#			try:
-#				#XXX: This way of calling the MACs comes from the setVMinterfaces, considering that the interfaces in the VM will be always eth0,1,...
-#				# maybe this should be changed
-#				mac = macs.get(ifaceName = 'eth'+str(ifaceIndex+1))
-#				print "Copiando %s" %mac.ifaceName
-#				if (ifaceIndex != 0):
-#					newInterface = copy.deepcopy(baseIface)
-#					VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].name = mac.ifaceName
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mask = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = None
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = serverDataIfaces[ifaceIndex].ifaceName
-#				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mac = mac.mac
-#			except:
-#				print "[Warning]: There is not corresponding MAC in the VM for a Server's dataIface"
-#				pass
-#
-#		#MGMT IFACE
-#		print "mgmt IFACE en VM %s" %VMmodel.name
-#		print "first len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
-#		newInterface = copy.deepcopy(baseIface)
-#		print "second len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
-#		VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
-#		print "third len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
-#		mgmtMac = macs.get(isMgmt = 1)
-#		newInterface.name = mgmtMac.ifaceName
-#		print mgmtMac.ifaceName
-#		newInterface.ismgmt='True'
-#		newInterface.ip = VMmodel.ips.get().ip
-#		newInterface.mask = VMmodel.ips.get().mask
-#		newInterface.gw = VMmodel.ips.get().gw
-#		newInterface.dns1 = VMmodel.ips.get().dns1
-#		newInterface.dns2 = VMmodel.ips.get().dns2
-#		newInterface.switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
-#		newInterface.mac = mgmtMac.mac
-#		#VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
-#
+		             
+		#XXX: It is important the order the ifaces are scanned. It should be first the dataIfaces and then the mgmt one.
+		vmInterfaces = VMmodel.networkInterfaces.all()
+		serverDataIfaces = VTServer.objects.get(uuid = VMmodel.getServerID()).ifaces.all()
+		baseIface = copy.deepcopy(VMxmlClass.xen_configuration.interfaces.interface[0])
+		for interface in serverDataIfaces:
+			print "SERVER IFACE: %s" %interface.ifaceName 
+		for ifaceIndex, serverDataIface in enumerate(serverDataIfaces):
+			try:
+				#XXX: This way of calling the MACs comes from the setVMinterfaces, considering that the interfaces in the VM will be always eth0,1,...
+				# maybe this should be changed
+				mac = macs.get(ifaceName = 'eth'+str(ifaceIndex+1))
+				print "Copiando %s" %mac.ifaceName
+				if (ifaceIndex != 0):
+					newInterface = copy.deepcopy(baseIface)
+					VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].name = mac.ifaceName
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ismgmt = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].ip = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mask = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].gw = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns1 = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].dns2 = None
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].switch_id = serverDataIfaces[ifaceIndex].ifaceName
+				VMxmlClass.xen_configuration.interfaces.interface[ifaceIndex].mac = mac.mac
+			except:
+				print "[Warning]: There is not corresponding MAC in the VM for a Server's dataIface"
+				pass
+
+		#MGMT IFACE
+		print "mgmt IFACE en VM %s" %VMmodel.name
+		print "first len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
+		newInterface = copy.deepcopy(baseIface)
+		print "second len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
+		VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
+		print "third len: %d" %len(VMxmlClass.xen_configuration.interfaces.interface)
+		mgmtMac = macs.get(isMgmt = 1)
+		newInterface.name = mgmtMac.ifaceName
+		print mgmtMac.ifaceName
+		newInterface.ismgmt='True'
+		newInterface.ip = VMmodel.ips.get().ip
+		newInterface.mask = VMmodel.ips.get().mask
+		newInterface.gw = VMmodel.ips.get().gw
+		newInterface.dns1 = VMmodel.ips.get().dns1
+		newInterface.dns2 = VMmodel.ips.get().dns2
+		newInterface.switch_id = VTServer.objects.get(uuid = VMmodel.getServerID()).getVmMgmtIface()
+		newInterface.mac = mgmtMac.mac
+		#VMxmlClass.xen_configuration.interfaces.interface.append(newInterface)
+

@@ -8,9 +8,10 @@ from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.settings import ROOT_USERNAME,ROOT_PASSWORD,VTAM_URL
 from vt_manager.controller.actions.ActionController import ActionController
-
 class ProvisioningDispatcher():
   
+	def __init__(self):
+		self.Dispatcher.__init__(self)
  
 	@staticmethod
 	@transaction.commit_on_success
@@ -51,7 +52,7 @@ class ProvisioningDispatcher():
 				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
 			Server, VMmodel = controller.getServerAndCreateVM(action)
-			ActionController.PopulateNetworkingParams(action.virtual_machine.xen_configuration.interfaces.interface, VMmodel)
+			ActionController.PopulateNetworkingParams(action, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()

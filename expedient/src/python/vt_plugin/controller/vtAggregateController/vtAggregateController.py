@@ -111,7 +111,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         print "Same HASH, no changes in resources"
         return
     else:
-	print remoteHashValue
+        print remoteHashValue
         oldHashValue = rHashObject.hashValue
         rHashObject.hashValue = remoteHashValue
         rHashObject.save() 
@@ -138,6 +138,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
             for s in serversInExpedient:
                 if s not in serversInAggregate:
+                    print "[LEODEBUG] DELETE SERVER"
                     delServer = VTServer.objects.get(uuid = s)
                     #for vm in delServer.vms.all():
                     #    delServer.vms.remove(vm)

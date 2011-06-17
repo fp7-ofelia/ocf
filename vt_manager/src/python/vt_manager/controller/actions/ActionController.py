@@ -40,9 +40,9 @@ class ActionController():
 		action.virtual_machine.xen_configuration.hd_setup_type = vm.getHdSetupType()
 
 	@staticmethod
-	def PopulateNetworkingParams(action, vm):
+	def PopulateNetworkingParams(actionIfaces, vm):
 		print "POPULATING NETWORKKING IN VMHITHIN ACTION"
-		actionIfaces = action.virtual_machine.xen_configuration.interfaces.interface
+		#actionIfaces = action.virtual_machine.xen_configuration.interfaces.interface
 		print "actionIfaces"
 		baseIface = copy.deepcopy(actionIfaces[0])
 		print "baseIface"
