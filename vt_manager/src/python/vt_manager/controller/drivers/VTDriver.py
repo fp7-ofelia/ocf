@@ -90,10 +90,10 @@ class VTDriver():
 			raise Exception("Server does not exist or id not unique")
 		
 	@staticmethod
-	def getServerById(id):
+	def getServerByUUID(uuid):
 		try:
 			from vt_manager.models.VTServer import VTServer
-			return VTServer.objects.get(id=id).getChildObject()
+			return VTServer.objects.get(uuid=uuid).getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 
