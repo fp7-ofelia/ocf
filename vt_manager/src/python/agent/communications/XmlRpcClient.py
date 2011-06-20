@@ -41,6 +41,7 @@ class XmlRpcClient:
 		
 		rspec.response.monitoring.action[0].id = actionId
 		rspec.response.monitoring.action[0].status = status
+		rspec.response.monitoring.action[0].type_ = "listActiveVMs"
 		
 		server = server_type()
 		rspec.response.monitoring.action[0].server = server
