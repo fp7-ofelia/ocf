@@ -12,7 +12,6 @@ class ProvisioningDispatcher():
   
  
 	@staticmethod
-	@transaction.commit_on_success
 	def processProvisioning(provisioning):
 
 		logging.debug("PROVISIONING STARTED...\n")
@@ -40,6 +39,7 @@ class ProvisioningDispatcher():
 
 
 	@staticmethod
+	@transaction.commit_on_success
 	def __createVM(controller, actionModel, action):
         
 		try:
@@ -58,6 +58,7 @@ class ProvisioningDispatcher():
 			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
 			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
+			print "[LEODEBUG] FALA EN EL __createVM "
 			raise e 
 
 	@staticmethod

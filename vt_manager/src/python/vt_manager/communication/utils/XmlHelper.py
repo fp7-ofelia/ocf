@@ -90,7 +90,7 @@ class XmlHelper(object):
         simpleRspec.response.provisioning.action[0].status = status
         simpleRspec.response.provisioning.action[0].id = id
         simpleRspec.response.provisioning.action[0].description = description
-        return simpleRspec
+        return XmlHelper.craftXmlClass(simpleRspec)
 
     @staticmethod
     def getSimpleActionQuery(action=None):
