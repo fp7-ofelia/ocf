@@ -9,7 +9,7 @@ print PYTHON_DIR
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.mySettings'
 
 sys.path.insert(0,PYTHON_DIR)
 

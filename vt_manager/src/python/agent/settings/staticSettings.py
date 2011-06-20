@@ -3,7 +3,6 @@
 
 	Ofelia XEN Agent settings file (Static settings) 
 '''
-
 ##General Parameters
 
 '''Base folder where vms and logs will be store.

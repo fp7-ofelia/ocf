@@ -5,9 +5,9 @@
 '''
 
 #Import static settings
-from settings.staticSettings import *
+from vt_manager.settings.staticSettings import *
 
 #Import user settings
-from mySettings import *
+from vt_manager.mySettings import *
 
 
