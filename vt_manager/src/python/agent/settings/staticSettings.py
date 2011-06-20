@@ -1,7 +1,7 @@
 '''
 	@author: msune
 
-	Ofelia XEN Agent settings file. 
+	Ofelia XEN Agent settings file (Static settings) 
 '''
 
 ##General Parameters
@@ -22,10 +22,6 @@ XMLRPC_SERVER_LISTEN_PORT=9229
 
 XMLRPC_SERVER_KEYFILE='security/certs/agent.key'    # Replace with your PEM formatted key file
 XMLRPC_SERVER_CERTFILE='security/certs/agent.crt'  # Replace with your PEM formatted certificate file
-
-#YOU MUST PUT A STRONG PASSWORD
-#XMLRPC_SERVER_PASSWORD="changeAndUncommentMe"
-
 
 ##FileHD driver settings
 '''Enable/disable file-type Hdmanager Cache FS'''

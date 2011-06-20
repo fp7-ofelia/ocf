@@ -7,7 +7,7 @@ from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
 from utils.xml.vtRspecInterface import rspec
-from settings import OXA_LOG
+from settings.settingsLoader import OXA_LOG
 
 '''
 	@author: msune
