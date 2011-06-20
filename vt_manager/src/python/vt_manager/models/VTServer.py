@@ -324,13 +324,11 @@ class VTServer(models.Model):
 		with MutexStore.getObjectLock(self.getLockIdentifier()):
 			nInter = self.networkInterfaces.filter(isMgmt=True,isBridge=True)
 			if nInter.count() == 1:
-				print "[LEODEBUG] count = 1"
 				mgmt = nInter.get()
 				mgmt.setName(name)
 				mgmt.setMacStr(macStr)
 
 			elif nInter.count() == 0:
-				print "[LEODEBUG] count = 0"
 				mgmt = NetworkInterface.createServerMgmtBridge(name,macStr)
 				self.networkInterfaces.add(mgmt)
 			else:

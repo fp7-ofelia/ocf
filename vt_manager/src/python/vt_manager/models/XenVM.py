@@ -101,7 +101,6 @@ class XenVM(VirtualMachine):
 	@staticmethod
 	def validateHdSetupType(hdType):
 		if value not in HD_SETUP_TYPE_CHOICES:
-			print "[LEODEBUG] INVALID HD SETUP TYPE"
 			raise Exception("Invalid HD Setup type")	
 	def setHdSetupType(self,hdType):
 		validateHdSetupType(hdType)

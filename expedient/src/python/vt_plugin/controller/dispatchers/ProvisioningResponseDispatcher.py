@@ -8,6 +8,8 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 from expedient.common.messaging.models import DatedMessage
+from vt_plugin.controller.vtAggregateController import vtAggregateController
+from vt_plugin.models.VtPlugin import VtPlugin
 
 class ProvisioningResponseDispatcher():
 
@@ -90,6 +92,11 @@ class ProvisioningResponseDispatcher():
                     if actionModel.type == 'create':
                         actionModel.vm.setState('creating...')
                         actionModel.vm.save()
+                        vtplugin = VtPlugin.objects.get(id=actionModel.vm.aggregate_id)
+                        projectUUID = actionModel.vm.projectId
+                        sliceUUID = actionModel.vm.sliceId
+                        vtAggregateController.askForAggregateResources(vtplugin,projectUUID,sliceUUID)	
+
                     elif actionModel.type == 'start':
                         actionModel.vm.setState('starting...')
                         actionModel.vm.save()

@@ -61,25 +61,23 @@ class Translator():
         
     @staticmethod
     def VMmodelToClass(VMmodel, VMxmlClass):
-        try:
-            VMxmlClass.name = VMmodel.getName()
-            VMxmlClass.uuid = VMmodel.getUUID()
-            VMxmlClass.project_id = VMmodel.getProjectId()
-            VMxmlClass.project_name = VMmodel.getProjectName()
-            VMxmlClass.slice_id = VMmodel.getSliceId()
-            VMxmlClass.slice_name = VMmodel.getSliceName()
-            VMxmlClass.operating_system_type = VMmodel.getOStype()
-            VMxmlClass.operating_system_version = VMmodel.getOSversion()
-            VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
-            VMxmlClass.virtualization_type = VMmodel.getVirtTech()
-            VMxmlClass.server_id = VMmodel.getServerID()
-            VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHDsetupType()
-            VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
-            VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
-            VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-        except Exception as e:
-			print e
-			return
+
+        VMxmlClass.name = VMmodel.getName()
+        VMxmlClass.uuid = VMmodel.getUUID()
+        VMxmlClass.project_id = VMmodel.getProjectId()
+        VMxmlClass.project_name = VMmodel.getProjectName()
+        VMxmlClass.slice_id = VMmodel.getSliceId()
+        VMxmlClass.slice_name = VMmodel.getSliceName()
+        VMxmlClass.operating_system_type = VMmodel.getOStype()
+        VMxmlClass.operating_system_version = VMmodel.getOSversion()
+        VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
+        VMxmlClass.virtualization_type = VMmodel.getVirtTech()
+        VMxmlClass.server_id = VMmodel.getServerID()
+        VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHDsetupType()
+        VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
+        VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
+        VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
+
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
 		#TODO: This is wrong, if a server changes its name this will create a new one instead of updating it
@@ -109,7 +107,6 @@ class Translator():
             #for iface in sClass.interfaces.interface:
             if sClass.interfaces:
                 for iface in sClass.interfaces.interface:
-                    print "IFACE CLASS: %s" %iface.name
                     if iface.ismgmt is True:
                         sModel.setVmMgmtIface(iface.name)
                     else:

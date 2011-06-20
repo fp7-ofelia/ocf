@@ -42,7 +42,7 @@
         font-weight: bold;
     }
 </style>
-<script src="{% url js_media 'jquery.min.js' %}"></script>
+<script src = {% url js_media 'jquery.min.js' %}></script> 
 <script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 
 <script>
