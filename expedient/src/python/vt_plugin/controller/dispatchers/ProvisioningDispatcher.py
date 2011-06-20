@@ -183,6 +183,5 @@ class ProvisioningDispatcher():
             #super(Resource).delete()
             vm.delete()
         except Exception as e:
-            print "Could not clean VM after fail, probably wrong data is in the database"
             print e
 

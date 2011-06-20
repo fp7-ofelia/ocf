@@ -5,14 +5,14 @@ import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
-from vt_manager.settings import ROOT_USERNAME,ROOT_PASSWORD,VTAM_URL
+#from vt_manager.settings.settingsLoader import ROOT_USERNAME,ROOT_PASSWORD,VTAM_IP,VTAM_PORT
+from vt_manager.utils.UrlUtils import UrlUtils
 from vt_manager.controller.actions.ActionController import ActionController
 
 class ProvisioningDispatcher():
   
  
 	@staticmethod
-	@transaction.commit_on_success
 	def processProvisioning(provisioning):
 
 		logging.debug("PROVISIONING STARTED...\n")
@@ -23,23 +23,39 @@ class ProvisioningDispatcher():
 			try:
 				print action.virtual_machine.virtualization_type
 				controller = VTDriver.getDriver(action.virtual_machine.virtualization_type)
+
+				#XXX:Change this when xml schema is updated
+				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+					server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
+				else:
+					server = VTDriver.getServerByUUID(VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get().getUUID())
 			except Exception as e:
 				logging.error(e)
 				raise e
-			
-			#PROVISIONING CREATE
-			if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-				ProvisioningDispatcher.__createVM(controller, actionModel, action)
-			#PROVISIONING DELETE, START, STOP, REBOOT
- 
-			else :
+		
+			try:	
+				#PROVISIONING CREATE
+				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+					vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
+				#PROVISIONING DELETE, START, STOP, REBOOT
+	 
+				else :
+	
+					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
 
-				ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
+				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+			except Exception as e:
+				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+					controller.deleteVM(vm)
+				print "[LEODEBUG] FALA EN EL PROVISIONING DISPATCHER "
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e))))
+
+		
 
 		logging.debug("PROVISIONING FINISHED...")
 
-
 	@staticmethod
+	@transaction.commit_on_success
 	def __createVM(controller, actionModel, action):
         
 		try:
@@ -54,11 +70,15 @@ class ProvisioningDispatcher():
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()
-
-			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
-		except Exception as e:
-			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
-			raise e 
+			return VMmodel
+		except:
+			raise
+#			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+#		except Exception as e:
+#			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
+#			controller.deleteVM(VMmodel)
+#			print "[LEODEBUG] FALA EN EL __createVM "
+#			raise e 
 
 	@staticmethod
 	def __deleteStartStopRebootVM(controller, actionModel, action):
@@ -78,9 +98,11 @@ class ProvisioningDispatcher():
 			#XXX:Change action Model
 			actionModel.setObjectUUID(VMmodel.getUUID())
 			actionModel.save()
-			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
-		except Exception as e:
-			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
-			raise e 
+		except:
+			raise 
+#			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+#		except Exception as e:
+#			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
+#			raise e 
 
 

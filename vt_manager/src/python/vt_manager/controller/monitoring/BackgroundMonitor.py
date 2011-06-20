@@ -3,7 +3,7 @@ import uuid
 from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
 import time
 import threading
-from vt_manager.settings import MONITORING_INTERVAL 
+from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
 
 '''
 author:msune

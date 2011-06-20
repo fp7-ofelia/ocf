@@ -7,7 +7,7 @@ from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 import xmlrpclib, threading, logging, copy
-from vt_manager.settings import ROOT_USERNAME, ROOT_PASSWORD, VTAM_URL
+from vt_manager.settings.settingsLoader import ROOT_USERNAME, ROOT_PASSWORD, VTAM_IP,VTAM_PORT
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
 from vt_manager.models.VirtualMachine import VirtualMachine
@@ -90,10 +90,10 @@ class VTDriver():
 			raise Exception("Server does not exist or id not unique")
 		
 	@staticmethod
-	def getServerById(id):
+	def getServerByUUID(uuid):
 		try:
 			from vt_manager.models.VTServer import VTServer
-			return VTServer.objects.get(id=id).getChildObject()
+			return VTServer.objects.get(uuid=uuid).getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 

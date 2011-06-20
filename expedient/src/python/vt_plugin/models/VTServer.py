@@ -11,7 +11,7 @@ from expedient.common.middleware import threadlocals
 from expedient.clearinghouse.utils import post_message_to_current_user
 from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
-from vt_manager.communication.utils.XmlUtils import XmlHelper 
+from vt_manager.communication.utils.XmlHelper import XmlHelper 
 #from vt_manager.models import Action, VTServer
 from vt_plugin.models import *
 from vt_plugin.models.VM import VM

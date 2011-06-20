@@ -18,5 +18,5 @@ DATABASE_PASSWORD = "expedient"
 
 '''Optional parameters'''
 
-#Monitoring of Agents time (commented = defaukt = 45 sec)
+#Monitoring of Agents time (commented = default = 45 sec)
 #MONITORING_INTERVAL = 45

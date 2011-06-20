@@ -24,7 +24,7 @@ class AgentMonitoringThread(Thread):
                         print "Ping Agent on server %s was SUCCESSFUL!" % server.name
 			if server.available == False:
 				#
-				VMMonitor.updateVMs(server)
+				VMMonitor.sendUpdateVMs(server)
 				server.setAvailable(True)
 				server.save()
 		except Exception as e:
