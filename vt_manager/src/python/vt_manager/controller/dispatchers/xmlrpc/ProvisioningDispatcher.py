@@ -5,7 +5,7 @@ import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
-from vt_manager.settings import ROOT_USERNAME,ROOT_PASSWORD,VTAM_URL
+from vt_manager.settings.settingsLoader import ROOT_USERNAME,ROOT_PASSWORD,VTAM_IP,VTAM_PORT
 from vt_manager.controller.actions.ActionController import ActionController
 
 class ProvisioningDispatcher():
@@ -55,7 +55,7 @@ class ProvisioningDispatcher():
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()
 
-			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
 			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
 			raise e 
@@ -78,7 +78,7 @@ class ProvisioningDispatcher():
 			#XXX:Change action Model
 			actionModel.setObjectUUID(VMmodel.getUUID())
 			actionModel.save()
-			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 		except Exception as e:
 			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
 			raise e 

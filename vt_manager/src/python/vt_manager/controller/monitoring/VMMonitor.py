@@ -5,7 +5,7 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.models.Action import Action
 
-from vt_manager.settings import *
+from vt_manager.settings.settingsLoader import *
 
 '''
 	author:msune
@@ -25,7 +25,7 @@ class VMMonitor():
 			
 		obj.query.monitoring.action[0].id = action.getUUID() 
 		obj.query.monitoring.action[0].server.virtualization_type = server.getid = server.getVirtTech() 
-		XmlRpcClient.callRPCMethod(server.getAgentURL(),"send","https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_URL,0,server.agentPassword,XmlHelper.craftXmlClass(obj))
+		XmlRpcClient.callRPCMethod(server.getAgentURL(),"send","https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT,0,server.agentPassword,XmlHelper.craftXmlClass(obj))
 		
 		
 

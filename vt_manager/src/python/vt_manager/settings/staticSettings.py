@@ -10,12 +10,6 @@ from os.path import dirname, join
 
 
 
-ADMINS = [
-    ("expedient", ROOT_EMAIL),
-]
-
-MANAGERS = ADMINS
-
 #EMAIL_HOST = "smtp.gmail.com"
 DEFAULT_FROM_EMAIL = "no-reply@gmail.com"
 EMAIL_USE_TLS=True
