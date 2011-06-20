@@ -12,14 +12,21 @@ class ProvisioningResponseDispatcher():
 	@staticmethod
 	def processResponse(rspec):
 		for action in rspec.response.monitoring.action:
-
+			if not action.type == "listActiveVMs":
+				raise Exception("Cannot process Monitoring action:"+action.type)
 			try:
 				actionModel = Action.getAndCheckActionByUUID(action.id)
 			except Exception as e:
 				logging.error("No action in DB with the incoming uuid\n%s", e)
 				return
 
-			'''
-			If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
-			'''
-				#TODO
+			if action.status == "ONGOING":
+				#ONGOING
+				actionModel.setStatus(Action.ONGOING_STATUS)	
+			elif action.status == "SUCCESS":
+				server = VTServer.objects.get(uuid=actionModel.getObjectUUID())
+				VMMonitor.processUpdateVMsList(server,action.server.virtual_machines)	
+				actionModel.destroy()
+
+			elif action.status == "FAILED":
+				actionModel.setStatus(Action.FAILED_STATUS)	
