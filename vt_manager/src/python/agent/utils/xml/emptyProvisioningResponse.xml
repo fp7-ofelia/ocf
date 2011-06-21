@@ -6,9 +6,9 @@
 			<status></status>
 			<description></description>
 			<server>
-				<virtual_machines>
-					<uuid></uuid>
-				</virtual_machines>
+				<virtual-machines>
+					<uuid>notRequired</uuid>
+				</virtual-machines>
 			</server>
 		</action>
 	</provisioning>
