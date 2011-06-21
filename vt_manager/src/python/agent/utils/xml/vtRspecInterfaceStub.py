@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Thu Jun  9 17:03:35 2011 by generateDS.py version 2.3b.
+# Generated Tue Jun 21 09:44:33 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -99,10 +99,24 @@ supermod.provisioning_type.subclass = provisioning_typeSub
 
 
 class provisioning_action_typeSub(supermod.provisioning_action_type):
-    def __init__(self, type_=None, id=None, virtual_machine=None, status=None, description=None):
-        super(provisioning_action_typeSub, self).__init__(type_, id, virtual_machine, status, description, )
+    def __init__(self, type_=None, id=None, server=None, status=None, description=None):
+        super(provisioning_action_typeSub, self).__init__(type_, id, server, status, description, )
 supermod.provisioning_action_type.subclass = provisioning_action_typeSub
 # end class provisioning_action_typeSub
+
+
+class server_typeSub(supermod.server_type):
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
+        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machines, status, )
+supermod.server_type.subclass = server_typeSub
+# end class server_typeSub
+
+
+class server_status_typeSub(supermod.server_status_type):
+    def __init__(self, valueOf_=None):
+        super(server_status_typeSub, self).__init__(valueOf_, )
+supermod.server_status_type.subclass = server_status_typeSub
+# end class server_status_typeSub
 
 
 class virtual_machine_typeSub(supermod.virtual_machine_type):
@@ -161,20 +175,6 @@ supermod.monitoring_action_type.subclass = monitoring_action_typeSub
 # end class monitoring_action_typeSub
 
 
-class server_typeSub(supermod.server_type):
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
-        super(server_typeSub, self).__init__(name, id, uuid, operating_system_type, operating_system_version, operating_system_distribution, virtualization_type, interfaces, virtual_machines, status, )
-supermod.server_type.subclass = server_typeSub
-# end class server_typeSub
-
-
-class server_status_typeSub(supermod.server_status_type):
-    def __init__(self, valueOf_=None):
-        super(server_status_typeSub, self).__init__(valueOf_, )
-supermod.server_status_type.subclass = server_status_typeSub
-# end class server_status_typeSub
-
-
 class information_typeSub(supermod.information_type):
     def __init__(self, resources=None):
         super(information_typeSub, self).__init__(resources, )
@@ -223,9 +223,9 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -242,9 +242,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -259,11 +259,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from ??? import *\n\n')
-    sys.stdout.write('import ??? as model_\n\n')
-    sys.stdout.write('rootObj = model_.rspec(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from ??? import *\n\n')
+##     sys.stdout.write('import ??? as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rspec(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
+##     sys.stdout.write(')\n')
     return rootObj
 
 

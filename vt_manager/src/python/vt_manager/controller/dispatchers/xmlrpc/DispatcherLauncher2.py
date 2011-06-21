@@ -15,6 +15,7 @@ class DispatcherLauncher():
 	@staticmethod
 	def processXmlResponse(rspec):
 		if(rspec.response.provisioning != None):
+			"PROVISIONING RESPONSE ---------------->"
 			ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse, rspec)
 
 		if(rspec.response.monitoring != None):

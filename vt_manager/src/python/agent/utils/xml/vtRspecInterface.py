@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Thu Jun  9 17:03:35 2011 by generateDS.py version 2.3b.
+# Generated Tue Jun 21 09:44:32 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -628,10 +628,10 @@ class provisioning_type(GeneratedsSuper):
 class provisioning_action_type(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, type_=None, id=None, virtual_machine=None, status=None, description=None):
+    def __init__(self, type_=None, id=None, server=None, status=None, description=None):
         self.type_ = _cast(None, type_)
         self.id = _cast(None, id)
-        self.virtual_machine = virtual_machine
+        self.server = server
         self.status = status
         self.description = description
     def factory(*args_, **kwargs_):
@@ -640,8 +640,8 @@ class provisioning_action_type(GeneratedsSuper):
         else:
             return provisioning_action_type(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_virtual_machine(self): return self.virtual_machine
-    def set_virtual_machine(self, virtual_machine): self.virtual_machine = virtual_machine
+    def get_server(self): return self.server
+    def set_server(self, server): self.server = server
     def get_status(self): return self.status
     def set_status(self, status): self.status = status
     def get_description(self): return self.description
@@ -669,8 +669,8 @@ class provisioning_action_type(GeneratedsSuper):
             already_processed.append('id')
             outfile.write(' id=%s' % (self.gds_format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='provisioning-action-type'):
-        if self.virtual_machine:
-            self.virtual_machine.export(outfile, level, namespace_, name_='virtual-machine', )
+        if self.server:
+            self.server.export(outfile, level, namespace_, name_='server', )
         if self.status is not None:
             showIndent(outfile, level)
             outfile.write('<%sstatus>%s</%sstatus>\n' % (namespace_, self.gds_format_string(quote_xml(self.status).encode(ExternalEncoding), input_name='status'), namespace_))
@@ -679,7 +679,7 @@ class provisioning_action_type(GeneratedsSuper):
             outfile.write('<%sdescription>%s</%sdescription>\n' % (namespace_, self.gds_format_string(quote_xml(self.description).encode(ExternalEncoding), input_name='description'), namespace_))
     def hasContent_(self):
         if (
-            self.virtual_machine is not None or
+            self.server is not None or
             self.status is not None or
             self.description is not None
             ):
@@ -701,10 +701,10 @@ class provisioning_action_type(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('id = "%s",\n' % (self.id,))
     def exportLiteralChildren(self, outfile, level, name_):
-        if self.virtual_machine is not None:
+        if self.server is not None:
             showIndent(outfile, level)
-            outfile.write('virtual_machine=model_.virtual_machine_type(\n')
-            self.virtual_machine.exportLiteral(outfile, level, name_='virtual_machine')
+            outfile.write('server=model_.server_type(\n')
+            self.server.exportLiteral(outfile, level, name_='server')
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.status is not None:
@@ -728,10 +728,10 @@ class provisioning_action_type(GeneratedsSuper):
             already_processed.append('id')
             self.id = value
     def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'virtual-machine': 
-            obj_ = virtual_machine_type.factory()
+        if nodeName_ == 'server': 
+            obj_ = server_type.factory()
             obj_.build(child_)
-            self.set_virtual_machine(obj_)
+            self.set_server(obj_)
         elif nodeName_ == 'status':
             status_ = child_.text
             self.status = status_
@@ -739,6 +739,264 @@ class provisioning_action_type(GeneratedsSuper):
             description_ = child_.text
             self.description = description_
 # end class provisioning_action_type
+
+
+class server_type(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
+        self.name = name
+        self.id = id
+        self.uuid = uuid
+        self.operating_system_type = operating_system_type
+        self.operating_system_version = operating_system_version
+        self.operating_system_distribution = operating_system_distribution
+        self.virtualization_type = virtualization_type
+        self.interfaces = interfaces
+        if virtual_machines is None:
+            self.virtual_machines = []
+        else:
+            self.virtual_machines = virtual_machines
+        self.status = status
+    def factory(*args_, **kwargs_):
+        if server_type.subclass:
+            return server_type.subclass(*args_, **kwargs_)
+        else:
+            return server_type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_name(self): return self.name
+    def set_name(self, name): self.name = name
+    def get_id(self): return self.id
+    def set_id(self, id): self.id = id
+    def get_uuid(self): return self.uuid
+    def set_uuid(self, uuid): self.uuid = uuid
+    def get_operating_system_type(self): return self.operating_system_type
+    def set_operating_system_type(self, operating_system_type): self.operating_system_type = operating_system_type
+    def get_operating_system_version(self): return self.operating_system_version
+    def set_operating_system_version(self, operating_system_version): self.operating_system_version = operating_system_version
+    def get_operating_system_distribution(self): return self.operating_system_distribution
+    def set_operating_system_distribution(self, operating_system_distribution): self.operating_system_distribution = operating_system_distribution
+    def get_virtualization_type(self): return self.virtualization_type
+    def set_virtualization_type(self, virtualization_type): self.virtualization_type = virtualization_type
+    def get_interfaces(self): return self.interfaces
+    def set_interfaces(self, interfaces): self.interfaces = interfaces
+    def get_virtual_machines(self): return self.virtual_machines
+    def set_virtual_machines(self, virtual_machines): self.virtual_machines = virtual_machines
+    def add_virtual_machines(self, value): self.virtual_machines.append(value)
+    def insert_virtual_machines(self, index, value): self.virtual_machines[index] = value
+    def get_status(self): return self.status
+    def set_status(self, status): self.status = status
+    def export(self, outfile, level, namespace_='', name_='server-type', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='server-type')
+        if self.hasContent_():
+            outfile.write('>\n')
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            showIndent(outfile, level)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='server-type'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='server-type'):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sname>%s</%sname>\n' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_))
+        if self.id is not None:
+            showIndent(outfile, level)
+            outfile.write('<%sid>%s</%sid>\n' % (namespace_, self.gds_format_string(quote_xml(self.id).encode(ExternalEncoding), input_name='id'), namespace_))
+        if self.uuid is not None:
+            showIndent(outfile, level)
+            outfile.write('<%suuid>%s</%suuid>\n' % (namespace_, self.gds_format_string(quote_xml(self.uuid).encode(ExternalEncoding), input_name='uuid'), namespace_))
+        if self.operating_system_type is not None:
+            showIndent(outfile, level)
+            outfile.write('<%soperating-system-type>%s</%soperating-system-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_type).encode(ExternalEncoding), input_name='operating-system-type'), namespace_))
+        if self.operating_system_version is not None:
+            showIndent(outfile, level)
+            outfile.write('<%soperating-system-version>%s</%soperating-system-version>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_version).encode(ExternalEncoding), input_name='operating-system-version'), namespace_))
+        if self.operating_system_distribution is not None:
+            showIndent(outfile, level)
+            outfile.write('<%soperating-system-distribution>%s</%soperating-system-distribution>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_distribution).encode(ExternalEncoding), input_name='operating-system-distribution'), namespace_))
+        if self.virtualization_type is not None:
+            showIndent(outfile, level)
+            outfile.write('<%svirtualization-type>%s</%svirtualization-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_type).encode(ExternalEncoding), input_name='virtualization-type'), namespace_))
+        if self.interfaces:
+            self.interfaces.export(outfile, level, namespace_, name_='interfaces', )
+        for virtual_machines_ in self.virtual_machines:
+            virtual_machines_.export(outfile, level, namespace_, name_='virtual-machines')
+        if self.status:
+            self.status.export(outfile, level, namespace_, name_='status', )
+    def hasContent_(self):
+        if (
+            self.name is not None or
+            self.id is not None or
+            self.uuid is not None or
+            self.operating_system_type is not None or
+            self.operating_system_version is not None or
+            self.operating_system_distribution is not None or
+            self.virtualization_type is not None or
+            self.interfaces is not None or
+            self.virtual_machines or
+            self.status is not None
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='server-type'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.name is not None:
+            showIndent(outfile, level)
+            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+        if self.id is not None:
+            showIndent(outfile, level)
+            outfile.write('id=%s,\n' % quote_python(self.id).encode(ExternalEncoding))
+        if self.uuid is not None:
+            showIndent(outfile, level)
+            outfile.write('uuid=%s,\n' % quote_python(self.uuid).encode(ExternalEncoding))
+        if self.operating_system_type is not None:
+            showIndent(outfile, level)
+            outfile.write('operating_system_type=%s,\n' % quote_python(self.operating_system_type).encode(ExternalEncoding))
+        if self.operating_system_version is not None:
+            showIndent(outfile, level)
+            outfile.write('operating_system_version=%s,\n' % quote_python(self.operating_system_version).encode(ExternalEncoding))
+        if self.operating_system_distribution is not None:
+            showIndent(outfile, level)
+            outfile.write('operating_system_distribution=%s,\n' % quote_python(self.operating_system_distribution).encode(ExternalEncoding))
+        if self.virtualization_type is not None:
+            showIndent(outfile, level)
+            outfile.write('virtualization_type=%s,\n' % quote_python(self.virtualization_type).encode(ExternalEncoding))
+        if self.interfaces is not None:
+            showIndent(outfile, level)
+            outfile.write('interfaces=model_.interfaces_type(\n')
+            self.interfaces.exportLiteral(outfile, level, name_='interfaces')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        showIndent(outfile, level)
+        outfile.write('virtual_machines=[\n')
+        level += 1
+        for virtual_machines_ in self.virtual_machines:
+            showIndent(outfile, level)
+            outfile.write('model_.virtual_machine_type(\n')
+            virtual_machines_.exportLiteral(outfile, level, name_='virtual-machine-type')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        if self.status is not None:
+            showIndent(outfile, level)
+            outfile.write('status=model_.server_status_type(\n')
+            self.status.exportLiteral(outfile, level, name_='status')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        if nodeName_ == 'name':
+            name_ = child_.text
+            self.name = name_
+        elif nodeName_ == 'id':
+            id_ = child_.text
+            self.id = id_
+        elif nodeName_ == 'uuid':
+            uuid_ = child_.text
+            self.uuid = uuid_
+        elif nodeName_ == 'operating-system-type':
+            operating_system_type_ = child_.text
+            self.operating_system_type = operating_system_type_
+        elif nodeName_ == 'operating-system-version':
+            operating_system_version_ = child_.text
+            self.operating_system_version = operating_system_version_
+        elif nodeName_ == 'operating-system-distribution':
+            operating_system_distribution_ = child_.text
+            self.operating_system_distribution = operating_system_distribution_
+        elif nodeName_ == 'virtualization-type':
+            virtualization_type_ = child_.text
+            self.virtualization_type = virtualization_type_
+        elif nodeName_ == 'interfaces': 
+            obj_ = interfaces_type.factory()
+            obj_.build(child_)
+            self.set_interfaces(obj_)
+        elif nodeName_ == 'virtual-machines': 
+            obj_ = virtual_machine_type.factory()
+            obj_.build(child_)
+            self.virtual_machines.append(obj_)
+        elif nodeName_ == 'status': 
+            obj_ = server_status_type.factory()
+            obj_.build(child_)
+            self.set_status(obj_)
+# end class server_type
+
+
+class server_status_type(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, valueOf_=None):
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if server_status_type.subclass:
+            return server_status_type.subclass(*args_, **kwargs_)
+        else:
+            return server_status_type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def export(self, outfile, level, namespace_='', name_='server-status-type', namespacedef_=''):
+        showIndent(outfile, level)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        self.exportAttributes(outfile, level, [], namespace_, name_='server-status-type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.valueOf_)
+            self.exportChildren(outfile, level + 1, namespace_, name_)
+            outfile.write('</%s%s>\n' % (namespace_, name_))
+        else:
+            outfile.write('/>\n')
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='server-status-type'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='server-status-type'):
+        pass
+    def hasContent_(self):
+        if (
+            self.valueOf_
+            ):
+            return True
+        else:
+            return False
+    def exportLiteral(self, outfile, level, name_='server-status-type'):
+        level += 1
+        self.exportLiteralAttributes(outfile, level, [], name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+        showIndent(outfile, level)
+        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        self.buildAttributes(node, node.attrib, [])
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, nodeName_, from_subclass=False):
+        pass
+# end class server_status_type
 
 
 class virtual_machine_type(GeneratedsSuper):
@@ -1730,264 +1988,6 @@ class monitoring_action_type(GeneratedsSuper):
 # end class monitoring_action_type
 
 
-class server_type(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, name=None, id=None, uuid=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, virtualization_type=None, interfaces=None, virtual_machines=None, status=None):
-        self.name = name
-        self.id = id
-        self.uuid = uuid
-        self.operating_system_type = operating_system_type
-        self.operating_system_version = operating_system_version
-        self.operating_system_distribution = operating_system_distribution
-        self.virtualization_type = virtualization_type
-        self.interfaces = interfaces
-        if virtual_machines is None:
-            self.virtual_machines = []
-        else:
-            self.virtual_machines = virtual_machines
-        self.status = status
-    def factory(*args_, **kwargs_):
-        if server_type.subclass:
-            return server_type.subclass(*args_, **kwargs_)
-        else:
-            return server_type(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_name(self): return self.name
-    def set_name(self, name): self.name = name
-    def get_id(self): return self.id
-    def set_id(self, id): self.id = id
-    def get_uuid(self): return self.uuid
-    def set_uuid(self, uuid): self.uuid = uuid
-    def get_operating_system_type(self): return self.operating_system_type
-    def set_operating_system_type(self, operating_system_type): self.operating_system_type = operating_system_type
-    def get_operating_system_version(self): return self.operating_system_version
-    def set_operating_system_version(self, operating_system_version): self.operating_system_version = operating_system_version
-    def get_operating_system_distribution(self): return self.operating_system_distribution
-    def set_operating_system_distribution(self, operating_system_distribution): self.operating_system_distribution = operating_system_distribution
-    def get_virtualization_type(self): return self.virtualization_type
-    def set_virtualization_type(self, virtualization_type): self.virtualization_type = virtualization_type
-    def get_interfaces(self): return self.interfaces
-    def set_interfaces(self, interfaces): self.interfaces = interfaces
-    def get_virtual_machines(self): return self.virtual_machines
-    def set_virtual_machines(self, virtual_machines): self.virtual_machines = virtual_machines
-    def add_virtual_machines(self, value): self.virtual_machines.append(value)
-    def insert_virtual_machines(self, index, value): self.virtual_machines[index] = value
-    def get_status(self): return self.status
-    def set_status(self, status): self.status = status
-    def export(self, outfile, level, namespace_='', name_='server-type', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='server-type')
-        if self.hasContent_():
-            outfile.write('>\n')
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            showIndent(outfile, level)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='server-type'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='server-type'):
-        if self.name is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sname>%s</%sname>\n' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_))
-        if self.id is not None:
-            showIndent(outfile, level)
-            outfile.write('<%sid>%s</%sid>\n' % (namespace_, self.gds_format_string(quote_xml(self.id).encode(ExternalEncoding), input_name='id'), namespace_))
-        if self.uuid is not None:
-            showIndent(outfile, level)
-            outfile.write('<%suuid>%s</%suuid>\n' % (namespace_, self.gds_format_string(quote_xml(self.uuid).encode(ExternalEncoding), input_name='uuid'), namespace_))
-        if self.operating_system_type is not None:
-            showIndent(outfile, level)
-            outfile.write('<%soperating-system-type>%s</%soperating-system-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_type).encode(ExternalEncoding), input_name='operating-system-type'), namespace_))
-        if self.operating_system_version is not None:
-            showIndent(outfile, level)
-            outfile.write('<%soperating-system-version>%s</%soperating-system-version>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_version).encode(ExternalEncoding), input_name='operating-system-version'), namespace_))
-        if self.operating_system_distribution is not None:
-            showIndent(outfile, level)
-            outfile.write('<%soperating-system-distribution>%s</%soperating-system-distribution>\n' % (namespace_, self.gds_format_string(quote_xml(self.operating_system_distribution).encode(ExternalEncoding), input_name='operating-system-distribution'), namespace_))
-        if self.virtualization_type is not None:
-            showIndent(outfile, level)
-            outfile.write('<%svirtualization-type>%s</%svirtualization-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.virtualization_type).encode(ExternalEncoding), input_name='virtualization-type'), namespace_))
-        if self.interfaces:
-            self.interfaces.export(outfile, level, namespace_, name_='interfaces', )
-        for virtual_machines_ in self.virtual_machines:
-            virtual_machines_.export(outfile, level, namespace_, name_='virtual-machines')
-        if self.status:
-            self.status.export(outfile, level, namespace_, name_='status', )
-    def hasContent_(self):
-        if (
-            self.name is not None or
-            self.id is not None or
-            self.uuid is not None or
-            self.operating_system_type is not None or
-            self.operating_system_version is not None or
-            self.operating_system_distribution is not None or
-            self.virtualization_type is not None or
-            self.interfaces is not None or
-            self.virtual_machines or
-            self.status is not None
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='server-type'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.name is not None:
-            showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
-        if self.id is not None:
-            showIndent(outfile, level)
-            outfile.write('id=%s,\n' % quote_python(self.id).encode(ExternalEncoding))
-        if self.uuid is not None:
-            showIndent(outfile, level)
-            outfile.write('uuid=%s,\n' % quote_python(self.uuid).encode(ExternalEncoding))
-        if self.operating_system_type is not None:
-            showIndent(outfile, level)
-            outfile.write('operating_system_type=%s,\n' % quote_python(self.operating_system_type).encode(ExternalEncoding))
-        if self.operating_system_version is not None:
-            showIndent(outfile, level)
-            outfile.write('operating_system_version=%s,\n' % quote_python(self.operating_system_version).encode(ExternalEncoding))
-        if self.operating_system_distribution is not None:
-            showIndent(outfile, level)
-            outfile.write('operating_system_distribution=%s,\n' % quote_python(self.operating_system_distribution).encode(ExternalEncoding))
-        if self.virtualization_type is not None:
-            showIndent(outfile, level)
-            outfile.write('virtualization_type=%s,\n' % quote_python(self.virtualization_type).encode(ExternalEncoding))
-        if self.interfaces is not None:
-            showIndent(outfile, level)
-            outfile.write('interfaces=model_.interfaces_type(\n')
-            self.interfaces.exportLiteral(outfile, level, name_='interfaces')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        showIndent(outfile, level)
-        outfile.write('virtual_machines=[\n')
-        level += 1
-        for virtual_machines_ in self.virtual_machines:
-            showIndent(outfile, level)
-            outfile.write('model_.virtual_machine_type(\n')
-            virtual_machines_.exportLiteral(outfile, level, name_='virtual-machine-type')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        level -= 1
-        showIndent(outfile, level)
-        outfile.write('],\n')
-        if self.status is not None:
-            showIndent(outfile, level)
-            outfile.write('status=model_.server_status_type(\n')
-            self.status.exportLiteral(outfile, level, name_='status')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        if nodeName_ == 'name':
-            name_ = child_.text
-            self.name = name_
-        elif nodeName_ == 'id':
-            id_ = child_.text
-            self.id = id_
-        elif nodeName_ == 'uuid':
-            uuid_ = child_.text
-            self.uuid = uuid_
-        elif nodeName_ == 'operating-system-type':
-            operating_system_type_ = child_.text
-            self.operating_system_type = operating_system_type_
-        elif nodeName_ == 'operating-system-version':
-            operating_system_version_ = child_.text
-            self.operating_system_version = operating_system_version_
-        elif nodeName_ == 'operating-system-distribution':
-            operating_system_distribution_ = child_.text
-            self.operating_system_distribution = operating_system_distribution_
-        elif nodeName_ == 'virtualization-type':
-            virtualization_type_ = child_.text
-            self.virtualization_type = virtualization_type_
-        elif nodeName_ == 'interfaces': 
-            obj_ = interfaces_type.factory()
-            obj_.build(child_)
-            self.set_interfaces(obj_)
-        elif nodeName_ == 'virtual-machines': 
-            obj_ = virtual_machine_type.factory()
-            obj_.build(child_)
-            self.virtual_machines.append(obj_)
-        elif nodeName_ == 'status': 
-            obj_ = server_status_type.factory()
-            obj_.build(child_)
-            self.set_status(obj_)
-# end class server_type
-
-
-class server_status_type(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, valueOf_=None):
-        self.valueOf_ = valueOf_
-    def factory(*args_, **kwargs_):
-        if server_status_type.subclass:
-            return server_status_type.subclass(*args_, **kwargs_)
-        else:
-            return server_status_type(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_valueOf_(self): return self.valueOf_
-    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
-    def export(self, outfile, level, namespace_='', name_='server-status-type', namespacedef_=''):
-        showIndent(outfile, level)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        self.exportAttributes(outfile, level, [], namespace_, name_='server-status-type')
-        if self.hasContent_():
-            outfile.write('>')
-            outfile.write(self.valueOf_)
-            self.exportChildren(outfile, level + 1, namespace_, name_)
-            outfile.write('</%s%s>\n' % (namespace_, name_))
-        else:
-            outfile.write('/>\n')
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='server-status-type'):
-        pass
-    def exportChildren(self, outfile, level, namespace_='', name_='server-status-type'):
-        pass
-    def hasContent_(self):
-        if (
-            self.valueOf_
-            ):
-            return True
-        else:
-            return False
-    def exportLiteral(self, outfile, level, name_='server-status-type'):
-        level += 1
-        self.exportLiteralAttributes(outfile, level, [], name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-        showIndent(outfile, level)
-        outfile.write('valueOf_ = """%s""",\n' % (self.valueOf_,))
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        pass
-    def exportLiteralChildren(self, outfile, level, name_):
-        pass
-    def build(self, node):
-        self.buildAttributes(node, node.attrib, [])
-        self.valueOf_ = get_all_text_(node)
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        pass
-    def buildChildren(self, child_, nodeName_, from_subclass=False):
-        pass
-# end class server_status_type
-
-
 class information_type(GeneratedsSuper):
     subclass = None
     superclass = None
@@ -2413,9 +2413,9 @@ def parse(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag, 
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag, 
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -2431,9 +2431,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_="rspec",
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_="rspec",
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -2448,11 +2448,11 @@ def parseLiteral(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from vtRspecInterface import *\n\n')
-    sys.stdout.write('import vtRspecInterface as model_\n\n')
-    sys.stdout.write('rootObj = model_.rootTag(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from vtRspecInterface import *\n\n')
+##     sys.stdout.write('import vtRspecInterface as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rootTag(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
+##     sys.stdout.write(')\n')
     return rootObj
 
 
