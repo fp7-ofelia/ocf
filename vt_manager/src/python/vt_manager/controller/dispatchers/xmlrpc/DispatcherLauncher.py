@@ -1,8 +1,6 @@
 from django.http import *                                                     
 import os                                                                     
 import sys                                                                    
-from vt_manager.models import *                                               
-from vt_manager.controller import *                                           
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningResponseDispatcher import ProvisioningResponseDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.MonitoringResponseDispatcher import MonitoringResponseDispatcher

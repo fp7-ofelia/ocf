@@ -1,5 +1,4 @@
 from threading import Thread
-from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.actions.ActionController import ActionController
@@ -30,6 +29,19 @@ class VMMonitor():
 
 	@staticmethod
 	def processUpdateVMsList(server,vmList):
-		for vm in vmList:
-			print "VM in: "+vm.uuid
+		from vt_manager.models.VirtualMachine import VirtualMachine
+		for vm in server.vms.all():
+			isUp = False
+			for iVm in vmList:
+				if iVm.uuid == vm.uuid
+					#Is running
+					vm.state = VirtualMachine.RUNNING_STATE
+					isUp = True
+					break
+
+			if isUp:
+				continue
+
+			#Is not running
+			vm.state = VirtualMachine.STOPPED_STATE
 		
