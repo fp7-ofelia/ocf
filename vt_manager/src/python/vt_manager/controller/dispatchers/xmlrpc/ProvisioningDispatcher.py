@@ -28,7 +28,7 @@ class ProvisioningDispatcher():
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
 				else:
-					server = VTDriver.getServerByUUID(VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get().getUUID())
+					server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
 			except Exception as e:
 				logging.error(e)
 				raise e
@@ -47,7 +47,6 @@ class ProvisioningDispatcher():
 			except Exception as e:
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					controller.deleteVM(vm)
-				print "[LEODEBUG] FALA EN EL PROVISIONING DISPATCHER "
 				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e))))
 
 		

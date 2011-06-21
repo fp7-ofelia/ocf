@@ -2,7 +2,7 @@ import copy
 from expedient.clearinghouse.slice.models import Slice
 from expedient.clearinghouse.project.models import Project
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
 from vt_plugin.utils.ServiceThread import *

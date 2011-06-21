@@ -74,15 +74,20 @@ class XmlHelper(object):
 
     @staticmethod
     def getSimpleActionSpecificQuery(type):
-        if type == 'start':
-            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
-        if type == 'delete':
-            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryDelete.xml','r').read())            
-        if type == 'stop':
-            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStop.xml','r').read())
-        if type == 'reboot':
-            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryReboot.xml','r').read())
-        return simpleRspec
+        
+         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
+         simpleRspec.query.provisioning.action[0].type = type
+         print "[LEODEBUG] LA ACCION ES DE TIPO: " + str(simpleRspec.query.provisioning.action[0].type)
+         return simpleRspec
+#        if type == 'start':
+#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
+#        if type == 'delete':
+#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryDelete.xml','r').read())            
+#        if type == 'stop':
+#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStop.xml','r').read())
+#        if type == 'reboot':
+#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryReboot.xml','r').read())
+#        return simpleRspec
 
     @staticmethod
     def getProcessingResponse(status, id, description):

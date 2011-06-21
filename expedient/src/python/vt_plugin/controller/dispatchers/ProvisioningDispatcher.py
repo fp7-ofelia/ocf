@@ -1,5 +1,4 @@
-from vt_manager.communication.utils.XmlUtils import *#XmlUtils
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import os
 import sys
 from expedient.common.messaging.models import DatedMessage
