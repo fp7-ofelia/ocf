@@ -84,9 +84,8 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
 
     vm = VM.objects.get(id = vm_id)
-
+    #if action_type == 'stop' : action_type = 'hardStop'
     rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
-     
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
 
     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)

@@ -76,7 +76,8 @@ class XmlHelper(object):
     def getSimpleActionSpecificQuery(type, serverUUID):
         
          simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryProvisioning.xml','r').read())
-         simpleRspec.query.provisioning.action[0].type = type
+         if type == 'stop': type = 'hardStop'
+         simpleRspec.query.provisioning.action[0].type_ = type
          simpleRspec.query.provisioning.action[0].server.uuid = serverUUID
          return simpleRspec
 #        if type == 'start':
