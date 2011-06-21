@@ -54,7 +54,7 @@ PROVISIONING
 	<xs:complexType name="provisioning-action-type">
 		<xs:sequence>
 			<!-- TODO this with a choice or restriction -->
-			<xs:element name="virtual-machine" type="virtual-machine-type" />
+			<xs:element name="server" type="server-type" />
 
 			<!-- Only used in response -->
 			<xs:element name="status" type="action-status-types" />
@@ -87,6 +87,28 @@ PROVISIONING
 			<!-- Add Other statusType here -->
 		</xs:restriction>
 	</xs:simpleType>
+
+	<!--Server Type -->
+	<xs:complexType name="server-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="id" type="xs:string" minOccurs="1"	maxOccurs="1" />
+			<xs:element name="uuid" type="xs:string" minOccurs="1"	maxOccurs="1" />
+			<xs:element name="operating-system-type" type="os-type-type" />
+			<xs:element name="operating-system-version" type="os-type-type" />
+			<xs:element name="operating-system-distribution" type="os-distro-type" />
+			<xs:element name="virtualization-type" type="virtualization-type"
+				minOccurs="1" maxOccurs="1" />
+			<xs:element name="interfaces" type="interfaces-type" />
+			<xs:element name="virtual-machines" type="virtual-machine-type"
+				maxOccurs="unbounded" />
+			<xs:element name="status" type="server-status-type" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Server status -->
+	<xs:complexType name="server-status-type">
+	</xs:complexType>
 
 	<xs:complexType name="virtual-machine-type">
 		<xs:sequence>
@@ -260,26 +282,6 @@ MONITORING
 	</xs:simpleType>
 
 
-	<!--Server Type -->
-	<xs:complexType name="server-type">
-		<xs:sequence>
-			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
-			<xs:element name="id" type="xs:string" minOccurs="1"	maxOccurs="1" />
-			<xs:element name="uuid" type="xs:string" minOccurs="1"	maxOccurs="1" />
-			<xs:element name="operating-system-type" type="os-type-type" />
-			<xs:element name="operating-system-version" type="os-type-type" />
-			<xs:element name="operating-system-distribution" type="os-distro-type" />
-			<xs:element name="virtualization-type" type="virtualization-type"
-				minOccurs="1" maxOccurs="1" />
-			<xs:element name="interfaces" type="interfaces-type" />
-			<xs:element name="virtual-machines" type="virtual-machine-type"
-				maxOccurs="unbounded" />
-			<xs:element name="status" type="server-status-type" />
-		</xs:sequence>
-	</xs:complexType>
-	<!-- Server status -->
-	<xs:complexType name="server-status-type">
-	</xs:complexType>
 
 <!--
 
