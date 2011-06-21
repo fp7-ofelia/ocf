@@ -21,14 +21,14 @@ class ProvisioningDispatcher():
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 			
 			try:
-				print action.virtual_machine.virtualization_type
-				controller = VTDriver.getDriver(action.virtual_machine.virtualization_type)
+				controller = VTDriver.getDriver(action.server.virtualization_type)
 
 				#XXX:Change this when xml schema is updated
-				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-					server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
-				else:
-					server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
+				server = VTDriver.getServerByUUID(action.server.uuid)
+				#if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+				#	server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
+				#else:
+				#	server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
 			except Exception as e:
 				logging.error(e)
 				raise e
@@ -47,7 +47,7 @@ class ProvisioningDispatcher():
 			except Exception as e:
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					controller.deleteVM(vm)
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e))))
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
 
 		
 
@@ -65,7 +65,7 @@ class ProvisioningDispatcher():
 				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
 			Server, VMmodel = controller.getServerAndCreateVM(action)
-			ActionController.PopulateNetworkingParams(action.virtual_machine.xen_configuration.interfaces.interface, VMmodel)
+			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
 			actionModel.save()
@@ -76,7 +76,6 @@ class ProvisioningDispatcher():
 #		except Exception as e:
 #			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
 #			controller.deleteVM(VMmodel)
-#			print "[LEODEBUG] FALA EN EL __createVM "
 #			raise e 
 
 	@staticmethod
@@ -85,10 +84,10 @@ class ProvisioningDispatcher():
 		try:
 
 			actionModel.checkActionIsPresentAndUnique()
-			VMmodel =  controller.getVMbyUUID(action.virtual_machine.uuid)
+			VMmodel =  controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
 			if not VMmodel:
-				logging.error("VM with uuid %s not found\n" % action.virtual_machine.uuid)
-				raise Exception("VM with uuid %s not found\n" % action.virtual_machine.uuid)
+				logging.error("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
+				raise Exception("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
 
 			elif not PolicyManager.checkPolicies(action):
 				logging.error("The requested action do not pass the Aggregate Manager Policies")

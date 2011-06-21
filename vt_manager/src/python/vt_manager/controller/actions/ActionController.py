@@ -23,26 +23,25 @@ class ActionController():
 	@staticmethod
 	def completeActionRspec(action, actionModel):
 		action.type_ = actionModel.getType()
-		tempVMclass = XmlHelper.getProcessingResponse('dummy', 'dummy', 'dummy').response.provisioning.action[0].virtual_machine
-		tempVMclass.uuid = actionModel.getObjectUUID()
-		action.virtual_machine = tempVMclass
+		#tempVMclass = XmlHelper.getProcessingResponse('dummy', None , 'dummy').response.provisioning.action[0].server.virtual_machines[0]
+		#tempVMclass.uuid = actionModel.getObjectUUID()
+		#action.server.virtual_machines[0] = tempVMclass
+		action.server.virtual_machines[0].uuid = actionModel.getObjectUUID()
 
 	@staticmethod
 	def PopulateNewActionWithVM(action, vm):
 		action.id = uuid.uuid4()
-		action.virtual_machine.name = vm.getName()
-		action.virtual_machine.uuid = vm.getUUID()
-		action.virtual_machine.project_id = vm.getProjectId()
-		action.virtual_machine.slice_id = vm.getSliceId()
-		action.virtual_machine.project_name = vm.getProjectName()
-		action.virtual_machine.slice_name = vm.getSliceName()
-		#XXX:CHECK IF IT IS NEEDED
-		#action.virtual_machine.virtualization_type = vm.Server.get().getVirtTech()
-		action.virtual_machine.xen_configuration.hd_setup_type = vm.getHdSetupType()
+		virtual_machine = action.server.virtual_machines[0]
+		virtual_machine.name = vm.getName()
+		virtual_machine.uuid = vm.getUUID()
+		virtual_machine.project_id = vm.getProjectId()
+		virtual_machine.slice_id = vm.getSliceId()
+		virtual_machine.project_name = vm.getProjectName()
+		virtual_machine.slice_name = vm.getSliceName()
+		virtual_machine.xen_configuration.hd_setup_type = vm.getHdSetupType()
 
 	@staticmethod
 	def PopulateNetworkingParams(actionIfaces, vm):
-		#actionIfaces = action.virtual_machine.xen_configuration.interfaces.interface
 		baseIface = copy.deepcopy(actionIfaces[0])
 		actionIfaces.pop()
 		for index, vmIface in enumerate(vm.networkInterfaces.all()):

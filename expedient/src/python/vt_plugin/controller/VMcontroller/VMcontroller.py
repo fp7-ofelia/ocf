@@ -46,9 +46,12 @@ class VMcontroller():
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()
-            Translator.VMmodelToClass(instance, actionClass.virtual_machine)
+            Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])
+            server = VTServer.objects.get(uuid = server_id)
+            actionClass.server.uuid = server_id
+            actionClass.server.virtualization_type = server.getVirtTech()
             rspec.query.provisioning.action.append(actionClass)
-        
+         
         ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
 
 

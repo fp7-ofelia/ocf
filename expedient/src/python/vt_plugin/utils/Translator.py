@@ -31,7 +31,6 @@ class Translator():
         else:
             VMmodel = VM()
             VMmodel.setState("on queue")
-            #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id
 
         #VMmodel.setState(statusTable.get(VMxmlClass.status))    
         VMmodel.setName(VMxmlClass.name)
@@ -155,14 +154,16 @@ class Translator():
     @staticmethod
     def PopulateNewAction(action, vm):
         action.id = uuid.uuid4()
-        action.virtual_machine.name = vm.getName()
-        action.virtual_machine.uuid = vm.getUUID()
-        action.virtual_machine.project_id = vm.getProjectId()
-        action.virtual_machine.project_name = vm.getProjectName()
-        action.virtual_machine.slice_id = vm.getSliceId()
-        action.virtual_machine.slice_name = vm.getSliceName()
-        action.virtual_machine.virtualization_type = vm.getVirtTech()
-        action.virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
+		
+        virtual_machine = action.server.virtual_machines[0]
+        virtual_machine.name = vm.getName()
+        virtual_machine.uuid = vm.getUUID()
+        virtual_machine.project_id = vm.getProjectId()
+        virtual_machine.project_name = vm.getProjectName()
+        virtual_machine.slice_id = vm.getSliceId()
+        virtual_machine.slice_name = vm.getSliceName()
+        virtual_machine.virtualization_type = vm.getVirtTech()
+        virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
 
     @staticmethod
     def PopulateNewVMifaces(VMclass, VMmodel):

@@ -27,8 +27,8 @@ class XenDriver(VTDriver):
 	def getServerAndCreateVM(self,action):
        
 		try: 
-			Server = XenServer.objects.get(uuid = action.virtual_machine.server_id )
-			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.virtual_machine,threading.currentThread().callBackURL, save = True))
+			Server = XenServer.objects.get(uuid = action.server.uuid )
+			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
 			return Server, VMmodel
 		except:
 			raise

@@ -130,16 +130,16 @@ class VTDriver():
 		print "EN DRIVER"
 		server.destroy()
 
-	@staticmethod
-	def propagateAction(vmId, action):
-		try:
-			from vt_manager.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
-			rspec = XmlHelper.getSimpleActionSpecificQuery(action)
-			#MARC XXX
-			#Translator.PopulateNewAction(rspec.query.provisioning.action[0], VTDriver.getVMbyId(vmId))
-			ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
-		except Exception as e:
-			logging.error(e)
+#	@staticmethod
+#	def propagateAction(vmId, serverUUID, action):
+#		try:
+#			from vt_manager.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
+#			rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
+#			#MARC XXX
+#			#Translator.PopulateNewAction(rspec.query.provisioning.action[0], VTDriver.getVMbyId(vmId))
+#			ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
+#		except Exception as e:
+#			logging.error(e)
 			
 	@staticmethod
 	def manageEthernetRanges(request, server, totalMacRanges):
@@ -181,10 +181,10 @@ class VTDriver():
 					pass
 
 	@staticmethod
-	def PropagateActionToProvisioningDispatcher(vm_id, action):
+	def PropagateActionToProvisioningDispatcher(vm_id, serverUUID, action):
 		from vt_manager.communication.utils.XmlHelper import XmlHelper
 		from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
 		vm = VirtualMachine.objects.get(id=vm_id).getChildObject()
-		rspec = XmlHelper.getSimpleActionSpecificQuery(action)
+		rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
 		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)

@@ -73,11 +73,11 @@ class XmlHelper(object):
     #TODO: improve this by creating a proper constructor    
 
     @staticmethod
-    def getSimpleActionSpecificQuery(type):
+    def getSimpleActionSpecificQuery(type, serverUUID):
         
-         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
+         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryProvisioning.xml','r').read())
          simpleRspec.query.provisioning.action[0].type = type
-         print "[LEODEBUG] LA ACCION ES DE TIPO: " + str(simpleRspec.query.provisioning.action[0].type)
+         simpleRspec.query.provisioning.action[0].server.uuid = serverUUID
          return simpleRspec
 #        if type == 'start':
 #            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
@@ -90,11 +90,14 @@ class XmlHelper(object):
 #        return simpleRspec
 
     @staticmethod
-    def getProcessingResponse(status, id, description):
+    def getProcessingResponse(status, action,  description, ):
         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/emptyResponse.xml','r').read())
         simpleRspec.response.provisioning.action[0].status = status
-        simpleRspec.response.provisioning.action[0].id = id
         simpleRspec.response.provisioning.action[0].description = description
+        #XXX:This is because the ActionController sends a dummy, None, dummy request
+        if action != None: 
+            simpleRspec.response.provisioning.action[0].id = action.id
+            simpleRspec.response.provisioning.action[0].server.uuid = action.server.uuid
         return simpleRspec
 
     @staticmethod

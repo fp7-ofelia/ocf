@@ -85,7 +85,7 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
     vm = VM.objects.get(id = vm_id)
 
-    rspec = XmlHelper.getSimpleActionSpecificQuery(action_type)
+    rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
      
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
 

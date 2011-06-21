@@ -180,11 +180,8 @@ def action_vm(request, server_id, vm_id, action):
 		)
 
 	else:
-		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, action)
-		#vm = VM.objects.get(id = vm_id)
-		#rspec = XmlHelper.getSimpleActionSpecificQuery(action)
-		#Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
-		#ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
+		#XXX: serverUUID should be passed in a different way
+		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, VTServer.objects.get(id=server_id).uuid, action)
     
 	return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
 

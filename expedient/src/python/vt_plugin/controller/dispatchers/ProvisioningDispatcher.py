@@ -46,8 +46,8 @@ class ProvisioningDispatcher():
                     #after saving action, we proceed to save the virtualmachines 
                     #(to be created) and the server modifications in local database
                     #first we translate the VM action into a VM model
-                    Server = VTServer.objects.get(uuid =  action.virtual_machine.server_id)
-                    VMmodel = Translator.VMtoModel(action.virtual_machine, Server.aggregate_id, "save")
+                    Server = VTServer.objects.get(uuid =  action.server.uuid)
+                    VMmodel = Translator.VMtoModel(action.server.virtual_machines[0], Server.aggregate_id, "save")
                     #Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
@@ -77,7 +77,7 @@ class ProvisioningDispatcher():
                 print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
 
                 #ProvisioningDispatcher.checkVMisPresent(action)
-                VMmodel =  VM.objects.get(uuid = action.virtual_machine.uuid)
+                VMmodel =  VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
                 if not  VMmodel:
                     try:
                         raise Exception
@@ -119,7 +119,7 @@ class ProvisioningDispatcher():
                 print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
                 
                 #ProvisioningDispatcher.checkVMisPresent(action)
-                VMmodel = VM.objects.get(uuid = action.virtual_machine.uuid)
+                VMmodel = VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
                     
                 if not VMmodel:
                     try:
