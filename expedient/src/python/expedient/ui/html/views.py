@@ -27,7 +27,6 @@ from vt_plugin.models import resourcesHash
 #VT_PLUGIN
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
 from vt_plugin.controller.vtAggregateController.vtAggregateController import askForAggregateResources
-from vt_manager.communication.utils.XmlUtils import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid, copy
 from vt_plugin.utils.ServiceThread import *

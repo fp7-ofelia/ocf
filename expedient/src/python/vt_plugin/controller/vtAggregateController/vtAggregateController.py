@@ -10,7 +10,7 @@ from expedient.clearinghouse.utils import post_message_to_current_user
 from vt_plugin.controller.vtAggregateController.forms.forms import *
 from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os
 from vt_plugin.utils.Translator import Translator
 from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash

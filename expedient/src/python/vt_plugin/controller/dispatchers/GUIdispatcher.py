@@ -13,7 +13,7 @@ from django.views.generic.create_update import get_model_and_form_class
 
 import copy
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
 from vt_plugin.utils.ServiceThread import *

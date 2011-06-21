@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 import os
 import sys
 from vt_plugin.models import *
-from vt_manager.communication.utils.XmlUtils import *
+from vt_manager.communication.utils.XmlHelper import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
