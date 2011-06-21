@@ -1,7 +1,6 @@
 from django.db import models
 from datetime import datetime
 from vt_manager.models.faults import *
-from vt_manager.models.XenVM import XenVM
 import logging
 import uuid
 

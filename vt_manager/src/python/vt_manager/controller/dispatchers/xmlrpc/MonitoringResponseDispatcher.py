@@ -10,11 +10,11 @@ class MonitoringResponseDispatcher():
 
 	@staticmethod
 	def processResponse(rspec):
-		from vt_manager.models.VTServer import VTServer
 	
 		print "-------------------> Monitoring!!!!!"
 	
 		for action in rspec.response.monitoring.action:
+			print action
 			if not action.type_ == "listActiveVMs":
 				raise Exception("Cannot process Monitoring action:"+action.type_)
 			try:
@@ -26,14 +26,17 @@ class MonitoringResponseDispatcher():
 			if action.status == "ONGOING":
 				print "----------------------->ONGOING"
 				#ONGOING
-				actionModel.setStatus(Action.ONGOING_STATUS)	
+				actionModel.setStatus(Action.ONGOING_STATUS)
+				return
 			elif action.status == "SUCCESS":
+				from vt_manager.models.VTServer import VTServer
+				from vt_manager.controller.monitoring.VMMonitor import VMMonitor
+
 				print "----------------------->SUCCESS"
 				server = VTServer.objects.get(uuid=actionModel.getObjectUUID())
 				print "----------------------->SUCCESS2"
 				VMMonitor.processUpdateVMsList(server,action.server.virtual_machines)	
 				actionModel.destroy()
-
 			elif action.status == "FAILED":
 				print "----------------------->FAILED!!"
 				actionModel.setStatus(Action.FAILED_STATUS)	
