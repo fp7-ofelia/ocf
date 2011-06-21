@@ -30,6 +30,7 @@ class XmlRpcClient:
 		rspec = XmlUtils.getEmptyMonitoringResponseObject()
 		
 		rspec.response.monitoring.action[0].id = actionId
+		rspec.response.monitoring.action[0].type_ = "listActiveVMs"
 		rspec.response.monitoring.action[0].status = status
 		rspec.response.monitoring.action[0].description = description
 		return XmlCrafter.craftXML(rspec) 
@@ -53,6 +54,7 @@ class XmlRpcClient:
 			vm = virtual_machine_type()
 			vm.uuid = dom[0]
 			vm.name = dom[1]
+			server.virtual_machines.append(vm)
 		return XmlCrafter.craftXML(rspec) 
 
 
