@@ -46,7 +46,7 @@ class ProvisioningDispatcher:
 	def processProvisioning(provisioning):
 
 		for action in provisioning.action:
-			vm = action.server.virtual_machine[0]
+			vm = action.server.virtual_machines[0]
 			try:
 				dispatcher = ProvisioningDispatcher.__getProvisioningDispatcher(vm.virtualization_type)	
 			except Exception as e:

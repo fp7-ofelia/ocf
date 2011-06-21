@@ -5,6 +5,11 @@
 		<action id="">
 			<status></status>
 			<description></description>
+			<server>
+				<virtual_machines>
+					<uuid></uuid>
+				</virtual_machines>
+			</server>
 		</action>
 	</provisioning>
 </response>
