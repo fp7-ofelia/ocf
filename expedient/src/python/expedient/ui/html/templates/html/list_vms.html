@@ -15,6 +15,9 @@
                   </td>
                    
                   <td id = td_vm{{vm.id}}>
+					{% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+                        <img src={% url img_media 'loading.gif'%}> 
+                    {% endif %}
                     {{ vm.state }}
                   </td>
                    <td>
