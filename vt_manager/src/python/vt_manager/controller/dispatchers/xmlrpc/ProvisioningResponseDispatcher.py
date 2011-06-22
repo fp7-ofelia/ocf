@@ -31,18 +31,12 @@ class ProvisioningResponseDispatcher():
 				actionModel.status = action.status
 				actionModel.description = action.description
 				actionModel.save()
-				#XXX: Check what is this for 18/5/11 Leo
-				#
 				#Complete information required for the Plugin: action type and VM
 				ActionController.completeActionRspec(action, actionModel)
-#				action.type_ = actionModel.getType()
-#				tempVMclass = XmlHelper.getProcessingResponse('dummy', 'dummy', 'dummy').response.provisioning.action[0].virtual_machine
-#				#tempVMclass.uuid = vm.uuid
-#				tempVMclass.uuid = actionModel.getObjectUUID()
-#				action.virtual_machine = tempVMclass
 
 				#XXX:Implement this method or some other doing this job
 				vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
+				controller=VTDriver.getDriver(vm.Server.get().getVirtTech())
 				failedOnCreate = 0
 				if actionModel.getStatus() == Action.SUCCESS_STATUS:
 					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm)

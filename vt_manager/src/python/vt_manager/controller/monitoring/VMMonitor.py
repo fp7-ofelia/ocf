@@ -30,10 +30,10 @@ class VMMonitor():
 	@staticmethod
 	def processUpdateVMsList(server,vmList):
 		from vt_manager.models.VirtualMachine import VirtualMachine
-		for vm in server.vms.all():
+		for vm in server.getChildObject().vms.all():
 			isUp = False
 			for iVm in vmList:
-				if iVm.uuid == vm.uuid
+				if iVm.uuid == vm.uuid:
 					#Is running
 					vm.state = VirtualMachine.RUNNING_STATE
 					isUp = True

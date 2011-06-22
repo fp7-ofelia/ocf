@@ -18,10 +18,10 @@ class AgentMonitoringThread(Thread):
 	'''
 	def __updateAgentStatus(self, server):
 		try:
-                        print "Pinging Agent on server %s" % server.name
+			print "Pinging Agent on server %s" % server.name
 			XmlRpcClient.callRPCMethod(server.getAgentURL(),"ping", "hola")
 			#Server is up
-                        print "Ping Agent on server %s was SUCCESSFUL!" % server.name
+ 			print "Ping Agent on server %s was SUCCESSFUL!" % server.name
 			if server.available == False:
 				#
 				VMMonitor.sendUpdateVMs(server)
