@@ -43,5 +43,5 @@ class VMMonitor():
 				continue
 
 			#Is not running
-			vm.serState(VirtualMachine.STOPPED_STATE)
+			vm.setState(VirtualMachine.STOPPED_STATE)
 		

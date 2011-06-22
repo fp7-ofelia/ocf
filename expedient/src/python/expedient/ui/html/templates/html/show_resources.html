@@ -56,12 +56,7 @@
     function updateVMstatus(){
         $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
            $.each(data.status, function(index,value){
-					if (value.match(/\.\.\.$/) || value.match(/^on\ queue$/)){
-                    	$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" ><img src=\"/static/media/img/loading.gif\">"+ value +" </td>");
-					}
-					else {
-						$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
-					}
+					$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
                     updateVMparams(data,index);
                 }
            );

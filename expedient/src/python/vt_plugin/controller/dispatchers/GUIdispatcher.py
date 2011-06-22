@@ -91,7 +91,17 @@ def manage_vm(request, slice_id, vm_id, action_type):
     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
 
     #set VM state to on queue
-    vm.state = "on queue"
+    #vm.state = "on queue"
+    if action_type == 'start':
+        vm.state = 'starting...'
+    elif action_type == 'stop':
+        vm.state = 'stopping...'
+    elif action_type == 'reboot':
+        vm.state = 'rebooting...'
+    elif action_type == 'delete':
+        vm.state = 'deleting...'
+    elif action_type == 'create':
+        vm.state = 'creating...'
     vm.save()
 
     #go to manage resources again
@@ -131,7 +141,7 @@ def check_vms_status(request, slice_id):
                         <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/delete/\">Delete</a>\
                         </div>"
                     else:
-                        actionsHtmlCode = "<div></div>"
+                        actionsHtmlCode = "<div><img src=\"/static/media/img/loading.gif\" align=\"absmiddle\"></div>"
                     vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
                     try:
                         vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip
