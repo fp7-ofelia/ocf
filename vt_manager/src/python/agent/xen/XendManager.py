@@ -12,8 +12,8 @@ from xen.provisioning.HdManager import HdManager
 
 	Xend manager; handles Xend calls through libvirt library
 '''
-OXA_XEN_STOP_STEP_SECONDS=20
-OXA_XEN_STOP_MAX_SECONDS=200
+OXA_XEN_STOP_STEP_SECONDS=6
+OXA_XEN_STOP_MAX_SECONDS=100
 OXA_XEN_REBOOT_WAIT_TIME=20
 OXA_XEN_CREATE_WAIT_TIME=2
 
@@ -75,7 +75,8 @@ class XendManager(object):
 		xmlConf = conn.domainXMLFromNative('xen-xm', open(HdManager.getConfigFilePath(vm),'r').read(), 0) 
 		try:
 			#Try first using libvirt call
-			conn.createXML(xmlConf,0)	
+			#conn.createXML(xmlConf,0)
+			raise Exception("Skip") #otherwise stop is ridicously slow
 		except Exception as e:
 			#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
 			subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
@@ -107,7 +108,7 @@ class XendManager(object):
 		#Let's behave impatiently
 		dom.destroy()
 		
-		time.sleep(OXA_XEN_STOP_STEP_SECONDS)
+		time.sleep(OXA_XEN_REBOOT_WAIT_TIME)
 	
 		if XendManager.isVmRunning(vm.name):
 			raise Exception("Could not stop domain")
