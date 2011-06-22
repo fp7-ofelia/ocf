@@ -56,7 +56,7 @@
     function updateVMstatus(){
         $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
            $.each(data.status, function(index,value){
-                    $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
+					$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
                     updateVMparams(data,index);
                 }
            );

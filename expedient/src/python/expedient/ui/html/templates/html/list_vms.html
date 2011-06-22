@@ -15,7 +15,7 @@
                   </td>
                    
                   <td id = td_vm{{vm.id}}>
-                    {{ vm.state }}
+					{{ vm.state }}
                   </td>
                    <td>
                     {{ vm.operatingSystemType }}
@@ -47,6 +47,10 @@
                         <a href="{% url manage_vm slice.id vm.id "start"%}">Start</a> |
                         <a href="{% url manage_vm slice.id vm.id "delete"%}">Delete</a>
                     {% endif %}
+					{% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+                        <img src={% url img_media 'loading.gif'%} align="absmiddle"> 
+                    {% endif %}
+
                     </div>
                 </td>
                 </tr>
