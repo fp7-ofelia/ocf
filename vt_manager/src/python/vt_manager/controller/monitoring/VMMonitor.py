@@ -35,7 +35,7 @@ class VMMonitor():
 			for iVm in vmList:
 				if iVm.uuid == vm.uuid:
 					#Is running
-					vm.state = VirtualMachine.RUNNING_STATE
+					vm.setState(VirtualMachine.RUNNING_STATE)
 					isUp = True
 					break
 
@@ -43,5 +43,5 @@ class VMMonitor():
 				continue
 
 			#Is not running
-			vm.state = VirtualMachine.STOPPED_STATE
+			vm.serState(VirtualMachine.STOPPED_STATE)
 		
