@@ -45,4 +45,6 @@ expedient/src/python/expedient/clearinghouse/localsettings.py
 optin_manager/src/python/openflow/optin_manager/localsettings.py
 vt_manager/src/python/agent/settings.py
 vt_manager/src/python/agent/mySettings.py
+vt_manager/src/python/agent/security/certs/agent.crt
+vt_manager/src/python/agent/security/certs/agent.key
 testfile
