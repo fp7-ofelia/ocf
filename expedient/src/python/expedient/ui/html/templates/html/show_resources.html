@@ -79,7 +79,13 @@
     var timer = setInterval(function(){
     updateVMstatus(); 
     },3000);
+</script>
 
+<script>
+	function handleVMaction(sliceId,vmId,action){
+		$.getJSON("../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
+		updateVMstatus();
+	}
 </script>
 {% endblock %}
 

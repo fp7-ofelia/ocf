@@ -82,7 +82,6 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
     "Manages the actions executed over VMs at url manage resources."
 
-
     vm = VM.objects.get(id = vm_id)
     #if action_type == 'stop' : action_type = 'hardStop'
     rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
@@ -90,7 +89,7 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
 
-    #set VM state to on queue
+    #set temporally status
     #vm.state = "on queue"
     if action_type == 'start':
         vm.state = 'starting...'
@@ -103,9 +102,10 @@ def manage_vm(request, slice_id, vm_id, action_type):
     elif action_type == 'create':
         vm.state = 'creating...'
     vm.save()
-
     #go to manage resources again
-    return HttpResponseRedirect(reverse("html_plugin_home",args=[slice_id]))
+    #return HttpResponseRedirect(reverse("html_plugin_home",args=[slice_id]))
+    response = HttpResponse("")
+    return response
 
 
 def check_vms_status(request, slice_id):
@@ -125,20 +125,20 @@ def check_vms_status(request, slice_id):
                     if vm.state == "running":
                         actionsHtmlCode =\
                         "<div>\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/reboot/\">Reboot</a> |\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/stop/\">Stop</a>\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
                         </div>"
                     elif  vm.state == "created (stopped)" :
                         actionsHtmlCode =\
-                        "<div>\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/start/\">Start</a> |\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/delete/\">Delete</a>\
+						"<div>\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
                         </div>"
                     elif vm.state == "stopped" :
                         actionsHtmlCode =\
                         "<div>\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/start/\">Start</a> |\
-                        <a href=\"/vt_plugin/manage_vm/"+str(slice.id)+"/"+str(vm.id)+"/delete/\">Delete</a>\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
                         </div>"
                     else:
                         actionsHtmlCode = "<div><img src=\"/static/media/img/loading.gif\" align=\"absmiddle\"></div>"
