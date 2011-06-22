@@ -9,7 +9,12 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
+from expedient.common.ldapproxy.models import LdapProxy
+from django.conf import settings
+from django.db import transaction
+from expedient.clearinghouse.localsettings import LDAP_STORE_PROJECTS
 import uuid
+import string
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -32,6 +37,11 @@ class ProjectManager(models.Manager):
             klass=Project, permittees=permittee).values_list(
                 "object_id", flat=True)
         return self.filter(id__in=list(proj_ids))
+
+
+import logging
+logger = logging.getLogger("Project.models")
+
 
 class Project(models.Model):
     '''
@@ -64,8 +74,8 @@ class Project(models.Model):
     
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    uuid = models.CharField(max_length=200, default = uuid.uuid4(), unique=True, editable =False)    
-
+    uuid = models.CharField(max_length=200, default = uuid.uuid4(), unique=True, editable =False)
+    '''
     save = permissions_save_override(
         permittee_kw="user",
         model_func=lambda: Project,
@@ -78,6 +88,38 @@ class Project(models.Model):
         model_func=lambda: Project,
         delete_perm="can_delete_project",
     )
+    '''
+    # originally, code was save = permissions_save_override (...)
+    # in which super(model_func(), self).save(*args, **kwargs) is called
+    # thus the save function of our parent class.
+    #
+    # the inner save function that is return by permissions_save_override
+    # calls must_have_permission, which raises an PermissionDenied when
+    # saving is not allowed. ==> extending the save functionality does not
+    # require checking whether action was allowed or not when this 
+    # exception is reaised.
+
+    def save(self, *args, **kwargs):
+	result = permissions_save_override(
+        	    permittee_kw="user",
+	            model_func=lambda: Project,
+        	    create_perm="can_create_project",
+	            edit_perm="can_edit_project",
+        	    delete_perm="can_delete_project",
+	)(self, *args, **kwargs)
+	if LDAP_STORE_PROJECTS:
+		self.sync_netgroup_ldap()
+        return result
+
+    def delete(self, *args, **kwargs):
+	result = permissions_delete_override(
+            permittee_kw="user",
+	    model_func=lambda: Project,
+            delete_perm="can_delete_project",
+	)
+	if LDAP_STORE_PROJECTS:
+	        self.delete_netgroup_ldap()
+	return result
     
     def _get_aggregates(self):
         """Get all aggregates that can be used by the project
@@ -188,4 +230,34 @@ class Project(models.Model):
             "proj_id": self.id,
             "user_id": user.id})
     
-    
+   
+    '''
+    LDAP sycnrhonization
+    '''
+ 
+    def get_netgroup(self):
+        str = 'proj_%s_%s' % (self.uuid, self.name)
+        str = string.replace(str,' ','_')
+        str = string.replace(str,'\t','__')
+        return str
+
+    def get_netgroup_dn(self):
+        return 'cn=%s,%s' % (self.get_netgroup(), settings.LDAP_MASTER_USERNETGROUPS)
+
+    def sync_netgroup_ldap (self):
+        l = LdapProxy()
+        dn = self.get_netgroup_dn()
+        cn = self.get_netgroup().encode()
+        data = {'objectClass': ['nisNetgroup', 'top'], 'cn': [cn], 'nisNetgroupTriple': []}
+        for user in self._get_members():
+	    print "New member: "+str(user.username)
+            data['nisNetgroupTriple'].append("(,%s,)" % str(user.username))
+            logger.debug("sync_netgroup_ldap: member: %s" % str(user.username))
+        l.create_or_replace (dn, data)        
+
+    def delete_netgroup_ldap(self):
+        l = LdapProxy()
+        dn = self.get_netgroup_dn()
+        l.delete (dn)
+
+
