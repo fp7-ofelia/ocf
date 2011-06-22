@@ -151,3 +151,32 @@ def check_vms_status(request, slice_id):
     data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes, 'ips': vmsIP,})
     response = HttpResponse(data)
     return response
+
+
+def startStopSlice(action,uuid):
+
+    "Manages the actions executed over VMs at url manage resources."
+    print "[LEODEBUG] ENTRA EN STARTSLICE"
+    try: 
+        vmsToStart = VM.objects.filter(sliceId = uuid)
+    
+        #if action_type == 'stop' : action_type = 'hardStop'
+        globalRspec = XmlHelper.getSimpleActionSpecificQuery(action, "dummy")
+    	globalRspec.query.provisioning.action.pop()
+        for vm in vmsToStart:
+            rspec = XmlHelper.getSimpleActionSpecificQuery(action, vm.serverID)
+            Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
+            globalRspec.query.provisioning.action.append(copy.deepcopy(rspec.query.provisioning.action[0]))
+    
+        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,globalRspec.query.provisioning, None)
+    
+        for vm in vmsToStart:
+            if action == 'start':
+            	vm.state = 'starting...'
+            elif action == 'stop':
+                vm.state = 'stopping'
+            vm.save()
+    except Exception as e:
+        print e
+        raise e
+
