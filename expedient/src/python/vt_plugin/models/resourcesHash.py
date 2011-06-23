@@ -9,6 +9,6 @@ class resourcesHash(models.Model):
     #hashValue = models.IntegerField()
     hashValue = models.CharField(max_length = 1024, default="")
     #serverUUID = models.CharField(max_length = 1024, default="")
-    vtamID = models.IntegerField(default="")
+    vtamID = models.IntegerField(default="-1")
     projectUUID = models.CharField(max_length = 1024, default="")
     sliceUUID = models.CharField(max_length = 1024, default="")
