@@ -23,7 +23,6 @@ from vt_plugin.utils.ServiceThread import *
 
 def goto_create_vm(request, slice_id):
     """Show a page that allows user to add SSH s to the aggregate."""
-    print "UI/HTML/views.py --> goto_create_vm"
 
     if request.method == "POST":
         if 'create_vms' in request.POST:
@@ -38,9 +37,7 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     """Show a page that allows user to add VMs to the VT server."""
 
-    print "VIRTUALMACHINE_CRUD"
     serv = get_object_or_404(VTServer, id = server_id)
-    #server_name = serv.name
     slice = get_object_or_404(Slice, id = slice_id)
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
@@ -156,7 +153,6 @@ def check_vms_status(request, slice_id):
 def startStopSlice(action,uuid):
 
     "Manages the actions executed over VMs at url manage resources."
-    print "[LEODEBUG] ENTRA EN STARTSLICE"
     try: 
         vmsToStart = VM.objects.filter(sliceId = uuid)
     

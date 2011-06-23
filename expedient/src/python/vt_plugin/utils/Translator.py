@@ -108,7 +108,6 @@ class Translator():
             #for iface in sClass.interfaces.interface:
             if sClass.interfaces:
                 for iface in sClass.interfaces.interface:
-                    print "IFACE CLASS: %s" %iface.name
                     if iface.ismgmt is True:
                         sModel.setVmMgmtIface(iface.name)
                     else:
