@@ -15,6 +15,7 @@ VTAM_PORT      = "8445"
 DATABASE_NAME = "vtm"
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"
+DATABASE_HOST = "changeMeWithIP"
 
 '''Optional parameters'''
 
