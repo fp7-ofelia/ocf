@@ -7,6 +7,7 @@ import os
 import sys
 import pkg_resources
 from utils import append_to_local_setting
+import ldap
 
 sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/python')
 
@@ -128,12 +129,13 @@ append_to_local_setting(
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
     'expedient_geni.backends.GENIRemoteUserBackend',
 ]
 append_to_local_setting(
     "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
 )
-    
+  
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
 TEMPLATE_DIRS = [
@@ -146,6 +148,7 @@ append_to_local_setting(
     "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),
 )
 
+
 INSTALLED_APPS = [
     'expedient.clearinghouse.firstapp', # Must remain first!
     'django.contrib.auth',
@@ -154,9 +157,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
-    'django_evolution',
     'autoslug',
     'registration',
+    'django_evolution',
     'expedient.common.timer',
     'expedient.common.permissions',
     'expedient.common.breadcrumbs',

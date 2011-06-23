@@ -1,7 +1,7 @@
-from vt_manager.communication.utils.XmlUtils import *#XmlUtils
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import os
 import sys
+from expedient.common.messaging.models import DatedMessage
 from vt_plugin.models import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
@@ -27,9 +27,8 @@ class ProvisioningDispatcher():
             #translate action to actionModel
             actionModel = Translator.ActionToModel(action,"provisioning")
             print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
-
+            actionModel.requestUser = threading.currentThread().requestUser
             if actionModel.type == "create":
-                
                 if Action.objects.filter (uuid = actionModel.uuid):
                     #if action already exists we raise exception. It shouldn't exist because it is create action!
                     try:
@@ -47,14 +46,24 @@ class ProvisioningDispatcher():
                     #after saving action, we proceed to save the virtualmachines 
                     #(to be created) and the server modifications in local database
                     #first we translate the VM action into a VM model
-                    VMmodel = Translator.VMtoModel(action.virtual_machine, "save")
-                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    Server = VTServer.objects.get(uuid =  action.server.uuid)
+                    VMmodel = Translator.VMtoModel(action.server.virtual_machines[0], Server.aggregate_id, "save")
+                    #Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
+                    #actionModel.requestUser = threading.currentThread().requestUser
                     actionModel.save()
                 except Exception as e:
                     print "Not possible to translate to VM model\n"
                     print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Not possible to translate VM %s to a proper app model" % VMmodel.name,
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+                    #VMmodel.delete()
+                     #ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
+                    Server.vms.remove(VMmodel)
+                    VMmodel.completeDelete()
                     return
                 
                 #finally we connect to the client server (in this case the VT AM)
@@ -68,7 +77,7 @@ class ProvisioningDispatcher():
                 print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
 
                 #ProvisioningDispatcher.checkVMisPresent(action)
-                VMmodel =  VM.objects.get(uuid = action.virtual_machine.uuid)
+                VMmodel =  VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
                 if not  VMmodel:
                     try:
                         raise Exception
@@ -91,9 +100,18 @@ class ProvisioningDispatcher():
                     actionModel.save()
                 
                 print "PROVISIONING DISPATCHER--> ACTION DELETE"
-                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
-                client = Server.aggregate.as_leaf_class().client
-                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
+                try:	
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    client = Server.aggregate.as_leaf_class().client
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
+                except:
+                    print "Could not connect to AM"
+                    print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Could not connect to AM",
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+
 
             #elif actionModel.type == "start":
             else:
@@ -101,7 +119,7 @@ class ProvisioningDispatcher():
                 print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
                 
                 #ProvisioningDispatcher.checkVMisPresent(action)
-                VMmodel = VM.objects.get(uuid = action.virtual_machine.uuid)
+                VMmodel = VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
                     
                 if not VMmodel:
                     try:
@@ -124,10 +142,19 @@ class ProvisioningDispatcher():
                     actionModel.vm = VMmodel
                     actionModel.save()
                 print "PROVISIONING DISPATCHER --> START, STOP, REBOOT START"
-                
-                Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
-                client = Server.aggregate.as_leaf_class().client
-                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+               
+		try: 
+                    Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
+                    client = Server.aggregate.as_leaf_class().client
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+                except:
+                    print "Could not connect to AM"
+                    print e
+                    DatedMessage.objects.post_message_to_user(
+                        "Could not connect to AM",
+                        threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                    )
+
 
     @staticmethod
     def connectAndSend(URL, action):
@@ -140,3 +167,20 @@ class ProvisioningDispatcher():
             print "Exception connecting to VT Manager"
             print e
             return
+
+    @staticmethod
+    def cleanWhenFail(vm , server = None):
+        try:
+            server.vms.remove(vm)
+        except:
+            pass
+        ifaces = vm.ifaces.all()
+        for iface in ifaces:
+            vm.ifaces.remove(iface)
+            iface.delete()
+        try:
+            #super(Resource).delete()
+            vm.delete()
+        except Exception as e:
+            print e
+

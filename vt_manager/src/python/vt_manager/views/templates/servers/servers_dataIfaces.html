@@ -1,0 +1,43 @@
+
+
+        <div>
+            <h3>Data Interfaces parameters</h3>
+			{{ ifaceformset.management_form}}
+			{% if ifaceformset.errors %}
+                <table>
+                    {%for form in ifaceformset.forms %}
+                    {%for field in form %}
+                        {% if field.errors %}
+                        <tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </table>
+            {% endif %}
+            <table id="ifacetable" class="formtable">
+                {% for form in ifaceformset.forms %}
+                    <tbody>
+                        <tr>
+                        <!--{{form.as_table}}-->
+                        {% for field in form %}
+                            {% if forloop.first %}
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            {% endif %}
+                            {% if field.errors %}
+                                <th class="fielderror"> {{ field.label_tag }}:</th><td class="fielderror"> {{ field }}</td>
+                            {% else %}
+                            {% if field.name != 'id' %}
+                                <th> {{ field.label_tag }}:</th><td> {{ field }}</td>
+                            {%endif%}
+                            {%endif%}
+                        {% endfor %}
+                        <th id='rowDelete'> Delete: <input type="checkbox" name="DELETE" value ={{form.initial.id}} ></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+            </table>
+            </br>
+        </div>
+        </tr>

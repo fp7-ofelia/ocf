@@ -15,4 +15,5 @@ class iFace(models.Model):
     mask =models.IPAddressField(blank = True, null=True)
     dns1 =models.IPAddressField(blank = True, null=True)
     dns2 =models.IPAddressField(blank = True, null=True)
+    bridgeIface = models.CharField(max_length = 32, default="", blank = True, null=True)
     

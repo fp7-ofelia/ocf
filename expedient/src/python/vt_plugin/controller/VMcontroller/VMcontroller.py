@@ -2,7 +2,7 @@ import copy
 from expedient.clearinghouse.slice.models import Slice
 from expedient.clearinghouse.project.models import Project
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
 from vt_plugin.utils.ServiceThread import *
@@ -13,7 +13,7 @@ class VMcontroller():
     "manages creation of VMs from the input of a given VM formulary"
     
     @staticmethod
-    def processVMCreation(instances, server_id, slice):
+    def processVMCreation(instances, server_id, slice, requestUser):
         
         rspec = XmlHelper.getSimpleActionQuery()
         actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
@@ -46,7 +46,12 @@ class VMcontroller():
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()
-            Translator.VMmodelToClass(instance, actionClass.virtual_machine)
+            Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])
+            server = VTServer.objects.get(uuid = server_id)
+            actionClass.server.uuid = server_id
+            actionClass.server.virtualization_type = server.getVirtTech()
             rspec.query.provisioning.action.append(actionClass)
-        
-        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning)
+         
+        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
+
+

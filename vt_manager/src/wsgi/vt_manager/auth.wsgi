@@ -7,9 +7,11 @@ PYTHON_DIR = join(dirname(__file__), '../../python')
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings.settingsLoader'
 
-sys.path.insert(0, PYTHON_DIR)
+#sys.path.append(PYTHON_DIR)
+sys.path.insert(0,PYTHON_DIR)
+
 
 from django.contrib.auth.models import User
 from django import db
@@ -23,7 +25,7 @@ def check_password(environ, user, password):
         try: 
             user = User.objects.get(**kwargs) 
         except User.DoesNotExist: 
-            return False
+            return None
 
         if user.check_password(password): 
             return True

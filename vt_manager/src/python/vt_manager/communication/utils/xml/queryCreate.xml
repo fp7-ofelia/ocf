@@ -3,7 +3,7 @@
 <query>
 	<provisioning>
 		<action type="create" id="testcreate">
-			<virtual-machine>
+			<virtual-machines>
 				<name>LeoTest</name>
 				<uuid>LeoUUID</uuid>
 				<project-id>NONE</project-id>
@@ -32,7 +32,7 @@
 						</interface>
 					</interfaces>
 				</xen-configuration>
-			</virtual-machine>	
+			</virtual-machines>	
 		</action>
 	</provisioning>
 </query>

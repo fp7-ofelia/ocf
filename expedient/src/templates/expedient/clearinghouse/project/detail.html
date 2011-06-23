@@ -128,35 +128,35 @@
 			{% endfor %}
 		</table>
 	</div>
-	
     <h2>Aggregates
-		<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-	</h2>
+                <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+        </h2>
 
-	<div class="tooltip" id="aggs_help_div">
-		Below you can manage and add aggregates in your project. You can
-		only create slices on aggregates that are in the project. When you
-		add an aggregate to the project, you might be prompted for some
-		additional information that the aggregate needs.
-	</div>
-	
-	<div class="aggregate_list">
-		{% with project.aggregates.all as aggregate_list %}
-		{% if aggregate_list.count %}
-			{% include "project/project_simple_agg_list.html" %}
-		{% else %}
-			<!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
-			This project has no aggregates added to it. To be able to
+        <div class="tooltip" id="aggs_help_div">
+                Below you can manage and add aggregates in your project. You can
+                only create slices on aggregates that are in the project. When you
+                add an aggregate to the project, you might be prompted for some
+                additional information that the aggregate needs.
+        </div>
+
+        <div class="aggregate_list">
+                {% with project.aggregates.all as aggregate_list %}
+                {% if aggregate_list.count %}
+                        {% include "project/project_simple_agg_list.html" %}
+                {% else %}
+                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
+                        This project has no aggregates added to it. To be able to
             create slices that can reserve resources on aggregates, you will
             need to add aggregates to the project.
-		{% endif %}
-		{% endwith %}
-		      <div class="center">
+                {% endif %}
+                {% endwith %}
+                      <div class="center">
             <input type="button" value="Add Aggregates"
             onclick="document.location='{% url project_add_agg project.id %}'" />
         </div>
 
-	</div>	
+        </div>
+	
 	<h2>Slices</h2>
 	<div class="slice_list">
 		<div class="table_div">

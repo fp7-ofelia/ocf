@@ -40,6 +40,7 @@ def validate_controller_url(value):
             "be less than %s" % (2**16),
             code="invalid",
         )
+
     m = cntrlr_url_re.match(value)
     if m:
         port = m.group("port")
@@ -218,6 +219,13 @@ production networks, and is currently deployed in several universities.
         super(OpenFlowAggregate, self).start_slice(slice)
         sw_slivers = self._get_slivers(slice)
         try:
+            slice.openflowsliceinfo.controller_url
+        except:
+            import traceback
+            logger.info("Can't start slice  %s because controller url is not set." % self.name)
+            logger.error(traceback.format_exc())
+            raise Exception("Can't start slice  %s because controller url is not set." % slice.name)
+        try: 
             return self.client.proxy.create_slice(
                 self._get_slice_id(slice), slice.project.name,
                 slice.project.description,

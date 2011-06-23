@@ -16,7 +16,7 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 	##Inventory routines
 	@staticmethod
 	def createVMfromImage(id,vm):
-		
+		pathToMountPoint = ""	
 		print "Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id
 		try:
 			#Clone HD
@@ -43,6 +43,12 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
+			try:
+				HdManager.umount(vm,pathToMountPoint)
+				#Delete VM disc and conf file
+				XenProvisioningDispatcher.deleteVM(id,vm)
+			except:
+				pass
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
 			#TODO improve this trace
 			print e

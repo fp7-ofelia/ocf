@@ -1,6 +1,6 @@
 {% extends "servers/servers_base.html" %}
 
-{% block pagehead %}<h1>Admin VTServers</h1>{% endblock pagehead %}
+{% block pagehead %}<h1>Adminstration of virtualized servers</h1>{% endblock pagehead %}
 
 {% block head %}
 {% endblock %}
@@ -8,15 +8,15 @@
 {% block content %}
 <div class="main">
      
-    <div> Select the VTServer you want to update/delete</div>
+    <div> Select the virtualized server you want to update/delete</div>
     <br/>
     <div style="width:730px"> 
-    <table class ="servers">
+    <table class ="blue">
         <tr class="header" >
         <th>Name</th>
         <th>Operating System</th>
-        <th>Version</th>
         <th>Distribution</th>
+        <th>Version</th>
         <th>Virtualization Type</th>
         </tr> 
         {% for server in servers_ids %}
@@ -28,10 +28,10 @@
                 {{ server.operatingSystemType }}
                 </td>
                 <td>
-                {{ server.operatingSystemVersion }}
+                {{ server.operatingSystemDistribution }}
                 </td>
                 <td>
-                {{ server.operatingSystemDistribution }}
+                {{ server.operatingSystemVersion }}
                 </td>
                 <td>
                 {{ server.virtTech }}
@@ -42,8 +42,8 @@
     </div>
     <br/>
     <div class="center">
-        <a href="{% url servers_create %}">Add</a> |
-        <a href="{% url dashboard  %}">Home</a>
+        <a href="{% url servers_create %}">Create a server</a> |
+        <a href="{% url dashboard  %}">Dashboard</a>
     </div>
 </div>
 {% endblock content %}

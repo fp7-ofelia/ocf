@@ -1,13 +1,13 @@
 {% extends "servers/servers_base.html" %}
 
-{% block pagehead %}<h1>Delete VTServer {{ object.name }}</h1>{% endblock pagehead %}
+{% block pagehead %}<h1>Delete virtualized server {{ object.name }}</h1>{% endblock pagehead %}
 
 {% block content %}
 <div class="main">
     <form action="" method="post">{% csrf_token %}
     <div class="iframe_button">
         <input type="hidden" name="post" value="yes" />
-        <div class="delete_msg">Are you sure you want to delete the VTServer "{{ object.name }}"?</div>
+        <div class="delete_msg">Are you sure you want to delete the server: "{{ object.name }}"?</div>
         <input type="submit" value="Yes, I'm sure" />
         <input type="button" value="No, cancel" onclick="document.location='{{ next }}';"/>
     </div>

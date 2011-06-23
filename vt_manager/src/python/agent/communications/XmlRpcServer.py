@@ -14,7 +14,7 @@ import SimpleXMLRPCServer
 import socket, os
 from OpenSSL import SSL
 
-from settings import XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LISTEN_PORT,XMLRPC_SERVER_KEYFILE,XMLRPC_SERVER_CERTFILE
+from settings.settingsLoader import XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LISTEN_PORT,XMLRPC_SERVER_KEYFILE,XMLRPC_SERVER_CERTFILE,XMLRPC_SERVER_PASSWORD
 
 class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
 
@@ -90,16 +90,14 @@ class XmlRpcServer():
             
 		def send(self, callBackUrl,amId,password,xml):
 		    #FIXME: XXX: use certificates instead of password based authentication
-		    referencePassword = "hfw9023jf0sdjr0fgrbjk"
-	        
-		    if password != referencePassword: 
+		    if password != XMLRPC_SERVER_PASSWORD:
 			raise Exception("Password mismatch")
 
-    		    callBackFunction(callBackUrl,amId,xml)
+    		    callBackFunction(callBackUrl,xml)
 		    return ""
         
 		def ping(self, challenge): 
-		    return challenge
+            	    return challenge
         
 	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)
 	    server = ServerClass(server_address, HandlerClass)    

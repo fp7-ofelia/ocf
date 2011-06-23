@@ -11,10 +11,10 @@ from expedient.common.middleware import threadlocals
 from expedient.clearinghouse.utils import post_message_to_current_user
 from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
-from vt_manager.communication.utils.XmlUtils import XmlHelper 
+from vt_manager.communication.utils.XmlHelper import XmlHelper 
 #from vt_manager.models import Action, VTServer
+from vt_plugin.models import *
 from vt_plugin.models.VM import VM
-#from vt_plugin.models import *
 
 
 class VTServer(Resource):
@@ -29,26 +29,24 @@ class VTServer(Resource):
 
     uuid = models.CharField(max_length = 1024, default="", editable = False)
     memory = models.IntegerField(blank = True, null=True,editable = False)
-    #url = models.URLField(verify_exists = False, verbose_name = "Url of the Server")
     virtTech = models.CharField(max_length = 1024, default="", verbose_name = "Virtualization Technology")    
     vms = models.ManyToManyField('VM', blank = True, null = True, editable = False)
     freeDiscSpace = models.IntegerField(blank = True, null=True, editable = False)
     freeMemory = models.IntegerField(blank = True, null=True, editable = False)
     freeCpu = models.DecimalField(max_digits=3, decimal_places=2,blank = True, null=True, editable = False)
     operatingSystemType = models.CharField(max_length = 512, verbose_name = "OS Type")
+    operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution")
     operatingSystemVersion = models.CharField(max_length = 512, verbose_name = "OS Version")
-    operatingSystemDistribution = models.CharField(max_length = 512, verbose_name = "OS Distribution") 
-    
-    #aggregate_id = models.IntegerField()
+    vmMgmtIface = models.CharField(max_length = 1024, default = "", verbose_name = "Bridge Mgmt Interface for VMs")
+    ifaces = models.ManyToManyField('VTServerIface', blank = True, null = True, editable = False)
 
 
-    '''
-    def setAggID(self, aggID):
-        self.aggregate_id = aggID
+#    def setAggID(self, aggID):
+#        self.aggregate_id = aggID
+#
+#    def getAggID(self):
+#        return self.aggregate_id
 
-    def getAggID(self):
-        return self.aggregate_id
-    '''
     def setName(self, name):
         self.name = name
 
@@ -115,10 +113,28 @@ class VTServer(Resource):
         return self.operatingSystemDistribution
 
     def setVMs(self):
-        vms = VM.objects.filter(serverID = self.name)
+        vms = VM.objects.filter(serverID = self.uuid)
         for vm in vms:
             self.vms.add(vm)
     
+    def setAvailable(self,av):
+        self.available = av
 
-        
-        
+    def getAvailable(self):
+        return self.available
+
+    def setVmMgmtIface(self, ifaceName):
+        self.vmMgmtIface = ifaceName        
+
+    def getVmMgmtIface(self):
+        return self.vmMgmtIface
+    
+    def completeDelete(self):
+        for vm in self.vms.all():
+            self.vms.remove(vm)
+            vm.completeDelete()
+        for iface in self.ifaces.all():
+            self.ifaces.remove(iface)
+            iface.delete()
+        super(VTServer, self).delete()
+

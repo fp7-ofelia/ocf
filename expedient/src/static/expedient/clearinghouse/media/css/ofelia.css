@@ -702,3 +702,10 @@ table.servers tr.odd{
     font-style:italic;
 }
 
+/* Other */
+.openflow{
+	margin-bottom:20px;
+}
+.planetlab{
+	margin-bottom:20px;
+}

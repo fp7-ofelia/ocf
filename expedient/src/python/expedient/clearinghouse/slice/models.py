@@ -76,23 +76,26 @@ class Slice(models.Model):
             raise Exception("Slice expired. Update slice expiration time.")
         logger.debug("Called start_slice on %s: %s" % (self, self.name))
         aggs = enumerate(self.aggregates.all())
+
+        started_aggs = list()
+
         for i, agg in aggs:
             logger.debug("starting slice on agg %s" % agg.name)
             try:
                 agg.as_leaf_class().start_slice(self)
+                started_aggs.append(agg)
             except Exception, e:
-		print e
                 logger.error("Error starting slice on agg %s" % agg.name)
                 # try to stop slice on all previously started aggregates
-                for j in xrange(i):
+                for ragg in started_aggs: 
                     try:
-                        aggs[j][1].as_leaf_class().stop_slice(self)
+                        ragg.as_leaf_class().stop_slice(self)
                     except Exception, e2:
                         # error stopping slice
                         logger.error(traceback.format_exc())
                         DatedMessage.objects.post_message_to_user(
                             msg_text="Error stopping slice %s on "
-                                "aggregate %s" % (self, aggs[j][1].name),
+                                "aggregate %s" % (self, ragg.name),
                             user=user, msg_type=DatedMessage.TYPE_ERROR)
                 # raise the original exception raised starting the slice.
                 raise e
@@ -127,8 +130,8 @@ class Slice(models.Model):
                 ).values_list("object_id", flat=True)
             )
         return Aggregate.objects.filter(pk__in=agg_ids)
-    aggregates=property(_get_aggregates)
 #        return Aggregate.objects
+    aggregates=property(_get_aggregates)
     
     @classmethod
     @models.permalink

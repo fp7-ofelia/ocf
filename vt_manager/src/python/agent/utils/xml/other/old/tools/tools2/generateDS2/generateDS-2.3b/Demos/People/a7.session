@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<session>
+    <input_schema>/home/dkuhlman/a1/Bzr/Repo2/Generateds/Generateds/Demos/People/people_7.xsd</input_schema>
+    <output_superclass>/home/dkuhlman/a1/Bzr/Repo2/Generateds/Generateds/Demos/People/peoplesup.py</output_superclass>
+    <output_subclass>/home/dkuhlman/a1/Bzr/Repo2/Generateds/Generateds/Demos/People/peoplesub.py</output_subclass>
+    <force>true</force>
+    <prefix></prefix>
+    <namespace_prefix></namespace_prefix>
+    <empty_namespace_prefix>false</empty_namespace_prefix>
+    <behavior_filename></behavior_filename>
+    <properties>true</properties>
+    <search_path></search_path>
+    <subclass_suffix></subclass_suffix>
+    <root_element></root_element>
+    <superclass_module>peoplesup</superclass_module>
+    <auto_super>true</auto_super>
+    <old_getters_setters>false</old_getters_setters>
+    <validator_bodies></validator_bodies>
+    <user_methods></user_methods>
+    <no_dates>false</no_dates>
+    <no_versions>false</no_versions>
+    <no_process_includes>false</no_process_includes>
+    <silence>false</silence>
+    <namespace_defs>xmlns:pl="http://kuhlman.com/people.xsd"</namespace_defs>
+    <external_encoding></external_encoding>
+    <member_specs>dict</member_specs>
+</session>

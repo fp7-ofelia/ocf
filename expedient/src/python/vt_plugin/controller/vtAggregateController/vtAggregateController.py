@@ -10,10 +10,10 @@ from expedient.clearinghouse.utils import post_message_to_current_user
 from vt_plugin.controller.vtAggregateController.forms.forms import *
 from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os
 from vt_plugin.utils.Translator import Translator
-from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy
+from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash
 
 
 def aggregate_crud(request, agg_id=None):
@@ -72,7 +72,7 @@ def aggregate_crud(request, agg_id=None):
             "client_form": client_form,
             "create": not agg_id,
             "aggregate": aggregate,
-            "available": available,
+            #"available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
                 ("%s Virtualization Aggregate" % ("Update" if agg_id else "Add"),
@@ -82,38 +82,59 @@ def aggregate_crud(request, agg_id=None):
     )
         
 
-def askForAggregateResources(vtPlugin):
+def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None'):
 
     "asks the VT AM for all the resources under it."
-
+    serversInAggregate = []
     try:
-        print 'DIRECCION: '+'https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:]
         client = xmlrpclib.Server('https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:])
     except Exception as e:
         print "Can't connect to server"
         print e
         return
+    
     try:
-        rspec = client.listResources()
-        print "RSPEC"
-        print rspec
+        rHashObject =  resourcesHash.objects.get(vtamID = vtPlugin.id, projectUUID = projectUUID, sliceUUID = sliceUUID)
+    except:
+        rHashObject = resourcesHash(hashValue = '0', vtamID = vtPlugin.id, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject.save()
+    try:
+        remoteHashValue ,resourcesString = client.listResources(rHashObject.hashValue, projectUUID, sliceUUID)
+        print remoteHashValue
     except Exception as e:
         print "Can't retrieve resources"
         print e
         return
-    print rspec
 
-    try:
-        xmlClass = XmlHelper.parseXmlString(rspec)
-    except Exception as e:
-        print "Can't parse rspec"
-        print e
+    if remoteHashValue == rHashObject.hashValue:
+        print "Same HASH, no changes in resources"
         return
-
-    for server in xmlClass.response.information.resources.server:
-        for vm in server.virtual_machine:
-            Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
-        Translator.ServerClassToModel(server, vtPlugin.id)
-
-    return xmlClass
+    else:
+        print remoteHashValue
+        oldHashValue = rHashObject.hashValue
+        rHashObject.hashValue = remoteHashValue
+        rHashObject.save() 
+        try:
+            xmlClass = XmlHelper.parseXmlString(resourcesString)
+        except Exception as e:
+            print "Can't parse rspec"
+            print e
+            return
+        try:
+            for server in xmlClass.response.information.resources.server:
+                for vm in server.virtual_machine:
+                    VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
+                    Translator.PopulateNewVMifaces(vm, VMmodel)
+                Translator.ServerClassToModel(server, vtPlugin.id)
+                serversInAggregate.append(server.uuid)
+            serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
+            for s in serversInExpedient:
+                if s not in serversInAggregate:
+                    delServer = VTServer.objects.get(uuid = s)
+                    delServer.completeDelete()
+            return xmlClass
+        except Exception as e:
+            print e
+            rHashObject.hashValue = oldHashValue
+            rHashObject.save()
     

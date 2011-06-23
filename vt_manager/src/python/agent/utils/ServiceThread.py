@@ -3,7 +3,7 @@ from threading import Thread
 '''
 	@author: msune
 
-	Ofelia XEN Agent settings file. 
+	Ofelia XEN Agent Service Thread class 
 '''
 
 

@@ -9,6 +9,8 @@ sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 
+# changed 19.04.2011, ak, tr
+#sys.path.append(PYTHON_DIR)
 sys.path.insert(0, PYTHON_DIR)
 
 from django.contrib.auth.models import User
@@ -23,7 +25,7 @@ def check_password(environ, user, password):
         try: 
             user = User.objects.get(**kwargs) 
         except User.DoesNotExist: 
-            return False
+            return None
 
         if user.check_password(password): 
             return True

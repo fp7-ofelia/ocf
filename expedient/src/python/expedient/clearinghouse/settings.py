@@ -19,6 +19,7 @@ from expedient.clearinghouse.defaultsettings.site import *
 from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
+from expedient.clearinghouse.defaultsettings.ldapSettings import *
 
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
@@ -80,3 +81,7 @@ if DEBUG:
     loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
     loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
+
+
+
+MONITORING_INTERVAL = 38

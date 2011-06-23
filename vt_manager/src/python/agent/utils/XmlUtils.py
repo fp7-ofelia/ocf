@@ -50,7 +50,8 @@ class XmlCrafter(object):
         	try:
             		xml = StringIO()
            		xml.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-            		XMLclass.export(xml, level=0)
+            		#XMLclass.export(xml, level=0)
+			XMLclass.export(xml, level=0,namespacedef_='xmlns=\"http://www.fp7-ofelia.eu/CF/vt_am/rspec\"')
             		print "Crafting of the XML Class concluded without significant errors."
             		xmlString = xml.getvalue()
             		xml.close()
@@ -64,7 +65,18 @@ class XmlUtils(object):
 	#TODO: improve this by creating a proper constructor	
 
 	@staticmethod
-	def getEmptyResponseObject():
-		return XmlParser.parseXML(open(os.path.dirname(__file__)+'/xml/emptyResponse.xml','r').read())
+	def getEmptyProvisioningResponseObject():
+		return XmlParser.parseXML(open(os.path.dirname(__file__)+'/xml/emptyProvisioningResponse.xml','r').read())
 		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
+
+	@staticmethod
+	def getEmptyMonitoringResponseObject():
+		return XmlParser.parseXML(open(os.path.dirname(__file__)+'/xml/emptyMonitoringResponse.xml','r').read())
+		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
+
+	@staticmethod
+	def getEmptyMonitoringVMsInfoResponseObject():
+		return XmlParser.parseXML(open(os.path.dirname(__file__)+'/xml/emptyMonitoringVMsInfoResponse.xml','r').read())
+		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
+
 

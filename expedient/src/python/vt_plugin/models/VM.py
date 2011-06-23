@@ -2,6 +2,7 @@ import shlex, subprocess
 from StringIO import StringIO
 from django.db import models
 from django.db.models.fields import IPAddressField
+from django.core.exceptions import ValidationError
 import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -20,12 +21,49 @@ DISC_IMAGE_CHOICES = (
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('file-image','File Image'),
-                        ('other','Other'),
+                        ('logical-volume-image','Logical Volume'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),
-                        ('logical volumes','Logical Volumes'),
+                        ('hvm','HVM'),
                       )
+
+
+def validate_memory(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: memory has to be higher than 128Mb",
+        )
+
+    if value < 128:
+        error()
+
+def validate_discImage(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only test image available",
+        )
+
+    if value not in ["test", "default"]:
+        error()
+        
+def validate_hdSetupType(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only File Image supported",
+        )
+
+    if value != "file-image":
+        error()
+
+def validate_virtualizationSetupType(value):
+    def error():
+        raise ValidationError(
+            "Invalid input: only Paravirtualization supported",
+        )
+
+    if value != "paravirtualization":
+        error()
 
 class VM(Resource):
     
@@ -35,7 +73,7 @@ class VM(Resource):
 
     #name = models.CharField(max_length = 1024, default="")
     uuid = models.CharField(max_length = 1024, default="")
-    memory = models.IntegerField(blank = True, null=True)
+    memory = models.IntegerField(blank = True, null=True, validators=[validate_memory])
     
   #  cpuNumber = models.IntegerField(blank = True, null=True)
     virtTech = models.CharField(max_length = 10, default="")
@@ -58,14 +96,17 @@ class VM(Resource):
 
     #serverID = models.CharField(max_length = 1024, default="")    
     #hdSetupType = models.CharField(max_length = 1024, default="")
-    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES)
+    hdSetupType = models.CharField(max_length = 20, choices = HD_SETUP_TYPE_CHOICES, validators=[validate_hdSetupType], 
+                                   verbose_name = "HD Setup Type")
     hdOriginPath = models.CharField(max_length = 1024, default="")    
     #virtualizationSetupType = models.CharField(max_length = 1024, default="")
-    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES)
+    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
+                                               validators=[validate_virtualizationSetupType],verbose_name = "Virtualization Setup Type")
 #    macs = models.ManyToManyField('Mac', blank = True, null = True)#, on_delete=models.SET_NULL)
     ifaces = models.ManyToManyField('iFace', blank = True, null = True)
     
-    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES)
+    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage],
+                                  verbose_name = "Disc Image")
     
     class Meta:
         """Meta Class for your model."""
@@ -85,6 +126,22 @@ class VM(Resource):
         return self.virtTech
 
     def setName(self, name):
+        def validate_name(value):
+            def error():
+                raise ValidationError(
+                    "Invalid input: VM name should not contain blank spaces",
+                    code="invalid",
+                )
+            cntrlr_name_re = re.compile("^[\S]*$")
+            m = cntrlr_name_re.match(value)
+            if not m:
+                error()
+        try:
+            validate_name(name)
+            self.name = name
+        except Exception as e:
+            raise e
+
         self.name = name
 
     def getName(self):
@@ -210,3 +267,11 @@ class VM(Resource):
     def delete(self):
         self.action_set.clear()
         super(VM, self).delete()
+
+    def completeDelete(self):
+        self.action_set.clear()
+        for iface in self.ifaces.all():
+            self.ifaces.remove(iface)
+            iface.delete()
+        super(VM, self).delete()
+

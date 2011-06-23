@@ -22,17 +22,21 @@ from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
 from django import forms
 from django.db.models import Q
 from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from vt_plugin.models import resourcesHash
 
 #VT_PLUGIN
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
 from vt_plugin.controller.vtAggregateController.vtAggregateController import askForAggregateResources
-from vt_manager.communication.utils.XmlUtils import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid, copy
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 
 logger = logging.getLogger("html_ui_views")
+
+'''
+Update resources
+'''
 
 def _update_openflow_resources(request, slice):
     """
@@ -80,18 +84,23 @@ def _update_planetlab_resources(request, slice):
 
 
 
+'''
+Node and links functions 
+'''
+
 def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
     Get nodes and links usable by protovis.
     """
     nodes = []
     links = []
-    vt_servers=[] #Jose F. Mingorance-Puga, 31 March 2011
-
+    
     id_to_idx = {}
     agg_ids = []
    
-    #Openflow devices 
+    #Openflow devices
+    #XXX: botch
+    openflowSwitches = dict() 
     for i, agg in enumerate(of_aggs):
         agg_ids.append(agg.pk)
         switches = OpenFlowSwitch.objects.filter(
@@ -103,6 +112,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
             nodes.append(dict(
                 name=s.name, value=s.id, group=i)
             )
+	    openflowSwitches[s.datapath_id] = len(nodes)-1
     
     #Planelab nodes 
     for i, agg in enumerate(pl_aggs):
@@ -117,25 +127,6 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                 name=n.name, value=n.id, group=i+len(of_aggs))
             )
 
-
-    #VT-AM nodes 
-    for i, agg in enumerate(vt_aggs):
-        agg_ids.append(agg.pk)
-#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
-        vt_servers = VTServer.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-
-
-    for n in vt_servers:
-            #id_to_idx[n.id] = len(nodes)
-        #print "afegeixo"+n['name']
-        print "afegeixo"+n.name
-        nodes.append(dict(
-            name=n.name, value=n.id, group=i+len(of_aggs)+len(pl_aggs))
-                #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-        )   
 
 
     # get all connections with both interfaces in wanted aggregates
@@ -153,22 +144,19 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     )
     
     for cnxn in of_cnxn_qs:
-	print id_to_idx
-	print "EO"+str(cnxn.src_iface.switch.id)
-	print "EO"+str(cnxn.dst_iface.switch.id)
-	try:
-	        links.append(
-        	    dict(
-			src=id_to_idx[cnxn.src_iface.switch.id],
-	                target=id_to_idx[cnxn.dst_iface.switch.id],
-        	        value="rsc_id_%s-rsc_id_%s" % (
-                	    cnxn.src_iface.id, cnxn.dst_iface.id
-                		),
-            		)
-        	)	
-   	except Exception as e:
-		print e
-
+        #XXX: change me
+        try:
+            links.append(
+                dict(
+                    src=id_to_idx[cnxn.src_iface.switch.id],
+                    target=id_to_idx[cnxn.dst_iface.switch.id],
+                   value="rsc_id_%s-rsc_id_%s" % (
+                        cnxn.src_iface.id, cnxn.dst_iface.id
+                    ),
+                )
+            )
+        except:
+            pass
     for cnxn in non_of_cnxn_qs:
         links.append(
             dict(
@@ -188,7 +176,40 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                 ),
             )
         )
-        
+
+    #VT-AM nodes 
+    for i, agg in enumerate(vt_aggs):
+        agg_ids.append(agg.pk)
+#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
+        vt_servers = VTServer.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+
+
+
+        for n in vt_servers:
+            #id_to_idx[n.id] = len(nodes)
+            nodes.append(dict(
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
+                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+            )   
+       	    for inter in n.ifaces.all():
+		#first check datapathId exists.
+		try:
+			sId= openflowSwitches[inter.switchID]
+		except:
+			continue
+		links.append(
+	            dict(
+               		target=sId,
+	                src=len(nodes)-1,
+			value=inter.ifaceName+":"+str(inter.port)
+               		),
+        	)
+ 
+
+
     return (nodes, links)
 
 
@@ -257,8 +278,13 @@ def _get_tree_ports(of_aggs, pl_aggs):
     
     # return the list of interface ids
     return list(tree)
-    
-def home(request, slice_id):
+
+
+'''
+Home and allocation view functions
+'''
+
+def bookOpenflow(request, slice_id):
     """
     Display the list of planetlab and openflow aggregates and their resources.
     On submit, create slivers and make reservation.
@@ -295,7 +321,7 @@ def home(request, slice_id):
 
         for agg in vt_aggs:
             vtPlugin = agg.as_leaf_class()
-            askForAggregateResources(vtPlugin)
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
@@ -321,7 +347,75 @@ def home(request, slice_id):
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
+                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    ("Allocate Openflow and PlanetLab resources", reverse("html_plugin_bookOpenflow", args=[slice_id])),
+                )
+            },
+        )
+ 
+
+def home(request, slice_id):
+    """
+    Display the list of all the resources  
+    """
+    
+    slice = get_object_or_404(Slice, id=slice_id)
+    if request.method == "POST":
+        
+        _update_openflow_resources(request, slice)
+        _update_planetlab_resources(request, slice)
+        
+        slice.modified = True
+        slice.save()
+        
+        return HttpResponseRedirect(reverse("html_plugin_flowspace",
+                                            args=[slice_id]))
+    else:
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+
+        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+        of_aggs = \
+            slice.aggregates.filter(aggs_filter)
+        pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+
+        vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+
+        for agg in vt_aggs:
+            vtPlugin = agg.as_leaf_class()
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+       
+#        vm = VM.objects.filter(sliceId=slice.uuid)        
+ 
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
+        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+        
+        return simple.direct_to_template(
+            request,
+            template="html/show_resources.html",
+            extra_context={
+                "protovis_nodes": protovis_nodes,
+                "protovis_links": protovis_links,
+                "tree_rsc_ids": tree_rsc_ids,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
+                "vt_aggs": vt_aggs,
+                "slice": slice,
+                "checked_ids": checked_ids,
+                "ofswitch_class": OpenFlowSwitch,
+                "planetlab_node_class": PlanetLabNode,
+                "breadcrumbs": (
+                    ("Home", reverse("home")),
+                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
                 )
             },
         )

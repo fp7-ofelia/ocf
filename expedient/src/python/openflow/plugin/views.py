@@ -278,21 +278,37 @@ def handle_add_to_slice(request, aggregate, slice):
     
     next = request.GET.get("next", None)
     
+    give_permission_to("can_use_aggregate", aggregate, slice)
+
+    #success_msg=lambda instance: "Successfully added OpenFlow aggregate %s to slice %s" % (aggregate.name, slice.name)    
+
+    #return HttpResponseRedirect(reverse("slice_detail", args=[slice.id])) 
+    return HttpResponseRedirect(next if next else reverse("slice_detail", args=[slice.id])) 
+
+def add_controller_to_slice(request, agg_id, slice_id):
+    """Perform the actual add_controllr_to_slice request."""
+    aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
+    slice = get_object_or_404(Slice, id=slice_id)   
+
+    must_have_permission(request.user, aggregate, "can_use_aggregate")
+    must_have_permission(slice.project, aggregate, "can_use_aggregate")
+
+    next = request.GET.get("next", None)
+
     # check if there's info already.
     try:
         info = OpenFlowSliceInfo.objects.get(slice=slice)
     except OpenFlowSliceInfo.DoesNotExist:
         info = None
-    
+
     id = info.id if info else None
     creating = info != None
-    
+
     def pre_save(instance, created):
         instance.slice = slice
-    
+
     def post_save(instance, created):
         give_permission_to("can_use_aggregate", aggregate, slice)
-    
     return generic_crud(
         request, id, OpenFlowSliceInfo,
         form_class=OpenFlowSliceInfoForm,
@@ -305,5 +321,6 @@ def handle_add_to_slice(request, aggregate, slice):
         template_object_name="info",
         pre_save=pre_save,
         post_save=post_save,
-        success_msg=lambda instance: "Successfully added OpenFlow aggregate %s to slice %s" % (aggregate.name, slice.name),
+        success_msg=lambda instance: "Successfully added OpenFlow controller to slice %s" % (slice.name),
     )
+

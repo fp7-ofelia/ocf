@@ -1,4 +1,5 @@
-from xen.provisioning.configurators.DebianVMConfigurator import DebianVMConfigurator
+from xen.provisioning.configurators.ofelia.OfeliaVMConfigurator import OfeliaVMConfigurator
+from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
 
 '''
 	@author: msune
@@ -10,22 +11,33 @@ from xen.provisioning.configurators.DebianVMConfigurator import DebianVMConfigur
 class VMConfigurator:
 	
 	@staticmethod
-	def __getConfiguratorByOsType(os_type,os_distribution):
-
-		if os_type == "GNU/Linux" and os_distribution == "Debian" :
-			return DebianVMConfigurator
+	def __getConfiguratorByOsType(configurator):
+	
+		if configurator != None and configurator != "":
+			if configurator == MediacatVMConfigurator.getIdentifier():
+				return MediacatVMConfigurator;
+			else:
+				raise Exception("Unknown configurator")	
+		else:
+			return OfeliaVMConfigurator
 	
 
 	
 	@staticmethod
 	def __configureNetworking(vm,path):
 		#Call Appropiate configurator according to VM OS type	
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.operating_system_type,vm.operating_system_distribution)
+		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
 		configurator.configureNetworking(vm,path)
 	@staticmethod
 	def __configureLDAPSettings(vm,path):
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.operating_system_type,vm.operating_system_distribution)
+		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
 		configurator.configureLDAPSettings(vm,path)
+
+	@staticmethod
+	def __configureHostname(vm,path):
+		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
+		configurator.configureHostname(vm,path)
+
 
 	##Public methods
 	@staticmethod
@@ -37,10 +49,13 @@ class VMConfigurator:
 		#Configure LDAP settings 
 		VMConfigurator.__configureLDAPSettings(vm,pathToMountPoint)
 		print "Authentication configured successfully..."
+	
+		#Configure Hostname
+		VMConfigurator.__configureHostname(vm,pathToMountPoint)
 					
 	@staticmethod
 	def createVmConfigurationFile(vm):
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.operating_system_type,vm.operating_system_distribution)
+		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
 		configurator.createVmConfigurationFile(vm)
 			
 
