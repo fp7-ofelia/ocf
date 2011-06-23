@@ -40,6 +40,7 @@ class ProvisioningDispatcher():
 						vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
 					except:
 						vm = None
+						raise
 				#PROVISIONING DELETE, START, STOP, REBOOT
 	 
 				else :
