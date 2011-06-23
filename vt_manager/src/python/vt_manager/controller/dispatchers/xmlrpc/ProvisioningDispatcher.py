@@ -45,7 +45,7 @@ class ProvisioningDispatcher():
 
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 			except Exception as e:
-				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE and vm:
 					controller.deleteVM(vm)
 				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
 
