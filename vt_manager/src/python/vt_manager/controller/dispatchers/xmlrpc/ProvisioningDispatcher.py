@@ -36,7 +36,11 @@ class ProvisioningDispatcher():
 			try:	
 				#PROVISIONING CREATE
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-					vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
+					try:
+						vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
+					except:
+						vm = None
+						raise
 				#PROVISIONING DELETE, START, STOP, REBOOT
 	 
 				else :
