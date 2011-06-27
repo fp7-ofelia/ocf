@@ -14,12 +14,7 @@ from os.path import dirname, join
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
-VTAM_URL      = "147.83.206.92:8445/xmlrpc/agent"
-ISLAND_IP_RANGE = "10.216.12.0"
-ISLAND_NETMASK = "255.255.252.0"
-ISLAND_GW = "192.168.10.1"
-ISLAND_DNS1 = "84.88.39.235"
-ISLAND_DNS2 = ""
+VTAM_URL = "vt_manager_ip:vt_manager_port/xmlrpc/agent" #this should be someting like "192.168.254.1:8445/xmlrpc/agent"
 
 ADMINS = [
     ("expedient", ROOT_EMAIL),
@@ -172,5 +167,3 @@ SITE_LOCKDOWN_EXCEPTIONS = (
 
 #Force https
 DOMAIN_SCHEME = "https"
-
-MONITORING_INTERVAL = 120

@@ -40,11 +40,7 @@ gcf-x509.*/
 build/
 localsettings.py
 vt_manager/src/python/vt_manager/settings.py
-vt_manager/src/python/vt_manager/mySettings.py
 expedient/src/python/expedient/clearinghouse/localsettings.py
 optin_manager/src/python/openflow/optin_manager/localsettings.py
 vt_manager/src/python/agent/settings.py
-vt_manager/src/python/agent/mySettings.py
-vt_manager/src/python/agent/security/certs/agent.crt
-vt_manager/src/python/agent/security/certs/agent.key
-testfile
+vt_manager/src/python/vt_manager/mySettings.py

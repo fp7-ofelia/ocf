@@ -2,7 +2,7 @@ body {
 	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
 	/*background-color: #EEEEEE;*/
-	background-color: #8CCDF8;
+	background-color: #CCDDDD;
 	color: #333;
 	text-align: center;
 	margin: 0px;
@@ -219,9 +219,8 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 	width: 378px;
 	height: 217px;
 }
-#leftContent{
-	width:740px;
-	font-size:12px;
+#main{
+    font-size:12px;
 }
 
 a {
@@ -255,7 +254,7 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 body {
 	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #8CCDF8;
+	background-color: #CCDDDD;
 	color: #333;
 	text-align: center;
 	margin: 0px;
@@ -287,9 +286,6 @@ body {
 	padding-bottom:30px;
 	}
 
-#inner-content {
-	width:400px
-}
 .widecolumn .entry p {
 	font-size: 1.05em;
 	}
@@ -989,6 +985,7 @@ div.stats h2 {
 p.error {
     font-family:courier, "courier new", monospace;
     font-size:10px;
+    font-spaing
     color:#000;
     background-color:#fff;
 }
@@ -1222,13 +1219,11 @@ table.servers{
 }
 
 table.servers td{
-    padding : 3px;
+    padding : 5px;
 }
 
 table.servers th {
-	
     padding : 2px;
-    text-align:left;
     background-color: #8ED6EA;
 }
 
@@ -1248,25 +1243,4 @@ table.servers tr.odd{
     margin:0px;
     background-position:left
 }
-
-#Errors
-.fielderror {
-	text-align:right;
-	color: red; 
-}
-.fielderror th{
-	text-align:left;
-	font-weight:normal;
-	color: red;
-}
-.fielderror label {
-	color: red;
-}
-.fielderror li{
-	list-style: none;
-}
-.fielderror input {
-	background-color:#FFDDEE;
-}
-
 
