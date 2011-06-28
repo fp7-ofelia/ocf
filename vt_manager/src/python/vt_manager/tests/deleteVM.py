@@ -14,8 +14,8 @@ sys.path.insert(0,PYTHON_DIR)
 
 from vt_manager.models.VirtualMachine import VirtualMachine
 
-vmName = str(sys.argv[1])
+vmid = str(sys.argv[1])
 
-vm = VirtualMachine.objects.get(name = vmName).getChildObject()
+vm = VirtualMachine.objects.get(id = vmid).getChildObject()
 server = vm.Server.get()
 server.deleteVM(vm)

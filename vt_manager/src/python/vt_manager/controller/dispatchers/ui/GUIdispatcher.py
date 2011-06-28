@@ -237,6 +237,37 @@ def subscribeIp4Ranges(request, server_id):
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
 
+#def vms_info(request,server_id,vm_id):
+#	vm = VTDriver.getVMbyId(vm_id)
+#	htmlCode = "<tr id=tr_vm"+vm_id class = \"odd\">
+#                <td><a href=\"servers/"+server_id+"/virtual_machines/"+vm_id+"/list\">"+str(vm.name)+"</a></td>
+#                <td> "+str(vm.memory)+"</td>
+#                <td> "+str(vm.operatingSystemType)+"</td>
+#                <td> "+str(vm.operatingSystemDistribution)+"</td>
+#                <td> "+srt(vm.operatingSystemVersion)"+</td>
+#                <td> <span title = \"uuid: "+str(vm.projectName)+"\">"+str(vm.projectName)</span></td>
+#                <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
+#                <td id = td_vm{{vm.id}}> {{vm.state }}</td>
+#                <td id = td_vm_actions{{vm.id}}>
+#                    <div>
+#                    {% if vm.state == "running" %}
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
+#                    {% endif %}
+#                    {% if  vm.state == "created (stopped)"%}
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+#                    {% endif %}
+#                    {% if vm.state == "stopped"%}
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+#                    {% endif %}
+#                    {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+#                        <img src={% url img_media 'loading.gif'%} align="absmiddle">
+#                    {% endif %}
+#                    </div>
+#				</td
+#			</tr>
 
 def check_vms_status(request, server_id):
 	from django.utils import simplejson
@@ -251,20 +282,20 @@ def check_vms_status(request, server_id):
 		if vm.state == "running":
 			actionsHtmlCode =\
 			"<div>\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
 			</div>"
 		elif  vm.state == "created (stopped)" :
 			actionsHtmlCode =\
 			"<div>\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
 			</div>"
 		elif vm.state == "stopped" :
 			actionsHtmlCode =\
 			"<div>\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
 			</div>"
 		else:
 			actionsHtmlCode = "<div><img src=\"/static/media/images/loading.gif\" align=\"absmiddle\"></div>"

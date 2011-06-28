@@ -1,5 +1,4 @@
 {% extends "servers/servers_base.html" %}
-{% load accessDict %}
 {% block pagehead %}<h1>Add/Update virtualized server:</h1>{% endblock pagehead %}
 
 
@@ -43,17 +42,29 @@ function adding(row){
 </script>
 
 <script>
+
+	function createVMtable(){
+         $(function () {
+                   alert("length 0");                                    
+         });
+	}
+
     function updateVMstatus(){
         //$.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
         $.getJSON("../../"+{{server.id}}+"/vms_status", function(data){
            $.each(data.status, function(index,value){
-                    $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
-                    updateVMparams(data,index);
+					if($("#td_vm"+index).length==0){
+						//alert("hola");
+					}
+					else{
+                    	$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
+                    	updateVMparams(data,index);
+					}
                 }
            );
            var vms_table = document.getElementById('table_vms_list');
            $.each($("#table_vms_list tr"), function(tr_index, tr_table){
-                var vmIdValue = tr_table.id.substring(5);
+                //var vmIdValue = tr_table.id.substring(5);
                 if (tr_table.id != 'table_vms_list_header'){
                     var vmIdValue = tr_table.id.substring(5);
                     if (!data.status[vmIdValue]) {
@@ -62,6 +73,10 @@ function adding(row){
                 }
             }
            );
+		  if ($("#table_vms_list tr").length == 1){
+				//$("#table_vms_list").remove()
+				$("#div_vms").replaceWith("<div id = div_vms>{{ server.name }} has no VMs at the moment</div>");
+			}
         });
     }
 
@@ -72,7 +87,11 @@ function adding(row){
 </script>
 <script>
     var timer = setInterval(function(){
-    updateVMstatus(); 
+	if ($("#table_vms_list tr").length != 0 ){
+    	updateVMstatus(); }
+	else{
+		createVMtable();
+	}
     },3000);
 </script>
 <script>
@@ -194,73 +213,8 @@ function adding(row){
     </form>
 
 
-	<div> 
-   		{% if server %}
-			{% with server.getChildObject as server %} 
-    		<h1>VMs in {{ server.name }}</h1>
-    		{% if not server.vms.all %}
-        		{{ server.name }} has no VMs at the moment
-    		{% else %}    
-    			<table class="blue">
-        	<tr id="table_vms_list_header">
-            <th> Name</th>
-            <th> Memory</th>
-            <th> OS Type</th>
-            <th> OS Dist</th>
-            <th> OS Version</th>
-            <th> Project</th>
-            <th> Slice</th>
-            <th> Status</th>
-            <th> Actions </th>
-        	</tr>
-	        {% for vm in server.vms.all %}
-	          <tr class = "{% cycle 'odd' 'even' %}">
-	            <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
-	            <td> {{vm.memory}}</td>
-	            <td> {{vm.operatingSystemType }}</td>
-	            <td> {{vm.operatingSystemDistribution }}</td>
-	            <td> {{vm.operatingSystemVersion }}</td>
-	            <td> <span title = "uuid: {{vmProjects|dictKeyLookup:vm.projectName}}">{{vm.projectName }}</span></td>
-	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
-	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
-	            <td id = td_vm_actions{{vm.id}}>
-					<div>
-					{% if vm.state == "running" %}
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
-                    {% endif %}
-                    {% if  vm.state == "created (stopped)"%}
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
-                    {% endif %}
-                    {% if vm.state == "stopped"%}
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
-                    {% endif %}
-                    {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
-                        <img src={% url img_media 'loading.gif'%} align="absmiddle">
-                    {% endif %}
-					</div>
-	                <!--{% if vm.state == "running" %}
-	                <a href="{% url action_vm server.id vm.id "stop" %}">Stop</a> | <a href="{% url action_vm server.id vm.id "reboot"%}">Reboot</a>
-	                {% endif %}
-	                {% if vm.state == "stopped" %}
-	                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
-	                {% endif %}
-	                {% if vm.state == "created (stopped)" %}
-	                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
-	                {% endif %}
-	                {% if vm.state == "failed" %}
-	                <a href="{% url action_vm server.id vm.id "check_status" %}">Check status</a> 
-	                {% endif %}-->
-	
-	            </td>
-	        </tr>
-	       {% endfor %}
-	    	 </table>   
-     		{% endif %}
-			{% endwith %}
-     	{% endif %}
+	<div>
+		{% include "servers/servers_vms_include.html" %} 
 	</div>
 
 </div>
