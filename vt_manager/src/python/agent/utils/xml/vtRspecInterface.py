@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 #
-# Generated Tue Jun 21 09:44:32 2011 by generateDS.py version 2.3b.
+# Generated Tue Jun 28 13:33:52 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -1223,9 +1223,9 @@ class virtual_machine_type(GeneratedsSuper):
 class xen_configuration(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, hd_setup_type=None, hd_size_gb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
+    def __init__(self, hd_setup_type=None, hd_size_mb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
         self.hd_setup_type = hd_setup_type
-        self.hd_size_gb = hd_size_gb
+        self.hd_size_mb = hd_size_mb
         self.hd_origin_path = hd_origin_path
         self.configurator = configurator
         self.virtualization_setup_type = virtualization_setup_type
@@ -1240,8 +1240,8 @@ class xen_configuration(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_hd_setup_type(self): return self.hd_setup_type
     def set_hd_setup_type(self, hd_setup_type): self.hd_setup_type = hd_setup_type
-    def get_hd_size_gb(self): return self.hd_size_gb
-    def set_hd_size_gb(self, hd_size_gb): self.hd_size_gb = hd_size_gb
+    def get_hd_size_mb(self): return self.hd_size_mb
+    def set_hd_size_mb(self, hd_size_mb): self.hd_size_mb = hd_size_mb
     def get_hd_origin_path(self): return self.hd_origin_path
     def set_hd_origin_path(self, hd_origin_path): self.hd_origin_path = hd_origin_path
     def get_configurator(self): return self.configurator
@@ -1271,9 +1271,9 @@ class xen_configuration(GeneratedsSuper):
         if self.hd_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('<%shd-setup-type>%s</%shd-setup-type>\n' % (namespace_, self.gds_format_string(quote_xml(self.hd_setup_type).encode(ExternalEncoding), input_name='hd-setup-type'), namespace_))
-        if self.hd_size_gb is not None:
+        if self.hd_size_mb is not None:
             showIndent(outfile, level)
-            outfile.write('<%shd-size-gb>%s</%shd-size-gb>\n' % (namespace_, self.gds_format_integer(self.hd_size_gb, input_name='hd-size-gb'), namespace_))
+            outfile.write('<%shd-size-mb>%s</%shd-size-mb>\n' % (namespace_, self.gds_format_integer(self.hd_size_mb, input_name='hd-size-mb'), namespace_))
         if self.hd_origin_path is not None:
             showIndent(outfile, level)
             outfile.write('<%shd-origin-path>%s</%shd-origin-path>\n' % (namespace_, self.gds_format_string(quote_xml(self.hd_origin_path).encode(ExternalEncoding), input_name='hd-origin-path'), namespace_))
@@ -1293,7 +1293,7 @@ class xen_configuration(GeneratedsSuper):
     def hasContent_(self):
         if (
             self.hd_setup_type is not None or
-            self.hd_size_gb is not None or
+            self.hd_size_mb is not None or
             self.hd_origin_path is not None or
             self.configurator is not None or
             self.virtualization_setup_type is not None or
@@ -1315,9 +1315,9 @@ class xen_configuration(GeneratedsSuper):
         if self.hd_setup_type is not None:
             showIndent(outfile, level)
             outfile.write('hd_setup_type=%s,\n' % quote_python(self.hd_setup_type).encode(ExternalEncoding))
-        if self.hd_size_gb is not None:
+        if self.hd_size_mb is not None:
             showIndent(outfile, level)
-            outfile.write('hd_size_gb=%d,\n' % self.hd_size_gb)
+            outfile.write('hd_size_mb=%d,\n' % self.hd_size_mb)
         if self.hd_origin_path is not None:
             showIndent(outfile, level)
             outfile.write('hd_origin_path=%s,\n' % quote_python(self.hd_origin_path).encode(ExternalEncoding))
@@ -1353,13 +1353,13 @@ class xen_configuration(GeneratedsSuper):
         if nodeName_ == 'hd-setup-type':
             hd_setup_type_ = child_.text
             self.hd_setup_type = hd_setup_type_
-        elif nodeName_ == 'hd-size-gb':
+        elif nodeName_ == 'hd-size-mb':
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
             except (TypeError, ValueError), exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
-            self.hd_size_gb = ival_
+            self.hd_size_mb = ival_
         elif nodeName_ == 'hd-origin-path':
             hd_origin_path_ = child_.text
             self.hd_origin_path = hd_origin_path_

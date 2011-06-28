@@ -7,7 +7,7 @@
 
 '''HTTP XML-RPC Server. You must define it!!!'''
 #YOU MUST PUT A STRONG PASSWORD
-#XMLRPC_SERVER_PASSWORD="changeAndUncommentMe"
+XMLRPC_SERVER_PASSWORD="prova"
 
 '''Network parameters. Uncomment only if you want to override settings'''
 #XMLRPC_SERVER_LISTEN_HOST='0.0.0.0' # You should not use '' here, unless you have a real FQDN.
@@ -17,5 +17,5 @@
 #OXA_FILEHD_USE_CACHE=True
 
 '''Use sparse disks while cloning. Uncomment to use Sparse disks. Default is false'''
-#OXA_FILEHD_CREATE_SPARSE_DISK=False
+#OXA_FILEHD_CREATE_SPARSE_DISK=True
 
