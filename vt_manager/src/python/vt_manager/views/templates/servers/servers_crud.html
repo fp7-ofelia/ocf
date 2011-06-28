@@ -38,9 +38,48 @@
 <script language="javascript">
 
 function adding(row){
-    //$(row).find('#deleteTD').replaceWith("<td id=\'deleteTD\'><input type=\"checkbox\" value=\"\" name=\"DELETE\"></td>");
     $(row).find('#rowDelete').remove();
 }
+</script>
+
+<script>
+    function updateVMstatus(){
+        //$.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
+        $.getJSON("../../"+{{server.id}}+"/vms_status", function(data){
+           $.each(data.status, function(index,value){
+                    $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
+                    updateVMparams(data,index);
+                }
+           );
+           var vms_table = document.getElementById('table_vms_list');
+           $.each($("#table_vms_list tr"), function(tr_index, tr_table){
+                var vmIdValue = tr_table.id.substring(5);
+                if (tr_table.id != 'table_vms_list_header'){
+                    var vmIdValue = tr_table.id.substring(5);
+                    if (!data.status[vmIdValue]) {
+                            $("#tr_vm"+vmIdValue).remove();
+                    }
+                }
+            }
+           );
+        });
+    }
+
+   function updateVMparams(data,index){
+        $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
+       // $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");               
+    } 
+</script>
+<script>
+    var timer = setInterval(function(){
+    updateVMstatus(); 
+    },3000);
+</script>
+<script>
+    function handleVMaction(serverId,vmId,action){
+        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action);  
+        updateVMstatus();                                                     
+    }
 </script>
 
 
@@ -163,7 +202,7 @@ function adding(row){
         		{{ server.name }} has no VMs at the moment
     		{% else %}    
     			<table class="blue">
-        	<tr>
+        	<tr id="table_vms_list_header">
             <th> Name</th>
             <th> Memory</th>
             <th> OS Type</th>
@@ -183,9 +222,26 @@ function adding(row){
 	            <td> {{vm.operatingSystemVersion }}</td>
 	            <td> <span title = "uuid: {{vmProjects|dictKeyLookup:vm.projectName}}">{{vm.projectName }}</span></td>
 	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
-	            <td> {{vm.state }}</td>
-	            <td>
-	                {% if vm.state == "running" %}
+	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
+	            <td id = td_vm_actions{{vm.id}}>
+					<div>
+					{% if vm.state == "running" %}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
+                    {% endif %}
+                    {% if  vm.state == "created (stopped)"%}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+                    {% endif %}
+                    {% if vm.state == "stopped"%}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+                    {% endif %}
+                    {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+                        <img src={% url img_media 'loading.gif'%} align="absmiddle">
+                    {% endif %}
+					</div>
+	                <!--{% if vm.state == "running" %}
 	                <a href="{% url action_vm server.id vm.id "stop" %}">Stop</a> | <a href="{% url action_vm server.id vm.id "reboot"%}">Reboot</a>
 	                {% endif %}
 	                {% if vm.state == "stopped" %}
@@ -196,7 +252,7 @@ function adding(row){
 	                {% endif %}
 	                {% if vm.state == "failed" %}
 	                <a href="{% url action_vm server.id vm.id "check_status" %}">Check status</a> 
-	                {% endif %}
+	                {% endif %}-->
 	
 	            </td>
 	        </tr>
