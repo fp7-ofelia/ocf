@@ -38,6 +38,12 @@ OXA_FILEHD_CACHE_TEMPLATES="/opt/ofelia/oxa/cache/templates/"
 '''Remote folder for templates'''
 OXA_FILEHD_REMOTE_TEMPLATES="/opt/ofelia/oxa/remote/templates/"
 
+'''Use sparse disks while cloning'''
+OXA_FILEHD_CREATE_SPARSE_DISK=False
+
+'''Nice priority for Copy&untar operations'''
+OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY=15
+
 ##Ofelia Debian VM configurator parameters
 '''Kernel and initrd that will be used by machines'''
 OXA_DEBIANCONF_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"

@@ -3,7 +3,7 @@ import sys
 import shutil
 import string
 import subprocess
-from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE
+from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE,OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY,OXA_FILEHD_CREATE_SPARSE_DISK
 
 '''
 	@author: msune
@@ -113,6 +113,7 @@ class FileHdManager(object):
 
 
 	##Hd management routines
+
 	@staticmethod
 	def __fileTemplateExistsOrImportFromRemote(filepath):
 		
@@ -131,7 +132,11 @@ class FileHdManager(object):
 			print "Importing image to cache directory:"+OXA_FILEHD_REMOTE_TEMPLATES+path+"->"+OXA_FILEHD_CACHE_TEMPLATES+path
 			try:
 				#Copy all 
-				shutil.copytree(OXA_FILEHD_REMOTE_TEMPLATES+path, OXA_FILEHD_CACHE_TEMPLATES+path)
+				#shutil.copytree(OXA_FILEHD_REMOTE_TEMPLATES+path, OXA_FILEHD_CACHE_TEMPLATES+path)
+				print "/bin/cp "+OXA_FILEHD_REMOTE_TEMPLATES+path+" "+OXA_FILEHD_CACHE_TEMPLATES+path
+				if subprocess.call(["/bin/cp",OXA_FILEHD_REMOTE_TEMPLATES+path, OXA_FILEHD_CACHE_TEMPLATES+path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					raise Exception("Cannot import template")
+
 				
 			except Exception as e:
 				return False
@@ -150,6 +155,7 @@ class FileHdManager(object):
 			raise Exception("Another VM with the same name exists in the same project and slice:"+FileHdManager.debugVM(vm))
 
 		if FileHdManager.__fileTemplateExistsOrImportFromRemote(vm.xen_configuration.hd_origin_path):
+			path= ""
 			try:
 				#TODO: user authentication 	
 				template_path=FileHdManager.getTemplatesPath(vm)+vm.xen_configuration.hd_origin_path
@@ -161,14 +167,46 @@ class FileHdManager(object):
 
 				if not os.path.exists(os.path.dirname(vm_path)):	
 					os.makedirs(os.path.dirname(vm_path))
-				#HD
-				shutil.copy(template_path, vm_path)
-				#Swap
-				shutil.copy(template_swap_path, swap_path)
-
+				
+				size = (vm.xen_configuration.hd_size_mb/1024)*1024
+				if vm.xen_configuration.hd_size_mb %1024 > 0:
+					print "[Warning] HD size is not multiple of 1024; will be modified to:"+str(size)
+				
+				#Create HD
+				print "Creating disks..."
+				if OXA_FILEHD_CREATE_SPARSE_DISK:
+					print "Main disk will be created as Sparse disk..."
+					if subprocess.call(["/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count=1","seek="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+						print "Failed to create Disk"
+						raise Exception("")
+				else:
+					if subprocess.call(["/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+						print "Failed to create Disk"
+						raise Exception("")
+				
+				#Create Swap
+				if subprocess.call(["/bin/dd","if=/dev/zero","of="+swap_path,"bs=1M","count=512"], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					print "Failed to create Swap"
+					raise Exception("")
+				#Format
+				print "Creating EXT3 fs..."
+				if subprocess.call(["/sbin/mkfs.ext3","-F","-q",vm_path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					print "Failed to format disk" 
+					raise Exception("")
+				
+				#Untar disk contents
+				print "Uncompressing disk contents..."
+				path = FileHdManager.mount(vm)
+				if subprocess.call(["/bin/tar","-xvf",template_path,"-C",path],stdout=open(os.devnull, 'w'), preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					print "Failed to uncompress disk contents"
+					raise Exception("")
+					
 			except Exception as e:
 				print e 
 				raise Exception("Could not clone image to working directory"+FileHdManager.debugVM(vm))
+			finally:
+				FileHdManager.umount(path)
+				
 		else:
 			raise Exception("Could not find origin hard-disk to clone"+FileHdManager.debugVM(vm))	
 

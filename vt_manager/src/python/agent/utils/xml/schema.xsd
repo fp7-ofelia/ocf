@@ -183,7 +183,7 @@ PROVISIONING
 	<xs:complexType name="xen-configuration">
 		<xs:sequence>
 			<xs:element name="hd-setup-type" type="xen-hd-setup-type" />
-			<xs:element name="hd-size-gb" type="xs:integer" />
+			<xs:element name="hd-size-mb" type="xs:integer" />
 			<xs:element name="hd-origin-path" type="xs:string" />
 			<xs:element name="configurator" type="xs:string" />
 			<xs:element name="virtualization-setup-type" type="xen-virtualization-setup-type" />
