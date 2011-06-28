@@ -157,7 +157,6 @@ def delete_server(request, server_id):
 		)
 	
 def action_vm(request, server_id, vm_id, action):
-
 	if (not request.user.is_superuser):
         
 		return simple.direct_to_template(request,
@@ -183,7 +182,8 @@ def action_vm(request, server_id, vm_id, action):
 		#XXX: serverUUID should be passed in a different way
 		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, VTServer.objects.get(id=server_id).uuid, action)
     
-	return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
+	#return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
+	return HttpResponse("")
 
 
 def subscribeEthernetRanges(request, server_id):
@@ -236,6 +236,49 @@ def subscribeIp4Ranges(request, server_id):
 		return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
+
+
+def check_vms_status(request, server_id):
+	from django.utils import simplejson
+	vmsStatus = {}
+	vmsActionsHtmlCodes = {}
+	#vmsIP = {}
+
+	server = VTDriver.getServerById(server_id)
+
+	for vm in VTDriver.getVMsInServer(server):
+		vmsStatus[str(vm.id)]= vm.state
+		if vm.state == "running":
+			actionsHtmlCode =\
+			"<div>\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
+			</div>"
+		elif  vm.state == "created (stopped)" :
+			actionsHtmlCode =\
+			"<div>\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+			</div>"
+		elif vm.state == "stopped" :
+			actionsHtmlCode =\
+			"<div>\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
+			<a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+			</div>"
+		else:
+			actionsHtmlCode = "<div><img src=\"/static/media/images/loading.gif\" align=\"absmiddle\"></div>"
+		vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
+		#try:
+		#	vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip
+		#except:
+		#	pass
+
+	#data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes, 'ips': vmsIP,})
+	data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes,})
+	response = HttpResponse(data)
+	return response
+
 
 '''
 Networking point of entry
