@@ -237,78 +237,37 @@ def subscribeIp4Ranges(request, server_id):
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
 
-#def vms_info(request,server_id,vm_id):
-#	vm = VTDriver.getVMbyId(vm_id)
-#	htmlCode = "<tr id=tr_vm"+vm_id class = \"odd\">
-#                <td><a href=\"servers/"+server_id+"/virtual_machines/"+vm_id+"/list\">"+str(vm.name)+"</a></td>
-#                <td> "+str(vm.memory)+"</td>
-#                <td> "+str(vm.operatingSystemType)+"</td>
-#                <td> "+str(vm.operatingSystemDistribution)+"</td>
-#                <td> "+srt(vm.operatingSystemVersion)"+</td>
-#                <td> <span title = \"uuid: "+str(vm.projectName)+"\">"+str(vm.projectName)</span></td>
-#                <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
-#                <td id = td_vm{{vm.id}}> {{vm.state }}</td>
-#                <td id = td_vm_actions{{vm.id}}>
-#                    <div>
-#                    {% if vm.state == "running" %}
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
-#                    {% endif %}
-#                    {% if  vm.state == "created (stopped)"%}
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
-#                    {% endif %}
-#                    {% if vm.state == "stopped"%}
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
-#                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
-#                    {% endif %}
-#                    {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
-#                        <img src={% url img_media 'loading.gif'%} align="absmiddle">
-#                    {% endif %}
-#                    </div>
-#				</td
-#			</tr>
+def list_vms(request, server_id):
 
-def check_vms_status(request, server_id):
-	from django.utils import simplejson
-	vmsStatus = {}
-	vmsActionsHtmlCodes = {}
-	#vmsIP = {}
+	"""Show a page for the user to add/edit an  VTServer """
 
-	server = VTDriver.getServerById(server_id)
+	if (not request.user.is_superuser):
+        
+		return simple.direct_to_template(request,
+						template = 'not_admin.html',
+						extra_context = {'user':request.user},
+					)
+	vmProjects = {}
+	vmSlices = {}
+	try:
+		for vm in VTDriver.getVMsInServer(VTDriver.getServerById(server_id)):
+			if vm.projectName not in vmProjects:
+				vmProjects[vm.projectName] = vm.projectId
+			if vm.sliceName not in vmSlices:
+				vmSlices[vm.sliceName] = vm.sliceId
+	except Exception as e:
+		print e
+		pass
 
-	for vm in VTDriver.getVMsInServer(server):
-		vmsStatus[str(vm.id)]= vm.state
-		if vm.state == "running":
-			actionsHtmlCode =\
-			"<div>\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
-			</div>"
-		elif  vm.state == "created (stopped)" :
-			actionsHtmlCode =\
-			"<div>\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
-			</div>"
-		elif vm.state == "stopped" :
-			actionsHtmlCode =\
-			"<div>\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-			<a href=\"JavaScript:void(0)\" onclick=\"handleVMaction("+str(server.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
-			</div>"
-		else:
-			actionsHtmlCode = "<div><img src=\"/static/media/images/loading.gif\" align=\"absmiddle\"></div>"
-		vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
-		#try:
-		#	vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip
-		#except:
-		#	pass
+	server = get_object_or_404(VTServer, pk=server_id)
+			
+	context = { 'vmProjects': vmProjects, 'vmSlices': vmSlices,'server':server}
 
-	#data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes, 'ips': vmsIP,})
-	data = simplejson.dumps({'status': vmsStatus, 'actions': vmsActionsHtmlCodes,})
-	response = HttpResponse(data)
-	return response
+	return simple.direct_to_template(
+		request,
+		template="servers/servers_list_vms.html",
+		extra_context=context,
+	)
 
 
 '''

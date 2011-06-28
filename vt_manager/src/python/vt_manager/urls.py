@@ -22,7 +22,8 @@ urlpatterns = patterns('',
     url(r'^servers/(?P<server_id>\d+)/virtual_machines/(?P<vm_id>\d+)/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.action_vm', name='action_vm'),
     url(r'^servers/(?P<server_id>\d+)/subscribeEthernetRanges/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.subscribeEthernetRanges', name='subscribeEthernetRanges'),
     url(r'^servers/(?P<server_id>\d+)/subscribeIp4Ranges/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.subscribeIp4Ranges', name='subscribeIp4Ranges'),
-    url(r'^servers/(?P<server_id>\d+)/vms_status/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.check_vms_status', name='check_vms_status'),
+#    url(r'^servers/(?P<server_id>\d+)/vms_status/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.check_vms_status', name='check_vms_status'),
+    url(r'^servers/(?P<server_id>\d+)/list_vms/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.list_vms', name='list_vms'),
 
 
     ##Networking

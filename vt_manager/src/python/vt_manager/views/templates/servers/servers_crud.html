@@ -43,55 +43,15 @@ function adding(row){
 
 <script>
 
-	function createVMtable(){
-         $(function () {
-                   alert("length 0");                                    
-         });
-	}
-
     function updateVMstatus(){
-        //$.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
-        $.getJSON("../../"+{{server.id}}+"/vms_status", function(data){
-           $.each(data.status, function(index,value){
-					if($("#td_vm"+index).length==0){
-						//alert("hola");
-					}
-					else{
-                    	$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
-                    	updateVMparams(data,index);
-					}
-                }
-           );
-           var vms_table = document.getElementById('table_vms_list');
-           $.each($("#table_vms_list tr"), function(tr_index, tr_table){
-                //var vmIdValue = tr_table.id.substring(5);
-                if (tr_table.id != 'table_vms_list_header'){
-                    var vmIdValue = tr_table.id.substring(5);
-                    if (!data.status[vmIdValue]) {
-                            $("#tr_vm"+vmIdValue).remove();
-                    }
-                }
-            }
-           );
-		  if ($("#table_vms_list tr").length == 1){
-				//$("#table_vms_list").remove()
-				$("#div_vms").replaceWith("<div id = div_vms>{{ server.name }} has no VMs at the moment</div>");
-			}
-        });
+		$('#vms').load("../../"+{{server.id}}+"/list_vms");
+		return;
     }
 
-   function updateVMparams(data,index){
-        $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
-       // $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");               
-    } 
 </script>
 <script>
     var timer = setInterval(function(){
-	if ($("#table_vms_list tr").length != 0 ){
-    	updateVMstatus(); }
-	else{
-		createVMtable();
-	}
+    	updateVMstatus();
     },3000);
 </script>
 <script>
@@ -213,8 +173,8 @@ function adding(row){
     </form>
 
 
-	<div>
-		{% include "servers/servers_vms_include.html" %} 
+	<div id="vms">
+		{% include "servers/servers_list_vms.html" %} 
 	</div>
 
 </div>
