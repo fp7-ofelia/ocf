@@ -42,7 +42,8 @@ class VMcontroller():
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-		instance.hdOriginPath = "default/squeeze"
+		#instance.hdOriginPath = "default/squeeze"
+		instance.hdOriginPath = "default/default.tar.gz"
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()

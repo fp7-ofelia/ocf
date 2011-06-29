@@ -94,6 +94,7 @@ class InformationDispatcher():
 
 		VMxmlClass.name = VMmodel.getName()
 		VMxmlClass.uuid = VMmodel.getUUID()
+		VMxmlClass.status = VMmodel.getState()
 		VMxmlClass.project_id = VMmodel.getProjectId()
 		VMxmlClass.slice_id = VMmodel.getSliceId()
 		VMxmlClass.project_name = VMmodel.getProjectName()

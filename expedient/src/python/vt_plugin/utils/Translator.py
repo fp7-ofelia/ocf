@@ -17,7 +17,6 @@ class Translator():
 
     @staticmethod
     def VMtoModel(VMxmlClass, agg_id, save = "noSave"):
-
        # statusTable = {
        #                 'CREATED':'created (stopped)',
        #                 'STARTED':'running',
@@ -27,7 +26,8 @@ class Translator():
 
         #search in database if VMxmlClass already exists
         if VM.objects.filter(uuid = VMxmlClass.uuid).exists():
-            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)            
+            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)     
+            VMmodel.setState(VMxmlClass.status)       
         else:
             VMmodel = VM()
             VMmodel.setState("on queue")
