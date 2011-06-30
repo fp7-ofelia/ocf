@@ -38,6 +38,7 @@ secret_key.py
 *.0
 *.launch
 gcf-x509.*/
+xmlrpc-ssl*/
 expedient-settings
 deployment_settings.py
 *.db
