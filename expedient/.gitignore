@@ -36,8 +36,6 @@ src/python/expedient/clearinghouse/deployment_settings.py
 src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf
 secret_key.py
 *.0
-*.crt
-*.key
 *.launch
 gcf-x509.*/
 expedient-settings
