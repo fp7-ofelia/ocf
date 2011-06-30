@@ -22,6 +22,7 @@ class VMcontroller():
         for instance in instances:
             instance.uuid = uuid.uuid4()
             instance.serverID = server_id
+            instance.state = "on queue"
             instance.sliceId = slice.uuid
             instance.sliceName= slice.name
 
@@ -30,20 +31,20 @@ class VMcontroller():
             instance.virtTech = s.virtTech
             instance.projectId = slice.project.uuid
             instance.projectName = slice.project.name
-	    instance.aggregate_id = s.aggregate_id
+            instance.aggregate_id = s.aggregate_id
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 
             if instance.disc_image == 'test':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-		instance.hdOriginPath = "default/test/lenny"
-	    if instance.disc_image == 'default':
+                instance.hdOriginPath = "default/test/lenny"
+            if instance.disc_image == 'default':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-		#instance.hdOriginPath = "default/squeeze"
-		instance.hdOriginPath = "default/default.tar.gz"
+                #instance.hdOriginPath = "default/squeeze"
+                instance.hdOriginPath = "default/default.tar.gz"
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()

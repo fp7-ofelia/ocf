@@ -83,7 +83,6 @@ def aggregate_crud(request, agg_id=None):
         
 
 def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None'):
-
     "asks the VT AM for all the resources under it."
     serversInAggregate = []
     try:
@@ -127,7 +126,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
                     Translator.PopulateNewVMifaces(vm, VMmodel)
                 Translator.ServerClassToModel(server, vtPlugin.id)
                 serversInAggregate.append(server.uuid)
-            serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
+            serversInExpedient  = VTServer.objects.filter(aggregate=vtPlugin.id).values_list('uuid', flat=True)
             for s in serversInExpedient:
                 if s not in serversInAggregate:
                     delServer = VTServer.objects.get(uuid = s)

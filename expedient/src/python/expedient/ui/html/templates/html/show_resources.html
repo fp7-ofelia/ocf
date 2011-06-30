@@ -226,11 +226,11 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 
 
 {% if vt_aggs %}
-<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 <h1>Virtualized servers resources</h1>
 {% endif %}
 
 {% for agg in vt_aggs %}
+<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
     <div>
     <h2>VT Aggregate Manager {{ agg.name }}</h2>
@@ -293,7 +293,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     <br/>
     <div id="create_server" style="clear:both;">
         Create a new virtual machine in server:
-        <select name = "server_id" id="server_id_agg_{{agg.id}}">
+        <select name = "selected_server" id="server_id_agg_{{agg.id}}">
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
         {% if rsc.leaf_name == 'VTServer' %}
@@ -310,9 +310,9 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
         The aggregate manager does not contain any server yet, or this Expedient instance has not enough privileges to access current servers...
     </div>
     {% endif %}
+</form> 
 {% endfor %}
 
-</form>
 
 
 {% endblock content %}

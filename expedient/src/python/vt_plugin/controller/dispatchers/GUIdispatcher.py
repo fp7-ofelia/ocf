@@ -26,7 +26,7 @@ def goto_create_vm(request, slice_id):
 
     if request.method == "POST":
         if 'create_vms' in request.POST:
-            server_id=request.POST['server_id']
+            server_id=request.POST['selected_server']
             return HttpResponseRedirect(reverse("virtualmachine_crud",
                                                 args=[slice_id,server_id]))
         else:
