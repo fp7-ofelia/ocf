@@ -38,20 +38,14 @@ class ProvisioningDispatcher():
                         print e
                         return                
                 else:
-                    #we save action in local database
                     print "ACTION start is going to be saved"
                     actionModel.save()
 
                 try:
-                    #after saving action, we proceed to save the virtualmachines 
-                    #(to be created) and the server modifications in local database
-                    #first we translate the VM action into a VM model
                     Server = VTServer.objects.get(uuid =  action.server.uuid)
                     VMmodel = Translator.VMtoModel(action.server.virtual_machines[0], Server.aggregate_id, "save")
-                    #Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     Server.vms.add(VMmodel)
                     actionModel.vm = VMmodel
-                    #actionModel.requestUser = threading.currentThread().requestUser
                     actionModel.save()
                 except Exception as e:
                     print "Not possible to translate to VM model\n"
@@ -60,14 +54,10 @@ class ProvisioningDispatcher():
                         "Not possible to translate VM %s to a proper app model" % VMmodel.name,
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
                     )
-                    #VMmodel.delete()
-                     #ProvisioningDispatcher.cleanWhenFail(VMmodel, Server)
                     Server.vms.remove(VMmodel)
                     VMmodel.completeDelete()
                     return
                 
-                #finally we connect to the client server (in this case the VT AM)
-                #and send the action class
                 print "PROVISIONING DISPATCHER --> ACTION CREATE"
                 client = Server.aggregate.as_leaf_class().client
                 

@@ -20,6 +20,7 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 from vt_plugin.controller.VMcontroller.VMcontroller import *
 from vt_plugin.utils.ServiceThread import *
+from expedient.common.messaging.context_processors import messaging
 
 def goto_create_vm(request, slice_id):
     """Show a page that allows user to add SSH s to the aggregate."""
@@ -175,4 +176,12 @@ def startStopSlice(action,uuid):
     except Exception as e:
         print e
         raise e
+
+
+def update_messages(request):
+    return simple.direct_to_template(
+        request,
+        template="messages_panel.html",
+        extra_context=messaging(request),
+    )
 

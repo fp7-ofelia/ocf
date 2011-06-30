@@ -52,6 +52,8 @@
     }
 </script>
 
+</script> 
+
 <script>
     function updateVMstatus(){
         $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
@@ -72,6 +74,7 @@
             }
            );
         });
+		$('#messages').load("../../vt_plugin/update_messages");
     }
     
 </script>
