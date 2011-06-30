@@ -12,7 +12,6 @@ from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
 from expedient.common.ldapproxy.models import LdapProxy
 from django.conf import settings
 from django.db import transaction
-from expedient.clearinghouse.localsettings import LDAP_STORE_PROJECTS
 import uuid
 import string
 
@@ -107,7 +106,7 @@ class Project(models.Model):
 	            edit_perm="can_edit_project",
         	    delete_perm="can_delete_project",
 	)(self, *args, **kwargs)
-	if LDAP_STORE_PROJECTS:
+	if settings.LDAP_STORE_PROJECTS:
 		self.sync_netgroup_ldap()
         return result
 
@@ -117,7 +116,7 @@ class Project(models.Model):
 	    model_func=lambda: Project,
             delete_perm="can_delete_project",
 	)
-	if LDAP_STORE_PROJECTS:
+	if settings.LDAP_STORE_PROJECTS:
 	        self.delete_netgroup_ldap()
 	return result
     
@@ -250,9 +249,10 @@ class Project(models.Model):
         cn = self.get_netgroup().encode()
         data = {'objectClass': ['nisNetgroup', 'top'], 'cn': [cn], 'nisNetgroupTriple': []}
         for user in self._get_members():
-	    print "New member: "+str(user.username)
-            data['nisNetgroupTriple'].append("(,%s,)" % str(user.username))
-            logger.debug("sync_netgroup_ldap: member: %s" % str(user.username))
+	    if user.password == "!":
+            	logger.debug("New member: "+str(user.username))
+            	data['nisNetgroupTriple'].append("(,%s,)" % str(user.username))
+            	logger.debug("sync_netgroup_ldap: member: %s" % str(user.username))
         l.create_or_replace (dn, data)        
 
     def delete_netgroup_ldap(self):
