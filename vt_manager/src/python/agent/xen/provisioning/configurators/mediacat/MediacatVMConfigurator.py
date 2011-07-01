@@ -5,7 +5,7 @@ import subprocess
 
 from xen.provisioning.hdmanagers.LVMHdManager import LVMHdManager
 from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_DEBIANCONF_XEN_SERVER_KERNEL,OXA_DEBIANCONF_XEN_SERVER_INITRD,OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION
+from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION
 
 class MediacatVMConfigurator:
 
@@ -39,8 +39,8 @@ class MediacatVMConfigurator:
 
                 #Set vars&render
                 output = template.render(
-                kernelImg=OXA_DEBIANCONF_XEN_SERVER_KERNEL,
-                initrdImg=OXA_DEBIANCONF_XEN_SERVER_INITRD,
+                kernelImg=OXA_XEN_SERVER_KERNEL,
+                initrdImg=OXA_XEN_SERVER_INITRD,
                 vm=vm)
 
                 #write file

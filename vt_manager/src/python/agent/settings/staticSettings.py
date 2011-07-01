@@ -46,11 +46,12 @@ OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY=15
 
 ##Ofelia Debian VM configurator parameters
 '''Kernel and initrd that will be used by machines'''
-OXA_DEBIANCONF_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
-OXA_DEBIANCONF_XEN_SERVER_INITRD="/boot/initrd.img-2.6.32-5-xen-amd64"
+OXA_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
+OXA_XEN_SERVER_INITRD="/boot/initrd.img-2.6.32-5-xen-amd64"
 
 '''Debian usual file locations'''
-OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION = "/etc/network/interfaces"
-OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
-OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
+OXA_DEBIAN_INTERFACES_FILE_LOCATION = "/etc/network/interfaces"
+OXA_DEBIAN_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
+OXA_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION="/etc/security/access.conf"
 

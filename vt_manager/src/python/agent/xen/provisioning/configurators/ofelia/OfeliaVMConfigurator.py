@@ -3,7 +3,7 @@ import os
 import jinja2 
 
 from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_DEBIANCONF_XEN_SERVER_KERNEL,OXA_DEBIANCONF_XEN_SERVER_INITRD,OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION
+from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
 
 
 class OfeliaVMConfigurator:
@@ -54,8 +54,8 @@ class OfeliaVMConfigurator:
 
 		#Set vars&render		
 		output = template.render(
-		kernelImg=OXA_DEBIANCONF_XEN_SERVER_KERNEL,
-		initrdImg=OXA_DEBIANCONF_XEN_SERVER_INITRD,
+		kernelImg=OXA_XEN_SERVER_KERNEL,
+		initrdImg=OXA_XEN_SERVER_INITRD,
 		hdFilePath=HdManager.getHdPath(vm),
 		swapFilePath=HdManager.getSwapPath(vm),
 		vm=vm)	
@@ -79,25 +79,34 @@ class OfeliaVMConfigurator:
 
 			try:
 				#Backup current files
-				shutil.copy(path+OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,path+OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION+".bak")	
-				shutil.copy(path+OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION,path+OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION+".bak")
+				shutil.copy(path+OXA_DEBIAN_INTERFACES_FILE_LOCATION,path+OXA_DEBIAN_INTERFACES_FILE_LOCATION+".bak")	
+				shutil.copy(path+OXA_DEBIAN_UDEV_FILE_LOCATION,path+OXA_DEBIAN_UDEV_FILE_LOCATION+".bak")
 			except Exception as e:
 				pass
 
-			OfeliaVMConfigurator.__configureInterfacesFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION,'w'))
-			OfeliaVMConfigurator.__configureUdevFile(vm,open(path+OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureInterfacesFile(vm,open(path+OXA_DEBIAN_INTERFACES_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureUdevFile(vm,open(path+OXA_DEBIAN_UDEV_FILE_LOCATION,'w'))
 		except Exception as e:
 			print e
 			raise Exception("Could not configure interfaces or Udev file")
 
 	@staticmethod
 	def configureLDAPSettings(vm,path):
-		pass
+		try:
+			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "r")
+			text = file.read() 
+			file.close() 
+			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "w") 
+			file.write(text.replace("__projectId","@proj_"+vm.project_id+"_"+vm.project_name))
+			file.close() 
+		except Exception as e:
+			print "Could not configure LDAP file!! "+str(e)
+
 
 	@staticmethod
 	def configureHostname(vm,path):
 		try:
-			OfeliaVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
+			OfeliaVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
 		except Exception as e:
 			print "Could not configure hostname; execution continues;"+str(e)
 			pass
