@@ -152,7 +152,7 @@ class Ip4Range(models.Model):
 		return self.ips.filter(isExcluded=False).order_by('ip')
  
 	def getNumberOfSlots(self):
-		return self.numberOfSlots
+		return int(self.numberOfSlots)
 	
 	def getPercentageRangeUsage(self):
 		if not self.numberOfSlots == -1:
@@ -289,7 +289,7 @@ class Ip4Range(models.Model):
 		slots = 0
 		for range in Ip4Range.objects.filter(isGlobal=True):
 			slots += range.numberOfSlots
-		return slots
+		return int(slots)
 	
 		
 

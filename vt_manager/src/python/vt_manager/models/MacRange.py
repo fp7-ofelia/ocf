@@ -121,7 +121,7 @@ class MacRange(models.Model):
 		return self.macs.filter(isExcluded=False).order_by('mac')
 
 	def getNumberOfSlots(self):
-		return self.numberOfSlots
+		return int(self.numberOfSlots)
 	
 	def getPercentageRangeUsage(self):
 		if not self.numberOfSlots == -1:
@@ -266,7 +266,7 @@ class MacRange(models.Model):
 		slots = 0
 		for range in MacRange.objects.filter(isGlobal=True):
 			slots += range.numberOfSlots
-		return slots
+		return int(slots)
 		
 
 		
