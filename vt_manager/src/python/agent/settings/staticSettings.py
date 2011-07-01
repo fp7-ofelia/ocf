@@ -44,6 +44,11 @@ OXA_FILEHD_CREATE_SPARSE_DISK=False
 '''Nice priority for Copy&untar operations'''
 OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY=15
 
+'''IONice copy&untar operations class'''
+OXA_FILEHD_COPY_IONICE_CLASS=2
+'''IONice copy&untar operations priority'''
+OXA_FILEHD_COPY_IONICE_PRIORITY=7
+
 ##Ofelia Debian VM configurator parameters
 '''Kernel and initrd that will be used by machines'''
 OXA_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
