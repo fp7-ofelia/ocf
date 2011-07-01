@@ -1,0 +1,47 @@
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number: 6 (0x6)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=EU, ST=Some-State, O=OFELIA, CN=CA
+        Validity
+            Not Before: Apr  6 11:52:33 2011 GMT
+            Not After : Aug 27 11:52:33 2019 GMT
+        Subject: C=BE, ST=Some-State, O=OFELIA, OU=IBBT, CN=expedientldap/emailAddress=didier.colle@intec.ugent.be
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:b1:e1:4d:6e:04:2b:fe:92:3f:a2:b9:0f:f6:91:
+                    e8:4c:7f:67:52:59:45:2c:83:b4:d1:ec:96:e2:f3:
+                    4a:72:cb:23:63:c6:cb:d0:ae:7e:e0:2f:5c:44:d3:
+                    f2:fa:eb:f0:18:ec:08:c0:d6:42:96:8d:a0:82:e5:
+                    a2:50:25:bd:19:c6:b3:4c:b4:83:2e:28:c6:0c:a3:
+                    07:fa:41:ca:b7:fd:0d:83:88:ab:f6:5b:7d:59:a9:
+                    94:ce:70:81:2c:c0:ea:e6:d1:f4:11:81:ce:fe:cf:
+                    5d:ff:7b:d9:d3:74:31:47:e5:ec:dc:b5:2f:a7:ab:
+                    01:bb:c7:38:cf:55:a9:ca:fb
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha1WithRSAEncryption
+        26:26:5e:56:10:45:e4:76:51:a0:5e:92:55:09:c2:66:8c:af:
+        ce:e2:7c:f9:a3:b2:7f:06:d8:fd:2d:25:28:3c:f5:40:76:a0:
+        cd:b5:7f:6b:db:22:21:97:e3:e7:b9:5a:38:90:95:e3:51:38:
+        79:0d:6f:12:ea:11:ba:af:ab:f2:ad:d3:c2:a3:f8:2b:af:b6:
+        79:42:fb:db:c7:7e:11:4e:36:e3:c5:84:54:0e:2a:b0:fd:f0:
+        80:4e:d0:c4:2e:52:69:c7:82:96:16:7c:22:cf:b1:e6:4d:43:
+        88:2a:68:b1:9a:83:36:04:7f:e5:73:10:1d:ca:27:4f:f7:88:
+        b7:1f
+-----BEGIN CERTIFICATE-----
+MIICNjCCAZ8CAQYwDQYJKoZIhvcNAQEFBQAwQDELMAkGA1UEBhMCRVUxEzARBgNV
+BAgTClNvbWUtU3RhdGUxDzANBgNVBAoTBk9GRUxJQTELMAkGA1UEAxMCQ0EwHhcN
+MTEwNDA2MTE1MjMzWhcNMTkwODI3MTE1MjMzWjCBhjELMAkGA1UEBhMCQkUxEzAR
+BgNVBAgTClNvbWUtU3RhdGUxDzANBgNVBAoTBk9GRUxJQTENMAsGA1UECxMESUJC
+VDEWMBQGA1UEAxMNZXhwZWRpZW50bGRhcDEqMCgGCSqGSIb3DQEJARYbZGlkaWVy
+LmNvbGxlQGludGVjLnVnZW50LmJlMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
+gQCx4U1uBCv+kj+iuQ/2kehMf2dSWUUsg7TR7Jbi80pyyyNjxsvQrn7gL1xE0/L6
+6/AY7AjA1kKWjaCC5aJQJb0ZxrNMtIMuKMYMowf6Qcq3/Q2DiKv2W31ZqZTOcIEs
+wOrm0fQRgc7+z13/e9nTdDFH5ezctS+nqwG7xzjPVanK+wIDAQABMA0GCSqGSIb3
+DQEBBQUAA4GBACYmXlYQReR2UaBeklUJwmaMr87ifPmjsn8G2P0tJSg89UB2oM21
+f2vbIiGX4+e5WjiQleNROHkNbxLqEbqvq/Kt08Kj+CuvtnlC+9vHfhFONuPFhFQO
+KrD98IBO0MQuUmnHgpYWfCLPseZNQ4gqaLGagzYEf+VzEB3KJ0/3iLcf
+-----END CERTIFICATE-----

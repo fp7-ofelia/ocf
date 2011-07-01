@@ -300,6 +300,7 @@ table.blue th {
 	
     padding : 2px;
     text-align:left;
+	font-weight:bold;
     background-color: #8ED6EA;
 }
 

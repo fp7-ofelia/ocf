@@ -73,7 +73,7 @@
 			<div id="content">
 				{% block messages %}
 				{% if messages %}
-				<div class="messages">
+				<div id="messages" class="messages">
 					<table class="msg_table">
 						{% for msg in messages %}
 						<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">

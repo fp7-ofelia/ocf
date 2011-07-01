@@ -43,6 +43,7 @@ class ProvisioningResponseDispatcher():
                 #update action status in DB
                 actionModel.status = action.status
                 print "The action.status is %s" %action.status
+                print "The action.description is %s" %action.description
                 actionModel.description = action.description
                 actionModel.save()
                 
@@ -59,20 +60,44 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.save()
                     elif actionModel.type == 'delete':
                         actionModel.vm.completeDelete()
+
+                    if actionModel.description == None: 
+                        actionModel.description = "" 
+                    else: 
+                        actionModel.description = ": "+actionModel.description
                     if actionModel.requestUser:
                         DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                                "Action %s on VM %s succeed %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
                                 actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
                             )
                     else:
                         project = Project.objects.get(uuid=actionModel.vm.getProjectId())
                         for user in project.members_as_permittees.all():
                             DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                                "Action %s on VM %s succeed %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
                                 user, msg_type=DatedMessage.TYPE_SUCCESS,
                             )
 
                 elif actionModel.status == 'FAILED':
+                    if actionModel.description == None:     
+                        actionModel.description = ""    
+                    else:    
+                        actionModel.description = ": "+actionModel.description
+
+                    if actionModel.requestUser:
+                        DatedMessage.objects.post_message_to_user(
+                                "Action %s on VM %s failed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                                actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
+                            )
+                    else:
+                        project = Project.objects.get(uuid=actionModel.vm.getProjectId())
+                        for user in project.members_as_permittees.all():
+                            DatedMessage.objects.post_message_to_user(
+                                "Action %s on VM %s failed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                                user, msg_type=DatedMessage.TYPE_ERROR,
+                            )
+
+
                     if actionModel.type == 'start':
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
@@ -83,27 +108,11 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('stopped')
                         actionModel.vm.save()
                     elif actionModel.type == 'create':
-                        DatedMessage.objects.post_message_to_user(
-                            "%s. VM %s not created." % (actionModel.description,actionModel.vm.name),
-                            actionModel.requestUser, msg_type=DatedMessage.TYPE_ERROR,
-                        )
                         ProvisioningDispatcher.cleanWhenFail(actionModel.vm, VTServer.objects.get(uuid = actionModel.vm.serverID))
                     else:
                         actionModel.vm.setState('failed')
                         actionModel.vm.save()
 
-                    if actionModel.requestUser:
-                        DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
-                    else:
-                        project = Project.objects.get(uuid=actionModel.vm.getProjectId())
-                        for user in project.members_as_permittees.all():
-                            DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                user, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
 
                 elif actionModel.status == 'ONGOING':
                     if actionModel.type == 'create':
@@ -127,35 +136,35 @@ class ProvisioningResponseDispatcher():
                         actionModel.vm.setState('rebooting...')
                         actionModel.vm.save()
 
-                    if actionModel.requestUser:
-                        DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
-                    else:
-                        project = Project.objects.get(uuid=actionModel.vm.getProjectId())
-                        for user in project.members_as_permittees.all():
-                            DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                user, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
+                    #if actionModel.requestUser:
+                    #    DatedMessage.objects.post_message_to_user(
+                    #            "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                    #            actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
+                    #        )
+                    #else:
+                    #    project = Project.objects.get(uuid=actionModel.vm.getProjectId())
+                    #    for user in project.members_as_permittees.all():
+                    #        DatedMessage.objects.post_message_to_user(
+                    #            "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                    #            user, msg_type=DatedMessage.TYPE_SUCCESS,
+                    #        )
 
                 else:                    
                     actionModel.vm.setState('unknown')
                     actionModel.vm.save()
                 
-                    if actionModel.requestUser:
-                        DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
-                    else:
-                        project = Project.objects.get(uuid=actionModel.vm.getProjectId())
-                        for user in project.members_as_permittees.all():
-                            DatedMessage.objects.post_message_to_user(
-                                "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
-                                user, msg_type=DatedMessage.TYPE_SUCCESS,
-                            )
+                    #if actionModel.requestUser:
+                    #    DatedMessage.objects.post_message_to_user(
+                    #            "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                    #            actionModel.requestUser, msg_type=DatedMessage.TYPE_SUCCESS,
+                    #        )
+                    #else:
+                    #    project = Project.objects.get(uuid=actionModel.vm.getProjectId())
+                    #    for user in project.members_as_permittees.all():
+                    #        DatedMessage.objects.post_message_to_user(
+                    #            "Action %s on VM %s succeed: %s" % (actionModel.type, actionModel.vm.name, actionModel.description),
+                    #            user, msg_type=DatedMessage.TYPE_SUCCESS,
+                    #        )
                 return "Done Response"
 
             else:
