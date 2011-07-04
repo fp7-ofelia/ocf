@@ -48,9 +48,9 @@
 					</tr>
 					<tr>
 						<td  style="text-align:center;">
-						<span id="status{{ip4.id}}"></span>
+						<span id="statusIp4{{ip4.id}}"></span>
 			<script>
-				createProgressBar("#status{{ip4.id}}",{{ip4.ips.all.count}},{{ip4.getNumberOfSlots}},false)	
+				createProgressBar("#statusIp4{{ip4.id}}",{{ip4.ips.all.count}},{{ip4.getNumberOfSlots}},false)	
 			</script>	
 							<br/><font class="smallInfo" style="text-decoration:italic">{{ip4.ips.all.count}}/{{ip4.getNumberOfSlots}}</font>
 		
@@ -116,9 +116,9 @@
 					</tr>
 					<tr>
 						<td>
-						<span id="status{{mac.id}}"></span>
+						<span id="statusMac{{mac.id}}"></span>
 			<script>
-				createProgressBar("#status{{mac.id}}",{{mac.macs.all.count}},{{mac.getNumberOfSlots}},false)
+				createProgressBar("#statusMac{{mac.id}}",{{mac.macs.all.count}},{{mac.getNumberOfSlots}},false)
 			</script>	
 							<br/><font class="smallInfo" style="text-decoration:italic">{{mac.macs.all.count}}/{{mac.getNumberOfSlots}}</font>
 		
