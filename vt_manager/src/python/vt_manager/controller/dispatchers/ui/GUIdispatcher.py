@@ -167,8 +167,8 @@ def action_vm(request, server_id, vm_id, action):
 	if(action == 'list'):
           
 		return simple.direct_to_template(
-				request, template="servers/list_vm.html",
-				extra_context={"vm": VTDriver.getVMbyId(vm_id)}
+				request, template="servers/server_vm_details.html",
+				extra_context={"vm": VTDriver.getVMbyId(vm_id), "server_id":server_id}
 		)
 
 	elif(action == 'check_status'):

@@ -1,6 +1,7 @@
 <h1>Topology</h1>
 
 
+<script src="{% url js_media 'jquery.tipsy.js' %}"></script>
 <script type="text/javascript+protovis">
 
 
@@ -187,6 +188,7 @@ force.node.add(pv.Image)
 //    .title(function(d) d.nodeName)
     .event("mousedown", pv.Behavior.drag())
     .event("mouseover", function(d) {
+//		pv.Behavior.tipsy({ gravity: "w", fade: true })
         /* display info on the selected node in the div */ 
         type = get_node_type(d);
         desc = "Unknown"
@@ -212,8 +214,6 @@ force.node.add(pv.Image)
         } else if(type == "vtserver") {
             clickServer(d); 
         }
-    
-
     })
     .event("mouseout", function() this.i(-1))
     .event("drag", force)
@@ -237,8 +237,7 @@ vis.render();
    <a href="#" onClick="return zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
 </div>
 </div>
-<div id="tooltip" style="visibility:hidden">
-</div>
+
 {% endif %}
 
 <br />

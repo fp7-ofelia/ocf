@@ -115,6 +115,13 @@ class VTDriver():
 		except:
 			raise
 
+	@staticmethod
+	def getVMbyId(id):
+		try:
+			return VirtualMachine.objects.get(id = id).getChildObject()
+		except:
+			raise
+
 	def deleteVM():
 		raise Exception("Method not callable for Driver Class")
 
