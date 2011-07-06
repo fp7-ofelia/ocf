@@ -2,9 +2,9 @@
 
 
 <script src="{% url js_media 'jquery.tipsy.js' %}"></script>
+<script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
 <script type="text/javascript+protovis">
-
-
 /* ProtoVIS data */    
 var data = {
     nodes: [
@@ -198,6 +198,7 @@ force.node.add(pv.Image)
             desc = "PlanetLab node";
         } else if(type == "vtserver") {
             desc = "Virtualized server";
+			tooltip.show('Testing  123 ', 200);
         }
     
         $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
@@ -216,12 +217,16 @@ force.node.add(pv.Image)
         }
     })
     .event("mouseout", function() this.i(-1))
+	.event("mouseout", function() {
+			tooltip.hide();
+		})
     .event("drag", force)
     .anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
 
 vis.render();
 
 </script>
+
 {% if openflow_aggs or planetlab_aggs or vt_aggs %}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
 <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;"></div>
