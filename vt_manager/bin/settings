@@ -1,0 +1,18 @@
+#!/bin/bash 
+
+###
+#	@author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#       @description:settings file 
+###
+
+VERSIONS_PATH="$EXECPATH/versions/"
+
+#Version files
+CURRENT_VERSION_PATH="/opt/ofelia/oxa/repository/vt_manager/.currentVersion" # Make sure this file is under .svnignore .gitignore... 
+TARGETED_VERSION_PATH="/opt/ofelia/oxa/repository/vt_manager/version" # Make sure this file is NOT under .svnignore .gitignore... 
+
+#CURRENT_VERSION_PATH="/opt/ofelia/vt_manager/.currentVersion" # Make sure this file is under .svnignore .gitignore... 
+#TARGETED_VERSION_PATH="/opt/ofelia/vt_manager/version" # Make sure this file is NOT under .svnignore .gitignore... 
+
