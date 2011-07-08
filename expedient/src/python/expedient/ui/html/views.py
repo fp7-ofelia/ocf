@@ -110,8 +110,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         )
         for s in switches:
             id_to_idx[s.id] = len(nodes)
-            nodes.append(dict(
-                name=s.name, value=s.id, group=i, infoKeys=[], info={})
+            nodes.append(dict( 
+                name=s.name, value=s.id, group=i, type="of_agg")
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
     
@@ -125,7 +125,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                name=n.name, value=n.id, group=i+len(of_aggs), infoKeys=[], info={})
+                name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
             )
 
 
@@ -199,8 +199,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
             for name in  n.vms.all().values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
-      	    for i,inter in enumerate(n.ifaces.all()):
-                vmInterfaces.append(dict(name="eth"+str(i), switch=str(inter.switchID), port=str(inter.port)))
+      	    for j,inter in enumerate(n.ifaces.all()):
+                vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
 		#first check datapathId exists.
                 try:
                     sId= openflowSwitches[inter.switchID]
@@ -214,7 +214,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                             ),
                      )
             nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), vmNames=vmNames, vmInterfaces=vmInterfaces)
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
                     #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
             )
     return (nodes, links)
@@ -394,7 +394,6 @@ def home(request, slice_id):
         vt_aggs = \
             slice.aggregates.filter(
                 leaf_name=VtPlugin.__name__.lower())
-
         for agg in vt_aggs:
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
@@ -404,8 +403,6 @@ def home(request, slice_id):
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
 
-        print "LEODEBUG"
-        print protovis_nodes
         return simple.direct_to_template(
             request,
             template="html/show_resources.html",

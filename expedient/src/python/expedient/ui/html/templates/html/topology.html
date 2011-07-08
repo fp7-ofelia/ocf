@@ -9,11 +9,13 @@
 
 <script type="text/javascript+protovis">
 /* ProtoVIS data */   
+
+/*alert("{{ openflow_aggs.count }},{{ planetlab_aggs.count }},{{ vt_aggs.count }}");*/
 var data = {
     nodes: [
         {% for node in protovis_nodes %}
         {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", 
-		{% if node.group == 2  %}
+		{% if node.type == "vt_agg"  %}
 			nodeVms: {{node.vmNames|safe }},
 			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
 		{%endif%}
@@ -67,7 +69,6 @@ function get_node_type(d) {
     var of_groups_len = {{ openflow_aggs.count }};
     var pl_groups_len = {{ planetlab_aggs.count }};
     var vt_aggs_len = {{ vt_aggs.count }};
-    
     if(d.group < of_groups_len) {
         return "openflow";
     } else if(d.group < of_groups_len + pl_groups_len) {
