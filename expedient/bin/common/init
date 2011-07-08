@@ -1,0 +1,68 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Initialization library 
+###
+
+#Usage functions
+function usage()
+{
+	print ""
+	print "Usage of the command"	
+	print ""
+}
+
+
+
+function checkAction()
+{
+	#Two actions {install,upgrade}
+ 
+	if [ "$1" == "install" ]; then
+		ACTION="install"
+		ACTION_="performInstall"
+		return	
+	elif [ "$1" == "upgrade" ]; then
+		ACTION="upgrade"
+		ACTION_="performUpgrade"
+		return
+	elif [ "-h" == "$1" ]; then
+		usage
+		exit 0
+	fi
+
+	usage 	
+	error "Unknown action: $1. Supported actions {install,upgrade}"  $NO_RESCUE
+}
+
+function checkArgsAndParseOpts()
+{
+	#At least one argument required
+
+	if [ $# -lt 1 ]; then
+		usage
+		error "Incorrect number of parameters" $NO_RESCUE
+	fi
+
+	#Check action arg
+	checkAction $1
+	shift 1
+	
+	#Extra args
+	while getopts ":dnf" o
+	do
+		case "$o" in
+
+			d)	DEBUG=1 ;;
+			n)	USE_LOG=0;;
+			f)	BACKUP=0 ;;
+			[?])	error "Unkown Option: $1" $NO_RESCUE && usage && exit 1	
+			exit 1;;
+		esac
+	done
+
+}
+

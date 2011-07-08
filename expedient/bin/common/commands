@@ -1,0 +1,94 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Commands library 
+###
+
+##
+#Commands
+##
+
+#Install
+function performInstall()
+{
+	#Override backup (not needed for install)
+	BACKUP=0
+
+	#Determine version
+	setVersions
+
+	#Version checks
+	printHeader "Version checkings." "Executing version checking code..."
+	source "$VERSIONS_PATH/version-checks"
+	
+	#Summary&Acceptance
+	summary `importModule description $DONT_ABORT`
+	confirm "Proceed with installation/upgrade." $NO_RETURN $NO_RESCUE
+
+	#No backup; rollback should only undo changes
+
+	#Pre-install hook
+	printHeader "Pre-install." "Executing pre-install hook code..." 
+	loadModule "pre-install-hook" $NO_RESCUE
+	
+	#install
+	printHeader "Install." "Installing software..."
+	loadModule "install" 
+	
+	#Post-install hook	
+	printHeader "Post-install." "Executing post-install hook code..." 
+	loadModule "post-install-hook" 
+
+	#Install new version file
+	printHeader "Version file." "Installing/updating version file..." 
+	writeVersion	
+	
+	printHeader "Installation has been successful." "Please, make appropiate tests (if not done by installation code) to make sure installation has been completely successful..." 
+
+}
+
+function performUpgrade()
+{
+
+	#Determine version
+	setVersions
+	
+	
+	#Version checks
+	printHeader "Version checkings." "Executing version checking code..."
+	checkVersionJump
+	source "$VERSIONS_PATH/version-checks"
+	
+	#Summary&Acceptance
+	summary `importModule description $DONT_ABORT`
+	confirm "Proceed with installation/upgrade." $NO_RETURN $NO_RESCUE
+
+	#Load backup to set restoration point 
+	if [ "$BACKUP" == "1" ]; then	
+		printHeader "Backup." "Starting backup..." 
+		loadModule "backup" $NO_RESCUE
+	fi
+	
+	#Pre-upgrade hook
+	printHeader "Pre-upgrade." "Executing pre-upgrade hook code..." 
+	loadModule "pre-upgrade-hook" $NO_RESCUE
+	
+	#upgrade
+	printHeader "Upgrade." "Upgrading software..." 
+	loadModule "upgrade" 
+	
+	#Post-upgrade hook	
+	printHeader "Post-upgrade." "Executing post-upgrade hook code..." 
+	loadModule "post-upgrade-hook" 
+
+	#Install new version file
+	printHeader "Version file." "Installing/updating version file..." 
+	writeVersion
+	
+	printHeader "Upgrade has been succesful." "\nPlease, make appropiate tests (if not done by upgrade code) to make sure upgrade has been completely successful" 
+
+}
+
