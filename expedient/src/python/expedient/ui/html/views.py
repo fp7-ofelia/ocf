@@ -31,6 +31,7 @@ from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid, copy
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
+import json
 
 logger = logging.getLogger("html_ui_views")
 
@@ -94,7 +95,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
     nodes = []
     links = []
-    
+
     id_to_idx = {}
     agg_ids = []
    
@@ -110,7 +111,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict(
-                name=s.name, value=s.id, group=i)
+                name=s.name, value=s.id, group=i, infoKeys=[], info={})
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
     
@@ -124,7 +125,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                name=n.name, value=n.id, group=i+len(of_aggs))
+                name=n.name, value=n.id, group=i+len(of_aggs), infoKeys=[], info={})
             )
 
 
@@ -190,26 +191,32 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
 
         for n in vt_servers:
             #id_to_idx[n.id] = len(nodes)
-            nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
-                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            )   
-       	    for inter in n.ifaces.all():
+#            nodes.append(dict(
+#                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
+#                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+#            )
+            vmNames = []
+            for name in  n.vms.all().values_list('name', flat=True):
+                vmNames.append(str(name))
+            vmInterfaces = []
+      	    for i,inter in enumerate(n.ifaces.all()):
+                vmInterfaces.append(dict(name="eth"+str(i), switch=str(inter.switchID), port=str(inter.port)))
 		#first check datapathId exists.
-		try:
-			sId= openflowSwitches[inter.switchID]
-		except:
-			continue
-		links.append(
-	            dict(
-               		target=sId,
-	                src=len(nodes)-1,
-			value=inter.ifaceName+":"+str(inter.port)
-               		),
-        	)
- 
-
-
+                try:
+                    sId= openflowSwitches[inter.switchID]
+                except:
+                    continue
+                links.append(
+                        dict(
+                            target=sId,
+                            src=len(nodes)-1,
+                            value=inter.ifaceName+":"+str(inter.port)
+                            ),
+                     )
+            nodes.append(dict(
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), vmNames=vmNames, vmInterfaces=vmInterfaces)
+                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+            )
     return (nodes, links)
 
 
@@ -396,7 +403,9 @@ def home(request, slice_id):
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
-        
+
+        print "LEODEBUG"
+        print protovis_nodes
         return simple.direct_to_template(
             request,
             template="html/show_resources.html",
