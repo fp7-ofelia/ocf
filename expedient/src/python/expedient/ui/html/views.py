@@ -199,8 +199,13 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
             for name in  n.vms.all().values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
-      	    for j,inter in enumerate(n.ifaces.all()):
+            for j,inter in enumerate(n.ifaces.all()):
                 vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
+            nodes.append(dict(
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
+                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+            ) 
+            for j,inter in enumerate(n.ifaces.all()):
 		#first check datapathId exists.
                 try:
                     sId= openflowSwitches[inter.switchID]
@@ -213,10 +218,6 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
                             value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
-            nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
-                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            )
     return (nodes, links)
 
 
