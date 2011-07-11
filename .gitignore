@@ -57,3 +57,4 @@ optin_manager/rescue/*
 vt_manager/.currentVersion
 vt_manager/log/*
 vt_manager/rescue/*
+!.gitignore
