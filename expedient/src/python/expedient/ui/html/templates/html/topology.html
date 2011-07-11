@@ -35,10 +35,11 @@ var data = {
 
 function get_node_info_formated(d){
 	type = get_node_type(d);
+		var nameString = "<b> "+d.nodeName+"<b></br>"
 	    if(type == "openflow") {
-            return "";
+            return nameString ;
         } else if(type == "planetlab") {
-            return "";
+            return nameString;
         } else if(type == "vtserver") {
 			if (d.nodeVms.length > 0){
 				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
@@ -50,16 +51,16 @@ function get_node_info_formated(d){
 					else{
 						vmListString = vmListString +"<br clear = left><br clear=left>";
 					}
-				} 
-				var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
-				for (i=0;i<d.nodeVmInterfaces.length;i++){
-	                vmInterfacesString = vmInterfacesString + "· "+d.nodeVmInterfaces[i]['name']+" connected to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
-	                }
-	            return vmListString+vmInterfacesString;
+				}
 			}
-			else{
-				return "No VMs in this Server"	
-			}
+            else{
+                vmListString =  "<b>No VMs in this Server </b></br><br clear=left>"  
+            } 
+			var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
+			for (i=0;i<d.nodeVmInterfaces.length;i++){
+	           vmInterfacesString = vmInterfacesString + "· "+"<b>"+d.nodeVmInterfaces[i]['name']+"</b> to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
+	         }
+	        return nameString + vmListString+vmInterfacesString;
         }
 
 
@@ -206,7 +207,7 @@ force.node.add(pv.Image)
         } else if(type == "planetlab") {
             return "#333333"; 
         } else if(type == "vtserver") {
-            return "#990000"; 
+            return "#006699"; 
         } else {
             return "#CCCCCC"; 
         }
@@ -240,9 +241,8 @@ force.node.add(pv.Image)
             desc = "PlanetLab node";
         } else if(type == "vtserver") {
             desc = "Virtualized server";
-			tooltip.show(get_node_info_formated(d));
-			
         }
+		tooltip.show(get_node_info_formated(d));
     
         $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
         $("#selected_node_info").show();
@@ -264,12 +264,11 @@ force.node.add(pv.Image)
 			tooltip.hide();
 		})
     .event("drag", force)
-    .anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
+    //.anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
 
 vis.render();
 
 </script>
-{{protovis_infoKeys}}
 {% if openflow_aggs or planetlab_aggs or vt_aggs %}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
 <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;"></div>
