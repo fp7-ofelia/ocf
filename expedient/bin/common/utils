@@ -102,6 +102,9 @@ function summary()
 	if [ "$DEBUG" == "1"  ]; then 
 		print "\t + Debug Mode enabled"
 	fi
+	if [ "$FORCE" == "1"  ]; then 
+		print "\t + ${txtred}Force mode...${txtrst}"
+	fi	
 
 	print ""
 	#Description

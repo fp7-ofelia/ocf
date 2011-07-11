@@ -52,13 +52,14 @@ function checkArgsAndParseOpts()
 	shift 1
 	
 	#Extra args
-	while getopts ":dnf" o
+	while getopts ":dnbf" o
 	do
 		case "$o" in
 
 			d)	DEBUG=1 ;;
 			n)	USE_LOG=0;;
-			f)	BACKUP=0 ;;
+			b)	BACKUP=0 ;;
+			f)	FORCE=1 ;;
 			[?])	error "Unkown Option: $1" $NO_RESCUE && usage && exit 1	
 			exit 1;;
 		esac
