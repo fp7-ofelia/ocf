@@ -24,8 +24,9 @@ function executeModule(){
 		local DPATH="$VERSIONS_PATH/default/install/$2"
 	
 	else
-		local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/$CURRENT_VERSION/$2"
-		local DPATH="$VERSIONS_PATH/default/upgrade/default/$2"
+		local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/$CURRENT_VERSION/$2" #specific v1 -> v2
+		local DPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/default/$2" #Generic from , specific to: whatever -> v1
+		local DDPATH="$VERSIONS_PATH/default/upgrade/default/$2" #Default
 	fi
 
 	#Verify existance
@@ -39,6 +40,10 @@ function executeModule(){
 	elif [ -f $DPATH ]; then
 		#Go to default 
 		$1 $DPATH || error "Error importing module '$2'"
+		return
+	elif [ -f $DDPATH ]; then
+		#Go to default 
+		$1 $DDPATH || error "Error importing module '$2'"
 		return
 	fi
 	
