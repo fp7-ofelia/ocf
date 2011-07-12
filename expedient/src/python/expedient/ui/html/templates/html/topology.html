@@ -37,8 +37,8 @@ var data = {
 
 function get_node_info_formated(d){
 	type = get_node_type(d);
-		var nameString = "<b>"+d.nodeName+"</b><br>";
 	    if(type == "openflow") {
+			var nameString = "<b>Switch Datapath ID: "+d.nodeName+"</b><br><br>";
 			if(d.nodeConnections.length>0){
 				connectionsString = "<b>Connections:</b><br>";
 				for (i=0;i<d.nodeConnections.length;i++){
@@ -52,6 +52,7 @@ function get_node_info_formated(d){
         } else if(type == "planetlab") {
             return nameString;
         } else if(type == "vtserver") {
+			var nameString = "<b>Server: "+d.nodeName+"</b><br><br>";			
 			if (d.nodeVms.length > 0){
 				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
 				for (i=0;i<d.nodeVms.length;i++){
@@ -123,7 +124,7 @@ cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
 }
 
 function zoomOut(zoom) {
-    if(cur_zoom-zoom >0)
+	if(cur_zoom-zoom >0)
             cur_zoom = cur_zoom - zoom;
     else
         return false;
@@ -134,7 +135,8 @@ cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
 }
 
 function zoomReset() {
-    cur_zoom=1;
+	// value is 0.99 due to Firefox bug when it is 1
+   cur_zoom=0.99;
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
     vis.render();
@@ -151,8 +153,7 @@ var vis;
 vis = new pv.Panel().canvas('target') 
     .width(w)
     .height(h)
-    .fillStyle("white");
-
+    .fillStyle("white")
 
 var force = vis.add(pv.Layout.Force)
     .bound(true)
