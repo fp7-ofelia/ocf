@@ -7,28 +7,51 @@
 #	@description: install module 
 ###
 
+#Constants
+SRC_DIR=/opt/ofelia/expedient/
+APACHE_USER="www-data"
+
 #Inform user
 printHeader ">" "Using default install module..."
 
-
 #Install dependencies
 printHeader ">" "Installing dependencies through apt-get..."
+
 source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies file" $NO_RESCUE
 /usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
 /usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
 
 #apt-get start apache => stop it
-
-print ""
+/usr/sbin/service apache2 stop
 
 printHeader ">" "Installing remaining dependencies through easy_install..."
+
 /usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
 
-print ""
+printHeader ">" "Enabling macro and ssl module in apache2..."
 
-printHeader ">" "Enabling macro and ssl module..."
 /usr/sbin/a2enmod macro || warn "Could not enable macro module" "; maybe already enabled?"
 /usr/sbin/a2enmod ssl || warn "Could not enable ssl module" "; maybe already enabled?"
 
 #Build ssl certs
 source $CURRENT_DIRECTORY/lib/ssl
+
+#Create symbolic links
+printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
+
+ln -sf $SRC_DIR/src/config/expedient/common/apache/vhost-macros.conf /etc/apache2/conf.d/ || error "Cannot create vhost-macros symbolic link"
+ln -sf $SRC_DIR/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf /etc/apache2/sites-available/expedient.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
+ln -sf /etc/apache2/sites-available/expedient.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
+
+
+#Change permissions of the code
+printHeader ">" "Setting correct file permissions..."
+chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
+chown -f $APACHE_USER $SRC_DIR/src/ -R
+
+#Django settings 
+source $CURRENT_DIRECTORY/lib/django-settings
+
+#Django database
+source $CURRENT_DIRECTORY/lib/django-db
+

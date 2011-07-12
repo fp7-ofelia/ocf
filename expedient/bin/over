@@ -1,0 +1,65 @@
+#!/bin/bash 
+
+###
+#	@author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#       @description: 
+###
+
+##GENERAL parameters
+BASH="/bin/bash"
+EXECPATH=$PWD
+EXECPID=$$
+LOG="$EXECPATH/log/`date +"%R-%d%m%y"`#$EXECPID"
+BACKUP_PATH="$EXECPATH/rescue/`date +"%R-%d%m%y"`#$EXECPID"
+DEBUG=0
+USE_LOG=1
+BACKUP=1
+FORCE=0
+
+##STATIC CONSTANTS
+NO_RETURN=1
+DONT_ABORT=2
+NO_RESCUE=1
+
+##Other info
+APP_NAME="over"
+
+
+##Main method
+function main()
+{
+	#Check root
+	if [ "$(id -u)" != "0" ]; then
+		echo "$(tput setaf 1)FATAL ERROR$(tput setaf 0): $APP_NAME must be run by root user"
+		exit 1
+	fi
+	
+	##Load settings
+	source "$EXECPATH/settings" || ( echo "FATAL ERROR: Cannot import settings" && exit 1 )
+
+	##Load libraries
+	source "$EXECPATH/common/utils" || ( echo "FATAL ERROR: Cannot import utils library" && exit 1 )
+	source "$EXECPATH/common/init" || error "Cannot import init library" $NO_RESCUE
+	source "$EXECPATH/common/versioning" ||error "Cannot import commands library" $NO_RESCUE
+	source "$EXECPATH/common/modules" ||error "Cannot import module library" $NO_RESCUE
+	source "$EXECPATH/common/commands" ||error "Cannot import commands library" $NO_RESCUE
+
+	#Spash
+	splash
+
+	#Arguments
+	checkArgsAndParseOpts $@
+	
+	#Invoque action
+	eval $ACTION_
+
+	#Finish
+	print "Finishing execution..."
+	exit 0		
+}
+
+
+#Calling main
+main $@

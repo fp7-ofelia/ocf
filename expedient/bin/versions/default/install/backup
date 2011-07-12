@@ -7,4 +7,7 @@
 #	@description: backup module 
 ###
 
-print "[DEFAULT] backup!"
+#Inform user
+printHeader ">" "Using default backup module..."
+
+print "Nothing to do..."

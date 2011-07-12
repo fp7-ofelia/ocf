@@ -7,4 +7,7 @@
 #	@description: rollback module 
 ###
 
-print "[DEFAULT] rollback!"
+#Inform user
+printHeader ">" "Using default backup module..."
+
+print "Nothing to do..."

@@ -14,5 +14,7 @@ printHeader ">" "Using default post-install-hook module..."
 print "Starting apache2..."
 /usr/sbin/service apache2 start
 
+#Cleaning the house
 
-
+#Testing
+#TODO
