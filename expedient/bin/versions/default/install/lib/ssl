@@ -1,0 +1,77 @@
+#!/bin/bash
+
+#SSL routines. Installing SSL certificates in apache2 (according to vhost configurations of the apps)
+
+#Check if not in force mode. If not and if the files exist
+
+function buildSSLCertificates(){
+
+print ""
+printHeader ">" "Building SSL certificates..."
+print ""
+
+mkdir /etc/apache2/ssl.crt/ /etc/apache2/ssl.crt/ /etc/apache2/ssl.crt/ || warning "Could not mkdir ssl directories under /etc/apache2. Proceeding with installation..."
+
+print ""
+print "Generating CA certificate..."
+print "You will be promted for several information. Please make sure CommonName (CN) is correct (correct IP or domain name). Do not enter extra information as it seems apache2/openssl is buggy?¿)"
+print ""
+
+#CA cert
+openssl genrsa -des3 -out /etc/apache2/ssl.crt/ca.key 4096 || error "Could not generate CA certificate."
+
+print ""
+print "Generating Request certificate..."
+print "You will be promted for several information. Please make sure CommonName (CN) is correct (correct IP or domain name). Do not enter extra information as it seems apache2/openssl is buggy?¿)"
+print ""
+
+
+#Request
+openssl req -new -x509 -days 3065 -key /etc/apache2/ssl.crt/ca.key -out /etc/apache2/ssl.crt/ca.crt || error "Could not generate Request certificate."
+
+print ""
+print "Generating private key..."
+print ""
+
+#Key
+openssl genrsa -des3 -out /etc/apache2/ssl.key/server.key 4096|| error "Could not generate Key."
+
+print ""
+print "Signing request..."
+print ""
+
+#Key&request
+openssl req -new -key /etc/apache2/ssl.key/server.key -out /etc/apache2/ssl.key/server.csr || error "Could not sign request."
+
+print ""
+print "Generating SSL certificate..."
+print ""
+
+#Generate certificate
+openssl x509 -req -days 3650 -in /etc/apache2/ssl.key/server.csr -CA /etc/apache2/ssl.crt/ca.crt -CAkey /etc/apache2/ssl.crt/ca.key -set_serial 01 -out /etc/apache2/ssl.key/server.crt || error "Could not generate certificate."
+
+print ""
+print "Moving keys and cleaning the house..."
+print ""
+
+#Move keys
+openssl rsa -in /etc/apache2/ssl.key/server.key -out /etc/apache2/ssl.key/server.key.insecure || error "Could not regenerate Key."
+mv /etc/apache2/ssl.key/server.key /etc/apache2/ssl.key/server.key.secure || error "Could not move keys."
+mv /etc/apache2/ssl.key/server.key.insecure /etc/apache2/ssl.key/server.key|| error "Could not move keys."
+mv /etc/apache2/ssl.key/server.crt /etc/apache2/ssl.crt/|| error "Could not move server certificate."
+
+}
+
+if [ "$FORCE" == 0 ]; then 
+	if [ -z /etc/apache2/ssl.key/server.key  ] || [ -z /etc/apache2/ssl.key/server.key   ] ; then
+		installSSLCertificates
+	elif
+		print ""
+		warning "SSL certificates exist; this is not a problem if they were previously installed correctly. If you experience problems with SSL certificates, consider using force flag (-f) to overwrite current SSL certificates. "
+		print ""
+	fi
+elif 
+	#Force mode
+	installSSLCertificates
+
+fi

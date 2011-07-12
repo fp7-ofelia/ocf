@@ -35,14 +35,17 @@ function executeModule(){
 
 	if [ -f $FPATH ]; then
 		#Check version specific first
+		CURRENT_DIRECTORY=`/usr/bin/dirname $FPATH`
 		$1 $FPATH || error "Error importing module '$2'"
 		return
 	elif [ -f $DPATH ]; then
 		#Go to default 
+		CURRENT_DIRECTORY=`/usr/bin/dirname $DPATH`
 		$1 $DPATH || error "Error importing module '$2'"
 		return
 	elif [ -f $DDPATH ]; then
 		#Go to default 
+		CURRENT_DIRECTORY=`/usr/bin/dirname $DDPATH`
 		$1 $DDPATH || error "Error importing module '$2'"
 		return
 	fi
