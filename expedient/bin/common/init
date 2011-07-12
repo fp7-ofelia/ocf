@@ -10,9 +10,15 @@
 #Usage functions
 function usage()
 {
-	print ""
-	print "Usage of the command"	
-	print ""
+	echo ""
+	echo "Usage: $APP_NAME {install upgrade} [options] "
+	echo ""
+	echo -e "\t -h \t Help and usage"
+	echo -e "\t -d \t Enable debug mode"
+	echo -e "\t -n \t Disable logging"
+	echo -e "\t -b \t Disable backup"
+	echo -e "\t -f \t Force mode. DO NOT USE 'Force mode' in PRODUCTION systems."
+	echo ""
 }
 
 

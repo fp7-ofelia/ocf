@@ -24,7 +24,10 @@ DONT_ABORT=2
 NO_RESCUE=1
 
 ##Other info
-APP_NAME="over"
+APP_NAME="ofver"
+APP_VER="0.1"
+APP_DESC="OFelia VERsioning system; a simple set of bash scripts to simplify repository based installations and upgrade"
+APP_WEB="http://www.fp7-ofelia.eu"
 
 
 ##Main method

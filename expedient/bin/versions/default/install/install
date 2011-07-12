@@ -12,7 +12,9 @@ SRC_DIR=/opt/ofelia/expedient/
 APACHE_USER="www-data"
 
 #Inform user
-printHeader ">" "Using default install module..."
+printHeader "info#" "Using default install module..."
+
+##Main routing
 
 #Install dependencies
 printHeader ">" "Installing dependencies through apt-get..."
@@ -20,6 +22,7 @@ printHeader ">" "Installing dependencies through apt-get..."
 source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies file" $NO_RESCUE
 /usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
 /usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
+
 
 #apt-get start apache => stop it
 /usr/sbin/service apache2 stop
@@ -30,8 +33,11 @@ printHeader ">" "Installing remaining dependencies through easy_install..."
 
 printHeader ">" "Enabling macro and ssl module in apache2..."
 
+
+#Enabling Apache mods
 /usr/sbin/a2enmod macro || warn "Could not enable macro module" "; maybe already enabled?"
 /usr/sbin/a2enmod ssl || warn "Could not enable ssl module" "; maybe already enabled?"
+
 
 #Build ssl certs
 source $CURRENT_DIRECTORY/lib/ssl
@@ -49,9 +55,12 @@ printHeader ">" "Setting correct file permissions..."
 chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
 chown -f $APACHE_USER $SRC_DIR/src/ -R
 
+
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
 
+
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
+
 

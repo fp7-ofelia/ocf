@@ -8,6 +8,6 @@
 ###
 
 #Inform user
-printHeader ">" "Using default backup module..."
+printHeader "info#" "Using default backup module..."
 
 print "Nothing to do..."

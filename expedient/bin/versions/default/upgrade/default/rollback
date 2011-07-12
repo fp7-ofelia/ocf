@@ -4,7 +4,9 @@
 #       @author: msune
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: Version checkings 
+#	@description: rollback module 
 ###
 
-print "[DEFAULT] rollback upgrade!"
+#inform user
+printheader "info#" "Using default rollback module..."
+

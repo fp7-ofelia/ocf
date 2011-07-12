@@ -4,9 +4,23 @@
 #       @author: msune
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: Version checkings 
+#	@description: backup module
 ###
 
-print "[DEFAULT] backup upgrade!"
+#inform user
+printheader "info#" "Using default backup module..."
 
+SRC_DIR=/opt/ofelia/expedient/
+
+#Backing up files
+cp $SRC_DIR $BACKUP_PATH
+
+#Backing up database
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+python manage.py dumpdata > $BACKUP_PATH/dbdump.data || error "Could backup data"
+#python manage.py dumpdata > $BACKUP_PATH/dbdump.sql || error "Could backup data"
+
+cd $TMP_PATH
 

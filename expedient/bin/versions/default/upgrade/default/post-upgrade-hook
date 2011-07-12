@@ -4,9 +4,18 @@
 #       @author: msune
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: Version checkings 
+#	@description: post-upgrade-hook module 
 ###
 
-print "[DEFAULT] Post upgrade hook!"
+#inform user
+printheader "info#" "Using default post-upgrade-hook module..."
 
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
+#Cleaning the house
+
+#Testing
+warning "Cleaning the house... TODO"
 

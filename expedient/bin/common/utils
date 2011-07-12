@@ -65,9 +65,8 @@ function warning()
 
 function splash()
 {
-	print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	print "Splash"
-	print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "$APP_NAME v$APP_VER"
+	echo "Website: $APP_WEB"
 }
 
 #Summary

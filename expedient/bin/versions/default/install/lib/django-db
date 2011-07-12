@@ -8,5 +8,6 @@ pause ""
 
 local TMP_PATH=$PWD
 cd $SRC_DIR/src/python/expedient/clearinghouse/ && python manage.py syncdb || error "Could not synchronize database using manage.py..."
+python manage.py create_secret_key || warning "Could not create secret key..."
 cd $TMP_PATH
 

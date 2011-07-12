@@ -8,9 +8,9 @@
 ###
 
 #Inform user
-printHeader ">" "Using default post-install-hook module..."
+printHeader "info#" "Using default post-install-hook module..."
 
-#Shutdown apache
+#Starting apache
 print "Starting apache2..."
 /usr/sbin/service apache2 start
 
