@@ -449,8 +449,6 @@ def home(request, slice_id):
                            ports.append(iface.port_num)
                    if ports:
                        allocated_of_resources.append(dict(switch=rsc,ports=ports))
-        print "LEODEBUG"
-        print allocated_of_resources
 
         return simple.direct_to_template(
             request,
