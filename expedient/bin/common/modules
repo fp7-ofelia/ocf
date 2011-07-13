@@ -17,7 +17,6 @@
 #executeModule execute $1 command with the module (e.g. `source` to load or `cat` to import
 #Parameters: $1 Command to execute $2 Module name [$3 Flags $NO_RESCUE or $DONT_ABORT ]
 function executeModule(){
-	
 	#Define file locations
 	if [ "$ACTION" == "install" ]; then
 		local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/install/$2"
@@ -35,19 +34,21 @@ function executeModule(){
 
 	if [ -f $FPATH ]; then
 		#Check version specific first
-		CURRENT_DIRECTORY=`/usr/bin/dirname $FPATH`
+		CURRENT_DIRECTORY=`getDirectory $FPATH`
 		$1 $FPATH || error "Error importing module '$2'"
 		return
 	elif [ -f $DPATH ]; then
 		#Go to default 
-		CURRENT_DIRECTORY=`/usr/bin/dirname $DPATH`
+		CURRENT_DIRECTORY=`getDirectory $DPATH` 
 		$1 $DPATH || error "Error importing module '$2'"
 		return
-	elif [ -f $DDPATH ]; then
-		#Go to default 
-		CURRENT_DIRECTORY=`/usr/bin/dirname $DDPATH`
-		$1 $DDPATH || error "Error importing module '$2'"
-		return
+	elif [ "$ACTION" == "upgrade" ]; then
+		if [ -f $DDPATH ]; then
+			#Go to default 
+			CURRENT_DIRECTORY=`getDirectory $DDPATH` 
+			$1 $DDPATH || error "Error importing module '$2'"
+			return
+		fi
 	fi
 	
 	#No module

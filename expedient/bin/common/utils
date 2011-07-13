@@ -42,6 +42,7 @@ function print()
 function printHeader()
 {
 	print ""
+	print ""
 	print "${txtgreen}$1 ${txtrst} $2"
 }
 
@@ -64,9 +65,8 @@ function warning()
 
 function splash()
 {
-	print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	print "Splash"
-	print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "$APP_NAME v$APP_VER"
+	echo "Website: $APP_WEB"
 }
 
 #Summary
@@ -147,12 +147,27 @@ function confirm()
 			return 0
 		elif [ "$VALUE" == "N" ] || [ "$VALUE" == "n" ]; then
 			#Rejected
-			if [ -n "$2" ]; then 
+			if [ "$2" == "$DONT_ABORT" ]; then 
+				return 1
+			else
 				error "'$1' clause not confirmed. Aborting..." $3 
 			fi
-			return 1
 		fi
 	done
 		
 }
 
+function pause
+{
+	echo $1
+	echo -n "Press any key to continue..."
+	read 
+}
+
+##File utils
+#Recover directory path
+#$1 contains 
+function getDirectory()
+{
+	echo `dirname $(readlink -f $1)`
+}

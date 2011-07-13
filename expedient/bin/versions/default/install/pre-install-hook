@@ -7,10 +7,10 @@
 #	@description: pre-install module 
 ###
 
-#Inform user
-printHeader ">" "Using default pre-install-hook module..."
+#inform user
+printheader "info#" "Using default pre-install-hook module..."
 
-#Shutdown apache
+#shutdown apache
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop
 

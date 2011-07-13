@@ -4,7 +4,14 @@
 #       @author: msune
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: Version checkings 
+#	@description: pre-upgrade-module 
 ###
 
-print "[DEFAULT] pre upgrade hook!"
+#inform user
+printheader "info#" "Using default pre-upgrade-hook module..."
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+
