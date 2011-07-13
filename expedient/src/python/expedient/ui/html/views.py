@@ -438,7 +438,6 @@ def home(request, slice_id):
         
         fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
         allocated_of_resources=[]
-        ports=[]
         for agg in of_aggs:
             for rsc in agg.resource_set.all():
                 rsc = rsc.as_leaf_class()

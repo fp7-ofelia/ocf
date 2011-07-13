@@ -29,20 +29,33 @@ urlpatterns = patterns('',
 
     # TODO: Change to the following after 0.8 of registration is out
     # (r'^accounts/', include('registration.backends.default.urls')),
-    url(r'^accounts/register/$',
-        'expedient.clearinghouse.users.views.register',
+    
+    # Registration URLs commented. They are copied and redirected to empty urls in order to get 500 error
+    #url(r'^accounts/register/$',
+    #    'expedient.clearinghouse.users.views.register',
+    #    name='registration_register'),
+    #url(r'^accounts/activate/(?P<activation_key>\w+)/$',
+    #    'expedient.clearinghouse.users.views.activate',
+    #    name='registration_activate'),
+    #url(r'^accounts/register/complete/$',
+    #    direct_to_template,
+    #    {'template': 'registration/registration_complete.html'},
+    #    name='registration_complete'),
+    #url(r'^accounts/', include('registration.urls')),
+     url(r'^accounts/register/$',
+        ' ',
         name='registration_register'),
     url(r'^accounts/activate/(?P<activation_key>\w+)/$',
-        'expedient.clearinghouse.users.views.activate',
+        ' ',
         name='registration_activate'),
     url(r'^accounts/register/complete/$',
         direct_to_template,
-        {'template': 'registration/registration_complete.html'},
+        ' ',
         name='registration_complete'),
-    (r'^accounts/', include('registration.urls')),
+    url(r'^accounts/', include('registration.urls')),
 
     # TODO: Remove after testing
-    (r'^dummyom/', include('openflow.dummyom.urls')),
+    #(r'^dummyom/', include('openflow.dummyom.urls')),
 )
 
 
