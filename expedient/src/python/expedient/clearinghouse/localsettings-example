@@ -12,8 +12,14 @@ ADMINS = [
 
 MANAGERS = ADMINS
 
+#EMAIL SETTINGS ARE NOT STRICTLY NECESSARY IN THIS VERSION
 EMAIL_HOST = "smtp.gmail.com"
-DEFAULT_FROM_EMAIL = "no-reply@gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'i2catopenflow@gmail.com'
+EMAIL_HOST_PASSWORD = 'expedient'
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
+EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
 
 GCF_BASE_NAME = "expedient//i2CAT"
 GCF_URN_PREFIX = "expedient:i2CAT"
