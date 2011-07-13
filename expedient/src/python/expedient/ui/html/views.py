@@ -435,6 +435,22 @@ def home(request, slice_id):
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+        
+        fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        allocated_of_resources=[]
+        ports=[]
+        for agg in of_aggs:
+            for rsc in agg.resource_set.all():
+                rsc = rsc.as_leaf_class()
+                if isinstance(rsc,OpenFlowSwitch):
+                   ports=[]
+                   for iface in rsc.openflowinterface_set.all():
+                       if iface.id in checked_ids:
+                           ports.append(iface.port_num)
+                   if ports:
+                       allocated_of_resources.append(dict(switch=rsc,ports=ports))
+        print "LEODEBUG"
+        print allocated_of_resources
 
         return simple.direct_to_template(
             request,
@@ -448,8 +464,10 @@ def home(request, slice_id):
                 "vt_aggs": vt_aggs,
                 "slice": slice,
                 "checked_ids": checked_ids,
+                "allfs": fsquery, 
                 "ofswitch_class": OpenFlowSwitch,
                 "planetlab_node_class": PlanetLabNode,
+                "allocated_of_resources":allocated_of_resources,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

@@ -162,66 +162,98 @@
 <div id="am_location">
 Aggregate physical location: <b>{{ agg.location }}.</b>
 </div >
-<div class="openflow">
-  <table class="openflow">
-    <tr class="header">
-      <th class="dpid">Datapath ID</th>
-      <th class="ports">Connections (Port and Remote Port)</th>
+<div>
+    {% if not checked_ids %}
+		<p>There are not allocated resources in Aggregate {{ agg.name }}</p>
+	{% else %}
+	<table class="servers">
+    <tr>
+      <th>OpenFlow Resources</th>
     </tr>
-    {% for rsc in agg.resource_set.all %}
-    {% if rsc.available and rsc|leaf_class_is:ofswitch_class %}
-    {% with rsc.as_leaf_class as switch %}
-    <tr class="body openflow">
-      <td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
-      <td class="ports">
-    <table class="connections_table">
-      {% for iface in switch.openflowinterface_set.all %}
-      <tr class="body {% cycle 'odd' 'even' %}">
-        <td class="select_checkbox">
-          <input type="checkbox" name="selected_ifaces" 
-          value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
-          class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
-          {% if iface.id in checked_ids %}checked{% endif %} />
-        </td>
-        <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
-        <td class="connections">
-          <table class="connections">
-        {% for cnxn in iface.nonopenflow_connections.all %}
-        <tr>
-          <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
-            Connected to <a href="#rsc_{{ cnxn.resource.id }}">
-              {{ cnxn.resource.as_leaf_class }}</a>.
-          </td>
+    {%for ofrsc in allocated_of_resources %}                                  
+    	 <tr class = "{% cycle 'odd' 'even' %}">                                  
+    	{% for key,value in ofrsc.items %}                                        
+            {%if key == "switch" %}                                           
+            <td> {{value}} - Port                                             
+            {%else%}                                                          
+            	{% for port in value%}                                            
+            	{{port}}{% if not forloop.last %},{%endif%}                  
+            	{%endfor%}
+			</td>
+            {%endif%}
+    	{%endfor%}
         </tr>
-        {% endfor %}
-        {% for neighbor in iface.ingress_neighbors.all %}
-        <tr>
-          <td class="neighbor neighbor_{{ neighbor.id }}">
-            Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
-              {{ neighbor.switch.datapath_id }}</a>
-            at port <a href="#iface_{{ neighbor.id }}">
-              {{ neighbor.port_num }}</a>.
-          </td>
-        </tr>
-        {% endfor %}
-          </table>
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
-      </td>
-    </tr>
-    {% endwith %}
-    {% endif %}
-    {% endfor %}
+    {%endfor%}
   </table>
+  {% endif %}
+  </div>
+	{% if checked_ids %}
+	<div style="padding-top:20px;">
+ 	  {% if allfs %}
+	<table class="servers" style="border-bottom:0px">
+    <tr><th>Requested Flowspace</th></tr>
+    </table>
+
+    {% for fs in allfs %}
+	<table class="servers">
+	<tr class="odd">
+      <td>Flowspace {{ fs.id }}</td>
+	</tr>
+	</table>
+	<table class="vms" style="margin-bottom:0px;">
+    <tr>
+           <tr class = "even">
+           <td>
+            {% if fs.dl_src_start or fs.dl_src_end %}
+                MAC Source: {{ fs.dl_src_start }} - {{ fs.dl_src_end }}<br />
+            {% endif %}
+    
+            {% if fs.dl_dst_start or fs.dl_dst_end %}
+               MAC Destination: {{ fs.dl_dst_start }} - {{ fs.dl_dst_end }}<br />
+            {% endif %}
+    
+            {% if fs.dl_type_start or fs.dl_type_end %}
+                Ethernet Type: {{ fs.dl_type_start }} {{ fs.dl_type_end }}<br />
+            {% endif %}
+            
+            {% if fs.vlan_id_start or fs.vlan_id_end %}
+                VLAN ID: {{ fs.vlan_id_start }} - {{ fs.vlan_id_end }}<br />
+            {% endif %}
+    
+            {% if fs.nw_src_start or fs.nw_src_end %}        
+                IP Source: {{ fs.nw_src_start }} - {{ fs.nw_src_end }}<br />
+            {% endif %}
+    
+            {% if fs.nw_dst_start or fs.nw_dst_end %}
+                IP Destination: {{ fs.nw_dst_start }} - {{ fs.nw_dst_end }}<br />
+            {% endif %}        
+    
+            {% if fs.nw_proto_start or fs.nw_proto_end %}
+                IP Protocol: {{ fs.nw_proto_start }} - {{ fs.nw_proto_end }}<br />
+            {% endif %}        
+    
+            {% if fs.tp_src_start or fs.tp_src_end %}
+                TCP/UDP Source: {{ fs.tp_src_start }} - {{ fs.tp_src_end }}<br />
+            {% endif %}        
+    
+            {% if fs.tp_dst_start or fs.tp_dst_end %}
+                TCP/UDP Destination: {{ fs.tp_dst_start }} - {{ fs.tp_dst_end }}<br />
+            {% endif %}        
+        	</td>
+     </tr>
+    {% endfor %}
+       </table>
+ 	{% else %}
+              <p>There is no Flowspace in the Slice. </p>
+   {% endif %}
 </div>
+{%endif%}
 {% empty %}
   <p>There are no OpenFlow aggregates in the slice. </p>
   {% endfor %}
 
   {% if openflow_aggs or planetlab_aggs %}
-	<div style="text-align:right">
+	<div style="margin-top:50px;text-align:right">
 		<input type="button" onClick='document.location="{% url html_plugin_bookOpenflow slice.id %}"' value="Book Openflow and PlanetLab resources" />
 	</div>
   {% endif %}
