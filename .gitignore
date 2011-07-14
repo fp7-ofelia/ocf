@@ -46,3 +46,14 @@ vt_manager/src/python/agent/settings.py
 vt_manager/src/python/vt_manager/mySettings.py
 vt_manager/src/python/agent/mySettings.py
 vt_manager/src/python/agent/security/certs/agent.key
+vt_manager/src/python/agent/security/certs/agent.crt
+expedient/.currentVersion
+expedient/bin/log/*
+expedient/bin/rescue/*
+optin_manager/.currentVersion
+optin_manager/log/*
+optin_manager/rescue/*
+vt_manager/.currentVersion
+vt_manager/log/*
+vt_manager/rescue/*
+
