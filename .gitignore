@@ -45,3 +45,4 @@ optin_manager/src/python/openflow/optin_manager/localsettings.py
 vt_manager/src/python/agent/settings.py
 vt_manager/src/python/vt_manager/mySettings.py
 vt_manager/src/python/agent/mySettings.py
+vt_manager/src/python/agent/security/certs/agent.key
