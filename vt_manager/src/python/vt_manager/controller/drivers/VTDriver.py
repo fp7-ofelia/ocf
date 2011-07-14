@@ -13,6 +13,7 @@ from django.db.models.query import QuerySet
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.utils.ServiceThread import *
+from django.core.exceptions import ValidationError
 
 class VTDriver():
 
@@ -79,7 +80,10 @@ class VTDriver():
 				server.updateDataBridge(newIface)
 		for id in ifacesToDelete:
 			if id != '':
-				server.deleteDataBridge(serverIfaces.get(id=id))
+				try:
+					server.deleteDataBridge(serverIfaces.get(id=id))
+				except Exception as e:
+					raise ValidationError(str(e))
 
 	@staticmethod
 	def getServerById(id):
