@@ -67,7 +67,13 @@ function adding(row){
 
 
 <div class="main">
-
+	{% if exception %}
+		<div>
+			<table>
+				<tr><th colspan ="2" class="fielderror">{{exception}}</th></tr>
+			</table>
+		<div/>
+	{% endif %}
     <form id="serverAndIfaceForms" method="post" action="" autocomplete="off">{% csrf_token %}
 
         <div>

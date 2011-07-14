@@ -103,7 +103,15 @@ def servers_crud(request, server_id=None):
 				VTDriver.crudDataBridgeFromInstance(server, ifaces,request.POST.getlist("DELETE"))
 			except Exception as e:
 				print e
-				raise e
+				e = HttpUtils.processException(e)	
+				context = {"exception":e, "serverForm": serverForm, 'vmProjects': vmProjects, 'vmSlices': vmSlices,'ifaceformset' : ifaceformset, 'mgmtIfaceForm' : mgmtIfaceForm}
+				if server_id != None: context["server"] = server
+				return simple.direct_to_template(
+				        request,
+				        template="servers/servers_crud.html",
+				        extra_context=context,
+				    )
+
 				#return a alguna pagina y volver atras las transacciones
 				
 			return HttpResponseRedirect('/servers/admin/')

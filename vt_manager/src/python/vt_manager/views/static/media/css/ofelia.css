@@ -374,7 +374,7 @@ table.ranges tr.odd{
     text-align:center;
     padding:0px;
     margin:0px;
-    background-position:left
+    background-position:left;
 }
 table.menutable {
 	border-collapse: collapse;
@@ -385,7 +385,7 @@ table.menutable {
 }
 
 table.menutable tbody td ,tbody th {
-	padding: 5px 10px;
+	padding: 1px 10px;
 	background: #fff;
 	color: #000;
     text-align:center;

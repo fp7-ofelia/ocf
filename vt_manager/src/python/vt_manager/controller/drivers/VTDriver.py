@@ -14,7 +14,7 @@ from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.utils.ServiceThread import *
 from django.core.exceptions import ValidationError
-
+from vt_manager.utils.HttpUtils import HttpUtils
 class VTDriver():
 
 
