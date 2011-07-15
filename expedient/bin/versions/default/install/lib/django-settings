@@ -9,7 +9,7 @@ printHeader ">" "Copying django settings file from template..."
 if [ -f $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py ];then
 	warning "Localsettings file already exists."
 
-	if [ "$DEBUG" == "1" ]; then
+	if [ "$FORCE" == "1" ]; then
 		confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
 		if [ $? == 0 ]; then			
 			cp $SRC_DIR/src/python/expedient/clearinghouse/localsettings-example $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py -f || error "Cannot copy localsettings.py"

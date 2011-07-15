@@ -7,4 +7,64 @@
 #	@description: install module 
 ###
 
-print "[DEFAULT] install!"
+#Constants
+SRC_DIR=/opt/ofelia/vt_manager/
+APACHE_USER="www-data"
+
+#Inform user
+printHeader "info#" "Using default install module..."
+
+##Main routing
+
+#Install dependencies
+printHeader ">" "Installing dependencies through apt-get..."
+
+#source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies file" $NO_RESCUE
+#/usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
+#/usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
+
+
+#apt-get start apache => stop it
+/usr/sbin/service apache2 stop
+
+printHeader ">" "Installing remaining dependencies through easy_install..."
+
+#/usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
+
+printHeader ">" "Enabling macro and ssl module in apache2..."
+
+
+#Enabling Apache mods
+/usr/sbin/a2enmod macro || warn "Could not enable macro module" "; maybe already enabled?"
+/usr/sbin/a2enmod ssl || warn "Could not enable ssl module" "; maybe already enabled?"
+
+
+#Build ssl certs
+source $CURRENT_DIRECTORY/lib/ssl
+
+#Create symbolic links
+printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
+
+if [ ! -f /etc/apache2/conf.d/vhost-macros.conf ]; then
+ln -sf $SRC_DIR/src/config/vt_manager/common7apache/vhost-macros.conf /etc/apache2/conf.d/vhost-macros.conf || error "Cannot create vhost-macros symbolic link"
+fi
+ln -sf $SRC_DIR/src/config/vt_manager/apache/vhost-vt.conf /etc/apache2/sites-available/vt_manager.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
+ln -sf /etc/apache2/sites-available/vt_manager.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
+
+#Create application folder for error log
+mkdir -p /var/log/apache2/vt_manager
+
+#Change permissions of the code ==> Not required for the vt_manager
+#printHeader ">" "Setting correct file permissions..."
+#chmod -f a+w $SRC_DIR/src/python/vt_manager/gcf-x509*
+#chown -f $APACHE_USER $SRC_DIR/src/ -R
+
+
+#Django settings 
+source $CURRENT_DIRECTORY/lib/django-settings
+
+
+#Django database
+source $CURRENT_DIRECTORY/lib/django-db
+
+
