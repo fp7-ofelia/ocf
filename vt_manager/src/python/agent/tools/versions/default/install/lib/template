@@ -1,0 +1,16 @@
+#!/bin/bash
+
+print "Downloading the template..."
+
+if [ -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz ];then
+	warning "Localsettings file already exists; skipping..."
+
+else:
+
+	echo -n "Please enter the USERNAME for the OFELIA storage system to download the template (email):"
+	USERNAME=read 
+	echo -n "Password:"
+
+	/usr/bin/wget https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz --no-check-certificate --user $USERNAME --pasword $PASSWORD -o $OXA_DIRECTORY/cache/templates/default/default.tar.gz
+
+fi
