@@ -1,6 +1,6 @@
 #!/bin/bash
 
 ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/oxad /etc/init.d || error "Could not create the symbolic link for oxad"
-ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/OfeliaLauncher.py /etc/init.d || error "Could not create the symbolic link for OfeliaLauncher.py"
+ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/OfeliaLauncher.sh /etc/init.d || error "Could not create the symbolic link for OfeliaLauncher.sh"
 /usr/sbin/update-rc.d oxad defaults || warning "It seems oxad update-rc.d has not worked... Take into account if service is not starting itself."
 
