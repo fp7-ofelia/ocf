@@ -7,6 +7,14 @@
 #	@description: post-install module
 ###
 
-print "[DEFAULT] Post install hook!"
+#Inform user
+printHeader "info#" "Using default post-install-hook module..."
 
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
 
+#Cleaning the house
+
+#Testing
+#TODO

@@ -1,12 +1,1 @@
-#!/bin/bash
-
-###
-#       @author: msune
-#	@organization: i2CAT
-#	@project: Ofelia FP7
-#	@description: Version checkings 
-###
-
-print "General version checks!"
-
-
+../../../expedient/bin/version-checks

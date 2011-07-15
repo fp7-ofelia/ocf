@@ -4,7 +4,31 @@
 #       @author: msune
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: Version checkings 
+#	@description: rollback module 
 ###
 
-print "[DEFAULT] rollback upgrade!"
+#inform user
+printHeader "info#" "Using default rollback module..."
+
+
+confirm "It seems something went wrong.. Now you will be able to rollback to the previous state of the filsystem and database. Alternatevily you can try to solve the problem manually, avoiding the rollback mechanism. Do you want to rollback now?" $DONT_ABORT $NO_RESCUE
+
+if [ $? == 0 ]; then
+	print "Please remember that you can find the log of this upgrade operation under log/ folder. Good luck!"
+	exit 1
+fi
+
+
+
+#Restoring files first
+print "Restoring files..."
+cp $BACKUP_PATH/* $SRC_DIR/ -Rf !(dbdump.data|dbdump.sql|dbdump.sql.cf) || error "Could not restore files. Please take into account that previous state including DB state is in $BACKUP_PATH"
+
+#Restoring database
+print "Restoring database..."
+
+$PWD/../tools/sqlRestore.py $BACKUP_PATH/dbdump.sql || error "Could not restore database. Please take into account that previous state including DB state is in $BACKUP_PATH" 
+
+cd $TMP_PATH
+
+

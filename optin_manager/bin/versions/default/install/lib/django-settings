@@ -6,20 +6,20 @@ EDITORS="vi vim emacs nano pico"
 #Copy from template
 printHeader ">" "Copying django settings file from template..."
 
-if [ -f $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py ];then
+if [ -f $SRC_DIR/src/python/openflow/optin_manager/localsettings.py ];then
 	warning "Localsettings file already exists."
 
 	if [ "$FORCE" == "1" ]; then
 		confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
 		if [ $? == 0 ]; then			
-			cp $SRC_DIR/src/python/expedient/clearinghouse/localsettings-example $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py -f || error "Cannot copy localsettings.py"
+			cp $SRC_DIR/src/python/openflow/optin_manager/localsettings-example $SRC_DIR/src/python/openflow/optin_manager/localsettings.py -f || error "Cannot copy localsettings.py"
 		fi 
 	else
 		print "Skipping copy (will not be overwritten)"
 	fi
 else
-	print "$SRC_DIR/src/python/expedient/clearinghouse/localsettings-example -> $SRC_DIR/src/python/expedient/clearinghouse/localsettings-example.py "
-	cp $SRC_DIR/src/python/expedient/clearinghouse/localsettings-example $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py || error "Cannot copy localsettings.py"
+	print "$SRC_DIR/src/python/openflow/optin_manager/localsettings-example -> $SRC_DIR/src/python/openflow/optin_manager/localsettings-example.py "
+	cp $SRC_DIR/src/python/openflow/optin_manager/localsettings-example $SRC_DIR/src/python/openflow/optin_manager/localsettings.py || error "Cannot copy localsettings.py"
 fi
 
 #Choose editor
@@ -40,12 +40,12 @@ done
 printHeader ">" "Editing localsettings file..."
 while :	
 do
-	print "Now you are going to edit the file $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+	print "Now you are going to edit the file $SRC_DIR/src/python/openflow/optin_manager/localsettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
 	pause ""
-	eval $EDITOR $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py
+	eval $EDITOR $SRC_DIR/src/python/openflow/optin_manager/localsettings.py
 	print ""
 	pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
-	less $SRC_DIR/src/python/expedient/clearinghouse/localsettings.py
+	less $SRC_DIR/src/python/openflow/optin_manager/localsettings.py
 	
 	confirm "Is it correct OK." $DONT_ABORT $NO_RESCUE
 
