@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#SSL routines. Installing SSL certificates in apache2 (according to vhost configurations of the apps)
+
+
+
+function installSSLCertificates(){
+	/usr/bin/make -C $OXAD_DIRECTORY/bin/security/certs/make  		
+}
+
+#Routine
+
+printHeader ">" "Building SSL certificates..."
+print ""
+
+if [ ! -f $OXA_DIRECTORY/bin/security/certs/agent.key  ] || [ ! -f $OXA_DIRECTORY/bin/security/certs/agent.crt   ]; then
+	installSSLCertificates
+
+else
+	if [ "$FORCE" == 0 ]; then 
+		print ""
+		warning "SSL certificates exist; this is not a problem if they were previously installed correctly. If you experience problems with SSL certificates, consider using force flag (-f) to overwrite current SSL certificates. "
+		print ""
+	else
+		confirm "SSL certificates seems to be installed in apache's folder. Do you want to overwrite them." $DONT_ABORT $NO_RESCUE
+
+		if [ $? == 0 ]; then
+			installSSLCertificates
+		fi
+
+	fi
+
+fi

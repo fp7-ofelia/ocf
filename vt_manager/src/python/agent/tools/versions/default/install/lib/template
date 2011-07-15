@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function downloadTemplate
+{
+print "Downloading the template..."
+
+
+	echo "Please enter the USERNAME for the OFELIA storage system to download the default template. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+	
+	echo -n "Username:"
+	/usr/bin/stty -echo
+	USERNAME=read 
+	/usr/bin/stty -echo
+	echo -n "Password:"
+
+	/usr/bin/stty -echo
+	PASSWORD=read 
+	/usr/bin/stty echo
+
+
+	/usr/bin/wget https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz --no-check-certificate --user $USERNAME --pasword $PASSWORD -o $OXA_DIRECTORY/cache/templates/default/default.tar.gz
+}
+
+if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz ];then
+	downloadTemplate	
+else
+	if [ "$FORCE" == 0 ]; then 
+		print ""
+		warning "Default template file already exists; skipping..."
+		print ""
+	else
+		confirm "Default template file already exists. Do you want to overwrite it." $DONT_ABORT $NO_RESCUE
+
+		if [ $? == 0 ]; then
+			downloadTemplate	
+		fi
+
+	fi
+
+fi

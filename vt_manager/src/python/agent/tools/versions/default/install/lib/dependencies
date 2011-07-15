@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Used to define package dependencies
+
+DEBIAN_DEPENDENCIES="python-openssl python-lxml python-libxml2 python-jinja2 python-libxslt1 python-setuptools python-libvirt"
+
+EASY_INSTALL_DEPENDENCIES="generateDS"
