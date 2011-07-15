@@ -8,7 +8,7 @@
 ###
 
 #inform user
-printheader "info#" "Using default pre-upgrade-hook module..."
+printHeader "info#" "Using default pre-upgrade-hook module..."
 
 #shutdown apache
 print "Shutting down apache2..."

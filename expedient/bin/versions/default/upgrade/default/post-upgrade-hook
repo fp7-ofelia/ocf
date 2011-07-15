@@ -8,12 +8,16 @@
 ###
 
 #inform user
-printheader "info#" "Using default post-upgrade-hook module..."
+printHeader "info#" "Using default post-upgrade-hook module..."
 
 #Starting apache
 print "Starting apache2..."
 /usr/sbin/service apache2 start
 
 #Cleaning the house
-warning "Cleaning the house... TODO"
+confirm "Delete backup files?" $DONT_ABORT
 
+if [ $? == 0 ]; then
+        print "Deleting backups..."
+        rm -rf $BACKUP_PATH
+fi

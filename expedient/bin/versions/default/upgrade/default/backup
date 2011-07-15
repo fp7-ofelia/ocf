@@ -8,12 +8,13 @@
 ###
 
 #inform user
-printheader "info#" "Using default backup module..."
+printHeader "info#" "Using default backup module..."
 
 SRC_DIR=/opt/ofelia/expedient/
 
 #Backing up files
-cp $SRC_DIR $BACKUP_PATH
+mkdir -p $BACKUP_PATH
+cp -R $SRC_DIR/src $BACKUP_PATH
 
 #Backing up database
 local TMP_PATH=$PWD
@@ -21,7 +22,6 @@ local TMP_PATH=$PWD
 cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
 
 python manage.py dumpdata > $BACKUP_PATH/dbdump.data || error "Could backup data"
-$TMP_PATH/../tools/sqlDump.py $BACKUP_PATH/dbdump.sql || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..."" 
-
+python $TMP_PATH/versions/default/upgrade/tools/sqlDump.py $BACKUP_PATH/dbdump.sql || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..." 
 cd $TMP_PATH
 

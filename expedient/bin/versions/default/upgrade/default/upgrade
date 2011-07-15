@@ -8,7 +8,7 @@
 ###
 
 #inform user
-printheader "info#" "Using default upgrade module..."
+printHeader "info#" "Using default upgrade module..."
 
 SRC_DIR=/opt/ofelia/expedient/
 
