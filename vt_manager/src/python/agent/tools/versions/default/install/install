@@ -32,20 +32,23 @@ source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies 
 
 printHeader ">" "Creating directory structure"
 
-source $CURRENT_DIRECTORY/libs/directories
+source $CURRENT_DIRECTORY/lib/directories
 
 printHeader ">" "Creating certificates for XMLRPC interface over HTTPS..."
 
-source $CURRENT_DIRECTORY/libs/ssl
+source $CURRENT_DIRECTORY/lib/ssl
 
 
 printHeader ">" "Configuring settings..."
-source $CURRENT_DIRECTORY/libs/settings
+source $CURRENT_DIRECTORY/lib/settings
   
 printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
 
 printHeader ">" "Configuring Daemon..."
-source "$CURRENT_DIRECTORY/libs/daemon"
+source "$CURRENT_DIRECTORY/lib/daemon"
+
+printHeader ">" "Download Template..." 
+source "$CURRENT_DIRECTORY/lib/template"
 
 
 
