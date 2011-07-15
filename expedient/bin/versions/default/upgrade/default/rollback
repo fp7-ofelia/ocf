@@ -22,7 +22,7 @@ fi
 
 #Restoring files first
 print "Restoring files..."
-cp $BACKUP_PATH/* $SRC_DIR/ -R || error "Could not restore files. Please take into account that previous state including DB state is in $BACKUP_PATH"
+cp $BACKUP_PATH/* $SRC_DIR/ -Rf || error "Could not restore files. Please take into account that previous state including DB state is in $BACKUP_PATH"
 
 #Restoring database
 print "Restoring database..."
