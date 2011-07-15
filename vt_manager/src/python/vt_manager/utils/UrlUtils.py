@@ -1,4 +1,5 @@
-from vt_manager.settings.settingsLoader import ROOT_USERNAME,ROOT_PASSWORD,VTAM_IP,VTAM_PORT
+#from vt_manager.settings.settingsLoader import settings.ROOT_USERNAME,settings.ROOT_PASSWORD,settings.VTAM_IP,settings.VTAM_PORT
+from django.conf import settings
 
 class UrlUtils():
 	
@@ -6,7 +7,7 @@ class UrlUtils():
 	def addPathToOwnURL(path):
 
 		path = str(path)
-		return "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT+path
+		return "https://"+settings.ROOT_USERNAME+":"+settings.ROOT_PASSWORD+"@"+settings.VTAM_IP+":"+settings.VTAM_PORT+path
 	
 	@staticmethod
 	def getOwnCallbackURL():

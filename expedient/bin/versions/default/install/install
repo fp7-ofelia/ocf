@@ -49,6 +49,8 @@ ln -sf $SRC_DIR/src/config/expedient/common/apache/vhost-macros.conf /etc/apache
 ln -sf $SRC_DIR/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf /etc/apache2/sites-available/expedient.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
 ln -sf /etc/apache2/sites-available/expedient.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
 
+#Create application folder for error log
+mkdir -p /var/log/apache2/expedient/clearinghouse
 
 #Change permissions of the code
 printHeader ">" "Setting correct file permissions..."

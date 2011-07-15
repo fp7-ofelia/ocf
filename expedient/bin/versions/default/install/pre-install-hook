@@ -8,10 +8,10 @@
 ###
 
 #inform user
-printheader "info#" "Using default pre-install-hook module..."
+printHeader "info#" "Using default pre-install-hook module..."
 
 #shutdown apache
 print "Shutting down apache2..."
-/usr/sbin/service apache2 stop
+/usr/sbin/service apache2 stop || warning "Could not stop apache"
 
 

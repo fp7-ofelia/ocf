@@ -68,7 +68,7 @@ function installSSLCertificates(){
 printHeader ">" "Building SSL certificates..."
 print ""
 
-if [ -f /etc/apache2/ssl.key/server.key  ] && [ -f /etc/apache2/ssl.key/server.crt   ]; then
+if [ ! -f /etc/apache2/ssl.key/server.key  ] || [ ! -f /etc/apache2/ssl.crt/server.crt   ]; then
 	installSSLCertificates
 
 else

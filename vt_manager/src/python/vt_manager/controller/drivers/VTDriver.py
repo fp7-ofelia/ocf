@@ -7,7 +7,8 @@ from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 import xmlrpclib, threading, logging, copy
-from vt_manager.settings.settingsLoader import ROOT_USERNAME, ROOT_PASSWORD, VTAM_IP,VTAM_PORT
+from django.conf import settings
+#from vt_manager.settings.settingsLoader import settings.ROOT_USERNAME, settings.ROOT_PASSWORD, settings.VTAM_IP,settings.VTAM_PORT
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
 from vt_manager.models.VirtualMachine import VirtualMachine
