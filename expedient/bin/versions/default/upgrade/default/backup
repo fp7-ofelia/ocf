@@ -19,8 +19,9 @@ cp $SRC_DIR $BACKUP_PATH
 local TMP_PATH=$PWD
 
 cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+
 python manage.py dumpdata > $BACKUP_PATH/dbdump.data || error "Could backup data"
-#python manage.py dumpdata > $BACKUP_PATH/dbdump.sql || error "Could backup data"
+$TMP_PATH/../tools/sqlDump.py $BACKUP_PATH/dbdump.sql || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..."" 
 
 cd $TMP_PATH
 
