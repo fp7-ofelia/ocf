@@ -176,28 +176,28 @@ class FileHdManager(object):
 				print "Creating disks..."
 				if OXA_FILEHD_CREATE_SPARSE_DISK:
 					print "Main disk will be created as Sparse disk..."
-					if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY, "/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count=1","seek="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY), "/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count=1","seek="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 						print "Failed to create Disk"
 						raise Exception("")
 				else:
-					if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY,"/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 						print "Failed to create Disk"
 						raise Exception("")
 				
 				#Create Swap
-				if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY,"/bin/dd","if=/dev/zero","of="+swap_path,"bs=1M","count=512"], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/dd","if=/dev/zero","of="+swap_path,"bs=1M","count=512"], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 					print "Failed to create Swap"
 					raise Exception("")
 				#Format
 				print "Creating EXT3 fs..."
-				if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY,"/sbin/mkfs.ext3","-F","-q",vm_path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/sbin/mkfs.ext3","-F","-q",vm_path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 					print "Failed to format disk" 
 					raise Exception("")
 				
 				#Untar disk contents
 				print "Uncompressing disk contents..."
 				path = FileHdManager.mount(vm)
-				if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY,"/bin/tar","-xvf",template_path,"-C",path],stdout=open(os.devnull, 'w'), preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/tar","-xvf",template_path,"-C",path],stdout=open(os.devnull, 'w'), preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 					print "Failed to uncompress disk contents"
 					raise Exception("")
 					
