@@ -8,6 +8,8 @@
 ###
 
 #print "General version checks!"
-print "OK"
 
+if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE"=="1" ]; then
+	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them"
+fi
 
