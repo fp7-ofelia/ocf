@@ -8,17 +8,19 @@ print "Downloading the template..."
 	echo "Please enter the USERNAME for the OFELIA storage system to download the default template. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
 	
 	echo -n "Username:"
-	/usr/bin/stty -echo
-	USERNAME=read 
-	/usr/bin/stty -echo
+	read USERNAME
 	echo -n "Password:"
 
-	/usr/bin/stty -echo
-	PASSWORD=read 
-	/usr/bin/stty echo
-
-
-	/usr/bin/wget https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz --no-check-certificate --user $USERNAME --pasword $PASSWORD -o $OXA_DIRECTORY/cache/templates/default/default.tar.gz
+	/bin/stty -echo
+	read PASSWORD 
+	/bin/stty echo
+	
+	
+	#Mkdir
+	mkdir -p $OXA_DIRECTORY/cache/templates/default
+	echo ""	
+	echo "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
+	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/squeeze || rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!"
 }
 
 if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz ];then
