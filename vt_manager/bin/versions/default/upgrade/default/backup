@@ -19,9 +19,9 @@ cp -R $SRC_DIR/src $BACKUP_PATH
 #Backing up database
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anymore?¿"
+cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exist anymore?¿"
 
-python manage.py dumpdata > $BACKUP_PATH/dbdump.data || error "Could backup data"
+python manage.py dumpdata > $BACKUP_PATH/dbdump.data || error "Could not backup data"
 python $TMP_PATH/versions/default/upgrade/tools/sqlDump.py $BACKUP_PATH/dbdump.sql || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..." 
 cd $TMP_PATH
 
