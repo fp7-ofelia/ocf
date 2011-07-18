@@ -5,7 +5,7 @@
 
 
 function installSSLCertificates(){
-	/usr/bin/make -C $OXAD_DIRECTORY/bin/security/certs/make  		
+	/usr/bin/make -C $OXAD_DIRECTORY/bin/security/certs  		
 }
 
 #Routine
