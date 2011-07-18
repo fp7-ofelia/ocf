@@ -35,7 +35,8 @@ class OfeliaVMConfigurator:
 				iFile.write(interfaceString)			 
 			else:
 				#is a data interface
-				iFile.write("auto "+inter.name)
+				iFile.write("auto "+inter.name+"\n\n")
+
 
 	@staticmethod
 	def __configureUdevFile(vm,uFile):
