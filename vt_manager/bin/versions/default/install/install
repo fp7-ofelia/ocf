@@ -46,7 +46,7 @@ source $CURRENT_DIRECTORY/lib/ssl
 printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
 
 if [ ! -f /etc/apache2/conf.d/vhost-macros.conf ]; then
-ln -sf $SRC_DIR/src/config/vt_manager/common7apache/vhost-macros.conf /etc/apache2/conf.d/vhost-macros.conf || error "Cannot create vhost-macros symbolic link"
+ln -sf $SRC_DIR/src/config/vt_manager/common/apache/vhost-macros.conf /etc/apache2/conf.d/vhost-macros.conf || error "Cannot create vhost-macros symbolic link"
 fi
 ln -sf $SRC_DIR/src/config/vt_manager/apache/vhost-vt.conf /etc/apache2/sites-available/vt_manager.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
 ln -sf /etc/apache2/sites-available/vt_manager.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
