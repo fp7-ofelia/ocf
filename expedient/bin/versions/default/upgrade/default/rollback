@@ -13,7 +13,7 @@ printHeader "info#" "Using default rollback module..."
 
 confirm "It seems something went wrong.. Now you will be able to rollback to the previous state of the filsystem and database. Alternatevily you can try to solve the problem manually, avoiding the rollback mechanism. Do you want to rollback now?" $DONT_ABORT $NO_RESCUE
 
-if [ $? == 0 ]; then
+if [ $? == 1 ]; then
 	print "Please remember that you can find the log of this upgrade operation under log/ folder. Good luck!"
 	exit 1
 fi
@@ -22,13 +22,14 @@ fi
 
 #Restoring files first
 print "Restoring files..."
-cp $BACKUP_PATH/* $SRC_DIR/ -Rf !(dbdump.data|dbdump.sql|dbdump.sql.cf) || error "Could not restore files. Please take into account that previous state including DB state is in $BACKUP_PATH"
+cp $BACKUP_PATH/* $SRC_DIR/ -Rf || error "Could not restore files. Please take into account that previous state including DB state is in $BACKUP_PATH"
 
 #Restoring database
 print "Restoring database..."
 
-$PWD/../tools/sqlRestore.py $BACKUP_PATH/dbdump.sql || error "Could not restore database. Please take into account that previous state including DB state is in $BACKUP_PATH" 
+#$PWD/../tools/sqlRestore.py $BACKUP_PATH/dbdump.sql || error "Could not restore database. Please take into account that previous state including DB state is in $BACKUP_PATH" 
+python $SRC_DIR/bin/versions/default/upgrade/tools/sqlRestore.py $BACKUP_PATH/dbdump.sql || error "Could not restore database. Please take into account that previous state including DB state is in $BACKUP_PATH" $NO_RESCUE
 
 cd $TMP_PATH
 
-
+service apache2 restart
