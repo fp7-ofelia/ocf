@@ -18,6 +18,8 @@ section = cfg['General']
 #Droping the database and recreating
 
 #Preparing command
+command =''
+
 if section["user"] != "":
 	command+=" --user="+ section["user"]
 if section["password"] != "":
@@ -29,15 +31,19 @@ if section["port"] != "":
 
 command+=" "+section["database"]+" < "+sys.argv[1]
 
+if section["host"] == "":
+        host="localhost"
+else:
+        host=section["host"]
 
-dropDB="mysql -e \"drop database"+section["database"]+"; CREATE DATABASE "+section["database"]+";\" "+command
+dropDB="mysql -e \"drop database "+section["database"]+"; CREATE DATABASE "+section["database"]+";GRANT ALL ON "+section["database"]+" . * TO '"+section["user"]+"'@'"+host+"';\""+command
 
 print dropDB
 
 if os.system(dropDB)>0:
-	sys.exit(1)
+        sys.exit(1)
 
-importDB="mysqlimport "+command+" < "+sys.argv[1]
+importDB="mysql "+command+" < "+sys.argv[1]
 
 print importDB
 

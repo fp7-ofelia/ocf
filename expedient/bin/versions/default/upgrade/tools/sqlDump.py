@@ -17,7 +17,8 @@ PYTHON_DIR = join(dirname(__file__), '../../../../../src/python')
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
+#os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = sys.argv[2]
 
 #sys.path.append(PYTHON_DIR)
 sys.path.insert(0,PYTHON_DIR)
