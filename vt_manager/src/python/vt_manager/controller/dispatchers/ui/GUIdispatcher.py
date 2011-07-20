@@ -158,6 +158,11 @@ def delete_server(request, server_id):
 
 		except Exception as e:
 			logging.error(e)
+			e = HttpUtils.processException(e)
+			return simple.direct_to_template(request,
+				template = 'servers/delete_server.html',
+				extra_context = {'user':request.user, 'exception':e, 'next':reverse("admin_servers")},
+				)	
 	elif request.method == 'GET':
 		return simple.direct_to_template(request,
 				template = 'servers/delete_server.html',

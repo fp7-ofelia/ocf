@@ -3,7 +3,20 @@
 {% block pagehead %}<h1>Delete virtualized server {{ object.name }}</h1>{% endblock pagehead %}
 
 {% block content %}
-<div class="main">
+	{% if exception %}
+<div class="main"> 
+    <div class="iframe_button">
+			<table>
+				<tr><th colspan ="2" class="fielderror">{{exception}}</th></tr>
+	 <tr><td colspan="2"><input type="button" value="Back" onclick="document.location='{{ next }}';"/></td></tr>
+	</table>
+
+    </div>
+</div>
+
+
+{% else %}
+<div class="main"> 
     <form action="" method="post">{% csrf_token %}
     <div class="iframe_button">
         <input type="hidden" name="post" value="yes" />
@@ -13,5 +26,6 @@
     </div>
     </form>
 </div>
+{% endif %}
 {% endblock %}
 
