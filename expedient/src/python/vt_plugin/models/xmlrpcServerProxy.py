@@ -23,4 +23,4 @@ class xmlrpcServerProxy(models.Model):
     #        "maximum. The new password is then randomly generated.")
     #password_timestamp = models.DateTimeField(auto_now_add=True)
     url = models.URLField("Server URL", verify_exists = False, max_length=1024,
-         help_text="URL use to access the remote server, should begin with https://")
+         help_text="URL use to access the remote server's xmlrpc interface, should begin with https://")
