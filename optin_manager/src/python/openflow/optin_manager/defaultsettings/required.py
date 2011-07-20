@@ -7,7 +7,7 @@ REQUIRED_SETTINGS = [
     ("admins", ["ADMINS", "MANAGERS"]),
     ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
     ("site", ["SITE_DOMAIN"]),
-    ("openflowtests", ["SITE_IP_ADDR", "MININET_VMS"]),
+#    ("openflowtests", ["SITE_IP_ADDR", "MININET_VMS"]),
 ]
 '''Required settings that should be overridden for each deployment.
 

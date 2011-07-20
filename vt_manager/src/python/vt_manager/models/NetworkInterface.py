@@ -23,7 +23,7 @@ class NetworkInterface(models.Model):
 		app_label = 'vt_manager'
 
 	'''Generic parameters'''
-	name = models.CharField(max_length = 128, default="", verbose_name = "Interface Name") #check if bank = True and null = True are required
+	name = models.CharField(max_length = 128, default="", verbose_name = "Name") #check if bank = True and null = True are required
 	mac = models.ForeignKey('MacSlot', blank = True, null = False, editable = False, verbose_name = "Mac address",validators=[EthernetUtils.checkValidMac],related_name="interface")
 	ip4s = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False, verbose_name = "IP4 addresses", related_name = "Interface")
 	isMgmt = models.BooleanField(verbose_name="Mgmt interface",default=0, editable = False)

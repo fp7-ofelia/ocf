@@ -18,14 +18,14 @@ EMAIL_HOST='smtp.gmail.com'
 EMAIL_HOST_USER='i2catopenflow@gmail.com'
 EMAIL_HOST_PASSWORD="expedient"
 EMAIL_PORT=587 
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
 
-#SITE_DOMAIN = "expedient.r1"
 SITE_DOMAIN = "OfeliaSDKR1"
 
 SITE_IP_ADDR = "192.168.254.199"
-MININET_VMS = [
-    ("84.88.41.12", 22),
-]
 
+DATABASE_NAME = "changeMe"
+DATABASE_HOST = "changeMe"
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"

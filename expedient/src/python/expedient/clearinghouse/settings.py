@@ -77,6 +77,7 @@ except ImportError as e:
 # Logging
 from expedient.common import loggingconf
 import logging
+
 if DEBUG:
     loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
@@ -84,4 +85,20 @@ else:
 
 
 
+
+
+#GENI CONTROL FRAMEWORK SETTINGS (NOT NEEDED AT THIS MOMENT)
+GCF_BASE_NAME = "expedient//your_affiliation"
+GCF_URN_PREFIX = "expedient:your_afiliation"
+
+
+OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+expedient:your_affiliation:openflow"
+OPENFLOW_GAPI_AM_URN = OPENFLOW_GAPI_RSC_URN_PREFIX+"+am"
+
+#Openflow Test (NOT NEEDED, BUT KEPT HERE JUST IN CASE)
+MININET_VMS = [
+    ("84.88.41.12", 22),
+]
+
+#Monitoring
 MONITORING_INTERVAL = 38
