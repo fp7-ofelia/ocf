@@ -20,7 +20,7 @@ print "Downloading the template..."
 	mkdir -p $OXA_DIRECTORY/cache/templates/default
 	echo ""	
 	echo "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
-	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz || rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!"
+	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
 }
 
 if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz ];then
