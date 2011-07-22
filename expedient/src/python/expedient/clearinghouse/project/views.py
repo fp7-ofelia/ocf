@@ -312,6 +312,8 @@ def add_member(request, proj_id):
         form = AddMemberForm(project=project, giver=request.user, data=request.POST)
         if form.is_valid():
             form.save()
+	    #Sync LDAP
+	    project.save()
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 
     else:
@@ -390,6 +392,9 @@ def remove_member(request, proj_id, user_id):
             role.remove_from_permittee(member)
         # Remove other permissions
         PermissionOwnership.objects.delete_all_for_target(project, member)
+	#Sync LDAP
+    	project.save()
+
         return HttpResponseRedirect(
             reverse("project_detail", args=[proj_id]))
     

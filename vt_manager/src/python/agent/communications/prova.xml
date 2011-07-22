@@ -1,49 +1,20 @@
-<rspec> 
-<query>
-<provisioning>
-<action type="create" id="ee15696c-91a4-44d9-93d0-6dcdf045c10d">
-<virtual-machine>
-<name>p</name>
-<uuid>938c6329-fa84-40cb-b6aa-5c9f5047d066</uuid>
-<project-id>f3813bd0-5e44-44ca-af75-fa82d765d193</project-id>
-<project-name>Test</project-name>
-<slice-id>7fcaebbe-c051-463e-8997-c1fd6242cac7</slice-id>
-<slice-name>test</slice-name>
-<operating-system-type>GNU/Linux</operating-system-type>
-<operating-system-version>6.0</operating-system-version>
-<operating-system-distribution>Debian</operating-system-distribution>
-<server-id>94ea0f91-8cef-40ab-9e1c-d0fc288dd659</server-id>
-<virtualization-type>xen</virtualization-type>
-<xen-configuration>
-<hd-setup-type>file-image</hd-setup-type>
-<hd-origin-path>default/squeeze</hd-origin-path>
-<virtualization-setup-type>paravirtualization</virtualization-setup-type>
-<memory-mb>512</memory-mb>
-<interfaces>
-<interface ismgmt="false">
-<name>eth1</name>
-<mac>00:16:3e:04:02:11</mac>
-<ip>NONE</ip>
-<mask>NONE</mask>
-<gw>NONE</gw>
-<dns1>NONE</dns1>
-<dns2>NONE</dns2>
-<switch-id>eth1</switch-id>
-</interface>
-<interface ismgmt="true">
-<name>eth0</name>
-<mac>00:16:3e:04:02:12</mac>
-<ip>10.216.12.9</ip>
-<mask>255.255.252.0</mask>
-<gw>192.168.10.1</gw>
-<dns1>84.88.39.235</dns1>
-<switch-id>eth0</switch-id>
-</interface>
-</interfaces>
-</xen-configuration>
-</virtual-machine>
-</action>
-</provisioning>
-</query>
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec>
+    <query>
+        <provisioning>
+            <action type="hardStop" id="4cac0113-4658-426d-bf26-42d97284f03a">
+                <virtual-machine>
+                    <name>testlockers</name>
+                    <uuid>3317c577-53af-4692-9a42-d2b6d73e25a0</uuid>
+                    <project-id>1</project-id>
+                    <slice-id>1787e222-9b31-4257-b1ff-aa6836b68625</slice-id>
+                    <virtualization-type>xen</virtualization-type>
+                    <xen-configuration>
+                        <hd-setup-type>file-image</hd-setup-type>
+                    </xen-configuration>
+                </virtual-machine>
+            </action>
+        </provisioning>
+    </query>
 </rspec>
 

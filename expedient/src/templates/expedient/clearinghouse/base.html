@@ -8,7 +8,7 @@
 		<title>
 			OFELIA Expedient - {% block title %}Expedient{% endblock %}
 		</title>
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+		<script src="{% url js_media 'jquery.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
 		<script src="{% url js_media 'iframe.js' %}"></script>
@@ -30,11 +30,11 @@
 					.prepend("<td />");
 
 				/* find help text and replace with image and tooltip */
-				$("table.formtable_noborder>tbody>tr>td:nth-child(3)")
+				$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
 {% include "fixformtable.js" %}
 				;
 
-				$("table.formtable>tbody>tr>td:nth-child(3)")
+				$("table.formtable>tbody>tr>td:nth-child(2)")
 {% include "fixformtable.js" %}
 				;
 			});
@@ -73,7 +73,7 @@
 			<div id="content">
 				{% block messages %}
 				{% if messages %}
-				<div class="messages">
+				<div id="messages" class="messages">
 					<table class="msg_table">
 						{% for msg in messages %}
 						<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">

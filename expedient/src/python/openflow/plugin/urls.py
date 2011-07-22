@@ -9,6 +9,7 @@ urlpatterns = patterns('openflow.plugin.views',
     url(r'^aggregate/create/$', 'aggregate_create', name='openflow_aggregate_create'),
     url(r'^aggregate/(?P<agg_id>\d+)/edit/$', 'aggregate_edit', name='openflow_aggregate_edit'),
     url(r'^aggregate/(?P<agg_id>\d+)/slice/(?P<slice_id>\d+)/add/$', 'aggregate_add_to_slice', name='openflow_aggregate_slice_add'),
+    url(r'^aggregate/(?P<agg_id>\d+)/slice/(?P<slice_id>\d+)/c_add/$', 'add_controller_to_slice', name='openflow_aggregate_slice_controller_add'),
     url(r'^aggregate/(?P<agg_id>\d+)/links/$', 'aggregate_add_links', name='openflow_aggregate_add_links'),
 )
 

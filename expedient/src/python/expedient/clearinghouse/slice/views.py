@@ -223,7 +223,6 @@ def add_aggregate(request, slice_id):
 
         if agg_id not in aggregate_list.values_list("id", flat=True):
             raise Http404
-
         aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
         return HttpResponseRedirect(aggregate.add_to_slice(
             slice, reverse("slice_add_agg", args=[slice_id])))
@@ -242,7 +241,9 @@ def update_aggregate(request, slice_id, agg_id):
             "id", flat=True)).as_leaf_class()
 
     if request.method == "POST":
-        return HttpResponseRedirect(aggregate.add_to_slice(
+        #return HttpResponseRedirect(aggregate.add_to_slice(
+        print "PRECALLING"
+        return HttpResponseRedirect(aggregate.add_controller_to_slice(
             slice, reverse("slice_detail", args=[slice_id])))
     else:
         return HttpResponseNotAllowed(["POST"])

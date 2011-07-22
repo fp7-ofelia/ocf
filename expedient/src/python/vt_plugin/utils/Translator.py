@@ -3,8 +3,7 @@ from vt_plugin.models.Action import Action
 import copy, uuid
 from datetime import datetime
 from expedient.clearinghouse.aggregate.models import Aggregate
-from vt_plugin.models.VTServer import VTServer
-from vt_plugin.models.VTServerIface import VTServerIface
+from vt_plugin.models import VTServer, VTServerIface
 
 class Translator():
 
@@ -17,8 +16,7 @@ class Translator():
 		return False
 
     @staticmethod
-    def VMtoModel(VMxmlClass, save = "noSave"):
-
+    def VMtoModel(VMxmlClass, agg_id, save = "noSave"):
        # statusTable = {
        #                 'CREATED':'created (stopped)',
        #                 'STARTED':'running',
@@ -28,13 +26,11 @@ class Translator():
 
         #search in database if VMxmlClass already exists
         if VM.objects.filter(uuid = VMxmlClass.uuid).exists():
-            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)            
+            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)     
         else:
             VMmodel = VM()
-            VMmodel.setState("on queue")
-            #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id
 
-        #VMmodel.setState(statusTable.get(VMxmlClass.status))    
+        VMmodel.setState(VMxmlClass.status)
         VMmodel.setName(VMxmlClass.name)
         VMmodel.setUUID(VMxmlClass.uuid)
         VMmodel.setProjectId(VMxmlClass.project_id)
@@ -50,7 +46,8 @@ class Translator():
         VMmodel.setHDoriginPath(VMxmlClass.xen_configuration.hd_origin_path) 
         VMmodel.setVirtualizationSetupType(VMxmlClass.xen_configuration.virtualization_setup_type)
         VMmodel.setMemory(VMxmlClass.xen_configuration.memory_mb)
-        VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id    
+        VMmodel.aggregate_id = agg_id    
+        #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id    
         #TODO: hablar con leo sobre incluir una variable disc_image para las vms...
         VMmodel.disc_image = 'Default'
         
@@ -61,29 +58,31 @@ class Translator():
         
     @staticmethod
     def VMmodelToClass(VMmodel, VMxmlClass):
-
-        VMxmlClass.name = VMmodel.getName()
-        VMxmlClass.uuid = VMmodel.getUUID()
-        VMxmlClass.project_id = VMmodel.getProjectId()
-        VMxmlClass.project_name = VMmodel.getProjectName()
-        VMxmlClass.slice_id = VMmodel.getSliceId()
-        VMxmlClass.slice_name = VMmodel.getSliceName()
-        VMxmlClass.operating_system_type = VMmodel.getOStype()
-        VMxmlClass.operating_system_version = VMmodel.getOSversion()
-        VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
-        VMxmlClass.virtualization_type = VMmodel.getVirtTech()
-        VMxmlClass.server_id = VMmodel.getServerID()
-        VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHDsetupType()
-        VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
-        VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
-        VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-
+        try:
+            VMxmlClass.name = VMmodel.getName()
+            VMxmlClass.uuid = VMmodel.getUUID()
+            VMxmlClass.status = VMmodel.getState()
+            VMxmlClass.project_id = VMmodel.getProjectId()
+            VMxmlClass.project_name = VMmodel.getProjectName()
+            VMxmlClass.slice_id = VMmodel.getSliceId()
+            VMxmlClass.slice_name = VMmodel.getSliceName()
+            VMxmlClass.operating_system_type = VMmodel.getOStype()
+            VMxmlClass.operating_system_version = VMmodel.getOSversion()
+            VMxmlClass.operating_system_distribution = VMmodel.getOSdist()
+            VMxmlClass.virtualization_type = VMmodel.getVirtTech()
+            VMxmlClass.server_id = VMmodel.getServerID()
+            VMxmlClass.xen_configuration.hd_setup_type = VMmodel.getHDsetupType()
+            VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
+            VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
+            VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
+        except Exception as e:
+			print e
+			return
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
-        #search in database if sClass already exists
         newServer = 0
-        if VTServer.objects.filter(name = sClass.name).exists():
-            sModel = VTServer.objects.get(name=sClass.name)
+        if VTServer.objects.filter(uuid = sClass.uuid).exists():
+            sModel = VTServer.objects.get(uuid=sClass.uuid)
         else:
             newServer = 1
             sModel = VTServer()
@@ -92,7 +91,7 @@ class Translator():
         sModel.name=sClass.name
         sModel.aggregate = Aggregate.objects.get(id = agg_id)
         sModel.status_change_timestamp = datetime.now()
-        sModel.available = True     
+        sModel.available = True      
         #XXX: The id field of the server in the xml is probably unnecessary,
         #for sure this line has to be deleted since sModel.id is a resource.id and can override other resources 
         #sModel.id = sClass.id
@@ -103,27 +102,29 @@ class Translator():
             sModel.setOSdist(sClass.operating_system_distribution)
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
-            for iface in sClass.interfaces.interface:
-                if iface.ismgmt is True:
-                    sModel.setVmMgmtIface(iface.switch_id)
-                else:
-                    if sModel.ifaces.filter(ifaceName = iface.name):
-                        ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+            #for iface in sClass.interfaces.interface:
+            if sClass.interfaces:
+                for iface in sClass.interfaces.interface:
+                    if iface.ismgmt is True:
+                        sModel.setVmMgmtIface(iface.name)
                     else:
-                        ifaceModel = VTServerIface()
-                    ifaceModel.ifaceName = iface.name
-                    ifaceModel.switchID = iface.switch_id
-		    if Translator._isInteger(iface.switch_port):
-                    	ifaceModel.port = iface.switch_port
-                    ifaceModel.save()
-                    if not sModel.ifaces.filter(ifaceName = iface.name):
-                        sModel.ifaces.add(ifaceModel)
+                        if sModel.ifaces.filter(ifaceName = iface.name):
+                            ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+                        else:
+                            ifaceModel = VTServerIface()
+                        ifaceModel.ifaceName = iface.name
+                        ifaceModel.switchID = iface.switch_id
+    		    if Translator._isInteger(iface.switch_port):
+                       	ifaceModel.port = iface.switch_port
+                        ifaceModel.save()
+                        if not sModel.ifaces.filter(ifaceName = iface.name):
+                            sModel.ifaces.add(ifaceModel)
             sModel.setVMs()        
             sModel.save()
             return sModel
         except Exception as e:
+            print e
             print "Error tranlating Server Class to Model"
-	    print e
             if newServer:
                 sModel.delete()
 
@@ -142,7 +143,6 @@ class Translator():
 
         actionModel.uuid = action.id
         if save is "save":
-            print "TRANSLATOR SAVING..."
             actionModel.save()
         return actionModel
 
@@ -150,14 +150,16 @@ class Translator():
     @staticmethod
     def PopulateNewAction(action, vm):
         action.id = uuid.uuid4()
-        action.virtual_machine.name = vm.getName()
-        action.virtual_machine.uuid = vm.getUUID()
-        action.virtual_machine.project_id = vm.getProjectId()
-        action.virtual_machine.project_name = vm.getProjectName()
-        action.virtual_machine.slice_id = vm.getSliceId()
-        action.virtual_machine.slice_name = vm.getSliceName()
-        action.virtual_machine.virtualization_type = vm.getVirtTech()
-        action.virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
+		
+        virtual_machine = action.server.virtual_machines[0]
+        virtual_machine.name = vm.getName()
+        virtual_machine.uuid = vm.getUUID()
+        virtual_machine.project_id = vm.getProjectId()
+        virtual_machine.project_name = vm.getProjectName()
+        virtual_machine.slice_id = vm.getSliceId()
+        virtual_machine.slice_name = vm.getSliceName()
+        virtual_machine.virtualization_type = vm.getVirtTech()
+        virtual_machine.xen_configuration.hd_setup_type = vm.getHDsetupType()
 
     @staticmethod
     def PopulateNewVMifaces(VMclass, VMmodel):

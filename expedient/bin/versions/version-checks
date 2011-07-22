@@ -1,0 +1,15 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Version checkings 
+###
+
+#print "General version checks!"
+
+if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE" == "0" ]; then
+	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them" $NO_RESCUE
+fi
+

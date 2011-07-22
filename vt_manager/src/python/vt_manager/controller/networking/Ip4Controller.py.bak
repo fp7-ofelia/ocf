@@ -1,0 +1,12 @@
+from vt_manager.models.Ip4Range import Ip4Range
+
+class Ip4Controller():
+	
+	@staticmethod
+	def listRanges(filterEnabled=False):
+		
+		if not filterEnabled:
+			return Ip4Range.objects.all()
+		else:
+			return Ip4Range.objects.filter(enabled=True) 
+

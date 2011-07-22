@@ -1,0 +1,68 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Modules library 
+###
+
+
+##
+#Modules
+##
+
+
+
+#executeModule execute $1 command with the module (e.g. `source` to load or `cat` to import
+#Parameters: $1 Command to execute $2 Module name [$3 Flags $NO_RESCUE or $DONT_ABORT ]
+function executeModule(){
+	#Define file locations
+	if [ "$ACTION" == "install" ]; then
+		local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/install/$2"
+		local DPATH="$VERSIONS_PATH/default/install/$2"
+	
+	else
+		local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/$CURRENT_VERSION/$2" #specific v1 -> v2
+		local DPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/default/$2" #Generic from , specific to: whatever -> v1
+		local DDPATH="$VERSIONS_PATH/default/upgrade/default/$2" #Default
+	fi
+
+	#Verify existance
+	#printDebug "Version specific module path: $FPATH"
+	#printDebug "Default module path: $DPATH"
+
+	if [ -f $FPATH ]; then
+		#Check version specific first
+		CURRENT_DIRECTORY=`getDirectory $FPATH`
+		$1 $FPATH || error "Error importing module '$2'"
+		return
+	elif [ -f $DPATH ]; then
+		#Go to default 
+		CURRENT_DIRECTORY=`getDirectory $DPATH` 
+		$1 $DPATH || error "Error importing module '$2'"
+		return
+	elif [ "$ACTION" == "upgrade" ]; then
+		if [ -f $DDPATH ]; then
+			#Go to default 
+			CURRENT_DIRECTORY=`getDirectory $DDPATH` 
+			$1 $DDPATH || error "Error importing module '$2'"
+			return
+		fi
+	fi
+	
+	#No module
+	if [ -z "$3" ] || [ "$3" == "$NO_RESCUE" ]; then
+		error "Could not load module: $2" $3
+	fi
+}
+
+#Loads (source) module
+function loadModule(){
+	executeModule "source" $1 $2 $3	
+}
+
+#echos module path
+function importModule(){
+	executeModule "echo" $1 $2 $3
+}

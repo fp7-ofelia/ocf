@@ -10,7 +10,7 @@ from expedient.clearinghouse.utils import post_message_to_current_user
 from vt_plugin.controller.vtAggregateController.forms.forms import *
 from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os
 from vt_plugin.utils.Translator import Translator
 from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash
@@ -40,28 +40,6 @@ def aggregate_crud(request, agg_id=None):
             client = client_form.save()
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
-            
-#            #check if virtualization aggregate manager is available
-#            try:
-#                print 'DIRECCION: '+'https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]
-#                temp_client = xmlrpclib.Server('https://'+aggregate.client.username+':'+aggregate.client.password+'@'+aggregate.client.url[8:]) 
-#            except Exception as e:
-#                print "Can't connect to server"
-#                print e
-#                return
-#                
-#            #TODO: finish check by calling the (yet not implemented) "ping" function in VT_AM
-#            #meanwhile we check connection through listResources service call
-#            #XXX: It is never going to work since listResurces requires parameters
-#            try:
-#                rspec = temp_client.listResources()
-#                aggregate.available = True
-#                print "aggregate_crud --> connection OK ; aggregate.available = True"
-#            except Exception as e:
-#                aggregate.available = False
-#                print "aggregate_crud --> connection OK; aggregate.available = False"                                            
-
-            
             aggregate.save()
             agg_form.save_m2m()
             aggregate.save()
@@ -104,8 +82,7 @@ def aggregate_crud(request, agg_id=None):
     )
         
 
-def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None', sliceUUID = 'None'):
-
+def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None'):
     "asks the VT AM for all the resources under it."
     serversInAggregate = []
     try:
@@ -116,48 +93,47 @@ def askForAggregateResources(vtPlugin, serverUUID = 'None', projectUUID = 'None'
         return
     
     try:
-        rHashObject =  resourcesHash.objects.get(serverUUID = serverUUID, projectUUID = projectUUID, sliceUUID = sliceUUID)
+        rHashObject =  resourcesHash.objects.get(vtamID = vtPlugin.id, projectUUID = projectUUID, sliceUUID = sliceUUID)
     except:
-        rHashObject = resourcesHash(hashValue = '0', serverUUID = serverUUID, projectUUID= projectUUID, sliceUUID = sliceUUID)
+        rHashObject = resourcesHash(hashValue = '0', vtamID = vtPlugin.id, projectUUID= projectUUID, sliceUUID = sliceUUID)
         rHashObject.save()
     try:
-        hashV ,rspec = client.listResources(rHashObject.hashValue, 'None', projectUUID, sliceUUID)
-	print hashV
+        remoteHashValue ,resourcesString = client.listResources(rHashObject.hashValue, projectUUID, sliceUUID)
+        print remoteHashValue
     except Exception as e:
         print "Can't retrieve resources"
         print e
         return
-    print rspec
 
-    if hashV == rHashObject.hashValue:
+    if remoteHashValue == rHashObject.hashValue:
         print "Same HASH, no changes in resources"
         return
     else:
-	print hashV
-        rHashObject.hashValue = hashV
+        print remoteHashValue
+        oldHashValue = rHashObject.hashValue
+        rHashObject.hashValue = remoteHashValue
         rHashObject.save() 
         try:
-            xmlClass = XmlHelper.parseXmlString(rspec)
+            xmlClass = XmlHelper.parseXmlString(resourcesString)
         except Exception as e:
             print "Can't parse rspec"
             print e
             return
-    
-        for server in xmlClass.response.information.resources.server:
-            for vm in server.virtual_machine:
-                Translator.PopulateNewVMifaces(vm, Translator.VMtoModel(vm, save="save"))
-            Translator.ServerClassToModel(server, vtPlugin.id)
-            serversInAggregate.append(server.uuid)
-        serversInExpedient  = VTServer.objects.all().values_list('uuid', flat=True)
-        for s in serversInExpedient:
-            if s not in serversInAggregate:
-                delServer = VTServer.objects.get(uuid = s)
-                for vm in delServer.vms.all():
-                    for vmIface in vm.ifaces.all():
-                        vmIface.delete()
-                    vm.delete()
-                for sIface in delServer.ifaces.all():
-                    sIface.delete()
-                delServer.delete()
-        return xmlClass
+        try:
+            for server in xmlClass.response.information.resources.server:
+                for vm in server.virtual_machine:
+                    VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
+                    Translator.PopulateNewVMifaces(vm, VMmodel)
+                Translator.ServerClassToModel(server, vtPlugin.id)
+                serversInAggregate.append(server.uuid)
+            serversInExpedient  = VTServer.objects.filter(aggregate=vtPlugin.id).values_list('uuid', flat=True)
+            for s in serversInExpedient:
+                if s not in serversInAggregate:
+                    delServer = VTServer.objects.get(uuid = s)
+                    delServer.completeDelete()
+            return xmlClass
+        except Exception as e:
+            print e
+            rHashObject.hashValue = oldHashValue
+            rHashObject.save()
     

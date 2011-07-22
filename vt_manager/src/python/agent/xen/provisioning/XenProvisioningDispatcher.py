@@ -45,6 +45,8 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			try:
 				HdManager.umount(vm,pathToMountPoint)
+				#Delete VM disc and conf file
+				XenProvisioningDispatcher.deleteVM(id,vm)
 			except:
 				pass
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))

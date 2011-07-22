@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Synchronize database
+printHeader ">" "Synchronizing database... It will ask for a root user of the component; use STRONG passwords for it!"
+
+warning "Make sure the database is already created, and that root passwords in settings file has enough rights to populate database before proceeding, or installation will fail..."
+pause ""
+
+local TMP_PATH=$PWD
+cd $SRC_DIR/src/python/expedient/clearinghouse/ && python manage.py syncdb || error "Could not synchronize database using manage.py..."
+python manage.py setup_expedient || warning "Could not create secret key..."
+cd $TMP_PATH
+

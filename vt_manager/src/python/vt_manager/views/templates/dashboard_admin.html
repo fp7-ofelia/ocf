@@ -1,6 +1,6 @@
 {% extends "base_admin.html" %}
 
-{% block pagehead %}<h1>{{ user.username }} - Admin Dashboard </h1> {% endblock %}
+{% block pagehead %}<h1>Dashboard ({{ user.username }})</h1> {% endblock %}
 {% block scripts %}
 <style>
 	table.formtable {
@@ -11,8 +11,54 @@
 {% block content %}
 <div class="main">
 
-	Welcome to the Virtualization Aggregate Manager!
+    <i>Welcome to the Virtualization Aggregate Manager!</i>
 
+    <h3>Available servers:</h3>
+	<div style="padding-left:20px">
+    {% if servers %}
+    {% for server in servers%}
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
+		<tr>
+			<th style="text-align:center">
+				<a href="{% url edit_server server.id %}">{{server.name}}</a>
+			</th>
+		</tr>
+		<tr>
+			<td style="text-align:center">
+				Number of VMs : <a href="{% url edit_server server.id %}">{{server.vms.all|length }}</a>
+			</td>
+		</tr>
+	</table>
+	
+    {% endfor %}
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
+		<tr>
+			<th style="text-align:center">
+				<a href="{% url admin_servers %}"><font style="color:#999">Manage servers</font></a>
+			</th>
+		</tr>
+		<tr>
+			<td style="text-align:center">
+				<a href ="{% url servers_create  %}"> Add a server <br/><img src="{% url img_media 'plus.gif' %}" style="border:0px;vertical-align:middle"/></a>
+			</td>
+		</tr>
+	</table>
+    {% else %}
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
+		<tr>
+			<th style="text-align:center">
+				<font style="color:#999">No servers defined yet...	</font>
+			</th>
+		</tr>
+		<tr>
+			<td style="text-align:center">
+				<a href ="{% url servers_create  %}"> Add a server <br/><img src="{% url img_media 'plus.gif' %}" style="border:0px;vertical-align:middle"/></a>
+			</td>
+		</tr>
+	</table>
+	
+    {% endif %}
+	</div>
 </div>
 {% endblock content %}
 

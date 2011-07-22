@@ -1,0 +1,421 @@
+/* 
+
+	Ofelia.css style sheet
+
+*/
+body {
+	font-size: 62.5%; /* Resets 1em to 10px */
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+	background-color: #8CCDF8;
+	color: #333;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
+	}
+html form {
+	display: inline; margin: 0;
+}
+#fancypage {
+    background-color: #FFFFFF;
+    padding: 10px 0 0 0;
+    width: 600px;
+    min-height: 300px;
+    margin: auto;
+    border: 1px solid #959596;
+    text-align: left;
+    }
+
+#fancycontent {
+    position: relative;
+    font-size: 1.2em;
+    padding-top: 20px;
+    padding-left:30px;
+    padding-right:30px;
+    padding-bottom:30px;
+}
+#page {
+	background-color: #FFFFFF;	
+	padding: 10px 0 0 0;
+	width: 1000px;
+	min-height: 600px;
+	margin: auto;
+	border: 1px solid #959596;
+	text-align: left;
+	}
+
+#header {
+	margin: 0 0 0 1px;
+	padding: 0;	
+	width: 800px;
+	background-color: #EEEEEE;
+	}
+
+#headerimg {
+	width: 900px;
+	margin: 0;	
+	width: 100%;
+	background-color: #EEEEEE;
+}
+
+#content {
+	position: relative;
+	font-size: 1.2em;
+	padding-top: 20px;
+	padding-left:30px;
+	padding-right:30px;
+	padding-bottom:30px;
+}
+
+#leftContent{
+	width:740px;
+	font-size:12px;
+}
+
+#inner-content {
+	width:400px
+}
+
+.right{
+	text-align:right;
+}
+
+.center{
+	text-align:center;
+}
+
+small {
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 0.9em;
+	line-height: 1.5em;
+	}
+
+h1, h2, h3 {
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;	
+	color: #005;	
+	font-weight:bold;
+	
+	}
+
+h1 {
+	font-size: 1.5em;
+	text-align: left;
+	}
+
+h2 {
+	font-size: 1.3em;
+	}
+
+
+h3 {
+	font-size: 1.0em;
+	}
+
+h1, h1 a, h1 a:hover, h1 a:visited, #headerimg .description {
+	text-decoration: none;
+	}
+
+h2, h2 a, h2 a:visited, h3, h3 a, h3 a:visited {
+	color: #000055;
+	}
+
+h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar h2, #wp-calendar caption, cite {
+	text-decoration: none;
+	}
+
+.entry p a:visited {
+	}
+a, h2 a:hover, h3 a:hover {
+	color: #259;
+	text-decoration: none;
+	}
+h2 {
+	text-decoration:underline;
+}
+a:hover {
+	color: #36A;
+	text-decoration: underline;
+	}
+/* End Typography & Colors */
+
+
+
+/* Begin Structure */
+
+
+#footer {
+	padding: 0;
+	margin: 0 auto;
+	width: 760px;
+	clear: both;
+	}
+
+#footer p {
+	margin: 0;
+	padding: 20px 0;
+	text-align: center;
+	}
+/* End Structure */
+
+
+
+/*	Begin Headers */
+h1 {
+	padding-top: 0px;
+	padding-bottom: 5px;
+	margin: 0px 0px 25px 0px;
+	border-width: 0px 0px 1px 0px;
+	border-style: solid;
+	border-color: #CCC;
+	}
+
+h2 {
+	margin: 15px 0 5px;
+	}
+
+h2.pagetitle {
+	margin-top: 30px;
+	text-align: center;
+}
+
+#sidebar h2 {
+	margin: 5px 0 0;
+	padding: 0;
+	}
+
+h3 {
+	padding: 0;
+	margin: 30px 0 0;
+	}
+
+h3.comments {
+	padding: 0;
+	margin: 40px auto 20px ;
+	}
+/* End Headers */
+
+
+/* 
+    Table Styles
+*/
+
+/* Table for Forms */
+table.formtable {
+	margin-bottom:10px;
+    	margin-top:10px;
+    	margin-left:5px;
+    	padding:5px;
+    	border: 1px solid #CCCCCC;
+    	-moz-border-radius: 0px 15px 15px 15px;
+    	-webkit-border-radius: 0px 15px 15px 15px;
+    	border-radius:  0px 15px 15px 15px;
+	display:inline-table;
+}
+
+table.formtable tbody td ,tbody th {
+	/*padding: 5px 10px;*/
+	color: #000;
+	font-weight:normal;
+}
+table.formtable tbody th {
+	font-weight:bold;
+}
+table.formtable .smallInfo {
+	font-weight: normal;
+	font-style: normal;
+	font-size: 9px;
+}
+/* Bold */
+table.formtableBold {
+	margin-bottom:10px;
+    	margin-top:10px;
+    	padding:5px;
+	background-color:#CCC;
+    	border: 1px solid #999999;
+    	-moz-border-radius: 0px 15px 15px 15px;
+    	-webkit-border-radius: 0px 15px 15px 15px;
+    	border-radius:  0px 15px 15px 15px;
+	display:inline-block;
+}
+table.formtableBold tbody td ,tbody th {
+	/*padding: 5px 10px;*/
+	color: #000;
+	background-color:#CCC;
+	font-weight:normal;
+}
+table.formtableBold tbody th {
+	font-weight:bold;
+}
+table.formtableBold .smallInfo {
+	font-weight: normal;
+	font-style: normal;
+	font-size: 9px;
+}
+/* Other */
+table.formtable_noborder {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:10px;
+	margin-top:5px;
+}
+
+table.formtable_noborder tbody td ,tbody th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+	
+/* Separator table */
+.separator-table{
+	font-weight:bold;
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+.separator{
+    color:#005;
+    margin:0px;
+    padding:0px;
+	text-decoration:underline;
+}
+
+#indented-div{
+    width:100%;
+    padding-left:40px;
+}
+
+/* Tables */
+/* BLUE */
+table.blue{
+    width: 100%; 
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+}
+
+table.blue td{
+    padding : 3px;
+}
+
+table.blue th {
+	
+    padding : 2px;
+    text-align:left;
+	font-weight:bold;
+    background-color: #8ED6EA;
+}
+
+
+table.blue tr.even{
+    background-color: #A6DEEE;
+}
+
+table.blue tr.odd{
+    background-color: #C0E7F3;
+}
+/* RED */
+table.red{
+    width: 100%; 
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+}
+
+table.red td{
+    padding : 3px;
+}
+
+table.red th {
+	
+    padding : 2px;
+    text-align:left;
+    background-color: #CC5555;
+}
+
+
+table.red tr.even{
+    background-color: #CC9999;
+}
+
+table.red tr.odd{
+    background-color: #CC8888;
+}
+
+/* Table ranges */
+table.ranges{
+    width: 100%; 
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+}
+
+table.ranges td{
+    padding : 3px;
+}
+
+table.ranges th {
+
+    padding : 2px;
+    text-align:left;
+    background-color: #8ED6EA;
+}
+
+
+table.ranges tr.even{
+    background-color: #A6DEEE;
+}
+
+table.ranges tr.odd{
+    background-color: #C0E7F3;
+}
+
+
+#Menu
+.menutable td{
+    text-align:center;
+    padding:0px;
+    margin:0px;
+    background-position:left;
+}
+table.menutable {
+	border-collapse: collapse;
+	border-width: 0px;
+	margin-bottom:0px;
+	margin-top:0px;
+    width:140px;
+}
+
+table.menutable tbody td ,tbody th {
+	padding: 1px 10px;
+	background: #fff;
+	color: #000;
+    text-align:center;
+    font-size:12px;
+}
+table.menutable a{ 
+    color:#fff;
+}
+table.menutable a:hover { 
+    color:#999966;
+}
+
+/* Errors */
+.fielderror{
+	color: red;
+	padding:5px 
+}
+.fielderror th{
+	text-align:center;
+	font-weight:normal;
+	color: red;
+}
+.fielderror label {
+	color: red;
+}
+.fielderror li{
+	list-style: none;
+}
+.fielderror input {
+	background-color:#FFDDEE;
+}
+
+

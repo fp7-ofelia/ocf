@@ -12,4 +12,6 @@ urlpatterns = patterns('expedient.ui.html.views',
     url(r'^ssh_keys/(?P<slice_id>\d+)/$', 'sshkeys', name='html_plugin_sshkeys'),
     url(r'^ssh_public_key/(?P<slice_id>\d+)/$', 'sshkey_file', kwargs={"type": "ssh_public_key"}, name='html_plugin_sshkeys_public'),
     url(r'^ssh_private_key/(?P<slice_id>\d+)/$', 'sshkey_file', kwargs={"type": "ssh_private_key"}, name='html_plugin_sshkeys_private'),
+    #url(r'^(?P<slice_id>\d+)/vms_status/$', 'check_vms_status', name='check_vms_status'),
+
 )

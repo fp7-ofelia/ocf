@@ -126,6 +126,22 @@ class VM(Resource):
         return self.virtTech
 
     def setName(self, name):
+        def validate_name(value):
+            def error():
+                raise ValidationError(
+                    "Invalid input: VM name should not contain blank spaces",
+                    code="invalid",
+                )
+            cntrlr_name_re = re.compile("^[\S]*$")
+            m = cntrlr_name_re.match(value)
+            if not m:
+                error()
+        try:
+            validate_name(name)
+            self.name = name
+        except Exception as e:
+            raise e
+
         self.name = name
 
     def getName(self):
@@ -251,3 +267,11 @@ class VM(Resource):
     def delete(self):
         self.action_set.clear()
         super(VM, self).delete()
+
+    def completeDelete(self):
+        self.action_set.clear()
+        for iface in self.ifaces.all():
+            self.ifaces.remove(iface)
+            iface.delete()
+        super(VM, self).delete()
+

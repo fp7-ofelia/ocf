@@ -12,7 +12,11 @@ urlpatterns = urlpatterns + patterns('vt_plugin.controller.dispatchers.GUIdispat
     url(r'^goto_create_vm/(?P<slice_id>\d+)/$', 'goto_create_vm', name='goto_create_vm'),
     url(r'^manage_vm/(?P<slice_id>\d+)/(?P<vm_id>\d+)/(?P<action_type>\w+)/$', 'manage_vm', name='manage_vm'),
     url(r'^virtualmachine_crud/(?P<slice_id>\d+)/(?P<server_id>\d+)/$', 'virtualmachine_crud', name='virtualmachine_crud'),
+    url(r'^vms_status/(?P<slice_id>\d+)/$', 'check_vms_status', name='check_vms_status'),
+    url(r'^update_messages/$', 'update_messages', name='update_messages'),
 )
+
+
 
 
 urlpatterns = urlpatterns + patterns('',

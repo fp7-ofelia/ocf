@@ -262,6 +262,23 @@ No information available.
             give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
+    def add_controller_to_slice(self, slice, next):
+        """
+        Works exactly the same as L{add_to_project} but for a slice.
+        """
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+
+        prefix = self.__class__.get_url_name_prefix()
+        try:
+            return reverse("%s_aggregate_slice_controller_add" % prefix,
+                           kwargs={'agg_id': self.id,
+                                   'slice_id': slice.id})+"?next=%s" % next
+        except NoReverseMatch:
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
+            return next
+
+
     def remove_from_slice(self, slice, next):
         """
         Works exactly the same as L{remove_from_project} but for a slice.

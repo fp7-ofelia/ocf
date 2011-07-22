@@ -17,9 +17,12 @@ class HdManager(object):
 
 		#Import of Dispatchers must go here to avoid import circular dependecy 		
 		from xen.provisioning.hdmanagers.FileHdManager import FileHdManager
+		from xen.provisioning.hdmanagers.LVMHdManager import LVMHdManager
 
 		if hdtype == "file-image": 
 			return FileHdManager
+		elif hdtype == "logical-volume-image":
+			return LVMHdManager
 		else:
 			raise Exception("HD type not yet supported by XEN agent")	
 

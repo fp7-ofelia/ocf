@@ -1,0 +1,47 @@
+{% extends "fancybase.html" %}
+{% load accessDict %}
+{% block pagehead %}<h1>Subscribe IPv4 Ranges for {{server.name}} :</h1>{% endblock pagehead %}
+
+
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<div>
+
+	{% if not ipRanges %}
+		There are no IPv4 Ranges defined. Click <a href="{% url createIp4Range "add" %}">here</a> to add a new one
+	{% else %}
+	<form method="post" action="{% url subscribeIp4Ranges server.id %}">{% csrf_token %}	
+		<table class="ranges">
+            <tr>
+            <th> Name</th>
+            <th> From</th>
+            <th> To</th>
+            <th> Global</th>
+            <th> Subscribe</th>
+            </tr>
+            {% for ipRange in ipRanges %}
+				<tr class = "{% cycle 'odd' 'even' %}">
+                <td> {{ipRange.name}}</td>
+                <td> {{ipRange.startIp }}</td>
+                <td> {{ipRange.endIp }}</td>
+                <td> {{ipRange.isGlobal}}</td>
+                <td> 
+					<input type="checkbox" name="subscribe_{{ipRange.id}}" value="1" 
+					{% if ipRange in server.getSubscribedIp4RangesNoGlobal %}
+						checked="checked"
+					{% endif %}>
+					</td>
+				</tr>	
+			{% endfor %}
+
+		</table>
+	{% endif %}
+	<div class="center" style="margin-top : 20px;" >
+        <input type="submit" value="Save"lick=checkCboxes/> |
+        <a href="">Cancel</a>
+    </div
+	</form>
+</div>
+{% endblock content %}

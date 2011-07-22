@@ -1,0 +1,18 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-install module
+###
+
+#Inform user
+printHeader "info#" "Using default post-install-hook module..."
+
+#Starting OXAD
+print "Starting OXAD daemon..."
+/usr/sbin/service oxad restart
+
+#Testing
+#TODO

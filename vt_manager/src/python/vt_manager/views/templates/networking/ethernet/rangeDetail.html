@@ -1,0 +1,102 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Ethernet Range: {{range.name}}</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div>
+	{% if errors %}
+	<div class="fielderror">{{ errors }}</div>
+	{% endif %}
+	<h3>Range information</h3>
+	 <table class="formtable">
+		<tr>
+		<td>Range name: </td><td><b>{{range.name}}</b></td>
+		</tr>
+		<tr>
+		<td>Is global: </td><td><b>{{range.isGlobal}}</b></td>		</tr>
+		<tr>
+	
+		<td>Start address: </td><td><b>{{range.startMac}}</b></td>		</tr>
+		<tr>
+			<td>Start address: </td><td><b>{{range.endMac}}</b></td>		
+		</tr>
+		<tr>
+			<td>Status: </td><td><span id="status"></span></td>	
+			<script>
+				createProgressBar("#status",{{range.macs.all.count}},{{range.getNumberOfSlots}},true)	
+			</script>	
+		</tr>
+	
+		<tr>
+	
+		<td>Next available MAC address: </td><td><b>{{range.nextAvailableMac}}</b></td>
+         </table>
+	<br>
+	<br>
+	<br>
+	
+	<!-- Excluded MACs -->
+	<h3>Excluded MACs<br/><br/></h3>
+    	<table class ="red" style="margin-bottom:20px;width:600px">
+		<tr>
+			<th width="200px">Excluded Address</th><th style="text-align:left" width="300px">Comment</th><th width="80px">Actions</th>
+		</tr>
+	{% if range.getExcludedMacs.count > 0 %}
+		{% for mac in range.getExcludedMacs %}
+			<tr class="{% cycle 'odd' 'even' %}">
+				<form action="{% url manageMacRangeExcluded "removeExcluded" range.id mac.id %}" method="POST">
+				{% csrf_token %}
+				<td>{{mac.mac}}</td><td>{{mac.comment}}</td><td><input type="submit" value="Remove" onClick="return confirmSubmit('Are you sure you want to remove {{mac.mac}} from the list of excluded Mac?')"></td>
+				</form>
+			</tr>
+		{%endfor%}
+	{% else %}
+		<tr class="{% cycle 'odd' 'even' %}">
+			<td colspan="3"> There are no excluded MACs at the moment...</td>
+		</tr>
+	{% endif %}
+		<form action="{% url manageMacRange "addExcluded" range.id %}" method="POST">
+				{% csrf_token %}
+				<tr class="{% cycle 'odd' 'even' %}"> 
+					<td><input type="text" name="mac"></td><td><input type="text" name="comment"></td><td> <input type="submit" value="Add new entry"></td>
+				</tr>
+		</form>	
+		
+	</table>
+
+
+	<!-- Allocated MACs -->
+	<h3>Allocated MACs<br/><br/></h3>
+    	<table class ="blue" style="margin-bottom:20px;width:600px">
+		<tr>
+			<th width="200px">Allocated Address</th><th style="text-align:left" width="300px">VM</th><!--<th width="80px">Actions</th>-->
+		</tr>
+	{% if range.getAllocatedMacs.count > 0 %}
+		{% for mac in range.getAllocatedMacs %}
+			<tr class="{% cycle 'odd' 'even' %}">
+				<td>{{mac.mac}}</td><td>{{mac.getAssociatedVM}}</td>
+			</tr>
+		{%endfor%}
+	{% else %}
+		<tr class="{% cycle 'odd' 'even' %}" >
+			<td colspan="2"> There are no MACs assigned at the moment...</td>
+		</tr>
+	{% endif %}
+	</table>
+	
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url createMacRange "add" %}">Create range</a> |
+		<form action="{% url manageMacRange "delete" range.id %}" method="POST" name="deleteForm">
+				{% csrf_token %}
+				<a href="#" onClick="if(confirmSubmit('Are you sure you want to delete range {{range.name}}?')){document.forms['deleteForm'].submit();}">Delete</a> |
+		</form>
+		<a href="{% url macRanges %}">Back</a>
+	</div>
+</div>
+{% endblock content %}
+
+

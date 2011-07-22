@@ -67,3 +67,8 @@ except ImportError as e:
         )
     else:
         raise
+
+#FOR TESTING. NOT REALLY NEEDED, SINCE THE LINE IN REQUIRED_SETTINGS IS COMMENTED
+MININET_VMS = [
+    ("84.88.41.12", 22),
+]

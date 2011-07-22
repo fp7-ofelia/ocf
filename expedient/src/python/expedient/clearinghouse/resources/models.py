@@ -6,7 +6,8 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.extendable.models import Extendable
 from expedient.clearinghouse.slice.models import Slice
 from datetime import datetime
-
+from django.core.exceptions import ValidationError
+import re
 class Resource(Extendable):
     '''
     Generic model of a resource.
@@ -22,6 +23,18 @@ class Resource(Extendable):
     @ivar slice_set: The set of slices this resource is in
     @type slice_set: a L{models.ManyToManyField} to L{Slice}.
     '''
+
+    def validate_name(value):
+        def error():
+            raise ValidationError(
+                "Invalid input: VM name should not contain blank spaces",
+                code="invalid",
+            )
+        cntrlr_name_re = re.compile("^[\S]*$")
+        m = cntrlr_name_re.match(value)
+        if not m:
+            error()
+
     
     name = models.CharField(max_length=200)
     available = models.BooleanField("Available", default=True, editable=False)

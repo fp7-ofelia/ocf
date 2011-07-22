@@ -2,7 +2,7 @@ import copy
 from expedient.clearinghouse.slice.models import Slice
 from expedient.clearinghouse.project.models import Project
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_manager.communication.utils.XmlUtils import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
 from vt_plugin.utils.ServiceThread import *
@@ -22,6 +22,7 @@ class VMcontroller():
         for instance in instances:
             instance.uuid = uuid.uuid4()
             instance.serverID = server_id
+            instance.state = "on queue"
             instance.sliceId = slice.uuid
             instance.sliceName= slice.name
 
@@ -30,23 +31,28 @@ class VMcontroller():
             instance.virtTech = s.virtTech
             instance.projectId = slice.project.uuid
             instance.projectName = slice.project.name
-	    instance.aggregate_id = s.aggregate_id
+            instance.aggregate_id = s.aggregate_id
             #assign parameters according to selected disc image
             #TODO get the rest of image choices! 
             if instance.disc_image == 'test':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-		instance.hdOriginPath = "default/test/lenny"
-	    if instance.disc_image == 'default':
+                instance.hdOriginPath = "default/test/lenny"
+            if instance.disc_image == 'default':
                 instance.operatingSystemType = 'GNU/Linux'
                 instance.operatingSystemVersion = '6.0'
                 instance.operatingSystemDistribution = 'Debian'
-		instance.hdOriginPath = "default/squeeze"
+                instance.hdOriginPath = "default/default.tar.gz"
 
             actionClass = copy.deepcopy(actionClassEmpty)
             actionClass.id = uuid.uuid4()
-            Translator.VMmodelToClass(instance, actionClass.virtual_machine)
+            Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])
+            server = VTServer.objects.get(uuid = server_id)
+            actionClass.server.uuid = server_id
+            actionClass.server.virtualization_type = server.getVirtTech()
             rspec.query.provisioning.action.append(actionClass)
-        
+         
         ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
+
+

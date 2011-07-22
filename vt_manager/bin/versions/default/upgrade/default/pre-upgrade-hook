@@ -1,0 +1,17 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-upgrade-module 
+###
+
+#inform user
+printHeader "info#" "Using default pre-upgrade-hook module..."
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+
