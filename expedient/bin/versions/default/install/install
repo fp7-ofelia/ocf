@@ -28,7 +28,7 @@ source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies 
 /usr/sbin/service apache2 stop
 
 printHeader ">" "Installing remaining dependencies through easy_install..."
-
+warning "easy_install may randomly fail on the installation. This is a common error of easy_install; simply try again installation."
 /usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
 
 printHeader ">" "Enabling macro and ssl module in apache2..."
@@ -52,11 +52,6 @@ ln -sf /etc/apache2/sites-available/expedient.conf /etc/apache2/sites-enabled/ |
 #Create application folder for error log
 mkdir -p /var/log/apache2/expedient/clearinghouse
 
-#Change permissions of the code
-printHeader ">" "Setting correct file permissions..."
-chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
-chown -f $APACHE_USER $SRC_DIR/src/ -R
-
 
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
@@ -64,5 +59,10 @@ source $CURRENT_DIRECTORY/lib/django-settings
 
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
+
+#Change permissions of the code
+printHeader ">" "Setting correct file permissions..."
+chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
+chown -f $APACHE_USER $SRC_DIR/src/ -R
 
 
