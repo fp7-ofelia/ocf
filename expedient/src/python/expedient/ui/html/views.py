@@ -31,6 +31,7 @@ from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid, copy
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
+import json
 
 logger = logging.getLogger("html_ui_views")
 
@@ -94,7 +95,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
     """
     nodes = []
     links = []
-    
+
     id_to_idx = {}
     agg_ids = []
    
@@ -109,8 +110,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         )
         for s in switches:
             id_to_idx[s.id] = len(nodes)
-            nodes.append(dict(
-                name=s.name, value=s.id, group=i)
+            nodes.append(dict( 
+                name=s.name, value=s.id, group=i, type="of_agg", connection=[])
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
     
@@ -124,7 +125,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                name=n.name, value=n.id, group=i+len(of_aggs))
+                name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
             )
 
 
@@ -136,6 +137,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         dst_iface__aggregate__id__in=agg_ids,
         dst_iface__available=True,
     )
+
     non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
         of_iface__aggregate__id__in=agg_ids,
         resource__id__in=id_to_idx.keys(),
@@ -143,13 +145,44 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         resource__available=True,
     )
     
+    for node in nodes:
+        try:
+           for cnxn in of_cnxn_qs:
+               cnx_exists=False
+               if node["value"] == cnxn.src_iface.switch.id:
+                   for old_cnx in node["connection"]:
+                       if (old_cnx["target_datapath"] == str(cnxn.dst_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.dst_iface.port_num)) :
+                           cnx_exists=True
+                           break
+                   if not cnx_exists:
+                       node["connection"].append(dict(
+                       src_port = str(cnxn.src_iface.port_num),
+                       target_port =  str(cnxn.dst_iface.port_num),
+                       target_datapath = str(cnxn.dst_iface.switch.datapath_id)))
+               elif node["value"] == cnxn.dst_iface.switch.id:
+                   for old_cnx in node["connection"]:
+                       if (old_cnx["target_datapath"] == str(cnxn.src_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.src_iface.port_num)):
+                          cnx_exists=True
+                          break
+                   if not cnx_exists :
+                       node["connection"].append(dict(
+                       target_port = str(cnxn.src_iface.port_num),
+                       src_port = str(cnxn.dst_iface.port_num),
+                       target_datapath = str(cnxn.src_iface.switch.datapath_id)))
+        except Exception as e:
+            pass
+    
     for cnxn in of_cnxn_qs:
         #XXX: change me
         try:
             links.append(
                 dict(
                     src=id_to_idx[cnxn.src_iface.switch.id],
+                    #src_datapath=cnxn.src_iface.switch.datapath_id,
+                    #src_port=cnxn.src_iface.port_num,
                     target=id_to_idx[cnxn.dst_iface.switch.id],
+                    #target_datapath=cnxn.dst_iface.switch.datapath_id,
+                    #target_port=cnxn.dst_iface.port_num,
                    value="rsc_id_%s-rsc_id_%s" % (
                         cnxn.src_iface.id, cnxn.dst_iface.id
                     ),
@@ -190,26 +223,33 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
 
         for n in vt_servers:
             #id_to_idx[n.id] = len(nodes)
+#            nodes.append(dict(
+#                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
+#                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
+#            )
+            vmNames = []
+            for name in  n.vms.all().values_list('name', flat=True):
+                vmNames.append(str(name))
+            vmInterfaces = []
+            for j,inter in enumerate(n.ifaces.all()):
+                vmInterfaces.append(dict(name="eth"+str(j+1), switch=str(inter.switchID), port=str(inter.port)))
             nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
+                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
                     #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            )   
-       	    for inter in n.ifaces.all():
+            ) 
+            for j,inter in enumerate(n.ifaces.all()):
 		#first check datapathId exists.
-		try:
-			sId= openflowSwitches[inter.switchID]
-		except:
-			continue
-		links.append(
-	            dict(
-               		target=sId,
-	                src=len(nodes)-1,
-			value=inter.ifaceName+":"+str(inter.port)
-               		),
-        	)
- 
-
-
+                try:
+                    sId= openflowSwitches[inter.switchID]
+                except:
+                    continue
+                links.append(
+                        dict(
+                            target=sId,
+                            src=len(nodes)-1,
+                            value=inter.ifaceName+":"+str(inter.port)
+                            ),
+                     )
     return (nodes, links)
 
 
@@ -387,7 +427,6 @@ def home(request, slice_id):
         vt_aggs = \
             slice.aggregates.filter(
                 leaf_name=VtPlugin.__name__.lower())
-
         for agg in vt_aggs:
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
@@ -397,6 +436,19 @@ def home(request, slice_id):
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
+        fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        allocated_of_resources=[]
+        for agg in of_aggs:
+            for rsc in agg.resource_set.all():
+                rsc = rsc.as_leaf_class()
+                if isinstance(rsc,OpenFlowSwitch):
+                   ports=[]
+                   for iface in rsc.openflowinterface_set.all():
+                       if iface.id in checked_ids:
+                           ports.append(iface.port_num)
+                   if ports:
+                       allocated_of_resources.append(dict(switch=rsc,ports=ports))
+
         return simple.direct_to_template(
             request,
             template="html/show_resources.html",
@@ -409,8 +461,10 @@ def home(request, slice_id):
                 "vt_aggs": vt_aggs,
                 "slice": slice,
                 "checked_ids": checked_ids,
+                "allfs": fsquery, 
                 "ofswitch_class": OpenFlowSwitch,
                 "planetlab_node_class": PlanetLabNode,
+                "allocated_of_resources":allocated_of_resources,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

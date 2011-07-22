@@ -1,0 +1,10 @@
+#!/bin/bash
+
+mkdir -p $OXA_DIRECTORY/cache/templates || warning "Could not create cache/templates directory under $OXA_DIRECTORY"
+mkdir -p $OXA_DIRECTORY/cache/vms || warning "Could not create cache/vms directory under $OXA_DIRECTORY"
+mkdir -p $OXA_DIRECTORY/remote/templates || warning "Could not create remote/templates directory under $OXA_DIRECTORY"
+mkdir -p $OXA_DIRECTORY/remote/vms || warning "Could not create remote/vms directory under $OXA_DIRECTORY"
+mkdir -p $OXA_DIRECTORY/log || warning "Could not create log directory under $OXA_DIRECTORY"
+
+#bin
+ln -sf $OXA_DIRECTORY/repository/vt_manager/src/python/agent/ $OXA_DIRECTORY/bin || error "Could not create symbolic link to to /bin directory"

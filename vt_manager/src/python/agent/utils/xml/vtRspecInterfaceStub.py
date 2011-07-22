@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue Jun 21 09:44:33 2011 by generateDS.py version 2.3b.
+# Generated Tue Jun 28 13:33:53 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -127,8 +127,8 @@ supermod.virtual_machine_type.subclass = virtual_machine_typeSub
 
 
 class xen_configurationSub(supermod.xen_configuration):
-    def __init__(self, hd_setup_type=None, hd_size_gb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
-        super(xen_configurationSub, self).__init__(hd_setup_type, hd_size_gb, hd_origin_path, configurator, virtualization_setup_type, memory_mb, interfaces, users, )
+    def __init__(self, hd_setup_type=None, hd_size_mb=None, hd_origin_path=None, configurator=None, virtualization_setup_type=None, memory_mb=None, interfaces=None, users=None):
+        super(xen_configurationSub, self).__init__(hd_setup_type, hd_size_mb, hd_origin_path, configurator, virtualization_setup_type, memory_mb, interfaces, users, )
 supermod.xen_configuration.subclass = xen_configurationSub
 # end class xen_configurationSub
 

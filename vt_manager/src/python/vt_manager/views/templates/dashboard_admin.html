@@ -17,7 +17,7 @@
 	<div style="padding-left:20px">
     {% if servers %}
     {% for server in servers%}
-	<table class="formtable" style="width:130px;height:80px">
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
 		<tr>
 			<th style="text-align:center">
 				<a href="{% url edit_server server.id %}">{{server.name}}</a>
@@ -31,7 +31,7 @@
 	</table>
 	
     {% endfor %}
-	<table class="formtable" style="width:130px;height:80px">
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
 		<tr>
 			<th style="text-align:center">
 				<a href="{% url admin_servers %}"><font style="color:#999">Manage servers</font></a>
@@ -44,7 +44,7 @@
 		</tr>
 	</table>
     {% else %}
-	<table class="formtable" style="width:130px;height:80px">
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:130px;height:85px">
 		<tr>
 			<th style="text-align:center">
 				<font style="color:#999">No servers defined yet...	</font>

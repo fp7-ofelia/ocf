@@ -16,7 +16,7 @@ from localsettings import CONF_DIR
 
 
 # Baseline configuration.
-AUTH_LDAP_SERVER_URI = "ldap://10.216.4.2:389"
+AUTH_LDAP_SERVER_URI = "ldap://ldap.ibbt.fp7-ofelia.eu:389"
 
 AUTH_LDAP_BIND_DN = "cn=admin,dc=fp7-ofelia,dc=eu"
 AUTH_LDAP_BIND_PASSWORD = "ailefo"
@@ -72,7 +72,7 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
  
 # THIS SHOULD BE ALWAYS THE MASTER, NEVER A SLAVE LDAP SERVER
 #LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
-LDAP_MASTER_URI="ldap://10.216.4.2"
+LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
 LDAP_MASTER_DN="cn=admin,dc=fp7-ofelia,dc=eu"
 LDAP_MASTER_PWD="ailefo"
 LDAP_MASTER_SSLDIR="%s/ldap.ssl" % CONF_DIR

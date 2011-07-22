@@ -3,7 +3,8 @@ import uuid
 from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
 import time
 import threading
-from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
+#from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
+from django.conf import settings
 
 '''
 author:msune
@@ -30,4 +31,4 @@ class BackgroundMonitor():
         while True:
             print "Monitoring Servers Thread starting..."
             BackgroundMonitor.__monitorServers()
-            time.sleep(MONITORING_INTERVAL)	
+            time.sleep(settings.MONITORING_INTERVAL)	

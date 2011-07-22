@@ -45,8 +45,10 @@ optin_manager/src/python/openflow/optin_manager/localsettings.py
 vt_manager/src/python/agent/settings.py
 vt_manager/src/python/vt_manager/mySettings.py
 vt_manager/src/python/agent/mySettings.py
-vt_manager/src/python/agent/security/certs/agent.key
+vt_manager/src/python/agent/.currentVersion
 vt_manager/src/python/agent/security/certs/agent.crt
+vt_manager/src/python/agent/security/certs/agent.key
+
 expedient/.currentVersion
 expedient/bin/log/*
 expedient/bin/rescue/*
@@ -56,4 +58,4 @@ optin_manager/rescue/*
 vt_manager/.currentVersion
 vt_manager/log/*
 vt_manager/rescue/*
-
+!.gitignore

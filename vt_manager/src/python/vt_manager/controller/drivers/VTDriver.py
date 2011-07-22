@@ -7,13 +7,15 @@ from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 import xmlrpclib, threading, logging, copy
-from vt_manager.settings.settingsLoader import ROOT_USERNAME, ROOT_PASSWORD, VTAM_IP,VTAM_PORT
+from django.conf import settings
+#from vt_manager.settings.settingsLoader import settings.ROOT_USERNAME, settings.ROOT_PASSWORD, settings.VTAM_IP,settings.VTAM_PORT
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.utils.ServiceThread import *
-
+from django.core.exceptions import ValidationError
+from vt_manager.utils.HttpUtils import HttpUtils
 class VTDriver():
 
 
@@ -79,7 +81,10 @@ class VTDriver():
 				server.updateDataBridge(newIface)
 		for id in ifacesToDelete:
 			if id != '':
-				server.deleteDataBridge(serverIfaces.get(id=id))
+				try:
+					server.deleteDataBridge(serverIfaces.get(id=id))
+				except Exception as e:
+					raise ValidationError(str(e))
 
 	@staticmethod
 	def getServerById(id):
@@ -112,6 +117,13 @@ class VTDriver():
 	def getVMbyUUID(uuid):
 		try:
 			return VirtualMachine.objects.get(uuid = uuid).getChildObject()
+		except:
+			raise
+
+	@staticmethod
+	def getVMbyId(id):
+		try:
+			return VirtualMachine.objects.get(id = id).getChildObject()
 		except:
 			raise
 

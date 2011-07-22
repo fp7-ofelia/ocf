@@ -17,7 +17,6 @@ class Translator():
 
     @staticmethod
     def VMtoModel(VMxmlClass, agg_id, save = "noSave"):
-
        # statusTable = {
        #                 'CREATED':'created (stopped)',
        #                 'STARTED':'running',
@@ -27,12 +26,11 @@ class Translator():
 
         #search in database if VMxmlClass already exists
         if VM.objects.filter(uuid = VMxmlClass.uuid).exists():
-            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)            
+            VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)     
         else:
             VMmodel = VM()
-            VMmodel.setState("on queue")
 
-        #VMmodel.setState(statusTable.get(VMxmlClass.status))    
+        VMmodel.setState(VMxmlClass.status)
         VMmodel.setName(VMxmlClass.name)
         VMmodel.setUUID(VMxmlClass.uuid)
         VMmodel.setProjectId(VMxmlClass.project_id)
@@ -63,6 +61,7 @@ class Translator():
         try:
             VMxmlClass.name = VMmodel.getName()
             VMxmlClass.uuid = VMmodel.getUUID()
+            VMxmlClass.status = VMmodel.getState()
             VMxmlClass.project_id = VMmodel.getProjectId()
             VMxmlClass.project_name = VMmodel.getProjectName()
             VMxmlClass.slice_id = VMmodel.getSliceId()
@@ -81,11 +80,9 @@ class Translator():
 			return
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
-		#TODO: This is wrong, if a server changes its name this will create a new one instead of updating it
-        #search in database if sClass already exists
         newServer = 0
-        if VTServer.objects.filter(name = sClass.name).exists():
-            sModel = VTServer.objects.get(name=sClass.name)
+        if VTServer.objects.filter(uuid = sClass.uuid).exists():
+            sModel = VTServer.objects.get(uuid=sClass.uuid)
         else:
             newServer = 1
             sModel = VTServer()

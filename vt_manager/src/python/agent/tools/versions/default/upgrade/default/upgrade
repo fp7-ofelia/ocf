@@ -1,0 +1,13 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Version checkings 
+###
+
+#inform user
+printHeader "info#" "Using default upgrade module..."
+
+print "Nothing to do..."

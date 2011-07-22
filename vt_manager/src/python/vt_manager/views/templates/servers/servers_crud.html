@@ -1,5 +1,4 @@
 {% extends "servers/servers_base.html" %}
-{% load accessDict %}
 {% block pagehead %}<h1>Add/Update virtualized server:</h1>{% endblock pagehead %}
 
 
@@ -38,9 +37,28 @@
 <script language="javascript">
 
 function adding(row){
-    //$(row).find('#deleteTD').replaceWith("<td id=\'deleteTD\'><input type=\"checkbox\" value=\"\" name=\"DELETE\"></td>");
     $(row).find('#rowDelete').remove();
 }
+</script>
+
+<script>
+
+    function updateVMstatus(){
+		$('#vms').load("../../"+{{server.id}}+"/list_vms");
+		return;
+    }
+
+</script>
+<script>
+    var timer = setInterval(function(){
+    	updateVMstatus();
+    },3000);
+</script>
+<script>
+    function handleVMaction(serverId,vmId,action){
+        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action);  
+        updateVMstatus();                                                     
+    }
 </script>
 
 
@@ -49,7 +67,13 @@ function adding(row){
 
 
 <div class="main">
-
+	{% if exception %}
+		<div>
+			<table>
+				<tr><th colspan ="2" class="fielderror">{{exception}}</th></tr>
+			</table>
+		<div/>
+	{% endif %}
     <form id="serverAndIfaceForms" method="post" action="" autocomplete="off">{% csrf_token %}
 
         <div>
@@ -82,7 +106,7 @@ function adding(row){
 	
 		<div>
 			<h2>Networking parameters</h2>
-			<h3>Mgmt interface parameters</h3>
+			<h3>Management Bridge parameters</h3>
 			{% if mgmtIfaceForm.errors %}
 				<table>
                 	{%for field in mgmtIfaceForm %}
@@ -155,56 +179,8 @@ function adding(row){
     </form>
 
 
-	<div> 
-   		{% if server %}
-			{% with server.getChildObject as server %} 
-    		<h1>VMs in {{ server.name }}</h1>
-    		{% if not server.vms.all %}
-        		{{ server.name }} has no VMs at the moment
-    		{% else %}    
-    			<table class="blue">
-        	<tr>
-            <th> Name</th>
-            <th> Memory</th>
-            <th> OS Type</th>
-            <th> OS Dist</th>
-            <th> OS Version</th>
-            <th> Project</th>
-            <th> Slice</th>
-            <th> Status</th>
-            <th> Actions </th>
-        	</tr>
-	        {% for vm in server.vms.all %}
-	          <tr class = "{% cycle 'odd' 'even' %}">
-	            <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
-	            <td> {{vm.memory}}</td>
-	            <td> {{vm.operatingSystemType }}</td>
-	            <td> {{vm.operatingSystemDistribution }}</td>
-	            <td> {{vm.operatingSystemVersion }}</td>
-	            <td> <span title = "uuid: {{vmProjects|dictKeyLookup:vm.projectName}}">{{vm.projectName }}</span></td>
-	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
-	            <td> {{vm.state }}</td>
-	            <td>
-	                {% if vm.state == "running" %}
-	                <a href="{% url action_vm server.id vm.id "stop" %}">Stop</a> | <a href="{% url action_vm server.id vm.id "reboot"%}">Reboot</a>
-	                {% endif %}
-	                {% if vm.state == "stopped" %}
-	                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
-	                {% endif %}
-	                {% if vm.state == "created (stopped)" %}
-	                <a href="{% url action_vm server.id vm.id "start"%}">Start</a> | <a href="{% url action_vm server.id vm.id "delete"%}">Delete</a>
-	                {% endif %}
-	                {% if vm.state == "failed" %}
-	                <a href="{% url action_vm server.id vm.id "check_status" %}">Check status</a> 
-	                {% endif %}
-	
-	            </td>
-	        </tr>
-	       {% endfor %}
-	    	 </table>   
-     		{% endif %}
-			{% endwith %}
-     	{% endif %}
+	<div id="vms">
+		{% include "servers/servers_list_vms.html" %} 
 	</div>
 
 </div>

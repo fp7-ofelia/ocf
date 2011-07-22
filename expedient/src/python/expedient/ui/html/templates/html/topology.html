@@ -1,14 +1,27 @@
 <h1>Topology</h1>
 
 
+<script src="{% url js_media 'jquery.tipsy.js' %}"></script>
+<script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
+
+</script>
+
 <script type="text/javascript+protovis">
+/* ProtoVIS data */   
 
-
-/* ProtoVIS data */    
 var data = {
     nodes: [
         {% for node in protovis_nodes %}
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}"}{% if not forloop.last %},{% endif %}
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", 
+		{% if node.type == "vt_agg"  %}
+			nodeVms: {{node.vmNames|safe }},
+			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
+		{%endif%}
+		{% if node.type == "of_agg"  %}
+			nodeConnections:{{node.connection|safe}}
+		{% endif %}
+		 }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
     links: [
@@ -19,13 +32,56 @@ var data = {
     ],
 }
 
-/* Useful functions*/
+				
+/* Useful functi ns*/
+
+function get_node_info_formated(d){
+	type = get_node_type(d);
+	    if(type == "openflow") {
+			var nameString = "<b>Switch Datapath ID: "+d.nodeName+"</b><br><br>";
+			if(d.nodeConnections.length>0){
+				connectionsString = "<b>Connections:</b><br>";
+				for (i=0;i<d.nodeConnections.length;i++){
+					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['src_port']+"<br>";
+				}
+			}
+			else{
+				connectionsString = "";
+			}
+            return nameString+connectionsString ;
+        } else if(type == "planetlab") {
+            return nameString;
+        } else if(type == "vtserver") {
+			var nameString = "<b>Server: "+d.nodeName+"</b><br><br>";			
+			if (d.nodeVms.length > 0){
+				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
+				for (i=0;i<d.nodeVms.length;i++){
+					vmListString = vmListString + d.nodeVms[i];
+					if (i < d.nodeVms.length-1){
+						vmListString = vmListString + ", ";
+					}
+					else{
+						vmListString = vmListString +"<br clear = left><br clear=left>";
+					}
+				}
+			}
+            else{
+                vmListString =  "<b>No VMs in this Server </b></br><br clear=left>"  
+            } 
+			var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
+			for (i=0;i<d.nodeVmInterfaces.length;i++){
+	           vmInterfacesString = vmInterfacesString + "· "+"<b>"+d.nodeVmInterfaces[i]['name']+"</b> to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
+	         }
+	        return nameString + vmListString+vmInterfacesString;
+        }
+
+
+}
 
 function get_node_type(d) {
     var of_groups_len = {{ openflow_aggs.count }};
     var pl_groups_len = {{ planetlab_aggs.count }};
     var vt_aggs_len = {{ vt_aggs.count }};
-    
     if(d.group < of_groups_len) {
         return "openflow";
     } else if(d.group < of_groups_len + pl_groups_len) {
@@ -68,7 +124,7 @@ cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
 }
 
 function zoomOut(zoom) {
-    if(cur_zoom-zoom >0)
+	if(cur_zoom-zoom >0)
             cur_zoom = cur_zoom - zoom;
     else
         return false;
@@ -79,7 +135,8 @@ cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
 }
 
 function zoomReset() {
-    cur_zoom=1;
+	// value is 0.99 due to Firefox bug when it is 1
+   cur_zoom=0.99;
     vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
 cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
     vis.render();
@@ -96,8 +153,7 @@ var vis;
 vis = new pv.Panel().canvas('target') 
     .width(w)
     .height(h)
-    .fillStyle("white");
-
+    .fillStyle("white")
 
 var force = vis.add(pv.Layout.Force)
     .bound(true)
@@ -163,7 +219,7 @@ force.node.add(pv.Image)
         } else if(type == "planetlab") {
             return "#333333"; 
         } else if(type == "vtserver") {
-            return "#990000"; 
+            return "#006699"; 
         } else {
             return "#CCCCCC"; 
         }
@@ -187,6 +243,7 @@ force.node.add(pv.Image)
 //    .title(function(d) d.nodeName)
     .event("mousedown", pv.Behavior.drag())
     .event("mouseover", function(d) {
+//		pv.Behavior.tipsy({ gravity: "w", fade: true })
         /* display info on the selected node in the div */ 
         type = get_node_type(d);
         desc = "Unknown"
@@ -197,6 +254,7 @@ force.node.add(pv.Image)
         } else if(type == "vtserver") {
             desc = "Virtualized server";
         }
+		tooltip.show(get_node_info_formated(d));
     
         $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
         $("#selected_node_info").show();
@@ -212,19 +270,20 @@ force.node.add(pv.Image)
         } else if(type == "vtserver") {
             clickServer(d); 
         }
-    
-
     })
     .event("mouseout", function() this.i(-1))
+	.event("mouseout", function() {
+			tooltip.hide();
+		})
     .event("drag", force)
-    .anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
+    //.anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
 
 vis.render();
 
 </script>
 {% if openflow_aggs or planetlab_aggs or vt_aggs %}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;"></div>
+<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
 <div id="target">
 </div>
 <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
@@ -237,6 +296,7 @@ vis.render();
    <a href="#" onClick="return zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
 </div>
 </div>
+
 {% endif %}
 
 <br />

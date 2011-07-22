@@ -14,9 +14,9 @@
 	<table>
 		<tr>
 			<td style="vertical-align:middle">
-				<table class="formtableBold" style="width:140px;height:85px">
+				<table class="formtableBold" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<td align="center"> 
+						<td > 
 							<b>Overall status</b>
 							<font class="smallInfo"><br/>(only globals)</font>
 						</td>
@@ -36,19 +36,21 @@
 			</td>
 			<td>
 	{% for ip4 in ip4Ranges %}
-				<table class="formtable" style="width:140px;height:85px">
+				<table class="formtable" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<th align="center">				<a href="{% url showIp4Range ip4.id %}">{{ip4.name}}</a>
+						<th>				<a href="{% url showIp4Range ip4.id %}">{{ip4.name}}</a>
 						{% if ip4.isGlobal %}
 							<font class="smallInfo"><br/>(global)</font>
+						{% else %}
+                            <font class="smallInfo"><br/>-</font>
 						{% endif %}
 						</th>
 					</tr>
 					<tr>
-						<td align="center">
-						<span id="status{{ip4.id}}"></span>
+						<td  style="text-align:center;">
+						<span id="statusIp4{{ip4.id}}"></span>
 			<script>
-				createProgressBar("#status{{ip4.id}}",{{ip4.ips.all.count}},{{ip4.getNumberOfSlots}},false)	
+				createProgressBar("#statusIp4{{ip4.id}}",{{ip4.ips.all.count}},{{ip4.getNumberOfSlots}},false)	
 			</script>	
 							<br/><font class="smallInfo" style="text-decoration:italic">{{ip4.ips.all.count}}/{{ip4.getNumberOfSlots}}</font>
 		
@@ -57,14 +59,14 @@
 					</tr>
 				</table>
     {% endfor %}
-	<table class="formtable" style="width:140px;height:85px">
+	<table class="formtable" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<th align="center">
+						<th>
 							<a href="{% url ip4Ranges %}">Manage Ip4 ranges</a>
 						</th>
 					</tr>
 					<tr>
-						<td align="center">				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
+						<td>				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
 
 						</td>
 					</tr>
@@ -79,9 +81,9 @@
 	<table>
 		<tr>
 			<td style="vertical-align:middle">
-				<table class="formtableBold" style="width:140px;height:85px">
+				<table class="formtableBold" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<td align="center"> 
+						<td> 
 							<b>Overall status</b>
 							<font class="smallInfo"><br/>(only globals)</font>
 						</td>
@@ -102,19 +104,21 @@
 			<td>
 	
 	{% for mac in macRanges %}
-				<table class="formtable" style="width:140px;height:85px">
+				<table class="formtable" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<th align="center">				<a href="{% url showMacRange mac.id %}">{{mac.name}}</a>
+						<th>				<a href="{% url showMacRange mac.id %}">{{mac.name}}</a>
 						{% if mac.isGlobal %}
 							<font class="smallInfo"><br/>(global)</font>
+						{% else %}
+							<font class="smallInfo"><br/>-</font>
 						{% endif %}
 						</th>
 					</tr>
 					<tr>
-						<td align="center">
-						<span id="status{{mac.id}}"></span>
+						<td>
+						<span id="statusMac{{mac.id}}"></span>
 			<script>
-				createProgressBar("#status{{mac.id}}",{{mac.macs.all.count}},{{mac.getNumberOfSlots}},false)
+				createProgressBar("#statusMac{{mac.id}}",{{mac.macs.all.count}},{{mac.getNumberOfSlots}},false)
 			</script>	
 							<br/><font class="smallInfo" style="text-decoration:italic">{{mac.macs.all.count}}/{{mac.getNumberOfSlots}}</font>
 		
@@ -123,13 +127,13 @@
 					</tr>
 				</table>
     {% endfor %}
-			<table class="formtable" style="width:140px;height:85px">
+			<table class="formtable" style="text-align:center;vertical-align:middle;width:140px;height:85px">
 					<tr>
-						<th align="center">				<a href="{% url macRanges %}">Manage MAC ranges</a>
+						<th >				<a href="{% url macRanges %}">Manage MAC ranges</a>
 						</th>
 					</tr>
 					<tr>
-						<td align="center">				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
+						<td >				<a href="{% url macRanges %}"><img src="{% url img_media 'right_arrow.gif' %}" style="border:0px"/></a>
 
 						</td>
 					</tr>

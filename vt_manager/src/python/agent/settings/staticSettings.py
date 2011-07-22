@@ -38,13 +38,25 @@ OXA_FILEHD_CACHE_TEMPLATES="/opt/ofelia/oxa/cache/templates/"
 '''Remote folder for templates'''
 OXA_FILEHD_REMOTE_TEMPLATES="/opt/ofelia/oxa/remote/templates/"
 
+'''Use sparse disks while cloning'''
+OXA_FILEHD_CREATE_SPARSE_DISK=False
+
+'''Nice priority for Copy&untar operations'''
+OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY=15
+
+'''IONice copy&untar operations class'''
+OXA_FILEHD_COPY_IONICE_CLASS=2
+'''IONice copy&untar operations priority'''
+OXA_FILEHD_COPY_IONICE_PRIORITY=7
+
 ##Ofelia Debian VM configurator parameters
 '''Kernel and initrd that will be used by machines'''
-OXA_DEBIANCONF_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
-OXA_DEBIANCONF_XEN_SERVER_INITRD="/boot/initrd.img-2.6.32-5-xen-amd64"
+OXA_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
+OXA_XEN_SERVER_INITRD="/boot/initrd.img-2.6.32-5-xen-amd64"
 
 '''Debian usual file locations'''
-OXA_DEBIANCONF_DEBIAN_INTERFACES_FILE_LOCATION = "/etc/network/interfaces"
-OXA_DEBIANCONF_DEBIAN_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
-OXA_DEBIANCONF_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
+OXA_DEBIAN_INTERFACES_FILE_LOCATION = "/etc/network/interfaces"
+OXA_DEBIAN_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
+OXA_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION="/etc/security/access.conf"
 

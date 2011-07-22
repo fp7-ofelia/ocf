@@ -27,7 +27,7 @@ class VtPlugin(Aggregate):
             raise
 
     def stop_slice(self, slice):
-        super(VtPlugin, self).start_slice(slice)
+        super(VtPlugin, self).stop_slice(slice)
         try:
             from vt_plugin.controller.dispatchers.GUIdispatcher import startStopSlice
             startStopSlice("stop",slice.uuid)

@@ -70,8 +70,8 @@ append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 # Installed Aggregate Models
 AGGREGATE_PLUGINS = [
     ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
-    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
-    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+#    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
+#    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
     ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
 ]
 '''List of aggregate plugins that are enabled in Expedient.

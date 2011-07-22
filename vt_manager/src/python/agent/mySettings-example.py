@@ -16,3 +16,6 @@
 '''Enable/disable the usage of Cache. If line is commented, default is to use it'''
 #OXA_FILEHD_USE_CACHE=True
 
+'''Use sparse disks while cloning. Uncomment to use Sparse disks. Default is false'''
+#OXA_FILEHD_CREATE_SPARSE_DISK=False
+

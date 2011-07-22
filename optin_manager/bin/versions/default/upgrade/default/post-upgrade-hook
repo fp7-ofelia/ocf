@@ -1,0 +1,23 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module 
+###
+
+#inform user
+printHeader "info#" "Using default post-upgrade-hook module..."
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
+#Cleaning the house
+confirm "Delete backup files?" $DONT_ABORT
+
+if [ $? == 0 ]; then
+        print "Deleting backups..."
+        rm -rf $BACKUP_PATH
+fi

@@ -1,0 +1,59 @@
+{% load accessDict %}
+
+   		{% if server %}
+			{% with server.getChildObject as server %} 
+    		<h1>VMs in {{ server.name }}</h1>
+			<div id = "div_vms">
+    		{% if not server.vms.all %}
+        		{{ server.name }} has no VMs at the moment
+    		{% else %}    
+				
+    			<table id="table_vms_list" class="blue">
+        	<tr id="table_vms_list_header" class="header">
+            <th> Name</th>
+            <th> Memory</th>
+            <th> OS Type</th>
+            <th> OS Dist</th>
+            <th> OS Version</th>
+            <th> Project</th>
+            <th> Slice</th>
+            <th> Status</th>
+            <th> Actions </th>
+        	</tr>
+	        {% for vm in server.vms.all %}
+	          <tr id=tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
+	            <td><a href="{% url action_vm server.id vm.id "list"%}">{{ vm.name }}</a></td>
+	            <td> {{vm.memory}}</td>
+	            <td> {{vm.operatingSystemType }}</td>
+	            <td> {{vm.operatingSystemDistribution }}</td>
+	            <td> {{vm.operatingSystemVersion }}</td>
+	            <td> <span title = "uuid: {{vmProjects|dictKeyLookup:vm.projectName}}">{{vm.projectName }}</span></td>
+	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
+	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
+	            <td id = td_vm_actions{{vm.id}}>
+					<div>
+					{% if vm.state == "running" %}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
+                    {% endif %}
+                    {% if  vm.state == "created (stopped)"%}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+                    {% endif %}
+                    {% if vm.state == "stopped"%}
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
+                    {% endif %}
+                    {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+                        <center><img src={% url img_media 'loading.gif'%} align="absmiddle"></center>
+                    {% endif %}
+					</div>
+	
+	            </td>
+	        </tr>
+	       {% endfor %}
+	    	 </table>   
+     		{% endif %}
+			{% endwith %}
+     	{% endif %}
+		</div>

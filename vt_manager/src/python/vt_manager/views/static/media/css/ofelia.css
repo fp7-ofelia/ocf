@@ -208,7 +208,7 @@ table.formtable {
     	-moz-border-radius: 0px 15px 15px 15px;
     	-webkit-border-radius: 0px 15px 15px 15px;
     	border-radius:  0px 15px 15px 15px;
-	display:inline-block;
+	display:inline-table;
 }
 
 table.formtable tbody td ,tbody th {
@@ -300,6 +300,7 @@ table.blue th {
 	
     padding : 2px;
     text-align:left;
+	font-weight:bold;
     background-color: #8ED6EA;
 }
 
@@ -373,7 +374,7 @@ table.ranges tr.odd{
     text-align:center;
     padding:0px;
     margin:0px;
-    background-position:left
+    background-position:left;
 }
 table.menutable {
 	border-collapse: collapse;
@@ -384,7 +385,7 @@ table.menutable {
 }
 
 table.menutable tbody td ,tbody th {
-	padding: 5px 10px;
+	padding: 1px 10px;
 	background: #fff;
 	color: #000;
     text-align:center;

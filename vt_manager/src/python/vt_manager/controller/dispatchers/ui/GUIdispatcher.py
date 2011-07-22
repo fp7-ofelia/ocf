@@ -103,7 +103,15 @@ def servers_crud(request, server_id=None):
 				VTDriver.crudDataBridgeFromInstance(server, ifaces,request.POST.getlist("DELETE"))
 			except Exception as e:
 				print e
-				raise e
+				e = HttpUtils.processException(e)	
+				context = {"exception":e, "serverForm": serverForm, 'vmProjects': vmProjects, 'vmSlices': vmSlices,'ifaceformset' : ifaceformset, 'mgmtIfaceForm' : mgmtIfaceForm}
+				if server_id != None: context["server"] = server
+				return simple.direct_to_template(
+				        request,
+				        template="servers/servers_crud.html",
+				        extra_context=context,
+				    )
+
 				#return a alguna pagina y volver atras las transacciones
 				
 			return HttpResponseRedirect('/servers/admin/')
@@ -150,6 +158,11 @@ def delete_server(request, server_id):
 
 		except Exception as e:
 			logging.error(e)
+			e = HttpUtils.processException(e)
+			return simple.direct_to_template(request,
+				template = 'servers/delete_server.html',
+				extra_context = {'user':request.user, 'exception':e, 'next':reverse("admin_servers")},
+				)	
 	elif request.method == 'GET':
 		return simple.direct_to_template(request,
 				template = 'servers/delete_server.html',
@@ -157,7 +170,6 @@ def delete_server(request, server_id):
 		)
 	
 def action_vm(request, server_id, vm_id, action):
-
 	if (not request.user.is_superuser):
         
 		return simple.direct_to_template(request,
@@ -168,8 +180,8 @@ def action_vm(request, server_id, vm_id, action):
 	if(action == 'list'):
           
 		return simple.direct_to_template(
-				request, template="servers/list_vm.html",
-				extra_context={"vm": VTDriver.getVMbyId(vm_id)}
+				request, template="servers/server_vm_details.html",
+				extra_context={"vm": VTDriver.getVMbyId(vm_id), "server_id":server_id}
 		)
 
 	elif(action == 'check_status'):
@@ -183,7 +195,8 @@ def action_vm(request, server_id, vm_id, action):
 		#XXX: serverUUID should be passed in a different way
 		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, VTServer.objects.get(id=server_id).uuid, action)
     
-	return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
+	#return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
+	return HttpResponse("")
 
 
 def subscribeEthernetRanges(request, server_id):
@@ -236,6 +249,39 @@ def subscribeIp4Ranges(request, server_id):
 		return HttpResponseRedirect(reverse('edit_server', args = [server_id]))
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
+
+def list_vms(request, server_id):
+
+	"""Show a page for the user to add/edit an  VTServer """
+
+	if (not request.user.is_superuser):
+        
+		return simple.direct_to_template(request,
+						template = 'not_admin.html',
+						extra_context = {'user':request.user},
+					)
+	vmProjects = {}
+	vmSlices = {}
+	try:
+		for vm in VTDriver.getVMsInServer(VTDriver.getServerById(server_id)):
+			if vm.projectName not in vmProjects:
+				vmProjects[vm.projectName] = vm.projectId
+			if vm.sliceName not in vmSlices:
+				vmSlices[vm.sliceName] = vm.sliceId
+	except Exception as e:
+		print e
+		pass
+
+	server = get_object_or_404(VTServer, pk=server_id)
+			
+	context = { 'vmProjects': vmProjects, 'vmSlices': vmSlices,'server':server}
+
+	return simple.direct_to_template(
+		request,
+		template="servers/servers_list_vms.html",
+		extra_context=context,
+	)
+
 
 '''
 Networking point of entry
