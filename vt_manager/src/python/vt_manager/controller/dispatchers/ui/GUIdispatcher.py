@@ -166,7 +166,7 @@ def delete_server(request, server_id):
 	elif request.method == 'GET':
 		return simple.direct_to_template(request,
 				template = 'servers/delete_server.html',
-				extra_context = {'user':request.user, 'next':reverse("admin_servers")},
+				extra_context = {'user':request.user, 'next':reverse("admin_servers"),'object':VTDriver.getServerById(server_id)},
 		)
 	
 def action_vm(request, server_id, vm_id, action):
