@@ -12,7 +12,7 @@ printHeader "info#" "Using default post-install-hook module..."
 
 #Starting apache
 print "Starting apache2..."
-/usr/sbin/service apache2 start
+/usr/sbin/service apache2 restart
 
 #Cleaning the house
 
