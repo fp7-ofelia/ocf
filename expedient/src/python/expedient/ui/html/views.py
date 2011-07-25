@@ -89,7 +89,7 @@ def _update_planetlab_resources(request, slice):
 Node and links functions 
 '''
 
-def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
+def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
     """
     Get nodes and links usable by protovis.
     """
@@ -144,7 +144,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
         of_iface__available=True,
         resource__available=True,
     )
-    
+
+    sliceUUID = Slice.objects.get(id=slice_id).uuid
     for node in nodes:
         try:
            for cnxn in of_cnxn_qs:
@@ -228,7 +229,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs):
 #                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
 #            )
             vmNames = []
-            for name in  n.vms.all().values_list('name', flat=True):
+            for name in  n.vms.all().filter(sliceId = sliceUUID).values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
             for j,inter in enumerate(n.ifaces.all()):
@@ -365,7 +366,7 @@ def bookOpenflow(request, slice_id):
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
-        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
         return simple.direct_to_template(
@@ -433,7 +434,7 @@ def home(request, slice_id):
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
-        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs)
+        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
         fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
