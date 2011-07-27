@@ -51,7 +51,8 @@ ln -sf /etc/apache2/sites-available/expedient.conf /etc/apache2/sites-enabled/ |
 
 #Create application folder for error log
 mkdir -p /var/log/apache2/expedient/clearinghouse
-
+#If it does not exist, expedient creates it with root user and then it crashes
+touch /var/log/sfa_access.log
 
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
@@ -64,5 +65,6 @@ source $CURRENT_DIRECTORY/lib/django-db
 printHeader ">" "Setting correct file permissions..."
 chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
 chown -f $APACHE_USER $SRC_DIR/src/ -R
+chown -f $APACHE_USER /var/log/sfa_access.log
 
 
