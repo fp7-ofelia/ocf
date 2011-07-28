@@ -9,7 +9,34 @@
 
 	<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
 	<script type="text/javascript">
+            if(top.location != document.location) {
+                top.location = document.location;
+            }
+            /**
+             * Move the help text in formtable classes to a new separate column.
+             */
+            $(document).ready(function() {
+                /* add a column at the beginning for the help icons */
+                $("table.formtable_noborder>tbody>tr," +
+                "table.formtable>tbody>tr")
+                    .prepend("<td />");
+                $("table.formtable_noborder>thead>tr," +
+                "table.formtable>thead>tr")
+                    .prepend("<td />");
 
+                /* find help text and replace with image and tooltip */
+                $("table.formtable_noborder>tbody>tr>td:nth-child(3)")
+{% include "fixformtable.js" %}
+                ;
+
+                $("table.formtable>tbody>tr>td:nth-child(3)")
+{% include "fixformtable.js" %}
+                ;
+            });
+        </script>  
+
+	<script type="text/javascript">
+	
 	$(document).ready(function(){
     	$(".menuimg,.submenuimg")
         	.mouseover(function() { 
