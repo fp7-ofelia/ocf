@@ -11,4 +11,4 @@ class ServerForm(forms.ModelForm):
 		exclude = ('numberofCPUs', 'memory', 'CPUFrequency',
 		'discSpaceGB', 'url', 'subscribedMacRanges', 'subscribedIp4Ranges')
 
-	agentPassword = forms.CharField(label='Agent Password',widget=forms.PasswordInput())
+	agentPassword = forms.CharField(label='Agent Password',widget=forms.PasswordInput(), help_text='Password set for the XMLRPC interface during the agent\'s installation')
