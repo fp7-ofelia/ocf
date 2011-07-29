@@ -85,41 +85,6 @@
 	});
 
 	</script>
-        <script type="text/javascript">
-            if(top.location != document.location) {
-                top.location = document.location;
-            }
-            /**
-             * Move the help text in formtable classes to a new separate column.
-             */
-            $(document).ready(function() {
-                /* add a column at the beginning for the help icons */
-                $("table.formtable_noborder>tbody>tr," +
-                "table.formtable>tbody>tr")
-                    .prepend("<td />");
-                $("table.formtable_noborder>thead>tr," +
-                "table.formtable>thead>tr")
-                    .prepend("<td />");
-
-                /* find help text and replace with image and tooltip */
-                /* the 2 and 3 is because firefox uses 2 and chrome/explorer 3. Probably firefox does not understand a th as another td */
-                $("table.formtable_noborder>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
-
-                $("table.formtable_noborder>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-                ;
-
-                $("table.formtable>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-                ;
-
-                $("table.formtable>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
-            });
-        </script>		
 		{% block scripts %}{% endblock %} 
 	</head>
 	
