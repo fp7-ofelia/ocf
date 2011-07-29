@@ -50,8 +50,8 @@ class VTServer(models.Model):
 	discSpaceGB = models.FloatField(blank = True, null=True, editable = False)
 
 	''' Agent fields'''
-	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper])
-	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password")
+	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper],help_text="URL of the agen daemon running in the server. It should be https://DOMAIN_OR_IP:9229")
+	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password", help_text="Password set for the XMLRPC interface during the agent's installation")
 
 	url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
     

@@ -6,6 +6,7 @@
 
 {% endblock %}
 {% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
 
 <script type="text/javascript">
       $(function() {
@@ -97,7 +98,7 @@ function adding(row){
                     {% if field.errors %}                             
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td>{{ field.help_text }}</td></tr>
 					{%endif%}
         		{% endfor %}
         	</table>
@@ -121,7 +122,7 @@ function adding(row){
                     {% if field.errors %}
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}      
-							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td>{{field.help_text}}</td></tr>
                     {%endif%}
 				{% endfor %}
 			</table>
