@@ -7,6 +7,7 @@
 {% endblock %}
 {% block scripts %}
 <script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
 
 <script type="text/javascript">
       $(function() {
@@ -23,6 +24,13 @@
 <script>
     $(document).ready(function() {
         /* add tooltip to question mark */
+	    $("img#mgmt_bridge").tooltip({
+            tip: "div#mgmt_bridge_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-100]
+        });
         $("img#data_bridges").tooltip({
             tip: "div#data_bridges_help",
             position: "top center",
@@ -113,7 +121,7 @@ function adding(row){
                     {% if field.errors %}                             
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td>{{ field.help_text }}</td></tr>
+	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
 					{%endif%}
         		{% endfor %}
         	</table>
@@ -122,7 +130,11 @@ function adding(row){
 	
 		<div>
 			<h2>Networking parameters</h2>
-			<h3>Management Bridge parameters</h3>
+			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+			<div class="tooltip" id="mgmt_bridge_help">
+            Managemente bridge connecting the control interface of the server and the VMs. 
+            </div>
+
 			{% if mgmtIfaceForm.errors %}
 				<table>
                 	{%for field in mgmtIfaceForm %}
@@ -137,7 +149,7 @@ function adding(row){
                     {% if field.errors %}
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}      
-							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td>{{field.help_text}}</td></tr>
+							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
                     {%endif%}
 				{% endfor %}
 			</table>
@@ -170,7 +182,7 @@ function adding(row){
 			<table class="formtable">
                 {%if server.getSubscribedIp4RangesNoGlobal %}
                 <tr>
-				<td style="width: 200px;">Range Name:</td>
+				<td style="width: 200px;">Range/s Name/s:</td>
 				<td>
 					{% for ipRange in server.getSubscribedIp4Ranges %}
 						<a href="{% url showIp4Range ipRange.id %}">{{ipRange.name}}</a>

@@ -65,7 +65,7 @@
 //                ;
 
 
-                $("table.formtable>tbody>tr>td:nth-child(3)")
+                $("table.formtable>tbody>tr>td.help_text")
                 
 				.contents()
                     .filter(function() {
