@@ -33,7 +33,11 @@ if(top.location != document.location) {
                             )
                         ;
                         $("img#tooltip_help_img_"+index).tooltip({
-                            tip: "div#tooltip_help_"+index
+                            tip: "div#tooltip_help_"+index,
+							position: "top center",
+                            cancelDefault: true,
+							relative: true,
+							offset: [0,-100]
                         });
                     })
 
@@ -58,7 +62,11 @@ if(top.location != document.location) {
                             )
                         ;
                         $("img#tooltip_help_img_"+index).tooltip({
-                            tip: "div#tooltip_help_"+index
+                            tip: "div#tooltip_help_"+index,
+							position: "top center",
+                            cancelDefault: true,
+							relative: true,
+                            offset: [0,-100]
                         });
                     })
 
@@ -84,7 +92,11 @@ if(top.location != document.location) {
                             )
                         ;
                         $("img#tooltip_help_img_"+index).tooltip({
-                            tip: "div#tooltip_help_"+index
+                            tip: "div#tooltip_help_"+index,
+							position: "top center",
+                            cancelDefault: true,
+							relative: true,
+                            offset: [0,-100]
                         });
                     })
 
@@ -109,7 +121,11 @@ if(top.location != document.location) {
                             )
                         ;
                         $("img#tooltip_help_img_"+index).tooltip({
-                            tip: "div#tooltip_help_"+index
+                            tip: "div#tooltip_help_"+index,
+							position: "top center",
+							cancelDefault: true,
+							relative: true,
+                            offset: [0,-100]
                         });
                     })
 

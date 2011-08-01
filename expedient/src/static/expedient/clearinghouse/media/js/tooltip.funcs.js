@@ -30,7 +30,11 @@ function addTooltipToClass(listClass){
 	
 	$(".val." + listClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />").tooltip({
-			tip: "." + listClass + ".description_" + index
+			tip: "." + listClass + ".description_" + index,
+			position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-100]
 		});
 	});
 	

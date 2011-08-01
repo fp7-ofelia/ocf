@@ -14,10 +14,18 @@ img#perm_help {
 	$(document).ready(function() {
 		/* add tooltip to question mark */
 		$("img#perm_help").tooltip({
-			tip: "div#perm_mgmt_help"
+			tip: "div#perm_mgmt_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-100]
 		});
 		$("img#users_help").tooltip({
-			tip: "div#user_mgmt_help"
+			tip: "div#user_mgmt_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-100]
 		});
 		
 		/* get the html for the projects div */
