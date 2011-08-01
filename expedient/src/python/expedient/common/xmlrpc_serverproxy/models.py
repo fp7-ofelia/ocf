@@ -80,7 +80,7 @@ class PasswordXMLRPCServerProxy(models.Model):
             "will automatically be changed once the password ages past the "\
             "maximum. The new password is then randomly generated.")
     password_timestamp = models.DateTimeField(auto_now_add=True)
-    url = models.CharField("Server URL", max_length=1024, help_text="The URL of the Opt-In Manager.")
+    url = models.CharField("Server URL", max_length=1024, help_text="The URL of the remote component's XMLRPC interface.")
     
     verify_certs = models.BooleanField(
         "Verify Certificates?", default=False,

@@ -45,12 +45,11 @@ def aggregate_create(request):
     methods=["POST", "GET"])
 def aggregate_edit(request, agg_id):
     return aggregate_crud(request, agg_id=agg_id)
-    
+
 def aggregate_crud(request, agg_id=None):
     '''
     Create/update an OpenFlow Aggregate.
     '''
-    
     if agg_id != None:
         aggregate = get_object_or_404(OpenFlowAggregate, pk=agg_id)
         client = aggregate.client
@@ -77,11 +76,14 @@ def aggregate_crud(request, agg_id=None):
             # Then save the aggregate and add the client
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
-            aggregate.save()
-            agg_form.save_m2m()
-            err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
+			#Originally these lines uncommented, a transacton.rollback() in the "if" and the agg_form.save_m2m() in the "else" deleted
+            #aggregate.save()
+            #agg_form.save_m2m()
+            try:
+                err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
+            except Exception as e:
+                 err = str(e)
             if err:
-                transaction.rollback()
                 if agg_id:
                     msg = "Problem setting up the updated aggregate. %s" % err
                 else:
@@ -90,8 +92,10 @@ def aggregate_crud(request, agg_id=None):
                     msg, user=request.user, msg_type=DatedMessage.TYPE_ERROR,
                 )
                 print err
+                return HttpResponseRedirect("/")
             else:
                 aggregate.save()
+                agg_form.save_m2m()
                 give_permission_to(
                     "can_use_aggregate",
                     aggregate,
@@ -108,7 +112,6 @@ def aggregate_crud(request, agg_id=None):
                     "Successfully created/updated aggregate %s" % aggregate.name,
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                 )
-            
                 return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
         logger.debug("Validation failed")
     else:
