@@ -24,7 +24,7 @@ class Ip4Range(models.Model):
 	#Range name
 	name = models.CharField(max_length = 255, default="", verbose_name = "Range name",unique=True)
 
-	isGlobal = models.BooleanField(verbose_name="Global range",default=1)
+	isGlobal = models.BooleanField(verbose_name="Global range",default=1, help_text="Globa ranges will be used by servers which are not subscribed to any specific range")
 
 	#Range parameters
 	startIp = models.IPAddressField(verbose_name = "Range start Ip", editable = True, validators = [IP4Utils.checkValidIp])
