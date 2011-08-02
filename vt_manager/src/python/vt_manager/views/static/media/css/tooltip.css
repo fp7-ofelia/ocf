@@ -18,7 +18,7 @@
 .tooltiptable {
 	border: none;
 	border-collapse: collapse;
-	background-color: #000;
+	background-color:#003366
 }
 .tooltiptable tbody td, tbody th{
 	background-color:"transparent";
