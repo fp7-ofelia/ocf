@@ -121,7 +121,7 @@ MIDDLEWARE_CLASSES = [
     'expedient.common.middleware.sitelockdown.SiteLockDown',
     'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
-#    'expedient_geni.middleware.CreateUserGID',
+    'expedient_geni.middleware.CreateUserGID',
 ]
 append_to_local_setting(
     "MIDDLEWARE_CLASSES", MIDDLEWARE_CLASSES, globals(), at_start=True,

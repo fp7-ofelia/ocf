@@ -79,6 +79,8 @@ def delete(request, proj_id):
                 "Successfully deleted project %s" % project.name,
                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         except Exception as e:
+            print "LEODEBUG ERROR EN EL VIEW"
+            print e
             DatedMessage.objects.post_message_to_user(
             "Problems ocurred while trying to delete project %s: %s" % (project.name,str(e)),
             request.user, msg_type=DatedMessage.TYPE_ERROR)
