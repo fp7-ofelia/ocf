@@ -121,7 +121,7 @@ MIDDLEWARE_CLASSES = [
     'expedient.common.middleware.sitelockdown.SiteLockDown',
     'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
-#    'expedient_geni.middleware.CreateUserGID',
+    'expedient_geni.middleware.CreateUserGID',
 ]
 append_to_local_setting(
     "MIDDLEWARE_CLASSES", MIDDLEWARE_CLASSES, globals(), at_start=True,
@@ -130,7 +130,7 @@ append_to_local_setting(
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'django_auth_ldap.backend.LDAPBackend',
-#    'expedient_geni.backends.GENIRemoteUserBackend',
+    'expedient_geni.backends.GENIRemoteUserBackend',
 ]
 append_to_local_setting(
     "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
