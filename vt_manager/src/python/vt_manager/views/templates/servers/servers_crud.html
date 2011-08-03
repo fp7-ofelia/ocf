@@ -6,6 +6,11 @@
 
 {% endblock %}
 {% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
 
 <script type="text/javascript">
       $(function() {
@@ -16,8 +21,30 @@
           added: adding,
           addCssClass: 'buttoncss',
         });
-      })
+      });
 </script>
+
+<script>
+    $(document).ready(function() {
+        /* add tooltip to question mark */
+	    $("img#mgmt_bridge").tooltip({
+            tip: "div#mgmt_bridge_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-110]
+        });
+        $("img#data_bridges").tooltip({
+            tip: "div#data_bridges_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-110]
+        });
+    });
+</script>
+
+
 <script type="text/javascript">
     $(document).ready(function() {
 
@@ -97,7 +124,7 @@ function adding(row){
                     {% if field.errors %}                             
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
 					{%endif%}
         		{% endfor %}
         	</table>
@@ -106,7 +133,11 @@ function adding(row){
 	
 		<div>
 			<h2>Networking parameters</h2>
-			<h3>Management Bridge parameters</h3>
+			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+			<div class="tooltip" id="mgmt_bridge_help">
+            Managemente bridge connecting the control interface of the server and the VMs. MAC address is optional. 
+            </div>
+
 			{% if mgmtIfaceForm.errors %}
 				<table>
                 	{%for field in mgmtIfaceForm %}
@@ -121,7 +152,7 @@ function adding(row){
                     {% if field.errors %}
                             <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
                     {% else %}      
-							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
                     {%endif%}
 				{% endfor %}
 			</table>
@@ -154,7 +185,7 @@ function adding(row){
 			<table class="formtable">
                 {%if server.getSubscribedIp4RangesNoGlobal %}
                 <tr>
-				<td style="width: 200px;">Range Name:</td>
+				<td style="width: 200px;">Range/s Name/s:</td>
 				<td>
 					{% for ipRange in server.getSubscribedIp4Ranges %}
 						<a href="{% url showIp4Range ipRange.id %}">{{ipRange.name}}</a>

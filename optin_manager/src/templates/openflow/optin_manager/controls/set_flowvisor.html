@@ -1,5 +1,9 @@
 {% extends "base_admin.html" %}
-{% block pagehead %} <h1>Setup FlowVisor</h1> {% endblock %}
+{% block pagehead %} <h1>Setup FlowVisor</h1> 
+{% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+{% endblock %}
+{% endblock %}
 {% block content %}
 <div class="main">
 	<form name="input" action="/controls/set_flowvisor" method="post">{% csrf_token %}

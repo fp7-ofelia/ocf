@@ -2,12 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
         <link rel="stylesheet" type="text/css" href="{% url css_media 'ofelia.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
 		<title>
 			{% block title %}OFELIA Virtualization Manager{% endblock %}
 		</title>
 
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	    <script type="text/javascript" src="{% url js_media 'jquery.min.js' %}"></script>
+	    <script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+    <script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+
 	<script type="text/javascript">
 
 	$(document).ready(function(){

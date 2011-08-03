@@ -6,7 +6,12 @@
 		<title>
 			OFELIA Opt-In Manager - {% block title %}Opt-In Manager{% endblock %}
 		</title>
-		{% block scripts %}{% endblock %} 
+        <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+
+        
+    <script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+    <script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+	{% block scripts %}{% endblock %} 
 	</head>
 	<body>
             <br/>

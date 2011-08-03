@@ -71,12 +71,19 @@ def delete(request, proj_id):
     '''Delete the project'''
     project = get_object_or_404(Project, id=proj_id)
     if request.method == "POST":
-        for s in project.slice_set.all():
-            s.stop(request.user)
-        project.delete()
-        DatedMessage.objects.post_message_to_user(
-            "Successfully deleted project %s" % project.name,
-            request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+        try:
+            for s in project.slice_set.all():
+                s.stop(request.user)
+            project.delete()
+            DatedMessage.objects.post_message_to_user(
+                "Successfully deleted project %s" % project.name,
+               request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+        except Exception as e:
+            print "LEODEBUG ERROR EN EL VIEW"
+            print e
+            DatedMessage.objects.post_message_to_user(
+            "Problems ocurred while trying to delete project %s: %s" % (project.name,str(e)),
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
         return HttpResponseRedirect(reverse("home"))
     else:
         return simple.direct_to_template(
@@ -164,23 +171,31 @@ def create(request):
     def redirect(instance):
         return reverse("project_detail", args=[instance.id])
     
-    return generic_crud(
-        request, None,
-        model=Project,
-        form_class=ProjectCreateForm,
-        template=TEMPLATE_PATH+"/create_update.html",
-        post_save=post_save,
-        redirect=redirect,
-        template_object_name="project",
-        extra_context={
-            "breadcrumbs": (
-                ("Home", reverse("home")),
-                ("Create Project", request.path),
-            ),
-        },
-        success_msg = lambda instance: "Successfully created project %s." % instance.name,
-    )
-    
+    try:
+        return generic_crud(
+            request, None,
+            model=Project,
+            form_class=ProjectCreateForm,
+            template=TEMPLATE_PATH+"/create_update.html",
+            post_save=post_save,
+            redirect=redirect,
+            template_object_name="project",
+            extra_context={
+                "breadcrumbs": (
+                    ("Home", reverse("home")),
+                    ("Create Project", request.path),
+                ),
+            },
+            success_msg = lambda instance: "Successfully created project %s." % instance.name,
+        )
+    except Exception as e:
+        DatedMessage.objects.post_message_to_user(
+            "Project may have been created, but some problem ocurred: %s" % str(e),
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+        return HttpResponseRedirect(reverse("home"))
+
+
+ 
 @require_objs_permissions_for_view(
     perm_names=["can_view_project"],
     permittee_func=get_user_from_req,

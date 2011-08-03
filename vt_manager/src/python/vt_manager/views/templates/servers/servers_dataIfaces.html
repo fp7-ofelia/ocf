@@ -1,7 +1,11 @@
 
 
         <div>
-            <h3>Data Bridges parameters</h3>
+            <h3>Data Bridges parameters <img id="data_bridges" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+			<div class="tooltip" id="data_bridges_help">
+        	Set the bridges used by the VMs to connect with the phisycal interfaces of the servers. Switch ID and Port correspond with the datapath ID and the port the server's interface is connected to.
+		    </div>
+
 			{{ ifaceformset.management_form}}
 			{% if ifaceformset.errors %}
                 <table>

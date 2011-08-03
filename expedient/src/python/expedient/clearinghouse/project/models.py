@@ -99,27 +99,27 @@ class Project(models.Model):
     # exception is reaised.
 
     def save(self, *args, **kwargs):
-	result = permissions_save_override(
+	permissions_save_override(
         	    permittee_kw="user",
 	            model_func=lambda: Project,
         	    create_perm="can_create_project",
 	            edit_perm="can_edit_project",
         	    delete_perm="can_delete_project",
-	)(self, *args, **kwargs)
-	if settings.LDAP_STORE_PROJECTS:
-		self.sync_netgroup_ldap()
-        return result
-
-    def delete(self, *args, **kwargs):
-	result = permissions_delete_override(
-            permittee_kw="user",
-	    model_func=lambda: Project,
-            delete_perm="can_delete_project",
 	)
 	if settings.LDAP_STORE_PROJECTS:
-	        self.delete_netgroup_ldap()
-	return result
-    
+		self.sync_netgroup_ldap()
+        super(Project, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        permissions_delete_override(
+            permittee_kw="user",
+            model_func=lambda: Project,
+            delete_perm="can_delete_project",
+        )
+        if settings.LDAP_STORE_PROJECTS:
+            self.delete_netgroup_ldap()
+        super(Project, self).delete(*args, **kwargs)
+
     def _get_aggregates(self):
         """Get all aggregates that can be used by the project
         (i.e. for which the project has the "can_use_aggregate" permission).
