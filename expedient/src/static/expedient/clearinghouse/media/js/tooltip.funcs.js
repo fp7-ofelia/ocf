@@ -34,7 +34,7 @@ function addTooltipToClass(listClass){
 			position: "top center",
             cancelDefault: true,
             relative: true,
-            offset: [0,-110]
+            offset: [0,110]
 		});
 	});
 	
@@ -97,7 +97,7 @@ function addTooltipToSummary(summaryClass){
 			position: "top center",
             cancelDefault: true,
             relative: true,
-            offset: [0,-110]
+            offset: [0,110]
 		});
 	});
 	
