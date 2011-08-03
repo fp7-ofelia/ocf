@@ -37,7 +37,7 @@ if(top.location != document.location) {
 							position: "top center",
                             cancelDefault: true,
 							relative: true,
-							offset: [0,-100]
+							offset: [0,-110]
                         });
                     })
 
@@ -66,7 +66,7 @@ if(top.location != document.location) {
 							position: "top center",
                             cancelDefault: true,
 							relative: true,
-                            offset: [0,-100]
+                            offset: [0,-110]
                         });
                     })
 
@@ -96,7 +96,7 @@ if(top.location != document.location) {
 							position: "top center",
                             cancelDefault: true,
 							relative: true,
-                            offset: [0,-100]
+                            offset: [0,-110]
                         });
                     })
 
@@ -125,7 +125,7 @@ if(top.location != document.location) {
 							position: "top center",
 							cancelDefault: true,
 							relative: true,
-                            offset: [0,-100]
+                            offset: [0,-110]
                         });
                     })
 

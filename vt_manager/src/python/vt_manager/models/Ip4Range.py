@@ -33,7 +33,7 @@ class Ip4Range(models.Model):
 
 	#Networking parameters associated to this range
 	gw = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp])
-	dns1 = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp])
+	dns1 = models.IPAddressField(blank = True, null=True, default="10.216.24.2", validators = [IP4Utils.checkValidIp], help_text="DNS1 must be the OFELIA internal 10.216.24.2. It will be used by the VMs to resolve the LDAP address and authenticate users.")
 	dns2 = models.IPAddressField(blank = True, null=True, validators = [IP4Utils.checkValidIp])
     
 	#Pool of ips both assigned and excluded (particular case of assignment)

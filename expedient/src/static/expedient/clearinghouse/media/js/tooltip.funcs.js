@@ -34,7 +34,7 @@ function addTooltipToClass(listClass){
 			position: "top center",
             cancelDefault: true,
             relative: true,
-            offset: [0,-100]
+            offset: [0,-110]
 		});
 	});
 	
@@ -93,7 +93,11 @@ function addTooltipToSummary(summaryClass){
 	$(".summarytext." + summaryClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />");
 		$(this).closest("a").tooltip({
-			tip: ".summarytooltip." + summaryClass
+			tip: ".summarytooltip." + summaryClass,
+			position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-110]
 		});
 	});
 	
