@@ -29,9 +29,15 @@ urlpatterns = patterns('',
 static_file_tuple = (r'^%s/(?P<path>.*)$' % settings.MEDIA_URL[1:],
                      'django.views.static.serve',
                      {'document_root': "%s" % settings.MEDIA_ROOT})
+static_js_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/js/"),
+                     'django.views.static.serve',
+                     {'document_root': "%s" % settings.MEDIA_ROOT})
+
+
 urlpatterns += patterns('',
    # TODO: Serve static content, should be removed in production deployment
     # serve from another domain to speed up connections (no cookies needed)
     url(*static_file_tuple, name="img_media"),
     url(*static_file_tuple, name="css_media"),
-)
+    url(*static_js_tuple, name="js_media"),)
+

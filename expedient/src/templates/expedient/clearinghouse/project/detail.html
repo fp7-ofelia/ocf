@@ -20,10 +20,18 @@
 			addTooltipToSummary("role_perms_"+index);
 		});
 		$("#role_req_help_img").tooltip({
-			tip: "#role_req_help_div"
+			tip: "#role_req_help_div",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-110]
 		});
 		$("#aggs_help_img").tooltip({
-			tip: "#aggs_help_div"
+			tip: "#aggs_help_div",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,-110]
 		});
 	});
 </script>

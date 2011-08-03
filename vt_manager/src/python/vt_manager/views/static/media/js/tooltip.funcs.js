@@ -31,7 +31,7 @@ function addTooltipToClass(listClass){
 	$(".val." + listClass).each(function(index){
 		$(this).wrap("<a class='noeffect' href='#' />").tooltip({
 			tip: "." + listClass + ".description_" + index,
-			position: "top center",
+		    position: "top center",
             cancelDefault: true,
             relative: true,
             offset: [0,-110]

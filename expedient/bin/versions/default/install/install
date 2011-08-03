@@ -66,5 +66,3 @@ printHeader ">" "Setting correct file permissions..."
 chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
 chown -f $APACHE_USER $SRC_DIR/src/ -R
 chown -f $APACHE_USER /var/log/sfa_access.log
-
-
