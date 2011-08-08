@@ -196,7 +196,7 @@
 			<span class="next_link">
 				| <a href="{% url html_plugin_flowspace slice.id %}">Clear</a> | 
 				{% if done %}
-				<a href="{% url slice_detail slice.id %}">Done</a>
+				<a href="{% url html_plugin_home slice.id %}" onClick='return confirm("Flowspace must be Saved before exiting; are you sure you are done?");'>Done</a>
 				{% else %}
 				<a href="{% url html_plugin_sshkeys slice.id %}">Next</a>
 				{% endif %}
