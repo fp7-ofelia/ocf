@@ -31,11 +31,8 @@
 
 {% block content %}
 <div class="steps center">
-	1. <a href="{% url html_plugin_home slice.id %}">Select Host and OpenFlow Resources</a>
+	1. <a href="{% url html_plugin_bookOpenflow slice.id %}">Select OpenFlow Ports</a>
 	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
-{% if done %}
-	3. <a href="{% url html_plugin_sshkeys slice.id %}">Get SSH keys</a>
-{% endif %}
 </div>
 
 <div class="main">
