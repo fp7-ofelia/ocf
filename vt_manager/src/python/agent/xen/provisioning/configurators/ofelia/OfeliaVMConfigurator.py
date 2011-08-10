@@ -1,6 +1,7 @@
 import shutil
 import os
 import jinja2 
+import string
 
 from xen.provisioning.HdManager import HdManager
 from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
@@ -97,8 +98,11 @@ class OfeliaVMConfigurator:
 			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "r")
 			text = file.read() 
 			file.close() 
-			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "w") 
-			file.write(text.replace("__projectId","@proj_"+vm.project_id+"_"+vm.project_name))
+			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "w")
+			#Scape spaces and tabs
+		        projectName = string.replace(vm.project_name,' ','_')
+			projectName = string.replace(projectName,'\t','__')
+			file.write(text.replace("__projectId","@proj_"+vm.project_id+"_"+projectName))
 			file.close() 
 		except Exception as e:
 			print "Could not configure LDAP file!! "+str(e)
