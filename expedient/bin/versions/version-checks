@@ -13,3 +13,15 @@ if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE" == "0" ]; then
 	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them" $NO_RESCUE
 fi
 
+if [ "$FORCE" == 0 ]; then 
+	if [[ "$TARGETED_VERSION" == "$CURRENT_VERSION" ]]; then
+		error "Cannot upgrade; targeted version is the same as current installed version. Use force if you want to override this..." $NO_RESCUE
+	fi
+else
+	confirm "Targeted version and current are the same one. Are you sure you want to force upgrade." $DONT_ABORT $NO_RESCUE
+	if [ $? == 1 ]; then
+		error "Aborted by the user" $NO_RESCUE	
+	fi
+
+
+fi

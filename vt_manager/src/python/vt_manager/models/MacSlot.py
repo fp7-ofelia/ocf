@@ -53,6 +53,14 @@ class MacSlot(models.Model):
 		return self
 	
 	def destroy(self):
+			
+		if self.macRange != None:
+			
+			if self.isExcluded:
+				self.macRange.removeExcludedMac(self)	
+			else:
+				self.macRange.releaseMac(self)	
+
 		self.delete()	
 
 	def getMac(self):
