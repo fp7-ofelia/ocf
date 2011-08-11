@@ -32,6 +32,7 @@ print "VM template installation..."
 
 	if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz -o "$NEWHASH"  != "$HASH" ];then
 		downloadTemplate	
+ 		mv -f $OXA_DIRECTORY/cache/templates/default/.default.hash $OXA_DIRECTORY/cache/templates/default/default.hash
 	else
 		if [ "$FORCE" == 0 ]; then 
 			print ""
@@ -42,9 +43,9 @@ print "VM template installation..."
 
 			if [ $? == 0 ]; then
 				downloadTemplate	
+ 				mv -f $OXA_DIRECTORY/cache/templates/default/.default.hash $OXA_DIRECTORY/cache/templates/default/default.hash
 			fi
 
 		fi
 
 	fi
- 	mv -f $OXA_DIRECTORY/cache/templates/default/.default.hash $OXA_DIRECTORY/cache/templates/default/default.hash
