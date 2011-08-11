@@ -13,15 +13,32 @@ if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE" == "0" ]; then
 	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them" $NO_RESCUE
 fi
 
-if [ "$FORCE" == 0 ]; then 
-	if [[ "$TARGETED_VERSION" == "$CURRENT_VERSION" ]]; then
-		error "Cannot upgrade; targeted version is the same as current installed version. Use force if you want to override this..." $NO_RESCUE
-	fi
-else
-	confirm "Targeted version and current are the same one. Are you sure you want to force upgrade." $DONT_ABORT $NO_RESCUE
-	if [ $? == 1 ]; then
-		error "Aborted by the user" $NO_RESCUE	
-	fi
+#Check already installed 
+if [ -n "$CURRENT_VERSION" -a  "$ACTION" == "install"  ]; then
 
+	if [ "$FORCE" == 0 ]; then 
+		error "Cannot install; It appears that a copy of the version $CURRENT_VERSION is already installed in your system. Upgrade it or use force flag if you want to overwrite it..." $NO_RESCUE
+	else
+		confirm "It appears that a copy of the version $CURRENT_VERSION is already installed in your system. Are you sure you want to force install." $DONT_ABORT $NO_RESCUE
+		if [ $? == 1 ]; then
+			error "Aborted by the user" $NO_RESCUE	
+		fi
+	fi
 
 fi
+#Check upgrade 
+if [ "$ACTION" == "upgrade"  ]; then
+	if [ "$FORCE" == 0 ]; then 
+		if [[ "$TARGETED_VERSION" == "$CURRENT_VERSION" ]]; then
+			error "Cannot upgrade; targeted version is the same as current installed version. Use force if you want to override this..." $NO_RESCUE
+		fi
+	else
+		confirm "Targeted version and current are the same one. Are you sure you want to force upgrade." $DONT_ABORT $NO_RESCUE
+		if [ $? == 1 ]; then
+			error "Aborted by the user" $NO_RESCUE	
+		fi
+
+
+	fi
+fi
+
