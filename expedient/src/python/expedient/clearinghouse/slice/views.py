@@ -18,6 +18,7 @@ import logging
 from expedient.common.permissions.shortcuts import must_have_permission
 from vt_plugin.models import VM
 logger = logging.getLogger("SliceViews")
+import uuid
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 
@@ -30,6 +31,10 @@ def create(request, proj_id):
     def pre_save(instance, created):
         instance.project = project
         instance.owner = request.user
+	#Generate UUID: fixes caching problem on model default value
+	instance.uuid = uuid.uuid4()
+	instance.save()
+        
         instance.reserved = False
     
     return generic_crud(

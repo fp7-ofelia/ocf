@@ -21,7 +21,7 @@ class MutexStore():
 	@staticmethod
 	def __getLockByKey(key):
 		 #This localExclusion is to prevent problems if never resources (dictionary entry) are freed in unlock method
-		print key
+		#print key
                 localmutex.acquire()
                 if not _locks.has_key(key):
                         #create Mutex for the VM

@@ -80,7 +80,7 @@ class FileHdManager(object):
 	''' Returns the path of the temporally mounted Hd in the dom0 filesystem'''
 	@staticmethod
 	def getTmpMountedHdPath(vm):
-		return OXA_FILEHD_HD_TMP_MP+vm.name+str(os.getpid())+"/"
+		return OXA_FILEHD_HD_TMP_MP+vm.name+"_"+vm.uuid+"/"
 
 	''' Returns the path of the templates origin''' 
 	@staticmethod
@@ -222,7 +222,9 @@ class FileHdManager(object):
 	@staticmethod
 	def mount(vm):
 		path = FileHdManager.getTmpMountedHdPath(vm)
-		os.makedirs(path)		
+
+		if not os.path.isdir(path):
+			os.makedirs(path)		
 	
 		vm_path=FileHdManager.getHdPath(vm)
 		#print '/bin/mount'+' -o loop '+vm_path+" "+path

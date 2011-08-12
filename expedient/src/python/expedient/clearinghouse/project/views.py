@@ -23,7 +23,8 @@ from expedient.common.permissions.models import ObjectPermission,\
 from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-    
+import uuid   
+ 
 logger = logging.getLogger("project.views")
 
 TEMPLATE_PATH = "project"
@@ -163,9 +164,12 @@ def create_project_roles(project, user):
 )
 def create(request):
     '''Create a new project'''
-    
+   
     def post_save(instance, created):
         # Create default roles in the project
+	#Generate UUID: fixes caching problem on model default value
+	instance.uuid = uuid.uuid4()
+	instance.save()
         create_project_roles(instance, request.user)
         
     def redirect(instance):

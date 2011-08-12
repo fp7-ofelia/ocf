@@ -166,7 +166,7 @@ class Ip4Range(models.Model):
 		
 			for ip in self.ips.all():
 				#Delete excluded ips
-				ip.destroy()
+				ip.delete()
 			self.delete()
 			
 	def allocateIp(self):
@@ -291,7 +291,30 @@ class Ip4Range(models.Model):
 			slots += range.numberOfSlots
 		return int(slots)
 	
-		
+	
+	def rebasePointer(self):
+		'''Used when pointer has lost track mostly due to bug #'''
+		with MutexStore.getObjectLock(self.getLockIdentifier()):
+			print "Rebasing pointer of range: "+str(self.id)
+			print "Current pointer point to: "+self.nextAvailableIp
+			try:
+                        	it= IP4Utils.getIpIterator(self.startIp,self.endIp,self.netMask)
+				while True:
+					ip = it.getNextIp()
+					if self.__isIpAvailable(ip):
+						break
+				self.nextAvailableIp = ip
+			except Exception as e:
+					self.nextAvailableIp = None
+			
+			print "Pointer will be rebased to: "+self.nextAvailableIp
+			self.save()
+	
+	@staticmethod
+	def rebasePointers():
+		'''Used when pointer has lost track mostly due to bug #'''
+		for range in Ip4Range.objects.all():
+			range.rebasePointer()	
 
 #slot = RangeSlot("127.0.0.1","127.0.0.255","255.255.255.0")
 
