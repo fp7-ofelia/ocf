@@ -34,10 +34,10 @@ sys.path.insert(0,PYTHON_DIR)
 command="mysqldump --databases "+settings.DATABASE_NAME
 
 if settings.DATABASE_USER != "":
-	command+=" --user="+settings.DATABASE_USER 
+	command+=" --user=\""+settings.DATABASE_USER+"\"" 
 
 if settings.DATABASE_PASSWORD != "":
-	command+=" --password="+settings.DATABASE_PASSWORD
+	command+=" --password=\""+settings.DATABASE_PASSWORD+"\""
 
 if settings.DATABASE_HOST != "":
 	command+=" --host="+settings.DATABASE_HOST

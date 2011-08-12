@@ -21,9 +21,9 @@ section = cfg['General']
 command =''
 
 if section["user"] != "":
-	command+=" --user="+ section["user"]
+	command+=" --user=\""+ section["user"]+"\""
 if section["password"] != "":
-	command+=" --password="+ section["password"]
+	command+=" --password=\""+ section["password"]+"\""
 if section["host"] != "":
 	command+=" --host="+ section["host"]
 if section["port"] != "":
