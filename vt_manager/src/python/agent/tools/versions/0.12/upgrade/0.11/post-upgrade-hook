@@ -1,0 +1,19 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module 
+###
+
+#inform user
+printHeader "info#" "Using 0.11->0.12 specificic post-upgrade-hook module..."
+
+source "$CURRENT_DIRECTORY/lib/template"
+
+#Starting apache
+print "Starting oxad..." 
+/usr/sbin/service oxad restart
+
+
