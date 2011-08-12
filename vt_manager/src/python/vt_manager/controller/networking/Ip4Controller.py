@@ -32,4 +32,5 @@ class Ip4Controller():
 	@staticmethod
 	def removeExcludedIp4(instance,ip4Id):
 		obj = Ip4Slot.objects.get(id = ip4Id)
-		instance.removeExcludedIp(obj)
+		#instance.removeExcludedIp(obj)
+		obj.destroy()

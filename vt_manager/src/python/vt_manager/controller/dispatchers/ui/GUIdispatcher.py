@@ -392,10 +392,12 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 
 		try:	
 			instance = Ip4Controller.getRange(rangeId)
-			extra_context["range"] = instance 
 		
 			#Create excluded
 			Ip4Controller.removeExcludedIp4(instance,ip4Id)
+			#FIXME: Why initial instance is not refreshed?
+			instance = Ip4Controller.getRange(rangeId)
+			extra_context["range"] = instance 
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
@@ -483,7 +485,7 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 	#Edit
 	#TODO
 
-	#Add excluded Ip
+	#Add excluded Mac 
 	if (action == NETWORKING_ACTION_ADDEXCLUDED) and (request.method == "POST"):
 		if not request.method == "POST":
 			raise Exception("Invalid method")
@@ -504,15 +506,17 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 			template="networking/ethernet/rangeDetail.html",
 		)
 		
-	#Release excluded Ip
+	#Release excluded Mac
 	if (action == NETWORKING_ACTION_REMOVEXCLUDED) and (request.method == "POST"):
 
 		try:	
 			instance = EthernetController.getRange(rangeId)
-			extra_context["range"] = instance 
 		
 			#Create excluded
+			#FIXME: Why initial instance is not refreshed?
 			EthernetController.removeExcludedMac(instance,macId)
+			instance = EthernetController.getRange(rangeId)
+			extra_context["range"] = instance 
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)

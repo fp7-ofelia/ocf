@@ -73,7 +73,7 @@ class Project(models.Model):
     
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    uuid = models.CharField(max_length=200, default = uuid.uuid4(), unique=True, editable =False)
+    uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     '''
     save = permissions_save_override(
         permittee_kw="user",
