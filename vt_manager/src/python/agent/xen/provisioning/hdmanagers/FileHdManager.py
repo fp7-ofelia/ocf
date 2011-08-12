@@ -222,7 +222,9 @@ class FileHdManager(object):
 	@staticmethod
 	def mount(vm):
 		path = FileHdManager.getTmpMountedHdPath(vm)
-		os.makedirs(path)		
+
+		if not os.path.isdir(path):
+			os.makedirs(path)		
 	
 		vm_path=FileHdManager.getHdPath(vm)
 		#print '/bin/mount'+' -o loop '+vm_path+" "+path
