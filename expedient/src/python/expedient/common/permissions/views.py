@@ -15,6 +15,8 @@ from expedient.common.permissions.forms import PermissionRequestForm
 from expedient.common.messaging.models import DatedMessage
 from django.contrib.auth.models import User
 import logging
+from django.core.mail import send_mail
+from django.conf import settings
 
 logger = logging.getLogger("permissions.views")
 
@@ -130,6 +132,16 @@ def request_permission(always_redirect_to=None,
                     "Sent request for permission %s to user %s" %
                     (permission.name, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+                try:
+                    send_mail(
+                         "Request for permission %s from user %s" % (permission.name,request.user),
+                         "You have a new request for permission %s from user %s. Please go to the Permission Management section in your Dashboard to manage it" % (permission.name,request.user),
+                         from_email=settings.DEFAULT_FROM_EMAIL,
+                         recipient_list=[settings.EMAIL_HOST_USER],
+                     )
+                except Exception as e:
+                    print "Email \"Request for permission %s from user %s\" could no be sent" % (permission.name,request.user)
+
                 if callable(always_redirect_to):
                     redirect_to = always_redirect_to(request)
                 else:
