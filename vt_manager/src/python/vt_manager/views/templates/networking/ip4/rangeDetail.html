@@ -76,7 +76,7 @@
 			<th width="200px">Allocated Address</th><th style="text-align:left" width="300px">VM</th><!--<th width="80px">Actions</th>-->
 		</tr>
 	{% if range.getAllocatedIps.count > 0 %}
-		{% for mac in range.getAllocatedIps %}
+		{% for ip in range.getAllocatedIps %}
 			<tr class="{% cycle 'odd' 'even' %}">
 				<td>{{ip.ip}}</td><td>TODO</td>
 			</tr>

@@ -67,6 +67,14 @@ class Ip4Slot(models.Model):
 		return self.ipRange.getDNS2()
 	
 	def destroy(self):
+	
+		if self.ipRange != None:
+			
+			if self.isExcluded:
+				self.ipRange.removeExcludedIp(self)	
+			else:
+				self.ipRange.releaseIp(self)	
+
 		self.delete()	
 
 	'''

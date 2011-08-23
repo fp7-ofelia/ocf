@@ -27,15 +27,13 @@ function setVersions()
 
 	printDebug "Detected target version:$TARGETED_VERSION"
 
-	if [ "$ACTION" == "install" ]; then
-		return	
-	fi
-	
 	if [ -f "$CURRENT_VERSION_PATH" ]; then
 		CURRENT_VERSION=`cat $CURRENT_VERSION_PATH `	
 	else
-		warning "Could not determine current(installed) version. \"default\" upgrade will be used..."
-		CURRENT_VERSION=default
+		if [ "$ACTION" == "upgrade" ]; then
+			warning "Could not determine current(installed) version. \"default\" upgrade will be used..."
+			CURRENT_VERSION=default
+		fi
 	fi
 	
 	printDebug "Detected current version:$CURRENT_VERSION"

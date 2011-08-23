@@ -135,7 +135,7 @@ class MacRange(models.Model):
 		
 			for mac in self.macs.all():
 				#Delete excluded macs
-				mac.destroy()
+				mac.delete()
 			self.delete()
 			
 
@@ -269,8 +269,30 @@ class MacRange(models.Model):
 		return int(slots)
 		
 
+	def rebasePointer(self):
+		'''Used when pointer has lost track mostly due to bug #'''
+		with MutexStore.getObjectLock(self.getLockIdentifier()):
+			print "Rebasing pointer of range: "+str(self.id)
+			print "Current pointer point to: "+self.nextAvailableMac
+			try:
+                    		it= EthernetUtils.getMacIterator(self.startMac,self.endMac)
+				while True:
+					mac = it.getNextMac()
+					if self.__isMacAvailable(mac):
+						break
+				self.nextAvailableMac= mac
+			except Exception as e:
+				self.nextAvailableMac = None
+			
+			print "Pointer will be rebased to: "+self.nextAvailableMac
+			self.save()
+	
+	@staticmethod
+	def rebasePointers():
+		for range in MacRange.objects.all():
+			range.rebasePointer()
 		
-
+			
 #slot = RangeSlot("127.0.0.1","127.0.0.255","255.255.255.0")
 
 #slot.allocateMac()

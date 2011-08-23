@@ -32,4 +32,5 @@ class EthernetController():
 	@staticmethod
 	def removeExcludedMac(instance,macId):
 		obj = MacSlot.objects.get(id = macId)
-		instance.removeExcludedMac(obj)
+		#instance.removeExcludedMac(obj)
+		obj.destroy()

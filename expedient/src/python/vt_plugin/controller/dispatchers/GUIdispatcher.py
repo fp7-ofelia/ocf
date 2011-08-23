@@ -130,13 +130,13 @@ def check_vms_status(request, slice_id):
                         actionsHtmlCode =\
 						"<div>\
                         <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
                         </div>"
                     elif vm.state == "stopped" :
                         actionsHtmlCode =\
                         "<div>\
                         <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\')\">Delete</a>\
+                        <a href=\"JavaScript:void()\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
                         </div>"
                     else:
                         actionsHtmlCode = "<div><img src=\"/static/media/img/loading.gif\" align=\"absmiddle\"></div>"
