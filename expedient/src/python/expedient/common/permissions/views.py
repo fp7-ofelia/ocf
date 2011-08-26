@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 import logging
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.models import User
 
 logger = logging.getLogger("permissions.views")
 
@@ -110,11 +111,13 @@ def request_permission(always_redirect_to=None,
         if permission_owners_func:
             user_qs = permission_owners_func(request, obj_perm, permittee)
         else:
-            user_qs = Permittee.objects.filter_for_class_and_permission_name(
-                klass=User,
-                permission=obj_perm.permission,
-                target_obj_or_class=obj_perm.target,
-                can_delegate=True)
+            #user_qs = Permittee.objects.filter_for_class_and_permission_name(
+            #    klass=User,
+            #    permission=obj_perm.permission,
+            #    target_obj_or_class=obj_perm.target,
+            #    can_delegate=True)
+            #ONLY ISLAND MANAGER/S
+            user_qs=User.objects.filter(is_superuser=1)
             
         # process the request
         if request.method == "POST":
@@ -133,11 +136,11 @@ def request_permission(always_redirect_to=None,
                     (permission.name, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 try:
-                    send_mail(
+                     send_mail(
                          "Request for permission %s from user %s" % (permission.name,request.user),
-                         "You have a new request for permission %s from user %s. Please go to the Permission Management section in your Dashboard to manage it" % (permission.name,request.user),
+                         "You have a new request for permission %s from user %s. Please go to the Permission Management section in your Dashboard to manage it: https://%s\n\n Original User Message:\n\"%s\"" % (permission.name,request.user, settings.SITE_DOMAIN, perm_request.message),
                          from_email=settings.DEFAULT_FROM_EMAIL,
-                         recipient_list=[settings.EMAIL_HOST_USER],
+                         recipient_list=[settings.ROOT_EMAIL],
                      )
                 except Exception as e:
                     print "Email \"Request for permission %s from user %s\" could no be sent" % (permission.name,request.user)
