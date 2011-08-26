@@ -140,7 +140,8 @@ def request_permission(always_redirect_to=None,
                          "Request for permission %s from user %s" % (permission.name,request.user),
                          "You have a new request for permission %s from user %s. Please go to the Permission Management section in your Dashboard to manage it: https://%s\n\n Original User Message:\n\"%s\"" % (permission.name,request.user, settings.SITE_DOMAIN, perm_request.message),
                          from_email=settings.DEFAULT_FROM_EMAIL,
-                         recipient_list=[settings.ROOT_EMAIL],
+                         recipient_list=[perm_request.permission_owner.email],
+                         #recipient_list=[settings.ROOT_EMAIL],
                      )
                 except Exception as e:
                     print "Email \"Request for permission %s from user %s\" could no be sent" % (permission.name,request.user)
