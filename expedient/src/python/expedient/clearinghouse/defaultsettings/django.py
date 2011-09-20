@@ -209,6 +209,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.media",
     'django.core.context_processors.request',
     'expedient.common.messaging.context_processors.messaging',
+    'expedient.common.utils.context_processors.contextSettingsInTemplate',
 ]
 append_to_local_setting(
     "TEMPLATE_CONTEXT_PROCESSORS", TEMPLATE_CONTEXT_PROCESSORS, globals())

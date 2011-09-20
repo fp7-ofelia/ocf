@@ -5,6 +5,7 @@ SRC_DIR = '/opt/ofelia/expedient/src'
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
+ISLAND_NAME   = "i2cat"
 
 ADMINS = [
     ("i2cat OFELIA Admin", ROOT_EMAIL),
@@ -32,3 +33,4 @@ DATABASE_NAME = "changeMe"
 
 #TO BE MODIFIED ONLY IN DEVELOPMENT ENVIORNMENTS
 LDAP_STORE_PROJECTS = True
+AUTH_LDAP_BIND_PASSWORD = "changeme"

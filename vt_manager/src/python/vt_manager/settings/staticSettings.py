@@ -37,6 +37,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
 )
+
 #Middleware
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +64,15 @@ ROOT_URLCONF = 'vt_manager.urls'
 TEMPLATE_DIRS = (
     join(SRC_DIR, 'python/vt_manager/views/templates'),
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = [
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    'django.core.context_processors.request',
+    'vt_manager.common.utils.context_processors.contextSettingsInTemplate',
+]
 
 #Static file paths
 MEDIA_ROOT = join(SRC_DIR+"views/static/", "media")

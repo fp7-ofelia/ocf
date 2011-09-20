@@ -56,13 +56,14 @@
 			<tr>
 				<td align="left">
 					<img src="{% url img_media 'logo_expedient.png' %}" />
+					<div>Software Version <strong>{{softwareVersion}}</strong></div>
 				</td>
 				<td>
 					{% if request.user %}
-					<div style="margin-top:42px;">
+					<div style="margin-top:55px;">
 					<div class="small" align="right" style="position: relative; top: 12px;">
 						{% if request.user.username %}
-						logged in as <strong>{{ request.user.username }}</strong>
+						logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong> island
 						{% else %}
 						not logged in
 						{% endif %}

@@ -356,6 +356,11 @@ def create_slice(slice_id, project_name, project_description,
                 raise Exception(
                         "Couldn't re-opt into updated experiment. Lost all the opt-ins: %s"%str(exc))
              
+    try:
+        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name),from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+    except Exception as e:
+        pass
+
     transaction.commit()       
     return {
         'error_msg': "",
