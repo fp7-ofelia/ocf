@@ -35,11 +35,11 @@ class AddMemberForm(forms.Form):
     roles = RoleModelMultipleChoiceField(
         ProjectRole.objects.get_empty_query_set(),
         widget=forms.CheckboxSelectMultiple,
-        help_text="Select the roles that the user should have in this project."
+        help_text="Select the roles that the user should have in this project. Owner users can add memebers to the project, researchers can not."
     )
-    delegate = forms.BooleanField(required=False,
-        help_text="Should the new member be able to give the new permissions"
-        " and roles to others?")
+    #delegate = forms.BooleanField(required=False,
+    #    help_text="Should the new member be able to give the new permissions"
+    #    " and roles to others?")
     
     def __init__(self, project, giver, *args, **kwargs):
         if not isinstance(project, Project):
@@ -63,9 +63,14 @@ class AddMemberForm(forms.Form):
     def save(self):
         user = self.cleaned_data["user"]
         roles = self.cleaned_data["roles"]
-        delegate = self.cleaned_data["delegate"]
+        #delegate = self.cleaned_data["delegate"]
         
         for role in roles:
+            if role.name == "owner":
+                delegate = True
+            else:
+                delegate = False
+
             role.give_to_permittee(
                 user, giver=self.giver, can_delegate=delegate)
         
