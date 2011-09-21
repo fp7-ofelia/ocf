@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
 
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -27,22 +28,26 @@ urlpatterns = patterns('',
     (r'^messagecenter/',include('expedient.clearinghouse.messagecenter.urls')),
     (r'^admin/', include(admin.site.urls)),
 
-    # TODO: Change to the following after 0.8 of registration is out
-    # (r'^accounts/', include('registration.backends.default.urls')),
-    
-    # Registration URLs commented. They are copied and redirected to empty urls in order to get 500 error
-    #url(r'^accounts/register/$',
-    #    'expedient.clearinghouse.users.views.register',
-    #    name='registration_register'),
-    #url(r'^accounts/activate/(?P<activation_key>\w+)/$',
-    #    'expedient.clearinghouse.users.views.activate',
-    #    name='registration_activate'),
-    #url(r'^accounts/register/complete/$',
-    #    direct_to_template,
-    #    {'template': 'registration/registration_complete.html'},
-    #    name='registration_complete'),
-    #url(r'^accounts/', include('registration.urls')),
-     url(r'^accounts/register/$',
+)
+
+#Registration urls depending on ALLOW_LOCAL_REGISTRATION flag
+if settings.ALLOW_LOCAL_REGISTRATION == True:
+    urlpatterns += patterns('',
+    url(r'^accounts/register/$',
+        'expedient.clearinghouse.users.views.register',
+        name='registration_register'),
+    url(r'^accounts/activate/(?P<activation_key>\w+)/$',
+        'expedient.clearinghouse.users.views.activate',
+        name='registration_activate'),
+    url(r'^accounts/register/complete/$',
+        direct_to_template,
+        {'template': 'registration/registration_complete.html'},
+        name='registration_complete'),
+    url(r'^accounts/', include('registration.urls')),
+    )
+else:
+    urlpatterns += patterns('',
+    url(r'^accounts/register/$',
         ' ',
         name='registration_register'),
     url(r'^accounts/activate/(?P<activation_key>\w+)/$',
@@ -53,10 +58,9 @@ urlpatterns = patterns('',
         ' ',
         name='registration_complete'),
     url(r'^accounts/', include('registration.urls')),
+    )
 
-    # TODO: Remove after testing
-    #(r'^dummyom/', include('openflow.dummyom.urls')),
-)
+
 
 
 # Add the plugin URLs:

@@ -13,6 +13,8 @@ from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,
     int_to_dotted_ip, int_to_mac
 from decorator import decorator
 from django.db import transaction
+from django.conf import settings
+from django.core.mail import send_mail
 
 
 @decorator

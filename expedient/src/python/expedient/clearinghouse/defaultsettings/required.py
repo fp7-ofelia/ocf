@@ -7,7 +7,7 @@ Created on Aug 19, 2010
 
 REQUIRED_SETTINGS = [
     ("admins", ["ADMINS", "MANAGERS"]),
-    ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
+#    ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
 #    ("gcf", ["GCF_BASE_NAME"]),
     ("site", ["SITE_DOMAIN"]),
 #    ("openflowtests", ["SITE_IP_ADDR", "MININET_VMS"]),

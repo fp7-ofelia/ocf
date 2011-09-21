@@ -8,5 +8,6 @@ def contextSettingsInTemplate(request):
 
 	extraSettings =  {'islandName':settings.ISLAND_NAME,
 					'softwareVersion':softwareVersion,
+					'allowLocalRegistration':settings.ALLOW_LOCAL_REGISTRATION,
 					}		
 	return extraSettings 

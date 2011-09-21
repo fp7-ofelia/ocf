@@ -12,16 +12,6 @@ ADMINS = [
 
 MANAGERS = ADMINS
 
-#EMAIL_HOST = "smtp.gmail.com"
-DEFAULT_FROM_EMAIL = "no-reply@gmail.com"
-EMAIL_USE_TLS=True
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_HOST_USER='i2catopenflow@gmail.com'
-EMAIL_HOST_PASSWORD="expedient"
-EMAIL_PORT=587 
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
-
 SITE_DOMAIN = "OfeliaSDKR1"
 
 SITE_IP_ADDR = "192.168.254.199"

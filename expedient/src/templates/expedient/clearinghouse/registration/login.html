@@ -24,9 +24,11 @@
 	   <td>{% trans "Forgot your password" %}?</td>
 	   <td><a href="{% url auth_password_reset %}">{% trans "Reset it" %}</a>!</td>
 	</tr>
-	<!--<tr>
+	{% if allowLocalRegistration == 1 %}
+	<tr>
 	   <td>{% trans "Not a member" %}?</td>
 	   <td><a href="{% url registration_register %}">{% trans "Register" %}</a>!</td>
-	 </tr>-->
+	 </tr>
+	{%endif%}
 </table>
 {% endblock %}
