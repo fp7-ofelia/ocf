@@ -23,11 +23,11 @@
 		</td>
 		<td>
                     <div align="right" style="position: relative; top: 19px;">
-					<div class="small" align="right" style="position: relative; top: 12px;">
+					<div class="small" align="right" style="position: relative; top: 12px;margin-top:52px;">
                         {% if request.user.username %}
                         logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong> island
                         {% else %}
-                        not logged in
+                        you are in <strong>{{islandName}} </strong> island
                         {% endif %}
                     </div>
 
