@@ -20,8 +20,13 @@ class MessageForm(forms.ModelForm):
         self.fields['users'].widget.attrs.update({'size': 5})
     class Meta:
         model = DatedMessage
-        fields = ['type', 'users', 'msg_text']
+        fields = ['type', 'users', 'msg_text', 'sender']
         widgets = {
             'msg_text': forms.Textarea(attrs={'cols': 40, 'rows': 4}),
             'users': forms.SelectMultiple(attrs={'size': 5}),
         }
+     
+class MessageFormNoIM(MessageForm):
+    def __init__(self, *args, **kwargs):
+        super(MessageForm, self).__init__(*args, **kwargs)
+        self.fields['type']= forms.ChoiceField(choices = ((DatedMessage.TYPE_U2U, 'From User',),))

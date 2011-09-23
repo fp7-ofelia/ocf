@@ -940,19 +940,21 @@ div.create_msg {
 	position:relative;
     top:0;
     left:0;
-    height:122px;
+    height:230px;
 }
 
 #type_users_div {
-	position:absolute;
+	/*position:absolute;*/
 	top:0;
 	left:0px;
+	clear:both;
 }
 
 #message_div {
-    position:absolute;
+/*    position:absolute;*/
     top:0;
-    right:0px;
+    left:0px;
+	clear:both;
 }
 
 #send_msg_button {
