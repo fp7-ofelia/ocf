@@ -19,6 +19,7 @@ cp -R $SRC_DIR/src $BACKUP_PATH
 #Backing up database
 local TMP_PATH=$PWD
 
+#Load the pre-backup-upgrade-hook in order to update localsettings before using python manage.py
 printHeader "Pre-backup." "Executing custom backup code in order to upgrade localsettings ..."
 loadModule "pre-backup-upgrade-hook" $NO_RESCUE
 
