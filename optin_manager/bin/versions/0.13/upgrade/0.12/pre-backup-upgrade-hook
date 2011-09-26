@@ -10,7 +10,7 @@
 #inform user
 printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
 
-SRC_DIR=/opt/ofelia/vt_manager/
+SRC_DIR=/opt/ofelia/optin_manager/
 EMAIL_PATTERNS="EMAIL_ DEFAULT_EMAIL"
 
 
