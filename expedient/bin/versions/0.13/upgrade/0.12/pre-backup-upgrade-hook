@@ -23,6 +23,7 @@ cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does 
 
 #Adding/Moving new variables to localsettings.py
 printHeader ">" "Adding new settings to localsettings.py ..."
+echo "ISLAND_NAME = \"changeme\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
 echo "AUTH_LDAP_BIND_PASSWORD = \"changeme\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
 echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not add ALLOW_LOCAL_REGISTRATION to localsettngs.py ..."
 
