@@ -29,7 +29,7 @@ echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not 
 
 for pattern in $EMAIL_PATTERNS
 do
-    sed -i "/$pattern/d" localsetting.py || error "Could not delete EMAIL settings from localsettngs.py ..."
+    sed -i "/$pattern/d" localsettings.py || error "Could not delete EMAIL settings from localsettngs.py ..."
 done
 
 
