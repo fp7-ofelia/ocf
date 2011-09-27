@@ -103,13 +103,3 @@ MININET_VMS = [
 #Monitoring
 MONITORING_INTERVAL = 38
 
-#SMTP configuration for IM notifications
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'i2catopenflow@gmail.com'
-EMAIL_HOST_PASSWORD = 'expedient'
-EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = 'no-reply@fp7-ofelia.eu'
-EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
-
-
