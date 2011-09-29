@@ -1,0 +1,14 @@
+#!/bin/sh
+ 
+#Email vars
+EMAIL_FROM="no-reply@fp7-ofelia.eu"
+SMTP_SERVER="mail.eict.fp7-ofelia.eu"
+#SMTP_SERVER="support.i2cat.net"
+#EMAIL_TO="marc.sune@i2cat.net leonardo.bergesio@i2cat.net" #Please change-me ;)
+#EMAIL_TO="i2catopenflow@gmail.com" #Please change-me ;)
+EMAIL_TO="leonardo.bergesio@i2cat.net" #Please change-me ;)
+ 
+function sendEmail(){ 
+	sendemail -f $EMAIL_FROM -t $EMAIL_TO -s $SMTP_SERVER \
+                        -u "$1" -m "$2" 
+}
