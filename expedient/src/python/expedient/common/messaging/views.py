@@ -89,7 +89,6 @@ def create_message(request, model=None, template_name=None,
             messages.success(request, msg, fail_silently=True)
             new_object.sender = request.user
             new_object.save()
-            print request.POST
             if new_object.type == DatedMessage.TYPE_U2U:
                 try:
                     send_mail(
