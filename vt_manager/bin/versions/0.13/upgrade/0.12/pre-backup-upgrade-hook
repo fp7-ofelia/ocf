@@ -20,8 +20,10 @@ cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anym
 
 #Adding/Moving new variables to localsettings.py
 printHeader ">" "Adding new settings to mySettings.py ..."
-echo "ISLAND_NAME = \"changeme\"" >> mySettings.py || error "Could not add ISLAND_NAME variable to mySettngs.py ..."
-
+echo "Set Island name please, it will appear in the header of all the web pages of the VT Manager app: "
+read ISLAND_NAME
+echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> mySettings.py || error "Could not add ISLAND_NAME variable to mySettngs.py ..."
+echo -e "\n\nYou can change the new settings by editing mySettings.py file"
 
 for pattern in $EMAIL_PATTERNS
 do

@@ -58,7 +58,7 @@ class OpenFlowSliceInfo(models.Model):
     controller_url = models.CharField(
         "OpenFlow controller URL", max_length=100,
         validators=[validate_controller_url],
-        help_text="e.g. tcp:beirut.stanford.edu:6633")
+        help_text=u"The format should be tcp:hostname:port or ssl:hostname:port")
     # TODO: It is not a good idea to store the password in the clear.
     password = models.CharField(
         max_length=64, help_text="This is the password to use when accessing\
