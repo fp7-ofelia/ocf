@@ -99,9 +99,9 @@ def create_message(request, model=None, template_name=None,
                              #recipient_list=[settings.ROOT_EMAIL],
                      )
                     print "LEODEBUG MANDO MAIL" 
-                 except Exception as e:
-                     print e
-                     print "User email notification could no be sent"
+                except Exception as e:
+                    print e
+                    print "User email notification could no be sent"
 
             return create_update.redirect(post_save_redirect, new_object)
     else:
