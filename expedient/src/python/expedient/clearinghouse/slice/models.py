@@ -56,7 +56,7 @@ class Slice(models.Model):
     modified = models.BooleanField(default=False, editable=False)
     uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     expiration_date = LimitedDateTimeField(
-        default=datetime.now,
+        default=datetime.now() + timedelta(days=settings.SLICE_DEFAULT_EXPIRATION_TIME),
         help_text="Enter a date and time. The date should be in the"
             " following format: 'YYYY-MM-DD'. And for the time: 'HH:MM:SS'."
             " The expiration date cannot be later than %s days from"
