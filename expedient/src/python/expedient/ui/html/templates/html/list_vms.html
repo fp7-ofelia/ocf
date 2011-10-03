@@ -31,8 +31,8 @@
                   <td>
                     <img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="/static/media/img/question_mark_15x15.png">  {{ vm.name }}
 					<div class="tooltip" id="vm_ssh_help_{{vm.id}}">
-				        To access the VM, do ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} and your password or root@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} with "openflow" as password to access as root
-				    </div>
+				        Access info:<br/><br> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %}<br/>(password: your user password)<br/><br> To access as root just use <b>su</b><br> (root password is <b>openflow</b>)
+					</div> 
                   </td>
                    
                   <td id = td_vm{{vm.id}}>

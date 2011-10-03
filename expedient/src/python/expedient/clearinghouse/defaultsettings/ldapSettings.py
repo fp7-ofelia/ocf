@@ -9,7 +9,7 @@ Created on Aug 18, 2010
 import ldap
 from django_auth_ldap.config import LDAPSearch, GroupOfUniqueNamesType
 from localsettings import CONF_DIR
-from localsettings import AUTH_LDAP_BIND_PASSWORD
+from localsettings import AUTH_LDAP_BIND_PASSWORD, AUTH_LDAP_BIND_DN
 ######################################################################
 #LDAP CLient settings; only for read access;should point to the slave 
 ######################################################################
@@ -18,7 +18,6 @@ from localsettings import AUTH_LDAP_BIND_PASSWORD
 # Baseline configuration.
 AUTH_LDAP_SERVER_URI = "ldap://ldap.ibbt.fp7-ofelia.eu:389"
 
-AUTH_LDAP_BIND_DN = "cn=admin,dc=fp7-ofelia,dc=eu"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=fp7-ofelia,dc=eu",ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 # or perhaps:

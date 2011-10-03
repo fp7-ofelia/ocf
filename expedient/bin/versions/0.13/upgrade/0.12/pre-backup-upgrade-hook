@@ -23,6 +23,9 @@ printHeader ">" "Adding new settings to localsettings.py ..."
 echo "Set Island name please, it will appear in the header of all the web pages of the Clearinghouse app: "
 read ISLAND_NAME
 echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> localsettings.py || error "Could not add ISLAND_NAME to localsettngs.py ..."
+echo "Set LDAP CN to generate DN: "
+read LDAP_CN
+echo "AUTH_LDAP_BIND_DN = \"cn=$LDAP_CN,dc=fp7-ofelia,dc=eu\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_DN to localsettngs.py ..."
 echo "Set LDAP Passord: "
 read LDAP_PASSWORD
 echo "AUTH_LDAP_BIND_PASSWORD = \"$LDAP_PASSWORD\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
