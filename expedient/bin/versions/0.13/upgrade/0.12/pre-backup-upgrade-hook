@@ -20,9 +20,15 @@ cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does 
 
 #Adding/Moving new variables to localsettings.py
 printHeader ">" "Adding new settings to localsettings.py ..."
-echo "ISLAND_NAME = \"changeme\"" >> localsettings.py || error "Could not add ISLAND_NAME to localsettngs.py ..."
-echo "AUTH_LDAP_BIND_PASSWORD = \"changeme\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
+echo "Set Island name please, it will appear in the header of all the web pages of the Clearinghouse app: "
+read ISLAND_NAME
+echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> localsettings.py || error "Could not add ISLAND_NAME to localsettngs.py ..."
+echo "Set LDAP Passord: "
+read LDAP_PASSWORD
+echo "AUTH_LDAP_BIND_PASSWORD = \"$LDAP_PASSWORD\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
 echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not add ALLOW_LOCAL_REGISTRATION to localsettngs.py ..."
+echo "#In days\nSLICE_DEFAULT_EXPIRATION_TIME = 7" >> localsettings.py || error "Could not add SLICE_DEFAULT_EXPIRATION_TIME to localsettngs.py ..."
+echo -e "\n\nYou can change the new settings by editing localsettings.py file"
 
 
 for pattern in $EMAIL_PATTERNS
