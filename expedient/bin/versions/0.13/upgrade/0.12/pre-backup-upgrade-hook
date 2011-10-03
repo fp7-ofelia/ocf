@@ -26,7 +26,7 @@ echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> localsettings.py || error "Could not ad
 echo "Set LDAP CN to generate DN: "
 read LDAP_CN
 echo "AUTH_LDAP_BIND_DN = \"cn=$LDAP_CN,dc=fp7-ofelia,dc=eu\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_DN to localsettngs.py ..."
-echo "Set LDAP Passord: "
+echo "Set LDAP Password: "
 read LDAP_PASSWORD
 echo "AUTH_LDAP_BIND_PASSWORD = \"$LDAP_PASSWORD\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
 echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not add ALLOW_LOCAL_REGISTRATION to localsettngs.py ..."
