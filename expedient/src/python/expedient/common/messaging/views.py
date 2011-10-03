@@ -90,17 +90,18 @@ def create_message(request, model=None, template_name=None,
             new_object.sender = request.user
             new_object.save()
             if new_object.type == DatedMessage.TYPE_U2U:
-             try:
-                send_mail(
-                         "User %s has sent you a message" % (new_object.sender),
-                         "Original Message:\n\"%s\"\n\n\nYou can check the new message at https://%s/messagecenter/\n\n" % (new_object.msg_text, settings.SITE_DOMAIN),
-                         from_email=settings.DEFAULT_FROM_EMAIL,
-                         recipient_list=[request.user.email],
-                         #recipient_list=[settings.ROOT_EMAIL],
-                 )
-             except Exception as e:
-                 print e
-                 print "User email notification could no be sent"
+                try:
+                    send_mail(
+                             "User %s has sent you a message" % (new_object.sender),
+                             "Original Message:\n\"%s\"\n\n\nYou can check the new message at https://%s/messagecenter/\n\n" % (new_object.msg_text, settings.SITE_DOMAIN),
+                             from_email=settings.DEFAULT_FROM_EMAIL,
+                             recipient_list=[request.user.email],
+                             #recipient_list=[settings.ROOT_EMAIL],
+                     )
+                    print "LEODEBUG MANDO MAIL" 
+                 except Exception as e:
+                     print e
+                     print "User email notification could no be sent"
 
             return create_update.redirect(post_save_redirect, new_object)
     else:
