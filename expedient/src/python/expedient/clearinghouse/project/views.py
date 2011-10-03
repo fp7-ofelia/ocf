@@ -339,9 +339,7 @@ def add_member(request, proj_id):
             project.save()
 			#Send mail notification to the user
             user = User.objects.get(id = request.POST['user'] )
-            roles = []
-            for role in request.POST['roles']:
-                 roles.append(str(ProjectRole.objects.get( id = role).name))
+            roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
             try:
                 send_mail(
                          "Project %s membership notification" % (project.name),
