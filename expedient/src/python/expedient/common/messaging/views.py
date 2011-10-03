@@ -16,6 +16,9 @@ from django.utils.translation import ugettext
 from django.contrib.auth.views import redirect_to_login
 from django.views.generic import GenericViewError
 from django.contrib import messages
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.conf import settings
 
 def list_msgs(request, number=None):
     '''
@@ -86,6 +89,19 @@ def create_message(request, model=None, template_name=None,
             messages.success(request, msg, fail_silently=True)
             new_object.sender = request.user
             new_object.save()
+            if new_object.type == DatedMessage.TYPE_U2U:
+             try:
+                send_mail(
+                         "User %s has sent you a message" % (new_object.sender),
+                         "Original Message:\n\"%s\"\n\n\nYou can check the new message at https://%s/messagecenter/\n\n" % (new_object.msg_text, settings.SITE_DOMAIN),
+                         from_email=settings.DEFAULT_FROM_EMAIL,
+                         recipient_list=[request.user.email],
+                         #recipient_list=[settings.ROOT_EMAIL],
+                 )
+             except Exception as e:
+                 print e
+                 print "User email notification could no be sent"
+
             return create_update.redirect(post_save_redirect, new_object)
     else:
         form = form_class()

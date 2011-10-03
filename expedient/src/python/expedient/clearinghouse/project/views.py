@@ -352,7 +352,7 @@ def add_member(request, proj_id):
                  )
 
             except Exception as e:
-                print "Email \"User notification could no be sent"
+                print "User email notification could no be sent"
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 
