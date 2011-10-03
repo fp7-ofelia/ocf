@@ -27,7 +27,7 @@ echo "Set LDAP Passord: "
 read LDAP_PASSWORD
 echo "AUTH_LDAP_BIND_PASSWORD = \"$LDAP_PASSWORD\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
 echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not add ALLOW_LOCAL_REGISTRATION to localsettngs.py ..."
-echo "#In days\nSLICE_DEFAULT_EXPIRATION_TIME = 7" >> localsettings.py || error "Could not add SLICE_DEFAULT_EXPIRATION_TIME to localsettngs.py ..."
+echo -e "#In days\nSLICE_DEFAULT_EXPIRATION_TIME = 7" >> localsettings.py || error "Could not add SLICE_DEFAULT_EXPIRATION_TIME to localsettngs.py ..."
 echo -e "\n\nYou can change the new settings by editing localsettings.py file"
 
 
