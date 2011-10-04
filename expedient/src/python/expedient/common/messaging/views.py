@@ -92,7 +92,7 @@ def create_message(request, model=None, template_name=None,
             if new_object.type == DatedMessage.TYPE_U2U:
                 try:
                     send_mail(
-                             "User %s has sent you a message" % (new_object.sender),
+                             settings.EMAIL_SUBJECT_PREFIX + "User %s has sent you a message" % (new_object.sender),
                              "Original Message:\n\"%s\"\n\n\nYou can check the new message at https://%s/messagecenter/\n\n" % (new_object.msg_text, settings.SITE_DOMAIN),
                              from_email=settings.DEFAULT_FROM_EMAIL,
                              recipient_list= User.objects.filter(id__in = request.POST.getlist('users')).values_list('email', flat=True),

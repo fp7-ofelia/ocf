@@ -137,7 +137,7 @@ def request_permission(always_redirect_to=None,
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 try:
                      send_mail(
-                         "Request for permission %s from user %s" % (permission.name,request.user),
+                         settings.EMAIL_SUBJECT_PREFIX + "Request for permission %s from user %s" % (permission.name,request.user),
                          "You have a new request for permission %s from user %s (%s). Please go to the Permission Management section in your Dashboard to manage it: https://%s\n\n Original User Message:\n\"%s\"" % (permission.name,request.user, request.user.email, settings.SITE_DOMAIN, perm_request.message),
                          from_email=settings.DEFAULT_FROM_EMAIL,
                          recipient_list=[perm_request.permission_owner.email],

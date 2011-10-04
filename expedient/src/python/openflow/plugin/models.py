@@ -27,6 +27,7 @@ from expedient.common.timer.exceptions import JobAlreadyScheduled
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
 
+
 def as_is_slugify(value):
     return value
 
@@ -155,6 +156,21 @@ production networks, and is currently deployed in several universities.
             raise
         self.parse_switches(switches)
         self.parse_links(links)
+
+ 
+#    def parse_fs(self, fs):
+
+
+    def get_granted_flowspace(self, slice_id, project_name):
+        
+        try:
+            gfs = self.client.proxy.get_granted_flowspace(slice_id, project_name)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
+
+        return gfs
         
     def _get_slice_id(self, slice):
         """
@@ -337,6 +353,7 @@ class OpenFlowInterfaceSliver(resource_models.Sliver):
                 raise cls.TooManySliversPerSlicePerInterface()
 signals.post_save.connect(OpenFlowInterfaceSliver.check_save,
                           OpenFlowInterfaceSliver)
+
 
 class FlowSpaceRule(models.Model):
     slivers = models.ManyToManyField(

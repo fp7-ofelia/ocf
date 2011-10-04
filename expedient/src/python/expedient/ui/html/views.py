@@ -431,24 +431,23 @@ def home(request, slice_id):
         for agg in vt_aggs:
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
-       
+      
+        try: 
+            gfs_list=[]
+            #XXX TODO LEODEBUG : Fallara con mas de un aggregate
+            for of_agg in of_aggs:
+                gfs = of_agg.as_leaf_class().get_granted_flowspace('192.168.254.193_'+str(slice.id),Project.objects.get(id = slice.project_id).name)
+                gfs_list.append(gfs)
+                print gfs
+            print gfs_list
+        except Exception as e:
+            print e
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
         fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
-        allocated_of_resources=[]
-        for agg in of_aggs:
-            for rsc in agg.resource_set.all():
-                rsc = rsc.as_leaf_class()
-                if isinstance(rsc,OpenFlowSwitch):
-                   ports=[]
-                   for iface in rsc.openflowinterface_set.all():
-                       if iface.id in checked_ids:
-                           ports.append(iface.port_num)
-                   if ports:
-                       allocated_of_resources.append(dict(switch=rsc,ports=ports))
 
         return simple.direct_to_template(
             request,
@@ -463,9 +462,9 @@ def home(request, slice_id):
                 "slice": slice,
                 "checked_ids": checked_ids,
                 "allfs": fsquery, 
+                "gfs_list": gfs_list, 
                 "ofswitch_class": OpenFlowSwitch,
                 "planetlab_node_class": PlanetLabNode,
-                "allocated_of_resources":allocated_of_resources,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

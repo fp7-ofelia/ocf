@@ -25,3 +25,12 @@ def ping(data):
     '''
     
     return "PONG: %s" % data
+
+@rpcmethod(signature=['string', 'string'], url_name="openflow_open_xmlrpc")
+def registerGrantedFlowSpace(**kwargs):
+
+    '''
+    Registers the granted FlowSpace (Rule in the Optin Manager) 
+    '''
+    print "LEODEBUG REGISTERGRANTEDFLOWSPACE XMLRPC METHOD"
+    return ""
