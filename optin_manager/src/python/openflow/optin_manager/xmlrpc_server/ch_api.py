@@ -521,6 +521,7 @@ def get_granted_flowspace(slice_id, project_name):
                 flowspace=dict(),
                 openflow=dict()
             )
+            fs_dict['openflow']=[]
             fs_dict['flowspace']=dict(
                                      mac_src_s=int_to_mac(fs.mac_src_s),
                                      mac_src_e=int_to_mac(fs.mac_src_e),
@@ -541,14 +542,23 @@ def get_granted_flowspace(slice_id, project_name):
                                      tp_src_e=fs.tp_src_e,
                                      tp_dst_e=fs.tp_dst_e,
                                  )
-
-            fs_dict['openflow']=dict(
+            
+            openflow_dict=dict(
                                     dpid=fs.dpid, 
                                     direction=fs.direction, 
                                     port_number_s=fs.port_number_s, 
                                     port_number_e=fs.port_number_e, 
                                )
-            gfs_list.append(fs_dict)
+            existing_fs = False
+            for prev_dict in gfs_list:
+                if fs_dict['flowspace'] == prev_dict['flowspace']:
+                    prev_dict['openflow'].append(openflow_dict)
+                    existing_fs = True
+                    break
+            if not existing_fs:
+                fs_dict['openflow'].append(openflow_dict) 
+                gfs_list.append(fs_dict)
+        
         return gfs_list
 
     try:

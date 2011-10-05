@@ -436,7 +436,7 @@ def home(request, slice_id):
             gfs_list=[]
             #XXX TODO LEODEBUG : Fallara con mas de un aggregate
             for of_agg in of_aggs:
-                gfs = of_agg.as_leaf_class().get_granted_flowspace('192.168.254.193_'+str(slice.id),Project.objects.get(id = slice.project_id).name)
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice),Project.objects.get(id = slice.project_id).name)
                 gfs_list.append([of_agg.id,gfs])
         except Exception as e:
             print e

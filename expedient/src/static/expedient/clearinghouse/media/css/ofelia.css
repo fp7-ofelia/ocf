@@ -682,14 +682,17 @@ table.servers tr.odd{
 
 
 table.flowspace{
-    width: 100%;
+    width: 90%;
     border-spacing: 0px;
     border-collapse: collapse;
     border: 1px solid #CCC;
+	margin-left:auto;
+    margin-right:auto;
 }
 
 table.flowspace td{
     padding : 2px;
+	border:2px solid #CCC;
 }
 
 table.flowspace th {
