@@ -680,6 +680,33 @@ table.servers tr.odd{
     background-color: #C0E7F3;
 }
 
+
+table.flowspace{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+}
+
+table.flowspace td{
+    padding : 2px;
+}
+
+table.flowspace th {
+    padding : 2px;
+    background-color: #8ED6EA;
+}
+
+
+table.flowspace tr.even{
+    background-color: #A6DEEE;
+}
+
+table.flowspace tr.odd{
+    background-color: #C0E7F3;
+}
+
+
 /*AM location*/
 
 #am_location{
