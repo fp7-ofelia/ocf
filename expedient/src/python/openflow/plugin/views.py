@@ -76,43 +76,44 @@ def aggregate_crud(request, agg_id=None):
             # Then save the aggregate and add the client
             aggregate = agg_form.save(commit=False)
             aggregate.client = client
-			#Originally these lines uncommented, a transacton.rollback() in the "if" and the agg_form.save_m2m() in the "else" deleted
-            #aggregate.save()
-            #agg_form.save_m2m()
+            aggregate.save()
+            agg_form.save_m2m()
             try:
-                err = aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
+                err = ' '
+                #flowvisor_msg = ''
+                aggregate.client.proxy.checkFlowVisor() 
+                aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
             except Exception as e:
                  err = str(e)
-            if err:
-                if agg_id:
-                    msg = "Problem setting up the updated aggregate. %s" % err
-                else:
-                    msg = "Problem setting up the new aggregate. %s" % err
-                DatedMessage.objects.post_message_to_user(
-                    msg, user=request.user, msg_type=DatedMessage.TYPE_ERROR,
-                )
-                print err
-                return HttpResponseRedirect("/")
-            else:
-                aggregate.save()
-                agg_form.save_m2m()
-                give_permission_to(
-                    "can_use_aggregate",
-                    aggregate,
-                    request.user,
-                    can_delegate=True
-                )
-                give_permission_to(
-                    "can_edit_aggregate",
-                    aggregate,
-                    request.user,
-                    can_delegate=True
-                )
-                DatedMessage.objects.post_message_to_user(
-                    "Successfully created/updated aggregate %s" % aggregate.name,
-                    user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
-                )
-                return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
+            #if err:
+            #    transaction.rollback()
+            #    if agg_id:
+            #        flowvisor_msg = "Topology could not be updated because could not connect to FlowVisor." 
+            #    else:
+            #        flowvisor_msg = "New Aggregate set, but there is no FlowVisor connected to it."
+#           #     DatedMessage.objects.post_message_to_user(
+#           #         msg, user=request.user, msg_type=DatedMessage.TYPE_WARNING,
+#           #     )
+            #    print err
+            #    #return HttpResponseRedirect("/")
+            aggregate.save()
+            give_permission_to(
+                "can_use_aggregate",
+                aggregate,
+                request.user,
+                can_delegate=True
+            )
+            give_permission_to(
+                "can_edit_aggregate",
+                aggregate,
+                request.user,
+                can_delegate=True
+            )
+            DatedMessage.objects.post_message_to_user(
+                "Successfully created/updated aggregate %s. %s" % (aggregate.name,err),
+                user=request.user, msg_type=DatedMessage.TYPE_SUCCESS,
+            )
+            return HttpResponseRedirect(reverse("openflow_aggregate_add_links", args=[aggregate.id]))
         logger.debug("Validation failed")
     else:
         return HttpResponseNotAllowed("GET", "POST")

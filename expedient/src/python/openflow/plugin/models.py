@@ -84,32 +84,35 @@ production networks, and is currently deployed in several universities.
         # TODO: re-enable this for security. Currently disabled for testing.
 #        err = self.client.change_password()
 #        if err: return err
-        if base_uri.endswith("/"): base_uri = base_uri[:-1]
-        try:
-            logger.debug("Registering topology callback at %s%s" % (
-                base_uri, reverse("openflow_open_xmlrpc")))
-            err = self.client.proxy.register_topology_callback(
-                "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
-                "%s" % self.pk,
-            )
-            if err: return err
-        except Exception as ret_exception:
-            import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
-            traceback.print_exc()
-            return str(ret_exception)
 
-        # schedule a job to automatically update resources
-        try:
-            Job.objects.schedule(
-                settings.OPENFLOW_TOPOLOGY_UPDATE_PERIOD,
-                self.update_topology,
-            )
-        except JobAlreadyScheduled:
-            pass
-
-        err = self.update_topology()
-        if err: return err
+#Leonardo: Disabling topology callback registration
+#        if base_uri.endswith("/"): base_uri = base_uri[:-1]
+#        try:
+#            logger.debug("Registering topology callback at %s%s" % (
+#                base_uri, reverse("openflow_open_xmlrpc")))
+#            err = self.client.proxy.register_topology_callback(
+#                "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
+#                "%s" % self.pk,
+#            )
+#            if err: 
+#                return err
+#        except Exception as ret_exception:
+#            import traceback
+#            logger.info("XML RPC call failed to aggregate %s" % self.name)
+#            traceback.print_exc()
+#            return str(ret_exception)
+#
+#        # schedule a job to automatically update resources
+#        try:
+#            Job.objects.schedule(
+#                settings.OPENFLOW_TOPOLOGY_UPDATE_PERIOD,
+#                self.update_topology,
+#            )
+#        except JobAlreadyScheduled:
+#            pass
+#
+#        err = self.update_topology()
+#        if err: return err
         
     def get_raw_topology(self):
         '''

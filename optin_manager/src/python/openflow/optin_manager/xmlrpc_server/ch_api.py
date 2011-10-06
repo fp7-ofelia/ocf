@@ -58,6 +58,19 @@ def check_user(func, *args, **kwargs):
 
 def _same(val):
         return "%s" % val
+
+@check_user
+@rpcmethod()
+def checkFlowVisor( *arg, **kwargs):
+    fv = FVServerProxy.objects.all()
+    if len(fv) == 0:
+        raise Exception("No flowvisor has been set. Please set Flowvisor\
+URL first and then try again")
+    elif (len(fv) > 1):
+        Exception("More than one flowvisor is set in database. Make\
+sure you just have one flowvisor")
+    return "" 
+
     
 class om_ch_translate(object):
     attr_funcs = {
