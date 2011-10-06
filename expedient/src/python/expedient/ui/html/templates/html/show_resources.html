@@ -316,14 +316,13 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 				</table>
     {% endfor %}  <!-- for fs in allfs -->
 	<!-- SPACE TO TEST GRANTED FLOWSPACE -->
-	 <div style="padding-top:20px;">	
-	<table class="servers" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}</th></tr>
-    </table>
-
 
 	{% for gfs in gfs_list %}<!--aggregate level-->
-		{% if gfs.0 == agg.id %}
+		{% if gfs.0 == agg.id  and gfs.1 %}
+	    <div style="padding-top:20px;">
+    <table class="servers" style="border-bottom:0px">
+    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}</th></tr>
+    </table>
 		{% for f in gfs.1 %}<!-- flowspace level-->
             <table class="flowspace">
                 <tr class="odd">
