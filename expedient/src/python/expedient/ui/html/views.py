@@ -432,15 +432,10 @@ def home(request, slice_id):
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
       
-        try: 
-            gfs_list=[]
-            #XXX TODO LEODEBUG : Fallara con mas de un aggregate
-            for of_agg in of_aggs:
-                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice),Project.objects.get(id = slice.project_id).name)
-                gfs_list.append([of_agg.id,gfs])
-        except Exception as e:
-            print e
-#        vm = VM.objects.filter(sliceId=slice.uuid)        
+        gfs_list=[]
+        for of_agg in of_aggs:
+            gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+            gfs_list.append([of_agg.id,gfs])
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)

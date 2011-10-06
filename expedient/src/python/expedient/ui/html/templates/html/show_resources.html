@@ -318,7 +318,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 	<!-- SPACE TO TEST GRANTED FLOWSPACE -->
 	 <div style="padding-top:20px;">	
 	<table class="servers" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}</th></tr>
+    <tr><th style="background-color:#FFCC00;">Granted Flowspace{%if allfs|length > 1%}s{%endif%}</th></tr>
     </table>
 
 
@@ -326,13 +326,13 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 		{% if gfs.0 == agg.id %}
 		{% for f in gfs.1 %}<!-- flowspace level-->
             <table class="flowspace">
-                <tr class="odd">
+                <tr class="odd_g">
                 <td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associaed OpenFlow Interfaces</strong></td>
                 </tr>
 	
 			{% with f.flowspace as fs%}	
 			{% with f.openflow as of_list%}	
-    		    <tr class = "even">
+    		    <tr class = "even_g">
     		       <td>
 						{%if  not fs.mac_src_s == "00:00:00:00:00:00" or not fs.mac_src_e == "ff:ff:ff:ff:ff:ff" %}
     		            MAC Source: {{ fs.mac_src_s }} {% if not fs.mac_src_s == fs.mac_src_e %}- {{ fs.mac_src_e }}{%endif%}<br />

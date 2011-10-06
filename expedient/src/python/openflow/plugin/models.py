@@ -161,10 +161,10 @@ production networks, and is currently deployed in several universities.
 #    def parse_fs(self, fs):
 
 
-    def get_granted_flowspace(self, slice_id, project_name):
+    def get_granted_flowspace(self, slice_id):
         
         try:
-            gfs = self.client.proxy.get_granted_flowspace(slice_id, project_name)
+            gfs = self.client.proxy.get_granted_flowspace(slice_id)
         except:
             import traceback
             traceback.print_exc()

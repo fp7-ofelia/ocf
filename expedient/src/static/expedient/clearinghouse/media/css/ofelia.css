@@ -692,25 +692,31 @@ table.flowspace{
 
 table.flowspace td{
     padding : 2px;
-	border:2px solid #CCC;
+	border:1px solid #CCC;
 }
 
-table.flowspace th {
+table.flowspace th{
     padding : 2px;
-    background-color: #8ED6EA;
-}
-
-
-table.flowspace tr.even{
-    background-color: #A6DEEE;
+    background-color: #FFCC00;
 }
 
 table.flowspace tr.odd{
+    background-color: #A6DEEE;
+}
+
+table.flowspace tr.even{
     background-color: #C0E7F3;
 }
 
+table.flowspace tr.even_g{ 
+    background-color: #FFCC66;
+}
 
-/*AM location*/
+table.flowspace tr.odd_g{
+    background-color: #FFCC33;
+}
+
+/M location*/
 
 #am_location{
     color: #999999;

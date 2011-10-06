@@ -506,10 +506,10 @@ def ping(data, **kwargs):
     return "PONG: %s" % data
 
 
-#@check_user
-#@check_fv_set
+@check_user
+@check_fv_set
 @rpcmethod()
-def get_granted_flowspace(slice_id, project_name):
+def get_granted_flowspace(slice_id, **kwargs):
     '''
     Return FlowVisor Rules for the slice.
     '''
@@ -562,7 +562,8 @@ def get_granted_flowspace(slice_id, project_name):
         return gfs_list
 
     try:
-        opts = Experiment.objects.filter(slice_id = slice_id, project_name= project_name)[0].useropts_set.all()
+        #TODO: Check 100% that only with slice_id (domain+slice.id) is enough not to crash with some other clearinghouse connected to the optin
+        opts = Experiment.objects.filter(slice_id = slice_id)[0].useropts_set.all()
         if opts:
             gfs = opts[0].optsflowspace_set.all()
             gfs = parse_granted_flowspaces(gfs)
