@@ -104,6 +104,13 @@
             relative: true,
             offset: [0,110]
         });
+		$("img#gr_fs_help").tooltip({
+            tip: "div#gr_fs_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
     });
 </script>
 
@@ -321,8 +328,12 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 		{% if gfs.0 == agg.id  and gfs.1 %}
 	    <div style="padding-top:20px;">
     <table class="servers" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}</th></tr>
+    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}  <img align="absmiddle" id="gr_fs_help" src="/static/media/img/question_mark_15x15.png"></th></tr>
     </table>
+		<div class="tooltip" id="gr_fs_help">
+    	This is the FlowSpace that has been granted to the slice and will be used in the experiment. It may be different from the requested one.
+	    </div>
+
 		{% for f in gfs.1 %}<!-- flowspace level-->
             <table class="flowspace">
                 <tr class="odd">
