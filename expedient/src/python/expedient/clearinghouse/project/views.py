@@ -342,7 +342,7 @@ def add_member(request, proj_id):
             roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
             try:
                 send_mail(
-                         "Project %s membership notification" % (project.name),
+                         settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),
                          "You have been added to Project %s as a %s user. You can now start experimenting by going to https://%s\n\n" % (project.name, roles, settings.SITE_DOMAIN),
                          from_email=settings.DEFAULT_FROM_EMAIL,
                          recipient_list=[user.email],

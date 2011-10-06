@@ -680,7 +680,62 @@ table.servers tr.odd{
     background-color: #C0E7F3;
 }
 
-/*AM location*/
+
+table.flowspace{
+    width: 90%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #CCC;
+	margin-left:auto;
+    margin-right:auto;
+}
+
+table.flowspace td{
+    padding : 2px;
+	border:1px solid #CCC;
+}
+
+table.flowspace th{
+    padding : 2px;
+    background-color: #FFCC00;
+}
+
+table.flowspace tr.odd{
+    background-color: #A6DEEE;
+}
+
+table.flowspace tr.even{
+    background-color: #C0E7F3;
+}
+
+table.flowspace_r{
+    width: 90%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 1px solid #C00;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+table.flowspace_r td{
+    padding : 2px;
+    border:1px solid #C00;
+}
+
+table.flowspace_r th{
+    padding : 2px;
+    background-color: #FFCC00;
+}
+
+table.flowspace_r tr.odd{ 
+    background-color: #EF2626;
+}
+
+table.flowspace_r tr.even{
+    background-color: #FF6060;
+}
+
+/M location*/
 
 #am_location{
     color: #999999;

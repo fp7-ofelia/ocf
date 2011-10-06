@@ -9,6 +9,8 @@ from django.views.generic import simple
 from openflow.optin_manager.opts.helper import opt_fs_into_exp,opt_fses_outof_exp,\
 update_match_struct_priority_and_get_fv_args, read_fs
 from django.db import transaction
+from django.core.mail import send_mail
+from django.conf import settings
     
 def change_priority(request):
     '''
@@ -159,6 +161,11 @@ def add_opt_in(request):
                     adminFS = AdminFlowSpace.objects.filter(user = request.user)
                     
                     intersected_flowspace = multi_fs_intersect([requested_opt],adminFS,FlowSpace)
+                    print "LEODEBUG FLOWSPACE"
+                    for fs in intersected_flowspace:
+                        print "\n\nFLOWSPACE"
+                        print fs.stringify()
+                        print fs.__unicode__()
                     if len(intersected_flowspace) == 0:
                         error_msg.append("Selected flowspace doesn't have any intersection with admin FS")
                 if len(error_msg)==0:
@@ -172,6 +179,27 @@ def add_opt_in(request):
                                 for i in range(len(match_list)):
                                     match_list[i].fv_id = returned_ids[i]
                                     match_list[i].save()
+                            try:
+                                allopts = UserOpts.objects.filter(user = request.user).order_by('-priority')
+                                for opt in allopts:
+                                    this_opt_fses = opt.optsflowspace_set.all()
+                                    fs_description = ""
+                                    for fs in this_opt_fses:
+                                        if fs_description != "":
+                                            fs_description = fs_description + " & %s"%fs
+                                        else:
+                                            fs_description = "%s"%fs
+                                send_mail(
+                                         settings.EMAIL_SUBJECT_PREFIX + "Your Flowspace request has been attended",
+                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (settings.SITE_DOMAIN,fs_description),
+                                         from_email=settings.DEFAULT_FROM_EMAIL,
+                                         recipient_list= [selexp.owner_email],
+                                         #recipient_list=[settings.ROOT_EMAIL],
+                                 )
+                            except Exception as e:
+                                print "User email notification could no be sent"
+                                print e
+
                             return simple.direct_to_template(request, 
                                 template ="openflow/optin_manager/opts/opt_in_successful_admin.html",
                                 extra_context = {
