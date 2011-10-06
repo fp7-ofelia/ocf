@@ -174,6 +174,7 @@ def create(request):
 	#Generate UUID: fixes caching problem on model default value
 	instance.uuid = uuid.uuid4()
 	instance.save()
+        instance.sync_netgroup_ldap()
         create_project_roles(instance, request.user)
         
     def redirect(instance):
