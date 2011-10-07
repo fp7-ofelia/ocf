@@ -5,21 +5,13 @@ SRC_DIR = '/opt/ofelia/expedient/src'
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
+ISLAND_NAME   = "i2cat"
 
 ADMINS = [
     ("i2cat OFELIA Admin", ROOT_EMAIL),
 ]
 
 MANAGERS = ADMINS
-
-#EMAIL SETTINGS ARE NOT STRICTLY NECESSARY IN THIS VERSION
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'i2catopenflow@gmail.com'
-EMAIL_HOST_PASSWORD = 'expedient'
-EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = 'no-reply@geni.org'
-EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
 
 SITE_DOMAIN = "192.168.254.193"
 
@@ -32,3 +24,10 @@ DATABASE_NAME = "changeMe"
 
 #TO BE MODIFIED ONLY IN DEVELOPMENT ENVIORNMENTS
 LDAP_STORE_PROJECTS = True
+ALLOW_LOCAL_REGISTRATION=False
+AUTH_LDAP_BIND_PASSWORD = "changeme"
+AUTH_LDAP_BIND_DN = "cn=changeme,dc=fp7-ofelia,dc=eu"
+
+#In days
+SLICE_DEFAULT_EXPIRATION_TIME = 7
+

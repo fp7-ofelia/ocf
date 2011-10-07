@@ -17,15 +17,15 @@ from expedient.clearinghouse.resources.models import Resource
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
-                        ('test','Test'),
+                        #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('file-image','File Image'),
-                        ('logical-volume-image','Logical Volume'),
+                        #('logical-volume-image','Logical Volume'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),
-                        ('hvm','HVM'),
+                        #('hvm','HVM'),
                       )
 
 

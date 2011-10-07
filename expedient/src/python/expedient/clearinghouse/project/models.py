@@ -106,7 +106,7 @@ class Project(models.Model):
 	            edit_perm="can_edit_project",
         	    delete_perm="can_delete_project",
 	)
-	if settings.LDAP_STORE_PROJECTS:
+	if settings.LDAP_STORE_PROJECTS and self.uuid:
 		self.sync_netgroup_ldap()
         super(Project, self).save(*args, **kwargs)
 

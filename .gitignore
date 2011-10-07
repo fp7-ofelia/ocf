@@ -36,6 +36,7 @@ secret_key.py
 *.0
 *.launch
 gcf-x509.*/
+expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/*
 *.db
 build/
 localsettings.py

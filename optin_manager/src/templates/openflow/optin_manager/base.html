@@ -19,9 +19,17 @@
             <tr>
 		<td align="left">
                     <img src="{% url img_media 'logo_optin.png' %}" />
+					<div>Software Version <strong>{{softwareVersion}}</strong></div>
 		</td>
 		<td>
                     <div align="right" style="position: relative; top: 19px;">
+					<div class="small" align="right" style="position: relative; top: 12px;margin-top:52px;">
+                        {% if request.user.username %}
+                        logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong> island
+                        {% else %}
+                        you are in <strong>{{islandName}} </strong> island
+                        {% endif %}
+                    </div>
 
                     </div>
 		</td>

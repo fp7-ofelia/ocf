@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import signals
+from django.core.mail import send_mail
+from django.conf import settings
 
 class DatedMessageManager(models.Manager):
     '''
@@ -84,7 +86,9 @@ class DatedMessage(models.Model):
     TYPE_ANNOUNCE = 'announcement'
     TYPE_INFO = 'info'
     TYPE_U2U = 'user2user'
-    
+   
+    MSG_TYPE_NOCHOICE={TYPE_U2U: 'From User',}
+ 
     MSG_TYPE_CHOICES={TYPE_ERROR: 'Error',
                       TYPE_SUCCESS: 'Success',
                       TYPE_WARNING: 'Warning',
@@ -100,7 +104,7 @@ class DatedMessage(models.Model):
                                    verbose_name="Recipients")
     msg_text = models.CharField("Message", max_length=200)
     sender = models.ForeignKey(User, related_name="sent_messages",
-                               editable=False, null=True, blank=True)
+                               null=True, blank=True)
     
     def format_date(self):
         return self.datetime.strftime("%Y-%m-%d")

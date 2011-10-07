@@ -54,19 +54,19 @@ img#perm_help {
    -->
 
 	{% if messages %}
-	<h2>Messages (Logs)</h2>
+	<h2>Messages & Logs</h2>
 	<br>
 	<div>
 		<div class="messages">
 			<table class="msg_table">
 				{% for msg in messages %}
 				<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
-					<td>{{ msg.msg_text }}</td>
+					<td> {%if msg.get_type_display == 'From User'%}From user<strong> {{msg.sender}}: </strong> {%endif%} {{ msg.msg_text }}</td>
 				</tr>
 				{% endfor %}
 				<tr>
 			</table>
-			<div class="messages_more"><a href="{% url messaging_center %}">Show more...</a></div>
+			<div class="messages_more"><a href="{% url messaging_center %}">Go to Message Center (See more...)</a></div>
 		</div>
 	</div>
 	{% endif %}

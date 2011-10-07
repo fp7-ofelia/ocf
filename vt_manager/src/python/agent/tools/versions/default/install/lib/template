@@ -23,12 +23,12 @@ print "VM template installation..."
 
 	#Mkdir
 	mkdir -p $OXA_DIRECTORY/cache/templates/default
-
-    echo "Attempting to download HASH file of the template..."  
-    /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
-
-    local HASH=`cat $OXA_DIRECTORY/cache/templates/default/default.hash > /dev/null 2>&1 `
-    local NEWHASH=`cat $OXA_DIRECTORY/cache/templates/default/.default.hash > /dev/null 2>&1`
+	
+	echo "Attempting to download HASH file of the template..."	
+	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+	
+	local HASH=`cat $OXA_DIRECTORY/cache/templates/default/default.hash > /dev/null 2>&1 `
+	local NEWHASH=`cat $OXA_DIRECTORY/cache/templates/default/.default.hash > /dev/null 2>&1`
 
 	if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz -o "$NEWHASH"  != "$HASH" ];then
 		downloadTemplate	

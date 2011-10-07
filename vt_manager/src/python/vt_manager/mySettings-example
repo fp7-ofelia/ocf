@@ -10,6 +10,7 @@ ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "i2catopenflow@gmail.com"
 VTAM_IP      = "147.83.206.92"
 VTAM_PORT      = "8445"
+ISLAND_NAME   = "i2cat"
 
 '''Database parameters'''
 DATABASE_NAME = "vtm"

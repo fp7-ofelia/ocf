@@ -38,7 +38,7 @@
 	        {% for a in latest %}
 	        <tr>
 	            <td class="select_checkbox"><input type="checkbox" name="selected" value="{{ a.id }}" /></td>
-	            <td class="type {{ a.type }}">{{ a.get_type_display }}</td>
+	            <td class="type {{ a.type }}">{{ a.get_type_display }} {%if a.get_type_display == 'From User'%}<strong>{{a.sender}}</strong> {%endif%}</td>
 	            <td class="date">{{ a.format_date }}</td>
 	            <td class="time">{{ a.format_time }}</td>
 	            <td class="msg_text">{{ a.msg_text }}</td>
@@ -46,7 +46,7 @@
 	        {% endfor %}
 	    </table>
 	    <div class="iframe_button" id="latest_msg_buttons">
-	        <input type="button" onclick="gotocreate();" value="Create" />
+	        <input type="button" onclick="gotocreate();" value="Send Message" />
 	        <input type="button" onclick="gotoall();" value="Show All" />
 	        <input type="button" onclick="refresh();" value="Refresh" />
 	        <input type="submit" value="Delete Selected" />

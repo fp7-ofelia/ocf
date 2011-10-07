@@ -42,7 +42,7 @@ function get_node_info_formated(d){
 			if(d.nodeConnections.length>0){
 				connectionsString = "<b>Connections:</b><br>";
 				for (i=0;i<d.nodeConnections.length;i++){
-					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['src_port']+"<br>";
+					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['target_port']+"<br>";
 				}
 			}
 			else{

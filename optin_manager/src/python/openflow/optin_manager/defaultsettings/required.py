@@ -5,7 +5,7 @@ Created on Sep 2, 2010
 '''
 REQUIRED_SETTINGS = [
     ("admins", ["ADMINS", "MANAGERS"]),
-    ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
+#    ("email", ["EMAIL_HOST", "DEFAULT_FROM_EMAIL"]),
     ("site", ["SITE_DOMAIN"]),
 #    ("openflowtests", ["SITE_IP_ADDR", "MININET_VMS"]),
 ]

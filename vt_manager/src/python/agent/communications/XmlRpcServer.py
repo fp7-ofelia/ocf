@@ -103,6 +103,6 @@ class XmlRpcServer():
 	    server = ServerClass(server_address, HandlerClass)    
 	    server.register_instance(xmlrpc_wrappers())    
 	    sa = server.socket.getsockname()
-	    print "Serving HTTPS on", sa[0], "port", sa[1]
+	    #print "Serving HTTPS on", sa[0], "port", sa[1]
 	    server.serve_forever()
 

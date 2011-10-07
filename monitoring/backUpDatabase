@@ -1,0 +1,33 @@
+#!/bin/bash
+
+###
+#   @author: lbergesio 
+#   @organization: i2CAT
+#   @project: Ofelia FP7
+#   @description: backup module
+###
+
+#Import email util
+source sendEmailUtil
+
+#Email presets
+EMAIL_SUBJECT="[OFELIA CF] Server Monitor Report"
+EMAIL_MESSAGE="The Server Monitoring Utilty could not backup some of the databases. Here is the report: \n\n"
+
+
+BACKUP_DIR=/opt/ofelia/monitoring/databaseBackupTemp/
+SETTINGS_PATHS="expedient.clearinghouse.settings vt_manager.settings.settingsLoader openflow.optin_manager.settings"
+
+for SETTINGS in $SETTINGS_PATHS
+do
+        FILE=`echo $SETTINGS | awk -F. '{print $1}'`
+	if [ "$FILE" == "openflow" ]; then
+		FILE=optin_manager
+	fi
+	PYTHON_PATH=/opt/ofelia/$FILE/src/pythonn
+	REPORT=`python sqlDump.py $BACKUP_DIR/$FILE $SETTINGS $PYTHON_PATH 2>&1` || echo "Could not dump data from $FILE database!"
+	if [[ $? == 0 ]]; then
+		echo "SENDING MAIL"
+		sendEmail $EMAIL_SUBJECT "$EMAIL_MESSAGE $REPORT"
+	fi
+done

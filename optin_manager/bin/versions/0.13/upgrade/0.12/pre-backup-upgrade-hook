@@ -1,0 +1,37 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/optin_manager/
+EMAIL_PATTERNS="EMAIL_ DEFAULT_EMAIL"
+
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/openflow/optin_manager/ || error "Target directory does not exit anymore?¿"
+
+#Adding/Moving new variables to localsettings.py
+printHeader ">" "Adding new settings to mySettings.py ..."
+echo "Set Island name please, it will appear in the header of all the web pages of the Clearinghouse app: "
+read ISLAND_NAME
+echo "ISLAND_NAME = \"i$ISLAND_NAME\"" >> localsettings.py || error "Could not add ISLAND_NAME variable to localsettings.py ..."
+echo -e "\n\nYou can change the new settings by editing localsettings.py file"
+
+for pattern in $EMAIL_PATTERNS
+do
+    sed -i "/$pattern/d" localsettings.py || error "Could not delete EMAIL settings from localsettings.py ..."
+done
+
+
+#Restarting apache
+print "Restarting apache2..."
+/usr/sbin/service apache2 restart
+

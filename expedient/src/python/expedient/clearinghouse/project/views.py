@@ -24,7 +24,11 @@ from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 import uuid   
- 
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.models import User
+
+
 logger = logging.getLogger("project.views")
 
 TEMPLATE_PATH = "project"
@@ -170,6 +174,7 @@ def create(request):
 	#Generate UUID: fixes caching problem on model default value
 	instance.uuid = uuid.uuid4()
 	instance.save()
+        instance.sync_netgroup_ldap()
         create_project_roles(instance, request.user)
         
     def redirect(instance):
@@ -331,8 +336,23 @@ def add_member(request, proj_id):
         form = AddMemberForm(project=project, giver=request.user, data=request.POST)
         if form.is_valid():
             form.save()
-	    #Sync LDAP
-	    project.save()
+            #Sync LDAP
+            project.save()
+			#Send mail notification to the user
+            user = User.objects.get(id = request.POST['user'] )
+            roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
+            try:
+                send_mail(
+                         settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),
+                         "You have been added to Project %s as a %s user. You can now start experimenting by going to https://%s\n\n" % (project.name, roles, settings.SITE_DOMAIN),
+                         from_email=settings.DEFAULT_FROM_EMAIL,
+                         recipient_list=[user.email],
+                         #recipient_list=[settings.ROOT_EMAIL],
+                 )
+
+            except Exception as e:
+                print "User email notification could no be sent"
+            
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 
     else:
