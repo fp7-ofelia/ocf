@@ -22,6 +22,7 @@ cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anym
 printHeader ">" "Adding new settings to mySettings.py ..."
 echo "Set Island name please, it will appear in the header of all the web pages of the VT Manager app: "
 read ISLAND_NAME
+sed -i "/ISLAND_NAME/d" mySettngs.py || error "Could not delete old ISLAND_NAME setting from mySettngs.py ..."
 echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> mySettings.py || error "Could not add ISLAND_NAME variable to mySettngs.py ..."
 echo -e "\n\nYou can change the new settings by editing mySettings.py file"
 
