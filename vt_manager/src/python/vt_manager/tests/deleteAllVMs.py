@@ -15,8 +15,11 @@ sys.path.insert(0,PYTHON_DIR)
 from vt_manager.models.VTServer import VTServer
 from vt_manager.models.VirtualMachine import VirtualMachine
 
-server =VTServer.objects.get().getChildObject()
 
-for vm in server.vms.all():
-	server.deleteVM(vm)
+servers = VTServer.objects.all()
+
+for gen_server in servers:
+        server = gen_server.getChildObject()
+        for vm in server.vms.all():
+                server.deleteVM(vm)
 
