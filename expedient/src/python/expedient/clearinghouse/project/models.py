@@ -111,6 +111,11 @@ class Project(models.Model):
         super(Project, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+
+        from vt_plugin.models.VM import VM
+        if VM.objects.filter(projectId__in = self.uuid):
+            raise Exception("Project still have VMs")
+
         permissions_delete_override(
             permittee_kw="user",
             model_func=lambda: Project,
@@ -118,6 +123,7 @@ class Project(models.Model):
         )
         if settings.LDAP_STORE_PROJECTS:
             self.delete_netgroup_ldap()
+
         super(Project, self).delete(*args, **kwargs)
 
     def _get_aggregates(self):

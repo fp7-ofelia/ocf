@@ -76,6 +76,13 @@ def delete(request, proj_id):
     '''Delete the project'''
     project = get_object_or_404(Project, id=proj_id)
     if request.method == "POST":
+        from vt_plugin.models.VM import VM
+        if VM.objects.filter(projectId__in = project.uuid):
+            DatedMessage.objects.post_message_to_user(
+            "Please before deleting the project, delete all the VMs in its slices",
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+            return HttpResponseRedirect(reverse("home"))
+
         try:
             for s in project.slice_set.all():
                 s.stop(request.user)
@@ -84,8 +91,6 @@ def delete(request, proj_id):
                 "Successfully deleted project %s" % project.name,
                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         except Exception as e:
-            print "LEODEBUG ERROR EN EL VIEW"
-            print e
             DatedMessage.objects.post_message_to_user(
             "Problems ocurred while trying to delete project %s: %s" % (project.name,str(e)),
             request.user, msg_type=DatedMessage.TYPE_ERROR)
