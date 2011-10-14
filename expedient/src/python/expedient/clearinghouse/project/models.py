@@ -113,7 +113,7 @@ class Project(models.Model):
     def delete(self, *args, **kwargs):
 
         from vt_plugin.models.VM import VM
-        if VM.objects.filter(projectId__in = self.uuid):
+        if VM.objects.filter(projectId = self.uuid):
             raise Exception("Project still have VMs")
 
         permissions_delete_override(

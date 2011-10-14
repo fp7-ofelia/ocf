@@ -76,13 +76,6 @@ def delete(request, proj_id):
     '''Delete the project'''
     project = get_object_or_404(Project, id=proj_id)
     if request.method == "POST":
-        from vt_plugin.models.VM import VM
-        if VM.objects.filter(projectId__in = project.uuid):
-            DatedMessage.objects.post_message_to_user(
-            "Please before deleting the project, delete all the VMs in its slices",
-            request.user, msg_type=DatedMessage.TYPE_ERROR)
-            return HttpResponseRedirect(reverse("home"))
-
         try:
             for s in project.slice_set.all():
                 s.stop(request.user)
@@ -96,6 +89,13 @@ def delete(request, proj_id):
             request.user, msg_type=DatedMessage.TYPE_ERROR)
         return HttpResponseRedirect(reverse("home"))
     else:
+        from vt_plugin.models.VM import VM
+        if VM.objects.filter(projectId = project.uuid):
+            DatedMessage.objects.post_message_to_user(
+            "Please before deleting the project %s, delete all the VMs in its slices" % project.name,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+            return detail(request, proj_id) 
+            #return HttpResponseRedirect(reverse("home"))
         return simple.direct_to_template(
             request,
             template=TEMPLATE_PATH+"/confirm_delete.html",
