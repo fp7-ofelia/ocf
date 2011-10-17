@@ -18,7 +18,7 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.utils.HttpUtils import HttpUtils
 from vt_manager.models.NetworkInterface import NetworkInterface
 from vt_manager.models.MacRange import MacRange
-from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm
+from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm, NetworkInterfaceForm
 from vt_manager.controller.dispatchers.forms.ServerForm import ServerForm
 from django.db import transaction
 
@@ -79,8 +79,9 @@ def servers_crud(request, server_id=None):
 			
 			data = server.getNetworkInterfaces().filter(isMgmt = False)
 			if data:
-				IfaceFormSetClass = modelformset_factory(NetworkInterface,extra = 0)
+				IfaceFormSetClass = modelformset_factory(NetworkInterface, form = NetworkInterfaceForm, extra = 0)
 			ifaceformset = IfaceFormSetClass(queryset= data)
+
 
 		else:
 			mgmtIfaceForm = MgmtBridgeForm(prefix ="mgmtBridge")

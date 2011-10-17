@@ -216,6 +216,10 @@ table.formtable tbody td ,tbody th {
 	color: #000;
 	font-weight:normal;
 }
+	
+table.formtable td.switchID input, table.formtable td.port input{
+	background: #CCC;
+}
 table.formtable tbody th {
 	font-weight:bold;
 }

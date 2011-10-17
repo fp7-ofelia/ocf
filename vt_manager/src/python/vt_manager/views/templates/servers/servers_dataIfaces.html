@@ -33,7 +33,7 @@
                                 <th class="fielderror"> {{ field.label_tag }}:</th><td class="fielderror"> {{ field }}</td>
                             {% else %}
                             {% if field.name != 'id' %}
-                                <th> {{ field.label_tag }}:</th><td> {{ field }}</td>
+                                <th> {{ field.label_tag }}:</th><td class={% if form.initial  %}{{field.name}}{%endif%}> {{ field }}</td>
                             {%endif%}
                             {%endif%}
                         {% endfor %}

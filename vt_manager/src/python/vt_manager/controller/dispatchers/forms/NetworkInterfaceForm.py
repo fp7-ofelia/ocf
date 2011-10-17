@@ -6,13 +6,20 @@ class NetworkInterfaceForm(forms.ModelForm):
     '''
     A form for editing NetorkInterfaces
     '''
+
+    def __init__(self, *args, **kwargs):
+        super(NetworkInterfaceForm, self).__init__(*args, **kwargs)           
+        instance = getattr(self, 'instance', None)
+        if instance and instance.id:
+            self.fields['switchID'].widget.attrs['readonly'] = True
+            self.fields['port'].widget.attrs['readonly'] = True
+
     class Meta:
         model = NetworkInterface
         exclude = ('isMgmt', 'isBridge', 'mac',
                    'ip4s', 'connectedTo')
 
 	mac = forms.CharField(max_length = 17, validators=[EthernetUtils.checkValidMac])
-
 
 class MgmtBridgeForm(forms.Form):
 
