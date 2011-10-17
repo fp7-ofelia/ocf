@@ -86,6 +86,12 @@ def delete(request, slice_id):
             reverse('project_detail', args=[project.id]))
 
     else:
+        from vt_plugin.models.VM import VM
+        if VM.objects.filter(sliceId = slice.uuid):
+            DatedMessage.objects.post_message_to_user(
+            "Please before deleting the slice %s, delete all the VMs in it" % slice.name,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+            return detail(request, slice_id)
         return simple.direct_to_template(
             request,
             template=TEMPLATE_PATH+"/confirm_delete.html",
