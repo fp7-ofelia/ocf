@@ -93,6 +93,8 @@ GCF_URN_PREFIX = "expedient:your_afiliation"
 
 #OFREG URL
 OFREG_URL = "https://fuzzy.eict.fp7-ofelia.eu"
+OFREG_RESET_PATH = '/password_reset/forgotten'
+
 
 OPENFLOW_GAPI_RSC_URN_PREFIX = "urn:publicid:IDN+expedient:your_affiliation:openflow"
 OPENFLOW_GAPI_AM_URN = OPENFLOW_GAPI_RSC_URN_PREFIX+"+am"

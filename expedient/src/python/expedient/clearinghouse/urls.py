@@ -30,6 +30,12 @@ urlpatterns = patterns('',
 
 )
 
+# Password reset url
+urlpatterns += patterns('',
+    url(r'^accounts/password/reset/$',
+        'expedient.clearinghouse.users.views.my_password_reset',
+        name='my_password_reset'),
+    )
 #Registration urls depending on ALLOW_LOCAL_REGISTRATION flag
 if settings.ALLOW_LOCAL_REGISTRATION == True:
     urlpatterns += patterns('',
@@ -43,9 +49,6 @@ if settings.ALLOW_LOCAL_REGISTRATION == True:
         direct_to_template,
         {'template': 'registration/registration_complete.html'},
         name='registration_complete'),
-    url(r'^accounts/password/reset/$',
-        'expedient.clearinghouse.users.views.my_password_reset',
-        name='my_password_reset'),
     url(r'^accounts/', include('registration.urls')),
     )
 else:

@@ -181,7 +181,7 @@ def my_password_reset(request):
     else:
         email = request.POST['email']
         user = User.objects.filter(email = email)
-        if len(user) == 1 and user.password == '!':
-             httpRedirect(settings.OFREG_URL)
+        if len(user) == 1 and user[0].password == '!':
+             return HttpResponseRedirect(settings.OFREG_URL+settings.OFREG_RESET_PATH)
         else:
             return password_reset(request)
