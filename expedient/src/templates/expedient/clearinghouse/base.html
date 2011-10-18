@@ -71,7 +71,7 @@
 					{% endif %}
 					<div align="right" style="position: relative; top: 19px; right: -4px;">
  						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
-							href="{% url users_my_detail %}"><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
+							href={%if ldapUser %}"{{ ofregURL }}"{% else %}"{% url users_my_detail %}"{% endif %}><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
 							href="{% url help %}"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
 							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
 					</div>
