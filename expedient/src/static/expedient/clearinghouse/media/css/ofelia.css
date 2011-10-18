@@ -712,14 +712,14 @@ table.flowspace_r{
     width: 90%;
     border-spacing: 0px;
     border-collapse: collapse;
-/*    border: 1px solid #CCC;*/
+    border: 1px solid #CCC;
     margin-left:auto;
     margin-right:auto;
 }
 
 table.flowspace_r td{
     padding : 2px;
-    border:1px solid #C00;
+/*    border:1px solid #C00;*/
 }
 
 table.flowspace_r th{
