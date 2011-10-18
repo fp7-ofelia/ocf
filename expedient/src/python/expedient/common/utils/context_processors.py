@@ -1,8 +1,8 @@
 def contextSettingsInTemplate(request):
 	from django.conf import settings
 	from os.path import dirname, join
+	from django.core.urlresolvers import reverse
 
-	#vf = open('../../../../../.currentVersion','r')
 	vf = open(join(dirname(__file__), '../../../../../.currentVersion'),'r')
 	softwareVersion = vf.read()
 

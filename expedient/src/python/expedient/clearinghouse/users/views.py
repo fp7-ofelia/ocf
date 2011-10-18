@@ -17,6 +17,7 @@ from expedient.clearinghouse.users.forms import FullRegistrationForm
 from registration.models import RegistrationProfile
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.views import password_reset
 
 def home(request):
     '''show list of users and form for adding users'''
@@ -172,3 +173,15 @@ def activate(request, activation_key):
         },
     )
 
+def my_password_reset(request):
+    
+    if request.method == 'GET':
+        return password_reset(request)
+
+    else:
+        email = request.POST['email']
+        user = User.objects.filter(email = email)
+        if len(user) == 1 and user.password == '!':
+             httpRedirect(settings.OFREG_URL)
+        else:
+            return password_reset(request)
