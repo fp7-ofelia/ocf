@@ -18,6 +18,7 @@ from registration.models import RegistrationProfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.views import password_reset
+from expedient.clearinghouse.users.forms import LDAPPasswordResetForm
 
 def home(request):
     '''show list of users and form for adding users'''
@@ -180,8 +181,8 @@ def my_password_reset(request):
 
     else:
         email = request.POST['email']
-        user = User.objects.filter(email = email)
-        if len(user) == 1 and user[0].password == '!':
+        users = User.objects.filter(email = email)
+        if len(users) == 1 and users[0].password == '!':
              return HttpResponseRedirect(settings.OFREG_URL+settings.OFREG_RESET_PATH)
         else:
-            return password_reset(request)
+            return password_reset(request, password_reset_form=LDAPPasswordResetForm)

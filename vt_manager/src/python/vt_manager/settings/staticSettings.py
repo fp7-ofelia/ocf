@@ -120,7 +120,7 @@ urlparse.uses_fragment.append("test")
 SITE_ID = 1
 
 # default sitename
-SITE_NAME = 'VT Manager' #'Opt-In Manager'
+SITE_NAME = 'OFELIA CF VT Manager' #'Opt-In Manager'
 
 #Fully qualified name
 SITE_DOMAIN = 'expedient.site:8445'

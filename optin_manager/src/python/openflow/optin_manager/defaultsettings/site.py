@@ -9,7 +9,7 @@ SITE_ID = 1
 change this unless you know what you are doing.'''
 
 # default site
-SITE_NAME = 'Opt-In Manager'
+SITE_NAME = 'OFELIA CF Opt-In Manager'
 '''Name of the site.'''
 
 SITE_DOMAIN = 'expedient.site:8443'

@@ -9,7 +9,7 @@ SITE_ID = 1
 '''ID of the database model that represents the site running Expedient. Do not
 change this unless you know what you are doing.'''
 
-SITE_NAME = "Expedient Clearinghouse"
+SITE_NAME = "OFELIA CF Clearinghouse"
 '''Name of the site.'''
 
 SITE_DOMAIN = "clearinghouse.geni.org"
