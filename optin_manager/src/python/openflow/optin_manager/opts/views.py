@@ -191,7 +191,7 @@ def add_opt_in(request):
                                             fs_description = "%s"%fs
                                 send_mail(
                                          settings.EMAIL_SUBJECT_PREFIX + "Your Flowspace request has been attended",
-                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (settings.SITE_DOMAIN,fs_description),
+                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (settings.SITE_DOMAIN.split(':')[0],fs_description),
                                          from_email=settings.DEFAULT_FROM_EMAIL,
                                          recipient_list= [selexp.owner_email],
                                          #recipient_list=[settings.ROOT_EMAIL],
