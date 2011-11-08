@@ -71,8 +71,12 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 # THIS SHOULD BE ALWAYS THE MASTER, NEVER A SLAVE LDAP SERVER
 #LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
 LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
-LDAP_MASTER_DN="cn=admin,dc=fp7-ofelia,dc=eu"
-LDAP_MASTER_PWD="ailefo"
+# Use not versioned password
+#LDAP_MASTER_DN="cn=admin,dc=fp7-ofelia,dc=eu"
+#LDAP_MASTER_PWD="ailefo"
+LDAP_MASTER_DN=AUTH_LDAP_BIND_DN
+LDAP_MASTER_PWD=AUTH_LDAP_BIND_PASSWORD
+
 LDAP_MASTER_SSLDIR="%s/ldap.ssl" % CONF_DIR
 LDAP_MASTER_CA="%s/ca.crt" % LDAP_MASTER_SSLDIR
 LDAP_MASTER_CERT="%s/expedientldap.crt" % LDAP_MASTER_SSLDIR
