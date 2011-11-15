@@ -80,22 +80,20 @@ def aggregate_crud(request, agg_id=None):
             agg_form.save_m2m()
             try:
                 err = ' '
-                #flowvisor_msg = ''
                 aggregate.client.proxy.checkFlowVisor() 
                 aggregate.setup_new_aggregate(request.build_absolute_uri("/"))
             except Exception as e:
                  err = str(e)
-            #if err:
-            #    transaction.rollback()
-            #    if agg_id:
-            #        flowvisor_msg = "Topology could not be updated because could not connect to FlowVisor." 
-            #    else:
-            #        flowvisor_msg = "New Aggregate set, but there is no FlowVisor connected to it."
-#           #     DatedMessage.objects.post_message_to_user(
-#           #         msg, user=request.user, msg_type=DatedMessage.TYPE_WARNING,
-#           #     )
-            #    print err
-            #    #return HttpResponseRedirect("/")
+            if err is not ' ':
+                #transaction.rollback()
+                if agg_id:
+                    flowvisor_msg = "Topology could not be updated because could not connect to FlowVisor." 
+                else:
+                    flowvisor_msg = "New Aggregate set, but there is no FlowVisor connected to it."
+                DatedMessage.objects.post_message_to_user(
+                    flowvisor_msg, user=request.user, msg_type=DatedMessage.TYPE_WARNING,
+                )
+                return HttpResponseRedirect("/")
             aggregate.save()
             give_permission_to(
                 "can_use_aggregate",
