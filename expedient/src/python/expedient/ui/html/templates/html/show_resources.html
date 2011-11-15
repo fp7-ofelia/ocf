@@ -411,7 +411,6 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 {% for agg in vt_aggs %}
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
-    <div>
     <h2>VT Aggregate Manager {{ agg.name }}</h2>
     <div id="am_location">
         Aggregate physical location: <b>{{ agg.location }}</b>.
