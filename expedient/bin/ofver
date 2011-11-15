@@ -22,25 +22,30 @@ FORCE=0
 NO_RETURN=1
 DONT_ABORT=2
 NO_RESCUE=1
+LOCK_FILE=".ofverLock"
+UPGRADE_REG=".upgradeReg"
 
 ##Other info
 APP_NAME="ofver"
-APP_VER="0.1"
-APP_DESC="OFelia VERsioning system; a simple set of bash scripts to simplify repository based installations and upgrade"
-APP_WEB="http://www.fp7-ofelia.eu"
+APP_VER="0.21"
+APP_DESC="OFelia VERsioning system; a simple set of bash scripts to simplify repository based installations and upgrades."
+APP_AUTHOR="{ marc.sune, leonardo.bergesio } @i2cat.net (i2CAT foundation)"
+APP_WEB="http://code.google.com/p/ofver/, http://www.fp7-ofelia.eu"
+
 
 
 ##Main method
 function main()
 {
+
 	#Check root
 	if [ "$(id -u)" != "0" ]; then
 		echo "$(tput setaf 1)FATAL ERROR$(tput setaf 0): $APP_NAME must be run by root user"
 		exit 1
 	fi
-	
+
 	##Load settings
-	source "$EXECPATH/settings" || ( echo "FATAL ERROR: Cannot import settings" && exit 1 )
+	source "$EXECPATH/settings" || ( echo "FATAL ERROR: Cannot import settings" && exit 1 )	
 
 	##Load libraries
 	source "$EXECPATH/common/utils" || ( echo "FATAL ERROR: Cannot import utils library" && exit 1 )
@@ -48,17 +53,31 @@ function main()
 	source "$EXECPATH/common/versioning" ||error "Cannot import commands library" $NO_RESCUE
 	source "$EXECPATH/common/modules" ||error "Cannot import module library" $NO_RESCUE
 	source "$EXECPATH/common/commands" ||error "Cannot import commands library" $NO_RESCUE
+	source "$EXECPATH/common/repository" ||error "Cannot import repository library" $NO_RESCUE
 
-	#Spash
-	splash
+	lock	
+
+	
+	#Check in_branch flag
+	varChecks
+
 
 	#Arguments
 	checkArgsAndParseOpts $@
+
+	#Try to recover upgrade from the 2 step process
+	recoverUpgradeState
+
+	#Spash
+	splash 
 	
 	#Invoque action
 	eval $ACTION_
 
 	#Finish
+	unlock
+	rm -rf $UPGRADE_REG	
+
 	print "Finishing execution..."
 	exit 0		
 }

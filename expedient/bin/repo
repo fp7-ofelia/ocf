@@ -1,0 +1,14 @@
+#!/bin/bash 
+
+###
+#	@author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#       @description: script for upgrading ofver code (and application code if you are using ofver in-branch). This can be as simple as a 'git pull' or 'svn update', for instance.
+###
+
+#Example
+#/usr/bin/git pull 
+#echo /usr/bin/git pull
+
+git pull || error "Could not upgrade ofver code"

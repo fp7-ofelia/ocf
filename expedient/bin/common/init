@@ -10,6 +10,7 @@
 #Usage functions
 function usage()
 {
+	splash 1
 	echo ""
 	echo "Usage: $APP_NAME {install upgrade} [options] "
 	echo ""
@@ -44,8 +45,20 @@ function checkAction()
 	error "Unknown action: $1. Supported actions {install,upgrade}"  $NO_RESCUE
 }
 
+#Checks variables existance
+function varChecks(){
+	if [ "$OFVER_IN_BRANCH" != "1" -a "$OFVER_IN_BRANCH" != "0"  ]; then 
+		error 'Invalid or unexistent value for $OFVER_IN_BRANCH setting' $NO_RESCUE
+	fi	
+}
+
 function checkArgsAndParseOpts()
 {
+	#Save all args
+	ALL_ARGS="$@"
+
+	printDebug $ALL_ARGS		
+
 	#At least one argument required
 
 	if [ $# -lt 1 ]; then
@@ -70,6 +83,6 @@ function checkArgsAndParseOpts()
 			exit 1;;
 		esac
 	done
-
+	
 }
 

@@ -65,8 +65,13 @@ function warning()
 
 function splash()
 {
-	echo "$APP_NAME v$APP_VER"
-	echo "Website: $APP_WEB"
+	echo -e "\n$APP_NAME v$APP_VER \n"
+	if [ "$1" == "1" ]; then 
+		echo -e "Description: $APP_DESC"
+		echo -e "Authorship: $APP_AUTHOR"
+	fi
+	echo -e "Websites: $APP_WEB"
+	echo ""	
 }
 
 #Summary
@@ -127,6 +132,10 @@ function error()
 		loadModule rollback
 	fi 
 	
+	#printDebug "Unlocking and exiting..."
+	unlock
+	rm -rf $UPGRADE_REG
+ 	
 	exit 1 
 }
 
@@ -170,4 +179,20 @@ function pause
 function getDirectory()
 {
 	echo `dirname $(readlink -f $1)`
+}
+
+#Mutex functions
+function lock(){	
+	if [ ! -f $LOCK_FILE ]; then	
+		touch $LOCK_FILE
+	else
+	
+		print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... It seems some other instance of ofver is already running... (file $LOCK_FILE exists!)"
+		exit 1
+	fi
+
+}
+
+function unlock(){
+	rm -f $LOCK_FILE
 }

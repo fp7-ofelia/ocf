@@ -17,6 +17,9 @@ function performInstall()
 	#Override backup (not needed for install)
 	BACKUP=0
 
+	#Download app code from repo 
+	downloadCodeFromRepo
+
 	#Determine version
 	setVersions
 
@@ -46,16 +49,33 @@ function performInstall()
 	printHeader "Version file." "Installing/updating version file..." 
 	writeVersion	
 	
-	printHeader "Installation has been successful." "Please, make appropiate tests (if not done by installation code) to make sure installation has been completely successful..." 
+	printHeader "Installation has been successful for version $TARGETED_VERSION." "Please, make appropiate tests (if not done by installation code) to make sure installation has been completely successful..." 
 
 }
 
 function performUpgrade()
 {
+	if [ "$OFVER_UPGRADED_STATUS" != "1" ]; then	
+	
+		#Load backup to set restoration point 
+		if [ "$BACKUP" == "1" ]; then	
+			printHeader "Backup." "Starting backup..." 
+			loadModule "backup" 
+		fi
+	
+
+		#Upgrade ofver from repo
+		upgradeOfverFromRepo
+	
+		#Restart with new ofver code
+		restartOfverInstance
+	fi
+
+	#Upgrade code from repo (if not already upgraded) 
+	upgradeCodeFromRepo
 
 	#Determine version
 	setVersions
-	
 	
 	#Version checks
 	printHeader "Version checkings." "Executing version checking code..."
@@ -66,17 +86,11 @@ function performUpgrade()
 	summary `importModule description $DONT_ABORT`
 	confirm "Proceed with installation/upgrade." $NO_RETURN $NO_RESCUE
 
-	#Load backup to set restoration point 
-	if [ "$BACKUP" == "1" ]; then	
-		printHeader "Backup." "Starting backup..." 
-		loadModule "backup" $NO_RESCUE
-	fi
-	
 	#Pre-upgrade hook
 	printHeader "Pre-upgrade." "Executing pre-upgrade hook code..." 
 	loadModule "pre-upgrade-hook" $NO_RESCUE
 	
-	#upgrade
+	#Upgrade
 	printHeader "Upgrade." "Upgrading software..." 
 	loadModule "upgrade" 
 	
@@ -88,7 +102,7 @@ function performUpgrade()
 	printHeader "Version file." "Installing/updating version file..." 
 	writeVersion
 	
-	printHeader "Upgrade has been succesful." "\nPlease, make appropiate tests (if not done by upgrade code) to make sure upgrade has been completely successful" 
+	printHeader "Upgrade has been succesful to $TARGETED_VERSION from $CURRENT_VERSION." "\nPlease, make appropiate tests (if not done by upgrade code) to make sure upgrade has been completely successful" 
 
 }
 
