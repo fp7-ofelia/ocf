@@ -27,7 +27,7 @@ import uuid
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
-
+import ldap 
 
 logger = logging.getLogger("project.views")
 
@@ -84,9 +84,14 @@ def delete(request, proj_id):
                 "Successfully deleted project %s" % project.name,
                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         except Exception as e:
-            DatedMessage.objects.post_message_to_user(
-            "Problems ocurred while trying to delete project %s: %s" % (project.name,str(e)),
-            request.user, msg_type=DatedMessage.TYPE_ERROR)
+            if isinstance(e,ldap.LDAPError):
+                DatedMessage.objects.post_message_to_user(
+                "Project %s can not be deleted because there is no connection to LDAP" % project.name,
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
+            else:
+                DatedMessage.objects.post_message_to_user(
+                "Problems ocurred while trying to delete project %s: %s" % (project.name,str(e)),
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
         return HttpResponseRedirect(reverse("home"))
     else:
         from vt_plugin.models.VM import VM
@@ -129,6 +134,7 @@ def detail(request, proj_id):
 
 def create_project_roles(project, user):
     """Create the default roles in a project."""
+
     owner_role = ProjectRole.objects.create(
         name="owner",
         description=\
@@ -159,7 +165,7 @@ def create_project_roles(project, user):
             get_or_create_for_object_or_class(
                 permission, project)[0]
         researcher_role.obj_permissions.add(obj_perm)
-    
+        
     # give the creator of the project an owner role
     owner_role.give_to_permittee(
         user,
@@ -178,9 +184,10 @@ def create(request):
         # Create default roles in the project
 	#Generate UUID: fixes caching problem on model default value
 	instance.uuid = uuid.uuid4()
+	create_project_roles(instance, request.user)
 	instance.save()
-        instance.sync_netgroup_ldap()
-        create_project_roles(instance, request.user)
+	#if settings.LDAP_STORE_PROJECTS:
+	#        instance.sync_netgroup_ldap()
         
     def redirect(instance):
         return reverse("project_detail", args=[instance.id])
@@ -203,9 +210,14 @@ def create(request):
             success_msg = lambda instance: "Successfully created project %s." % instance.name,
         )
     except Exception as e:
-        DatedMessage.objects.post_message_to_user(
-            "Project may have been created, but some problem ocurred: %s" % str(e),
-            request.user, msg_type=DatedMessage.TYPE_ERROR)
+        if isinstance(e,ldap.LDAPError):
+            DatedMessage.objects.post_message_to_user(
+                "Project have been created but only locally since LDAP is not reachable. You will not be able to add users to the project until connection is restored.",
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Project may have been created, but some problem ocurred: %s" % str(e),
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
         return HttpResponseRedirect(reverse("home"))
 
 

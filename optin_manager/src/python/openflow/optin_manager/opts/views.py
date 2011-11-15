@@ -161,7 +161,6 @@ def add_opt_in(request):
                     adminFS = AdminFlowSpace.objects.filter(user = request.user)
                     
                     intersected_flowspace = multi_fs_intersect([requested_opt],adminFS,FlowSpace)
-                    print "LEODEBUG FLOWSPACE"
                     for fs in intersected_flowspace:
                         print "\n\nFLOWSPACE"
                         print fs.stringify()
