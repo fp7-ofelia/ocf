@@ -182,84 +182,6 @@
 <h1>Select OpenFlow Resources</h1>
 {% endif %}
 
-<!-- FIRST VERSION
-
-{% for agg in openflow_aggs %}
-<h2>OpenFlow Aggregate {{ agg.name }}</h2>
-<div id="am_location">
-Aggregate physical location: <b>{{ agg.location }}.</b>
-</div >
-<div>
-	{% if checked_ids %}
-	<div style="padding-top:20px;">
- 	  {% if allfs %}
-	<table class="servers" style="border-bottom:0px">
-    <tr><th>Requested Flowspace</th></tr>
-    </table>
-
-    {% for fs in allfs %}
-	<table class="servers">
-	  {%for ofiface in fs.slivers.all %}
-		<tr class="odd">
-			{% if forloop.first %}<td><strong> Flowspace {{fs.id }}</strong>{%else %}<td></td>{% endif %}
-			 <td><strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}</td>
-		</tr> 
-	{% endfor %}
-	</table>
-	<table class="vms" style="margin-bottom:0px;">
-    <tr>
-           <tr class = "even">
-           <td>
-            {% if fs.dl_src_start or fs.dl_src_end %}
-                MAC Source: {{ fs.dl_src_start }} - {{ fs.dl_src_end }}<br />
-            {% endif %}
-    
-            {% if fs.dl_dst_start or fs.dl_dst_end %}
-               MAC Destination: {{ fs.dl_dst_start }} - {{ fs.dl_dst_end }}<br />
-            {% endif %}
-    
-            {% if fs.dl_type_start or fs.dl_type_end %}
-                Ethernet Type: {{ fs.dl_type_start }} {{ fs.dl_type_end }}<br />
-            {% endif %}
-            
-            {% if fs.vlan_id_start or fs.vlan_id_end %}
-                VLAN ID: {{ fs.vlan_id_start }} - {{ fs.vlan_id_end }}<br />
-            {% endif %}
-    
-            {% if fs.nw_src_start or fs.nw_src_end %}        
-                IP Source: {{ fs.nw_src_start }} - {{ fs.nw_src_end }}<br />
-            {% endif %}
-    
-            {% if fs.nw_dst_start or fs.nw_dst_end %}
-                IP Destination: {{ fs.nw_dst_start }} - {{ fs.nw_dst_end }}<br />
-            {% endif %}        
-    
-            {% if fs.nw_proto_start or fs.nw_proto_end %}
-                IP Protocol: {{ fs.nw_proto_start }} - {{ fs.nw_proto_end }}<br />
-            {% endif %}        
-    
-            {% if fs.tp_src_start or fs.tp_src_end %}
-                TCP/UDP Source: {{ fs.tp_src_start }} - {{ fs.tp_src_end }}<br />
-            {% endif %}        
-    
-            {% if fs.tp_dst_start or fs.tp_dst_end %}
-                TCP/UDP Destination: {{ fs.tp_dst_start }} - {{ fs.tp_dst_end }}<br />
-            {% endif %}        
-        	</td>
-     </tr>
-    {% endfor %}
-       </table>
- 	{% else %}
-              <p>There is no Flowspace in the Slice. </p>
-   {% endif %}
-</div>
-{%endif%}
-{% empty %}
-  <p>There are no OpenFlow aggregates in the slice. </p>
-  {% endfor %}
-
--->
-
 {% for agg in openflow_aggs %}
 <h2>OpenFlow Aggregate {{ agg.name }}</h2>
 <div id="am_location">
@@ -272,6 +194,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 	<table class="servers" style="border-bottom:0px">
     <tr><th style="background-color:#FF9966">Requested Flowspace{%if allfs|length > 1%}s{%endif%}  <img align="absmiddle" id="req_fs_help" src="/static/media/img/question_mark_15x15.png"></th></tr>
     </table>
+	</div>
 	<div class="tooltip" id="req_fs_help">
 	Notice that a "None" value means that that field is getting the maximum possible value.<br/>In addition if different Flowspaces are defined over the same OpenFlow interface (Switch-Port), the resultant FlowSpace over this interface will be the combination of all the FlowSpaces. This can be seen better in the Granted FlowSpace
 	</div>	
@@ -330,6 +253,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     <table class="servers" style="border-bottom:0px">
     <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%}  <img align="absmiddle" id="gr_fs_help" src="/static/media/img/question_mark_15x15.png"></th></tr>
     </table>
+	</div>
 		<div class="tooltip" id="gr_fs_help">
     	This is the FlowSpace that has been granted to the slice and will be used in the experiment. It may be different from the requested one.
 	    </div>
