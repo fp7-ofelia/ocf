@@ -14,4 +14,4 @@ CURRENT_VERSION_PATH="$EXECPATH/../.currentVersion" # Make sure this file is und
 TARGETED_VERSION_PATH="$EXECPATH/../version" # Make sure this file is NOT under .svnignore .gitignore... 
 
 #Use ofver in branch or out of the branch (either in another repository branch or in a separate repository)
-OFVER_IN_BRANCH=0
+OFVER_IN_BRANCH=1
