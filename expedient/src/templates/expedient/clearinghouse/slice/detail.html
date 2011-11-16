@@ -98,7 +98,7 @@
                     </div>
                 </div>
         </div>
-	<div class="detail_section">
+<!--	<div class="detail_section">
 		<h2>Resources in the slice</h2>
 		<div class="resource_list">
 			<div class="table_div center">
@@ -129,6 +129,11 @@
 		    	onclick='document.location="{% url html_plugin_home slice.id %}"' />
 			</div>
 		</div>
-	</div>
+	</div>-->
+        <div class="center" style="margin-top:30px;">
+	        <input type="button" value="Manage Slice Resources"
+                onclick='document.location="{% url html_plugin_home slice.id %}"' />
+                </div>
+
 </div>
 {% endblock content %}
