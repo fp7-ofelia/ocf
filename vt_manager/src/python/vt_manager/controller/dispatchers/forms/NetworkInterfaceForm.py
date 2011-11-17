@@ -11,8 +11,9 @@ class NetworkInterfaceForm(forms.ModelForm):
         super(NetworkInterfaceForm, self).__init__(*args, **kwargs)           
         instance = getattr(self, 'instance', None)
         if instance and instance.id:
-            self.fields['switchID'].widget.attrs['readonly'] = True
-            self.fields['port'].widget.attrs['readonly'] = True
+            self.fields['name'].widget.attrs['readonly'] = True
+#            self.fields['switchID'].widget.attrs['readonly'] = True
+#            self.fields['port'].widget.attrs['readonly'] = True
 
     class Meta:
         model = NetworkInterface

@@ -73,12 +73,22 @@
 	<h3>Assigned IPs<br/><br/></h3>
     	<table class ="blue" style="margin-bottom:20px;width:600px">
 		<tr>
-			<th width="200px">Allocated Address</th><th style="text-align:left" width="300px">VM</th><!--<th width="80px">Actions</th>-->
+			<th width="300px">Allocated Address</th>
+			<th style="text-align:left" width="200px">Server</th><!--<th width="80px">Actions</th>-->
+			<th style="text-align:left" width="200px">VM</th><!--<th width="80px">Actions</th>-->
+			<th style="text-align:left" width="150px">VM Iface</th>
+			<th style="text-align:left" width="200px">Project</th>
+			<th style="text-align:left" width="200px">Slice</th>
 		</tr>
 	{% if range.getAllocatedIps.count > 0 %}
 		{% for ip in range.getAllocatedIps %}
 			<tr class="{% cycle 'odd' 'even' %}">
-				<td>{{ip.ip}}</td><td>TODO</td>
+				<td>{{ip.ip}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.getChildObject.Server.all.0.name}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.name}}</td>
+				<td>{{ip.Interface.all.0.name}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.projectName}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.sliceName}}</td>
 			</tr>
 		{%endfor%}
 	{% else %}
@@ -98,6 +108,7 @@
 		<a href="{% url ip4Ranges %}">Back</a>
 	</div>
 </div>
+
 {% endblock content %}
 
 

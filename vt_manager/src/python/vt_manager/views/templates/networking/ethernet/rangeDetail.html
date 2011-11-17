@@ -73,12 +73,23 @@
 	<h3>Allocated MACs<br/><br/></h3>
     	<table class ="blue" style="margin-bottom:20px;width:600px">
 		<tr>
-			<th width="200px">Allocated Address</th><th style="text-align:left" width="300px">VM</th><!--<th width="80px">Actions</th>-->
+			<th width="300px">Allocated Address</th>
+			<th style="text-align:left" width="200px">Server</th><!--<th width="80px">Actions</th>-->
+                        <th style="text-align:left" width="200px">VM</th><!--<th width="80px">Actions</th>-->
+                        <th style="text-align:left" width="150px">VM Iface</th>
+                        <th style="text-align:left" width="200px">Project</th>
+                        <th style="text-align:left" width="200px">Slice</th>
 		</tr>
 	{% if range.getAllocatedMacs.count > 0 %}
 		{% for mac in range.getAllocatedMacs %}
 			<tr class="{% cycle 'odd' 'even' %}">
-				<td>{{mac.mac}}</td><td>{{mac.getAssociatedVM}}</td>
+				<td>{{mac.mac}}</td>
+				<td>{{mac.interface.all.0.vm.all.0.getChildObject.Server.all.0.name}}</td>
+                                <td>{{mac.interface.all.0.vm.all.0.name}}</td>
+                                <td>{{mac.interface.all.0.name}}</td>
+                                <td>{{mac.interface.all.0.vm.all.0.projectName}}</td>
+                                <td>{{mac.interface.all.0.vm.all.0.sliceName}}</td>
+
 			</tr>
 		{%endfor%}
 	{% else %}

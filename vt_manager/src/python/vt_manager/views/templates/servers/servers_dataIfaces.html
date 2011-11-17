@@ -1,4 +1,23 @@
-
+<script>
+function confirmInput(inputElement){
+	if(inputElement.type == "checkbox"){
+		if (inputElement.checked == true){
+			var agree=confirm("VMs already created will not be reconfigured. Are you sure you want to delete the brige?");
+			if(agree){
+				return true;
+			}
+			else{ 
+				inputElement.checked=false;
+				return false;
+			} 
+		}
+	}
+	else{
+	//	return confirm("VMs already created will not be reconfigured. Are you sure you want to add a new brige?");
+		alert("VMs already created will not be reconfigured. Are you sure you want to add a new brige?\nLeave it blanck if you do not want to create the new bridge");
+	}
+}
+</script>
 
         <div>
             <h3>Data Bridges parameters <img id="data_bridges" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
@@ -33,11 +52,11 @@
                                 <th class="fielderror"> {{ field.label_tag }}:</th><td class="fielderror"> {{ field }}</td>
                             {% else %}
                             {% if field.name != 'id' %}
-                                <th> {{ field.label_tag }}:</th><td class={% if form.initial  %}{{field.name}}{%endif%}> {{ field }}</td>
+                                <th> {{ field.label_tag }}:</th><td {% if form.initial%}{%if field.name == "name" %}class="readonly"{%endif%}{%endif%}>{{ field }}</td>
                             {%endif%}
                             {%endif%}
                         {% endfor %}
-                        <th id='rowDelete'> Delete: <input type="checkbox" name="DELETE" value ={{form.initial.id}} ></td>
+                        <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></td>
                         </tr>
                     </tbody>
                 {% endfor %}

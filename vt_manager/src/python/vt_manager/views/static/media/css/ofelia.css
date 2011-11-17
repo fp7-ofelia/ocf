@@ -217,7 +217,7 @@ table.formtable tbody td ,tbody th {
 	font-weight:normal;
 }
 	
-table.formtable td.switchID input, table.formtable td.port input{
+table.formtable td.readonly input{
 	background: #CCC;
 }
 table.formtable tbody th {

@@ -12,7 +12,9 @@
 <script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
 <script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
 
+
 <script type="text/javascript">
+
       $(function() {
         $('#ifacetable tbody').formset({
           prefix: '{{ ifaceformset.prefix }}',
@@ -20,10 +22,15 @@
           deleteText: '',
           added: adding,
           addCssClass: 'buttoncss',
+	  onClickFunction: 'confirmInput(this)',
         });
       });
 </script>
-
+<script>
+       
+        $("Add Bridge").click(function(){alert("HOLA");});
+        
+</script>
 <script>
     $(document).ready(function() {
         /* add tooltip to question mark */

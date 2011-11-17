@@ -119,19 +119,31 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             print "Can't parse rspec"
             print e
             return
+#        try:
+#            for server in xmlClass.response.information.resources.server:
+#                for vm in server.virtual_machine:
+#                    VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
+#                    Translator.PopulateNewVMifaces(vm, VMmodel)
+#                Translator.ServerClassToModel(server, vtPlugin.id)
+#                serversInAggregate.append(server.uuid)
+#            serversInExpedient  = VTServer.objects.filter(aggregate=vtPlugin.id).values_list('uuid', flat=True)
+#            for s in serversInExpedient:
+#                if s not in serversInAggregate:
+#                    delServer = VTServer.objects.get(uuid = s)
+#                    delServer.completeDelete()
+#            return xmlClass
         try:
+            for s in VTServer.objects.all():
+                s.completeDelete()
             for server in xmlClass.response.information.resources.server:
+                Translator.ServerClassToModel(server, vtPlugin.id)
                 for vm in server.virtual_machine:
                     VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
                     Translator.PopulateNewVMifaces(vm, VMmodel)
-                Translator.ServerClassToModel(server, vtPlugin.id)
-                serversInAggregate.append(server.uuid)
-            serversInExpedient  = VTServer.objects.filter(aggregate=vtPlugin.id).values_list('uuid', flat=True)
-            for s in serversInExpedient:
-                if s not in serversInAggregate:
-                    delServer = VTServer.objects.get(uuid = s)
-                    delServer.completeDelete()
+                VTServer.objects.get(uuid=server.uuid).setVMs()
             return xmlClass
+
+
         except Exception as e:
             print e
             rHashObject.hashValue = oldHashValue
