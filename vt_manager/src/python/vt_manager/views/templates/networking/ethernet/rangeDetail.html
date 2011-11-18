@@ -87,8 +87,8 @@
 				<td>{{mac.interface.all.0.vm.all.0.getChildObject.Server.all.0.name}}</td>
                                 <td>{{mac.interface.all.0.vm.all.0.name}}</td>
                                 <td>{{mac.interface.all.0.name}}</td>
-                                <td>{{mac.interface.all.0.vm.all.0.projectName}}</td>
-                                <td>{{mac.interface.all.0.vm.all.0.sliceName}}</td>
+                                <td><span title = "uuid: {{mac.interface.all.0.vm.all.0.getProjectId}}">{{mac.interface.all.0.vm.all.0.projectName}}</span></td>
+                                <td><span title = "uuid: {{mac.interface.all.0.vm.all.0.getSliceId}}">{{mac.interface.all.0.vm.all.0.sliceName}}</span></td>
 
 			</tr>
 		{%endfor%}

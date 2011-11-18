@@ -87,8 +87,8 @@
 				<td>{{ip.Interface.all.0.vm.all.0.getChildObject.Server.all.0.name}}</td>
 				<td>{{ip.Interface.all.0.vm.all.0.name}}</td>
 				<td>{{ip.Interface.all.0.name}}</td>
-				<td>{{ip.Interface.all.0.vm.all.0.projectName}}</td>
-				<td>{{ip.Interface.all.0.vm.all.0.sliceName}}</td>
+				<td><span title = "uuid: {{ip.Interface.all.0.vm.all.0.getProjectId}}">{{ip.Interface.all.0.vm.all.0.projectName}}</span></td>
+				<td><span title = "uuid: {{ip.Interface.all.0.vm.all.0.getProjectId}}">{{ip.Interface.all.0.vm.all.0.sliceName}}</span></td>
 			</tr>
 		{%endfor%}
 	{% else %}
