@@ -26,15 +26,11 @@ class ProjectRoleManager(models.Manager):
         @return: all users with that role in the project
         @rtype: C{QuerySet} of C{User} objects.
         """
-        print "LEODEBUG PROJECT" 
-        print project 
         user_ids = set(Permittee.objects.filter(
             projectrole__name=role_name,
             projectrole__project=project).values_list(
 #                "pk", flat=True))
                 "object_id", flat=True))
-        print "LEODEBUG USER IDS"
-        print user_ids 
         return User.objects.filter(pk__in=user_ids)
     
     def filter_for_can_delegate(self, permittee, project):
