@@ -27,4 +27,4 @@ class XmlRpcClient():
 		except Exception as e:
 			print "XMLRPC Client error: can't connect to method %s at %s" % (methodName, url)
 			print e 
-			raise e
+			raise Exception("XMLRPC Client error: can't connect to method %s at %s\n" % (methodName, url) + str(e))

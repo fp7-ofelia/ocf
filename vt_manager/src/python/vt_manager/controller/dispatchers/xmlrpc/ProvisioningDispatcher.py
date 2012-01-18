@@ -76,11 +76,6 @@ class ProvisioningDispatcher():
 			return VMmodel
 		except:
 			raise
-#			XmlRpcClient.callRPCMethod(Server.getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
-#		except Exception as e:
-#			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
-#			controller.deleteVM(VMmodel)
-#			raise e 
 
 	@staticmethod
 	def __deleteStartStopRebootVM(controller, actionModel, action):
@@ -102,9 +97,5 @@ class ProvisioningDispatcher():
 			actionModel.save()
 		except:
 			raise 
-#			XmlRpcClient.callRPCMethod(VMmodel.Server.get().getAgentURL() ,"send", "https://"+ROOT_USERNAME+":"+ROOT_PASSWORD+"@"+VTAM_IP+":"+VTAM_PORT, 1, "hfw9023jf0sdjr0fgrbjk",XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
-#		except Exception as e:
-#			XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action.id, str(e)))
-#			raise e 
 
 
