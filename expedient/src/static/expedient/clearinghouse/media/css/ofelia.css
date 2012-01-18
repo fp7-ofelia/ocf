@@ -28,6 +28,11 @@ body {
 	padding: 0px;
 	}
 
+input {
+        max-width:200px;
+}
+
+
 #page {
 	background-color: white;
 	border: 1px solid #959596;
