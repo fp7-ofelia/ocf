@@ -1,3 +1,4 @@
+# -- coding: utf-8 --
 '''
 @author: jnaous
 '''
@@ -14,6 +15,8 @@ from django.conf import settings
 from django.db import transaction
 import uuid
 import string
+from django import forms
+import re
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -69,9 +72,14 @@ class Project(models.Model):
         that have some permission in the project as Permittee instances.
     @type members_as_permittees: C{QuerySet} of L{Permittee}s.
     '''
+
+    def asciiValidator(s):
+        if not re.match(r"^([a-zA-Z 'òàèéìùáéíóúñÑ]+)$", s):
+            raise forms.ValidationError("Check chars")
+
     objects = ProjectManager()
     
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
     description = models.TextField()
     uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     '''
