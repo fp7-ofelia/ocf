@@ -1,4 +1,3 @@
-# -- coding: utf-8 --
 '''
 @author: jnaous
 '''
@@ -74,13 +73,15 @@ class Project(models.Model):
     '''
 
     def asciiValidator(s):
-        if not re.match(r"^([a-zA-Z 'òàèéìùáéíóúñÑ]+)$", s):
-            raise forms.ValidationError("Check chars")
-
+        for c in s:
+            if ord(c)>127:
+                raise forms.ValidationError("Please use only non accented characters")
+     
+    
     objects = ProjectManager()
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
-    description = models.TextField()
+    description = models.TextField(validators=[asciiValidator])
     uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     '''
     save = permissions_save_override(
