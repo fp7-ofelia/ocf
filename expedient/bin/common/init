@@ -86,3 +86,19 @@ function checkArgsAndParseOpts()
 	
 }
 
+function askForOfeliaInstallation()
+{
+	OFELIA="none"
+	while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ]
+	do
+		echo "Is this an OFELIA istallation? (yes/no):"
+		read OFELIA
+		if [ $OFELIA == yes ];then
+			NOT_OFELIA=0
+		elif [ $OFELIA == no ];then
+			NOT_OFELIA=1
+		else
+			echo "Not valid option. Please say yes/no"
+		fi
+	done		
+}

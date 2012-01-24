@@ -1,0 +1,16 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: repo module for Non OFELIA's Installations using OUT_BRANCH mode
+###
+
+
+#if [ $NOT_OFELIA == "yes"];then
+#	git clone ssh://gitolite@codebasin.net:ocf.git ocf || error "Not possible to download app code from repo"
+#else
+#	error "For OFELIA installations use IN_BRANCH installation"
+#fi
+

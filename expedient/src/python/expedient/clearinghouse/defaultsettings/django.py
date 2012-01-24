@@ -129,9 +129,11 @@ append_to_local_setting(
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'django_auth_ldap.backend.LDAPBackend',
     'expedient_geni.backends.GENIRemoteUserBackend',
 ]
+if ENABLE_LDAP_BACKEND:
+    AUTHENTICATION_BACKENDS.insert(1,'django_auth_ldap.backend.LDAPBackend')
+
 append_to_local_setting(
     "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
 )

@@ -17,6 +17,9 @@ function performInstall()
 	#Override backup (not needed for install)
 	BACKUP=0
 
+	#Check if installations is for OFELIA or not
+	askForOfeliaInstallation
+
 	#Download app code from repo 
 	downloadCodeFromRepo
 
