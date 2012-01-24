@@ -1,0 +1,26 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/expedient/
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+
+#Adding/Moving new variables to localsettings.py
+printHeader ">" "Adding new settings to localsettings.py ..."
+echo "ENABLE_LDAP_BACKEND = True" >> localsettings.py || error "Could not add ENABLE_LDAP_BACKEND to localsettngs.py ..."
+
+#Restarting apache
+print "Restarting apache2..."
+/usr/sbin/service apache2 restart
+
