@@ -1,31 +1,55 @@
 #!/bin/bash
 
+
+function getTemplateLocation{
+	if [ $OFELIA == yes ];then
+        	WGET_COMMAND='/usr/bin/wget --progress=bar:force --no-check-certificate --user='$USERNAME' --password='$PASSWORD' --output-document '$OXA_DIRECTORY'/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz'
+	else
+		WGET_COMMAND='/usr/bin/wget --progress=bar:force --no-check-certificate --output-document '$OXA_DIRECTORY'/cache/templates/default/default.tar.gz  http://codebasin.net/storage/images/xen/templates/Debian/0.1/default.tar.gz'
+	fi	
+}
+
 function downloadTemplate
 {
 	echo ""	
 	echo "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
+        if [ $OFELIA == yes ];then  
 	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
+	else
+	/usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://codebasin.net/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
+	fi
 }
 
+function downloadTemplateHash
+{
+	echo ""
+        echo "Attempting to download HASH file of the template..."     
+        if [ $OFELIA == yes ];then 
+	        /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+	else
+		 /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  http://codebasin.net/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+	fi
+}
 
 print "VM template installation..."
 
-
-	echo "Please enter the USERNAME for the OFELIA storage system to download the default template. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+        if [ $OFELIA == yes ];then  
+		echo "Please enter the USERNAME for the OFELIA storage system to download the default template. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+		
+		echo -n "Username:"
+		read USERNAME
+		echo -n "Password:"
 	
-	echo -n "Username:"
-	read USERNAME
-	echo -n "Password:"
-
-	/bin/stty -echo
-	read PASSWORD 
-	/bin/stty echo
-
+		/bin/stty -echo
+		read PASSWORD 
+		/bin/stty echo
+	fi
 	#Mkdir
 	mkdir -p $OXA_DIRECTORY/cache/templates/default
 	
 	echo "Attempting to download HASH file of the template..."	
-	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+	downloadTemplateHash
+#	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
 	
 	local HASH=`cat $OXA_DIRECTORY/cache/templates/default/default.hash > /dev/null 2>&1 `
 	local NEWHASH=`cat $OXA_DIRECTORY/cache/templates/default/.default.hash > /dev/null 2>&1`
