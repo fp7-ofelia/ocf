@@ -15,3 +15,7 @@ print "Shutting down apache2..."
 /usr/sbin/service apache2 stop || warning "Could not stop apache"
 
 
+#Check if installations is for OFELIA or not
+askForOfeliaInstallation
+
+

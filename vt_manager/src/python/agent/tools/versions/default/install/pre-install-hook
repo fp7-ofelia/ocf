@@ -13,4 +13,6 @@ printHeader "info#" "Using default pre-install-hook module..."
 #shutdown apache
 print "Nothing to do..."
 
+#Check if installations is for OFELIA or not
+askForOfeliaInstallation
 
