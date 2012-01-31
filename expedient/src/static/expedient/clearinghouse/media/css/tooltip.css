@@ -29,3 +29,35 @@
 .tooltip a {
 	color: #ADD8E6;
 }
+
+.animatedTooltip{
+    position:relative;
+    top:-50px;
+    right:-1000px;
+    background-color:#003366;
+    border:1px solid #fff;
+    padding:10px 10px;
+    width:200px;
+    color:#fff;
+    text-align:left;
+    font-size:10px;
+    -moz-box-shadow:0 0 10px #000;
+    -webkit-box-shadow:0 0 10px #000;
+    -moz-border-radius: 15px 15px 15px 0px;
+    -webkit-border-radius: 15px 15px 15px 0px;
+     border-radius:  0px 15px 15px 15px;
+     -webkit-transition: all 1s ease-in-out;
+     -o-transition: all 1s ease-in-out;
+     -moz-transition: all 1s ease-in-out;
+     transition: all 1.5s ease-in-out;
+}
+
+.animatedTooltip a {
+    color: white;
+    float: right;
+}
+
+.animatedTooltipChange {
+    float:right;
+    right:-75px;
+}
