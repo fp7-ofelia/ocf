@@ -38,7 +38,7 @@ secret_key.py
 *.0
 *.launch
 gcf-x509.*/
-src/python/expedient/clearinghouse/xmlrpc-ssl.crt/*
+src/python/expedient/clearinghouse/xmlrpc-ssl.crt/*.crt
 expedient-settings
 deployment_settings.py
 *.db
