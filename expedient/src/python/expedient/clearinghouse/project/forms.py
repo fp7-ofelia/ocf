@@ -53,9 +53,13 @@ class AddMemberForm(forms.Form):
         self.fields["user"].queryset = User.objects.exclude(
             id__in=list(project.members.values_list("id", flat=True)))
         
-        self.fields["roles"].queryset = \
-            ProjectRole.objects.filter_for_can_delegate(
-                giver, project=project)
+        if giver.is_superuser:
+            self.fields["roles"].queryset = \
+                ProjectRole.objects.filter(project=project)
+        else:
+            self.fields["roles"].queryset = \
+                ProjectRole.objects.filter_for_can_delegate(
+                    giver, project=project)
         
         self.project = project
         self.giver = giver
