@@ -8,7 +8,8 @@ function downloadTemplate
         if [ $OFELIA == yes ];then  
 	/usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
 	else
-	/usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://codebasin.net/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
+	/usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  http://www.footballpictures.net/data/media/77/Ex-Boca-Juniors.jpg || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
+	#/usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://codebasin.net/storage/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
 	fi
 }
 
@@ -19,7 +20,8 @@ function downloadTemplateHash
         if [ $OFELIA == yes ];then 
 	        /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
 	else
-		 /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  http://codebasin.net/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+		 /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  http://www.footballpictures.net/data/media/77/Boca-Juniors-Logo.jpg || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
+		 #/usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  http://codebasin.net/storage/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
 	fi
 }
 
