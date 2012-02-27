@@ -10,4 +10,5 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-print "Nothing to do..."
+print "Checking for new versions of the VM template..."
+source "$CURRENT_DIRECTORY/lib/template"
