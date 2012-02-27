@@ -14,7 +14,7 @@ SRC_DIR=/opt/ofelia/expedient/
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?"
 
 #Adding/Moving new variables to localsettings.py
 printHeader ">" "Adding new settings to localsettings.py ..."
@@ -24,4 +24,21 @@ echo "ENABLE_LDAP_BACKEND = True" >> localsettings.py || error "Could not add EN
 #Restarting apache
 print "Restarting apache2..."
 /usr/sbin/service apache2 restart
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then 
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+
 
