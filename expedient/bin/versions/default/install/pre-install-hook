@@ -18,7 +18,7 @@ print "Shutting down apache2..."
 #Check if installations is for OFELIA or not
 OFELIA="none"
 
-while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
     do
         echo "Is this an OFELIA istallation? (yes/no):"
         read OFELIA
