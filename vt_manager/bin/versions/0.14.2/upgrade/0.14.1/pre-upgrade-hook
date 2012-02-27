@@ -1,18 +1,11 @@
 #!/bin/bash
 
 ###
-#       @author: msune
-#	@organization: i2CAT
-#	@project: Ofelia FP7
-#	@description: pre-upgrade-module 
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: pre-upgrade-hook module  for v0.14.2
 ###
-
-#inform user
-printHeader "info#" "Using default pre-upgrade-hook module..."
-
-#shutdown apache
-print "Shutting down apache2..."
-/usr/sbin/service apache2 stop
 
 #Check for OFELIA installation
 OFELIA="none"
@@ -29,3 +22,4 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
             echo "Not valid option. Please say yes/no"
         fi
     done
+
