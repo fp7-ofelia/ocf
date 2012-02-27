@@ -11,4 +11,4 @@
 printHeader "info#" "Using default upgrade module..."
 
 print "Checking for new versions of the VM template..."
-source "$CURRENT_DIRECTORY/lib/template"
+loadModule "lib/template" $NO_RESCUE
