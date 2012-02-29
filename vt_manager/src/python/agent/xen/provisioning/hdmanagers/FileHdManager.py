@@ -197,9 +197,10 @@ class FileHdManager(object):
 				#Untar disk contents
 				print "Uncompressing disk contents..."
 				path = FileHdManager.mount(vm)
-				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/tar","-xvf",template_path,"-C",path],stdout=open(os.devnull, 'w'), preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-					print "Failed to uncompress disk contents"
-					raise Exception("")
+				with open(os.devnull, 'w') as opendev:
+					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/tar","-xvf",template_path,"-C",path],stdout=opendev, preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
+						print "Failed to uncompress disk contents"
+						raise Exception("")
 					
 			except Exception as e:
 				print e 

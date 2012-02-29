@@ -46,6 +46,7 @@ class MediacatVMConfigurator:
                 #write file
                 cfile = open(HdManager.getConfigFilePath(vm),'w')
                 cfile.write(output)
+		cfile.close()
 	
 
 	''' Public methods '''

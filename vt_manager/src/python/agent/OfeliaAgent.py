@@ -38,7 +38,9 @@ def redirectStdinStderr():
 
 	os.dup2(output.fileno(), sys.stdout.fileno())
 	os.dup2(error.fileno(), sys.stderr.fileno())
-	
+
+	output.close()
+	error.close()	
 
 ''' Restore stdout and stderr '''
 def restoreStdinStderr():
@@ -58,6 +60,7 @@ def forkAndExitFather():
 		fp = open('/var/run/OfeliaAgent.pid', 'w')
         	fp.write(str(child_pid))
         	fp.flush()
+		fp.close()
          	sys.exit()	
 
 

@@ -62,6 +62,7 @@ def xmlFileToString(file):
     try:        
         f = open(file, 'r')
         xml =  f.read()
+	f.close()
         #print xml
         return xml
     except Exception:
@@ -75,11 +76,12 @@ class XmlHelper(object):
     @staticmethod
     def getSimpleActionSpecificQuery(type, serverUUID):
         
-         simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryProvisioning.xml','r').read())
-         if type == 'stop': type = 'hardStop'
-         simpleRspec.query.provisioning.action[0].type_ = type
-         simpleRspec.query.provisioning.action[0].server.uuid = serverUUID
-         return simpleRspec
+	with open(os.path.dirname(__file__)+'/xml/queryProvisioning.xml','r') as openProv:
+	         simpleRspec =  XmlHelper.parseXmlString(openProv.read())
+	if type == 'stop': type = 'hardStop'
+	simpleRspec.query.provisioning.action[0].type_ = type
+	simpleRspec.query.provisioning.action[0].server.uuid = serverUUID
+	return simpleRspec
 #        if type == 'start':
 #            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
 #        if type == 'delete':
@@ -92,7 +94,8 @@ class XmlHelper(object):
 
     @staticmethod
     def getProcessingResponse(status, action,  description, ):
-        simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/emptyResponse.xml','r').read())
+	with open(os.path.dirname(__file__)+'/xml/emptyResponse.xml','r') as openResp:
+        	simpleRspec =  XmlHelper.parseXmlString(openResp.read())
         simpleRspec.response.provisioning.action[0].status = status
         simpleRspec.response.provisioning.action[0].description = description
         #XXX:This is because the ActionController sends a dummy, None, dummy request
@@ -103,19 +106,22 @@ class XmlHelper(object):
 
     @staticmethod
     def getSimpleActionQuery(action=None):
-        simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/simpleActionQuery.xml','r').read())
+	with open(os.path.dirname(__file__)+'/xml/simpleActionQuery.xml','r') as openAction:
+	        simpleRspec =  XmlHelper.parseXmlString(openAction.read())
         if action:
             simpleRspec.query.provisioning.action[0] = action
         return simpleRspec
 
     @staticmethod
     def getSimpleInformation():
-        simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/simpleListResources.xml','r').read())
+	with open(os.path.dirname(__file__)+'/xml/simpleListResources.xml','r') as openResources:
+	        simpleRspec =  XmlHelper.parseXmlString(openResources.read())
         return simpleRspec
 
     @staticmethod
     def getListActiveVMsQuery():
-        simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/listActiveVMsQuery.xml','r').read())
+	with open(os.path.dirname(__file__)+'/xml/listActiveVMsQuery.xml','r') as openVMs:
+	        simpleRspec =  XmlHelper.parseXmlString(openVMS.read())
         return simpleRspec
 
 

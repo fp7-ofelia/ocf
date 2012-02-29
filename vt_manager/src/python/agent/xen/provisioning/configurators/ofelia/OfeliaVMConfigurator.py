@@ -65,6 +65,7 @@ class OfeliaVMConfigurator:
 		#write file
 		cfile = open(HdManager.getConfigFilePath(vm),'w')
 		cfile.write(output)
+		cfile.close()
 
 
 
@@ -86,8 +87,10 @@ class OfeliaVMConfigurator:
 			except Exception as e:
 				pass
 
-			OfeliaVMConfigurator.__configureInterfacesFile(vm,open(path+OXA_DEBIAN_INTERFACES_FILE_LOCATION,'w'))
-			OfeliaVMConfigurator.__configureUdevFile(vm,open(path+OXA_DEBIAN_UDEV_FILE_LOCATION,'w'))
+			with open(path+OXA_DEBIAN_INTERFACES_FILE_LOCATION,'w') as openif:
+				OfeliaVMConfigurator.__configureInterfacesFile(vm,openif)
+			with open(path+OXA_DEBIAN_UDEV_FILE_LOCATION,'w') as openudev:
+				OfeliaVMConfigurator.__configureUdevFile(vm,openudev)
 		except Exception as e:
 			print e
 			raise Exception("Could not configure interfaces or Udev file")
@@ -111,7 +114,8 @@ class OfeliaVMConfigurator:
 	@staticmethod
 	def configureHostname(vm,path):
 		try:
-			OfeliaVMConfigurator.__configureHostname(vm, open(path+OXA_DEBIAN_HOSTNAME_FILE_LOCATION,'w'))
+			with open(path+OXA_DEBIAN_HOSTNAME_FILE_LOCATION,'w') as openhost:
+				OfeliaVMConfigurator.__configureHostname(vm, openhost)
 		except Exception as e:
 			print "Could not configure hostname; execution continues;"+str(e)
 			pass

@@ -100,7 +100,8 @@ class XendManager(object):
 		#Getting connection
 		conn = XendManager.__getConnection()
 
-		xmlConf = conn.domainXMLFromNative('xen-xm', open(HdManager.getConfigFilePath(vm),'r').read(), 0) 
+		with open(HdManager.getConfigFilePath(vm),'r') as openConfig: 
+			xmlConf = conn.domainXMLFromNative('xen-xm', openConfig.read(), 0) 
 
 		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
 			#Duplicated name; trying to find an Alias
