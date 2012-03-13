@@ -29,7 +29,8 @@ cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anym
 
 #Adding/Moving new variables to mySettings.py
 printHeader ">" "Adding new settings to mySettings.py ..."
-echo "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any ther entity connected to the northbound interface of the VT Manager to authenticate.\nusername: "
+echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any ther entity connected to the northbound interface of the VT Manager to authenticate
+\nusername: "
 read XMLRPC_USER
 while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
 	do
@@ -45,8 +46,8 @@ while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
 	        	echo "Password does not match, please set it again."
 		fi
 	done
-sed -i "/XMLRPC_USER/d" mySettings.py || error "Could not delete old ISLAND_NAME setting from mySettings.py ..."
-echo "XMLRPC_USER = \"$ISLAND_NAME\"" >> mySettings.py || error "Could not add ISLAND_NAME to mySettings.py ..."
+sed -i "/XMLRPC_USER/d" mySettings.py || error "Could not delete old XMLRPC_USER setting from mySettings.py ..."
+echo "XMLRPC_USER = \"$XMLRPC_USER\"" >> mySettings.py || error "Could not add XMLRPC_USER to mySettings.py ..."
 sed -i "/XMLRPC_PASS/d" mySettings.py || error "Could not delete old XMLRPC_PASS setting from mySettings.py ..."
 echo "XMLRPC_PASS = \"$XMLRPC_PASS\"" >> mySettings.py || error "Could not add XMLRPC_PASS to mySettings.py ..."
 
