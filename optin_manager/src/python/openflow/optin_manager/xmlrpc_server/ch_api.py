@@ -10,7 +10,7 @@ from models import CallBackServerProxy, FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,\
-    int_to_dotted_ip, int_to_mac
+    int_to_dotted_ip, int_to_mac, parseFVexception
 from decorator import decorator
 from django.db import transaction
 from django.conf import settings
@@ -309,8 +309,9 @@ def create_slice(slice_id, project_name, project_description,
                 old_e.delete()
             else:
                 e.delete()
+                print exc
                 raise Exception(
-                "While trying to update experiment, FV raised exception on the delete previous experiment step: %s"%exc)
+                "While trying to update experiment, FV raised exception on the delete previous experiment step: %s"%parseFVexception(exc))
                 
         if (not fv_success):
             e.delete()
@@ -333,12 +334,13 @@ def create_slice(slice_id, project_name, project_description,
         import traceback
         traceback.print_exc()
         e.delete()
+        print exc
         if (update_exp):
             raise Exception(
-            "Could not create slice at the Flowvisor, after deleting old slice. Error was %s"%str(exc))
+            "Could not create slice at the Flowvisor, after deleting old slice. Error was: %s"%parseFVexception(exc))
         else:
             raise Exception(
-            "Could not create slice at the Flowvisor. Error was %s"%str(exc))
+            "Could not create slice at the Flowvisor. Error was: %s"%parseFVexception(exc))
             
     if not fv_success:
         e.delete()
@@ -368,8 +370,9 @@ def create_slice(slice_id, project_name, project_description,
                     optfses = OptsFlowSpace.objects.filter(opt = opt)
                     opt_fses_outof_exp(optfses)
                 all_opts.delete()
+                print exc
                 raise Exception(
-                        "Couldn't re-opt into updated experiment. Lost all the opt-ins: %s"%str(exc))
+                        "Couldn't re-opt into updated experiment. Lost all the opt-ins: %s"%parseFVexception(exc))
              
     try:
         send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://"+settings.SITE_IP_ADDR+":8443/opts/opt_in",from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
@@ -415,7 +418,8 @@ def delete_slice(sliceid, **kwargs):
         if "slice does not exist" in str(e):
             success = True
         else:
-            return "Couldn't delete slice on flowvisor: %s"%str(e)
+            print e
+            return "Couldn't delete slice on flowvisor: %s"%parseFVexception(e)
      
     # get all flowspaces opted into this exp
     ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
@@ -447,7 +451,8 @@ def get_switches(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise e        
+        print e
+        raise parseFVexception(e)        
     complete_list.extend(switches)
         
     return complete_list
@@ -467,7 +472,8 @@ def get_links(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise e   
+        print e
+        raise parseFVexception(e)
     
     complete_list.extend(links)
         
@@ -589,7 +595,8 @@ def get_granted_flowspace(slice_id, **kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise e
+        print e
+        raise parseFVexception(e)
 
 
     return gfs 

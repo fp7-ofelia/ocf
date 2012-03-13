@@ -19,6 +19,7 @@ from expedient.common.permissions.shortcuts import must_have_permission
 from vt_plugin.models import VM
 logger = logging.getLogger("SliceViews")
 import uuid
+from  expedient.clearinghouse.slice.utils import parseFVexception
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 
@@ -138,9 +139,10 @@ def start(request, slice_id):
         except Exception as e:
             import traceback
             traceback.print_exc()
+            print e
             DatedMessage.objects.post_message_to_user(
                 "Error starting slice %s: %s" % (
-                    slice.name, e),
+                    slice.name, parseFVexception(e)),
                 user=request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
             DatedMessage.objects.post_message_to_user(
@@ -162,9 +164,10 @@ def stop(request, slice_id):
         except Exception as e:
             import traceback
             traceback.print_exc()
+            print e
             DatedMessage.objects.post_message_to_user(
                 "Error stopping slice %s: %s" % (
-                    slice.name, e),
+                    slice.name, parseFVexception(e)),
                 user=request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
             DatedMessage.objects.post_message_to_user(
