@@ -44,8 +44,8 @@ while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
                         echo "Password does not match, please set it again."
 		fi
         done
-sed -i "/XMLRPC_USER/d" mySettings.py || error "Could not delete old ISLAND_NAME setting from mySettings.py ..."
-echo "XMLRPC_USER = \"$ISLAND_NAME\"" >> mySettings.py || error "Could not add ISLAND_NAME to mySettings.py ..."
+sed -i "/XMLRPC_USER/d" mySettings.py || error "Could not delete old XMLRPC_USER setting from mySettings.py ..."
+echo "XMLRPC_USER = \"$XMLRPC_USER\"" >> mySettings.py || error "Could not add XMLRPC_USER to mySettings.py ..."
 sed -i "/XMLRPC_PASS/d" mySettings.py || error "Could not delete old XMLRPC_PASS setting from mySettings.py ..."
 echo "XMLRPC_PASS = \"$XMLRPC_PASS\"" >> mySettings.py || error "Could not add XMLRPC_PASS to mySettings.py ..."
 
