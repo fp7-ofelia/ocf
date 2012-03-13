@@ -52,13 +52,14 @@ def change_profile(request):
 			}
 		)
 	else:
-		return simple.direct_to_template(request, 
-			template = 'users/change_profile_user.html',
-			extra_context = {
-				'user_form':user_form,
-				'pass_form':pass_change_form,
-			}
-		)  
+		return HttpResponseRedirect('/accounts/login')
+#		return simple.direct_to_template(request, 
+#			template = 'users/change_profile_user.html',
+#			extra_context = {
+#				'user_form':user_form,
+#				'pass_form':pass_change_form,
+#			}
+#		)  
 
 
 @login_required
@@ -68,13 +69,8 @@ def dashboard(request):
 	'''
     
 	if (not request.user.is_superuser):
-           
-		return simple.direct_to_template(request, 
-							template = 'dashboard_user.html',
-							extra_context = {
-								'user':request.user,
-							},
-						)
+		return HttpResponseRedirect('/accounts/login')        
+   
 	else: #Admin
         
 		servers = VTDriver.getAllServers()

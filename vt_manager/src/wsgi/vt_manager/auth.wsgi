@@ -9,27 +9,39 @@ sys.stdout = sys.stderr
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings.settingsLoader'
 
+
+
 #sys.path.append(PYTHON_DIR)
 sys.path.insert(0,PYTHON_DIR)
 
 
 from django.contrib.auth.models import User
 from django import db
+from vt_manager.settings.settingsLoader import XMLRPC_USER, XMLRPC_PASS
 
 def check_password(environ, user, password):
-    db.reset_queries() 
-
+    db.reset_queries()
     kwargs = {'username': user, 'is_active': True}
-    
-    try: 
-        try: 
-            user = User.objects.get(**kwargs) 
-        except User.DoesNotExist: 
-            return None
 
-        if user.check_password(password): 
-            return True
-        else: 
-            return False
-    finally: 
-        db.connection.close() 
+    try:
+        if environ['REQUEST_URI'] == '/xmlrpc/plugin':
+            if user == XMLRPC_USER and password == XMLRPC_PASS:
+                return True
+            else:
+                return False
+        else:
+            try:
+                print "LEODEBUG ENTRA EN NORMAL AUTH"
+                user = User.objects.get(**kwargs)
+            except User.DoesNotExist:
+                return None
+
+            if user.check_password(password):
+                return True
+            else:
+                return False
+#    except Exception as e:
+#         if environ['REQUEST_URI'] == '/xmlrpc/plugin':
+#              raise e
+    finally:
+        db.connection.close()
