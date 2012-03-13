@@ -40,8 +40,5 @@ def check_password(environ, user, password):
                 return True
             else:
                 return False
-#    except Exception as e:
-#         if environ['REQUEST_URI'] == '/xmlrpc/plugin':
-#              raise e
     finally:
         db.connection.close()
