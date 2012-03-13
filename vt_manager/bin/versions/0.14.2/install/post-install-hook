@@ -22,7 +22,7 @@ if ! grep -Fxq "XMLRPC_USER" mySettings.py
 then
 	#Adding/Moving new variables to mySettings.py
 	printHeader ">" "Adding new settings to mySettings.py ..."
-	echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any ther entity connected to the northbound interface of the VT Manager to authenticate.\nThis are new variables in this version, as you mainteined your old mySettings.py file, they have to be added.\nusername: "
+	echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any other entity connected to the northbound interface of the VT Manager to authenticate.\nThese are new variables for this version, as you maintained your old mySettings.py file, they have to be added.\nusername: "
 	read XMLRPC_USER
 	while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
 	        do

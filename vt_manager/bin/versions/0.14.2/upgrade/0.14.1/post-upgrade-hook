@@ -19,7 +19,7 @@ XMLRPC_USER2="nullValue2"
 cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anymore?¿"
 #Adding/Moving new variables to mySettings.py
 printHeader ">" "Adding new settings to mySettings.py ..."
-echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any ther entity connected to the northbound interface of the VT Manager to authenticate.\nusername: "
+echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any other entity connected to the northbound interface of the VT Manager to authenticate.\nusername: "
 read XMLRPC_USER
 while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
         do
