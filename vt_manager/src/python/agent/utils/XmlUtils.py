@@ -66,20 +66,20 @@ class XmlUtils(object):
 
 	@staticmethod
 	def getEmptyProvisioningResponseObject():
-		with open(os.path.dirname(__file__)+'/xml/emptyProvisioningResponse.xml','r') as ProvResp:
-			return XmlParser.parseXML(ProvResp.read())
+		with open(os.path.dirname(__file__)+'/xml/emptyProvisioningResponse.xml','r') as fxml:
+			return XmlParser.parseXML(fxml.read())
 		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
 
 	@staticmethod
 	def getEmptyMonitoringResponseObject():
-		with open(os.path.dirname(__file__)+'/xml/emptyMonitoringResponse.xml','r') as MonitResp:
-			return XmlParser.parseXML(MonitResp.read())
+		with open(os.path.dirname(__file__)+'/xml/emptyMonitoringResponse.xml','r') as fxml:
+			return XmlParser.parseXML(fxml.read())
 		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
 
 	@staticmethod
 	def getEmptyMonitoringVMsInfoResponseObject():
-		with open(os.path.dirname(__file__)+'/xml/emptyMonitoringVMsInfoResponse.xml','r') as MonitVMs:
-		return XmlParser.parseXML(MonitVMs.read())
+		with open(os.path.dirname(__file__)+'/xml/emptyMonitoringVMsInfoResponse.xml','r') as fxml:
+			return XmlParser.parseXML(fxml.read())
 		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
 
 
