@@ -235,7 +235,7 @@ class FileHdManager(object):
 
 	@staticmethod
 	def umount(path):
-		subprocess.call(['/bin/umount',path])	
+		subprocess.call(['/bin/umount','-d',path])	
 		#remove dir
 		os.removedirs(path)	
 		

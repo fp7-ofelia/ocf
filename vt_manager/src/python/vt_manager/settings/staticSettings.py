@@ -93,7 +93,7 @@ INSTALLED_APPS = (
     'django_evolution',
     'vt_manager.models',
     'vt_manager',
-    'vt_manager.communication',
+#    'vt_manager.communication',
 )
 
 #Redirect login

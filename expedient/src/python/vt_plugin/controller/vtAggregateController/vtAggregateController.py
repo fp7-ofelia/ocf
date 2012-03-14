@@ -37,6 +37,14 @@ def aggregate_crud(request, agg_id=None):
         client_form = xmlrpcServerProxyForm(
             data=request.POST, instance=client)
         if client_form.is_valid() and agg_form.is_valid():
+            s = xmlrpclib.Server('https://'+client.username+':'+client.password+'@'+client.url[8:])
+            try:
+                s.ping('ping')
+            except:
+                DatedMessage.objects.post_message_to_user(
+                    'Could not connect to server: username, password or url are not correct' , user=request.user, msg_type=DatedMessage.TYPE_ERROR,
+                )
+                return HttpResponseRedirect(request.path) 
             client = client_form.save()
             aggregate = agg_form.save(commit=False)
             aggregate.client = client

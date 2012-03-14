@@ -44,3 +44,5 @@ def long_to_dpid(l):
     m = re.findall("\w\w", s)
     return ":".join(m)
 
+def parseFVexception(exc):
+    return str(exc).split(':',2)[2][0:-2]
