@@ -8,7 +8,7 @@
 ###
 
 #inform user
-printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
+printHeader "info#" "Using specific 14 pre-upgrade-hook module..."
 
 SRC_DIR=/opt/ofelia/expedient/
 
@@ -47,6 +47,6 @@ if [ $OFELIA==1 ];then
         printHeader ">" "Setting ldap domain in /etc/hosts..."
         line=`cat /etc/hosts | grep "ldap.ibbt.fp7-ofelia.eu"`
         if [ "$line" == "" ];then
-                sed -i '1i\10.216.4.2 ldap.ibbt.fp7-ofelia.eu' /etc/hosts       
+                sed -i '1i\10.216.4.2    ldap.ibbt.fp7-ofelia.eu' /etc/hosts       
         fi
 fi
