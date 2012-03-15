@@ -50,3 +50,5 @@ if [ $OFELIA==1 ];then
                 sed -i '1i\10.216.4.2    ldap.ibbt.fp7-ofelia.eu' /etc/hosts       
         fi
 fi
+
+PWD=$TMP_PATH
