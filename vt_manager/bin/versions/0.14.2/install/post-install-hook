@@ -8,7 +8,7 @@
 ###
 
 #inform user
-printHeader "info#" "Using specific 0.14.2-0.14.1 post-install-hook module..."
+printHeader "info#" "Using specific 0.14.2 post-install-hook module..."
 
 SRC_DIR=/opt/ofelia/vt_manager/
 local TMP_PATH=$PWD
