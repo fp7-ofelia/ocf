@@ -8,7 +8,7 @@
 ###
 
 #inform user
-printHeader "info#" "Using specific 14 pre-upgrade-hook module..."
+printHeader "info#" "Using specific 0.14.2 pre-upgrade-hook module..."
 
 SRC_DIR=/opt/ofelia/expedient/
 
