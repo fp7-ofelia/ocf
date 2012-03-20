@@ -44,3 +44,6 @@ then
 	echo "XMLRPC_PASS = \"$XMLRPC_PASS\"" >> mySettings.py || error "Could not add XMLRPC_PASS to mySettings.py ..."
 
 fi
+
+# recover PWD 
+cd $TMP_PATH

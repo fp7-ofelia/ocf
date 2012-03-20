@@ -51,4 +51,4 @@ if [ $OFELIA==1 ];then
         fi
 fi
 
-PWD=$TMP_PATH
+cd $TMP_PATH
