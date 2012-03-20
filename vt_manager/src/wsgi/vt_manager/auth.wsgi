@@ -27,18 +27,17 @@ def check_password(environ, user, password):
         if environ['REQUEST_URI'] == '/xmlrpc/plugin':
             if user == XMLRPC_USER and password == XMLRPC_PASS:
                 return True
-            else:
-                return False
-        else:
-            try:
-                print "LEODEBUG ENTRA EN NORMAL AUTH"
-                user = User.objects.get(**kwargs)
-            except User.DoesNotExist:
-                return None
+#            else:
+#                return False
+#        else:
+        try:
+            user = User.objects.get(**kwargs)
+        except User.DoesNotExist:
+            return None
 
-            if user.check_password(password):
-                return True
-            else:
-                return False
+        if user.check_password(password):
+            return True
+        else:
+            return False
     finally:
         db.connection.close()
