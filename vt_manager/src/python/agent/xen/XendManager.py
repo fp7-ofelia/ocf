@@ -19,11 +19,11 @@ OXA_XEN_REBOOT_WAIT_TIME=20
 OXA_XEN_CREATE_WAIT_TIME=2
 OXA_XEN_MAX_DUPLICATED_NAME_VMS=999999
 
-_XendManagerMutex = Lock()
-
 class XendManager(object):
 	
-	_mutex = _XendManagerMutex
+	_mutex = Lock() 
+	_xendConnection = None #NEVER CLOSE IT 
+	_xendConnectionRO = None #Not really used 
 
 	#Shell util
 	@staticmethod
@@ -32,11 +32,14 @@ class XendManager(object):
 	
 	@staticmethod
 	def __getROConnection():
-		return libvirt.openReadOnly(None)
-	
+		#return libvirt.openReadOnly(None)
+		return XendManager.__getConnection() #By-passed
 	@staticmethod
 	def __getConnection():
-		return libvirt.open(None)
+		with XendManager._mutex:
+			if XendManager._xendConnection is None:
+				XendManager._xendConnection = libvirt.open(None)
+			return XendManager._xendConnection
 	
 	@staticmethod
 	def __getDomainByVmName(conn,name):
