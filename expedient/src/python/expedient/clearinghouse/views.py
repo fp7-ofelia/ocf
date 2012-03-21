@@ -13,12 +13,19 @@ def home(request):
     isSuperUser = False
     if(has_permission(request.user, User, "can_manage_users")):
 		isSuperUser = True
-    
+  
+    if request.session.get('visited') == None:
+        showFirstTimeTooltips = True 
+        request.session['visited'] = True      
+    else:
+        showFirstTimeTooltips = False
+ 
     return direct_to_template(
         request,
         template='expedient/clearinghouse/index.html',
         extra_context={
 	    "isSuperUser": isSuperUser,
+            "showFirstTimeTooltips" :  showFirstTimeTooltips,
             "breadcrumbs": (
                 ("Home", reverse("home")),
             ),

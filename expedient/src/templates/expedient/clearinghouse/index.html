@@ -35,7 +35,9 @@ img#perm_help {
 	});
 
 	$(document).ready(function() {
-	    $(".animatedTooltip").toggleClass("animatedTooltipChange");  
+	    if( "{{showFirstTimeTooltips}}" == "True"){
+		    $(".animatedTooltip").toggleClass("animatedTooltipChange");  
+		}
 	 });  
 	function closeTooltip(){
 	    $(".animatedTooltip").css("display","none");
