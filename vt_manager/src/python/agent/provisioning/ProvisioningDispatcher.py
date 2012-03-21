@@ -45,9 +45,6 @@ class ProvisioningDispatcher:
 
 	@staticmethod
 	def processProvisioning(provisioning):
-		print "******************************************************************\n
-                       LEODEBUG: CURRENT THREAD: "+str(threading.currentThread().get_ident())+"\n
-                       *******************************************************************"
 		for action in provisioning.action:
 			vm = action.server.virtual_machines[0]
 			try:
