@@ -45,5 +45,12 @@ then
 
 fi
 
+#inform user
+printHeader "info#" "Using default post-upgrade-hook module..."
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
 # recover PWD 
 cd $TMP_PATH
