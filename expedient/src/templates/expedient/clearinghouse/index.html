@@ -49,7 +49,9 @@ img#perm_help {
 {% block messages %}{% endblock %}
 
 {% block content %}
-<div class="animatedTooltip"><a href="#" onclick="closeTooltip()">x</a><p>Don't forget to check the different help channels available!</p></div>
+{% if showFirstTimeTooltips %}
+	<div class="animatedTooltip"><a href="#" onclick="closeTooltip()">x</a><p>Don't forget to check the different help channels available!</p></div>
+{% endif %}
 <div class="main">
 	<h1>Welcome to Expedient {{ request.user.username }}!</h1>
     
