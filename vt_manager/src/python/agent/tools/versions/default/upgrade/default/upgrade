@@ -7,6 +7,10 @@
 #	@description: Version checkings 
 ###
 
+#Constants
+SRC_DIR=/opt/ofelia/oxa/repository/
+OXA_DIRECTORY="/opt/ofelia/oxa/"
+
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
