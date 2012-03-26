@@ -43,11 +43,11 @@ print "VM template installation..."
         downloadTemplateHash
 	
 	if [ -f $OXA_DIRECTORY/cache/templates/default/default.hash ];then
-	        local HASH=`cat $OXA_DIRECTORY/cache/templates/default/default.hash > /dev/null 2>&1 `
+	        local HASH=`cat $OXA_DIRECTORY/cache/templates/default/default.hash 2>/dev/null`
 	else
 		local HASH=""
 	fi
-        local NEWHASH=`cat $OXA_DIRECTORY/cache/templates/default/.default.hash > /dev/null 2>&1`
+        local NEWHASH=`cat $OXA_DIRECTORY/cache/templates/default/.default.hash 2>/dev/null`
 
         if [ ! -f $OXA_DIRECTORY/cache/templates/default/default.tar.gz -o "$NEWHASH"  != "$HASH" ];then
                 downloadTemplate
