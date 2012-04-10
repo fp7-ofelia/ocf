@@ -189,7 +189,7 @@
 	        </table>
 			<br/>
 	        {% endfor %}
-            <input id='submit' type="submit" value="Save" />
+            <input id='submit' type="submit" value="Save" onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted; Are you sure you want to save a new FlowSpace?");'/>
 			<span class="next_link">
 				| <a href="{% url html_plugin_flowspace slice.id %}">Clear</a> | 
 				{% if done %}

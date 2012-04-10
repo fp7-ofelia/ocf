@@ -72,8 +72,9 @@ class Slice(models.Model):
         Should be an idempotent operation on the aggregates.
         """
         # check the expiration date
-        if self.expiration_date <= datetime.now():
-            raise Exception("Slice expired. Update slice expiration time.")
+	# XXX: Expiration mechanism review needed
+        #if self.expiration_date <= datetime.now():
+        #    raise Exception("Slice expired. Update slice expiration time.")
         logger.debug("Called start_slice on %s: %s" % (self, self.name))
         aggs = enumerate(self.aggregates.all())
 
@@ -254,12 +255,13 @@ def notify_slice_expirations():
                 "email to user: %s" % traceback.format_exc())
     
 # schedule jobs
-try:
-    Job.objects.schedule_post_syncdb(settings.SLICE_EXPIRATION_CHECK_INTERVAL, stop_expired_slices)
-except JobAlreadyScheduled:
-    pass
-
-try:
-    Job.objects.schedule_post_syncdb(settings.SLICE_EXPIRATION_NOTIFICATION_TIME, notify_slice_expirations)
-except JobAlreadyScheduled:
-    pass
+# XXX: Expiration mechanism review needed
+#try:
+#    Job.objects.schedule_post_syncdb(settings.SLICE_EXPIRATION_CHECK_INTERVAL, stop_expired_slices)
+#except JobAlreadyScheduled:
+#    pass
+#
+#try:
+#    Job.objects.schedule_post_syncdb(settings.SLICE_EXPIRATION_NOTIFICATION_TIME, notify_slice_expirations)
+#except JobAlreadyScheduled:
+#    pass

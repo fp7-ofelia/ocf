@@ -479,7 +479,7 @@ def flowspace(request, slice_id):
         
         def widget_attrs(self, widget):
             return {"class": "wide"}
-    
+   	 
     def formfield_callback(f):
         if f.name == "slivers":
             return SliverMultipleChoiceField(
@@ -511,6 +511,8 @@ def flowspace(request, slice_id):
             
             slice.modified = True
             slice.save()
+            #slice.stop()
+            slice.start(request.user)
             return HttpResponseRedirect(request.path)
     
     elif request.method == "GET":
