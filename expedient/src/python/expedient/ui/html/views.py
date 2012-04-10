@@ -511,7 +511,8 @@ def flowspace(request, slice_id):
             
             slice.modified = True
             slice.save()
-            #slice.stop()
+            if slice.started:
+                slice.stop(request.user)    
             slice.start(request.user)
             return HttpResponseRedirect(request.path)
     
