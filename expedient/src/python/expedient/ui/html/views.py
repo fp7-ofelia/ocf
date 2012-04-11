@@ -506,6 +506,7 @@ def flowspace(request, slice_id):
 
             slice.modified = True
             slice.save()
+            e=""
             try:
                 if slice.started:
                     slice.stop(request.user)
