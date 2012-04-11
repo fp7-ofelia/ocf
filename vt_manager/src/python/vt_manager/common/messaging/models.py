@@ -95,7 +95,7 @@ class DatedMessage(models.Model):
                                     editable=False)
     users = models.ManyToManyField(User, related_name="messages",
                                    verbose_name="Recipients")
-    msg_text = models.CharField("Message", max_length=250)
+    msg_text = models.CharField("Message", max_length=300)
     sender = models.ForeignKey(User, related_name="sent_messages",
                                editable=False, null=True, blank=True)
     
