@@ -501,19 +501,29 @@ def flowspace(request, slice_id):
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
-        if formset.is_valid():
+	if formset.is_valid():
             formset.save()
-            
-            DatedMessage.objects.post_message_to_user(
-                "Successfully set flowspace for slice %s" % slice.name,
-                request.user, msg_type=DatedMessage.TYPE_SUCCESS,
-            )
-            
+
             slice.modified = True
             slice.save()
-            if slice.started:
-                slice.stop(request.user)    
-            slice.start(request.user)
+            try:
+                if slice.started:
+                    slice.stop(request.user)
+                slice.start(request.user)
+            except Exception as e:
+                pass
+            finally:
+                if e:
+                     DatedMessage.objects.post_message_to_user(
+                         "Successfully set flowspace for slice %s but with following warning %s\nIt is probably you still need to start/update your slice after solving the problem." % (slice.name, str(e)),
+                         request.user, msg_type=DatedMessage.TYPE_WARNING,
+                     )
+                else: 
+                    DatedMessage.objects.post_message_to_user(
+                        "Successfully set flowspace for slice %s" % slice.name,
+                        request.user, msg_type=DatedMessage.TYPE_SUCCESS,
+                    )
+
             return HttpResponseRedirect(request.path)
     
     elif request.method == "GET":
