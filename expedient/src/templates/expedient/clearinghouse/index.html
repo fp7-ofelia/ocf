@@ -83,7 +83,7 @@ img#perm_help {
 		<div class="messages">
 			<table class="msg_table">
 				{% for msg in messages %}
-				<tr class="{{ msg.type }} "{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
+				<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
 					<td> {%if msg.get_type_display == 'From User'%}From user<strong> {{msg.sender}}: </strong> {%endif%} {{ msg.msg_text }}</td>
 				</tr>
 				{% endfor %}
