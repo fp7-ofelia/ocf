@@ -470,8 +470,12 @@ table.msg_table td.msg_text {
     text-align:left;
 }
 
-table.msg_table .error,.warning {
+table.msg_table .error {
 	color:#9a1b1b;
+}
+
+table.msg_table .warning {
+        color:#FFBF00;
 }
 
 table.msg_table .error {
@@ -609,7 +613,7 @@ tr.error {
 tr.warning {
 	font-weight:bold;
 	font-size:11px
-        color:#FF6600;
+        color:#FFBF00;
 }
 
 tr.success {
