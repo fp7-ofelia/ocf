@@ -595,16 +595,26 @@ tr.old_message {
 	opacity: 0.4;
 }
 
-tr.error,.warning {
+tr.not_that_old_message {
+        opacity: 0.6;
+}
+
+
+tr.error {
+	font-weight:bold;
+	font-size:11px
 	color:#9a1b1b;
 }
 
-tr.success {
-	color:green;
+tr.warning {
+	font-weight:bold;
+	font-size:11px
+        color:#FF6600;
 }
 
-tr.error {
-    font-weight:bold;
+tr.success {
+/*	font-size:11px;*/
+	color:green;
 }
 
 table.detail_management_table {

@@ -45,7 +45,13 @@
                 $("table.formtable>tbody>tr>td:nth-child(3)")
 {% include "fixformtable.js" %}
                 ;
-
+		$("img#notifications_help_base").tooltip({
+                        tip: "div#notifications_help_base",
+            position: "top center",
+            cancelDefault: true,
+            relative: false,
+            offset: [-10,110]
+                });
 			});
 		</script>
 
@@ -84,10 +90,14 @@
 			<div id="content">
 				{% block messages %}
 				{% if messages %}
+				<div class="tooltip" id="notifications_help_base">Click here to go to the Message Center and see the history of notifications and messages.</div>
+				<div style="position: relative; top: -20px;">
+				<a href="{% url messaging_center %}"><img id="notifications_help_base" src="{% url img_media 'notification_16x16.png' %}" align="right" style="vertical-align:middle"></img></a>
+				</div>
 				<div id="messages" class="messages">
 					<table class="msg_table">
 						{% for msg in messages %}
-						<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
+						<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
 							<td>{{ msg.msg_text }}</td>
 						</tr>
 						{% endfor %}

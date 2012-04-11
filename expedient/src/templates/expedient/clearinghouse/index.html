@@ -27,6 +27,14 @@ img#perm_help {
             relative: true,
             offset: [0,110]
 		});
+	
+		$("img#notifications_help").tooltip({
+                        tip: "div#notifications_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+                });
 		
 		/* get the html for the projects div */
 		$.get('{% url project_list %}', function(data) {
@@ -42,6 +50,7 @@ img#perm_help {
 	function closeTooltip(){
 	    $(".animatedTooltip").css("display","none");
 	}
+	
 
 </script>
 {% endblock %}
@@ -67,19 +76,19 @@ img#perm_help {
    -->
 
 	{% if messages %}
-	<h2>Messages & Logs</h2>
+	<h2>Messages & Logs <a href="{% url messaging_center %}"><img id="notifications_help" src="{% url img_media 'notification_16x16.png' %}" align="right"></img></a></h2>
+	<div class="tooltip" id="notifications_help">Click here to go to the Message Center and see the history of notifications and messages.</div>
 	<br>
 	<div>
 		<div class="messages">
 			<table class="msg_table">
 				{% for msg in messages %}
-				<tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
+				<tr class="{{ msg.type }} "{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
 					<td> {%if msg.get_type_display == 'From User'%}From user<strong> {{msg.sender}}: </strong> {%endif%} {{ msg.msg_text }}</td>
 				</tr>
 				{% endfor %}
 				<tr>
 			</table>
-			<div class="messages_more"><a href="{% url messaging_center %}">Go to Message Center (See more...)</a></div>
 		</div>
 	</div>
 	{% endif %}
