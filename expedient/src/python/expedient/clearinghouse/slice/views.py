@@ -106,8 +106,6 @@ def detail(request, slice_id):
     must_have_permission(request.user, slice.project, "can_view_project")
     
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
-    print "RSC: "
-    print slice.resource_set.all()
     vms_list = VM.objects.filter(sliceId = slice.uuid)
  
     return list_detail.object_detail(

@@ -10,4 +10,4 @@ from django.conf import settings
 class SliceCrudForm(forms.ModelForm):
     class Meta:
         model = Slice
-        exclude = ["project", "aggregates", "owner", "reserved"]
+        exclude = ["project", "aggregates", "owner", "reserved", "expiration_date"]
