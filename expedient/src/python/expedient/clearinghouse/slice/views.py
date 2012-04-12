@@ -15,7 +15,7 @@ from models import Slice
 from forms import SliceCrudForm
 from django.conf import settings
 import logging
-from expedient.common.permissions.shortcuts import must_have_permission
+from expedient.common.permissions.shortcuts import must_have_permission, give_permission_to
 from vt_plugin.models import VM
 logger = logging.getLogger("SliceViews")
 import uuid
@@ -38,6 +38,13 @@ def create(request, proj_id):
         
         instance.reserved = False
     
+    #use to give the can_delete_slices over the slice to the creator and the owners of the project 
+    def post_save(instance, created):
+	give_permission_to("can_delete_slices", instance, instance.owner, giver=None, can_delegate=False)
+#	for projectOwner in instance.project._get_owners():
+#		give_permission_to("can_delete_slices", instance, projectOwner, giver=None, can_delegate=False)	
+
+ 
     return generic_crud(
         request, None, Slice,
         TEMPLATE_PATH+"/create_update.html",
@@ -49,6 +56,7 @@ def create(request, proj_id):
             "cancel_url": reverse("project_detail", args=[proj_id]),
         },
         pre_save=pre_save,
+        post_save=post_save,
         success_msg = lambda instance: "Successfully created slice %s." % instance.name,
     )
 
@@ -75,7 +83,15 @@ def delete(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
     project = slice.project
     
-    must_have_permission(request.user, project, "can_delete_slices")
+    #Slice can edited and used by anyone in the project, but only the owner of the slice
+    #or the project's owner can delete it
+    try:
+        must_have_permission(request.user, slice, "can_delete_slices")
+    except Exception,e:
+        try:
+            must_have_permission(request.user, project, "can_delete_slices")
+        except Exception,e2:
+            raise e if e else e2
 
     if request.method == "POST":
         stop(request, slice_id)
@@ -254,7 +270,6 @@ def update_aggregate(request, slice_id, agg_id):
 
     if request.method == "POST":
         #return HttpResponseRedirect(aggregate.add_to_slice(
-        print "PRECALLING"
         return HttpResponseRedirect(aggregate.add_controller_to_slice(
             slice, reverse("slice_detail", args=[slice_id])))
     else:

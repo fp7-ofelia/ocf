@@ -14,6 +14,7 @@ from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
 from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
 from expedient.clearinghouse.roles.models import ProjectRole,\
@@ -42,9 +43,15 @@ DEFAULT_OWNER_PERMISSIONS = [
     "can_create_roles", "can_edit_roles",
 ]
 
+#DEFAULT_RESEARCHER_PERMISSIONS = [
+#    "can_view_project",
+#    "can_create_slices", "can_edit_slices", "can_delete_slices",
+#    "can_start_slices", "can_stop_slices",
+#]
+
 DEFAULT_RESEARCHER_PERMISSIONS = [
     "can_view_project",
-    "can_create_slices", "can_edit_slices", "can_delete_slices",
+    "can_create_slices", "can_edit_slices", 
     "can_start_slices", "can_stop_slices",
 ]
 
@@ -358,6 +365,16 @@ def add_member(request, proj_id):
 			#Send mail notification to the user
             user = User.objects.get(id = request.POST['user'] )
             roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
+            user = User.objects.get(id = request.POST['user'] )
+            #XXX: Not sure about this...
+        #    for aggregate in project._get_aggregates():
+	#	aggregate.add_to_user(user,"/")
+                #give_permission_to(
+                #   "can_use_aggregate",
+                #   aggregate,
+                #   user,
+                #   can_delegate= True if "owner" in roles else False 
+                #)
             try:
                 send_mail(
                          settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),

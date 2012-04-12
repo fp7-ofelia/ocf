@@ -154,11 +154,20 @@ def make_request(request, permission, permittee, target_obj_or_class,
         done_url = request.session["breadcrumbs"][-1][1]
     except IndexError:
         done_url = reverse("home")
-    
     # get all the roles that have this permission
     roles = ProjectRole.objects.filter_for_permission(
         permission.name, target_obj_or_class)
-    
+   
+    if not roles:
+       return simple.direct_to_template(
+        request,
+        template=TEMPLATE_PATH+"/no_permission.html",
+        extra_context={
+            "cancel_url": done_url,
+            "target": target_obj_or_class,
+        }
+        )
+ 
     # for each role get the users that can delegate it
     roles_to_users = {}
     for r in roles:

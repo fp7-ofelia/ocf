@@ -21,12 +21,10 @@ class ProvisioningDispatcher():
     @staticmethod    
     def processProvisioning(provisioning):
 
-        print "PROVISIONING STARTED...\n"
         #go through all actions in provisioning class
         for action in provisioning.action:
             #translate action to actionModel
             actionModel = Translator.ActionToModel(action,"provisioning")
-            print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
             actionModel.requestUser = threading.currentThread().requestUser
             if actionModel.type == "create":
                 if Action.objects.filter (uuid = actionModel.uuid):
@@ -38,7 +36,6 @@ class ProvisioningDispatcher():
                         print e
                         return                
                 else:
-                    print "ACTION start is going to be saved"
                     actionModel.save()
 
                 try:
@@ -58,13 +55,11 @@ class ProvisioningDispatcher():
                     VMmodel.completeDelete()
                     return
                 
-                print "PROVISIONING DISPATCHER --> ACTION CREATE"
                 client = Server.aggregate.as_leaf_class().client
                 
                 ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
 
             elif actionModel.type == "delete" :
-                print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
 
                 #ProvisioningDispatcher.checkVMisPresent(action)
                 VMmodel =  VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
@@ -89,7 +84,6 @@ class ProvisioningDispatcher():
                     actionModel.vm = VMmodel
                     actionModel.save()
                 
-                print "PROVISIONING DISPATCHER--> ACTION DELETE"
                 try:	
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     client = Server.aggregate.as_leaf_class().client
@@ -105,8 +99,6 @@ class ProvisioningDispatcher():
 
             #elif actionModel.type == "start":
             else:
-                print "PROV DISPATCHER --> START, STOP, REBOOT ACTION"
-                print "ACTION = %s with id: %s" % (actionModel.type, actionModel.uuid)
                 
                 #ProvisioningDispatcher.checkVMisPresent(action)
                 VMmodel = VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
@@ -128,10 +120,8 @@ class ProvisioningDispatcher():
                         print e
                         return
                 else:
-                    print "START, STOP, REBOOT start is going to be saved"
                     actionModel.vm = VMmodel
                     actionModel.save()
-                print "PROVISIONING DISPATCHER --> START, STOP, REBOOT START"
                
 		try: 
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
@@ -148,10 +138,8 @@ class ProvisioningDispatcher():
 
     @staticmethod
     def connectAndSend(URL, action):
-        print "PROVISIONING DISPATCHER --> CONNECTANDSEND"
         try:
             vt_manager = xmlrpclib.Server(URL)
-            print "Sending ActionQuery to VT Manager\n"
             vt_manager.send(PLUGIN_URL, XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
             print "Exception connecting to VT Manager"

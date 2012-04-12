@@ -182,6 +182,10 @@ class Project(models.Model):
             objectpermission__object_id=self.id,
         ).distinct()
     members_as_permittees=property(_get_permittees)
+
+    def _getSlices(self):
+	from expedient.clearinghouse.slice.models import Slice
+        return Slice.objects.filter(project=self)
     
     def __unicode__(self):
         s = u"Project %s" % self.name

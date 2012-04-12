@@ -40,7 +40,7 @@ class PermissionMiddleware(object):
             else:
                 permittee = exception.permittee
             permittee_type = ContentType.objects.get_for_model(permittee)
-            
+
             url = reverse("permissions_url",
                 kwargs={
                     "perm_name": exception.perm_name,
