@@ -7,7 +7,7 @@
 
 '''HTTP XML-RPC Server. You must define it!!!'''
 #YOU MUST PUT A STRONG PASSWORD
-#XMLRPC_SERVER_PASSWORD="changeAndUncommentMe"
+XMLRPC_SERVER_PASSWORD="changeMe"
 
 '''Network parameters. Uncomment only if you want to override settings'''
 #XMLRPC_SERVER_LISTEN_HOST='0.0.0.0' # You should not use '' here, unless you have a real FQDN.

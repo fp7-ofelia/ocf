@@ -42,8 +42,6 @@ source $CURRENT_DIRECTORY/lib/ssl
 printHeader ">" "Configuring settings..."
 source $CURRENT_DIRECTORY/lib/settings
   
-printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
-
 printHeader ">" "Configuring Daemon..."
 source "$CURRENT_DIRECTORY/lib/daemon"
 
