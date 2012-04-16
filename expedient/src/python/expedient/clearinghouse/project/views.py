@@ -14,7 +14,7 @@ from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
 from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.shortcuts import give_permission_to
+from expedient.common.permissions.shortcuts import give_permission_to, has_permission
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
 from expedient.clearinghouse.roles.models import ProjectRole,\
@@ -362,19 +362,14 @@ def add_member(request, proj_id):
             form.save()
             #Sync LDAP
             project.save()
-			#Send mail notification to the user
+            #Send mail notification to the user
             user = User.objects.get(id = request.POST['user'] )
             roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
             user = User.objects.get(id = request.POST['user'] )
-            #XXX: Not sure about this...
-        #    for aggregate in project._get_aggregates():
-	#	aggregate.add_to_user(user,"/")
-                #give_permission_to(
-                #   "can_use_aggregate",
-                #   aggregate,
-                #   user,
-                #   can_delegate= True if "owner" in roles else False 
-                #)
+            #XXX: Not sure about this...  hace un give_permission_to...
+            for aggregate in project._get_aggregates():
+                if not has_permission(user, aggregate, "can_use_aggregate"):
+                    aggregate.add_to_user(user,"/")
             try:
                 send_mail(
                          settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),
@@ -465,6 +460,18 @@ def remove_member(request, proj_id, user_id):
             role.remove_from_permittee(member)
         # Remove other permissions
         PermissionOwnership.objects.delete_all_for_target(project, member)
+
+        #Remove can_use_aggregate if user is not member of any other project using the aggregates of this project
+        for projectAgg in project._get_aggregates():
+            aggNotUsedAnymoreByMember=1
+            for p in Project.objects.exclude(id=project.id):
+                if projectAgg in p._get_aggregates() and unicode(member) in p.members.values_list("username", flat=True):
+                    aggNotUsedAnymoreByMember=0
+                    break;
+            if aggNotUsedAnymoreByMember and not has_permission(member, projectAgg, "can_use_aggregate"):
+                projectAgg.remove_from_user(member,"/")
+
+
 	#Sync LDAP
     	project.save()
 
