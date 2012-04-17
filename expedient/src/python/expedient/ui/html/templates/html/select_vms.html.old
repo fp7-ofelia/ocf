@@ -38,7 +38,7 @@
 
 <div class="main">
     
-    <h1>Reserve Virtual Machines at Server {{ server.name }}</h1>
+    <h1>Create a Virtual Machines at Server <font class="highlight"> {{ server.name }}</font></h1>
     
 	<div class="help_text">
 	<p>Each table below describes a class of traffic you would like your

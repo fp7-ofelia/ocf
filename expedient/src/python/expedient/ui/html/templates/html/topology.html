@@ -1,4 +1,4 @@
-<h1>Topology</h1>
+<h2>Topology</h2>
 
 
 <script src="{% url js_media 'jquery.tipsy.js' %}"></script>
@@ -281,7 +281,7 @@ force.node.add(pv.Image)
 vis.render();
 
 </script>
-{% if openflow_aggs or planetlab_aggs or vt_aggs %}
+{# {% if openflow_aggs or planetlab_aggs or vt_aggs %} #}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
 <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
 <div id="target">
@@ -297,7 +297,7 @@ vis.render();
 </div>
 </div>
 
-{% endif %}
+{# {% endif %} #}
 
 <br />
 <br />

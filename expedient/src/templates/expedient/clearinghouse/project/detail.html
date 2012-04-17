@@ -86,7 +86,74 @@
 			onclick="document.location='{% url project_member_add project.id %}'" />
 	    </div>
 	</div>
+   
+	 <h2>Aggregates
+                <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+        </h2>
+
+        <div class="tooltip" id="aggs_help_div">
+                Below you can manage and add aggregates in your project. You can
+                only create slices on aggregates that are in the project. When you
+                add an aggregate to the project, you might be prompted for some
+                additional information that the aggregate needs.
+        </div>
+
+        <div class="aggregate_list">
+                {% with project.aggregates.all as aggregate_list %}
+                {% if aggregate_list.count %}
+                        {% include "project/project_simple_agg_list.html" %}
+                {% else %}
+                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
+                        This project has no aggregates added to it. To be able to
+            create slices that can reserve resources on aggregates, you will
+            need to add aggregates to the project.
+                {% endif %}
+                {% endwith %}
+                      <div class="center">
+            <input type="button" value="Add Aggregates"
+            onclick="document.location='{% url project_add_agg project.id %}'" />
+        </div>
+
+        </div>
 	
+	<h2>Slices</h2>
+	<div class="slice_list">
+		<div class="table_div">
+			<table class="fulltable" id="slice_table">
+				<tr class="head">
+		            <th class="name">Name</th>
+					<th class="description">Description</th>
+					<th class="resources">Size</th>
+					<th class="owner">Owner</th>
+					<th class="status">Reserved?</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for slice in project.slice_set.all %}
+				<tr class="body">
+					<td class="name"><a href="{% url slice_detail slice.id %}">{{ slice.name }}</a></td>
+					<td class="description">{{ slice.description }}</td>
+					<td class="resources">{{ slice.resource_set.all.count }}</td>
+					<td class="owner">
+						{% with slice.owner as user %}
+						<div class="val user_desc">{{ user.username }}</div>
+						<div class="description user_desc">{% include "users/tooltipdesc.html" %}</div>
+						{% endwith %}
+			        </td>
+					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+					<td class="actions">
+						<a href="{% url slice_detail slice.id %}">details</a>,
+						<a href="{% url slice_delete slice.id %}">delete</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div class="center">
+	    	<input type="button" value="Create Slice"
+	    	onclick="document.location='{% url slice_create project.id %}'" />
+		</div>
+	</div>
+		
 	<h2>Role Requests
 	<img id="role_req_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
 	</h2>
@@ -136,73 +203,7 @@
 			{% endfor %}
 		</table>
 	</div>
-    <h2>Aggregates
-                <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-        </h2>
 
-        <div class="tooltip" id="aggs_help_div">
-                Below you can manage and add aggregates in your project. You can
-                only create slices on aggregates that are in the project. When you
-                add an aggregate to the project, you might be prompted for some
-                additional information that the aggregate needs.
-        </div>
-
-        <div class="aggregate_list">
-                {% with project.aggregates.all as aggregate_list %}
-                {% if aggregate_list.count %}
-                        {% include "project/project_simple_agg_list.html" %}
-                {% else %}
-                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
-                        This project has no aggregates added to it. To be able to
-            create slices that can reserve resources on aggregates, you will
-            need to add aggregates to the project.
-                {% endif %}
-                {% endwith %}
-                      <div class="center">
-            <input type="button" value="Add Aggregates"
-            onclick="document.location='{% url project_add_agg project.id %}'" />
-        </div>
-
-        </div>
-	
-	<h2>Slices</h2>
-	<div class="slice_list">
-		<div class="table_div">
-			<table class="fulltable" id="slice_table">
-				<tr class="head">
-		            <th class="name">Name</th>
-					<th class="description">Description</th>
-					<th class="resources">Size</th>
-					<th class="owner">Owner</th>
-					<th class="status">Reserved?</th>
-					<th class="actions">Actions</th>
-				</tr>
-				{% for slice in project.slice_set.all %}
-				<tr class="body">
-					<td class="name">{{ slice.name }}</td>
-					<td class="description">{{ slice.description }}</td>
-					<td class="resources">{{ slice.resource_set.all.count }}</td>
-					<td class="owner">
-						{% with slice.owner as user %}
-						<div class="val user_desc">{{ user.username }}</div>
-						<div class="description user_desc">{% include "users/tooltipdesc.html" %}</div>
-						{% endwith %}
-			        </td>
-					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
-					<td class="actions">
-						<a href="{% url slice_detail slice.id %}">details</a>,
-						<a href="{% url slice_delete slice.id %}">delete</a>
-					</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-		<div class="center">
-	    	<input type="button" value="Create Slice"
-	    	onclick="document.location='{% url slice_create project.id %}'" />
-		</div>
-	</div>
-	
 	<h2>Roles</h2>
 	<div class="role_list">
 		<div class="table_div">

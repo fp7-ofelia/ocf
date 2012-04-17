@@ -368,7 +368,7 @@ def bookOpenflow(request, slice_id):
  
         protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
-        
+
         return simple.direct_to_template(
             request,
             template="html/select_resources.html",
@@ -393,8 +393,58 @@ def bookOpenflow(request, slice_id):
                 )
             },
         )
- 
 
+def getUIdata(request, slice):
+    """
+    Returns information  
+    """
+    slice_id=slice.id 
+    checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+    checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+
+    aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+    of_aggs = \
+            slice.aggregates.filter(aggs_filter)
+    pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+
+    vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+    for agg in vt_aggs:
+        vtPlugin = agg.as_leaf_class()
+        askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+      
+    gfs_list=[]
+    for of_agg in of_aggs:
+        gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+        gfs_list.append([of_agg.id,gfs])
+ 
+    protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+    tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+        
+    fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+
+    return {
+                "protovis_nodes": protovis_nodes,
+                "protovis_links": protovis_links,
+                "tree_rsc_ids": tree_rsc_ids,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
+                "vt_aggs": vt_aggs,
+                "slice": slice,
+                "checked_ids": checked_ids,
+                "allfs": fsquery, 
+                "gfs_list": gfs_list, 
+                "ofswitch_class": OpenFlowSwitch,
+                "planetlab_node_class": PlanetLabNode,
+            }
+ 
+#XXX: deprecated
 def home(request, slice_id):
     """
     Display the list of all the resources  

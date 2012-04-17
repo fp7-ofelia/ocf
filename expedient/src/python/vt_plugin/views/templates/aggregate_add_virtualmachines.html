@@ -1,6 +1,6 @@
 {% extends "vt_plugin_base.html" %}
 
-{% block title %}Add Virtual Machines in Server {{ server_name }}.{% endblock title %}
+{% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
 
@@ -21,7 +21,7 @@
 
 {% block content %}
 <div class="main">
-	<h1>Create a new Virtual Machine in Server {{ server_name }}</h1>
+	<h1>Create a new Virtual Machine in server <span class="highlight">{{ server_name }}</span></h1>
 	
 	<form method="post" action="">{% csrf_token %}
     	{{ formset.management_form }}
@@ -37,7 +37,7 @@
         {% endfor %}
 		<div id = "buttons" class="center"> 
 			<input type="submit" name = "create_new_vms" value="Done" onClick="return checkNameBlanks()"/> |
-			<a href="{% url html_plugin_home slice.id %}">Cancel</a>
+			<a href="{% url slice_detail slice.id %}">Cancel</a>
 		</div>
 	</form>
 </div>

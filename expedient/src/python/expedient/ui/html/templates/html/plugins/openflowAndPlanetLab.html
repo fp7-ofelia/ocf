@@ -1,138 +1,15 @@
-{% extends "base.html" %}
 {% load ch_extras %}
-
-{% block head %}
-<style>
-    table.openflow,table.planetlab {
-        width: 100%;
-        border-spacing: 0px;
-        border-collapse: collapse;
-        border: 1px solid #CCC;
-    }
-    table.openflow .dpid,.ports {
-        border-bottom: 1px solid #000;
-    }
-    table.connections_table {
-        border-width: 0px;
-        width: 100%;
-    } 
-    table.openflow td {
-        border-spacing: 0px;
-        padding: 0px;
-        border-collapse: collapse;
-    }
-    td.select_checkbox {
-        width: 24px;
-    }
-    table.connections {
-        width: 440px;
-    }
-    tr.odd {
-        background-color: #ecf4d7;
-    }
-    td.connected {
-        font-weight: bold;
-    }
-    
-    td.port_num {
-        width: 45px;
-    }
-    div.steps {
-        padding: 4px;
-        font-weight: bold;
-    }
-</style>
-<script src="{% url js_media 'protovis-r3.2.js' %}"></script>
-
-<script>
-    function updateVMparams(data,index){
-        $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
-        $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");
-    }
-</script>
-
-</script> 
-
-<script>
-    function updateVMstatus(){
-        $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
-           $.each(data.status, function(index,value){
-					$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
-                    updateVMparams(data,index);
-                }
-           );
-           var vms_table = document.getElementById('table_vms_list');
-           $.each($("#table_vms_list tr"), function(tr_index, tr_table){
-                var vmIdValue = tr_table.id.substring(5);
-                if (tr_table.id != 'table_vms_list_header'){
-                    var vmIdValue = tr_table.id.substring(5);
-                    if (!data.status[vmIdValue]) {
-                            $("#tr_vm"+vmIdValue).remove();
-                    }
-                }
-            }
-           );
-        });
-		$('#messages').load("../../vt_plugin/update_messages");
-    }
-    
-</script>
-<script>
-    var timer = setInterval(function(){
-    updateVMstatus(); 
-    },3000);
-</script>
-
-<script>
-	function handleVMaction(sliceId,vmId,action,vmName){
-		if(action == "delete"){
-			if(!confirm(" Are you sure you want to delete VM: "+vmName+"?"))
-				return;	
-		}
-		$.getJSON("../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
-		updateVMstatus();
-	}
-</script>
-
-<script>
-    $(document).ready(function() {
-        /* add tooltip to question mark */
-        $("img#req_fs_help").tooltip({
-            tip: "div#req_fs_help",
-            position: "top center",
-            cancelDefault: true,
-            relative: true,
-            offset: [0,110]
-        });
-		$("img#gr_fs_help").tooltip({
-            tip: "div#gr_fs_help",
-            position: "top center",
-            cancelDefault: true,
-            relative: true,
-            offset: [0,110]
-        });
-    });
-</script>
-
-
-{% endblock %}
-
 {% block content %}
-<div style="text-align:center;font-size:18px">
-<b>Resource visualization panel</b><br> 
-</div>
-
-{% include "html/topology.html" %}
-
-<form action="" method="POST">{% csrf_token %}
+{# PLANETLAB #}
 
 
 {% if planetlab_aggs %}
-<h1>Select PlanetLab Nodes</h1>
+<h2 class="resourcesh2">Select PlanetLab Nodes</h2>
 {% endif %}
 
 {% for agg in planetlab_aggs %}
-<h2>PlanetLab Aggregate {{ agg.name }}</h2>
+<h2 class="resourcesh2">PlanetLab Aggregate {{ agg.name }}</h2>
+<div class="aggregateManager">
 <div id="am_location">
 	Aggregate physical location: <b>{{ agg.location }}.</b>
 </div>
@@ -176,25 +53,54 @@
     {% endfor %}
   </table>
 </div>
+</div> <!-- aggregateManager container -->
 {% endfor %}
 
+
+{# OPENFLOW #}
 {% if openflow_aggs %}
-<h1>Select OpenFlow Resources</h1>
+<h2 class="resourcesh2">Network resources (Openflow)</h2>
 {% endif %}
 
 {% for agg in openflow_aggs %}
-<h2>OpenFlow Aggregate {{ agg.name }}</h2>
-<div id="am_location">
-Aggregate physical location: <b>{{ agg.location }}.</b>
-</div >
+<h2>OpenFlow Aggregate: {{ agg.name }}</h2>
+<div class="aggregateManager">
+	<table class="aggregateManagerDetail">
+	<tr>
+	<td class="label">Name:</td>
+	<td> <b>{{ agg.name }}</b>.</td>
+	</tr>
+	<tr>
+	
+	<tr>
+	<td class="label">Status:</td>
+	<td>			{% if not agg.available %}
+				<img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
+				{%else%}
+				<img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em"> 
+				{% endif %}
+	</tr>
+	<tr>
+	<td class="label">Physical location:</td>
+	<td> <b>{{ agg.location }}</b>.</td>
+	</tr>	
+
+	<tr>
+	<td class="label" style="border-bottom:0px!important">Resources:</td><td style="border-bottom:0px!important"></td>
+	</tr>
+	<tr>
+	<td colspan="2">
+
+
 	{% if checked_ids %}
-<div>
 	<div style="padding-top:20px;">
  	  {% if allfs %}
 	<table class="servers" style="border-bottom:0px">
-    <tr><th style="background-color:#FF9966">Requested Flowspace{%if allfs|length > 1%}s{%endif%}  <img align="absmiddle" id="req_fs_help" src="/static/media/img/question_mark_15x15.png"></th></tr>
-    </table>
-	</div>
+		<tr>
+			<th style="background-color:#FF9966">Requested Flowspace{%if allfs|length > 1%}s{%endif%}  <img align="absmiddle" id="req_fs_help" src="/static/media/img/question_mark_15x15.png"></th>	
+		</tr>
+	</table>
+	
 	<div class="tooltip" id="req_fs_help">
 	Notice that a "None" value means that that field is getting the maximum possible value.<br/>In addition if different Flowspaces are defined over the same OpenFlow interface (Switch-Port), the resultant FlowSpace over this interface will be the combination of all the FlowSpaces. This can be seen better in the Granted FlowSpace
 	</div>	
@@ -314,107 +220,34 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
  	{% else %}
               <p>There is no Flowspace in the Slice. </p>
    {% endif %}
-</div>
-{%endif%}
-{% empty %}
-  <p>There are no OpenFlow aggregates in the slice. </p>
-  {% endfor %}
-
+{% else %} {#Should never reach this#}
+{%endif%} {#Checked IDs#}
+   </div>
+   </td>
+   </tr>
+   <tr>
+	<td class="label">Openflow controller:</td>
+	<td>
+		<form method="POST" action="{% url slice_update_agg slice.id agg.id %}">{% csrf_token %}
+        	<input type="submit" value="Set controller" />
+		</form>
+ 	</td>
+   </tr>
+  {#Actions#}
+  <tr>
+	<td class="label" width="150px">Actions:</td>
+	<td>
+    	
   {% if openflow_aggs or planetlab_aggs %}
-	<div style="margin-top:50px;text-align:right">
-		<input type="button" onClick='document.location="{% url html_plugin_bookOpenflow slice.id %}"' value="Book Openflow and PlanetLab resources" />
-	</div>
+		<input type="button" onClick='document.location="{% url html_plugin_bookOpenflow slice.id %}"' value="Book Openflow resources" />
   {% endif %}
-</form>
+  </tr>
+  </table> <!-- Table details -->
 
-
-{% if vt_aggs %}
-<h1>Virtualized servers resources</h1>
-{% endif %}
-
-{% for agg in vt_aggs %}
-<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
-
-    <h2>VT Aggregate Manager {{ agg.name }}</h2>
-    <div id="am_location">
-        Aggregate physical location: <b>{{ agg.location }}</b>.
-    </div>
-    {% if agg.resource_set.all %}
-
-    {% for rsc in agg.resource_set.all %}
-    {% if rsc.leaf_name == 'VTServer' %}
-    {% with rsc.as_leaf_class as server %}
-       <table class="servers">
-    <tr>
-      <th>Server Name</th>
-      <th>Virt. Tech.</th>
-      <th>Operating System</th>
-      <th>CPU</th>
-      <th>Memory</th>
-      <th>Disc</th>
-    </tr>
-
-
-       <tr class = "odd">
-      <!--  <td>
-        <input type = "radio" name = "server_id" value = "{{server.id}}" checked/>
-        </td>-->
-        <td>
-            {{ server.name }}
-        </td>
-        </td>
-        <td>
-            {{ server.virtTech  }}
-        </td>
-          <td>
-            {{ server.operatingSystemType }}
-            {{server.operatingSystemDistribution}} ({{server.operatingSystemVersion}})
-        </td>
-        <td>
-            {{ server.freeCpu }}
-        </td>
-        <td>
-            {{ server.memory }}
-        </td>
-        <td>
-            {{ server.freeDiscSpace }}
-        </td>
-        </tr>
-        </table>
-            <div id = "vms_table">
-            {% if server.vms.all%}
-            {% include "html/list_vms.html" %}
-            {% endif %}
-            </div>
-
-
-    {% endwith %}
-    {% endif %}
-    {% endfor %}
-    </table>
-    <br/>
-    <div id="create_server" style="clear:both;">
-        Create a new virtual machine in server:
-        <select name = "selected_server" id="server_id_agg_{{agg.id}}">
-        {% for rsc in agg.resource_set.all %}
-        {% with rsc.as_leaf_class as server %}
-        {% if rsc.leaf_name == 'VTServer' %}
-            <option value="{{server.id}}">{{server.name}}</option>
-        {% endif %}
-        {% endwith %}
-        {% endfor %}
-        </select>
-        <input type="submit" name = "create_vms"  id="create_vms_agg_{{agg.id}}" value="Create VM" />
-
-    </div>
-    {% else %}
-    <div id="no_servers">
-        The aggregate manager does not contain any server yet, or this Expedient instance has not enough privileges to access current servers...
-    </div>
-    {% endif %}
-</form> 
+</div> <!-- aggregateManager container -->
+{% empty %}
+  <!--<p>There are no OpenFlow aggregates in the slice. </p>-->
 {% endfor %}
-
 
 
 {% endblock content %}

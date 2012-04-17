@@ -202,17 +202,26 @@ body {
 /*	Begin Headers */
 h1 {
 	padding-top: 0px;
-	padding-bottom: 5px;
 	margin: 0px 0px 25px 0px;
 	border-width: 0px 0px 1px 0px;
 	border-style: solid;
 	border-color: #CCC;
 	}
-
+.highlight{
+	color: #225599;	
+}
 h2 {
-	margin: 15px 0 5px;
+	margin: 15px 0 0px;
+	border-width: 0px 0px 1px 0px;
 	}
 
+.resourcesh2 {
+	color:#666;
+	margin-top:28px;
+	text-align:right;
+	font-size:15px;
+	font-style:italic;
+}
 h2.pagetitle {
 	margin-top: 30px;
 	text-align: center;
@@ -522,7 +531,10 @@ div.mgmt_actions {
 	border: 1px solid #E0E8FF;
 	float: right;
 }
-
+div.slicemgmt_actions {
+	border: 1px solid #E0E8FF;
+	margin-top:-20px;
+}
 div.proj_description {
 	height: 100px;
 }
@@ -649,56 +661,81 @@ table.detail_management_table {
 }
 
 
-table.vms tr.even{
-    background-color: #CEF6F5;
-}
-
-table.vms tr.odd{
-    background-color: #E0F8E0;
-}
 
 table.servers{
     width: 100%;
     border-spacing: 0px;
     border-collapse: collapse;
-    border: 1px solid #CCC;
+    font-size:11px;
+    border:0px;
+    border-left:15px solid #333;
 }
 
+table.servers tr{
+	border:0px!important;
+	border-bottom:1px solid red;
+}
 table.servers td{
-    padding : 2px;
+    padding : 4px;
+    border:0px!important;
+    color:#000;
 }
-
-table.vms th {
-    background-color: #CEF6F5;
-}
-
-table.vms{
-    width: 95%;
-    float:right;
-    border-spacing: 0px;
-    border-collapse: collapse;
-    border: 1px solid #CCC;
-    margin-bottom:25px;
-}
-
-table.vms td{
-    padding : 2px;
-}
-
 table.servers th {
-    padding : 2px;
-    background-color: #8ED6EA;
+    padding : 4px;
+    border:0px;
+    /*background-color: #8ED6EA;*/
+    background-color: /*#CEF6F5;*/ #333;
+    color: #eee;  
+    text-align:left;
 }
-
-
 table.servers tr.even{
-    background-color: #A6DEEE;
+    /*background-color: #A6DEEE;*/
+    background-color: #AAA;
+    border:0px!important;
 }
 
 table.servers tr.odd{
-    background-color: #C0E7F3;
+    /*background-color: #C0E7F3;*/
+    background-color: #999;
+    border:0px!important;
 }
 
+
+
+table.vms{
+    border-spacing: 0px;
+    border-collapse: collapse;
+    text-align:left;
+    font-size:11px;
+    width:100%;
+    border-left:15px solid #333!important;
+}
+
+table.vms th {
+    background-color: /*#CEF6F5;*/ #666;  
+    color: #fff;
+    padding : 4px;
+    text-align:left;
+    border:0px;
+}
+
+table.vms td{
+    padding : 4px;
+    text-align:left;
+    border:0px!important;
+    color:#000;
+}
+
+table.vms tr{
+}
+table.vms tr.even{
+    background-color: #DDD;
+    border:0px!important;
+}
+
+table.vms tr.odd{
+    background-color: #CCC;
+}
 
 table.flowspace{
     width: 90%;
@@ -765,7 +802,6 @@ table.flowspace_r tr.even{
 #create_server{
     color: #000000;
     font-size:12px;
-    margin-bottom: 45px;
 }
 #no_servers{
     padding-left: 30px;
@@ -775,10 +811,75 @@ table.flowspace_r tr.even{
     font-style:italic;
 }
 
+/* New slice mgmt actions*/
+#slicemgmt_table{
+	margin:0px;
+	padding:0px;
+}
+#slicemgmt_table th{
+	margin:0px;
+	padding:0px;
+}
+#slicemgmt_table th h2{
+	padding:2px;
+	margin:0px;
+}
+#slicemgmt_table td{
+	margin:0px;
+	padding:0px 3px 0px 3px;
+	vertical-align: middle!important;
+	text-align:left;
+}
+
 /* Other */
 .openflow{
 	margin-bottom:20px;
 }
 .planetlab{
 	margin-bottom:20px;
+}
+
+/* Reestyling */
+
+/* AM borders */
+div.aggregateManager {
+	margin-bottom:10px;
+	background-color:#EEE;
+    	border: 1px solid #CCC;
+    	-moz-border-radius: 0px 25px 25px 25px;
+    	-webkit-border-radius: 0px 25px 25px 25px;
+    	border-radius:  0px 25px 25px 25px;
+	display:inline-block;
+	width:720px;;
+	text-align:center;
+	vertical-align:middle;
+	padding:10px;
+}
+div.addAggregateManager {
+	width:350px;
+	padding:5px!important;
+}
+div.addAggregateManager:hover {
+	background-color: #CCFFBB;
+    	border: 1px solid #bbb;
+	cursor:pointer;
+}
+div.aggregateManager a.noMouseOver:hover {
+	text-decoration:none!important;
+}
+
+div.aggregateManager table.aggregateManagerDetail {
+	margin:5px;
+	margin-right:10;
+	width:100%;
+}
+div.aggregateManager table.aggregateManagerDetail td {
+	text-align:left;
+	vertical-align:middle;
+	border-bottom:1px solid #DDD;
+}
+div.aggregateManager table.aggregateManagerDetail .label {
+	font-size:11px;
+	padding-top:2px;
+	vertical-align:top!important;
 }

@@ -123,14 +123,7 @@ def detail(request, slice_id):
     
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
     vms_list = VM.objects.filter(sliceId = slice.uuid)
- 
-    return list_detail.object_detail(
-        request,
-        Slice.objects.all(),
-        object_id=slice_id,
-        template_name=TEMPLATE_PATH+"/detail.html",
-        template_object_name="slice",
-        extra_context={
+    extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
@@ -138,7 +131,17 @@ def detail(request, slice_id):
             ),
             "resource_list": resource_list,
             "vms_list": vms_list,
-        }
+    }
+    from expedient.ui.html.views import getUIdata
+    #extra_context+=getUIdata(request,slice)
+    
+    return list_detail.object_detail(
+        request,
+        Slice.objects.all(),
+        object_id=slice_id,
+        template_name=TEMPLATE_PATH+"/detail.html",
+        template_object_name="slice",
+	extra_context=dict(extra_context.items()+getUIdata(request,slice).items())
     )
     
 def start(request, slice_id):
