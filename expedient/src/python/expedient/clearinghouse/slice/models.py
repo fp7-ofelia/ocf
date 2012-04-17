@@ -18,6 +18,7 @@ from expedient.common.timer.models import Job
 from expedient.common.timer.exceptions import JobAlreadyScheduled
 from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
+from expedient.common.utils.validators import *
 
 logger = logging.getLogger("slice.models")
 
@@ -48,8 +49,8 @@ class Slice(models.Model):
     @type aggregates: C{QuerySet} of L{Aggregate}s
     '''
     
-    name = models.CharField(max_length=200, unique=True)
-    description = models.TextField()
+    name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
+    description = models.TextField(validators=[asciiValidator])
     project = models.ForeignKey(Project)
     owner = models.ForeignKey(User, related_name="owned_slices")
     started = models.BooleanField(default=False, editable=False)
