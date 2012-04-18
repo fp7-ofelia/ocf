@@ -494,7 +494,7 @@ def home(request, slice_id):
 
         return simple.direct_to_template(
             request,
-            template="html/show_resources.html",
+            template="expedient/clearinghouse/slice/detail.html",
             extra_context={
                 "protovis_nodes": protovis_nodes,
                 "protovis_links": protovis_links,
