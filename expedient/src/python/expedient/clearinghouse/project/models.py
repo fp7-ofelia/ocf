@@ -14,8 +14,8 @@ from django.conf import settings
 from django.db import transaction
 import uuid
 import string
-from django import forms
 import re
+from expedient.common.utils.validators import *
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -72,12 +72,6 @@ class Project(models.Model):
     @type members_as_permittees: C{QuerySet} of L{Permittee}s.
     '''
 
-    def asciiValidator(s):
-        for c in s:
-            if ord(c)>127:
-                raise forms.ValidationError("Please use only non accented characters")
-     
-    
     objects = ProjectManager()
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
