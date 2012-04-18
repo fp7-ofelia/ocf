@@ -556,20 +556,17 @@ def flowspace(request, slice_id):
 
             slice.modified = True
             slice.save()
-            e=""
+            exp=""
             try:
                 if slice.started:
-                    slice.stop(request.user)
-                slice.start(request.user)
+                    #slice.stop(request.user)
+                    slice.start(request.user)
             except Exception as e:
-                pass
+                exp=str(e)
             finally:
-                if e:
-                     print "\n\n\nLEODEBUG"
-                     print e
-                     print "\n\n\n"
+                if exp:
                      DatedMessage.objects.post_message_to_user(
-                         "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, str(e)),
+                         "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
                          request.user, msg_type=DatedMessage.TYPE_WARNING,
                      )
                 else: 

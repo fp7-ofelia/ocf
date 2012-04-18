@@ -189,7 +189,10 @@
 	        </table>
 			<br/>
 	        {% endfor %}
-            <input id='submit' type="submit" value="Save" onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted; Are you sure you want to save a new FlowSpace?");'/>
+            <input id='submit' type="submit" value="Save" 
+		{%if slice.started %}onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted; Are you sure you want to save a new FlowSpace?");'
+		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace.");'
+		{% endif%}/>
 			<span class="next_link">
 				| <a href="{% url html_plugin_flowspace slice.id %}">Clear</a> | 
 				{% if done %}
