@@ -565,6 +565,9 @@ def flowspace(request, slice_id):
                 pass
             finally:
                 if e:
+                     print "\n\n\nLEODEBUG"
+                     print e
+                     print "\n\n\n"
                      DatedMessage.objects.post_message_to_user(
                          "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, str(e)),
                          request.user, msg_type=DatedMessage.TYPE_WARNING,

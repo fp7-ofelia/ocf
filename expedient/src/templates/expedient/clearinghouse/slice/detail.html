@@ -125,7 +125,7 @@
                         <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
                 </h1>
 		<center>
-		<div class="aggregateManager addAggregateManager" onclick='document.location="{% url slice_add_agg slice.id %}"' style="vertical-align:middle">
+		<div id="addAggregate" class="aggregateManager addAggregateManager" onclick='document.location="{% url slice_add_agg slice.id %}"' style="vertical-align:middle">
 		<a href="#/" class="noMouseOver"><span style="font-size:25px;font-weight:bold;vertical-align:middle">+</span><span style="vertical-align:middle"> Add an Agregate Manager to the current slice</span></a>
 		</div>
 		</center>
