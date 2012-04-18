@@ -67,7 +67,10 @@
 				    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
 								<input 
 								type="submit" 
-								value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
+								value="{% if slice.started %}Update {% else %}Start{% endif %} Slice"
+								{%if slice.started %}
+								onClick='return confirm("Updating the slice will cause all granted flowsapces to be deleted in the Flowvisor, and require approval the updated flowspaces. Are you sure you want to update the slice?");'
+								{%endif%}
 							/>
 			    			</form>
 			    		</td>
@@ -77,6 +80,7 @@
 							type="submit"
 							value="Stop Slice"
 							{% if not slice.started %} disabled {% endif %}
+							onClick='return confirm("Stopping the slice will cause all granted flowsapces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to stop the slice?");'
 							/>
 				    		</form>
 		    			</td>
@@ -89,7 +93,7 @@
     </div><!-- detail section -->
 
 {# Topology #}
-{% include "slice/templates/topology.html" %}
+{% include "slice/ui/topology.html" %}
 
 {# List of aggregates #}
     <div class="detail_section">
@@ -134,8 +138,8 @@
         </div>
 
 {# Aggregate details #}
-{% include "slice/templates/plugins/openflowAndPlanetLab.html" %}
-{% include "slice/templates/plugins/vt.html" %}
+{% include "slice/ui/plugins/openflowAndPlanetLab.html" %}
+{% include "slice/ui/plugins/vt.html" %}
 
 {# Show message when no aggregates are added to the slice #}
 {% with slice.aggregates.all as aggregate_list %}

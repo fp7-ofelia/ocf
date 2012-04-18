@@ -533,7 +533,7 @@ div.mgmt_actions {
 }
 div.slicemgmt_actions {
 	border: 1px solid #E0E8FF;
-	margin-top:-20px;
+	margin-top:-10px;
 }
 div.proj_description {
 	height: 100px;
@@ -738,17 +738,17 @@ table.vms tr.odd{
 }
 
 table.flowspace{
-    width: 90%;
+    width: 100%;
     border-spacing: 0px;
     border-collapse: collapse;
-    border: 1px solid #CCC;
-	margin-left:auto;
+    border: 0px 
+    margin-left:auto;
     margin-right:auto;
 }
 
 table.flowspace td{
     padding : 2px;
-	border:1px solid #CCC;
+    border:0px!important;
 }
 
 table.flowspace th{
@@ -764,31 +764,55 @@ table.flowspace tr.even{
     background-color: #C0E7F3;
 }
 
-table.flowspace_r{
-    width: 90%;
+/* Flowspaces*/
+
+table.flowspaceHeader {
+     width: 100%;
     border-spacing: 0px;
     border-collapse: collapse;
-    border: 1px solid #CCC;
+    font-size:11px;
+    border:0px;
+}
+table.requestedFlowspaceHeader {
+    background-color: #FF9966;
+}
+table.grantedFlowspaceHeader {
+    background-color: #44AAAA;
+}
+table.flowspaceHeader th {
+	text-align:left;
+}
+
+table.flowspace{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
     margin-left:auto;
     margin-right:auto;
+    font-size:11px;
 }
 
 table.flowspace_r td{
+    border:0px!important;
+}
+table.flowspace td{
     padding : 2px;
-/*    border:1px solid #C00;*/
+    border:0px!important;
 }
 
 table.flowspace_r th{
-  /*  padding : 2px;*/
-  /*  background-color: #FFCC00;*/
+    border:0px;
+    background-color: #FFBB88;
 }
 
 table.flowspace_r tr.odd{ 
-  /*  background-color: #EF2626;*/
+    background-color: #FFBB88;
+    border:0px;
 }
 
 table.flowspace_r tr.even{
-  /*  background-color: #FF6060;*/
+    background-color: #FFDDAA;
+    border:0px;
 }
 
 

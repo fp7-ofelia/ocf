@@ -281,23 +281,20 @@ force.node.add(pv.Image)
 vis.render();
 
 </script>
-{# {% if openflow_aggs or planetlab_aggs or vt_aggs %} #}
+{#Render#}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
 <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
 <div id="target">
 </div>
 <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
-<!--    <input type="button" value="Zoom In" onClick="zoomIn(0.25)"/>
-    <input type="button" value="Zoom Out" onClick="zoomOut(0.5)">
-    <input type="button" value="Reset" onClick="zoomReset()">
--->
-   <a href="#" onClick="return zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   
+    <a href="#" onClick="return zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
    <a href="#" onClick="return zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
    <a href="#" onClick="return zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
 </div>
 </div>
 
-{# {% endif %} #}
+
 
 <br />
 <br />

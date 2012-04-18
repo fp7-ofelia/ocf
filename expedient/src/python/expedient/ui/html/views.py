@@ -388,7 +388,7 @@ def bookOpenflow(request, slice_id):
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
                     ("Allocate Openflow and PlanetLab resources", reverse("html_plugin_bookOpenflow", args=[slice_id])),
                 )
             },
@@ -512,7 +512,7 @@ def home(request, slice_id):
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    ("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
                 )
             },
         )
@@ -599,8 +599,8 @@ def flowspace(request, slice_id):
                 ("Home", reverse("home")),
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
-                ("HTML UI - Choose Flowspace", reverse("html_plugin_flowspace", args=[slice_id])),
+                #("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
+                ("Choose Flowspace", reverse("html_plugin_flowspace", args=[slice_id])),
             ),
         },
     )
@@ -627,9 +627,9 @@ def sshkeys(request, slice_id):
                 ("Home", reverse("home")),
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                ("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
-                ("HTML UI - Choose Flowspace", reverse("html_plugin_flowspace", args=[slice_id])),
-                ("HTML UI - Download SSH Keys", reverse("html_plugin_sshkeys", args=[slice_id])),
+                #("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
+                ("Choose Flowspace", reverse("html_plugin_flowspace", args=[slice_id])),
+                ("Download SSH Keys", reverse("html_plugin_sshkeys", args=[slice_id])),
             ),
         }
     )

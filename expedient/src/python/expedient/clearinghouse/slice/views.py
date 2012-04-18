@@ -123,6 +123,11 @@ def detail(request, slice_id):
     
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
     vms_list = VM.objects.filter(sliceId = slice.uuid)
+    from openflow.plugin.models import OpenFlowSliceInfo
+    try:
+        controller_url = OpenFlowSliceInfo.objects.get(slice=slice).controller_url
+    except:
+        controller_url= "Not set"
     extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
@@ -131,6 +136,7 @@ def detail(request, slice_id):
             ),
             "resource_list": resource_list,
             "vms_list": vms_list,
+	    "controller_url":controller_url 
     }
     from expedient.ui.html.views import getUIdata
     #extra_context+=getUIdata(request,slice)

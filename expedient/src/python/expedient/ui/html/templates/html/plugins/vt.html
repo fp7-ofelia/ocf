@@ -53,7 +53,7 @@
 
 <script>
     function updateVMstatus(){
-        $.getJSON("../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
+        $.getJSON("../../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
            $.each(data.status, function(index,value){
 					$("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
                     updateVMparams(data,index);
@@ -71,7 +71,7 @@
             }
            );
         });
-		$('#messages').load("../../vt_plugin/update_messages");
+		$('#messages').load("../../../vt_plugin/update_messages");
     }
     
 </script>
@@ -87,7 +87,7 @@
 			if(!confirm(" Are you sure you want to delete VM: "+vmName+"?"))
 				return;	
 		}
-		$.getJSON("../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
+		$.getJSON("../../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
 		updateVMstatus();
 	}
 </script>
@@ -129,7 +129,7 @@
 	<table class="aggregateManagerDetail">
 	<tr>
 	<td class="label">Name:</td>
-	<td> <b>{{ agg.name }}</b>.</td>
+	<td> <b>{{ agg.name }}</b></td>
 	</tr>
 	<tr>
 	<!--<td class="label">Type:</td>
@@ -145,7 +145,7 @@
 	</tr>
 	<tr>
 	<td class="label">Physical location:</td>
-	<td> <b>{{ agg.location }}</b>.</td>
+	<td> <b>{{ agg.location }}</b></td>
 	</tr>	
 
 	<tr>
