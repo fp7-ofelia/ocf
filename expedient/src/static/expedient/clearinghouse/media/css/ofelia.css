@@ -907,3 +907,12 @@ div.aggregateManager table.aggregateManagerDetail .label {
 	padding-top:2px;
 	vertical-align:top!important;
 }
+
+/* Loading blockUI */
+.blockUI h1{
+	text-decoration:none;
+	border:0px!important;
+	color: #fff;
+	text-align:center;
+	margin:auto;	
+}

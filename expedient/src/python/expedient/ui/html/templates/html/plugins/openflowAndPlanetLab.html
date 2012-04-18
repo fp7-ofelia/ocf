@@ -113,6 +113,7 @@
 			jQuery("span", this).toggleClass("opened closed");
 	  	});
 	});
+
 	</script>
 
 
@@ -240,6 +241,11 @@
 		</table>
 		</div> <!-- grantedFlowsapceContainer -->
 		{% endfor %} <!-- gfs in gfs_lis -->
+		{%else%}
+		 <p style="font-size:10px">
+			<img style="height:12px;" src="{% url img_media 'inactive.png' %}" alt="Flowspace not yet granted" title="Flowspace not yet granted">
+			 Flowspace has not been granted yet, which means slice controller will NOT receive any packet. Consider contacting Island Manager(s) involved if grant of the flowspace does not happen in a reasonable time-frame.
+		 </p>
 		{% endif %}
 	{% endfor %} <!-- fs in gfs_list -->
 	<!-- END -->		
