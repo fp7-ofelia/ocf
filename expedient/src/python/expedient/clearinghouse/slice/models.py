@@ -19,6 +19,7 @@ from expedient.common.timer.exceptions import JobAlreadyScheduled
 from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
 from expedient.common.utils.validators import *
+from expedient.clearinghouse.slice.utils import startAggregateException
 
 logger = logging.getLogger("slice.models")
 
@@ -67,7 +68,7 @@ class Slice(models.Model):
     
     def __unicode__(self):
         return u"Slice '%s' in project '%s'" % (self.name, self.project.name)
-    
+   
     def start(self, user):
         """
         Should be an idempotent operation on the aggregates.
@@ -100,7 +101,8 @@ class Slice(models.Model):
                                 "aggregate %s" % (self, ragg.name),
                             user=user, msg_type=DatedMessage.TYPE_ERROR)
                 # raise the original exception raised starting the slice.
-                raise e
+		if not isinstance(e,startAggregateException):
+                    raise e
         
         # all is well
         self.started = True

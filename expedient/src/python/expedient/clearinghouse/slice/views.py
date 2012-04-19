@@ -158,7 +158,7 @@ def start(request, slice_id):
     
     if request.method == "POST":
         try:
-            slice.start(request.user)
+            startedAggExps = slice.start(request.user)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -168,9 +168,14 @@ def start(request, slice_id):
                     slice.name, parseFVexception(e)),
                 user=request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
-            DatedMessage.objects.post_message_to_user(
+             if startedAggExps:
+                 DatedMessage.objects.post_message_to_user(
+                     "Slice %s was started, but some resources in some AM could not be started sucessfully. Check previous messages" % slice.name, request.user, msg_type=DatedMessage.TYPE_WARNING)
+             else:
+                DatedMessage.objects.post_message_to_user(
                 "Successfully started slice %s" % slice.name,
-                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     else:
         return HttpResponseNotAllowed(["POST"])
