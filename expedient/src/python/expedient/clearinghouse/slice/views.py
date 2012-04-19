@@ -157,8 +157,16 @@ def start(request, slice_id):
     must_have_permission(request.user, slice.project, "can_start_slices")
     
     if request.method == "POST":
+
+        if False in slice._get_aggregates().values_list("available",flat=True):
+            DatedMessage.objects.post_message_to_user(
+                "Slice %s can not be started because some of its AMs is not available" % slice.name,
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
+            return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+
+
         try:
-            startedAggExps = slice.start(request.user)
+            excs = slice.start(request.user)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -168,14 +176,14 @@ def start(request, slice_id):
                     slice.name, parseFVexception(e)),
                 user=request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
-             if startedAggExps:
-                 DatedMessage.objects.post_message_to_user(
-                     "Slice %s was started, but some resources in some AM could not be started sucessfully. Check previous messages" % slice.name, request.user, msg_type=DatedMessage.TYPE_WARNING)
-             else:
+            if not excs:
                 DatedMessage.objects.post_message_to_user(
-                "Successfully started slice %s" % slice.name,
-             request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-
+                    "Successfully started slice %s" % slice.name,
+                     request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+            else:
+                DatedMessage.objects.post_message_to_user(
+                    "Slice %s was started, but some AMs could not be started. Double check your VMs staus" % slice.name,
+                     request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     else:
         return HttpResponseNotAllowed(["POST"])

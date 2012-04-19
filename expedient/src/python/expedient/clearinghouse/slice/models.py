@@ -19,7 +19,6 @@ from expedient.common.timer.exceptions import JobAlreadyScheduled
 from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
 from expedient.common.utils.validators import *
-from expedient.clearinghouse.slice.utils import startAggregateException
 
 logger = logging.getLogger("slice.models")
 
@@ -68,7 +67,7 @@ class Slice(models.Model):
     
     def __unicode__(self):
         return u"Slice '%s' in project '%s'" % (self.name, self.project.name)
-   
+    
     def start(self, user):
         """
         Should be an idempotent operation on the aggregates.
@@ -77,10 +76,14 @@ class Slice(models.Model):
 	# XXX: Expiration mechanism review needed
         #if self.expiration_date <= datetime.now():
         #    raise Exception("Slice expired. Update slice expiration time.")
+
+	from vt_plugin.models.VtPlugin import VtPlugin
+
         logger.debug("Called start_slice on %s: %s" % (self, self.name))
         aggs = enumerate(self.aggregates.all())
 
         started_aggs = list()
+        exceptions = list()
 
         for i, agg in aggs:
             logger.debug("starting slice on agg %s" % agg.name)
@@ -90,24 +93,40 @@ class Slice(models.Model):
             except Exception, e:
                 logger.error("Error starting slice on agg %s" % agg.name)
                 # try to stop slice on all previously started aggregates
-                for ragg in started_aggs: 
+               
+                #Error is in a VT AM, can continue 
+                if isinstance(agg.as_leaf_class(),VtPlugin):
                     try:
-                        ragg.as_leaf_class().stop_slice(self)
+                        agg.as_leaf_class().stop_slice(self)
                     except Exception, e2:
-                        # error stopping slice
-                        logger.error(traceback.format_exc())
-                        DatedMessage.objects.post_message_to_user(
+                            # error stopping slice
+                            logger.error(traceback.format_exc())
+                            DatedMessage.objects.post_message_to_user(
                             msg_text="Error stopping slice %s on "
-                                "aggregate %s" % (self, ragg.name),
+                            "aggregate %s" % (self, agg.name),
                             user=user, msg_type=DatedMessage.TYPE_ERROR)
-                # raise the original exception raised starting the slice.
-		if not isinstance(e,startAggregateException):
+                            # raise the original exception raised starting the slice.
+                    exceptions.append(e)
+                #Error is on a OF AM, can not start slice, and should stop all the AMs
+                else:
+                    for ragg in started_aggs:
+                        try:
+                            ragg.as_leaf_class().stop_slice(self)
+                        except Exception, e2:
+                            # error stopping slice
+                            logger.error(traceback.format_exc())
+                            DatedMessage.objects.post_message_to_user(
+                            msg_text="Error stopping slice %s on "
+                            "aggregate %s" % (self, ragg.name),
+                            user=user, msg_type=DatedMessage.TYPE_ERROR)
+                    # raise the original exception raised starting the slice.
                     raise e
         
         # all is well
         self.started = True
         self.modified = False
         self.save()
+        return exceptions
 
     def stop(self, user):
         """
