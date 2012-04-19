@@ -12,7 +12,7 @@ except:
         from configobj import ConfigObj
 
 
-PYTHON_DIR = join(dirname(__file__), '../../../../../src/python')
+PYTHON_DIR = join(dirname(__file__), '../../../../../../src/python')
 
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr
@@ -54,7 +54,7 @@ for agg in Aggregate.objects.all():
 	for user in User.objects.exclude(is_superuser=True):
 		userUsesAgg = False
 		for project in Project.objects.all():
-			if user in project.members and unicode(agg.name) in p._get_aggregates().values_list("name",flat=True):
+			if user in project.members and unicode(agg.name) in project._get_aggregates().values_list("name",flat=True):
 				userUsesAgg = True
 				if has_permission(user, agg, "can_use_aggregate"):
 					#print "I will give can_use_aggregate permission to %s for agg %s" % (user.username, agg.name)
