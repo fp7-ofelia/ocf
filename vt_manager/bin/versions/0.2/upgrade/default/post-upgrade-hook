@@ -20,7 +20,7 @@ cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anym
 #Adding/Moving new variables to mySettings.py
 
 MOD=`grep XMLRPC_USER mySettings.py 2>/dev/null`
-if [[ $MOD != "" ]];then
+if [[ $MOD == "" ]];then
 
 printHeader ">" "Adding new settings to mySettings.py ..."
 echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new from v0.14.2 and will be used to any other entity connected to the northbound interface of the VT Manager to authenticate.\nusername: "
