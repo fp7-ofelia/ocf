@@ -19,7 +19,7 @@ XMLRPC_USER2="nullValue2"
 cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anymore?¿"
 #Adding/Moving new variables to mySettings.py
 
-MOD=`grep testy test 2>/dev/null`
+MOD=`grep XMLRPC_USER mySettings.py 2>/dev/null`
 if [[ $MOD != "" ]];then
 
 printHeader ">" "Adding new settings to mySettings.py ..."
