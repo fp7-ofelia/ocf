@@ -51,7 +51,7 @@
 			<div style="float:right">
     			<table align="right" class="menutable">
 		        <tr> 
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
+		            <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
 			            <a href="/servers/admin/">
 			                    Administrate Servers
 				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
@@ -59,7 +59,7 @@
 		            </td>
 		        </tr>
 		       	<tr>
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
+		            <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
 			            <a href="{% url networkingDashboard %}">
 			                    Network Settings
 				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
@@ -68,13 +68,13 @@
 			</tr>
 			{% if  section = "networking" %}
 			<tr>
-				<td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
+				<td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
 			            <a href="{% url ip4Ranges %}">
 			                    IP4 ranges
 					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
 			            </a>
 			<tr>	
-	        	    <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
+	        	    <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
 			            <a href="{% url macRanges %}">
 			                    Ethernet ranges
 					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
@@ -86,7 +86,7 @@
 		        <tr><td><br></td></tr>
 		        <tr><td><br></td></tr>
 		        <tr> 
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
+		            <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
 			            <a href="/dashboard">
 			                    Dashboard 
 				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
@@ -94,7 +94,7 @@
 		            </td>
 		        </tr>
 		        <tr>
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
+		            <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
 			            <a href="/change_profile">
 			                    Change profile 
 				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
@@ -102,7 +102,7 @@
 		            </td>
 		        </tr>
 		         <tr>
-			     <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
+			     <td class="button_admin" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
         			    <a href="/accounts/logout/">
 			                    Logout
 				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
