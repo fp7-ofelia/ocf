@@ -914,6 +914,7 @@ input[type=button],
 	padding:3px 10px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
+	margin-bottom:4px;
 }
 input[type=submit]:hover,
 input[type=button]:hover,
