@@ -81,6 +81,15 @@ input[type=button],
 .button a:hover {
 	text-decoration:none;
 }
+.button_admin{
+	width:120px;
+	padding:10px;
+	text-align:center;
+	cursor:pointer;
+}
+.subutton{
+	width:100px;
+}
 
 #fancypage {
     background-color: #FFFFFF;
@@ -90,7 +99,8 @@ input[type=button],
     margin: auto;
     border: 1px solid #959596;
     text-align: left;
-    }
+	
+}
 
 #fancycontent {
     position: relative;
@@ -440,34 +450,6 @@ table.ranges tr.odd{
 }
 
 
-#Menu
-.menutable td{
-    text-align:center;
-    padding:0px;
-    margin:0px;
-    background-position:left;
-}
-table.menutable {
-	border-collapse: collapse;
-	border-width: 0px;
-	margin-bottom:0px;
-	margin-top:0px;
-    width:140px;
-}
-
-table.menutable tbody td ,tbody th {
-	padding: 1px 10px;
-	background: #fff;
-	color: #000;
-    text-align:center;
-    font-size:12px;
-}
-table.menutable a{ 
-    color:#fff;
-}
-table.menutable a:hover { 
-    color:#999966;
-}
 
 /* Errors */
 .fielderror{
