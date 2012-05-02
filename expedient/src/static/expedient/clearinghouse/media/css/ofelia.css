@@ -892,6 +892,9 @@ div.addAggregateManager:hover {
 }
 
 */
+input,
+select,
+textarea,
 input[type=submit],
 input[type=button],
 .button{
@@ -914,8 +917,22 @@ input[type=button],
 	padding:3px 10px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
-	margin-bottom:4px;
+	margin-bottom:5px;
 }
+input[type=text],
+input[type=password],
+select,
+textarea{
+	background:#f9f9f9!important;
+	
+}
+select option {
+	background: #EEE;
+	color: #444;
+	text-decoration: none!important;
+	text-shadow: none;
+}
+
 input[type=submit]:hover,
 input[type=button]:hover,
 .button:hover {

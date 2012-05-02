@@ -19,6 +19,9 @@ html form {
 input {
         max-width:200px;
 }
+input,
+select,
+textarea,
 input[type=submit],
 input[type=button],
 .button{
@@ -42,6 +45,20 @@ input[type=button],
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
 }
+input[type=text],
+input[type=password],
+select,
+textarea{
+	background:#f9f9f9!important;
+	
+}
+select option {
+	background: #EEE;
+	color: #444;
+	text-decoration: none!important;
+	text-shadow: none;
+}
+
 input[type=submit]:hover,
 input[type=button]:hover,
 .button:hover {
