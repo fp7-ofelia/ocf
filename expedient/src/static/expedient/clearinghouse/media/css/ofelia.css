@@ -524,15 +524,21 @@ table.fulltable tbody td.logocol {
 
 /* iframes */
 iframe {
-    border: 1px solid #E0E8FF;
+    border: 1px solid #CCC;
 }
 
 div.mgmt_actions {
-	border: 1px solid #E0E8FF;
+	/*border: 1px solid #E0E8FF;*/
+	border: 1px solid #CCC;
+	background-color: #eee;
 	float: right;
+	padding:10px;
 }
 div.slicemgmt_actions {
-	border: 1px solid #E0E8FF;
+	border: 1px solid #CCC;
+	background-color: #eee;
+	
+/*	border: 1px solid #E0E8FF;*/
 	margin-top:-10px;
 }
 div.proj_description {
@@ -908,7 +914,7 @@ input[type=button],
 	-moz-border-radius:6px;
 	-webkit-border-radius:6px;
 	border-radius:6px;
-	border:1px solid #dcdcdc;
+	border:1px solid #bbb;
 	display:inline-block;
 	color:#333;
 	font-family:arial;
