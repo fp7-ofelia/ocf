@@ -33,7 +33,8 @@ for rRole in ProjectRole.objects.filter(name="researcher"):
 	for permission in rRole.obj_permissions.all():
 		if permission.permission.name == "can_delete_slices":
 			rRole.remove_permission(permission)
-			permission.permission.delete()
+			#This line deletes the permission from the database
+			#permission.permission.delete()
 			#print "I will remove permission %s from role %s in project %s" %(str(permission),str(rRole),str(rRole.project))
 
 #Delete can_delete_slices permission over the project if the user is not a project owner
@@ -64,4 +65,4 @@ for agg in Aggregate.objects.all():
 				break;
 		if not userUsesAgg and not has_permission(user, agg, "can_use_aggregate"):
 			#print "I will remove can_use_aggregate permission to %s for agg %s" % (user.username, agg.name)
-			agg.remove_from_user(member,"/")
+			agg.remove_from_user(user,"/")
