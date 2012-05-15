@@ -12,7 +12,6 @@ printHeader "info#" "Using specific 0.2 post-upgrade-hook module..."
 
 SRC_DIR=/opt/ofelia/expedient/
 
-#Backing up database
 local TMP_PATH=$PWD
 
 python $TMP_PATH/versions/0.2/upgrade/default/tools/permissionsRefactor.py || warning "Could not update Expedient's permissions. You may be to do it manually. Proceeding with upgrade..."
