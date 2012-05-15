@@ -64,4 +64,5 @@ vt_manager/bin/log/*
 vt_manager/bin/.ofverLock
 vt_manager/rescue/*
 branchMerger
+updater*
 !.gitignore
