@@ -1,0 +1,24 @@
+#!/bin/bash
+
+##Stable Branch
+STABLE_BRANCH="$1"
+
+##Development branch
+DEV_BRANCH="$2"
+
+##Version to release
+VERSION="0.2"
+
+########################################################################################
+##### Last commit, tagging and push in development branch
+
+##in case not in DEV_BRANCH
+git checkout $DEV_BRANCH
+
+git add -A
+git commit -m"OCF v$VERSION released"
+if git tag -l | grep OCF-v$VERSION-dev ;then
+	git tag -d OCF-v$VERSION-dev
+git tag -a OCF-v$VERSION-dev -m"OFELIA CF release $VERSION-dev"
+git push origin $DEV_BRANCH --tags
+
