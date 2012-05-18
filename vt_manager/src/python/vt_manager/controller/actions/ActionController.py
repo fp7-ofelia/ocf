@@ -44,7 +44,7 @@ class ActionController():
 	def PopulateNetworkingParams(actionIfaces, vm):
 		baseIface = copy.deepcopy(actionIfaces[0])
 		actionIfaces.pop()
-		for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('isMgmt','id')):
+		for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
 			currentIface = copy.deepcopy(baseIface)
 			currentIface.ismgmt = vmIface.isMgmt
 			currentIface.name = "eth"+str(index)
