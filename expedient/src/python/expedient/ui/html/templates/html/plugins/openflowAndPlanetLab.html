@@ -63,8 +63,11 @@
 {% endif %}
 
 {% for agg in openflow_aggs %}
-<h2>OpenFlow Aggregate: {{ agg.name }}</h2>
-<div class="aggregateManager">
+<table><tr>
+<td><h2>OpenFlow Aggregate: {{ agg.name }}</h2></td>
+<td> <a id="ofam_{{agg.id}}" class="expandableCtl" ref="#/">More information<span class="closed">▼</span></a></td>
+</tr></table>
+<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable">
 	<table class="aggregateManagerDetail">
 	<tr>
 	<td class="label">Name:</td>
