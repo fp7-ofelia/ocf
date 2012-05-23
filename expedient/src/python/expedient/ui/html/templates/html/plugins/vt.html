@@ -119,13 +119,13 @@
 {% block content %}
 
 {% if vt_aggs %}
-<h2 class="resourcesh2"><a id="computationalResources" class="expandableCtl resourcesh2" ref="#/">Computational resources (Virtual Machines) <span class="opened">&#x25B2;</span></a></h2>
+<h2 class="resourcesh2"><a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">Computational resources (Virtual Machines) <span class="opened">&#x25B2;</span></a></h2>
 
 <div id="computationalResourcesContainer" class="expandable"> 
 {% for agg in vt_aggs %}
 <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
 
-    <h2><a id="vtm_{{agg.id}}" class="expandableCtl" ref="#/">VT Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a></h2></h2>
+    <h2><a id="vtm_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">VT Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a></h2></h2>
     <div id="vtm_{{agg.id}}Container" class="aggregateManager expandable" >
 	<table class="aggregateManagerDetail">
 	<tr>
