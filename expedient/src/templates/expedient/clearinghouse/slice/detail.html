@@ -42,6 +42,9 @@
 		$("#aggs_help_img").tooltip({
 			tip: "#aggs_help_div"
 		});
+		$(".expandableTooltipable").tooltip({
+			tip: "#expandableHelp"
+		});
 	});
 </script>
 {% endblock %}
@@ -160,7 +163,8 @@
 		
                 </div>-->	
         </div>
-
+<!-- Common expandable tooltip -->
+<div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
 {# Aggregate details #}
 {% include "slice/ui/plugins/openflowAndPlanetLab.html" %}
 {% include "slice/ui/plugins/vt.html" %}
