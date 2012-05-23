@@ -46,8 +46,6 @@ class ProvisioningDispatcher():
 				else :
 	
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
-				print "LEODEBUG"
-				print XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action))
 
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 			except Exception as e:
