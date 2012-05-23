@@ -121,7 +121,7 @@ class XmlHelper(object):
     @staticmethod
     def getListActiveVMsQuery():
 	with open(os.path.dirname(__file__)+'/xml/listActiveVMsQuery.xml','r') as openVMs:
-	        simpleRspec =  XmlHelper.parseXmlString(openVMS.read())
+	        simpleRspec =  XmlHelper.parseXmlString(openVMs.read())
         return simpleRspec
 
 
