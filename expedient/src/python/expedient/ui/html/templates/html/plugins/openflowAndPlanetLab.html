@@ -1,5 +1,25 @@
 {% load ch_extras %}
 {% block content %}
+	<script type="text/javascript">
+	jQuery(document).ready(function() {
+		//jQuery(".expandable").hide();
+	 
+		jQuery(".expandableCtl").click(function()
+		{
+	   		//$(this).next(".expandable").show();
+			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
+			//alert("#"+$(this).attr('id')+"Container");
+	    		//$(this).next(".expandable").slideToggle(500)i;
+			if(jQuery("span", this).attr("class") == "closed"){
+				jQuery("span", this).html("&#x25B2;");
+			}else{
+				jQuery("span", this).html("&#x25BC;");
+			}
+			jQuery("span", this).toggleClass("opened closed");
+	  	});
+	});
+
+	</script>
 {# PLANETLAB #}
 
 
@@ -59,15 +79,16 @@
 
 {# OPENFLOW #}
 {% if openflow_aggs %}
-<h2 class="resourcesh2">Network resources (Openflow)</h2>
+<h2 class="resourcesh2"><a id="networkResources" class="expandableCtl resourcesh2" ref="#/">Network resources (Openflow) <span class="opened">&#x25B2;</span></a></h2>
+<div id="networkResourcesContainer" class="expandable" >
 {% endif %}
 
 {% for agg in openflow_aggs %}
 <table><tr>
-<td><h2>OpenFlow Aggregate: {{ agg.name }}</h2></td>
-<td> <a id="ofam_{{agg.id}}" class="expandableCtl" ref="#/">More information<span class="closed">▼</span></a></td>
+<td><h2><a id="ofam_{{agg.id}}" class="expandableCtl" ref="#/">OpenFlow Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a></h2></td>
+<td> </td>
 </tr></table>
-<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable">
+<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable" >
 	<table class="aggregateManagerDetail">
 	<tr>
 	<td class="label">Name:</td>
@@ -98,26 +119,6 @@
 	{% if checked_ids %}
 	<div style="padding-top:20px;">
  	  {% if allfs %}
-	<script type="text/javascript">
-	jQuery(document).ready(function() {
-		jQuery(".expandable").hide();
-	 
-		jQuery(".expandableCtl").click(function()
-		{
-	   		//$(this).next(".expandable").show();
-			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
-	    		//$(this).next(".expandable").slideToggle(500)i;
-			if(jQuery("span", this).attr("class") == "closed"){
-				jQuery("span", this).html("&#x25B2;");
-			}else{
-				jQuery("span", this).html("&#x25BC;");
-				
-			}
-			jQuery("span", this).toggleClass("opened closed");
-	  	});
-	});
-
-	</script>
 
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
@@ -131,7 +132,7 @@
 	</div>	
 
 	
-    <div id="requestedFlowspaceContainer" class="expandable">
+    <div id="requestedFlowspaceContainer" class="expandable" style="display:none;">
     {% for fs in allfs %}
 			<table class="flowspace flowspace_r">
 				<tr class="odd">
@@ -178,8 +179,8 @@
 					<td>{%for ofiface in fs.slivers.all %}<strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}<br/>{% endfor %}</td>
 		     	</tr>
 				</table>
-		</div> <!-- RequestedFlowspaceContainer -->
     {% endfor %}  <!-- for fs in allfs -->
+    </div> <!-- RequestedFlowspaceContainer -->
 	<!-- SPACE TO TEST GRANTED FLOWSPACE -->
 
 	{% for gfs in gfs_list %}<!--aggregate level-->
@@ -242,8 +243,8 @@
 		{% endwith %}
 		{% endwith %}
 		</table>
-		</div> <!-- grantedFlowsapceContainer -->
 		{% endfor %} <!-- gfs in gfs_lis -->
+		</div> <!-- grantedFlowsapceContainer -->
 		{%else%}
 		 <p style="font-size:10px">
 			<img style="height:12px;" src="{% url img_media 'inactive.png' %}" alt="Flowspace not yet granted" title="Flowspace not yet granted">
@@ -287,6 +288,11 @@
 {% empty %}
   <!--<p>There are no OpenFlow aggregates in the slice. </p>-->
 {% endfor %}
+
+{% if openflow_aggs %}
+</div><!-- id="networkResourcesContainer"--> 
+{% endif %}
+
 
 
 {% endblock content %}

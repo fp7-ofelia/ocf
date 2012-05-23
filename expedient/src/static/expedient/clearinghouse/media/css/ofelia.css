@@ -221,6 +221,7 @@ h2 {
 	text-align:right;
 	font-size:15px;
 	font-style:italic;
+	border-bottom: 1px solid #ddd;
 }
 h2.pagetitle {
 	margin-top: 30px;
@@ -524,7 +525,7 @@ table.fulltable tbody td.logocol {
 
 /* iframes */
 iframe {
-    border: 1px solid #CCC;
+   
 }
 
 div.mgmt_actions {
@@ -930,6 +931,7 @@ input[type=password],
 select,
 textarea{
 	background:#f9f9f9!important;
+	padding:3px 5px;
 	
 }
 select option {
@@ -989,4 +991,9 @@ div.aggregateManager table.aggregateManagerDetail .label {
 	color: #fff;
 	text-align:center;
 	margin:auto;	
+}
+
+/* Expandable stuff */
+.expandableCtl {
+	cursor:pointer;	
 }
