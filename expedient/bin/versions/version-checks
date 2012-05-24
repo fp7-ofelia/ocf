@@ -9,6 +9,8 @@
 
 #print "General version checks!"
 
+MIN_ALLOWED_VERSION="0.14.2"
+
 if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE" == "0" ]; then
 	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them" $NO_RESCUE
 fi
@@ -38,6 +40,18 @@ if [ "$ACTION" == "upgrade"  ]; then
 			fi
 		fi
 
+	fi
+fi
+
+#Check upgrade from version previous to 0.14.2
+if [ "$CURRENT_VERSION" -a  "$ACTION" == "upgrade"  ]; then
+
+	if [ "$FORCE" == 0 ]; then
+
+		MIN_VERSION=$(echo -e "$CURRENT_VERSION\n$MIN_ALLOWED_VERSION" | sort -t '.' -g | head -n 1)
+		if [ ! "$MIN_VERSION" == "$MIN_ALLOWED_VERSION" ]; then
+        		error "Cannot upgrade from installations previous to version $MIN_ALLOWED_VERSION; If you still want to do it under your own responsability use force flag..." $NO_RESCUE
+		fi
 	fi
 fi
 
