@@ -13,7 +13,7 @@ from expedient.common.permissions.shortcuts import give_permission_to,\
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os
 from vt_plugin.utils.Translator import Translator
-from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash
+from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash, VM
 
 
 def aggregate_crud(request, agg_id=None):
@@ -129,27 +129,30 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             return
         try:
             for server in xmlClass.response.information.resources.server:
+                vmsInAggregate = []
                 for vm in server.virtual_machine:
+                    #Translate and register VM present in the AM
                     VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
                     Translator.PopulateNewVMifaces(vm, VMmodel)
-                Translator.ServerClassToModel(server, vtPlugin.id)
+                    vmsInAggregate.append(VMmodel.uuid)
+                #Translate The whole server with the vms updated. There may be still VMs in the models
+                #which are not in the AM
+                serverModel = Translator.ServerClassToModel(server, vtPlugin.id)
+                # Delete VMs in the model that are not in the AM
+                for vmuuid in serverModel.vms.all().values_list('uuid', flat=True):
+                    if vmuuid not in vmsInAggregate:
+                        VM.objects.get(uuid=vmuuid).delete() 
                 serversInAggregate.append(server.uuid)
+                #Update VMs in the server model
+                serverModel.setVMs()
             serversInExpedient  = VTServer.objects.filter(aggregate=vtPlugin.id).values_list('uuid', flat=True)
+            #Delete servers in Expedient that are not any more in the AM. VMs in that server included
             for s in serversInExpedient:
                 if s not in serversInAggregate:
                     delServer = VTServer.objects.get(uuid = s)
                     delServer.completeDelete()
+                
             return xmlClass
-#        try:
-#            for s in VTServer.objects.all():
-#                s.completeDelete()
-#            for server in xmlClass.response.information.resources.server:
-#                Translator.ServerClassToModel(server, vtPlugin.id)
-#                for vm in server.virtual_machine:
-#                    VMmodel = Translator.VMtoModel(vm, vtPlugin.id, save="save")
-#                    Translator.PopulateNewVMifaces(vm, VMmodel)
-#                VTServer.objects.get(uuid=server.uuid).setVMs()
-#            return xmlClass
 
 
         except Exception as e:
