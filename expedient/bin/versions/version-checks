@@ -43,7 +43,7 @@ if [ "$ACTION" == "upgrade"  ]; then
 	fi
 fi
 
-#Check upgrade from version previous to 0.14.2
+#Check upgrade from version previous to $MIN_ALLOWED_VERSION (0.14.2)
 if [ "$CURRENT_VERSION" -a  "$ACTION" == "upgrade"  ]; then
 
 	if [ "$FORCE" == 0 ]; then
