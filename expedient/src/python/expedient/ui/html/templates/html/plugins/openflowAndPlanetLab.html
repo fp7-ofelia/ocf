@@ -7,12 +7,14 @@
 		jQuery(".expandableCtl").click(function()
 		{
 			elementName = "#"+$(this).attr('id')+"Container";
-			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250,function() {
-  			$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);	
-			});
+//			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250,function() {
+//  			$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);	
+//			});
 			//alert("#"+$(this).attr('id')+"Container");
+			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
 			if(jQuery("span", this).attr("class") == "closed"){
 				jQuery("span", this).html("&#x25B2;");
+				$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
 			}else{
 				jQuery("span", this).html("&#x25BC;");
 			}
