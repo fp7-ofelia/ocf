@@ -37,6 +37,7 @@ def aggregate_crud(request, agg_id=None):
         client_form = xmlrpcServerProxyForm(
             data=request.POST, instance=client)
         if client_form.is_valid() and agg_form.is_valid():
+            client = client_form.save(commit=False)
             s = xmlrpclib.Server('https://'+client.username+':'+client.password+'@'+client.url[8:])
             try:
                 s.ping('ping')
