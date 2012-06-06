@@ -25,5 +25,10 @@ python manage.py syncdb || error "Could not synchronize database using manage.py
 printHeader ">" "Evolving Database schema..."
 python manage.py evolve --hint -x || error "Could not evolve database..."
 
+
+printHeader ">" "Cleaning UI's cache hash values..."
+$TMP_PATH/versions/default/upgrade/tools/cleanCache.py
+
 cd $TMP_PATH
+
 

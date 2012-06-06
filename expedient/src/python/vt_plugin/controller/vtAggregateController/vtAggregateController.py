@@ -139,10 +139,12 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
                 #Translate The whole server with the vms updated. There may be still VMs in the models
                 #which are not in the AM
                 serverModel = Translator.ServerClassToModel(server, vtPlugin.id)
-                # Delete VMs in the model that are not in the AM
-                for vmuuid in serverModel.vms.all().values_list('uuid', flat=True):
+                # Delete VMs in the model that are not in the linked to the server in the AM
+                for vmuuid in serverModel.vms.filter(sliceId=sliceUUID, projectId=projectUUID).values_list('uuid', flat=True):                
                     if vmuuid not in vmsInAggregate:
-                        VM.objects.get(uuid=vmuuid).delete() 
+                        vmToDelete = VM.objects.get(uuid=vmuuid)
+                        serverModel.vms.remove(vmToDelete)
+                        vmToDelete.completeDelete() 
                 serversInAggregate.append(server.uuid)
                 #Update VMs in the server model
                 serverModel.setVMs()
