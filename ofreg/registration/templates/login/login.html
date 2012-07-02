@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load form_helper %}
+
+{% block content%}
+
+<form action="{% url registration.views.login.login %}" method="post">
+	{{ form.non_field_errors }}
+	{% field_row form "login" %}
+	{% field_row form "password" %}
+	
+	{% submit_row "login" %}
+</form>
+<p>
+	No login? Please <a href="{% url registration.views.registration.register %}">register</a>.<br/>
+	Password forgotten? Please <a href="{% url registration.views.password_reset.forgotten %}">reset your password</a>
+</p>
+
+{% endblock %}

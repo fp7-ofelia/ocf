@@ -1,0 +1,104 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Approve Admin Requests</h1> {% endblock %}
+	
+{% block scripts %}
+	<script type="text/javascript">
+
+
+	
+	$(document).ready(function(){
+		$(".infodiv")
+			.each( function() {
+				var element = this;
+				$(element).hide();
+			});
+		$(".expdiv")
+			.click(function() {
+				var info_id = $(this).attr("id").replace("expdiv", "infodiv");
+				$("#"+info_id).toggle();
+				if ($(this).text() == "[Conflicts...]") {
+					$(this).html("[<font color='red'>Colapse...</font>]");
+				} else {
+					$(this).html("[<font color='red'>Conflicts...</font>]");
+				}
+			});
+	});
+
+	</script>
+{% endblock %}
+	
+{% block content %}
+<div class="main">
+	
+	{% for error in error_msg %}
+	<p><font color="red">{{error}}</font></p>
+	{% endfor %}
+	
+	<form name="input" action="/admin_manager/approve_admin" method="post">
+	{% csrf_token %}
+	<b>Admin Flowspace Requests:</b><br/>
+	<table class="formtable">
+	<tr><th>Reject</th><th>Defer</th><th>Accept</th><th>Admin</th><th>Requested Flowspace</th></tr>
+	{% for req in fs_reqs %}
+	<tr>
+	<td>
+		<input type="radio" name="fs_req_{{req.req.id}}" value="reject"/>
+	</td>
+	<td>
+		<input type="radio" name="fs_req_{{req.req.id}}" value="none" checked="yes"/>
+	</td>
+	<td>
+		<input type="radio" name="fs_req_{{req.req.id}}" value="accept"/>
+	</td>
+	<td>{{req.req.user.first_name}} {{req.req.user.last_name}} ({{req.req.user.username}})<br/>
+	e-mail: {{req.req.user.emial}}</td>
+	<td>{{req.req}}
+	{% if req.conflicts != 0 %}
+	
+	<div id="expdiv_{{req.req.id}}" class="expdiv">[<font color="red">Conflicts...</font>]</div>
+	<div id="infodiv_{{req.req.id}}" class="infodiv">
+	<font color="red">
+	{% for conflict in req.conflicts %}
+	<br/>
+	{{conflict}}
+	{% endfor %}
+	</font>
+	</div>
+	</td>
+	</tr>
+	{% endif %}
+	{% endfor %}
+	</table>
+	<br/><br/>
+	<b>New Admin Requests:</b><br/>
+	<table class="formtable">
+	<tr><th>Reject</th><th>Defer</th><th>Accept</th><th>User</th><th>Requested Position</th><th>Message</th></tr>
+	{% for req in admin_reqs %}
+	<tr>
+	<td>
+		<input type="radio" name="adm_req_{{req.id}}" value="reject"/>
+	</td>
+	<td>
+		<input type="radio" name="adm_req_{{req.id}}" value="none" checked="yes"/>
+	</td>
+	<td>
+		<input type="radio" name="adm_req_{{req.id}}" value="accept"/>
+	</td>
+	<td>
+		{{req.user.first_name}} {{req.user.last_name}} ({{req.user.username}})<br>
+		e-mail: {{req.user.email}}
+	</td>
+	<td>
+		{{req.requested_position}}
+	</td>
+	<td>
+		{{req.text}}
+	</td>
+	</tr>
+	{% endfor %}
+	</table>
+	<input type="submit" value="Submit"/>
+	</form>
+	
+</div>
+{% endblock content %}	

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+###
+#       @author: msune, lbergesio
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Version checkings 
+###
+
+#print "General version checks!"
+
+MIN_ALLOWED_VERSION="0.14.2"
+
+if [[ $TARGETED_VERSION == *R* ]] && [ "$FORCE" == "0" ]; then
+	error "Cannot install Release/Release Candidates in production enviornments. Use force mode if you want to test them" $NO_RESCUE
+fi
+
+#Check already installed 
+if [ -n "$CURRENT_VERSION" -a  "$ACTION" == "install"  ]; then
+
+	if [ "$FORCE" == 0 ]; then 
+		error "Cannot install; It appears that a copy of the version $CURRENT_VERSION is already installed in your system. Upgrade it or use force flag if you want to overwrite it..." $NO_RESCUE
+	else
+		confirm "It appears that a copy of the version $CURRENT_VERSION is already installed in your system. Are you sure you want to force install." $DONT_ABORT $NO_RESCUE
+		if [ $? == 1 ]; then
+			error "Aborted by the user" $NO_RESCUE	
+		fi
+	fi
+
+fi
+#Check upgrade 
+if [ "$ACTION" == "upgrade"  ]; then
+	if [[ "$TARGETED_VERSION" == "$CURRENT_VERSION" ]]; then
+		if [ "$FORCE" == 0 ]; then 
+			error "Cannot upgrade; targeted version is the same as current installed version. Use force if you want to override this..." $NO_RESCUE
+		else
+			confirm "Targeted version and current are the same one. Are you sure you want to force upgrade." $DONT_ABORT $NO_RESCUE
+			if [ $? == 1 ]; then
+				error "Aborted by the user" $NO_RESCUE	
+			fi
+		fi
+
+	fi
+fi
+
+#Check upgrade from version previous to $MIN_ALLOWED_VERSION (0.14.2)
+if [ "$CURRENT_VERSION" -a  "$ACTION" == "upgrade"  ]; then
+
+	if [ "$FORCE" == 0 ]; then
+
+		MIN_VERSION=$(echo -e "$CURRENT_VERSION\n$MIN_ALLOWED_VERSION" | sort -t '.' -g | head -n 1)
+		if [ ! "$MIN_VERSION" == "$MIN_ALLOWED_VERSION" ]; then
+        		error "Cannot upgrade from installations previous to version $MIN_ALLOWED_VERSION; If you still want to do it under your own responsability use force flag..." $NO_RESCUE
+		fi
+	fi
+fi
+

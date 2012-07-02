@@ -1,0 +1,50 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/expedient/
+EMAIL_PATTERNS="EMAIL_ DEFAULT_EMAIL"
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+
+#Adding/Moving new variables to localsettings.py
+printHeader ">" "Adding new settings to localsettings.py ..."
+echo "Set Island name please, it will appear in the header of all the web pages of the Clearinghouse app: "
+read ISLAND_NAME
+sed -i "/ISLAND_NAME/d" localsettings.py || error "Could not delete old ISLAND_NAME setting from localsettngs.py ..."
+echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> localsettings.py || error "Could not add ISLAND_NAME to localsettngs.py ..."
+echo "Set LDAP CN to generate DN: "
+read LDAP_CN
+sed -i "/AUTH_LDAP_BIND_DN/d" localsettings.py || error "Could not delete old AUTH_LDAP_BIND_DN setting from localsettngs.py ..."
+echo "AUTH_LDAP_BIND_DN = \"uid=$LDAP_CN,ou=admins,dc=fp7-ofelia,dc=eu\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_DN to localsettngs.py ..."
+echo "Set LDAP Password: "
+read LDAP_PASSWORD
+sed -i "/AUTH_LDAP_BIND_PASSWORD/d" localsettings.py || error "Could not delete old AUTH_LDAP_BIND_PASSWORD setting from localsettngs.py ..."
+echo "AUTH_LDAP_BIND_PASSWORD = \"$LDAP_PASSWORD\"" >> localsettings.py || error "Could not add AUTH_LDAP_BIND_PASSWORD to localsettngs.py ..."
+sed -i "/ALLOW_LOCAL_REGISTRATION/d" localsettings.py || error "Could not delete old ALLOW_LOCAL_REGISTRATION setting from localsettngs.py ..."
+echo "ALLOW_LOCAL_REGISTRATION = False" >> localsettings.py || error "Could not add ALLOW_LOCAL_REGISTRATION to localsettngs.py ..."
+sed -i "/SLICE_DEFAULT_EXPIRATION_TIME/d" localsettings.py || error "Could not delete old nSLICE_DEFAULT_EXPIRATION_TIME setting from localsettngs.py ..."
+echo -e "#In days\nSLICE_DEFAULT_EXPIRATION_TIME = 30" >> localsettings.py || error "Could not add SLICE_DEFAULT_EXPIRATION_TIME to localsettngs.py ..."
+echo -e "\n\nYou can change the new settings by editing localsettings.py file"
+
+
+for pattern in $EMAIL_PATTERNS
+do
+    sed -i "/$pattern/d" localsettings.py || error "Could not delete EMAIL settings from localsettngs.py ..."
+done
+
+
+#Restarting apache
+print "Restarting apache2..."
+/usr/sbin/service apache2 restart
+

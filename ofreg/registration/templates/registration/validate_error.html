@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content%}
+
+<p>
+{{ message }}
+</p>
+<p>
+Please try to <a href="{% url registration.views.login.login %}">logging in</a> or <a href="{% url registration.views.registration.register %}">registering again</a> instead.
+</p>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+CONF_DIR = '/opt/ofelia/expedient/src/python/expedient/clearinghouse'
+SRC_DIR = '/opt/ofelia/expedient/src'
+
+
+ROOT_USERNAME = "expedient"
+ROOT_PASSWORD = "expedient"
+ROOT_EMAIL    = "i2catopenflow@gmail.com"
+ISLAND_NAME   = "i2cat"
+
+ADMINS = [
+    ("i2cat OFELIA Admin", ROOT_EMAIL),
+]
+
+MANAGERS = ADMINS
+
+SITE_DOMAIN = "192.168.254.193"
+
+SITE_IP_ADDR = "192.168.254.193"
+
+DATABASE_USER = "expedient"
+DATABASE_PASSWORD = "expedient"
+DATABASE_HOST = "changeMe"
+DATABASE_NAME = "changeMe"
+
+#TO BE MODIFIED ONLY IN DEVELOPMENT ENVIORNMENTS OR
+#FOR NOT OFELIA INSTALLATIONS, YOU MAY WANT TO SET
+# ENABLE_LDAP_BACKEND TO False, LDAP_STORE_PROJECTS TO False, ALLOW_LOCAL_REGISTRATION TO True and AUTH_LDAP_BIND_PASSWORD and AUTH_LDAP_BIND_DN to ""
+ENABLE_LDAP_BACKEND = True
+LDAP_STORE_PROJECTS = True
+ALLOW_LOCAL_REGISTRATION=False
+AUTH_LDAP_BIND_PASSWORD = "changeme"
+AUTH_LDAP_BIND_DN = "uid=changeme,ou=admins,dc=fp7-ofelia,dc=eu"
+
+#In days
+SLICE_DEFAULT_EXPIRATION_TIME = 30
+

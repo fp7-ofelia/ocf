@@ -1,0 +1,18 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Version checkings 
+###
+
+#Constants
+SRC_DIR=/opt/ofelia/oxa/repository/
+OXA_DIRECTORY="/opt/ofelia/oxa/"
+
+#inform user
+printHeader "info#" "Using default upgrade module..."
+
+print "Checking for new versions of the VM template..."
+loadModule "lib/template" $NO_RESCUE

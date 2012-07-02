@@ -1,0 +1,77 @@
+/* general layout */
+body {
+	background-color: #8ccdf8;
+	font: 12px sans-serif;
+}
+
+p {
+	margin: 0 0 10px 0px;
+}
+
+a, a:visited {
+	color: #009;
+	text-decoration: none;
+}
+a:hover {
+	color: #00c;
+	text-decoration: underline;
+}
+
+/* document structure */
+#wrapper {
+	width: 800px;
+	margin: 20px auto;
+	padding: 0px;
+}
+
+#header {
+	height: 115px;
+	padding: 15px;
+}
+
+#content {
+	background-color: #fff;
+	padding: 15px;
+	border: 1px #666 solid;
+}
+
+#footer {
+	margin: 10px 0;
+	text-align: center;
+	font-size: 75%;
+}
+
+/* Form stuff*/
+form div {
+	clear: both;
+	margin-bottom: 5px;
+}
+
+form div label {
+	width: 150px;
+	float: left;
+}
+
+form div input, form div textarea, form div select {
+	width: 200px;
+	border: 1px #666 solid;
+}
+
+form div input[type="checkbox"] {
+	width: 20px;
+}
+
+form div input.submit {
+	margin-left: 150px;
+}
+
+form div .error {
+	color: #900;
+	margin-left: 5px;
+	vertical-align: top;
+}
+form .errorlist {
+	color: #900;
+	margin-left: 150px;
+	padding-left: 15px;
+}

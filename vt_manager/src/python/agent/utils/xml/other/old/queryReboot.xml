@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
+
+<provisioning>
+	<action type="reboot" id="this is an id">
+		<virtual-machine>
+			<name>myName</name>
+			<uuid>myuuid</uuid>
+			<project-id>project1</project-id>
+			<slice-id>slice1</slice-id>
+			<virtualization-type>xen</virtualization-type>
+			<xen-configuration>
+				<hd-setup-type>file-image</hd-setup-type>
+			</xen-configuration>
+		</virtual-machine>
+	</action>
+</provisioning>
+</rspec>

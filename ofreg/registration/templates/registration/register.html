@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load form_helper %}
+
+{% block content%}
+
+<p>
+	For project information please see the official <a href="http://www.fp7-ofelia.eu/" target="_blank">Ofelia website</a>.
+</p>
+<form action="{% url registration.views.registration.register %}" method="post">
+	{{ form.non_field_errors }}
+	{% field_row form "name" %}
+	{% field_row form "email" %}
+	{% field_row form "password" %}
+	{% field_row form "password_confirmation" %}
+	{% field_row form "organization" %}
+	{% field_row form "island" %}
+	{% field_row form "usage_accept" "Read the usage policy <a href=\"http://www.fp7-ofelia.eu/assets/Uploads/OFELIA-usage-policies.pdf\" target=\"_blank\">here</a>" %}
+	{% field_row form "public_key" %}
+
+<!-- reCAPTCHA -->
+<script type="text/javascript">
+ var RecaptchaOptions = { theme : 'white' };
+ </script>
+	<div style="margin-left: 40px; margin-bottom: 15px;">
+    <script type="text/javascript" src="https://www.google.com/recaptcha/api/challenge?k=6LdJ6MYSAAAAANdZ-3N6et7f76PAMpysJb9hE9x3"></script>
+	</div>
+    <noscript>
+       <iframe src="http://www.google.com/recaptcha/api/noscript?k=6LdJ6MYSAAAAANdZ-3N6et7f76PAMpysJb9hE9x3" height="300" width="350" frameborder="0"></iframe><br>
+       <textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+       <input type="hidden" name="recaptcha_response_field" value="manual_challenge">
+    </noscript>
+	{% submit_row "register" %}
+</form>
+
+{% endblock %}

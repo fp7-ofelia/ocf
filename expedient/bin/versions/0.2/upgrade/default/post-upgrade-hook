@@ -1,0 +1,22 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.2 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/expedient/
+
+local TMP_PATH=$PWD
+
+python $TMP_PATH/versions/0.2/upgrade/default/tools/permissionsRefactor.py || warning "Could not update Expedient's permissions. You may be to do it manually. Proceeding with upgrade..."
+
+cd $TMP_PATH
+
+
+

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{% if create %}Create{% else %}Update{% endif %} Aggregate.{% endblock title %}
+
+{% block head %}
+{% if not create %}
+<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
+<script>
+	$(document).ready(function() {
+		get_status({{ aggregate.id }}, "{% url aggregate_status_img aggregate.id %}");
+	});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<form method="post" action="">{% csrf_token %}
+	<table enctype="multipart/form-data" class="formtable">
+	{{ form.as_table }}
+	{% if not create %}
+	<tr>
+		<th>Current status:</th>
+		<td class="status">
+			<img class="am-status-img" id="status_{{ aggregate.id }}"
+			src="{% url img_media 'status-question-small.jpg' %}">
+		</td>
+	</tr>
+	{% endif %}
+    </table>
+    {% if create %}
+	<input type="submit" value="Create" />
+	{% else %}
+	<input type="submit" value="Update" />
+	<input type="button" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
+	{% endif %}
+	<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
+	</form>
+</div>
+{% endblock content %}

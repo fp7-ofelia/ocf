@@ -1,0 +1,43 @@
+{% extends "base_admin.html" %}
+{% block pagehead %} <h1>Manage Admins FlowSpaces</h1> {% endblock %}
+{% block scripts %}
+<style>
+  select {
+    width: 400px;
+  }
+  iframe {
+  	width: 700px;
+  	min-height: 500px;
+  }
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#adminsel").
+		change(function(){
+			var addr = "/admin_manager/change_admin_fs/"
+			var sel_value = $(this).val()
+			addr = addr+sel_value
+			$("#admin_iframe").attr('src',addr)
+		});
+});
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="main">
+	<div>
+		<b>Admins:</b><br/>
+		<select name="admin" id="adminsel">
+			{% for admin in admin_list %}
+			<option value="{{admin.user.id}}">
+			{{admin.user.first_name}} {{admin.user.last_name}}(username: {{admin.user.username}}, e-mail:{{admin.user.email}})
+			</option>
+			{% endfor %}
+		</select>
+	</div>	
+		<iframe src="{% if exist %}/admin_manager/change_admin_fs/{{first_admin}}{% endif %}" id="admin_iframe">
+		</iframe>
+</div>
+{% endblock content %}

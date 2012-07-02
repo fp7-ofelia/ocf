@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+    	$("#id_mac_from_s,#id_mac_from_e").attr('disabled', true);
+    	$("#id_mac_to_s,#id_mac_to_e").attr('disabled', true);
+    	$("#id_eth_type_s,#id_eth_type_e").attr('disabled', true);
+    	$("#id_vlan_id_s,#id_vlan_id_e").attr('disabled', true);
+    	$("#id_ip_from_s,#id_ip_from_e").attr('disabled', true);
+    	$("#id_ip_to_s,#id_ip_to_e").attr('disabled', true);
+    	$("#id_ip_proto_s,#id_ip_proto_e").attr('disabled', true);
+    	$("#id_tp_from_s,#id_tp_from_e").attr('disabled', true);
+    	$("#id_tp_to_s,#id_tp_to_e").attr('disabled', true);
+		$("#add_fs_chk").
+			change(function(){
+			    if ($(this).is(':checked')) {
+			    	$("#id_mac_from_s,#id_mac_from_e").removeAttr('disabled');
+			    	$("#id_mac_to_s,#id_mac_to_e").removeAttr('disabled');
+			    	$("#id_eth_type_s,#id_eth_type_e").removeAttr('disabled');
+			    	$("#id_vlan_id_s,#id_vlan_id_e").removeAttr('disabled');
+			    	$("#id_ip_from_s,#id_ip_from_e").removeAttr('disabled');
+			    	$("#id_ip_to_s,#id_ip_to_e").removeAttr('disabled');
+			    	$("#id_ip_proto_s,#id_ip_proto_e").removeAttr('disabled');
+			    	$("#id_tp_from_s,#id_tp_from_e").removeAttr('disabled');
+			    	$("#id_tp_to_s,#id_tp_to_e").removeAttr('disabled');
+			    } else {
+			    	$("#id_mac_from_s,#id_mac_from_e").attr('disabled', true);
+			    	$("#id_mac_to_s,#id_mac_to_e").attr('disabled', true);
+			    	$("#id_eth_type_s,#id_eth_type_e").attr('disabled', true);
+			    	$("#id_vlan_id_s,#id_vlan_id_e").attr('disabled', true);
+			    	$("#id_ip_from_s,#id_ip_from_e").attr('disabled', true);
+			    	$("#id_ip_to_s,#id_ip_to_e").attr('disabled', true);
+			    	$("#id_ip_proto_s,#id_ip_proto_e").attr('disabled', true);
+			    	$("#id_tp_from_s,#id_tp_from_e").attr('disabled', true);
+			    	$("#id_tp_to_s,#id_tp_to_e").attr('disabled', true);
+			    }  
+			});
+	});
+	
+	</script>
+</head>
+
+<body>
+{% for msg in error_msg %}
+	<p><font color="red">{{msg}}</font></p>
+{% endfor %}
+<center>
+<form name="input" action="/admin_manager/change_admin_fs/{{user_id}}" method="post">{% csrf_token %}
+	<table class="formtable">
+	<tr><th>UnRegister?</th><th>FlowSpace</th></tr>
+	{% for fs in adminfs %}
+		<tr><td><input type="checkbox" name="del_{{fs.id}}"/></td>
+		<td>{{fs}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+	<br/>
+	<br/>
+	<input type="checkbox" name="register_flowspace" id="add_fs_chk"/><b>Register New Flowspace</b>
+	{{form.non_field_errors}}
+	<table class="formtable">
+		<tr><th>Field</th><th>[From Value,To Value]</th></tr>
+		<tr>
+		<td>
+			<label for="id_mac_from">Source MAC address {{form.errors.mac_from_s}}{{form.errors.mac_from_e}}</label>
+		</td><td>
+			{{form.mac_from_s}}-{{form.mac_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label for="id_mac_to">Destination MAC address {{form.errors.mac_to_s}}{{form.errors.mac_to_e}}</label>
+		</td><td>
+			{{form.mac_to_s}}-{{form.mac_to_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Ethernet Types {{form.errors.eth_type_s}}{{form.errors.eth_type_e}}</label>
+		</td><td>
+			{{form.eth_type_s}} - {{form.eth_type_e}}
+		</td>
+		</tr><tr>
+		</tr><tr>
+		<td>
+			<label>VLAN Range {{form.errors.vlan_id_s}}{{form.errors.vlan_id_s}}</label>
+		</td><td>
+			{{form.vlan_id_s}} - {{form.vlan_id_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Source IP Address {{form.errors.ip_from_s}}{{form.errors.ip_from_e}}</label>
+		</td><td>
+			{{form.ip_from_s}} - {{form.ip_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Destination IP Address {{form.errors.ip_to_s}}{{form.errors.ip_to_e}}</label>
+		</td><td>
+			{{form.ip_to_s}} - {{form.ip_to_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>IP Protocol Range {{form.errors.ip_proto_s}}{{form.errors.ip_proto_e}}</label>
+		</td><td>
+			{{form.ip_proto_s}} - {{form.ip_proto_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Transport Source Port Range {{form.errors.tp_from_s}}{{form.errors.tp_from_e}}</label>
+		</td><td>
+			{{form.tp_from_s}} - {{form.tp_from_e}}
+		</td>
+		</tr><tr>
+		<td>
+			<label>Transport Destination Port Range {{form.errors.tp_to_s}}{{form.errors.tp_to_e}}</label>
+		</td><td>
+			{{form.tp_to_s}} - {{form.tp_to_e}}
+		</td>
+		</tr>
+	</table>
+	<input type="submit" value="Submit"/>
+</form>
+</center>
+</body>
+</html>

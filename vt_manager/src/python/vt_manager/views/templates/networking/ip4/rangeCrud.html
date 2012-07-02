@@ -1,0 +1,36 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Add an IP4 Address range</h1>{% endblock pagehead %}
+
+{% block head %}
+{% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div>
+    	<form method="post">{% csrf_token %}
+	        <table class="formtable">
+			<tr>
+				<th class="fielderror" colspan="2">{{ form.non_field_errors }}</th>
+			</tr>
+	               	{% for field in form %}
+        	       	{% if not field.name = "resource_ptr" %}
+		              <tr> <td {% if field.errors %} class="fielderror" {% endif %}> {{ field.label_tag }}:</td><td {% if field.errors %} class="fielderror" {% endif %}> {{ field }}</td><td class="help_text">{{field.help_text}}</td></tr>
+                	{% endif %}
+	                {% endfor %}
+               </table>
+	<div>	
+		<input type="submit" value="save">
+	</div>
+	</form>
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url createIp4Range "add" %}">Create range</a> |
+		<a href="{% url ip4Ranges %}">Back</a>
+	</div>
+</div>
+{% endblock content %}
+
+

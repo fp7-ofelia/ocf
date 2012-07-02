@@ -1,0 +1,56 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-install-hook module  for v0.14.2
+###
+
+#inform user
+printHeader "info#" "Using specific 0.14.2 post-install-hook module..."
+
+SRC_DIR=/opt/ofelia/vt_manager/
+local TMP_PATH=$PWD
+
+XMLRPC_USER="nullValue"
+XMLRPC_USER2="nullValue2"
+
+cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anymore?¿"
+
+if ! grep -Fxq "XMLRPC_USER" mySettings.py
+then
+	#Adding/Moving new variables to mySettings.py
+	printHeader ">" "Adding new settings to mySettings.py ..."
+	echo -e "Plase set username and password to be used by Expedient to call XMLRPC methods.This credentials are new in v0.14.2 and will be used to any other entity connected to the northbound interface of the VT Manager to authenticate.\nThese are new variables for this version, as you maintained your old mySettings.py file, they have to be added.\nusername: "
+	read XMLRPC_USER
+	while [ $XMLRPC_PASS != $XMLRPC_PASS2 ]
+	        do
+	                echo "password:"
+	                stty -echo
+	                read XMLRPC_PASS
+	                stty echo
+	                echo "repeat password:"
+	                stty -echo
+	                read XMLRPC_PASS2
+	                stty echo
+	                if [ $XMLRPC_PASS != $XMLRPC_PASS2 ]; then
+	                        echo "Password does not match, please set it again."
+	                fi
+	        done
+	sed -i "/XMLRPC_USER/d" mySettings.py || error "Could not delete old XMLRPC_USER setting from mySettings.py ..."
+	echo "XMLRPC_USER = \"$XMLRPC_USER\"" >> mySettings.py || error "Could not add XMLRPC_USER to mySettings.py ..."
+	sed -i "/XMLRPC_PASS/d" mySettings.py || error "Could not delete old XMLRPC_PASS setting from mySettings.py ..."
+	echo "XMLRPC_PASS = \"$XMLRPC_PASS\"" >> mySettings.py || error "Could not add XMLRPC_PASS to mySettings.py ..."
+
+fi
+
+#inform user
+printHeader "info#" "Using default post-upgrade-hook module..."
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
+# recover PWD 
+cd $TMP_PATH

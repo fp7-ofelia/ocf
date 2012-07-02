@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Upload User Certificate{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<h1>Upload certificate and key for {{ curr_user.username }}</h1>
+	<h2>If you proceed you will overwrite any existing previous
+	certificate and keys. You will not be able to access slices
+	that you have previously created.</h2>
+	<form enctype="multipart/form-data" method="POST" action=".">{% csrf_token %}
+		<table class="formtable">
+			{{ form.as_table }}
+		</table>
+		<input type="submit" value="Upload and Overwrite" />
+		<a href="{% url gcf_cert_manage curr_user.pk %}">Cancel</a>
+	</form>
+</div>
+{% endblock content %}

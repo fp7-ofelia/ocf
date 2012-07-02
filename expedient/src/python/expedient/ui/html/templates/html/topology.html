@@ -1,0 +1,304 @@
+<h2>Topology</h2>
+
+
+<!--<script src="{% url js_media 'jquery.tipsy.js' %}"></script>-->
+<script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+
+</script>
+
+<script type="text/javascript+protovis">
+/* ProtoVIS data */   
+
+var data = {
+    nodes: [
+        {% for node in protovis_nodes %}
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", 
+		{% if node.type == "vt_agg"  %}
+			nodeVms: {{node.vmNames|safe }},
+			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
+		{%endif%}
+		{% if node.type == "of_agg"  %}
+			nodeConnections:{{node.connection|safe}}
+		{% endif %}
+		 }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    links: [
+        {% for link in protovis_links %}
+        {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+	
+    ],
+}
+
+				
+/* Useful functi ns*/
+
+function get_node_info_formated(d){
+	type = get_node_type(d);
+	    if(type == "openflow") {
+			var nameString = "<b>Switch Datapath ID: "+d.nodeName+"</b><br><br>";
+			if(d.nodeConnections.length>0){
+				connectionsString = "<b>Connections:</b><br>";
+				for (i=0;i<d.nodeConnections.length;i++){
+					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['target_port']+"<br>";
+				}
+			}
+			else{
+				connectionsString = "";
+			}
+            return nameString+connectionsString ;
+        } else if(type == "planetlab") {
+            return nameString;
+        } else if(type == "vtserver") {
+			var nameString = "<b>Server: "+d.nodeName+"</b><br><br>";			
+			if (d.nodeVms.length > 0){
+				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
+				for (i=0;i<d.nodeVms.length;i++){
+					vmListString = vmListString + d.nodeVms[i];
+					if (i < d.nodeVms.length-1){
+						vmListString = vmListString + ", ";
+					}
+					else{
+						vmListString = vmListString +"<br clear = left><br clear=left>";
+					}
+				}
+			}
+            else{
+                vmListString =  "<b>No VMs in this Server </b></br><br clear=left>"  
+            } 
+			var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
+			for (i=0;i<d.nodeVmInterfaces.length;i++){
+	           vmInterfacesString = vmInterfacesString + "· "+"<b>"+d.nodeVmInterfaces[i]['name']+"</b> to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
+	         }
+	        return nameString + vmListString+vmInterfacesString;
+        }
+
+
+}
+
+function get_node_type(d) {
+    var of_groups_len = {{ openflow_aggs.count }};
+    var pl_groups_len = {{ planetlab_aggs.count }};
+    var vt_aggs_len = {{ vt_aggs.count }};
+    if(d.group < of_groups_len) {
+        return "openflow";
+    } else if(d.group < of_groups_len + pl_groups_len) {
+        return "planetlab";
+    } else if (d.group <(of_groups_len + pl_groups_len+vt_aggs_len)){
+	return "vtserver"
+    }else{
+        return "unknown";
+    }
+}
+/* On Click event functions */
+function clickSwitchOrLink(d){
+	 /* if all are selected then unselect all */
+        selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length
+        all_len = $(":checkbox:.node_id_"+d.nodeValue).length
+        if(selected_len == all_len) {
+            $(":checkbox:checked.node_id_"+d.nodeValue).click();
+        }
+        /* else, select all */
+        else {
+            $(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
+        }
+}
+
+function clickServer(d){
+
+}
+
+
+/* Zooming routines */
+
+cur_zoom = 1;
+
+function zoomIn(zoom) {
+        cur_zoom = cur_zoom + zoom;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
+        vis.render();
+        return false;
+}
+
+function zoomOut(zoom) {
+	if(cur_zoom-zoom >0)
+            cur_zoom = cur_zoom - zoom;
+    else
+        return false;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2));
+        vis.render();
+        return false;
+}
+
+function zoomReset() {
+	// value is 0.99 due to Firefox bug when it is 1
+   cur_zoom=0.99;
+    vis.transform(pv.Transform.identity.scale(cur_zoom).translate((Math.round(w/
+cur_zoom) - w)/2, (Math.round(h/cur_zoom) - h)/2)); 
+    vis.render();
+    return false;
+}
+
+
+/* Instansiation General parameters*/
+var w = 740,
+    h = 400,
+    colors = pv.Colors.category20();
+
+var vis;
+vis = new pv.Panel().canvas('target') 
+    .width(w)
+    .height(h)
+    .fillStyle("white")
+
+var force = vis.add(pv.Layout.Force)
+    .bound(true)
+    .nodes(data.nodes)
+    .links(data.links)
+	.iterations(90);
+
+force.springLength(100);
+force.chargeConstant(0.1);
+force.chargeTheta(0.9);
+
+force.link.add(pv.Line)
+    .strokeStyle(function(d, p) {
+        /* if any resources on the link are selected */
+        rsc_ids = p.value.split("-");
+        if($(":checkbox#"+rsc_ids[0]+":checked").length) {
+            return "#990000";
+        }
+        if($(":checkbox#"+rsc_ids[1]+":checked").length) {
+            return "#990000";
+        }
+        return "black";
+    });
+
+//force.label.add(pv.Label);
+	//.top();
+
+/*
+force.node.add(pv.Dot)
+    .size(function(d) (50))
+    .fillStyle(function(d) d.fix ? "brown" : colors(d.group))
+    .strokeStyle(function() this.fillStyle().darker())
+    .lineWidth(1)
+    .title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+    .event("drag", force);
+*/
+
+//$("#selected_node_info").hide()
+
+force.node.add(pv.Image)
+    .url(function (d) {
+        type = get_node_type(d);
+        if(type == "openflow") {
+            return "{% url img_media 'switch-tiny.png' %}";
+        } else if(type == "planetlab") {
+            return "{% url img_media 'host-tiny.png' %}";
+        } else if(type == "vtserver") {
+            return "{% url img_media 'server-tiny.png' %}";
+        } else {
+            return "{% url img_media 'inactive.png' %}";
+        }
+    })
+    .def("i", -1)
+    .width(20)
+    .height(20)
+    .fillStyle(function (d) {
+	if (this.i() == this.index)
+		return "brown";
+        type = get_node_type(d);
+        if(type == "openflow") {
+            return "#999999"; 
+        } else if(type == "planetlab") {
+            return "#333333"; 
+        } else if(type == "vtserver") {
+            return "#006699"; 
+        } else {
+            return "#CCCCCC"; 
+        }
+    }/*function(d) {
+        if (this.i() == this.index) {
+            return "brown";
+        }
+	if(get_node_type(d)=="openflow")
+	        return "#999999"; 
+	else
+		return "#CCCCCC";
+    }*/)
+    .strokeStyle(function(d) {
+        /* if any ports are selected */
+        if($(":checkbox:checked.node_id_"+d.nodeValue).length) {
+            return "#990000";
+        }
+        return this.fillStyle().darker();
+    })
+    .cursor("pointer")
+//    .title(function(d) d.nodeName)
+    .event("mousedown", pv.Behavior.drag())
+    .event("mouseover", function(d) {
+//		pv.Behavior.tipsy({ gravity: "w", fade: true })
+        /* display info on the selected node in the div */ 
+        type = get_node_type(d);
+        desc = "Unknown"
+        if(type == "openflow") {
+            desc = "OpenFlow switch";
+        } else if(type == "planetlab") {
+            desc = "PlanetLab node";
+        } else if(type == "vtserver") {
+            desc = "Virtualized server";
+        }
+		tooltip.show(get_node_info_formated(d));
+    
+        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
+        $("#selected_node_info").show();
+        /* store the info about the selected node and highlight it */
+        this.i(this.index);
+    })
+    .event("click", function(d) {
+       	type = get_node_type(d);
+        if(type == "openflow") {
+	    clickSwitchOrLink(d);
+        } else if(type == "planetlab") {
+            return; 
+        } else if(type == "vtserver") {
+            clickServer(d); 
+        }
+    })
+    .event("mouseout", function() this.i(-1))
+	.event("mouseout", function() {
+			tooltip.hide();
+		})
+    .event("drag", force)
+    //.anchor("bottom").add(pv.Label).text(function(d) d.nodeName);
+
+vis.render();
+
+</script>
+{#Render#}
+<div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
+<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
+{%if not protovis_nodes %}
+<a href="#addAggregate"><div style="position:relative; top:200px; left:200px; width:450px;color=black;">Nothing to show yet. Add Aggregates to the slice.</div></a>
+{% endif %}
+<div id="target">
+</div>
+<div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+   
+    <a href="#" onClick="return zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   <a href="#" onClick="return zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="#" onClick="return zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+</div>
+</div>
+
+
+
+<br />
+<br />

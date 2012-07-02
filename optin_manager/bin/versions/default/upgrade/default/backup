@@ -1,0 +1,27 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: backup module
+###
+
+#inform user
+printHeader "info#" "Using default backup module..."
+
+SRC_DIR=/opt/ofelia/optin_manager/
+
+#Backing up files
+mkdir -p $BACKUP_PATH
+cp -R $SRC_DIR/src $BACKUP_PATH
+
+#Backing up database
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/openflow/optin_manager/ || error "Target directory does not exist anymore?¿"
+
+python manage.py dumpdata > $BACKUP_PATH/dbdump.data || warning "Could not backup data. Check database for inconsistencies in foireign keys or many-to-many relationships"
+python $TMP_PATH/versions/default/upgrade/tools/sqlDump.py $BACKUP_PATH/dbdump.sql "openflow.optin_manager.settings" || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..." 
+cd $TMP_PATH
+

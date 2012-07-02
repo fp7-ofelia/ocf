@@ -1,0 +1,45 @@
+{% extends "base_user.html" %}
+{% block pagehead %} <h1>Opt Traffic In, for User {{user.username}}</h1> {% endblock %}
+{% block scripts %}
+<style>
+  select {
+    width: 400px;
+  }
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#expsel").
+		change(function(){
+			var addr = "/opts/experiment_simple/"
+			var sel_value = $(this).val()
+			addr = addr+sel_value
+			$("#exp_iframe").attr('src',addr)
+		});
+});
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	{% for msg in error_msg %}
+	<p><font color="red">{{msg}}</font></p>
+	{% endfor %}
+	<form name="input" action="/opts/opt_in" method="post">{% csrf_token %}
+			Experiment:<br/>
+			<select name="experiment" id="expsel">
+				{% for exp in experiments %}
+				<option value="{{exp.id}}">
+				{{exp.project_name}}:{{exp.slice_name}}
+				</option>
+				{% endfor %}
+			</select>
+		<input type="submit" value="Opt In"/>
+	</form>
+	<br/>
+	
+	<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe">
+	</ifram>
+</div>
+
+{% endblock content %}

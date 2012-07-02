@@ -1,0 +1,9 @@
+Your registration has been completed.
+Please browse to the login: {{ link }}
+Your login is: {{ login }}
+
+Please use the password you provided in the registration process.
+
+
+Best regards
+  Your Ofelia Team

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.12-0.13 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/vt_manager/
+EMAIL_PATTERNS="EMAIL_ DEFAULT_EMAIL"
+
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exit anymore?¿"
+
+#Adding/Moving new variables to localsettings.py
+printHeader ">" "Adding new settings to mySettings.py ..."
+echo "Set Island name please, it will appear in the header of all the web pages of the VT Manager app: "
+read ISLAND_NAME
+sed -i "/ISLAND_NAME/d" mySettings.py || error "Could not delete old ISLAND_NAME setting from mySettngs.py ..."
+echo "ISLAND_NAME = \"$ISLAND_NAME\"" >> mySettings.py || error "Could not add ISLAND_NAME variable to mySettngs.py ..."
+echo -e "\n\nYou can change the new settings by editing mySettings.py file"
+
+for pattern in $EMAIL_PATTERNS
+do
+    sed -i "/$pattern/d" mySettings.py || error "Could not delete EMAIL settings from mySettngs.py ..."
+done
+
+
+#Restarting apache
+print "Restarting apache2..."
+/usr/sbin/service apache2 restart
+

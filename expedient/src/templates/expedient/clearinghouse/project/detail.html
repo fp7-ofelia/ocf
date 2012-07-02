@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Project {{ project.name }}{% endblock title %}
+
+{% block head %}
+<style>
+	.table_div td,th {
+    	text-align: center;
+	}
+</style>
+<script>
+	$(document).ready(function() {
+		addTooltipToClass("project_name");
+		addTooltipToClass("role_desc");
+		addTooltipToClass("user_desc");
+		addTooltipToClass("req_msg");
+		addTooltipToClass("req_user");
+		$(".permissions").each(function(index) {
+			addTooltipToSummary("role_perms_"+index);
+		});
+		$("#role_req_help_img").tooltip({
+			tip: "#role_req_help_div",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+		});
+		$("#aggs_help_img").tooltip({
+			tip: "#aggs_help_div",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+		});
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Project <font class="highlight">{{ project.name }}</font></h1>
+	</div>
+	
+	<div class="mgmt_actions">
+		<h2>Management Actions:</h2>
+    	<p><a href="{% url project_update project.id %}">Edit</a> basic information.</p>
+    	<p><a href="{% url project_delete project.id %}">Delete</a> project.</p>
+    </div>
+	
+    <div class="proj_description">
+        {{ project.description }}
+    </div>
+	
+	<h2>Members</h2>
+	<div class="Members">
+		<div class="members">
+			<table class="fulltable" id="members_table">
+				<tr class="head">
+					<th class="username">Username</th>
+					<th class="roles">Roles</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for member in project.members_as_permittees.all %}
+				<tr class="body">
+					<td class="username">{{ member.object.username }}</td>
+					<td class="roles">
+						{% for role in member.projectrole_set.all %}
+						{% if role.project == project %}
+						<div class="role_desc val">{{ role.name }}</div>
+						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
+						{% endif %}
+						{% endfor %}
+					</td>
+					<td class="actions">
+						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>,
+						<a href="{% url project_member_update project.id member.object_id %}">update</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	    <div class="center">
+	    	<input type="button" value="Add Members"
+			onclick="document.location='{% url project_member_add project.id %}'" />
+	    </div>
+	</div>
+   
+	 <h2>Aggregates
+                <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+        </h2>
+
+        <div class="tooltip" id="aggs_help_div">
+                Below you can manage and add aggregates in your project. You can
+                only create slices on aggregates that are in the project. When you
+                add an aggregate to the project, you might be prompted for some
+                additional information that the aggregate needs.
+        </div>
+
+        <div class="aggregate_list">
+                {% with project.aggregates.all as aggregate_list %}
+                {% if aggregate_list.count %}
+                        {% include "project/project_simple_agg_list.html" %}
+                {% else %}
+                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
+                        This project has no aggregates added to it. To be able to
+            create slices that can reserve resources on aggregates, you will
+            need to add aggregates to the project.
+                {% endif %}
+                {% endwith %}
+                      <div class="center">
+            <input type="button" value="Add Aggregates"
+            onclick="document.location='{% url project_add_agg project.id %}'" />
+        </div>
+
+        </div>
+	
+	<h2>Slices</h2>
+	<div class="slice_list">
+		<div class="table_div">
+			<table class="fulltable" id="slice_table">
+				<tr class="head">
+		            <th class="name">Name</th>
+					<th class="description">Description</th>
+					<th class="resources">Size</th>
+					<th class="owner">Owner</th>
+					<th class="status">Reserved?</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for slice in project.slice_set.all %}
+				<tr class="body">
+					<td class="name"><a href="{% url slice_detail slice.id %}">{{ slice.name }}</a></td>
+					<td class="description">{{ slice.description }}</td>
+					<td class="resources">{{ slice.resource_set.all.count }}</td>
+					<td class="owner">
+						{% with slice.owner as user %}
+						<div class="val user_desc">{{ user.username }}</div>
+						<div class="description user_desc">{% include "users/tooltipdesc.html" %}</div>
+						{% endwith %}
+			        </td>
+					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+					<td class="actions">
+						<a href="{% url slice_detail slice.id %}">details</a>,
+						<a href="{% url slice_delete slice.id %}">delete</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div class="center">
+	    	<input type="button" value="Create Slice"
+	    	onclick="document.location='{% url slice_create project.id %}'" />
+		</div>
+	</div>
+		
+	<h2>Role Requests
+	<img id="role_req_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+	</h2>
+	
+	<div class="tooltip" id="role_req_help_div">
+		When users try to do something in the project that they do not have
+		permission for, they will get to a page that allows them to request
+		additional permissions be requesting a particular role from a user
+		who can give it to them. <br /><br />
+		Below is a list of roles users are currently requesting from you. You
+		can approve or deny these requests. You can also delegate a role
+		to allow a user to be able to give the role out to others.
+	</div>
+	
+	<div class="role_requests">
+		<table class="fulltable" id="role_request_table">
+			<tr>
+				<th>Requester</th>
+				<th>Requested Role</th>
+				<th>Message</th>
+				<th>Actions</th>
+			</tr>
+			{% for req in role_requests %}
+			<tr>
+				<td>
+					{% with req.requester as user %}
+					<span class="req_user val">{{ user.username }}</span>
+					<div class="req_user description">
+						{% include "users/tooltipdesc.html" %}
+					</div>
+					{% endwith %}
+				</td>
+				<td>
+					<div class="role_desc val">{{ role.name }}</div>
+					<div class="role_desc description">{{ role.description }}</div>
+				</td>
+				<td>
+					<div class="req_msg val">{{ req.message|truncatewords:10 }}</div>
+					<div class="req_msg description">{{ req.message }}</div>
+				</td>
+				<td>
+					<a href="{% url roles_confirm_request proj_id=project.id, req_id=req.id, allow=1, delegate=0 %}">Allow</a>,
+					<a href="{% url roles_confirm_request proj_id=project.id, req_id=req.id, allow=1, delegate=1 %}">Delegate</a>,
+					<a href="{% url roles_confirm_request proj_id=project.id, req_id=req.id, allow=0, delegate=0 %}">Deny</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+
+	<h2>Roles</h2>
+	<div class="role_list">
+		<div class="table_div">
+			<table class="fulltable" id="role_table">
+				<tr class="head">
+		            <th class="name">Name</th>
+					<th class="description">Description</th>
+					<th class="permissions">Permissions</th>
+					<th class="actions">Actions</th>
+				</tr>
+				{% for role in project.projectrole_set.all %}
+				<tr class="body">
+					<td class="name">{{ role.name }}</td>
+					<td class="description">
+						<div class="role_desc val">{{ role.description|truncatewords:12 }}</div>
+						<div class="role_desc description">{{ role.description }}</div>
+					</td>
+					<td class="permissions">
+						<div class="summarytext role_perms_{{ forloop.counter0 }}">
+							{{ role.obj_permissions.all.count }}</div>
+						<div class="summarytooltip role_perms_{{ forloop.counter0 }}">
+							{% for obj_perm in role.obj_permissions.all %}
+							<div class="val role_perms_{{ forloop.parentloop.counter0 }}">{{ obj_perm.permission.name }}</div>
+							<div class="description role_perms_{{ forloop.parentloop.counter0 }}">
+								<table class="tooltiptable">
+									<tr>
+										<th>Name</th><td>:</td><td>{{ obj_perm.permission.name }}</td>
+									</tr>
+									<tr>
+										<th>Target</th><td>:</td><td>{{ obj_perm.target }}</td>
+									</tr>
+									<tr>
+										<th>Description</th><td>:</td><td>{{ obj_perm.permission.description }}</td>
+									</tr>
+								</table>
+							</div>{% if not forloop.last %} | {% endif %}
+ 							{% endfor %}
+						</div>
+					</td>
+					<td class="actions">
+						<a href="{% url roles_update role.id %}">update</a>{% if role.name != "owner" and role.name != "researcher" %},
+						<a href="{% url roles_delete role.id %}">delete</a>{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		<div class="center">
+	    	<input type="button" value="Create Role"
+	    	onclick="document.location='{% url roles_create project.id %}'" />
+		</div>
+	</div>
+</div>
+{% endblock content %}

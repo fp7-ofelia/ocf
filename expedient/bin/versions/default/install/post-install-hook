@@ -1,0 +1,20 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-install module
+###
+
+#Inform user
+printHeader "info#" "Using default post-install-hook module..."
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 restart
+
+#Cleaning the house
+
+#Testing
+#TODO

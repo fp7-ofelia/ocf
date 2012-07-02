@@ -1,0 +1,63 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: repository utils 
+###
+
+function recoverUpgradeState(){
+	
+
+	if [ -f $UPGRADE_REG ]; then
+	
+		OFVER_UPGRADED_STATUS="1"
+		printDebug "Recovering state..." 
+		source $UPGRADE_REG
+		rm -f $UGPRADE_REG
+		printDebug "Recovered state: EXECPID=$EXECPID, BACKUP_PATH=$BACKUP_PATH, LOG=$LOG"
+	fi
+
+}
+
+function upgradeOfverFromRepo(){
+	#Call user-defined code to upgrade ofver code (and if in-branch the app code)
+	source "$EXECPATH/repo" || error "Could not load $EXEC_PATH/repo script to upgrade ofver code" $NO_RESCUE 	
+}
+
+function restartOfverInstance(){
+	#Save upgrade info
+	echo -e "EXECPID=$EXECPID\nBACKUP_PATH=$BACKUP_PATH\nLOG=$LOG" > $UPGRADE_REG
+	
+	#Unlock
+	unlock
+
+	#Execute ofver again with all params and exit
+	TO_EXECUTE="$EXECPATH/ofver $ALL_ARGS"
+	print "Restarting ofver...\n"
+	printDebug "Restarting ofver by triggering: $TO_EXECUTE"
+	
+	/bin/bash $TO_EXECUTE 
+	exit 0 
+}
+
+function upgradeCodeFromRepo(){
+	if [ "$OFVER_IN_BRANCH" != "1"  ]; then
+		#Upgrade app code
+		print "Upgrading application code..."	
+		loadModule "repo" $NO_RESCUE	
+	else	
+		print "Using in-branch ofver code. Application code already retrieved"	
+	fi	
+}
+
+function downloadCodeFromRepo(){
+	if [ "$OFVER_IN_BRANCH" != "1"  ]; then
+		#Downloading app code
+		print "Downloading application code..."	
+		loadModule "repo" $NO_RESCUE	
+	else	
+		print "Using in-branch ofver code. Application code already retrieved"	
+	fi	
+}

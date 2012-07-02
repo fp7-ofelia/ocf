@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load form_helper %}
+
+{% block content%}
+<p>
+{{ message }}	
+</p>
+
+<form action="{% url registration.views.password_reset.forgotten %}" method="post">
+	{{ form.non_field_errors }}
+	{% field_row form "email" %}
+	{% field_row form "challenge" %}
+	
+	{% submit_row "reset" %}
+</form>
+
+{% endblock %}

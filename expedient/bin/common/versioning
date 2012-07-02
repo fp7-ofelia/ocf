@@ -1,0 +1,45 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Versioning library 
+###
+
+##
+#Versioning
+##
+
+function checkVersionJump()
+{
+	local FPATH="$VERSIONS_PATH/$TARGETED_VERSION/upgrade/$CURRENT_VERSION/forbidden"
+	printDebug "Checking forbidden file in $FPATH"
+
+	if [ -f "$FPATH" ]; then
+		error "Forbidden upgrade from version $CURRENT_VERSION to $TARGETED_VERSION" $NO_RESCUE	
+	fi	
+}
+
+function setVersions()
+{
+	TARGETED_VERSION=`cat $TARGETED_VERSION_PATH` || error "Could not find targeted(new) version identifier. File missing" $NO_RESCUE	
+
+	printDebug "Detected target version:$TARGETED_VERSION"
+
+	if [ -f "$CURRENT_VERSION_PATH" ]; then
+		CURRENT_VERSION=`cat $CURRENT_VERSION_PATH `	
+	else
+		if [ "$ACTION" == "upgrade" ]; then
+			warning "Could not determine current(installed) version. \"default\" upgrade will be used..."
+			CURRENT_VERSION=default
+		fi
+	fi
+	
+	printDebug "Detected current version:$CURRENT_VERSION"
+}
+
+function writeVersion()
+{
+	echo $TARGETED_VERSION > $CURRENT_VERSION_PATH
+}

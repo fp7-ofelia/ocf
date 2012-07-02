@@ -1,0 +1,56 @@
+{% extends "vt_plugin_base.html" %}
+
+{% block title %}{% if create %}Add Virtualization Aggregate{% else %}Update Virtualization Aggregate {{ aggregate.name }}{% endif %}.{% endblock title %}
+
+{% block head %}
+<style>
+	/* OpenFlow stuff */
+	table.openflow_create {
+		width:70%;
+		margin-left:15%;
+		margin-right:15%;
+	}
+	table.openflow_create th {
+	    text-align:right;
+	}
+	table.openflow_create tr {
+	    text-align:left;
+	}
+	table.openflow_create input[type='textarea'], input[type='text'] {
+	    width:335px;
+	}
+	table.openflow_create #id_description {
+		height:75px;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
+	<table class="formtable_noborder openflow_create">
+	{{ agg_form.as_table }}
+	{{ client_form.as_table }}
+
+	<!--
+	{% if not create %}	
+	<tr>
+		<th>Current status:</th>
+		<td class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
+	</tr>	
+	{% endif %}
+	-->
+	
+    </table>
+	<div class="center">
+	    {% if create %}
+		<input type="submit" value="Create" />
+		{% else %}
+		<input type="submit" value="Update" />
+		<input type="button" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
+		{% endif %}
+		<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
+	</div>
+	</form>
+</div>
+{% endblock content %}

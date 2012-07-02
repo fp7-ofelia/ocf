@@ -1,0 +1,87 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Initialization library 
+###
+
+#Usage functions
+function usage()
+{
+	splash 1
+	echo ""
+	echo "Usage: $APP_NAME {install upgrade} [options] "
+	echo ""
+	echo -e "\t -h \t Help and usage"
+	echo -e "\t -d \t Enable debug mode"
+	echo -e "\t -n \t Disable logging"
+	echo -e "\t -b \t Disable backup"
+	echo -e "\t -f \t Force mode. DO NOT USE 'Force mode' in PRODUCTION systems."
+	echo ""
+}
+
+
+
+function checkAction()
+{
+	#Two actions {install,upgrade}
+ 
+	if [ "$1" == "install" ]; then
+		ACTION="install"
+		ACTION_="performInstall"
+		return	
+	elif [ "$1" == "upgrade" ]; then
+		ACTION="upgrade"
+		ACTION_="performUpgrade"
+		return
+	elif [ "-h" == "$1" ]; then
+		usage
+		exit 0
+	fi
+
+	usage 	
+	error "Unknown action: $1. Supported actions {install,upgrade}"  $NO_RESCUE
+}
+
+#Checks variables existance
+function varChecks(){
+	if [ "$OFVER_IN_BRANCH" != "1" -a "$OFVER_IN_BRANCH" != "0"  ]; then 
+		error 'Invalid or unexistent value for $OFVER_IN_BRANCH setting' $NO_RESCUE
+	fi	
+}
+
+function checkArgsAndParseOpts()
+{
+	#Save all args
+	ALL_ARGS="$@"
+
+	printDebug $ALL_ARGS		
+
+	#At least one argument required
+
+	if [ $# -lt 1 ]; then
+		usage
+		error "Incorrect number of parameters" $NO_RESCUE
+	fi
+
+	#Check action arg
+	checkAction $1
+	shift 1
+	
+	#Extra args
+	while getopts ":dnbf" o
+	do
+		case "$o" in
+
+			d)	DEBUG=1 ;;
+			n)	USE_LOG=0;;
+			b)	BACKUP=0 ;;
+			f)	FORCE=1 ;;
+			[?])	error "Unkown Option: $1" $NO_RESCUE && usage && exit 1	
+			exit 1;;
+		esac
+	done
+	
+}

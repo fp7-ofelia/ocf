@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load breadcrumbs %}
+
+{% block title %}Delete Role {{ role.name }} in Project {{ project.name }}{% endblock %}
+
+{% block head %}
+<script>
+	$(document).ready(function(){
+		addTooltipToClass("role_desc");
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+	<h1>Delete Role {{ role.name }} in Project {{ project.name }}?</h1>
+	
+	This will delete the role <span class="role_desc val">{{ role.name }}</span>
+	<span class="role_desc description">{{ role.description }}</span>
+	from the project and remove all permissions
+	associated with the role from users who have the role. Any permissions
+	that are given by another role are not affected.
+	
+	<h2>Are you sure you want to proceed?</h2>
+	
+	<form action="" method="POST">{% csrf_token %}
+		<div class="center">
+			<input type="submit" value="Yes, delete the role" />
+			<a href="{% before_last_link breadcrumbs %}">No, cancel</a>
+		</div>
+	</form>
+</div>
+{% endblock %}
