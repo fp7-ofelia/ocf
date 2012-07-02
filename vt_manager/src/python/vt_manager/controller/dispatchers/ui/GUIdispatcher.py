@@ -18,7 +18,7 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.utils.HttpUtils import HttpUtils
 from vt_manager.models.NetworkInterface import NetworkInterface
 from vt_manager.models.MacRange import MacRange
-from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm, NetworkInterfaceForm
+from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm
 from vt_manager.controller.dispatchers.forms.ServerForm import ServerForm
 from django.db import transaction
 
@@ -79,9 +79,8 @@ def servers_crud(request, server_id=None):
 			
 			data = server.getNetworkInterfaces().filter(isMgmt = False)
 			if data:
-				IfaceFormSetClass = modelformset_factory(NetworkInterface, form = NetworkInterfaceForm, extra = 0)
+				IfaceFormSetClass = modelformset_factory(NetworkInterface,extra = 0)
 			ifaceformset = IfaceFormSetClass(queryset= data)
-
 
 		else:
 			mgmtIfaceForm = MgmtBridgeForm(prefix ="mgmtBridge")
@@ -334,16 +333,21 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 				template="networking/ip4/rangeCrud.html",
 			)
 			return 
+
+	               # return HttpResponseRedirect("/networking/ip4/")
+
 		
 		elif request.method == "POST":
 			try:
 				instance = HttpUtils.getInstanceFromForm(request,Ip4Range)
 				#Create Range
 				Ip4Controller.createRange(instance)
+				return HttpResponseRedirect("/networking/ip4/")
 			except Exception as e:
 				print e
 				extra_context["form"] = HttpUtils.processExceptionForm(e,request,Ip4Range)
 				#Process creation query
+		                #return HttpResponseRedirect("/networking/ip4/")
 				return simple.direct_to_template(
 					request,
 					extra_context = extra_context, 
@@ -357,11 +361,12 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 		instance = Ip4Controller.getRange(rangeId)
 		extra_context["range"] = instance 
 
-		return simple.direct_to_template(
-			request,
-			extra_context = extra_context, 
-			template="networking/ip4/rangeDetail.html",
-		)
+		return HttpResponseRedirect("/networking/ip4/")
+		#return simple.direct_to_template(
+		#	request,
+		#	extra_context = extra_context, 
+		#	template="networking/ip4/rangeDetail.html",
+		#)
 		
 			
 	#Edit
@@ -377,11 +382,11 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 		
 			#Create excluded
 			Ip4Controller.addExcludedIp4(instance,request)
+			return HttpResponseRedirect("/networking/ip4/")
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
-			pass	
-					
+			pass
 		return simple.direct_to_template(
 			request,
 			extra_context = extra_context, 
@@ -398,12 +403,14 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 			Ip4Controller.removeExcludedIp4(instance,ip4Id)
 			#FIXME: Why initial instance is not refreshed?
 			instance = Ip4Controller.getRange(rangeId)
-			extra_context["range"] = instance 
+			extra_context["range"] = instance
+			return HttpResponseRedirect("/networking/ip4/") 
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
 			pass	
-					
+
+			
 		return simple.direct_to_template(
 			request,
 			extra_context = extra_context, 
@@ -415,23 +422,19 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 
 		try:	
 			Ip4Controller.deleteRange(rangeId)
+			return HttpResponseRedirect("/networking/ip4/")
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
-			pass	
-	
-
-
-	
-	
+			pass
 	extra_context["ranges"] = Ip4Controller.listRanges()	
-
 	template = "networking/ip4/index.html"
 	return simple.direct_to_template(
 			request,
 			extra_context = extra_context, 
 			template=template,
 		)
+
 
 def manageEthernet(request,rangeId=None,action=None,macId=None):
 
@@ -459,6 +462,7 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 				instance = HttpUtils.getInstanceFromForm(request,MacRange)
 				#Create Range
 				EthernetController.createRange(instance)
+				return HttpResponseRedirect("/networking/ethernet/")
 			except Exception as e:
 				print e
 				extra_context["form"] = HttpUtils.processExceptionForm(e,request,MacRange)
@@ -475,12 +479,13 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 
 		instance = EthernetController.getRange(rangeId)
 		extra_context["range"] = instance 
+		return HttpResponseRedirect("/networking/ethernet/")
 
-		return simple.direct_to_template(
-			request,
-			extra_context = extra_context, 
-			template="networking/ethernet/rangeDetail.html",
-		)
+		#return simple.direct_to_template(
+		#	request,
+		#	extra_context = extra_context, 
+		#	template="networking/ethernet/rangeDetail.html",
+		#)
 		
 			
 	#Edit
@@ -496,6 +501,9 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 		
 			#Create excluded
 			EthernetController.addExcludedMac(instance,request)
+
+			return HttpResponseRedirect("/networking/ethernet/")
+
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
@@ -518,6 +526,7 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 			EthernetController.removeExcludedMac(instance,macId)
 			instance = EthernetController.getRange(rangeId)
 			extra_context["range"] = instance 
+			return HttpResponseRedirect("/networking/ethernet/")
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
@@ -534,6 +543,8 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 
 		try:	
 			EthernetController.deleteRange(rangeId)
+			return HttpResponseRedirect("/networking/ethernet/")
+
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
