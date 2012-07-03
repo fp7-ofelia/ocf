@@ -157,7 +157,7 @@ img {
   -o-box-shadow: 0 0 5px #ebebeb;
   -ms-box-shadow: 0 0 5px #ebebeb;
 }
-.imgNoWrap {
+.imageNoWrap {
   border: 0px solid;
 
   box-shadow: 0 0 0px #ebebeb;
