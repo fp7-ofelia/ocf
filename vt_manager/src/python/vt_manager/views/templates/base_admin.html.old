@@ -49,75 +49,43 @@
 				
 			{% endblock %}
 			<div style="float:right">
-    			<table align="right" class="menutable">
+    			<table align="right"> 
 		        <tr> 
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-			            <a href="/servers/admin/">
+			     <td class="button button_admin" onClick="location.href='{% url admin_servers %}'">
 			                    Administrate Servers
-				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 		            </td>
 		        </tr>
 		       	<tr>
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-			            <a href="{% url networkingDashboard %}">
+			     <td class="button button_admin" onClick="location.href='{% url networkingDashboard %}'">
 			                    Network Settings
-				<!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 			    </td>
 			</tr>
-
 			{% if  section = "networking" %}
-			<tr>
-				<td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
-			            <a href="{% url ip4Ranges %}">
+			<tr align="right" >
+			     <td class="button button_admin subutton" onClick="location.href='{% url ip4Ranges %}'">
 			                    IP4 ranges
-					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
-			<tr>	
-	        	    <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;background-position: 14px;padding-left:14px" height="38px" width="60px" >
-			            <a href="{% url macRanges %}">
+				</td>
+			<tr align="right" >
+			     <td class="button button_admin subutton" onClick="location.href='{% url macRanges %}'">
 			                    Ethernet ranges
-					<!--                <img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 			   </td>
 		        </tr>
 			{% endif %} 
-
-                        <tr>
-                            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-<!--                                    <a href="/policy"> -->
-                                    <a href="/rule_table_view">
-                                            Policy Manager
-                                <!--<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-                                    </a>
-                            </td>
 		
 		        <tr><td><br></td></tr>
-		        <tr><td><br></td></tr>
 		        <tr> 
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-			            <a href="/dashboard">
+			     <td class="button button_admin" onClick="location.href='{% url dashboard %}'">
 			                    Dashboard 
-				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 		            </td>
 		        </tr>
 		        <tr>
-		            <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-			            <a href="/change_profile">
+			     <td class="button button_admin" onClick="location.href='{% url change_profile %}'">
 			                    Change profile 
-				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 		            </td>
 		        </tr>
-
 		         <tr>
-			     <td class="button" style="background:url({% url img_media 'base_dark.png' %});background-repeat:no-repeat;" height="38px" width="60px" >
-        			    <a href="/accounts/logout/">
+			     <td class="button button_admin" onClick="location.href='/accounts/logout/'">
 			                    Logout
-				<!--        		<img src="{% url img_media 'base_dark.png' %}" class="menuimg" id="profile"/>-->
-			            </a>
 		            </td>
 		        </tr>
 	    	</table>

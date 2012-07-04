@@ -1,0 +1,95 @@
+{% extends "base_admin.html" %}
+
+{% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
+
+<script type="text/javascript">
+    	$(document).ready(function() {
+	      $("#editRSbutton").click(function() {
+          		$.fancybox({'href': '{% url edit_ruleset table.name %}'});
+    	});
+});
+	
+</script>
+
+{% endblock %}
+
+
+{% block pagehead %}
+	<div class="main">
+        	<h1>RuleTable Overview</h1>
+	</div>
+{% endblock pagehead %}
+{% block content %}
+	<div class="main">
+
+	<div style="width:730px">
+
+		<div class="wrapper">
+		<table>
+			<tr>
+			<td><b>Default Policy: </b>
+			{% if  table.getPolicyType %} <img src="{% url img_media 'active_t.png' %}" width="15px"/><b> Accept </b>
+			{% else %} <img src="{% url img_media 'inactive_t.png' %}" width="15px"/><b> Deny </b>
+			{% endif %}</td>
+			</tr>
+			<tr> 
+			<form action ="{% url update_ruleTable_policy %}" method="post">{% csrf_token %}
+			{% if table.getPolicyType %}
+			<td><input id="accept" type="radio" name="defaultPolicy" value="accept" checked> Accept
+		        <input id="deny" type="radio" name="defaultPolicy" value="deny"> Deny</td>
+			{% else %}
+			<td><input id="accept" type="radio" name="defaultPolicy" value="accept"> Accept
+                        <input id="deny" type="radio" name="defaultPolicy" value="deny" checked> Deny</td>
+			{% endif %}
+			<input type="hidden" name="table_name" value="{{ table.name }}">
+			<td><input type="submit" value="Update Default Policy">
+			</form>
+			</tr>
+		</table>
+		</div>
+		<h2> RuleSet of {{ table.getName }}</h2>
+		<div class="wrapper">
+		<br>
+		<table class ="ruleTable">
+		<tr class="header" >
+        		<th>Enabled</th>
+        		<th>Rule</th>
+			<th>Actions</th>
+			{% if table.getRuleSet %}
+				{% for rule in table.getRuleSet %}
+					<tr class="{% cycle 'odd' 'even' %}">
+					<td>{% if rule.enabled %}
+						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'active_t.png' %}" width="15px"/></a>
+					    {%else%}
+						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'inactive_t.png' %}" width="15px"/></a>
+					    {%endif%}</td>
+                                        <form action ="{% url rule_delete %}" method="post">{% csrf_token %}
+                                        <td><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td>
+                                        <input type="hidden" name="table_name" value="{{ table.name }}">
+                                        <input type="hidden" name="uuid" value="{{ rule.rule.getUUID }}">
+                                        <td><input type="submit" value="Delete Rule"></td>
+                                        </form>
+                                        </tr>
+				{% endfor %}
+			{% else %}
+				<tr>
+				<td>There are not rules in {{ table.getName }} yet</td>
+				<td></td>
+				<td></td>
+				</tr>
+			{% endif %}
+		</table>
+		<br>
+		</div>
+        	<center>
+			<a href="{% url policy_create table.name  %}">add Rule</a>|
+			<a href="{% url  dashboard  %}">Dashboard</a>
+    	</div>
+	
+{% endblock content %}
+
