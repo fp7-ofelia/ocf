@@ -452,7 +452,86 @@ table.ranges tr.odd{
 
 
 
-rder: 0;
+/* Errors */
+.fielderror{
+	color: red;
+	padding:5px 
+}
+.fielderror th{
+	text-align:center;
+	font-weight:normal;
+	color: red;
+}
+.fielderror label {
+	color: red;
+}
+.fielderror li{
+	list-style: none;
+}
+.fielderror input {
+	background-color:#FFDDEE;
+}
+
+
+/*Policy Engine CSS */
+
+/* RULETABLE STYLES*/
+
+table.ruleTable{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    font-size:11px;
+    border:0px;
+}
+
+table.ruleTable tr{
+        border:0px!important;
+        border-bottom:1px solid red;
+}
+table.ruleTable td{
+    padding : 4px;
+    border:0px!important;
+    color:#000;
+}
+table.ruleTable th {
+    padding : 4px;
+    border:0px;
+    /*background-color: #8ED6EA;*/
+    background-color: /*#CEF6F5;*/ #333;
+    color: #eee;
+    text-align:left;
+}
+table.ruleTable tr.even{
+    /*background-color: #A6DEEE;*/
+    background-color: #AAA;
+    border:0px!important;
+}
+
+table.ruleTable tr.odd{
+    /*background-color: #C0E7F3;*/
+    background-color: #999;
+    border:0px!important;
+}
+div.wrapper {
+        margin-bottom:10px;
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        display:inline-block;
+        width:720px;;
+        text-align:center;
+        vertical-align:middle;
+        padding:10px;
+}
+
+
+/* DRAG n DROP */
+
+#table1 td {
+border: 0;
 padding:0;
 margin:0;
 }
@@ -461,6 +540,7 @@ margin:0;
 #drag {
 margin: auto;
 }
+
 
 /* drag objects (DIV inside table cells) */
 .drag{
@@ -493,11 +573,6 @@ font-size: 12px;
 border: 1px solid yellow;
 }
 
-/* tables */
-/* TRASH CELL */
-div#drag table {
-border-collapse: collapse;
-}
 
 /* table cells */
 /*TEXT CELLS */
@@ -508,7 +583,6 @@ text-align: center;
 font-size: 12pt;
 padding: 2px;
 }
-
 
 #cond_div{
 width: auto;
@@ -551,25 +625,4 @@ width:50px;
 background: #aaaaaa;
 }
 
-
-/* Errors */
-.fielderror{
-	color: red;
-	padding:5px 
-}
-.fielderror th{
-	text-align:center;
-	font-weight:normal;
-	color: red;
-}
-.fielderror label {
-	color: red;
-}
-.fielderror li{
-	list-style: none;
-}
-.fielderror input {
-	background-color:#FFDDEE;
-}
-
-
+   
