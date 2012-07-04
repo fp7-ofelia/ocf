@@ -71,12 +71,12 @@
 			   </td>
 		        </tr>
 			{% endif %} 
-			<tr>
-                             <td class="button button_admin" onClick="location.href='/rule_table_view'">
+			 <tr>
+                             <td class="button button_admin" onClick="location.href='{% url rule_table_view %}'">
                                             Policy Manager
                             </td>
                         </tr>
-
+	
 		        <tr><td><br></td></tr>
 		        <tr> 
 			     <td class="button button_admin" onClick="location.href='{% url dashboard %}'">
