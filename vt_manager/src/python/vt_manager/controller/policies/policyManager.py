@@ -186,6 +186,7 @@ def rule_create(request):
                 return HttpResponseRedirect("rule_table_view")#rule_table_view(tableName)		
 
 	except Exception as e:
+		print "CADRDEBUG exception: ", e
 		errors.insert(0,e)
 		errors.insert(0,"The Rule cannot be generated. Reason(s):")
 		ruleTable = RuleTableManager.load(tableName)
@@ -210,7 +211,7 @@ def rule_create(request):
 			ruleType = "terminal"
 			type2 = ["nonterminal"]
 
-		if saved == "True":
+		if saved == "True" or ruleid == "":
 			return simple.direct_to_template(request,
         	        	template = 'policyEngine/policy_create.html',
                 		extra_context = {'user': request.user,
