@@ -57,33 +57,19 @@
 		<br>
 		<table class ="ruleTable">
 		<tr class="header" >
-			<th>Order</th>
         		<th>Enabled</th>
-        		<th>Condition</th>
-        		<th>Description</th>
-        		<th>Return</th>
+        		<th>Rule</th>
 			<th>Actions</th>
 			{% if table.getRuleSet %}
 				{% for rule in table.getRuleSet %}
 					<tr class="{% cycle 'odd' 'even' %}">
-					<td>{{ forloop.counter0 }}</td>
 					<td>{% if rule.enabled %}
-						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'active_t.png' %}" width="15px" border=0/></a>
+						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'active_t.png' %}" width="15px"/></a>
 					    {%else%}
-						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'inactive_t.png' %}" width="15px" border=0/></a>
+						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'inactive_t.png' %}" width="15px"/></a>
 					    {%endif%}</td>
                                         <form action ="{% url rule_delete %}" method="post">{% csrf_token %}
-<!--					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td> -->
-					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getCondition.dump }}</a></td>
-					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getDescription }}</a></td>
-					<td align=left>
-						{% if rule.rule.getType.terminal%}
-							{% if rule.rule.getType.value %}ACCEPT
-							{% else %}DENY
-							{% endif %}
-						{% else %}NON-TERMINAL
-						{% endif %}
-					</td>
+                                        <td><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td>
                                         <input type="hidden" name="table_name" value="{{ table.name }}">
                                         <input type="hidden" name="uuid" value="{{ rule.rule.getUUID }}">
                                         <td><input type="submit" value="Delete Rule"></td>

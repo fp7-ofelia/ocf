@@ -337,8 +337,7 @@
 			elem_delete($("div.selected")[2].getAttribute('id'));
 			elem_delete($("div.selected")[0].getAttribute('id'));
 		};
-//		REDIPS.drag.init();
-		rd.init();
+		REDIPS.drag.init();
 		cond_assign();
 	};
 
@@ -420,7 +419,7 @@
     <div style="width:730px" id = "elements">
 
 
-	<table class="formtable" width="750">
+	<table class="formtable">
         <tr>
         <td><h4>Rule Condition:</h4></td>
 	</tr>
@@ -431,49 +430,41 @@
 <!-- Drag-and-drop condition creation -->
 	<div id="drag">
 		<table border="0">
-<!--			<colgroup>
+			<colgroup>
 				<col width="450"/>
 				<col width="150"/>
 			</colgroup>
--->			<th>
-				<td class="mark" valign="top"><BR><b>Operators</b><BR> </td>
-			</th>
-<!--					<table id="table1"> -->
 			<tr>
-			    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
-				<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
-				<td class="mark"><div id="not"      class="drag not clone">not</div></td>
-			</tr>
-			<tr>
-				<td colspan=3 class="mark">
-					<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
-					<input id="CreateCondButton" type="button" value="Create New Condition" class="button" >
+				<td class="mark" valign="top" id="cond_cell"><BR><b>Conditions</b>
+					{% for cond in conditions %}
+						<div id="operand" class="drag operand clone">{{ cond }}</div>
+					{% endfor %}
+				</td>
+				<td class="mark" valign="top"><BR><b>Operators</b><BR>
+					<table id="table1">
+						<tr>
+						    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
+							<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
+							<td class="mark"><div id="not"      class="drag not clone">not</div></td>
+						    
+						</tr>
+						<tr><td colspan=3 class="mark">
+							<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+						    </td>
+						</tr>
+					</table>
 				</td>
 			</tr>
-<!--		</table> -->
-<!--				</td>-->
-			</tr>
-<!--			<tr>
-				<td class="mark"><input id="CreateCondButton" type="button" value="Create New Condition" class="button" ></td>
+			<tr>
+				<td class="mark"><input id="CreateCondButton" type="button" value="+" class="button" ></td>
 				<td class="mark"></td>
 			</tr>
--->		</table>
+		</table>
 		<BR>
 		<div id="cond_div">
 			<table align=center id="cond_table">
 				<tr id="cond_row">
-				{% if edit or saved %}
-					<td class="single condcell"></td>
-					<td class="single condcell">
-						<div id=operandc0 class="drag operand">
-							<div class="xcloser"><a href="javascript:elem_delete('operandc0')">&#10006;</a></div>
-						{{condition}}
-						</div>
-					</td>
-					<td class="single condcell"></td>
-				{% else %}
-					<td class="single condcell"></td>
-				{% endif %}
+				    <td class="single condcell"></td>
 				</tr>
 			</table>
 		</div>
@@ -482,7 +473,8 @@
 <!-- End Drag-and-drop condition creation -->
 	<input type="hidden" name="table" value="{{ CurrentTable }}">
 	<td>
-	<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
+<!--	<input id="finalCond" type="hidden" size="85"  value="{{ condition }}" name="condition">
+-->	<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
 	</tr>
 	<tr><td><h4>Rule Parameters:</h4></td></tr>
 	<tr>
@@ -539,8 +531,7 @@
 	<td><div>
 		<table>
 		<td>Error Message:&nbsp;</td>
-<!--		<td><textarea name="error_message" rows="1" cols="75" id="errorMsg">{{ errorMsg }}</textarea></td> -->
-		<td><input type="text" name="error_message" size="90" id="errorMsg" value="{{ errorMsg }}"></td>
+		<td><textarea name="error_message" rows="1" cols="25" id="errorMsg">{{ errorMsg }}</textarea></td>
 		</table>
 	</div></td>
 	</tr>
@@ -548,8 +539,7 @@
 	<td><div>
 		<table>
 		<td>Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<!--		<td><textarea name="description" rows="1" cols="75" id="description">{{ description }}</textarea></td> -->
-		<td><input type="text" name="description" size="90" id="description" value="{{ description }}"></td>
+		<td><textarea name="description" rows="1" cols="25" id="description">{{ description }}</textarea></td>
 		</table>
 	</div></td>
 	</tr>
@@ -559,11 +549,11 @@
 	
 	<td><div>
 		<h3>Advanced Mode</h3>
-		<table class="formtable" width="750">
+		<table class="formtable">
 		<tr>
 		<td>Rule:&nbsp;</td>
 		<td><input type="text" id="advancedRule" name="expertRule" disabled size="85" value =
-		{% if edit or saved %}
+		{% if edit %}
 			{% if terminalS == "nonterminal" %}
 				"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
 			{% else %}
@@ -646,7 +636,6 @@
 		<input type="hidden" name="hidden_name" value="{{ ptable }}">
 		<input type="hidden" name="uuid" value="{{ rule_uuid }}">
 		<input type="hidden" name="ppriority" value="{{ priority }}">
-		<input type="hidden" name="saved" value="{{ saved }}">
 	{% if edit %}
 		<input type="submit" value="Save Changes">
 		<input type="hidden" name="editing" value="1">

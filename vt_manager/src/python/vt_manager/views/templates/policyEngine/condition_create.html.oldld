@@ -4,8 +4,7 @@
 	var i=1;
 	var t1= new Array();
 //	var clist = new Array();
-//	clist.join(document.getElementById("conditionID").value);
-	var errorList = new Array();	
+//	clist.join(document.getElementById("conditionID").value);	
 
 	function createHidden(condition){
 		i = document.getElementById("conditionID").value;
@@ -24,9 +23,6 @@
 	            
 	      var rangO = '[';
 	      var rangC = ']';
-
-	      document.getElementById("leftOP").textContent = document.getElementById("mappings").value;
-	      document.getElementById("oper").textContent = document.getElementById("operators").value;
 
 	      $("#negate").click(function() {
 			if (document.getElementById("negate").checked){
@@ -84,13 +80,12 @@
 	      $("#erase").click(function() {
                         document.getElementById("area").value = " ";
         });
-	      $("#operators").click(function() {
+	      $("#operators").mouseup(function() {
 	      		if (document.getElementById("operators").value == "in"){
 				document.getElementById("in").style.display = "";
 				document.getElementById("normal").style.display = "none";
 				document.getElementById("rightOP").textContent = "";
                                 document.getElementById("auxOP").textContent = "";
-				document.getElementById("oper").textContent = document.getElementById("operators").value;
 
 			} else {
 				document.getElementById("in").style.display = "none";
@@ -141,63 +136,25 @@
 	                                document.getElementById("auxOP").textContent = "," + document.getElementById("upper").value + "]";
  				}
 	});
-
 	      $("#Create").click(function() {
-				var areErrors = "false";
-				var myList = document.getElementById("errors");
-				$("#errors").empty();
-				if (document.getElementById("leftOP").textContent == ""){
-					var new_element = document.createElement('li');
-					new_element.innerHTML = "<p style='color: red;'>Left operand missing</p>";
-					myList.insertBefore(new_element, myList.firstChild);
-					areErrors = "true";
-				};
-				if (document.getElementById("oper").textContent == ""){
-                                        var new_element = document.createElement('li');
-                                        new_element.innerHTML = "<p style='color: red;'>Operator missing</p>";
-                                        myList.insertBefore(new_element, myList.firstChild);
-					areErrors = "true";
-				};
-				if (document.getElementById("oper").textContent != 'in range' && document.getElementById("rightOP").textContent ==""){
-                                        var new_element = document.createElement('li');
-                                        new_element.innerHTML = "<p style='color: red;'>Right operand missing</p>";
-                                        myList.insertBefore(new_element, myList.firstChild);
-					areErrors = "true";
-				};
-				if (document.getElementById("oper").textContent == 'in range' && (document.getElementById("rightOP").textContent =="" || document.getElementById("rightOP").textContent =="[")){
-                                        var new_element = document.createElement('li');
-                                        new_element.innerHTML = "<p style='color: red;'>Lower limit missing</p>";
-                                        myList.insertBefore(new_element, myList.firstChild);
-                                        areErrors = "true";
-                                };
-				if (document.getElementById("oper").textContent == 'in range' && (document.getElementById("auxOP").textContent =="" || document.getElementById("auxOP").textContent ==",]")){
-                                        var new_element = document.createElement('li');
-                                        new_element.innerHTML = "<p style='color: red;'>Upper limit missing</p>";
-                                        myList.insertBefore(new_element, myList.firstChild);
-					areErrors = "true";
-                                };
-				if (areErrors == "true"){
-					return;
-				};
 				newCond = document.getElementById("notOP").textContent + " " + document.getElementById("leftOP").textContent  + " " + document.getElementById("oper").textContent + " " + document.getElementById("rightOP").textContent + document.getElementById("auxOP").textContent;
+//				var select = document.getElementById("conditionList");
+//				select.options[select.options.length] = new Option(newCond, newCond);
 				createList(newCond);
 				var cond = document.createElement('div');
-				var trow = document.getElementById('cond_row')
-				var tcells = trow.getElementsByTagName('td');
-				var ident = "operandc" + Math.floor(Math.random()*10000).toString()
-		                cond.setAttribute('id',ident);
-              			cond.className= "drag operand";
-                		cond.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+ident+'\')">&#10006;</a></div>' + "("+ newCond+ ")";
-				trow.insertCell(0).setAttribute("class", "single condcell");
-				trow.insertCell(1).setAttribute("class", "single condcell");
-				tcells[1].appendChild(cond);
+		                cond.setAttribute('id','operand');
+              			cond.className= "drag operand clone";
+                		cond.innerHTML = newCond;
+                		var td = document.getElementById('cond_cell');
+                		td.appendChild(cond);
                 		REDIPS.drag.init();
 
-				$.fancybox.close();
-				cond_assign();
+				$.fancybox.close()
 	});
 
 	function createList (condition){
+//		clist[parseInt(document.getElementById("dition").value)]=newCond;
+//		clist.push(newCond)
 		document.getElementById("conditionID").value += condition + '*' ;
 	};
 });
@@ -210,8 +167,6 @@
 	<div class="main">
                 <h1>Create a new Condition</h1>
         </div>
-	<ul id="errors">
-	</ul>
 	<table class="formtable">
 		<td><b>Negate</b></td>
 		<td><b>Left Operand:</b></td>
@@ -278,27 +233,27 @@
 		</td>
 	</table>
 	<br>	
-	<form action ="{% url condition_save %}" method="post" name="CC">{% csrf_token %}
 	<table class="formtable">
 		<tr>
-	                <td colspan=5 align=left><b>Condition:</b></td>
+                <td><b>Final Condition:</b></td>
 		</tr>
 		<tr>
-<!--			<form action ="{% url condition_save %}" method="post" name="CC">{% csrf_token %} -->
-			<td><label id ="notOP" name="not"></label></td>
-			<td><label id ="leftOP" name="leftOP" ></label></td>
-			<td><label id ="oper" name="oper" ></label></td>
-			<td><label id ="rightOP" name = "rightOP" ></label></td>
-			<td><label id = "auxOP" name ="auxOP"></label></td>
+		<form action ="{% url condition_save %}" method="post" name="CC">{% csrf_token %}
+		<td><label id ="notOP" name="not"></label></td>
+		<td><label id ="leftOP" name="leftOP" ></label></td>
+		<td><label id ="oper" name="oper" ></label></td>
+		<td><label id ="rightOP" name = "rightOP" ></label></td>
+		<td><label id = "auxOP" name ="auxOP"></label></td>
 
-			<input type="hidden" name="table" id="RuleTableName" value="{{ tableName }}">
-			<input type="hidden" id="condition" name="condition">
+		<input type="hidden" name="table" id="RuleTableName" value="{{ tableName }}">
+		<input type="hidden" id="condition" name="condition">
+
 		</tr>
 			
 	</table>
 		<br>
 		<input type="button" id="Create"  value="Create Condition">
-	</form>
+		 </form>
         <br/>
         <div class="center">
        		<a href="{% url rule_table_view %}">Policy Manager</a> |
