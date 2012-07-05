@@ -1,0 +1,659 @@
+{% extends "base_admin.html" %}
+{% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script type="text/javascript" src="{% url js_media 'redips-drag.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
+<script>
+    $(document).ready(function() {
+        /* add tooltip to question mark */
+            $("img#mode_question").tooltip({
+            tip: "div#mode_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+        $("img#enable_question").tooltip({
+            tip: "div#enable_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+	$("img#advanced_question").tooltip({
+            tip: "div#advanced_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+	$("img#ConditionMappings_question").tooltip({
+            tip: "div#ConditionMappings_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+	$("img#ActionMappings_question").tooltip({
+            tip: "div#ActionMappings_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+    });
+</script>
+<script type="text/javascript">
+
+        $(document).ready(function() {
+		$("#formMode").click(function() {
+				$('#elements :input').attr('disabled', false);
+				document.getElementById("advancedRule").disabled = true;
+				document.getElementById("drag").style.display = "";
+	});
+
+		$("#advancedMode").click(function() {
+			
+			if ($('#advancedMode').is(':checked')) {
+ 				$('#elements :input').attr('disabled', true);
+				document.getElementById("advancedRule").disabled = false;
+    				document.getElementById("drag").style.display = "none";}   
+
+	});
+	
+               	$("#CreateCondButton").click(function() {
+                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});
+        });
+		$("#ac").click(function() {
+                        document.getElementById("finalCond").value = " ";
+        });
+		$("#backSpace").click(function() {
+                        
+                        var n = 0;
+                        var a = document.getElementById("finalCond").value;
+                        var i = a.length;
+                        while (i >= 0) {
+                                if ((a[i] == "{") || (a[i] == "[") || (a[i]==',') || (a[i]==']') || (a[i]=='}')){
+                                        n = -1;
+                                }
+                                if (a[i] == " "){
+                                        n += 1;
+                                }
+                                if (n >= 2){
+                                        document.getElementById("finalCond").value = a.slice(0,(i+1));
+                                        break;
+                                }
+                                i -= 1;
+                        }
+         });
+		$("#assign").click(function() {
+			document.getElementById("finalCond").value += document.getElementById("conditionList").value + " ";
+	});		
+		$("#openPar").click(function() {
+                        document.getElementById("finalCond").value += "( ";
+        });
+		$("#closePar").click(function() {
+                        document.getElementById("finalCond").value += ") ";
+        });
+		$("#and").click(function() {
+                        document.getElementById("finalCond").value += "&& ";
+        });
+		$("#or").click(function() {
+                        document.getElementById("finalCond").value += "|| ";
+        });
+		$("#ok").click(function() {
+			displayRule();
+        });	
+		$("#value").click(function() {
+			displayRule();
+	});
+		$("#type").click(function() {
+			displayRule();
+        });
+		$("#action").click(function() {
+			displayRule();
+        });
+		$("#errorMsg").keyup(function() {
+			displayRule();
+        });
+		$("#description").keyup(function() {
+			displayRule();
+        });
+
+	displayRule = function(){
+		rule = "";
+		if (document.getElementById("finalCond").value != ""){
+			rule = rule + "if " + document.getElementById("finalCond").value;
+		}
+		if (document.getElementById("value").value != ""){
+			rule = rule + " then " + document.getElementById("value").value;
+		}
+		if (document.getElementById("type").value != ""){
+			if (document.getElementById("type").value == "terminal"){
+                                terminal = " ";
+                        } else {
+                                terminal = " nonterminal ";
+                        }
+			rule = rule + terminal;
+		}
+		if (document.getElementById("action").value != ""){
+			rule = rule + "do " + document.getElementById("action").value;
+		}
+		if (document.getElementById("errorMsg").value != ""){
+			rule = rule + " denyMessage " + document.getElementById("errorMsg").value;
+		}
+		if (document.getElementById("description").value != ""){
+			rule = rule + " # " + document.getElementById("description").value;
+		}
+		document.getElementById("advancedRule").value = rule
+	}
+
+
+
+// Drag&Drop variables and functions
+	
+		var rd = REDIPS.drag;
+		rd.init();
+		
+		rd.myhandler_cloned = function(target_cell){
+			var elem = document.getElementById(rd.obj.id);
+			var elemID = rd.obj.id;
+			if (elemID.substr(0,7) == "operand"){
+				elem.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+elemID+'\')">&#10006;</a></div>' + "("+ elem.innerHTML+ ")";
+			}
+			else {
+				elem.innerHTML = elem.innerHTML + '<div class="xcloser"><a href="javascript:elem_delete(\''+elemID+'\')">&#10006;</a></div>';
+			};
+			$("#"+rd.obj.id).toggleClass("selected");
+		};
+
+		rd.myhandler_dropped = function(target_cell){
+
+			var row = document.getElementById("cond_row");
+			var pos = rd.get_position();
+			
+			if(pos[0] != pos[3]){
+				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
+				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
+			}
+			else if(pos[2] < pos[5]){
+				if(pos[3] != 0) {
+					row.deleteCell(pos[5]+1);
+					row.deleteCell(pos[5]);
+				};
+				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
+				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
+			}
+			else if(pos[2] > pos[5]){
+				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
+				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
+				if(pos[3] != 0) {
+					row.deleteCell(pos[5]+1);
+					row.deleteCell(pos[5]);
+				};
+			};
+			cond_assign();
+		};
+
+
+		// This function allows to clone any number of elements and make them only droppable in the correct cell
+		rd.myhandler_moved = function(){
+			$("#"+rd.obj.id).toggleClass("selected");
+		};
+
+		rd.myhandler_clicked = function (current){
+			if (current.parentNode.id == "cond_row"){
+				$("#"+rd.obj.id).toggleClass("selected");
+			};
+		};
+}); // End document.ready()
+
+	removeAdjacentCells = function(source_cell){
+		var row = document.getElementById("cond_row");
+		row.deleteCell(source_cell.cellIndex+1);
+		row.deleteCell(source_cell.cellIndex);
+	};
+
+	cond_group = function(){
+		var group = "";
+		var text = "";
+		if ( $("div.selected").length < 3 || $("div.selected").length > 4){
+			document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+			return;
+		}
+		else if ($("div.selected").length == 3){
+			if ($("div.selected")[0].id.substr(0,7) == "operand" || $("div.selected")[0].id.substr(0,9) == "comp_cond"){
+				if ($("div.selected")[0].innerText == null){
+					group =  $("div.selected")[0].textContent.replace("✖","");
+				}
+				else {
+					group =  $("div.selected")[0].innerText.replace("✖","");
+				};
+			}
+			else {
+				document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+				return;
+			};
+
+			if ($("div.selected")[1].id.substr(0,8) == "operator"){
+				if ($("div.selected")[1].innerText == null){
+					text = $("div.selected")[1].textContent.replace("✖","");
+				}
+				else {
+					text = $("div.selected")[1].innerText.replace("✖","");
+				};
+				group = group + " " + text + " "; 
+			}
+			else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+
+                        if ($("div.selected")[2].id.substr(0,7) == "operand" || $("div.selected")[2].id.substr(0,9) == "comp_cond"){
+				if ($("div.selected")[2].innerText == null){
+					text = $("div.selected")[2].textContent.replace("✖","");
+				}
+				else {
+					text = $("div.selected")[2].innerText.replace("✖","");
+				};
+				group = group + text;
+                        }
+                        else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+			group = "(" + group + ")"
+
+			$("div.selected")[0].setAttribute('id',$("div.selected")[0].getAttribute('id'));
+                        $("div.selected")[0].innerHTML = '<div class="xcloser"><A href="javascript:elem_delete(\''+$("div.selected")[0].getAttribute('id')+'\')">&#10006;</A></div>' + group;
+                        $("div.selected")[0].setAttribute('className', 'drag operand');
+                        elem_delete($("div.selected")[2].getAttribute('id'));
+                        elem_delete($("div.selected")[1].getAttribute('id'));
+
+		} 
+		else if ($("div.selected").length == 4){
+                        if ($("div.selected")[0].id.substr(0,3) == "not"){
+				if ($("div.selected")[0].innerText == null){
+	                                text = $("div.selected")[0].textContent.replace("✖","");
+				}
+				else {
+	                                text = $("div.selected")[0].innerText.replace("✖","");
+				};
+				group = text + " ";
+                        }
+                        else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+
+                        if ($("div.selected")[1].id.substr(0,7) == "operand" || $("div.selected")[1].id.substr(0,9) == "comp_cond"){
+				if ($("div.selected")[1].innerText == null){
+	                                text = $("div.selected")[1].textContent.replace("✖","");
+				}
+				else {
+	                                text = $("div.selected")[1].innerText.replace("✖","");
+				};
+				group = group + text;
+                        }
+                        else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+
+                        if ($("div.selected")[2].id.substr(0,8) == "operator"){
+				if ($("div.selected")[2].innerText == null){
+	                                text = $("div.selected")[2].textContent.replace("✖","");
+				}
+				else {
+	                                text = $("div.selected")[2].innerText.replace("✖","");
+				};
+                                group = group +" "+ text + " "; 
+                        }
+                        else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+
+                        if ($("div.selected")[3].id.substr(0,7) == "operand" || $("div.selected")[3].id.substr(0,9) == "comp_cond"){
+				if ($("div.selected")[3].innerText == null){
+	                                text = $("div.selected")[3].textContent.replace("✖","");
+				}
+				else {
+	                                text = $("div.selected")[3].innerText.replace("✖","");
+				};
+                                group = "(" + group + text + " )";
+                        }
+                        else {
+                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
+                                return;
+                        };
+			$("div.selected")[1].setAttribute('id',$("div.selected")[1].getAttribute('id'));
+			$("div.selected")[1].innerHTML = '<div class="xcloser"><A href="javascript:elem_delete(\''+$("div.selected")[1].getAttribute('id')+'\')">&#10006;</A></div>' + group;
+			$("div.selected")[1].setAttribute('className', 'drag operand');
+			elem_delete($("div.selected")[3].getAttribute('id'));
+			elem_delete($("div.selected")[2].getAttribute('id'));
+			elem_delete($("div.selected")[0].getAttribute('id'));
+		};
+		REDIPS.drag.init();
+		cond_assign();
+	};
+
+	cond_assign = function(){
+		var row = document.getElementById("cond_row");
+		var text = "";
+		var content = "";
+		for (var i = 0; i < row.cells.length; i++){
+			if (row.cells[i].innerText == null){
+				content = row.cells[i].textContent.replace("✖","").replace("\n","");
+			}
+			else {
+				content = row.cells[i].innerText.replace("✖","").replace("\n","")
+			};
+			if (content.length > 0){
+				text = text + content + " ";
+			};
+		};
+		text = text.substr(0,text.length-1);
+		document.getElementById("finalCond").value = text;
+		displayRule();
+	};
+
+	cond_limpia = function(){
+		for ( var i = 0; i < arguments.length; i++ ){
+			REDIPS.drag.delete_object(arguments[i]);
+		};
+	};
+
+	elem_delete = function(elemID){
+		cell = document.getElementById(elemID).parentNode;
+		removeAdjacentCells(cell);
+		cond_limpia(elemID);
+		cond_assign();
+	};
+
+</script>
+<script>
+	$(document).mouseup(function() {
+		document.getElementById("exceptions").textContent = "";
+	});
+
+</script>
+{% endblock %}
+{% block pagehead %}
+<div class="main">
+        <h1>Generate a new Rule</h1>
+</div>
+{% endblock pagehead %}
+
+{% block content %}
+<div class="main">
+	<br/>
+<!-- Error List-->
+	{% if errors %}
+		<ul>
+			{% for error in errors %}
+				<p style="color: red;">{{error}}</p>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	<div>
+		<div id=exceptions>
+			
+		</div> 
+		<form action="{% url rule_create %}" method="post" name="ruleCreate">{% csrf_token %}
+		<table>
+			<td><b>Select a input type for the rule:</b></td>
+			<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
+			<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
+			<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+				<div class="tooltip" id="mode_help">Form mode input type allows to create a rule using the form fields below. Advanced Mode input type allows to create a rule typing all the required syntax in the advanced mode form field
+				</div>
+			</td>
+		</table>
+	</div>
+
+    <h3>Form Mode</h3>
+    <div style="width:730px" id = "elements">
+
+
+	<table class="formtable">
+        <tr>
+        <td><h4>Rule Condition:</h4></td>
+	</tr>
+
+	<tr>
+	<td>
+
+<!-- Drag-and-drop condition creation -->
+	<div id="drag">
+		<table border="0">
+			<colgroup>
+				<col width="450"/>
+				<col width="150"/>
+			</colgroup>
+			<tr>
+				<td class="mark" valign="top" id="cond_cell"><BR><b>Conditions</b>
+					{% for cond in conditions %}
+						<div id="operand" class="drag operand clone">{{ cond }}</div>
+					{% endfor %}
+				</td>
+				<td class="mark" valign="top"><BR><b>Operators</b><BR>
+					<table id="table1">
+						<tr>
+						    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
+							<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
+							<td class="mark"><div id="not"      class="drag not clone">not</div></td>
+						    
+						</tr>
+						<tr><td colspan=3 class="mark">
+							<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+						    </td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="mark"><input id="CreateCondButton" type="button" value="+" class="button" ></td>
+				<td class="mark"></td>
+			</tr>
+		</table>
+		<BR>
+		<div id="cond_div">
+			<table align=center id="cond_table">
+				<tr id="cond_row">
+				    <td class="single condcell"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	</td> </tr>
+<!-- End Drag-and-drop condition creation -->
+	<input type="hidden" name="table" value="{{ CurrentTable }}">
+	<td>
+<!--	<input id="finalCond" type="hidden" size="85"  value="{{ condition }}" name="condition">
+-->	<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
+	</tr>
+	<tr><td><h4>Rule Parameters:</h4></td></tr>
+	<tr>
+	<td><div>
+		<table>
+		<td>Value:&nbsp;</td>
+			<td><select name="value" id="value">
+		 		{% if edit or saved %}
+                        		<option selected value="{{ valueS }}">{{ valueS }}</option>
+					{% for value in valueD %}
+                        			<option value="{{ value }}">{{ value }}
+					{% endfor %}
+                			{% else %}
+						<option value="accept">accept</option>
+						<option value="deny">deny</option>
+					{% endif %}
+			    </select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </td>
+		<td>Type:&nbsp;</td>
+			<td><select name="type" id="type">
+				{% if edit or saved %}
+                        		<option selected value="{{ terminalS }}">{{ terminalS }}</option>
+					{% for terminal in terminalD %}
+                        			<option value="{{ terminal }}">{{ terminal }}</option>
+					{% endfor %}
+                			{% else %}
+	                			<option value="terminal">Terminal</option>
+        	        			<option value="nonterminal">Non-Terminal</option>
+					{% endif %}
+		
+		<td>	</select></td>
+		</table>
+	</div></td>
+	</tr>
+	<tr>
+	<td><div>
+		<table>
+		<td>Action:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+		<td><select name="action" id="action">
+			{% if edit or saved %}
+				<option selected value="{{ action }}">{{ action }}</option>
+				{% for act in actionList %}
+					<option value ="{{ act }}">{{ act }}</option>
+				{% endfor %} 
+			{% else %}
+				{% for act in mappings.keys %}
+					<option value ="{{ act }}">{{ act }}</option>
+				{% endfor %}
+			{% endif %}
+	    	</select></td>
+		</table>
+	<div></td>
+	</tr>
+	<tr>
+	<td><div>
+		<table>
+		<td>Error Message:&nbsp;</td>
+		<td><textarea name="error_message" rows="1" cols="25" id="errorMsg">{{ errorMsg }}</textarea></td>
+		</table>
+	</div></td>
+	</tr>
+	<tr>
+	<td><div>
+		<table>
+		<td>Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td><textarea name="description" rows="1" cols="25" id="description">{{ description }}</textarea></td>
+		</table>
+	</div></td>
+	</tr>
+	<tr>
+	</table>
+	</div>
+	
+	<td><div>
+		<h3>Advanced Mode</h3>
+		<table class="formtable">
+		<tr>
+		<td>Rule:&nbsp;</td>
+		<td><input type="text" id="advancedRule" name="expertRule" disabled size="85" value =
+		{% if edit %}
+			{% if terminalS == "nonterminal" %}
+				"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+			{% else %}
+				"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+			{% endif %}
+		{% endif %}>
+		</td>
+		<input type="hidden" name="table" value="{{ CurrentTable }}">
+		<td><img id="advanced_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+            	<div class="tooltip" id="advanced_help">
+      		The rule syntax is: <b>if</b> Condition <b>then</b> accept/deny nonterminal/empty  <b> do</b>  Action  <b>denyMessage</b>  <b>Error</b> <b>#</b>description        	
+                </div></td>
+		</tr>
+		<tr>
+		<td>Condition Mappings:</td>
+		<td>
+		<div>
+			<table>
+			<td>{% for map in ConditionMappings.keys %}
+                        	{{ map }},
+                    	{% endfor %}
+			</td>
+			<td><img id="ConditionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+                	<div class="tooltip" id="ConditionMappings_help">
+			The Condition mappings allow PolicyEngine relate the conditions of the rules with the requests of the users in order to evaluate if the request is possible or not.
+			</table>
+                </div></td>
+		</tr>
+		<tr>
+		<td>Action Mappings:</td>
+		<td>
+		<div>
+			<table>
+			<td>{% for acti in ActionMappings.keys %}
+				{{ acti }},
+			    {% endfor %}
+			</td>
+			<td><img id="ActionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+                	<div class="tooltip" id="ActionMappings_help">
+				The Action Mappings allow PolicyEngine relate the actions of the rules with possible fuction or methods programmed by the Island Manager
+			</div></td>
+			</table>
+		</div><td>
+		</table>
+		</tr>
+		</table>
+		<table>
+		<td>Priority:&nbsp;
+		<select name="priority">
+			{% if edit or saved %}
+				<option selected value="{{ PrioritySel }}">{{ PrioritySel }}</option>
+			{% endif %}
+			{% if not saved %}
+				<option value="">Last</option>	
+			{% endif %}
+			{% for number in priorityList %} 
+				<option value ="{{ number }}">{{ number }}</option>
+			{% endfor %}
+		
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;
+		Enable Rule:&nbsp;
+			{% if edit or saved  %}
+				{% if enabled %}
+					<input type="checkbox" name="enable" value="enable" checked></td>
+				{% else %}
+					<input type="checkbox" name="enable" value="enable"></td>
+				{% endif %}
+			{% else %}
+				<input type="checkbox" name="enable" value="enable" checked></td>
+			{% endif %}
+	</div></td>
+	<td><img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+	    <div class="tooltip" id="enable_help">
+            The priority of a Rule, is the position of the rule in the RuleTable ruleSet. The higher the priority, sooner will be processed. The Enable Checkbox enable or disable the rule. If the rule is enabled, will be processed else, the rule will be avoided when the process starts.
+            </div></td>
+
+	</table>
+	</table>
+	<br>
+		<input type="hidden" name="hidden_name" value="{{ ptable }}">
+		<input type="hidden" name="uuid" value="{{ rule_uuid }}">
+		<input type="hidden" name="ppriority" value="{{ priority }}">
+	{% if edit %}
+		<input type="submit" value="Save Changes">
+		<input type="hidden" name="editing" value="1">
+	{% else %}
+	        <input type="submit" value="Generate Rule">
+		<input type="hidden" name="editing" value="0">
+	{% endif %}
+	<input type="hidden" id="conditionID" name="conditionID" value="" >
+	</form>
+	<br><br>	
+	<div class="center">
+        <a href="{% url rule_table_view %}">Policy Manager</a> |
+        <a href="{% url dashboard  %}">Dashboard</a>
+
+    </div>
+</div>
+
+
+
+{% endblock content %}
+
