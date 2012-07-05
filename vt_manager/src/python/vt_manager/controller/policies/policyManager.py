@@ -52,9 +52,14 @@ def rule_table_view(request, TableName = None):
 
         if TableName == None:
                 tableList =  RuleTableManager.getNameNUUID()
-                firstTable = tableList[0]
-                TableName = firstTable['name']
-		
+		try:
+                	firstTable = tableList[0]
+                	TableName = firstTable['name']
+		except:
+			print "No RuleTables created yet:"
+			TableName = 'RuleTable1'
+			print TableName,"will be created..."
+
 	table = RuleTableManager.load(TableName)
 	
  	return simple.direct_to_template(request,

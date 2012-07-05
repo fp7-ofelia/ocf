@@ -37,11 +37,16 @@ class RuleTableManager():
 
 	@staticmethod
         def load(name):
-		mapps = dict()
-		mapps.update(RuleTableManager._ConditionMappings)
-		mapps.update(RuleTableManager._ActionMappings)
-		print mapps
-                return RuleTableManager.getRuleTable(name,mapps)
+		if CreatedRuledTables.objects.filter(name=name):
+			mapps = dict()
+			mapps.update(RuleTableManager._ConditionMappings)
+			mapps.update(RuleTableManager._ActionMappings)
+			print mapps
+                	return RuleTableManager.getRuleTable(name,mapps)
+		else: 
+			CreateModel = CreatedRuledTables(name = name, uuid = uuid.uuid4().hex)
+                	CreateModel.save()
+			return RuleTableManager.load(name)
 
 	@staticmethod
 	def getRuleTable(name, mapps):
