@@ -125,7 +125,7 @@ def rule_create(request):
 	newConditions = request.POST.get("conditionID")	
 	saved = request.POST.get("saved")
 
-	print newConditions	
+	print newConditions
 	condition_save(newConditions.split('*'),tableName)
 
         if rulePriority == 'Last' or rulePriority == '':
@@ -212,6 +212,7 @@ def rule_create(request):
 			type2 = ["nonterminal"]
 
 		if saved == "True" or ruleid == "":
+
 			return simple.direct_to_template(request,
         	        	template = 'policyEngine/policy_create.html',
                 		extra_context = {'user': request.user,
@@ -336,6 +337,7 @@ def rule_edit(request, rule_uuid, table_name, errors=None):
 	error = str(rule[0].getErrorMsg())
 	description = str(rule[0].getDescription())
 
+
 	return simple.direct_to_template(request,
                                                  template = 'policyEngine/policy_create.html',
                                                  extra_context = {'user':request.user,
@@ -350,8 +352,8 @@ def rule_edit(request, rule_uuid, table_name, errors=None):
                                                                   'terminalD':ruletypes[1],
                                                                   'rule_uuid':rule_uuid,
 								  'ptable':table_name,
-								  'errorMsg':error[0:len(error)-2],
-								  'description':description[0:len(description)-1],
+								  'errorMsg':error,
+								  'description':description,
 								  'condition':CondList[0],
 								  'conditions':conditions,
 								  'conditionList':CondList[1],
