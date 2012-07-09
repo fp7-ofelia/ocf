@@ -9,18 +9,27 @@ from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.utils.UrlUtils import UrlUtils
 from vt_manager.controller.actions.ActionController import ActionController
 
+from vt_manager.controller.policies.RuleTableManager import*
+
 class ProvisioningDispatcher():
   
  
 	@staticmethod
 	def processProvisioning(provisioning):
 
+
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
+
+			
+
 			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
-			
+		
+				
 			try:
+				
+				RuleTableManager.evaluate(action, 'T1')
 				controller = VTDriver.getDriver(action.server.virtualization_type)
 
 				#XXX:Change this when xml schema is updated

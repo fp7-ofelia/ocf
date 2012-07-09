@@ -22,8 +22,8 @@ class RuleTableManager():
         #Note that these mappings are ONLY defined by the lib user (programmer) 
         _ConditionMappings = ControllerMappings.getConditionMappings()
 
-	_ActionMappings = {"None":None,
-			   "something":None}
+	_ActionMappings = {"None":"None",
+			   "something":"None"}
 	
 	#Main methods 
 	@staticmethod
@@ -66,6 +66,13 @@ class RuleTableManager():
 		CreateModel = CreatedRuledTables(name = createdRuleTable.name, uuid = createdRuleTable.uuid)
 		CreateModel.save()
 		return createdRuleTable
+
+	@staticmethod
+	def evaluate(metaObj, RTname=None):
+		if RTname == None:
+			RTname = "RuleTable1"
+		ruleTable = RuleTableManager.load(RTname)
+		return ruleTable.evaluate(metaObj)
 
 	#getters
 	@staticmethod
