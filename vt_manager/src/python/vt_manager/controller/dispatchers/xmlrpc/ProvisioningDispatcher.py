@@ -40,7 +40,8 @@ class ProvisioningDispatcher():
 				#	server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
 			except Exception as e:
 				logging.error(e)
-				raise e
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
+				#raise e
 		
 			try:	
 				#PROVISIONING CREATE
