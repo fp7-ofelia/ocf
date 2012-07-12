@@ -45,7 +45,7 @@ else
 fi
 
 NEW_REPO=`cat $GIT_DIR/.git/config | grep "/home/ofelia/ofelia-git" | grep -v "#"`
-GITHUB=`cat $GIT_DIR/.git/config | grep "https://github.com/fp7-ofelia/ocf.git"`
+GITHUB=`cat $GIT_DIR/.git/config | grep "https://github.com/fp7-ofelia/ocf.git" | grep -v "#"`
 
 if [ "$NEW_REPO" == "" ];then
         NEW_REPO=1
