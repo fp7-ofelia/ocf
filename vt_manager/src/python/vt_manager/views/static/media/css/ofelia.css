@@ -527,6 +527,18 @@ div.wrapper {
         padding:10px;
 }
 
+table tr.policy{
+
+}
+
+table tr.pEnabled th{
+	background-color: #aaffaa;
+	color: black;
+}
+table tr.pDisabled th{
+	background-color: #ff7777;
+}
+
 
 /* DRAG n DROP */
 
