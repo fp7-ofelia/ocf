@@ -21,7 +21,7 @@
 
 {% block pagehead %}
 	<div class="main">
-        	<h1>RuleTable Overview</h1>
+        	<h1>Provisioning Interface polices </h1>
 	</div>
 {% endblock pagehead %}
 {% block content %}
@@ -29,54 +29,33 @@
 
 	<div style="width:730px">
 
-		<div class="wrapper">
-		<table>
-			<tr>
-			<td><b>Default Policy: </b>
-			{% if  table.getPolicyType %} <img src="{% url img_media 'active_t.png' %}" width="15px"/><b> Accept </b>
-			{% else %} <img src="{% url img_media 'inactive_t.png' %}" width="15px"/><b> Deny </b>
-			{% endif %}</td>
-			</tr>
-			<tr> 
-			<form action ="{% url update_ruleTable_policy %}" method="post">{% csrf_token %}
-			{% if table.getPolicyType %}
-			<td><input id="accept" type="radio" name="defaultPolicy" value="accept" checked> Accept
-		        <input id="deny" type="radio" name="defaultPolicy" value="deny"> Deny</td>
-			{% else %}
-			<td><input id="accept" type="radio" name="defaultPolicy" value="accept"> Accept
-                        <input id="deny" type="radio" name="defaultPolicy" value="deny" checked> Deny</td>
-			{% endif %}
-			<input type="hidden" name="table_name" value="{{ table.name }}">
-			<td><input type="submit" value="Update Default Policy">
-			</form>
-			</tr>
-		</table>
-		</div>
-		<h2> RuleSet of {{ table.getName }}</h2>
+		<h2> Policy table (XML-RPC provisioning interfaces)<img id="mode_question" src="/static/media/images//question_mark_15x15.png">
+				<div class="tooltip">Form mode input type allows to create a rule using the form fields below. Advanced Mode input type allows to create a rule typing all the required syntax in the advanced mode form field
+				</div></h2>
 		<div class="wrapper">
 		<br>
 		<table class ="ruleTable">
 		<tr class="header" >
-			<th>Order</th>
-        		<th>Enabled</th>
+			<th style="text-align:center">Order</th>
+        		<th style="text-align:center">Enabled</th>
         		<th>Condition</th>
         		<th>Description</th>
         		<th>Return</th>
-			<th>Actions</th>
+			<th style="text-align:right">Actions</th>
 			{% if table.getRuleSet %}
 				{% for rule in table.getRuleSet %}
 					<tr class="{% cycle 'odd' 'even' %}">
 					<td>{{ forloop.counter0 }}</td>
-					<td>{% if rule.enabled %}
+					<td align="center">{% if rule.enabled %}
 						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'active_t.png' %}" width="15px" border=0/></a>
 					    {%else%}
 						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'inactive_t.png' %}" width="15px" border=0/></a>
 					    {%endif%}</td>
                                         <form action ="{% url rule_delete %}" method="post">{% csrf_token %}
 <!--					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td> -->
-					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getCondition.dump }}</a></td>
-					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getDescription }}</a></td>
-					<td align=left>
+					<td align="left"><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getCondition.dump }}</a></td>
+					<td align="left"><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getDescription }}</a></td>
+					<td align="left">
 						{% if rule.rule.getType.terminal%}
 							{% if rule.rule.getType.value %}ACCEPT
 							{% else %}DENY
@@ -86,7 +65,7 @@
 					</td>
                                         <input type="hidden" name="table_name" value="{{ table.name }}">
                                         <input type="hidden" name="uuid" value="{{ rule.rule.getUUID }}">
-                                        <td><input type="submit" value="Delete Rule"></td>
+                                        <td align="right"><input type="submit" value="Delete Rule"></td>
                                         </form>
                                         </tr>
 				{% endfor %}
@@ -97,13 +76,26 @@
 				<td></td>
 				</tr>
 			{% endif %}
+			<tr class="policy {%if table.getPolicyType %}pEnabled{% else %}pDisabled{% endif %}">
+				<th colspan="4" style="text-align:right">DEFAULT POLICY:</th>
+				<th style="text-align:left">{%if table.getPolicyType %} ACCEPT {% else %} DENY {% endif %}</th>
+				<th style="text-align:right">
+	   				<form action ="{% url update_ruleTable_policy %}" method="post">
+						{% csrf_token %}
+                        			<input type="hidden" name="defaultPolicy" value="{% if table.getPolicyType %}deny{% else %}accept{% endif %}" /> 
+                 		        	<input type="hidden" name="table_name" value="{{ table.name }}" />
+                        		<input type="submit" value="Change default policy" />
+                        		</form>
+				</th>
+			</tr>
 		</table>
-		<br>
+			<p>
+			<a href="{% url policy_create table.name  %}" class="button">Add Rule</a>
+			</p>
 		</div>
         	<center>
-			<a href="{% url policy_create table.name  %}">add Rule</a>|
 			<a href="{% url  dashboard  %}">Dashboard</a>
     	</div>
-	
+</div>	
 {% endblock content %}
 
