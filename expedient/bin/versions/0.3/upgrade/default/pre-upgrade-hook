@@ -1,0 +1,117 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.3/0.3RC1 pre-upgrade-hook module..."
+
+OFELIA_DIR=/opt/ofelia/
+
+local TMP_PATH=$PWD
+
+cd $OFELIA_DIR || error "Target directory does not exit anymore?"
+
+#Check for OFELIA installation
+OFELIA="none"
+NO_OFELIA_SCRIPT="nombredelscript"
+SCRIPT="none"
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an official OFELIA'island istallation (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+
+if [ -f $OFELIA_DIR/oxa/ ]; then
+	local GIT_DIR="$OFELIA_DIR/oxa/repository/"
+else
+	local GIT_DIR="$OFELIA_DIR"
+fi
+
+NEW_REPO=`cat $GIT_DIR/.git/config | grep "/home/ofelia/ofelia-git" | grep -v "#"`
+GITHUB=`cat $GIT_DIR/.git/config | grep "https://github.com/fp7-ofelia/ocf.git"`
+
+if [ "$NEW_REPO" == "" ];then
+        NEW_REPO=1
+else
+	NEW_REPO=0
+fi
+if [ "$GITHUB" == "" ];then
+        GITHUB=0
+else
+        GITHUB=1
+fi
+
+if [ $OFELIA == 1 && $NEW_REPO == 0 ]; then
+
+	#Move original files to temp folder
+	TMP_DIR=/tmp/ofeliatmp$EXECPID/
+
+	if [ -f $OFELIA_DIR/oxa/ ]; then
+                CF_AGENT_INSTALL=0
+                TARGET_DIR="oxa/repository/"
+		mv $OFELIA_DIR/$TARGET_DIR $TMP_DIR || error "Maybe some directory is not present?"
+        else
+                CF_AGENT_INSTALL=1
+                TARGET_DIR="."
+		mv $OFELIA_DIR $TMP_DIR || error "Maybe some directory is not present?"
+		mkdir -p $OFELIA_DIR
+        fi
+
+	cd $OFELIA_DIR	
+
+	#Ask for OFELIA credentials
+        echo "Please enter your OFELIA username.Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+
+	RERUN="none"
+	while [ $RERUN != 1 ]
+	    do
+		RERUN=0
+	        echo -n "Username:"
+	        read USERNAME
+		#Clone new repo in old location
+		git clone ssh://$USERNAME@alpha.fp7-ofelia.eu/home/ofelia/ofelia $TARGET_DIR || RERUN=1
+		if [ RERUN == 1 ]; then
+			echo "Insert your username again please"
+		fi
+	    done
+
+	#Restore non tracked files from tmp backup
+	if [ $CF_AGENT_INSTALL == 1 ]; then
+		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
+		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
+		cp $TMP_DIR/expedient/src/python/expedient/clearinghouse/localsettings.py $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ || error "Could not copy expedient's localsettings.py"
+		cp $TMP_DIR/vt_manager/src/python/vt_manager/mySettings.py $OFELIA_DIR/vt_manager/src/python/vt_manager/ || error "Could not copy vt_manager's mySettings.py"
+		cp $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
+	elif [ $CF_AGENT_INSTALL == 0 ]; then
+		cp $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
+	fi
+
+	#Remove temp folder?
+	#rm -rf $TMP_DIR
+
+	#restart ofver from appropiate directory
+	unlock
+	restartOfverInstance
+	exit 0
+
+elif [ $OFELIA == 0 && $GITHUB == 0]; then
+        error "Error ocurred. Probably you have not executed first the $NO_OFELIA_SCRIPT script. Please do it and restart ofver:"
+	exit 1
+fi
