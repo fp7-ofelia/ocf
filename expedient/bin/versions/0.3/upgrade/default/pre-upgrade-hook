@@ -10,7 +10,7 @@
 #inform user
 printHeader "info#" "Using specific 0.3/0.3RC1 pre-upgrade-hook module..."
 
-OFELIA_DIR=/opt/ofelia/
+OFELIA_DIR=/opt/ofelia
 
 local TMP_PATH=$PWD
 
@@ -61,8 +61,10 @@ fi
 if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#Move original files to temp folder
-	TMP_DIR=/opt/tmp/ofeliatmp$EXECPID/
-	mkdir -p /opt/tmp/ 
+	TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
+	if [ -f /opt/tmp ]; then
+		mkdir -p /opt/tmp 
+	fi
 
 	if [ -f $OFELIA_DIR/oxa/ ]; then
                 CF_AGENT_INSTALL=0
