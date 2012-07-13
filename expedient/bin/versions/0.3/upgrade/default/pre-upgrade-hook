@@ -62,7 +62,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#Move original files to temp folder
 	TMP_DIR=/tmp/ofeliatmp$EXECPID/
-	mkdir -p $TMP_DIR
+#	mkdir -p $TMP_DIR
 
 	if [ -f $OFELIA_DIR/oxa/ ]; then
                 CF_AGENT_INSTALL=0
