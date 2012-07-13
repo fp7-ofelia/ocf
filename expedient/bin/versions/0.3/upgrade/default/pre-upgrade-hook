@@ -125,6 +125,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	exit 0
 
 elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
-        error "Error ocurred. Probably you have not executed first the $NO_OFELIA_SCRIPT script. Please do it and restart ofver:"
+        error "Error ocurred. Probably you have not executed first the $NO_OFELIA_SCRIPT script. Please do it and restart ofver..."
+	cd $TMP_PATH
 	exit 1
 fi
