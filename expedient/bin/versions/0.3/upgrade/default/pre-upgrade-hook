@@ -120,6 +120,8 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	print "Repo Migration done, restarting ofver..."
 	unlock
 	restartOfverInstance
+
+	warning "Old repository backup files are stored at $TMP_PATH. Consider deleting them after checking everything is working..."
 	exit 0
 
 elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
