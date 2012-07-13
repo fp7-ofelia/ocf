@@ -168,8 +168,14 @@ def rule_create(request):
 		if editing == '1':
                 	print 'editing...'
                 	if previousTable == tableName:
-                        	ruleTable.removeRule(None,int(PreviousPriority))
-                        	ruleTable.addRule(strings,enable,priority)
+				try:
+					ruleTable.addRule(strings,enable,priority, None, None, persist=False)
+#					ruleTable.removeRule(None,int(PreviousPriority))
+					ruleTable.removeRule(None,0)
+#					ruleTable.addRule(strings,enable,priority)
+				except Exception as e:
+					print "CARDEBUG. Algo ha fallado: ", e
+					raise e
                 	else:
                         	print 'Changing table...'
                         	ruleTable.addRule(strings,enable,priority)
@@ -186,7 +192,7 @@ def rule_create(request):
                 return HttpResponseRedirect("rule_table_view")#rule_table_view(tableName)		
 
 	except Exception as e:
-		print "CADRDEBUG exception: ", e
+		print "CARDEBUG exception: ", e
 		errors.insert(0,e)
 		errors.insert(0,"The Rule cannot be generated. Reason(s):")
 		ruleTable = RuleTableManager.load(tableName)
