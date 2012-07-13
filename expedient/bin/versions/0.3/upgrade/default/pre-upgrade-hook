@@ -96,6 +96,7 @@ if [ $OFELIA == 1 && $NEW_REPO == 0 ]; then
 	if [ $CF_AGENT_INSTALL == 1 ]; then
 		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
 		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
+		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.key/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.key folder"
 		cp $TMP_DIR/expedient/src/python/expedient/clearinghouse/localsettings.py $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ || error "Could not copy expedient's localsettings.py"
 		cp $TMP_DIR/expedient/.currentVersion $OFELIA_DIR/expedient/.currentVersion || error "Could not copy expedient's .currentVersion file"
 		cp $TMP_DIR/vt_manager/src/python/vt_manager/mySettings.py $OFELIA_DIR/vt_manager/src/python/vt_manager/ || error "Could not copy vt_manager's mySettings.py"
