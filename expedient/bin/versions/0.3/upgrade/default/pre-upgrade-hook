@@ -83,7 +83,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
         echo "Please enter your OFELIA username.Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
 
 	RERUN="none"
-	while [ $RERUN != 1 ]
+	while [ $RERUN != 0 ]
 	    do
 		RERUN=0
 	        echo -n "Username:"
