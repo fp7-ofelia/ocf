@@ -116,6 +116,8 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	#rm -rf $TMP_DIR
 
 	#restart ofver from appropiate directory
+	cd $TMP_PATH
+	print "Repo Migration done, restarting ofver..."
 	unlock
 	restartOfverInstance
 	exit 0
