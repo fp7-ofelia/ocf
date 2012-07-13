@@ -58,7 +58,7 @@ else
         GITHUB=1
 fi
 
-if [ $OFELIA == 1 && $NEW_REPO == 0 ]; then
+if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#Move original files to temp folder
 	TMP_DIR=/tmp/ofeliatmp$EXECPID/
@@ -117,7 +117,7 @@ if [ $OFELIA == 1 && $NEW_REPO == 0 ]; then
 	restartOfverInstance
 	exit 0
 
-elif [ $OFELIA == 0 && $GITHUB == 0]; then
+elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
         error "Error ocurred. Probably you have not executed first the $NO_OFELIA_SCRIPT script. Please do it and restart ofver:"
 	exit 1
 fi
