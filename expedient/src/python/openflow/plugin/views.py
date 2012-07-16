@@ -87,11 +87,17 @@ def aggregate_crud(request, agg_id=None):
             if err is not ' ':
                 #transaction.rollback()
                 if agg_id:
-                    flowvisor_msg = "Topology could not be updated because could not connect to FlowVisor." 
+                    if "check_fv_set" in err:
+                        flowvisor_msg = "Topology could not be updated because could not connect to FlowVisor."
+                        msg_type = DatedMessage.TYPE_WARNING
+                    else:
+                        flowvisor_msg = err
+                        msg_type = DatedMessage.TYPE_ERROR
                 else:
                     flowvisor_msg = "New Aggregate set, but there is no FlowVisor connected to it."
+                    msg_type = DatedMessage.TYPE_WARNING
                 DatedMessage.objects.post_message_to_user(
-                    flowvisor_msg, user=request.user, msg_type=DatedMessage.TYPE_WARNING,
+                    flowvisor_msg, user=request.user, msg_type=msg_type,
                 )
                 return HttpResponseRedirect("/")
             aggregate.save()

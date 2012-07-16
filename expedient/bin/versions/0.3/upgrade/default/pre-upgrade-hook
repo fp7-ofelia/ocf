@@ -97,19 +97,20 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#Restore non tracked files from tmp backup
 	if [ $CF_AGENT_INSTALL == 1 ]; then
-		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
-		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
-		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.key/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.key folder"
-		cp -R $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.cred/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.cred folder"
-		cp $TMP_DIR/expedient/src/python/expedient/clearinghouse/localsettings.py $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ || error "Could not copy expedient's localsettings.py"
-		cp $TMP_DIR/expedient/.currentVersion $OFELIA_DIR/expedient/.currentVersion || error "Could not copy expedient's .currentVersion file"
-		cp $TMP_DIR/vt_manager/src/python/vt_manager/mySettings.py $OFELIA_DIR/vt_manager/src/python/vt_manager/ || error "Could not copy vt_manager's mySettings.py"
-		cp $TMP_DIR/vt_manager/.currentVersion $OFELIA_DIR/vt_manager/.currentVersion || error "Could not copy vt_manager's .currentVersion file"
-		cp $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
-		cp $TMP_DIR/optin_manager/.currentVersion $OFELIA_DIR/optin_manager/.currentVersion || error "Could not copy optin's .currentVersion file"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.key/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.key folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.cred/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.cred folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/xmlrpc-ssl.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy xmlrpc-ssl.crt folder"
+		cp -p $TMP_DIR/expedient/src/python/expedient/clearinghouse/localsettings.py $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ || error "Could not copy expedient's localsettings.py"
+		cp -p $TMP_DIR/expedient/.currentVersion $OFELIA_DIR/expedient/.currentVersion || error "Could not copy expedient's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/vt_manager/mySettings.py $OFELIA_DIR/vt_manager/src/python/vt_manager/ || error "Could not copy vt_manager's mySettings.py"
+		cp -p $TMP_DIR/vt_manager/.currentVersion $OFELIA_DIR/vt_manager/.currentVersion || error "Could not copy vt_manager's .currentVersion file"
+		cp -p $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
+		cp -p $TMP_DIR/optin_manager/.currentVersion $OFELIA_DIR/optin_manager/.currentVersion || error "Could not copy optin's .currentVersion file"
 	elif [ $CF_AGENT_INSTALL == 0 ]; then
-		cp $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
-		cp $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
 	fi
 
 	#Remove temp folder?
