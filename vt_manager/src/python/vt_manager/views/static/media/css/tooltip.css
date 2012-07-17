@@ -22,6 +22,7 @@
   	-moz-opacity: 0.85;
   	/* Safari 1.x */
   	-khtml-opacity: 0.85;
+	font-style:normal;
 
 }
 .tooltiptable {

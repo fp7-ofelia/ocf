@@ -47,21 +47,24 @@
     });
 </script>
 <script type="text/javascript">
-
+	/* Handlers */
         $(document).ready(function() {
 		$("#formMode").click(function() {
 				$('#elements :input').attr('disabled', false);
 				document.getElementById("advancedRule").disabled = true;
-				document.getElementById("drag").style.display = "";
+				$("#formModeWrapper").show("slow");
+				$("#formModeHeader").show("slow");
+				$(".mappingList").hide("slow");
 	});
 
 		$("#advancedMode").click(function() {
-			
 			if ($('#advancedMode').is(':checked')) {
  				$('#elements :input').attr('disabled', true);
 				document.getElementById("advancedRule").disabled = false;
-    				document.getElementById("drag").style.display = "none";}   
-
+				$("#formModeWrapper").hide("slow");
+				$("#formModeHeader").hide("slow");
+				$(".mappingList").show("slow");
+			}   
 	});
 	
                	$("#CreateCondButton").click(function() {
@@ -391,7 +394,6 @@
 
 {% block content %}
 <div class="main">
-	<br/>
 <!-- Error List-->
 	{% if errors %}
 		<ul>
@@ -400,231 +402,24 @@
 			{% endfor %}
 		</ul>
 	{% endif %}
-	<div>
-		<div id=exceptions>
+	<div id=exceptions>
 			
-		</div> 
-		<form action="{% url rule_create %}" method="post" name="ruleCreate">{% csrf_token %}
-		<table>
-			<td><b>Select a input type for the rule:</b></td>
-			<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
-			<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
-			<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-				<div class="tooltip" id="mode_help">Form mode input type allows to create a rule using the form fields below. Advanced Mode input type allows to create a rule typing all the required syntax in the advanced mode form field
-				</div>
-			</td>
-		</table>
-	</div>
-
-    <h3>Form Mode</h3>
-    <div style="width:730px" id = "elements">
-
-
-	<table class="formtable" width="750">
-        <tr>
-        <td><h4>Rule Condition:</h4></td>
-	</tr>
-
-	<tr>
-	<td>
-
-<!-- Drag-and-drop condition creation -->
-	<div id="drag">
-		<table border="0">
-<!--			<colgroup>
-				<col width="450"/>
-				<col width="150"/>
-			</colgroup>
--->			<th>
-				<td class="mark" valign="top"><BR><b>Operators</b><BR> </td>
-			</th>
-<!--					<table id="table1"> -->
-			<tr>
-			    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
-				<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
-				<td class="mark"><div id="not"      class="drag not clone">not</div></td>
-			</tr>
-			<tr>
-				<td colspan=3 class="mark">
-					<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
-					<input id="CreateCondButton" type="button" value="Create New Condition" class="button" >
-				</td>
-			</tr>
-<!--		</table> -->
-<!--				</td>-->
-			</tr>
-<!--			<tr>
-				<td class="mark"><input id="CreateCondButton" type="button" value="Create New Condition" class="button" ></td>
-				<td class="mark"></td>
-			</tr>
--->		</table>
-		<BR>
-		<div id="cond_div">
-			<table align=center id="cond_table" width=700px>
-				<tr id="cond_row">
-				{% if edit or saved and condition != "" %}
-					<td class="single condcell"></td>
-					<td class="single condcell">
-						<div id=operandc0 class="drag operand">
-							<div class="xcloser"><a href="javascript:elem_delete('operandc0')">&#10006;</a></div>
-						{{condition}}
-						</div>
-					</td>
-					<td class="single condcell"></td>
-				{% else %}
-					<td class="single condcell"></td>
-				{% endif %}
-				</tr>
-			</table>
-		</div>
-	</div>
-	</td> </tr>
-<!-- End Drag-and-drop condition creation -->
-	<input type="hidden" name="table" value="{{ CurrentTable }}">
-	<td>
-	<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
-	</tr>
-	<tr><td><h4>Rule Parameters:</h4></td></tr>
-	<tr>
-	<td><div>
-		<table>
-		<td>Value:&nbsp;</td>
-			<td><select name="value" id="value">
-		 		{% if edit or saved %}
-                        		<option selected value="{{ valueS }}">{{ valueS }}</option>
-					{% for value in valueD %}
-                        			<option value="{{ value }}">{{ value }}
-					{% endfor %}
-                			{% else %}
-						<option value="accept">accept</option>
-						<option value="deny">deny</option>
-					{% endif %}
-			    </select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </td>
-		<td>Type:&nbsp;</td>
-			<td><select name="type" id="type">
-				{% if edit or saved %}
-                        		<option selected value="{{ terminalS }}">{{ terminalS }}</option>
-					{% for terminal in terminalD %}
-                        			<option value="{{ terminal }}">{{ terminal }}</option>
-					{% endfor %}
-                			{% else %}
-	                			<option value="terminal">Terminal</option>
-        	        			<option value="nonterminal">Non-Terminal</option>
-					{% endif %}
-		
-		<td>	</select></td>
-		</table>
-	</div></td>
-	</tr>
-	<tr>
-	<td><div>
-		<table>
-		<td>Action:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-		<td><select name="action" id="action">
-			{% if edit or saved %}
-				<option selected value="{{ action }}">{{ action }}</option>
-				{% for act in actionList %}
-					<option value ="{{ act }}">{{ act }}</option>
-				{% endfor %} 
-			{% else %}
-				{% for act in mappings.keys %}
-					<option value ="{{ act }}">{{ act }}</option>
-				{% endfor %}
-			{% endif %}
-	    	</select></td>
-		</table>
-	<div></td>
-	</tr>
-	<tr>
-	<td><div>
-		<table>
-		<td>Error Message:&nbsp;</td>
-<!--		<td><textarea name="error_message" rows="1" cols="75" id="errorMsg">{{ errorMsg }}</textarea></td> -->
-		<td><input type="text" name="error_message" size="90" id="errorMsg" value="{{ errorMsg }}"></td>
-		</table>
-	</div></td>
-	</tr>
-	<tr>
-	<td><div>
-		<table>
-		<td>Description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<!--		<td><textarea name="description" rows="1" cols="75" id="description">{{ description }}</textarea></td> -->
-		<td><input type="text" name="description" size="90" id="description" value="{{ description }}"></td>
-		</table>
-	</div></td>
-	</tr>
-	<tr>
-	</table>
-	</div>
-	
-	<td><div>
-		<h3>Advanced Mode</h3>
-		<table class="formtable" width="750">
-		<tr>
-		<td>Rule:&nbsp;</td>
-		<td><input type="text" id="advancedRule" name="expertRule" disabled size="85" value =
-		{% if edit or saved %}
-			{% if terminalS == "nonterminal" %}
-				"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
-			{% else %}
-				"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
-			{% endif %}
-		{% endif %}>
+	</div> 
+	<form action="{% url rule_create %}" method="post" name="ruleCreate">{% csrf_token %}
+	<table>
+		<td><b>Editing mode:</b></td>
+		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
+		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
+		<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+			<div class="tooltip" id="mode_help">Form mode edition allows to create a rule using the form fields below. Advanced Mode edition allows you to write rules according to RegexParser syntax
+			</div>
 		</td>
-		<input type="hidden" name="table" value="{{ CurrentTable }}">
-		<td><img id="advanced_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-            	<div class="tooltip" id="advanced_help">
-      		The rule syntax is: <b>if</b> Condition <b>then</b> accept/deny nonterminal/empty  <b> do</b>  Action  <b>denyMessage</b>  <b>Error</b> <b>#</b>description        	
-                </div></td>
-		</tr>
-		<tr>
-		<td>Condition Mappings:</td>
-		<td>
-		<div>
-			<table>
-			<td>{% for map in ConditionMappings.keys %}
-                        	{{ map }},
-                    	{% endfor %}
-			</td>
-			<td><img id="ConditionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-                	<div class="tooltip" id="ConditionMappings_help">
-			The Condition mappings allow PolicyEngine relate the conditions of the rules with the requests of the users in order to evaluate if the request is possible or not.
-			</table>
-                </div></td>
-		</tr>
-		<tr>
-		<td>Action Mappings:</td>
-		<td>
-		<div>
-			<table>
-			<td>{% for acti in ActionMappings.keys %}
-				{{ acti }},
-			    {% endfor %}
-			</td>
-			<td><img id="ActionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-                	<div class="tooltip" id="ActionMappings_help">
-				The Action Mappings allow PolicyEngine relate the actions of the rules with possible fuction or methods programmed by the Island Manager
-			</div></td>
-			</table>
-		</div><td>
-		</table>
-		</tr>
-		</table>
-		<table>
-		<td>Priority:&nbsp;
-		<select name="priority">
-			{% if edit or saved %}
-				<option selected value="{{ PrioritySel }}">{{ PrioritySel }}</option>
-			{% endif %}
-			{% if not saved %}
-				<option value="">Last</option>	
-			{% endif %}
-			{% for number in priorityList %} 
-				<option value ="{{ number }}">{{ number }}</option>
-			{% endfor %}
-		
-		</select>&nbsp;&nbsp;&nbsp;&nbsp;
-		Enable Rule:&nbsp;
+	</table>
+
+   	<h3>General rule parameters</h3>
+	<div>	
+		<p>
+			Enable Rule:
 			{% if edit or saved  %}
 				{% if enabled %}
 					<input type="checkbox" name="enable" value="enable" checked></td>
@@ -634,36 +429,195 @@
 			{% else %}
 				<input type="checkbox" name="enable" value="enable" checked></td>
 			{% endif %}
-	</div></td>
-	<td><img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-	    <div class="tooltip" id="enable_help">
-            The priority of a Rule, is the position of the rule in the RuleTable ruleSet. The higher the priority, sooner will be processed. The Enable Checkbox enable or disable the rule. If the rule is enabled, will be processed else, the rule will be avoided when the process starts.
-            </div></td>
+			<img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+	   	 	<div class="tooltip" id="enable_help">
+            			The priority of a Rule, is the position of the rule in the RuleTable ruleSet. The higher the priority, sooner will be processed. The Enable Checkbox enable or disable the rule. If the rule is enabled, will be processed else, the rule will be avoided when the process starts.
+            		</div>
+		</p>
+		<p>
+			Priority:
+			<select name="priority">
+				{% if edit or saved %}
+					<option selected value="{{ PrioritySel }}">{{ PrioritySel }}</option>
+				{% endif %}
+				{% if not saved %}
+					<option value="">Last</option>	
+				{% endif %}
+				{% for number in priorityList %} 
+					<option value ="{{ number }}">{{ number }}</option>
+				{% endfor %}
+		
+			</select>
+		</p>
+	</div> <!-- General rule parameters -->
 
-	</table>
-	</table>
-	<br>
+	<h3 id="formModeHeader">Form Mode</h3>
+	<div class="wrapper" width="750" id="formModeWrapper" style="text-align:left">
+		<!-- Drag-and-drop condition creation -->
+		<div id="drag">
+        		<h4>Rule Condition:</h4>
+			<table border="0" align="left" class="draggableConditions">
+				<tr >
+				<td class="mark" valign="top" colspan="3"><BR><b>Operators</b><BR> </td>
+				</tr>
+				<tr>
+				    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
+					<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
+					<td class="mark"><div id="not"      class="drag not clone">not</div></td>
+				</tr>
+				<tr>
+					<td colspan="3" class="mark">
+						<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+						<input id="CreateCondButton" type="button" value="Create New Condition" class="button" >
+					</td>
+				</tr>
+				</tr>
+			</table>
+			<div id="cond_div">
+				<table align="center" class="cond_table" width="100%">
+					<tr> 
+					{% if edit or saved and condition != "" %}
+						<td class="single condcell"></td>
+						<td class="single condcell">
+							<div id="operandc0" class="drag operand">
+								<div class="xcloser"><a href="javascript:elem_delete('operandc0')">&#10006;</a></div>
+							{{condition}}
+							</div>
+						</td>
+						<td class="single condcell"></td>
+					{% else %}
+						<td class="single condcell"></td>
+					{% endif %}
+					</tr>
+				</table>
+			</div>
+			<h4>Rule Parameters:</h4>
+			<div>
+				<table class="leftTable">
+					<tr>
+					<td>Value:</td>
+					<td>
+						<select name="value" id="value">
+		 				{% if edit or saved %}
+                        				<option selected value="{{ valueS }}">{{ valueS }}</option>
+						{% for value in valueD %}
+                        				<option value="{{ value }}">{{ value }}
+						{% endfor %}
+                				{% else %}
+							<option value="accept">accept</option>
+							<option value="deny">deny</option>
+						{% endif %}
+			    			</select>
+					</td>
+					</tr>
+					<tr>
+					<td>Type:</td>
+					<td>
+						<select name="type" id="type">
+						{% if edit or saved %}
+                        				<option selected value="{{ terminalS }}">{{ terminalS }}</option>
+							{% for terminal in terminalD %}
+ 	        	               				<option value="{{ terminal }}">{{ terminal }}</option>
+							{% endfor %}
+                				{% else %}
+	                				<option value="terminal">Terminal</option>
+        	        				<option value="nonterminal">Non-Terminal</option>
+						{% endif %}
+						</select>
+					</td>
+					</tr>
+					<tr>
+						<td>Action:</th>
+						<td><select name="action" id="action">
+						{% if edit or saved %}
+							<option selected value="{{ action }}">{{ action }}</option>
+							{% for act in actionList %}
+								<option value ="{{ act }}">{{ act }}</option>
+							{% endfor %} 
+						{% else %}
+							{% for act in mappings.keys %}
+								<option value ="{{ act }}">{{ act }}</option>
+							{% endfor %}
+						{% endif %}
+	    					</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Error Message:</td>
+						<td><input type="text" name="error_message" size="90" id="errorMsg" value="{{ errorMsg }}"></td>
+					</tr>
+					<tr>
+						<td>Description:</td>
+						<td><input type="text" name="description" size="90" id="description" value="{{ description }}"></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div> <!-- Wrapper -->
+	<!-- End Drag-and-drop condition creation -->
+
+	<h3>Advanced Mode</h3>
+	<div class="wrapper" id="advancedModeWrapper" style="text-align:left">
+		<div class="advancedRule">
+			<b>Rule:</b> 
+					<img id="advanced_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+            				<div class="tooltip" id="advanced_help">
+      						The rule syntax is: <b>if</b> Condition <b>then</b> accept/deny nonterminal/empty  <b> do</b>  Action  <b>denyMessage</b>  <b>Error</b> <b>#</b>description        	
+                			</div>
+				<input type="text" id="advancedRule" name="expertRule" disabled value =
+					{% if edit or saved %}
+						{% if terminalS == "nonterminal" %}
+							"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+						{% else %}
+							"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+						{% endif %}
+					{% endif %} />
+		</div>
+		<div>
+			<div class="mappingList">
+			<h5>Condition Mappings:</h5><img id="ConditionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+                	<div class="tooltip" id="ConditionMappings_help">
+			The Condition mappings allow PolicyEngine relate the conditions of the rules with the requests of the users in order to evaluate if the request is possible or not.
+                	</div>
+
+			{% for map in ConditionMappings.keys %}
+                        	{{ map }}{% if not loop.last %},{% endif %}
+                    	{% endfor %}
+			</div>
+			<div class="mappingList">
+			<h5>Action Mappings:</h5> <img id="ActionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}"><div class="tooltip" id="ActionMappings_help">
+				The Action Mappings allow PolicyEngine relate the actions of the rules with possible fuction or methods programmed by the Island Manager
+			</div>
+			{% for action in ActionMappings.keys %}
+                        	{{ action }}{% if not loop.last %},{% endif %}
+			{% endfor %}
+			</div>
+		</div>
+	</div>
+		
+		<!-- Rest of form params -->
+		<input type="hidden" name="table" value="{{ CurrentTable }}">
+		<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
 		<input type="hidden" name="hidden_name" value="{{ ptable }}">
 		<input type="hidden" name="uuid" value="{{ rule_uuid }}">
 		<input type="hidden" name="ppriority" value="{{ priority }}">
 		<input type="hidden" name="saved" value="{{ saved }}">
-	{% if edit %}
-		<input type="submit" value="Save Changes">
-		<input type="hidden" name="editing" value="1">
-	{% else %}
-	        <input type="submit" value="Generate Rule">
-		<input type="hidden" name="editing" value="0">
-	{% endif %}
-	<input type="hidden" id="conditionID" name="conditionID" value="" >
+		{% if edit %}
+			<input type="submit" value="Save Changes">
+			<input type="hidden" name="editing" value="1">
+		{% else %}
+		        <input type="submit" value="Generate Rule">
+			<input type="hidden" name="editing" value="0">
+		{% endif %}
+		<input type="hidden" id="conditionID" name="conditionID" value="" >
 	</form>
-	<br><br>	
+	
+	
 	<div class="center">
-        <a href="{% url rule_table_view %}">Policy Manager</a> |
-        <a href="{% url dashboard  %}">Dashboard</a>
-
-    </div>
+	        <a href="{% url rule_table_view %}">Policy Manager</a> |
+        	<a href="{% url dashboard  %}">Dashboard</a>
+	</div>
 </div>
-
 
 
 {% endblock content %}
