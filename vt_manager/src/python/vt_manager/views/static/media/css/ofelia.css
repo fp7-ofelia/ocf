@@ -567,6 +567,30 @@ div .advancedRule input[type=text]:disabled {
 	color: #bbb;
 }
 
+div .PEbox{
+	float:right;
+	padding:10px;
+	padding-left:15px;
+	padding-right:15px;
+	width:175px;
+	height:75px;
+	margin-right:15px;
+	margin-bottom:15px;
+	border: 1px solid #ccc; 
+        -moz-border-radius: 15px 15px 15px 15px;
+        -webkit-border-radius: 15px 15px 15px 15px;
+        border-radius:  15px 15px 15px 15px;
+        display:inline-block;
+	vertical-align:top;     
+}
+
+div .PEoperators {
+	background-color: #FFFACD;
+}
+div .PEactions {
+	background-color: #E0FFFF;
+}
+
 /* DRAG n DROP */
 
 table .cond_table tr td{
@@ -601,7 +625,7 @@ border: white;
 }
 
 .condcell{
-width:10px;
+	min-width:60px;
 /*border: 1px solid black;*/
 }
 

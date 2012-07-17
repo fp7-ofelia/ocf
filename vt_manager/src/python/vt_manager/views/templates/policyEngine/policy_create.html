@@ -456,23 +456,25 @@
 		<!-- Drag-and-drop condition creation -->
 		<div id="drag">
         		<h4>Rule Condition:</h4>
-			<table border="0" align="left" class="draggableConditions">
-				<tr >
-				<td class="mark" valign="top" colspan="3"><BR><b>Operators</b><BR> </td>
-				</tr>
-				<tr>
-				    	<td class="mark"><div id="operator" class="drag operator clone">&&</div></td>
-					<td class="mark"><div id="operator" class="drag operator clone">||</div></td>
-					<td class="mark"><div id="not"      class="drag not clone">not</div></td>
-				</tr>
-				<tr>
-					<td colspan="3" class="mark">
+					<div class="PEbox PEoperators">
+						<h4>Operators</h4>
+						<table border="0" align="left"> 
+					 	   	<td class="mark">
+								<div id="operator" class="drag operator clone">&&</div>
+							</td>
+							<td class="mark">
+								<div id="operator" class="drag operator clone">||</div>
+							</td>
+							<td class="mark">
+								<div id="not" class="drag not clone">not</div>
+							</td>
+						</table>
+					</div>
+					<div class="PEbox PEactions">
+						<h4>Actions</h4>
 						<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
-						<input id="CreateCondButton" type="button" value="Create New Condition" class="button" >
-					</td>
-				</tr>
-				</tr>
-			</table>
+						<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
+					</div>
 			<div id="cond_div">
 				<table align="center" class="cond_table" width="100%">
 					<tr> 
@@ -491,6 +493,7 @@
 					</tr>
 				</table>
 			</div>
+		</div>
 			<h4>Rule Parameters:</h4>
 			<div>
 				<table class="leftTable">
@@ -551,7 +554,6 @@
 						<td><input type="text" name="description" size="90" id="description" value="{{ description }}"></td>
 					</tr>
 				</table>
-			</div>
 		</div>
 	</div> <!-- Wrapper -->
 	<!-- End Drag-and-drop condition creation -->
@@ -561,8 +563,8 @@
 		<div class="advancedRule">
 			<b>Rule:</b> 
 					<img id="advanced_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
-            				<div class="tooltip" id="advanced_help">
-      						The rule syntax is: <b>if</b> Condition <b>then</b> accept/deny nonterminal/empty  <b> do</b>  Action  <b>denyMessage</b>  <b>Error</b> <b>#</b>description        	
+            				<div class="tooltip" id="advanced_help" style="width:500px!important">
+      						Rule syntax is:<br> <b>if</b> Condition <b>then</b> accept/deny [<b>nonterminal</b>]  [<b>do</b>  Action<b>] [denyMessage</b>  ErrorMessage] [<b>#</b>Description]        	
                 			</div>
 				<input type="text" id="advancedRule" name="expertRule" disabled value =
 					{% if edit or saved %}
