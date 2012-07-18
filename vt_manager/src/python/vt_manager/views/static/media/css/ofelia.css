@@ -635,7 +635,6 @@ div .operator{
 /* Drag and drop area*/
 .cond_table{
 	clear:both;
-	display:block;
 	
 	background-color:#ddd;
 	padding:10px;

@@ -1,10 +1,7 @@
 {% extends "fancybase.html" %}
 {% block scripts %}
 <script type="text/javascript">
-//	var i=1;
 	var t1= new Array();
-//	var clist = new Array();
-//	clist.join(document.getElementById("conditionID").value);
 	var errorList = new Array();	
 
 	function createHidden(condition){
@@ -14,7 +11,6 @@
 		t1[i].name=i;
 		t1[i].value = i; //condition;
 		t1[i].size = 10;
-		//document.getElementById("conditionID").value = i;
 		
 		document.forms[0].appendChild(t1[i]);
 		sum = parseInt(document.getElementById("conditionID").value) + 1;
@@ -197,7 +193,7 @@
 				var ident = "operandc" + Math.floor(Math.random()*10000).toString()
 		                cond.setAttribute('id',ident);
               			cond.className= "drag operand";
-                		cond.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+ident+'\')">&#10006;</a></div>' + "("+ newCond+ ")";
+                		cond.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+ident+'\')">&#10006;</a></div>' + newCond;
 				trow.insertCell(0).setAttribute("class", "single condcell blankCell");
 				trow.insertCell(1).setAttribute("class", "single condcell blankCell");
 				tcells[1].appendChild(cond);
