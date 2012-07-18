@@ -182,7 +182,7 @@
 	<div id=exceptions>
 			
 	</div> 
-	<form action="{% url rule_create %}" method="post" name="ruleCreate">{% csrf_token %}
+	<form action="{% url rule_create CurrentTable  %}" method="post" name="ruleCreate">{% csrf_token %}
 	<table>
 		<td><b>Editing mode:</b></td>
 		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>

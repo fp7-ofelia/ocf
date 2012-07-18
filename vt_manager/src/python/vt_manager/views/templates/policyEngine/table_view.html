@@ -60,10 +60,10 @@
 					    {%else%}
 						<a href="{% url enable_disable rule.rule.getUUID table.name %}"><img src="{% url img_media 'inactive_t.png' %}" width="15px" border=0/></a>
 					    {%endif%}</td>
-                                        <form action ="{% url rule_delete %}" method="post">{% csrf_token %}
-<!--					<td align=left><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td> -->
-					<td align="left"><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getCondition.dump }}</a></td>
-					<td align="left"><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.getDescription }}</a></td>
+                                        <form action ="{% url rule_delete table.name %}" method="post">{% csrf_token %}
+<!--					<td align=left><a href="{% url rule_edit table.name rule.rule.getUUID %}">{{ rule.rule.dump }}</a></td> -->
+					<td align="left"><a href="{% url rule_edit table.name rule.rule.getUUID %}">{{ rule.rule.getCondition.dump }}</a></td>
+					<td align="left"><a href="{% url rule_edit table.name rule.rule.getUUID %}">{{ rule.rule.getDescription }}</a></td>
 					<td align="left">
 						{% if rule.rule.getType.terminal%}
 							{% if rule.rule.getType.value %}ACCEPT
