@@ -111,7 +111,7 @@ def rule_create(request,table_name=None):
         	else:
                 	RuleTableManager.AddRule(strings,enable,priority,tableName=tableName)
 
-                return HttpResponseRedirect("rule_table_view")#rule_table_view(tableName)		
+                return HttpResponseRedirect("/policies/rule_table_view")#rule_table_view(tableName)		
 
 	except Exception as e:
 
@@ -173,7 +173,7 @@ def enable_disable(request, rule_uuid, table_name):
 
 	RuleTableManager.EnableOrDisableRule(rule_uuid,table_name)
 
-	return HttpResponseRedirect("/rule_table_view")	
+	return HttpResponseRedirect("/policies/rule_table_view")	
 
 def condition_create(request, TableName):
 	return simple.direct_to_template(request,
@@ -189,7 +189,7 @@ def rule_delete(request):
         tableName = request.POST.get("table_name")
 	RuleTableManager.deleteRule(rule_uuid,tableName)
 
-	return HttpResponseRedirect("rule_table_view")
+	return HttpResponseRedirect("/policies/rule_table_view")
 	
 def update_ruleTable_policy(request):
 	
@@ -197,10 +197,11 @@ def update_ruleTable_policy(request):
 	tableName = request.POST.get("table_name")
 	RuleTableManager.UpdateRuleTablePolicy(policy,tableName)
 	 
-	return HttpResponseRedirect("rule_table_view")
+	return HttpResponseRedirect("/policies/rule_table_view")
 
-def rule_edit(request, rule_uuid, table_name, errors=None):
-        
+def rule_edit(request,table_name,rule_uuid):
+
+        errors=[]
 	rule = RuleTableManager.getRuleOrIndexOrIsEnabled(rule_uuid,'Rule',table_name)
 	rulevalues = RuleTableManager.getValue(rule)
 	ruletypes = RuleTableManager.getType(rule)

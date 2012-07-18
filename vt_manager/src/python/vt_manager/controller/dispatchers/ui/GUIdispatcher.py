@@ -382,7 +382,7 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 		
 			#Create excluded
 			Ip4Controller.addExcludedIp4(instance,request)
-			return HttpResponseRedirect("/networking/ip4/")
+			return HttpResponseRedirect("/networking/ip4/"+rangeId)
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
@@ -404,7 +404,7 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 			#FIXME: Why initial instance is not refreshed?
 			instance = Ip4Controller.getRange(rangeId)
 			extra_context["range"] = instance
-			return HttpResponseRedirect("/networking/ip4/") 
+			return HttpResponseRedirect("/networking/ip4/"+rangeId) 
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
@@ -502,7 +502,7 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 			#Create excluded
 			EthernetController.addExcludedMac(instance,request)
 
-			return HttpResponseRedirect("/networking/ethernet/")
+			return HttpResponseRedirect("/networking/ethernet/"+rangeId)
 
 		except Exception as e:
 			print e
@@ -526,7 +526,7 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 			EthernetController.removeExcludedMac(instance,macId)
 			instance = EthernetController.getRange(rangeId)
 			extra_context["range"] = instance 
-			return HttpResponseRedirect("/networking/ethernet/")
+			return HttpResponseRedirect("/networking/ethernet/"+rangeId)
 		except Exception as e:
 			print e
 			extra_context["errors"] = HttpUtils.processException(e)
