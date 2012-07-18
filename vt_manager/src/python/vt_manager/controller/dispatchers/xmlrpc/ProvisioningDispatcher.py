@@ -20,14 +20,11 @@ class ProvisioningDispatcher():
 
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
-
-			
-
 			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 
 			try:
-				RuleTableManager.evaluate(action, 'PolicyProvisioning')
+				RuleTableManager.evaluate(action,RuleTableManager.getDefaultName())
 			except Exception as e:
 				a = str(e)
 				if len(a)>200:

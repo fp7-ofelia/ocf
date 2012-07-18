@@ -100,7 +100,7 @@ $(document).ready(function() {
                                 else {
                                         text = $("div.selected")[1].innerText.replace("✖","");
                                 };
-                                group = group + " " + text + " "; 
+                                group = "(" + group + ") " + text + " "; 
                         }
                         else {
                                 document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
@@ -114,7 +114,7 @@ $(document).ready(function() {
                                 else {
                                         text = $("div.selected")[2].innerText.replace("✖","");
                                 };
-                                group = group + text;
+                                group = group + "(" + text + ")";
                         }
                         else {
                                 document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
@@ -151,7 +151,7 @@ $(document).ready(function() {
                                 else {
                                         text = $("div.selected")[1].innerText.replace("✖","");
                                 };
-                                group = group + text;
+                                group = group + "(" + text + ")";
                         }
                         else {
                                 document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
@@ -178,7 +178,7 @@ $(document).ready(function() {
                                 else {
                                         text = $("div.selected")[3].innerText.replace("✖","");
                                 };
-                                group = "(" + group + text + " )";
+                                group = "(" + group + "(" + text + ") )";
                         }
                         else {
                                 document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
