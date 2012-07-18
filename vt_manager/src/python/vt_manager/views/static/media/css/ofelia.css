@@ -569,7 +569,6 @@ div .advancedRule input[type=text]:disabled {
 
 div .PEbox{
 	float:right;
-	padding:10px;
 	padding-left:15px;
 	padding-right:15px;
 	width:175px;
@@ -582,26 +581,36 @@ div .PEbox{
         border-radius:  15px 15px 15px 15px;
         display:inline-block;
 	vertical-align:top;     
+	padding-bottom:25px;
 }
 
 div .PEoperators {
 	background-color: #FFFACD;
+	border: 1px solid #DDD8CB; 
 }
 div .PEactions {
 	background-color: #E0FFFF;
+	border: 1px solid #C0DDDD;
 }
 
-/* DRAG n DROP */
-
-table .cond_table tr td{
-	height:50px!important;
-	background-color: red!important;
+/* DRAG n DROP boxes */
+div .drag{
+	background-color: #ccc;	
+	border: 0px; 
+	padding:10px;
+	padding-left:13px; 
+	padding-right:13px; 
+        -moz-border-radius: 8px 8px 8px 8px;
+        -webkit-border-radius: 8px 8px 8px 8px;
+        border-radius:  8px 8px 8px 8px;
+        display:inline-block;
+	vertical-align:top; 
 }
 
 .xcloser{
 float:right;
 top:0px;
-margin: -13px -13px 0 0;
+margin: -10px -9px 0 0;
 position: relative;
 cursor:pointer;
 }
@@ -611,26 +620,40 @@ color: rgba(0, 0, 0, 0.65);
 text-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
+div .not{
+	background-color: #D2691E;
+}
+div .operator{
+	background-color:#DAA520;
+}
+
 .selected{
-background: rgb(252,255,244); /* Old browsers */
-background: -moz-linear-gradient(top, rgba(252,255,244,1) 0%, rgba(223,229,215,1) 40%, rgba(179,190,173,1) 100%); /* FF3.6+ */
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,255,244,1)), color-stop(40%,rgba(223,229,215,1)), color-stop(100%,rgba(179,190,173,1))); /* Chrome,Safari4+ */
-background: -webkit-linear-gradient(top, rgba(252,255,244,1) 0%,rgba(223,229,215,1) 40%,rgba(179,190,173,1) 100%); /* Chrome10+,Safari5.1+ */
-background: -o-linear-gradient(top, rgba(252,255,244,1) 0%,rgba(223,229,215,1) 40%,rgba(179,190,173,1) 100%); /* Opera 11.10+ */
-background: -ms-linear-gradient(top, rgba(252,255,244,1) 0%,rgba(223,229,215,1) 40%,rgba(179,190,173,1) 100%); /* IE10+ */
-background: linear-gradient(top, rgba(252,255,244,1) 0%,rgba(223,229,215,1) 40%,rgba(179,190,173,1) 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfff4', endColorstr='#b3bead',GradientType=0 ); /* IE6-9 */
-color: rgba(0, 0, 0, 1);
-border: white;
+	background-color: #990000!important;
+	color: #fff!important;
 }
 
-.condcell{
-	min-width:60px;
-/*border: 1px solid black;*/
+/* Drag and drop area*/
+.cond_table{
+	clear:both;
+	display:block;
+	
+	background-color:#ddd;
+	padding:10px;
+        -moz-border-radius: 15px 15px 15px 15px;
+        -webkit-border-radius: 15px 15px 15px 15px;
+        border-radius:  15px 15px 15px 15px;
+	border: 2px dashed #bbb;
+	margin:0px;
+	width:700px!important;
+	text-align:center;
 }
-
-.condcell:hover {
-background: #aaaaaa;
+.cond_table tr{
+	width:100%;
 }
-
-   
+.cond_table td{
+	/*width:33%;*/
+	width:100%;
+	height:60px;
+	/*background-color:green;*/
+	text-align:center;	
+}

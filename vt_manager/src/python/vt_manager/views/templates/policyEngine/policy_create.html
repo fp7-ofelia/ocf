@@ -46,10 +46,11 @@
         });
     });
 </script>
+<script type="text/javascript" src="{% url js_media 'dragndrop.js' %}"></script>
 <script type="text/javascript">
 	/* Handlers */
         $(document).ready(function() {
-		$("#formMode").click(function() {
+		$("#formMode").change(function() {
 				$('#elements :input').attr('disabled', false);
 				document.getElementById("advancedRule").disabled = true;
 				$("#formModeWrapper").show("slow");
@@ -57,7 +58,7 @@
 				$(".mappingList").hide("slow");
 	});
 
-		$("#advancedMode").click(function() {
+		$("#advancedMode").change(function() {
 			if ($('#advancedMode').is(':checked')) {
  				$('#elements :input').attr('disabled', true);
 				document.getElementById("advancedRule").disabled = false;
@@ -67,13 +68,13 @@
 			}   
 	});
 	
-               	$("#CreateCondButton").click(function() {
+               	$("#CreateCondButton").change(function() {
                         $.fancybox({'href': '{% url condition_create CurrentTable %}'});
         });
-		$("#ac").click(function() {
+		$("#ac").change(function() {
                         document.getElementById("finalCond").value = " ";
         });
-		$("#backSpace").click(function() {
+		$("#backSpace").change(function() {
                         
                         var n = 0;
                         var a = document.getElementById("finalCond").value;
@@ -92,31 +93,31 @@
                                 i -= 1;
                         }
          });
-		$("#assign").click(function() {
+		$("#assign").change(function() {
 			document.getElementById("finalCond").value += document.getElementById("conditionList").value + " ";
 	});		
-		$("#openPar").click(function() {
+		$("#openPar").change(function() {
                         document.getElementById("finalCond").value += "( ";
         });
-		$("#closePar").click(function() {
+		$("#closePar").change(function() {
                         document.getElementById("finalCond").value += ") ";
         });
-		$("#and").click(function() {
+		$("#and").change(function() {
                         document.getElementById("finalCond").value += "&& ";
         });
-		$("#or").click(function() {
+		$("#or").change(function() {
                         document.getElementById("finalCond").value += "|| ";
         });
-		$("#ok").click(function() {
+		$("#ok").change(function() {
 			displayRule();
         });	
-		$("#value").click(function() {
+		$("#value").change(function() {
 			displayRule();
 	});
-		$("#type").click(function() {
+		$("#type").change(function() {
 			displayRule();
         });
-		$("#action").click(function() {
+		$("#action").change(function() {
 			displayRule();
         });
 		$("#errorMsg").keyup(function() {
@@ -153,231 +154,7 @@
 		}
 		document.getElementById("advancedRule").value = rule
 	}
-
-
-
-// Drag&Drop variables and functions
-	
-		var rd = REDIPS.drag;
-		rd.init();
-		
-		rd.myhandler_cloned = function(target_cell){
-			var elem = document.getElementById(rd.obj.id);
-			var elemID = rd.obj.id;
-			if (elemID.substr(0,7) == "operand"){
-				elem.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+elemID+'\')">&#10006;</a></div>' + "("+ elem.innerHTML+ ")";
-			}
-			else {
-				elem.innerHTML = elem.innerHTML + '<div class="xcloser"><a href="javascript:elem_delete(\''+elemID+'\')">&#10006;</a></div>';
-			};
-			$("#"+rd.obj.id).toggleClass("selected");
-		};
-
-		rd.myhandler_dropped = function(target_cell){
-
-			var row = document.getElementById("cond_row");
-			var pos = rd.get_position();
-			
-			if(pos[0] != pos[3]){
-				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
-				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
-			}
-			else if(pos[2] < pos[5]){
-				if(pos[3] != 0) {
-					row.deleteCell(pos[5]+1);
-					row.deleteCell(pos[5]);
-				};
-				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
-				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
-			}
-			else if(pos[2] > pos[5]){
-				row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell");
-				row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell");
-				if(pos[3] != 0) {
-					row.deleteCell(pos[5]+1);
-					row.deleteCell(pos[5]);
-				};
-			};
-			cond_assign();
-		};
-
-
-		// This function allows to clone any number of elements and make them only droppable in the correct cell
-		rd.myhandler_moved = function(){
-			$("#"+rd.obj.id).toggleClass("selected");
-		};
-
-		rd.myhandler_clicked = function (current){
-			if (current.parentNode.id == "cond_row"){
-				$("#"+rd.obj.id).toggleClass("selected");
-			};
-		};
 }); // End document.ready()
-
-	removeAdjacentCells = function(source_cell){
-		var row = document.getElementById("cond_row");
-		row.deleteCell(source_cell.cellIndex+1);
-		row.deleteCell(source_cell.cellIndex);
-	};
-
-	cond_group = function(){
-		var group = "";
-		var text = "";
-		if ( $("div.selected").length < 3 || $("div.selected").length > 4){
-			document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-			return;
-		}
-		else if ($("div.selected").length == 3){
-			if ($("div.selected")[0].id.substr(0,7) == "operand" || $("div.selected")[0].id.substr(0,9) == "comp_cond"){
-				if ($("div.selected")[0].innerText == null){
-					group =  $("div.selected")[0].textContent.replace("✖","");
-				}
-				else {
-					group =  $("div.selected")[0].innerText.replace("✖","");
-				};
-			}
-			else {
-				document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-				return;
-			};
-
-			if ($("div.selected")[1].id.substr(0,8) == "operator"){
-				if ($("div.selected")[1].innerText == null){
-					text = $("div.selected")[1].textContent.replace("✖","");
-				}
-				else {
-					text = $("div.selected")[1].innerText.replace("✖","");
-				};
-				group = group + " " + text + " "; 
-			}
-			else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-
-                        if ($("div.selected")[2].id.substr(0,7) == "operand" || $("div.selected")[2].id.substr(0,9) == "comp_cond"){
-				if ($("div.selected")[2].innerText == null){
-					text = $("div.selected")[2].textContent.replace("✖","");
-				}
-				else {
-					text = $("div.selected")[2].innerText.replace("✖","");
-				};
-				group = group + text;
-                        }
-                        else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-			group = "(" + group + ")"
-
-			$("div.selected")[0].setAttribute('id',$("div.selected")[0].getAttribute('id'));
-                        $("div.selected")[0].innerHTML = '<div class="xcloser"><A href="javascript:elem_delete(\''+$("div.selected")[0].getAttribute('id')+'\')">&#10006;</A></div>' + group;
-                        $("div.selected")[0].setAttribute('className', 'drag operand');
-                        elem_delete($("div.selected")[2].getAttribute('id'));
-                        elem_delete($("div.selected")[1].getAttribute('id'));
-
-		} 
-		else if ($("div.selected").length == 4){
-                        if ($("div.selected")[0].id.substr(0,3) == "not"){
-				if ($("div.selected")[0].innerText == null){
-	                                text = $("div.selected")[0].textContent.replace("✖","");
-				}
-				else {
-	                                text = $("div.selected")[0].innerText.replace("✖","");
-				};
-				group = text + " ";
-                        }
-                        else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-
-                        if ($("div.selected")[1].id.substr(0,7) == "operand" || $("div.selected")[1].id.substr(0,9) == "comp_cond"){
-				if ($("div.selected")[1].innerText == null){
-	                                text = $("div.selected")[1].textContent.replace("✖","");
-				}
-				else {
-	                                text = $("div.selected")[1].innerText.replace("✖","");
-				};
-				group = group + text;
-                        }
-                        else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-
-                        if ($("div.selected")[2].id.substr(0,8) == "operator"){
-				if ($("div.selected")[2].innerText == null){
-	                                text = $("div.selected")[2].textContent.replace("✖","");
-				}
-				else {
-	                                text = $("div.selected")[2].innerText.replace("✖","");
-				};
-                                group = group +" "+ text + " "; 
-                        }
-                        else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-
-                        if ($("div.selected")[3].id.substr(0,7) == "operand" || $("div.selected")[3].id.substr(0,9) == "comp_cond"){
-				if ($("div.selected")[3].innerText == null){
-	                                text = $("div.selected")[3].textContent.replace("✖","");
-				}
-				else {
-	                                text = $("div.selected")[3].innerText.replace("✖","");
-				};
-                                group = "(" + group + text + " )";
-                        }
-                        else {
-                                document.getElementById("exceptions").textContent = "Invalid condition: Missing operator, left condition or right condition";
-                                return;
-                        };
-			$("div.selected")[1].setAttribute('id',$("div.selected")[1].getAttribute('id'));
-			$("div.selected")[1].innerHTML = '<div class="xcloser"><A href="javascript:elem_delete(\''+$("div.selected")[1].getAttribute('id')+'\')">&#10006;</A></div>' + group;
-			$("div.selected")[1].setAttribute('className', 'drag operand');
-			elem_delete($("div.selected")[3].getAttribute('id'));
-			elem_delete($("div.selected")[2].getAttribute('id'));
-			elem_delete($("div.selected")[0].getAttribute('id'));
-		};
-//		REDIPS.drag.init();
-		rd.init();
-		cond_assign();
-	};
-
-	cond_assign = function(){
-		var row = document.getElementById("cond_row");
-		var text = "";
-		var content = "";
-		for (var i = 0; i < row.cells.length; i++){
-			if (row.cells[i].innerText == null){
-				content = row.cells[i].textContent.replace("✖","").replace("\n","");
-			}
-			else {
-				content = row.cells[i].innerText.replace("✖","").replace("\n","")
-			};
-			if (content.length > 0){
-				text = text + content + " ";
-			};
-		};
-		text = text.substr(0,text.length-1);
-		document.getElementById("finalCond").value = text;
-		displayRule();
-	};
-
-	cond_limpia = function(){
-		for ( var i = 0; i < arguments.length; i++ ){
-			REDIPS.drag.delete_object(arguments[i]);
-		};
-	};
-
-	elem_delete = function(elemID){
-		cell = document.getElementById(elemID).parentNode;
-		removeAdjacentCells(cell);
-		cond_limpia(elemID);
-		cond_assign();
-	};
-
 </script>
 <script>
 	$(document).mouseup(function() {
@@ -456,46 +233,46 @@
 		<!-- Drag-and-drop condition creation -->
 		<div id="drag">
         		<h4>Rule Condition:</h4>
-					<div class="PEbox PEoperators">
-						<h4>Operators</h4>
-						<table border="0" align="left"> 
-					 	   	<td class="mark">
-								<div id="operator" class="drag operator clone">&&</div>
-							</td>
-							<td class="mark">
-								<div id="operator" class="drag operator clone">||</div>
-							</td>
-							<td class="mark">
-								<div id="not" class="drag not clone">not</div>
-							</td>
-						</table>
-					</div>
-					<div class="PEbox PEactions">
-						<h4>Actions</h4>
-						<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
-						<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
-					</div>
+			<div class="PEbox PEoperators">
+				<h4>Operators</h4>
+				<table border="0" align="left"> 
+			 	   	<td class="mark">
+						<div id="operator" class="drag operator clone">&&</div>
+					</td>
+					<td class="mark">
+						<div id="operator" class="drag operator clone">||</div>
+					</td>
+					<td class="mark">
+						<div id="not" class="drag not clone">not</div>
+					</td>
+				</table>
+			</div>
+			<div class="PEbox PEactions">
+				<h4>Actions</h4>
+				<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+				<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
+			</div>
 			<div id="cond_div">
-				<table align="center" class="cond_table" width="100%">
-					<tr> 
+				<table class="cond_table" width="100%">
+					<tr id="cond_row"> 
 					{% if edit or saved and condition != "" %}
-						<td class="single condcell"></td>
-						<td class="single condcell">
+						<td class="single condcell blankCell" style="width=33.333333333333336%"></td>
+						<td class="single condcell" style="width:33.333333333333336%">
 							<div id="operandc0" class="drag operand">
 								<div class="xcloser"><a href="javascript:elem_delete('operandc0')">&#10006;</a></div>
 							{{condition}}
 							</div>
 						</td>
-						<td class="single condcell"></td>
+						<td class="single condcell blankCell" style="width:33.333333333333336%"></td>
 					{% else %}
-						<td class="single condcell"></td>
+						<td class="single condcell blankCell"> </td>
 					{% endif %}
 					</tr>
 				</table>
 			</div>
 		</div>
-			<h4>Rule Parameters:</h4>
-			<div>
+		<h4>Rule Parameters:</h4>
+		<div>
 				<table class="leftTable">
 					<tr>
 					<td>Value:</td>

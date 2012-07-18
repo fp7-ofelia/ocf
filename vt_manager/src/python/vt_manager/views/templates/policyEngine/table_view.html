@@ -9,8 +9,6 @@
 
 <script type="text/javascript">
     	$(document).ready(function() {
-	      $("#editRSbutton").click(function() {
-          		$.fancybox({'href': '{% url edit_ruleset table.name %}'});
         
 		/* add tooltip to question mark */
             	$("img#interface_question").tooltip({
@@ -20,8 +18,6 @@
             		relative: true,
             		offset: [0,110]
  	       });
- 
-    	});
 });
 	
 </script>
@@ -104,7 +100,7 @@
 			</tr>
 		</table>
 			<p>
-			<a href="{% url policy_create table.name  %}" class="button">Add Rule</a>
+			<input type="button" onClick="location.href='{% url policy_create table.name  %}'" class="button" value="Add rule"/>
 			</p>
 		</div>
         	<center>
