@@ -27,7 +27,7 @@ class RuleTableManager():
 
 	#RuleTable default atributes
 	#All rules created, moved or updated will be in a RuleTable with the atributes below
-	_defaultName = 'PolicyProvisioning'
+	_defaultName = 'Provisioning'
 	_defaultPersistence = 'Django'
 	_defaultParser = 'RegexParser'
 	_persistenceFlag = True

@@ -18,7 +18,7 @@ def rule_table_view(request, TableName = None):
                                                 )
 
         else: #Admin
-        	ruleTable = RuleTableManager.getInstance('PolicyProvisioning')
+        	ruleTable = RuleTableManager.getInstance(RuleTableManager.getDefaultName())
 
         	return simple.direct_to_template(request,
                 	                         template = 'policyEngine/table_view.html',
