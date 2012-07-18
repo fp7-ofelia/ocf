@@ -1,14 +1,14 @@
 {% extends "fancybase.html" %}
 {% block scripts %}
 <script type="text/javascript">
-	var i=1;
+//	var i=1;
 	var t1= new Array();
 //	var clist = new Array();
 //	clist.join(document.getElementById("conditionID").value);
 	var errorList = new Array();	
 
 	function createHidden(condition){
-		i = document.getElementById("conditionID").value;
+		var i = document.getElementById("conditionID").value;
 		t1[i]=document.createElement('input');
 		t1[i].type='text';
 		t1[i].name=i;
@@ -28,7 +28,7 @@
 	      document.getElementById("leftOP").textContent = document.getElementById("mappings").value;
 	      document.getElementById("oper").textContent = document.getElementById("operators").value;
 
-	      $("#negate").click(function() {
+	      $("#negate").change(function() {
 			if (document.getElementById("negate").checked){
                         	document.getElementById("notOP").textContent =  "not";
 			} else {
@@ -36,17 +36,17 @@
 			}
         });
 
-	      $("#mappings").click(function() {
+	      $("#mappings").change(function() {
                         document.getElementById("leftOP").textContent =  document.getElementById("mappings").value;
         });
-	      $("#insertCondition").click(function() {
+	      $("#insertCondition").change(function() {
                         document.getElementById("area").value +=  document.getElementById("cond").value + " ";
         });
-	      $("#insertValue").click(function() {
+	      $("#insertValue").change(function() {
                         document.getElementById("area").value +=  document.getElementById("value").value + " ";
         });
 
-	      $("#range").click(function() {
+	      $("#range").change(function() {
 			
                         if (document.getElementById("strict").checked){
 				document.getElementById("area").value += "in range {" + document.getElementById("lower").value + "," + document.getElementById("upper").value +"} ";
@@ -54,7 +54,7 @@
 				document.getElementById("area").value += "in range [" + document.getElementById("lower").value + "," + document.getElementById("upper").value +"] ";
 			}
         });	     
-	      $("#collection").click(function() {
+	      $("#collection").change(function() {
 			
 			var a = document.getElementById("list").value;
 			if (a[a.length-1] == ","){
@@ -62,7 +62,7 @@
 			}
                         document.getElementById("area").value += "in collection {" + a + "} ";
         });
-	      $("#backSpace").click(function() {
+	      $("#backSpace").change(function() {
 		       	
 			var n = 0;
 			var a = document.getElementById("area").value;
@@ -81,39 +81,49 @@
 				i -= 1;
 			}
 	 });
-	      $("#erase").click(function() {
+	      $("#erase").change(function() {
                         document.getElementById("area").value = " ";
         });
-	      $("#operators").click(function() {
+	      $("#operators").change(function() {
 	      		if (document.getElementById("operators").value == "in"){
 				document.getElementById("in").style.display = "";
 				document.getElementById("normal").style.display = "none";
 				document.getElementById("rightOP").textContent = "";
                                 document.getElementById("auxOP").textContent = "";
 				document.getElementById("oper").textContent = document.getElementById("operators").value;
+				switch($('input:radio[name=inGroup]:checked').val()){
+					case 'collection':
+						$("#inGroupCollection").change();
+						break;
+					case 'range':
+						$("#inGroupRange").change();
+						break;
+				}
 
 			} else {
 				document.getElementById("in").style.display = "none";
 				document.getElementById("range").style.display = "none";
                                 document.getElementById("collection").style.display = "none";
                                 document.getElementById("normal").style.display = "";
+				document.getElementById("rightOP").textContent = document.getElementById("rightOperandText").value;
+				document.getElementById("auxOP").textContent = "";
 				document.getElementById("oper").textContent = document.getElementById("operators").value;
 
 			}
 	});
-	      $("#inGroupCollection").click(function() {
+	      $("#inGroupCollection").change(function() {
 				document.getElementById("range").style.display = "none";
 				document.getElementById("collection").style.display = "";
 				document.getElementById("oper").textContent = "in " + document.getElementById("inGroupCollection").value;
-				document.getElementById("rightOP").textContent = "";
+				document.getElementById("rightOP").textContent = "{" + document.getElementById("list").value + "}";
 				document.getElementById("auxOP").textContent = "";
 	});
-	      $("#inGroupRange").click(function() {
+	      $("#inGroupRange").change(function() {
                                 document.getElementById("range").style.display = "";
                                 document.getElementById("collection").style.display = "none";
 				document.getElementById("oper").textContent = "in " + document.getElementById("inGroupRange").value;
-				document.getElementById("rightOP").textContent = "";
-                                document.getElementById("auxOP").textContent = "";
+				document.getElementById("rightOP").textContent = "[" + document.getElementById("lower").value;
+                                document.getElementById("auxOP").textContent = " ," + document.getElementById("upper").value + "]";
         });
 	      $("#rightOperandText").keyup(function() {
 				document.getElementById("rightOP").textContent = document.getElementById("rightOperandText").value;
@@ -129,7 +139,7 @@
 				document.getElementById("auxOP").textContent = "," +  document.getElementById("upper").value + rangC;
 	     
         });
-	      $("#strict").click(function() {
+	      $("#strict").change(function() {
 				if (document.getElementById("strict").checked){
 					rangO  = '{';
               				rangC = '}';
@@ -188,12 +198,14 @@
 		                cond.setAttribute('id',ident);
               			cond.className= "drag operand";
                 		cond.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+ident+'\')">&#10006;</a></div>' + "("+ newCond+ ")";
-				trow.insertCell(0).setAttribute("class", "single condcell");
-				trow.insertCell(1).setAttribute("class", "single condcell");
+				trow.insertCell(0).setAttribute("class", "single condcell blankCell");
+				trow.insertCell(1).setAttribute("class", "single condcell blankCell");
 				tcells[1].appendChild(cond);
+				tcells[1].setAttribute("class", "single condcell");
                 		REDIPS.drag.init();
 
 				$.fancybox.close();
+				change_width();
 				cond_assign();
 	});
 
@@ -280,13 +292,11 @@
 		</td>
 	</table>
 	<br>	
-	<form action ="{% url condition_save %}" method="post" name="CC">{% csrf_token %}
 	<table class="formtable">
 		<tr>
 	                <td colspan=5 align=left><b>Condition:</b></td>
 		</tr>
 		<tr>
-<!--			<form action ="{% url condition_save %}" method="post" name="CC">{% csrf_token %} -->
 			<td><label id ="notOP" name="not"></label></td>
 			<td><label id ="leftOP" name="leftOP" ></label></td>
 			<td><label id ="oper" name="oper" ></label></td>

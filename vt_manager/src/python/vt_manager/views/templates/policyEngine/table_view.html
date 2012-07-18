@@ -9,8 +9,6 @@
 
 <script type="text/javascript">
     	$(document).ready(function() {
-	      $("#editRSbutton").click(function() {
-          		$.fancybox({'href': '{% url edit_ruleset table.name %}'});
         
 		/* add tooltip to question mark */
             	$("img#interface_question").tooltip({
@@ -20,8 +18,6 @@
             		relative: true,
             		offset: [0,110]
  	       });
- 
-    	});
 });
 	
 </script>
@@ -42,7 +38,7 @@
 		<h2> XMLRPC provisioning interface policies
 				<img id="interface_question" src="/static/media/images//question_mark_15x15.png">
 				<div class="tooltip" id="interface_help">
-					Form mode input type allows to create a rule using the form fields below. Advanced Mode input type allows to create a rule typing all the required syntax in the advanced mode form field
+					This dialog shows the policy rules applied to the requests comming to the provisioning XMLRPC API.	
 				</div>
 		</h2>
 		<div class="wrapper">
@@ -83,10 +79,8 @@
                                         </tr>
 				{% endfor %}
 			{% else %}
-				<tr>
-				<td>There are not rules in {{ table.getName }} yet</td>
-				<td></td>
-				<td></td>
+				<tr class="odd">
+				<td colspan="6">There are no rules in this table yet</td>
 				</tr>
 			{% endif %}
 			<tr class="policy {%if table.getPolicyType %}pEnabled{% else %}pDisabled{% endif %}">
@@ -104,7 +98,7 @@
 			</tr>
 		</table>
 			<p>
-			<a href="{% url policy_create table.name  %}" class="button">Add Rule</a>
+			<input type="button" onClick="location.href='{% url policy_create table.name  %}'" class="button" value="Add rule"/>
 			</p>
 		</div>
         	<center>
