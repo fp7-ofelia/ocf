@@ -27,14 +27,13 @@ class ProvisioningDispatcher():
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 
 			try:
-				RuleTableManager.evaluate(action, 'T1')
+				RuleTableManager.evaluate(action, 'PolicyProvisioning')
 			except Exception as e:
-				#a = "" + str(e)
-				print 'EXCEPTION',e,'aaa'
-				#print 'XMLHELPER',XmlHelper.getProcessingResponse('FAILED', action, str(e))
 				a = str(e)
+				if len(a)>200:
+					a = a[0:199]
 				
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a[0:199] )))
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a )))
 #				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse('FAILED', action, 'You requested more than the 128Mbytes allowed for your project')))
 				return None
 			try:
