@@ -80,10 +80,10 @@ def processXmlQuery(notificationCallBackUrl,xml):
 
 	#For each type of action call appropiate method in a new thread
 	if(rspecValue.query.provisioning != None):
-		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspecValue.query.provisioning,notificationCallBackUrl)
+		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspecValue.query.provisioning,notificationCallBackUrl,xml)
 
 	if(rspecValue.query.monitoring != None):
-		ServiceThread.startMethodInNewThread(MonitoringDispatcher.processMonitoring,rspecValue.query.monitoring,notificationCallBackUrl)
+		ServiceThread.startMethodInNewThread(MonitoringDispatcher.processMonitoring,rspecValue.query.monitoring,notificationCallBackUrl,xml)
 
 
 

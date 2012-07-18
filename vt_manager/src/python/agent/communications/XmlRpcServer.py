@@ -19,8 +19,10 @@ from settings.settingsLoader import XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LIST
 
 
 class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
+    def log_request(self, code='-', size='-'): 
+        pass
 
-    def __init__(self, server_address, HandlerClass, logRequests=True):
+    def __init__(self, server_address, HandlerClass, logRequests=False):
         """Secure XML-RPC server.
 
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
@@ -102,6 +104,7 @@ class XmlRpcServer():
 		    return ""
         
 		def ping(self, challenge): 
+	    	    XmlRpcServer.logger.debug("PING")
             	    return challenge
         
 	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)

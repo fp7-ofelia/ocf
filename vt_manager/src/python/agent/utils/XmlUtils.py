@@ -35,7 +35,7 @@ class XmlParser(object):
 			XmlParser.logger.debug("Parsing of XML concluded without significant errors.")
 			return object 
 		except Exception as e:
-            		XmlParser.logger.error(e) 
+            		XmlParser.logger.error(str(e)) 
 			raise XMLParsingException("Could not parse parse XML;"+str(e))
 
 
@@ -59,7 +59,7 @@ class XmlCrafter(object):
             		xml.close()
             		return xmlString
         	except Exception as e:
-            		XmlCrafter.logger.error(e) 
+            		XmlCrafter.logger.error(str(e)) 
             		raise XMLParsingException("Could not craft Model;"+str(e))
 class XmlUtils(object):
 

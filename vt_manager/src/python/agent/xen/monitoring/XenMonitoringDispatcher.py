@@ -2,7 +2,7 @@ import sys
 from xen.XendManager import XendManager
 from monitoring.MonitoringDispatcher import MonitoringDispatcher
 from communications.XmlRpcClient import XmlRpcClient
-from utils.logger import Logger
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -24,6 +24,6 @@ class XenMonitoringDispatcher(MonitoringDispatcher):
 		except Exception as e:
 			#Send async notification
 			XmlRpcClient.sendAsyncMonitoringActionStatus(id,"FAILED",str(e))
-			XenMonitoringDispatcher.logger.error(e)
+			XenMonitoringDispatcher.logger.error(str(e))
 			return
 		

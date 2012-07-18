@@ -12,7 +12,7 @@ from utils.Logger import Logger
  
 class ProvisioningDispatcher: 
 	
-	logger = Logger.getLoger()
+	logger = Logger.getLogger()
 
 	@staticmethod
 	def __getProvisioningDispatcher(vtype):
