@@ -13,6 +13,7 @@ $(document).ready(function() {
                         else {
                                 elem.innerHTML = elem.innerHTML + '<div class="xcloser"><a href="javascript:elem_delete(\''+elemID+'\')">&#10006;</a></div>';
                         };
+			$("#"+rd.obj.id).toggleClass("selected");
                 };
 
                 rd.myhandler_dropped = function(target_cell){
