@@ -30,7 +30,7 @@
 
 	      $("#negate").change(function() {
 			if (document.getElementById("negate").checked){
-                        	document.getElementById("notOP").textContent =  "not";
+                        	document.getElementById("notOP").textContent =  "not ";
 			} else {
 				document.getElementById("notOP").textContent =  "";
 			}
@@ -189,7 +189,7 @@
 				if (areErrors == "true"){
 					return;
 				};
-				newCond = document.getElementById("notOP").textContent + " " + document.getElementById("leftOP").textContent  + " " + document.getElementById("oper").textContent + " " + document.getElementById("rightOP").textContent + document.getElementById("auxOP").textContent;
+				newCond = document.getElementById("notOP").textContent + document.getElementById("leftOP").textContent  + " " + document.getElementById("oper").textContent + " " + document.getElementById("rightOP").textContent + document.getElementById("auxOP").textContent;
 				createList(newCond);
 				var cond = document.createElement('div');
 				var trow = document.getElementById('cond_row')
@@ -257,7 +257,6 @@
 			</td>
 			<td colspan="3">
                         <div id = "normal">
-<!--                            <textarea name="value" id="rightOperandText" rows="1"></textarea> -->
                                 <input type="text" name="value" id="rightOperandText">
                         </div>
 			<div id="range" style="display:none;">
@@ -285,7 +284,6 @@
 			
 			 
 			<div id="collection" style="display:none;">
-<!--				List:<textarea name="list" id="list" cols="7" rows="1"></textarea> -->
 				List:<input type="text" name="list" id="list" >
 			</div>
 			</td>

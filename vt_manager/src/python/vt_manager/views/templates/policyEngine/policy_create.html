@@ -56,6 +56,7 @@
 				$("#formModeWrapper").show("slow");
 				$("#formModeHeader").show("slow");
 				$(".mappingList").hide("slow");
+				displayRule();
 	});
 
 		$("#advancedMode").change(function() {
@@ -143,7 +144,7 @@
                         }
 			rule = rule + terminal;
 		}
-		if (document.getElementById("action").value != ""){
+		if (document.getElementById("action").value != "" && document.getElementById("action").value != "None"){
 			rule = rule + "do " + document.getElementById("action").value;
 		}
 		if (document.getElementById("errorMsg").value != ""){
@@ -350,7 +351,7 @@
 						{% else %}
 							"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
 						{% endif %}
-					{% endif %} />
+					{% endif %}>
 		</div>
 		<div>
 			<div class="mappingList">
