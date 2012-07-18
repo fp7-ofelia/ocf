@@ -16,9 +16,9 @@ urlpatterns = patterns('',
 
     #Policy Engine
     url(r'^policies/policy_create/(?P<table>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.policy_create', name="policy_create"),    
-    url(r'^policies/create$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_create', name="rule_create"),   
-    url(r'^policies/delete$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_delete', name="rule_delete"),
-    url(r'^policies/edit/(?P<rule_uuid>\w+)/(?P<table_name>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_edit', name="rule_edit"),
+    url(r'^policies/(?P<table_name>\w+)/create$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_create', name="rule_create"),   
+    url(r'^policies/(?P<table_name>\w+)/delete/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_delete', name="rule_delete"),
+    url(r'^policies/(?P<table_name>\w+)/edit/(?P<rule_uuid>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_edit', name="rule_edit"),
     url(r'^policies/rule_table_view$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_table_view', name="rule_table_view"),
     url(r'^policies/update_ruleTable_policy$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.update_ruleTable_policy', name="update_ruleTable_policy"),
     url(r'^policies/enable_disable/(?P<rule_uuid>\w+)/(?P<table_name>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.enable_disable', name="enable_disable"),
