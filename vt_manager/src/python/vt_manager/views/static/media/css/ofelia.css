@@ -524,11 +524,10 @@ div.wrapper {
         width:720px;;
         text-align:center;
         vertical-align:middle;
-        padding:10px;
+        padding:20px;
 }
 
 table tr.policy{
-
 }
 
 table tr.pEnabled th{
@@ -538,70 +537,43 @@ table tr.pEnabled th{
 table tr.pDisabled th{
 	background-color: #ff7777;
 }
-
+table .leftTable{
+	border: 2px solid #000;
+	background-color: red;
+	text-align:left;
+}
+div .mappingList{
+	font-style: italic;
+	margin-bottom: 10px;
+	margin-top: 4px;
+	display:none
+}
+div .mappingList h5{
+	font-style:normal;
+	display:inline;
+	font-size:12px;
+	margin:0px;
+	padding:0px;
+}
+div .advancedRule{
+	margin-bottom: 10px;
+}
+div .advancedRule input[type=text]{
+	width:100%;
+	max-width:650px!important;
+	color: #333;
+}
+div .advancedRule input[type=text]:disabled {
+	color: #bbb;
+}
 
 /* DRAG n DROP */
 
-#table1 td {
-border: 0;
-padding:0;
-margin:0;
+table .cond_table tr td{
+	height:50px!important;
+	background-color: red!important;
 }
 
-/* drag container (contains two tables) */
-#drag {
-margin: auto;
-}
-
-
-/* drag objects (DIV inside table cells) */
-.drag{
-background: #e5e5e5; /* Old browsers */
-background: -moz-linear-gradient(top,  #e5e5e5 0%, #bfbfbf 100%); /* FF3.6+ */
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e5e5e5), color-stop(100%,#bfbfbf)); /* Chrome,Safari4+ */
-background: -webkit-linear-gradient(top,  #e5e5e5 0%,#bfbfbf 100%); /* Chrome10+,Safari5.1+ */
-background: -o-linear-gradient(top,  #e5e5e5 0%,#bfbfbf 100%); /* Opera 11.10+ */
-background: -ms-linear-gradient(top,  #e5e5e5 0%,#bfbfbf 100%); /* IE10+ */
-background: linear-gradient(top,  #e5e5e5 0%,#bfbfbf 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#bfbfbf',GradientType=0 ); /* IE6-9 */
-border-radius: 5px 5px 5px 5px;
-box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) inset, 0 1px 0 rgba(0, 0, 0, 0.5), 0 1px 0 rgba(0, 0, 0, 0.2) inset;
-color: rgba(0, 0, 0, 0.65);
-display: block;
-margin:10px auto;
-width:auto;
-padding: 10px 15px 7px;
-text-decoration: none;
-text-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
-position: relative;
-cursor: move;
-height:auto;
-text-align: center;
-font-size: 12px;
-}
-
-/* drag objects border for the first table */
-.t1 {
-border: 1px solid yellow;
-}
-
-
-/* table cells */
-/*TEXT CELLS */
-div#drag td {
-height: 50px;
-/*border: 1px solid white;*/
-text-align: center;
-font-size: 12pt;
-padding: 2px;
-}
-
-#cond_div{
-width: auto;
-background: #EEEEEE;
-border: 1px solid #AAAAAA;
-margin-bottom:10px;
-}
 .xcloser{
 float:right;
 top:0px;
@@ -633,7 +605,7 @@ width:10px;
 /*border: 1px solid black;*/
 }
 
-.condcell:hover{
+.condcell:hover {
 background: #aaaaaa;
 }
 
