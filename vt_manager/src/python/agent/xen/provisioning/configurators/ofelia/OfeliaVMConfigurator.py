@@ -5,9 +5,12 @@ import string
 
 from xen.provisioning.HdManager import HdManager
 from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
+from utils.Logger import Logger
 
 
 class OfeliaVMConfigurator:
+	
+	logger = Logger.getLogger()
 
 	''' Private methods '''
 	@staticmethod
@@ -92,7 +95,7 @@ class OfeliaVMConfigurator:
 			with open(path+OXA_DEBIAN_UDEV_FILE_LOCATION,'w') as openudev:
 				OfeliaVMConfigurator.__configureUdevFile(vm,openudev)
 		except Exception as e:
-			print e
+			OfeliaVMConfigurator.logger.error(str(e))
 			raise Exception("Could not configure interfaces or Udev file")
 
 	@staticmethod
@@ -108,8 +111,7 @@ class OfeliaVMConfigurator:
 			file.write(text.replace("__projectId","@proj_"+vm.project_id+"_"+projectName))
 			file.close() 
 		except Exception as e:
-			print "Could not configure LDAP file!! "+str(e)
-
+			OfeliaVMConfigurator.logger.error("Could not configure LDAP file!! - "+str(e))
 
 	@staticmethod
 	def configureHostname(vm,path):
@@ -117,8 +119,7 @@ class OfeliaVMConfigurator:
 			with open(path+OXA_DEBIAN_HOSTNAME_FILE_LOCATION,'w') as openhost:
 				OfeliaVMConfigurator.__configureHostname(vm, openhost)
 		except Exception as e:
-			print "Could not configure hostname; execution continues;"+str(e)
-			pass
+			OfeliaVMConfigurator.logger.error("Could not configure hostname;skipping.. - "+str(e))
 
 	@staticmethod
 	def createVmConfigurationFile(vm):

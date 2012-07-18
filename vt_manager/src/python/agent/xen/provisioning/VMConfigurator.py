@@ -1,5 +1,6 @@
 from xen.provisioning.configurators.ofelia.OfeliaVMConfigurator import OfeliaVMConfigurator
 from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -9,6 +10,8 @@ from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import Media
 
 
 class VMConfigurator:
+	
+	logger = Logger.getLogger()
 	
 	@staticmethod
 	def __getConfiguratorByOsType(configurator):
@@ -44,11 +47,11 @@ class VMConfigurator:
 	def configureVm(vm,pathToMountPoint):
 		#Configure networking
 		VMConfigurator.__configureNetworking(vm,pathToMountPoint)
-		print "Network configured successfully..."
-	
+		XenProvisioningDispatcher.logger.info("Network configured successfully...")
+		
 		#Configure LDAP settings 
 		VMConfigurator.__configureLDAPSettings(vm,pathToMountPoint)
-		print "Authentication configured successfully..."
+		XenProvisioningDispatcher.logger.info("Authentication configured successfully...")
 	
 		#Configure Hostname
 		VMConfigurator.__configureHostname(vm,pathToMountPoint)

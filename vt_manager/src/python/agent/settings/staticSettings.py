@@ -1,3 +1,4 @@
+import logging
 '''
 	@author: msune
 
@@ -13,6 +14,9 @@ OXA_PATH="/opt/ofelia/oxa/"
 '''Log folder. Must exist!'''
 OXA_LOG="/opt/ofelia/oxa/log/"
 
+#Log level. Should be: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+#Default warning
+LOG_LEVEL="WARNING"
 
 '''XMLRPC over HTTPS server parameters'''
 #XMLRPC_SERVER_LISTEN_HOST='127.0.0.1' # You should not use '' here, unless you have a real FQDN.

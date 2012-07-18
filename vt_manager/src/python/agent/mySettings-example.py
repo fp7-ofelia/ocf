@@ -19,3 +19,5 @@ XMLRPC_SERVER_PASSWORD="changeMe"
 '''Use sparse disks while cloning. Uncomment to use Sparse disks. Default is false'''
 #OXA_FILEHD_CREATE_SPARSE_DISK=False
 
+#Possible values are "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL". If not specified default is "WARNING"
+#LOG_LEVEL="DEBUG"

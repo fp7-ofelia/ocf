@@ -1,9 +1,13 @@
 import libvirt
+
 from xen.XendManager import XendManager
+from utils.Logger import Logger
 	
 con =  libvirt.openReadOnly(None)
 
 class DomainMonitor:
+
+	logger = Logger.getLogger()
 
 	@staticmethod
 	def retriveActiveDomainsByUUID(con):
@@ -19,13 +23,9 @@ class DomainMonitor:
 	
 			domain = con.lookupByID(dId)
 			doms.append(domain.UUIDString())
-			#print str(domain.UUIDString())
+			#DomainMonitor.logger.debug("Appending: "str(domain.UUIDString()))
 
 		return doms 
 
 
-doms = DomainMonitor.retriveActiveDomains(con)
-
-for dom in doms:
-	print dom
 

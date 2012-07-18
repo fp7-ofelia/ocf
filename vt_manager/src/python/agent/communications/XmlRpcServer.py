@@ -13,8 +13,10 @@ import SimpleXMLRPCServer
 
 import socket, os
 from OpenSSL import SSL
+from utils.Logger import Logger
 
 from settings.settingsLoader import XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LISTEN_PORT,XMLRPC_SERVER_KEYFILE,XMLRPC_SERVER_CERTFILE,XMLRPC_SERVER_PASSWORD
+
 
 class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
 
@@ -80,6 +82,9 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.connection.shutdown() # Modified here!
     
 class XmlRpcServer():
+	
+	logger = Logger.getLogger()
+
 	@staticmethod
 	def createInstanceAndEngage(callBackFunction,HandlerClass = SecureXMLRpcRequestHandler,ServerClass = SecureXMLRPCServer):
 	    """Test xml rpc over https server"""
@@ -103,6 +108,6 @@ class XmlRpcServer():
 	    server = ServerClass(server_address, HandlerClass)    
 	    server.register_instance(xmlrpc_wrappers())    
 	    sa = server.socket.getsockname()
-	    #print "Serving HTTPS on", sa[0], "port", sa[1]
+	    XmlRpcServer.logger.debug("Serving HTTPS XMLRPC requests on "+str(sa[0])+":"+ str(sa[1]))
 	    server.serve_forever()
 

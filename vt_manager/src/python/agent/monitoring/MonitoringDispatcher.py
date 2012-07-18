@@ -5,8 +5,11 @@
 '''
 
 from communications.XmlRpcClient import XmlRpcClient
+from utils.Logger import Logger
 
 class MonitoringDispatcher: 
+	
+	logger = Logger.getLogger()	
 
 	@staticmethod
 	def __getMonitoringDispatcher(vtype):
@@ -37,7 +40,7 @@ class MonitoringDispatcher:
 				dispatcher = MonitoringDispatcher.__getMonitoringDispatcher(server.virtualization_type)	
 			except Exception as e:
 				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"FAILED",str(e))
-				print e
+				MonitoringDispatcher.logger.error(str(e))	
 				return
 
 			try:
@@ -46,8 +49,7 @@ class MonitoringDispatcher:
 	
 				MonitoringDispatcher.__dispatchAction(dispatcher,action,server)	
 			except Exception as e:
-				#TODO improve this trace
-				print e
+				MonitoringDispatcher.logger.error(str(e))	
 				raise e
 
 

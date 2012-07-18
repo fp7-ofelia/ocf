@@ -4,11 +4,15 @@
 	Provisioning dispatcher. Selects appropiate Driver for VT tech
 '''
 
-from communications.XmlRpcClient import XmlRpcClient
-from utils.VmMutexStore import VmMutexStore
 import threading
 
+from communications.XmlRpcClient import XmlRpcClient
+from utils.VmMutexStore import VmMutexStore
+from utils.Logger import Logger
+ 
 class ProvisioningDispatcher: 
+	
+	logger = Logger.getLoger()
 
 	@staticmethod
 	def __getProvisioningDispatcher(vtype):
@@ -51,7 +55,7 @@ class ProvisioningDispatcher:
 				dispatcher = ProvisioningDispatcher.__getProvisioningDispatcher(vm.virtualization_type)	
 			except Exception as e:
 				XmlRpcClient.sendAsyncProvisioningActionStatus(action.id,"FAILED",str(e))
-				print e
+				ProvisioningDispatcher.logger.error(str(e))	
 				return
 
 			try:
@@ -62,8 +66,7 @@ class ProvisioningDispatcher:
 	
 				ProvisioningDispatcher.__dispatchAction(dispatcher,action,vm)	
 			except Exception as e:
-				#TODO improve this trace
-				print e
+				ProvisioningDispatcher.logger.error(str(e))
 				raise e
 			finally:
 				#Release VM lock

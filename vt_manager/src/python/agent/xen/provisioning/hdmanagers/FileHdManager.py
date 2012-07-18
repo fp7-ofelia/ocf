@@ -4,6 +4,7 @@ import shutil
 import string
 import subprocess
 from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE,OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY,OXA_FILEHD_CREATE_SPARSE_DISK,OXA_FILEHD_COPY_IONICE_CLASS, OXA_FILEHD_COPY_IONICE_PRIORITY
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -14,6 +15,8 @@ from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,O
 OXA_FILEHD_HD_TMP_MP="/tmp/oxa/hd"
 
 class FileHdManager(object):
+	
+	logger = Logger.getLogger()
 
 	#Enables/disables the usage of Cache directory
 	__useCache=OXA_FILEHD_USE_CACHE
@@ -129,11 +132,11 @@ class FileHdManager(object):
 		#Check remote	
 		if os.path.exists(OXA_FILEHD_REMOTE_TEMPLATES+path):
 			#import from remote to cache
-			print "Importing image to cache directory:"+OXA_FILEHD_REMOTE_TEMPLATES+path+"->"+OXA_FILEHD_CACHE_TEMPLATES+path
+			FileHdManager.logger.info("Importing image to cache directory:"+OXA_FILEHD_REMOTE_TEMPLATES+path+"->"+OXA_FILEHD_CACHE_TEMPLATES+path)
 			try:
 				#Copy all 
 				#shutil.copytree(OXA_FILEHD_REMOTE_TEMPLATES+path, OXA_FILEHD_CACHE_TEMPLATES+path)
-				print "/bin/cp "+OXA_FILEHD_REMOTE_TEMPLATES+path+" "+OXA_FILEHD_CACHE_TEMPLATES+path
+				#FileHdManager.logger.debug("/bin/cp "+OXA_FILEHD_REMOTE_TEMPLATES+path+" "+OXA_FILEHD_CACHE_TEMPLATES+path)
 				if subprocess.call(["/usr/bin/ionice", "-c", OXA_FILEHD_COPY_IONICE_CLASS, "-n", OXA_FILEHD_COPY_IONICE_PRIORITY,"/bin/cp",OXA_FILEHD_REMOTE_TEMPLATES+path, OXA_FILEHD_CACHE_TEMPLATES+path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
 					raise Exception("Cannot import template")
 
@@ -163,47 +166,43 @@ class FileHdManager(object):
 				vm_path=FileHdManager.getHdPath(vm)
 				swap_path=FileHdManager.getSwapPath(vm)
 
-				print "Trying to clone from:"+template_path+"->>"+vm_path
+				FileHdManager.logger.debug("Trying to clone from:"+template_path+"->>"+vm_path)
 
 				if not os.path.exists(os.path.dirname(vm_path)):	
 					os.makedirs(os.path.dirname(vm_path))
 				
 				size = (vm.xen_configuration.hd_size_mb/1024)*1024
 				if vm.xen_configuration.hd_size_mb %1024 > 0:
-					print "[Warning] HD size is not multiple of 1024; will be modified to:"+str(size)
+					FileHdManager.logger.warning("HD size is not multiple of 1024; will be modified to:"+str(size))
 				
 				#Create HD
-				print "Creating disks..."
+				FileHdManager.logger.info("Creating disks...")
 				if OXA_FILEHD_CREATE_SPARSE_DISK:
-					print "Main disk will be created as Sparse disk..."
+					FileHdManager.logger.info("Main disk will be created as Sparse disk...")
 					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY), "/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count=1","seek="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-						print "Failed to create Disk"
-						raise Exception("")
+						raise Exception("Failed to create Disk")
 				else:
 					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/dd","if=/dev/zero","of="+vm_path,"bs=1M","count="+str(size)], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-						print "Failed to create Disk"
-						raise Exception("")
+						raise Exception("Failed to create Disk")
 				
 				#Create Swap
 				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/dd","if=/dev/zero","of="+swap_path,"bs=1M","count=512"], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-					print "Failed to create Swap"
-					raise Exception("")
+					raise Exception("Failed to create Swap")
 				#Format
-				print "Creating EXT3 fs..."
+				FileHdManager.logger.info("Creating EXT3 fs...")
 				if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/sbin/mkfs.ext3","-F","-q",vm_path], preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-					print "Failed to format disk" 
-					raise Exception("")
+					
+					raise Exception("Failed to format disk") 
 				
 				#Untar disk contents
-				print "Uncompressing disk contents..."
+				FileHdManager.logger.info("Uncompressing disk contents...")
 				path = FileHdManager.mount(vm)
 				with open(os.devnull, 'w') as opendev:
 					if subprocess.call(["/usr/bin/ionice", "-c", str(OXA_FILEHD_COPY_IONICE_CLASS), "-n", str(OXA_FILEHD_COPY_IONICE_PRIORITY),"/bin/tar","-xvf",template_path,"-C",path],stdout=opendev, preexec_fn=lambda : os.nice(OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY)) > 0:
-						print "Failed to uncompress disk contents"
-						raise Exception("")
+						raise Exception("Failed to uncompress disk contents")
 					
 			except Exception as e:
-				print e 
+				FileHdManager.logger.error("Could not clone image to working directory: "+str(e)) 
 				raise Exception("Could not clone image to working directory"+FileHdManager.debugVM(vm))
 			finally:
 				FileHdManager.umount(path)
@@ -228,7 +227,7 @@ class FileHdManager(object):
 			os.makedirs(path)		
 	
 		vm_path=FileHdManager.getHdPath(vm)
-		#print '/bin/mount'+' -o loop '+vm_path+" "+path
+		#FileHdManager.logger.debug('/bin/mount'+' -o loop '+vm_path+" "+path)
 		subprocess.call(['/bin/mount','-o','loop',vm_path,path])	
 	
 		return path

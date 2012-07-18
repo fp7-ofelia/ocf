@@ -4,6 +4,7 @@ from xen.XendManager import XendManager
 from xen.provisioning.VMConfigurator import VMConfigurator
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher
 from communications.XmlRpcClient import XmlRpcClient
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -13,32 +14,34 @@ from communications.XmlRpcClient import XmlRpcClient
 
 class XenProvisioningDispatcher(ProvisioningDispatcher):
 
+	logger = Logger.getLogger()
+
 	##Inventory routines
 	@staticmethod
 	def createVMfromImage(id,vm):
 		pathToMountPoint = ""	
-		print "Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id
+		XenProvisioningDispatcher.logger.info("Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id)
 		try:
 			#Clone HD
 			HdManager.clone(vm)
-			print "HD cloned successfully..."
+			XenProvisioningDispatcher.logger.debug("HD cloned successfully...")
 			
 			#Mount copy
 			pathToMountPoint=HdManager.mount(vm)
-			print "HD mounted successfully..."
+			XenProvisioningDispatcher.logger.debug("HD mounted successfully...")
 
 			#Configure VM OS
 			VMConfigurator.configureVm(vm,pathToMountPoint)
 
 			#Synthesize config file
 			VMConfigurator.createVmConfigurationFile(vm)
-			print "XEN configuration file created successfully..."
+			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
 			
 			#Umount copy
 			HdManager.umount(vm,pathToMountPoint)
-			print "HD unmounted successfully..."
+			XenProvisioningDispatcher.logger.debug("HD unmounted successfully...")
 	
-			print "Creation of VM "+vm.name+" has been successful!! \n\n"
+			XenProvisioningDispatcher.logger.info("Creation of VM "+vm.name+" has been successful!!")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
@@ -50,8 +53,7 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			except:
 				pass
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -78,6 +80,7 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
 			#TODO improve this trace
 			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 	
 	##Scheduling routines
@@ -88,13 +91,13 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			HdManager.startHook(vm)	
 			XendManager.startDomain(vm)
 	
+			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been started.")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -104,13 +107,13 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			HdManager.rebootHook(vm)
 			XendManager.rebootDomain(vm)
 	
+			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been rebooted.")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -119,13 +122,13 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Just try to stop
 			XendManager.stopDomain(vm)
 	
+			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been stopped.")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -135,12 +138,12 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			XendManager.stopDomain(vm)	
 			HdManager.stopHook(vm)	
 		
+			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been stopped.")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
+			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
