@@ -18,7 +18,7 @@ def rule_table_view(request, TableName = None):
                                                 )
 
         else: #Admin
-        	ruleTable = RuleTableManager.getInstance('Provisioning')
+        	ruleTable = RuleTableManager.getInstance('PolicyProvisioning')
 
         	return simple.direct_to_template(request,
                 	                         template = 'policyEngine/table_view.html',
@@ -44,7 +44,7 @@ def policy_create(request,table):
                                                            'ActionMappings':RuleTableManager.getActionMappings()},
                                         )
 
-def rule_create(request,table_name=None):
+def rule_create(request):
 
 	errors = list()
 	formMode = request.POST.get("conditionMode")

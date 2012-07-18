@@ -361,12 +361,12 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 		instance = Ip4Controller.getRange(rangeId)
 		extra_context["range"] = instance 
 
-		return HttpResponseRedirect("/networking/ip4/")
-		#return simple.direct_to_template(
-		#	request,
-		#	extra_context = extra_context, 
-		#	template="networking/ip4/rangeDetail.html",
-		#)
+		#return HttpResponseRedirect("/networking/ip4/")
+		return simple.direct_to_template(
+			request,
+			extra_context = extra_context, 
+			template="networking/ip4/rangeDetail.html",
+		)
 		
 			
 	#Edit
@@ -479,13 +479,13 @@ def manageEthernet(request,rangeId=None,action=None,macId=None):
 
 		instance = EthernetController.getRange(rangeId)
 		extra_context["range"] = instance 
-		return HttpResponseRedirect("/networking/ethernet/")
+		#return HttpResponseRedirect("/networking/ethernet/")
 
-		#return simple.direct_to_template(
-		#	request,
-		#	extra_context = extra_context, 
-		#	template="networking/ethernet/rangeDetail.html",
-		#)
+		return simple.direct_to_template(
+			request,
+			extra_context = extra_context, 
+			template="networking/ethernet/rangeDetail.html",
+		)
 		
 			
 	#Edit
