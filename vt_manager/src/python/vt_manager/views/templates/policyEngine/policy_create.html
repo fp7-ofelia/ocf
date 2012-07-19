@@ -121,10 +121,10 @@
 		$("#action").change(function() {
 			displayRule();
         });
-		$("#errorMsg").keyup(function() {
+		$("#errorMsg").change(function() {
 			displayRule();
         });
-		$("#description").keyup(function() {
+		$("#description").change(function() {
 			displayRule();
         });
 
@@ -218,7 +218,7 @@
 				{% if edit or saved %}
 					<option selected value="{{ PrioritySel }}">{{ PrioritySel }}</option>
 				{% endif %}
-				{% if not saved %}
+				{% if not edit and not saved %}
 					<option value="">Last</option>	
 				{% endif %}
 				{% for number in priorityList %} 

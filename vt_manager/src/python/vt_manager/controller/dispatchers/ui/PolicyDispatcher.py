@@ -198,9 +198,8 @@ def update_ruleTable_policy(request):
 	 
 	return HttpResponseRedirect("/policies")
 
-def rule_edit(request,table_name,rule_uuid):
+def rule_edit(request,table_name,rule_uuid,errors):
 
-        errors=[]
 	rule = RuleTableManager.getRuleOrIndexOrIsEnabled(rule_uuid,'Rule',table_name)
 	rulevalues = RuleTableManager.getValue(rule)
 	ruletypes = RuleTableManager.getType(rule)
