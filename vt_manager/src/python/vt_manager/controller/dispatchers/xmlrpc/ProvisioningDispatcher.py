@@ -24,7 +24,7 @@ class ProvisioningDispatcher():
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 
 			try:
-				RuleTableManager.evaluate(action,RuleTableManager.getDefaultName())
+				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
 			except Exception as e:
 				a = str(e)
 				if len(a)>200:

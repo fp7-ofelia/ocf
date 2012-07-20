@@ -82,6 +82,9 @@ def rule_create(request,table_name=None):
            enable = False
 	if ruleType == "terminal":
 		ruleType = ""
+	
+	if saved == None:
+		saved = False
 	#Rule String convertion required
 	if formMode == "easy":
         	strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " do " + ruleAction + " denyMessage " + ruleError + " #" + ruleDesc
@@ -90,10 +93,9 @@ def rule_create(request,table_name=None):
 	
 	try:
 		if errors:
-                        raise Exception("")	
-		print "EDITING:",editing
-		if editing == '1':
-                	print 'editing...'
+                        raise Exception("")
+			
+		if editing == '1' or saved:
 			#Editing Rules Case:
                 	if previousTable == tableName:
 				try:
@@ -140,34 +142,34 @@ def rule_create(request,table_name=None):
 			ruleType = "terminal"
 			type2 = ["nonterminal"]
 
-		if saved == "True" or ruleid == "":
-
-			return simple.direct_to_template(request,
-        	        	template = 'policyEngine/policy_create.html',
-                		extra_context = {'user': request.user,
-						 'saved':True,
-						 'CurrentTable':tableName,
-                                        	 'priority':priority,
-	                                         'enabled':ruleEnable,
-        	                                 'valueS':ruleValue,
-                	                         'valueD':value2,
-                        	                 'terminalS':ruleType,
-                                	         'terminalD':type2,
-	                                         'errorMsg':ruleError,
-        	                                 'description':ruleDesc,
-                                	         'condition':ruleCondition,
-	                                         'action':ruleAction,
-        	                                 'actionList':actionList[1],
-                	                         'PrioritySel':rulePriority,
-                                	         'priorityList':priority,
-                        	                 'allMappings':RuleTableManager.GetResolverMappings(tableName),
-	                                         'ConditionMappings':RuleTableManager.getConditionMappings(),
-        	                                 'ActionMappings':RuleTableManager.getActionMappings(),
-                	                         'errors': errors,
-						 'rule_uuid':ruleid,}
+		#if saved == "True" or ruleid == "":
+		return simple.direct_to_template(request,
+        	       	template = 'policyEngine/policy_create.html',
+                	extra_context = {'user': request.user,
+					 'saved':True,
+					 'CurrentTable':tableName,
+                                       	 'priority':PreviousPriority,
+	                                 'enabled':ruleEnable,
+        	                         'valueS':ruleValue,
+                                         'valueD':value2,
+                       	                 'terminalS':ruleType,
+                               	         'terminalD':type2,
+	                                 'errorMsg':ruleError,
+        	                         'description':ruleDesc,
+                             	         'condition':ruleCondition,
+					 'ptable':tableName,
+	                                 'action':ruleAction,
+        	                         'actionList':actionList[1],
+                                         'PrioritySel':rulePriority,
+                               	         'priorityList':priority,
+                      	                 'allMappings':RuleTableManager.GetResolverMappings(tableName),
+	                                 'ConditionMappings':RuleTableManager.getConditionMappings(),
+        	                         'ActionMappings':RuleTableManager.getActionMappings(),
+                                         'errors': errors,
+		            		 'rule_uuid':ruleid,}
                         	                         )
-		else:
-			return rule_edit(request, ruleid, tableName, errors)
+		#else:
+		#	return rule_edit(request, ruleid, tableName, errors)
 
 def enable_disable(request, rule_uuid, table_name):
 
@@ -198,7 +200,7 @@ def update_ruleTable_policy(request):
 	 
 	return HttpResponseRedirect("/policies")
 
-def rule_edit(request,table_name,rule_uuid,errors):
+def rule_edit(request,table_name,rule_uuid,errors=None):
 
 	rule = RuleTableManager.getRuleOrIndexOrIsEnabled(rule_uuid,'Rule',table_name)
 	rulevalues = RuleTableManager.getValue(rule)
