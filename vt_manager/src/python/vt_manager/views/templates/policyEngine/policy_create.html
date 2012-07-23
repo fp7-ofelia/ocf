@@ -183,7 +183,12 @@
 	<div id=exceptions>
 			
 	</div> 
-	<form action="{% url rule_create CurrentTable  %}" method="post" name="ruleCreate">{% csrf_token %}
+	{% if not edit %}
+
+		<form action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
+	{% else %}
+		<form action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
+	{% endif %}
 	<table>
 		<td><b>Editing mode:</b></td>
 		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
@@ -382,6 +387,8 @@
 		<input type="hidden" name="uuid" value="{{ rule_uuid }}">
 		<input type="hidden" name="ppriority" value="{{ priority }}">
 		<input type="hidden" name="saved" value="{{ saved }}">
+		<input type="hidden" name="edit" value="{{ edit }}">
+		<input type="hidden" name="load" value="True">
 		{% if edit %}
 			<input type="submit" value="Save Changes">
 			<input type="hidden" name="editing" value="1">

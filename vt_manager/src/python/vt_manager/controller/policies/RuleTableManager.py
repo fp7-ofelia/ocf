@@ -198,7 +198,6 @@ class RuleTableManager():
 		
 		ruleList = RuleTableManager.getInstance(tableName).getRuleSet()
                 for rule in ruleList:
-			
                         if str(rule.rule.getUUID()) == str(ruleID):
                                 if Mode == 'Rule':
                                         return rule.rule

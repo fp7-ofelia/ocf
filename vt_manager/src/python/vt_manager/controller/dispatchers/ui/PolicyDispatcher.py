@@ -69,6 +69,7 @@ def rule_create(request,table_name=None):
                 priority = None
         else:
                 priority = int(rulePriority)
+
 	#Avoid empty fields
         if ruleDesc == "":
                 errors.append("Description Field is empty")
@@ -94,22 +95,21 @@ def rule_create(request,table_name=None):
 	try:
 		if errors:
                         raise Exception("")
-			
-		if editing == '1' or saved:
+		
+		if editing == '1':
 			#Editing Rules Case:
                 	if previousTable == tableName:
 				try:
-
 					RuleTableManager.editRule(strings,enable,priority,PreviousPriority,tableName)
 				except Exception as e:
 					raise e
-                	else:
+                	#else:
 				#Moving a rule to a different RuleTable --> this is not possible yet 
-                        	print 'Changing table...'
-                        	RuleTableManager.AddRule(strings,enable,priority,tableName=tableName)
-                        	print 'successful add to ' + tableName
-                        	RuleTableManager.RemoveRule(None,int(PreviousPriority),'oldTableName')
-                        	print 'remove from ' +  previousTable + ' successful'
+                        	#print 'Changing table...'
+                        	#RuleTableManager.AddRule(strings,enable,priority,tableName=tableName)
+                        	#print 'successful add to ' + tableName
+                        	#RuleTableManager.RemoveRule(None,int(PreviousPriority),'oldTableName')
+                        	#print 'remove from ' +  previousTable + ' successful'
         	else:
                 	RuleTableManager.AddRule(strings,enable,priority,tableName=tableName)
 
@@ -142,34 +142,37 @@ def rule_create(request,table_name=None):
 			ruleType = "terminal"
 			type2 = ["nonterminal"]
 
-		#if saved == "True" or ruleid == "":
+
+		context = {'user': request.user,
+                           'saved':True,
+                           'CurrentTable':tableName,
+                           'priority':PreviousPriority,
+                           'enabled':ruleEnable,
+			   'load':'True',
+                           'valueS':ruleValue,
+                           'valueD':value2,
+                           'terminalS':ruleType,
+                           'terminalD':type2,
+                           'errorMsg':ruleError,
+                           'description':ruleDesc,
+                           'condition':ruleCondition,
+                           'ptable':tableName,
+			   'edit': request.POST.get('edit'),
+                           'action':ruleAction,
+                           'actionList':actionList[1],
+                           'PrioritySel':rulePriority,
+                           'priorityList':priority,
+                           'allMappings':RuleTableManager.GetResolverMappings(tableName),
+                           'ConditionMappings':RuleTableManager.getConditionMappings(),
+                           'ActionMappings':RuleTableManager.getActionMappings(),
+                           'errors': errors,
+                           'rule_uuid':ruleid,}
+		#if ruleid == "":
 		return simple.direct_to_template(request,
-        	       	template = 'policyEngine/policy_create.html',
-                	extra_context = {'user': request.user,
-					 'saved':True,
-					 'CurrentTable':tableName,
-                                       	 'priority':PreviousPriority,
-	                                 'enabled':ruleEnable,
-        	                         'valueS':ruleValue,
-                                         'valueD':value2,
-                       	                 'terminalS':ruleType,
-                               	         'terminalD':type2,
-	                                 'errorMsg':ruleError,
-        	                         'description':ruleDesc,
-                             	         'condition':ruleCondition,
-					 'ptable':tableName,
-	                                 'action':ruleAction,
-        	                         'actionList':actionList[1],
-                                         'PrioritySel':rulePriority,
-                               	         'priorityList':priority,
-                      	                 'allMappings':RuleTableManager.GetResolverMappings(tableName),
-	                                 'ConditionMappings':RuleTableManager.getConditionMappings(),
-        	                         'ActionMappings':RuleTableManager.getActionMappings(),
-                                         'errors': errors,
-		            		 'rule_uuid':ruleid,}
-                        	                         )
-		#else:
-		#	return rule_edit(request, ruleid, tableName, errors)
+        	       		template = 'policyEngine/policy_create.html',
+                		extra_context = context)
+		#else:	
+			#return errors,context
 
 def enable_disable(request, rule_uuid, table_name):
 
@@ -200,19 +203,21 @@ def update_ruleTable_policy(request):
 	 
 	return HttpResponseRedirect("/policies")
 
-def rule_edit(request,table_name,rule_uuid,errors=None):
+def rule_edit(request,table_name,rule_uuid,context=None):
+	
+	load = request.POST.get('load')
+	if not load == 'True':
+		rule = RuleTableManager.getRuleOrIndexOrIsEnabled(rule_uuid,'Rule',table_name)
+		rulevalues = RuleTableManager.getValue(rule)
+		ruletypes = RuleTableManager.getType(rule)
+		#Flag to be able to diferenciate edit state from creating estate                
+        	edit = True
+		actionList = RuleTableManager.SetActionList(rule,RuleTableManager.getActionMappings())
+		priorityList = RuleTableManager.SetPriorityList(rule,table_name)
+		error = str(rule.getErrorMsg())
+		description = str(rule.getDescription())
 
-	rule = RuleTableManager.getRuleOrIndexOrIsEnabled(rule_uuid,'Rule',table_name)
-	rulevalues = RuleTableManager.getValue(rule)
-	ruletypes = RuleTableManager.getType(rule)
-	#Flag to be able to diferenciate edit state from creating estate                
-        edit = True
-	actionList = RuleTableManager.SetActionList(rule,RuleTableManager.getActionMappings())
-	priorityList = RuleTableManager.SetPriorityList(rule,table_name)
-	error = str(rule.getErrorMsg())
-	description = str(rule.getDescription())
-
-	return simple.direct_to_template(request,
+		return simple.direct_to_template(request,
                                                  template = 'policyEngine/policy_create.html',
                                                  extra_context = {'user':request.user,
                                                                   'edit':edit,
@@ -235,7 +240,8 @@ def rule_edit(request,table_name,rule_uuid,errors=None):
 								  'allMappings':RuleTableManager.GetResolverMappings(),
 								  'ConditionMappings':RuleTableManager.getConditionMappings(),
 								  'ActionMappings':RuleTableManager.getActionMappings(),
-                                                                  'CurrentTable':table_name,
-								  'errors':errors},
+                                                                  'CurrentTable':table_name},
                                         )
+	else:
+		return rule_create(request,table_name)
 
