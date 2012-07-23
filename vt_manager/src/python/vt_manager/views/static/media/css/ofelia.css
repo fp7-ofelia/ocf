@@ -585,17 +585,17 @@ div .PEbox{
 }
 
 div .PEoperators {
-	background-color: #FFFACD;
+	background-color: #CCEBF5;
 	border: 1px solid #DDD8CB; 
 }
 div .PEactions {
-	background-color: #E0FFFF;
-	border: 1px solid #C0DDDD;
+	background-color: #CCEBF5;
+	border: 1px solid #DDD8CB;
 }
 
 /* DRAG n DROP boxes */
 div .drag{
-	background-color: #ccc;	
+	background-color: #8CCDF8;	
 	border: 0px; 
 	padding:10px;
 	padding-left:13px; 
@@ -621,14 +621,14 @@ text-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 div .not{
-	background-color: #D2691E;
+	background-color: #80B2FF;
 }
 div .operator{
-	background-color:#DAA520;
+	background-color:#80CCE6;
 }
 
 .selected{
-	background-color: #990000!important;
+	background-color: #FF6666!important;
 	color: #fff!important;
 }
 
