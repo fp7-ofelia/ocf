@@ -32,6 +32,8 @@ def policy_create(request,table):
         rules = []
 	mapps = RuleTableManager.getActionMappings()
 	priorityList = RuleTableManager.getPriorityList()
+	condMapps = RuleTableManager.getConditionMappings()
+
 
 	return simple.direct_to_template(request,
                                           template = 'policyEngine/policy_create.html',
@@ -40,7 +42,7 @@ def policy_create(request,table):
 							   'mappings':mapps,
 							   'priorityList':priorityList,
 							   'allMappings':RuleTableManager.GetResolverMappings(table),
-							   'ConditionMappings':RuleTableManager.getConditionMappings(),
+							   'ConditionMappings':condMapps,
                                                            'ActionMappings':RuleTableManager.getActionMappings()},
                                         )
 

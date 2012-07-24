@@ -51,8 +51,9 @@ class RuleTableManager():
 		if not name:
 			name = RuleTableManager._defaultName
 		mapps = dict()
-                mapps.update(RuleTableManager._ConditionMappings)
-                mapps.update(RuleTableManager._ActionMappings)
+                mapps.update(RuleTableManager.getConditionMappings())
+                mapps.update(RuleTableManager.getActionMappings())
+		sorted(mapps.iterkeys())
 		
 		with RuleTableManager._mutex:
 			RuleTableManager._instance = RuleTable.loadOrGenerate(name, mapps, RuleTableManager._defaultParser, RuleTableManager._defaultPersistence, RuleTableManager._persistenceFlag, RuleTableManager._policyType, uuid.uuid4().hex)
@@ -146,7 +147,7 @@ class RuleTableManager():
 
 	@staticmethod
         def GetResolverMappings(tableName = None):
-                return RuleTableManager.getInstance(tableName).getResolverMappings()
+                return sorted(RuleTableManager.getInstance(tableName).getResolverMappings().iterkeys())
 
 	@staticmethod
         def GetPersistenceFlag(tableName = None):
