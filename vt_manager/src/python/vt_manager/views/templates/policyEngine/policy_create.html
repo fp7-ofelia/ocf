@@ -364,10 +364,20 @@
                 	<div class="tooltip" id="ConditionMappings_help">
 			The Condition mappings allow PolicyEngine relate the conditions of the rules with the requests of the users in order to evaluate if the request is possible or not.
                 	</div>
-
-			{% for map in ConditionMappings.keys %}
-                        	{{ map }}{% if not loop.last %},{% endif %}
-                    	{% endfor %}
+			<div>
+				<table>
+					{% for map in ConditionMappings.keys %}
+						{% cycle ' ' ' ' None as t %}
+							{% if t %}
+                       						<td style="width:30%">{{ map }} </td>
+							{% else %}
+								<td style="width:30%">{{ map }} </td><tr>
+							{% endif %}
+					{% endfor %}
+					
+					
+				</table>
+			</div>
 			</div>
 			<div class="mappingList">
 			<h5>Action Mappings:</h5> <img id="ActionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}"><div class="tooltip" id="ActionMappings_help">
