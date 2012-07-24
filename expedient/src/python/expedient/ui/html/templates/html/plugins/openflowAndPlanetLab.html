@@ -179,7 +179,7 @@
 		                TCP/UDP Destination: {{ fs.tp_dst_start }} - {{ fs.tp_dst_end }}<br />
 		            {% endif %}        
 		        	</td>
-					<td>{%for ofiface in fs.slivers.all %}<strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}<br/>{% endfor %}</td>
+					<td>{%for ofiface in fs.slivers.all %}{%if ofiface.resource.aggregate_id == agg.id%}<strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}<br/>{%endif%}{% endfor %}</td>
 		     	</tr>
 				</table>
     {% endfor %}  <!-- for fs in allfs -->
