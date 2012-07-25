@@ -29,10 +29,10 @@ class XmlParser(object):
 
 	@staticmethod 
 	def parseXML(rawXML):
-		XmlParser.logger.debug("Parsing XML...")
+		#XmlParser.logger.debug("Parsing XML...")
 		try:			
 			object = vtRspecInterface.parseString(rawXML)   	
-			XmlParser.logger.debug("Parsing of XML concluded without significant errors.")
+			#XmlParser.logger.debug("Parsing of XML concluded without significant errors.")
 			return object 
 		except Exception as e:
             		XmlParser.logger.error(str(e)) 
@@ -48,13 +48,13 @@ class XmlCrafter(object):
 		
 	@staticmethod
 	def craftXML(XMLclass):
-		XmlCrafter.logger.debug("Crafting Model...")
+		#XmlCrafter.logger.debug("Crafting Model...")
         	try:
             		xml = StringIO()
            		xml.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             		#XMLclass.export(xml, level=0)
 			XMLclass.export(xml, level=0,namespacedef_='xmlns=\"http://www.fp7-ofelia.eu/CF/vt_am/rspec\"')
-            		XmlCrafter.logger.debug("Crafting of the XML Class concluded without significant errors.")
+            		#XmlCrafter.logger.debug("Crafting of the XML Class concluded without significant errors.")
             		xmlString = xml.getvalue()
             		xml.close()
             		return xmlString
