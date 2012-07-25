@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#inform user
+printHeader "info#" "Using specific (0.3) post-upgrade-hook module..."
+
+#There is no need to stop machines. If booted swap is not active anyway...
+
+printHeader "info#" "Rebuilding all machines swap. This may take a while..."
+
+VMS=`find /opt/ofelia/oxa/ -name *_swap.img`
+
+print "Found disks at: $VMS"
+
+for VM in $VMS 
+do
+	print "Rebuilding swap at: $VM"
+	/sbin/mkswap $VM
+done
+
+#ReStartingo agent 
+print "Starting oxad..." 
+/usr/sbin/service oxad restart
+

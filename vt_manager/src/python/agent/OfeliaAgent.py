@@ -80,17 +80,17 @@ def processXmlQuery(notificationCallBackUrl,xml):
 
 	#For each type of action call appropiate method in a new thread
 	if(rspecValue.query.provisioning != None):
-		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspecValue.query.provisioning,notificationCallBackUrl,xml)
+		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspecValue.query.provisioning,notificationCallBackUrl)
 
 	if(rspecValue.query.monitoring != None):
-		ServiceThread.startMethodInNewThread(MonitoringDispatcher.processMonitoring,rspecValue.query.monitoring,notificationCallBackUrl,xml)
+		ServiceThread.startMethodInNewThread(MonitoringDispatcher.processMonitoring,rspecValue.query.monitoring,notificationCallBackUrl)
 
 
 
 '''Main routine, opening the XML-RPC server'''
 def main():
 	logger.info("OFELIA XEN Agent")	
-
+	
 	checkArgs()
 
 	#If -b is passed, demonize it 

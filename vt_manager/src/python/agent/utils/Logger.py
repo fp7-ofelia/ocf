@@ -1,4 +1,5 @@
 import logging
+import threading 
 
 '''
         @author: msune
@@ -23,7 +24,13 @@ elif LOG_LEVEL == "CRITICAL":
 else:
 	log_level = logging.DEBUG
 
-logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)d] %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p', level=log_level)
+threadId="main"
+try:
+	threadId = threading.current_thread().OXAId
+except:
+	pass
+
+logging.basicConfig(format='%(asctime)s [%(threadName)s>%(filename)s:%(lineno)d] %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p', level=log_level)
 
 class Logger():
 	@staticmethod
