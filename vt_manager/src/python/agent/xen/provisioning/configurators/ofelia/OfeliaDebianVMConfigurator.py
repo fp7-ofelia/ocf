@@ -2,13 +2,15 @@ import shutil
 import os
 import jinja2 
 import string
+import subprocess
+import re
 
 from xen.provisioning.HdManager import HdManager
 from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
 from utils.Logger import Logger
 
 
-class OfeliaVMConfigurator:
+class OfeliaDebianVMConfigurator:
 	
 	logger = Logger.getLogger()
 
@@ -76,10 +78,10 @@ class OfeliaVMConfigurator:
 
 	@staticmethod
 	def getIdentifier():
-		return	OfeliaVMConfigurator.__name__ 
+		return	OfeliaDebianVMConfigurator.__name__ 
 
 	@staticmethod
-	def configureNetworking(vm,path):
+	def _configureNetworking(vm,path):
 		#Configure interfaces and udev settings	
 		try:
 
@@ -91,15 +93,15 @@ class OfeliaVMConfigurator:
 				pass
 
 			with open(path+OXA_DEBIAN_INTERFACES_FILE_LOCATION,'w') as openif:
-				OfeliaVMConfigurator.__configureInterfacesFile(vm,openif)
+				OfeliaDebianVMConfigurator.__configureInterfacesFile(vm,openif)
 			with open(path+OXA_DEBIAN_UDEV_FILE_LOCATION,'w') as openudev:
-				OfeliaVMConfigurator.__configureUdevFile(vm,openudev)
+				OfeliaDebianVMConfigurator.__configureUdevFile(vm,openudev)
 		except Exception as e:
-			OfeliaVMConfigurator.logger.error(str(e))
+			OfeliaDebianVMConfigurator.logger.error(str(e))
 			raise Exception("Could not configure interfaces or Udev file")
 
 	@staticmethod
-	def configureLDAPSettings(vm,path):
+	def _configureLDAPSettings(vm,path):
 		try:
 			file = open(path+OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, "r")
 			text = file.read() 
@@ -111,16 +113,34 @@ class OfeliaVMConfigurator:
 			file.write(text.replace("__projectId","@proj_"+vm.project_id+"_"+projectName))
 			file.close() 
 		except Exception as e:
-			OfeliaVMConfigurator.logger.error("Could not configure LDAP file!! - "+str(e))
+			OfeliaDebianVMConfigurator.logger.error("Could not configure LDAP file!! - "+str(e))
 
 	@staticmethod
-	def configureHostname(vm,path):
+	def _configureHostName(vm,path):
 		try:
 			with open(path+OXA_DEBIAN_HOSTNAME_FILE_LOCATION,'w') as openhost:
-				OfeliaVMConfigurator.__configureHostname(vm, openhost)
+				OfeliaDebianVMConfigurator.__configureHostname(vm, openhost)
 		except Exception as e:
-			OfeliaVMConfigurator.logger.error("Could not configure hostname;skipping.. - "+str(e))
+			OfeliaDebianVMConfigurator.logger.error("Could not configure hostname;skipping.. - "+str(e))
+	@staticmethod
+	def _configureSSHServer(vm,path):
+		try:
+			OfeliaDebianVMConfigurator.logger.debug("Regenerating SSH keys...\n Deleting old keys...")
+			subprocess.check_call("rm -f "+path+"/etc/ssh/ssh_host_*", shell=True, stdout=None)
+			#subprocess.check_call("chroot "+path+" dpkg-reconfigure openssh-server ", shell=True, stdout=None)
+			
+			OfeliaDebianVMConfigurator.logger.debug("Creating SSH1 key; this may take some time...")
+			subprocess.check_call("ssh-keygen -q -f "+path+"/etc/ssh/ssh_host_key -N '' -t rsa1", shell=True, stdout=None)
+			OfeliaDebianVMConfigurator.logger.debug("Creating SSH2 RSA key; this may take some time...")
+			subprocess.check_call("ssh-keygen -q -f "+path+"/etc/ssh/ssh_host_rsa_key -N '' -t rsa", shell=True, stdout=None)
+			OfeliaDebianVMConfigurator.logger.debug("Creating SSH2 DSA key; this may take some time...")
+			subprocess.check_call("ssh-keygen -q -f "+path+"/etc/ssh/ssh_host_dsa_key -N '' -t dsa", shell=True, stdout=None)
+		except Exception as e:
+			OfeliaDebianVMConfigurator.logger.error("Fatal error; could not regenerate SSH keys. Aborting to prevent VM to be unreachable..."+str(e))
+			raise e
 
+
+	#Public methods
 	@staticmethod
 	def createVmConfigurationFile(vm):
 
@@ -130,7 +150,28 @@ class OfeliaVMConfigurator:
 		env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dirs))
 
 		if vm.xen_configuration.hd_setup_type == "file-image" and vm.xen_configuration.virtualization_setup_type == "paravirtualization" :
-			OfeliaVMConfigurator.__createParavirtualizationFileHdConfigFile(vm,env)
+			OfeliaDebianVMConfigurator.__createParavirtualizationFileHdConfigFile(vm,env)
 		else:
 			raise Exception("type of file or type of virtualization not supported for the creation of xen vm configuration file")	
+
+	@staticmethod
+	def configureVmDisk(vm, path):
+		
+		if not path or not re.match(r'[\s]*\/\w+\/\w+\/.*', path,re.IGNORECASE): #For security, should never happen anyway
+			raise Exception("Incorrect vm path")
+
+		#Configure networking
+		OfeliaDebianVMConfigurator._configureNetworking(vm,path)
+		OfeliaDebianVMConfigurator.logger.info("Network configured successfully...")
+		
+		#Configure LDAP settings 
+		OfeliaDebianVMConfigurator._configureLDAPSettings(vm,path)
+		OfeliaDebianVMConfigurator.logger.info("Authentication configured successfully...")
 	
+		#Configure Hostname
+		OfeliaDebianVMConfigurator._configureHostName(vm,path)
+		OfeliaDebianVMConfigurator.logger.info("Hostname configured successfully...")
+		
+		#Regenerate SSH keys
+		OfeliaDebianVMConfigurator._configureSSHServer(vm,path)
+		OfeliaDebianVMConfigurator.logger.info("SSH have been keys regenerated...")
