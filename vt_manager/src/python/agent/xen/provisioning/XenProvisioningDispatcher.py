@@ -28,10 +28,11 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			
 			#Mount copy
 			pathToMountPoint=HdManager.mount(vm)
+			XenProvisioningDispatcher.logger.debug("Mounting at:"+pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD mounted successfully...")
-
+			
 			#Configure VM OS
-			VMConfigurator.configureVm(vm,pathToMountPoint)
+			VMConfigurator.configureVmDisk(vm,pathToMountPoint)
 
 			#Synthesize config file
 			VMConfigurator.createVmConfigurationFile(vm)
@@ -45,15 +46,18 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			try:
 				HdManager.umount(vm,pathToMountPoint)
+			except:
+				pass
+			try:
 				#Delete VM disc and conf file
 				XenProvisioningDispatcher.deleteVM(id,vm)
 			except:
 				pass
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -76,11 +80,9 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			#TODO improve this trace
-			print e
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 	
 	##Scheduling routines
@@ -95,9 +97,9 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -111,9 +113,9 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -126,9 +128,9 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 
 	@staticmethod
@@ -142,8 +144,8 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
 		except Exception as e:
+			XenProvisioningDispatcher.logger.error(str(e))
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			XenProvisioningDispatcher.logger.error(str(e))
 			return
 

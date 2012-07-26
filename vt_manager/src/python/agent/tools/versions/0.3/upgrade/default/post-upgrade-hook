@@ -7,7 +7,7 @@ printHeader "info#" "Using specific (0.3) post-upgrade-hook module..."
 
 printHeader "info#" "Rebuilding all machines swap. This may take a while..."
 
-VMS=`find /opt/ofelia/oxa/ -name *_swap.img`
+VMS=`find $EXECPATH/../../ -name *_swap.img`
 
 print "Found disks at: $VMS"
 

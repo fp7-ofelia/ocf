@@ -102,7 +102,7 @@ def main():
 	#print "Main ends..." 
 
 	#Engage XMLRPC
-	logger.debug("Trying to engage XMLRPC server...")	
+	#logger.debug("Trying to engage XMLRPC server...")	
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
 
 	logger.debug("This is unreachable!")	

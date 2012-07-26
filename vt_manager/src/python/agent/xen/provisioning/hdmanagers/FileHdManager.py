@@ -3,6 +3,7 @@ import sys
 import shutil
 import string
 import subprocess
+import re
 from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE,OXA_FILEHD_NICE_PRIORITY,OXA_FILEHD_CREATE_SPARSE_DISK,OXA_FILEHD_IONICE_CLASS, OXA_FILEHD_IONICE_PRIORITY,OXA_FILEHD_DD_BS_KB, OXA_DEFAULT_SWAP_SIZE_MB
 
 from utils.Logger import Logger
@@ -164,9 +165,12 @@ class FileHdManager(object):
 	def clone(vm):
 
 		##Check file existance in CACHE		
+		#FileHdManager.logger.debug("Checking:"+FileHdManager.getHdPath(vm))
 		if os.path.exists(FileHdManager.getHdPath(vm)):
 			raise Exception("Another VM with the same name exists in the same project and slice:"+FileHdManager.debugVM(vm))
 
+		#FileHdManager.logger.debug("Checking:"+FileHdManager.getRemoteHdPath(vm))
+		##Check file existance in REMOTE 
 		if os.path.exists(FileHdManager.getRemoteHdPath(vm)):
 			raise Exception("Another VM with the same name exists in the same project and slice:"+FileHdManager.debugVM(vm))
 

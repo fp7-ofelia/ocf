@@ -11,14 +11,6 @@ class MediacatVMConfigurator:
 
 	''' Private methods '''
 	@staticmethod
-	def __configureInterfacesFile(vm,iFile):
-		return
-
-	@staticmethod
-	def __configureUdevFile(vm,uFile):
-		return
-		
-	@staticmethod
 	def __createParavirtualizationVM(vm):
 		swap = 0
                 if len(vm.xen_configuration.users.user) == 1 and vm.xen_configuration.users.user[0].name == "root":
@@ -49,21 +41,13 @@ class MediacatVMConfigurator:
 		cfile.close()
 	
 
-	''' Public methods '''
+	#Public methods	
 	@staticmethod
 	def getIdentifier():
 		return	MediacatVMConfigurator.__name__ 
 
 	@staticmethod
-	def configureNetworking(vm,path):
-		return
-
-	@staticmethod
-	def configureLDAPSettings(vm,path):
-		return
-	
-	@staticmethod
-        def configureHostname(vm,path):
+        def configureVmDisk(vm,path):
                 return
 
 	@staticmethod
