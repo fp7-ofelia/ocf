@@ -104,7 +104,7 @@ class XmlRpcServer():
 		    return ""
         
 		def ping(self, challenge): 
-	    	    XmlRpcServer.logger.debug("PING")
+	    	    #XmlRpcServer.logger.debug("PING")
             	    return challenge
         
 	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)

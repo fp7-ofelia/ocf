@@ -106,7 +106,10 @@ def rule_create(request,table_name=None):
 		saved = False
 	#Rule String convertion required
 	if formMode == "easy":
-        	strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " do " + ruleAction + " denyMessage " + ruleError + " #" + ruleDesc
+		if ruleAction != "None":
+			strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " do " + ruleAction + " denyMessage " + ruleError + " #" + ruleDesc
+		else:
+			strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " denyMessage " + ruleError + " #" + ruleDesc
 	else:
 		strings = expertRule
 		try:

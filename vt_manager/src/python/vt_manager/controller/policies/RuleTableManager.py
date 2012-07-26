@@ -251,7 +251,9 @@ class RuleTableManager():
         	try:
                 	action = rule.getMatchAction()
         	except:
-                	action = rule
+                	action = "None"
+		if action == None:
+			action = "None"
         	keys = mapps.keys()
         	for act in keys:
                 	if action.replace(" ","") == act.replace(" ",""):

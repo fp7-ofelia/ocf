@@ -95,7 +95,7 @@ input[type=button],
 #fancypage {
     background-color: #FFFFFF;
     padding: 10px 0 0 0;
-    width: 600px;
+    width: 700px;
     min-height: 300px;
     margin: auto;
     border: 1px solid #959596;
@@ -585,11 +585,11 @@ div .PEbox{
 }
 
 div .PEoperators {
-	background-color: #CCEBF5;
+	background-color: #5DD0C0;
 	border: 1px solid #DDD8CB; 
 }
 div .PEactions {
-	background-color: #CCEBF5;
+	background-color: #5DD0C0;
 	border: 1px solid #DDD8CB;
 }
 
@@ -621,14 +621,14 @@ text-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 div .not{
-	background-color: #80B2FF;
+	background-color: #6B8FD4;
 }
 div .operator{
-	background-color:#80CCE6;
+	background-color:#0969A2;
 }
 
 .selected{
-	background-color: #FF6666!important;
+	background-color: #66FF99!important;
 	color: #fff!important;
 }
 

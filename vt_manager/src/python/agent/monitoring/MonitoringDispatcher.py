@@ -46,7 +46,7 @@ class MonitoringDispatcher:
 			try:
 				#Send async notification
 				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"ONGOING","")
-	
+				MonitoringDispatcher.logger.debug("After sending ongoing")	
 				MonitoringDispatcher.__dispatchAction(dispatcher,action,server)	
 			except Exception as e:
 				MonitoringDispatcher.logger.error(str(e))	

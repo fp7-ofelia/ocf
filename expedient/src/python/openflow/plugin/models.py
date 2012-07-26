@@ -23,6 +23,7 @@ from django.db.models.aggregates import Count
 from django.core.exceptions import ValidationError
 from expedient.common.timer.models import Job
 from expedient.common.timer.exceptions import JobAlreadyScheduled
+from random import randrange
 
 logger = logging.getLogger("OpenflowModels")
 parse_logger = logging.getLogger("OpenflowModelsParsing")
@@ -62,7 +63,7 @@ class OpenFlowSliceInfo(models.Model):
         help_text=u"The format should be tcp:hostname:port or ssl:hostname:port")
     # TODO: It is not a good idea to store the password in the clear.
     password = models.CharField(
-        max_length=64, help_text="This is the password to use when accessing\
+        max_length=64, default="ofeliaSlicePassword"+str(randrange(10000,99999,1)), editable = False, help_text="This is the password to use when accessing\
  the slice directly at the flowvisors.")
 
 class OpenFlowAggregate(aggregate_models.Aggregate):

@@ -1,4 +1,4 @@
-from xen.provisioning.configurators.ofelia.OfeliaVMConfigurator import OfeliaVMConfigurator
+from xen.provisioning.configurators.ofelia.OfeliaDebianVMConfigurator import OfeliaDebianVMConfigurator
 from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
 from utils.Logger import Logger
 
@@ -9,58 +9,29 @@ from utils.Logger import Logger
 '''
 
 
-class VMConfigurator:
+class VMConfigurator():
 	
 	logger = Logger.getLogger()
 	
 	@staticmethod
-	def __getConfiguratorByOsType(configurator):
+	def __getConfiguratorByNameAndOsType(configurator, os):
 	
-		if configurator != None and configurator != "":
+		if configurator and configurator != "":
 			if configurator == MediacatVMConfigurator.getIdentifier():
 				return MediacatVMConfigurator;
-			else:
-				raise Exception("Unknown configurator")	
 		else:
-			return OfeliaVMConfigurator
-	
-
-	
-	@staticmethod
-	def __configureNetworking(vm,path):
-		#Call Appropiate configurator according to VM OS type	
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
-		configurator.configureNetworking(vm,path)
-	@staticmethod
-	def __configureLDAPSettings(vm,path):
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
-		configurator.configureLDAPSettings(vm,path)
-
-	@staticmethod
-	def __configureHostname(vm,path):
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
-		configurator.configureHostname(vm,path)
-
+			if os.lower() == "debian" or os.lower() == "ubuntu":
+				return OfeliaDebianVMConfigurator
+		
+		raise Exception("Unknown configurator")	
 
 	##Public methods
 	@staticmethod
-	def configureVm(vm,pathToMountPoint):
-		#Configure networking
-		VMConfigurator.__configureNetworking(vm,pathToMountPoint)
-		VMConfigurator.logger.info("Network configured successfully...")
-		
-		#Configure LDAP settings 
-		VMConfigurator.__configureLDAPSettings(vm,pathToMountPoint)
-		VMConfigurator.logger.info("Authentication configured successfully...")
-	
-		#Configure Hostname
-		VMConfigurator.__configureHostname(vm,pathToMountPoint)
+	def configureVmDisk(vm,pathToMountPoint):
+		VMConfigurator.__getConfiguratorByNameAndOsType(vm.xen_configuration.configurator, vm.operating_system_distribution).configureVmDisk(vm,pathToMountPoint)
 					
 	@staticmethod
 	def createVmConfigurationFile(vm):
-		configurator = VMConfigurator.__getConfiguratorByOsType(vm.xen_configuration.configurator)
-		configurator.createVmConfigurationFile(vm)
+		VMConfigurator.__getConfiguratorByNameAndOsType(vm.xen_configuration.configurator, vm.operating_system_distribution).createVmConfigurationFile(vm)
 			
-
-
 

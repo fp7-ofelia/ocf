@@ -365,7 +365,11 @@
 						{% if terminalS == "nonterminal" %}
 							"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
 						{% else %}
-							"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+							{% if action != "None" %}
+								"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+							{% else %}
+								"if{{ condition }}then {{ valueS }} denyMessage {{ errorMsg }} # {{ description }}"
+							{% endif %}
 						{% endif %}
 					{% endif %}>
 		</div>
