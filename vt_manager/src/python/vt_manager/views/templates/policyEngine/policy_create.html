@@ -128,8 +128,11 @@
 			displayRule();
         });
 		$("#SubmitForm").click(function() {
-		
-			checked = check_cond_grouped();	
+			if (document.getElementById("advancedMode").checked == true){	
+				checked = "True";
+			}else{
+				checked = check_cond_grouped();	
+			}
 			if (checked == "True"){
 				document.ruleCreate.submit();
 			}else{

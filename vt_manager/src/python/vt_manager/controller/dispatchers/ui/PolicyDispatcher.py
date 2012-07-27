@@ -72,26 +72,26 @@ def rule_create(request,table_name=None):
         else:
                 priority = int(rulePriority)
 
+	if formMode == "easy":
 	#Avoid empty fields
-        if ruleDesc == "":
-                errors.append("Description Field is empty")
-        if ruleError == "":
-                errors.append("Error Message field is empty")
-        if ruleCondition == "":
-                errors.append("Condition field is empty")
-	try:
-		print '---Entrando en el Try de unicode-----------------------------------------'
-		str(ruleDesc)
-	except:
-		errors.append("Only ascii characters are allowed in Description field")
-	try:
-		str(ruleError)
-	except:
-		errors.append("Only ascii characters are allowed in Error Message field")
-	try:
-		str(ruleCondition)
-	except:
-		errors.append("Only ascii characters are allowed in Conditions")
+        	if ruleDesc == "":
+                	errors.append("Description Field is empty")
+        	if ruleError == "":
+                	errors.append("Error Message field is empty")
+        	if ruleCondition == "":
+                	errors.append("Condition field is empty")
+		try:
+			str(ruleDesc)
+		except:
+			errors.append("Only ascii characters are allowed in Description field")
+		try:
+			str(ruleError)
+		except:
+			errors.append("Only ascii characters are allowed in Error Message field")
+		try:
+			str(ruleCondition)
+		except:
+			errors.append("Only ascii characters are allowed in Conditions")
 
 	
 
