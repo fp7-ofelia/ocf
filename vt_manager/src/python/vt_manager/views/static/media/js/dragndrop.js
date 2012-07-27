@@ -237,4 +237,10 @@ $(document).ready(function() {
                 };
         };
 
-
+	check_cond_grouped = function(){
+		if ($("td.single").length == 3){
+			return "True";
+		}else{
+			return "False";
+		};
+	};		

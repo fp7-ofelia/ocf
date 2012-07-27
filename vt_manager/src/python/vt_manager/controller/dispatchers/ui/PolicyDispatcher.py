@@ -79,6 +79,22 @@ def rule_create(request,table_name=None):
                 errors.append("Error Message field is empty")
         if ruleCondition == "":
                 errors.append("Condition field is empty")
+	try:
+		print '---Entrando en el Try de unicode-----------------------------------------'
+		str(ruleDesc)
+	except:
+		errors.append("Only ascii characters are allowed in Description field")
+	try:
+		str(ruleError)
+	except:
+		errors.append("Only ascii characters are allowed in Error Message field")
+	try:
+		str(ruleCondition)
+	except:
+		errors.append("Only ascii characters are allowed in Conditions")
+
+	
+
         if request.POST.get("enable") == 'enable':
            enable = True
         else:
@@ -90,9 +106,16 @@ def rule_create(request,table_name=None):
 		saved = False
 	#Rule String convertion required
 	if formMode == "easy":
-        	strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " do " + ruleAction + " denyMessage " + ruleError + " #" + ruleDesc
+		if ruleAction != "None":
+			strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " do " + ruleAction + " denyMessage " + ruleError + " #" + ruleDesc
+		else:
+			strings = "if " + ruleCondition +  " then " + ruleValue + " " + ruleType  + " denyMessage " + ruleError + " #" + ruleDesc
 	else:
 		strings = expertRule
+		try:
+			str(expertRule)
+		except:
+			errors.append("Only ascii characters are allowed in a Rule")
 	
 	try:
 		if errors:
@@ -157,7 +180,7 @@ def rule_create(request,table_name=None):
                            'terminalD':type2,
                            'errorMsg':ruleError,
                            'description':ruleDesc,
-                           'condition':ruleCondition,
+                           'condition':" " + ruleCondition + " ",
                            'ptable':tableName,
 			   'edit': request.POST.get('edit'),
                            'action':ruleAction,

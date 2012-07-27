@@ -228,7 +228,7 @@
 		<td><b>Right Operand:</b></td>
 		<td></td>
 		<td></td>
-		<tr>
+		<tr valign="top">
 		<td><input type="checkbox" id="negate"></td>	
 		<td><select id="mappings" name="maps">
                 	{% for key in mappings.keys %}
@@ -250,39 +250,39 @@
 				<input type="radio" name="inGroup" id="inGroupRange" value="range"> Range<br>
 				<input type="radio" name="inGroup" id="inGroupCollection" value="collection"> Collection<br>
 			</div>
-			</td>
-			<td colspan="3">
+		</td>
+		<td colspan="3">
                         <div id = "normal">
                                 <input type="text" name="value" id="rightOperandText">
                         </div>
 			<div id="range" style="display:none;">
 				<table>
-				 <td>
+				<tr><td>
                                 strict 
                                 </td>
 				<td>
 				<input type="checkbox" name="strict" id="strict" value="strict">
-				</td>
-				<td>
+				</td></tr>
+				<tr><td>
 				lower Limit:
 				</td>
 				<td>
 				<input type="text" name="lowerlimit" id="lower" size="4">
-	                  	</td>
-				<td>
+	                  	</td></tr>
+				<tr><td>
 				Upper Limit:
 				</td>
 				<td>
 				<input type="text" name="upperlimit" id="upper" size="4">
-				</td>
+				</td></tr>
 				</table>
 			</div>
 			
 			 
 			<div id="collection" style="display:none;">
-				List:<input type="text" name="list" id="list" >
+				List:<input type="text" name="list" id="list" size=16>
 			</div>
-			</td>
+		</td>
 		</td>
 	</table>
 	<br>	
