@@ -31,13 +31,14 @@ class ControllerMappings():
 					
 					#XEN configuration mappings
 					
-					"vm.hd_size_mb": "ControllerMappings.getValueFromConfiguration(metaObj,'metaObj.server.virtual_machines[0]',eval('metaObj.server.virtual_machines[0].get_virtualization_type()'),'get_hd_size_mb()')",
+					#DEPRECATED:XXX"vm.hd_size_mb": "vt_manager.controller.policies.ControllerMappings.getValueFromConfiguration(metaObj,'metaObj.server.virtual_machines[0]',eval('metaObj.server.virtual_machines[0].get_virtualization_type()'),'get_hd_size_mb()')",
+					"vm.hd_size_mb":ControllerMappings.getVMHDMemory,
 
 					#DEPRECATED:XXX"vm.hd_size_mb": "metaObj.server.virtual_machines[0].xen_configuration.get_hd_size_mb()",
 					#"vm.hd_origin_path":"metaObj.server.virtual_machines[0].xen_configuration.get_hd_origin_path()",
 					#"vm.configurator":"metaObj.server.virtual_machines[0].xen_configuration.get_configurator()",
 
-					"vm.memory_mb":"ControllerMappings.getValueFromConfiguration(metaObj,'metaObj.server.virtual_machines[0]',eval('metaObj.server.virtual_machines[0].get_virtualization_type()'),'get_memory_mb()')",
+					"vm.memory_mb": ControllerMappings.getVMMemory,
 					
 					#DEPRECATED:XXX"vm.memory_mb":"metaObj.server.virtual_machines[0].xen_configuration.get_memory_mb()",
 					
@@ -61,10 +62,18 @@ class ControllerMappings():
 		return dict2
 
 	@staticmethod
-	def getValueFromConfiguration(metaObj,metaObjPath,metaObjConf,metaObjGetter):
-		print metaObjPath,metaObjConf,metaObjGetter
+	def getValueFromConfiguration(metaObj,metaObjGetter):
+		metaObjPath = "metaObj.server.virtual_machines[0]"
+		metaObjConf = eval('metaObj.server.virtual_machines[0].get_virtualization_type()')
 
 		conf = '.' + str(metaObjConf).lower() + '_configuration.'
 		value = metaObjPath + conf + metaObjGetter
 		return eval(value)
-		
+
+	@staticmethod
+	def getVMMemory(metaObj):
+		return ControllerMappings.getValueFromConfiguration(metaObj,'get_memory_mb()')
+	
+	@staticmethod
+	def getVMHDMemory(metaObj):
+		return ControllerMappings.getValueFromConfiguration(metaObj,'get_hd_size_mb()')
