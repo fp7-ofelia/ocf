@@ -133,7 +133,7 @@
 			if (checked == "True"){
 				document.ruleCreate.submit();
 			}else{
-				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before add the rule";
+				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before adding the rule";
 			};
 		});
 			
@@ -167,12 +167,6 @@
 	}
 }); // End document.ready()
 </script>
-<script>
-	$(document).mouseup(function() {
-		document.getElementById("exceptions").textContent = "";
-	});
-
-</script>
 {% endblock %}
 {% block pagehead %}
 <div class="main">
@@ -182,8 +176,9 @@
 
 {% block content %}
 <div class="main">
-{% load myurl %}
+{#{% load myurl %}#}
 <!-- Error List-->
+	<div id=exceptions style="color: red;font-size:14px">
 	{% if errors %}
 		<ul>
 			{% for error in errors %}
@@ -191,7 +186,6 @@
 			{% endfor %}
 		</ul>
 	{% endif %}
-	<div id=exceptions>
 			
 	</div> 
 	{% if not edit %}
@@ -204,7 +198,7 @@
 		<td><b>Editing mode:</b></td>
 		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
 		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
-		<td><img id="mode_question" src= "{% myurl img_media 'question_mark_15x15.png'  %}">
+		<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
 			<div class="tooltip" id="mode_help">Form mode edition allows to create a rule using the form fields below. Advanced Mode edition allows you to write rules according to RegexParser syntax
 			</div>
 		</td>
