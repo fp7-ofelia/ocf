@@ -585,11 +585,11 @@ div .PEbox{
 }
 
 div .PEoperators {
-	background-color: #5DD0C0;
+	background-color: #A5CDE8;
 	border: 1px solid #DDD8CB; 
 }
 div .PEactions {
-	background-color: #5DD0C0;
+	background-color: #A5CDE8;
 	border: 1px solid #DDD8CB;
 }
 
@@ -621,15 +621,15 @@ text-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 div .not{
-	background-color: #6B8FD4;
+	background-color: #7F9FDB;
 }
 div .operator{
-	background-color:#0969A2;
+	background-color:#6684BA;
 }
 
 .selected{
-	background-color: #66FF99!important;
-	color: #fff!important;
+	background-color: #B4DEFA!important;
+	color: #555!important;
 }
 
 /* Drag and drop area*/
