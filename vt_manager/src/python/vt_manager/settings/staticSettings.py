@@ -9,6 +9,8 @@ from django.conf import settings
 from os.path import dirname, join
 
 
+#theme
+THEME = 'geant'
 
 #EMAIL_HOST = "smtp.gmail.com"
 DEFAULT_FROM_EMAIL = "OFELIA-noreply@fp7-ofelia.eu"
@@ -62,8 +64,10 @@ ROOT_URLCONF = 'vt_manager.urls'
 
 #Template dirs
 TEMPLATE_DIRS = (
-    join(SRC_DIR, 'python/vt_manager/views/templates'),
+    join(SRC_DIR, 'python/vt_manager/views/templates/default'),
 )
+
+#THEME_DIR = join(SRC_DIR, 'python/vt_manager/views/static/media')
 
 TEMPLATE_CONTEXT_PROCESSORS = [
     "django.contrib.auth.context_processors.auth",
@@ -75,7 +79,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 ]
 
 #Static file paths
-MEDIA_ROOT = join(SRC_DIR+"views/static/", "media")
+MEDIA_ROOT = join(SRC_DIR+"python/vt_manager/views/static/", "media")
 MEDIA_URL = '/static/media'
 ADMIN_MEDIA_PREFIX = '/admin/media/'
 

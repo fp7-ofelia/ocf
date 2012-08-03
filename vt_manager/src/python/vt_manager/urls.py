@@ -2,12 +2,19 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from common.rpc4django.utils import rpc_url
+import re 
 admin.autodiscover()
+
+from vt_manager.utils.ThemeManager import ThemeManager
+
+'''
+Load Themes
+'''
+ThemeManager.initialize()
 
 '''
 Dynamic content
 '''
-
 urlpatterns = patterns('',
     ##Main entry point
     url(r'^dashboard$', 'vt_manager.controller.users.urlHandlers.dashboard', name="dashboard"),
@@ -68,32 +75,37 @@ urlpatterns = patterns('',
     rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 
+def get_static_url(name, path=""):
+    static_file_tuple = (
+        r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:], path),
+        'django.views.static.serve',
+        {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
+    return url(*static_file_tuple, name=name)
 
 '''
 Static content
 '''
+urlpatterns += patterns('',
+    get_static_url("img_media", "/default/images"),
+    get_static_url("css_media", "/default/css"),
+    get_static_url("js_media", "/default/js"),
+    get_static_url("fancybox", "/default/fancybox"),
+)
 
-static_image_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/images/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_css_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/css/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_js_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/js/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_fancybox_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/fancybox/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
+'''
+Static theme content
+'''
+img_theme_tuple = ThemeManager.getStaticThemeTuple("img_media")
+css_theme_tuple = ThemeManager.getStaticThemeTuple("css_media")
+js_theme_tuple = ThemeManager.getStaticThemeTuple("js_media")
+fancybox_theme_tuple = ThemeManager.getStaticThemeTuple("fancybox")
 
 urlpatterns += patterns('',
-    # TODO: Serve static content, should be removed in production deployment
-    # serve from another domain to speed up connections (no cookies needed)
-    url(*static_image_file_tuple, name="img_media"),
-    url(*static_css_file_tuple, name="css_media"),
-    url(*static_js_file_tuple, name="js_media"),
-    url(*static_fancybox_tuple, name="fancybox"),
+    get_static_url(img_theme_tuple[0],img_theme_tuple[1]), 
+    get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
+    get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
+    get_static_url(fancybox_theme_tuple[0],fancybox_theme_tuple[1]),
 )
+
+
+

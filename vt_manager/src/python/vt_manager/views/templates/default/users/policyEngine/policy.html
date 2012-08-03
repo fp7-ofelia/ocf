@@ -1,0 +1,37 @@
+{% extends "base_admin.html" %}
+
+
+{% block pagehead %}
+<div class="main">
+	<h1>Policy Manager</h1>
+</div>
+{% endblock pagehead %}
+
+{% block content %}
+<div class="main">
+    <div style="width:730px">
+    <table class ="blue">
+        <tr class="header" >
+	<th>Table</th>
+        <th>Enable/disable</th>
+        </tr>
+	{% for table in tables %}
+          <tr class="{% cycle 'odd' 'even' %}">
+	   <td><a href="{% url rule_table_view table.name  %}">{{ table.name }}</a>
+	   <td></td>
+ 		<input type="hidden" name="uuid" value="{{ table }}">
+		<input type="hidden" name="table_name" value="{{ RuleTable }}">
+	</tr>
+	</form>
+	   {% endfor %}
+     </table>
+    </div>
+    <br/>
+    <div class="center">
+        <a href="{% url dashboard  %}">Dashboard</a>
+
+    </div>
+</div>
+
+{% endblock content %}
+ 

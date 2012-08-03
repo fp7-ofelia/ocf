@@ -24,3 +24,15 @@ DATABASE_HOST = "changeMeWithIP"
 
 #Monitoring of Agents time (commented = default = 45 sec)
 #MONITORING_INTERVAL = 45
+
+'''Theme Parameters'''
+
+#To create a theme, type a theme_name in THEME
+#Create the static directories [images, css, js, fancybox] in SRC_DIR/python/vt_manager/views/static/media/theme_name/
+#Create the template directories [networking, policyEngine, users, ...] in SRC_DIR/python/vt_manager/views/templates/theme_name
+#The path and the name of the custom themes and the default must be the same
+#if some templates or static content are not in the theme_name dirs, the default content/templates will be authomatically loaded from default dirs
+
+THEME = 'geant'
+
+
