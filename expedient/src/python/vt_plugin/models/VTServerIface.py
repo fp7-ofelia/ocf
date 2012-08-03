@@ -10,4 +10,4 @@ class VTServerIface(models.Model):
     ifaceName = models.CharField(max_length = 128, default="", blank = True, null=True, verbose_name = "Interface Name")
     switchID = models.CharField(max_length = 128, default="", blank = True, null=True, verbose_name = "Switch ID")
     port = models.IntegerField(blank = True, null=True, verbose_name = "Swtich Port")
-
+    isMgmt = models.BooleanField(verbose_name="Mgmt interface",default=0, editable = False)
