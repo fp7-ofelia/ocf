@@ -80,7 +80,7 @@ class Translator():
 			return
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
-        print "[[[Translating Server XML description into plugin dataModel]]]"
+        #print "[[[Translating Server XML description into plugin dataModel]]]"
        	sModel = None 
         if VTServer.objects.filter(uuid = sClass.uuid).exists():
             sModel = VTServer.objects.get(uuid=sClass.uuid)
