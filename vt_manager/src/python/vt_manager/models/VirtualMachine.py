@@ -209,3 +209,6 @@ class VirtualMachine(models.Model):
 	def getCallBackURL(self):
 		return self.callBackURL
 
+	def getNetworkInterfaces(self):
+		return self.networkInterfaces.all().order_by('-isMgmt','id')
+
