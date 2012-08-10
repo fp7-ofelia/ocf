@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}Aggregates for Slice {{ slice.name }}{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>Add an Aggregate for Slice {{ slice.name }}</h1>
+	</div>
+	<div class="aggregate_list">
+		{% if aggregate_list.count %}
+			{% with "project/agg_add_actions.html" as action_template %}
+				{% include "aggregate/list_table.html" %}
+			{% endwith %}
+		{% else %}
+			Either this slice has all aggregates in the project or there are
+			no aggregates in the project to begin with. Sorry, no aggregates
+			to add.
+		{% endif %}
+	</div>
+	<div class="center">
+		<input type="button" value="Done"
+		onclick="document.location='{% url slice_detail slice.id %}'">
+	</div>
+</div>
+{% endblock content %}

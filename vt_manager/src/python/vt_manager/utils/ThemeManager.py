@@ -63,7 +63,8 @@ class ThemeManager():
 
 	@staticmethod
 	def getThemeTemplatePath(strPath):
-		
+	
+		#TODO:It is possible to have only one template_dir in TEMPLATE_DIRS?	
 		templateDirSplit = strPath.split('/')		
 		
 		#Remove all '' elements of the list
@@ -73,5 +74,3 @@ class ThemeManager():
 		templateDirSplit.pop(len(templateDirSplit)-1)
 		templateDirSplit.append(str(ThemeManager._theme[1:]))
 		return "/"+"/".join(templateDirSplit)
-		
-	

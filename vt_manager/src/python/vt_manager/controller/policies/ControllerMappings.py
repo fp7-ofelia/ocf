@@ -57,6 +57,7 @@ class ControllerMappings():
 					}
 		dict2 = dict()
 		listt = sorted(conditionMappings.iterkeys())
+		#listt.reverse()
 		for key in listt:
 			dict2[key] = conditionMappings[key]
 		return dict2
@@ -77,3 +78,8 @@ class ControllerMappings():
 	@staticmethod
 	def getVMHDMemory(metaObj):
 		return ControllerMappings.getValueFromConfiguration(metaObj,'get_hd_size_mb()')
+
+	@staticmethod
+	def getNumberOfVMs(metaObj):
+		pass		
+

@@ -139,7 +139,14 @@
 				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before adding the rule";
 			};
 		});
-			
+		
+		$("#cond_div").click(function() {
+			alert($("#cond_row").width())
+			if ( $("#cond_row").width() < "678"){
+				alert('lo es');
+                        	$.fancybox({'href': '{% url condition_create CurrentTable %}'});
+        		}
+		});	
 
 	displayRule = function(){
 		rule = "";
@@ -167,7 +174,9 @@
 			rule = rule + " # " + document.getElementById("description").value;
 		}
 		document.getElementById("advancedRule").value = rule
+
 	}
+		
 }); // End document.ready()
 </script>
 {% endblock %}

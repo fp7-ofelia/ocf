@@ -755,6 +755,9 @@ REDIPS.drag = (function () {
 			}
 		};
 		// if table_mini is not defined, then row_drop() is called from handler_onmouseup() and set reference to the currently dragged row - mini table
+			alert($("#cond_row").width())
+			alert($("#cond_row").width())
+			alert($("#cond_row").width())
 		if (table_mini === undefined) {
 			table_mini = obj;
 		}

@@ -10,7 +10,7 @@ from os.path import dirname, join
 
 
 #theme
-THEME = 'geant'
+THEME = 'default'
 
 #EMAIL_HOST = "smtp.gmail.com"
 DEFAULT_FROM_EMAIL = "OFELIA-noreply@fp7-ofelia.eu"

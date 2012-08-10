@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main">
+    <h1>User {{ curr_user.username }} was saved.</h1>
+    <p>Go to <a href="{% url users_detail curr_user.pk %}">User Detail</a></p>
+    <p>Go to <a href="{% url users_home %}">User Administration</a></p>
+</div>
+{% endblock %}

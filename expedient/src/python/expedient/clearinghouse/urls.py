@@ -7,6 +7,13 @@ from django.conf import settings
 from django.views.generic.simple import direct_to_template
 
 
+''' Theme Management '''
+
+from expedient.common.utils.ExpedientThemeManager import ExpedientThemeManager
+ExpedientThemeManager.initialize()
+
+
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -88,4 +95,20 @@ urlpatterns += patterns('',
     get_static_url("css_media", '/css'),
     get_static_url("js_media", "/js"),
     get_static_url("root_media"),
+    #get_static_url("fibre_img_media", '/../fibre/img'),
 )
+
+'''
+Static theme content
+'''
+img_theme_tuple = ExpedientThemeManager.getStaticThemeTuple("img_media")
+css_theme_tuple = ExpedientThemeManager.getStaticThemeTuple("css_media")
+js_theme_tuple = ExpedientThemeManager.getStaticThemeTuple("js_media")
+
+urlpatterns += patterns('',
+    get_static_url(img_theme_tuple[0],img_theme_tuple[1]),
+    get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
+    get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
+
+)
+

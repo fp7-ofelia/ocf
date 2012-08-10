@@ -101,9 +101,11 @@ AUTHENTICATION_BACKENDS = (
 
 ROOT_URLCONF = 'openflow.optin_manager.urls'
 
+THEME = 'fibre'
+
 TEMPLATE_DIRS = (
-    join(SRC_DIR, 'templates'),
-    join(SRC_DIR, 'templates/openflow/optin_manager'),
+    join(SRC_DIR, 'templates/default'),
+    join(SRC_DIR, 'templates/default/openflow/optin_manager'),
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = [

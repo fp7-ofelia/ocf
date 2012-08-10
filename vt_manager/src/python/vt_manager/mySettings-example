@@ -33,6 +33,6 @@ DATABASE_HOST = "changeMeWithIP"
 #The path and the name of the custom themes and the default must be the same
 #if some templates or static content are not in the theme_name dirs, the default content/templates will be authomatically loaded from default dirs
 
-THEME = 'geant'
+THEME = 'fibre'
 
 

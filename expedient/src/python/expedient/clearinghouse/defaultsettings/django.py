@@ -87,7 +87,7 @@ Example: "/home/media/media.lawrence.com/"'''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static/media'
+MEDIA_URL = '/static/media/default'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -140,11 +140,13 @@ append_to_local_setting(
   
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
+THEME = 'default'
+
 TEMPLATE_DIRS = [
-    os.path.join(SRC_DIR, 'templates'),
-    os.path.join(SRC_DIR, 'templates/expedient/clearinghouse'),
-    os.path.join(SRC_DIR, 'templates/expedient/common'),
-    os.path.join(SRC_DIR, 'python/vt_plugin/views/templates'),
+    os.path.join(SRC_DIR, 'templates/default'),
+    os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
+    os.path.join(SRC_DIR, 'templates/default/expedient/common'),
+    os.path.join(SRC_DIR, 'python/vt_plugin/views/templates/default'),
 ]
 append_to_local_setting(
     "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load breadcrumbs %}
+
+{% block title %}Help{% endblock %}
+
+{% block content %}
+<style type="text/css" media="screen">
+	.toc1 { display: block; margin-top: 10px; font-weight: bold; }
+	.toc2 { display: block; margin-top: 5px; }
+	.toc3 { display: block; margin-top: 0px; }
+	h1 {margin-top: 20px;}
+	h3 {margin: 5px 0;}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+	function add_headline(parent_list, headline, order, level) {
+		var li = document.createElement('div');
+		var toca = document.createElement('a');
+		var heada = document.createElement('a');
+		toca.innerHTML = order + ' ' + headline.innerHTML;
+		toca.href='#toc' + order;
+		toca.className = 'toc'+level.toString();
+		heada.name='toc' + order;
+		headline.parentNode.insertBefore(heada, headline);
+		headline.innerHTML = order + ' ' + headline.innerHTML;
+
+		li.appendChild(toca);
+		parent_list.appendChild(li);
+	}
+
+	function copy_node_list(nodes) {
+		res = []
+		for (var i=0; i < nodes.length; i++) {
+			res.push(nodes[i]);
+		}
+		return res;
+	}
+	
+	function get_order_string(orders, level) {
+		res = '';
+		for (var i=1; i <= level; i++) {
+			res += orders[i-1].toString() + '.';
+		}
+		return res;
+	}
+	// cleanup necessary. this script does not respect if a head type has been skipped. E.g.: <h1/>...<h3/>
+	function setup_toc() {
+		var toc = document.getElementById('toc');
+
+		var elms = copy_node_list(document.getElementsByTagName('*')); // needs to be copied, since the DOM tree changes while iterating
+		var orders = [1,1,1];
+		var last_level = 1;
+		for (var i=0; i < elms.length; i++) {
+			tagname = elms[i].tagName.toLowerCase();
+			if (((tagname == 'h1') || (tagname == 'h2') || (tagname == 'h3')) && (elms[i].className != "skiptoc")) {
+				var level = parseInt(tagname.substring(1,2));
+				if (level > last_level) { // level has changed to a sub level
+					orders[level-1] = 1;
+					orders[last_level-1] -= 1;
+				}
+				if (level < last_level) { // level has changed to a super level
+					orders[level-1] += 1;
+
+				}
+				var orderstring = get_order_string(orders, level);
+				add_headline(toc, elms[i], orderstring, level);
+				orders[level-1] += 1;
+				last_level = level;
+			}
+		}
+		toc.appendChild(parent_list);
+	}
+	window.onload = setup_toc;
+</script>
+
+
+<div class="main">
+	<h1 class="skiptoc">Contents</h1>
+	<div id="toc"></div><br/><br/>
+	<h1>Introduction</h1>
+	Expedient is a part of OFELIA's control framework. It enables experimenters to create and run experiments within the OFELIA federation. Through the user interface of Expedient, the user can deploy experiments, which include virtual machines, switch configurations and other resources. The control framework handles the separation of the experiments and the monitoring. Hence the user can fully concentrate on his/her research. 
+	<h2>The OFELIA project</h2>
+	The aim of the OFELIA project is to create a unique experimental facility that allows researchers to not only experiment on a test network but to control the network itself precisely and dynamically. To achieve this, the OFELIA facility is based on OpenFlow, which allows to virtualize and control the network environment through secure and standardized interfaces. OFELIA will provide high-performance OpenFlow equipment and a comprehensive control framework to enable experiments.
+	OFELIA’s consists of federated / interconnected islands. A set of five islands creates a diverse OpenFlow infrastructure that allows experimentation on multi-layer and multi-technology networks provided by the different islands. The facility extend all the way from standard Ethernet to optical and wireless transmission and also includes an emulation wall for scalability tests comprising thousands of nodes.
+	<h2>Expedient</h2>
+	Expedient was adopted from Stanford's implementation of <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">Expedient</a>. OFELIA's implementation has been adapted and optimized to accommodate the project’s goals. The software can automatically deploy virtual machines and handle the configuration of OpenFlow switches. Additionally, Expedient includes a comprehensive user and role management for projects and resources.
+	<h2>Disclaimer</h2>
+	Expedient is currently under heavy development. Hence, the screenshots depicted and the workflow shown may differ from the actual software. Furthermore, the software may contain minor bugs or inconveniences. Please contact <a href="mailto:info@fp7-ofelia.eu">info@fp7-ofelia.eu</a> if you have trouble using OFELIA’s controll framework.
+	<h2>Concepts</h2>
+	Expedient is loosely based on the principles of the <a href="http://www.geni.net/">GENI project</a>. Hence, some concepts were adapted
+	<h3>Project and slices</h3>
+	A project is an organizational entity, which groups multiple experiments and users. An experiment is called slice and consists of resources to be used and the associated configuration. Additionally, a slice encapsulates the state of an experiment (e.g. started, stopped, etc.).
+	<h3>Aggregates and slivers</h3>
+	For managing resources within a project, Expedient uses so called Aggregate Managers (AM). An aggregate manager handles the interaction with a specific resource type. Hence, there is an AM for virtual machines and one for the OpenFlow switch configuration.
+	When starting a slice each AM is responsible for deploying (starting and configuring) its assigned resources. By doing so, the AM typically creates so called slivers. A sliver is a running resource which has been instantiated by a resource provider. Example: A user has specified the need for 2 virtual machines in a slice. When starting the slice, Expedient instructs the aggregate manager to start to virtual machines. Thereafter, the AM connects to the hypervisor and instructs it to create two virtual machine instances. These two machines are instantiated resources, hence they are called slivers.
+	<h3>Users and roles</h3>
+	A user is a client to the OFELIA control framework. The system stores name, email, password for each client. This data is used to authenticate the person operating the software. Each user has roles associated to him/her. A role specifies the permissions for a project or experiment. E.g., a user may be <em>owner</em> of a project and may hence perform more actions than a user having <em>researcher</em> privileges.
+
+	<h2>Opt-In Manager</h2>
+	Expedient works closely with the Opt-In Manager. Opt-In Manager offers a GUI and acts as aggregate manager. Expedient is responsible for managing users, projects and slices with their resources. In order to cleanly separate OpenFlow experiments and their traffic from each other, it is necessary to dissect the flow space. When starting a slice Expedient sends a request to the Opt-In Manager. This request contains details for the desired flow space. The Opt-In Manager saves this request. When accessing the Opt-In Manager through its own GUI, island responsibles may subsequently approve this request. After approval, the software will then handle the assignment of the flow space.
+	<h1>Using Expedient</h1>
+	<em>This usage part has been adapted from <a href="http://yuba.stanford.edu/~jnaous/expedient/docs/user/tutorial.html" target=”_blank”>Stanford’s Expedient Tutorial</a>.</em><br/>
+	<h2>Overview</h2>
+	The home page has four sections:
+	<ul>
+	<li>Messages: Here you can look at messages you have received, delete old ones, and send messages to other users.</li>
+	<li>Aggregates: This is a list of aggregate managers that are available in Expedient. You can use this section to add and remove aggregate managers. You will need permission to manage aggregate managers.</li>
+	<li>Projects: This section will list the projects of which you are a member.</li>
+	<li>Permission Management: Here you can see a list of pending permission requests that others have made to you.</li>
+	</ul>
+	As noted above, users create slices within the context of projects. A project has a set of members with different roles. Roles give users permissions to do various actions in a project such as changing the project’s information, adding users to the project, or creating slices.
+
+	<h2>Create a user account</h2>
+	Go to the Expedient site, and click on the Register link. Fill-in your username, email, and password. An email will be sent to you to activate your account. Once activated, log into your account.
+	<h2>Create a project</h2>
+	Click on the Create button in the Projects section. You will most likely encounter a “Permission Denied” page. You will need to request the permission from a island manager who can allow you to create a project. Select a user to make the request  add a message that helps the manager to make a decision to allow you to create a project, and click Request.<br/>
+	Once your administrator approves the request, you can go back to the homepage and try to create the project again. Choose a simple descriptive short name, add a description for the project, and click Save. You will be redirected to the project’s detail page where you can manage the project. <br/>
+	Each project has a set of members. Each member can have multiple roles. Roles are project-specific and they define the set of permissions a member has for the project.<br/>
+	<h3>Project overview</h3>
+	The project page has the following sections:
+	<ul>
+	<li>Members: Shows list of members and links to add/remove/update members.</li>
+	<li>Role Requests: When members try an action they do not have permission to execute, they will be redirected to a page where they can request a role that allows them to execute that action. This section lists any roles other members have requested from the project manager (you).</li>
+	<li>Aggregates: This section lists the resource aggregates the project is allowed to use. The list is the same as the one on Expedient’s start page. Slices you create can only use the aggregates in this list.</li>
+	<li>Slices: List of the slices in the project.</li>
+	<li>Roles: List of roles in the project.</li>
+	</ul>
+	Each new project gets two default roles: “researcher” and “owner”. The “researcher” role only allows the user to create and delete slices, while the “owner” role allows a user to do everything (e.g. change the project’s details or issue permissions).
+	<h3>Add a Member</h3>
+	In order to add another member to the project, click on Add Members in the “Members” section. Select another user you want in the project, select researcher role, and click on Add. The delegate checkbox can be used to allow the user to give the roles you give him to others.
+	<h2>Create a Slice</h2>
+	To create a slice, click on Create Slice in the “Slices” section. Fill the form and click Save. The system will show the new slice’s detail page. The Management box on the right allows you to edit basic information about the slice, as well as start and stop the slice.
+	<h3>Configure an OpenFlow AM</h3>
+	TODO
+	<!-- When you add an OpenFlow Aggregate, you will need to provide the URL of the controller for your slice. All OpenFlow aggregates that you add will use the same information, although it may be requested multiple times. So if you change it for one, you also change it for all. -->
+	<h3>Configure a virtual machine AM</h3>
+	TODO
+	<h3>Add Resources</h3>
+	To add resources to the slice, you will need to use a “User Interface Plugin”. Each such plugin specializes in some subset of resources. Click on Manage Resources to select a plugin to add OpenFlow and virtual machine resources. Click on Open for the HTML Table UI plugin.<br/>
+	Here you’ll see information about the virtual machine and OpenFlow resources that are available for the slice. To select a tree from all the resources present, click on Select Tree. When you are done selecting the resources you want in the slice, click Next.
+	<h3>Select flow space</h3>
+	Select the flow space that you want the controller to receive by specifying it here. Click Save and then Next when done.
+	<!--Download RSA keys
+	Expedient generates an RSA key and uses it to create the PlanetLab slice for you. Here you can download the provate key that you can use to login to your PlanetLab nodes. Use the given login username to login to the PlanetLab nodes.-->
+	<h2>Start the slice</h2>
+	At this point nothing has been created/instanciated at the actual aggregate managers themselves. To start your slice, click on Start Slice.
+	<h2>Stop the slice</h2>
+	Click Stop Slice to free the resources associated with your slice at the resource aggregates.
+
+	<h1>Administering Expedient</h1>
+	<h2>Adding virtual machine aggregates</h2>
+	TODO
+	<h2>Adding OpenFlow aggregate managers</h2>
+	To be able to add an Aggregate to Expedient, you will need to be logged in as a user who has that permission or as a superuser. If you don’t have that permission, Expedient allows you to request it from a user who does when you try to perform that action.<br/>
+	When adding an OpenFlow aggregate manager, you will be telling Expedient where the Opt-In Manager for that aggregate manager can be found and telling it about static connections that are not automatically discovered. To add an OpenFlow aggregate manager from the Expedient dashboard page, select the OpenFlow Aggregate from the Aggregate Type drop-down menu under the Aggregates section, and click Add Aggregate.<br/>
+	Please fill in the shown form:
+	<ul>
+	<li>Name is the name of the aggregate. The name must be unique within Expedient.</li>
+	<li>Description should be some information on the aggregate to help users know whether to use this aggregate or not.</li>
+	<li>Geographic Location should be a location that can be found using Google Maps. It is the location of the aggregate.</li>
+	<li>Available should be checked if you want to make the aggregate available for users.</li>
+	<li>Usage Agreement is currently not used, but in later versions the plugin will require users to agree to it before using the aggregate.</li>
+	<li>Username is the name of the user that has been set for Expedient in the Opt-In manager, using the Set Clearinghouse button in the Opt-In manager.</li>
+	<li>Password is the password that has been set for Expedient in the Opt-In manager.</li>
+	<li>Max Password Age sets the maximum age of the password before it is automatically changed to a randomly generated one.</li>
+	<li>Server URL is the URL of the Opt-In Manager’s XML RPC interface. This is of the form https://<optin_manager.host>:<port>/xmlrpc/xmlrpc/. The trailing slash is important.</li>
+	<li>Verify Certificates should currently remain unchecked. Later versions will use this boolean to decide whether or not to verify the certificate chain coming back from the Opt-In manager.</li>
+	</ul>
+	After filling the form and clicking Create, you will be taken to a page to add static links. This is where you can add links that are not automatically discovered by the underlying infrastructure such as links between OpenFlow aggregate managers or between the OpenFlow aggregate manager and other types of resources such as virtual machine nodes.<br/>
+	You will need to click on Add Link to add the link. When done, click on Done. You should see the aggregate manager added in the list of installed aggregates in Expedient. If the aggregate has an OpenFlow switch, you should see a non-zero number under the Size column and a green checkmark under Status.<br/>
+	Changes in the underlying infrastructure and topology should be automatically reflected through callbacks in Expedient.
+</div>
+{% endblock %}

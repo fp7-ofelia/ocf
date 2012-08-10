@@ -28,7 +28,7 @@ $(document).ready(function() {
                         // pos[4] - source row index
                         // pos[5] - source cell (column) index
                         var pos = rd.get_position();
-                        
+			
                         if(pos[0] != pos[3]){
                                 row.insertCell(target_cell.cellIndex).setAttribute("class", "single condcell blankCell");
                                 row.insertCell(target_cell.cellIndex+1).setAttribute("class", "single condcell blankCell");
@@ -243,4 +243,20 @@ $(document).ready(function() {
 		}else{
 			return "False";
 		};
+	};
+
+	checkMaxWidth = function() {
+		var row = document.getElementById("cond_row");
+		var dragDiv = document.getElementById("drag");
+		//alert(row.offsetWidth <= dragDiv.offsetWidth * 0.96)
+		return (row.offsetWidth <= dragDiv.offsetWidth * 0.96);
+	};
+
+	 REDIPS.drag.myhandler_dropped_before = function(){ 
+		if (!checkMaxWidth()) { 
+			//alert ('checking width of row_cond => false'); 
+			return false;
+		}else{
+			return true; 
+		}; 
 	};		

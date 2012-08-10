@@ -34,3 +34,13 @@ AUTH_LDAP_BIND_DN = "uid=changeme,ou=admins,dc=fp7-ofelia,dc=eu"
 #In days
 SLICE_DEFAULT_EXPIRATION_TIME = 30
 
+#Theme Mmanagement
+
+THEME = 'default'
+
+#To create a theme, type a theme_name in THEME
+#Create the static directories [images, css, js] in SRC_DIR/static/expedient/clearinghouse/media/theme_name/
+#Create the template directories in TEMPLATE_DIRS/theme_name or /path/to/template/dir/THEME_NAME/foo/bar
+#The path and the name of the custom themes and the default must be the same
+#if some templates or static content are not in the theme_name dirs, the default content/templates will be authomatically loaded from default dirs
+
