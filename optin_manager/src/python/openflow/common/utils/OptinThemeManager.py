@@ -30,7 +30,6 @@ class OptinThemeManager():
         @staticmethod
         def getThemeStaticUrl(viewname, args):
 
-                print '-----------------------------------------------------------------------CUSTOM_URL------------------------------'
                 if OptinThemeManager._theme[1:] == OptinThemeManager._default:
                         return viewname
                 if not len(args)==1:
@@ -41,12 +40,10 @@ class OptinThemeManager():
                         return viewname
 
                 path = str(OptinThemeManager._mediaDir) + str(OptinThemeManager._theme) + '/' + str(OptinThemeManager._pathFromView[viewname]) + str(args[0]).replace("'","")
-                print '---------------------------------------PATH---------------------------------------------',path
                 #flag os.F_OK is to test the existence of the path
                 if os.access(path,os.F_OK):
                         viewname = OptinThemeManager._theme[1:] + '_' + viewname
 
-                print '--------------------------------------------------------------viewname',viewname
                 return viewname
 
         @staticmethod

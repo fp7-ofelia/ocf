@@ -30,7 +30,6 @@ class ExpedientThemeManager():
         @staticmethod
         def getThemeStaticUrl(viewname, args):
 
-		print '-----------------------------------------------------------------------CUSTOM_URL------------------------------'
                 if ExpedientThemeManager._theme[1:] == ExpedientThemeManager._default:
                         return viewname
                 if not len(args)==1:
@@ -41,12 +40,10 @@ class ExpedientThemeManager():
                         return viewname
 
                 path = str(ExpedientThemeManager._mediaDir) + str(ExpedientThemeManager._theme) + '/' + str(ExpedientThemeManager._pathFromView[viewname]) + str(args[0]).replace("'","")
-		print '---------------------------------------PATH---------------------------------------------',path 
                 #flag os.F_OK is to test the existence of the path
                 if os.access(path,os.F_OK):
                         viewname = ExpedientThemeManager._theme[1:] + '_' + viewname
 
-		print '--------------------------------------------------------------viewname',viewname
                 return viewname
 
 	@staticmethod
@@ -55,7 +52,7 @@ class ExpedientThemeManager():
 		#setting up TEMPLATE_DIRS to support themes	
 		if not ExpedientThemeManager._theme == ExpedientThemeManager._default:
 			ThemeTemplateDirs = ExpedientThemeManager.setThemeTemplateDirs()
-			settings.TEMPLATE_DIRS = tuple(ThemeTemplateDirs) + settings.TEMPLATE_DIRS
+			settings.TEMPLATE_DIRS = ThemeTemplateDirs + settings.TEMPLATE_DIRS
 		
 		#loading url templatetag
 		from django.template.loader import add_to_builtins
