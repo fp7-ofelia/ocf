@@ -140,13 +140,6 @@
 			};
 		});
 		
-		$("#cond_div").click(function() {
-			alert($("#cond_row").width())
-			if ( $("#cond_row").width() < "678"){
-				alert('lo es');
-                        	$.fancybox({'href': '{% url condition_create CurrentTable %}'});
-        		}
-		});	
 
 	displayRule = function(){
 		rule = "";

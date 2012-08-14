@@ -200,6 +200,11 @@
 				tcells[1].setAttribute("class", "single condcell");
                 		REDIPS.drag.init();
 
+				if (!checkMaxWidth()){
+					elem_delete(ident);
+					document.getElementById('exceptions').textContent = "WARNING. The condition you are trying to create is too large.";
+				}
+
 				$.fancybox.close();
 				change_width();
 				cond_assign();

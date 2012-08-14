@@ -64,6 +64,13 @@ $(document).ready(function() {
                                 $("#"+rd.obj.id).toggleClass("selected");
                         };
                 };
+
+		rd.myhandler_dropped_before = function(){
+                if (!checkMaxWidth()) {
+			document.getElementById('exceptions').textContent = "WARNING. The Drag zone cannot admit more conditions. Please group some conditions and try again.";
+                        return false;
+                };
+        };
 }); // End document.ready()
 
         removeAdjacentCells = function(source_cell){
@@ -248,15 +255,7 @@ $(document).ready(function() {
 	checkMaxWidth = function() {
 		var row = document.getElementById("cond_row");
 		var dragDiv = document.getElementById("drag");
-		//alert(row.offsetWidth <= dragDiv.offsetWidth * 0.96)
-		return (row.offsetWidth <= dragDiv.offsetWidth * 0.96);
+		
+		return (row.offsetWidth <= dragDiv.offsetWidth * 0.95);
 	};
 
-	 REDIPS.drag.myhandler_dropped_before = function(){ 
-		if (!checkMaxWidth()) { 
-			//alert ('checking width of row_cond => false'); 
-			return false;
-		}else{
-			return true; 
-		}; 
-	};		
