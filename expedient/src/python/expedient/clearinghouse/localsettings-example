@@ -43,4 +43,6 @@ THEME = 'default'
 #Create the template directories in TEMPLATE_DIRS/theme_name or /path/to/template/dir/THEME_NAME/foo/bar
 #The path and the name of the custom themes and the default must be the same
 #if some templates or static content are not in the theme_name dirs, the default content/templates will be authomatically loaded from default dirs
+##Note: In default template dirs there are symbolic links. In order to create your html themes, you can create a common folder instead the symbolic link.
+
 
