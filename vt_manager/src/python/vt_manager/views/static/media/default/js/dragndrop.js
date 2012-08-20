@@ -66,10 +66,13 @@ $(document).ready(function() {
                 };
 
 		rd.myhandler_dropped_before = function(){
-                if (!checkMaxWidth()) {
+		if (!checkMaxWidth()) {
 			document.getElementById('exceptions').textContent = "WARNING. The Drag zone cannot admit more conditions. Please group some conditions and try again.";
-                        return false;
-                };
+			return false;
+		}
+		else {
+			document.getElementById('exceptions').textContent = "";
+		};
         };
 }); // End document.ready()
 
