@@ -15,7 +15,8 @@ class ControllerMappings():
 					
 					#VM mappings
 					#XXX: This mappings only alows ONE virtual machine in the xml, otherwise the metaObj parameters of the others vms will not be evaluated
-
+					
+					"number.vms":ControllerMappings.getNumberOfVMs,	
 				 	"vm.name": "metaObj.server.virtual_machines[0].get_name()",
                                 	#"vm.uuid": "metaObj.server.virtual_machines[0].get_uuid()",
 					"vm.status":"metaObj.server.virtual_machines[0].get_status()",
@@ -39,6 +40,7 @@ class ControllerMappings():
 					#"vm.configurator":"metaObj.server.virtual_machines[0].xen_configuration.get_configurator()",
 
 					"vm.memory_mb": ControllerMappings.getVMMemory,
+					
 					
 					#DEPRECATED:XXX"vm.memory_mb":"metaObj.server.virtual_machines[0].xen_configuration.get_memory_mb()",
 					
@@ -81,5 +83,8 @@ class ControllerMappings():
 
 	@staticmethod
 	def getNumberOfVMs(metaObj):
-		pass		
+		from vt_manager.models import VirtualMachine
+
+		projectUUID = str(metaObj.server.virtual_machines[0].get_project_id())
+		return len(VirtualMachine.objects.filter(projectId = projectUUID))		
 
