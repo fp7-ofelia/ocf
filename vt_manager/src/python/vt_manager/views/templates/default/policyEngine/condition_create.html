@@ -204,6 +204,9 @@
 					elem_delete(ident);
 					document.getElementById('exceptions').textContent = "WARNING. The condition you are trying to create is too large.";
 				}
+				else {
+					document.getElementById('exceptions').textContent = "";
+				}
 
 				$.fancybox.close();
 				change_width();
