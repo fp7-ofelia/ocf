@@ -11,6 +11,9 @@ import uuid
  
 '''
 
+RAM = 512
+NVMS = 10
+
 class RuleTableManager():
 
 	#RuleTableManager atributes
@@ -33,7 +36,6 @@ class RuleTableManager():
 	_persistenceFlag = True
 	_policyType = True #True: Accept; False:Deny
  	
-	
 	#Main methods 
 #	@staticmethod
 #        def getInstance(name = None):
@@ -57,7 +59,8 @@ class RuleTableManager():
 		
 		with RuleTableManager._mutex:
 			RuleTableManager._instance = RuleTable.loadOrGenerate(name, mapps, RuleTableManager._defaultParser, RuleTableManager._defaultPersistence, RuleTableManager._persistenceFlag, RuleTableManager._policyType, uuid.uuid4().hex)
-			return RuleTableManager._instance
+				
+		return RuleTableManager._instance
 
 	#RuleTableMethods
 	@staticmethod
@@ -89,10 +92,10 @@ class RuleTableManager():
 	@staticmethod
 	def editRule(rule,enable,priority,PreviousPriority,tableName):
 
-                #When the IM is editing a Rule, a new one is added to the top of the ruleSet(the edited rule).Here is known position.
+                #When the IM is editing a Rule, a new one is added to the top of the ruleSet(the edited rule).Here is a known position.
                 #Then a remove of the "old rule" is done. This rule is in previousPriority + 1 beacuse the addition of the edited rule
                 #Finally the edited rule in pos. 0 is moved to the priority position
-                #This aproach is maked in this way to avoid to lose the removed Rule if the edited rule has any exception.
+                #This aproach is maked in this way to avoid to lose the removed Rule if the edited rule raises any exception.
                 RuleTableManager.AddRule(rule,enable,0, None, None,False,tableName)
                 RuleTableManager.RemoveRule(None,(int(PreviousPriority)+1),tableName)
                 RuleTableManager.MoveRule(priority,None,0)
@@ -271,3 +274,21 @@ class RuleTableManager():
                                 	if index == num:
                                         	PriorityList.pop(PriorityList.index(num))
         	return index, PriorityList
+
+#	@staticmethod
+#	def setDefaultRule(RAM,NVMS,name=None):
+#
+#		RuleTableManager.getInstance()
+#
+#		if not RuleTableManager.getRuleSet():
+
+#			if RuleTableManager.GetPolicyType():
+#				operator = '>'
+#				value = 'deny'
+#			else:
+#				operator = '<='
+#				value = 'accept'
+
+#			rule = 'if ((number.vms %s %s) && (vm.memory_mb %s %s)) then %s  denyMessage You cannot request more than %s vms or %sMBytes/vm #Main Rule' %(operator,NVMS,operator,RAM,value,NVMS,RAM) 
+		
+#			RuleTableManager.AddRule(rule)
