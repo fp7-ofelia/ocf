@@ -38,7 +38,7 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
         fi
     done
 
-if [ -f $OFELIA_DIR/oxa/ ]; then
+if [ -d $OFELIA_DIR/oxa/ ]; then
 	local GIT_DIR="$OFELIA_DIR/oxa/repository/"
 else
 	local GIT_DIR="$OFELIA_DIR"
@@ -62,11 +62,11 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#Move original files to temp folder
 	TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
-	if [ -f /opt/tmp ]; then
+	if [ ! -d /opt/tmp ]; then
 		mkdir -p /opt/tmp 
 	fi
 
-	if [ -f $OFELIA_DIR/oxa/ ]; then
+	if [ -d $OFELIA_DIR/oxa/ ]; then
                 CF_AGENT_INSTALL=0
                 TARGET_DIR="oxa/repository/"
 		mv $OFELIA_DIR/$TARGET_DIR $TMP_DIR || error "Maybe some directory is not present?"
@@ -124,9 +124,15 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	warning "Old repository backup files are stored at $TMP_PATH. Consider deleting them after checking everything is working..."
 	exit 0
-
-elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
-        error "Error ocurred. Probably you have not executed first the $NO_OFELIA_SCRIPT script. Please do it and restart ofver..."
+else
+	# Not an Ofelia installation and not downloaded from Git-hub
+	if [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
+		warning "An error occurred. You have probably not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
+	else
+		#XXX What to do when [[ $OFELIA == 0 ]] && [[ $NEW_REPO == 0 ]], [[ $OFELIA == 0 ]] && [[ $GITHUB == 1 ]], etc?
+		warning "An error occurred. This is not an Ofelia installation or either the sources were downloaded from a non-supported site"
+	fi
+	unlock
 	cd $TMP_PATH
 	exit 1
 fi
