@@ -14,6 +14,12 @@ printHeader "info#" "Using default post-install-hook module..."
 print "Starting apache2..."
 /usr/sbin/service apache2 restart
 
+if [$OFELIA == 1];then
+	print "setting default rule/s"
+	#Setting Default Policies
+	python $SRC_DIR/bin/versions/default/install/tools/DefaultPolicyEngineRules.py
+fi
+
 #Cleaning the house
 
 #Testing
