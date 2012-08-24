@@ -15,7 +15,7 @@ print "Starting apache2..."
 /usr/sbin/service apache2 restart
 
 if [$OFELIA == 1];then
-	print "setting default rule/s"
+	print "Setting default PolicyEngine Rules"
 	#Setting Default Policies
 	python $SRC_DIR/bin/versions/default/install/tools/DefaultPolicyEngineRules.py
 fi

@@ -3,7 +3,7 @@ import os
 import sys
 from os.path import dirname, join
 
-PYTHON_DIR = os.getcwd()+'/../src/python/'
+PYTHON_DIR = os.getcwd()+'/../../../../../src/python/'
 print PYTHON_DIR
 
 # This is needed because wsgi disallows using stdout
@@ -23,7 +23,7 @@ RuleTableName = None #leave it to None if you want to put the default rule/s int
 NVMS = 10
 RAM = 256
 
-if not RuleTableMAnager.GetRuleSet(RuleTableName):
+if not RuleTableManager.GetRuleSet(RuleTableName):
 	if RuleTableManager.GetPolicyType(RuleTableName):
 		operator = '>'
         	value = 'deny'
