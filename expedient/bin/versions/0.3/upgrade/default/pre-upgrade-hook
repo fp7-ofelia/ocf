@@ -67,11 +67,11 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	fi
 
 	if [ -d $OFELIA_DIR/oxa/ ]; then
-                CF_AGENT_INSTALL=0
+                CF_AGENT_INSTALL=1
                 TARGET_DIR="oxa/repository/"
 		mv $OFELIA_DIR/$TARGET_DIR $TMP_DIR || error "Maybe some directory is not present?"
         else
-                CF_AGENT_INSTALL=1
+                CF_AGENT_INSTALL=0
                 TARGET_DIR="."
 		mv $OFELIA_DIR $TMP_DIR || error "Maybe some directory is not present?"
 		mkdir -p $OFELIA_DIR
@@ -96,7 +96,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	    done
 
 	#Restore non tracked files from tmp backup
-	if [ $CF_AGENT_INSTALL == 1 ]; then
+	if [ $CF_AGENT_INSTALL == 0 ]; then
 		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
 		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
 		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.key/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.key folder"
@@ -108,9 +108,9 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 		cp -p $TMP_DIR/vt_manager/.currentVersion $OFELIA_DIR/vt_manager/.currentVersion || error "Could not copy vt_manager's .currentVersion file"
 		cp -p $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
 		cp -p $TMP_DIR/optin_manager/.currentVersion $OFELIA_DIR/optin_manager/.currentVersion || error "Could not copy optin's .currentVersion file"
-	elif [ $CF_AGENT_INSTALL == 0 ]; then
+	elif [ $CF_AGENT_INSTALL == 1 ]; then
 		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
-		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
 	fi
 
 	#Remove temp folder?
@@ -129,7 +129,6 @@ else
 	if [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
 		warning "An error occurred. You have probably not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
 	else
-		#XXX What to do when [[ $OFELIA == 0 ]] && [[ $NEW_REPO == 0 ]], [[ $OFELIA == 0 ]] && [[ $GITHUB == 1 ]], etc?
 		warning "An error occurred. This is not an Ofelia installation or either the sources were downloaded from a non-supported site"
 	fi
 	unlock
