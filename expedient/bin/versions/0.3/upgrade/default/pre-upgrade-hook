@@ -14,7 +14,7 @@ OFELIA_DIR=/opt/ofelia
 
 local TMP_PATH=$PWD
 
-cd $OFELIA_DIR || error "Target directory does not exit anymore?"
+cd $OFELIA_DIR || error "Target directory does not exist anymore?"
 
 #Check for OFELIA installation
 OFELIA="none"
@@ -27,14 +27,14 @@ print "Shutting down apache2..."
 
 while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
     do
-        echo "Is this an official OFELIA'island istallation (yes/no):"
+        echo "Is this an official OFELIA island installation (yes/no):"
         read OFELIA
         if [ $OFELIA == yes ]; then
             OFELIA=1
         elif [ $OFELIA == no ]; then
             OFELIA=0
         else
-            echo "Not valid option. Please say yes/no"
+            echo "Not a valid option. Please answer yes/no"
         fi
     done
 
@@ -80,7 +80,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	cd $OFELIA_DIR	
 
 	#Ask for OFELIA credentials
-        echo "Please enter your OFELIA username.Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+        echo "Please enter your OFELIA username. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
 
 	RERUN="none"
 	while [ $RERUN != 0 ]
@@ -91,7 +91,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 		#Clone new repo in old location
 		git clone ssh://$USERNAME@alpha.fp7-ofelia.eu/home/ofelia/ofelia $TARGET_DIR || RERUN=1
 		if [ RERUN == 1 ]; then
-			echo "Insert your username again please"
+			echo "Insert your username again, please"
 		fi
 	    done
 
@@ -118,20 +118,25 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 
 	#restart ofver from appropiate directory
 	cd $TMP_PATH
-	print "Repo Migration done, restarting ofver..."
+	print "Repo migration done, restarting ofver..."
 	unlock
 	restartOfverInstance
 
 	warning "Old repository backup files are stored at $TMP_PATH. Consider deleting them after checking everything is working..."
 	exit 0
-else
-	# Not an Ofelia installation and not downloaded from Git-hub
-	if [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
-		warning "An error occurred. You have probably not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
-	else
-		warning "An error occurred. This is not an Ofelia installation or either the sources were downloaded from a non-supported site"
-	fi
+elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
+	warning "An error occurred. You have probably not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
 	unlock
 	cd $TMP_PATH
 	exit 1
 fi
+
+# Installing pyPElib
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
