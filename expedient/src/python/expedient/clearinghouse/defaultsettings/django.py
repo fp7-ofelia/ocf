@@ -140,8 +140,6 @@ append_to_local_setting(
   
 ROOT_URLCONF = 'expedient.clearinghouse.urls'
 
-THEME = 'default'
-
 TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates/default'),
     os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),

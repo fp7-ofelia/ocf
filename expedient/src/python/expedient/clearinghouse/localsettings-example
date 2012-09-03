@@ -34,15 +34,10 @@ AUTH_LDAP_BIND_DN = "uid=changeme,ou=admins,dc=fp7-ofelia,dc=eu"
 #In days
 SLICE_DEFAULT_EXPIRATION_TIME = 30
 
-#Theme Mmanagement
-
-THEME = 'default'
-
+#Theme Manager
 #To create a theme, type a theme_name in THEME
-#Create the static directories [images, css, js] in SRC_DIR/static/expedient/clearinghouse/media/theme_name/
-#Create the template directories in TEMPLATE_DIRS/theme_name or /path/to/template/dir/THEME_NAME/foo/bar
-#The path and the name of the custom themes and the default must be the same
-#if some templates or static content are not in the theme_name dirs, the default content/templates will be authomatically loaded from default dirs
-##Note: In default template dirs there are symbolic links. In order to create your html themes, you can create a common folder instead the symbolic link.
-
+#Create the theme_name's media directory and the static directories [images, css, js] in SRC_DIR/static/expedient/clearinghouse/media/theme_name/ as needed.
+#For templates (.html) files add a directory called theme_name in the same location as your default TEMPLAES_DIR (check django.py file) as needed.
+#Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration for more information on how to install new themes for OCF.
+THEME = 'default'
 

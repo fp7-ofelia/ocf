@@ -140,3 +140,6 @@ print "Installing pypelib_latest_all.deb..."
 
 print "Removing temporary files..."
 rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?"
+

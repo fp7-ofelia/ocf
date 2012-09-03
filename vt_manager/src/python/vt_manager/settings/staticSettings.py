@@ -9,9 +9,6 @@ from django.conf import settings
 from os.path import dirname, join
 
 
-#theme
-THEME = 'default'
-
 #EMAIL_HOST = "smtp.gmail.com"
 DEFAULT_FROM_EMAIL = "OFELIA-noreply@fp7-ofelia.eu"
 EMAIL_USE_TLS=True
