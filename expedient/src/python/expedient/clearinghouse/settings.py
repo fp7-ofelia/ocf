@@ -92,7 +92,7 @@ GCF_BASE_NAME = "expedient//your_affiliation"
 GCF_URN_PREFIX = "expedient:your_afiliation"
 
 #OFREG URL
-OFREG_URL = "https://fuzzy.eict.fp7-ofelia.eu"
+OFREG_URL = " https://register.fp7-ofelia.eu"
 OFREG_RESET_PATH = '/password_reset/forgotten'
 
 
