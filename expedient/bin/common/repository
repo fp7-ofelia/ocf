@@ -23,7 +23,7 @@ function recoverUpgradeState(){
 
 function upgradeOfverFromRepo(){
 	#Call user-defined code to upgrade ofver code (and if in-branch the app code)
-	source "$EXECPATH/repo" || error "Could not load $EXEC_PATH/repo script to upgrade ofver code" $NO_RESCUE 	
+	source "$EXECPATH/repo" || error "Could not load $EXECPATH/repo script to upgrade ofver code" $NO_RESCUE 	
 }
 
 function restartOfverInstance(){

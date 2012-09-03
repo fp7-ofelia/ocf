@@ -232,8 +232,12 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             for name in  n.vms.all().filter(sliceId = sliceUUID).values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
-            for j,inter in enumerate(n.ifaces.all()):
-                vmInterfaces.append(dict(name="eth"+str(j+1), switch=str(inter.switchID), port=str(inter.port)))
+            j=1 #FIXME XXX: eth0 is mgmt 
+            for inter in n.getNetworkInterfaces():
+		inter = inter[1] #WTF: why QuerySet is not iterable straight away, and have to wrap it via enumerate
+                if not inter.isMgmt: 
+                    vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
+                    j+=1
             nodes.append(dict(
                     name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
                     #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))

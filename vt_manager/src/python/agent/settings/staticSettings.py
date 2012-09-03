@@ -1,3 +1,4 @@
+import logging
 '''
 	@author: msune
 
@@ -13,6 +14,9 @@ OXA_PATH="/opt/ofelia/oxa/"
 '''Log folder. Must exist!'''
 OXA_LOG="/opt/ofelia/oxa/log/"
 
+#Log level. Should be: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+#Default warning
+LOG_LEVEL="WARNING"
 
 '''XMLRPC over HTTPS server parameters'''
 #XMLRPC_SERVER_LISTEN_HOST='127.0.0.1' # You should not use '' here, unless you have a real FQDN.
@@ -21,6 +25,9 @@ XMLRPC_SERVER_LISTEN_PORT=9229
 
 XMLRPC_SERVER_KEYFILE='security/certs/agent.key'    # Replace with your PEM formatted key file
 XMLRPC_SERVER_CERTFILE='security/certs/agent.crt'  # Replace with your PEM formatted certificate file
+
+#HDs
+OXA_DEFAULT_SWAP_SIZE_MB=512
 
 ##FileHD driver settings
 '''Enable/disable file-type Hdmanager Cache FS'''
@@ -42,12 +49,14 @@ OXA_FILEHD_REMOTE_TEMPLATES="/opt/ofelia/oxa/remote/templates/"
 OXA_FILEHD_CREATE_SPARSE_DISK=False
 
 '''Nice priority for Copy&untar operations'''
-OXA_FILEHD_COPY_OPERATIONS_NICE_PRIORITY=15
+OXA_FILEHD_NICE_PRIORITY=15
 
 '''IONice copy&untar operations class'''
-OXA_FILEHD_COPY_IONICE_CLASS=2
+OXA_FILEHD_IONICE_CLASS=2
 '''IONice copy&untar operations priority'''
-OXA_FILEHD_COPY_IONICE_PRIORITY=7
+OXA_FILEHD_IONICE_PRIORITY=5
+'''/bin/dd block size(bs) for copy operations'''
+OXA_FILEHD_DD_BS_KB=32
 
 ##Ofelia Debian VM configurator parameters
 '''Kernel and initrd that will be used by machines'''

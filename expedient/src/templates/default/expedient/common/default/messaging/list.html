@@ -1,0 +1,67 @@
+{% extends "iframebase.html" %}
+
+{% block title %}Messages{% endblock title %}
+
+{% block head %}
+<script type="text/javascript">
+    function gotoall() {
+        window.location="{% url messaging_all %}";
+    }
+    function refresh() {
+        window.location = "{% url messaging_latest %}";
+    }
+    function toggle_all() {
+        s_all = document.getElementById("selectall");
+        elems = document.getElementsByName("selected");
+        for(i = 0; i < elems.length; i++) {
+            elems[i].checked = s_all.checked;
+        }
+    }
+    function gotocreate() {
+        window.location = "{% url messaging_create %}";
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="messages_div">
+	<form method="post" action="">{% csrf_token %}
+	    {% if latest %}
+		<table class="msg_table" id="messages">
+		    <tr>
+		        <th class="select_checkbox"><input type="checkbox" id="selectall" value="selectall" onclick={toggle_all();} /></th>
+		        <th class="type">Type</th>
+		        <th class="date">Date</th>
+		        <th class="time">Time</th>
+		        <th>Message</th>
+	        </tr>
+	        {% for a in latest %}
+	        <tr>
+	            <td class="select_checkbox"><input type="checkbox" name="selected" value="{{ a.id }}" /></td>
+	            <td class="type {{ a.type }}">{{ a.get_type_display }} {%if a.get_type_display == 'From User'%}<strong>{{a.sender}}</strong> {%endif%}</td>
+	            <td class="date">{{ a.format_date }}</td>
+	            <td class="time">{{ a.format_time }}</td>
+	            <td class="msg_text">{{ a.msg_text }}</td>
+	        </tr>
+	        {% endfor %}
+	    </table>
+	    <div class="iframe_button" id="latest_msg_buttons" style="margin-top:15px;">
+	        <input type="button" onclick="gotocreate();" value="Send Message" />
+	        <input type="button" onclick="gotoall();" value="Show All" />
+	        <input type="button" onclick="refresh();" value="Refresh" />
+	        <input type="submit" value="Delete Selected" />
+	    </div>
+	    {% else %}
+	    <div class="iframe_info_msg">
+	        <div class="info_msg">
+	            No new messages.
+	        </div>
+		    <div class="iframe_button" id="latest_msg_buttons">
+	        <input type="button" onclick="gotocreate();" value="Create" />
+		        <input type="button" onclick="refresh();" value="Refresh" />
+		    </div>
+	    </div>
+	    {% endif %}
+	</form>
+</div>
+{% endblock content %}

@@ -1,0 +1,432 @@
+{% extends "base_admin.html" %}
+{% block scripts %}
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script type="text/javascript" src="{% url js_media 'redips-drag.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
+<script>
+    $(document).ready(function() {
+        /* add tooltip to question mark */
+            $("img#mode_question").tooltip({
+            tip: "div#mode_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+        $("img#enable_question").tooltip({
+            tip: "div#enable_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+	$("img#advanced_question").tooltip({
+            tip: "div#advanced_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+	$("img#ConditionMappings_question").tooltip({
+            tip: "div#ConditionMappings_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+	$("img#ActionMappings_question").tooltip({
+            tip: "div#ActionMappings_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,150]
+        });
+    });
+</script>
+<script type="text/javascript" src="{% url js_media 'dragndrop.js' %}"></script>
+<script type="text/javascript">
+	/* Handlers */
+        $(document).ready(function() {
+		$("#formMode").change(function() {
+				$('#elements :input').attr('disabled', false);
+				document.getElementById("advancedRule").disabled = true;
+				$("#formModeWrapper").show("slow");
+				$("#formModeHeader").show("slow");
+				$(".mappingList").hide("slow");
+				displayRule();
+	});
+
+		$("#advancedMode").change(function() {
+			if ($('#advancedMode').is(':checked')) {
+ 				$('#elements :input').attr('disabled', true);
+				document.getElementById("advancedRule").disabled = false;
+				$("#formModeWrapper").hide("slow");
+				$("#formModeHeader").hide("slow");
+				$(".mappingList").show("slow");
+			}   
+	});
+	
+               	$("#CreateCondButton").click(function() {
+                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});
+        });
+		$("#ac").change(function() {
+                        document.getElementById("finalCond").value = " ";
+        });
+		$("#backSpace").change(function() {
+                        
+                        var n = 0;
+                        var a = document.getElementById("finalCond").value;
+                        var i = a.length;
+                        while (i >= 0) {
+                                if ((a[i] == "{") || (a[i] == "[") || (a[i]==',') || (a[i]==']') || (a[i]=='}')){
+                                        n = -1;
+                                }
+                                if (a[i] == " "){
+                                        n += 1;
+                                }
+                                if (n >= 2){
+                                        document.getElementById("finalCond").value = a.slice(0,(i+1));
+                                        break;
+                                }
+                                i -= 1;
+                        }
+         });
+		$("#assign").change(function() {
+			document.getElementById("finalCond").value += document.getElementById("conditionList").value + " ";
+	});		
+		$("#openPar").change(function() {
+                        document.getElementById("finalCond").value += "( ";
+        });
+		$("#closePar").change(function() {
+                        document.getElementById("finalCond").value += ") ";
+        });
+		$("#and").change(function() {
+                        document.getElementById("finalCond").value += "&& ";
+        });
+		$("#or").change(function() {
+                        document.getElementById("finalCond").value += "|| ";
+        });
+		$("#ok").change(function() {
+			displayRule();
+        });	
+		$("#value").change(function() {
+			displayRule();
+	});
+		$("#type").change(function() {
+			displayRule();
+        });
+		$("#action").change(function() {
+			displayRule();
+        });
+		$("#errorMsg").change(function() {
+			displayRule();
+        });
+		$("#description").change(function() {
+			displayRule();
+        });
+		$("#SubmitForm").click(function() {
+			if (document.getElementById("advancedMode").checked == true){	
+				checked = "True";
+			}else{
+				checked = check_cond_grouped();	
+			}
+			if (checked == "True"){
+				document.ruleCreate.submit();
+			}else{
+				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before adding the rule";
+			};
+		});
+			
+
+	displayRule = function(){
+		rule = "";
+		if (document.getElementById("finalCond").value != ""){
+			rule = rule + "if " + document.getElementById("finalCond").value;
+		}
+		if (document.getElementById("value").value != ""){
+			rule = rule + " then " + document.getElementById("value").value;
+		}
+		if (document.getElementById("type").value != ""){
+			if (document.getElementById("type").value == "terminal"){
+                                terminal = " ";
+                        } else {
+                                terminal = " nonterminal ";
+                        }
+			rule = rule + terminal;
+		}
+		if (document.getElementById("action").value != "" && document.getElementById("action").value != "None"){
+			rule = rule + "do " + document.getElementById("action").value;
+		}
+		if (document.getElementById("errorMsg").value != ""){
+			rule = rule + " denyMessage " + document.getElementById("errorMsg").value;
+		}
+		if (document.getElementById("description").value != ""){
+			rule = rule + " # " + document.getElementById("description").value;
+		}
+		document.getElementById("advancedRule").value = rule
+	}
+}); // End document.ready()
+</script>
+{% endblock %}
+{% block pagehead %}
+<div class="main">
+        <h1>Generate a new Rule</h1>
+</div>
+{% endblock pagehead %}
+
+{% block content %}
+<div class="main">
+
+<!-- Error List-->
+	<div id=exceptions style="color: red;font-size:14px">
+	{% if errors %}
+		<ul>
+			{% for error in errors %}
+				<p style="color: red;">{{error}}</p>
+			{% endfor %}
+		</ul>
+	{% endif %}
+			
+	</div> 
+	{% if not edit %}
+
+		<form action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
+	{% else %}
+		<form action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
+	{% endif %}
+	<table>
+		<td><b>Editing mode:</b></td>
+		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
+		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
+		<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+			<div class="tooltip" id="mode_help">Form mode edition allows to create a rule using the form fields below. Advanced Mode edition allows you to write rules according to RegexParser syntax
+			</div>
+		</td>
+	</table>
+
+   	<h3>General rule parameters</h3>
+	<div>	
+		<p>
+			Enable Rule:
+			{% if edit or saved  %}
+				{% if enabled %}
+					<input type="checkbox" name="enable" value="enable" checked></td>
+				{% else %}
+					<input type="checkbox" name="enable" value="enable"></td>
+				{% endif %}
+			{% else %}
+				<input type="checkbox" name="enable" value="enable" checked></td>
+			{% endif %}
+			<img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+	   	 	<div class="tooltip" id="enable_help">
+            			The priority of a Rule, is the position of the rule in the RuleTable ruleSet. The higher the priority, sooner will be processed. The Enable Checkbox enable or disable the rule. If the rule is enabled, will be processed else, the rule will be avoided when the process starts.
+            		</div>
+		</p>
+		<p>
+			Priority:
+			<select name="priority">
+				{% if edit or saved %}
+					<option selected value="{{ PrioritySel }}">{{ PrioritySel }}</option>
+				{% endif %}
+				{% if not edit and not saved %}
+					<option value="">Last</option>	
+				{% endif %}
+				{% for number in priorityList %} 
+					<option value ="{{ number }}">{{ number }}</option>
+				{% endfor %}
+		
+			</select>
+		</p>
+	</div> <!-- General rule parameters -->
+
+	<h3 id="formModeHeader">Form Mode</h3>
+	<div class="wrapper" width="750" id="formModeWrapper" style="text-align:left">
+		<!-- Drag-and-drop condition creation -->
+		<div id="drag">
+        		<h4>Rule Condition:</h4>
+			<div class="PEbox PEoperators">
+				<h4>Operators</h4>
+				<table border="0" align="left"> 
+			 	   	<td class="mark">
+						<div id="operator" class="drag operator clone">&&</div>
+					</td>
+					<td class="mark">
+						<div id="operator" class="drag operator clone">||</div>
+					</td>
+					<td class="mark">
+						<div id="not" class="drag not clone">not</div>
+					</td>
+				</table>
+			</div>
+			<div class="PEbox PEactions">
+				<h4>Actions</h4>
+				<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+				<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
+			</div>
+			<div id="cond_div">
+				<table class="cond_table" width="100%">
+					<tr id="cond_row"> 
+					{% if condition != "" and edit or saved and condition != "" %}
+						<td class="single condcell blankCell" style="width:33.333333333333336%"></td>
+						<td class="single condcell" style="width:33.333333333333336%">
+							<div id="operandc0" class="drag operand">
+								<div class="xcloser"><a href="javascript:elem_delete('operandc0')">&#10006;</a></div>
+							{{condition}}
+							</div>
+						</td>
+						<td class="single condcell blankCell" style="width:33.333333333333336%"></td>
+					{% else %}
+						<td class="single condcell blankCell"> </td>
+					{% endif %}
+					</tr>
+				</table>
+			</div>
+		</div>
+		<h4>Rule Parameters:</h4>
+		<div>
+				<table class="leftTable">
+					<tr>
+					<td>Value:</td>
+					<td>
+						<select name="value" id="value">
+		 				{% if edit or saved %}
+                        				<option selected value="{{ valueS }}">{{ valueS }}</option>
+						{% for value in valueD %}
+                        				<option value="{{ value }}">{{ value }}
+						{% endfor %}
+                				{% else %}
+							<option value="accept">accept</option>
+							<option value="deny">deny</option>
+						{% endif %}
+			    			</select>
+					</td>
+					</tr>
+					<tr>
+					<td>Type:</td>
+					<td>
+						<select name="type" id="type">
+						{% if edit or saved %}
+                        				<option selected value="{{ terminalS }}">{{ terminalS }}</option>
+							{% for terminal in terminalD %}
+ 	        	               				<option value="{{ terminal }}">{{ terminal }}</option>
+							{% endfor %}
+                				{% else %}
+	                				<option value="terminal">Terminal</option>
+        	        				<option value="nonterminal">Non-Terminal</option>
+						{% endif %}
+						</select>
+					</td>
+					</tr>
+					<tr>
+						<td>Action:</th>
+						<td><select name="action" id="action">
+						{% if edit or saved %}
+							<option selected value="{{ action }}">{{ action }}</option>
+							{% for act in actionList %}
+								<option value ="{{ act }}">{{ act }}</option>
+							{% endfor %} 
+						{% else %}
+							{% for act in mappings.keys %}
+								<option value ="{{ act }}">{{ act }}</option>
+							{% endfor %}
+						{% endif %}
+	    					</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Error Message:</td>
+						<td><input type="text" name="error_message" size="90" id="errorMsg" value="{{ errorMsg }}"></td>
+					</tr>
+					<tr>
+						<td>Description:</td>
+						<td><input type="text" name="description" size="90" id="description" value="{{ description }}"></td>
+					</tr>
+				</table>
+		</div>
+	</div> <!-- Wrapper -->
+	<!-- End Drag-and-drop condition creation -->
+
+	<h3>Advanced Mode</h3>
+	<div class="wrapper" id="advancedModeWrapper" style="text-align:left">
+		<div class="advancedRule">
+			<b>Rule:</b> 
+					<img id="advanced_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+            				<div class="tooltip" id="advanced_help" style="width:500px!important">
+      						Rule syntax is:<br> <b>if</b> Condition <b>then</b> accept/deny [<b>nonterminal</b>]  [<b>do</b>  Action<b>] [denyMessage</b>  ErrorMessage] [<b>#</b>Description]        	
+                			</div>
+				<input type="text" id="advancedRule" name="expertRule" disabled value =
+					{% if edit or saved %}
+						{% if terminalS == "nonterminal" %}
+							"if{{ condition }}then {{ valueS }} {{ terminalS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+						{% else %}
+							{% if action != "None" %}
+								"if{{ condition }}then {{ valueS }} do {{ action }} denyMessage {{ errorMsg }} # {{ description }}"
+							{% else %}
+								"if{{ condition }}then {{ valueS }} denyMessage {{ errorMsg }} # {{ description }}"
+							{% endif %}
+						{% endif %}
+					{% endif %}>
+		</div>
+		<div>
+			<div class="mappingList">
+			<h5>Condition Mappings:</h5><img id="ConditionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+                	<div class="tooltip" id="ConditionMappings_help">
+			The Condition mappings allow PolicyEngine relate the conditions of the rules with the requests of the users in order to evaluate if the request is possible or not.
+                	</div>
+			<div>
+				<table>
+					{% for map in ConditionMappings.keys %}
+						{% cycle ' ' ' ' None as t %}
+							{% if t %}
+                       						<td style="width:30%">{{ map }} </td>
+							{% else %}
+								<td style="width:30%">{{ map }} </td><tr>
+							{% endif %}
+					{% endfor %}
+					
+					
+				</table>
+			</div>
+			</div>
+			<div class="mappingList">
+			<h5>Action Mappings:</h5> <img id="ActionMappings_question" src= "{% url img_media 'question_mark_15x15.png'  %}"><div class="tooltip" id="ActionMappings_help">
+				The Action Mappings allow PolicyEngine relate the actions of the rules with possible fuction or methods programmed by the Island Manager
+			</div>
+			{% for action in ActionMappings.keys %}
+                        	{{ action }}{% if not loop.last %},{% endif %}
+			{% endfor %}
+			</div>
+		</div>
+	</div>
+		
+		<!-- Rest of form params -->
+		<input type="hidden" name="table" value="{{ CurrentTable }}">
+		<input id="finalCond" type="hidden"  size="85"  value="{{ condition }}" name="condition">
+		<input type="hidden" name="hidden_name" value="{{ ptable }}">
+		<input type="hidden" name="uuid" value="{{ rule_uuid }}">
+		<input type="hidden" name="ppriority" value="{{ priority }}">
+		<input type="hidden" name="saved" value="{{ saved }}">
+		<input type="hidden" name="edit" value="{{ edit }}">
+		<input type="hidden" name="load" value="True">
+		{% if edit %}
+			<input id="SubmitForm" type="button" value="Save Changes">
+			<input type="hidden" name="editing" value="1">
+		{% else %}
+		        <input id="SubmitForm" type="button" value="Generate Rule">
+			<input type="hidden" name="editing" value="0">
+		{% endif %}
+		<input type="hidden" id="conditionID" name="conditionID" value="" >
+	</form>
+	
+	
+	<div class="center">
+	        <a href="{% url rule_table_view %}">Policy Manager</a> |
+        	<a href="{% url dashboard  %}">Dashboard</a>
+	</div>
+</div>
+
+{% endblock content %}
+

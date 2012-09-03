@@ -1,4 +1,5 @@
-from threading import Thread
+from threading import Thread, Lock
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -6,23 +7,22 @@ from threading import Thread
 	Ofelia XEN Agent Service Thread class 
 '''
 
-
 class ServiceThread(Thread):
+
+	logger= Logger.getLogger()
 	
-	__method = None	
-	__param = None
-	callBackURL=None
+	def __init__(self,servMethod, param, url):
+		Thread.__init__(self)
+		self.__method = servMethod	
+		self.__param = param
+		self.callBackURL=url
 
 	@staticmethod
-	def startMethodInNewThread(servmethod,param,url):
-		thread = ServiceThread()	
-		thread.callBackURL = url
-		thread.startMethod(servmethod,param)
-
-	def startMethod(self,servmethod,param):
-		self.__method = servmethod
-		self.__param = param
-		self.start()
+	def startMethodInNewThread(serviceMethod, param,url):
+		thread=None
+		ServiceThread(serviceMethod, param, url).start()
 
 	def run(self):	
-		self.__method(self.__param)			
+		self.logger.debug("Starting service thread")
+		self.__method(self.__param)
+		self.logger.debug("Terminating service thread")

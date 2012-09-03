@@ -22,12 +22,12 @@ from vt_plugin.controller.VMcontroller.VMcontroller import *
 from vt_plugin.utils.ServiceThread import *
 from expedient.common.messaging.context_processors import messaging
 
-def goto_create_vm(request, slice_id):
+def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
 
     if request.method == "POST":
         if 'create_vms' in request.POST:
-            server_id=request.POST['selected_server']
+            server_id=request.POST['selected_server_'+agg_id]
             return HttpResponseRedirect(reverse("virtualmachine_crud",
                                                 args=[slice_id,server_id]))
         else:

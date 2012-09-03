@@ -4,7 +4,7 @@
 #       @author:lbergesio 
 #	@organization: i2CAT
 #	@project: Ofelia FP7
-#	@description: post-upgrade-hook module  
+#	@description: pre-upgrade-hook module  
 ###
 
 #inform user

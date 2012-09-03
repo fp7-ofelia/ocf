@@ -7,6 +7,7 @@ import time
 from threading import Thread, Lock
 
 from xen.provisioning.HdManager import HdManager
+from utils.Logger import Logger
 
 '''
 	@author: msune
@@ -24,6 +25,7 @@ class XendManager(object):
 	_mutex = Lock() 
 	_xendConnection = None #NEVER CLOSE IT 
 	_xendConnectionRO = None #Not really used 
+	logger = Logger.getLogger()
 
 	#Shell util
 	@staticmethod

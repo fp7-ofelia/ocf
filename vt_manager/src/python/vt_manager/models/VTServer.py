@@ -367,5 +367,5 @@ class VTServer(models.Model):
 
 
 	def getNetworkInterfaces(self):
-		return self.networkInterfaces.all()
+		return self.networkInterfaces.all().order_by('-isMgmt','id')
 

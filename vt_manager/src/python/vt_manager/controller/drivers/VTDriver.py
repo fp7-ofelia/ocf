@@ -49,7 +49,6 @@ class VTDriver():
 		for server in servers:
 			server = server.getChildObject()
 			serversChild.append(server)
-		print serversChild
 		return serversChild
 
 	
@@ -139,7 +138,6 @@ class VTDriver():
 
 	@staticmethod
 	def deleteServer(server):	
-		print "EN DRIVER"
 		server.destroy()
 
 #	@staticmethod
