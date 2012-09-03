@@ -14,7 +14,7 @@ SRC_DIR=/opt/ofelia/expedient/
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/expedient/clearinhouse/
+cd $SRC_DIR/src/python/expedient/clearinghouse/
 
 #Adding/Moving new variables to localsettings.py
 printHeader ">" "Adding new settings to localsettings.py ..."
