@@ -111,6 +111,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	elif [ $CF_AGENT_INSTALL == 1 ]; then
 		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
 		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/security/certs/agent.* $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/security/certs/ || error "Could not copy agent's .currentVersion file"
 	fi
 
 	#Remove temp folder?
