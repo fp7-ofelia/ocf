@@ -47,7 +47,7 @@ class ActionController():
 		baseIface = copy.deepcopy(actionIfaces[0])
 		actionIfaces.pop()
 		#for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
-		for index, vmIface in vm.getNetworkInterfaces():
+		for index, vmIface in enumerate(vm.getNetworkInterfaces()):
 			currentIface = copy.deepcopy(baseIface)
 			currentIface.ismgmt = vmIface.isMgmt
 			currentIface.name = "eth"+str(index)
