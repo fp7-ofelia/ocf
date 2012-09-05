@@ -109,9 +109,9 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 		cp -p $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
 		cp -p $TMP_DIR/optin_manager/.currentVersion $OFELIA_DIR/optin_manager/.currentVersion || error "Could not copy optin's .currentVersion file"
 	elif [ $CF_AGENT_INSTALL == 1 ]; then
-		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/ || error "Could not copy agent's mySettings.py"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/mySettings.py || error "Could not copy agent's mySettings.py"
 		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
-		cp -p $TMP_DIR/vt_manager/src/python/agent/security/certs/agent.* $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/security/certs/ || error "Could not copy agent's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/security/certs/agent.* $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/security/certs/ || error "Could not copy agent's certificates"
 	fi
 
 	#Remove temp folder?
@@ -133,6 +133,11 @@ elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
 fi
 
 # Installing pyPElib
+printHeader "info#" "Downloading pypelib libraries..."
+ 
+print "Downloading dependencies [pyparsing]..."
+/usr/bin/apt-get -y install python-pyparsing || error "Could not install dependencies (apt-get)"
+
 print "Downloading latest pypelib version..."
 /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
 
