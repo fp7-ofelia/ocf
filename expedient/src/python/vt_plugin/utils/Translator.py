@@ -99,6 +99,9 @@ class Translator():
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
             #for iface in sClass.interfaces.interface:
+            #VTServer instance needs to be saved in order to be able to create many-to-many relationships
+            #for the interfaces and VMs
+            sModel.save()
             for iface in sClass.interfaces.interface:
                 ifaceModel = None
                 if iface.ismgmt:
