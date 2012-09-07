@@ -18,7 +18,7 @@ cd $OFELIA_DIR || error "Target directory does not exist anymore?"
 
 #Check for OFELIA installation
 OFELIA="none"
-NO_OFELIA_SCRIPT="nombredelscript"
+NO_OFELIA_SCRIPT="ocfToGithubMigration"
 SCRIPT="none"
 
 #shutdown apache
@@ -126,7 +126,7 @@ if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
 	warning "Old repository backup files are stored at $TMP_PATH. Consider deleting them after checking everything is working..."
 	exit 0
 elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
-	warning "An error occurred. You have probably not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
+	warning "An error occurred. You are probably upgrading from the repository previously hosted at codebasin and you have not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
 	unlock
 	cd $TMP_PATH
 	exit 1

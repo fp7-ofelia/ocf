@@ -126,7 +126,7 @@
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
 		<tr>
-			<th>Requested Flowspace{%if allfs|length > 1%}s{%endif%} ({{allfs|length}}) <img align="absmiddle" id="req_fs_help" src="/static/media/img/question_mark_15x15.png">	</th>	
+			<th>Requested Flowspace{%if allfs|length > 1%}s{%endif%} ({{allfs|length}}) <img align="absmiddle" id="req_fs_help" src="{% url img_media 'question_mark_15x15.png' %}">	</th>	
 		<th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="requestedFlowspace{{agg.id}}">More information <span class="closed">&#x25BC;</span> </a></th>
 		</tr>
 	</table>
@@ -190,7 +190,7 @@
 		{% if gfs.0 == agg.id  and gfs.1 %}
 	    <div> 
     <table class="grantedFlowspaceHeader flowspaceHeader" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%} ({{ allfs|length}}) <img align="absmiddle" id="gr_fs_help" src="/static/media/img/question_mark_15x15.png"></th>
+    <tr><th>Granted Flowspace{%if allfs|length > 1%}s{%endif%} ({{ allfs|length}}) <img align="absmiddle" id="gr_fs_help" src="{% url img_media 'question_mark_15x15.png' %}"></th>
     <th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="grantedFlowspace{{agg.id}}">More information <span class="opened">&#x25B2;</span> </a></th></tr>
     </table>
 	</div>
@@ -250,8 +250,8 @@
 		{% endfor %} <!-- gfs in gfs_lis -->
 		</div> <!-- grantedFlowsapceContainer -->
 		{%else%}
-			{%if forloop.first%}
-			 <p style="font-size:10px">
+			{%if forloop.first and gfs.0 == agg.id%}
+			<p style="font-size:10px">
 				<img style="height:12px;" src="{% url img_media 'inactive.png' %}" alt="Flowspace not yet granted" title="Flowspace not yet granted">
 				 Flowspace has not been granted yet, which means slice controller will NOT receive any packet. Consider contacting Island Manager(s) involved if grant of the flowspace does not happen in a reasonable time-frame.
 			 </p>
