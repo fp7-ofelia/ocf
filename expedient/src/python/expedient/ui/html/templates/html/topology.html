@@ -14,7 +14,8 @@
 var data = {
     nodes: [
         {% for node in protovis_nodes %}
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", 
+//        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", 
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", x:Math.random()*740,y:Math.random()*400,
 		{% if node.type == "vt_agg"  %}
 			nodeVms: {{node.vmNames|safe }},
 			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
@@ -163,7 +164,8 @@ var force = vis.add(pv.Layout.Force)
 	.iterations(90);
 
 force.springLength(100);
-force.chargeConstant(0.1);
+//force.chargeConstant(0.1);
+force.chargeConstant(-10);
 force.chargeTheta(0.9);
 
 force.link.add(pv.Line)
