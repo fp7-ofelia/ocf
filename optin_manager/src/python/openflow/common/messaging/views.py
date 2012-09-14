@@ -22,7 +22,7 @@ def list_msgs(request, number=None):
             queryset=qs,
             date_field='datetime',
             num_latest=number,
-            template_name='expedient/common/default/messaging/list.html',
+            template_name='expedient/common/messaging/list.html',
             extra_context={'requested': number}
         )
         
@@ -48,6 +48,6 @@ def create(request):
     return create_update.create_object(
         request,
         form_class=MessageForm,
-        template_name="expedient/common/default/messaging/create.html",
+        template_name="expedient/common/messaging/create.html",
         post_save_redirect=reverse("messaging_created"),
     )
