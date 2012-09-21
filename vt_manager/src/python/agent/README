@@ -83,7 +83,33 @@ support Debian-like OSs currently.
     in the localsettings.py file.
 
 
-3. Upgrade instructions
+3. Additional steps per component (Agent)
+-----------------------------------------
+
+In order for XEN servers to be managed you need to install the OFELIA XEN
+Agent Daemon (OXAD) in each an every single server.
+
+3.1 Create the directory and clone the repository:
+
+    mkdir -p /opt/ofelia/oxa
+    git clone https://github.com/fp7-ofelia/ocf.git repository
+
+    The tree should look like:
+
+    marc@foix:/opt/ofelia/oxa$ tree . -L 1
+    └── repository
+    
+3.2 Trigger ofver [http://code.google.com/p/pypelib/]:
+
+    cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
+    ./ofver install
+
+Note #1: When installation starts, ofver will ask if it is an OFELIA
+project installation or not, and accordingly ofver will download the
+VMs templates from the proper storage.
+
+
+4. Upgrade instructions
 -----------------------
 
 For all the components the upgrade procedure is the following:
@@ -97,7 +123,7 @@ or for the OXAD:
     ./ofver upgrade
 
 
-4. Additional notes
+5. Additional notes
 -------------------
 
 Please have a look to Manuals [https://github.com/fp7-ofelia/ocf/wiki/Manuals]
