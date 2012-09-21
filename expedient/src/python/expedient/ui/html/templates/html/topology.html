@@ -34,9 +34,10 @@
 <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
 
     <!--<a href="#" onClick="return showAllInfo()"/>Show</a>&nbsp;-->
-    <a href="javascript: zoomIn(0.25)"/><img src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-   <a href="javascript: zoomOut(0.5)"/><img src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
-   <a href="javascript: zoomReset()"/><img src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+    <a href="javascript: regroup()"/><img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+    <a href="javascript: zoomIn(0.25)"/><img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
+   <a href="javascript: zoomOut(0.25)"/><img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
+   <a href="javascript: zoomReset()"/><img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
 </div>
 </div>
 
@@ -324,14 +325,31 @@ var force = d3.layout.force()
     .links(links)
     .start();
 
-var dataislands = []
+//XXX:Very ugly, needs improvement
+var islandsLocs = []
 for (i = 0; i< nIslands; i++){
-	dataislands[i] = {rx: (aw/2 + ah/2)/2, ry: ah/2, cx:(foci[i].x0+foci[i].x1)/2, cy:(foci[i].y0+foci[i].y1)/2, group: i,};
+	islandsLocs[i]=-1;
 }
 
-var islands = svg.selectAll("ellipse")
+nodeInitialPos = []
+for (i = 0; i< nodes.length; i++){
+	nodeInitialPos[i] = [nodes[i].x, nodes[i].y];
+	if (islandsLocs[nodes[i].group] == -1){
+		islandsLocs[nodes[i].group] = nodes[i].loc;
+	}
+}
+
+var dataislands = []
+for (i = 0; i< nIslands; i++){
+	dataislands[i] = {rx: (aw/2 + ah/2)/2, ry: ah/2, cx:(foci[i].x0+foci[i].x1)/2, cy:(foci[i].y0+foci[i].y1)/2, group: i, loc: islandsLocs[i]};
+}
+
+var islands = svg.selectAll(".island")
     .data(dataislands)
-  .enter().append("ellipse")
+  .enter().append("g")
+	.attr("class", "island")
+
+var iellipses = islands.append("ellipse")
     .attr("rx", function(d) { return d.rx; })
     .attr("ry", function(d) { return d.ry; })
     .attr("cx",function(d) { return d.cx; })
@@ -340,14 +358,18 @@ var islands = svg.selectAll("ellipse")
     .style("stroke", function(d) { return color(d.group%nIslands);}) 
     .style("opacity", 0.3)
     .style("stroke-opacity", 0.7)
-    .transition()
-                .style("stroke-width",3)
-		.style("stroke", function(d) { return d3.rgb(color(d.group%nIslands)).brighter(10);})
-		.duration(1500)
-islands.transition()
-           .delay(1500)
-           .style("opacity",0)
-           .duration(3000);
+
+var ilabels = islands.append("text")
+      .attr("text-anchor", "middle")
+      .attr("y", function(d){ return d.cy + d.ry*0.9})
+      .attr("x", function(d){ return d.cx})
+      .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
+      .style("opacity",1)
+      .style("cursor", "default")
+      .text(function(d) { return d.loc });
+
+//First ellipse animation on startup
+animate();
 
 var link = svg.selectAll(".link")
     .data(links)
@@ -409,9 +431,9 @@ node.on("mouseover", function (d, i){
 	        }
 	                tooltip.show(get_node_info_formated(d));
 	    
-	        //$("#selected_node_info").html(desc + ": " + d.nodeName);
 	        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName + " at " + d.loc);
 	        $("#selected_node_info").css("background-color", d.color );
+	        $("#selected_node_info").css("text-shadow", "-3px 2px 4px #eee");
 	        $("#selected_node_info").show();
 
 
@@ -443,6 +465,48 @@ function tick() {
   node.each(collide(.5));
   node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 };
+
+function animate(){
+
+iellipses.attr("rx", function(d) { return d.rx; })
+    .attr("ry", function(d) { return d.ry; })
+    .attr("cx",function(d) { return d.cx; })
+    .attr("cy", function(d) { return d.cy; })
+    .style("fill", function(d) { return color(d.group%nIslands); })
+    .style("stroke", function(d) { return color(d.group%nIslands);}) 
+    .style("opacity", 0.3)
+    .style("stroke-opacity", 0.7)
+
+ilabels.attr("text-anchor", "middle")
+      .attr("y", function(d){ return d.cy + d.ry*0.9})
+      .attr("x", function(d){ return d.cx})
+      .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
+      .style("opacity",1)
+      .text(function(d) { return d.loc });
+
+iellipses.transition()
+                .style("stroke-width",3)
+                .style("stroke", function(d) { return d3.rgb(color(d.group%nIslands)).brighter(10);})
+                .duration(1500)
+iellipses.transition()
+           .delay(1500)
+           .style("opacity",0)
+           .duration(3000);
+ilabels.transition()
+           .delay(1500)
+           .style("opacity",0)
+           .duration(3000);
+
+}
+
+function regroup(){
+	for (i=0; i<nodes.length; i++){
+		nodes[i].x = nodeInitialPos[i][0];
+		nodes[i].y = nodeInitialPos[i][1];
+	}
+	tick();
+	animate();
+}
 
 function collide(alpha) {
   var quadtree = d3.geom.quadtree(nodes);
