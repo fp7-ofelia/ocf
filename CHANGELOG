@@ -1,0 +1,473 @@
+=============
+PREVIOUS INFO
+=============
+
+Caption
+[+] Added features
+[*] Improved/Changed features
+[-] Missing features
+[T] Known issues/TODOs
+[B] Fixed bugs
+
+Components:
+
+EXP: Expedient
+OPT: Opt-in
+VTA: VT AM
+AGN: Agent
+OFR: Ofelia Registration
+OFVER: OFELIA VERsioning
+
+
+========
+VERSIONS
+========
+
+--------------------------------------------------
+v0.3RC1
+--------------------------------------------------
+Released: 03/09/2012
+
+/!\ Not for production
+
+Change log:
+
+[B] OFVER : Custom scripts for OCF v0.3RC1/0.3
+[*] ALL : Added Theme Manager to customize look & fill (images, css, colors, etc) of the different modules. Issue 14
+[B] OFVER : lock file is deleted when installation fails. Issue 12
+[*] EXP : Flowvisor password in Slice controller page not needed nor shown anymore. Issue 11
+[B] EXP : Fixed visualization errors of the flowspaces when having multiple OF AMs (federation). Issue 10
+[B] AGN : Fixed improperly partitioning of Swap on File Image hard disks. Issue 9
+[B] EXP,OPT : Fixed exception message when adding OF AM due to the lack of the proper xmlrpc-ssl/xxxx-ca.crt file. Issue 8
+[B] EXP,OPT : Fixed permission problem with AMs and flowspaces requests in intra-federation environments. Issue 5
+[*] VTA : Policy Engine based on pypelib and corresponding GUI integrated in VM Manager. Issue 3
+[B] EXP,VTA,AGN : Fixed interfaces mismatch between real topology and its visualization. Issue 2
+[B] EXP,VTA : Fixed bug when creating a VM having multiple VM AMs (federation). Issue 1
+
+Known issues/TODOs:
+
+[T] VTA : Check Server information update (Enable checkbox).
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
+v0.21.1
+--------------------------------------------------
+
+Released: 06/06/2012
+
+./ Production ready
+
+Change log:
+
+[B] OFVER : Custom scripts for OCF v0.21.1
+[B] EXP : Fixed bug in listResources method in Expedient producing no VMs in the Resources Visualization Panel.
+[B] EXP : Fixed small UI bug in the Resources Visualization Panel.
+[B] EXP : Fixed bug when adding a new Virtualilzation AM.
+
+Known issues/TODOs:
+
+[T] VTA : Check Server information update (Enable checkbox).
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] OFVER : If ofver run fails for wrong inputs, lockfile is not removed. Next run gets blocked.
+[T] OFVER : Incorrect handling of invalid inputs. Use default value or repeat question.
+[T] EXP : Improve error message if a project with duplicated UUID is attempted to be created.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
+v0.21
+--------------------------------------------------
+Released: 24/05/2012
+
+/!\ Outdated
+
+Change log:
+
+[B] OFVER : Custom scripts for OCF v0.21
+[B] EXP : Fixed and improved listResources method in Expedient to retrieve VMs status from VT AM.
+[B] VTA : Fixed and improved mechanism to perioically retrieve information from the agent about the status of the VMs.
+[B] VTA : Fixed and improved mechanism to retrieve information from the agent about the status of the VMs when agent is up again.
+[*] EXP : Improved UI in the Resources Visualization Panel adding collapsable sections.
+[B] EXP : Fixed bug in the generation of the RSPEC resulting in a wrong order of the VM's interfaces.
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] OFVER : If ofver run fails for wrong inputs, lockfile is not removed. Next run gets blocked.
+[T] OFVER : Incorrect handling of invalid inputs. Use default value or repeat question.
+[T] EXP : VMs status does not update.
+[T] EXP : Improve error message if a project with duplicated UUID is attempted to be created.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
+v0.2
+--------------------------------------------------
+Released: 16/05/2012
+
+/!\ Outdated
+
+Change log:
+
+[B] OFVER : Installation process checked. Permissions reorganization script checked.
+[+] EXP : UI cleaned.
+[+] ALL : Identification of TODOs in 0.2RC1 (check in 0.2RC1 changelog).
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] OFVER : If ofver run fails for wrong inputs, lockfile is not removed. Next run gets blocked.
+[T] OFVER : Incorrect handling of invalid inputs. Use default value or repeat question.
+[T] EXP : VMs status does not update.
+[T] EXP : Improve error message if a project with duplicated UUID is attempted to be created.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
+v0.2RC1
+--------------------------------------------------
+Released: 19/04/2012
+
+/!\ Outdated
+/!\ Not for production
+
+Change log:
+
+[B] OFVER : Wrong message targeting same version when force flag was used
+[B] OFVER : Remove unnecessary messages displayed.
+[B] VTA : Corrected the order VMs interfaces are bridged to server’s ones.
+[+] EXP : New merged view of Resource Visualization Panel and slice details pages. Workflow modified.
+[+] EXP : UI cosmetics in previous sections very enhanced.
+[B] EXP : Fixed problem with Start/Stop VM button which sometimes required 2 clicks.
+[+] EXP : Slice expiration mechanism disabled.
+[B+] EXP : Solved problem when Project owner cannot start slices from his project created by other users. Changes in permissions management.
+[B] EXP : Validation in project and slice names to avoid '@' character.
+[+] EXP : Better exception handling in Start/Stop slice.
+[+] EXP : Clean FlowVisor exception messages.
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] OFVER : If ofver run fails for wrong inputs, lockfile is not removed. Next run gets blocked.
+[T] OFVER : Incorrect handling of invalid inputs. Use default value or repeat question.
+[T] OFVER : Check script to update researchers permissions.
+[T] EXP : Change “Add aggregate Manager” button stile.
+[T] EXP : VMs status does not update.
+[T] EXP : Check if projects with duplicated UUIDs are created. Modify error message if required.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
+v0.14.2
+--------------------------------------------------
+Released: 23/03/2012
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP : Exception messaged raised by VT AM when it is not able to connect the agent treated in Message Panel.
+[+] EXP : Valildation in the project/slice name and description fields to filter not allowed characters.
+[+] EXP : Tested mail notifications and smptp server in EICT.
+[+] EXP : Help tooltip y user mail list in help page.
+[B] VTA : Visualization error in VT AM in the server's details page in Firefox for Linux.
+[*] VTA : Improved XMLRPC communicatin with VT_AM, using an XMLRPC_USER which is stored in local configuration variables not to have to provide superuser credentials when intrafederating.
+[*] OFVER : Added build-essential and python-pyparsing dependencies in the installers of all modules.
+[+] OFVER : Custom processes for OFELIA (project islands) and NON OFELIA (any one installing the OCF) installation/upgrades.
+[+] OFVER : VM template for NON OFELIA installations not using LDAP authentication and other custom OFELIA configurations. Dedicated storage space in codebasin.net.
+[+] OFVER : LDAP domain name added to /etc/hosts in the Expedient machine.
+[B] OFVER : Fixed ofver .ofverLock bug
+[B] OFVER : Fixed BUG in OFVER's agent's module, expecting non yet existing VM template HASH file when installing.
+[B] AGN : Fixed BUG in agent not handling file descriptors correctly which causes that agents crash after some time because the amount of open file descriptors.
+[B] AGN : Fixed BUG when unmounting VMs.
+[*] AGN : New VM template for OFELIA installations fixing LDAP and local authentication.
+[B] ALL : License file renamed.
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+
+
+--------------------------------------------------
+v0.14.1
+--------------------------------------------------
+Released: 13/12/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP : Fixed bug: Project owners and members correctly displayed in Dashboard.
+[*] ALL : Monitoring of expired sessions to prevent huge size of databases.
+[*] VTA : IP and Mac ranges details page showing mapping between IP/MAC and VM-interface/Project/Slice
+[*] ALL : Added Liscence file
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the VM's template.
+[T] AGN : Slow performance on SSH logins (probably related to above issue).
+
+
+--------------------------------------------------
+v0.14
+--------------------------------------------------
+Released: 16/11/2011
+
+/!\ Outdated
+
+Change log:
+
+[*] EXP : Projects and Slices can not be deleted if there are exisiting VMs. A message is displayed to the user in the Message Panel.
+[*] EXP : "Reset password" link in the login page supports ldap users by redirecting to ofreg and local users through the old reset system (email)
+[*] EXP : "Account" link redirects to ofreg for ldap users and to a local page for local users.
+[*] EXP : Several visual improvents and fixes
+[*] EXP : Servers bridges are not editable. Existing ones are shown in grey.
+[*] EXP : Help tooltip when creating a requesting a project to provide proper information (users were not filling this information correctly)
+[B] EXP : Introduced BUG in v0.13 because of which topology was not recovered when adding an OF AM for first time.
+[*] OFVER : ofver v0.21 deployed.
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the VM's template.
+[T] AGN : Slow performance on SSH logins (probably related to above issue).
+
+
+--------------------------------------------------
+v0.13
+--------------------------------------------------
+Released: 07/10/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP : Fixed bug of the topology map which was displaying wrong information regarding the port mapping of the switches connections.
+[*] ALL : Local Settings reorder.
+[*] EXP : can_create_project permission improved. When IM receives the request (email notification) would proceed to create the project and assign the user as "owner". The "owner" user will automatcally have the permissions to add new users to the project. "Researcher" users are not allowed to add members to the project. "Can Delegate" flag deleted.
+[*] EXP : Email Notification to the user when he is added to a Project.
+[*] EXP : Possibility to enable/disable local registration of users
+[*] EXP : Message pannel and Message center improved. Possibility of sending messages inside Expedient between users showing sender.
+[*] EXP : Mail notification to the user when some other user inside the clearinghouse sends him a message.
+[*] ALL : Software version and island name displayed in all the modules under the OFELIA logo.
+[*] OFVER : Custom upgrade script for v0.13
+[*] OPT: Email notification to the IM when a new FlowSpace request arrives
+[*] OPT: Email notigication to the user when his FlowSpace request has been attended.
+[B] EXP : Fixed bug when creating adding an OpenFlow AM (Identified by Nikos)
+[B] EXP : Fixed bug when creating projects, the LDAP was creating two projects with different names (one with the uuid attached and the other not)
+[*] EXP : New Set of admin users in the LDAP, one for each island.
+[B] EXP : Slice controller help tooltip fixed.
+[*] EXP : Help Tooltips next to the VM's names showing how to access them via ssh.
+[*] EXP/OPT : Granted FlowSpace recover by the Clearinhouse and displayed in the resources panel.
+[B] AGN : Supports same VM names in different projects
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the VM's template.
+[T] AGN : Slow performance on SSH logins (probably related to above issue).
+
+
+--------------------------------------------------
+v0.12
+--------------------------------------------------
+Released: 12/08/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP : Fixed bug Expedient was sometimes caching UUIDs of projects and slices, causing duplicated and non random UUID assignation.
+[B] EXP : Fixed some links in "Openflow resources reservation process" that were pointing to wrong locations.
+[*] EXP : UI improvements: added confirmation to VM deletion and added confirmation to "Done" button in Openflow "Openflow resources reservation process" process.
+[*] EXP : Notification email sent to the IM when project creation request is generated.
+[B] VTA : Solved bug preventing status bars of the network dashboard UI to be shown properly and other minor UI improvements.
+[B] VTA : VTAM was not handling correctly release of IP and MAC slots, hence leaking slots.
+[B] VTA : Was leaving already deleted slots in DB.
+[B] AGN : Fixed bug, LDAP SSH configuration was not scaping spaces in Project names, making users unable to login to the VMs. (Note that already created VMs will not be updated)
+[B] AGN : Missing XEN modules required by paravirtualized VMs now installed in the new template version. (Note that already created VMs will not be updated)
+[B] AGN : AGN was not correctly handling catched exceptions while cloning, and hence sometimes not deleting disks on error.
+[*] AGN: New version of VM template with improved software organization, precompiled OF software. (Note that already created VMs will not be updated)
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the VM's template.
+[T] AGN : Slow performance on SSH logins (probably related to above issue).
+[T] EXP : In early versions of Expedient, under one installation some strange errors on permission delegation were seen. However, in this final version of the release, this behaviour was unreproducible. Needs deeper testing.
+
+Missing Features:
+
+[-] EXP : Export VT Manager data model to VT plugin in Expedient.
+
+
+--------------------------------------------------
+v0.11
+--------------------------------------------------
+Released: 03/08/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP : Fixed bug when adding an OF AM and it has no flowvisor set.
+[+] EXP/VTA/AGN : More help tooltips along the configuration process for island managers.
+[+] EXP : Help page updated with links to the OFELIA User Documentation and OFELIA Help Desk.
+[B] EXP : Fixed bug when trying to delete Projects
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the VM's template.
+
+Missing Features:
+
+[-] EXP : Export VT Manager data model to VT plugin in Expedient.
+
+
+--------------------------------------------------
+v0.1
+--------------------------------------------------
+Released: 22/07/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] EXP/VTA : Resources hash mechanism for listing resources supports multiple VT Manager instances.
+[B] VTA : Some UI disadjustments (Chrome BUG).
+[B] EXP : Information messages for the user are automatically refreshed in the message panel.
+[+] VTA/AGN: New Default template for the VMs.
+[+] VTA/AGN: LDAP support for SSH in the VMs added.
+[+] AGN: New cloning process for creating VMs. Disks are created using dd and then template's filesystem is decompressed. Improved performance and reliability. Also changed priority of cloning processes to not affect VM's I/O rate.
+[+] VTA: AJAX implementation of GUI in order to update VM status and IPs without refreshing the page.
+[+] VTA : AJAX implementation of GUI in order to trigger actions over VMs without reloading pages.
+[B] VTA : Exceptions were not treated when trying to create VMs in a server not subscribed to any range.
+[B] VTA : Exceptions were not treated when trying to delete a server with existing VMs.
+[+] EXP/VTA/AGN : Settings files simplified.
+[+] EXP/VTA/AGN : OFELIA Version Manager (ofver) deployed: installation and upgrade processes now are extremely simplified by emans of a set of bash scripts. This tool will also allow smart upgrades between versions with particular workflows.
+
+Known issues/TODOs:
+
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] EXP : Not possible to delete projects
+[T] AGN : When connection is lost with LDAP even local users cannot login to the VMs; this is an incorrect configuration of the template.
+[T] EXP : When trying to add an OpenFlow AM and the Opt-In Manager has not the FlowVisor set, Expedient crashes
+
+Missing Features:
+
+[-] EXP : Export VT Manager data model to VT plugin in Expedient.
+
+
+--------------------------------------------------
+v0.1RC2
+--------------------------------------------------
+Released: 23/06/2011
+
+/!\ Outdated
+
+Change log:
+
+[*] EXP/VTA : Better error handling and rollback.
+[+] EXP : AJAX implementation of GUI in order to update VM status and IPs without refreshing the page.
+[+] EXP : AJAX implementation of GUI in order to realize action over VMs without reloading pages.
+[*] EXP/VTA : Improve data validators for VT Manager and Clearinghouse (Expedient) GUIs
+[+] VTA/AGN : Monitoring of VM state when connection with server agent is recovered.
+[*] EXP/VTA : Communication mechanism to list resources from VT Manager to Clearinghouse through hash value improved.
+[+] AGN: Server agent using libvirt for almost all tasks.
+[+] AGN: Server agent setup script to facilitate installation.
+[+] VTA: Server agent's password settable in Server configuration web page in VT Manager.
+[*] VTA : VT Manager data model completely redesign allowing:
+- Networking interfaces management totally improved for servers and VMs.
+- Definition of Mac Ranges and IP Ranges that servers can subscribe to.
+- Mac and IP exceptions configurable inside Mac and IP ranges.
+- Virtualization technology drivers to support servers not using Xen hypervisor (only Xen drivers and base class implemented so far).
+[+] EXP : Expedient is able to authenticate against LDAP and push projects and slices. Due to this, Expedient requires connectivity with the LDAP and a flag was created in the settings file to enable/disable this capability. (SSH and LDAP in VMs not finished yet).
+[B] Several bug fixing.
+[*] Several UI improvements.
+[+] EXP : Start/Stop slice in Expedient starts/stops VMs in the slice.
+[+] VTA : Information message displayed to all the users of the slice if an action over a VM is performed by the Island Manager through the VT Manager.
+[*] VTA : Settings configuration for VT Manager improved by isolating static and island dependent variables.
+
+Known issues/TODOs:
+
+[T] Resources hash mechanism does not work properly when more than one VT Manager are present.
+[T] Some UI disadjustments.
+[T] Information messages for the user are not displayed in the message panel if webpage is not refreshed .
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+
+Missing Features:
+
+[-] Finishing the SSH configuration in the VMs to allow them use the LDAP. This feature will probably require a new default template for VMs and updating the agent code.
+[-] VTA : AJAX in VT Manager GUI following Expedient GUI implementation.
+[-] OPT : Optin Manager change topology callback to Expedient.
+[-] EXP : Export VT Manager data model to VT plugin in Expedient.
+
+
+--------------------------------------------------
+v0.1RC1
+--------------------------------------------------
+Released: 18/04/2011
+
+/!\ Outdated
+
+Change log:
+
+[B] Lots of bug fixing
+[*] EXP/VTA : Monitoring mechanisms to ensure connectivity between Expedient-AM and VT_AM-agent
+[*] Improved monitoring(control) of the VMs and error recovery.
+[+] Now virtualization plugin informs of errors during the creation, start and stop.
+[*] New logos and customized UI.
+[+] New "Resource visualization panel"
+[*] VTA : Now links between switches and servers are shown, information is filled in VT_AM (visualization engine must be improved).
+[*] Now it can be specified where the servers are physically connected (switch and port); no more hardcoded bridge information in the configuration file for the VMs
+[*] Now VMs take as hostname the name of the VM.
+
+Known issues/TODOs:
+
+[T] VTA : Javascript bug regarding the addition of interfaces in the VT_AM (it deletes values in the form). Suggestion: first add all the interfaces needed, then put the values.
+[T] EXP : Reboot machine is NOT working; this is due to an obscure bug in the libvirt library (we might have to use stop and then start method of libvirt, as sometimes reboot method in libvirt silently fails).
+[T] EXP : Sometimes appears a NONE before Mgmt IP in the Resource visualization panel in Expedient. IP is correct though.
+[-] EXP : New information in visualization panel for the Openflow resources.
+[-] EXP/VTA : AJAX recovery of the VM status in both resource vis. panel in Expedient and VT_AM.
+
+
+--------------------------------------------------
+v0.1Alpha
+--------------------------------------------------
+Released: 15/03/2011
+
+/!\ Outdated
+
+Change log:
+
+[*] EXP : Customized version of Expedient; Apparence, simplification of the AMs selection on projects and slices (now is not necessary), plugin for Virtualization Aggregate Manager
+[*] OPT : Customized version of Optin Manager: only look&feel
+[*] EXP : Customized version of Expedient; Several things of apparence (look&feel, controls, visualization of topology...), simplification of the AMs selection on projects and slices (now is not necessary), plugin for Virtualization Aggregate Manager
+[*] OPT : Customized version of Optin Manager: only look&feel
+[*] VTA/AGN : XEN virtualization management (plugin + AM + agent)
+Known BUGS and improvements:
+[T] EXP : In the slice and project pages, Aggregate Managers box has to be deleted (since all the slices and projects use all AMs). In the slice a (unique) button must be put to specify Openflow controller instead of current approach
+[T] VTA : Look and feel of both VT_AM and plugin needs to be improved.
+[T] VTA : VT plugin fails to retrieve the status of the AM itself (it always OK status). while this is not corrected, the way to make sure Expedient is properly connected to the Virtualization AM, is to define a server in the AM (doesn't matter for the moment is not there ) try to allocate resource, and see that this servers is listed --> will be corrected soon.
+[T] VTA : still doesn't correctly manage situations were connectivity problems appear between AM and Agent in the XEN server (not yet implemented) --> will be corrected soon.
+[T] VTA : VT plugin still does not show servers on the topology (on process).
+[T] VTA : VT_plugin does not refresh status of the VM that have pending actions in process (will be corrected via AJAX).
+[T] EXP : Expedient DOES NOT use LDAP yet (LDAP code has not been merged to expedient in ofelia.development, since no LDAP server reachable for everyone is yet deployed)
+[T] EXP : Expedient does not populate slice info to LDAP, and Agent still does not configure VMs to restrict login to them based on LDAP slice groups (not yet implemented).
+[T] EXP : Expedient does not show in the topology the switch and host icons instead of boxes (this is indeed a bug from Stanford code that we will try to sort out).

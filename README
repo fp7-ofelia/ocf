@@ -1,0 +1,886 @@
+========
+OVERVIEW
+========
+
+OFELIA Control Framework (OCF) is a set of software tools for testbed
+management. It controls experimentation life-cycle; reservation,
+instantiation, configuration, monitoring and uninistantiation.
+
+Features:
+
+Full software stack: frontend, clearinghouse and resources managers
+(AMs) Support for mangement of Openflow, Virtual Machines (currently XEN)
+and Emulab resources.
+OCF is currently deployed in OFELIA FP7 project testbed, the European
+Openflow testbed. The ideas behind its architecture are heavily influenced
+by the experience of other testbed management tools and GENI architectural
+concepts. Take a look at Overview section for more details.
+
+
+You may check the full Wiki at https://github.com/fp7-ofelia/ocf/wiki
+
+
+=========
+USING OCF
+=========
+
+1. INSTALLATION AND CONFIGURATION MANUALS
+-----------------------------------------
+
+1.1 Requirements
+
+* One (or more) GNU/Linux Debian-like* system.
+* One (or more) GNU/Linux Debian-like* systems to be virtualized by XEN (For VM
+Manager installations only).
+
+Note: for none Debian-like OSs you will have to manually install components since
+OCF ofver-based [http://code.google.com/p/pypelib/] installation scripts only
+support Debian-like OSs currently.
+
+
+1.2 Installation procedure for Expedient, Optin and VM Manager
+
+    1.2.1 Install mysql server
+
+        apt-get install mysql-server
+
+    1.2.2 For each component create (example expedient) its own database. Use 
+    strong passwords.
+
+        mysql -p
+        mysql> CREATE DATABASE expedient342;
+        Query OK, 1 row affected (0.00 sec)
+        mysql> grant all on expedient342.* to userName@127.0.0.1 identified by 'password';
+        Query OK, 0 rows affected (0.00 sec)
+
+    1.2.3 If not already cloned, clone the OCF repository under folder /opt/:
+
+        cd /opt
+        git clone https://github.com/fp7-ofelia/ocf.git ofelia
+
+        Alternatively you can download the tarball and uncompress it to /opt/
+
+    1.2.4 Trigger ofver [http://code.google.com/p/pypelib/] installation by
+    doing for each component:
+
+        cd /opt/ofelia/{COMPONENT_NAME}/bin
+        ./ofver install
+
+        Where {COMPONENT_NAME} is either: expedient, optin or vt_manager
+        The following actions will take place:
+
+        * Install dependencies
+        * Build Certificates (see Note 1)
+        * Configure Apache
+        * Set file permissions
+        * Modify the localsettings.py or mySettings.py depending on the 
+        component being installed
+        * Populate database
+        * When installation starts, ofver will ask if it is an OFELIA
+        project installation or not. Select No (N) for non OFELIA testbeds.
+
+        Note1: When installing the component, you will need to create the
+        certificates for the Certification Authority (CA) first and for the
+        component later. Do not use the same Common Name (CN) for both of them,
+        and make sure that the CN you use in the component later certificate
+        (you can use an IP) is the same you then set in the SITE_DOMAIN field
+        in the localsettings.py file.
+
+
+1.3 Additional steps per component
+
+    1.3.1 VM Manager
+
+    In order for XEN servers to be managed you need to install the OFELIA XEN
+    Agent Daemon (OXAD) in each an every single server.
+
+    1.3.2 Procedure to install OXAD
+
+        1.3.2.1 Create the directory and clone the repository:
+
+            mkdir -p /opt/ofelia/oxa
+            git clone https://github.com/fp7-ofelia/ocf.git repository
+            The tree should look like:
+
+            marc@foix:/opt/ofelia/oxa$ tree . -L 1
+            └── repository
+    
+        1.3.2.2 Trigger ofver [http://code.google.com/p/pypelib/]:
+
+            cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
+            ./ofver install
+
+        Note #1: When installation starts, ofver will ask if it is an OFELIA
+        project installation or not, and accordingly ofver will download the
+        VMs templates from the proper storage.
+
+
+1.4 Additional notes
+
+Please have a look to Manuals [https://github.com/fp7-ofelia/ocf/wiki/Manuals]
+for further component configuration.
+
+You can use -f force flag on ofver to force installations/upgrades. Take a look
+at ./ofver -h help information for more details.
+
+
+2. UPGRADE INSTRUCTIONS
+-----------------------
+
+2.1 Upgrade procedure
+
+For all the components the upgrade procedure is the following:
+
+    cd /opt/ofelia/{COMPONENT_NAME}/bin
+    ./ofver upgrade
+
+or for the OXAD:
+
+    cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
+    ./ofver upgrade 
+
+
+2.2 Additional notes
+
+You can use -f force flag on ofver to force installations/upgrades. Take a look
+at ./ofver -h help information for more details.
+
+
+3. CONFIGURATION INSTRUCTIONS
+-----------------------------
+
+3.1 Control framework: Frontend (Expedient) configuration
+
+Disclaimer: the following configuration manual assumes that installation of the
+whole software has been done according to the installation manual.
+
+
+    3.1.1 localsettings.py configuration options (common)
+
+    General parameters
+    ------------------
+    FLAG    Values    Comments
+    ISLAND_NAME    String    Island/testbed name. Shown on the upper right corner
+    of the Web frontend
+    SITE_DOMAIN    String    Expedient host domain name
+
+    Root (Island Manager) account information
+    -----------------------------------------
+    FLAG    Values    Comments
+    ROOT_USERNAME    String    Expedient's root username
+    ROOT_PASSWORD    String    Expedient's root password
+    ROOT_EMAIL    String    Expedient's root email. This mail will be used to send
+    notifications
+
+    Database parameters
+    -------------------
+    FLAG    Values    Comments
+    DATABASE_USER    String    MySQL username
+    DATABASE_PASSWORD    String    MySQL password
+    DATABASE_HOST    String    MySQL host (e.g. 127.0.0.1)
+    DATABASE_NAME    String    Expedient database name.
+
+    LDAP support
+    ------------
+    FLAG    Values    Comments
+    ENABLE_LDAP_BACKEND    True/False    Enable LDAP Backend for user authentication
+    in coexistance or not with the MySQL users. Requires AUTH_LDAP_BIND_PASSWORD and
+    AUTH_LDAP_BIND_DN to be correctly setup
+    AUTH_LDAP_BIND_PASSWORD    String    LDAP BIND DN password
+    AUTH_LDAP_BIND_DN    String    LDAP BIND DN. Example
+    AUTH_LDAP_BIND_DN="uid=changeme,ou=admins,dc=fp7-ofelia,dc=eu"
+    LDAP_STORE_PROJECTS    True/False    Enable LDAP project member group storage
+    (to be used for instance by VM pam_ldap.so module). For non-OFELIA we recommend
+    to set it to False
+    ALLOW_LOCAL_REGISTRATION    True/False    Disables local (MySQL) user registration
+    mechanism, usually to force users to use LDAP registration mechanisms and/or to
+    temporally limit user registration.
+
+
+    3.1.2 GUI procedures
+
+    Login as root user to the frontend to perform administrative operations.
+
+
+    3.1.2.1 Adding OpenFlow Aggregate Manager in Expedient
+
+    Check Opt-in Manager instance is up and running and configured as explained
+    in Optin configuration manual
+    [https://github.com/fp7-ofelia/ocf/wiki/OFAM-configuration].
+
+    Make sure Optin Manager has connectivity with Flowvisor and that
+    authentication between Flowvisor and Optin Manager is correctly set before
+    proceeding. If Optin Manager is unable to contact Flowvisor, topology will
+    not be imported into the GUI. Re-update the AM in Expedient to refresh/import
+    the topology.
+
+    From Administration page in the Expedient Dashboard select OpenFlow Aggregate
+    from the Aggregate Type list and click in Add Aggregate
+
+    Important parameters:
+
+    * Username: Clearinghouse user set in Opt-in Manager in previous section
+    * Password: Clearinghouse password set in Opt-in Manager in previous section
+    * Server URL: URL of the Opt-in Manager's XMLRPC interface. It should be
+    https://DOMAIN_NAME:PORT/xmlrpc/xmlrpc/. Notice that DOMAIN_NAME can be an
+    IP address as long as it matches the certificate's Common Name of the server
+    where Opt-in Manager is running.
+
+
+    3.1.2.2 Adding Virtualization Aggregate Manager in Expedient
+
+    From Administration page in the Expedient Dashboard select Virtualization
+    Aggregate from the Aggregate Type list and click in Add Aggregate
+
+    Important parameters:
+
+    * Username: ROOT_USERNAME set in the VM Aggregate Manager settings during
+    installation
+    * Password: ROOT_PASSWORD set in the VM Aggregate Manager settings during
+    installation
+    * Server URL: URL of the VM Aggregate Manager's XMLRPC interface is exporting
+    to the Expedient. It should be https://DOMAIN_NAME:PORT/xmlrpc/plugin. Notice
+    that DOMAIN_NAME can be an IP address as long as it matches the certificate's
+    Common Name of the server where VM AM is running. Default port is 8445
+
+
+3.2 Control framework: OFAM (Optin) configuration
+
+
+    3.2.1 localsettings.py configuration options (common)
+
+    General parameters
+    ------------------
+    FLAG    Values    Comments
+    SITE_DOMAIN    String    Expedient host domain name
+
+    Root (Island Manager) account information
+    -----------------------------------------
+    FLAG    Values    Comments
+    ROOT_USERNAME    String    Optin's root username
+    ROOT_PASSWORD    String    Optin's root password
+    ROOT_EMAIL    String    Optin's root email. This mail will be used to send
+    notifications
+
+    Database parameters
+    -------------------
+    FLAG    Values    Comments
+    DATABASE_USER    String    MySQL username
+    DATABASE_PASSWORD    String    MySQL password
+    DATABASE_HOST    String    MySQL host (e.g. 127.0.0.1)
+    DATABASE_NAME    String    Optin database name.
+
+
+    3.2.2 GUI procedures
+
+    Configuring connection with Expedient
+
+    From the Manage Website button two actions should be performed:
+
+    Set Clearinghouse: This sets the username/password which the Clearinghouse
+    (Expedient) will use to authenticate against Optin Manager when it uses the
+    XMLRPC interface. Just set:
+
+    * Username
+    * Password
+
+    Remember this for username and password to setup AM in Expedient
+
+    Set FlowVisor: This sets the parameters required to communicate with the
+    FlowVisor:
+
+    * FV Name: Name to identify this FlowVisor instance.
+    * Username: Username to use to access the FlowVisor (set during FlowVisor
+    installation)
+    * Password: Password to use to access the FlowVisor (set during FlowVisor
+    installation)
+    * Server URL: URL of the FlowVisor's XMLRPC interface. It should be
+    https://DOMAIN_NAME:PORT/xmlrpc/, default port is 8080. Notice that
+    DOMAIN_NAME can be an IP address as long as it matches the certificate's
+    Common Name of the server where FlowVisor is running.
+
+
+    3.2.3 Handling of Expedient Flowspace requests
+
+    If properly configured, Optin manager will send an email to the Root email
+    once a new request comes from the Expedient. Requests comming from Expedient
+    do NOT appear on the "Request list". To see them you have to go to
+    Administrate Flowspace>Add rule.
+
+
+3.3 Control framework: VMAM (VTAM) configuration
+
+    3.3.1 mySettings.py configuration options (common)
+
+    General parameters
+
+    FLAG    Values    Comments
+    ISLAND_NAME    String    Island/testbed name. Shown on the upper right
+    corner of the Web frontend
+    VTAM_IP    String    VM AM host domain name/IP
+    VTAM_PORT    String    WebUI and XMLRPC TCP port (default:8445)
+    XMLRPC_USER    String    XMLRPC interface username
+    XMLRPC_PASS    String    XMLRPC interface username's password
+    Root (Island Manager) account information
+
+    FLAG    Values    Comments
+    ROOT_USERNAME    String    VM AM's root username
+    ROOT_PASSWORD    String    VM AM's root password
+    ROOT_EMAIL    String    VM AM's root email
+    Database parameters
+
+    FLAG    Values    Comments
+    DATABASE_USER    String    MySQL username
+    DATABASE_PASSWORD    String    MySQL password
+    DATABASE_HOST    String    MySQL host (e.g. 127.0.0.1)
+    DATABASE_NAME    String    VM AM database name.
+
+
+    3.3.2 Configure Agent on virtualized servers
+
+    The configuration of the Agent is performed during the installation. The
+    only important parameter to take into account is the XMLRPC_PASSWORD,
+    which is set during installation, and will be required when adding
+    Servers to the Virtualization Aggregate Manager, in next section.
+
+
+    3.3.3 VM AM GUI procedures
+
+
+        3.3.3.1 Add Ethernet/IP Ranges to the Virtualization Aggregate Manager
+
+        Servers currently in order to create VMs MUST have one available range
+        (pool) of MAC addresses and IPs. This, in a common configuration, means
+        that at least one global IP and MAC range is needed to be defined. Take
+        a look at next section for details.
+
+        * Global vs. non-global ranges
+
+        By default servers use ranges tagged as global without having to do any
+        kind of configuration to the server (subscription). In other words, if
+        they are not subscribed to any range in particular, they will use all
+        the global ranges to obtain MACs and IPs, in a random order.
+
+        However, if the servers subscribe to one or more ranges, regardless of
+        its nature (whether if they are global or not), VMs will be created from
+        addresses contained only in the pool of subscribed ranges (in a random
+        manner).
+
+        The global flag, accordingly, should be disabled by those ranges that
+        are particular to one server, and that do not apply to the rest of the
+        servers (for instance a local testing server out of the addressing of
+        the testbed). In general, servers should use global ranges for simplicty
+        and since they do not need this mechanism.
+
+        Remember that subscription to MAC ranges does not imply nor have any
+        effect to IP4 subscription to ranges (they are completely independent).
+
+        Take this into account while defining the ranges and configure the servers.
+
+        * Creating the ranges...
+
+        From the UI Dashboard click on Network Settings IP4 ranges and Create
+        range to define a new IP4 range. The parameters of the IP4 Range will
+        be used to configure the VMs networking, this is, they will use the
+        Mask, GW and DNSs of the range which provides the IP.
+
+        Create as many ranges as needed. For IP4 ranges
+
+        * Range name: Name to identify the range.
+        * Global range: Global/Not Global flag.
+        * Range start Ip: Beggining of the range.
+        * Range end Ip: End of the range.
+        * Network mask: Network mask to apply over the IPs.
+        * Gw: IP address of the default gateway for the VMs.
+        * Dns1: In OFELIA installations it is important the first DNS to be
+        the OFELIA internal DNS (currently 10.216.24.2).
+        * Dns2
+
+        For Ethernet Ranges, the only parameters are:
+
+        * Range name
+        * Global range
+        * Start Mac Address: In OFELIA installations MACs have to be in the
+        range 02:0Y:XX:XX:XX:XX, where Y is the island identifier, as agreed
+        in WP4. Refer to WP4 documentation for details.
+        * End Mac Address
+
+        Now if it is necessary, you can add Exceptions to this ranges.
+
+        After they have been set, and in the case you need specially addressing
+        schema for a specific server, you can edit the server to subscribe it
+        to specific ranges.
+
+
+        3.3.3.2 Add Servers in the Virtualization Aggregate Manager
+
+        Create a server from the Add a server link in the Dashboard or in the
+        Adiministrate Servers_ page.
+
+        * UUID: Automatically generated.
+        * Enabled: Uncheck if you want to add the server but not make it
+        available for use.
+        * Name: Server name *_ OS Type_: Server's OS type
+        * OS Distribution: Server's OS type
+        * OS Version: Server's OS version
+        * Virtualization Technology: hypervisor running in the server
+        * URL of the Server Agent: URL where the Agent daemon in the Server
+        is listening.
+        It should be https://DOMAIN_NAME:PORT/, default PORT is 9229.
+
+
+3.4 XEN Server configuration
+
+    This is a step-by-setup configuration for a typical XEN server networking
+    setup using multiple linux bridges with VLAN transparent tagging support.
+    This configuration is roughly the one used within OFELIA for the VM service.
+
+
+    3.4.1 Targeted configuration
+
+    (See image at https://github.com/fp7-ofelia/ocf/wiki/XEN-server-configuration)
+
+    Example will setup a bridge (eth1.999 in the example) to transparently
+    tag/untag (VLAN 999 in the example), and the rest of the bridges(eth2..ethN in
+    the example) to forward unmodified traffic. VMs in the, with the appropiate
+    .conf file, can have one interface in each of the bridges.
+
+
+    3.4.2 Requirements
+
+    * GNU/Linux physical dedicated Server
+    * Following packages are required (Debian-like OSs):
+
+        apt-get install xen-linux-system-2.6-xen-amd64 vlan python-libvirt libvirt-dev
+
+    or according to server architecture:
+
+        apt-get install xen-linux-system-2.6-xen-686 vlan python-libvirt libvirt-dev
+
+
+    3.4.3 Procedure
+
+    3.4.3.1 Install packages shown in requirements. Make the following changes
+
+        mv /etc/grub.d/10_linux /etc/grub.d/50_linux
+        update-grub2
+        reboot
+    3.4.3.2 Edit /etc/modules and add:
+
+        8021q
+        loop max_loop=64
+        
+    3.4.3.3 Edit xend file configuration at /etc/xen/xend-config.sxp, and enable
+    (uncomment) following lines:
+
+        (xend-http-server yes)
+        (xend-port 8000)
+        #...
+        (network-script 'network-multi-bridge-vlan')
+        
+    3.4.3.4 Make sure all the scripts under /etc/xen/scripts/ do have execution
+    permission:
+
+        chmod +x /etc/xen/scripts/*
+        
+    3.4.3.5 Copy network-bridge-vlan and network-multi-bridge-vlan to
+    /etc/xen/scripts.
+    
+    3.4.3.6 Grant execution permissions to all scripts under /etc/xen/scripts
+
+        chmod +x /etc/xen/scripts/*
+        
+    3.4.3.7 Edit /etc/xen/scripts/network-multi-bridge-vlan for your particular
+    setup details.
+
+        * Specify your control (called management in the script) interfaces
+        (eth1.999 in the example).
+        * Add your data or experimental interfaces (eth2..ethN in the example).
+    
+    3.4.3.8 If some of those dom0 interfaces should have an IP, simply edit
+    /etc/network/interfaces normally (note that renaming on interfaces according
+    to [http://wiki.xensource.com/xenwiki/XenNet], e.g. eth1->peth1, is applied
+    after /etc/network/interfaces configuration is set).
+
+        
+    3.4.3.9 [optional] You can disable VM state saving/restore at boot time if
+    you desire, by editing file: /etc/defaults/domains, and disable
+    XENDOMAINS_SAVE, and put false value to XENDOMAINS_RESTORE
+
+        XENDOMAINS_SAVE=””
+        XENDOMAINS_RESTORE=false
+        
+    3.4.3.10 Reboot
+
+        reboot
+
+
+    3.4.4 Verification
+
+    As root, issue brctl show command:
+
+    bridge name    bridge id          STP enabled  interfaces
+    eth1.999       8000.00269005db67  no           peth1.999
+    eth2           8000.00269005dbe7  no           peth2
+    eth3           8000.00269005dbb7  no           peth3
+
+    You should see the bridges defined in /etc/xen/scripts/network-multi-bridge-vlan.
+    If something went wrong, and tmpbridge or pan0 is appearing, revise
+    the procedure specially concerning permissions in the scripts,
+    /etc/xen/scripts/network-multi-bridge-vlan configuration and
+    /etc/network/interfaces configuration.
+
+
+4. OPERATION TROUBLESHOOTING
+----------------------------
+
+Frequent operational problems and errors.
+
+
+4.1 All Components
+
+
+    4.1.1 Extremely slow performance on framework components.
+
+    Problem usually is that the MySQL engine is trying to make a reverse lookup
+    for each and every external connection (especially for external MySQL
+    servers), when for some reason DNSs are down or not able to do the reverse
+    lookups.
+
+    To solve this issue, first check for appropiate DNSes under /etc/resolv.conf;
+    primary and secondary.
+
+    In addition, MySQL engine can be configured to avoid reverse lookups (it can
+    increase a little bit performance on external MySQL queries). Adding the
+    following at the end of /etc/mysql/my.cfg:
+
+        #Skip name resolv
+        skip-name-resolve
+
+    Remember that this change will only take effect after MySQL engine restarts
+
+
+    4.1.2 Expedient
+
+    Nothing here yet...
+
+
+    4.1.3 Optin Manager
+
+
+    4.1.3.1 Requests from the Web UI do not appear as Requests. Were are they?
+
+    No, they don't. Requests made through the Expedient plugin can be found in
+    the menu Administrate Flowspace->Add rule of the Optin Manager Web UI.
+
+
+    4.1.4 VM AM
+
+
+    4.1.4.1 VMs appear in the VM AM GUI and are being created, but state in the
+    Fronted is not updated
+
+    The communication between VM AM and Expedient (and also between VM AM and
+    agent) is fully asynchronous. Make sure there are no firewall rules between
+    these three components and that VTAM_IP, VTAM_PORT settings in mySettings.py
+    file are correctly set.
+
+    Have a look to Overview for more details.
+
+
+    4.1.4.2 OXA (Ofelia XEN Agent): 'Directory not empty' error
+
+    If users experience this error during VM creation:
+
+        Action create on VM test failed: : [Errno 39] Directory not empty: '/tmp/oxa/hdtest_3382/'
+
+    It is most likely due to a wrong configuration of the server, specially
+    /etc/modules file. Please, revise XEN installation manual and note that
+    loop module must have max_loop=64 or higher.
+
+        root@node04:/etc# cat modules 
+        # /etc/modules: kernel modules to load at boot time.
+        #
+        # This file contains the names of kernel modules that should be loaded
+        # at boot time, one per line. Lines beginning with "#" are ignored.
+        # Parameters can be specified after the module name.
+
+        8021q
+        loop max_loop=64
+
+    Remember that changes in /etc/modules will not take effect until you reboot
+    the system
+
+    4.1.4.3 XEN server networking: interconnection between two VMs in the same
+    server through data-path is possible, without any OF rule.
+
+    Although not desired, this is known limitation of the current XEN server
+    network configuration. This is due to the fact that XEN bridges(one per
+    physical interface) are shared among the VMs and are normal Linux bridges
+    (learning switches).
+
+    There are plans to deploy openvswitch to do some l2 filtering / enable OF
+    in those bridges, as well as to prevent spoofing, but this is still under
+    discussion inside of OFELIA.
+
+
+5. THEME MANAGER
+----------------
+
+Theme manager allows to use a set of custom static content files (images, css,
+javascript files...) and/or templates (HTMLs) creating a custom theme or look
+for OCF without overwriting or substituting any file of OCF and taking
+advantage of what is already there. These custom files must be named equal
+than the OCF main files that are replacing.
+
+5.1 OCF Static Content and Templates Overview
+
+
+    5.1.1 Static Content
+
+    Ofelia Control Framework's static content is distributed in the three main
+    modules (vt_manager, expedient, optin_manager). Every module has its static
+    content distributed in static paths like this one:
+
+        OCF_MEDIA_PATH/static/path/to_media/media/
+
+    In media directory there is the folder default. Here there are all the
+    images and css and javascripts main files of OCF. Usually the static
+    content is organized in subdirectories sepparating the different static
+    content files type.
+
+
+    5.1.2 Templates
+
+    The Django templates have a similar static content distribution, also
+    separated in the three main modules and using a path like this:
+
+        OCF_TEMPLATE_PATH/templates/
+
+    In templates directory there is the folder default. Here there are all
+    the templates, some distributed in different subdirectories and the
+    others in default directory.
+
+    Theme Manager takes advantage of static content and template dirs
+    disposition, organizing the files in media path or template path in a new
+    folder named THEME with the same structure than default. The structure of
+    THEME must be equal than default only for the customed files.
+
+
+    5.1.3 Example
+
+    The theme myTheme is running and the only diference with OCF is the main
+    logo in vtmanager. The first thing is check that the setting variable
+    THEME is equal to myTheme and then check the media paths.
+
+    The main logo of vt_manager in OCF is in
+    OCF_MEDIA_PATH/static/path/to_media/media/default/img/vm_logo.png. So to
+    use the custom logo, the new logo (called vm_logo.png too) must be in
+    OCF_MEDIA_PATH/static/path/to_media/media/myTheme/img/vm_logo.png
+
+
+5.2 How does it work?
+
+
+When a file (static Content file or template) is loaded, Theme Manager looks
+for the file in the custom theme dirs, if the file is found, Theme Manager
+will serve this custom content; if not, Theme manager will serve this file
+from OCF default dirs.
+
+
+5.3 How to use it?
+
+* Set the variable THEME equal to the name of your theme in
+localsettings/mySettings.py.
+* Create a directory named as your theme in media path and create the
+subdirectories you need in order to mantain the structure of OCF.
+* Create the directory or directories named as your theme in tempalate
+paths and create the subdirectories you need in order to maintain the
+structure of OCF.
+* Add your custom files to your theme directory respecting the structure
+and the name as in OCF.
+
+
+5.4 Example: Configure Theme Manager in vt_manager
+
+In this example a theme called myTheme will be created in vt_manager
+
+5.4.1 Edit the mySettings.py in
+OFELIA_DIR/vt_manager/src/python/vt_manager/mySettings.py and set the var
+THEME = 'myTheme'
+5.4.2 Open the media dir in
+OFELIA_DIR/vt_manager/src/python/vt_manager/views/static/media/ and create
+here the directory myTheme/.
+5.4.3 In 
+OFELIA_DIR/vt_manager/src/python/vt_manager/views/static/media/myTheme
+create the directories css/, images/, js/ and fancybox/ *.
+5.4.4 Open the templates dir in
+OFELIA_DIR/vt_manager/src/python/vt_manager/views/templates/ and create
+the folder myTheme/
+5.4.5 Open the directory
+vt_manager/src/python/vt_manager/views/templates/myTheme and create the
+directories networking/, policyEngine/, registration/, servers/ and users/ *.
+5.4.6 Place the content of myTheme (images, js,css, HTMLs...) in the correct
+folder and restart apache server.
+
+
+5.5 Example: Configure Theme Manager in expedient
+
+In this example a theme called myTheme will be created in expedient
+
+5.5.1 First of all, edit localsettings.py in
+OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ and set the var
+THEME = 'myTheme'.
+5.5.2 Open the media dir in
+OFELIA_DIR/expedient/src/static/expedient/clearinghouse/media/ and
+create the folder myTheme.
+5.5.3 Create the directories css/, img/ and js/ * in
+OFELIA_DIR/expedient/src/static/expedient/clearinghouse/media/myTheme/.
+5.5.4 Open the template dir OFELIA_DIR/expedient/src/templates/ and
+create the directory myTheme/.
+5.5.5 Create the necessary directories in
+OFELIA_DIR/expedient/src/templates/myTheme/ to obtain the same structure
+as in OFELIA_DIR/expedient/src/templates/default/ *.
+5.5.6 Open the template directory
+OFELIA_DIR/expedient/src/python/vt_plugin/views/templates/ and create
+the directory myTheme/.
+5.5.7 Place the content of myTheme (images, js, css, HTMLs...) in the
+correct folder and restart apache server.
+
+
+5.6 Example: Configure Theme Manager in optin_manager
+
+In this example a theme called myTheme will be created in optin_manager
+
+5.6.1 Edit localsettings.py in
+OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ and set the var
+THEME = 'myTheme'
+5.6.2 Open the the media dir in
+OFELIA_DIR/optin_manager/src/static/openflow/optin_manager/media/ and create
+the directory myTheme/.
+5.6.3 Create the directory js/ * in
+OFELIA_DIR/optin_manager/src/static/openflow/optin_manager/media/myTheme/
+5.6.4 Open the template dir in
+OFELIA_DIR/optin_manager/src/templates/default/openflow/optin_manager/ and
+create the directory myTheme
+5.6.5 Create the necessary directories in
+OFELIA_DIR/optin_manager/src/templates/default/openflow/optin_manager/myTheme
+to obtain the same structure as in
+OFELIA_DIR/optin_manager/src/templates/default/openflow/optin_manager/default *.
+5.6.6 Place the content of myTheme (images, js, css, HTMLs...) in the correct
+folder and restart apache server.
+
+Note: Please note that you only need to create the directories, or paths, of
+files you want to replace from the custom theme. I.e. if you only need to
+replace the logo of the OCF in Expedient, then you would only need to create
+the img dir path and place there the new logo with the name logo-expedient.png.
+
+
+===================
+CONTRIBUTING TO OCF
+===================
+
+1. Development Wiki
+-------------------
+
+OCF project is open for external contributions. If you are willing to get
+involved, just contact any of the members of the team.
+
+
+1.1 Roadmap
+
+Roadmap can be found at https://github.com/fp7-ofelia/ocf/issues/milestones
+
+
+1.2 ChangeLog
+
+Please refer to the ChangeLog file located in the source code for details:
+https://github.com/fp7-ofelia/ocf/blob/ofelia.stable/CHANGELOG
+
+
+1.3 Development notes
+
+
+1.3.1 Current software architecture
+
+(See image at https://github.com/fp7-ofelia/ocf/wiki/Development)
+
+Disclaimer: TCP ports shown are for a typical installation.
+
+
+1.3.2 EXPEDIENT
+
+    Northbound Interface:
+        * WEB UI, accesible at https://EXPEDIENT_URL
+
+    Southbound Interfaces:
+        * HTTPS + XMLRPC, exported to the VT Manager at
+        https://EXPEDIENT_URL/xmlrpc/vt_am
+        * HTTPS + XMLRPC, exported to the Opt-in Manager at
+        https://EXPEDIENT_URL/xmlrpc/ and https://EXPEDIENT_URL/open/xmlrpc
+
+
+1.3.3 VM MANAGER
+
+    Northbound Interfaces:
+        * WEB UI, accesible at https://VM_MANAGER_URL:8445
+        * HTTPS + XMLRPC, accesible at https://VM_MANAGER_URL:8445/xmlrpc/plugin
+
+    Southbound Interface:
+        * HTTPS + XMLRPC, https://VM_MANAGER_URL:8445/xmlrpc/agent
+
+    1.3.3.1 Agent
+
+        Northbound Interface:
+            * HTTPS + XMLRPC, accesible at https://SERVER_URL:9229
+
+
+1.3.4 OPT-IN MANAGER
+
+    Northbound Interfaces:
+        * WEB UI, accesible at https://OPTIN_MANAGER_URL:8443
+        * HTTPS + XMLRPC, accesible at
+        https://OPTIN_MANAGER_URL:8443/xmlrpc/xmlrpc
+
+
+1.4 Issue tracker
+-----------------
+
+    To report or check the project issues please visit the following page:
+    https://github.com/fp7-ofelia/ocf/issues?state=open
+
+
+==========
+AUTHORSHIP
+==========
+
+Authorship
+----------
+
+OFELIA Control Framework is being in actively developed and used as the
+production CF by OFELIA FP7 project testbed, within activities of WP5.
+
+Expedient and Opt-In Manager were adapted from software gracefully provided by
+Stanford University.
+
+
+Contact
+-------
+
+Contact { marc.sune | leonardo.bergesio | carlos.bermudo } @ i2cat.net for
+further information.
+
+
+Related software projects
+-------------------------
+
+The PyPElib library is a small library to help to build rule-based Policy
+Engine(s) within a certain scope of action. The ofver tool/library is used
+in OCF package to automate installation and upgrade procedures.
+
+
+License
+-------
+
+OCF is released under BSD license
+
