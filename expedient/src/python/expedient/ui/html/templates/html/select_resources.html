@@ -43,7 +43,6 @@
     }
 </style>
 
-<script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
 $(document).ready(function(){
@@ -74,6 +73,7 @@ $(document).ready(function(){
     });
     $("input[name=clear_button]").click(function (){
         $(":checked").click();
+	redrawNodes();
     });
     $("input[name=select_all_button]").click(function (){
         $(":checkbox:not(:checked)").click();
@@ -83,8 +83,17 @@ $(document).ready(function(){
         $(":checked").click();
         $(":checkbox.in_tree").click();
     });
+
+    link.on("mouseover", function(d) {
+                values = getLinkStyle(d,"mouseover");
+                d3.select(this).style("stroke", values["stroke"]);
+                d3.select(this).style("stroke-width", values["strokewidth"]);
+        })
+     link.on("mouseout", redrawNodes);
+
 })
 </script>
+
 {% endblock %}
 
 {% block content %}

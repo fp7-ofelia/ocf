@@ -1,15 +1,10 @@
 <h2>Topology</h2>
 
 
-<!--<script src="{% url js_media 'jquery.tipsy.js' %}"></script>-->
 <script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<script src="{% url js_media 'd3.v2.min.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
-
-</script>
-    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?1.29.1"></script>
-    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.geom.js?1.29.1"></script>
-    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.js?1.29.1"></script>
 
 <style>
 
@@ -110,7 +105,7 @@ var data = {
     nodes: [
         {% for node in d3_nodes %}
         //{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: randomXToY(foci[{{ node.group }}].y0 , foci[{{ node.group }}].y1),x : randomXToY(foci[{{ node.group }}].x0 , foci[{{ node.group }}].x1), fixed:true, radius:10, color:"",
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, color:"",
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, color:"",
 		{% if node.type == "vt_agg"  %}
 			nodeVms: {{node.vmNames|safe }},
 			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
@@ -203,18 +198,28 @@ function getNodeImage(d){
 function getLinkStyle(d, attr){
         
         rsc_ids = d.value.split("-");
+	if(attr=="click"){
+		id0 = rsc_ids[0];
+		id1 = rsc_ids[1];
+		$(":checkbox#"+rsc_ids[0]).click();
+		$(":checkbox#"+id1).click();
+	}else if(attr=="mouseover"){
+		var values = {stroke: "#00BFFF", strokewidth: "2" };
+		return values;
+	}else{
 
-        if($(":checkbox#"+rsc_ids[0]+":checked").length && $(":checkbox#"+rsc_ids[1]+":checked").length){
-                if (attr == "stroke")
-                        return "#999";
-                else
-                        return 2;
-        }else{
-                if (attr == "stroke")
-                        return "#ccc";
-                else
-                        return 1;
-        }
+        	if($(":checkbox#"+rsc_ids[0]+":checked").length && $(":checkbox#"+rsc_ids[1]+":checked").length){
+        	        if (attr == "stroke")
+        	                return "#999";
+        	        else
+        	                return 2;
+        	}else{
+        	        if (attr == "stroke")
+        	                return "#ccc";
+        	        else
+        	                return 1;
+        	}
+	}
 }
 
 function getBaseNodeColor(d){
@@ -349,6 +354,9 @@ var link = svg.selectAll(".link")
   .enter().append("line")
     .attr("class", "link");
 
+link.on("click", function(d) {
+                d3.select(this).style("stroke", function(d){return getLinkStyle(d, "click");})});
+
 var node = svg.selectAll(".node")
     .data(nodes)
   .enter().append("g")
@@ -401,13 +409,17 @@ node.on("mouseover", function (d, i){
 	        }
 	                tooltip.show(get_node_info_formated(d));
 	    
-	        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName);
+	        //$("#selected_node_info").html(desc + ": " + d.nodeName);
+	        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName + " at " + d.loc);
+	        $("#selected_node_info").css("background-color", d.color );
 	        $("#selected_node_info").show();
 
 
 	}
 	)
 	.on("mouseout", function() {
+			$("#selected_node_info").css("background-color", "#DDDDDD");
+			//$("#selected_node_info").hide()
                         tooltip.hide();
                 })
 	.on("click", function(d) {
@@ -462,17 +474,6 @@ function collide(alpha) {
   };
 };
 
-////Start start up animations 
-//$(document).ready(function(){
-//	islands.transition()
-//		.style("stroke-opacity",1)
-//		.style("stroke-width",2)
-//		.duration(2000)
-//		//.style("stroke-opacity",0.1)
-//		//.duration(2000)
-//  		//.style("opacity",0)
-//		//  .duration(2000); // this is 1s
-//});
 </script>
 
 <br />

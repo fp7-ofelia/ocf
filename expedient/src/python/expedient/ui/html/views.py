@@ -113,7 +113,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict( 
-                name=s.name, value=s.id, group=i, type="of_agg", connection=[])
+                name=s.name, value=s.id, group=i, type="of_agg", connection=[], loc=agg.location)
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
    
@@ -132,7 +132,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             nodes.append(dict(
                 #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
                 #same group. Will planetlab be supported at the end?
-                name=n.name, value=n.id, group=-1, type="pl_agg" )
+                name=n.name, value=n.id, group=-1, type="pl_agg" , loc=agg.location)
                 #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
             )
 
@@ -243,7 +243,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             nodes.append(dict(
                     #XXX: lbergesio: Removed len(pl_aggs) to matche vt_aggs con of_aggs in the 
                     #same group. Will planetlab be supported at the end?
-                    name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
+                    name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
                     #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
             )
             serverGroupSet=False 
