@@ -75,7 +75,7 @@ def aggregate_crud(request, agg_id=None):
     available = aggregate.check_status() if agg_id else False
     return simple.direct_to_template(
         request,
-        template="aggregate_crud.html",
+        template="openflow/plugin/aggregate_crud.html",
         extra_context={
             "agg_form": agg_form,
             "client_form": client_form,
@@ -162,4 +162,4 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
             print e
             rHashObject.hashValue = oldHashValue
             rHashObject.save()
-    
+   

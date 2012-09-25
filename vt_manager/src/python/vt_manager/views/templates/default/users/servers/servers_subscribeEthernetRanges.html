@@ -1,0 +1,49 @@
+{% extends "fancybase.html" %}
+{% load accessDict %}
+{% block pagehead %}<h1>Subscribe Ethernet Ranges for {{server.name}} :</h1>{% endblock pagehead %}
+
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+
+<div>
+
+	{% if not macRanges %}
+		There are no Ethernet Ranges defined. Click <a href="{% url createMacRange "add" %}">here</a> to add a new one.
+	{% else %}
+	<form method="post" action="{% url subscribeEthernetRanges server.id %}">{% csrf_token %}	
+		<table class="ranges">
+            <tr>
+            <th> Name</th>
+            <th> From</th>
+            <th> To</th>
+            <th> Global</th>
+            <th> Subscribe</th>
+            </tr>
+            {% for macRange in macRanges %}
+				<tr class = "{% cycle 'odd' 'even' %}">
+                <td> {{macRange.name}}</td>
+                <td> {{macRange.startMac }}</td>
+                <td> {{macRange.endMac }}</td>
+                <td> {{macRange.isGlobal}}</td>
+                <td> 
+					<input type="checkbox" name="subscribe_{{macRange.id}}" value="1" 
+					{% if macRange in server.getSubscribedMacRangesNoGlobal %}
+						checked="checked"
+					{% endif %}>
+					</td>
+				</tr>	
+			{% endfor %}
+
+		</table>
+	{% endif %}
+	<div class="center" style="margin-top : 20px;" >
+        <input type="submit" value="Save"> |
+        <a href="">Cancel</a>
+    </div
+	</form>
+</div>
+{% endblock content %}

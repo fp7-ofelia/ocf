@@ -17,3 +17,7 @@ ADMINS = [
 ]
 
 MANAGERS = ADMINS
+
+#from vt_manager.utils.ThemeManager import initialize
+
+

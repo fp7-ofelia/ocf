@@ -2,13 +2,15 @@ import xmlrpclib
 import threading
 from utils.xml.vtRspecInterface import rspec, server_type, virtual_machine_type
 from utils.XmlUtils import *
+from utils.Logger import Logger
 
 class XmlRpcClient:
+
+	logger = Logger.getLogger()
 
 	##Provisioning
 	@staticmethod
 	def __craftProvisioningResponseXml(actionId,status,description):
-	
 		rspec = XmlUtils.getEmptyProvisioningResponseObject()
 		
 		rspec.response.provisioning.action[0].id = actionId
@@ -19,9 +21,11 @@ class XmlRpcClient:
 
 	@staticmethod
 	def sendAsyncProvisioningActionStatus(actionId,status,description):
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" provisioning message to: "+threading.current_thread().callBackURL)
 		server = xmlrpclib.Server(threading.current_thread().callBackURL)
-		print XmlRpcClient.__craftProvisioningResponseXml(actionId,status,description)
+		XmlRpcClient.logger.debug(XmlRpcClient.__craftProvisioningResponseXml(actionId,status,description))
 		server.sendAsync(XmlRpcClient.__craftProvisioningResponseXml(actionId,status,description))
+		XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
 	##Monitoring
 	@staticmethod
@@ -60,15 +64,18 @@ class XmlRpcClient:
 
 	@staticmethod
 	def sendAsyncMonitoringActionStatus(actionId,status,description):
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: "+threading.current_thread().callBackURL)
 		server = xmlrpclib.Server(threading.current_thread().callBackURL)
-		print XmlRpcClient.__craftMonitoringResponseXml(actionId,status,description)
+		XmlRpcClient.logger.debug(XmlRpcClient.__craftMonitoringResponseXml(actionId,status,description))
 		server.sendAsync(XmlRpcClient.__craftMonitoringResponseXml(actionId,status,description))
+		XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
 	@staticmethod
 	def sendAsyncMonitoringActiveVMsInfo(actionId,status,vms,serverInfo):
-
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: "+threading.current_thread().callBackURL)
 		server = xmlrpclib.Server(threading.current_thread().callBackURL)
-		print XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo)
+		XmlRpcClient.logger.debug(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo))
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo))
+		XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
 

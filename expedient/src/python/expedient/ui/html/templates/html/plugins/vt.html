@@ -123,7 +123,7 @@
 
 <div id="computationalResourcesContainer" class="expandable"> 
 {% for agg in vt_aggs %}
-<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/" method="POST">{% csrf_token %}
+<form action="/vt_plugin/goto_create_vm/{{ slice.id }}/{{agg.id}}/" method="POST">{% csrf_token %}
 
     <h2><a id="vtm_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">VT Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a></h2></h2>
     <div id="vtm_{{agg.id}}Container" class="aggregateManager expandable" >
@@ -224,7 +224,7 @@
 	<td>
     	        <div id="create_server" style="clear:both;">
 		Create a new virtual machine in server:
-		<select name = "selected_server" id="server_id_agg_{{agg.id}}">
+		<select name = "selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}">
 		{% for rsc in agg.resource_set.all %}
 		{% with rsc.as_leaf_class as server %}
 		{% if rsc.leaf_name == 'VTServer' %}
@@ -240,8 +240,8 @@
 	</tr>
 </table>	
 </div> <!-- AM resources container div --> 
-{% endfor %}
 </form>
+{% endfor %}
 </div> <!-- Computational resources div --> 
 {% endif %}
 </div> <!-- aggregateManager container -->

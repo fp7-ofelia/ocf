@@ -16,6 +16,7 @@ from localsettings import AUTH_LDAP_BIND_PASSWORD, AUTH_LDAP_BIND_DN
 
 
 # Baseline configuration.
+#AUTH_LDAP_SERVER_URI = "ldap://ldapserver:389"
 AUTH_LDAP_SERVER_URI = "ldap://ldap.ibbt.fp7-ofelia.eu:389"
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=fp7-ofelia,dc=eu",ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
@@ -69,7 +70,6 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 
  
 # THIS SHOULD BE ALWAYS THE MASTER, NEVER A SLAVE LDAP SERVER
-#LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
 LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
 # Use not versioned password
 #LDAP_MASTER_DN="cn=admin,dc=fp7-ofelia,dc=eu"
@@ -81,7 +81,9 @@ LDAP_MASTER_SSLDIR="%s/ldap.ssl" % CONF_DIR
 LDAP_MASTER_CA="%s/ca.crt" % LDAP_MASTER_SSLDIR
 LDAP_MASTER_CERT="%s/expedientldap.crt" % LDAP_MASTER_SSLDIR
 LDAP_MASTER_KEY="%s/expedientldap.key" % LDAP_MASTER_SSLDIR
-LDAP_MASTER_REQCERT=ldap.OPT_X_TLS_NEVER
+LDAP_MASTER_REQCERT=ldap.OPT_X_TLS_DEMAND
+#LDAP_MASTER_REQCERT=ldap.OPT_X_TLS_NEVER
+#LDAP_MASTER_REQCERT=ldap.OPT_X_TLS_ALLOW
 LDAP_MASTER_TIMEOUT=15
 #LDAP_MASTER_EXPEDIENT_DISCR="ibbt" # to make sure that names (e.g. of netgroups) are unique across different islands
 LDAP_MASTER_RETRIES=3 # see LdapProxy.create_or_update
@@ -91,5 +93,14 @@ LDAP_MASTER_BASE="dc=fp7-ofelia,dc=eu"
 LDAP_MASTER_NETGROUPS="ou=netgroups,%s" % LDAP_MASTER_BASE
 LDAP_MASTER_USERNETGROUPS="ou=users,%s" % LDAP_MASTER_NETGROUPS
 LDAP_MASTER_HOSTNETGROUPS="ou=hosts,%s" % LDAP_MASTER_NETGROUPS
+AUTH_LDAP_START_TLS = True
 
 LDAP_STORE_PROJECTS=True
+
+AUTH_LDAP_GLOBAL_OPTIONS = {
+	ldap.OPT_X_TLS_CACERTFILE: LDAP_MASTER_CA,
+#	ldap.OPT_X_TLS_CERTFILE: LDAP_MASTER_CERT,
+#	ldap.OPT_X_TLS_KEYFILE: LDAP_MASTER_KEY,
+	ldap.OPT_X_TLS_REQUIRE_CERT: LDAP_MASTER_REQCERT,
+	ldap.OPT_TIMEOUT: LDAP_MASTER_TIMEOUT,
+}	

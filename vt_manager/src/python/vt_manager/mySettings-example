@@ -24,3 +24,12 @@ DATABASE_HOST = "changeMeWithIP"
 
 #Monitoring of Agents time (commented = default = 45 sec)
 #MONITORING_INTERVAL = 45
+
+'''Theme Manager'''
+#To create a theme, type a theme_name in THEME
+#Create the theme_name's media directory and the static directories [images, css, js] in SRC_DIR/python/vt_manager/views/static/media/theme_name/ as needed.
+#For templates (.html) files add a directory called theme_name in the same location as your default TEMPLA
+ES_DIR:  [networking, policyEngine, users, ...] in SRC_DIR/python/vt_manager/views/templates/theme_name as needed.
+#Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration for more information on how to i
+nstall new themes for OCF.
+THEME = 'default'

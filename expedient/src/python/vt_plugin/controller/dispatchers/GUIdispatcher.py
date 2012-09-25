@@ -22,12 +22,12 @@ from vt_plugin.controller.VMcontroller.VMcontroller import *
 from vt_plugin.utils.ServiceThread import *
 from expedient.common.messaging.context_processors import messaging
 
-def goto_create_vm(request, slice_id):
+def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
 
     if request.method == "POST":
         if 'create_vms' in request.POST:
-            server_id=request.POST['selected_server']
+            server_id=request.POST['selected_server_'+agg_id]
             return HttpResponseRedirect(reverse("virtualmachine_crud",
                                                 args=[slice_id,server_id]))
         else:
@@ -139,7 +139,7 @@ def check_vms_status(request, slice_id):
                         <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
                         </div>"
                     else:
-                        actionsHtmlCode = "<div><img src=\"/static/media/img/loading.gif\" align=\"absmiddle\"></div>"
+                        actionsHtmlCode = "<div><img src=\"/static/media/default/img/loading.gif\" align=\"absmiddle\"></div>"
                     vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
                     try:
                         vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip

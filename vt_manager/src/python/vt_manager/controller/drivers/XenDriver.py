@@ -15,7 +15,6 @@ class XenDriver(VTDriver):
 
 	@staticmethod
 	def getInstance():
-		print "getInstance"
 		return XenDriver()
 
 	def deleteVM(self, vm):

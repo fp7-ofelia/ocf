@@ -2,18 +2,36 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from common.rpc4django.utils import rpc_url
+import re 
 admin.autodiscover()
+
+from vt_manager.utils.ThemeManager import ThemeManager
+
+'''
+Load Themes
+'''
+ThemeManager.initialize()
 
 '''
 Dynamic content
 '''
-
 urlpatterns = patterns('',
     ##Main entry point
     url(r'^dashboard$', 'vt_manager.controller.users.urlHandlers.dashboard', name="dashboard"),
     (r'^$', 'vt_manager.controller.users.urlHandlers.index'),
 #    url(r'^servers/net/update/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_net_update', name='servers_net_update'),
-    
+
+    #Policy Engine
+    url(r'^policies/(?P<table>\w+)/add/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.policy_create', name="policy_create"),    
+    url(r'^policies/(?P<table_name>\w+)/add/rules/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_create', name="rule_create"),   
+    url(r'^policies/(?P<table_name>\w+)/delete/rules/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_delete', name="rule_delete"),
+    url(r'^policies/(?P<table_name>\w+)/edit/rules/(?P<rule_uuid>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_edit', name="rule_edit"),
+    url(r'^policies/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_table_view', name="rule_table_view"),
+    url(r'^policies/update_ruleTable_policy$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.update_ruleTable_policy', name="update_ruleTable_policy"),
+    url(r'^policies/enable_disable/(?P<rule_uuid>\w+)/(?P<table_name>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.enable_disable', name="enable_disable"),
+    url(r'^condition_create/(?P<TableName>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.condition_create', name="condition_create"),
+
+
     ##Server management
     url(r'^servers/add/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_crud', name='servers_create'),
     url(r'^servers/(?P<server_id>\d+)/edit/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.servers_crud', name='edit_server'),
@@ -57,32 +75,37 @@ urlpatterns = patterns('',
     rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 
+def get_static_url(name, path=""):
+    static_file_tuple = (
+        r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:], path),
+        'django.views.static.serve',
+        {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
+    return url(*static_file_tuple, name=name)
 
 '''
 Static content
 '''
+urlpatterns += patterns('',
+    get_static_url("img_media", "/default/images"),
+    get_static_url("css_media", "/default/css"),
+    get_static_url("js_media", "/default/js"),
+    get_static_url("fancybox", "/default/fancybox"),
+)
 
-static_image_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/images/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_css_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/css/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_js_file_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/js/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
-
-static_fancybox_tuple = (r'^%s/(?P<path>.*)$' % str(settings.MEDIA_URL[1:]+"/fancybox/"),
-                     'django.views.static.serve',
-                     {'document_root': "%s" % settings.MEDIA_ROOT})
+'''
+Static theme content
+'''
+img_theme_tuple = ThemeManager.getStaticThemeTuple("img_media")
+css_theme_tuple = ThemeManager.getStaticThemeTuple("css_media")
+js_theme_tuple = ThemeManager.getStaticThemeTuple("js_media")
+fancybox_theme_tuple = ThemeManager.getStaticThemeTuple("fancybox")
 
 urlpatterns += patterns('',
-    # TODO: Serve static content, should be removed in production deployment
-    # serve from another domain to speed up connections (no cookies needed)
-    url(*static_image_file_tuple, name="img_media"),
-    url(*static_css_file_tuple, name="css_media"),
-    url(*static_js_file_tuple, name="js_media"),
-    url(*static_fancybox_tuple, name="fancybox"),
+    get_static_url(img_theme_tuple[0],img_theme_tuple[1]), 
+    get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
+    get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
+    get_static_url(fancybox_theme_tuple[0],fancybox_theme_tuple[1]),
 )
+
+
+

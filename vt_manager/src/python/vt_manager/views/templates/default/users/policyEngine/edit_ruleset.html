@@ -1,0 +1,39 @@
+{% extends "fancybase.html" %}
+{% block pagehead %}
+{% endblock pagehead %}
+{% block content %}
+	<div class="main">
+        	<h1>Edit RuleSet of {{table.name }}</h1>
+	</div>
+	<table class ="blue">
+		<tr class="header" >
+		<th>Rule</th>
+		<th>Enabled</th>
+		<th><th>
+		{% if table.getRuleSet %}
+			{% for rule in table.getRuleSet %}
+				<tr class="{% cycle 'odd' 'even' %}">
+					<form action ="{% url rule_delete %}" method="post">{% csrf_token %}
+					<td><a href="{% url rule_edit rule.rule.getUUID table.name  %}">{{ rule.rule.dump }}</a></td>
+					<td>{{ rule.enabled }}</td>
+					<input type="hidden" name="table_name" value="{{ table.name }}">
+					<input type="hidden" name="uuid" value="{{ rule.rule.getUUID }}">
+					<td><input type="submit" value="Delete Rule"></td>
+					</form>
+					</tr>
+			{% endfor %}
+		{% else %}
+			<tr>
+			<td>There are not rules in {{ table.getName }} yet</td>
+			<td></td>
+			</tr>
+			{% endif %}
+	</table>
+	<br>
+	<center>
+        <a href="{% url policy_create table.name  %}">add Rule</a>|
+	<a href="{% url dashboard  %}">Dashboard</a>
+	</center>
+    	</div>
+
+{% endblock content %}

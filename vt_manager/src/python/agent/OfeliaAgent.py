@@ -8,13 +8,15 @@ from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
 from utils.xml.vtRspecInterface import rspec
 from settings.settingsLoader import OXA_LOG
-
+from utils.Logger import Logger
 '''
 	@author: msune
 
 	OXA: Ofelia XEN Agent. 
 
 '''
+
+logger = Logger.getLogger()
 
 ''' Usage message '''
 def usage():
@@ -70,11 +72,10 @@ def processXmlQuery(notificationCallBackUrl,xml):
 			
 	#Parse
 	try:
-		#TODO: log
-		print xml
+		logger.debug(xml)
 		rspecValue = XmlParser.parseXML(xml)
 	except Exception as e:
-		#TODO: print to stderr	
+		logger.error(e)	
 		raise e
 
 	#For each type of action call appropiate method in a new thread
@@ -88,24 +89,23 @@ def processXmlQuery(notificationCallBackUrl,xml):
 
 '''Main routine, opening the XML-RPC server'''
 def main():
-
+	logger.info("OFELIA XEN Agent")	
+	
 	checkArgs()
 
 	#If -b is passed, demonize it 
 	if len(sys.argv) == 2 and sys.argv[1] == "-b" :
 		forkAndExitFather()
 
-	#XXX: testing	
+	##testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
 
-	#Engage XMLRPC	
+	#Engage XMLRPC
+	#logger.debug("Trying to engage XMLRPC server...")	
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
 
-	
-	#testing
-	#processXmlQuery(sys.argv[1])
-
+	logger.debug("This is unreachable!")	
 
 #Calling main
 if __name__ == "__main__":

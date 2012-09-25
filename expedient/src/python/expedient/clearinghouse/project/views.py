@@ -305,6 +305,12 @@ def add_aggregate(request, proj_id):
             raise Http404
 
         aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
+
+        #Look for the users in the project and give them permission to use the new AM.
+        for member in project.members.exclude(is_superuser=True):
+            #if not has_permission(member, project, "can_delete_slices"):
+            give_permission_to("can_use_aggregate", aggregate, member, giver=None, can_delegate=False)
+
         return HttpResponseRedirect(aggregate.add_to_project(
             project, reverse("project_add_agg", args=[proj_id])))
     else:
@@ -366,7 +372,7 @@ def add_member(request, proj_id):
             user = User.objects.get(id = request.POST['user'] )
             roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
             user = User.objects.get(id = request.POST['user'] )
-            #XXX: Not sure about this...  hace un give_permission_to...
+            #XXX: Not sure about this...  maybe  give_permission_to...
             for aggregate in project._get_aggregates():
                 if not has_permission(user, aggregate, "can_use_aggregate"):
                     aggregate.add_to_user(user,"/")

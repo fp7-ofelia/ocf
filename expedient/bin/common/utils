@@ -183,16 +183,16 @@ function getDirectory()
 
 #Mutex functions
 function lock(){	
-	if [ ! -f $LOCK_FILE ]; then	
-		touch $LOCK_FILE
+	if [ ! -f $EXECPATH/$LOCK_FILE ]; then	
+		touch $EXECPATH/$LOCK_FILE
 	else
 	
-		print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... It seems some other instance of ofver is already running... (file $LOCK_FILE exists!)"
+		print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... It seems some other instance of ofver is already running... (file $EXECPATH/$LOCK_FILE exists!)"
 		exit 1
 	fi
 
 }
 
 function unlock(){
-	rm -f $LOCK_FILE
+	rm -f $EXECPATH/$LOCK_FILE
 }

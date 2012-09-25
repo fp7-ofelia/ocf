@@ -28,6 +28,8 @@ class ActionController():
 		#action.server.virtual_machines[0] = tempVMclass
 		action.server.virtual_machines[0].uuid = actionModel.getObjectUUID()
 
+	#XXX: Why are these two functions here? Do not beling to the Action, aren't they?
+
 	@staticmethod
 	def PopulateNewActionWithVM(action, vm):
 		action.id = uuid.uuid4()
@@ -44,7 +46,8 @@ class ActionController():
 	def PopulateNetworkingParams(actionIfaces, vm):
 		baseIface = copy.deepcopy(actionIfaces[0])
 		actionIfaces.pop()
-		for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
+		#for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
+		for index, vmIface in enumerate(vm.getNetworkInterfaces()):
 			currentIface = copy.deepcopy(baseIface)
 			currentIface.ismgmt = vmIface.isMgmt
 			currentIface.name = "eth"+str(index)

@@ -31,7 +31,7 @@
                 <tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
                   <!--<td width="25px" style="background-color: #CCC"></td>-->
                   <td>
-                    <img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="/static/media/img/question_mark_15x15.png">  {{ vm.name }}
+                    <img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="{% url img_media 'question_mark_15x15.png' %}">  {{ vm.name }}
 					<div class="tooltip" id="vm_ssh_help_{{vm.id}}">
 				        Access info:<br/><br> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %}<br/>(password: your user password)<br/><br> To access as root just use <b>su</b><br> (root password is <b>openflow</b>)
 					</div> 

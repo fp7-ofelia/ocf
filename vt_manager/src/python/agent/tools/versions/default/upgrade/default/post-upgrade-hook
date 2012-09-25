@@ -10,7 +10,7 @@
 #inform user
 printHeader "info#" "Using default post-upgrade-hook module..."
 
-#Starting apache
+#Starting OXA 
 print "Starting oxad..." 
 /usr/sbin/service oxad restart
 

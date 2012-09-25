@@ -43,10 +43,10 @@
     }
 </style>
 
-<script src="{% url js_media 'protovis-r3.2.js' %}"></script>
 <script>
 /* boldface connected interfaces */
 $(document).ready(function(){
+    redrawNodes();
     $(":checkbox[name=selected_ifaces]:checked").each(function(){
         iface_id = $(this).attr("value");
         $(".neighbor_"+iface_id).addClass("connected");
@@ -56,7 +56,8 @@ $(document).ready(function(){
         iface_id = $(this).attr("value");
         $(".iface_"+iface_id).toggleClass("connected");
         $(".neighbor_"+iface_id).toggleClass("connected");
-        vis.render();
+        tick();
+	redrawNodes();
     });
     $(":checkbox[name=selected_nodes]:checked").each(function(){
         node_id = $(this).attr("value");
@@ -67,10 +68,12 @@ $(document).ready(function(){
         node_id = $(this).attr("value");
         $(".rsc_"+node_id).toggleClass("connected");
         $(".neighbor_rsc_"+node_id).toggleClass("connected");
-        vis.render();
+	tick();
+        redrawNodes();
     });
     $("input[name=clear_button]").click(function (){
         $(":checked").click();
+	redrawNodes();
     });
     $("input[name=select_all_button]").click(function (){
         $(":checkbox:not(:checked)").click();
@@ -80,8 +83,17 @@ $(document).ready(function(){
         $(":checked").click();
         $(":checkbox.in_tree").click();
     });
+
+    link.on("mouseover", function(d) {
+                values = getLinkStyle(d,"mouseover");
+                d3.select(this).style("stroke", values["stroke"]);
+                d3.select(this).style("stroke-width", values["strokewidth"]);
+        })
+     link.on("mouseout", redrawNodes);
+
 })
 </script>
+
 {% endblock %}
 
 {% block content %}
@@ -177,7 +189,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
           class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
           {% if iface.id in checked_ids %}checked{% endif %} />
         </td>
-        <td class="port_num iface_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></td>
+        <td class="port_num iface_{{ iface.id }}"><label for = "rsc_id_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></label></td>
         <td class="connections">
           <table class="connections">
         {% for cnxn in iface.nonopenflow_connections.all %}

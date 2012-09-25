@@ -1,0 +1,38 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.3/0.3RC1 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/expedient/
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/expedient/clearinghouse/
+
+#Adding/Moving new variables to localsettings.py
+printHeader ">" "Adding new settings to localsettings.py ..."
+sed -i "/THEME/d" localsettings.py || error "Could not delete old THEME setting from localsettngs.py ..."
+echo "THEME = \"default\"" >> localsettings.py && echo "Check localsettings-example file for more info about how to configure a custom theme for OCF" || error "Could not add THEME to localsettngs.py ..."
+
+cd $TMP_PATH
+
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
+#Cleaning the house
+confirm "Delete backup files?" $DONT_ABORT
+
+if [ $? == 0 ]; then
+        print "Deleting backups..."
+        rm -rf $BACKUP_PATH
+fi
+

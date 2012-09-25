@@ -91,7 +91,7 @@ Node and links functions
 
 def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
     """
-    Get nodes and links usable by protovis.
+    Get nodes and links usable by d3.
     """
     nodes = []
     links = []
@@ -99,6 +99,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
     id_to_idx = {}
     agg_ids = []
    
+    nIslands = 0
+
     #Openflow devices
     #XXX: botch
     openflowSwitches = dict() 
@@ -111,10 +113,13 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict( 
-                name=s.name, value=s.id, group=i, type="of_agg", connection=[])
+                name=s.name, value=s.id, group=i, type="of_agg", connection=[], loc=agg.location)
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
-    
+   
+    #One island per OF AM
+    nIslands = len(of_aggs)
+
     #Planelab nodes 
     for i, agg in enumerate(pl_aggs):
         agg_ids.append(agg.pk)
@@ -125,7 +130,10 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
             nodes.append(dict(
-                name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
+                #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
+                #same group. Will planetlab be supported at the end?
+                name=n.name, value=n.id, group=-1, type="pl_agg" , loc=agg.location)
+                #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
             )
 
 
@@ -214,7 +222,6 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
     #VT-AM nodes 
     for i, agg in enumerate(vt_aggs):
         agg_ids.append(agg.pk)
-#       vt_servers = [{'name':"prova",'id':99},{'name':"prova2",'id':100},{'name':"prova3",'id':101}]
         vt_servers = VTServer.objects.filter(
             aggregate__pk=agg.pk,
             available=True,
@@ -223,21 +230,23 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
 
 
         for n in vt_servers:
-            #id_to_idx[n.id] = len(nodes)
-#            nodes.append(dict(
-#                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs))
-#                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-#            )
             vmNames = []
             for name in  n.vms.all().filter(sliceId = sliceUUID).values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
-            for j,inter in enumerate(n.ifaces.all()):
-                vmInterfaces.append(dict(name="eth"+str(j+1), switch=str(inter.switchID), port=str(inter.port)))
+            j=1 #FIXME XXX: eth0 is mgmt 
+            for inter in n.getNetworkInterfaces():
+		inter = inter[1] #WTF: why QuerySet is not iterable straight away, and have to wrap it via enumerate
+                if not inter.isMgmt: 
+                    vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
+                    j+=1
             nodes.append(dict(
-                    name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
-                    #name=n['name'], value=n['id'], group=i+len(of_aggs)+len(pl_aggs))
-            ) 
+                    #XXX: lbergesio: Removed len(pl_aggs) to matche vt_aggs con of_aggs in the 
+                    #same group. Will planetlab be supported at the end?
+                    name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
+                    #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
+            )
+            serverGroupSet=False 
             for j,inter in enumerate(n.ifaces.all()):
 		#first check datapathId exists.
                 try:
@@ -251,7 +260,13 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
                             value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
-    return (nodes, links)
+                if (not serverGroupSet):
+                    nodes[len(nodes)-1]["group"]=nodes[sId]["group"]
+                    serverGroupSet = True
+            if(not serverGroupSet):
+                #Add nIslands since there is an Island with VM AM but no OF AM
+                nIslands+=1
+    return (nIslands, nodes, links)
 
 
 
@@ -366,15 +381,16 @@ def bookOpenflow(request, slice_id):
        
 #        vm = VM.objects.filter(sliceId=slice.uuid)        
  
-        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+        nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
 
         return simple.direct_to_template(
             request,
             template="html/select_resources.html",
             extra_context={
-                "protovis_nodes": protovis_nodes,
-                "protovis_links": protovis_links,
+                "nIslands": nIslands,
+                "d3_nodes": d3_nodes,
+                "d3_links": d3_links,
                 "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,
@@ -424,14 +440,15 @@ def getUIdata(request, slice):
         gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
         gfs_list.append([of_agg.id,gfs])
  
-    protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+    nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
     tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
     fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
 
     return {
-                "protovis_nodes": protovis_nodes,
-                "protovis_links": protovis_links,
+                "nIslands": nIslands,
+                "d3_nodes": d3_nodes,
+                "d3_links": d3_links,
                 "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,
@@ -487,7 +504,7 @@ def home(request, slice_id):
             gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
             gfs_list.append([of_agg.id,gfs])
  
-        protovis_nodes, protovis_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+        nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
         
         fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
@@ -496,8 +513,9 @@ def home(request, slice_id):
             request,
             template="expedient/clearinghouse/slice/detail.html",
             extra_context={
-                "protovis_nodes": protovis_nodes,
-                "protovis_links": protovis_links,
+                "nIslands": nIslands,
+                "d3_nodes": d3_nodes,
+                "d3_links": d3_links,
                 "tree_rsc_ids": tree_rsc_ids,
                 "openflow_aggs": of_aggs,
                 "planetlab_aggs": pl_aggs,

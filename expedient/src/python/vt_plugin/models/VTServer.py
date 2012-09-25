@@ -138,3 +138,5 @@ class VTServer(Resource):
             iface.delete()
         super(VTServer, self).delete()
 
+    def getNetworkInterfaces(self):
+        return enumerate(self.ifaces.all().order_by('-isMgmt','id'))

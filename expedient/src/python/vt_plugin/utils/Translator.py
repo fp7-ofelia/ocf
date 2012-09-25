@@ -80,53 +80,51 @@ class Translator():
 			return
     @staticmethod
     def ServerClassToModel(sClass, agg_id):
-        newServer = 0
+        #print "[[[Translating Server XML description into plugin dataModel]]]"
+       	sModel = None 
         if VTServer.objects.filter(uuid = sClass.uuid).exists():
             sModel = VTServer.objects.get(uuid=sClass.uuid)
         else:
-            newServer = 1
             sModel = VTServer()
        
-        #sModel.aggregate_id = agg_id
-        sModel.name=sClass.name
-        sModel.aggregate = Aggregate.objects.get(id = agg_id)
-        sModel.status_change_timestamp = datetime.now()
-        sModel.available = True      
-        #XXX: The id field of the server in the xml is probably unnecessary,
-        #for sure this line has to be deleted since sModel.id is a resource.id and can override other resources 
-        #sModel.id = sClass.id
-        sModel.save()   
         try:
+            #sModel.aggregate_id = agg_id
+            sModel.name=sClass.name
+            sModel.aggregate = Aggregate.objects.get(id = agg_id)
+            sModel.status_change_timestamp = datetime.now()
+            sModel.available = True      
             sModel.setUUID(sClass.uuid)        
             sModel.setOStype(sClass.operating_system_type)
             sModel.setOSdist(sClass.operating_system_distribution)
             sModel.setOSversion(sClass.operating_system_version)
             sModel.setVirtTech(sClass.virtualization_type)
             #for iface in sClass.interfaces.interface:
-            if sClass.interfaces:
-                for iface in sClass.interfaces.interface:
-                    if iface.ismgmt is True:
-                        sModel.setVmMgmtIface(iface.name)
-                    else:
-                        if sModel.ifaces.filter(ifaceName = iface.name):
-                            ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
-                        else:
-                            ifaceModel = VTServerIface()
-                        ifaceModel.ifaceName = iface.name
-                        ifaceModel.switchID = iface.switch_id
-    		    if Translator._isInteger(iface.switch_port):
-                       	ifaceModel.port = iface.switch_port
-                        ifaceModel.save()
-                        if not sModel.ifaces.filter(ifaceName = iface.name):
-                            sModel.ifaces.add(ifaceModel)
+            #VTServer instance needs to be saved in order to be able to create many-to-many relationships
+            #for the interfaces and VMs
+            sModel.save()
+            for iface in sClass.interfaces.interface:
+                ifaceModel = None
+                if iface.ismgmt:
+                    sModel.setVmMgmtIface(iface.name) #XXX: remove, no longer used
+                if sModel.ifaces.filter(ifaceName = iface.name):
+		    ifaceModel = sModel.ifaces.get(ifaceName = iface.name)
+		else:
+		    ifaceModel = VTServerIface()
+		ifaceModel.ifaceName = iface.name
+		ifaceModel.switchID = iface.switch_id
+		ifaceModel.isMgmt = iface.ismgmt 
+    		 
+                if Translator._isInteger(iface.switch_port):
+                    ifaceModel.port = iface.switch_port
+                ifaceModel.save()
+                if not sModel.ifaces.filter(ifaceName = iface.name):
+                    sModel.ifaces.add(ifaceModel)
             sModel.setVMs()        
             sModel.save()
             return sModel
         except Exception as e:
             print e
             print "Error tranlating Server Class to Model"
-            if newServer:
-                sModel.delete()
 
     @staticmethod
     def ActionToModel(action, hyperaction, save = "noSave"):#, callBackUrl):

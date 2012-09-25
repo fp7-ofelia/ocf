@@ -20,8 +20,8 @@ class LdapProxy:
             logger.debug("TLS AVAILABLE? %d" % (ldap.TLS_AVAIL))
 	    print "LDAP SETTINGS->"+settings.LDAP_MASTER_URI
             ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, settings.LDAP_MASTER_CA)
-            ldap.set_option(ldap.OPT_X_TLS_CERTFILE, settings.LDAP_MASTER_CERT)
-            ldap.set_option(ldap.OPT_X_TLS_KEYFILE, settings.LDAP_MASTER_KEY)
+            #ldap.set_option(ldap.OPT_X_TLS_CERTFILE, settings.LDAP_MASTER_CERT)
+            #ldap.set_option(ldap.OPT_X_TLS_KEYFILE, settings.LDAP_MASTER_KEY)
             ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, settings.LDAP_MASTER_REQCERT)
             ldap.set_option(ldap.OPT_TIMEOUT, settings.LDAP_MASTER_TIMEOUT)
             self.proxy = ldap.initialize (settings.LDAP_MASTER_URI)

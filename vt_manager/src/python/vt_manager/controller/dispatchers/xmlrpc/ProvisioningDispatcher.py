@@ -9,18 +9,32 @@ from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.utils.UrlUtils import UrlUtils
 from vt_manager.controller.actions.ActionController import ActionController
 
+from vt_manager.controller.policies.RuleTableManager import RuleTableManager
+
 class ProvisioningDispatcher():
   
  
 	@staticmethod
 	def processProvisioning(provisioning):
 
+
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
 			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
-			
+
 			try:
+				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
+			except Exception as e:
+				a = str(e)
+				if len(a)>200:
+					a = a[0:199]
+				
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a )))
+#				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse('FAILED', action, 'You requested more than the 128Mbytes allowed for your project')))
+				return None
+			try:
+				
 				controller = VTDriver.getDriver(action.server.virtualization_type)
 
 				#XXX:Change this when xml schema is updated

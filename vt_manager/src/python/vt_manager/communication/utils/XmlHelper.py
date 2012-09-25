@@ -1,8 +1,8 @@
-from vt_manager.controller import *
 import sys
 import os
 from StringIO import StringIO
 from agent.utils.xml import vtRspecInterface
+
 '''
     @author: msune, lber
     
