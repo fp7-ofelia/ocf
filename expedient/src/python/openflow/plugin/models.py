@@ -171,7 +171,11 @@ production networks, and is currently deployed in several universities.
         except:
             import traceback
             traceback.print_exc()
-            raise
+            #XXX:lbergesio: if e is raised it is not properly handled and OCF crashes. Better 
+            #option is not to do it but log the error. Nevertheless this is related with the 
+            #available flag of the AM.
+            #raise
+            return {}
 
         return gfs
         
