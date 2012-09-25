@@ -24,11 +24,38 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.3
+--------------------------------------------------
+Released: 25/09/2012
+
+./ Production ready
+
+Change log:
+
+[*] EXP : Migration from protovis to d3 to display topology. Several improvements and enhancements in resources visualization and selection facing intrafederation. Issue 26
+[B] OFVER : Add pyparsing dependency in v0.3 pre-upgrade script. Issue 16
+[B] VTA, AGN : Fixed bug when creating VMs due to but handling of VM's interfaces. Issue 17
+[B] EXP : Fixed LDAP TLS certificate problem. Issue 18
+[B] EXP : OFREF URL updated. Issue 19
+[B] EXP : Fix bug causing the "Flowspace not granted" message remain in some AMs although it is granted. Issue 20
+[B] EXP : Fixed some files location problem due to refactor done by the Theme Manager. Issue 23
+[B] EXP : Fixed bug of Expedient crashing when trying to retrieve granted flow space if the AM is not available. Issue 24
+
+Known issues/TODOs:
+
+[T] VTA : Check Server information update (Enable checkbox).
+[T] VTA : Action model callBackURL attribute is no longer needed in VT Manager.
+[T] OPT : Optin Manager change topology callback to Expedient: code merge done, but further testing required.
+[T] VTA : Check oxad version when creating a VM.
+
+
+--------------------------------------------------
 v0.3RC1
 --------------------------------------------------
 Released: 03/09/2012
 
 /!\ Not for production
+/!\ Outdated
 
 Change log:
 
@@ -58,7 +85,7 @@ v0.21.1
 
 Released: 06/06/2012
 
-./ Production ready
+/!\ Outdated
 
 Change log:
 

@@ -202,8 +202,17 @@ function getLinkStyle(d, attr){
 	if(attr=="click"){
 		id0 = rsc_ids[0];
 		id1 = rsc_ids[1];
-		$(":checkbox#"+rsc_ids[0]).click();
-		$(":checkbox#"+id1).click();
+		if((! $(":checkbox#"+id0+":checked").length && ! $(":checkbox#"+id1+":checked").length) || ($(":checkbox#"+id0+":checked").length && $(":checkbox#"+id1+":checked").length)){
+			$(":checkbox#"+id0).click();
+			$(":checkbox#"+id1).click();
+		}
+		else if ($(":checkbox#"+id0+":checked").length){
+			$(":checkbox#"+id1).click();
+		}
+		else{
+			$(":checkbox#"+id0).click();	
+		}
+
 	}else if(attr=="mouseover"){
 		var values = {stroke: "#00BFFF", strokewidth: "2" };
 		return values;
@@ -457,6 +466,7 @@ function redrawNodes(){
 }
 
 function tick() {
+
   link.attr("x1", function(d) { return d.source.x; })
       .attr("y1", function(d) { return d.source.y; })
       .attr("x2", function(d) { return d.target.x; })
@@ -469,6 +479,7 @@ function tick() {
 function animate(){
 
 iellipses.attr("rx", function(d) { return d.rx; })
+    .style("display","block")
     .attr("ry", function(d) { return d.ry; })
     .attr("cx",function(d) { return d.cx; })
     .attr("cy", function(d) { return d.cy; })
@@ -491,11 +502,15 @@ iellipses.transition()
 iellipses.transition()
            .delay(1500)
            .style("opacity",0)
-           .duration(3000);
+           .duration(3000)
 ilabels.transition()
            .delay(1500)
            .style("opacity",0)
            .duration(3000);
+//xxx lbergesio: not needed if scrolling is done with d3
+iellipses.transition()
+	.delay(4500)
+	.style("display", "none");
 
 }
 
@@ -537,6 +552,9 @@ function collide(alpha) {
     });
   };
 };
+
+//XXX lbergesio: Try to find how to allow scrolling within d3
+$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
 
 </script>
 
