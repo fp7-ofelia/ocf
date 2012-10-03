@@ -480,7 +480,7 @@ table.msg_table td.msg_text {
     text-align:left;
 }
 
-table.msg_table .error {
+table.msg_table .error, .errorlist {
 	color:#9a1b1b;
 }
 
@@ -997,3 +997,13 @@ div.aggregateManager table.aggregateManagerDetail .label {
 .expandableCtl {
 	cursor:pointer;	
 }
+
+/* Success, error font styles */
+.success {
+        color: green;
+}
+
+.error {
+        color:#9a1b1b;
+}
+

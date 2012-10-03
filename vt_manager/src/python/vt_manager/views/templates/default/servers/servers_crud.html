@@ -142,7 +142,7 @@ function adding(row){
 			<h2>Networking parameters</h2>
 			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
 			<div class="tooltip" id="mgmt_bridge_help">
-            Managemente bridge connecting the control interface of the server and the VMs. MAC address is optional. 
+            Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
             </div>
 
 			{% if mgmtIfaceForm.errors %}
@@ -183,7 +183,7 @@ function adding(row){
 						<input id="submacbutton" type="button" value="Subscribe" >
 				</td>
 				{% else %}
-				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. If not a global range will be used</td></tr>
+				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. Otherwise a global range will be used</td></tr>
 				{% endif %}
             </table>
 		</div>
@@ -201,7 +201,7 @@ function adding(row){
 						<input id="subipbutton" type="button" value="Subscribe">
 				</td>
                 {% else %}
-                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. If not a global range will be used</td></tr>
+                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. Otherwise a global range will be used</td></tr>
                 {% endif %}
             </table>
 		</div>

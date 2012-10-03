@@ -3,20 +3,6 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
-
-<script>
-    function checkNameBlanks(){
-        //alert("checkBlancks");
-        reWhiteSpace = new RegExp(/\s/);
-        var str = document.getElementById("id_form-0-name").value;
-        if (reWhiteSpace.test(str)) {
-            $("#error_td").replaceWith("<td id = \"error_td\" >· Check the VM name has no white spaces</td>");
-            return false;
-        }
-        return true;
-     }
-</script>
-
 {% endblock %}
 
 {% block content %}
@@ -27,7 +13,13 @@
     	{{ formset.management_form }}
 		{% for form in formset.forms %}
             <table class="separator-table">
-                <tr class="error"><th/><td id = "error_td" ></td></tr>
+                <tr class="error"><th/>
+                    <td id="error_td">
+                    {% if exception != "" %}    
+                        <ul class="error"><li>{{ exception }}</li></ul>
+                    {% endif %}
+                    </td>
+                </tr>
                 {% for field in form %}
                 {% if field.name != "resource_ptr"%}
                 <tr> <th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
@@ -36,7 +28,7 @@
             </table>
         {% endfor %}
 		<div id = "buttons" class="center"> 
-			<input type="submit" name = "create_new_vms" value="Done" onClick="return checkNameBlanks()"/> |
+			<input type="submit" name = "create_new_vms" value="Done" onClick="return checkVirtualMachineInfo()" /> |
 			<a href="{% url slice_detail slice.id %}">Cancel</a>
 		</div>
 	</form>
