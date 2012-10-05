@@ -252,8 +252,6 @@ def subscribeIp4Ranges(request, server_id):
 
 def list_vms(request, server_id):
 
-	"""Show a page for the user to add/edit an  VTServer """
-
 	if (not request.user.is_superuser):
         
 		return simple.direct_to_template(request,

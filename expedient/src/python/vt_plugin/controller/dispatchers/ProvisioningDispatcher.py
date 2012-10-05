@@ -5,11 +5,10 @@ from expedient.common.messaging.models import DatedMessage
 from vt_plugin.models import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
-import xmlrpclib
-import threading
+import xmlrpclib, threading, logging
 from expedient.clearinghouse.settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR
 
-PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
+#PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
 
 class ProvisioningDispatcher():
     
@@ -32,8 +31,8 @@ class ProvisioningDispatcher():
                     try:
                         raise Exception
                     except Exception as e:
-                        print "Action already exists"
-                        print e
+                        logging.error("Action already exists")
+                        logging.error(e)
                         return                
                 else:
                     actionModel.save()
@@ -45,8 +44,8 @@ class ProvisioningDispatcher():
                     actionModel.vm = VMmodel
                     actionModel.save()
                 except Exception as e:
-                    print "Not possible to translate to VM model\n"
-                    print e
+                    logging.error("Not possible to translate to VM model\n")
+                    logging.error(e)
                     DatedMessage.objects.post_message_to_user(
                         "Not possible to translate VM %s to a proper app model" % VMmodel.name,
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
@@ -57,7 +56,7 @@ class ProvisioningDispatcher():
                 
                 client = Server.aggregate.as_leaf_class().client
                 
-                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+                ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action, client)                
 
             elif actionModel.type == "delete" :
 
@@ -67,8 +66,8 @@ class ProvisioningDispatcher():
                     try:
                         raise Exception
                     except Exception as e:
-                        print "No VM found to start it\n"
-                        print e
+                        logging.error("No VM found to start it\n")
+                        logging.error(e)
                         return
                     
                 #ProvisioningDispatcher.checkActionIsPresent(actionModel)
@@ -76,21 +75,21 @@ class ProvisioningDispatcher():
                     try:
                         raise Exception
                     except Exception as e:
-                        print "Action already exists"
-                        print e
+                        logging.error("Action already exists")
+                        logging.error(e)
                         return
                 else:
-                    print "ACTION delete is going to be saved"
+                    logging.error("ACTION delete is going to be saved")
                     actionModel.vm = VMmodel
                     actionModel.save()
                 
                 try:	
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     client = Server.aggregate.as_leaf_class().client
-                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)  
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action, client) 
                 except:
-                    print "Could not connect to AM"
-                    print e
+                    logging.error("Could not connect to AM")
+                    logging.error(e)
                     DatedMessage.objects.post_message_to_user(
                         "Could not connect to AM",
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
@@ -107,8 +106,8 @@ class ProvisioningDispatcher():
                     try:
                         raise Exception
                     except Exception as e:
-                        print "No VM found to start it\n"
-                        print e
+                        logging.error("No VM found to start it\n")
+                        logging.error(e)
                         return
                 #AGENT_URL = VTServer.objects.get(name = VMmodel.getServerID() ).getAgentURL()                
                 #ProvisioningDispatcher.checkActionIsPresent(actionModel)            
@@ -116,8 +115,8 @@ class ProvisioningDispatcher():
                     try:
                         raise Exception
                     except Exception as e:
-                        print "Action already exists"
-                        print e
+                        logging.error("Action already exists")
+                        logging.error(e)
                         return
                 else:
                     actionModel.vm = VMmodel
@@ -126,10 +125,10 @@ class ProvisioningDispatcher():
 		try: 
                     Server = VTServer.objects.get(uuid = VMmodel.getServerID() )
                     client = Server.aggregate.as_leaf_class().client
-                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action)                
+                    ProvisioningDispatcher.connectAndSend('https://'+client.username+':'+client.password+'@'+client.url[8:], action, client)                
                 except:
-                    print "Could not connect to AM"
-                    print e
+                    logging.error("Could not connect to AM")
+                    logging.error(e)
                     DatedMessage.objects.post_message_to_user(
                         "Could not connect to AM",
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
@@ -137,13 +136,14 @@ class ProvisioningDispatcher():
 
 
     @staticmethod
-    def connectAndSend(URL, action):
+    def connectAndSend(URL, action, client):
         try:
             vt_manager = xmlrpclib.Server(URL)
+            PLUGIN_URL = 'https://'+client.username+':'+client.password+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
             vt_manager.send(PLUGIN_URL, XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)))
         except Exception as e:
-            print "Exception connecting to VT Manager"
-            print e
+            logging.error("Exception connecting to VT Manager")
+            logging.error(e)
             return
 
     @staticmethod
@@ -160,5 +160,5 @@ class ProvisioningDispatcher():
             #super(Resource).delete()
             vm.delete()
         except Exception as e:
-            print e
+            logging.error(e)
 
