@@ -2,7 +2,8 @@
 import sys,os
 import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
-from monitoring.MonitoringDispatcher import MonitoringDispatcher 
+from monitoring.MonitoringDispatcher import MonitoringDispatcher
+from monitoring.LibvirtMonitor import LibvirtMonitor 
 from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
@@ -89,7 +90,7 @@ def processXmlQuery(notificationCallBackUrl,xml):
 
 '''Main routine, opening the XML-RPC server'''
 def main():
-	logger.info("OFELIA XEN Agent")	
+	logger.info("OFELIA XEN Agente")	
 	
 	checkArgs()
 
@@ -102,9 +103,13 @@ def main():
 	#print "Main ends..." 
 
 	#Engage XMLRPC
-	#logger.debug("Trying to engage XMLRPC server...")	
-	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
-
+	#logger.debug("Trying to engage XMLRPC server...")
+        logger.info("pre CreateInstanceAndEngage")	
+	XmlRpcServer.createInstanceAndEngage(processXmlQuery)	
+	logger.info("Starting libvirt monitoring")
+	
+	#XXX: ADD try/except 
+	LibvirtMonitor.initialize()
 	logger.debug("This is unreachable!")	
 
 #Calling main
