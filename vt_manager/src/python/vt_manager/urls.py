@@ -6,6 +6,8 @@ import re
 admin.autodiscover()
 
 from vt_manager.utils.ThemeManager import ThemeManager
+from vt_manager.communication.southCommInterface import *
+from vt_manager.communication.northCommInterface import *
 
 '''
 Load Themes
