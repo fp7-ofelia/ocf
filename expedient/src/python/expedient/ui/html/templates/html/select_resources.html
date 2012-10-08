@@ -192,6 +192,19 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
         <td class="port_num iface_{{ iface.id }}"><label for = "rsc_id_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></label></td>
         <td class="connections">
           <table class="connections">
+	{% for node in d3_nodes %}
+		{% for conn in node.vmInterfaces %}
+			{% if conn.switch ==  switch.datapath_id  and conn.port|safe == iface.port_num|safe %}
+        <tr>
+          <td class="neighbor neighbor_{{ iface.id }} server_node_{{node.value}}" value="{{iface.id}}">
+            Connected to <a href="#">
+              {{ node.name }}</a> at  <a href="#">
+              {{ conn.name }}</a>
+          </td>
+        </tr>
+        		{% endif %}
+        	{% endfor %}
+        {% endfor %}
         {% for cnxn in iface.nonopenflow_connections.all %}
         <tr>
           <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">

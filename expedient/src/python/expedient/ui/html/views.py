@@ -243,7 +243,8 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             nodes.append(dict(
                     #XXX: lbergesio: Removed len(pl_aggs) to matche vt_aggs con of_aggs in the 
                     #same group. Will planetlab be supported at the end?
-                    name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
+                    name=n.name, value=n.id, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
+                    #name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
                     #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
             )
             serverGroupSet=False 

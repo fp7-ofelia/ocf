@@ -245,13 +245,30 @@ function getBaseNodeColor(d){
 		return d3.rgb("FFFFFF");
 	
 }
+
 function getNodeCircleStyle(d, attr){
         type = get_node_type(d);
         selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length;
         all_len = $(":checkbox:.node_id_"+d.nodeValue).length;
+	selected_server = $(".server_node_"+d.nodeValue+".connected").length;
         if(attr == "drag"){
                 return d3.rgb(d.color.toString()).brighter(5);
 	}else if(attr=="click"){
+		 if (type == "vtserver" && selected_server != 0){
+			return d3.rgb(d.color.toString()).darker(5);
+		 }
+		 //if (type == "vtserver"){
+		 //       if (selected_server != 0){
+		 //       	value = $(".server_node_"+d.nodeValue).attr("value");
+                 //               $(":checkbox:checked#rsc_id_"+value).click();
+	         //               return getBaseNodeColor(d);
+		 //       }
+		 //       else{
+		 //       	value = $(".server_node_"+d.nodeValue).attr("value");
+		 //       	$(":checkbox:not(checked)#rsc_id_"+value).click();
+		 //       	return d3.rgb(d.color.toString()).darker(5);
+		 //       }
+		 //}
 		 if(selected_len == all_len) {
                         $(":checkbox:checked.node_id_"+d.nodeValue).click();
 			return getBaseNodeColor(d);
@@ -260,11 +277,15 @@ function getNodeCircleStyle(d, attr){
 			return d3.rgb(d.color.toString()).darker(5);
                 }
         }else if (attr == "dragstop" && selected_len == 0){
+		if(type == "vtserver" && selected_server != 0)
+                      return d3.rgb(d.color.toString()).darker(5);
 		return getBaseNodeColor(d);
         }else{
                         if (attr == "fill"){
                                 return getBaseNodeColor(d);
                         } else{
+				if(type == "vtserver" && selected_server != 0)
+		                        return d3.rgb(d.color.toString()).darker(5);
 				if (selected_len != 0){
 	                                return d3.rgb(d.color.toString()).darker(5);
 				}else{
