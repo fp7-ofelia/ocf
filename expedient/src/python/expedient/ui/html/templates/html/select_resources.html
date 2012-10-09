@@ -197,8 +197,8 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 			{% if conn.switch ==  switch.datapath_id  and conn.port|safe == iface.port_num|safe %}
         <tr>
           <td class="neighbor neighbor_{{ iface.id }} server_node_{{node.value}}" value="{{iface.id}}">
-            Connected to <a href="#">
-              {{ node.name }}</a> at  <a href="#">
+            Connected to VMs hosted at<a href="#">
+              {{ node.name }}</a> to the VM's interface  <a href="#">
               {{ conn.name }}</a>
           </td>
         </tr>
