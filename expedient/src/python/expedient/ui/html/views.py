@@ -252,13 +252,16 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
 		#first check datapathId exists.
                 try:
                     sId= openflowSwitches[inter.switchID]
+                    pId = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
                 except:
                     continue
                 links.append(
                         dict(
                             target=sId,
                             src=len(nodes)-1,
-                            value=inter.ifaceName+":"+str(inter.port)
+                            value="rsc_id_"+str(pId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
+                            #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
+                            #value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
                 if (not serverGroupSet):
