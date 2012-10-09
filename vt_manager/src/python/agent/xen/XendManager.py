@@ -9,6 +9,8 @@ from threading import Thread, Lock
 from xen.provisioning.HdManager import HdManager
 from utils.Logger import Logger
 
+from xen.xmlTest import xmldesc
+
 '''
 	@author: msune
 
@@ -111,16 +113,19 @@ class XendManager(object):
 		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
 			#Duplicated name; trying to find an Alias
 			newVmName = XendManager.__findAliasForDuplicatedVmName(vm)
-			subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+			#subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
 		else:	
 			try:
 				#Try first using libvirt call
-				#conn.createXML(xmlConf,0)
+				XendManager.logger.info('creating vm using python-libvirt methods')
+                                XendManager.logger.info('xmlConf')
+				conn.createXML(xmlConf,0)
+                                XendManager.logger.info('created vm?')
 				raise Exception("Skip") #otherwise stop is ridicously slow
 			except Exception as e:
 				#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
-				subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
-			
+				#subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+				raise e	
 		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
 
 		if not XendManager.isVmRunningByUUID(vm.uuid):
