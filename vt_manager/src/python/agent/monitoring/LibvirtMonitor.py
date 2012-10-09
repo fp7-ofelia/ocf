@@ -19,15 +19,16 @@ import time
 import threading
 import logging
 
+from utils.Logger import Logger
+
+logger = Logger.getLogger()
 '''
         @author: omoya
 
         Libvirt Monitoring      
-        Implement callback functions in libvirt virtualmachines 
+        Implement callback functions in libvirt virtual machines 
 '''
 
-
-#from ExampleLibvirtMonitor import *
 
 # For the sake of demonstration, this example program includes
 # an implementation of a pure python event loop. Most applications
@@ -47,6 +48,7 @@ import logging
 #
 # It is a pure python implementation based around the poll() API
 #
+
 class virEventLoopPure:
     # This class contains the data we need to track for a
     # single file handle
@@ -130,6 +132,7 @@ class virEventLoopPure:
         # with the event loop for input events. When we need to force
         # the main thread out of a poll() sleep, we simple write a
         # single byte of data to the other end of the pipe.
+
         logging.debug("Self pipe watch %d write %d" %(self.pipetrick[0], self.pipetrick[1]))
         self.poll.register(self.pipetrick[0], select.POLLIN)
 
@@ -183,6 +186,7 @@ class virEventLoopPure:
     # back around the loop with a crazy 5ms sleep. So when checking
     # if timeouts are due, we allow a margin of 20ms, to avoid
     # these pointless repeated tiny sleeps.
+
     def run_once(self):
         sleep = -1
         self.runningPoll = True
@@ -251,6 +255,7 @@ class virEventLoopPure:
     # event constants), firing the callback  cb() when an event occurs.
     # Returns a unique integer identier for this handle, that should be
     # used to later update/remove it
+
     def add_handle(self, fd, events, cb, opaque):
         handleID = self.nextHandleID + 1
         self.nextHandleID = self.nextHandleID + 1
@@ -459,7 +464,7 @@ class LibvirtMonitor:
             LibvirtMonitor.virEventLoopNativeStart()
  	    info = 'libvirt.virEventRegisterDefaultImpl()'
 
-        logging.debug("The libvirt version installed is %d, using %s method" %(libvirt.getVersion(),info))
+        logging.debug("Libvirt version installed is %d, using %s method" %(libvirt.getVersion(),info))
         vc = libvirt.open(None)
         vc.domainEventRegisterAny(None,libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE, callback, None)
        
@@ -496,11 +501,11 @@ def detailToString(event, detail):
     return eventStrings[event][detail]
 
 def callback (conn, dom, event, detail, opaque):
-    print "myDomainEventCallback1 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
+    logger.info("myDomainEventCallback1 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
                                                                  eventToString(event),
-                                                                 detailToString(event, detail))
+                                                                 detailToString(event, detail)))
     f = open('opt/ofelia/oxa/log/libvirt.log','a')
-    f.write('myDomainEventCallback1 EVENT: Domain %s(%s) %s %s' % (dom.name(), dom.ID(),
+    f.write('myDomainEventCallback1 EVENT: Domain %s(%s) %s %s\n' % (dom.name(), dom.ID(),
                                                                  eventToString(event),
                                                                  detailToString(event, detail)))
 

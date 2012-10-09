@@ -90,7 +90,7 @@ def processXmlQuery(notificationCallBackUrl,xml):
 
 '''Main routine, opening the XML-RPC server'''
 def main():
-	logger.info("OFELIA XEN Agente")	
+	logger.info("OFELIA XEN Agent")	
 	
 	checkArgs()
 
@@ -101,15 +101,16 @@ def main():
 	##testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
-
+	logger.info("Starting libvirt monitoring")
+	LibvirtMonitor.Initialize()
+	logger.info("OK")
 	#Engage XMLRPC
 	#logger.debug("Trying to engage XMLRPC server...")
-        logger.info("pre CreateInstanceAndEngage")	
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)	
-	logger.info("Starting libvirt monitoring")
-	
+	#logger.info("Starting libvirt monitoring")
+	#print "Starting libvirt monitoring"	
 	#XXX: ADD try/except 
-	LibvirtMonitor.initialize()
+	#LibvirtMonitor.initialize()
 	logger.debug("This is unreachable!")	
 
 #Calling main
