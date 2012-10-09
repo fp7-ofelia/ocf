@@ -57,9 +57,11 @@ touch /var/log/sfa_access.log
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
 
-
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
+
+#LDAP settings
+source $CURRENT_DIRECTORY/lib/ldap-settings
 
 #Change permissions of the code
 printHeader ">" "Setting correct file permissions..."

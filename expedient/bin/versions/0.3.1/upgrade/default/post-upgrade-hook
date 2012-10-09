@@ -1,0 +1,33 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio, cfernandez
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.3.1 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/expedient/
+
+local TMP_PATH=$PWD
+
+#LDAP settings
+source $CURRENT_DIRECTORY/lib/ldap-settings
+
+cd $TMP_PATH
+
+#Starting apache
+print "Starting apache2..."
+/usr/sbin/service apache2 start
+
+#Cleaning the house
+confirm "Delete backup files?" $DONT_ABORT
+
+if [ $? == 0 ]; then
+        print "Deleting backups..."
+        rm -rf $BACKUP_PATH
+fi
+

@@ -38,7 +38,6 @@ class Resource(Extendable):
             error()
 
     
-#    name = models.CharField(max_length=200)
     name = models.CharField(max_length=200, validators=[asciiValidator])
     available = models.BooleanField("Available", default=True, editable=False)
     status_change_timestamp = models.DateTimeField(

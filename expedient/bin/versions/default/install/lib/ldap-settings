@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#Constants
+EDITORS="vi vim emacs nano pico"
+
+#Copy from template
+printHeader ">" "Copying LDAP settings file from template..."
+
+if [ -f $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings.py ];then
+    warning "localLdapSettings file already exists."
+
+    if [ "$FORCE" == "1" ]; then
+        confirm "Overwrite currently installed localLdapSettings.py." $DONT_ABORT
+        if [ $? == 0 ]; then
+            cp $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings-example $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings.py -f || error "Cannot copy localLdapSettings.py"
+        fi
+    else
+        print "Skipping copy (will not be overwritten)"
+    fi
+else
+    print "$SRC_DIR""src/python/expedient/clearinghouse/localLdapSettings-example -> $SRC_DIRsrc/python/expedient/clearinghouse/localLdapSettings.py "
+    cp $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings-example $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings.py || error "Cannot copy localLdapSettings.py"
+fi
+
+#Non-OFELIA installation may need its own settings
+if [ $OFELIA == 0 ]; then
+    #Choose editor
+    printHeader ">" "Choosing the editor..."
+    select editor in $EDITORS;
+    do
+        if [ -z $editor ]; then
+            print "Invalid option $editor"
+            continue
+        fi
+        print ""
+        EDITOR=$editor
+        print "You are going to use $EDITOR for file manipulation..."
+        break;
+    done
+
+    #Edit file
+    printHeader ">" "Editing localLdapSettings file..."
+    while : 
+    do
+        print "Now you are going to edit the file $SRC_DIR""src/python/expedient/clearinghouse/localLdapSettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+        pause ""
+        eval $EDITOR $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings.py
+        print ""
+        pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
+        less $SRC_DIR/src/python/expedient/clearinghouse/localLdapSettings.py
+
+        confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
+
+        if [ $? == 0 ]; then
+            break
+        fi
+    done
+fi
+

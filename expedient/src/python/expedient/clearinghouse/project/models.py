@@ -75,7 +75,7 @@ class Project(models.Model):
     objects = ProjectManager()
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
-    description = models.TextField(validators=[asciiValidator])
+    description = models.TextField(validators=[descriptionValidator])
     uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     '''
     save = permissions_save_override(

@@ -1,6 +1,6 @@
-var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
-var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
 var NUMBER_RE = /^([0-9])+$/;
+var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
+var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
 
 function doErrorlistExists(fieldID) {
     var result = false;

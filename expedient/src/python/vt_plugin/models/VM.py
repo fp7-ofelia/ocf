@@ -7,6 +7,7 @@ import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.resources.models import Resource, Sliver
+#from expedient.common.utils import validators
 from expedient.common.utils.modelfields import LimitedIntegerField
 from expedient.common.middleware import threadlocals
 from expedient.clearinghouse.utils import post_message_to_current_user
@@ -138,6 +139,7 @@ class VM(Resource):
                 error()
         try:
             validate_name(name)
+#            validators.resourceNameValidator(name)
             self.name = name
         except Exception as e:
             raise e

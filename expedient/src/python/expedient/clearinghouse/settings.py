@@ -19,7 +19,10 @@ from expedient.clearinghouse.defaultsettings.site import *
 from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
+# LDAP static settings
 from expedient.clearinghouse.defaultsettings.ldapSettings import *
+# LDAP custom settings
+from expedient.clearinghouse.localLdapSettings import *
 
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS

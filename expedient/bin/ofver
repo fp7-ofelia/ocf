@@ -22,7 +22,6 @@ FORCE=0
 NO_RETURN=1
 DONT_ABORT=2
 NO_RESCUE=1
-LOCK_FILE=".ofverLock"
 UPGRADE_REG=".upgradeReg"
 
 ##Other info
@@ -37,10 +36,9 @@ APP_WEB="http://code.google.com/p/ofver/, http://www.fp7-ofelia.eu"
 ##Main method
 function main()
 {
-
 	#Check root
 	if [ "$(id -u)" != "0" ]; then
-		echo "$(tput setaf 1)FATAL ERROR$(tput setaf 0): $APP_NAME must be run by root user"
+		echo "$(tput setaf 1)FATAL ERROR: $(tput sgr0)$APP_NAME must be run by root user"
 		exit 1
 	fi
 
@@ -57,10 +55,8 @@ function main()
 
 	lock	
 
-	
 	#Check in_branch flag
 	varChecks
-
 
 	#Arguments
 	checkArgsAndParseOpts $@
@@ -68,10 +64,10 @@ function main()
 	#Try to recover upgrade from the 2 step process
 	recoverUpgradeState
 
-	#Spash
+	#Splash
 	splash 
 	
-	#Invoque action
+	#Invoke action
 	eval $ACTION_
 
 	#Finish
