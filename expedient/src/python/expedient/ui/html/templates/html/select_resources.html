@@ -2,15 +2,46 @@
 {% load ch_extras %}
 
 {% block head %}
+
+<script type="text/javascript">
+        jQuery(document).ready(function() {
+                //jQuery(".expandable").hide();
+         
+                jQuery(".expandableCtl").click(function()
+                {
+                        elementName = "#"+$(this).attr('id')+"Container";
+                        jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
+                        if(jQuery("span", this).attr("class") == "closed"){
+                                jQuery("span", this).html(" &#x25B2;");
+                                $('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
+                        }else{
+                                jQuery("span", this).html(" &#x25BC;");
+                        }
+                        jQuery("span", this).toggleClass("opened closed");
+                });
+        });
+
+	$(document).ready(function() {
+		$("#aggs_help_img").tooltip({
+			tip: "#aggs_help_div"
+		});
+		$(".expandableTooltipable").tooltip({
+			tip: "#expandableHelp"
+		});
+}); 
+
+</script>
+
 <style>
     table.openflow,table.planetlab {
         width: 100%;
         border-spacing: 0px;
         border-collapse: collapse;
-        border: 1px solid #CCC;
+        /*border: 1px solid #CCC;*/
     }
     table.openflow .dpid,.ports {
         border-bottom: 1px solid #000;
+	border-color: #555555;
     }
     table.connections_table {
         border-width: 0px;
@@ -26,6 +57,9 @@
     }
     table.connections {
         width: 440px;
+    }
+    tr.even {
+        background-color: #dfd7f4;
     }
     tr.odd {
         background-color: #ecf4d7;
@@ -107,17 +141,23 @@ $(document).ready(function(){
 <br />
 <br />
 
+<div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
+
 <form action="" method="POST">{% csrf_token %}
 {% if planetlab_aggs %}
 <h1>Select PlanetLab Nodes</h1>
 {% endif %}
 
 {% for agg in planetlab_aggs %}
-<h2>PlanetLab Aggregate {{ agg.name }}</h2>
+<h2>
+	<a id="ofam_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">
+	&bull; PlanetLab Aggregate {{ agg.name }}<span class="opened"> &#x25B2;</span>
+	</a>
+</h2>
 <div id="am_location">
 	Aggregate physical location: <b>{{ agg.location }}.</b>
 </div>
-<div class="planetlab">
+<div id="plam_{{agg.id}}Container" class="aggregateManager expandable">
   <table class="planetlab">
     <tr class="header">
       <th class="select_checkbox"></th>
@@ -164,11 +204,15 @@ $(document).ready(function(){
 {% endif %}
 
 {% for agg in openflow_aggs %}
-<h2>OpenFlow Aggregate {{ agg.name }}</h2>
+<h2>
+	<a id="ofam_{{agg.id}}"class="expandableTooltipable expandableCtl" ref="#/">
+	&bull; OpenFlow Aggregate {{ agg.name }}<span class="opened"> &#x25B2;</span>
+	</a>
+</h2>
 <div id="am_location">
 Aggregate physical location: <b>{{ agg.location }}.</b>
 </div >
-<div class="openflow">
+<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable">
   <table class="openflow">
     <tr class="header">
       <th class="dpid">Datapath ID</th>

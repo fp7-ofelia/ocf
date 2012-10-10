@@ -1,43 +1,69 @@
-<h2>Topology</h2>
+<h2>
+  Topology
+</h2>
 
 
-<script src="{% url js_media 'tooltip.topology.js' %}"></script>
-<script src="{% url js_media 'd3.v2.min.js' %}"></script>
+<script src="{% url js_media 'tooltip.topology.js' %}">
+</script>
+<script src="{% url js_media 'd3.v2.min.js' %}">
+</script>
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
 <style>
-
-.link {
-  stroke: #ccc;
-  stroke-width:1px;
-}
-
-.node {
- stroke-width:2px;
-}
-.node text {
-  pointer-events: none;
-  font: 10px sans-serif;
-}
-
+  
+  .link {
+    stroke: #ccc;
+    stroke-width:1px;
+  }
+  
+  .node {
+    stroke-width:2px;
+  }
+  .node text {
+    pointer-events: none;
+    font: 10px sans-serif;
+  }
+  
 </style>
 
 {#Render#}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
-{%if not d3_nodes %}
-<a href="#addAggregate"><div style="position:relative; top:200px; left:200px; width:450px;color=black;">Nothing to show yet. Add Aggregates to the slice.</div></a>
-{% endif %}
-<div id="target">
-</div>
-<div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
-
-    <!--<a href="#" onClick="return showAllInfo()"/>Show</a>&nbsp;-->
-    <a href="javascript: regroup()"/><img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-    <a href="javascript: zoomIn(0.25)"/><img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-   <a href="javascript: zoomOut(0.25)"/><img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
-   <a href="javascript: zoomReset()"/><img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+    Tip: Move cursor over the icons to get extra information...
+  </div>
+  {%if not d3_nodes %}
+  <a href="#addAggregate">
+    <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
+      Nothing to show yet. Add Aggregates to the slice.
+    </div>
+  </a>
+  {% endif %}
+  <div id="target">
+  </div>
+  <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+    
+    <!--
+<a href="#" onClick="return showAllInfo()"/>
+Show
+</a>
+&nbsp;-->
+  <a href="javascript: regroup()"/>
+  <img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/>
+  </a>
+  &nbsp;
+  <a href="javascript: zoomIn(0.25)"/>
+  <img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/>
+</a>
+&nbsp;
+<a href="javascript: zoomOut(0.25)"/>
+<img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
+<a href="javascript: zoomReset()"/>
+<img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
 </div>
 </div>
 
@@ -569,6 +595,3 @@ function collide(alpha) {
 $("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
 
 </script>
-
-<br />
-<br />

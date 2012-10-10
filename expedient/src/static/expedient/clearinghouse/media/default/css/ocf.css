@@ -874,6 +874,7 @@ table.flowspace_r tr.even{
 
 /* AM borders */
 div.aggregateManager {
+	margin-top:0px;
 	margin-bottom:10px;
 	background-color:#EEE;
     	border: 1px solid #CCC;
@@ -881,11 +882,29 @@ div.aggregateManager {
     	-webkit-border-radius: 0px 25px 25px 25px;
     	border-radius:  0px 25px 25px 25px;
 	display:inline-block;
-	width:720px;;
+	width:720px;
 	text-align:center;
 	vertical-align:middle;
 	padding:10px;
+	padding-top:0;
 }
+
+/*div.aggregateManagerHeader {
+        margin-bottom: 0;
+        text-align:left;
+	background-color:#EEE;
+        border-left: 1px solid #CCC;
+        border-right: 1px solid #CCC;
+        border-top: 1px solid #CCC;
+        border-bottom: 0px;
+        -moz-border-radius: 0px 25px 0 0;
+        -webkit-border-radius: 0px 25px 0 0;
+        border-radius:  0px 25px 0 0;
+        display:inline-block;
+        width:730px;
+        vertical-align:middle;
+        padding:5px;
+}*/
 /*div.addAggregateManager {
 	width:350px;
 	padding:5px!important;
