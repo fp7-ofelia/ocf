@@ -456,7 +456,7 @@ class LibvirtMonitor:
     @staticmethod
     def Initialize():
         # Run a background thread with the event loop
-
+	logger.warning('Arribing to LibvirtMonitor.Initialize(), things are OK for now')
         if libvirt.getVersion() < 9000:
             LibvirtMonitor.virEventLoopPureStart()
             info = 'virEventLoopPureRun'
@@ -467,7 +467,7 @@ class LibvirtMonitor:
         logging.debug("Libvirt version installed is %d, using %s method" %(libvirt.getVersion(),info))
         vc = libvirt.open(None)
         vc.domainEventRegisterAny(None,libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE, callback, None)
-       
+        logger.warning('Callback() seems registered as libvirt callback')
         #Run Test
         #print 'callback saved'
         #print 'main'
@@ -501,13 +501,14 @@ def detailToString(event, detail):
     return eventStrings[event][detail]
 
 def callback (conn, dom, event, detail, opaque):
-    logger.info("myDomainEventCallback1 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
+    print "myDomainEventCallback1 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
                                                                  eventToString(event),
-                                                                 detailToString(event, detail)))
-    f = open('opt/ofelia/oxa/log/libvirt.log','a')
+                                                                 detailToString(event, detail))
+    f = open('opt/ofelia/oxa/log/libvirt.log','a+')
     f.write('myDomainEventCallback1 EVENT: Domain %s(%s) %s %s\n' % (dom.name(), dom.ID(),
                                                                  eventToString(event),
                                                                  detailToString(event, detail)))
+    f.close()
 
 
 
