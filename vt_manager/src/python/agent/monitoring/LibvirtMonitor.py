@@ -76,7 +76,8 @@ class virEventLoopPure:
             self.cb(self.handle,
                     self.fd,
                     events,
-                    self.opaque)
+                    self.opaque,
+		    None)
 
     # This class contains the data we need to track for a
     # single periodic timer
