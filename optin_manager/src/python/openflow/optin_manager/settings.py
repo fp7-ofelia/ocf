@@ -68,10 +68,15 @@ except ImportError as e:
     else:
         raise
 
-#FOR TESTING. NOT REALLY NEEDED, SINCE THE LINE IN REQUIRED_SETTINGS IS COMMENTED
+#
+# For testing. Not really needed, since the line is commented in
+# REQUIRED_SETTINGS.
+#
 MININET_VMS = [
     ("84.88.41.12", 22),
 ]
 
-#Default Moniroting interval in seconds
+#
+# Default monitoring interval in seconds.
+#
 MONITORING_INTERVAL = 38

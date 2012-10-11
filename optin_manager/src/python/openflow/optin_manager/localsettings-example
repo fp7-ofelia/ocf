@@ -1,31 +1,73 @@
-CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager' #'/etc/optin_manager'
-SRC_DIR = '/opt/ofelia/optin_manager/src' #'/usr/share/optin_manager'
+'''
+Ofelia Opt-in AM user settings file
 
+@author: msune, CarolinaFernandez
+'''
+
+#
+# Based upon the Apache server configuration files.
+#
+
+### Section 1: Opt-in settings
+#
+# Basic settings for the Opt-in (GUI) configuration.
+#
+
+#
+# Directories for the Opt-in sources and the configuration file.
+#
+CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager'
+SRC_DIR = '/opt/ofelia/optin_manager/src'
+
+#
+# User management for the Graphical User Interface.
+#
 ROOT_USERNAME = "expedient"
 ROOT_PASSWORD = "expedient"
 ROOT_EMAIL    = "ale@gmail.com"
-ISLAND_NAME   = "i2cat"
 
+#
+# You may add different groups here and decide whether they are
+# managers or not.
+#
 ADMINS = [
     ("expedient", ROOT_EMAIL),
 ]
-
 MANAGERS = ADMINS
 
-SITE_DOMAIN = "OfeliaSDKR1"
-
-SITE_IP_ADDR = "192.168.254.199"
-
+#
+# Database parameters.
+# DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
+#
 DATABASE_NAME = "changeMe"
-DATABASE_HOST = "changeMe"
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"
+DATABASE_HOST = "127.0.0.1"
 
+#
+# Name for the island that is to be set on your host.
+#
+ISLAND_NAME   = "i2cat"
 
-#Theme Manager
-#To create a theme, type a theme_name in THEME
-#Create the theme_name's media directory and the static directories [images, css, js] in SRC_DIR/static/openflow/optin_manager/media/theme_name/ as needed.
-#For templates (.html) files add a directory called theme_name in the same location as your default TEMPLAES_DIR as needed.
-#Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration for more information on how to install new themes for OCF.
+#
+# Name and IP you would like to use to access Opt-in GUI.
+#
+SITE_DOMAIN = "changeMe"
+SITE_IP_ADDR = "192.168.254.193"
+
+##
+## Theme Manager 
+##
+
+#
+# THEME: write a theme_name here to create a theme.
+#
+# Create the theme_name's media directory and the static directories (images,
+# css, js) in SRC_DIR/static/openflow/optin_manager/media/theme_name/
+# For templates (.html) files add a directory called theme_name in the same
+# location as your default TEMPLATES_DIR as needed.
+#
+# Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration
+# for further information on how to install new themes for OCF.
+#
 THEME = 'default'
-

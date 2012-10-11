@@ -60,9 +60,6 @@ source $CURRENT_DIRECTORY/lib/django-settings
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
 
-#LDAP settings
-source $CURRENT_DIRECTORY/lib/ldap-settings
-
 #Change permissions of the code
 printHeader ">" "Setting correct file permissions..."
 chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*

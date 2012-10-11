@@ -66,5 +66,3 @@ vt_manager/rescue/*
 ofrelease
 updater*
 !.gitignore
-
-expedient/src/python/expedient/clearinghouse/localLdapSettings.py
