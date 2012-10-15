@@ -27,11 +27,6 @@
       });
 </script>
 <script>
-       
-        $("Add Bridge").click(function(){alert("HOLA");});
-        
-</script>
-<script>
     $(document).ready(function() {
         /* add tooltip to question mark */
 	    $("img#mgmt_bridge").tooltip({
@@ -142,7 +137,7 @@ function adding(row){
 			<h2>Networking parameters</h2>
 			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
 			<div class="tooltip" id="mgmt_bridge_help">
-            Managemente bridge connecting the control interface of the server and the VMs. MAC address is optional. 
+            Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
             </div>
 
 			{% if mgmtIfaceForm.errors %}

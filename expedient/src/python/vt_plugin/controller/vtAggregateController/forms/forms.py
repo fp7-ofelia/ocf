@@ -25,10 +25,40 @@ class xmlrpcServerProxyForm(forms.ModelForm):
     A form to create and edit OpenFlow Aggregates.
     '''
 
+    confirm_password = forms.CharField(
+        help_text="Confirm password.",
+        max_length=40,
+        widget=forms.PasswordInput(render_value=False))
+
+    def __init__(self, check_available=False, *args, **kwargs):
+        super(xmlrpcServerProxyForm, self).__init__(*args, **kwargs)
+        self.check_available = check_available
+        # Fix Django's autocompletion of username/password fields when type is password
+        self.fields['username'].widget.attrs["autocomplete"] = 'off'
+        self.fields['password'].widget.attrs["autocomplete"] = 'off'
+        self.fields['confirm_password'].widget.attrs["autocomplete"] = 'off'
+
     class Meta:
         model = xmlrpcServerProxy
+        # Defines all the fields in the model by ORDER
+        fields = ('username', 'password', 'confirm_password', 'url')
+        # Form widgets: HTML representation of fields
+        widgets = {
+            # Shows the password
+            'password': forms.PasswordInput(render_value=True),
+        }
 
-
+    # Validation and so on
+    def clean(self):
+        d = dict(self.cleaned_data)
+        # Check that both passwords are the same
+        if self.cleaned_data['confirm_password'] != self.cleaned_data['password']:
+            raise forms.ValidationError("Passwords don't match")
+        # Remove fields that are not in the Model so as not to save an incomplete Model
+        if "confirm_password" in d:
+            del d["confirm_password"]
+        p = self._meta.model(**d)
+        return self.cleaned_data
 
 DISC_IMAGE_CHOICES = (
             ('default', 'Default'),

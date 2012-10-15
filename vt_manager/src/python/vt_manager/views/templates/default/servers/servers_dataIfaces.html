@@ -45,7 +45,9 @@ function confirmInput(inputElement){
                         {% for field in form %}
                             {% if forloop.first %}
                                 {% for hidden in form.hidden_fields %}
-                                    {{ hidden }}
+                                    <td>
+                                        {{ hidden }}
+                                    </td>
                                 {% endfor %}
                             {% endif %}
                             {% if field.errors %}
@@ -56,11 +58,9 @@ function confirmInput(inputElement){
                             {%endif%}
                             {%endif%}
                         {% endfor %}
-                        <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></td>
+                        <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></th>
                         </tr>
                     </tbody>
                 {% endfor %}
             </table>
-            </br>
         </div>
-        </tr>

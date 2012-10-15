@@ -422,6 +422,16 @@ table.fulltable>thead {
 	padding: 3px;
 }
 
+/* Hack that loads help text and hides it at the label */
+table.fulltable>tbody>tr>td label {
+    display: none;
+}
+table.fulltable tbody tr td ul.fulltable_tooltip_list, 
+table.fulltable>tbody>tr>td>div>ul.fulltable_tooltip_list {
+    margin: 2px;
+    padding-left: 20px;
+}
+
 table.fulltable>tbody>tr>td,table.fulltable>tbody>tr>th {
 	padding: 2px 4px;
 	background: #fff;

@@ -10,6 +10,34 @@ body {
 
 img, div { behavior: url(/media/js/iepngfix.htc) }
 
+input, select, textarea, input[type="submit"], input[type="button"], .button {
+    -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+    -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+    box-shadow: inset 0px 1px 0px 0px #ffffff;
+    background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #F9F9F9), color-stop(1, #E9E9E9) );
+    background: -moz-linear-gradient( center top, #F9F9F9 5%, #E9E9E9 100% );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e9e9e9');
+    background-color: #F9F9F9;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    border: 1px solid #BBB;
+    display: inline-block;
+    color: #333;
+    font-family: arial;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 3px 10px;
+    text-decoration: none;
+    text-shadow: 1px 1px 0px white;
+    margin-bottom: 5px;
+}
+
+input[type="text"], input[type="password"], select, textarea {
+    background: #F9F9F9 !important;
+    padding: 3px 5px;
+}
+
 #frontpage {
 	width: 1000px;
 	margin: auto;
@@ -1057,6 +1085,7 @@ table.menutable {
 
 table.menutable tbody td ,tbody th {
 	padding: 0px 0px;
+        padding-bottom: 2px;
 	background: #fff;
 	color: #000;
 }

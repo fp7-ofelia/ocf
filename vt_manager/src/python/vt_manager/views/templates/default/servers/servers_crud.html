@@ -1,5 +1,5 @@
-{% extends "servers/servers_base.html" %}
-{% block pagehead %}<h1>Add/Update virtualized server:</h1>{% endblock pagehead %}
+
+ck pagehead %}<h1>Add/Update virtualized server:</h1>{% endblock pagehead %}
 
 
 {% block head %}
@@ -25,11 +25,6 @@
 	  onClickFunction: 'confirmInput(this)',
         });
       });
-</script>
-<script>
-       
-        $("Add Bridge").click(function(){alert("HOLA");});
-        
 </script>
 <script>
     $(document).ready(function() {
@@ -76,15 +71,19 @@ function adding(row){
 </script>
 
 <script>
-
-    function updateVMstatus(){
-		$('#vms').load("../../"+{{server.id}}+"/list_vms");
-		return;
+    function updateVMstatus() {
+        {% if server.id != NaN %}
+            $("#vms").load("../../" + {{server.id}} + "/list_vms", function(response, status, xhr) {
+                if (status != "error") {
+                    $("#vms").html(response);
+                }
+            });
+        {% endif %}
+        return;
     }
-
 </script>
 <script>
-    var timer = setInterval(function(){
+    var timer = setInterval(function() {
     	updateVMstatus();
     },3000);
 </script>

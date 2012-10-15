@@ -31,30 +31,49 @@
 					.prepend("<td />");
 
 				/* find help text and replace with image and tooltip */
-				$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-				;
+                		$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
+				    {% include "fixformtable.js" %};
 
-				$("table.formtable>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-				;
+                		$("table.formtable>tbody>tr>td:nth-child(2)")
+				    {% include "fixformtable.js" %};
 
-                $("table.formtable_noborder>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
+                		$("table.formtable_noborder>tbody>tr>td:nth-child(3)")
+				    {% include "fixformtable.js" %};
 
-                $("table.formtable>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
-		$("img#notifications_help_base").tooltip({
-                        tip: "div#notifications_help_base",
-            position: "top center",
-            cancelDefault: true,
-            relative: false,
-            offset: [-10,110]
-                });
-			});
-		</script>
+                		$("table.formtable>tbody>tr>td:nth-child(3)")
+				    {% include "fixformtable.js" %};
+
+                                /* For FlowSpace editing only */
+                                if (document.URL.indexOf("flowspace") > -1) {
+                                    var numRows = Math.floor($("table.formtable>tbody>tr:nth-child>td:nth-child(3)").size()/2);
+                                    for (index=1; index<=numRows; index++) {
+                                        var labels = $("table.formtable>tbody>tr:nth-child(" + index + ")>td").find('label');
+                                        var text = "";
+                                        if (labels[0] != undefined && labels[1] != undefined) {
+                                            text = labels[0].textContent;
+                                            if (labels[0].textContent != labels[1].textContent) {
+                                                text = "<ul class=\"fulltable_tooltip_list\"><li>" + text + "</li>";
+                                                text = text + "<li>" + labels[1].textContent + "</li></ul>";
+                                            }
+                                        }
+                                        if (text.length > 1) {
+                                            $("table.formtable>tbody>tr:nth-child(" + index + ")>td")
+                                                .closest("tr")
+                                                .find("td:first-child>div#[id^='tooltip_help']")
+                                                .html(text);
+                                        }
+                                    }
+                                }
+
+				$("img#notifications_help_base").tooltip({
+                        		tip: "div#notifications_help_base",
+            				position: "top center",
+            				cancelDefault: true,
+            				relative: false,
+            				offset: [-10,110]
+                			});
+				});
+			</script>
 
 		{% block head %}{% endblock %}
 	</head>
