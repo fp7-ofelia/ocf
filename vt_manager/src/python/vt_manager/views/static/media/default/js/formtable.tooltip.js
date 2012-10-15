@@ -78,7 +78,7 @@
                             .closest("tr")
                             .find("td:first-child")
                             .html(
-                                "<img id='tooltip_help_img_"+index+"' src='/static/media/images/question_mark_15x15.png'/>" +
+                                "<img id='tooltip_help_img_"+index+ "' src=" + url_img_question + ">" +
                                 "<div id='tooltip_help_"+index+"' class='tooltip'>"+
                                 text+"</div>"
                             )

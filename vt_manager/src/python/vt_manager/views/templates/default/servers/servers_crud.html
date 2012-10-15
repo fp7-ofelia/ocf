@@ -6,6 +6,12 @@
 
 {% endblock %}
 {% block scripts %}
+<script type="text/javascript">
+        //To be able to use django tags in the static js files, use this approach:
+        //First create a js variable with your django tag
+        //Use this variable in your js.
+        url_img_question = "{% url img_media 'question_mark_15x15.png'%}";
+</script>
 <script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
 <script src = {% url js_media 'jquery.formset.min.js'%}></script>
 <script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
