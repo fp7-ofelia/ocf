@@ -61,6 +61,12 @@
                                                 .closest("tr")
                                                 .find("td:first-child>div#[id^='tooltip_help']")
                                                 .html(text);
+                                        } else {
+                                            // No text --> remove question icon
+                                            $("table.formtable>tbody>tr:nth-child(" + index + ")>td")
+                                                .closest("tr")
+                                                .find("td:first-child")
+                                                .html("");
                                         }
                                     }
                                 }
