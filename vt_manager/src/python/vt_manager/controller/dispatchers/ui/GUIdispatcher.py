@@ -112,8 +112,7 @@ def servers_crud(request, server_id=None):
 				        extra_context=context,
 				    )
 
-				#return a alguna pagina y volver atras las transacciones
-				
+			# Returns to server's admin page and rollback transactions
 			return HttpResponseRedirect('/servers/admin/')
 	else:
 		return HttpResponseNotAllowed("GET", "POST")

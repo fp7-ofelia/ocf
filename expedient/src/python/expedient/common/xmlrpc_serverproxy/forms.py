@@ -32,11 +32,13 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
         logger.debug("Cleaning data")
         if self._errors:
             return self.cleaned_data
-        d = dict(self.cleaned_data)
-        # Check that both passwords are the same
-        if self.cleaned_data['confirm_password'] != self.cleaned_data['password']:
+        # Check that both passwords (if present) are the same
+        password = self.cleaned_data.get('password', None)
+        confirm_password = self.cleaned_data.get('confirm_password', None)
+        if password and confirm_password and (password != confirm_password):
             raise forms.ValidationError("Passwords don't match")
-        # Remove fields that are not in the Model so as not to save an incomplete Model
+        # Remove fields that are not in the Model to avoid any mismatch when synchronizing
+        d = dict(self.cleaned_data)
         if "password2" in d: del d["password2"]
         if "confirm_password" in d: del d["confirm_password"]
         p = self._meta.model(**d)
