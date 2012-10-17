@@ -11,7 +11,6 @@
 		<script src="{% url js_media 'jquery.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
 		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
-		<script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
 		<script src="{% url js_media 'iframe.js' %}"></script>
 		<!-- simple frame busting -->
 		<script type="text/javascript">
@@ -140,5 +139,7 @@
 			 OFELIA is funded by the EU in the 7th framework program and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
 			Expedient was adapted from <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">software</a> gracefully provided by Stanford University.<br/><br/>
 		</div>
+		<!-- Validation in the end waits for the forms to be loaded -->
+		<script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
 	</body>
 </html>

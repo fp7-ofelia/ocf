@@ -1,7 +1,10 @@
+var DESCRIPTION_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)])+$/;
+var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
 var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
 var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
 
+/* Error list check and generation */
 function doErrorlistExists(fieldID) {
     var result = false;
     if ($("#errorlist_" + fieldID).length > 0) {
@@ -18,9 +21,10 @@ function removeErrorlist(fieldID) {
     $("#errorlist_" + fieldID).remove();
 }
 
+/* REGEX wrapper */
 function checkWithRegExp(fieldID, regExp, errorMessage) {
     var result = false;
-    reCorrectFormat = new RegExp(regExp);
+    var reCorrectFormat = new RegExp(regExp);
     var field = $("#" + fieldID);
     if (!reCorrectFormat.test(field.val())) {
         if (!doErrorlistExists(field.attr("id"))) {
@@ -35,20 +39,31 @@ function checkWithRegExp(fieldID, regExp, errorMessage) {
     return result;
 }
 
-function checkProjectName() {
-    return checkWithRegExp("id_name", TEXT_RE, "Check that the project name has ASCII characters only.");
+/* Generic validation */
+function checkDescription(id, resourceName) {
+    return checkWithRegExp(id, DESCRIPTION_RE, "Check that the " + resourceName + " has ASCII characters only.");
 }
 
-function checkProjectDescription() {
-    return checkWithRegExp("id_description", TEXT_RE, "Check that the project description has ASCII characters only.");
+function checkNotBlank(id, resourceName) {
+    return checkWithRegExp(id, NOTBLANK_RE, "Check that the " + resourceName + " is not empty.");
 }
 
-function checkVirtualMachineName() {
-    return checkWithRegExp("id_form-0-name", RESOURCE_RE, "Check that the VM has ASCII characters only and no whitespaces.");
+function checkNumber(id, resourceName) {
+    return checkWithRegExp(id, NUMBER_RE, "Check that the " + resourceName + " consists only of numbers.");
 }
 
-function checkVirtualMachineMemory() {
-    return checkWithRegExp("id_form-0-memory", NUMBER_RE, "Check that the VM size consists only of numbers.");
+function checkRestrictedName(id, resourceName) {
+    return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only and no whitespaces.");
+}
+
+function checkText(id, resourceName) {
+    return checkWithRegExp(id, TEXT_RE, "Check that the " + resourceName + " has ASCII characters only.");
+}
+
+function checkAllResultsOK(results) {
+    var result = true;
+    $.each(results, function(index, value) { result = result && value; });
+    return result;
 }
 
 function checkDropDownSelected(fieldID) {
@@ -67,25 +82,52 @@ function checkDropDownSelected(fieldID) {
     return result;
 }
 
-function checkAllResultsOK(results) {
-    var result = true;
-    $.each(results, function(index, value) { result = result && value; });
-    return result;
+/* Automated validation */
+function contains(substring, string) {
+    return (string != undefined && substring != undefined && string.indexOf(substring) > -1);
 }
 
-function checkProjectInfo() {
-    var results = Array();
-    results[0] = checkProjectName();
-    results[1] = checkProjectDescription();
-    return checkAllResultsOK(results);
-}
+/* Bind validation check to the submit button */
+$(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create], :button[id^=form_update]").click(function() {
+    // First, submit ID
+    var submitID = $(this).attr("id") || "";
+    if (contains("form_create_", submitID)) {
+        submitID = submitID.split('form_create_').slice(1).join('')
+    } else if (contains("form_update_", submitID)) {
+        submitID = submitID.split('form_update_').slice(1).join('')
+    }
 
-function checkVirtualMachineInfo() {
+    // Second, all other input IDs
+    var id = "";
+    var type = "";
     var results = Array();
-    results[0] = checkVirtualMachineName();
-    results[1] = checkVirtualMachineMemory();
-    results[2] = checkDropDownSelected("id_form-0-disc_image");
-    results[3] = checkDropDownSelected("id_form-0-hdSetupType");
-    results[4] = checkDropDownSelected("id_form-0-virtualizationSetupType");
+    $("form table input, form table select, form table textarea").each(function(index) {
+        id = $(this).attr("id") || "";
+        type = $(this).attr("type") || "";
+        if (contains("text",type) || contains("password",type)) {
+            // VM names have a special treatment
+            if (contains("name",id) && submitID == "VM") {
+                results[index] = checkRestrictedName(id,submitID + " name");
+            } else if (contains("name",id)) {
+                results[index] = checkText(id,submitID + " name");
+            } else if (contains("description",id)) {
+                results[index] = checkDescription(id,submitID + " description");
+            } else if (contains("location",id)) {
+                results[index] = checkDescription(id,submitID + " location");
+            } else if (contains("username",id)) {
+                results[index] = checkRestrictedName(id,submitID + " username");
+            } else if (contains("password",id)) {
+                results[index] = checkRestrictedName(id,submitID + " password");
+            } else if (contains("memory",id)) {
+                results[index] = checkNumber(id,submitID + " memory");
+            } else if (contains("url",id)) {
+                results[index] = checkNotBlank(id,submitID + " URL");
+            }
+        } else if (contains("select",type)) {
+            results[index] = checkDropDownSelected(id);
+        } else {
+            results[index] = false;
+        }
+    });
     return checkAllResultsOK(results);
-}
+});

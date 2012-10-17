@@ -28,7 +28,7 @@
             </table>
         {% endfor %}
 		<div id = "buttons" class="center"> 
-			<input type="submit" name = "create_new_vms" value="Done" onClick="return checkVirtualMachineInfo()" /> |
+			<input type="submit" id="form_create_VM" name="create_new_vms" value="Done" /> |
 			<a href="{% url slice_detail slice.id %}">Cancel</a>
 		</div>
 	</form>
