@@ -104,6 +104,8 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
     $("form table input, form table select, form table textarea").each(function(index) {
         id = $(this).attr("id") || "";
         type = $(this).attr("type") || "";
+        // Correct by default (ignores fields non stated in the if/else block
+        results[index] = true;
         if (contains("text",type) || contains("password",type)) {
             // VM names have a special treatment
             if (contains("name",id) && submitID == "VM") {
@@ -125,8 +127,6 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
             }
         } else if (contains("select",type)) {
             results[index] = checkDropDownSelected(id);
-        } else {
-            results[index] = false;
         }
     });
     return checkAllResultsOK(results);

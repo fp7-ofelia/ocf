@@ -81,7 +81,8 @@ def aggregate_crud(request, agg_id=None):
             "client_form": client_form,
             "create": not agg_id,
             "aggregate": aggregate,
-            #"available": available,
+            # Previously commented
+            "available": available,
             "breadcrumbs": (
                 ('Home', reverse("home")),
                 ("%s Virtualization Aggregate" % ("Update" if agg_id else "Add"),

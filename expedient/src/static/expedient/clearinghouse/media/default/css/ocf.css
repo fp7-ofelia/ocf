@@ -491,7 +491,12 @@ table.msg_table td.msg_text {
 }
 
 table.msg_table .error, .errorlist {
-	color:#9a1b1b;
+	/*color:#9a1b1b;*/
+	background: #AA2B2B;
+	border-radius: 10px;
+	color: white;
+	margin: 10px;
+	padding: 10px;
 }
 
 table.msg_table .warning {
