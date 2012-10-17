@@ -3,7 +3,7 @@ import sys,os
 import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
 from monitoring.MonitoringDispatcher import MonitoringDispatcher
-from monitoring.LibvirtMonitor import LibvirtMonitor 
+from monitoring.LibvirtTest import LibvirtMonitor 
 from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
@@ -102,7 +102,7 @@ def main():
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
 	logger.info("Starting libvirt monitoring")
-	LibvirtMonitor.Initialize()
+	LibvirtMonitor.initialize()
 	logger.info("OK")
 	#Engage XMLRPC
 	#logger.debug("Trying to engage XMLRPC server...")
