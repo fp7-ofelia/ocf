@@ -442,7 +442,9 @@ def myDomainEventCallback1 (conn, dom, event, detail, opaque):
                                                                  detailToString(event, detail))
 
 def myDomainEventCallback2 (conn, dom, event, detail, opaque):
-    print "myDomainEventCallback2 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
+    toLog = "myDomainEventCallback2 EVENT: Domain %s(%s) %s %s\n" % (dom.name(), dom.ID(),
                                                                  eventToString(event),
                                                                  detailToString(event, detail))
-
+    print toLog
+    log = open('/opt/ofelia/oxa/log/LivirtMonitor.log','a')
+    log.write(toLog)
