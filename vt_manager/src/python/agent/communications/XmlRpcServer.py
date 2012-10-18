@@ -89,33 +89,6 @@ class XmlRpcServer():
 
 	@staticmethod
 	def createInstanceAndEngage(callBackFunction,HandlerClass = SecureXMLRpcRequestHandler,ServerClass = SecureXMLRPCServer):
-<<<<<<< HEAD
-	    """Test xml rpc over https server"""
-	    class xmlrpc_wrappers:
-        	def __init__(self):
-	            import string
-        	    self.python_string = string
-            
-		def send(self, callBackUrl,amId,password,xml):
-		    #FIXME: XXX: use certificates instead of password based authentication
-		    if password != XMLRPC_SERVER_PASSWORD:
-			raise Exception("Password mismatch")
-
-    		    callBackFunction(callBackUrl,xml)
-		    return ""
-        
-		def ping(self, challenge): 
-	    	    #XmlRpcServer.logger.debug("PING")
-            	    return challenge
-        
-	    server_address = (XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT) # (address, port)
-	    server = ServerClass(server_address, HandlerClass)    
-	    server.register_instance(xmlrpc_wrappers())    
-	    sa = server.socket.getsockname()
-	    XmlRpcServer.logger.debug("Serving HTTPS XMLRPC requests on "+str(sa[0])+":"+ str(sa[1]))
-	    server.serve_forever()
-
-=======
             """Test xml rpc over https server"""
             class xmlrpc_wrappers:
                 def __init__(self):
@@ -144,4 +117,3 @@ class XmlRpcServer():
             sa = server.socket.getsockname()
             XmlRpcServer.logger.debug("Serving HTTPS XMLRPC requests on "+str(sa[0])+":"+ str(sa[1]))
             server.serve_forever()
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156

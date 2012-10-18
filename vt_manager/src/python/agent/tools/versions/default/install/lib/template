@@ -4,13 +4,6 @@
 function downloadTemplate
 {
         echo "" 
-<<<<<<< HEAD
-        echo "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
-        if [ $OFELIA == 1 ];then
-        /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.11/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
-        else
-        /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  http://codebasin.net/webdav/ocf/images/xen/templates/Debian/0.1/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!!" )
-=======
         print "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
         if [ $OFELIA == 1 ];then
 	mv $OXA_DIRECTORY/cache/templates/default/default.tar.gz $OXA_DIRECTORY/cache/templates/default/default.tar.gz.old
@@ -18,20 +11,12 @@ function downloadTemplate
         else
 	mv $OXA_DIRECTORY/cache/templates/default/default.tar.gz $OXA_DIRECTORY/cache/templates/default/default.tar.gz.old
         /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://github.com/downloads/fp7-ofelia/ocf/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && mv $OXA_DIRECTORY/cache/templates/default/default.tar.gz.old $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!! Previous template was restored. " )
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
         fi
 }
 
 function downloadTemplateHash
 {
         echo ""
-<<<<<<< HEAD
-        echo "Attempting to download HASH file of the template..."     
-        if [ $OFELIA == 1 ];then
-                /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.11/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
-        else
-                 /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  http://codebasin.net/webdav/ocf/images/xen/templates/Debian/0.1/default.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
-=======
         print "Attempting to download HASH file of the template..."     
         if [ $OFELIA == 1 ];then
 		mv $OXA_DIRECTORY/cache/templates/default/.default.hash $OXA_DIRECTORY/cache/templates/default/.default.hash.old
@@ -39,7 +24,6 @@ function downloadTemplateHash
         else
 		mv $OXA_DIRECTORY/cache/templates/default/.default.hash $OXA_DIRECTORY/cache/templates/default/.default.hash.old
                  /usr/bin/wget --progress=bar:force --no-check-certificate --output-document $OXA_DIRECTORY/cache/templates/default/.default.hash  https://github.com/downloads/fp7-ofelia/ocf/default.tar.gz.hash || ( rm $OXA_DIRECTORY/cache/templates/default/.default.hash && mv $OXA_DIRECTORY/cache/templates/default/.default.hash.old $OXA_DIRECTORY/cache/templates/default/.default.hash && error "Cannot download HASH for the template from storage system!!!" $NO_RESCUE )
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
         fi
 }
 
@@ -78,11 +62,7 @@ print "VM template installation..."
                         warning "Default template file already exists and is up-to-date; skipping..."
                         print ""
                 else
-<<<<<<< HEAD
-                        confirm "Default template file already exists. Do you want to OVERWRITE it (It will not be backuped!)." $DONT_ABORT $NO_RESCUE
-=======
                         confirm "Default template file already exists. Do you want to OVERWRITE it? (Backup with .old extension will be created)." $DONT_ABORT $NO_RESCUE
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 
                         if [ $? == 0 ]; then
                                 downloadTemplate

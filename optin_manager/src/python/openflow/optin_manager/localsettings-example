@@ -1,36 +1,3 @@
-<<<<<<< HEAD
-CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager' #'/etc/optin_manager'
-SRC_DIR = '/opt/ofelia/optin_manager/src' #'/usr/share/optin_manager'
-
-ROOT_USERNAME = "expedient"
-ROOT_PASSWORD = "expedient"
-ROOT_EMAIL    = "ale@gmail.com"
-ISLAND_NAME   = "i2cat"
-
-ADMINS = [
-    ("expedient", ROOT_EMAIL),
-]
-
-MANAGERS = ADMINS
-
-SITE_DOMAIN = "OfeliaSDKR1"
-
-SITE_IP_ADDR = "192.168.254.199"
-
-DATABASE_NAME = "changeMe"
-DATABASE_HOST = "changeMe"
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
-
-
-#Theme Manager
-#To create a theme, type a theme_name in THEME
-#Create the theme_name's media directory and the static directories [images, css, js] in SRC_DIR/static/openflow/optin_manager/media/theme_name/ as needed.
-#For templates (.html) files add a directory called theme_name in the same location as your default TEMPLAES_DIR as needed.
-#Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration for more information on how to install new themes for OCF.
-THEME = 'default'
-
-=======
 '''
 Ofelia Opt-in AM user settings file
 
@@ -104,4 +71,3 @@ SITE_IP_ADDR = "192.168.254.193"
 # for further information on how to install new themes for OCF.
 #
 THEME = 'default'
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156

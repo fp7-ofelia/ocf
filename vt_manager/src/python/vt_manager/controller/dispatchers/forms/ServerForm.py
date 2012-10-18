@@ -3,17 +3,6 @@ from django import forms
 from vt_manager.utils.EthernetUtils import EthernetUtils
 
 class ServerForm(forms.ModelForm):
-<<<<<<< HEAD
-	'''
-	A form for editing NetorkInterfaces
-	'''
-	class Meta:
-		model = VTServer
-		exclude = ('numberofCPUs', 'memory', 'CPUFrequency',
-		'discSpaceGB', 'url', 'subscribedMacRanges', 'subscribedIp4Ranges')
-
-	agentPassword = forms.CharField(label='Agent Password',widget=forms.PasswordInput(), help_text='Password set for the XMLRPC interface during the agent\'s installation')
-=======
     ''' 
     A form for editing NetorkInterfaces
     '''
@@ -40,4 +29,3 @@ class ServerForm(forms.ModelForm):
             del d["agentPasswordConfirm"]
         p = self._meta.model(**d)
         return self.cleaned_data
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156

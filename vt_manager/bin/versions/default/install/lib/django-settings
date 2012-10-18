@@ -18,11 +18,7 @@ if [ -f $SRC_DIR/src/python/vt_manager/mySettings.py ];then
 		print "Skipping copy (will not be overwritten)"
 	fi
 else
-<<<<<<< HEAD
-	print "$SRC_DIR/src/python/vt_manager/mySettings-example -> $SRC_DIR/src/python/vt_manager/mySettings-example.py "
-=======
 	print "$SRC_DIR""src/python/vt_manager/mySettings-example -> $SRC_DIR""src/python/vt_manager/mySettings.py "
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	cp $SRC_DIR/src/python/vt_manager/mySettings-example $SRC_DIR/src/python/vt_manager/mySettings.py || error "Cannot copy localsettings.py"
 fi
 
@@ -44,22 +40,14 @@ done
 printHeader ">" "Editing localsettings file..."
 while :	
 do
-<<<<<<< HEAD
-	print "Now you are going to edit the file $SRC_DIR/src/python/vt_manager/mySettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
-=======
 	print "Now you are going to edit the file $SRC_DIR""src/python/vt_manager/mySettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	pause ""
 	eval $EDITOR $SRC_DIR/src/python/vt_manager/mySettings.py
 	print ""
 	pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
 	less $SRC_DIR/src/python/vt_manager/mySettings.py
 	
-<<<<<<< HEAD
-	confirm "Is it correct OK." $DONT_ABORT $NO_RESCUE
-=======
 	confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 
 	if [ $? == 0 ]; then
 		break

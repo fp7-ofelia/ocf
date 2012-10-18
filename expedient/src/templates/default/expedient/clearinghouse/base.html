@@ -30,32 +30,6 @@
 					.prepend("<td />");
 
 				/* find help text and replace with image and tooltip */
-<<<<<<< HEAD
-				$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-				;
-
-				$("table.formtable>tbody>tr>td:nth-child(2)")
-{% include "fixformtable.js" %}
-				;
-
-                $("table.formtable_noborder>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
-
-                $("table.formtable>tbody>tr>td:nth-child(3)")
-{% include "fixformtable.js" %}
-                ;
-		$("img#notifications_help_base").tooltip({
-                        tip: "div#notifications_help_base",
-            position: "top center",
-            cancelDefault: true,
-            relative: false,
-            offset: [-10,110]
-                });
-			});
-		</script>
-=======
                 		$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
 				    {% include "fixformtable.js" %};
 
@@ -105,7 +79,6 @@
                 			});
 				});
 			</script>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 
 		{% block head %}{% endblock %}
 	</head>
@@ -114,11 +87,7 @@
 		<table width="800" border="0" align="center" cellpadding="3" cellspacing="0">
 			<tr>
 				<td align="left">
-<<<<<<< HEAD
-					<img src="{% url img_media 'logo_expedient.png' %}" />
-=======
 					<a href="{% url home %}" title="Dashboard"><img src="{% url img_media 'logo_expedient.png' %}" /></a>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 					<div>Software Version <strong>{{softwareVersion}}</strong></div>
 				</td>
 				<td>
@@ -170,10 +139,7 @@
 			 OFELIA is funded by the EU in the 7th framework program and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
 			Expedient was adapted from <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">software</a> gracefully provided by Stanford University.<br/><br/>
 		</div>
-<<<<<<< HEAD
-=======
 		<!-- Validation in the end waits for the forms to be loaded -->
 		<script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	</body>
 </html>

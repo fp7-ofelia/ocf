@@ -1,39 +1,4 @@
 '''
-<<<<<<< HEAD
-	@author: msune
-
-	Ofelia VT AM User settings file 
-'''
-
-'''General parameters'''
-ROOT_USERNAME  = "expedient"
-ROOT_PASSWORD  = "expedient"
-ROOT_EMAIL     = "i2catopenflow@gmail.com"
-VTAM_IP        = "147.83.206.92"
-VTAM_PORT      = "8445"
-ISLAND_NAME    = "i2cat"
-XMLRPC_USER    = "user to call xmlrpc methods from Expedient"
-XMLRPC_PASS    = "changepassword"
-
-'''Database parameters'''
-DATABASE_NAME = "vtm"
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
-DATABASE_HOST = "changeMeWithIP"
-
-'''Optional parameters'''
-
-#Monitoring of Agents time (commented = default = 45 sec)
-#MONITORING_INTERVAL = 45
-
-'''Theme Manager'''
-#To create a theme, type a theme_name in THEME
-#Create the theme_name's media directory and the static directories [images, css, js] in SRC_DIR/python/vt_manager/views/static/media/theme_name/ as needed.
-#For templates (.html) files add a directory called theme_name in the same location as your default TEMPLA
-ES_DIR:  [networking, policyEngine, users, ...] in SRC_DIR/python/vt_manager/views/templates/theme_name as needed.
-#Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration for more information on how to i
-nstall new themes for OCF.
-=======
 Ofelia VT AM User settings file
 
 @author: msune, CarolinaFernandez
@@ -102,5 +67,4 @@ VTAM_PORT = "8445"
 # Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration
 # for further information on how to install new themes for OCF.
 #
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 THEME = 'default'

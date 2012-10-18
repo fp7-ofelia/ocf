@@ -15,11 +15,8 @@ sys.path.insert(0, PYTHON_DIR)
 
 from django.contrib.auth.models import User
 from django import db
-<<<<<<< HEAD
-=======
 from expedient.clearinghouse.settings import ROOT_PASSWORD, ROOT_USERNAME
 from expedient.clearinghouse.aggregate.models import *
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 
 def check_password(environ, user, password):
     db.reset_queries() 
@@ -27,8 +24,6 @@ def check_password(environ, user, password):
     kwargs = {'username': user, 'is_active': True}
     
     try: 
-<<<<<<< HEAD
-=======
         print "\n\n\nPASO1\n\n\n"
         if environ['REQUEST_URI'] == '/vt_plugin/xmlrpc/vt_am/':
             for agg in Aggregate.objects.all():
@@ -37,7 +32,6 @@ def check_password(environ, user, password):
                     print "PASO3"
                     return True
             return False
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
         try: 
             user = User.objects.get(**kwargs) 
         except User.DoesNotExist: 

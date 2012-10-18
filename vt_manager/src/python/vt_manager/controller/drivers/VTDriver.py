@@ -8,10 +8,7 @@ from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 import xmlrpclib, threading, logging, copy
 from django.conf import settings
-<<<<<<< HEAD
-=======
 from django import forms
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 #from vt_manager.settings.settingsLoader import settings.ROOT_USERNAME, settings.ROOT_PASSWORD, settings.VTAM_IP,settings.VTAM_PORT
 from vt_manager.utils.HttpUtils import HttpUtils
 from django.db.models.query import QuerySet
@@ -20,10 +17,7 @@ from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.utils.ServiceThread import *
 from django.core.exceptions import ValidationError
 from vt_manager.utils.HttpUtils import HttpUtils
-<<<<<<< HEAD
-=======
 
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 class VTDriver():
 
 
@@ -69,15 +63,12 @@ class VTDriver():
 
 	@staticmethod
 	def crudServerFromInstance(instance):
-<<<<<<< HEAD
-=======
                 # Password check. Ping is directly checked in the VTServer model
                 s = xmlrpclib.Server(instance.agentURL)
                 try:
                     s.pingAuth("ping",instance.agentPassword)
                 except:
                     raise forms.ValidationError("Could not connect to server: password mismatch")
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 		controller = VTDriver.getDriver(instance.getVirtTech())
 		return controller.crudServerFromInstance(instance)
 

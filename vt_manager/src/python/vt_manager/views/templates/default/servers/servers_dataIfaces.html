@@ -14,11 +14,7 @@ function confirmInput(inputElement){
 	}
 	else{
 	//	return confirm("VMs already created will not be reconfigured. Are you sure you want to add a new brige?");
-<<<<<<< HEAD
-		alert("VMs already created will not be reconfigured. Are you sure you want to add a new brige?\nLeave it blanck if you do not want to create the new bridge");
-=======
 		alert("VMs already created will not be reconfigured. Are you sure you want to add a new brige?\nLeave it blank if you do not want to create the new bridge");
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	}
 }
 </script>
@@ -49,13 +45,9 @@ function confirmInput(inputElement){
                         {% for field in form %}
                             {% if forloop.first %}
                                 {% for hidden in form.hidden_fields %}
-<<<<<<< HEAD
-                                    {{ hidden }}
-=======
                                     <td>
                                         {{ hidden }}
                                     </td>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                                 {% endfor %}
                             {% endif %}
                             {% if field.errors %}
@@ -66,19 +58,9 @@ function confirmInput(inputElement){
                             {%endif%}
                             {%endif%}
                         {% endfor %}
-<<<<<<< HEAD
-                        <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></td>
-=======
                         <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></th>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                         </tr>
                     </tbody>
                 {% endfor %}
             </table>
-<<<<<<< HEAD
-            </br>
         </div>
-        </tr>
-=======
-        </div>
->>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
