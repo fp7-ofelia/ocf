@@ -11,6 +11,7 @@ update_match_struct_priority_and_get_fv_args, read_fs
 from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
+from openflow.optin_manager.opts.vlans.vlanController import vlanController
     
 def change_priority(request):
     '''
@@ -131,11 +132,17 @@ def add_opt_in(request):
         all_exps = Experiment.objects.all()
         admin_fs = AdminFlowSpace.objects.filter(user=request.user)
         exps = []
+
         for exp in all_exps:
             exp_fs = ExperimentFLowSpace.objects.filter(exp=exp)
             intersection = multi_fs_intersect(exp_fs,admin_fs,FlowSpace)
             if (len(intersection)>0):
                 exps.append(exp)
+
+        ######## XXX Experimental: Show allocated VLANs ######
+        allocated_vlans = vlanController.get_allocated_vlans()
+        requested_vlans = vlanController.get_requested_vlans_by_all_experiments() 
+        ########################################################################################
 
         assigned_priority = profile.max_priority_level - Priority.Strict_Priority_Offset - 1
         error_msg = []
@@ -238,6 +245,8 @@ def add_opt_in(request):
                                 'first_exp':first_exp,
                                 'form':form,
                                 'upload_form':upload_form,
+                                'requested_vlans':requested_vlans,
+                                'allocated_vlans':allocated_vlans,
                             },
                     )  
                     
@@ -644,11 +653,17 @@ def view_experiment_simple(request, exp_id):
     '''
     theexp = Experiment.objects.filter(id=exp_id)
     allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
+    requested_vlans = vlanController.get_requested_vlans_by_experiment(theexp[0])
+    #requested_vlans = {}
+    #vranges =  [x for x in theexp[0].experimentflowspace_set.values_list('vlan_id_s','vlan_id_e').distinct()]
+    #requested_vlans['ranges'] = [(int(x[0]),int(x[1])) for x in vranges] 
+    #requested_vlans['values'] = sum([range(x[0],x[1]+1) for x in vranges],[])
     return simple.direct_to_template(request, 
                         template = 'openflow/optin_manager/opts/view_experiment_simple.html', 
                         extra_context = {
                                         'exp':theexp[0],
                                         'allfs':allfs,
+                                        'requested_vlans':requested_vlans,
                                         'back':request.META['HTTP_REFERER'],
                                     }, 
                     )
@@ -692,4 +707,5 @@ def view_experiments(request):
                             extra_context = {'exps':exps}, 
                             ) 
     
-    
+
+

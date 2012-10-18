@@ -1,6 +1,14 @@
 {% extends "base_admin.html" %}
 {% block pagehead %} <h1>Add Admin Rule</h1> {% endblock %}
 {% block scripts %}
+
+<script> 
+function resizeFrame(f) {
+f.style.height = "1px"; 
+f.style.height = f.contentWindow.document.body.scrollHeight + "px"; 
+}  
+</script>
+
 <style>
   select {
     width: 400px;
@@ -18,6 +26,7 @@ $(document).ready(function(){
 			var sel_value = $(this).val()
 			addr = addr+sel_value
 			$("#exp_iframe").attr('src',addr)
+			resizeFrame(document.getElementById('exp_iframe'))
 		});
 });
 
@@ -39,9 +48,25 @@ $(document).ready(function(){
 			{% endfor %}
 		</select>
 		<br/>
-		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe">
+		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe" onload="resizeFrame(this);">
 		</iframe>
 		<br/><br/>
+		<h3>VLAN Tags already allocated:</h3>
+                <div class="roundBlockContainer">
+			<p>
+                        {% for vlan in allocated_vlans %}
+                        {{vlan|safe}}
+			{%if forloop.last%}
+				.
+			{%else%}
+				,
+			{%endif%}
+                        {% endfor %}
+			</p>
+                </div>
+	
+
+
 		<label> <b>FlowSpace to Opt-In: </b></label>
 		<br/>
 		<table class="formtable">

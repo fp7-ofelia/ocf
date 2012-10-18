@@ -33,6 +33,9 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 import json
 
+#OF PLUGIN
+from openflow.plugin.vlans import *
+
 logger = logging.getLogger("html_ui_views")
 
 '''
@@ -344,75 +347,6 @@ def _get_tree_ports(of_aggs, pl_aggs):
 Home and allocation view functions
 '''
 
-def bookOpenflow(request, slice_id):
-    """
-    Display the list of planetlab and openflow aggregates and their resources.
-    On submit, create slivers and make reservation.
-    """
-    
-    slice = get_object_or_404(Slice, id=slice_id)
-    if request.method == "POST":
-        
-        _update_openflow_resources(request, slice)
-        _update_planetlab_resources(request, slice)
-        
-        slice.modified = True
-        slice.save()
-        
-        return HttpResponseRedirect(reverse("html_plugin_flowspace",
-                                            args=[slice_id]))
-    else:
-        checked_ids = list(OpenFlowInterface.objects.filter(
-            slice_set=slice).values_list("id", flat=True))
-        checked_ids.extend(PlanetLabNode.objects.filter(
-            slice_set=slice).values_list("id", flat=True))
-
-        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
-                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
-        of_aggs = \
-            slice.aggregates.filter(aggs_filter)
-        pl_aggs = \
-            slice.aggregates.filter(
-                leaf_name=PlanetLabAggregate.__name__.lower())
-
-        vt_aggs = \
-            slice.aggregates.filter(
-                leaf_name=VtPlugin.__name__.lower())
-
-        for agg in vt_aggs:
-            vtPlugin = agg.as_leaf_class()
-            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
-       
-#        vm = VM.objects.filter(sliceId=slice.uuid)        
- 
-        nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
-        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
-
-        return simple.direct_to_template(
-            request,
-            template="html/select_resources.html",
-            extra_context={
-                "nIslands": nIslands,
-                "d3_nodes": d3_nodes,
-                "d3_links": d3_links,
-                "tree_rsc_ids": tree_rsc_ids,
-                "openflow_aggs": of_aggs,
-                "planetlab_aggs": pl_aggs,
-                "vt_aggs": vt_aggs,
-                "slice": slice,
-                "checked_ids": checked_ids,
-                "ofswitch_class": OpenFlowSwitch,
-                "planetlab_node_class": PlanetLabNode,
-#                "virtualmachines": vm,
-                "breadcrumbs": (
-                    ("Home", reverse("home")),
-                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
-                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
-                    ("Allocate Openflow and PlanetLab resources", reverse("html_plugin_bookOpenflow", args=[slice_id])),
-                )
-            },
-        )
 
 def getUIdata(request, slice):
     """
@@ -539,7 +473,95 @@ def home(request, slice_id):
             },
         )
         
-def flowspace(request, slice_id):
+def bookOpenflow(request, slice_id):
+    """
+    Display the list of planetlab and openflow aggregates and their resources.
+    On submit, create slivers and make reservation.
+    """
+    
+    slice = get_object_or_404(Slice, id=slice_id)
+    enable_simple_mode = not check_existing_flowspace_in_slice(slice)
+
+    if request.method == "POST":
+        _update_openflow_resources(request, slice)
+        _update_planetlab_resources(request, slice)
+        
+        slice.modified = True
+        slice.save()
+        if request.POST['fsmode'] == 'simple':
+            try:
+                request.POST = request.POST.copy()
+                request.POST['free_vlan_tag'] = calculate_free_vlan(slice)
+                return flowspace(request,slice.id)
+            except Exception as e:
+                print e
+                DatedMessage.objects.post_message_to_user(
+                         "Could not find free vlan to slice your experiment in all the affected AMs",
+                         request.user, msg_type=DatedMessage.TYPE_ERROR,
+                     )
+                request.POST['alertMessage'] = "Could not find free vlan to slice your experiment in all the affected AMs. It has been switched to advanced mode, choose your flowspace and wait for the admins decision."
+                return HttpResponseRedirect(reverse("html_plugin_flowspace",
+                                            args=[slice_id]))  
+
+            
+
+ 
+        else:        
+            return HttpResponseRedirect(reverse("html_plugin_flowspace",
+                                            args=[slice_id]))
+    else:
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+
+        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+        of_aggs = \
+            slice.aggregates.filter(aggs_filter)
+        pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+
+        vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+
+        for agg in vt_aggs:
+            vtPlugin = agg.as_leaf_class()
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+       
+#        vm = VM.objects.filter(sliceId=slice.uuid)        
+ 
+        nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+
+        return simple.direct_to_template(
+            request,
+            template="html/select_resources.html",
+            extra_context={
+                "nIslands": nIslands,
+                "d3_nodes": d3_nodes,
+                "d3_links": d3_links,
+                "tree_rsc_ids": tree_rsc_ids,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
+                "vt_aggs": vt_aggs,
+                "slice": slice,
+                "checked_ids": checked_ids,
+                "ofswitch_class": OpenFlowSwitch,
+                "planetlab_node_class": PlanetLabNode,
+                "enable_simple_mode":enable_simple_mode,
+                "breadcrumbs": (
+                    ("Home", reverse("home")),
+                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                    #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    ("Allocate Openflow and PlanetLab resources", reverse("html_plugin_bookOpenflow", args=[slice_id])),
+                )
+            },
+        )
+def flowspace(request, slice_id, alertMessage=None):
     """
     Add flowspace.
     """
@@ -568,21 +590,40 @@ def flowspace(request, slice_id):
     )
     
     if request.method == "POST":
-        formset = FSFormSet(
-            request.POST,
-            queryset=FlowSpaceRule.objects.filter(
-                slivers__slice=slice).distinct(),
-        )
-	if formset.is_valid():
-            formset.save()
-
+        print "ENTRO EN POST\n\n"
+        try:
+            request.POST['fsmode']
+        except:
+            request.POST = request.POST.copy()
+            request.POST['fsmode'] = 'advanced'
+        continue_to_start_slice = False
+        if request.POST['fsmode'] == 'advanced':
+            print "LEODEBUG ENTRO EN ADVANCED\n\n"
+            formset = FSFormSet(
+                request.POST,
+                queryset=FlowSpaceRule.objects.filter(
+                    slivers__slice=slice).distinct(),
+            )
+	    if formset.is_valid():
+                formset.save()
+                continue_to_start_slice = True
+        else:
+            print "LEODEBUG ENTRO EN SIMPLE\n\n"
+            #create a simple flowspacerule containing only the vlans tags and the OF ports
+            try:
+                create_simple_slice_vlan_based(request.POST['free_vlan_tag'][0], slice)
+                continue_to_start_slice = True
+            except Exception as e:
+                print e
+        if continue_to_start_slice:
             slice.modified = True
             slice.save()
             exp=""
             try:
-                if slice.started:
+                #if slice.started:
                     #slice.stop(request.user)
-                    slice.start(request.user)
+                print "LEODEBUG A STARTEAR AL SLICE!\n\n"
+                slice.start(request.user)
             except Exception as e:
                 exp=str(e)
             finally:
@@ -596,16 +637,19 @@ def flowspace(request, slice_id):
                         "Successfully set flowspace for slice %s" % slice.name,
                         request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                     )
-
+            print "LEODEBUG SALGO DE BOOKOF\n\n"
+            print request.path
             return HttpResponseRedirect(request.path)
     
     elif request.method == "GET":
+        print "LEODEBUG ENTRO EN GET\n\n"
         formset = FSFormSet(
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
     
     else:
+        print "ENTRO EN NOTALLOWED\n\n"
         return HttpResponseNotAllowed("GET", "POST")
         
     done = PlanetLabSliver.objects.filter(slice=slice).count() == 0
@@ -616,6 +660,7 @@ def flowspace(request, slice_id):
         extra_context={
             "slice": slice,
             "fsformset": formset,
+            "alertMessage":alertMessage,
             "done": done,
             "breadcrumbs": (
                 ("Home", reverse("home")),

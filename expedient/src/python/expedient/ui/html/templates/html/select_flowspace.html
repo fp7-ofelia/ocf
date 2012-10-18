@@ -6,6 +6,9 @@
 	$(document).ready(function() {
 		$("table.fulltable td").css("padding", "1px 1px 1px 1px");
 		$("input[type=text]").css("width", "280px");
+                if ("{{alertMessage}}" != "None"){
+			alert("{{alertMessage}}");
+		}
 	})
 </script>
 <style>

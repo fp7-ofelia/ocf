@@ -601,3 +601,10 @@ def get_granted_flowspace(slice_id, **kwargs):
 
     return gfs 
 
+#@check_user
+@check_fv_set
+@rpcmethod()
+def get_offered_vlans(set=None):
+    from openflow.optin_manager.opts.vlans.vlanController import vlanController
+    vlans =  vlanController.offer_vlan_tags(set)
+    return vlans
