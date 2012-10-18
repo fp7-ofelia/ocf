@@ -454,6 +454,17 @@ table.ranges tr.odd{
 
 
 /* Errors */
+.errorlist, ul[id^="errorlist"] {
+        background: #AA2B2B;
+        border-radius: 7px;
+        color: #fff !important;
+        list-style-type: none;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        padding-left: 7px;
+        padding-top: 5px;
+        padding-right: 7px;
+}
 .fielderror{
 	color: red;
 	padding:5px 

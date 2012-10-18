@@ -118,29 +118,15 @@ function adding(row){
         <div>
 			<h2>General parameters</h2>
 			<h3>Parameters</h3>
-			{% if serverForm.errors %}
-				<table>
-				{%for field in serverForm %}
-					{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-					{% endif %}
-				{% endfor %}
-				</table>
-            {% endif %}
        		<table class="formtable">
-				{% if field.errors %} 
-                	<tr><th colspan ="2">{{field.errors}}</th></tr>
-				{% endif %} 
-		    	<tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
-        		{% for field in serverForm %}
-                    {% if field.errors %}                             
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
-					{%endif%}
-        		{% endfor %}
+		    <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
+        	    {% for field in serverForm %}
+                        {% if field.errors %}    
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                        {% endif %}	
+	                <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
+        	    {% endfor %}
         	</table>
-	
         </div>
 	
 		<div>
@@ -149,23 +135,12 @@ function adding(row){
 			<div class="tooltip" id="mgmt_bridge_help">
             Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
             </div>
-
-			{% if mgmtIfaceForm.errors %}
-				<table>
-                	{%for field in mgmtIfaceForm %}
-						{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-            			{% endif %}
-            		{% endfor %}
-				</table>
-            {% endif %}
 			<table id="mgmtifacetable" class="formtable">
 				{% for field in mgmtIfaceForm %}
                     {% if field.errors %}
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}      
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                    {% endif %}      
 							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
-                    {%endif%}
 				{% endfor %}
 			</table>
 		</div>	
