@@ -422,6 +422,19 @@ table.fulltable>thead {
 	padding: 3px;
 }
 
+<<<<<<< HEAD
+=======
+/* Hack that loads help text and hides it at the label */
+table.fulltable>tbody>tr>td label {
+    display: none;
+}
+table.fulltable tbody tr td ul.fulltable_tooltip_list, 
+table.fulltable>tbody>tr>td>div>ul.fulltable_tooltip_list {
+    margin: 2px;
+    padding-left: 20px;
+}
+
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 table.fulltable>tbody>tr>td,table.fulltable>tbody>tr>th {
 	padding: 2px 4px;
 	background: #fff;
@@ -480,8 +493,18 @@ table.msg_table td.msg_text {
     text-align:left;
 }
 
+<<<<<<< HEAD
 table.msg_table .error {
 	color:#9a1b1b;
+=======
+table.msg_table .error, .errorlist {
+	/*color:#9a1b1b;*/
+	background: #AA2B2B;
+	border-radius: 10px;
+	color: white;
+	margin: 10px;
+	padding: 10px;
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 }
 
 table.msg_table .warning {
@@ -874,6 +897,10 @@ table.flowspace_r tr.even{
 
 /* AM borders */
 div.aggregateManager {
+<<<<<<< HEAD
+=======
+	margin-top:0px;
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	margin-bottom:10px;
 	background-color:#EEE;
     	border: 1px solid #CCC;
@@ -881,11 +908,37 @@ div.aggregateManager {
     	-webkit-border-radius: 0px 25px 25px 25px;
     	border-radius:  0px 25px 25px 25px;
 	display:inline-block;
+<<<<<<< HEAD
 	width:720px;;
 	text-align:center;
 	vertical-align:middle;
 	padding:10px;
 }
+=======
+	width:720px;
+	text-align:center;
+	vertical-align:middle;
+	padding:10px;
+	padding-top:0;
+}
+
+/*div.aggregateManagerHeader {
+        margin-bottom: 0;
+        text-align:left;
+	background-color:#EEE;
+        border-left: 1px solid #CCC;
+        border-right: 1px solid #CCC;
+        border-top: 1px solid #CCC;
+        border-bottom: 0px;
+        -moz-border-radius: 0px 25px 0 0;
+        -webkit-border-radius: 0px 25px 0 0;
+        border-radius:  0px 25px 0 0;
+        display:inline-block;
+        width:730px;
+        vertical-align:middle;
+        padding:5px;
+}*/
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 /*div.addAggregateManager {
 	width:350px;
 	padding:5px!important;
@@ -997,3 +1050,16 @@ div.aggregateManager table.aggregateManagerDetail .label {
 .expandableCtl {
 	cursor:pointer;	
 }
+<<<<<<< HEAD
+=======
+
+/* Success, error font styles */
+.success {
+        color: green;
+}
+
+.error {
+        color:#9a1b1b;
+}
+
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156

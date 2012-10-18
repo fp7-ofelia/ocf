@@ -127,7 +127,11 @@ class VTServer(models.Model):
 			try:
 				XmlRpcClient.callRPCMethod(url,"ping","testing")
 			except Exception as e:
+<<<<<<< HEAD
 				raise ValidationError("Cannot communicate with Agent. Nested exception is:"+str(e))
+=======
+				raise ValidationError("Cannot communicate with Agent. Nested exception is: " + str(e))
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 		
 	def setAgentURL(self, url):
 		with MutexStore.getObjectLock(self.getLockIdentifier()):

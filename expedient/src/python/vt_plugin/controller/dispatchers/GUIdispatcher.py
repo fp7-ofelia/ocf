@@ -20,12 +20,22 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 from vt_plugin.controller.VMcontroller.VMcontroller import *
 from vt_plugin.utils.ServiceThread import *
+from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.messaging.context_processors import messaging
+from expedient.common.messaging.models import DatedMessage
 
 def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
 
     if request.method == "POST":
+        # Shows error message when Aggregate is unreachable, disable VM creation and get back to slice detail page
+        agg = Aggregate.objects.get(id = agg_id)
+        if agg.check_status() == False:
+            DatedMessage.objects.post_message_to_user(
+                "VM Aggregate '%s' is not available" % agg.name,
+                request.user, msg_type=DatedMessage.TYPE_ERROR,)
+            return HttpResponseRedirect(reverse("slice_detail",args=[slice_id]))
+
         if 'create_vms' in request.POST:
             server_id=request.POST['selected_server_'+agg_id]
             return HttpResponseRedirect(reverse("virtualmachine_crud",
@@ -37,7 +47,7 @@ def goto_create_vm(request, slice_id, agg_id):
 def virtualmachine_crud(request, slice_id, server_id):
 
     """Show a page that allows user to add VMs to the VT server."""
-
+    error_crud = ""
     serv = get_object_or_404(VTServer, id = server_id)
     slice = get_object_or_404(Slice, id = slice_id)
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
@@ -47,34 +57,51 @@ def virtualmachine_crud(request, slice_id, server_id):
         fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
     )
 
-    if request.method == "POST":
-        if 'create_new_vms' in request.POST:
-            # "Done" pressed ==> send xml to AM
-            formset = VMFormSet(
-                request.POST, queryset=virtualmachines)
-            if formset.is_valid():
-                instances = formset.save(commit=False)
-                #create virtualmachines from received formulary
-                VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
+    try:
+        if request.method == "POST":
+            if 'create_new_vms' in request.POST:
+                # "Done" pressed ==> send xml to AM
+                formset = VMFormSet(
+                    request.POST, queryset=virtualmachines)
+                if formset.is_valid():
+                    instances = formset.save(commit=False)
+                    #create virtualmachines from received formulary
+                    VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
 
-                return HttpResponseRedirect(reverse("html_plugin_home",
+                    return HttpResponseRedirect(reverse("html_plugin_home",
                                                 args=[slice_id]))
-    else:
-        formset = VMFormSet(queryset=VM.objects.none())
+                else:
+                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters or whitespaces or the memory is not a number.", code="invalid",)
+
+        else:
+            formset = VMFormSet(queryset=VM.objects.none())
+
+    except Exception as e:
+        # Django exception handling is different to Python's... Now smile! :)
+        error_crud = ";".join(e.messages)
+#        if isinstance(e,ValidationError):
+#            DatedMessage.objects.post_message_to_user(
+#                error_crud,
+#                request.user, msg_type=DatedMessage.TYPE_ERROR)
+#        else:
+        if not isinstance(e,ValidationError):
+            DatedMessage.objects.post_message_to_user(
+                "VM may have been created, but some problem ocurred: %s" % str(e),
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
+            return HttpResponseRedirect(reverse("home"))
 
     return simple.direct_to_template(
         request, template="aggregate_add_virtualmachines.html",
-        extra_context={"virtual_machines": virtualmachines,
-                        "server_name":serv.name, "formset": formset,"slice":slice,
+        extra_context={"virtual_machines": virtualmachines, "exception": error_crud,
+                        "server_name": serv.name, "formset": formset,"slice":slice,
                         "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                    #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
-                    ("Create VM in server %s" %serv.name, reverse("virtualmachine_crud", args=[slice_id, server_id])), 
+#                   #("Resource visualization panel ", reverse("html_plugin_home", args=[slice_id])),
+                    ("Create VM in server %s" %serv.name, reverse("virtualmachine_crud", args=[slice_id, server_id])),
                 )
         })
-
 
 def manage_vm(request, slice_id, vm_id, action_type):
 

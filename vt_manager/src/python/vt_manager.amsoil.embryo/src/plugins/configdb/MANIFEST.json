@@ -1,0 +1,9 @@
+{
+  "name" : "Configuration Provider",
+  "author" : "Nick Bastin, Tom Rothe",
+  "author-email" : "nick.bastin@gmail.com",
+  "version" : 1,
+  "implements" : ["config"],
+  "loads-after" : ["authorization"],
+  "requires" : ["notification"]
+}

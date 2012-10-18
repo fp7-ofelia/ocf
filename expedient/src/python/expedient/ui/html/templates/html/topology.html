@@ -1,43 +1,69 @@
-<h2>Topology</h2>
+<h2>
+  Topology
+</h2>
 
 
-<script src="{% url js_media 'tooltip.topology.js' %}"></script>
-<script src="{% url js_media 'd3.v2.min.js' %}"></script>
+<script src="{% url js_media 'tooltip.topology.js' %}">
+</script>
+<script src="{% url js_media 'd3.v2.min.js' %}">
+</script>
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
 <style>
-
-.link {
-  stroke: #ccc;
-  stroke-width:1px;
-}
-
-.node {
- stroke-width:2px;
-}
-.node text {
-  pointer-events: none;
-  font: 10px sans-serif;
-}
-
+  
+  .link {
+    stroke: #ccc;
+    stroke-width:1px;
+  }
+  
+  .node {
+    stroke-width:2px;
+  }
+  .node text {
+    pointer-events: none;
+    font: 10px sans-serif;
+  }
+  
 </style>
 
 {#Render#}
 <div style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-<div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">Tip: Move cursor over the icons to get extra information...</div>
-{%if not d3_nodes %}
-<a href="#addAggregate"><div style="position:relative; top:200px; left:200px; width:450px;color=black;">Nothing to show yet. Add Aggregates to the slice.</div></a>
-{% endif %}
-<div id="target">
-</div>
-<div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
-
-    <!--<a href="#" onClick="return showAllInfo()"/>Show</a>&nbsp;-->
-    <a href="javascript: regroup()"/><img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-    <a href="javascript: zoomIn(0.25)"/><img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/></a>&nbsp;
-   <a href="javascript: zoomOut(0.25)"/><img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/></a>&nbsp;
-   <a href="javascript: zoomReset()"/><img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/></a>&nbsp;
+  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+    Tip: Move cursor over the icons to get extra information...
+  </div>
+  {%if not d3_nodes %}
+  <a href="#addAggregate">
+    <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
+      Nothing to show yet. Add Aggregates to the slice.
+    </div>
+  </a>
+  {% endif %}
+  <div id="target">
+  </div>
+  <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+    
+    <!--
+<a href="#" onClick="return showAllInfo()"/>
+Show
+</a>
+&nbsp;-->
+  <a href="javascript: regroup()"/>
+  <img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/>
+  </a>
+  &nbsp;
+  <a href="javascript: zoomIn(0.25)"/>
+  <img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/>
+</a>
+&nbsp;
+<a href="javascript: zoomOut(0.25)"/>
+<img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
+<a href="javascript: zoomReset()"/>
+<img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
 </div>
 </div>
 
@@ -197,40 +223,43 @@ function getNodeImage(d){
 }
 
 function getLinkStyle(d, attr){
-        
         rsc_ids = d.value.split("-");
-	if(attr=="click"){
-		id0 = rsc_ids[0];
-		id1 = rsc_ids[1];
-		if((! $(":checkbox#"+id0+":checked").length && ! $(":checkbox#"+id1+":checked").length) || ($(":checkbox#"+id0+":checked").length && $(":checkbox#"+id1+":checked").length)){
-			$(":checkbox#"+id0).click();
-			$(":checkbox#"+id1).click();
-		}
-		else if ($(":checkbox#"+id0+":checked").length){
-			$(":checkbox#"+id1).click();
-		}
-		else{
-			$(":checkbox#"+id0).click();	
-		}
-
-	}else if(attr=="mouseover"){
-		var values = {stroke: "#00BFFF", strokewidth: "2" };
-		return values;
-	}else{
-
-        	if($(":checkbox#"+rsc_ids[0]+":checked").length && $(":checkbox#"+rsc_ids[1]+":checked").length){
-        	        if (attr == "stroke")
-        	                return "#999";
-        	        else
-        	                return 2;
-        	}else{
-        	        if (attr == "stroke")
-        	                return "#ccc";
-        	        else
-        	                return 1;
-        	}
-	}
+        if(attr=="click"){
+                id0 = rsc_ids[0];
+                id1 = rsc_ids[1];
+                if (id1.indexOf("eth") != -1){
+                     $(":checkbox#"+id0).click();
+                }
+                else{           
+                if((! $(":checkbox#"+id0+":checked").length && ! $(":checkbox#"+id1+":checked").length) || ($(":checkbox#"+id0+":checked").length && $(":checkbox#"+id1+":checked").length)){
+                        $(":checkbox#"+id0).click();
+                        $(":checkbox#"+id1).click();
+                }
+                else if ($(":checkbox#"+id0+":checked").length){
+                        $(":checkbox#"+id1).click();
+                }
+                else{
+                        $(":checkbox#"+id0).click();    
+                }
+                }
+        }else if(attr=="mouseover"){
+                var values = {stroke: "#00BFFF", strokewidth: "2" };
+                return values;
+        }else{
+		if( ($(":checkbox#"+rsc_ids[0]+":checked").length && rsc_ids[1].indexOf("eth") != -1) ||($(":checkbox#"+rsc_ids[0]+":checked").length && $(":checkbox#"+rsc_ids[1]+":checked").length)){
+                        if (attr == "stroke")
+                                return "#666";
+                        else
+                                return 2;
+                }else{
+                        if (attr == "stroke")
+                                return "#ccc";
+                        else
+                                return 2;
+                }
+        }
 }
+
 
 function getBaseNodeColor(d){
 	type = get_node_type(d);
@@ -245,13 +274,18 @@ function getBaseNodeColor(d){
 		return d3.rgb("FFFFFF");
 	
 }
+
 function getNodeCircleStyle(d, attr){
         type = get_node_type(d);
         selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length;
         all_len = $(":checkbox:.node_id_"+d.nodeValue).length;
+	selected_server = $(".server_node_"+d.nodeValue+".connected").length;
         if(attr == "drag"){
                 return d3.rgb(d.color.toString()).brighter(5);
 	}else if(attr=="click"){
+		 if (type == "vtserver" && selected_server != 0){
+			return d3.rgb(d.color.toString()).darker(5);
+		 }
 		 if(selected_len == all_len) {
                         $(":checkbox:checked.node_id_"+d.nodeValue).click();
 			return getBaseNodeColor(d);
@@ -260,11 +294,15 @@ function getNodeCircleStyle(d, attr){
 			return d3.rgb(d.color.toString()).darker(5);
                 }
         }else if (attr == "dragstop" && selected_len == 0){
+		if(type == "vtserver" && selected_server != 0)
+                      return d3.rgb(d.color.toString()).darker(5);
 		return getBaseNodeColor(d);
         }else{
                         if (attr == "fill"){
                                 return getBaseNodeColor(d);
                         } else{
+				if(type == "vtserver" && selected_server != 0)
+		                        return d3.rgb(d.color.toString()).darker(5);
 				if (selected_len != 0){
 	                                return d3.rgb(d.color.toString()).darker(5);
 				}else{
@@ -304,7 +342,7 @@ function redraw() {
 
 
 
-/* Instansiation General parameters*/
+/* Instantiation General parameters*/
 var  padding = 6,
      color = d3.scale.category10().domain(d3.range(nIslands)),
      radius = d3.scale.sqrt().range([0, 12]);
@@ -404,7 +442,7 @@ var node = svg.selectAll(".node")
         tick();
     })
     .on("dragend", function(d, i){
-	d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+	d.fixed = true; // of course set the node to fixed so the force does not include the node in its auto positioning stuff
         d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "dragstop");})
         tick();
         force.stop();
@@ -557,6 +595,3 @@ function collide(alpha) {
 $("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
 
 </script>
-
-<br />
-<br />

@@ -1,0 +1,9 @@
+{
+  "name" : "CoreTaskQueue",
+  "author" : "Marc Sune Clos",
+  "author-email" : "marc.sune@i2cat.net",
+  "version" : 1,
+  "implements" : ["taskqueue"],
+  "loads-after" : [],
+  "requires" : []
+}

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 		if(	top.location != document.location) {
+=======
+if(     top.location != document.location) {
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                 top.location = document.location;
             }
             /**
@@ -14,6 +18,7 @@
                     .prepend("<td />");
 
                 /* find help text and replace with image and tooltip */
+<<<<<<< HEAD
 //                $("table.formtable_noborder>tbody>tr>td:nth-child(3)")
 //                
 //				.contents()
@@ -68,6 +73,11 @@
                 $("table.formtable>tbody>tr>td.help_text")
                 
 				.contents()
+=======
+                $("table.formtable>tbody>tr>td.help_text")
+
+                                .contents()
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                     .filter(function() {
                         return this.nodeType == Node.TEXT_NODE && $(this).text().length > 1;
                     })
@@ -78,13 +88,18 @@
                             .closest("tr")
                             .find("td:first-child")
                             .html(
+<<<<<<< HEAD
                                 "<img id='tooltip_help_img_"+index+"' src='/static/media/images/question_mark_15x15.png'/>" +
+=======
+                                "<img id='tooltip_help_img_"+index+ "' src=" + url_img_question + ">" +
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                                 "<div id='tooltip_help_"+index+"' class='tooltip'>"+
                                 text+"</div>"
                             )
                         ;
                         $("img#tooltip_help_img_"+index).tooltip({
                             tip: "div#tooltip_help_"+index,
+<<<<<<< HEAD
 							position: "top center",
 							cancelDefault: true,
 							relative: true,
@@ -120,5 +135,13 @@
 //;
 
 
+=======
+                                                        position: "top center",
+                                                        cancelDefault: true,
+                                                        relative: true,
+                                                        offset: [0,110]
+                        });
+                    });
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
             });
 

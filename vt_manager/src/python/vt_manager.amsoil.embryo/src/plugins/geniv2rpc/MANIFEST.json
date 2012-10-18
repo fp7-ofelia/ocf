@@ -1,0 +1,9 @@
+{
+  "name" : "GENI v2 API RPC",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["geniv2rpc", "geni2adapterbase"],
+  "loads-after" : ["xmlrpc", "config"],
+  "requires" : ["adapterregistry", "adapterbase", "context"]
+}

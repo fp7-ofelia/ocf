@@ -1,0 +1,151 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.3/0.3RC1 pre-upgrade-hook module..."
+
+OFELIA_DIR=/opt/ofelia
+
+local TMP_PATH=$PWD
+
+cd $OFELIA_DIR || error "Target directory does not exist anymore?"
+
+#Check for OFELIA installation
+OFELIA="none"
+NO_OFELIA_SCRIPT="ocfToGithubMigration"
+SCRIPT="none"
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an official OFELIA island installation (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not a valid option. Please answer yes/no"
+        fi
+    done
+
+if [ -d $OFELIA_DIR/oxa/ ]; then
+	local GIT_DIR="$OFELIA_DIR/oxa/repository/"
+else
+	local GIT_DIR="$OFELIA_DIR"
+fi
+
+NEW_REPO=`cat $GIT_DIR/.git/config | grep "/home/ofelia/ofelia-git" | grep -v "#"`
+GITHUB=`cat $GIT_DIR/.git/config | grep "github.com/fp7-ofelia/ocf.git" | grep -v "#"`
+
+if [ "$NEW_REPO" == "" ];then
+        NEW_REPO=1
+else
+	NEW_REPO=0
+fi
+if [ "$GITHUB" == "" ];then
+        GITHUB=0
+else
+        GITHUB=1
+fi
+
+if [[ $OFELIA == 1 ]] && [[ $NEW_REPO == 0 ]]; then
+
+	#Move original files to temp folder
+	TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
+	if [ ! -d /opt/tmp ]; then
+		mkdir -p /opt/tmp 
+	fi
+
+	if [ -d $OFELIA_DIR/oxa/ ]; then
+                CF_AGENT_INSTALL=1
+                TARGET_DIR="oxa/repository/"
+		mv $OFELIA_DIR/$TARGET_DIR $TMP_DIR || error "Maybe some directory is not present?"
+        else
+                CF_AGENT_INSTALL=0
+                TARGET_DIR="."
+		mv $OFELIA_DIR $TMP_DIR || error "Maybe some directory is not present?"
+		mkdir -p $OFELIA_DIR
+        fi
+
+	cd $OFELIA_DIR	
+
+	#Ask for OFELIA credentials
+        echo "Please enter your OFELIA username. Credentials are the same ones used in Ofelia's TRAC, WIKI and SVN (email). Usernames and passwords will NOT be stored."
+
+	RERUN="none"
+	while [ $RERUN != 0 ]
+	    do
+		RERUN=0
+	        echo -n "Username:"
+	        read USERNAME
+		#Clone new repo in old location
+		git clone ssh://$USERNAME@alpha.fp7-ofelia.eu/home/ofelia/ofelia $TARGET_DIR || RERUN=1
+		if [ RERUN == 1 ]; then
+			echo "Insert your username again, please"
+		fi
+	    done
+
+	#Restore non tracked files from tmp backup
+	if [ $CF_AGENT_INSTALL == 0 ]; then
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-user.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-user.crt folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509-trusted.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509-trusted.crt folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.key/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.key folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509.cred/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy gcf-x509.cred folder"
+		cp -Rp $TMP_DIR/expedient/src/python/expedient/clearinghouse/xmlrpc-ssl.crt/ $OFELIA_DIR/expedient/src/python/expedient/clearinghouse || error "Could not copy xmlrpc-ssl.crt folder"
+		cp -p $TMP_DIR/expedient/src/python/expedient/clearinghouse/localsettings.py $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/ || error "Could not copy expedient's localsettings.py"
+		cp -p $TMP_DIR/expedient/.currentVersion $OFELIA_DIR/expedient/.currentVersion || error "Could not copy expedient's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/vt_manager/mySettings.py $OFELIA_DIR/vt_manager/src/python/vt_manager/ || error "Could not copy vt_manager's mySettings.py"
+		cp -p $TMP_DIR/vt_manager/.currentVersion $OFELIA_DIR/vt_manager/.currentVersion || error "Could not copy vt_manager's .currentVersion file"
+		cp -p $TMP_DIR/optin_manager/src/python/openflow/optin_manager/localsettings.py $OFELIA_DIR/optin_manager/src/python/openflow/optin_manager/ || error "Could not copy optin manager's localsettings.py"
+		cp -p $TMP_DIR/optin_manager/.currentVersion $OFELIA_DIR/optin_manager/.currentVersion || error "Could not copy optin's .currentVersion file"
+	elif [ $CF_AGENT_INSTALL == 1 ]; then
+		cp -p $TMP_DIR/vt_manager/src/python/agent/mySettings.py $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/mySettings.py || error "Could not copy agent's mySettings.py"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/.currentVersion $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/.currentVersion || error "Could not copy agent's .currentVersion file"
+		cp -p $TMP_DIR/vt_manager/src/python/agent/security/certs/agent.* $OFELIA_DIR/$TARGET_DIR/vt_manager/src/python/agent/security/certs/ || error "Could not copy agent's certificates"
+	fi
+
+	#Remove temp folder?
+	#rm -rf $TMP_DIR
+
+	#restart ofver from appropiate directory
+	cd $TMP_PATH
+	print "Repo migration done, restarting ofver..."
+	unlock
+	restartOfverInstance
+
+	warning "Old repository backup files are stored at $TMP_PATH. Consider deleting them after checking everything is working..."
+	exit 0
+elif [[ $OFELIA == 0 ]] && [[ $GITHUB == 0 ]]; then
+	warning "An error occurred. You are probably upgrading from the repository previously hosted at codebasin and you have not executed the $NO_OFELIA_SCRIPT script first. Please do it and restart ofver..."
+	unlock
+	cd $TMP_PATH
+	exit 1
+fi
+
+# Installing pyPElib
+printHeader "info#" "Downloading pypelib libraries..."
+ 
+print "Downloading dependencies [pyparsing]..."
+/usr/bin/apt-get -y install python-pyparsing || error "Could not install dependencies (apt-get)"
+
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+
+#cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?"
+cd $TMP_PATH

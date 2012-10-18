@@ -26,7 +26,11 @@ loadModule "pre-backup-upgrade-hook" $NO_RESCUE
 
 cd $SRC_DIR/src/python/openflow/optin_manager/ || error "Target directory does not exist anymore?¿"
 
+<<<<<<< HEAD
 python manage.py dumpdata > $BACKUP_PATH/dbdump.data || warning "Could not backup data. Check database for inconsistencies in foireign keys or many-to-many relationships"
+=======
+python manage.py dumpdata > $BACKUP_PATH/dbdump.data || warning "Could not backup data. Check database for inconsistencies in foreign keys or many-to-many relationships"
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 python $TMP_PATH/versions/default/upgrade/tools/sqlDump.py $BACKUP_PATH/dbdump.sql "openflow.optin_manager.settings" || warning "Could not backup data using SQL... (is redundant). Proceeding with upgrade..." 
 cd $TMP_PATH
 

@@ -112,8 +112,12 @@ def servers_crud(request, server_id=None):
 				        extra_context=context,
 				    )
 
+<<<<<<< HEAD
 				#return a alguna pagina y volver atras las transacciones
 				
+=======
+			# Returns to server's admin page and rollback transactions
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 			return HttpResponseRedirect('/servers/admin/')
 	else:
 		return HttpResponseNotAllowed("GET", "POST")
@@ -252,8 +256,11 @@ def subscribeIp4Ranges(request, server_id):
 
 def list_vms(request, server_id):
 
+<<<<<<< HEAD
 	"""Show a page for the user to add/edit an  VTServer """
 
+=======
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	if (not request.user.is_superuser):
         
 		return simple.direct_to_template(request,

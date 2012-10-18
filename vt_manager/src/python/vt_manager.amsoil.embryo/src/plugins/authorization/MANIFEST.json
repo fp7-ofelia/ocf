@@ -1,0 +1,9 @@
+{
+  "name" : "Authorization Plug-in",
+  "author" : "Nick Bastin",
+  "author-email" : "nick.bastin@gmail.com",
+  "version" : 1,
+  "implements" : ["authorization"],
+  "loads-after" : [],
+  "requires" : []
+}

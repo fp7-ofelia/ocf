@@ -1,0 +1,51 @@
+import util
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': util.project_path('db/ofreg.sqlite'),                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'dozd^2%vf@p7&5dn6u@-a&a^q09lq4i&z9v*sw=tfl@&q$5e-z'
+
+# Specifies the groups a user might belong to
+OFELIA_ISLANDS = ( # key, html-label
+	('ibbt', 'IBBT'),
+	('i2cat', 'i2cat'),
+	('eict', 'EICT'),
+	('uessex', 'UEssex'),
+	('tub', 'TUB'))
+
+MAIL_FROM='ofelia@example.com'
+
+# the URL the server has been deployed to
+SERVER_BASE='http://localhost:8000' # please mind, there is no trailing slash
+
+# LDAP interaction
+LDAP_SERVER = 'ldap://localhost:19389'
+LDAP_USER = 'cn=admin,dc=fp7-ofelia,dc=eu' # User credentials to make changes in the LDAP
+LDAP_PASSWORD = 'ailefo'
+LDAP_USERGP = 'ou=users,dc=fp7-ofelia,dc=eu' # OU where users reside
+LDAP_MOUNTGP = 'ou=home,ou=automount,dc=fp7-ofelia,dc=eu' # OU where automount info for users reside
+LDAP_EXPEDIENTGP = 'cn=enabled,ou=expedient,ou=acl,dc=fp7-ofelia,dc=eu' # CN where a members for the expedient ACL reside
+LDAP_VPNGP = 'ou=users,ou=netgroups,dc=fp7-ofelia,dc=eu' # CN where a members for the VPN access control
+LDAP_VPNCN = 'vpnusers'
+
+# This is the minimal uid which will be chosen for the user record.
+# For each registration a id is assigned (starting with 0). When a new registration has been created the next id will be the old plus one.
+# For the uid in the LDAP, the value of the registration id plus the LDAP_UID_START value will be calculated.
+# This might lead to unused UIDs, since not every registration request will be validated.
+LDAP_UID_START = 1000
+LDAP_GID_START = 1000 # same as LDAP_UID_START
+
+LDAP_HOME = '/ofelia/users/%(safe_name)s' # String template home directory for a new user; available replacements are: 'safe_name', 'uid', 'gid', 'island'
+LDAP_MOUNT_INFO = '-fstype=nfs,hard,intr,nodev,nosuid nfs.%(island)s.fp7-ofelia.eu:/storage/users/%(safe_name)s' # String template used for the autoMountInformation; available replacements are: 'safe_name', 'uid', 'gid', 'island'
+LDAP_LOGIN_SHELL = '/bin/bash'
+
+BLOCKED_USERNAMES = ['root', 'expedient', 'optin', 'vtam', 'test', 'manager']

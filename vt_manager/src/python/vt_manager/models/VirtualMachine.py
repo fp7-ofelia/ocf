@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.db import models
 from django.contrib import auth
 from datetime import datetime
@@ -7,6 +8,18 @@ import re
 import inspect
 from vt_manager.models.utils.Choices import OSDistClass, OSVersionClass, OSTypeClass
 from vt_manager.utils.MutexStore import MutexStore
+=======
+from datetime import datetime
+from django.contrib import auth
+from django.db import models
+from threading import Lock
+#from expedient.common.utils import validators
+from vt_manager.models.faults import *
+from vt_manager.models.utils.Choices import OSDistClass, OSVersionClass, OSTypeClass
+from vt_manager.utils.MutexStore import MutexStore
+import re
+import inspect
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 
 class VirtualMachine(models.Model):
 	"""VM data model class"""
@@ -104,6 +117,10 @@ class VirtualMachine(models.Model):
 				error()
 		try:
 			validate_name(name)
+<<<<<<< HEAD
+=======
+#                        validators.resourceNameValidator(name)
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 			self.name = name
 			self.autoSave()
 		except Exception as e:

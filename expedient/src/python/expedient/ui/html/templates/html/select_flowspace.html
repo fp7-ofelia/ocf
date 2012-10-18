@@ -77,10 +77,12 @@
 		            	<th><strong>MAC Source</strong></th>
 		            	<td>
 		            		{{ form.dl_src_start.errors }}
+		            		{{ form.dl_src_start.label_tag }}
 		            		{{ form.dl_src_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.dl_src_end.errors }}
+		            		{{ form.dl_src_end.label_tag }}
 		            		{{ form.dl_src_end }}
 		            	</td>
 		            </tr>
@@ -88,10 +90,12 @@
 		            	<th><strong>MAC Destination</strong></th>
 		            	<td>
 		            		{{ form.dl_dst_start.errors }}
+		            		{{ form.dl_dst_start.label_tag }}
 		            		{{ form.dl_dst_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.dl_dst_end.errors }}
+		            		{{ form.dl_dst_end.label_tag }}
 		            		{{ form.dl_dst_end }}
 		            	</td>
 		            </tr>
@@ -99,10 +103,12 @@
 		            	<th><strong>Ethernet Type</strong></th>
 		            	<td>
 		            		{{ form.dl_type_start.errors }}
+		            		{{ form.dl_type_start.label_tag }}
 		            		{{ form.dl_type_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.dl_type_end.errors }}
+		            		{{ form.dl_type_end.label_tag }}
 		            		{{ form.dl_type_end }}
 		            	</td>
 		            </tr>
@@ -110,10 +116,12 @@
 		            	<th><strong>VLAN ID</strong></th>
 		            	<td>
 		            		{{ form.vlan_id_start.errors }}
+		            		{{ form.vlan_id_start.label_tag }}
 		            		{{ form.vlan_id_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.vlan_id_end.errors }}
+		            		{{ form.vlan_id_end.label_tag }}
 		            		{{ form.vlan_id_end }}
 		            	</td>
 		            </tr>
@@ -121,10 +129,12 @@
 		            	<th><strong>IP Source</strong></th>
 		            	<td>
 		            		{{ form.nw_src_start.errors }}
+		            		{{ form.nw_src_start.label_tag }}
 		            		{{ form.nw_src_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.nw_src_end.errors }}
+		            		{{ form.nw_src_end.label_tag }}
 		            		{{ form.nw_src_end }}
 		            	</td>
 		            </tr>
@@ -132,10 +142,12 @@
 		            	<th><strong>IP Destination</strong></th>
 		            	<td>
 		            		{{ form.nw_dst_start.errors }}
+		            		{{ form.nw_dst_start.label_tag }}
 		            		{{ form.nw_dst_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.nw_dst_end.errors }}
+		            		{{ form.nw_dst_end.label_tag }}
 		            		{{ form.nw_dst_end }}
 		            	</td>
 		            </tr>
@@ -143,10 +155,12 @@
 		            	<th><strong>IP Protocol</strong></th>
 		            	<td>
 		            		{{ form.nw_proto_start.errors }}
+		            		{{ form.nw_proto_start.label_tag }}
 		            		{{ form.nw_proto_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.nw_proto_end.errors }}
+		            		{{ form.nw_proto_end.label_tag }}
 		            		{{ form.nw_proto_end }}
 		            	</td>
 		            </tr>
@@ -154,10 +168,12 @@
 		            	<th><strong>TCP/UDP Source</strong></th>
 		            	<td>
 		            		{{ form.tp_src_start.errors }}
+		            		{{ form.tp_src_start.label_tag }}
 		            		{{ form.tp_src_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.tp_src_end.errors }}
+		            		{{ form.tp_src_end.label_tag }}
 		            		{{ form.tp_src_end }}
 		            	</td>
 		            </tr>
@@ -165,10 +181,12 @@
 		            	<th><strong>TCP/UDP Destination</strong></th>
 		            	<td>
 		            		{{ form.tp_dst_start.errors }}
+		            		{{ form.tp_dst_start.label_tag }}
 		            		{{ form.tp_dst_start }}
 		            	</td>
 		            	<td>
 		            		{{ form.tp_dst_end.errors }}
+		            		{{ form.tp_dst_end.label_tag }}
 		            		{{ form.tp_dst_end }}
 		            	</td>
 		            </tr>
@@ -176,6 +194,7 @@
 		            	<th><strong>Ports</strong></th>
 		            	<td COLSPAN="2">
 		            		{{ form.slivers.errors }}
+		            		{{ form.slivers.label_tag }}
 		            		{{ form.slivers }}
 		            	</td>
 		            </tr>
@@ -190,13 +209,13 @@
 			<br/>
 	        {% endfor %}
             <input id='submit' type="submit" value="Save" 
-		{%if slice.started %}onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted; Are you sure you want to save a new FlowSpace?");'
+		{%if slice.started %}onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted. Are you sure you want to save a new FlowSpace?");'
 		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace.");'
 		{% endif%}/>
 			<span class="next_link">
 				| <a href="{% url html_plugin_flowspace slice.id %}">Clear</a> | 
 				{% if done %}
-				<a href="{% url slice_detail slice.id %}" onClick='return confirm("Flowspace must be Saved before exiting; are you sure you are done?");'>Done</a>
+				<a href="{% url slice_detail slice.id %}" onClick='return confirm("Flowspace must be saved before exiting. Are you sure you are done?");'>Done</a>
 				{% else %}
 				<a href="{% url html_plugin_sshkeys slice.id %}">Next</a>
 				{% endif %}

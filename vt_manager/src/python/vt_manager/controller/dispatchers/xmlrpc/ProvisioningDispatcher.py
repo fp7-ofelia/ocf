@@ -31,7 +31,10 @@ class ProvisioningDispatcher():
 					a = a[0:199]
 				
 				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a )))
+<<<<<<< HEAD
 #				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse('FAILED', action, 'You requested more than the 128Mbytes allowed for your project')))
+=======
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 				return None
 			try:
 				

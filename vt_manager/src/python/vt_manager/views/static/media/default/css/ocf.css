@@ -82,11 +82,20 @@ input[type=button],
 .button a:hover {
 	text-decoration:none;
 }
+<<<<<<< HEAD
 .button_admin{
 	width:120px;
 	padding:10px;
 	text-align:center;
 	cursor:pointer;
+=======
+.button_admin {
+    width: 120px;
+    padding: 10px;
+    margin-bottom: 2px;
+    text-align: center;
+    cursor: pointer;
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 }
 .subutton{
 	width:100px;
@@ -571,7 +580,11 @@ div .PEbox{
 	float:right;
 	padding-left:15px;
 	padding-right:15px;
+<<<<<<< HEAD
 	width:175px;
+=======
+	min-width:175px;
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 	height:75px;
 	margin-right:15px;
 	margin-bottom:15px;

@@ -3,6 +3,7 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
+<<<<<<< HEAD
 
 <script>
     function checkNameBlanks(){
@@ -17,6 +18,8 @@
      }
 </script>
 
+=======
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 {% endblock %}
 
 {% block content %}
@@ -27,7 +30,17 @@
     	{{ formset.management_form }}
 		{% for form in formset.forms %}
             <table class="separator-table">
+<<<<<<< HEAD
                 <tr class="error"><th/><td id = "error_td" ></td></tr>
+=======
+                <tr class="error"><th/>
+                    <td id="error_td">
+                    {% if exception != "" %}    
+                        <ul class="error"><li>{{ exception }}</li></ul>
+                    {% endif %}
+                    </td>
+                </tr>
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
                 {% for field in form %}
                 {% if field.name != "resource_ptr"%}
                 <tr> <th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
@@ -36,7 +49,11 @@
             </table>
         {% endfor %}
 		<div id = "buttons" class="center"> 
+<<<<<<< HEAD
 			<input type="submit" name = "create_new_vms" value="Done" onClick="return checkNameBlanks()"/> |
+=======
+			<input type="submit" id="form_create_VM" name="create_new_vms" value="Done" /> |
+>>>>>>> 8973dbcd3e450399738a5324ba6d9057bc126156
 			<a href="{% url slice_detail slice.id %}">Cancel</a>
 		</div>
 	</form>

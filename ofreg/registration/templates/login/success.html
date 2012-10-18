@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Welcome to the Ofelia Federation</h1>
+<p>
+	In order to use the configuration web application and to enter the experiment network of Ofelia, please download the <a href="/static/openvpn.tar.gz">OpenVPN configuration</a> and fire up your OpenVPN.
+</p>
+<p>
+	The minimum requirements for the tunnel to work is OpenVPN 2.x.x and optionally resolvconf to update your DNS (e.g. <tt>sudo apt-get install resolvconf</tt>).<br/>
+	Please refer to the <a href="https://alpha.fp7-ofelia.eu/doc/index.php/Working_with_the_OFELIA_Control_Framework">documentation wiki</a> for setup.
+</p>
+<p>
+	After opening the tunnel, please visit Expedient. Please see <a href="https://alpha.fp7-ofelia.eu/doc/index.php/Working_with_the_OFELIA_Control_Framework" target="_blank">the wiki</a> for links and more information.
+</p>
+<p>
+	Please also see the official <a href="http://www.fp7-ofelia.eu/" target="_blank">Ofelia website</a>.
+</p>
+{% endblock %}
