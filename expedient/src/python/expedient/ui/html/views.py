@@ -488,20 +488,22 @@ def bookOpenflow(request, slice_id):
         
         slice.modified = True
         slice.save()
-        if request.POST['fsmode'] == 'simple':
+        free_vlan = 'None'
+        alertMessage = ''
+        fsmode = request.POST['fsmode'] 
+        if fsmode == 'simple':
             try:
-                request.POST = request.POST.copy()
-                request.POST['free_vlan_tag'] = calculate_free_vlan(slice)
-                return flowspace(request,slice.id)
+                free_vlan = calculate_free_vlan(slice)
             except Exception as e:
-                print e
+                fsmode = 'failed' 
                 DatedMessage.objects.post_message_to_user(
                          "Could not find free vlan to slice your experiment in all the affected AMs",
                          request.user, msg_type=DatedMessage.TYPE_ERROR,
                      )
-                request.POST['alertMessage'] = "Could not find free vlan to slice your experiment in all the affected AMs. It has been switched to advanced mode, choose your flowspace and wait for the admins decision."
-                return HttpResponseRedirect(reverse("html_plugin_flowspace",
-                                            args=[slice_id]))  
+                alertMessage = "Could not find free vlan to slice your experiment in all the affected AMs. It has been switched to advanced mode, choose your flowspace and wait for the admins decision."
+            #return HttpResponseRedirect(reverse("html_plugin_flowspace", args=[slice_id, fsmode, free_vlan, alertMessage]))  
+            return flowspace(request, slice_id, fsmode, free_vlan, alertMessage)
+
 
             
 
@@ -561,7 +563,7 @@ def bookOpenflow(request, slice_id):
                 )
             },
         )
-def flowspace(request, slice_id, alertMessage=None):
+def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
     """
     Add flowspace.
     """
@@ -590,15 +592,8 @@ def flowspace(request, slice_id, alertMessage=None):
     )
     
     if request.method == "POST":
-        print "ENTRO EN POST\n\n"
-        try:
-            request.POST['fsmode']
-        except:
-            request.POST = request.POST.copy()
-            request.POST['fsmode'] = 'advanced'
         continue_to_start_slice = False
-        if request.POST['fsmode'] == 'advanced':
-            print "LEODEBUG ENTRO EN ADVANCED\n\n"
+        if fsmode == 'advanced':
             formset = FSFormSet(
                 request.POST,
                 queryset=FlowSpaceRule.objects.filter(
@@ -607,23 +602,28 @@ def flowspace(request, slice_id, alertMessage=None):
 	    if formset.is_valid():
                 formset.save()
                 continue_to_start_slice = True
-        else:
-            print "LEODEBUG ENTRO EN SIMPLE\n\n"
+        elif fsmode == 'simple':
             #create a simple flowspacerule containing only the vlans tags and the OF ports
             try:
-                create_simple_slice_vlan_based(request.POST['free_vlan_tag'][0], slice)
+                create_simple_slice_vlan_based(free_vlan[0], slice)
                 continue_to_start_slice = True
             except Exception as e:
-                print e
+                #continue_to_start_slice flag will deal with this
+                pass
+        else:
+             formset = FSFormSet(
+                 queryset=FlowSpaceRule.objects.filter(
+                     slivers__slice=slice).distinct(),
+             )
+
         if continue_to_start_slice:
             slice.modified = True
             slice.save()
             exp=""
             try:
-                #if slice.started:
+                if slice.started:
                     #slice.stop(request.user)
-                print "LEODEBUG A STARTEAR AL SLICE!\n\n"
-                slice.start(request.user)
+                    slice.start(request.user)
             except Exception as e:
                 exp=str(e)
             finally:
@@ -637,19 +637,16 @@ def flowspace(request, slice_id, alertMessage=None):
                         "Successfully set flowspace for slice %s" % slice.name,
                         request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                     )
-            print "LEODEBUG SALGO DE BOOKOF\n\n"
-            print request.path
             return HttpResponseRedirect(request.path)
+            #return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     
     elif request.method == "GET":
-        print "LEODEBUG ENTRO EN GET\n\n"
         formset = FSFormSet(
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
     
     else:
-        print "ENTRO EN NOTALLOWED\n\n"
         return HttpResponseNotAllowed("GET", "POST")
         
     done = PlanetLabSliver.objects.filter(slice=slice).count() == 0

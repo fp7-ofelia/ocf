@@ -6,16 +6,12 @@
 	$(document).ready(function() {
 		$("table.fulltable td").css("padding", "1px 1px 1px 1px");
 		$("input[type=text]").css("width", "280px");
-                if ("{{alertMessage}}" != "None"){
+                if ("{{alertMessage}}" != ""){
 			alert("{{alertMessage}}");
 		}
 	})
 </script>
 <style>
-	div.steps {
-		padding: 4px;
-		font-weight: bold;
-	}
 	table.fulltable input[type=text] {
 		width: 70px;
 	}
@@ -33,9 +29,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="steps center">
-	1. <a href="{% url html_plugin_bookOpenflow slice.id %}">Select OpenFlow Ports</a>
-	2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
+<div id="procsteps" class="steps center">
+    1. <a href="{% url html_plugin_bookOpenflow slice.id %}">Select OpenFlow Ports</a>
+    2. <a href="{% url html_plugin_flowspace slice.id %}" style="font-weight: bold;">Select Flowspace</a>
 </div>
 
 <div class="main">
@@ -60,7 +56,7 @@
 	<br />
 	<br />
 	
-    <form class="form" id='flowspace_formset' method="POST" action="">{% csrf_token %}
+    <form class="form" id='flowspace_formset' method="POST" action="{% url html_plugin_flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
 		{% for form in fsformset.forms %}
 			{% for hidden in form.hidden_fields %}

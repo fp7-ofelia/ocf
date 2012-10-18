@@ -42,10 +42,6 @@
     td.port_num {
         width: 45px;
     }
-    div.steps {
-        padding: 4px;
-        font-weight: bold;
-    }
 </style>
 
 <script type="text/javascript">
@@ -78,21 +74,39 @@
 </script>
 
 <script>
+function mode_selector(){
+                if ($('#fsmodesimple').attr('checked')){
+                         //$('#procsteps').css('display','none');
+			$("#procsteps").slideUp("slow");
+                        $('#fssimple_mode_explanation').css('display','inline-block');
+                        $('#fsadvanced_mode_explanation').css('display','none');
+                 }
+                 else{
+                        //$('#procsteps').css('display','block');
+			$("#procsteps").slideDown("slow")
+                        $('#fssimple_mode_explanation').css('display','none');
+                        $('#fsadvanced_mode_explanation').css('display','inline-block');
+                 }
+        }
 
 $(document).ready(function(){
+
+	mode_selector();
+
         if("{{enable_simple_mode}}" == "False"){
 		$("#mode_selector").css('display','none');
+                 $('#procsteps').css('display','block');
 	}
+	else{
+                $('#procsteps').css('display','none');
+        }
+
+	
         $("input:radio").
                 click(function(){
-			if ($("#fsmodesimple").attr('checked')){
-        		        $("#procsteps").css('display','none');
-        		}
-        		else{
-                		$("#procsteps").css('display','block');
-        		}
-
+			mode_selector();
                 }); 
+
 });
 
 $(":radio")
@@ -216,18 +230,27 @@ $(document).ready(function(){
 {% endfor %}
 
 {% if openflow_aggs %}
-<h1>Select OpenFlow Resources</h1>
+<h1 style="margin-bottom:0px;">Select OpenFlow Resources</h1>
 
-<div id="mode_selector" class="aggregateManager">
-<input type="radio" id="fsmodesimple" name="fsmode" value="simple"> Simple
-<input type="radio" id="fsmodeadnaced" name="fsmode" value="advanced" checked> Advanced
+<div class="center">
+<div id="mode_selector" class="mode_selector">
+	<div style="text-align: left; display:inline-block;">
+		<input type="radio" id="fsmodesimple" name="fsmode" value="simple" checked><label for="fsmodesimple">Simple</label><br/>
+		<input type="radio" id="fsmodeadvanced" name="fsmode" value="advanced" ><label for="fsmodeadvanced">Advanced</label>
+	</div>
+	<div class="mode_explanation" id="fssimple_mode_explanation">
+	In simple mode, after you select your topology a simple OFELIA slice VLAN-based will be provided for your experiment. Check the VLAN tag when done.
+	</div>
+	<div class="mode_explanation" id="fsadvanced_mode_explanation">
+	In advanced mode you will go through a two-steps process. First select your topology. Second select your flowspace.
+	</div>
 </div>
 
-<div id="procsteps" class="steps center">
-    1. <a href="{% url html_plugin_bookOpenflow slice.id %}">Select OpenFlow Ports</a>
+<div id="procsteps" class="steps">
+    1. <a href="{% url html_plugin_bookOpenflow slice.id %} "style="font-weight: bold;">Select OpenFlow Ports</a>
     2. <a href="{% url html_plugin_flowspace slice.id %}">Select Flowspace</a>
 </div>
-
+</div>
 {% endif %}
 
 {% for agg in openflow_aggs %}
