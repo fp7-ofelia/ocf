@@ -20,6 +20,7 @@ f.style.height = f.contentWindow.document.body.scrollHeight + "px";
 </style>
 <script type="text/javascript">
 $(document).ready(function(){
+        a_vlans = {{allocated_vlans}}
 	$("#expsel").
 		change(function(){
 			var addr = "/opts/experiment_simple/"
@@ -27,7 +28,15 @@ $(document).ready(function(){
 			addr = addr+sel_value
 			$("#exp_iframe").attr('src',addr)
 			resizeFrame(document.getElementById('exp_iframe'))
+                        req_vlans = {{requested_vlans}};
+			for (i=0; i<req_vlans[sel_value].length; i++){
+				if (a_vlans.indexOf(req_vlans[sel_value][i])!=-1){
+					$("#il_"+req_vlans[sel_value][i]).css("color","red");
+				}
+
+			}
 		});
+
 });
 
 </script>
@@ -51,23 +60,32 @@ $(document).ready(function(){
 		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe" onload="resizeFrame(this);">
 		</iframe>
 		<br/><br/>
-		<h3>VLAN Tags already allocated:</h3>
+		<h3>VLAN(s) already allocated:</h3>
                 <div class="roundBlockContainer">
-			<p>
+                        <div style="display:inline; float:left;">
+                        <ul>
                         {% for vlan in allocated_vlans %}
-                        {{vlan|safe}}
-			{%if forloop.last%}
-				.
-			{%else%}
-				,
-			{%endif%}
+                            {% if forloop.counter|divisibleby:2 %}
+			    <li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
+			    {% endif %}
                         {% endfor %}
-			</p>
+			</ul>
+			</div>
+                        <div style="display:inline; float:rigth;"">
+                        <ul>
+                        {% for vlan in allocated_vlans %}
+                            {% if not forloop.counter|divisibleby:2  and not forloop.counter == 1%}
+                            <li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+			</div>
+
                 </div>
 	
 
 
-		<label> <b>FlowSpace to Opt-In: </b></label>
+		<label> <h3>FlowSpace to Opt-In: </h3></label>
 		<br/>
 		<table class="formtable">
 		<tr><th>Field</th><th>[From Value,To Value]</th></tr>

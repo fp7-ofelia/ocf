@@ -15,7 +15,16 @@ div.roundBlockContainer {
         vertical-align:middle;
         padding:10px;
 }
-</head>
+
+h3 {
+        font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+        color: #005;
+        font-weight:bold;
+        font-size: 1em;
+        }
+h3 a:visited{
+        text-decoration: none;
+      }
 </style>
 <body> 
 	<b>Project Name: </b>{{exp.project_name}}<br/>
@@ -27,7 +36,7 @@ div.roundBlockContainer {
 	<b>FlowSpace: </b><br/>{% for fs in allfs %}{{fs}}<br/>{% endfor %}<br/>
 
 	{% if requested_vlans.ranges|length == 1 and requested_vlans.ranges.0.0 == requested_vlans.ranges.0.1 %}
-	<h3>Requested VLAN:</h3>
+	<h3>Requested VLAN(s):</h3>
                 <div class="roundBlockContainer">
                         {% for value in requested_vlans.values %}
                         <b>VLAN Tag: </b>{{value|safe}}<br/>

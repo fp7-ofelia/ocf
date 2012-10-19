@@ -1188,8 +1188,7 @@ div.roundBlockContainer {
         -moz-border-radius: 0px 25px 25px 25px;
         -webkit-border-radius: 0px 25px 25px 25px;
         border-radius:  0px 25px 25px 25px;
-        display:inline-block;
-        width:720px;
+        width:600px;
         text-align:center;
         vertical-align:middle;
         padding:10px;
