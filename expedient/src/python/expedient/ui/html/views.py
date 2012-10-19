@@ -637,8 +637,11 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
                         "Successfully set flowspace for slice %s" % slice.name,
                         request.user, msg_type=DatedMessage.TYPE_SUCCESS,
                     )
-            return HttpResponseRedirect(request.path)
-            #return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+            if fsmode == 'simple':
+                return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+            else:
+                return HttpResponseRedirect(request.path)
+           
     
     elif request.method == "GET":
         formset = FSFormSet(

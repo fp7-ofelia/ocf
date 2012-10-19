@@ -77,9 +77,15 @@
 function mode_selector(){
                 if ($('#fsmodesimple').attr('checked')){
                          //$('#procsteps').css('display','none');
-			$("#procsteps").slideUp("slow");
-                        $('#fssimple_mode_explanation').css('display','inline-block');
-                        $('#fsadvanced_mode_explanation').css('display','none');
+                        if("{{enable_simple_mode}}" == "False"){
+                            $("#mode_selector").css('display','none');
+                            $('#procsteps').css('display','block');
+			}
+                        else{
+                            $("#procsteps").slideUp("slow");
+                            $('#fssimple_mode_explanation').css('display','inline-block');
+                            $('#fsadvanced_mode_explanation').css('display','none');
+			}
                  }
                  else{
                         //$('#procsteps').css('display','block');
@@ -92,15 +98,6 @@ function mode_selector(){
 $(document).ready(function(){
 
 	mode_selector();
-
-        if("{{enable_simple_mode}}" == "False"){
-		$("#mode_selector").css('display','none');
-                 $('#procsteps').css('display','block');
-	}
-	else{
-                $('#procsteps').css('display','none');
-        }
-
 	
         $("input:radio").
                 click(function(){
