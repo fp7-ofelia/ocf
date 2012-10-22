@@ -436,15 +436,16 @@ def detailToString(event, detail):
         )
     return eventStrings[event][detail]
 
-def myDomainEventCallback1 (conn, dom, event, detail, opaque):
-    print "myDomainEventCallback1 EVENT: Domain %s(%s) %s %s" % (dom.name(), dom.ID(),
-                                                                 eventToString(event),
-                                                                 detailToString(event, detail))
+from communications.XmlRpcClient import XmlRpcClient
 
 def myDomainEventCallback2 (conn, dom, event, detail, opaque):
     toLog = "myDomainEventCallback2 EVENT: Domain %s(%s) %s %s\n" % (dom.name(), dom.ID(),
                                                                  eventToString(event),
                                                                  detailToString(event, detail))
     print toLog
-    log = open('/opt/ofelia/oxa/log/LivirtMonitor.log','a')
+    log = open('/opt/ofelia/oxa/log/libvirtmonitor.log','a')
     log.write(toLog)
+    print dom.UUIDString()
+    print dom.name()
+    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[dom.UUIDString(),dom.name()]) 
+    log.write('Callback end\n')   
