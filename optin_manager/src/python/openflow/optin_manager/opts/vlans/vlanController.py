@@ -42,6 +42,16 @@ class vlanController():
         return used_vlans
 
     @staticmethod
+    def get_allocated_vlans_sorted():
+        used_vlans = vlanController.get_allocated_vlans()
+        sorted_vlans = [0 for x in xrange(4)] 
+        sorted_vlans[0] = [x for x in used_vlans if x <= 1000]
+        sorted_vlans[1] = [x for x in used_vlans if x > 1000 and x <= 2000]
+        sorted_vlans[2] = [x for x in used_vlans if x > 2000 and x <= 3000]
+        sorted_vlans[3] = [x for x in used_vlans if x > 3000]
+        return sorted_vlans
+
+    @staticmethod
     def offer_vlan_tags(set=None):
         if not set:
             return [x for x in range(1,4096) if x not in vlanController.get_allocated_vlans() and x not in settings.UNALLOWED_VLANS]

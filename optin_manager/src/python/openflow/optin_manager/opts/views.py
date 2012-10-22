@@ -246,6 +246,7 @@ def add_opt_in(request):
                                 'form':form,
                                 'upload_form':upload_form,
                                 'requested_vlans':requested_vlans,
+                                'vlan_list_length':len(allocated_vlans)/5,
                                 'allocated_vlans':allocated_vlans,
                             },
                     )  

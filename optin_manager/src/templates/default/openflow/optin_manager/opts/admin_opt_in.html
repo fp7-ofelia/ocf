@@ -8,6 +8,25 @@ f.style.height = "1px";
 f.style.height = f.contentWindow.document.body.scrollHeight + "px"; 
 }  
 </script>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+        //jQuery(".expandable").hide();
+         
+        jQuery(".expandableCtl").click(function()
+        {
+		elementName = "#"+$(this).attr('id')+"Container";
+		jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
+		if(jQuery("span", this).attr("class") == "closed"){
+		jQuery("span", this).html("&#x25B2;");
+		$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
+		}else{
+			jQuery("span", this).html("&#x25BC;");
+		}
+		jQuery("span", this).toggleClass("opened closed");
+	});
+});
+
+</script>
 
 <style>
   select {
@@ -19,23 +38,39 @@ f.style.height = f.contentWindow.document.body.scrollHeight + "px";
   }
 </style>
 <script type="text/javascript">
-$(document).ready(function(){
-        a_vlans = {{allocated_vlans}}
-	$("#expsel").
-		change(function(){
-			var addr = "/opts/experiment_simple/"
-			var sel_value = $(this).val()
-			addr = addr+sel_value
-			$("#exp_iframe").attr('src',addr)
-			resizeFrame(document.getElementById('exp_iframe'))
-                        req_vlans = {{requested_vlans}};
-			for (i=0; i<req_vlans[sel_value].length; i++){
-				if (a_vlans.indexOf(req_vlans[sel_value][i])!=-1){
-					$("#il_"+req_vlans[sel_value][i]).css("color","red");
-				}
 
-			}
-		});
+function match_allocated_vlans(sel_value){
+        a_vlans = {{allocated_vlans}};
+        $("li").css("color","#333");
+        $(".header_vlan").css("color","#333");
+        req_vlans = {{requested_vlans}};
+        for (i=0; i<req_vlans[sel_value].length; i++){
+            if (a_vlans.indexOf(req_vlans[sel_value][i])!=-1){
+                $("#il_"+req_vlans[sel_value][i]).css("color","red");
+                headers = $(".header_vlan");
+                sel_header = null
+                for(j=0;j<headers.length;j++){
+                        if(headers[j].id.split('_')[2] <= req_vlans[sel_value][i]){
+                                sel_header = headers[j];
+                        }
+                }
+                $("#"+sel_header.id).css("color","red");
+            }
+
+        }
+};
+
+$(document).ready(function(){
+        match_allocated_vlans({{first_exp}});
+        $("#expsel").
+                change(function(){
+                        var addr = "/opts/experiment_simple/"
+                        var sel_value = $(this).val()
+                        addr = addr+sel_value
+                        $("#exp_iframe").attr('src',addr)
+                        resizeFrame(document.getElementById('exp_iframe'))
+                        match_allocated_vlans(sel_value);
+                });
 
 });
 
@@ -62,29 +97,24 @@ $(document).ready(function(){
 		<br/><br/>
 		<h3>VLAN(s) already allocated:</h3>
                 <div class="roundBlockContainer">
-                        <div style="display:inline; float:left;">
-                        <ul>
                         {% for vlan in allocated_vlans %}
-                            {% if forloop.counter|divisibleby:2 %}
-			    <li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
-			    {% endif %}
+                        {% if  forloop.first %}
+			<div class="vlan_list">
+			<ul style="margin:7px; padding:0px;">
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="opened">&#x25B2;</span></a></li></ul>
+			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
+			{%endif%}
+			<li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
+                        {% if forloop.counter|divisibleby:vlan_list_length %}</ul></div></div>
+			<div class="vlan_list">
+			<ul style="margin:7px; padding:0px;">
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="opened">&#x25B2;</span></a></li></ul>
+			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
+			{% endif %}
+			{% if  forloop.last %}</ul></div></div>{%endif%}
                         {% endfor %}
-			</ul>
-			</div>
-                        <div style="display:inline; float:rigth;"">
-                        <ul>
-                        {% for vlan in allocated_vlans %}
-                            {% if not forloop.counter|divisibleby:2  and not forloop.counter == 1%}
-                            <li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
-                            {% endif %}
-                        {% endfor %}
-                        </ul>
-			</div>
-
                 </div>
 	
-
-
 		<label> <h3>FlowSpace to Opt-In: </h3></label>
 		<br/>
 		<table class="formtable">
