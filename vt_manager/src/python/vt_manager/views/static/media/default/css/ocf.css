@@ -82,11 +82,12 @@ input[type=button],
 .button a:hover {
 	text-decoration:none;
 }
-.button_admin{
-	width:120px;
-	padding:10px;
-	text-align:center;
-	cursor:pointer;
+.button_admin {
+    width: 120px;
+    padding: 10px;
+    margin-bottom: 2px;
+    text-align: center;
+    cursor: pointer;
 }
 .subutton{
 	width:100px;
@@ -453,6 +454,17 @@ table.ranges tr.odd{
 
 
 /* Errors */
+.errorlist, ul[id^="errorlist"] {
+        background: #AA2B2B;
+        border-radius: 7px;
+        color: #fff !important;
+        list-style-type: none;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        padding-left: 7px;
+        padding-top: 5px;
+        padding-right: 7px;
+}
 .fielderror{
 	color: red;
 	padding:5px 
@@ -571,7 +583,7 @@ div .PEbox{
 	float:right;
 	padding-left:15px;
 	padding-right:15px;
-	width:175px;
+	min-width:175px;
 	height:75px;
 	margin-right:15px;
 	margin-bottom:15px;

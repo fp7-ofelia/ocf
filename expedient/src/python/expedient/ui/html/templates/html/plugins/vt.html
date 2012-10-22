@@ -290,8 +290,8 @@ Type:
         {% endwith %}
         {% endfor %}
       </select>
-      <input type="submit" name = "create_vms"  id="create_vms_agg_{{agg.id}}" value="Create VM" />
-      
+      <!-- Checks that VM aggregate is reachable -->
+      <input type="submit" name = "create_vms" id="create_vms_agg_{{agg.id}}" value="Create VM" {% if not agg.available %} onclick="alert('Warning: VM Aggregate \'{{ agg.name }}\' is not available'); {% endif %}" />
     </div>
   </td>
 </tr>

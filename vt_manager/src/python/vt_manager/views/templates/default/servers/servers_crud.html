@@ -6,6 +6,12 @@
 
 {% endblock %}
 {% block scripts %}
+<script type="text/javascript">
+        //To be able to use django tags in the static js files, use this approach:
+        //First create a js variable with your django tag
+        //Use this variable in your js.
+        url_img_question = "{% url img_media 'question_mark_15x15.png'%}";
+</script>
 <script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
 <script src = {% url js_media 'jquery.formset.min.js'%}></script>
 <script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
@@ -25,11 +31,6 @@
 	  onClickFunction: 'confirmInput(this)',
         });
       });
-</script>
-<script>
-       
-        $("Add Bridge").click(function(){alert("HOLA");});
-        
 </script>
 <script>
     $(document).ready(function() {
@@ -76,15 +77,19 @@ function adding(row){
 </script>
 
 <script>
-
-    function updateVMstatus(){
-		$('#vms').load("../../"+{{server.id}}+"/list_vms");
-		return;
+    function updateVMstatus() {
+        {% if server.id != NaN %}
+            $("#vms").load("../../" + {{server.id}} + "/list_vms", function(response, status, xhr) {
+                if (status != "error") {
+                    $("#vms").html(response);
+                }
+            });
+        {% endif %}
+        return;
     }
-
 </script>
 <script>
-    var timer = setInterval(function(){
+    var timer = setInterval(function() {
     	updateVMstatus();
     },3000);
 </script>
@@ -113,29 +118,15 @@ function adding(row){
         <div>
 			<h2>General parameters</h2>
 			<h3>Parameters</h3>
-			{% if serverForm.errors %}
-				<table>
-				{%for field in serverForm %}
-					{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-					{% endif %}
-				{% endfor %}
-				</table>
-            {% endif %}
        		<table class="formtable">
-				{% if field.errors %} 
-                	<tr><th colspan ="2">{{field.errors}}</th></tr>
-				{% endif %} 
-		    	<tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
-        		{% for field in serverForm %}
-                    {% if field.errors %}                             
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
-					{%endif%}
-        		{% endfor %}
+		    <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
+        	    {% for field in serverForm %}
+                        {% if field.errors %}    
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                        {% endif %}	
+	                <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
+        	    {% endfor %}
         	</table>
-	
         </div>
 	
 		<div>
@@ -144,23 +135,12 @@ function adding(row){
 			<div class="tooltip" id="mgmt_bridge_help">
             Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
             </div>
-
-			{% if mgmtIfaceForm.errors %}
-				<table>
-                	{%for field in mgmtIfaceForm %}
-						{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-            			{% endif %}
-            		{% endfor %}
-				</table>
-            {% endif %}
 			<table id="mgmtifacetable" class="formtable">
 				{% for field in mgmtIfaceForm %}
                     {% if field.errors %}
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}      
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                    {% endif %}      
 							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
-                    {%endif%}
 				{% endfor %}
 			</table>
 		</div>	

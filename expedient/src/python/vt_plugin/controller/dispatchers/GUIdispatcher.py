@@ -20,12 +20,22 @@ from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 from vt_plugin.controller.VMcontroller.VMcontroller import *
 from vt_plugin.utils.ServiceThread import *
+from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.messaging.context_processors import messaging
+from expedient.common.messaging.models import DatedMessage
 
 def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
 
     if request.method == "POST":
+        # Shows error message when Aggregate is unreachable, disable VM creation and get back to slice detail page
+        agg = Aggregate.objects.get(id = agg_id)
+        if agg.check_status() == False:
+            DatedMessage.objects.post_message_to_user(
+                "VM Aggregate '%s' is not available" % agg.name,
+                request.user, msg_type=DatedMessage.TYPE_ERROR,)
+            return HttpResponseRedirect(reverse("slice_detail",args=[slice_id]))
+
         if 'create_vms' in request.POST:
             server_id=request.POST['selected_server_'+agg_id]
             return HttpResponseRedirect(reverse("virtualmachine_crud",

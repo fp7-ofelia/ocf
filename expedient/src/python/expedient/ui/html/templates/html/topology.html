@@ -134,7 +134,7 @@ var data = {
     nodes: [
         {% for node in d3_nodes %}
         //{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: randomXToY(foci[{{ node.group }}].y0 , foci[{{ node.group }}].y1),x : randomXToY(foci[{{ node.group }}].x0 , foci[{{ node.group }}].x1), fixed:true, radius:10, color:"",
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, color:"",
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, available:"{{ node.available }}", color:"",
 		{% if node.type == "vt_agg"  %}
 			nodeVms: {{node.vmNames|safe }},
 			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
@@ -154,7 +154,7 @@ var data = {
 }
 
 /* Harcoded data for testing */
-/* Useful functi ns*/
+/* Useful functions*/
 
 function get_node_info_formated(d){
 	type = get_node_type(d);
@@ -265,16 +265,15 @@ function getLinkStyle(d, attr){
 
 function getBaseNodeColor(d){
 	type = get_node_type(d);
-	if(type == "openflow") {
+	if (type == "openflow") {
                return d3.rgb(d.color.toString());
-        } else if(type == "planetlab") {
+        } else if (type == "planetlab") {
                 return d3.rgb(d.color.toString()).darker(0.75);
-        } else if(type == "vtserver") {
+        } else if (type == "vtserver") {
                 return d3.rgb(d.color.toString()).darker(1.5);
-        }
-	else
-		return d3.rgb("FFFFFF");
-	
+        } else {
+		return d3.rgb("#FFFFFF");
+	}
 }
 
 function getNodeCircleStyle(d, attr){
@@ -335,6 +334,7 @@ function zoomReset(){
 	return redraw();
 }
 
+/* Redraw canvas - bound to zoom behaviour */
 function redraw() {
   trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
   svg.attr("transform",
@@ -342,25 +342,44 @@ function redraw() {
       + " scale(" + cur_zoom + ")");
 }
 
+/* Translation - bound to drag behavior */
+dragMap = function(d) {
+  d.x = (-width/2) + d3.event.x;
+  d.y = (-height/2) + d3.event.y;
+  svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
+     .attr("cursor", "move");
+}
 
-
-/* Instansiation General parameters*/
+/* Instantiation General parameters*/
 var  padding = 6,
      color = d3.scale.category10().domain(d3.range(nIslands)),
      radius = d3.scale.sqrt().range([0, 12]);
+
+/* Drag behavior */
+dragMap = function(d) {
+  d.x = (-width/2) + d3.event.x;
+  d.y = (-height/2) + d3.event.y;
+  svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
+     .attr("cursor", "move");
+}
 
 var svg = d3.select("#target")
     .append("svg")
         .attr("pointer-events", "all")
         .attr("width", width)
         .attr("height", height)
+        .datum({x: 0, y: 0})
+        .call(d3.behavior.drag().on("drag", dragMap))
     .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
-
 
 // DATA VARIABLES
 var nodes = data.nodes;
 nodes.forEach(function(d) {
+    if (d.available != "False") {
         d.color = color(d.group%nIslands);
+    } else {
+        d.color = "#CCC";
+    }
 });
 
 var links = data.links;
@@ -374,16 +393,18 @@ var force = d3.layout.force()
     .links(links)
     .start();
 
+var EMPTY_ISLAND = "Island with no resources";
+
 //XXX:Very ugly, needs improvement
 var islandsLocs = []
 for (i = 0; i< nIslands; i++){
-	islandsLocs[i]=-1;
+	islandsLocs[i] = EMPTY_ISLAND;
 }
 
 nodeInitialPos = []
 for (i = 0; i< nodes.length; i++){
 	nodeInitialPos[i] = [nodes[i].x, nodes[i].y];
-	if (islandsLocs[nodes[i].group] == -1){
+	if (islandsLocs[nodes[i].group] == EMPTY_ISLAND){
 		islandsLocs[nodes[i].group] = nodes[i].loc;
 	}
 }
@@ -432,22 +453,23 @@ var node = svg.selectAll(".node")
     .data(nodes)
   .enter().append("g")
     .attr("class", "node")
-    .call(d3.behavior.drag().on("dragstart", function(d, i, e){
-	force.stop();
-	})
-    .on("drag", function(d, i){
-	d.px += d3.event.dx;
-        d.py += d3.event.dy;
-        d.x += d3.event.dx;
-        d.y += d3.event.dy;
-       	d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "drag");}) 
-        tick();
+    .call(d3.behavior.drag()
+    .on("dragstart", function(d, i, e) {
+	    force.stop();
     })
-    .on("dragend", function(d, i){
-	d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
-        d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "dragstop");})
-        tick();
-        force.stop();
+    .on("drag", function(d, i) {
+	    d.px += d3.event.dx;
+            d.py += d3.event.dy;
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+       	    d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "drag");}) 
+            tick();
+    })
+    .on("dragend", function(d, i) {
+	    d.fixed = true; // of course set the node to fixed so the force does not include the node in its auto positioning stuff
+            d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "dragstop");})
+            tick();
+            force.stop();
     })
     );
 
@@ -457,11 +479,12 @@ node.append("circle")
     .style("fill", function(d){return getNodeCircleStyle(d, "fill");});
 
 node.append("image")
-    .attr("xlink:href", function (d) { return getNodeImage(d);})
+    .attr("xlink:href", function (d) { return getNodeImage(d); })
     .attr("x", -8)
     .attr("y", -8)
     .attr("width", 16)
     .attr("height", 16)
+    .attr("opacity", function(d) { return d.available=="False"?0.8:1; })
 
 node.append("text")
     .attr("dx", 12)
@@ -494,7 +517,10 @@ node.on("mouseover", function (d, i){
                         tooltip.hide();
                 })
 	.on("click", function(d) {
-		d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "click");});
+	    /* Only available AMs can be selected */
+	    if (d.available != "False") {
+	        d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "click");});
+	    }
     	})
 
 force.on("tick", tick);

@@ -40,12 +40,12 @@
     </table>
 	<div class="center">
 	    {% if create %}
-		<input type="submit" value="Create" />
+		<input type="submit" id="form_create_AM" value="Create" />
 		{% else %}
-		<input type="submit" value="Update" />
-		<input type="button" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
+		<input type="submit" id="form_update_AM" value="Update" />
+		<input type="button" id="form_delete_AM" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
 		{% endif %}
-		<input type="button" value="Cancel" onclick="document.location='{% url home %}'"/>
+		<input type="button" id="form_cancel_AM" value="Cancel" onclick="document.location='{% url home %}'"/>
 	</div>
 	</form>
 </div>
