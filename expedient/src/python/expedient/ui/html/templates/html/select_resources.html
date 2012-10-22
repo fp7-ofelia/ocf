@@ -75,47 +75,71 @@
         padding: 4px;
         font-weight: bold;
     }
+    div#select_buttons_div {
+        background: #f4f4f4;
+        border: 1px solid #ccc;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        display: inline;
+        margin-right: 20px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-top: 3px;
+    }
+    div#select_buttons_div input {
+        box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+        -moz-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+        padding-bottom: 1px;
+        padding-top: 1px;
+        -webkit-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+        width: 60px;
+    }
 </style>
 
 <script>
 /* boldface connected interfaces */
 $(document).ready(function(){
     redrawNodes();
-    $(":checkbox[name=selected_ifaces]:checked").each(function(){
+    $(":checkbox[name=selected_ifaces]:checked:not(:disabled)").each(function(){
         iface_id = $(this).attr("value");
         $(".neighbor_"+iface_id).addClass("connected");
         $(".iface_"+iface_id).addClass("connected");
     });
-    $(":checkbox[name=selected_ifaces]").click(function (){
+    $(":checkbox[name=selected_ifaces]:not(:disabled)").click(function (){
         iface_id = $(this).attr("value");
         $(".iface_"+iface_id).toggleClass("connected");
         $(".neighbor_"+iface_id).toggleClass("connected");
         tick();
 	redrawNodes();
     });
-    $(":checkbox[name=selected_nodes]:checked").each(function(){
+    $(":checkbox[name=selected_nodes]:checked:not(:disabled)").each(function(){
         node_id = $(this).attr("value");
         $(".neighbor_rsc_"+node_id).addClass("connected");
         $(".rsc_"+node_id).addClass("connected");
     });
-    $(":checkbox[name=selected_nodes]").click(function (){
+    $(":checkbox[name=selected_nodes]:not(:disabled)").click(function (){
         node_id = $(this).attr("value");
         $(".rsc_"+node_id).toggleClass("connected");
         $(".neighbor_rsc_"+node_id).toggleClass("connected");
 	tick();
         redrawNodes();
     });
-    $("input[name=clear_button]").click(function (){
-        $(":checked").click();
+
+    $("input#select_button").click(function (){
+        $("div#select_buttons_div").toggle();
+    });
+    $("input#select_none_button").click(function (){
+        $(":checked:not(:disabled)").click();
 	redrawNodes();
     });
-    $("input[name=select_all_button]").click(function (){
-        $(":checkbox:not(:checked)").click();
+    $("input#select_all_button").click(function (){
+        $(":checkbox:not(:checked):not(:disabled)").click();
     });
     
-    $("input[name=select_tree_button]").click(function (){
-        $(":checked").click();
-        $(":checkbox.in_tree").click();
+    $("input#select_tree_button").click(function (){
+        $(":checked:not(:disabled)").click();
+        $(":checkbox:not(:disabled).in_tree").click();
+        redrawNodes();
     });
 
     link.on("mouseover", function(d) {
@@ -172,7 +196,8 @@ $(document).ready(function(){
     <input type="checkbox" name="selected_nodes"
            value="{{ node.id }}" id="rsc_id_{{ node.id }}"
            class="node_id_{{ node.id }} {% if node.id in tree_rsc_ids %}in_tree{% endif %}"
-           {% if node.id in checked_ids %}checked{% endif %} />
+           {% if node.id in checked_ids %}checked{% endif %} 
+           {% if not agg.available %} disabled="disabled" {% endif %} />
       </td>
       <td class="hostname rsc_{{ rsc.id }}"><a name="rsc_{{ rsc.id }}">{{ node.name }}</a></td>
       <td class="connections">
@@ -231,7 +256,8 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
           <input type="checkbox" name="selected_ifaces" 
           value="{{ iface.id }}" id="rsc_id_{{ iface.id }}"
           class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
-          {% if iface.id in checked_ids %}checked{% endif %} />
+          {% if iface.id in checked_ids %}checked{% endif %} 
+          {% if not agg.available %} disabled="disabled" {% endif %} />
         </td>
         <td class="port_num iface_{{ iface.id }}"><label for = "rsc_id_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></label></td>
         <td class="connections">
@@ -284,10 +310,14 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
   {% endfor %}
 
   {% if openflow_aggs or planetlab_aggs %}
-  <input type="submit" value="Next" />
-  <input type="button" name="clear_button" value="Clear" />
-  <input type="button" name="select_all_button" value="Select All" />
-  <input type="button" name="select_tree_button" value="Select Tree" />
+  <input type="submit" id="next_button" name="next_button" value="Next" />
+  <input type="button" id="select_button" name="select_button" value="Select..." />
+  <div id="select_buttons_div" style="display: none">
+    <input type="button" id="select_none_button" name="select_none_button" value="None" />
+    <input type="button" id="select_tree_button" name="select_tree_button" value="Tree" />
+    <input type="button" id="select_all_button" name="select_all_button" value="All" />
+  </div>
+  <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
   {% endif %}
 </form>
 

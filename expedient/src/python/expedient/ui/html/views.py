@@ -113,7 +113,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
         for s in switches:
             id_to_idx[s.id] = len(nodes)
             nodes.append(dict( 
-                name=s.name, value=s.id, group=i, type="of_agg", connection=[], loc=agg.location)
+                name=s.name, value=s.id, group=i, type="of_agg", available=agg.available, connection=[], loc=agg.location)
             )
 	    openflowSwitches[s.datapath_id] = len(nodes)-1
    
@@ -132,7 +132,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             nodes.append(dict(
                 #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
                 #same group. Will planetlab be supported at the end?
-                name=n.name, value=n.id, group=-1, type="pl_agg" , loc=agg.location)
+                name=n.name, value=n.id, group=-1, type="pl_agg", available=agg.available, loc=agg.location)
                 #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
             )
 
@@ -219,7 +219,7 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             )
         )
 
-    #VT-AM nodes 
+    # For every Virtualization AM
     for i, agg in enumerate(vt_aggs):
         agg_ids.append(agg.pk)
         vt_servers = VTServer.objects.filter(
@@ -227,8 +227,9 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             available=True,
         )
 
+        serverInSameIsland = False
 
-
+        # For every server of the Virtualization AM
         for n in vt_servers:
             vmNames = []
             for name in  n.vms.all().filter(sliceId = sliceUUID).values_list('name', flat=True):
@@ -243,11 +244,13 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
             nodes.append(dict(
                     #XXX: lbergesio: Removed len(pl_aggs) to matche vt_aggs con of_aggs in the 
                     #same group. Will planetlab be supported at the end?
-                    name=n.name, value=n.id, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
+                    name=n.name, value=n.id, group=i+len(of_aggs), type="vt_agg", available=agg.available, vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
                     #name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
                     #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
             )
-            serverGroupSet=False 
+            serverGroupSet=False
+
+            # For every interface of the server
             for j,inter in enumerate(n.ifaces.all()):
 		#first check datapathId exists.
                 try:
@@ -264,12 +267,18 @@ def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
                             #value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
+                # When the server has >= 1 interfaces, set 'serverGroupSet' to True
                 if (not serverGroupSet):
                     nodes[len(nodes)-1]["group"]=nodes[sId]["group"]
                     serverGroupSet = True
-            if(not serverGroupSet):
+
+            # When the previous flag is set to True, add island
+            if(not serverGroupSet and not serverInSameIsland):
                 #Add nIslands since there is an Island with VM AM but no OF AM
-                nIslands+=1
+                nIslands += 1
+                # This groups servers of the same VT AM in the same island
+                serverInSameIsland = True
+
     return (nIslands, nodes, links)
 
 
@@ -383,7 +392,7 @@ def bookOpenflow(request, slice_id):
             vtPlugin = agg.as_leaf_class()
             askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
        
-#        vm = VM.objects.filter(sliceId=slice.uuid)        
+        vm = VM.objects.filter(sliceId=slice.uuid)        
  
         nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
@@ -403,7 +412,7 @@ def bookOpenflow(request, slice_id):
                 "checked_ids": checked_ids,
                 "ofswitch_class": OpenFlowSwitch,
                 "planetlab_node_class": PlanetLabNode,
-#                "virtualmachines": vm,
+                "virtualmachines": vm,
                 "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
@@ -426,6 +435,9 @@ def getUIdata(request, slice):
 
     aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
                        Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+# Avoid non-available OF AMs
+#    aggs_filter = ((Q(leaf_name=OpenFlowAggregate.__name__.lower()) & Q(available = True)) | 
+#                    (Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()) & Q(available = True)))
     of_aggs = \
             slice.aggregates.filter(aggs_filter)
     pl_aggs = \
@@ -441,8 +453,10 @@ def getUIdata(request, slice):
       
     gfs_list=[]
     for of_agg in of_aggs:
-        gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
-        gfs_list.append([of_agg.id,gfs])
+        # Checks that each OF AM is available prior to ask for granted flowspaces
+        if of_agg.available:
+            gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+            gfs_list.append([of_agg.id,gfs])
  
     nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
     tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
@@ -505,8 +519,10 @@ def home(request, slice_id):
       
         gfs_list=[]
         for of_agg in of_aggs:
-            gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
-            gfs_list.append([of_agg.id,gfs])
+            # Checks that each OF AM is available prior to ask for granted flowspaces
+            if of_agg.available:
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+                gfs_list.append([of_agg.id,gfs])
  
         nIslands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
         tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
