@@ -59,6 +59,7 @@ class XmlRpcClient:
 			vm.uuid = dom[0]
 			vm.name = dom[1]
 			server.virtual_machines.append(vm)
+
 		return XmlCrafter.craftXML(rspec) 
 
 
@@ -78,4 +79,11 @@ class XmlRpcClient:
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo))
 		XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
-
+	@staticmethod
+	def sendAsyncMonitoringLibvirtVMsInfo(actionId,status,vms):
+		#TODO: HARDCODED!!
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: Expedient ")
+                serverInfo = server_type()
+                serverInfo.virtualization_type = 'xen'
+		server = xmlrpclib.Server('https://expedient:expedient@147.83.206.92:8445/xmlrpc/agent')
+		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo))
