@@ -1048,3 +1048,45 @@ div.aggregateManager table.aggregateManagerDetail .label {
         color:#9a1b1b;
 }
 
+div.mode_selector {
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        display:inline-block;
+        width:600px;
+        vertical-align:middle;
+        padding:10px;
+	height:70px;
+}
+
+div.mode_explanation {
+        margin-bottom:10px;
+        background-color:#FFF;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        float:right;
+	text-align:left;
+        display:none;
+        width:400px;
+        vertical-align:middle;
+        padding:10px;
+}
+
+div.steps {
+        margin-top:0px;
+        margin-bottom:10px;
+        margin-left: auto; 
+	margin-right: auto;
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 0px 25px 25px;
+        -webkit-border-radius: 0px 0px 25px 25px;
+        border-radius:  0px 0px 25px 25px;
+        width:400px;
+        vertical-align:middle;
+        padding:10px;
+    }

@@ -1197,8 +1197,7 @@ img.submenuimg {
 }
 	
 #exp_iframe {
-	width: 500px;
-	height: 300px;
+	width: 720px;
 }
 
 .expdiv {
@@ -1208,4 +1207,28 @@ img.submenuimg {
 
 .active_div {
 	cursor: default;	
+}
+
+div.roundBlockContainer {
+        margin-top:0px;
+        margin-bottom:10px;
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        width:700px;
+        text-align:center;
+        vertical-align:middle;
+        padding:10px;
+        padding-top:0;
+	overflow: hidden;
+}
+
+.vlan_list{
+	display:inline;
+	float:left;
+	color:#333;
+	margin:5px;
+	padding:0px;
 }

@@ -161,8 +161,16 @@ production networks, and is currently deployed in several universities.
         self.parse_links(links)
 
  
-#    def parse_fs(self, fs):
+    def get_offered_vlans(self, set=None):
 
+        try:
+            vlans = self.client.proxy.get_offered_vlans(set)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise Exception("AM %s could not return available VLANS for your slice" % self.name)
+
+        return vlans
 
     def get_granted_flowspace(self, slice_id):
         
