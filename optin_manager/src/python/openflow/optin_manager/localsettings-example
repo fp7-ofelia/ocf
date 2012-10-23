@@ -1,7 +1,7 @@
 '''
 Ofelia Opt-in AM user settings file
 
-@author: msune, CarolinaFernandez
+@author: msune, CarolinaFernandez,lbergesio
 '''
 
 #
@@ -10,7 +10,7 @@ Ofelia Opt-in AM user settings file
 
 ### Section 1: Opt-in settings
 #
-# Basic settings for the Opt-in (GUI) configuration.
+# Basic settings for the Opt-in Manager configuration.
 #
 
 #
@@ -20,11 +20,12 @@ CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager'
 SRC_DIR = '/opt/ofelia/optin_manager/src'
 
 #
-# User management for the Graphical User Interface.
+# Super user credentials to access the admin GUI.
+# aka Island Manager credentials.
 #
-ROOT_USERNAME = "expedient"
-ROOT_PASSWORD = "expedient"
-ROOT_EMAIL    = "ale@gmail.com"
+ROOT_USERNAME = "changeMe"
+ROOT_PASSWORD = "changeMe"
+ROOT_EMAIL    = "changeMe@gmail.com"
 
 #
 # You may add different groups here and decide whether they are
@@ -40,14 +41,14 @@ MANAGERS = ADMINS
 # DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
 #
 DATABASE_NAME = "changeMe"
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
+DATABASE_USER = "changeMe"
+DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
 
 #
 # Name for the island that is to be set on your host.
 #
-ISLAND_NAME   = "i2cat"
+ISLAND_NAME   = "i2CAT"
 
 #
 # Name and IP you would like to use to access Opt-in GUI.
@@ -62,12 +63,18 @@ SITE_IP_ADDR = "192.168.254.193"
 #
 # THEME: write a theme_name here to create a theme.
 #
-# Create the theme_name's media directory and the static directories (images,
+# Manually create the theme_name's media directory and the static directories (images,
 # css, js) in SRC_DIR/static/openflow/optin_manager/media/theme_name/
 # For templates (.html) files add a directory called theme_name in the same
-# location as your default TEMPLATES_DIR as needed.
+# location as your default TEMPLATES_DIR if needed.
 #
 # Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration
 # for further information on how to install new themes for OCF.
 #
 THEME = 'default'
+
+#
+# VLANS not allowed: When simple OF slices are requested, Optin offers VLAN tags.
+# in tha normal [1-4095] range except of those tags in VLANS_UNALLOWED
+#
+UNALLOWED_VLANS=[]

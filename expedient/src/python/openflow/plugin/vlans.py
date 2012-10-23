@@ -12,9 +12,16 @@ VLAN_TAG_SUBSET = 10
 
 def calculate_free_vlan(slice):
 
-    aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
-                   Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
-    of_aggs = slice.aggregates.filter(aggs_filter)
+    #aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+    #               Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+    #aggs_filter = ((Q(leaf_name=OpenFlowAggregate.__name__.lower()) & Q(available = True)) | 
+    #                (Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()) & Q(available = True)))
+
+    #of_aggs = slice.aggregates.filter(aggs_filter)
+
+    #Returns of ams only of the of ports and switches selected.
+    of_aggs = list(set([x.resource.aggregate for x in OpenFlowInterfaceSliver.objects.filter(slice=slice)]))
+
     available_vlans = []
     free_vlan = None
 
@@ -24,10 +31,10 @@ def calculate_free_vlan(slice):
 
     else:
         got_vlan = False
-        set = VLAN_TAG_SUBSET
+        subset = VLAN_TAG_SUBSET
         while(not got_vlan):
             for of_agg in of_aggs:
-                available_vlans += of_agg.as_leaf_class().get_offered_vlans(set)
+                available_vlans += of_agg.as_leaf_class().get_offered_vlans(subset)
             temp_vlans = {}
             for v in available_vlans:
                 if temp_vlans[v] == len(of_agg):
@@ -38,10 +45,10 @@ def calculate_free_vlan(slice):
                     temp_vlans[v]=0
                 else:
                     temp_vlans[v]=temp_vlans[v]+1
-            if set >= 4096:
+            if subset >= 4096:
                 raise Exception("There is no free vlan to slice your experiment in all the affected AMs. Plase switch no advanced mode, choose your flowspace and wait for the admins decision.")
             elif free_vlan == None:
-                set+=VLAN_TAG_SUBSET   
+                subset+=VLAN_TAG_SUBSET   
     return free_vlan
 
 def create_simple_slice_vlan_based(vlan_tag, slice):

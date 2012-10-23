@@ -347,21 +347,12 @@ dragMap = function(d) {
   d.x = (-width/2) + d3.event.x;
   d.y = (-height/2) + d3.event.y;
   svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
-     .attr("cursor", "move");
 }
 
 /* Instantiation General parameters*/
 var  padding = 6,
      color = d3.scale.category10().domain(d3.range(nIslands)),
      radius = d3.scale.sqrt().range([0, 12]);
-
-/* Drag behavior */
-dragMap = function(d) {
-  d.x = (-width/2) + d3.event.x;
-  d.y = (-height/2) + d3.event.y;
-  svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
-     .attr("cursor", "move");
-}
 
 var svg = d3.select("#target")
     .append("svg")
@@ -371,6 +362,7 @@ var svg = d3.select("#target")
         .datum({x: 0, y: 0})
         .call(d3.behavior.drag().on("drag", dragMap))
     .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
+        .attr("cursor", "move")
 
 // DATA VARIABLES
 var nodes = data.nodes;
