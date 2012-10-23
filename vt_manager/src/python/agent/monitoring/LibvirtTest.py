@@ -447,5 +447,5 @@ def myDomainEventCallback2 (conn, dom, event, detail, opaque):
     log.write(toLog)
     print dom.UUIDString()
     print dom.name()
-    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[dom.UUIDString(),dom.name()]) 
+    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[dom.UUIDString(),dom.name()],eventToString(event)) 
     log.write('Callback end\n')   

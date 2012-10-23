@@ -18,7 +18,13 @@ class MonitoringResponseDispatcher():
 			if not action.type_ == "listActiveVMs":
 				raise Exception("Cannot process Monitoring action:"+action.type_)
 			try:
-				actionModel = Action.getAndCheckActionByUUID(action.id)
+				if action.id == "callback":
+					from vt_manager.controller.monitoring.VMMonitor import VMMonitor
+					from vt_manager.models.VTServer import VTServer
+					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,status)
+					return
+				else:
+					actionModel = Action.getAndCheckActionByUUID(action.id)
 			except Exception as e:
 				logging.error("No action in DB with the incoming uuid\n%s", e)
 				return

@@ -44,4 +44,20 @@ class VMMonitor():
 
 			#Is not running
 			vm.setState(VirtualMachine.STOPPED_STATE)
-		
+
+	@staticmethod
+	def processUpdateVMsListFromCallback(VmUUID,state):
+		from vt_manager.models.VirtualMachine import VirtualMachine
+		try:
+			VM = VirtualMachine.Objects.get(uuid = VmUUID)
+		except Exception as e:
+			raise e
+
+		if state == 'Started':
+			VM.setState(VirtualMachine.RUNNING_STATE)
+		elif state == 'Stopped':
+			VM.setState(VirtualMachine.STOPPED_STATE)
+		else:
+			VM.setState(VirtualMachine.UNKNOWN_STATE)
+			
+				
