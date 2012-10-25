@@ -24,7 +24,7 @@ class MonitoringResponseDispatcher():
 					from vt_manager.models.VTServer import VTServer
                                         print '------>UUID',action.server.virtual_machines[0].uuid
 					print '------>STATUS',action.server.virtual_machines[0].status
-					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status)
+					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status,rspec)
 					print '---------------------->LibvirtMonitoring Finished!!!'
 					return
 				else:

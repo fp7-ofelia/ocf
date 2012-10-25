@@ -15,7 +15,7 @@ class MonitoringResponseDispatcher():
         for action in response.action:
 		if action.id == "callback":
 			try:
-                        	vm = VM.Objects.get(uuid = action.server.virtual_machines[0].uuid)
+                        	vm = VM.objects.get(uuid = action.server.virtual_machines[0].uuid)
                 	except Exception as e:
                         	raise e
 

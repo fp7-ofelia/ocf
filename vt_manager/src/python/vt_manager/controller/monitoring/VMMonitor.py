@@ -48,7 +48,7 @@ class VMMonitor():
 	def processUpdateVMsListFromCallback(vmUUID,state,rspec):
 		from vt_manager.models.VirtualMachine import VirtualMachine
 		try:
-			VM = VirtualMachine.objects.get(uuid = VmUUID)
+			VM = VirtualMachine.objects.get(uuid = vmUUID)
 
 		except Exception as e:
 			raise e
