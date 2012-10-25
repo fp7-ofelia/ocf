@@ -24,8 +24,7 @@ class VMMonitor():
 		obj.query.monitoring.action[0].id = action.getUUID() 
 		obj.query.monitoring.action[0].server.virtualization_type = server.getid = server.getVirtTech() 
 		XmlRpcClient.callRPCMethod(server.getAgentURL(),"send",UrlUtils.getOwnCallbackURL(),0,server.agentPassword,XmlHelper.craftXmlClass(obj))
-		
-		
+				
 
 	@staticmethod
 	def processUpdateVMsList(server,vmList):
@@ -46,7 +45,7 @@ class VMMonitor():
 			vm.setState(VirtualMachine.STOPPED_STATE)
 
 	@staticmethod
-	def processUpdateVMsListFromCallback(VmUUID,state):
+	def processUpdateVMsListFromCallback(vmUUID,state,rspec):
 		from vt_manager.models.VirtualMachine import VirtualMachine
 		try:
 			VM = VirtualMachine.Objects.get(uuid = VmUUID)
@@ -59,5 +58,6 @@ class VMMonitor():
 			VM.setState(VirtualMachine.STOPPED_STATE)
 		else:
 			VM.setState(VirtualMachine.UNKNOWN_STATE)
-			
-				
+		
+		#XXX: Maybe there better palces to send to expedient this update state...	
+		XmlRpcClient.callRPCMethod(VM.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))				

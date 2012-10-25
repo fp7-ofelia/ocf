@@ -21,7 +21,7 @@ class MonitoringResponseDispatcher():
 				if action.id == "callback":
 					from vt_manager.controller.monitoring.VMMonitor import VMMonitor
 					from vt_manager.models.VTServer import VTServer
-					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,status)
+					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status,rspec)
 					return
 				else:
 					actionModel = Action.getAndCheckActionByUUID(action.id)
