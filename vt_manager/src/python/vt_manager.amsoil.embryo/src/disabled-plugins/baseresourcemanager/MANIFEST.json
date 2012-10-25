@@ -1,9 +1,0 @@
-{
-    "name" : "Base Resource Manager",
-    "author" : "Marc Sune Clos",
-    "author-email" : "marc.sune@i2cat.net",
-    "version" : 1,
-	"implements": ["baseresourcemanager"],
-	"loads-after" : ["resourcemanagerregistry"],
-	"requires" : ["resourcemanagerregistry"]
-}

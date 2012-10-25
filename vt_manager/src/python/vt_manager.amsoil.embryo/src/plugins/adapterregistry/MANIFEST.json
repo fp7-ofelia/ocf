@@ -1,9 +1,0 @@
-{
-  "name" : "Adapter Registry",
-  "author" : "Tom Rothe",
-  "author-email" : "tom.rothe@eict.de",
-  "version" : 1,
-  "implements" : ["adapterregistry", "adapterbase"],
-  "loads-after" : [],
-  "requires" : []
-}

@@ -1,9 +1,0 @@
-{
-  "name" : "core resourcemanagerregistry",
-  "author" : "Marc Sune Clos / Tom Rothe",
-  "author-email" : "marc.sune@i2cat.net / tom.rothe@eict.de",
-  "version" : 1,
-  "implements" : ["resourcemanagerregistry", "resourcebase", "resourcemanagerbase"],
-  "loads-after" : [],
-  "requires" : []
-}

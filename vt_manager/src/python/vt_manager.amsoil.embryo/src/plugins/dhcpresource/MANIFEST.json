@@ -1,9 +1,0 @@
-{
-  "name" : "Example Resource, implementing the GENI API v2",
-  "author" : "Tom Rothe",
-  "author-email" : "tom.rothe@eict.de",
-  "version" : 1,
-  "implements" : [],
-  "loads-after" : ["geniv2rpc", "geni2adapterbase", "adapterregistry", "adapterbase", "resourcebase", "resourcemanagerbase", "resourcemanagerregistry"],
-  "requires" : []
-}
