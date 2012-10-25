@@ -48,16 +48,16 @@ def redirect_permissions_request(request, perm_name=None,
     permittee = get_object_from_ids(permittee_ct_id, permittee_id)
     if not permission.view:
         raise PermissionDenied(perm_name, target_obj_or_class, permittee, False)
-    
+
     view = get_callable(permission.view)
-    
+
     logger.debug("Calling permission view %s" % permission.view)
-    
+
     # no urls allowed in redirection.
     redirect_to = request.session.get("from_url", '')
     if not redirect_to or ' ' in redirect_to or "//" in redirect_to:
         redirect_to = None
-    
+
     return view(request, permission, permittee, target_obj_or_class,
                 redirect_to=redirect_to)
 
@@ -111,6 +111,7 @@ def request_permission(always_redirect_to=None,
 
         # Get the object permission name
         perm_name = obj_perm.permission.name 
+        perm_name = obj_perm.permission.name
 
         # Get the users who can delegate the permission
         if permission_owners_func:
@@ -123,7 +124,7 @@ def request_permission(always_redirect_to=None,
             #    can_delegate=True)
             #ONLY ISLAND MANAGER/S
             user_qs=User.objects.filter(is_superuser=1)
-            
+
         # process the request
         if request.method == "POST":
             permittee = Permittee.objects.get_or_create_from_instance(
@@ -170,12 +171,12 @@ def request_permission(always_redirect_to=None,
                 form = ProjectRequestForm(user_qs)
             else:
                 form = PermissionRequestForm(user_qs)
-        
+
         ec = {"form": form, "obj_perm": obj_perm, "perm_name": perm_name}
         ec.update(extra_context)
-        
+
         return simple.direct_to_template(
             request, template=template,
             extra_context=ec)
-        
+
     return request_permission_view
