@@ -52,7 +52,7 @@ class ProjectRequestForm(PermissionRequestForm):
             aux_message += "* Project name: " + name + " || "
         if organization:
             aux_message += "* Organization: " + organization + " || "
-        if organization:
+        if duration:
             aux_message += "* End date (approx): " + duration + " || "
         # Return the new forged message
         aux_message += "* Project description: " + message
