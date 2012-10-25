@@ -334,6 +334,12 @@ function zoomReset(){
 	return redraw();
 }
 
+/* Check topology loops*/
+function checkTopologyLoops(d) {
+    //TODO verify loops in topology and warn user
+    //alert(d.nodeConnections);
+}
+
 /* Redraw canvas - bound to zoom behaviour */
 function redraw() {
   trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
@@ -511,6 +517,7 @@ node.on("mouseover", function (d, i){
 	.on("click", function(d) {
 	    /* Only available AMs can be selected */
 	    if (d.available != "False") {
+	        //checkTopologyLoops(d);
 	        d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "click");});
 	    }
     	})

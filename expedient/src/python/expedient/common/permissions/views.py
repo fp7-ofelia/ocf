@@ -11,13 +11,14 @@ from expedient.common.permissions.exceptions import PermissionDenied
 from expedient.common.permissions.models import ExpedientPermission,\
     PermissionRequest, Permittee, ObjectPermission
 from expedient.common.permissions.utils import get_object_from_ids
-from expedient.common.permissions.forms import PermissionRequestForm
+from expedient.common.permissions.forms import PermissionRequestForm, ProjectRequestForm
 from expedient.common.messaging.models import DatedMessage
 from django.contrib.auth.models import User
 import logging
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import QueryDict
 
 logger = logging.getLogger("permissions.views")
 
@@ -103,10 +104,14 @@ def request_permission(always_redirect_to=None,
     """
     def request_permission_view(request, permission, permittee,
                                 target_obj_or_class, redirect_to=None):
+
         # Get the object permission
         obj_perm = ObjectPermission.objects.get_or_create_for_object_or_class(
             permission, target_obj_or_class)[0]
-        
+
+        # Get the object permission name
+        perm_name = obj_perm.permission.name 
+
         # Get the users who can delegate the permission
         if permission_owners_func:
             user_qs = permission_owners_func(request, obj_perm, permittee)
@@ -126,7 +131,12 @@ def request_permission(always_redirect_to=None,
             perm_request = PermissionRequest(requesting_user=request.user,
                                              permittee=permittee,
                                              requested_permission=obj_perm)
-            form = PermissionRequestForm(user_qs, request.POST,
+
+            if perm_name == "can_create_project":
+                form = ProjectRequestForm(user_qs, request.POST,
+                                         instance=perm_request)
+            else:
+                form = PermissionRequestForm(user_qs, request.POST,
                                          instance=perm_request)
             if form.is_valid():
                 # Post a permission request for the permission owner
@@ -143,7 +153,6 @@ def request_permission(always_redirect_to=None,
                          recipient_list=[perm_request.permission_owner.email],
                          #recipient_list=[settings.ROOT_EMAIL],
                      )
-
                 except Exception as e:
                     print "Email \"Request for permission %s from user %s\" could no be sent" % (permission.name,request.user)
 
@@ -154,10 +163,15 @@ def request_permission(always_redirect_to=None,
                     redirect_to = always_redirect_to or redirect_to
                 return simple.redirect_to(request, redirect_to,
                                           permanent=False)
+        # GET
         else:
-            form = PermissionRequestForm(user_qs)
+            # Show the project form when the user can create projects
+            if perm_name == "can_create_project":
+                form = ProjectRequestForm(user_qs)
+            else:
+                form = PermissionRequestForm(user_qs)
         
-        ec = {"form": form, "obj_perm": obj_perm}
+        ec = {"form": form, "obj_perm": obj_perm, "perm_name": perm_name}
         ec.update(extra_context)
         
         return simple.direct_to_template(
