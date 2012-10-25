@@ -19,9 +19,13 @@ class MonitoringResponseDispatcher():
 				raise Exception("Cannot process Monitoring action:"+action.type_)
 			try:
 				if action.id == "callback":
+					print '---------------------->Libvirt Monitoring!!!'
 					from vt_manager.controller.monitoring.VMMonitor import VMMonitor
 					from vt_manager.models.VTServer import VTServer
-					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status,rspec)
+                                        print '------>UUID',action.server.virtual_machines[0].uuid
+					print '------>STATUS',action.server.virtual_machines[0].status
+					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status)
+					print '---------------------->LibvirtMonitoring Finished!!!'
 					return
 				else:
 					actionModel = Action.getAndCheckActionByUUID(action.id)

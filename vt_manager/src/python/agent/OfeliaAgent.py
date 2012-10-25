@@ -3,7 +3,7 @@ import sys,os
 import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
 from monitoring.MonitoringDispatcher import MonitoringDispatcher
-from monitoring.LibvirtTest import LibvirtMonitor 
+from monitoring.LibvirtMonitoring import LibvirtMonitor 
 from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
