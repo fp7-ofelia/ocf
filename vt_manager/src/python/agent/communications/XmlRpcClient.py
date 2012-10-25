@@ -87,5 +87,5 @@ class XmlRpcClient:
 		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: Expedient ")
                 serverInfo = server_type()
                 serverInfo.virtualization_type = 'xen'
-		server = xmlrpclib.Server('https://expedient:expedient@147.83.206.92:8445/xmlrpc/agent')
+		server = xmlrpclib.Server('https://expedient:expedient@10.216.140.11:8445/xmlrpc/agent')
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))

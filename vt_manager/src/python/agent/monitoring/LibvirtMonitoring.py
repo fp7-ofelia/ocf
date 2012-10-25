@@ -441,10 +441,11 @@ from communications.XmlRpcClient import XmlRpcClient
 
 def myDomainEventCallback2 (conn, dom, event, detail, opaque):
     liblog = open('/opt/ofelia/oxa/log/libvirtmonitor.log','a')
-    log =  "Libvirt Monitoring: Domain %s(%s) %s %s\n" % (dom.name(), dom.ID(),
-                                                                eventToString(event),
-                                                                detailToString(event, detail))
+    log =  "Libvirt Monitoring: Domain %s(%s) with uuid %s  %s %s\n" % (dom.name(), dom.ID(),
+								        dom.UUIDString(),
+                                                                        eventToString(event),
+                                                                        detailToString(event, detail))
     liblog.write(log)
     
-    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[dom.UUIDString(),dom.name()],eventToString(event)) 
+    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[[dom.UUIDString(),dom.name()]],eventToString(event)) 
     
