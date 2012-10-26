@@ -1,7 +1,7 @@
 '''
 Ofelia Opt-in AM user settings file
 
-@author: msune, CarolinaFernandez,lbergesio
+@author: msune, CarolinaFernandez, lbergesio
 '''
 
 #
@@ -55,6 +55,11 @@ ISLAND_NAME   = "i2CAT"
 #
 SITE_DOMAIN = "changeMe"
 SITE_IP_ADDR = "192.168.254.193"
+
+#
+# VLANs management.
+#
+UNALLOWED_VLANS = []
 
 ##
 ## Theme Manager 
