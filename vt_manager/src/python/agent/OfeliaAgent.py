@@ -103,14 +103,9 @@ def main():
 	#print "Main ends..." 
 	logger.info("Starting libvirt monitoring")
 	LibvirtMonitor.initialize()
-	logger.info("OK")
 	#Engage XMLRPC
 	#logger.debug("Trying to engage XMLRPC server...")
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)	
-	#logger.info("Starting libvirt monitoring")
-	#print "Starting libvirt monitoring"	
-	#XXX: ADD try/except 
-	#LibvirtMonitor.initialize()
 	logger.debug("This is unreachable!")	
 
 #Calling main
