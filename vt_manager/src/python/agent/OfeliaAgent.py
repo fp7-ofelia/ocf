@@ -101,10 +101,14 @@ def main():
 	##testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
-	logger.info("Starting libvirt monitoring")
-	LibvirtMonitor.initialize()
+	logger.debug("Starting LibvirtMonitoring...")
+	try:
+		LibvirtMonitor.initialize()
+	except Exception as e:
+		looger.debug("LibvirtMonitoring failed: %s" % (e))
+	logger.debug('LibvirtMonitoring started')
 	#Engage XMLRPC
-	#logger.debug("Trying to engage XMLRPC server...")
+	logger.debug("Trying to engage XMLRPC server...")
 	XmlRpcServer.createInstanceAndEngage(processXmlQuery)	
 	logger.debug("This is unreachable!")	
 

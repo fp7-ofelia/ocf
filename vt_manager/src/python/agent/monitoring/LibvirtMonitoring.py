@@ -445,6 +445,7 @@ def LifeCycleEventCallbacks (conn, dom, event, detail, opaque):
                                                                         eventToString(event),
                                                                         detailToString(event, detail))
     liblog.write(log)
-    
-    XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback',"SUCCESS",[[dom.UUIDString(),dom.name()]],eventToString(event)) 
-    
+    try:
+    	XmlRpcClient.sendAsyncMonitoringLibvirtVMsInfo('callback','SUCCESS',[[dom.UUIDString(),dom.name()]],eventToString(event)) 
+    except Exception as e:
+	raise e
