@@ -3,6 +3,7 @@ import threading
 from utils.xml.vtRspecInterface import rspec, server_type, virtual_machine_type
 from utils.XmlUtils import *
 from utils.Logger import Logger
+from django.conf import settings
 
 class XmlRpcClient:
 
@@ -84,8 +85,11 @@ class XmlRpcClient:
 	@staticmethod
 	def sendAsyncMonitoringLibvirtVMsInfo(actionId,status,vms,VmStatus):
 		#TODO: HARDCODED!!
-		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: Expedient ")
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: VM Manager")
                 serverInfo = server_type()
                 serverInfo.virtualization_type = 'xen'
-		server = xmlrpclib.Server('https://expedient:expedient@10.216.140.11:8445/xmlrpc/agent')
+		#Trying to craft VM Manager URL
+		server = xmlrpclib.Server('https://%s:%s@%s:%s/xmlrpc/agent'%(settings.XMLRPC_USER, settings.XMLRPC_PASS, settings.VTAM_IP, settings.VTAM_PORT))	
+		#XXX:This direction works
+		#server = xmlrpclib.Server('https://expedient:expedient@10.216.140.11:8445/xmlrpc/agent')
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))
