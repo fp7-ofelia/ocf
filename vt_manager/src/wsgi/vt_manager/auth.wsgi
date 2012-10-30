@@ -24,7 +24,7 @@ def check_password(environ, user, password):
     kwargs = {'username': user, 'is_active': True}
 
     try:
-        if environ['REQUEST_URI'] == '/xmlrpc/plugin':
+        if environ['REQUEST_URI'] == '/xmlrpc/plugin' or environ['REQUEST_URI'] == '/xmlrpc/agent':
             if user == XMLRPC_USER and password == XMLRPC_PASS:
                 return True
 #            else:
