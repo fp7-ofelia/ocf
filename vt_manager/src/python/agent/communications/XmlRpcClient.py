@@ -3,6 +3,7 @@ import threading
 from utils.xml.vtRspecInterface import rspec, server_type, virtual_machine_type
 from utils.XmlUtils import *
 from utils.Logger import Logger
+from mySettings import *
 
 class XmlRpcClient:
 
@@ -40,7 +41,7 @@ class XmlRpcClient:
 		return XmlCrafter.craftXML(rspec) 
 
 	@staticmethod
-	def __craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo):
+	def __craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus=None):
 	
 		rspec = XmlUtils.getEmptyMonitoringResponseObject()
 		
@@ -58,9 +59,12 @@ class XmlRpcClient:
 			vm = virtual_machine_type()
 			vm.uuid = dom[0]
 			vm.name = dom[1]
+			vm.status = VmStatus
 			server.virtual_machines.append(vm)
-		return XmlCrafter.craftXML(rspec) 
 
+		return XmlCrafter.craftXML(rspec) 
+	
+	
 
 	@staticmethod
 	def sendAsyncMonitoringActionStatus(actionId,status,description):
@@ -78,4 +82,14 @@ class XmlRpcClient:
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo))
 		XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
-
+	@staticmethod
+	def sendAsyncMonitoringLibvirtVMsInfo(actionId,status,vms,VmStatus):
+		#TODO: HARDCODED!!
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" monitoring message to: VM Manager")
+                serverInfo = server_type()
+                serverInfo.virtualization_type = 'xen'
+		#Trying to craft VM Manager URL
+		server = xmlrpclib.Server('https://%s:%s@%s:%s/xmlrpc/agent'%(XMLRPC_USER,XMLRPC_PASS,VTAM_IP,VTAM_PORT))	
+		#XXX:This direction works
+		#server = xmlrpclib.Server('https://xml:rpc@10.216.140.11:8445/xmlrpc/agent')
+		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))

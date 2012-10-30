@@ -2,7 +2,8 @@
 import sys,os
 import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
-from monitoring.MonitoringDispatcher import MonitoringDispatcher 
+from monitoring.MonitoringDispatcher import MonitoringDispatcher
+from monitoring.LibvirtMonitoring import LibvirtMonitor 
 from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
@@ -100,11 +101,15 @@ def main():
 	##testing	
 	#processXmlQuery("https://147.83.206.92:9229",1,sys.argv[1])
 	#print "Main ends..." 
-
+	logger.debug("Starting LibvirtMonitoring...")
+	try:
+		LibvirtMonitor.initialize()
+	except Exception as e:
+		looger.debug("LibvirtMonitoring failed: %s" % (e))
+	logger.debug('LibvirtMonitoring started')
 	#Engage XMLRPC
-	#logger.debug("Trying to engage XMLRPC server...")	
-	XmlRpcServer.createInstanceAndEngage(processXmlQuery)		
-
+	logger.debug("Trying to engage XMLRPC server...")
+	XmlRpcServer.createInstanceAndEngage(processXmlQuery)	
 	logger.debug("This is unreachable!")	
 
 #Calling main
