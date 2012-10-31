@@ -72,8 +72,8 @@ urlpatterns = patterns('',
     (r'^accounts/', include('registration.urls')),
 
     #RPC
-    rpc_url(r'^xmlrpc/agent$', name='agent'),
-    rpc_url(r'^xmlrpc/plugin$', name='plugin'),
+    rpc_url(r'^xmlrpc/agent/?$', name='agent'),
+    rpc_url(r'^xmlrpc/plugin/?$', name='plugin'),
     rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 
