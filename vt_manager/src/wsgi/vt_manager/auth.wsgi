@@ -18,13 +18,21 @@ sys.path.insert(0,PYTHON_DIR)
 from django.contrib.auth.models import User
 from django import db
 from vt_manager.settings.settingsLoader import XMLRPC_USER, XMLRPC_PASS
+import re
+
+
+AGENT_RE = "^/xmlrpc/agent/?$"
+PLUGIN_RE = "^/xmlrpc/plugin/?$"
 
 def check_password(environ, user, password):
     db.reset_queries()
     kwargs = {'username': user, 'is_active': True}
 
+    pattern_agent = re.compile(AGENT_RE)
+    pattern_plugin = re.compile(PLUGIN_RE)
+
     try:
-        if environ['REQUEST_URI'] == '/xmlrpc/plugin' or environ['REQUEST_URI'] == '/xmlrpc/agent':
+        if pattern_plugin.match(environ['REQUEST_URI']) or pattern_agent.match(environ['REQUEST_URI']):
             if user == XMLRPC_USER and password == XMLRPC_PASS:
                 return True
 #            else:
