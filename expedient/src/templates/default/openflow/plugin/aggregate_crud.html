@@ -29,8 +29,23 @@
 <div class="main">
 	<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
 	<table class="formtable_noborder openflow_create">
+	{{ agg_form.non_field_errors }}
 	{{ agg_form.as_table }}
-	{{ client_form.as_table }}
+	{% if client_form.non_field_errors %}
+	    <tr><td></td><td>{{ client_form.non_field_errors }}</td></tr>
+        {% endif %}
+        {% for field in client_form %}
+            {% if field.name == 'url' %}
+                {% if errors %}
+                    <tr><td></td><td><ul id="errorlist_err_url" class="error"><li>{{ errors }}</li></ul></td></tr>
+                {% endif %}
+            {% else %}
+                {% if field.errors %}
+                    <tr><td></td><td>{{ field.errors }}</td></tr>
+                {% endif %}
+            {% endif %}
+            <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+        {% endfor %}
 	{% if not create %}
 	<tr>
 		<th>Current status:</th>
