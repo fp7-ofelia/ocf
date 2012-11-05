@@ -70,6 +70,7 @@
      -o-transition: all 1.5s ease-in-out;
      -moz-transition: all 1.5s ease-in-out;
      transition: all 1.5s ease-in-out;
+     margin-left: -220px; /* Fast visual fix */
 }
 
 .animatedTooltip a {
