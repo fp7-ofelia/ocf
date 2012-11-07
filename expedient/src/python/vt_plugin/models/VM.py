@@ -7,7 +7,6 @@ import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.resources.models import Resource, Sliver
-#from expedient.common.utils import validators
 from expedient.common.utils.modelfields import LimitedIntegerField
 from expedient.common.middleware import threadlocals
 from expedient.clearinghouse.utils import post_message_to_current_user
@@ -130,16 +129,16 @@ class VM(Resource):
         def validate_name(value):
             def error():
                 raise ValidationError(
-                    "Invalid input: VM name should not contain blank spaces",
+                    "Invalid input: VM name should not contain accented characters, symbols, underscores or whitespaces.",
                     code="invalid",
                 )
-            cntrlr_name_re = re.compile("^[\S]*$")
+#            cntrlr_name_re = re.compile("^[\S]*$")
+            cntrlr_name_re = re.compile("^([0-9a-zA-Z\-]){1,64}$")
             m = cntrlr_name_re.match(value)
             if not m:
                 error()
         try:
             validate_name(name)
-#            validators.resourceNameValidator(name)
             self.name = name
         except Exception as e:
             raise e

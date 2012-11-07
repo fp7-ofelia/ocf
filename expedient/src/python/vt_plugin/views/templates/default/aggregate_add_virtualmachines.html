@@ -13,17 +13,17 @@
     	{{ formset.management_form }}
 		{% for form in formset.forms %}
             <table class="separator-table">
-                <tr class="error"><th/>
-                    <td id="error_td">
+                <tr>
+                    <td id="error_td" colspan="2">
                     {% if exception != "" %}    
-                        <ul class="error"><li>{{ exception }}</li></ul>
+                        <ul class="errorlist"><li>{{ exception }}</li></ul>
                     {% endif %}
                     </td>
                 </tr>
                 {% for field in form %}
-                {% if field.name != "resource_ptr"%}
-                <tr> <th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                {% endif %}
+                  {% if field.name != "resource_ptr"%}
+                    <tr> <th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+                  {% endif %}
                 {% endfor %}
             </table>
         {% endfor %}
