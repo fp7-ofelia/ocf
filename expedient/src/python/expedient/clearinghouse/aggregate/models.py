@@ -243,6 +243,8 @@ No information available.
                     self.as_leaf_class().stop_slice(slice)
                 except:
                     pass
+                # Carolina: remove permision for aggregate in every slice inside the project
+                self.remove_from_slice(slice, next)
             delete_permission("can_use_aggregate", self.as_leaf_class(), project)
             return next
         

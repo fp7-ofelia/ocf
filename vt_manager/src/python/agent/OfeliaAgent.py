@@ -73,7 +73,7 @@ def processXmlQuery(notificationCallBackUrl,xml):
 			
 	#Parse
 	try:
-		logger.debug(xml)
+#		logger.debug(xml)
 		rspecValue = XmlParser.parseXML(xml)
 	except Exception as e:
 		logger.error(e)	
@@ -105,7 +105,7 @@ def main():
 	try:
 		LibvirtMonitor.initialize()
 	except Exception as e:
-		looger.debug("LibvirtMonitoring failed: %s" % (e))
+		logger.debug("LibvirtMonitoring failed: %s" % (e))
 	logger.debug('LibvirtMonitoring started')
 	#Engage XMLRPC
 	logger.debug("Trying to engage XMLRPC server...")

@@ -50,7 +50,7 @@
 
 {% block content %}
 {% if showFirstTimeTooltips %}
-	<div class="animatedTooltip"><a href="#" onclick="closeTooltip()">x</a><p>Don't forget to check the different help channels available!</p></div>
+	<div class="animatedTooltip"><a href="#" onclick="closeTooltip(); return false;">x</a><p>Don't forget to check the different help channels available!</p></div>
 {% endif %}
 <div class="main">
 	<h1>Welcome <font class="highlight">{{ request.user.username }}</font>!</h1>
