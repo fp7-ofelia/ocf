@@ -48,7 +48,7 @@
     }
 
     function updateVMstatus(){
-        $.getJSON("../../../vt_plugin/vms_status/"+{{slice.id}}, function(data){
+        $.getJSON("../../../vt_plugin/vms_status/"+{{slice.id}}+"/", function(data){
            $.each(data.status, function(index,value){
                                         $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
                     updateVMparams(data,index);
@@ -66,7 +66,7 @@
             }
            );
         });
-                $('#messages').load("../../../vt_plugin/update_messages");
+                $('#messages').load("../../../vt_plugin/update_messages/");
     }
     
     var timer = setInterval(function(){

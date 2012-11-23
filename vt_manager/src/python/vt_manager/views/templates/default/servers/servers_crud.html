@@ -79,7 +79,7 @@ function adding(row){
 <script>
     function updateVMstatus() {
         {% if server.id != NaN %}
-            $("#vms").load("../../" + {{server.id}} + "/list_vms", function(response, status, xhr) {
+            $("#vms").load("../../" + {{server.id}} + "/list_vms/", function(response, status, xhr) {
                 if (status != "error") {
                     $("#vms").html(response);
                 }
@@ -95,7 +95,7 @@ function adding(row){
 </script>
 <script>
     function handleVMaction(serverId,vmId,action){
-        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action);  
+        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action+"/");
         updateVMstatus();                                                     
     }
 </script>
