@@ -106,7 +106,8 @@ class PasswordXMLRPCServerProxy(models.Model):
                                               username=self.username,
                                               password=self.password,
                                               transport=self.transport,
-                                              verbose=getattr(settings, "DEBUG", False))
+                                              #verbose=getattr(settings, "DEBUG", False))
+                                              verbose=False)
             self.set_verify_certs()
         else:
             self.proxy = BasicAuthServerProxy(self.url,

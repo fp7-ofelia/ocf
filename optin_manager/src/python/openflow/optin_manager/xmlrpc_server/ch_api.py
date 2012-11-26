@@ -521,7 +521,7 @@ def ping(data, **kwargs):
     Test method to see that everything is up.
     return a string that is "PONG: %s" % data
     '''
-    print "Pinged!"
+    #print "Pinged!"
     return "PONG: %s" % data
 
 

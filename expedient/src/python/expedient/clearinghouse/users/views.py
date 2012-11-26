@@ -14,7 +14,6 @@ from expedient.common.permissions.shortcuts import must_have_permission,\
     give_permission_to
 from registration import views as registration_views
 from expedient.clearinghouse.users.forms import FullRegistrationForm
-from registration.models import RegistrationProfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.views import password_reset
@@ -161,6 +160,9 @@ def register(request):
 def activate(request, activation_key):
     template_name = 'registration/activate.html'
     activation_key = activation_key.lower() # Normalize before trying anything with it.
+    # Import only here to avoid every time warning 'DeprecationWarning:
+    # the sha module is deprecated; use the hashlib module instead'
+    from registration.models import RegistrationProfile
     account = RegistrationProfile.objects.activate_user(activation_key)
     if account:
         give_permission_to(
