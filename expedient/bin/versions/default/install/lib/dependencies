@@ -5,3 +5,47 @@
 DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod-macro python-setuptools python-django python-mysqldb python-django-extensions python-ldap python-openssl python-m2crypto python-dateutil python-decorator python-paramiko build-essential python-imaging python-django-registration python-configobj python-pyparsing"
 
 EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug django_auth_ldap==1.0.19"
+
+# Checks that Python 2.6 exists or points to current version for pyPElib
+if [[ ! -d /usr/lib/python2.6 ]]; then
+    pyVersion="python"`python -c "import sys; print(sys.version.split(' ')[0])"`
+    i=3
+    while [[ ! -d /usr/lib/$pyVersion && $i -gt 0 ]]; do
+        # Looks for the 'longest' version possible
+        case $i in
+            2) pyVersion="python$(expr "$pyVersion" : 'python\([0-9].[0-9]\).*')" ;;
+            1) pyVersion="python$(expr "$pyVersion" : 'python\([0-9]\).*')" ;;
+        esac
+        i=$((i-1))
+
+        i=$((i-1))
+    done
+    if [[ -d /usr/lib/$pyVersion ]]; then
+        ln -s /usr/lib/$pyVersion /usr/lib/python2.6
+    fi  
+fi  
+
+# Installing pyPElib (only if not previously installed)
+installedPypelib=`dpkg --get-selections | grep "pypelib" | grep "install"`
+if [[ $installedPypelib == "" ]]; then
+    print "Downloading latest pypelib version..."
+   /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not     download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb.     Do you have connectivity?"
+
+    print "Installing pypelib_latest_all.deb..."
+    /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version us    ing /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+    print "Removing temporary files..."
+    rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+fi
+
+# Checks that Python's mod_wsgi is enabled in the Apache's mod-enabled folder
+installedModWsgi=`dpkg --get-selections | grep "libapache2-mod-wsgi" | grep "install"`
+if [[ $installedModWsgi != "" ]]; then
+    if [[ ! -f /etc/apache2/mods-enabled/mod_wsgi.load && -f /etc/apache2/mods-available/wsgi.load ]]; then
+        currentDir=$PWD
+        cd /etc/apache2/mods-enabled/
+        ln -s ../mods-available/wsgi.load .
+        cd $currentDir
+    fi
+fi
+
