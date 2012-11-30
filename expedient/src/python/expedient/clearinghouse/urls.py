@@ -22,7 +22,8 @@ urlpatterns = patterns('',
         direct_to_template,
         {'template': 'help/index.html'},
         name='help'),
-    
+
+#    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),    
     (r'^users/', include('expedient.clearinghouse.users.urls')),
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
     (r'^project/', include('expedient.clearinghouse.project.urls')),
@@ -95,7 +96,7 @@ urlpatterns += patterns('',
     get_static_url("css_media", '/css'),
     get_static_url("js_media", "/js"),
     get_static_url("root_media"),
-    #get_static_url("fibre_img_media", '/../fibre/img'),
+    #get_static_url("/favicon.ico","/img/favicon.ico")
 )
 
 '''
@@ -109,6 +110,4 @@ urlpatterns += patterns('',
     get_static_url(img_theme_tuple[0],img_theme_tuple[1]),
     get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
     get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
-
 )
-
