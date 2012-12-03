@@ -10,10 +10,10 @@ Created on Aug 18, 2010
 
 #SMTP configuration for IM notifications
 EMAIL_HOST = "mail.eict.fp7-ofelia.eu"
-EMAIL_USE_TLS = True
+EMAIL_PORT = 25
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 25
+EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'OFELIA-noreply@fp7-ofelia.eu'
 EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
 
