@@ -119,31 +119,34 @@ function adding(row){
 			<h2>General parameters</h2>
 			<h3>Parameters</h3>
        		<table class="formtable">
+                    {% if serverForm.non_field_errors %}
+                        <tr><td class="fielderror">{{serverForm.non_field_errors}}</td></tr>
+                    {% endif %}
 		    <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
         	    {% for field in serverForm %}
                         {% if field.errors %}    
                             <tr><td colspan="3">{{field.errors}}</td></tr>
-                        {% endif %}	
+                        {% endif %}
 	                <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
         	    {% endfor %}
         	</table>
         </div>
 	
-		<div>
-			<h2>Networking parameters</h2>
-			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
-			<div class="tooltip" id="mgmt_bridge_help">
-            Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
+	<div>
+	    <h2>Networking parameters</h2>
+	    <h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+	    <div class="tooltip" id="mgmt_bridge_help">
+                Management bridge connecting the control interface of the server and the VMs. MAC address is optional. 
             </div>
-			<table id="mgmtifacetable" class="formtable">
-				{% for field in mgmtIfaceForm %}
-                    {% if field.errors %}
-                            <tr><td colspan="3">{{field.errors}}</td></tr>
-                    {% endif %}      
-							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
-				{% endfor %}
-			</table>
-		</div>	
+	    <table id="mgmtifacetable" class="formtable">
+	    {% for field in mgmtIfaceForm %}
+                {% if field.errors %}
+                    <tr><td colspan="3">{{field.errors}}</td></tr>
+                {% endif %}      
+		   <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
+	    {% endfor %}
+	    </table>
+	</div>	
 
 		{% include "servers/servers_dataIfaces.html" %}
 
@@ -188,7 +191,7 @@ function adding(row){
 		{% endif %}
 
         <div class="center" style="margin-top : 30px;">
-            <input type="submit" value="Save" /> |
+            <input type="submit" id="form_create_server" value="Save" /> |
             {% if server %}
             <a href="{% url delete_server server.id %}">Delete</a> |
             {% endif %}
@@ -202,5 +205,9 @@ function adding(row){
 	</div>
 
 </div>
+
+        <!-- Validation in the end waits for the forms to be loaded -->
+        <script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+
 {% endblock content %}
 
