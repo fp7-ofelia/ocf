@@ -327,7 +327,6 @@ def add_opt_in(request):
                             },
                         )
                     except Exception,e:
-                        print "HITTTTT"
                         import traceback
                         traceback.print_exc()
                         transaction.rollback()
