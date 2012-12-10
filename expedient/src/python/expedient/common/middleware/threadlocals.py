@@ -36,7 +36,7 @@ def pop_frame():
     try:
         _thread_locals.d_stack.pop(get_tpid_key())
     except KeyError:
-        print "[WARNING] Exception at 'expedient.common.middleware.threadlocals.ThreadLocals': tried to access to permittees stack when it was already empty. This may happem because an incorrect URL (request.url) was requested and Django's CommonMiddleware forwarded it to a new one without processing the request in this middleware."
+        print "[WARNING] Exception at 'expedient.common.middleware.threadlocals.ThreadLocals': tried to access to permittees stack when it was already empty. This may happen because an incorrect URL (request.url) was requested and Django's CommonMiddleware forwarded it to a new one without processing the request in this middleware."
         pass
 
 def get_thread_locals():

@@ -1,0 +1,626 @@
+<h2>
+	<a id="topology" class="expandableTooltipable expandableCtl" ref="#/">
+        Topology <span class="opened"> &#x25B2;</span>
+        </a>
+</h2>
+
+
+<script src="{% url js_media 'tooltip.topology.js' %}">
+</script>
+<script src="{% url js_media 'd3.v2.min.js' %}">
+</script>
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+
+<style>
+  
+  .link {
+    stroke: #ccc;
+    stroke-width:1px;
+  }
+  
+  .node {
+    stroke-width:2px;
+  }
+  .node text {
+    pointer-events: none;
+    font: 10px sans-serif;
+  }
+  
+</style>
+
+{#Render#}
+<div id="topologyContainer" class="expandable" style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
+  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+    Tip: Move cursor over the icons to get extra information...
+  </div>
+  {%if not d3_nodes %}
+  <a href="#addAggregate">
+    <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
+      Nothing to show yet. Add Aggregates to the slice.
+    </div>
+  </a>
+  {% endif %}
+  <div id="target">
+  </div>
+  <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+    
+    <!--
+<a href="#" onClick="return showAllInfo()"/>
+Show
+</a>
+&nbsp;-->
+  <a href="javascript: regroup()"/>
+  <img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/>
+  </a>
+  &nbsp;
+  <a href="javascript: zoomIn(0.25)"/>
+  <img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/>
+</a>
+&nbsp;
+<a href="javascript: zoomOut(0.25)"/>
+<img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
+<a href="javascript: zoomReset()"/>
+<img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/>
+</a>
+&nbsp;
+</div>
+</div>
+
+<script type="text/javascript">
+/* d3 data */
+var nIslands = {{ nIslands }},
+    pad = 5,
+    width = 740,
+    height = 400
+
+//Islands area generation
+var p = width/height
+    ny = Math.sqrt(nIslands/p),
+    nx = Math.ceil(p*ny),
+    ny = Math.ceil(ny),
+    foci = []
+
+if (nx*ny > nIslands){
+	if (nx > ny && (nx-1)*ny >= nIslands)
+		nx--;
+	else if( nx <= ny && nx*(ny-1) >= nIslands)
+		ny--;
+}
+
+var aw = Math.floor((width-(nx+1)*pad)/nx),
+    ah = Math.floor((height-(ny+1)*pad)/ny)
+
+for (i=0; i<nIslands; i++){
+        tx0 = pad + (pad + aw)*(Math.floor(i%nx));
+        ty0 = pad + (pad + ah)*(Math.floor(i/nx));
+	foci[i] = {x0: tx0, x1: tx0 + aw, y0: ty0, y1: ty0 + ah};
+}  
+
+function randomXToY(minVal,maxVal,floatVal)
+{
+  var randVal = minVal+(Math.random()*(maxVal-minVal));
+  return typeof floatVal=='undefined'?Math.round(randVal):randVal.toFixed(floatVal);
+}
+
+function pEllipse(set){
+
+	function getDistance(p){
+                return Math.pow((p[0]-cx),2)/Math.pow(rx,2) + Math.pow((p[1]-cy),2)/Math.pow(ry,2);
+        };
+
+	cx = (set.x1 + set.x0)/2;
+	rx = ((set.x1 - set.x0)/2 + (set.y1 - set.y0)/2)/2;
+	cy = (set.y1 + set.y0)/2;
+	ry = (set.y1 - set.y0)/2;
+	
+	d = 2;
+	while (d>1){
+        	p = [randomXToY(set.x0, set.x1), randomXToY(set.y0, set.y1) ];
+		d = getDistance(p);	
+	}
+	return p;
+}
+
+var epoints= [
+                {% for node in d3_nodes %}
+                        points = pEllipse(foci[{{node.group}}]),
+                {% endfor %}
+        ]
+
+var data = {
+    nodes: [
+        {% for node in d3_nodes %}
+        //{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: randomXToY(foci[{{ node.group }}].y0 , foci[{{ node.group }}].y1),x : randomXToY(foci[{{ node.group }}].x0 , foci[{{ node.group }}].x1), fixed:true, radius:10, color:"",
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, available:"{{ node.available }}", color:"",
+		{% if node.type == "vt_agg"  %}
+			nodeVms: {{node.vmNames|safe }},
+			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
+		{%endif%}
+		{% if node.type == "of_agg"  %}
+			nodeConnections:{{node.connection|safe}}
+		{% endif %}
+		 }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    links: [
+        {% for link in d3_links %}
+        {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+	
+    ],
+}
+
+/* Harcoded data for testing */
+/* Useful functions*/
+
+function get_node_info_formated(d){
+	type = get_node_type(d);
+	    if(type == "openflow") {
+			var nameString = "<b>Switch Datapath ID: "+d.nodeName+"</b><br><br>";
+			if(d.nodeConnections.length>0){
+				connectionsString = "<b>Connections:</b><br>";
+				for (i=0;i<d.nodeConnections.length;i++){
+					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['target_port']+"<br>";
+				}
+			}
+			else{
+				connectionsString = "";
+			}
+            return nameString+connectionsString ;
+        } else if(type == "planetlab") {
+            return nameString;
+        } else if(type == "vtserver") {
+			var nameString = "<b>Server: "+d.nodeName+"</b><br><br>";			
+			if (d.nodeVms.length > 0){
+				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
+				for (i=0;i<d.nodeVms.length;i++){
+					vmListString = vmListString + d.nodeVms[i];
+					if (i < d.nodeVms.length-1){
+						vmListString = vmListString + ", ";
+					}
+					else{
+						vmListString = vmListString +"<br clear = left><br clear=left>";
+					}
+				}
+			}
+            else{
+                vmListString =  "<b>No VMs in this Server </b></br><br clear=left>"  
+            } 
+			var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
+			for (i=0;i<d.nodeVmInterfaces.length;i++){
+	           vmInterfacesString = vmInterfacesString + "· "+"<b>"+d.nodeVmInterfaces[i]['name']+"</b> to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
+	         }
+	        return nameString + vmListString+vmInterfacesString;
+        }
+
+
+}
+
+function get_node_type(d) {
+    if(d.type == "of_agg") {
+        return "openflow";
+    } else if(d.type == "pl_agg") {
+        return "planetlab";
+    } else if (d.type == "vt_agg"){
+	return "vtserver"
+    }else{
+        return "unknown";
+    }
+}
+
+function getNodeImage(d){
+        type = get_node_type(d);
+        if(type == "openflow") {
+            return "{% url img_media 'switch-tiny.png' %}";
+        } else if(type == "planetlab") {
+            return "{% url img_media 'host-tiny.png' %}";
+        } else if(type == "vtserver") {
+            return "{% url img_media 'server-tiny.png' %}";
+        } else {
+            return "{% url img_media 'inactive.png' %}";
+        }
+}
+
+function getLinkStyle(d, attr){
+        rsc_ids = d.value.split("-");
+        if(attr=="click"){
+                id0 = rsc_ids[0];
+                id1 = rsc_ids[1];
+                if (id1.indexOf("eth") != -1){
+                     $(":checkbox#"+id0).click();
+                }
+                else{           
+                if((! $(":checkbox#"+id0+":checked").length && ! $(":checkbox#"+id1+":checked").length) || ($(":checkbox#"+id0+":checked").length && $(":checkbox#"+id1+":checked").length)){
+                        $(":checkbox#"+id0).click();
+                        $(":checkbox#"+id1).click();
+                }
+                else if ($(":checkbox#"+id0+":checked").length){
+                        $(":checkbox#"+id1).click();
+                }
+                else{
+                        $(":checkbox#"+id0).click();    
+                }
+                }
+        }else if(attr=="mouseover"){
+                var values = {stroke: "#00BFFF", strokewidth: "2" };
+                return values;
+        }else{
+		if( ($(":checkbox#"+rsc_ids[0]+":checked").length && rsc_ids[1].indexOf("eth") != -1) ||($(":checkbox#"+rsc_ids[0]+":checked").length && $(":checkbox#"+rsc_ids[1]+":checked").length)){
+                        if (attr == "stroke")
+                                return "#666";
+                        else
+                                return 2;
+                }else{
+                        if (attr == "stroke")
+                                return "#ccc";
+                        else
+                                return 2;
+                }
+        }
+}
+
+
+function getBaseNodeColor(d){
+	type = get_node_type(d);
+	if (type == "openflow") {
+               return d3.rgb(d.color.toString());
+        } else if (type == "planetlab") {
+                return d3.rgb(d.color.toString()).darker(0.75);
+        } else if (type == "vtserver") {
+                return d3.rgb(d.color.toString()).darker(1.5);
+        } else {
+		return d3.rgb("#FFFFFF");
+	}
+}
+
+function getNodeCircleStyle(d, attr){
+        type = get_node_type(d);
+        selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length;
+        all_len = $(":checkbox:.node_id_"+d.nodeValue).length;
+	selected_server = $(".server_node_"+d.nodeValue+".connected").length;
+        if(attr == "drag"){
+                return d3.rgb(d.color.toString()).brighter(5);
+	}else if(attr=="click"){
+		 if (type == "vtserver" && selected_server != 0){
+			return d3.rgb(d.color.toString()).darker(5);
+		 }
+		 if(selected_len == all_len) {
+                        $(":checkbox:checked.node_id_"+d.nodeValue).click();
+			return getBaseNodeColor(d);
+                 }else{
+                        $(":checkbox:not(:checked).node_id_"+d.nodeValue).click();
+			return d3.rgb(d.color.toString()).darker(5);
+                }
+        }else if (attr == "dragstop" && selected_len == 0){
+		if(type == "vtserver" && selected_server != 0)
+                      return d3.rgb(d.color.toString()).darker(5);
+		return getBaseNodeColor(d);
+        }else{
+                        if (attr == "fill"){
+                                return getBaseNodeColor(d);
+                        } else{
+				if(type == "vtserver" && selected_server != 0)
+		                        return d3.rgb(d.color.toString()).darker(5);
+				if (selected_len != 0){
+	                                return d3.rgb(d.color.toString()).darker(5);
+				}else{
+					return getBaseNodeColor(d);
+				}
+                        }
+        }
+};
+
+
+/* Zooming routines */
+
+cur_zoom = 1;
+
+function zoomIn(zoom){
+	cur_zoom = cur_zoom + zoom;
+        return redraw();
+}
+
+function zoomOut(zoom){
+        if(cur_zoom-zoom >0)
+                cur_zoom = cur_zoom - zoom;
+        return redraw();
+}
+
+function zoomReset(){
+	cur_zoom = 0.99;
+	return redraw();
+}
+
+/* Check topology loops*/
+function checkTopologyLoops(d) {
+    //TODO verify loops in topology and warn user
+    //alert(d.nodeConnections);
+}
+
+/* Redraw canvas - bound to zoom behaviour */
+function redraw() {
+  trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
+  svg.attr("transform",
+      "translate(" + trans + ")"
+      + " scale(" + cur_zoom + ")");
+}
+
+/* Translation - bound to drag behavior */
+dragMap = function(d) {
+  d.x = (-width/2) + d3.event.x;
+  d.y = (-height/2) + d3.event.y;
+  svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
+}
+
+/* Instantiation General parameters*/
+var  padding = 6,
+     color = d3.scale.category10().domain(d3.range(nIslands)),
+     radius = d3.scale.sqrt().range([0, 12]);
+
+var svg = d3.select("#target")
+    .append("svg")
+        .attr("pointer-events", "all")
+        .attr("width", width)
+        .attr("height", height)
+        .datum({x: 0, y: 0})
+        .call(d3.behavior.drag().on("drag", dragMap))
+/*    .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
+        .attr("cursor", "move")*/
+    .append("svg:g").on("zoom", redraw)
+
+// DATA VARIABLES
+var nodes = data.nodes;
+nodes.forEach(function(d) {
+    if (d.available != "False") {
+        d.color = color(d.group%nIslands);
+    } else {
+        d.color = "#CCC";
+    }
+});
+
+var links = data.links;
+
+var force = d3.layout.force()
+    .gravity(0.05)
+    .distance(50)
+    .charge(-200)
+    .size([width, height])
+    .nodes(nodes)
+    .links(links)
+    .start();
+
+var EMPTY_ISLAND = "Island with no resources";
+
+//XXX:Very ugly, needs improvement
+var islandsLocs = []
+for (i = 0; i< nIslands; i++){
+	islandsLocs[i] = EMPTY_ISLAND;
+}
+
+nodeInitialPos = []
+for (i = 0; i< nodes.length; i++){
+	nodeInitialPos[i] = [nodes[i].x, nodes[i].y];
+	if (islandsLocs[nodes[i].group] == EMPTY_ISLAND){
+		islandsLocs[nodes[i].group] = nodes[i].loc;
+	}
+}
+
+var dataislands = []
+for (i = 0; i< nIslands; i++){
+	dataislands[i] = {rx: (aw/2 + ah/2)/2, ry: ah/2, cx:(foci[i].x0+foci[i].x1)/2, cy:(foci[i].y0+foci[i].y1)/2, group: i, loc: islandsLocs[i]};
+}
+
+var islands = svg.selectAll(".island")
+    .data(dataislands)
+  .enter().append("g")
+	.attr("class", "island")
+
+var iellipses = islands.append("ellipse")
+    .attr("rx", function(d) { return d.rx; })
+    .attr("ry", function(d) { return d.ry; })
+    .attr("cx",function(d) { return d.cx; })
+    .attr("cy", function(d) { return d.cy; })
+    .style("fill", function(d) { return color(d.group%nIslands); })
+    .style("stroke", function(d) { return color(d.group%nIslands);}) 
+    .style("opacity", 0.3)
+    .style("stroke-opacity", 0.7)
+
+var ilabels = islands.append("text")
+      .attr("text-anchor", "middle")
+      .attr("y", function(d){ return d.cy + d.ry*0.9})
+      .attr("x", function(d){ return d.cx})
+      .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
+      .style("opacity",1)
+      .style("cursor", "default")
+      .text(function(d) { return d.loc });
+
+//First ellipse animation on startup
+animate();
+
+var link = svg.selectAll(".link")
+    .data(links)
+  .enter().append("line")
+    .attr("class", "link");
+
+link.on("click", function(d) {
+                d3.select(this).style("stroke", function(d){return getLinkStyle(d, "click");})});
+
+var node = svg.selectAll(".node")
+    .data(nodes)
+  .enter().append("g")
+    .attr("class", "node")
+    .call(d3.behavior.drag()
+    .on("dragstart", function(d, i, e) {
+	    force.stop();
+    })
+    .on("drag", function(d, i) {
+	    d.px += d3.event.dx;
+            d.py += d3.event.dy;
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+       	    d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "drag");}) 
+            tick();
+    })
+    .on("dragend", function(d, i) {
+	    d.fixed = true; // of course set the node to fixed so the force does not include the node in its auto positioning stuff
+            d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "dragstop");})
+            tick();
+            force.stop();
+    })
+    );
+
+node.append("circle")
+    .attr("r", function(d) { return d.radius; })
+    .style("stroke", function(d){return getNodeCircleStyle(d, "stroke");})
+    .style("fill", function(d){return getNodeCircleStyle(d, "fill");});
+
+node.append("image")
+    .attr("xlink:href", function (d) { return getNodeImage(d); })
+    .attr("x", -8)
+    .attr("y", -8)
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("opacity", function(d) { return d.available=="False"?0.8:1; })
+
+node.append("text")
+    .attr("dx", 12)
+    .attr("dy", ".35em")
+    .text(function(d) { return d.name });
+
+node.on("mouseover", function (d, i){
+		type = get_node_type(d);
+	        desc = "Unknown"
+	        if(type == "openflow") {
+	            desc = "OpenFlow switch";
+	        } else if(type == "planetlab") {
+	            desc = "PlanetLab node";
+	        } else if(type == "vtserver") {
+	            desc = "Virtualized server";
+	        }
+	                tooltip.show(get_node_info_formated(d));
+	    
+	        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName + " at " + d.loc);
+	        $("#selected_node_info").css("background-color", d.color );
+	        $("#selected_node_info").css("text-shadow", "-3px 2px 4px #eee");
+	        $("#selected_node_info").show();
+
+
+	}
+	)
+	.on("mouseout", function() {
+			$("#selected_node_info").css("background-color", "#DDDDDD");
+			//$("#selected_node_info").hide()
+                        tooltip.hide();
+                })
+	.on("click", function(d) {
+	    /* Only available AMs can be selected */
+	    if (d.available != "False") {
+	        //checkTopologyLoops(d);
+	        d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "click");});
+	    }
+    	})
+
+force.on("tick", tick);
+
+function redrawNodes(){
+	node.selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "stroke");});
+	link.style("stroke", function(d) {return getLinkStyle(d, "stroke");});
+	link.style("stroke-width", function(d) {return getLinkStyle(d, "stroke-width");});
+}
+
+function tick() {
+
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+  
+  node.each(collide(.5));
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+};
+
+function animate(){
+
+iellipses.attr("rx", function(d) { return d.rx; })
+    .style("display","block")
+    .attr("ry", function(d) { return d.ry; })
+    .attr("cx",function(d) { return d.cx; })
+    .attr("cy", function(d) { return d.cy; })
+    .style("fill", function(d) { return color(d.group%nIslands); })
+    .style("stroke", function(d) { return color(d.group%nIslands);}) 
+    .style("opacity", 0.3)
+    .style("stroke-opacity", 0.7)
+
+ilabels.attr("text-anchor", "middle")
+      .attr("y", function(d){ return d.cy + d.ry*0.9})
+      .attr("x", function(d){ return d.cx})
+      .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
+      .style("opacity",1)
+      .text(function(d) { return d.loc });
+
+iellipses.transition()
+                .style("stroke-width",3)
+                .style("stroke", function(d) { return d3.rgb(color(d.group%nIslands)).brighter(10);})
+                .duration(1500)
+/*iellipses.transition()
+           .delay(1500)
+           .style("opacity",0)
+           .duration(3000)
+
+ilabels.transition()
+           .delay(1500)
+           .style("opacity",0)
+           .duration(3000);
+//xxx lbergesio: not needed if scrolling is done with d3
+iellipses.transition()
+	.delay(4500)
+	.style("display", "none");
+*/
+}
+
+function regroup(){
+	for (i=0; i<nodes.length; i++){
+		nodes[i].x = nodeInitialPos[i][0];
+		nodes[i].y = nodeInitialPos[i][1];
+	}
+	tick();
+	animate();
+}
+
+function collide(alpha) {
+  var quadtree = d3.geom.quadtree(nodes);
+  return function(d) {
+    var r = d.radius + radius.domain()[1] + padding,
+        nx1 = d.x - r,
+        nx2 = d.x + r,
+        ny1 = d.y - r,
+        ny2 = d.y + r;
+    quadtree.visit(function(quad, x1, y1, x2, y2) {
+      if (quad.point && (quad.point !== d)) {
+        var x = d.x - quad.point.x,
+            y = d.y - quad.point.y,
+            l = Math.sqrt(x * x + y * y),
+            r = d.radius + quad.point.radius + (d.color !== quad.point.color) * padding;
+        if (l < r) {
+          l = (l - r) / l * alpha;
+          d.x -= x *= l;
+          d.y -= y *= l;
+          quad.point.x += x;
+          quad.point.y += y;
+        }
+      }
+      return x1 > nx2
+          || x2 < nx1
+          || y1 > ny2
+          || y2 < ny1;
+    });
+  };
+};
+
+//XXX lbergesio: Try to find how to allow scrolling within d3
+/*$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });*/
+
+</script>

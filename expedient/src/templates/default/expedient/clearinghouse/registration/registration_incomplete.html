@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block messages %}{% endblock %}
+
+{% block content %}
+<h2>There was a problem with the registration</h2>
+<p>{% trans "You have not been successfully registered.<br/><br/> Please try again later. In case this persisted over time do contact the " %}<a href="mailto:{{root_email}}?bcc={{failed_email}}&amp;subject=[OCF i2cat] User could not register&amp;body=Personal message (optional): ...%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A=========================%0D%0AError report (do NOT modify)%0D%0A=========================%0D%0A%0D%0AUser: {{failed_username}} ({{failed_email}})%0D%0A%0D%0AException is: {{exception}}">{% trans "Island Manager" %}</a>.</p>
+{% endblock %}

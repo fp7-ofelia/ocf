@@ -35,3 +35,14 @@ if [[ $installedPypelib == "" ]]; then
     print "Removing temporary files..."
     rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
 fi
+
+# Checks that Python's mod_wsgi is enabled in the Apache's mod-enabled folder
+installedModWsgi=`dpkg --get-selections | grep "libapache2-mod-wsgi" | grep "install"`
+if [[ $installedModWsgi != "" ]]; then
+    if [[ ! -f /etc/apache2/mods-enabled/wsgi.load && -f /etc/apache2/mods-available/wsgi.load ]]    ; then
+        currentDir=$PWD
+        cd /etc/apache2/mods-enabled/
+        ln -s ../mods-available/wsgi.load .
+        cd $currentDir
+    fi
+fi

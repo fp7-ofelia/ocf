@@ -1,0 +1,321 @@
+{% load ch_extras %}
+{% block head %}
+<style>
+    table.openflow,table.planetlab {
+        width: 100%;
+        border-spacing: 0px;
+        border-collapse: collapse;
+        border: 1px solid #CCC;
+    }
+    table.openflow .dpid,.ports {
+        border-bottom: 1px solid #000;
+    }
+    table.connections_table {
+        border-width: 0px;
+        width: 100%;
+    } 
+    table.openflow td {
+        border-spacing: 0px;
+        padding: 0px;
+        border-collapse: collapse;
+    }
+    td.select_checkbox {
+        width: 24px;
+    }
+    table.connections {
+        width: 440px;
+    }
+    tr.odd {
+        background-color: #ecf4d7;
+    }
+    td.connected {
+        font-weight: bold;
+    }
+    
+    td.port_num {
+        width: 45px;
+    }
+    div.steps {
+        padding: 4px;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    function updateVMparams(data,index){
+        $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
+        $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");
+    }
+
+    function updateVMstatus(){
+        $.getJSON("../../../vt_plugin/vms_status/"+{{slice.id}}+"/", function(data){
+           $.each(data.status, function(index,value){
+                                        $("#td_vm"+index).replaceWith("<td id = td_vm"+index +" >"+ value +" </td>");
+                    updateVMparams(data,index);
+                }
+           );
+           var vms_table = document.getElementById('table_vms_list');
+           $.each($("#table_vms_list tr"), function(tr_index, tr_table){
+                var vmIdValue = tr_table.id.substring(5);
+                if (tr_table.id != 'table_vms_list_header'){
+                    var vmIdValue = tr_table.id.substring(5);
+                    if (!data.status[vmIdValue]) {
+                            $("#tr_vm"+vmIdValue).remove();
+                    }
+                }
+            }
+           );
+        });
+                $('#messages').load("../../../vt_plugin/update_messages/");
+    }
+    
+    var timer = setInterval(function(){
+    updateVMstatus(); 
+    },3000);
+
+	function handleVMaction(sliceId,vmId,action,vmName){
+        if(action == "delete"){
+            if(!confirm(" Are you sure you want to delete VM '"+vmName+"'?"))
+                return; 
+        }
+        $.getJSON("../../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
+        updateVMstatus();
+    }
+
+    $(document).ready(function() {
+        /* add tooltip to question mark */
+        $("img#req_fs_help").tooltip({
+            tip: "div#req_fs_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+                $("img#gr_fs_help").tooltip({
+            tip: "div#gr_fs_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+    });
+</script>
+
+
+{% endblock %}
+
+
+{% block content %}
+
+{% if vt_aggs %}
+<h2 class="resourcesh2">
+  <a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
+    Computational resources (Virtual Machines) 
+    <span class="opened">
+      &#x25B2;
+    </span>
+  </a>
+</h2>
+
+<div id="computationalResourcesContainer" class="expandable">
+  {% for agg in vt_aggs %}
+    <h2>
+      <a id="vtm_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">
+        &bull; Virt. Aggregate: {{ agg.name }} 
+        <span class="opened">
+          &#x25B2;
+        </span>
+      </a>
+    </h2>
+  <div id="vtm_{{agg.id}}Container" class="aggregateManager expandable" >
+    <table class="aggregateManagerDetail">
+      <form action="/vt_plugin/goto_create_vm/{{ slice.id }}/{{agg.id}}/" method="POST">
+        {% csrf_token %}
+      <tr>
+        <td class="label">
+          Name:
+          </td>
+          <td>
+            
+            <b>
+              {{ agg.name }}
+            </b>
+          </td>
+          </tr>
+          <tr>
+            <!--
+<td class="label">
+Type:
+</td>
+<td>
+
+<b>
+{{ agg|get_meta_field:"verbose_name" }}
+</b>
+.
+</td>
+</tr>
+-->
+          <tr>
+            <td class="label">
+              Status:
+            </td>
+            <td>
+              {% if not agg.available %}
+              <img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em">
+              {%else%}
+              <img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em">
+              {% endif %}
+            </tr>
+          <tr>
+            <td class="label">
+              Physical location:
+            </td>
+            <td>
+              
+              <b>
+                {{ agg.location }}
+              </b>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="label" style="border-bottom:0px!important">
+              Resources:
+            </td>
+            <td style="border-bottom:0px!important">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <br>
+              {% if agg.resource_set.all %}
+              
+              {% for rsc in agg.resource_set.all %}
+              {% if rsc.leaf_name == 'VTServer' %}
+              {% with rsc.as_leaf_class as server %}
+              <div style="margin-bottom:15px;margin-right:10px;">
+                <table class="servers">
+                  <tr>
+                    <th>
+                      Server Name
+                    </th>
+                    <th>
+                      Virt. Tech.
+                    </th>
+                    <th>
+                      Operating System
+                    </th>
+                    <th>
+                      CPU
+                    </th>
+                    <th>
+                      Memory
+                    </th>
+                    <th>
+                      Disc
+                    </th>
+                  </tr>
+                  
+                  
+                  <tr class = "odd">
+                    <!--  
+<td>
+<input type = "radio" name = "server_id" value = "{{server.id}}" checked/>
+</td>
+-->
+                 <td>
+                   {{ server.name }}
+                 </td>
+              </td>
+              <td style="text-transform:uppercase;">
+                {{ server.virtTech  }}
+              </td>
+              <td>
+                {{ server.operatingSystemType }}
+                {{server.operatingSystemDistribution}} ({{server.operatingSystemVersion}})
+              </td>
+              <td>
+                {{ server.freeCpu }}
+              </td>
+              <td>
+                {{ server.memory }}
+              </td>
+              <td>
+                
+                {{ server.freeDiscSpace }}
+              </td>
+          </tr>
+          </table>
+          <div id = "vms_table">
+            {% if server.vms.all%}
+            {% include "expedient/clearinghouse/slice/list_vms.html" %}
+            {% endif %}
+          </div>
+      </div>
+      {# Surrounding VMS and server table#}
+      
+      {% endwith %}
+      {% endif %}
+      {% endfor %}
+      <br/>
+      
+      {% else %}
+      <div id="no_servers">
+        The aggregate manager does not contain any server yet, or this Expedient instance has not enough privileges to access current servers...
+      </div>
+      {% endif %}
+  </td>
+</tr>
+
+{# Actions #}
+<tr>
+  <td class="label" width="100px;">
+    Actions:
+  </td>
+  <td>
+    <div id="create_server" style="clear:both;">
+      Create a new virtual machine in server:
+      <select name = "selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}">
+        {% for rsc in agg.resource_set.all %}
+        {% with rsc.as_leaf_class as server %}
+        {% if rsc.leaf_name == 'VTServer' %}
+        <option value="{{server.id}}">
+          {{server.name}}
+        </option>
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+      </select>
+      <!-- Checks that VM aggregate is reachable -->
+      <input type="submit" name = "create_vms" id="create_vms_agg_{{agg.id}}" value="Create VM" {% if not agg.available %} onclick="alert('Warning: VM Aggregate \'{{ agg.name }}\' is not available'); {% endif %}" />
+    </div>
+  </td>
+</tr>
+<!-- AM resources container div -->
+</form>
+
+<!--Remove AM-->
+<tr>
+      <td class="label">
+        Remove from slice:
+      </td>
+      <td>
+        <form name="slice_remove_agg_{{ slice.id }}_{{ agg.id }}" method="POST" action="{% url slice_remove_agg slice.id agg.id %}" onsubmit="javascript: return confirm('Are you sure you want to remove AM \'{{ agg.name }}\' from slice \'{{ slice.name }}\'?');">{% csrf_token %}
+            <input type="submit" value="Remove AM" />
+        </form>
+      </td>
+</tr>
+
+</table>
+</div>
+
+{% endfor %}
+</div>
+
+<!-- Computational resources div -->
+{% endif %}
+</div>
+
+<!-- aggregateManager container -->
+{% endblock %}

@@ -11,6 +11,7 @@ from vt_manager.models.utils.Choices import VirtTechClass, OSDistClass, OSVersio
 from vt_manager.utils.MutexStore import MutexStore
 from vt_manager.models.MacRange import MacRange
 from vt_manager.models.Ip4Range import Ip4Range
+from vt_manager.common.utils import validators
 
 def validateAgentURLwrapper(url):
 	VTServer.validateAgentURL(url)
@@ -32,7 +33,7 @@ class VTServer(models.Model):
 	''' General attributes '''
 	available = models.BooleanField(default=1, verbose_name = "Available", editable = False)
 	enabled = models.BooleanField(default=1, verbose_name = "Enabled", editable = True)
-	name = models.CharField(max_length = 511, default="", verbose_name = "Name")
+	name = models.CharField(max_length = 511, default="", verbose_name = "Name", validators=[validators.resourceNameValidator])
 	uuid = models.CharField(max_length = 1024, default = uuid.uuid4(), editable = False)
 
 	''' OS '''
@@ -50,8 +51,8 @@ class VTServer(models.Model):
 	discSpaceGB = models.FloatField(blank = True, null=True, editable = False)
 
 	''' Agent fields'''
-	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper],help_text="URL of the agen daemon running in the server. It should be https://DOMAIN_OR_IP:9229")
-	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password")
+	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper], help_text="URL of the agent daemon running in the server. It should be https://DOMAIN_OR_IP:9229")
+	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password", validators=[validators.resourceNameValidator])
 
 	url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
     
