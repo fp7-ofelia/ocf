@@ -3,7 +3,6 @@ from vt_manager.models.Action import Action
 from django.db import transaction
 import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
-from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 #from vt_manager.settings.settingsLoader import ROOT_USERNAME,ROOT_PASSWORD,VTAM_IP,VTAM_PORT
 from vt_manager.utils.UrlUtils import UrlUtils
@@ -77,10 +76,6 @@ class ProvisioningDispatcher():
 		try:
 			actionModel.checkActionIsPresentAndUnique()
 
-			if not PolicyManager.checkPolicies(action):
-				logging.error("The requested action do not pass the Aggregate Manager Policies")
-				raise Exception("The requested action do not pass the Aggregate Manager Policies")
-			
 			Server, VMmodel = controller.getServerAndCreateVM(action)
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
@@ -101,9 +96,6 @@ class ProvisioningDispatcher():
 				logging.error("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
 				raise Exception("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
 
-			elif not PolicyManager.checkPolicies(action):
-				logging.error("The requested action do not pass the Aggregate Manager Policies")
-				raise Exception("The requested action do not pass the Aggregate Manager Policies")
 			
 			#XXX:Change action Model
 			actionModel.setObjectUUID(VMmodel.getUUID())
