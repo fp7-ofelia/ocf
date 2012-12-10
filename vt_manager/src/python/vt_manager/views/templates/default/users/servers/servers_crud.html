@@ -108,16 +108,10 @@ function adding(row){
         <div>
 			<h2>General parameters</h2>
 			<h3>Parameters</h3>
-			{% if serverForm.errors %}
-				<table>
-				{%for field in serverForm %}
-					{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-					{% endif %}
-				{% endfor %}
-				</table>
-            {% endif %}
                 <table class="formtable">
+                    {% if serverForm.non_field_errors %}
+                        <tr><td class="fielderror">{{serverForm.non_field_errors}}</td></tr>
+                    {% endif %}
                     <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
                     {% for field in serverForm %}
                         {% if field.errors %}
@@ -162,7 +156,7 @@ function adding(row){
 						<input id="submacbutton" type="button" value="Subscribe" >
 				</td>
 				{% else %}
-				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. If not a global range will be used</td></tr>
+				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. Otherwise a global range will be used</td></tr>
 				{% endif %}
             </table>
 		</div>
@@ -180,14 +174,14 @@ function adding(row){
 						<input id="subipbutton" type="button" value="Subscribe">
 				</td>
                 {% else %}
-                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. If not a global range will be used</td></tr>
+                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. Otherwise a global range will be used</td></tr>
                 {% endif %}
             </table>
 		</div>
 		{% endif %}
 
         <div class="center" style="margin-top : 30px;">
-            <input type="submit" value="Save" /> |
+            <input type="submit" id="form_create_server" value="Save" /> |
             {% if server %}
             <a href="{% url delete_server server.id %}">Delete</a> |
             {% endif %}
@@ -201,5 +195,9 @@ function adding(row){
 	</div>
 
 </div>
+
+        <!-- Validation in the end waits for the forms to be loaded -->
+        <script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+
 {% endblock content %}
 

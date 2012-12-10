@@ -119,7 +119,7 @@
     </div><!-- detail section -->
 
 {# Topology #}
-{% include "slice/ui/topology.html" %}
+{% include "slice/topology.html" %}
 
 {# List of aggregates #}
     <div class="detail_section">
@@ -166,8 +166,8 @@
 <!-- Common expandable tooltip -->
 <div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
 {# Aggregate details #}
-{% include "slice/ui/plugins/openflowAndPlanetLab.html" %}
-{% include "slice/ui/plugins/vt.html" %}
+{% include "slice/plugins/openflowAndPlanetLab.html" %}
+{% include "slice/plugins/vt.html" %}
 
 {# Show message when no aggregates are added to the slice #}
 {% with slice.aggregates.all as aggregate_list %}

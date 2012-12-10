@@ -26,17 +26,6 @@ function confirmInput(inputElement){
 		    </div>
 
 			{{ ifaceformset.management_form}}
-			{% if ifaceformset.errors %}
-                <table>
-                    {%for form in ifaceformset.forms %}
-                    {%for field in form %}
-                        {% if field.errors %}
-                        <tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-                        {% endif %}
-                    {% endfor %}
-                    {% endfor %}
-                </table>
-            {% endif %}
             <table id="ifacetable" class="formtable">
                 {% for form in ifaceformset.forms %}
                     <tbody>
@@ -50,12 +39,13 @@ function confirmInput(inputElement){
                                     </td>
                                 {% endfor %}
                             {% endif %}
-                            {% if field.errors %}
-                                <th class="fielderror"> {{ field.label_tag }}:</th><td class="fielderror"> {{ field }}</td>
-                            {% else %}
                             {% if field.name != 'id' %}
-                                <th> {{ field.label_tag }}:</th><td {% if form.initial%}{%if field.name == "name" %}class="readonly"{%endif%}{%endif%}>{{ field }}</td>
-                            {%endif%}
+                                <th>{{ field.label_tag }}:</th>
+                                <td {% if form.initial%}{%if field.name == "name" %}class="readonly"{%endif%}{%endif%}>
+                                    {% if field.errors %}
+                                        <ul id="errorlist_{{ field.name }}" class="errorlist"><li>{{ field.errors }}</li></ul>
+                                    {% endif %}
+                                {{ field }}</td>
                             {%endif%}
                         {% endfor %}
                         <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></th>
