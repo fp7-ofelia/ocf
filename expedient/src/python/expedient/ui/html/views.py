@@ -502,7 +502,7 @@ def bookOpenflow(request, slice_id):
         free_vlan = 'None'
         alertMessage = ''
         fsmode = request.POST['fsmode'] 
-        if fsmode == 'simple':
+        if fsmode == 'simple' and enable_simple_mode:
             try:
                 free_vlan = calculate_free_vlan(slice)
             except Exception as e:
@@ -551,7 +551,7 @@ def bookOpenflow(request, slice_id):
 
         return simple.direct_to_template(
             request,
-            template="html/select_resources.html",
+            template="expedient/clearinghouse/slice/select_resources.html",
             extra_context={
                 "nIslands": nIslands,
                 "d3_nodes": d3_nodes,
@@ -667,7 +667,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         
     return simple.direct_to_template(
         request,
-        template="html/select_flowspace.html",
+        template="expedient/clearinghouse/slice/select_flowspace.html",
         extra_context={
             "slice": slice,
             "fsformset": formset,
@@ -698,7 +698,7 @@ def sshkeys(request, slice_id):
     
     return simple.direct_to_template(
         request,
-        template="html/sshkeys.html",
+        template="expedient/clearinghouse/slice/sshkeys.html",
         extra_context={
             "slice":slice,
             "breadcrumbs": (
