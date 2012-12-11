@@ -502,7 +502,7 @@ def bookOpenflow(request, slice_id):
         free_vlan = 'None'
         alertMessage = ''
         fsmode = request.POST['fsmode'] 
-        if fsmode == 'simple':
+        if fsmode == 'simple' and enable_simple_mode:
             try:
                 free_vlan = calculate_free_vlan(slice)
             except Exception as e:
