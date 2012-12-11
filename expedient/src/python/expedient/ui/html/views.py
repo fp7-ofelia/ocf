@@ -515,6 +515,10 @@ def bookOpenflow(request, slice_id):
             #return HttpResponseRedirect(reverse("html_plugin_flowspace", args=[slice_id, fsmode, free_vlan, alertMessage]))  
             return flowspace(request, slice_id, fsmode, free_vlan, alertMessage)
 
+
+            
+
+ 
         else:        
             return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
@@ -547,7 +551,7 @@ def bookOpenflow(request, slice_id):
 
         return simple.direct_to_template(
             request,
-            template="expedient/clearinghouse/slice/select_resources.html",
+            template="html/select_resources.html",
             extra_context={
                 "nIslands": nIslands,
                 "d3_nodes": d3_nodes,
@@ -570,7 +574,6 @@ def bookOpenflow(request, slice_id):
                 )
             },
         )
-
 def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
     """
     Add flowspace.
@@ -664,7 +667,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         
     return simple.direct_to_template(
         request,
-        template="expedient/clearinghouse/slice/select_flowspace.html",
+        template="html/select_flowspace.html",
         extra_context={
             "slice": slice,
             "fsformset": formset,
@@ -695,7 +698,7 @@ def sshkeys(request, slice_id):
     
     return simple.direct_to_template(
         request,
-        template="expedient/clearinghouse/slice/sshkeys.html",
+        template="html/sshkeys.html",
         extra_context={
             "slice":slice,
             "breadcrumbs": (
