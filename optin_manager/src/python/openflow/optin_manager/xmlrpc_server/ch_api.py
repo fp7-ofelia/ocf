@@ -16,6 +16,7 @@ from django.db import transaction
 from django.conf import settings
 from django.core.mail import send_mail
 from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
+from django.contrib.sites.models import Site
 
 @decorator
 def check_fv_set(func, *arg, **kwargs):
@@ -375,8 +376,9 @@ def create_slice(slice_id, project_name, project_description,
                         "Couldn't re-opt into updated experiment. Lost all the opt-ins: %s"%parseFVexception(exc))
              
     try:
-        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://"+settings.SITE_IP_ADDR+":8443/opts/opt_in",from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://%s/opts/opt_in" % Site.objects.get_current() ,from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
     except Exception as e:
+        print e
         pass
 
     transaction.commit()       
