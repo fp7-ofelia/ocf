@@ -145,7 +145,12 @@ def status_img_url(request, agg_id):
     fail = HttpResponse(reverse("img_media", args=["inactive.png"]))
     
     try:
-        if aggregate.as_leaf_class().check_status():
+        # Check aggregate status and update model if it changed
+        agg_status = aggregate.as_leaf_class().check_status()
+        if agg_status != aggregate.available:
+            aggregate.available = agg_status
+            aggregate.save()
+        if agg_status:
             return success
         else:
             return fail

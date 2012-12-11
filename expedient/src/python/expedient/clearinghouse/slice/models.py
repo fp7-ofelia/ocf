@@ -95,32 +95,33 @@ class Slice(models.Model):
                 # try to stop slice on all previously started aggregates
                
                 #Error is in a VT AM, can continue 
-                if isinstance(agg.as_leaf_class(),VtPlugin):
+                #if isinstance(agg.as_leaf_class(),VtPlugin):
+                #    try:
+                #        agg.as_leaf_class().stop_slice(self)
+                #    except Exception, e2:
+                #            # error stopping slice
+                #            logger.error(traceback.format_exc())
+                #            DatedMessage.objects.post_message_to_user(
+                #            msg_text="Error stopping slice %s on "
+                #            "aggregate %s" % (self, agg.name),
+                #            user=user, msg_type=DatedMessage.TYPE_ERROR)
+                #            # raise the original exception raised starting the slice.
+                #    exceptions.append(e)
+                ##Error is on a OF AM, can not start slice, and should stop all the AMs
+                #else:
+                for ragg in started_aggs:
                     try:
-                        agg.as_leaf_class().stop_slice(self)
-                    except Exception, e2:
-                            # error stopping slice
-                            logger.error(traceback.format_exc())
-                            DatedMessage.objects.post_message_to_user(
-                            msg_text="Error stopping slice %s on "
-                            "aggregate %s" % (self, agg.name),
-                            user=user, msg_type=DatedMessage.TYPE_ERROR)
-                            # raise the original exception raised starting the slice.
-                    exceptions.append(e)
-                #Error is on a OF AM, can not start slice, and should stop all the AMs
-                else:
-                    for ragg in started_aggs:
-                        try:
+                        if not isinstance(agg.as_leaf_class(),VtPlugin):
                             ragg.as_leaf_class().stop_slice(self)
-                        except Exception, e2:
-                            # error stopping slice
-                            logger.error(traceback.format_exc())
-                            DatedMessage.objects.post_message_to_user(
-                            msg_text="Error stopping slice %s on "
-                            "aggregate %s" % (self, ragg.name),
-                            user=user, msg_type=DatedMessage.TYPE_ERROR)
-                    # raise the original exception raised starting the slice.
-                    raise e
+                    except Exception, e2:
+                        # error stopping slice
+                        logger.error(traceback.format_exc())
+                        DatedMessage.objects.post_message_to_user(
+                        msg_text="Error stopping slice %s on "
+                        "aggregate %s" % (self, ragg.name),
+                        user=user, msg_type=DatedMessage.TYPE_ERROR)
+                # raise the original exception raised starting the slice.
+                raise e
         
         # all is well
         self.started = True

@@ -9,10 +9,7 @@ from vt_manager.models.MacSlot import MacSlot
 from vt_manager.models.Ip4Slot import Ip4Slot
 from vt_manager.models.Ip4Range import Ip4Range
 from vt_manager.utils.EthernetUtils import EthernetUtils
-
-def checkBlank(value):
-	if value=='':
-		raise ValidationError("Field required")	
+from vt_manager.common.utils import validators
 
 class NetworkInterface(models.Model):
 
@@ -23,8 +20,8 @@ class NetworkInterface(models.Model):
 		app_label = 'vt_manager'
 
 	'''Generic parameters'''
-	name = models.CharField(max_length = 128, default="", verbose_name = "Name") #check if bank = True and null = True are required
-	mac = models.ForeignKey('MacSlot', blank = True, null = False, editable = False, verbose_name = "Mac address",validators=[EthernetUtils.checkValidMac],related_name="interface")
+	name = models.CharField(max_length = 128, default="", verbose_name = "Name", validators=[validators.resourceNameValidator]) #check if bank = True and null = True are required
+	mac = models.ForeignKey('MacSlot', blank = True, null = False, editable = False, verbose_name = "Mac address", validators=[EthernetUtils.checkValidMac],related_name="interface")
 	ip4s = models.ManyToManyField('Ip4Slot', blank = True, null = True, editable = False, verbose_name = "IP4 addresses", related_name = "Interface")
 	isMgmt = models.BooleanField(verbose_name="Mgmt interface",default=0, editable = False)
 	isBridge = models.BooleanField(verbose_name="bridge interface",default=0, editable = False)
@@ -33,8 +30,9 @@ class NetworkInterface(models.Model):
 	connectedTo =  models.ManyToManyField('NetworkInterface', blank = True, null = False, editable = False, verbose_name = "Interfaces connected", related_name= "serverBridge")
 
 	'''Physical connection details for bridged interfaces'''	
-	switchID = models.CharField(max_length = 128, default="", blank = True, null=True, verbose_name = "Switch ID",validators=[checkBlank])
-	port = models.IntegerField( blank = True, null=True, verbose_name = "Switch Port",validators=[checkBlank])
+	#switchID = models.CharField(max_length = 128, default="", blank = True, null=True, verbose_name = "Switch ID",validators=[checkBlank])
+	switchID = models.CharField(max_length = 23, default="", blank = True, null=True, verbose_name = "Switch ID", validators=[validators.datapathValidator])
+	port = models.IntegerField( blank = True, null=True, verbose_name = "Switch Port", validators=[validators.numberValidator])
 	idForm = models.IntegerField(blank = True, null=True, editable = False)
 
 	'''Defines soft or hard state of the VM'''	

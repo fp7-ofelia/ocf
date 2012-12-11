@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
     HttpResponse
 from django.forms.models import modelformset_factory
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django import forms
 from django.db.models import Q
@@ -52,6 +53,7 @@ def virtualmachine_crud(request, slice_id, server_id):
     slice = get_object_or_404(Slice, id = slice_id)
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
+    # Creates a model based on VM
     VMFormSet = modelformset_factory(
         VM, can_delete=False, 
         fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
@@ -64,6 +66,17 @@ def virtualmachine_crud(request, slice_id, server_id):
                 formset = VMFormSet(
                     request.POST, queryset=virtualmachines)
                 if formset.is_valid():
+                    # Check VM name
+                    import re
+                    name = request.POST['form-0-name'] if request.POST['form-0-name'] else None
+                    cntrlr_name_re = re.compile("^([0-9a-zA-Z\-]){1,64}$")
+                    m = cntrlr_name_re.match(name)
+                    if not m:
+                        raise ValidationError(
+                            "Invalid input: VM name should not contain accented characters, symbols, underscores or whitespaces.",
+                            code="invalid",
+                        )
+
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
@@ -71,7 +84,7 @@ def virtualmachine_crud(request, slice_id, server_id):
                     return HttpResponseRedirect(reverse("html_plugin_home",
                                                 args=[slice_id]))
                 else:
-                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters or whitespaces or the memory is not a number.", code="invalid",)
+                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number.", code="invalid",)
 
         else:
             formset = VMFormSet(queryset=VM.objects.none())

@@ -186,8 +186,8 @@ def handle_add_links(request, aggregate,
     types = []
     for app, model_name in getattr(settings, "OPENFLOW_OTHER_RESOURCES", []):
         app_label = app.rpartition(".")[2]
-        logger.debug(
-            "getting model for app %s model %s" % (app_label, model_name))
+#        logger.debug(
+#            "getting model for app %s model %s" % (app_label, model_name))
         model = cache.get_model(app_label, model_name)
         if not model:
             raise Exception(

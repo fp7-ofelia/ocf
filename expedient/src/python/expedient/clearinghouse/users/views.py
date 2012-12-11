@@ -14,7 +14,6 @@ from expedient.common.permissions.shortcuts import must_have_permission,\
     give_permission_to
 from registration import views as registration_views
 from expedient.clearinghouse.users.forms import FullRegistrationForm
-from registration.models import RegistrationProfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.views import password_reset
@@ -154,13 +153,29 @@ def delete(request, user_id):
     )
 
 def register(request):
-    return registration_views.register(
-        request,
-        form_class=FullRegistrationForm)
+    try:
+	return registration_views.register(
+	    request,
+            form_class=FullRegistrationForm)
+    except Exception as e:
+        print "[ERROR] Exception at 'expedient.clearinghouse.users.views': user '%s' (%s) could not fully register. RegistrationForm module returned: %s" % (request.POST['username'], request.POST['email'], str(e))
+        return simple.direct_to_template(
+            request,
+            template='registration/registration_incomplete.html',
+            extra_context={
+                'exception': e,
+                'root_email': settings.ROOT_EMAIL,
+                'failed_username': request.POST['username'],
+                'failed_email': request.POST['email'],
+            },
+        )
 
 def activate(request, activation_key):
     template_name = 'registration/activate.html'
     activation_key = activation_key.lower() # Normalize before trying anything with it.
+    # Import only here to avoid every time warning 'DeprecationWarning:
+    # the sha module is deprecated; use the hashlib module instead'
+    from registration.models import RegistrationProfile
     account = RegistrationProfile.objects.activate_user(activation_key)
     if account:
         give_permission_to(

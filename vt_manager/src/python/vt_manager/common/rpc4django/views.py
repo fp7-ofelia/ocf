@@ -155,7 +155,8 @@ def serve_rpc_request(request, url_name="root", **kwargs):
         # Handle POST request with RPC payload
         
         if LOG_REQUESTS_RESPONSES:
-            logger.debug('Incoming request: %s' % str(request.raw_post_data))
+            logger.debug('\nIncoming request\n----------------')
+            logger.debug('\n%s\n\n\n\n' % str(request.raw_post_data))
             
         if _is_xmlrpc_request(request):
             if RESTRICT_XML:
@@ -179,7 +180,8 @@ def serve_rpc_request(request, url_name="root", **kwargs):
             response_type = 'application/json'
             
         if LOG_REQUESTS_RESPONSES:
-            logger.debug('Outgoing %s response: %s' %(response_type, resp))
+            logger.debug('Outgoing %s request\n---------------------------' % response_type)
+            logger.debug('\n%s\n\n\n\n' % resp)
         
         return HttpResponse(resp, response_type)
     elif request.method == 'OPTIONS':

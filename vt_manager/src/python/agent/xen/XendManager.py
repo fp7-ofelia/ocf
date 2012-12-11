@@ -90,15 +90,13 @@ class XendManager(object):
 
 	@staticmethod
 	def __findAliasForDuplicatedVmName(vm):
-		with XendManager._mutex:
-			#Duplicated VM name; find new temporal alias
-			newVmName = vm.name
-			for i in range(OXA_XEN_MAX_DUPLICATED_NAME_VMS):
-				if not XendManager.isVmRunning(vm.name+"_"+str(i)):
-					return str(vm.name+"_"+str(i))
-								
-			Exception("Could not generate an alias for a duplicated vm name.")	
-			
+		#Duplicated VM name; find new temporal alias
+		newVmName = vm.name
+		for i in range(OXA_XEN_MAX_DUPLICATED_NAME_VMS):
+			if not XendManager.isVmRunning(vm.name+"_"+str(i)):
+				return str(vm.name+"_"+str(i))
+		
+		Exception("Could not generate an alias for a duplicated vm name.")
 
 	#Provisioning routines
 	@staticmethod
@@ -109,26 +107,26 @@ class XendManager(object):
 		with open(HdManager.getConfigFilePath(vm),'r') as openConfig: 
 			xmlConf = conn.domainXMLFromNative('xen-xm', openConfig.read(), 0) 
 
-		con = libvirt.open('xen:///')
-		dom = con.createLinux(xmlConf,0)
+		#con = libvirt.open('xen:///')
+		#dom = con.createLinux(xmlConf,0)
 				
 
-#		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
-#			#Duplicated name; trying to find an Alias
-#			newVmName = XendManager.__findAliasForDuplicatedVmName(vm)
-#			subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
-#		else:	
-#			try:
-#				#Try first using libvirt call
-#				XendManager.logger.warning('creating vm using python-libvirt methods')
- #                               XendManager.logger.warning(xmlConf)
-#				conn.createXML(xmlConf,0)
-#				XendManager.logger.warning(XendManager.sanitize_arg(HdManager.getConfigFilePath(vm)))
- #                               XendManager.logger.warning('created vm?')
-#				raise Exception("Skip") #otherwise stop is ridicously slow
-#			except Exception as e:
-#				#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
-#				subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
+			#Duplicated name; trying to find an Alias
+			newVmName = XendManager.__findAliasForDuplicatedVmName(vm)
+			subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+		else:	
+			try:
+				#Try first using libvirt call
+				#XendManager.logger.warning('creating vm using python-libvirt methods')
+                                #XendManager.logger.warning(xmlConf)
+				#conn.createXML(xmlConf,0)
+				#XendManager.logger.warning(XendManager.sanitize_arg(HdManager.getConfigFilePath(vm)))
+                                #XendManager.logger.warning('created vm?')
+				raise Exception("Skip") #otherwise stop is ridicously slow
+			except Exception as e:
+				#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
+				subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
 
 		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
 

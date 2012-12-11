@@ -24,12 +24,10 @@ def check_password(environ, user, password):
     kwargs = {'username': user, 'is_active': True}
     
     try: 
-        print "\n\n\nPASO1\n\n\n"
         if environ['REQUEST_URI'] == '/vt_plugin/xmlrpc/vt_am/':
             for agg in Aggregate.objects.all():
                 agg = agg.as_leaf_class()
                 if agg.leaf_name == 'VtPlugin' and user == agg.client.username and password == agg.client.password:
-                    print "PASO3"
                     return True
             return False
         try: 

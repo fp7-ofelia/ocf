@@ -3,7 +3,6 @@ import os
 import sys
 from vt_manager.models import *
 from vt_manager.controller import *
-from vt_manager.controller.policy.PolicyManager import PolicyManager
 from vt_manager.communication.utils import *
 from vt_manager.utils.ServiceThread import *
 import xmlrpclib, threading, logging, copy
