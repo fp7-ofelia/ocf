@@ -12,6 +12,7 @@ from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
 from openflow.optin_manager.opts.vlans.vlanController import vlanController
+from django.contrib.sites.models import Site
     
 def change_priority(request):
     '''
@@ -197,7 +198,7 @@ def add_opt_in(request):
                                             fs_description = "%s"%fs
                                 send_mail(
                                          settings.EMAIL_SUBJECT_PREFIX + "Your Flowspace request has been attended",
-                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (settings.SITE_DOMAIN.split(':')[0],fs_description),
+                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (Site.objects.get_current(),fs_description),
                                          from_email=settings.DEFAULT_FROM_EMAIL,
                                          recipient_list= [selexp.owner_email],
                                          #recipient_list=[settings.ROOT_EMAIL],

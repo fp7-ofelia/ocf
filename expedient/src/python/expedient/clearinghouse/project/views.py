@@ -29,6 +29,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 import ldap 
+from django.contrib.sites.models import Site
+
 
 logger = logging.getLogger("project.views")
 
@@ -379,13 +381,15 @@ def add_member(request, proj_id):
             try:
                 send_mail(
                          settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),
-                         "You have been added to Project %s as a %s user. You can now start experimenting by going to https://%s\n\n" % (project.name, roles, settings.SITE_DOMAIN),
+                         "You have been added to Project %s as a %s user. You can now start experimenting by going to https://%s/\n\n" % (project.name, roles, Site.objects.get_current()),
                          from_email=settings.DEFAULT_FROM_EMAIL,
                          recipient_list=[user.email],
                          #recipient_list=[settings.ROOT_EMAIL],
                  )
 
             except Exception as e:
+                print e
+                print SITE_CACHE
                 print "User email notification could no be sent"
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
