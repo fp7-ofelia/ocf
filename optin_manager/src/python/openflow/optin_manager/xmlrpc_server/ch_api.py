@@ -378,7 +378,6 @@ def create_slice(slice_id, project_name, project_description,
     try:
         send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://%s/opts/opt_in" % Site.objects.get_current() ,from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
     except Exception as e:
-        print e
         pass
 
     transaction.commit()       
@@ -420,7 +419,6 @@ def delete_slice(sliceid, **kwargs):
         if "slice does not exist" in str(e):
             success = True
         else:
-            print e
             return "Couldn't delete slice on flowvisor: %s"%parseFVexception(e)
      
     # get all flowspaces opted into this exp
@@ -453,7 +451,6 @@ def get_switches(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        print e
         raise parseFVexception(e)        
     complete_list.extend(switches)
         
@@ -474,7 +471,6 @@ def get_links(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        print e
         raise parseFVexception(e)
     
     complete_list.extend(links)
@@ -597,7 +593,6 @@ def get_granted_flowspace(slice_id, **kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        print e
         raise parseFVexception(e)
 
 
