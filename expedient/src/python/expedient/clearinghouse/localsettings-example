@@ -101,7 +101,50 @@ THEME = 'default'
 
 
 
-### Section 2: LDAP Client settings
+### Section 2: E-mail settings
+#
+# Configure your SMTP parameters.
+#
+
+#
+# Address of the mailing host.
+#
+EMAIL_HOST = "changeMe"
+
+#
+# Port used in that host. Default is '25'.
+#
+EMAIL_PORT = 25
+
+#
+# User to authenticate against mailing host.
+#
+EMAIL_HOST_USER = ''
+
+#
+# Password to authenticate against mailing host.
+#
+EMAIL_HOST_PASSWORD = ''
+
+#
+# Activate TLS (True) or SSL (False).
+#
+EMAIL_USE_TLS = True
+
+#
+# E-mail address used as sender.
+#
+DEFAULT_FROM_EMAIL = 'changeMe'
+
+#
+# Subject (a prefix of it) for the e-mail.
+#
+EMAIL_SUBJECT_PREFIX = 'changeMe'
+
+
+
+
+### Section 3: LDAP Client settings
 #
 # If you are using a LDAP server out of the OFELIA FP7 infraestructure
 # then you would probably like to configure it. You may want to uncomment the 

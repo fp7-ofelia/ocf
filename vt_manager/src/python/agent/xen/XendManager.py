@@ -90,15 +90,13 @@ class XendManager(object):
 
 	@staticmethod
 	def __findAliasForDuplicatedVmName(vm):
-		with XendManager._mutex:
-			#Duplicated VM name; find new temporal alias
-			newVmName = vm.name
-			for i in range(OXA_XEN_MAX_DUPLICATED_NAME_VMS):
-				if not XendManager.isVmRunning(vm.name+"_"+str(i)):
-					return str(vm.name+"_"+str(i))
-								
-			Exception("Could not generate an alias for a duplicated vm name.")	
-			
+		#Duplicated VM name; find new temporal alias
+		newVmName = vm.name
+		for i in range(OXA_XEN_MAX_DUPLICATED_NAME_VMS):
+			if not XendManager.isVmRunning(vm.name+"_"+str(i)):
+				return str(vm.name+"_"+str(i))
+		
+		Exception("Could not generate an alias for a duplicated vm name.")
 
 	#Provisioning routines
 	@staticmethod

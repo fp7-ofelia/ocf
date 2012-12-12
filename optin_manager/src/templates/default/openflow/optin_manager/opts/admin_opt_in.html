@@ -11,18 +11,24 @@ f.style.height = f.contentWindow.document.body.scrollHeight + "px";
 <script type="text/javascript">
 jQuery(document).ready(function() {
         //jQuery(".expandable").hide();
-         
+        jQuery(".expandableCtl").each(function(){
+		elementName = "#"+$(this).attr('id')+"Container";
+		$(elementName).css("display","none");
+	})
+
+ 
         jQuery(".expandableCtl").click(function()
         {
 		elementName = "#"+$(this).attr('id')+"Container";
 		jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
-		if(jQuery("span", this).attr("class") == "closed"){
-		jQuery("span", this).html("&#x25B2;");
-		$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
+		if(jQuery("span", this).attr("class") == "opened"){
+		jQuery("span", this).html("&#x25BC;");
+		$('html, body').animate({scrollBottom: $(elementName).offset().top-150}, 200);
 		}else{
-			jQuery("span", this).html("&#x25BC;");
+			jQuery("span", this).html("&#x25B2;");
 		}
-		jQuery("span", this).toggleClass("opened closed");
+		jQuery("span", this).toggleClass("closed opened");
+		//jQuery("span", this).toggleClass("opened closed");
 	});
 });
 
@@ -101,14 +107,14 @@ $(document).ready(function(){
                         {% if  forloop.first %}
 			<div class="vlan_list">
 			<ul style="margin:7px; padding:0px;">
-			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="opened">&#x25B2;</span></a></li></ul>
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="closed">&#x25BC;</span></a></li></ul>
 			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
 			{%endif%}
 			<li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
                         {% if forloop.counter|divisibleby:vlan_list_length %}</ul></div></div>
 			<div class="vlan_list">
 			<ul style="margin:7px; padding:0px;">
-			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="opened">&#x25B2;</span></a></li></ul>
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="closed">&#x25BC;</span></a></li></ul>
 			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
 			{% endif %}
 			{% if  forloop.last %}</ul></div></div>{%endif%}

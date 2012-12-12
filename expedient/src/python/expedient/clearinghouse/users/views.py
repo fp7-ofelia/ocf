@@ -153,9 +153,22 @@ def delete(request, user_id):
     )
 
 def register(request):
-    return registration_views.register(
-        request,
-        form_class=FullRegistrationForm)
+    try:
+	return registration_views.register(
+	    request,
+            form_class=FullRegistrationForm)
+    except Exception as e:
+        print "[ERROR] Exception at 'expedient.clearinghouse.users.views': user '%s' (%s) could not fully register. RegistrationForm module returned: %s" % (request.POST['username'], request.POST['email'], str(e))
+        return simple.direct_to_template(
+            request,
+            template='registration/registration_incomplete.html',
+            extra_context={
+                'exception': e,
+                'root_email': settings.ROOT_EMAIL,
+                'failed_username': request.POST['username'],
+                'failed_email': request.POST['email'],
+            },
+        )
 
 def activate(request, activation_key):
     template_name = 'registration/activate.html'

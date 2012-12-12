@@ -74,8 +74,8 @@ def rule_create(request,table_name=None):
 
 	if formMode == "easy":
 	#Avoid empty fields
-        	if ruleDesc == "":
-                	errors.append("Description Field is empty")
+#        	if ruleDesc == "":
+#                	errors.append("Description Field is empty")
         	if ruleError == "":
                 	errors.append("Error Message field is empty")
         	if ruleCondition == "":

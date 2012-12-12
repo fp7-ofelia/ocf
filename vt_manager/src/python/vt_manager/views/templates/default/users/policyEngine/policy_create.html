@@ -199,8 +199,8 @@
 	{% endif %}
 	<table>
 		<td><b>Editing mode:</b></td>
-		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
-		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
+		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> <label for="formMode">Form Mode</label></td>
+		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> <label for="advancedMode">Advanced Mode</label></td>
 		<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
 			<div class="tooltip" id="mode_help">Form mode edition allows to create a rule using the form fields below. Advanced Mode edition allows you to write rules according to RegexParser syntax
 			</div>
@@ -210,15 +210,15 @@
    	<h3>General rule parameters</h3>
 	<div>	
 		<p>
-			Enable Rule:
+			<label for="enableRule">Enable Rule</label>:
 			{% if edit or saved  %}
 				{% if enabled %}
-					<input type="checkbox" name="enable" value="enable" checked></td>
+					<input id="enableRule" type="checkbox" name="enable" value="enable" checked></td>
 				{% else %}
-					<input type="checkbox" name="enable" value="enable"></td>
+					<input id="enableRule" type="checkbox" name="enable" value="enable"></td>
 				{% endif %}
 			{% else %}
-				<input type="checkbox" name="enable" value="enable" checked></td>
+				<input id="enableRule" type="checkbox" name="enable" value="enable" checked></td>
 			{% endif %}
 			<img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
 	   	 	<div class="tooltip" id="enable_help">

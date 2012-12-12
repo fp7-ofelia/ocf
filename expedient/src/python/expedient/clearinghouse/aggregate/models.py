@@ -123,7 +123,7 @@ No information available.
         try:
             return self.logo.url
         except Exception as e:
-            logger.debug("Exception getting logo url %s" % e)
+            #logger.debug("Exception getting logo url %s" % e)
             return ""
         
     @classmethod

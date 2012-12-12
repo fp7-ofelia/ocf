@@ -367,8 +367,9 @@ var svg = d3.select("#target")
         .attr("height", height)
         .datum({x: 0, y: 0})
         .call(d3.behavior.drag().on("drag", dragMap))
-    .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
-        .attr("cursor", "move")
+/*    .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
+        .attr("cursor", "move")*/
+    .append("svg:g").on("zoom", redraw)
 
 // DATA VARIABLES
 var nodes = data.nodes;
@@ -564,10 +565,11 @@ iellipses.transition()
                 .style("stroke-width",3)
                 .style("stroke", function(d) { return d3.rgb(color(d.group%nIslands)).brighter(10);})
                 .duration(1500)
-iellipses.transition()
+/*iellipses.transition()
            .delay(1500)
            .style("opacity",0)
            .duration(3000)
+
 ilabels.transition()
            .delay(1500)
            .style("opacity",0)
@@ -576,7 +578,7 @@ ilabels.transition()
 iellipses.transition()
 	.delay(4500)
 	.style("display", "none");
-
+*/
 }
 
 function regroup(){
@@ -619,6 +621,6 @@ function collide(alpha) {
 };
 
 //XXX lbergesio: Try to find how to allow scrolling within d3
-$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
+/*$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });*/
 
 </script>
