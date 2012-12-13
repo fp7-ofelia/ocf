@@ -311,13 +311,11 @@ def create_slice(slice_id, project_name, project_description,
             else:
                 e.delete()
                 print exc
-                raise Exception(
-                "While trying to update experiment, FV raised exception on the delete previous experiment step: %s"%parseFVexception(exc))
+                raise Exception(parseFVexception(exc,"While trying to update experiment, FV raised exception on the delete previous experiment step: "))
                 
         if (not fv_success):
             e.delete()
-            raise Exception(
-            "While trying to update experiment, FV returned False on the delete previous experiment step")
+            raise Exception("While trying to update experiment, FV returned False on the delete previous experiment step")
             
     # create the new experiment on FV
     try:    
@@ -337,11 +335,9 @@ def create_slice(slice_id, project_name, project_description,
         e.delete()
         print exc
         if (update_exp):
-            raise Exception(
-            "Could not create slice at the Flowvisor, after deleting old slice. Error was: %s"%parseFVexception(exc))
+            raise Exception(parseFVexception(exc,"Could not create slice at the Flowvisor, after deleting old slice. Error was: "))
         else:
-            raise Exception(
-            "Could not create slice at the Flowvisor. Error was: %s"%parseFVexception(exc))
+            raise Exception(parseFVexception(exc,"Could not create slice at the Flowvisor. Error was: "))
             
     if not fv_success:
         e.delete()
@@ -372,8 +368,7 @@ def create_slice(slice_id, project_name, project_description,
                     opt_fses_outof_exp(optfses)
                 all_opts.delete()
                 print exc
-                raise Exception(
-                        "Couldn't re-opt into updated experiment. Lost all the opt-ins: %s"%parseFVexception(exc))
+                raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
              
     try:
         send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://%s/opts/opt_in" % Site.objects.get_current() ,from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
@@ -451,7 +446,7 @@ def get_switches(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise parseFVexception(e)        
+        raise Exception(parseFVexception(e))        
     complete_list.extend(switches)
         
     return complete_list
@@ -471,7 +466,7 @@ def get_links(**kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise parseFVexception(e)
+        raise Exception(parseFVexception(e))
     
     complete_list.extend(links)
         
@@ -593,7 +588,7 @@ def get_granted_flowspace(slice_id, **kwargs):
     except Exception,e:
         import traceback
         traceback.print_exc()
-        raise parseFVexception(e)
+        raise Exception(parseFVexception(e))
 
 
     return gfs 
