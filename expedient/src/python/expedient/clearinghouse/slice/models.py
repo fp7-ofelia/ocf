@@ -122,10 +122,7 @@ class Slice(models.Model):
                         "aggregate %s" % (self, ragg.name),
                         user=user, msg_type=DatedMessage.TYPE_ERROR)
                 # raise the original exception raised starting the slice.
-                print "LEODEBUG EN MODELS"
                 print e
-                print parseFVexception(e)
-                print "\n\n"
                 raise Exception(parseFVexception(e))
         
         # all is well
