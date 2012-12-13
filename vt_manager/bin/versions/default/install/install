@@ -54,10 +54,9 @@ ln -sf /etc/apache2/sites-available/vt_manager.conf /etc/apache2/sites-enabled/ 
 #Create application folder for error log
 mkdir -p /var/log/apache2/vt_manager
 
-#Change permissions of the code ==> Not required for the vt_manager
-#printHeader ">" "Setting correct file permissions..."
-#chmod -f a+w $SRC_DIR/src/python/vt_manager/gcf-x509*
-#chown -f $APACHE_USER $SRC_DIR/src/ -R
+#Change permissions of the code 
+printHeader ">" "Setting correct file permissions..."
+chown -f $APACHE_USER $SRC_DIR/src/python/vt_manager/controller/policies/utils/log
 
 
 #Django settings 

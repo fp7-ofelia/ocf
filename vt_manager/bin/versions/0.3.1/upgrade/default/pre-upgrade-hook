@@ -1,0 +1,22 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: OFELIA, FIBRE  FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.3.1 pre-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/vt_manager/
+
+local TMP_PATH=$PWD
+
+#Change permissions of the code 
+printHeader ">" "Setting correct file permissions..."
+chown -f $APACHE_USER $SRC_DIR/src/python/vt_manager/controller/policies/utils/log
+
+cd $TMP_PATH
+
