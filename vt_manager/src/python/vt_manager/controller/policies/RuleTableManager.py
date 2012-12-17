@@ -3,6 +3,7 @@ from pypelib.utils.Exceptions import *
 from ControllerMappings import ControllerMappings
 from threading import Thread, Lock
 from utils.PolicyLogger import PolicyLogger
+from django.conf import settings
 from django.core.mail import send_mail
 #CBA
 import uuid
@@ -157,17 +158,16 @@ class RuleTableManager():
 			if issubclass(type(e), MultiplePolicyObjectsReturned):
 				send_mail(
 					settings.EMAIL_SUBJECT_PREFIX + "DB error: multiple Policy tables",
-					"There are multiple PolicyTables in your SQL engine. Please do check the contents of table 'pypelib_RuleTableModel' inside database %s.\n\n" % (settings.DATABASE_NAME),
+					"There are multiple PolicyTables with the same name in your SQL engine.\nPlease do ensure this is not happening by checking the contents of:\n\n    database: %s\n    table: pypelib_RuleTableModel\n\n" % (settings.DATABASE_NAME),
 					from_email=settings.DEFAULT_FROM_EMAIL,
 					recipient_list=[settings.ROOT_EMAIL],
-				)
+					)
 				RuleTableManager.logger.info("E-mail sent to Island Manager. Reason: multiple Policy tables")
-			else:
-				raise e
+			# Policy denial raises Exception to avoid VM resources allocation
+			raise e
 
-		RuleTableManager.logger.debug("All policies were accepted")
-		return 
-			
+                RuleTableManager.logger.debug("All policies were accepted")
+                return
 
 	#getters
 	@staticmethod
