@@ -1,14 +1,15 @@
 from pypelib.RuleTable import RuleTable
+from pypelib.utils.Exceptions import *
 from ControllerMappings import ControllerMappings
 from threading import Thread, Lock
 from utils.PolicyLogger import PolicyLogger
+from django.core.mail import send_mail
 #CBA
 import uuid
 
 
 '''
-        @author: lbergesio, omoya
-
+        @author: lbergesio, omoya, CarolinaFernandez
  
 '''
 
@@ -62,6 +63,30 @@ class RuleTableManager():
 			RuleTableManager._instance = RuleTable.loadOrGenerate(name, mapps, RuleTableManager._defaultParser, RuleTableManager._defaultPersistence, RuleTableManager._persistenceFlag, RuleTableManager._policyType, uuid.uuid4().hex)
 				
 		return RuleTableManager._instance
+
+        '''
+        Deletes the instance of PolicyRuleTable for a given ID.
+        This method should be seldom used.
+        '''
+        @staticmethod
+        def deleteInstance(tableID=None):
+            if tableID:
+                backend = RuleTableManager._defaultPersistence
+                with RuleTableManager._mutex:
+                    RuleTable.delete(tableID, backend)
+
+	'''
+	Retrieves all instances of PolicyRuleTable for a given name.
+	This method should be seldom used.
+	'''
+        @staticmethod
+        def getAllInstances(name=None):
+                if not name:
+                        name = RuleTableManager._defaultName
+		backend = RuleTableManager._defaultPersistence
+                with RuleTableManager._mutex:
+			instances = RuleTable.loadAll(name, backend)
+		return instances
 
 	#RuleTableMethods
 	@staticmethod
@@ -128,7 +153,17 @@ class RuleTableManager():
 			RuleTableManager.getInstance(tableName).evaluate(metaObj)
 		except Exception as e:
 			RuleTableManager.logger.error("Denied policy: %s" %(e))
-			raise e
+			#if isinstance(e, MultiplePolicyObjectsReturned):
+			if issubclass(type(e), MultiplePolicyObjectsReturned):
+				send_mail(
+					settings.EMAIL_SUBJECT_PREFIX + "DB error: multiple Policy tables",
+					"There are multiple PolicyTables in your SQL engine. Please do check the contents of table 'pypelib_RuleTableModel' inside database %s.\n\n" % (settings.DATABASE_NAME),
+					from_email=settings.DEFAULT_FROM_EMAIL,
+					recipient_list=[settings.ROOT_EMAIL],
+				)
+				RuleTableManager.logger.info("E-mail sent to Island Manager. Reason: multiple Policy tables")
+			else:
+				raise e
 
 		RuleTableManager.logger.debug("All policies were accepted")
 		return 

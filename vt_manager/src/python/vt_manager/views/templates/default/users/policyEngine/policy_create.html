@@ -72,6 +72,12 @@
                	$("#CreateCondButton").click(function() {
                         $.fancybox({'href': '{% url condition_create CurrentTable %}'});
         });
+        /* Bind fancybox to each button and their respective URLs */
+        /*
+                $("#CreateCondButton").live('click',function() {
+                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});   
+        });
+        */
 		$("#ac").change(function() {
                         document.getElementById("finalCond").value = " ";
         });
@@ -412,10 +418,10 @@
 		<input type="hidden" name="edit" value="{{ edit }}">
 		<input type="hidden" name="load" value="True">
 		{% if edit %}
-			<input id="SubmitForm" type="button" value="Save Changes">
+			<input id="SubmitForm" type="submit" value="Save Changes">
 			<input type="hidden" name="editing" value="1">
 		{% else %}
-		        <input id="SubmitForm" type="button" value="Generate Rule">
+		        <input id="SubmitForm" type="submit" value="Generate Rule">
 			<input type="hidden" name="editing" value="0">
 		{% endif %}
 		<input type="hidden" id="conditionID" name="conditionID" value="" >

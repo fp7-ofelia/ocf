@@ -57,13 +57,23 @@
     $(document).ready(function() {
 
    	{%if server%} 
-    $("#submacbutton").click(function() {
-        $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});
-    });
+            $("#submacbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});
+            });
+            /*
+            $("#submacbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});   
+            });
+            */
    
-    $("#subipbutton").click(function() {
-        $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});
-    });
+            $("#subipbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});
+            });
+            /*
+            $("#subipbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});   
+            });
+            */
 	{% endif%}
 
 });

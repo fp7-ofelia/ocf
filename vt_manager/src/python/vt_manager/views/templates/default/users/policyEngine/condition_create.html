@@ -208,6 +208,13 @@
 	function createList (condition){
 		document.getElementById("conditionID").value += condition + '*' ;
 	};
+
+        /* Simulate form */
+        $("#rightOperandText").keypress(function(e) {
+            if(e.which == 13) {
+                $("#Create").click();
+            }
+        });
 });
         
 </script>
@@ -303,7 +310,7 @@
 			
 	</table>
 		<br>
-		<input type="button" id="Create"  value="Create Condition">
+		<input type="button" id="Create" value="Create Condition">
 	</form>
         <br/>
         <div class="center">

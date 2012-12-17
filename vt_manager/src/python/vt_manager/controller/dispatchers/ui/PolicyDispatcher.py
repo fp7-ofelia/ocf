@@ -1,11 +1,13 @@
 import uuid
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, HttpResponse
 from django.views.generic import simple
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from pypelib.RuleTable import RuleTable
 from vt_manager.controller.policies.RuleTableManager import RuleTableManager
 from pypelib.Rule import Rule 
+from pypelib.utils.Exceptions import *
 
 @login_required
 def rule_table_view(request, TableName = None):
@@ -16,15 +18,21 @@ def rule_table_view(request, TableName = None):
                                                  template = 'not_admin.html',
                                                  extra_context = {'user':request.user},
                                                 )
-
         else: #Admin
-        	ruleTable = RuleTableManager.getInstance(RuleTableManager.getDefaultName())
-
-        	return simple.direct_to_template(request,
-                	                         template = 'policyEngine/table_view.html',
-                        	                 extra_context = {'user': request.user,
-                                                                  'table':ruleTable},
-                                	        )
+        	try:
+        		ruleTable = RuleTableManager.getInstance(RuleTableManager.getDefaultName())
+                        # If everything runs smoothly, return normal template
+        		return simple.direct_to_template(
+        			request,
+        			template = 'policyEngine/table_view.html',
+        			extra_context = {'user': request.user,
+        				'table': ruleTable}
+        			)
+        	# Handle each exception and pass the error to template
+        	except ZeroPolicyObjectsReturned:
+			return HttpResponseRedirect("/policies/")
+        	except MultiplePolicyObjectsReturned:
+			return HttpResponseRedirect(reverse('policy_edit', args=(RuleTableManager.getDefaultName(),)))
 
 def policy_create(request,table):
 
@@ -45,6 +53,29 @@ def policy_create(request,table):
 							   'ConditionMappings':condMapps,
                                                            'ActionMappings':RuleTableManager.getActionMappings()},
                                         )
+
+def policy_edit(request,table):
+
+	if "HTTP_REFERER" in request.META:
+		# Checks if the referer page is the home or this page itself
+		if "/dashboard" in request.META['HTTP_REFERER'] or "/policies" in request.META['HTTP_REFERER']:
+			ruleTableSet = RuleTableManager.getAllInstances(RuleTableManager.getDefaultName())
+			return simple.direct_to_template(request,
+                                          template = 'policyEngine/policy_edit.html',
+                                          extra_context = {'user': request.user,
+                                                           'CurrentTable': ruleTableSet}
+                                        )
+	# If the access flow is incorrect, send home
+	return HttpResponseRedirect("/")
+
+'''
+PolicyTable objects may only be deleted via POST
+'''
+def policy_delete(request,table_uuid):
+
+	if request.method == "POST":
+		RuleTableManager.deleteInstance(table_uuid)
+	return HttpResponseRedirect("/policies")
 
 def rule_create(request,table_name=None):
 
@@ -145,7 +176,6 @@ def rule_create(request,table_name=None):
 		errors.append(e)
 		errors.insert(0,"The Rule cannot be generated. Reason(s):")#Insterting the main message error in the first position of the table
 		priority = RuleTableManager.getPriorityList(tableName)
-		actionList = RuleTableManager.SetActionList(ruleAction,RuleTableManager.getActionMappings())
 		priority = RuleTableManager.getPriorityList(tableName)
 		
 		#if a rule index is the last, insert "LAST" in the rule priority instead the true index.
@@ -184,7 +214,6 @@ def rule_create(request,table_name=None):
                            'ptable':tableName,
 			   'edit': request.POST.get('edit'),
                            'action':ruleAction,
-                           'actionList':actionList[1],
                            'PrioritySel':rulePriority,
                            'priorityList':priority,
                            'allMappings':RuleTableManager.GetResolverMappings(tableName),
@@ -192,12 +221,10 @@ def rule_create(request,table_name=None):
                            'ActionMappings':RuleTableManager.getActionMappings(),
                            'errors': errors,
                            'rule_uuid':ruleid,}
-		#if ruleid == "":
+
 		return simple.direct_to_template(request,
         	       		template = 'policyEngine/policy_create.html',
                 		extra_context = context)
-		#else:	
-			#return errors,context
 
 def enable_disable(request, rule_uuid, table_name):
 
@@ -259,7 +286,6 @@ def rule_edit(request,table_name,rule_uuid,context=None):
 								  'description':description,
 								  'condition':rule.getConditionDump(),
 								  'action':actionList[0],
-								  'actionList':actionList[1],
 								  'PrioritySel':priorityList[0], 
 								  'priorityList':priorityList[1],
 								  'allMappings':RuleTableManager.GetResolverMappings(),
