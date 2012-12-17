@@ -97,6 +97,17 @@
 </script>
 
 <script>
+var connections = new Object();
+var serverPorts = new Array();
+function list_connected(srcp,destp){
+        connections[srcp] = new Array();
+        connections[srcp].push(destp);
+};
+var switchMap = new Object();
+function map_switchs(port_id, switch_id){
+        switchMap[port_id] = switch_id;
+};
+
 function mode_selector(){
                 if ($('#fsmodesimple').attr('checked')){
                         if("{{enable_simple_mode}}" == "False"){
@@ -183,6 +194,46 @@ $(document).ready(function(){
         })
      link.on("mouseout", redrawNodes);
 
+    function list_checked(){
+        selectedPorts = new Array();
+        $("input:checkbox:checked:not(:disabled)").each(function(){
+                selectedPorts.push('P'+$(this).val());
+        });
+        selectedPorts = selectedPorts.concat(selectedPorts, serverPorts)
+        return selectedPorts
+    }
+
+    function get_flowvisor_path(selectedPorts){
+        var out_path = new Object();
+        for (var i=0; i<selectedPorts.length; i++){
+                if (connections[selectedPorts[i]]){
+                        if (jQuery.inArray(String(connections[selectedPorts[i]]),selectedPorts)>-1){
+                                out_path[selectedPorts[i]] = connections[selectedPorts[i]];
+                        }
+                }
+             
+        }
+        return translate_path(out_path, selectedPorts,switchMap);
+    }
+
+    $("#link_go_next").click(function(evt){
+        url = evt.target.href;
+        if (!(get_flowvisor_path(list_checked()))){
+                if (confirm ( "There are loops in the  selected topology. Are you sure you want to continue?")){
+                        window.open(url,'_self');
+                } else {
+                        return false;
+                };
+        };
+                window.open(url,'_self');
+        
+    });
+    $("input#next_button").click(function (){
+        if (!(get_flowvisor_path(list_checked()))){
+                return confirm ( "There are loops in the selected topology. Are you sure do you want to continue?");
+        };
+    });
+
 })
 </script>
 
@@ -242,6 +293,7 @@ $(document).ready(function(){
         {{ neighbor.port_num }}</a>
         </td>
       </tr>
+	<script>list_connected("PL{{ node.id }}","PL{{ neighbor.id }}");</script>
       {% endwith %}
       {% endfor %}
     </table>
@@ -273,7 +325,7 @@ $(document).ready(function(){
 
 <div id="procsteps" class="steps">
     1. <a href="{% url html_plugin_bookOpenflow slice.id %} "style="font-weight: bold;">Select OpenFlow Ports</a>
-    2. <a href="{% url html_plugin_flowspace slice.id %}">Select/Modify Flowspace</a>
+    2. <a href="{% url html_plugin_flowspace slice.id %}" id="link_go_next">Select/Modify Flowspace</a>
 </div>
 </div>
 {% endif %}
@@ -309,6 +361,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
           class="node_id_{{ switch.id }} {% if iface.id in tree_rsc_ids %}in_tree{% endif %}"
           {% if iface.id in checked_ids %}checked{% endif %} 
           {% if not agg.available %} disabled="disabled" {% endif %} />
+	  <script>map_switchs("P{{ iface.id }}","SW{{ switch.id }}");</script>
         </td>
         <td class="port_num iface_{{ iface.id }}"><label for = "rsc_id_{{ iface.id }}">Port <a name="iface_{{ iface.id }}">{{ iface.port_num }}</a></label></td>
         <td class="connections">
@@ -323,6 +376,12 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
               {{ conn.name }}</a>
           </td>
         </tr>
+			<script>list_connected("P{{ iface.id }}","{{ node.value }}{{ conn.name }}");</script>
+                        {# Strongly connected nodes #}
+                        <script>list_connected("{{ node.value }}{{ conn.name }}","P{{ iface.id }}");</script>
+                        <script>map_switchs("{{ node.value }}{{ conn.name }}","{{ node.value }}");</script>
+                        <script>serverPorts.push("{{ node.value }}{{ conn.name }}");</script>
+
         		{% endif %}
         	{% endfor %}
         {% endfor %}
@@ -333,6 +392,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
               {{ cnxn.resource.as_leaf_class }}</a>.
           </td>
         </tr>
+	<script>list_connected("P{{ iface.id }}","R{{ cnxn.resource.id }}");</script>
         {% endfor %}
         {% for neighbor in iface.ingress_neighbors.all %}
         <tr>
@@ -342,6 +402,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
             at port <a href="#iface_{{ neighbor.id }}">
               {{ neighbor.port_num }}</a>.
           </td>
+	  <script>list_connected("P{{ iface.id }}","P{{ neighbor.id }}");</script>
         </tr>
         {% endfor %}
           </table>
