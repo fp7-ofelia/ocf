@@ -49,34 +49,24 @@ chown www-data $OFELIA_DIR/expedient/src/python/expedient/clearinghouse/gcf-x509
 #Upgrading django_auth_ldap
 easy_install django_auth_ldap==1.0.19
 
-# Installing pyPElib (only if not previously installed)
-
-installedPypelib=`dpkg --get-selections | grep "pypelib" | grep "install"`
-
-if [[ $installedPypelib == "" ]]; then
-
-    if [[ ! -d /usr/lib/python2.6 ]]; then
-        pyVersion="python"`python -c "import sys; print(sys.version.split(' ')[0])"`
-        i=3
-        while [[ ! -d /usr/lib/$pyVersion && $i -gt 0 ]]; do
-            # Looks for the 'longest' version possible
-            case $i in
-                2) pyVersion="python$(expr "$pyVersion" : 'python\([0-9].[0-9]\).*')" ;;
-                1) pyVersion="python$(expr "$pyVersion" : 'python\([0-9]\).*')" ;;
-            esac
-            i=$((i-1))
-        done
-        if [[ -d /usr/lib/$pyVersion ]]; then
-            ln -s /usr/lib/$pyVersion /usr/lib/python2.6
-        fi
+# Installing pyPElib (if not previously installed or version not up to date)
+pypelibUpToDate=`dpkg --get-selections | grep "pypelib" | grep "install"`
+# 1st: install check
+if [[ $pypelibUpToDate != "" ]]; then
+    pypelibCurrentVersion=`sudo dpkg --list pypelib | awk '{for (i=1;i<=NF;i++) if (i==3) { print $i } }' | tail -n 1`
+    sudo /usr/bin/wget https://pypelib.googlecode.com/git/VERSION -O pypelib.version.tmp
+    pypelibLatestVersion=`cat pypelib.version.tmp`
+    rm pypelib.version.tmp
+    if [[ $pypelibCurrentVersion != $pypelibLatestVersion ]]; then
+       $pypelibUpToDate=""
     fi
-
+fi
+# 2nd: up-to-date check
+if [[ $pypelibUpToDate == "" ]]; then
     print "Downloading latest pypelib version..."
     /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
-
     print "Installing pypelib_latest_all.deb..."
     /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
-
     print "Removing temporary files..."
     rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
 fi
