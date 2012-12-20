@@ -24,6 +24,46 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.4
+--------------------------------------------------
+Released: Week of 24th to 28th, December 2012
+
+Change log:
+  
+[B] EXP : Fixed bug originated by a race condition between askForAggregateResouces and async communication model. Issue 98
+[+] OFVER : Modify ofver scripts to check pyPElib version and upgrade it when a new version is available. Issue 95
+[B] VTA : pyPElib does not correctly handle rule tables exceptions when multiple PolicyRuleTable's exist. Issue 94
+[+] EXP, OPT, VTA : Add favicon to all the applications. Compatible with Theme Manager. Issue 93
+[*] VTA : Cleanup of VM Manager policy code. Issue 92
+[B] VTA, EXP, AGN : VM naming conflicts when names are duplicated. Issue 90
+[B] OPT : Parse exceptions raised from Optin to avoid the raising of the full URL including HTTP basic auth. Issue 85
+[B] EXP : Theme manager not working for UI/ subfolder specializations. Issue 84
+[B] EXP : Raise exception when registration e-mail cannot be sent to avoid Error 500. Issue 81
+[B] OFVER, EXP, OPT, VTA : Activate Apache module (add symbolic link from Apache's mods-enabled to mods-available) to avoid ofver installation fail because of Apache's mod_wsgi. Issue 78
+[B] EXP : Automatically install pyPElib in Expedient module. Issue 77
+[B] VTA, EXP : Add trailing slash in urls.py file to avoid Error HTTP 301 for some AJAX calls. Issue 75
+[+] EXP : Add remove AM functionality to Slices and Projects. Issue 74
+[B] VTA : When MacRange has no MacSlots, table in the view (template) is bad formatted. Issue 71
+[*] EXP : Modified VM name field validator to not allow underscores in VMs names since GNU/Linux does not accept them due to some standard convention. Issue 69
+[*] EXP : Preserve data in the VT AM form and raise exception when URL is not available to avoid loss of the inputted data. Issue 54
+[*] OFVER : Add ofver update for django_auth_ldap to support Active Directory. Issue 53
+[*] EXP : Improve the form used by the user to ask for a project. It must be specified at least the project name, organization, approx. duration and description. Issue 52
+[B] OFVER : ofver upgraded to v0.22 to allow to be run again when user manually halts it. Issue 46
+[+] EXP : Show connections with servers in the table of the select_resources page so the port of the siwtch connected to a server is shown in the other edge of the link. Issue 45
+[B] EXP, VTA : Cross dependencies between Expedient and VM Manager affecting installation. Moved imports to allow the communication package and all its contents may be used independently from other modules. Issue 43
+[B] VTA, EXP : Security issue between VM AM and Expedient. Fixed bug that exposed users' credentials in error message when VM status update fails. Issue 42
+[B] EXP : Correct display of requested and granted flowspaces. Issue 38
+[+] EXP : Detect loops in requested topologies and warn user. Issue 37
+[*] EXP, OPT : Simplified FlowSpace allocation. Only VLAN parameter is selectable. The other fields are collapsed and only displayed when switching to advanced mode. Issue 36
+[B] EXP : Fixed mySettings-example file in Expedient which contained wrong uncommented lines. Issue 34
+[B] EXP : Fixed ofreg url in Expedient. Issue 33
+[+] OFVER : ofver backups the current template when it downloads a new template and replace echo with print so the messages are logged in the log file. Issue 32
+[B] VTA, EXP, AGN : Fixed bug that avoided VMs containing '/' characters to be started. Issue 30
+
+Known issues/TODOs:
+
+
+--------------------------------------------------
 v0.3
 --------------------------------------------------
 Released: 25/09/2012
