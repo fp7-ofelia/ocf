@@ -13,7 +13,7 @@ from expedient.common.permissions.shortcuts import give_permission_to,\
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os
 from vt_plugin.utils.Translator import Translator
-from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash, VM
+from vt_plugin.models import VTServer, VtPlugin, xmlrpcServerProxy, resourcesHash, VM, Action
 
 
 def aggregate_crud(request, agg_id=None):
@@ -112,8 +112,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
     try:
         client = xmlrpclib.Server('https://'+vtPlugin.client.username+':'+vtPlugin.client.password+'@'+vtPlugin.client.url[8:])
     except Exception as e:
-        print "Can't connect to server"
-        print e
+        print "Can't connect to server: %s" % str(e)
         return
     
     try:
@@ -125,8 +124,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         remoteHashValue ,resourcesString = client.listResources(rHashObject.hashValue, projectUUID, sliceUUID)
         print remoteHashValue
     except Exception as e:
-        print "Can't retrieve resources"
-        print e
+        print "Can't retrieve resources: %s" % str(e)
         return
 
     if remoteHashValue == rHashObject.hashValue:
@@ -140,8 +138,7 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
         try:
             xmlClass = XmlHelper.parseXmlString(resourcesString)
         except Exception as e:
-            print "Can't parse rspec"
-            print e
+            print "Can't parse rspec: %s" % str(e)
             return
         try:
             for server in xmlClass.response.information.resources.server:
@@ -156,7 +153,15 @@ def askForAggregateResources(vtPlugin, projectUUID = 'None', sliceUUID = 'None')
                 serverModel = Translator.ServerClassToModel(server, vtPlugin.id)
                 # Delete VMs in the model that are not in the linked to the server in the AM
                 for vmuuid in serverModel.vms.filter(sliceId=sliceUUID, projectId=projectUUID).values_list('uuid', flat=True):                
-                    if vmuuid not in vmsInAggregate:
+
+                    try:
+                        action_present = False
+                        action_create =  Action.objects.get(vm__uuid=vmuuid)
+                        if action_create.type=="create" and action_create.status=="SUCCESS":
+                            action_present = True
+                    except:
+                        print "VM Manager returned a VM which has not provisioning create action associated"
+                    if vmuuid not in vmsInAggregate and action_present:
                         vmToDelete = VM.objects.get(uuid=vmuuid)
                         serverModel.vms.remove(vmToDelete)
                         vmToDelete.completeDelete() 
