@@ -6,6 +6,8 @@ DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod
 
 EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug"
 
+## PyPElib installation ...
+
 # Checks that Python 2.6 exists or points to current version for pyPElib
 if [[ ! -d /usr/lib/python2.6 ]]; then
     pyVersion="python"`python -c "import sys; print(sys.version.split(' ')[0])"`
@@ -27,14 +29,15 @@ fi
 pypelibUpToDate=`dpkg --get-selections | grep "pypelib" | grep "install"`
 # 1st: install check
 if [[ $pypelibUpToDate != "" ]]; then
-    pypelibCurrentVersion=`sudo dpkg --list pypelib | awk '{for (i=1;i<=NF;i++) if (i==3) { print $i } }' | tail -n 1`
-    sudo /usr/bin/wget https://pypelib.googlecode.com/git/VERSION -O pypelib.version.tmp || error "Could not check pypelib latest version. Do you have connectivity?"
+    pypelibCurrentVersion=`dpkg --list pypelib | awk '{for (i=1;i<=NF;i++) if (i==3) { print $i } }' | tail -n 1`
+    /usr/bin/wget https://pypelib.googlecode.com/git/VERSION -O pypelib.version.tmp || error "Could not retrieve pypelib version. Do you have connectivity?"
     pypelibLatestVersion=`cat pypelib.version.tmp`
     rm pypelib.version.tmp || error "Could not remove pypelib.version.tmp"
     if [[ $pypelibCurrentVersion != $pypelibLatestVersion ]]; then
        $pypelibUpToDate=""
     fi
 fi
+
 # 2nd: up-to-date check
 if [[ $pypelibUpToDate == "" ]]; then
     print "Downloading latest pypelib version..."
@@ -42,7 +45,7 @@ if [[ $pypelibUpToDate == "" ]]; then
     print "Installing pypelib_latest_all.deb..."
     /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
     print "Removing temporary files..."
-    rm pypelib_latest_all.deb || error "Could not remove pypelib_latest_all.deb"
+    rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
 fi
 
 # Checks that Python's mod_wsgi is enabled in the Apache's mod-enabled folder
