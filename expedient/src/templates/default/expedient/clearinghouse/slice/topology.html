@@ -54,15 +54,15 @@ Show
   <img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/>
   </a>
   &nbsp;
-  <a href="javascript: zoomIn(0.25)"/>
+  <a id="link_zoom_in" href="javascript: zoomIn(0.25)"/>
   <img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/>
 </a>
 &nbsp;
-<a href="javascript: zoomOut(0.25)"/>
+<a id="link_zoom_out" href="javascript: zoomOut(0.25)"/>
 <img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/>
 </a>
 &nbsp;
-<a href="javascript: zoomReset()"/>
+<a id="link_zoom_out" href="javascript: zoomReset()"/>
 <img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/>
 </a>
 &nbsp;
@@ -755,11 +755,11 @@ function collide(alpha) {
 };
 
 $("#link_zoom_in").click(function(){
-  $("#target, svg, g").css("cursor", "url(/static/media/default/img/zoomin.png),auto");
+  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomin.png' %}),auto");
 });
 
 $("#link_zoom_out").click(function(){
-  $("#target, svg, g").css("cursor", "url(/static/media/default/img/zoomout.png),auto");
+  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomout.png' %}),auto" );
 });
 
 
