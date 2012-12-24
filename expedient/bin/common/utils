@@ -197,7 +197,7 @@ function lock()
 	numProcesses=`echo ${#pids[@]}`
 	for (( i = 0; i < $numProcesses; i++ )); do
 		# Do not lock if older PIDs running and these run in the same folder
-		if [[ `echo ${pids[$i]} | bc` -lt $((currentPID-1)) &&
+		if [[ ${pids[0]+0} -lt $((CURRENTPID-1)) &&
 		`pwdx ${pids[$i]} | awk '{print $2}'` == $PWD ]]; then
                 	print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... Other instance (PID ${pids[$i]}) of ofver is already running."
                 	exit 1
