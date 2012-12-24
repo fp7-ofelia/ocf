@@ -11,6 +11,7 @@
 printHeader "info#" "Using specific 0.4 pre-upgrade-hook module..."
 
 SRC_DIR=/opt/ofelia/vt_manager/
+APACHE_USER="www-data"
 
 local TMP_PATH=$PWD
 
