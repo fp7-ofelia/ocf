@@ -77,7 +77,7 @@ if [[ $pypelibUpToDate != "" ]]; then
     pypelibLatestVersion=`cat pypelib.version.tmp`
     rm pypelib.version.tmp || error "Could not remove pypelib.version.tmp"
     if [[ $pypelibCurrentVersion != $pypelibLatestVersion ]]; then
-       $pypelibUpToDate=""
+       pypelibUpToDate=""
     fi 
 fi  
 
