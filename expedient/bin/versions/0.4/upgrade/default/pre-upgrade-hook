@@ -129,7 +129,7 @@ if [[ $pypelibUpToDate == "" ]]; then
     
         mv "$PYPELIB_DJANGO_PATH$file" "$PYPELIB_DJANGO_PATH$file".bkp
         mv out $PYPELIB_DJANGO_PATH$file
-        rm -rf pypelib_variables_*
+        rm -rf pypelib_variables_$file
     
     done
 
