@@ -55,7 +55,7 @@ if [[ $pypelibUpToDate != "" ]]; then
 fi
 
 # 2nd: up-to-date check
-if [[ $pypelibUpToDate != "" ]]; then
+if [[ $pypelibUpToDate == "" ]]; then
     print "Downloading latest pypelib version..."
     /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
 
@@ -66,9 +66,9 @@ if [[ $pypelibUpToDate != "" ]]; then
         cat $PYPELIB_DJANGO_PATH$file |
         while read line           
         do
-            if echo $line | grep "app_label";then
+            if echo $line | grep "app_label" >/dev/null ;then
                 echo "$line" >> pypelib_variables_$file
-            elif echo $line | grep "db_table";then
+            elif echo $line | grep "db_table" >/dev/null ;then
                 echo "$line" >> pypelib_variables_$file
             fi
         done
@@ -87,12 +87,12 @@ if [[ $pypelibUpToDate != "" ]]; then
         while read line           
         do
             lineout=$line
-            if echo "$line" | grep "app_label";then
+            if echo "$line" | grep "app_label" >/dev/null ;then
                 lineout=`cat pypelib_variables_$file | grep "app_label"`
-            elif echo "$line" | grep "db_table";then
+            elif echo "$line" | grep "db_table" >/dev/null ;then
             lineout=`cat pypelib_variables_$file | grep "db_table"`
             fi
-            if echo "$lineout" != ""; then
+            if echo "$lineout" >/dev/null != ""; then
                  echo $lineout >> out
             fi
         done
