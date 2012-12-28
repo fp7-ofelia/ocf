@@ -13,6 +13,9 @@ printHeader "info#" "Using specific 0.4 pre-upgrade-hook module..."
 SRC_DIR=/opt/ofelia/vt_manager/
 APACHE_USER="www-data"
 
+PYPELIB_DJANGO_PATH='/usr/lib/python2.6/pypelib/persistence/backends/django/'
+FILES=(RuleTableModel.py RuleModel.py)
+
 local TMP_PATH=$PWD
 
 #Change permissions of the code 
@@ -55,10 +58,51 @@ fi
 if [[ $pypelibUpToDate == "" ]]; then
     print "Downloading latest pypelib version..."
     /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+    #Save current app_label and db_table variables in Django persistence engine's models
+    for file in ${FILES[@]}
+    do
+        IFS=''
+        cat $PYPELIB_DJANGO_PATH$file |
+        while read line           
+        do
+            if echo $line | grep "app_label";then
+                echo "$line" >> pypelib_variables_$file
+            elif echo $line | grep "db_table";then
+                echo "$line" >> pypelib_variables_$file
+            fi
+        done
+    done
+
     print "Installing pypelib_latest_all.deb..."
     /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
     print "Removing temporary files..."
     rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+
+    #Updating the new files with the old variables
+    for file in ${FILES[@]}
+    do
+        IFS=''
+        cat $PYPELIB_DJANGO_PATH$file |
+        while read line           
+        do
+            lineout=$line
+            if echo "$line" | grep "app_label";then
+                lineout=`cat pypelib_variables_$file | grep "app_label"`
+            elif echo "$line" | grep "db_table";then
+            lineout=`cat pypelib_variables_$file | grep "db_table"`
+            fi
+            if echo "$lineout" != ""; then
+                 echo $lineout >> out
+            fi
+        done
+
+        mv "$file" "$file".bkp
+        mv out $file
+        rm -rf pypelib_variables_*
+
+    done
+
 fi
 
 cd $TMP_PATH

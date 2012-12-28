@@ -6,6 +6,9 @@ DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod
 
 EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug"
 
+PYPELIB_DJANGO_PATH='/usr/lib/python2.6/pypelib/persistence/backends/django/'
+FILES=(RuleTableModel.py RuleModel.py)
+
 ## PyPElib installation ...
 
 # Checks that Python 2.6 exists or points to current version for pyPElib
@@ -42,10 +45,49 @@ fi
 if [[ $pypelibUpToDate == "" ]]; then
     print "Downloading latest pypelib version..."
     /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+    #Save current app_label and db_table variables in Django persistence engine's models
+    for file in ${FILES[@]}
+    do
+        IFS=''
+        cat $PYPELIB_DJANGO_PATH$file |
+        while read line           
+        do
+            if echo $line | grep "app_label";then
+                echo "$line" >> pypelib_variables_$file
+            elif echo $line | grep "db_table";then
+                echo "$line" >> pypelib_variables_$file
+            fi
+        done
+    done
     print "Installing pypelib_latest_all.deb..."
     /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
     print "Removing temporary files..."
     rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+
+    #Updating the new files with the old variables
+    for file in ${FILES[@]}
+    do
+        IFS=''
+        cat $PYPELIB_DJANGO_PATH$file |
+        while read line           
+        do
+            lineout=$line
+            if echo "$line" | grep "app_label";then
+                lineout=`cat pypelib_variables_$file | grep "app_label"`
+            elif echo "$line" | grep "db_table";then
+            lineout=`cat pypelib_variables_$file | grep "db_table"`
+            fi
+            if echo "$lineout" != ""; then
+                 echo $lineout >> out
+            fi
+        done
+
+        mv "$file" "$file".bkp
+        mv out $file
+        rm -rf pypelib_variables_*
+
+    done
 fi
 
 # Checks that Python's mod_wsgi is enabled in the Apache's mod-enabled folder
