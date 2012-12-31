@@ -3,7 +3,6 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple
-from vt_manager.common.messaging.models import DatedMessage
 from django.views.generic import list_detail, simple
 from django.views.generic.create_update import apply_extra_context
 from vt_manager.models import *

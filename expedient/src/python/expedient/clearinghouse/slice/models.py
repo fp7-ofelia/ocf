@@ -19,6 +19,7 @@ from expedient.common.timer.exceptions import JobAlreadyScheduled
 from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
 from expedient.common.utils.validators import *
+from expedient.clearinghouse.slice.utils import *
 
 logger = logging.getLogger("slice.models")
 
@@ -121,13 +122,15 @@ class Slice(models.Model):
                         "aggregate %s" % (self, ragg.name),
                         user=user, msg_type=DatedMessage.TYPE_ERROR)
                 # raise the original exception raised starting the slice.
-                raise e
+                print e
+                raise Exception(parseFVexception(e))
         
         # all is well
         self.started = True
         self.modified = False
         self.save()
         return exceptions
+
 
     def stop(self, user):
         """

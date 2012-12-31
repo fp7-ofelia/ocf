@@ -502,7 +502,7 @@ def bookOpenflow(request, slice_id):
         free_vlan = 'None'
         alertMessage = ''
         fsmode = request.POST['fsmode'] 
-        if fsmode == 'simple':
+        if fsmode == 'simple' and enable_simple_mode:
             try:
                 free_vlan = calculate_free_vlan(slice)
             except Exception as e:
@@ -515,6 +515,10 @@ def bookOpenflow(request, slice_id):
             #return HttpResponseRedirect(reverse("html_plugin_flowspace", args=[slice_id, fsmode, free_vlan, alertMessage]))  
             return flowspace(request, slice_id, fsmode, free_vlan, alertMessage)
 
+
+            
+
+ 
         else:        
             return HttpResponseRedirect(reverse("html_plugin_flowspace",
                                             args=[slice_id]))
@@ -570,7 +574,6 @@ def bookOpenflow(request, slice_id):
                 )
             },
         )
-
 def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
     """
     Add flowspace.

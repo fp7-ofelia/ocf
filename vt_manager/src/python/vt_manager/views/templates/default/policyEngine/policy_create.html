@@ -69,9 +69,15 @@
 			}   
 	});
 	
-               	$("#CreateCondButton").click(function() {
-                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});
+        /* Bind fancybox to each button and their respective URLs */
+               $("#CreateCondButton").click(function() {
+                       $.fancybox({'href': '{% url condition_create CurrentTable %}'});
         });
+        /*
+                $("#CreateCondButton").live('click',function() {
+                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});   
+        });
+        */
 		$("#ac").change(function() {
                         document.getElementById("finalCond").value = " ";
         });
@@ -127,17 +133,16 @@
 		$("#description").change(function() {
 			displayRule();
         });
-		$("#SubmitForm").click(function() {
-			if (document.getElementById("advancedMode").checked == true){	
+		$("form#formRuleCreate").submit(function(event) {
+			if (document.getElementById("advancedMode").checked == true) {
 				checked = "True";
-			}else{
+			} else {
 				checked = check_cond_grouped();	
 			}
-			if (checked == "True"){
-				document.ruleCreate.submit();
-			}else{
+			if (checked == "False") {
+				event.preventDefault();
 				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before adding the rule";
-			};
+			}
 		});
 		
 
@@ -195,9 +200,9 @@
 	</div> 
 	{% if not edit %}
 
-		<form action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
+		<form id="formRuleCreate" action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
 	{% else %}
-		<form action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
+		<form id="formRuleCreate" action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
 	{% endif %}
 	<table>
 		<td><b>Editing mode:</b></td>
@@ -265,7 +270,7 @@
 			</div>
 			<div class="PEbox PEactions">
 				<h4>Actions</h4>
-				<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+				<input id="GroupCondButton" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
 				<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
 			</div>
 			<div id="cond_div">
@@ -323,12 +328,14 @@
 					</td>
 					</tr>
 					<tr>
-						<td>Action:</th>
+						<td>Action:</td>
 						<td><select name="action" id="action">
 						{% if edit or saved %}
 							<option selected value="{{ action }}">{{ action }}</option>
-							{% for act in actionList %}
+							{% for act in ActionMappings %}
+							    {% if act != action %}
 								<option value ="{{ act }}">{{ act }}</option>
+							    {% endif %}
 							{% endfor %} 
 						{% else %}
 							{% for act in mappings.keys %}
@@ -415,10 +422,10 @@
 		<input type="hidden" name="edit" value="{{ edit }}">
 		<input type="hidden" name="load" value="True">
 		{% if edit %}
-			<input id="SubmitForm" type="button" value="Save Changes">
+			<input id="SubmitForm" type="submit" value="Save Changes">
 			<input type="hidden" name="editing" value="1">
 		{% else %}
-		        <input id="SubmitForm" type="button" value="Generate Rule">
+		        <input id="SubmitForm" type="submit" value="Generate Rule">
 			<input type="hidden" name="editing" value="0">
 		{% endif %}
 		<input type="hidden" id="conditionID" name="conditionID" value="" >

@@ -131,7 +131,7 @@ $(":submit[id^=form_create_server]").click(function() {
                 results[index] = checkRestrictedName(id,submitID + " agent password");
             } else if (contains("url",id)) {
                 results[index] = checkNotBlank(id,submitID + " agent URL");
-            } else if (contains("mac",id)) {
+            } else if (contains("-mac",id)) {
                 results[index] = (isBlank(id) || checkMAC(id,submitID + " mac"));
             } else if (contains("switchID",id)) {
                 results[index] = ((isBlank(id) && isBlank(replaceID(id, "switchID", "name")) && isBlank(replaceID(id, "switchID", "port"))) || checkDatapathID(id,submitID + " switch"));

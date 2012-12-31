@@ -24,10 +24,10 @@ sys.path.insert(0,PYTHON_DIR)
 from vt_manager.settings.settingsLoader import XMLRPC_USER, XMLRPC_PASS
 from vt_manager.models import VirtualMachine
 
+print "Updating VM's callback URLs to use XMLRPC user in the database..."
 for vm in VirtualMachine.objects.all():
-	print vm.name
-#	url = vm.getCallBackURL()
-#	url= url[:url.find('//')+2]+XMLRPC_USER+":"+XMLRPC_PASS+url[url.find('@'):]
-#	vm.setCallBackURL(url)
-#	vm.save()
+	url = vm.getCallBackURL()
+	url= url[:url.find('//')+2]+XMLRPC_USER+":"+XMLRPC_PASS+url[url.find('@'):]
+	vm.setCallBackURL(url)
+	vm.save()
 

@@ -54,15 +54,15 @@ Show
   <img title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle"/>
   </a>
   &nbsp;
-  <a href="javascript: zoomIn(0.25)"/>
+  <a id="link_zoom_in" href="javascript: zoomIn(0.25)"/>
   <img title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle"/>
 </a>
 &nbsp;
-<a href="javascript: zoomOut(0.25)"/>
+<a id="link_zoom_out" href="javascript: zoomOut(0.25)"/>
 <img title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;"/>
 </a>
 &nbsp;
-<a href="javascript: zoomReset()"/>
+<a id="link_zoom_out" href="javascript: zoomReset()"/>
 <img title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;"/>
 </a>
 &nbsp;
@@ -71,7 +71,7 @@ Show
 
 <script type="text/javascript">
 /* d3 data */
-var nIslands = {{ nIslands }},
+var nIslands = {{ nIslands}},
     pad = 5,
     width = 740,
     height = 400
@@ -134,7 +134,7 @@ var data = {
     nodes: [
         {% for node in d3_nodes %}
         //{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: randomXToY(foci[{{ node.group }}].y0 , foci[{{ node.group }}].y1),x : randomXToY(foci[{{ node.group }}].x0 , foci[{{ node.group }}].x1), fixed:true, radius:10, color:"",
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", y: epoints[{{forloop.counter0}}][1], x : epoints[{{forloop.counter0}}][0] , fixed:true, radius:10, available:"{{ node.available }}", color:"",
+        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", fixed:false, radius:10, available:"{{ node.available }}", color:"",
 		{% if node.type == "vt_agg"  %}
 			nodeVms: {{node.vmNames|safe }},
 			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
@@ -313,25 +313,101 @@ function getNodeCircleStyle(d, attr){
         }
 };
 
+function getNodesIsland(d){
+        var nNodes = 0;
+        data.nodes.forEach(function(o, i){
+	   if(o.group == d){
+     		nNodes++;
+	   }
+        });
+    return nNodes;
+}
 
 /* Zooming routines */
 
 cur_zoom = 1;
+zoom_in_active = false;
+zoom_out_active = false;
 
 function zoomIn(zoom){
+    if(zoom_in_active == false && zoom_out_active == false){
+	$("#link_zoom_in img").css("background-color", "#666");
 	cur_zoom = cur_zoom + zoom;
-        return redraw();
+	zoom_in_active = true;
+    }
+
+    else if(zoom_in_active == true){
+	cur_zoom = cur_zoom - zoom;
+	$("#link_zoom_in img").css("background-color", "");
+	$("#target, svg, g").css("cursor", "move");
+	zoom_in_active = false;
+    }
+
+    else{
+	cur_zoom = cur_zoom + zoom + zoom;
+	$("#link_zoom_out img").css("background-color", "");
+	$("#link_zoom_in img").css("background-color", "#666");
+	zoom_out_active = false;
+	zoom_in_active = true;
+    }
 }
 
 function zoomOut(zoom){
-        if(cur_zoom-zoom >0)
-                cur_zoom = cur_zoom - zoom;
-        return redraw();
+    if(zoom_out_active == false && zoom_in_active == false){
+	if((cur_zoom - zoom) >0){
+	    $("#link_zoom_out img").css("background-color", "#666");
+            cur_zoom = cur_zoom - zoom;
+	    zoom_out_active = true;
+        }
+	else{
+	    $("#target, svg, g").css("cursor", "move");
+	}
+    }	
+    else if(zoom_out_active == true){
+	cur_zoom = cur_zoom + zoom;
+	$("#link_zoom_out img").css("background-color", "");
+	$("#target, svg, g").css("cursor", "move");
+	zoom_out_active = false;
+    }
+
+    else{
+	cur_zoom = cur_zoom - zoom;
+	zoom_out_active = false;
+        $("#link_zoom_in img").css("background-color", "");
+	if((cur_zoom - zoom) > 0){
+	    $("#link_zoom_out img").css("background-color", "#666");
+	    zoom_out_active = true;
+	}
+	else{
+	    $("#target, svg, g").css("cursor", "move");
+	}
+    }
 }
 
 function zoomReset(){
-	cur_zoom = 0.99;
-	return redraw();
+    cur_zoom = 0.99;
+    posx = 0;
+    posy = 0;
+    return redraw();
+}
+
+
+
+function click(){
+    if (zoom_in_active == true || zoom_out_active == true){
+	var mouseClick = d3.mouse(this);
+	_x = -mouseClick[0]/2;
+        _y = -mouseClick[1]/2;
+	if(zoom_out_active == true){
+	    _x = -_x/2;
+	    _y = -_y/2;
+        }
+	posx += _x;
+	posy += _y;
+	zoom_in_active = false;
+        zoom_out_active = false;
+        return redraw();
+    }
 }
 
 /* Check topology loops*/
@@ -340,19 +416,36 @@ function checkTopologyLoops(d) {
     //alert(d.nodeConnections);
 }
 
-/* Redraw canvas - bound to zoom behaviour */
+/* Redraw canvas - not bound to zoom behaviour */
 function redraw() {
-  trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
-  svg.attr("transform",
-      "translate(" + trans + ")"
-      + " scale(" + cur_zoom + ")");
+//  trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
+    trans = [posx, posy];
+    svg.transition()
+       .duration(500)
+       .attr('x', function(d){ return d.x; })
+       .attr('y', function(d){ return d.y; })
+       .attr("transform", 
+            "translate(" + trans +")"
+            + "scale(" + cur_zoom + ")");
+   $("#link_zoom_in img").css("background-color","");
+   $("#link_zoom_out img").css("background-color","");
+   $("#target, svg, g").css("cursor", "move"); 
 }
+
+//Global position of the canvas
+var posx = 0;
+var posy = 0;
 
 /* Translation - bound to drag behavior */
 dragMap = function(d) {
-  d.x = (-width/2) + d3.event.x;
-  d.y = (-height/2) + d3.event.y;
-  svg.attr("transform", "translate(" + [d.x, d.y] + ") scale(" + cur_zoom + ")")
+//No drag while zoom option active
+   if(zoom_in_active == false && zoom_out_active == false){
+      posx += d3.event.dx;
+      posy += d3.event.dy;
+      svg.attr('x', function(d) { return d.x; })
+         .attr('y', function(d) { return d.y; })
+         .attr("transform", "translate(" + posx + "," + posy + ") scale (" + cur_zoom + ")");
+   }
 }
 
 /* Instantiation General parameters*/
@@ -361,15 +454,15 @@ var  padding = 6,
      radius = d3.scale.sqrt().range([0, 12]);
 
 var svg = d3.select("#target")
+    .on("click", click)
     .append("svg")
         .attr("pointer-events", "all")
         .attr("width", width)
         .attr("height", height)
         .datum({x: 0, y: 0})
         .call(d3.behavior.drag().on("drag", dragMap))
-/*    .append("svg:g").call(d3.behavior.zoom().on("zoom", redraw))
-        .attr("cursor", "move")*/
     .append("svg:g").on("zoom", redraw)
+        .attr("cursor", "move")       
 
 // DATA VARIABLES
 var nodes = data.nodes;
@@ -384,9 +477,10 @@ nodes.forEach(function(d) {
 var links = data.links;
 
 var force = d3.layout.force()
-    .gravity(0.05)
-    .distance(50)
-    .charge(-200)
+    .gravity(0)
+    .distance(100)
+    .charge(-500)
+    .friction(0.6)
     .size([width, height])
     .nodes(nodes)
     .links(links)
@@ -452,8 +546,10 @@ var node = svg.selectAll(".node")
     .data(nodes)
   .enter().append("g")
     .attr("class", "node")
+    .call(force.drag)
     .call(d3.behavior.drag()
     .on("dragstart", function(d, i, e) {
+	    d.fixed = false;
 	    force.stop();
     })
     .on("drag", function(d, i) {
@@ -465,7 +561,7 @@ var node = svg.selectAll(".node")
             tick();
     })
     .on("dragend", function(d, i) {
-	    d.fixed = true; // of course set the node to fixed so the force does not include the node in its auto positioning stuff
+	  //  d.fixed = true; // of course set the node to fixed so the force does not include the node in its auto positioning stuff //with the force.stop() it won't autopositioning, allowing to regroup the nodes
             d3.select(this).selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "dragstop");})
             tick();
             force.stop();
@@ -523,7 +619,44 @@ node.on("mouseover", function (d, i){
 	    }
     	})
 
-force.on("tick", tick);
+//Number of nodes in each Island
+var qNodes = [];
+for(i=0; i<nIslands; i++){
+   qNodes[i] = getNodesIsland(i);
+} 
+var grav = 0.008 * nx * ny;
+
+force.on("tick", function(e){
+    var k = grav * e.alpha;
+    data.nodes.forEach(function(o, i){
+	var fact = 1;
+	var node_type = get_node_type(o);
+	if(node_type == "openflow" || node_type == "planetlab"){
+	    fact = 3;
+	} else if(node_type == "vtserver"){
+	    fact = 2;
+	}
+	//When there are few nodes, avoid them to stay too far away from the center. Also, when there are so many nodes avoid them to stay too near each others 
+	if(qNodes[o.group] < 5){
+	    fact = fact * 2;
+	}
+	else{
+	    fact = fact/2;
+	}
+	o.y += k * fact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
+	o.x += k * fact * qNodes[o.group] * ((dataislands[o.group].cx) - o.x);
+    });
+
+    node.each(collide(.5));
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";})
+	.attr("cx", function(d) { return d.x; })
+	.attr("cy", function(d) { return d.y; });
+
+    link.attr("x1", function(d) { return d.source.x; })
+	.attr("y1", function(d) { return d.source.y; })
+	.attr("x2", function(d) { return d.target.x; })
+	.attr("y2", function(d) { return d.target.y; });
+});
 
 function redrawNodes(){
 	node.selectAll("circle").style("stroke", function(d){return getNodeCircleStyle(d, "stroke");});
@@ -532,14 +665,16 @@ function redrawNodes(){
 }
 
 function tick() {
-
+  
   link.attr("x1", function(d) { return d.source.x; })
       .attr("y1", function(d) { return d.source.y; })
       .attr("x2", function(d) { return d.target.x; })
       .attr("y2", function(d) { return d.target.y; });
   
   node.each(collide(.5));
-  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .attr("cx", d.x)
+      .attr("cy", d.y);
 };
 
 function animate(){
@@ -565,28 +700,27 @@ iellipses.transition()
                 .style("stroke-width",3)
                 .style("stroke", function(d) { return d3.rgb(color(d.group%nIslands)).brighter(10);})
                 .duration(1500)
-/*iellipses.transition()
+iellipses.transition()
            .delay(1500)
            .style("opacity",0)
            .duration(3000)
-
 ilabels.transition()
            .delay(1500)
            .style("opacity",0)
            .duration(3000);
 //xxx lbergesio: not needed if scrolling is done with d3
-iellipses.transition()
-	.delay(4500)
-	.style("display", "none");
-*/
+//iellipses.transition()
+//	.delay(4500)
+//	.style("display", "none");
+
 }
 
 function regroup(){
-	for (i=0; i<nodes.length; i++){
+/*	for (i=0; i<nodes.length; i++){
 		nodes[i].x = nodeInitialPos[i][0];
 		nodes[i].y = nodeInitialPos[i][1];
-	}
-	tick();
+	}*/
+	force.resume();
 	animate();
 }
 
@@ -620,7 +754,17 @@ function collide(alpha) {
   };
 };
 
+$("#link_zoom_in").click(function(){
+  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomin.png' %}),auto");
+});
+
+$("#link_zoom_out").click(function(){
+  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomout.png' %}),auto" );
+});
+
+
+
 //XXX lbergesio: Try to find how to allow scrolling within d3
-/*$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });*/
+//$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
 
 </script>

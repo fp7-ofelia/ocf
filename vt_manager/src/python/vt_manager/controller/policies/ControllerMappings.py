@@ -1,4 +1,14 @@
+from vt_manager.controller.policies.utils.PolicyLogger import PolicyLogger
+
 class ControllerMappings():
+	
+	logger = PolicyLogger.getLogger()
+	
+	@staticmethod
+	def getActionMappings():
+		actionMappings = { "None":"None",
+				   "LogVM": ControllerMappings.logVM,}
+		return actionMappings				     
 
 	@staticmethod
 	def getConditionMappings():
@@ -58,5 +68,8 @@ class ControllerMappings():
 		from vt_manager.models import VirtualMachine
 
 		projectUUID = str(metaObj.server.virtual_machines[0].get_project_id())
-		return len(VirtualMachine.objects.filter(projectId = projectUUID))		
+		return len(VirtualMachine.objects.filter(projectId = projectUUID))
 
+	@staticmethod
+	def logVM(metaObj):
+		ControllerMappings.logger.debug("[NAME:%s|RAM:%s|HD:%s]" %(eval("metaObj.server.virtual_machines[0].get_name()"),ControllerMappings.getVMMemory(metaObj),ControllerMappings.getVMHDMemory(metaObj)))
