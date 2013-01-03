@@ -6,67 +6,12 @@ DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod
 
 EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug"
 
-PYPELIB_DJANGO_PATH='/usr/lib/python2.6/pypelib/persistence/backends/django/'
-FILES=(RuleTableModel.py RuleModel.py)
-
 ## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
 
-# Checks that Python 2.6 exists or points to current version for pyPElib
-if [[ ! -d /usr/lib/python2.6 ]]; then
-    pyVersion="python"`python -c "import sys; print(sys.version.split(' ')[0])"`
-    i=3
-    while [[ ! -d /usr/lib/$pyVersion && $i -gt 0 ]]; do
-        # Looks for the 'longest' version possible
-        case $i in
-            2) pyVersion="python$(expr "$pyVersion" : 'python\([0-9].[0-9]\).*')" ;;
-            1) pyVersion="python$(expr "$pyVersion" : 'python\([0-9]\).*')" ;;
-        esac
-        i=$((i-1))
-    done
-    if [[ -d /usr/lib/$pyVersion ]]; then
-        ln -s /usr/lib/$pyVersion /usr/lib/python2.6
-    fi
-fi
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
 
-# Installing pyPElib (if not previously installed or version not up to date)
-pypelibUpToDate=`dpkg --get-selections | grep "pypelib" | grep "install"`
-# 1st: install check
-if [[ $pypelibUpToDate != "" ]]; then
-    pypelibCurrentVersion=`dpkg --list pypelib | awk '{for (i=1;i<=NF;i++) if (i==3) { print $i } }' | tail -n 1`
-    /usr/bin/wget https://pypelib.googlecode.com/git/VERSION -O pypelib.version.tmp || error "Could not retrieve pypelib version. Do you have connectivity?"
-    pypelibLatestVersion=`cat pypelib.version.tmp`
-    rm pypelib.version.tmp || error "Could not remove pypelib.version.tmp"
-    if [[ $pypelibCurrentVersion != $pypelibLatestVersion ]]; then
-       pypelibUpToDate=""
-    fi
-fi
-
-# 2nd: up-to-date check
-if [[ $pypelibUpToDate == "" ]]; then
-    print "Downloading latest pypelib version..."
-    /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
-
-    print "Installing pypelib_latest_all.deb..."
-    /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
-    print "Removing temporary files..."
-    rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
-
-    #Updating the new files with the old vt_manager label
-    for file in ${FILES[@]}
-    do
-	sed 's/'pypelib'/'vt_manager'/' $PYPELIB_DJANGO_PATH$file > $file.new
-        mv $PYPELIB_DJANGO_PATH$file $PYPELIB_DJANGO_PATH$file.bkp
-        mv $file.new $PYPELIB_DJANGO_PATH$file
-    done
-fi
-
-# Checks that Python's mod_wsgi is enabled in the Apache's mod-enabled folder
-installedModWsgi=`dpkg --get-selections | grep "libapache2-mod-wsgi" | grep "install"`
-if [[ $installedModWsgi != "" ]]; then
-    if [[ ! -f /etc/apache2/mods-enabled/wsgi.load && -f /etc/apache2/mods-available/wsgi.load ]]    ; then
-        currentDir=$PWD
-        cd /etc/apache2/mods-enabled/
-        ln -s ../mods-available/wsgi.load .
-        cd $currentDir
-    fi
-fi
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###
-#       @author:lbergesio 
+#       @author:lbergesio, CarolinaFernandez
 #       @organization: i2CAT
 #       @project: OFELIA, FIBRE  FP7
 #       @description: pre-upgrade-hook module  
@@ -13,9 +13,6 @@ printHeader "info#" "Using specific 0.4 pre-upgrade-hook module..."
 SRC_DIR=/opt/ofelia/vt_manager/
 APACHE_USER="www-data"
 
-PYPELIB_DJANGO_PATH='/usr/lib/python2.6/pypelib/persistence/backends/django/'
-FILES=(RuleTableModel.py RuleModel.py)
-
 local TMP_PATH=$PWD
 
 #Change permissions of the code 
@@ -23,87 +20,14 @@ printHeader ">" "Setting correct file permissions..."
 chown -f $APACHE_USER $SRC_DIR/src/python/vt_manager/controller/policies/utils/log
 
 ## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
 
-# Checks that Python 2.6 exists or points to current version for pyPElib
-if [[ ! -d /usr/lib/python2.6 ]]; then
-    pyVersion="python"`python -c "import sys; print(sys.version.split(' ')[0])"`
-    i=3
-    while [[ ! -d /usr/lib/$pyVersion && $i -gt 0 ]]; do
-        # Looks for the 'longest' version possible
-        case $i in
-            2) pyVersion="python$(expr "$pyVersion" : 'python\([0-9].[0-9]\).*')" ;;
-            1) pyVersion="python$(expr "$pyVersion" : 'python\([0-9]\).*')" ;;
-        esac
-        i=$((i-1))
-    done
-    if [[ -d /usr/lib/$pyVersion ]]; then
-        ln -s /usr/lib/$pyVersion /usr/lib/python2.6
-    fi
-fi
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
 
-# Installing pyPElib (if not previously installed or version not up to date)
-pypelibUpToDate=`dpkg --get-selections | grep "pypelib" | grep "install"`
-# 1st: install check
-if [[ $pypelibUpToDate != "" ]]; then
-    pypelibCurrentVersion=`dpkg --list pypelib | awk '{for (i=1;i<=NF;i++) if (i==3) { print $i } }' | tail -n 1`
-    /usr/bin/wget https://pypelib.googlecode.com/git/VERSION -O pypelib.version.tmp || error "Could not retrieve pypelib version. Do you have connectivity?"
-    pypelibLatestVersion=`cat pypelib.version.tmp`
-    rm pypelib.version.tmp || error "Could not remove pypelib.version.tmp"
-    if [[ $pypelibCurrentVersion != $pypelibLatestVersion ]]; then
-       pypelibUpToDate=""
-    fi
-fi
-
-# 2nd: up-to-date check
-if [[ $pypelibUpToDate == "" ]]; then
-    print "Downloading latest pypelib version..."
-    /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
-
-    #Save current app_label and db_table variables in Django persistence engine's models
-    for file in ${FILES[@]}
-    do
-        IFS=''
-        cat $PYPELIB_DJANGO_PATH$file |
-        while read line           
-        do
-            if echo $line | grep "app_label" >/dev/null ;then
-                echo "$line" >> pypelib_variables_$file
-            elif echo $line | grep "db_table" >/dev/null ;then
-                echo "$line" >> pypelib_variables_$file
-            fi
-        done
-    done
-
-    print "Installing pypelib_latest_all.deb..."
-    /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
-    print "Removing temporary files..."
-    rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
-
-    #Updating the new files with the old variables
-    for file in ${FILES[@]}
-    do
-        IFS=''
-        cat $PYPELIB_DJANGO_PATH$file |
-        while read line           
-        do
-            lineout=$line
-            if echo "$line" | grep "app_label" >/dev/null ;then
-                lineout=`cat pypelib_variables_$file | grep "app_label"`
-            elif echo "$line" | grep "db_table" >/dev/null ;then
-            lineout=`cat pypelib_variables_$file | grep "db_table"`
-            fi
-            if echo "$lineout" >/dev/null != ""; then
-                 echo $lineout >> out
-            fi
-        done
-
-        mv "$PYPELIB_DJANGO_PATH$file" "$PYPELIB_DJANGO_PATH$file".bkp
-        mv out $PYPELIB_DJANGO_PATH$file
-        rm -rf pypelib_variables_$file
-
-    done
-
-fi
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
 
 cd $TMP_PATH
 

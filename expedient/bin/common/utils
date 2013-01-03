@@ -188,21 +188,19 @@ function getDirectory()
 	echo `dirname $(readlink -f $1)`
 }
 
-#Check that no other OFVER instance is already running
+#Mutex functions
 function lock()
 {
-	currentPID=$$
-	runningInstances=`ps aux | grep "ofver" | grep -v "grep" | grep -e "install" -e "upgrade" | awk '{print $2}'`
-	pids=($runningInstances)
-	numProcesses=`echo ${#pids[@]}`
-	for (( i = 0; i < $numProcesses; i++ )); do
-		# Do not lock if older PIDs running and these run in the same folder
-		if [[ $((pids[$i]+0)) -lt $((CURRENTPID-1)) &&
-		`pwdx ${pids[$i]} | awk '{print $2}'` == $PWD ]]; then
-                	print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... Other instance (PID ${pids[$i]}) of ofver is already running."
-                	exit 1
-        	fi
-	done
+        currentPID=$$
+        pids=( $(ps aux | grep "ofver" | grep "bash" | grep -v "grep" | awk '{print $2}') )
+        for pid in "${pids[@]}"; do
+                # Do not lock if older PIDs running and these run in the same folder
+                if [[ $pid -lt $((currentPID-1)) &&
+                `pwdx $pid | awk '{print $2}'` == $PWD ]]; then
+                        print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... Other instance (PID $pid) of ofver is already running."
+                        exit 1
+                fi
+        done
 }
 
 #Unlocks automatically (process terminated after execution)
