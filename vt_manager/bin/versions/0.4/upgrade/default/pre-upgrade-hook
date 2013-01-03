@@ -27,7 +27,7 @@ print "Installing pypelib_latest_all.deb..."
 /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
 
 print "Removing temporary files..."
-rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
 
 cd $TMP_PATH
 
