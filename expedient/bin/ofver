@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 ###
-#	@author: msune
+#	@author: msune, CarolinaFernandez
 #	@organization: i2CAT
 #	@project: Ofelia FP7
 #       @description: 
@@ -17,6 +17,8 @@ DEBUG=0
 USE_LOG=1
 BACKUP=1
 FORCE=0
+#Enable/disable ofver to call itself (through a son process) without being blocked
+ENABLE_OFVER_SON_PROCESSES=1
 
 ##STATIC CONSTANTS
 NO_RETURN=1
@@ -26,7 +28,7 @@ UPGRADE_REG=".upgradeReg"
 
 ##Other info
 APP_NAME="ofver"
-APP_VER="0.21"
+APP_VER="0.4"
 APP_DESC="OFelia VERsioning system; a simple set of bash scripts to simplify repository based installations and upgrades."
 APP_AUTHOR="{ marc.sune, leonardo.bergesio } @i2cat.net (i2CAT foundation)"
 APP_WEB="http://code.google.com/p/ofver/, http://www.fp7-ofelia.eu"
