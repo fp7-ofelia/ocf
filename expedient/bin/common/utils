@@ -188,19 +188,54 @@ function getDirectory()
 	echo `dirname $(readlink -f $1)`
 }
 
-#Mutex functions
+#Aux functions for lock
+function is_number()
+{
+    printf '%f' "$1" &>/dev/null && echo "1" || echo "0";
+}
+
+function get_parent_pid()
+{
+    process=$1
+    while [[ `is_number $process` == 1 ]]; do
+        if [[ $process -gt 0 ]]; then
+            process=`cat /proc/$((process))/stat | awk '{print $4 }'`
+            echo $process
+        else
+            break
+        fi
+    done
+}
+
+function contains_element()
+{
+	local e
+	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 1; done
+	return 0
+}
+
+#Check that no other OFVER instance is already running
 function lock()
 {
-        currentPID=$$
-        pids=( $(ps aux | grep "ofver" | grep "bash" | grep -v "grep" | awk '{print $2}') )
-        for pid in "${pids[@]}"; do
-                # Do not lock if older PIDs running and these run in the same folder
-                if [[ $pid -lt $((currentPID-1)) &&
-                `pwdx $pid | awk '{print $2}'` == $PWD ]]; then
-                        print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... Other instance (PID $pid) of ofver is already running."
-                        exit 1
-                fi
-        done
+	currentPID=$$
+	pids=( $(ps aux | grep "ofver" | grep "bash" | grep -v "grep" | awk '{print $2}') )
+	for pid in "${pids[@]}"; do
+		# Do not lock if non-related (not parent of the current
+		# process) and older PIDs run in the same folder
+		if [[ $pid -lt $((currentPID-1)) &&
+		`pwdx $pid | awk '{print $2}'` == $PWD ]]; then
+			pidFromParent=0
+			if [[ $ENABLE_OFVER_SON_PROCESSES -eq 1 ]]; then
+	                        parent_pids=( $(get_parent_pid $currentPID) )
+				contains_element $pid "${parent_pids[@]}"
+				pidFromParent=$?
+			fi
+                        if [[ $pidFromParent -eq 0 ]]; then
+                                print "${txtred}FATAL ERROR:${txtrst} Could not acquire lock... Other instance (PID $pid) of ofver is already running."
+                                exit 1
+                        fi
+        	fi
+	done
 }
 
 #Unlocks automatically (process terminated after execution)
@@ -208,3 +243,4 @@ function unlock()
 {
 	return
 }
+
