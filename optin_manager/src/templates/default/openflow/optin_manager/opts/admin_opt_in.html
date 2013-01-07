@@ -1,6 +1,39 @@
 {% extends "base_admin.html" %}
 {% block pagehead %} <h1>Add Admin Rule</h1> {% endblock %}
 {% block scripts %}
+
+<script> 
+function resizeFrame(f) {
+f.style.height = "1px"; 
+f.style.height = f.contentWindow.document.body.scrollHeight + "px"; 
+}  
+</script>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+        //jQuery(".expandable").hide();
+        jQuery(".expandableCtl").each(function(){
+		elementName = "#"+$(this).attr('id')+"Container";
+		$(elementName).css("display","none");
+	})
+
+ 
+        jQuery(".expandableCtl").click(function()
+        {
+		elementName = "#"+$(this).attr('id')+"Container";
+		jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
+		if(jQuery("span", this).attr("class") == "opened"){
+		jQuery("span", this).html("&#x25BC;");
+		$('html, body').animate({scrollBottom: $(elementName).offset().top-150}, 200);
+		}else{
+			jQuery("span", this).html("&#x25B2;");
+		}
+		jQuery("span", this).toggleClass("closed opened");
+		//jQuery("span", this).toggleClass("opened closed");
+	});
+});
+
+</script>
+
 <style>
   select {
     width: 400px;
@@ -11,14 +44,40 @@
   }
 </style>
 <script type="text/javascript">
+
+function match_allocated_vlans(sel_value){
+        a_vlans = {{allocated_vlans}};
+        $("li").css("color","#333");
+        $(".header_vlan").css("color","#333");
+        req_vlans = {{requested_vlans}};
+        for (i=0; i<req_vlans[sel_value].length; i++){
+            if (a_vlans.indexOf(req_vlans[sel_value][i])!=-1){
+                $("#il_"+req_vlans[sel_value][i]).css("color","red");
+                headers = $(".header_vlan");
+                sel_header = null
+                for(j=0;j<headers.length;j++){
+                        if(headers[j].id.split('_')[2] <= req_vlans[sel_value][i]){
+                                sel_header = headers[j];
+                        }
+                }
+                $("#"+sel_header.id).css("color","red");
+            }
+
+        }
+};
+
 $(document).ready(function(){
-	$("#expsel").
-		change(function(){
-			var addr = "/opts/experiment_simple/"
-			var sel_value = $(this).val()
-			addr = addr+sel_value
-			$("#exp_iframe").attr('src',addr)
-		});
+        match_allocated_vlans({{first_exp}});
+        $("#expsel").
+                change(function(){
+                        var addr = "/opts/experiment_simple/"
+                        var sel_value = $(this).val()
+                        addr = addr+sel_value
+                        $("#exp_iframe").attr('src',addr)
+                        resizeFrame(document.getElementById('exp_iframe'))
+                        match_allocated_vlans(sel_value);
+                });
+
 });
 
 </script>
@@ -39,10 +98,30 @@ $(document).ready(function(){
 			{% endfor %}
 		</select>
 		<br/>
-		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe">
+		<iframe src="{% if exp_exist %}/opts/experiment_simple/{{first_exp}}{% endif %}" id="exp_iframe" onload="resizeFrame(this);">
 		</iframe>
 		<br/><br/>
-		<label> <b>FlowSpace to Opt-In: </b></label>
+		<h3>VLAN(s) already allocated:</h3>
+                <div class="roundBlockContainer">
+                        {% for vlan in allocated_vlans %}
+                        {% if  forloop.first %}
+			<div class="vlan_list">
+			<ul style="margin:7px; padding:0px;">
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="closed">&#x25BC;</span></a></li></ul>
+			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
+			{%endif%}
+			<li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
+                        {% if forloop.counter|divisibleby:vlan_list_length %}</ul></div></div>
+			<div class="vlan_list">
+			<ul style="margin:7px; padding:0px;">
+			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="closed">&#x25BC;</span></a></li></ul>
+			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
+			{% endif %}
+			{% if  forloop.last %}</ul></div></div>{%endif%}
+                        {% endfor %}
+                </div>
+	
+		<label> <h3>FlowSpace to Opt-In: </h3></label>
 		<br/>
 		<table class="formtable">
 		<tr><th>Field</th><th>[From Value,To Value]</th></tr>

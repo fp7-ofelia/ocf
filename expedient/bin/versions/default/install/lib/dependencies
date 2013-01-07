@@ -2,6 +2,17 @@
 
 #Used to define package dependencies
 
-DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod-macro python-setuptools python-django python-mysqldb python-django-extensions python-django-auth-ldap python-openssl python-m2crypto python-dateutil python-decorator python-paramiko build-essential python-imaging python-django-registration python-configobj python-pyparsing"
+DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod-macro python-setuptools python-django python-mysqldb python-django-extensions python-ldap python-openssl python-m2crypto python-dateutil python-decorator python-paramiko build-essential python-imaging python-django-registration python-configobj python-pyparsing"
 
-EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug"
+EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug django_auth_ldap==1.0.19"
+
+## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
+

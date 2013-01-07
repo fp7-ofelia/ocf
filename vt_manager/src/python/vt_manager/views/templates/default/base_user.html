@@ -3,6 +3,8 @@
 	<head>
         <link rel="stylesheet" type="text/css" href="{% url css_media 'ocf.css' %}" />
         <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+	<link rel="icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
+        <link rel="shortcut icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
 
 		<title>
 			{% block title %}OFELIA Virtualization Manager{% endblock %}
@@ -102,9 +104,6 @@
     	</div>
    
   </div>
-
-  <div id="footer">
-    (c) in 2009 by Stanford University. This software is licensed under the GENI License.
-  </div>
+{% include 'footer.html' %}
 </body>
 </html>

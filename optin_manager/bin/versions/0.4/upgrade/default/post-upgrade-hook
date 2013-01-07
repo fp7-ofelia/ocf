@@ -1,0 +1,24 @@
+#!/bin/bash
+
+###
+#       @author:omoya 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.4 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/optin_manager/
+
+local TMP_PATH=$PWD
+
+cd $SRC_DIR/src/python/openflow/optin_manager/
+
+#Adding/Moving new variables to mySettings.py
+printHeader ">" "Adding new settings to localsettings.py ..."
+sed -i "/UNALLOWED_VLANS/d" localsettings.py || error "Could not delete old THEME setting from localsettings.py ..."
+echo "UNALLOWED_VLANS = []" >> localsettings.py && echo "Check localsettings-example file for more info about how to configure a custom theme for OCF" || error "Could not add UNALLOWED_VLANS to localsettings.py ..."
+
+cd $SRC_DIR

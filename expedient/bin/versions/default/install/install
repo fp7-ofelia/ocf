@@ -57,7 +57,6 @@ touch /var/log/sfa_access.log
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
 
-
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
 

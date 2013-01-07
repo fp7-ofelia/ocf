@@ -18,13 +18,13 @@ class VtPlugin(Aggregate):
     client = models.OneToOneField('xmlrpcServerProxy', editable = False, blank = True, null = True)
 
 
-    def start_slice(self, slice):
-        super(VtPlugin, self).start_slice(slice)
-        try:
-            from vt_plugin.controller.dispatchers.GUIdispatcher import startStopSlice
-            startStopSlice("start",slice.uuid)
-        except:
-            raise
+    #def start_slice(self, slice):
+    #    super(VtPlugin, self).start_slice(slice)
+    #    try:
+    #        from vt_plugin.controller.dispatchers.GUIdispatcher import startStopSlice
+    #        startStopSlice("start",slice.uuid)
+    #    except:
+    #        raise
 
     def stop_slice(self, slice):
         super(VtPlugin, self).stop_slice(slice)

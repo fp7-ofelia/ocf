@@ -1,0 +1,33 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio, CarolinaFernandez
+#       @organization: i2CAT
+#       @project: OFELIA, FIBRE  FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.4 pre-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/vt_manager/
+APACHE_USER="www-data"
+
+local TMP_PATH=$PWD
+
+#Change permissions of the code 
+printHeader ">" "Setting correct file permissions..."
+chown -f $APACHE_USER $SRC_DIR/src/python/vt_manager/controller/policies/utils/log
+
+## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
+
+cd $TMP_PATH
+

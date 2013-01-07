@@ -6,6 +6,12 @@
 
 {% endblock %}
 {% block scripts %}
+<script type="text/javascript">
+        //To be able to use django tags in the static js files, use this approach:
+        //First create a js variable with your django tag
+        //Use this variable in your js.
+        url_img_question = "{% url img_media 'question_mark_15x15.png'%}";
+</script>
 <script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
 <script src = {% url js_media 'jquery.formset.min.js'%}></script>
 <script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
@@ -25,11 +31,6 @@
 	  onClickFunction: 'confirmInput(this)',
         });
       });
-</script>
-<script>
-       
-        $("Add Bridge").click(function(){alert("HOLA");});
-        
 </script>
 <script>
     $(document).ready(function() {
@@ -56,13 +57,23 @@
     $(document).ready(function() {
 
    	{%if server%} 
-    $("#submacbutton").click(function() {
-        $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});
-    });
+            $("#submacbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});
+            });
+            /*
+            $("#submacbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});   
+            });
+            */
    
-    $("#subipbutton").click(function() {
-        $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});
-    });
+            $("#subipbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});
+            });
+            /*
+            $("#subipbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});   
+            });
+            */
 	{% endif%}
 
 });
@@ -76,21 +87,25 @@ function adding(row){
 </script>
 
 <script>
-
-    function updateVMstatus(){
-		$('#vms').load("../../"+{{server.id}}+"/list_vms");
-		return;
+    function updateVMstatus() {
+        {% if server.id != NaN %}
+            $("#vms").load("../../" + {{server.id}} + "/list_vms/", function(response, status, xhr) {
+                if (status != "error") {
+                    $("#vms").html(response);
+                }
+            });
+        {% endif %}
+        return;
     }
-
 </script>
 <script>
-    var timer = setInterval(function(){
+    var timer = setInterval(function() {
     	updateVMstatus();
     },3000);
 </script>
 <script>
     function handleVMaction(serverId,vmId,action){
-        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action);  
+        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action+"/");  
         updateVMstatus();                                                     
     }
 </script>
@@ -113,57 +128,35 @@ function adding(row){
         <div>
 			<h2>General parameters</h2>
 			<h3>Parameters</h3>
-			{% if serverForm.errors %}
-				<table>
-				{%for field in serverForm %}
-					{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-					{% endif %}
-				{% endfor %}
-				</table>
-            {% endif %}
-       		<table class="formtable">
-				{% if field.errors %} 
-                	<tr><th colspan ="2">{{field.errors}}</th></tr>
-				{% endif %} 
-		    	<tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
-        		{% for field in serverForm %}
-                    {% if field.errors %}                             
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}	
-	                    	<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
-					{%endif%}
-        		{% endfor %}
-        	</table>
-	
+                <table class="formtable">
+                    {% if serverForm.non_field_errors %}
+                        <tr><td class="fielderror">{{serverForm.non_field_errors}}</td></tr>
+                    {% endif %}
+                    <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
+                    {% for field in serverForm %}
+                        {% if field.errors %}
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                        {% endif %}
+                        <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
+                    {% endfor %}
+                </table>	
         </div>
 	
-		<div>
-			<h2>Networking parameters</h2>
-			<h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
-			<div class="tooltip" id="mgmt_bridge_help">
-            Managemente bridge connecting the control interface of the server and the VMs. MAC address is optional. 
+        <div>
+            <h2>Networking parameters</h2>
+            <h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+            <div class="tooltip" id="mgmt_bridge_help">
+                Management bridge connecting the control interface of the server and the VMs. MAC address is optional.
             </div>
-
-			{% if mgmtIfaceForm.errors %}
-				<table>
-                	{%for field in mgmtIfaceForm %}
-						{% if field.errors %}
-                		<tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
-            			{% endif %}
-            		{% endfor %}
-				</table>
-            {% endif %}
-			<table id="mgmtifacetable" class="formtable">
-				{% for field in mgmtIfaceForm %}
-                    {% if field.errors %}
-                            <tr class="fielderror" ><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-                    {% else %}      
-							<tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
-                    {%endif%}
-				{% endfor %}
-			</table>
-		</div>	
+            <table id="mgmtifacetable" class="formtable">
+            {% for field in mgmtIfaceForm %}
+                {% if field.errors %}
+                    <tr><td colspan="3">{{field.errors}}</td></tr>
+                {% endif %}
+                   <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
+            {% endfor %}
+            </table>
+        </div>
 
 		{% include "servers/servers_dataIfaces.html" %}
 
@@ -183,7 +176,7 @@ function adding(row){
 						<input id="submacbutton" type="button" value="Subscribe" >
 				</td>
 				{% else %}
-				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. If not a global range will be used</td></tr>
+				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. Otherwise a global range will be used</td></tr>
 				{% endif %}
             </table>
 		</div>
@@ -201,14 +194,14 @@ function adding(row){
 						<input id="subipbutton" type="button" value="Subscribe">
 				</td>
                 {% else %}
-                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. If not a global range will be used</td></tr>
+                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. Otherwise a global range will be used</td></tr>
                 {% endif %}
             </table>
 		</div>
 		{% endif %}
 
         <div class="center" style="margin-top : 30px;">
-            <input type="submit" value="Save" /> |
+            <input type="submit" id="form_create_server" value="Save" /> |
             {% if server %}
             <a href="{% url delete_server server.id %}">Delete</a> |
             {% endif %}
@@ -222,5 +215,9 @@ function adding(row){
 	</div>
 
 </div>
+
+        <!-- Validation in the end waits for the forms to be loaded -->
+        <script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+
 {% endblock content %}
 

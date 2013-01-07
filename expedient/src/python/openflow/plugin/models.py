@@ -88,8 +88,8 @@ production networks, and is currently deployed in several universities.
 
         if base_uri.endswith("/"): base_uri = base_uri[:-1]
         try:
-            logger.debug("Registering topology callback at %s%s" % (
-                base_uri, reverse("openflow_open_xmlrpc")))
+#            logger.debug("Registering topology callback at %s%s" % (
+#                base_uri, reverse("openflow_open_xmlrpc")))
             err = self.client.proxy.register_topology_callback(
                 "%s%s" % (base_uri, reverse("openflow_open_xmlrpc")),
                 "%s" % self.pk,
@@ -161,8 +161,16 @@ production networks, and is currently deployed in several universities.
         self.parse_links(links)
 
  
-#    def parse_fs(self, fs):
+    def get_offered_vlans(self, set=None):
 
+        try:
+            vlans = self.client.proxy.get_offered_vlans(set)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise Exception("AM %s could not return available VLANS for your slice" % self.name)
+
+        return vlans
 
     def get_granted_flowspace(self, slice_id):
         
@@ -477,8 +485,8 @@ def create_or_update_links(aggregate, links):
     active_cnxn_ids = []
     # Create any missing connections.
     for src_dpid, src_port, dst_dpid, dst_port, attrs in links:
-        parse_logger.debug("parsing link %s:%s - %s:%s" % (
-            src_dpid, src_port, dst_dpid, dst_port))
+#        parse_logger.debug("parsing link %s:%s - %s:%s" % (
+#            src_dpid, src_port, dst_dpid, dst_port))
         try:
             src_iface = OpenFlowInterface.objects.get(
                 switch__datapath_id=src_dpid,

@@ -1,13 +1,16 @@
 from pypelib.RuleTable import RuleTable
+from pypelib.utils.Exceptions import *
 from ControllerMappings import ControllerMappings
 from threading import Thread, Lock
+from utils.PolicyLogger import PolicyLogger
+from django.conf import settings
+from django.core.mail import send_mail
 #CBA
 import uuid
 
 
 '''
-        @author: lbergesio, omoya
-
+        @author: lbergesio, omoya, CarolinaFernandez
  
 '''
 
@@ -20,13 +23,13 @@ class RuleTableManager():
 	_instance = None
         _mutex = Lock()
 	_createdRuleTables = list()
+	logger = PolicyLogger.getLogger()
 	
 	#Mappings	
         #Mappings contains the basic association between keywords and objects, functions or static values
         #Note that these mappings are ONLY defined by the lib user (programmer) 
         _ConditionMappings = ControllerMappings.getConditionMappings()
-	_ActionMappings = {"None":"None",
-			   "something":"None"}
+	_ActionMappings = ControllerMappings.getActionMappings()
 
 	#RuleTable default atributes
 	#All rules created, moved or updated will be in a RuleTable with the atributes below
@@ -62,6 +65,30 @@ class RuleTableManager():
 				
 		return RuleTableManager._instance
 
+        '''
+        Deletes the instance of PolicyRuleTable for a given ID.
+        This method should be seldom used.
+        '''
+        @staticmethod
+        def deleteInstance(tableID=None):
+            if tableID:
+                backend = RuleTableManager._defaultPersistence
+                with RuleTableManager._mutex:
+                    RuleTable.delete(tableID, backend)
+
+	'''
+	Retrieves all instances of PolicyRuleTable for a given name.
+	This method should be seldom used.
+	'''
+        @staticmethod
+        def getAllInstances(name=None):
+                if not name:
+                        name = RuleTableManager._defaultName
+		backend = RuleTableManager._defaultPersistence
+                with RuleTableManager._mutex:
+			instances = RuleTable.loadAll(name, backend)
+		return instances
+
 	#RuleTableMethods
 	@staticmethod
 	def AddRule(string,enabled=True,pos=None,parser=None,pBackend=None,persist=True, tableName=None):
@@ -80,11 +107,9 @@ class RuleTableManager():
 		enabled = RuleTableManager.getRuleOrIndexOrIsEnabled(ruleUUID,'Enabled',tableName)
 	        index = RuleTableManager.getRuleOrIndexOrIsEnabled(ruleUUID,'Index',tableName)
         	if enabled:
-			print 'is enabled so lets disable it!'
                 	RuleTableManager.DisableRule(None,index,tableName)
                 
         	else:
-			print 'is disabled so lets enable it!'
                 	RuleTableManager.EnableRule(None,index,tableName)
 
 		return RuleTableManager.getInstance(tableName)
@@ -92,8 +117,8 @@ class RuleTableManager():
 	@staticmethod
 	def editRule(rule,enable,priority,PreviousPriority,tableName):
 
-                #When the IM is editing a Rule, a new one is added to the top of the ruleSet(the edited rule).Here is a known position.
-                #Then a remove of the "old rule" is done. This rule is in previousPriority + 1 beacuse the addition of the edited rule
+                #When the IM is editing a Rule, a new one is added to the top of the ruleSet(the edited rule).That rule is in a known position.
+                #Then the "old rule" is removed. This rule was in previousPriority + 1 beacuse of the addition of the edited rule
                 #Finally the edited rule in pos. 0 is moved to the priority position
                 #This aproach is maked in this way to avoid to lose the removed Rule if the edited rule raises any exception.
                 RuleTableManager.AddRule(rule,enable,0, None, None,False,tableName)
@@ -125,7 +150,24 @@ class RuleTableManager():
 
 	@staticmethod
 	def Evaluate(metaObj, tableName=None):
-		return RuleTableManager.getInstance(tableName).evaluate(metaObj)
+		try:
+			RuleTableManager.getInstance(tableName).evaluate(metaObj)
+		except Exception as e:
+			RuleTableManager.logger.error("Denied policy: %s" %(e))
+			#if isinstance(e, MultiplePolicyObjectsReturned):
+			if issubclass(type(e), MultiplePolicyObjectsReturned):
+				send_mail(
+					settings.EMAIL_SUBJECT_PREFIX + "DB error: multiple Policy tables",
+					"There are multiple PolicyTables with the same name in your SQL engine.\nPlease do ensure this is not happening by checking the contents of:\n\n    database: %s\n    table: pypelib_RuleTableModel\n\n" % (settings.DATABASE_NAME),
+					from_email=settings.DEFAULT_FROM_EMAIL,
+					recipient_list=[settings.ROOT_EMAIL],
+					)
+				RuleTableManager.logger.info("E-mail sent to Island Manager. Reason: multiple Policy tables")
+			# Policy denial raises Exception to avoid VM resources allocation
+			raise e
+
+                RuleTableManager.logger.debug("All policies were accepted")
+                return
 
 	#getters
 	@staticmethod
@@ -195,10 +237,9 @@ class RuleTableManager():
         @staticmethod
         def getRuleOrIndexOrIsEnabled(ruleID,Mode,tableName=None):
 
-		print 'RuleUUID',ruleID
 
                 if Mode not in ['Rule','Index','Enabled']:
-                        raise Exception ('Unrecognized Mode: Only three modes are allowed: Rule, Index and Enabled')
+                        raise Exception ('Unrecognized Mode. Only three modes are allowed: Rule, Index and Enabled')
 		
 		ruleList = RuleTableManager.getInstance(tableName).getRuleSet()
                 for rule in ruleList:
@@ -209,7 +250,7 @@ class RuleTableManager():
                                         return ruleList.index(rule)
                                 if Mode == 'Enabled':
                                         return rule.enabled
-                raise Exception('Cannot edit the rule, the rule you are looking for does not exist')
+                raise Exception('Cannot edit the rule. The rule you are looking for does not exist')
 
 	@staticmethod
         def getPriorityList(name = None):

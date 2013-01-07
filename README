@@ -29,7 +29,7 @@ INSTALLING OCF
 Manager installations only).
 
 Note: for none Debian-like OSs you will have to manually install components since
-OCF ofver-based [http://code.google.com/p/pypelib/] installation scripts only
+OCF ofver-based [http://code.google.com/p/ofver/] installation scripts only
 support Debian-like OSs currently.
 
 
@@ -56,7 +56,7 @@ support Debian-like OSs currently.
 
     Alternatively you can download the tarball and uncompress it to /opt/
 
-2.4 Trigger ofver [http://code.google.com/p/pypelib/] installation by 
+2.4 Trigger ofver [http://code.google.com/p/ofver/] installation by 
     doing for each component:
 
     cd /opt/ofelia/{COMPONENT_NAME}/bin
@@ -113,4 +113,3 @@ FURTHER READING
 
 For more information about configuration, troubleshooting, contribution and
 more please visit https://github.com/fp7-ofelia/ocf/wiki
-

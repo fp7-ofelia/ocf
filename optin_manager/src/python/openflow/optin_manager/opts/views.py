@@ -11,6 +11,8 @@ update_match_struct_priority_and_get_fv_args, read_fs
 from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
+from openflow.optin_manager.opts.vlans.vlanController import vlanController
+from django.contrib.sites.models import Site
     
 def change_priority(request):
     '''
@@ -131,11 +133,17 @@ def add_opt_in(request):
         all_exps = Experiment.objects.all()
         admin_fs = AdminFlowSpace.objects.filter(user=request.user)
         exps = []
+
         for exp in all_exps:
             exp_fs = ExperimentFLowSpace.objects.filter(exp=exp)
             intersection = multi_fs_intersect(exp_fs,admin_fs,FlowSpace)
             if (len(intersection)>0):
                 exps.append(exp)
+
+        ######## XXX Experimental: Show allocated VLANs ######
+        allocated_vlans = vlanController.get_allocated_vlans()
+        requested_vlans = vlanController.get_requested_vlans_by_all_experiments() 
+        ########################################################################################
 
         assigned_priority = profile.max_priority_level - Priority.Strict_Priority_Offset - 1
         error_msg = []
@@ -161,10 +169,10 @@ def add_opt_in(request):
                     adminFS = AdminFlowSpace.objects.filter(user = request.user)
                     
                     intersected_flowspace = multi_fs_intersect([requested_opt],adminFS,FlowSpace)
-                    for fs in intersected_flowspace:
-                        print "\n\nFLOWSPACE"
-                        print fs.stringify()
-                        print fs.__unicode__()
+                    #for fs in intersected_flowspace:
+                    #    print "\n\nFLOWSPACE"
+                    #    print fs.stringify()
+                    #    print fs.__unicode__()
                     if len(intersected_flowspace) == 0:
                         error_msg.append("Selected flowspace doesn't have any intersection with admin FS")
                 if len(error_msg)==0:
@@ -190,7 +198,7 @@ def add_opt_in(request):
                                             fs_description = "%s"%fs
                                 send_mail(
                                          settings.EMAIL_SUBJECT_PREFIX + "Your Flowspace request has been attended",
-                                         "Your Flowspace request has been attended, go to your project and slice page at https://%s to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % (settings.SITE_DOMAIN.split(':')[0],fs_description),
+                                         "Your Flowspace request has been attended, go to your project and slice page at your Expedient's site to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % fs_description,
                                          from_email=settings.DEFAULT_FROM_EMAIL,
                                          recipient_list= [selexp.owner_email],
                                          #recipient_list=[settings.ROOT_EMAIL],
@@ -238,6 +246,9 @@ def add_opt_in(request):
                                 'first_exp':first_exp,
                                 'form':form,
                                 'upload_form':upload_form,
+                                'requested_vlans':requested_vlans,
+                                'vlan_list_length':len(allocated_vlans)/5,
+                                'allocated_vlans':allocated_vlans,
                             },
                     )  
                     
@@ -317,7 +328,6 @@ def add_opt_in(request):
                             },
                         )
                     except Exception,e:
-                        print "HITTTTT"
                         import traceback
                         traceback.print_exc()
                         transaction.rollback()
@@ -644,11 +654,17 @@ def view_experiment_simple(request, exp_id):
     '''
     theexp = Experiment.objects.filter(id=exp_id)
     allfs = ExperimentFLowSpace.objects.filter(exp=theexp[0])
+    requested_vlans = vlanController.get_requested_vlans_by_experiment(theexp[0])
+    #requested_vlans = {}
+    #vranges =  [x for x in theexp[0].experimentflowspace_set.values_list('vlan_id_s','vlan_id_e').distinct()]
+    #requested_vlans['ranges'] = [(int(x[0]),int(x[1])) for x in vranges] 
+    #requested_vlans['values'] = sum([range(x[0],x[1]+1) for x in vranges],[])
     return simple.direct_to_template(request, 
                         template = 'openflow/optin_manager/opts/view_experiment_simple.html', 
                         extra_context = {
                                         'exp':theexp[0],
                                         'allfs':allfs,
+                                        'requested_vlans':requested_vlans,
                                         'back':request.META['HTTP_REFERER'],
                                     }, 
                     )
@@ -692,4 +708,5 @@ def view_experiments(request):
                             extra_context = {'exps':exps}, 
                             ) 
     
-    
+
+

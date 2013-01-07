@@ -15,8 +15,8 @@
 			{{ form.as_table }}
 		</table>
 		<div class="center">
-			<input type="submit" value="Save" />
-			<a href='{% before_last_link breadcrumbs %}'>Cancel</a>
+			<input type="submit" id="form_create_project" value="Save" />
+                        <input type="button" onclick="javascipt:document.location='{% before_last_link breadcrumbs %}'" value="Cancel" />
 		</div>
 	</form>
 </div>

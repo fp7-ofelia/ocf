@@ -37,6 +37,7 @@ printHeader ">" "Enabling macro and ssl module in apache2..."
 #Enabling Apache mods
 /usr/sbin/a2enmod macro || warn "Could not enable macro module" "; maybe already enabled?"
 /usr/sbin/a2enmod ssl || warn "Could not enable ssl module" "; maybe already enabled?"
+/usr/sbin/a2enmod wsgi || warn "Could not enable wsgi module" "; maybe already enabled?"
 
 
 #Build ssl certs

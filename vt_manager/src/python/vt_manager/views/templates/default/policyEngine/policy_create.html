@@ -69,9 +69,15 @@
 			}   
 	});
 	
-               	$("#CreateCondButton").click(function() {
-                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});
+        /* Bind fancybox to each button and their respective URLs */
+               $("#CreateCondButton").click(function() {
+                       $.fancybox({'href': '{% url condition_create CurrentTable %}'});
         });
+        /*
+                $("#CreateCondButton").live('click',function() {
+                        $.fancybox({'href': '{% url condition_create CurrentTable %}'});   
+        });
+        */
 		$("#ac").change(function() {
                         document.getElementById("finalCond").value = " ";
         });
@@ -127,17 +133,16 @@
 		$("#description").change(function() {
 			displayRule();
         });
-		$("#SubmitForm").click(function() {
-			if (document.getElementById("advancedMode").checked == true){	
+		$("form#formRuleCreate").submit(function(event) {
+			if (document.getElementById("advancedMode").checked == true) {
 				checked = "True";
-			}else{
+			} else {
 				checked = check_cond_grouped();	
 			}
-			if (checked == "True"){
-				document.ruleCreate.submit();
-			}else{
+			if (checked == "False") {
+				event.preventDefault();
 				document.getElementById("exceptions").textContent = "WARNING: Conditions must be grouped before adding the rule";
-			};
+			}
 		});
 		
 
@@ -195,14 +200,14 @@
 	</div> 
 	{% if not edit %}
 
-		<form action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
+		<form id="formRuleCreate" action="{% url rule_create CurrentTable %}" method="post" name="ruleCreate">{% csrf_token %}
 	{% else %}
-		<form action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
+		<form id="formRuleCreate" action="{% url rule_edit CurrentTable rule_uuid  %}" method="post" name="ruleCreate">{% csrf_token %}	
 	{% endif %}
 	<table>
 		<td><b>Editing mode:</b></td>
-		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> Form Mode</td>
-		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> Advanced Mode</td>
+		<td><input id="formMode" type="radio" name="conditionMode" value="easy" checked> <label for="formMode">Form Mode</label></td>
+		<td><input id="advancedMode" type="radio" name="conditionMode" value="expert"> <label for="advancedMode">Advanced Mode</label></td>
 		<td><img id="mode_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
 			<div class="tooltip" id="mode_help">Form mode edition allows to create a rule using the form fields below. Advanced Mode edition allows you to write rules according to RegexParser syntax
 			</div>
@@ -212,15 +217,15 @@
    	<h3>General rule parameters</h3>
 	<div>	
 		<p>
-			Enable Rule:
+			<label for="enableRule">Enable Rule</label>:
 			{% if edit or saved  %}
 				{% if enabled %}
-					<input type="checkbox" name="enable" value="enable" checked></td>
+					<input id="enableRule" type="checkbox" name="enable" value="enable" checked></td>
 				{% else %}
-					<input type="checkbox" name="enable" value="enable"></td>
+					<input id="enableRule" type="checkbox" name="enable" value="enable"></td>
 				{% endif %}
 			{% else %}
-				<input type="checkbox" name="enable" value="enable" checked></td>
+				<input id="enableRule" type="checkbox" name="enable" value="enable" checked></td>
 			{% endif %}
 			<img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
 	   	 	<div class="tooltip" id="enable_help">
@@ -265,7 +270,7 @@
 			</div>
 			<div class="PEbox PEactions">
 				<h4>Actions</h4>
-				<input id="save_button" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
+				<input id="GroupCondButton" type="button" value="( )" class="button" onclick="cond_group()" title="Group Condition">
 				<input id="CreateCondButton" type="button" value="Create Condition" class="button" >
 			</div>
 			<div id="cond_div">
@@ -323,12 +328,14 @@
 					</td>
 					</tr>
 					<tr>
-						<td>Action:</th>
+						<td>Action:</td>
 						<td><select name="action" id="action">
 						{% if edit or saved %}
 							<option selected value="{{ action }}">{{ action }}</option>
-							{% for act in actionList %}
+							{% for act in ActionMappings %}
+							    {% if act != action %}
 								<option value ="{{ act }}">{{ act }}</option>
+							    {% endif %}
 							{% endfor %} 
 						{% else %}
 							{% for act in mappings.keys %}
@@ -359,6 +366,7 @@
             				<div class="tooltip" id="advanced_help" style="width:500px!important">
       						Rule syntax is:<br> <b>if</b> Condition <b>then</b> accept/deny [<b>nonterminal</b>]  [<b>do</b>  Action<b>] [denyMessage</b>  ErrorMessage] [<b>#</b>Description]        	
                 			</div>
+				<!--<textarea id="advancedRule" name="expertRule" disabled cols="70" rows="3">-->
 				<input type="text" id="advancedRule" name="expertRule" disabled value =
 					{% if edit or saved %}
 						{% if terminalS == "nonterminal" %}
@@ -414,10 +422,10 @@
 		<input type="hidden" name="edit" value="{{ edit }}">
 		<input type="hidden" name="load" value="True">
 		{% if edit %}
-			<input id="SubmitForm" type="button" value="Save Changes">
+			<input id="SubmitForm" type="submit" value="Save Changes">
 			<input type="hidden" name="editing" value="1">
 		{% else %}
-		        <input id="SubmitForm" type="button" value="Generate Rule">
+		        <input id="SubmitForm" type="submit" value="Generate Rule">
 			<input type="hidden" name="editing" value="0">
 		{% endif %}
 		<input type="hidden" id="conditionID" name="conditionID" value="" >

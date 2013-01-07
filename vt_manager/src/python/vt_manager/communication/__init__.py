@@ -5,6 +5,6 @@
 #for file in pyfiles:
 #    from file import *
 #import *
-
-from southCommInterface import *
-from northCommInterface import *
+#
+#from southCommInterface import *
+#from northCommInterface import *

@@ -6,6 +6,8 @@ import re
 admin.autodiscover()
 
 from vt_manager.utils.ThemeManager import ThemeManager
+from vt_manager.communication.southCommInterface import *
+from vt_manager.communication.northCommInterface import *
 
 '''
 Load Themes
@@ -23,6 +25,8 @@ urlpatterns = patterns('',
 
     #Policy Engine
     url(r'^policies/(?P<table>\w+)/add/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.policy_create', name="policy_create"),    
+    url(r'^policies/(?P<table>\w+)/edit/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.policy_edit', name="policy_edit"),
+    url(r'^policies/(?P<table_uuid>\w+)/delete/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.policy_delete', name="policy_delete"),
     url(r'^policies/(?P<table_name>\w+)/add/rules/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_create', name="rule_create"),   
     url(r'^policies/(?P<table_name>\w+)/delete/rules/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_delete', name="rule_delete"),
     url(r'^policies/(?P<table_name>\w+)/edit/rules/(?P<rule_uuid>\w+)/$', 'vt_manager.controller.dispatchers.ui.PolicyDispatcher.rule_edit', name="rule_edit"),
@@ -70,9 +74,9 @@ urlpatterns = patterns('',
     (r'^accounts/', include('registration.urls')),
 
     #RPC
-    rpc_url(r'^xmlrpc/agent$', name='agent'),
-    rpc_url(r'^xmlrpc/plugin$', name='plugin'),
-    rpc_url(r'^xmlrpc/.*$', name='root'),
+    rpc_url(r'^xmlrpc/agent/?$', name='agent'),
+    rpc_url(r'^xmlrpc/plugin/?$', name='plugin'),
+    #rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 
 def get_static_url(name, path=""):

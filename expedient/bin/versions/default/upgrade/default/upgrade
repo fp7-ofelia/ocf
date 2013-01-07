@@ -15,7 +15,7 @@ SRC_DIR=/opt/ofelia/expedient/
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?¿"
+cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exists anymore?"
 
 #Syncing DB
 printHeader ">" "Syncing Database..."
@@ -25,10 +25,9 @@ python manage.py syncdb || error "Could not synchronize database using manage.py
 printHeader ">" "Evolving Database schema..."
 python manage.py evolve --hint -x || error "Could not evolve database..."
 
-
+# Clean cache
 printHeader ">" "Cleaning UI's cache hash values..."
 python $TMP_PATH/versions/default/upgrade/tools/cleanCache.py || error "Could not clean UI's hashes..."
 
 cd $TMP_PATH
-
 

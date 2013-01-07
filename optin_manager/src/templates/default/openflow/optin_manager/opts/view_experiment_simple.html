@@ -1,5 +1,32 @@
 <html>
-<body>
+<head>
+<style>
+div.roundBlockContainer {
+        margin-top:0px;
+        margin-bottom:10px;
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        /*display:inline-block;*/
+        width:200px;
+        text-align:center;
+        vertical-align:middle;
+        padding:10px;
+}
+
+h3 {
+        font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+        color: #005;
+        font-weight:bold;
+        font-size: 1em;
+        }
+h3 a:visited{
+        text-decoration: none;
+      }
+</style>
+<body> 
 	<b>Project Name: </b>{{exp.project_name}}<br/>
 	<b>Project Description: </b>{{exp.project_desc}}<br/>
 	<b>Slice Name: </b>{{exp.slice_name}}<br/>
@@ -7,5 +34,22 @@
 	<b>Slice ID: </b>{{exp.slice_id}}<br/>
 	<b>Owner Contact: </b>{{exp.owner_email}}<br/>
 	<b>FlowSpace: </b><br/>{% for fs in allfs %}{{fs}}<br/>{% endfor %}<br/>
+
+	{% if requested_vlans.ranges|length == 1 and requested_vlans.ranges.0.0 == requested_vlans.ranges.0.1 %}
+	<h3>Requested VLAN(s):</h3>
+                <div class="roundBlockContainer">
+                        {% for value in requested_vlans.values %}
+                        <b>VLAN Tag: </b>{{value|safe}}<br/>
+                        {% endfor %}
+                </div>
+
+	{% else %}
+	<h3>Requested VLAN Ranges:</h3>
+                <div class="roundBlockContainer">
+                        {% for range in requested_vlans.ranges %}
+                        <b>Range {{forloop.counter0}}: </b>{{range|safe}}<br/>
+                        {% endfor %}
+                </div>
+	{%endif%}
 </body>
 </html>

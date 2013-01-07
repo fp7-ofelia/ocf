@@ -5,9 +5,11 @@ from django.db import models
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.extendable.models import Extendable
 from expedient.clearinghouse.slice.models import Slice
+from expedient.common.utils.validators import asciiValidator
 from datetime import datetime
 from django.core.exceptions import ValidationError
 import re
+
 class Resource(Extendable):
     '''
     Generic model of a resource.
@@ -36,7 +38,7 @@ class Resource(Extendable):
             error()
 
     
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, validators=[asciiValidator])
     available = models.BooleanField("Available", default=True, editable=False)
     status_change_timestamp = models.DateTimeField(
         editable=False, auto_now_add=True)

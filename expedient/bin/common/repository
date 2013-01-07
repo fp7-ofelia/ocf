@@ -8,17 +8,13 @@
 ###
 
 function recoverUpgradeState(){
-	
-
 	if [ -f $UPGRADE_REG ]; then
-	
 		OFVER_UPGRADED_STATUS="1"
 		printDebug "Recovering state..." 
 		source $UPGRADE_REG
 		rm -f $UGPRADE_REG
 		printDebug "Recovered state: EXECPID=$EXECPID, BACKUP_PATH=$BACKUP_PATH, LOG=$LOG"
 	fi
-
 }
 
 function upgradeOfverFromRepo(){

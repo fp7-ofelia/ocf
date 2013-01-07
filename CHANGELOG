@@ -29,7 +29,7 @@ v0.4
 Released: Week of 24th to 28th, December 2012
 
 Change log:
-  
+
 [B] EXP : Fixed bug originated by a race condition between askForAggregateResouces and async communication model. Issue 98
 [+] OFVER : Modify ofver scripts to check pyPElib version and upgrade it when a new version is available. Issue 95
 [B] VTA : pyPElib does not correctly handle rule tables exceptions when multiple PolicyRuleTable's exist. Issue 94
@@ -54,13 +54,11 @@ Change log:
 [B] VTA, EXP : Security issue between VM AM and Expedient. Fixed bug that exposed users' credentials in error message when VM status update fails. Issue 42
 [B] EXP : Correct display of requested and granted flowspaces. Issue 38
 [+] EXP : Detect loops in requested topologies and warn user. Issue 37
-[*] EXP, OPT : Simplified FlowSpace allocation. Only VLAN parameter is selectable. The other fields are collapsed and only displayed when switching to advanced mode. Issue 36
+[*] EXP, OPT : Simplified FlowSpace allocation mode added. Issue 36
 [B] EXP : Fixed mySettings-example file in Expedient which contained wrong uncommented lines. Issue 34
 [B] EXP : Fixed ofreg url in Expedient. Issue 33
 [+] OFVER : ofver backups the current template when it downloads a new template and replace echo with print so the messages are logged in the log file. Issue 32
 [B] VTA, EXP, AGN : Fixed bug that avoided VMs containing '/' characters to be started. Issue 30
-
-Known issues/TODOs:
 
 
 --------------------------------------------------

@@ -1,43 +1,66 @@
 '''
-	@author: msune
+Ofelia VT AM settings file (static settings)
 
-	Ofelia VT AM settings file (Static settings) 
+@author: msune, CarolinaFernandez
 '''
+
+#
+# Based upon the Apache server configuration files.
+#
+
+### Section 1: VT AM settings
+#
+# Static settings for Virtual Machine Aggregate Manager.
+#
 
 import sys, traceback, logging
 from django.conf import settings
 from os.path import dirname, join
 
-
-#EMAIL_HOST = "smtp.gmail.com"
+#
+# Email configuration.
+#
 DEFAULT_FROM_EMAIL = "OFELIA-noreply@fp7-ofelia.eu"
+EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '
 EMAIL_USE_TLS=True
 EMAIL_HOST='mail.eict.fp7-ofelia.eu'
 EMAIL_HOST_USER=''
 EMAIL_HOST_PASSWORD=''
 EMAIL_PORT=25 
 
-# Enable debugging?
+#
+# Set true to enable debug.
+#
 DEBUG = True
 
+##
+## Advanced parameters.
+## You SHOULD NOT change them unless you have a good reason.
+##
 
-##### Advanced parameters: you shouldn't be changing them, unless you have a good reason #########
-
-#SRC_DIR
+#
+# Directory for the VT manager sources.
+#
 SRC_DIR = join(dirname(__file__), '../../../')
 
-#Database default params
+#
+# Database default parameters.
+#
 DATABASE_ENGINE = 'mysql'
 DATABASE_HOST = ''
 DATABASE_PORT = ''
 
+#
 # List of callables that know how to import templates from various sources.
+#
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
 )
 
-#Middleware
+#
+# Middleware classes for Django.
+#
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
@@ -48,24 +71,33 @@ MIDDLEWARE_CLASSES = (
     'vt_manager.common.middleware.basicauth.HTTPBasicAuthMiddleware',
     'vt_manager.common.middleware.sitelockdown.SiteLockDown',
 )
-#Authentication_backends
+
+#
+# Authentication_backend(s) for Django.
+# django.contrib.auth.backends.RemoteUserBackend: added for HTTPS over
+# RPC following http://packages.python.org/rpc4django/usage/auth.html
+#
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'vt_manager.common.backends.remoteuser.NoCreateRemoteUserBackend',
-    #VTAM: added for HTTPS over RPC following http://packages.python.org/rpc4django/usage/auth.html
     'django.contrib.auth.backends.RemoteUserBackend',
 )
 
-#Urls.py
+#
+# Path to the urls.py file.
+#
 ROOT_URLCONF = 'vt_manager.urls'
 
-#Template dirs
+#
+# Path to the template (.html files) folder(s).
+#
 TEMPLATE_DIRS = (
     join(SRC_DIR, 'python/vt_manager/views/templates/default'),
 )
 
-#THEME_DIR = join(SRC_DIR, 'python/vt_manager/views/static/media')
-
+#
+# Template context processors
+#
 TEMPLATE_CONTEXT_PROCESSORS = [
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
@@ -75,12 +107,16 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'vt_manager.common.utils.context_processors.contextSettingsInTemplate',
 ]
 
-#Static file paths
+#
+# Path to the static content (images, css, js) folders.
+#
 MEDIA_ROOT = join(SRC_DIR+"python/vt_manager/views/static/", "media")
 MEDIA_URL = '/static/media'
 ADMIN_MEDIA_PREFIX = '/admin/media/'
 
-#Installed apps
+#
+# Installed apps
+#
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -95,60 +131,77 @@ INSTALLED_APPS = (
     'vt_manager.models',
     'vt_manager',
     'pypelib.persistence.backends.django',
-#    'vt_manager.communication',
 )
 
-#Redirect login
+#
+# URL to redirect after login.
+#
 LOGIN_REDIRECT_URL = '/'
 
-# Registration App settings
+#
+# Registration application settings.
+#
 ACCOUNT_ACTIVATION_DAYS = 3
 
+#
+# See Django documentation.
+#
 TEMPLATE_DEBUG = DEBUG
-'''See Django documentation.'''
-
 DEBUG_PROPAGATE_EXCEPTIONS = True
-'''See Django documentation.'''
 
-## Session cookie names to avoid conflicts
+#
+# Set session cookie names so as to avoid conflicts.
+#
 SESSION_COOKIE_NAME = "vtam_sessionid"
 
-## workaround to allow test:// schemes
+#
+# Workaround to allow test:// schemes.
+#
 import urlparse
 urlparse.uses_netloc.append("test")
 urlparse.uses_fragment.append("test")
 
-#DJANGO id
+#
+# Django ID.
+#
 SITE_ID = 1
 
-# default sitename
-SITE_NAME = 'OFELIA CF VT Manager' #'Opt-In Manager'
+#
+# Default sitename.
+#
+SITE_NAME = 'OFELIA CF VT Manager'
 
-#Fully qualified name
+#
+# Fully qualified name
+#
 SITE_DOMAIN = 'expedient.site:8445'
 
-#Basic authentication urls
+#
+# Basic authentication urls
+#
 BASIC_AUTH_URLS = (
-    #r'^/.*',
-    r'^/xmlrpc/.*',#.*',
-    ### for testing
- #   r'^/dummyfv/.*',
+    r'^/xmlrpc/.*',
 )
 
+#
 # List of locations that do not need authentication to access.
+#
 SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/accounts/register/.*$',
     r'^/accounts/activate/.*$',
-#    r'^/admin/.*',
-#    r'^/accounts/password/reset/.*$',
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
-#    r'.*/xmlrpc/?',
 )
 
-#Force https
+#
+# Set to force https.
+#
 DOMAIN_SCHEME = "https"
 
+#
+# Agent monitoring interval in seconds. That is, seconds until it
+# asks for the current status of the servers and virtual machines.
+#
 MONITORING_INTERVAL = 45
 

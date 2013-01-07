@@ -1,0 +1,19 @@
+#!/bin/bash
+
+###
+#       @author:lbergesio 
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: post-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.4 post-upgrade-hook module..."
+
+SRC_DIR=/opt/ofelia/vt_manager/
+
+local TMP_PATH=$PWD
+
+python $TMP_PATH/versions/0.4/upgrade/default/tools/vmCallBackURLupdate.py || warning "Could not update existing VM's callbacks URLs to Expedient. You may be to do it manually or contact OCF developers for support. Proceeding with upgrade..."
+
+cd $TMP_PATH
