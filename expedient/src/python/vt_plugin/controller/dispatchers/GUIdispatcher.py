@@ -83,8 +83,9 @@ def virtualmachine_crud(request, slice_id, server_id):
 
                     return HttpResponseRedirect(reverse("html_plugin_home",
                                                 args=[slice_id]))
-                else:
-                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number.", code="invalid",)
+#                # If left, VMs are not assigned an IP when some error occurs in the form
+#                else:
+#                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number.", code="invalid",)
 
         else:
             formset = VMFormSet(queryset=VM.objects.none())

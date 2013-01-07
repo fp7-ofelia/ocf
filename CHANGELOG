@@ -24,9 +24,25 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.4.1
+--------------------------------------------------
+Released: 07/01/2013
+
+./ Production ready
+
+Change log:
+
+[B] OFVER : Fixed bug raleted with backup restoration. Issue 104
+[+] OFVER : Ofver lock functions handling PIDs and forks. Issue 102
+[B] EXP : New VM naming policies crashed slices containing VMs with names containing "_". Issue 105
+
+
+--------------------------------------------------
 v0.4
 --------------------------------------------------
-Released: Week of 24th to 28th, December 2012
+Released: 04/01/2013
+
+/!\ Outdated
 
 Change log:
 
@@ -66,7 +82,7 @@ v0.3
 --------------------------------------------------
 Released: 25/09/2012
 
-./ Production ready
+/!\ Outdated
 
 Change log:
 
