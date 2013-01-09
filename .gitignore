@@ -53,14 +53,17 @@ vt_manager/src/python/agent/security/certs/agent.key
 
 expedient/.currentVersion
 expedient/bin/log/*
+expedient/bin/.upgradeReg
 expedient/bin/.ofverLock
 expedient/bin/rescue/*
 optin_manager/.currentVersion
 optin_manager/bin/log/*
+optin_manager/bin/.upgradeReg
 optin_manager/bin/.ofverLock
 optin_manager/rescue/*
 vt_manager/.currentVersion
 vt_manager/bin/log/*
+vt_manager/bin/.upgradeReg
 vt_manager/bin/.ofverLock
 vt_manager/rescue/*
 ofrelease
