@@ -46,12 +46,19 @@ class ProvisioningDispatcher():
                 except Exception as e:
                     logging.error("Not possible to translate to VM model\n")
                     logging.error(e)
+                    if not VMmodel:
+                        vm_name = action.server.virtual_machines[0].name
+                    else:
+                        vm_name = VMmodel.name
+
                     DatedMessage.objects.post_message_to_user(
-                        "Not possible to translate VM %s to a proper app model" % VMmodel.name,
+                        "Not possible to translate VM %s to a proper app model" % vm_name,
                         threading.currentThread().requestUser, msg_type=DatedMessage.TYPE_ERROR,
                     )
-                    Server.vms.remove(VMmodel)
-                    VMmodel.completeDelete()
+
+                    if VMmodel:
+                        VMmodel.completeDelete()
+                        Server.vms.remove(VMmodel)
                     return
                 
                 client = Server.aggregate.as_leaf_class().client
