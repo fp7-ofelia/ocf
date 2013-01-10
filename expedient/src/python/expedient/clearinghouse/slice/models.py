@@ -51,7 +51,7 @@ class Slice(models.Model):
     '''
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
-    description = models.TextField(validators=[asciiValidator])
+    description = models.TextField(validators=[descriptionValidator])
     project = models.ForeignKey(Project)
     owner = models.ForeignKey(User, related_name="owned_slices")
     started = models.BooleanField(default=False, editable=False)
