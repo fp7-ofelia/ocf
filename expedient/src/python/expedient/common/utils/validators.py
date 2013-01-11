@@ -1,7 +1,7 @@
 '''
 Created on Jul 17, 2010
 
-@author: jnaous
+@author: jnaous, CarolinaFernandez
 '''
 import re
 from django.core.validators import RegexValidator
@@ -9,8 +9,8 @@ from django.forms import ValidationError
 
 ASCII_RE = "^([0-9a-zA-Z\-\_\ ])+$"
 NUMBER_RE = "^([0-9])+$"
-RESOURCE_RE = "^([0-9a-zA-iZ\-\_])+$"
-TEXT_RE = "^([0-9a-zA-Z\-\_\ \.])+$"
+RESOURCE_RE = "^([0-9a-zA-Z\-])+$"
+TEXT_RE = "^([0-9a-zA-Z\-\_\ \.\!\?\"\'\r\n])+$"
 
 mac_re = re.compile(r'^([\dA-Fa-f]{2}:){5}[\dA-Fa-f]{2}$')
 validate_mac_address = RegexValidator(mac_re, u'Enter a valid MAC address (in "xx:xx:xx:xx:xx:xx" format).', 'invalid')

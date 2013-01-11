@@ -13,14 +13,19 @@ DATAPATH_RE = "^([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})$";
 MAC_RE = "^([\dA-Fa-f]{2}:){5}[\dA-Fa-f]{2}$";
 NOTBLANK_RE = "^.+$";
 NUMBER_RE = "^([0-9])+$";
-RESOURCE_RE = "^([0-9a-zA-Z\-\_])+$";
-TEXT_RE = "^([0-9a-zA-Z\-\_\ \.])+$";
+RESOURCE_RE = "^([0-9a-zA-Z\-])+$";
+TEXT_RE = "^([0-9a-zA-Z\-\_\ \.\!\?\"\'\r\n])+$"
 
 mac_re = re.compile(r'^([\dA-Fa-f]{2}:){5}[\dA-Fa-f]{2}$')
 validate_mac_address = RegexValidator(mac_re, u'Enter a valid MAC address (in "xx:xx:xx:xx:xx:xx" format).', 'invalid')
 
 def asciiValidator(s):
     pattern = re.compile(ASCII_RE)
+    if (pattern.match(s) == None):
+        raise ValidationError("Please do not use accented characters and avoid using \'@\'.")
+
+def descriptionValidator(s):
+    pattern = re.compile(TEXT_RE)
     if (pattern.match(s) == None):
         raise ValidationError("Please do not use accented characters and avoid using \'@\'.")
 
