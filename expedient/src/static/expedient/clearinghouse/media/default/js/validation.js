@@ -1,4 +1,4 @@
-var DESCRIPTION_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)])+$/;
+var DESCRIPTION_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)\!\?\"\'\r\n])+$/;
 var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
 var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;

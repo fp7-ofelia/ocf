@@ -2,7 +2,7 @@ var DATAPATH_RE = /^([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})$/;
 var MAC_RE = /^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$/;
 var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
-var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
+var RESOURCE_RE = /^([0-9a-zA-Z\-])+$/;
 var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
 
 /* Error list check and generation */
