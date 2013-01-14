@@ -14,7 +14,7 @@ from django.views.generic.create_update import get_model_and_form_class
 
 import copy
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_plugin.forms.VMFormSet import VMFormSet
+from vt_plugin.forms.VM import VMModelForm
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
@@ -55,8 +55,8 @@ def virtualmachine_crud(request, slice_id, server_id):
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
     # Creates a model based on VM
-    VMFormSetAux = modelformset_factory(
-        VM, can_delete=False, formset=VMFormSet,
+    VMModelFormAux = modelformset_factory(
+        VM, can_delete=False, form=VMModelForm,
         fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
     )
 
@@ -64,7 +64,7 @@ def virtualmachine_crud(request, slice_id, server_id):
         if request.method == "POST":
             if 'create_new_vms' in request.POST:
                 # "Done" pressed ==> send xml to AM
-                formset = VMFormSetAux(request.POST, queryset=virtualmachines)
+                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
                 if formset.is_valid():
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
@@ -74,20 +74,20 @@ def virtualmachine_crud(request, slice_id, server_id):
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
-                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number.", code="invalid",)
+                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
-            formset = VMFormSetAux(request.POST, queryset=VM.objects.none())
+            formset = VMModelFormAux(queryset=VM.objects.none())
 
-    except Exception as e:
+    except ValidationError as e:
         # Django exception message handling is different to Python's...
         error_crud = ";".join(e.messages)
-
-        if not isinstance(e,ValidationError):
-            DatedMessage.objects.post_message_to_user(
-                "VM may have been created, but some problem ocurred: %s" % str(e),
-                request.user, msg_type=DatedMessage.TYPE_ERROR)
-            return HttpResponseRedirect(reverse("home"))
+    except Exception as e:
+        print "normal exception here: %s" % str(e)
+        DatedMessage.objects.post_message_to_user(
+            "VM might have been created, but some problem ocurred: %s" % str(e),
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+        return HttpResponseRedirect(reverse("home"))
 
     return simple.direct_to_template(
         request, template="aggregate_add_virtualmachines.html",

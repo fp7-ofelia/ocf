@@ -2,7 +2,6 @@ import shlex, subprocess
 from StringIO import StringIO
 from django.db import models
 from django.db.models.fields import IPAddressField
-from django.core.exceptions import ValidationError
 import paramiko
 from paramiko.rsakey import RSAKey
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -14,6 +13,7 @@ from expedient.common.messaging.models import DatedMessage
 from expedient.clearinghouse.slice.models import Slice
 from vt_plugin.models import *
 from expedient.clearinghouse.resources.models import Resource
+from vt_plugin.utils.validators import *
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
@@ -27,44 +27,6 @@ VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),
                         #('hvm','HVM'),
                       )
-
-
-def validate_memory(value):
-    def error():
-        raise ValidationError(
-            "Invalid input: memory has to be higher than 128Mb",
-        )
-
-    if value < 128:
-        error()
-
-def validate_discImage(value):
-    def error():
-        raise ValidationError(
-            "Invalid input: only test image available",
-        )
-
-    if value not in ["test", "default"]:
-        error()
-        
-def validate_hdSetupType(value):
-    def error():
-        raise ValidationError(
-            "Invalid input: only File Image supported",
-        )
-
-    if value != "file-image":
-        error()
-
-def validate_virtualizationSetupType(value):
-    def error():
-        raise ValidationError(
-            "Invalid input: only Paravirtualization supported",
-        )
-
-    if value != "paravirtualization":
-        error()
-
 class VM(Resource):
     
     '''
@@ -126,24 +88,9 @@ class VM(Resource):
         return self.virtTech
 
     def setName(self, name):
-        def validate_name(value):
-            def error():
-                raise ValidationError(
-                    "Invalid input: VM name should not contain accented characters, symbols, underscores or whitespaces.",
-                    code="invalid",
-                )
-#            cntrlr_name_re = re.compile("^[\S]*$")
-            cntrlr_name_re = re.compile("^([0-9a-zA-Z\-]){1,64}$")
-            m = cntrlr_name_re.match(value)
-            if not m:
-                error()
-        try:
-            validate_name(name)
+        if not self.name:
+            resourceVMNameValidator(name)
             self.name = name
-        except Exception as e:
-            raise e
-
-        self.name = name
 
     def getName(self):
         return self.name
