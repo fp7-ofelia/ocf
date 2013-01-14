@@ -69,7 +69,8 @@ def virtualmachine_crud(request, slice_id, server_id):
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
-                    return HttpResponseRedirect(reverse("html_plugin_home",
+#                    return HttpResponseRedirect(reverse("html_plugin_home",
+                    return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
