@@ -1,8 +1,9 @@
 var DESCRIPTION_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)\!\?\"\'\r\n])+$/;
 var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
-var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
-var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
+var RESOURCE_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
+//var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
+var RESOURCE_RESTRICTED_RE = /^([0-9a-zA-Z\-]){1,64}$/;
 
 /* Error list check and generation */
 function doErrorlistExists(fieldID) {
@@ -53,11 +54,11 @@ function checkNumber(id, resourceName) {
 }
 
 function checkRestrictedName(id, resourceName) {
-    return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only and no whitespaces.");
+    return checkWithRegExp(id, RESOURCE_RESTRICTED_RE, "Check that the " + resourceName + " has ASCII characters only and no whitespaces.");
 }
 
-function checkText(id, resourceName) {
-    return checkWithRegExp(id, TEXT_RE, "Check that the " + resourceName + " has ASCII characters only.");
+function checkName(id, resourceName) {
+    return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only.");
 }
 
 function checkAllResultsOK(results) {
@@ -111,7 +112,7 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
             if (contains("name",id) && submitID == "VM") {
                 results[index] = checkRestrictedName(id,submitID + " name");
             } else if (contains("name",id)) {
-                results[index] = checkText(id,submitID + " name");
+                results[index] = checkName(id,submitID + " name");
             } else if (contains("description",id)) {
                 results[index] = checkDescription(id,submitID + " description");
             } else if (contains("location",id)) {
