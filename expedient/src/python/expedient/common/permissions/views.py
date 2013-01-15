@@ -110,6 +110,7 @@ def request_permission(always_redirect_to=None,
             permission, target_obj_or_class)[0]
 
         # Get the object permission name
+        perm_name = obj_perm.permission.name 
         perm_name = obj_perm.permission.name
 
         # Get the users who can delegate the permission

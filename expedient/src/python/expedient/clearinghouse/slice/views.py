@@ -5,6 +5,7 @@ Created on Jun 17, 2010
 '''
 from django.views.generic import create_update, list_detail, simple
 from django.core.urlresolvers import reverse, get_callable
+from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponseRedirect, HttpResponseNotAllowed
 from expedient.common.utils.views import generic_crud
@@ -106,7 +107,7 @@ def delete(request, slice_id):
         from vt_plugin.models.VM import VM
         if VM.objects.filter(sliceId = slice.uuid):
             DatedMessage.objects.post_message_to_user(
-            "Please before deleting the slice %s, delete all the VMs in it" % slice.name,
+            "Please delete all VMs inside slice '%s' before deleting it" % slice.name,
             request.user, msg_type=DatedMessage.TYPE_ERROR)
             return detail(request, slice_id)
         return simple.direct_to_template(
@@ -306,9 +307,19 @@ def remove_aggregate(request, slice_id, agg_id):
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
             "id", flat=True)).as_leaf_class()
-            
+
     if request.method == "POST":
-        return HttpResponseRedirect(aggregate.remove_from_slice(
-            slice, reverse("slice_detail", args=[slice_id])))
+        try:
+            return HttpResponseRedirect(aggregate.remove_from_slice(
+                slice, reverse("slice_detail", args=[slice_id])))
+        except MultipleObjectsReturned as e:
+            DatedMessage.objects.post_message_to_user(
+                str(e), request.user, msg_type=DatedMessage.TYPE_ERROR)
+        except:
+            pass
+        # If any error occurs, redirect to slice detail page
+        return HttpResponseRedirect(
+            reverse('slice_detail', args=[slice_id]))
     else:
         return HttpResponseNotAllowed(["POST"])
+

@@ -2,8 +2,9 @@ var DATAPATH_RE = /^([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})$/;
 var MAC_RE = /^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$/;
 var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
-var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
-var TEXT_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
+var RESOURCE_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
+//var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
+var RESOURCE_RESTRICTED_RE = /^([0-9a-zA-Z\-]){1,64}$/;
 
 /* Error list check and generation */
 function doErrorlistExists(fieldID) {
@@ -58,11 +59,11 @@ function checkPort(id, resourceName) {
 }
 
 function checkRestrictedName(id, resourceName) {
-    return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only and no whitespaces.");
+    return checkWithRegExp(id, RESOURCE_RESTRICTED_RE, "Check that the " + resourceName + " has ASCII characters only and no whitespaces.");
 }
 
-function checkText(id, resourceName) {
-    return checkWithRegExp(id, TEXT_RE, "Check that the " + resourceName + " has ASCII characters only.");
+function checkName(id, resourceName) {
+    return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only.");
 }
 
 function checkMAC(id, resourceName) {
@@ -124,9 +125,9 @@ $(":submit[id^=form_create_server]").click(function() {
         if ($(this).is("input")) {
             // VM names have a special treatment
             if (contains("name",id) && (contains("server", id) || contains("bridge", id))) {
-                results[index] = checkText(id,submitID + " name");
+                results[index] = checkName(id,submitID + " name");
             } else if (contains("name",id)) {
-                results[index] = ((isBlank(id) && isBlank(replaceID(id, "name", "port")) && isBlank(replaceID(id, "name", "switchID"))) || checkText(id,submitID + " name"));
+                results[index] = ((isBlank(id) && isBlank(replaceID(id, "name", "port")) && isBlank(replaceID(id, "name", "switchID"))) || checkName(id,submitID + " name"));
             } else if ((contains("password",id))) {
                 results[index] = checkRestrictedName(id,submitID + " agent password");
             } else if (contains("url",id)) {

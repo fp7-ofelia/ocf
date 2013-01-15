@@ -15,8 +15,6 @@ class ProvisioningDispatcher():
  
 	@staticmethod
 	def processProvisioning(provisioning):
-
-
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
 			actionModel = ActionController.ActionToModel(action,"provisioning")
@@ -54,18 +52,21 @@ class ProvisioningDispatcher():
 						vm = None
 						raise
 				#PROVISIONING DELETE, START, STOP, REBOOT
-	 
 				else :
-	
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
 
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
 			except Exception as e:
-				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE and vm:
-					controller.deleteVM(vm)
+				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+					# If the VM creation was interrupted in the network
+					# configuration, the created VM won't be returned
+					try:
+						if not vm:
+							vm = controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
+						controller.deleteVM(vm)
+					except Exception as e:
+						print "Could not delete VM. Exception: %s" % str(e)
 				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
-
-		
 
 		logging.debug("PROVISIONING FINISHED...")
 
@@ -75,7 +76,6 @@ class ProvisioningDispatcher():
         
 		try:
 			actionModel.checkActionIsPresentAndUnique()
-
 			Server, VMmodel = controller.getServerAndCreateVM(action)
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
@@ -89,18 +89,15 @@ class ProvisioningDispatcher():
 	def __deleteStartStopRebootVM(controller, actionModel, action):
 
 		try:
-
 			actionModel.checkActionIsPresentAndUnique()
 			VMmodel =  controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
 			if not VMmodel:
 				logging.error("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
 				raise Exception("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
-
 			
 			#XXX:Change action Model
 			actionModel.setObjectUUID(VMmodel.getUUID())
 			actionModel.save()
 		except:
 			raise 
-
 

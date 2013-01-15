@@ -14,6 +14,7 @@ from django.views.generic.create_update import get_model_and_form_class
 
 import copy
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
+from vt_plugin.forms.VM import VMModelForm
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
@@ -54,8 +55,8 @@ def virtualmachine_crud(request, slice_id, server_id):
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
     # Creates a model based on VM
-    VMFormSet = modelformset_factory(
-        VM, can_delete=False, 
+    VMModelFormAux = modelformset_factory(
+        VM, can_delete=False, form=VMModelForm,
         fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
     )
 
@@ -63,46 +64,30 @@ def virtualmachine_crud(request, slice_id, server_id):
         if request.method == "POST":
             if 'create_new_vms' in request.POST:
                 # "Done" pressed ==> send xml to AM
-                formset = VMFormSet(
-                    request.POST, queryset=virtualmachines)
+                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
                 if formset.is_valid():
-                    # Check VM name
-                    import re
-                    name = request.POST['form-0-name'] if request.POST['form-0-name'] else None
-                    cntrlr_name_re = re.compile("^([0-9a-zA-Z\-]){1,64}$")
-                    m = cntrlr_name_re.match(name)
-                    if not m:
-                        raise ValidationError(
-                            "Invalid input: VM name should not contain accented characters, symbols, underscores or whitespaces.",
-                            code="invalid",
-                        )
-
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
-
-                    return HttpResponseRedirect(reverse("html_plugin_home",
+#                    return HttpResponseRedirect(reverse("html_plugin_home",
+                    return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
-#                # If left, VMs are not assigned an IP when some error occurs in the form
-#                else:
-#                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number.", code="invalid",)
+                # Form not valid => raise error
+                else:
+                    raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
-            formset = VMFormSet(queryset=VM.objects.none())
+            formset = VMModelFormAux(queryset=VM.objects.none())
 
-    except Exception as e:
-        # Django exception handling is different to Python's... Now smile! :)
+    except ValidationError as e:
+        # Django exception message handling is different to Python's...
         error_crud = ";".join(e.messages)
-#        if isinstance(e,ValidationError):
-#            DatedMessage.objects.post_message_to_user(
-#                error_crud,
-#                request.user, msg_type=DatedMessage.TYPE_ERROR)
-#        else:
-        if not isinstance(e,ValidationError):
-            DatedMessage.objects.post_message_to_user(
-                "VM may have been created, but some problem ocurred: %s" % str(e),
-                request.user, msg_type=DatedMessage.TYPE_ERROR)
-            return HttpResponseRedirect(reverse("home"))
+    except Exception as e:
+        print "normal exception here: %s" % str(e)
+        DatedMessage.objects.post_message_to_user(
+            "VM might have been created, but some problem ocurred: %s" % str(e),
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+        return HttpResponseRedirect(reverse("home"))
 
     return simple.direct_to_template(
         request, template="aggregate_add_virtualmachines.html",

@@ -7,6 +7,7 @@ from models import Project
 from forms import ProjectCreateForm
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.core.urlresolvers import reverse
+from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
 from expedient.clearinghouse.aggregate.models import Aggregate
 import logging
@@ -106,7 +107,7 @@ def delete(request, proj_id):
         from vt_plugin.models.VM import VM
         if VM.objects.filter(projectId = project.uuid):
             DatedMessage.objects.post_message_to_user(
-            "Please before deleting the project %s, delete all the VMs in its slices" % project.name,
+            "Please delete all VMS inside project '%s' before deleting it" % project.name,
             request.user, msg_type=DatedMessage.TYPE_ERROR)
             return detail(request, proj_id) 
             #return HttpResponseRedirect(reverse("home"))
@@ -349,8 +350,17 @@ def remove_aggregate(request, proj_id, agg_id):
             "id", flat=True)).as_leaf_class()
 
     if request.method == "POST":
-        return HttpResponseRedirect(aggregate.remove_from_project(
-            project, reverse("project_detail", args=[proj_id])))
+        try:
+            return HttpResponseRedirect(aggregate.remove_from_project(
+                project, reverse("project_detail", args=[proj_id])))
+        except MultipleObjectsReturned as e:
+            DatedMessage.objects.post_message_to_user(
+                str(e), request.user, msg_type=DatedMessage.TYPE_ERROR)
+        except:
+            pass
+        # If any error occurs, redirect to slice detail page
+        return HttpResponseRedirect(
+            reverse('project_detail', args=[proj_id]))
     else:
         return HttpResponseNotAllowed(["POST"])
 
@@ -389,7 +399,6 @@ def add_member(request, proj_id):
 
             except Exception as e:
                 print e
-                print SITE_CACHE
                 print "User email notification could no be sent"
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))

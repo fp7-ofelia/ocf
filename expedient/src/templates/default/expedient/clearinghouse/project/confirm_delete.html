@@ -3,14 +3,16 @@
 
 {% block content %}
 <div class="main">
-    <h2>Are you sure you want to delete the project 
-    "{{ object.name }}"?</h2>
-    This will stop all slices and delete the project.
+    <p>
+        <h2>Are you sure you want to delete the project 
+        "{{ object.name }}"?</h2>
+        This will stop all slices and delete the project.
+    </p>
     <form action="" method="post">{% csrf_token %}
     <div class="center">
-	    <input type="hidden" name="post" value="yes" />
+        <input type="hidden" name="post" value="yes" />
     	<input type="submit" value="Yes, I'm sure" />
-    	<a href="{% last_link breadcrumbs %}">Cancel</a>
+    	<input type="button" value="Cancel" onclick="document.location='{% last_link breadcrumbs %}'" />
     </div>
     </form>
 </div>

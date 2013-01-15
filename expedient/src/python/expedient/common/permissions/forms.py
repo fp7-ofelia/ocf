@@ -16,7 +16,7 @@ class PermissionRequestForm(forms.ModelForm):
     message = forms.CharField(required=True, widget=forms.Textarea, label="Description")
 
     class Meta:
-        fields=["permission_owner", "message"]
+        fields=["permission_owner", "message"] 
         model = PermissionRequest
 
     def __init__(self, permission_owners_qs, *args, **kwargs):

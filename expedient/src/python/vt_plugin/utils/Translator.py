@@ -29,9 +29,11 @@ class Translator():
             VMmodel = VM.objects.get(uuid=VMxmlClass.uuid)     
         else:
             VMmodel = VM()
+            #lbergesio 9-1-12. Moved this line here to avoid VM's name validation after creating it and
+            #maintein support of old VMs with names containing "_". 
+            VMmodel.setName(VMxmlClass.name)
 
         VMmodel.setState(VMxmlClass.status)
-        VMmodel.setName(VMxmlClass.name)
         VMmodel.setUUID(VMxmlClass.uuid)
         VMmodel.setProjectId(VMxmlClass.project_id)
         VMmodel.setProjectName(VMxmlClass.project_name)

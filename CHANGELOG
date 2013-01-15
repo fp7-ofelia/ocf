@@ -24,11 +24,25 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.4.2
+--------------------------------------------------
+Released: 15/01/2013
+
+./ Production ready
+
+Change log:
+
+[B] EXP : Mail notifications not arriving. Issue 106
+[*] VTA : Issue showing slices that contain VMs with incorrect names (retaken). Issue 105
+[B] VTA : MacSlot is reserved even when VM is not created. Issue 70
+
+
+--------------------------------------------------
 v0.4.1
 --------------------------------------------------
 Released: 07/01/2013
 
-./ Production ready
+/!\ Outdated
 
 Change log:
 
