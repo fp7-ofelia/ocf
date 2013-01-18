@@ -128,8 +128,6 @@ $(":submit[id^=form_create_server]").click(function() {
                 results[index] = checkName(id,submitID + " name");
             } else if (contains("name",id)) {
                 results[index] = ((isBlank(id) && isBlank(replaceID(id, "name", "port")) && isBlank(replaceID(id, "name", "switchID"))) || checkName(id,submitID + " name"));
-            } else if ((contains("password",id))) {
-                results[index] = checkRestrictedName(id,submitID + " agent password");
             } else if (contains("url",id)) {
                 results[index] = checkNotBlank(id,submitID + " agent URL");
             } else if (contains("-mac",id)) {

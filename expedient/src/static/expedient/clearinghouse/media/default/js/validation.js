@@ -4,6 +4,7 @@ var NUMBER_RE = /^([0-9])+$/;
 var RESOURCE_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
 //var RESOURCE_RE = /^([0-9a-zA-Z\-\_])+$/;
 var RESOURCE_RESTRICTED_RE = /^([0-9a-zA-Z\-]){1,64}$/;
+var USERNAME_RE = /^([0-9a-zA-Z\-\_])+$/;
 
 /* Error list check and generation */
 function doErrorlistExists(fieldID) {
@@ -61,6 +62,10 @@ function checkName(id, resourceName) {
     return checkWithRegExp(id, RESOURCE_RE, "Check that the " + resourceName + " has ASCII characters only.");
 }
 
+function checkUserName(id, resourceName) {
+    return checkWithRegExp(id, USERNAME_RE, "Check that the " + resourceName + " has ASCII characters only.");
+}
+
 function checkAllResultsOK(results) {
     var result = true;
     $.each(results, function(index, value) { result = result && value; });
@@ -107,9 +112,11 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
         type = $(this).attr("type") || "";
         // Correct by default (ignores fields non stated in the if/else block
         results[index] = true;
-        if (contains("text",type) || contains("password",type)) {
-            // VM names have a special treatment
-            if (contains("name",id) && submitID == "VM") {
+        if (contains("text",type)) {
+            if (contains("username",id)) {
+                results[index] = checkUserName(id,submitID + " username");
+            } else if (contains("name",id) && submitID == "VM") {
+                // VM names have a special treatment
                 results[index] = checkRestrictedName(id,submitID + " name");
             } else if (contains("name",id)) {
                 results[index] = checkName(id,submitID + " name");
@@ -117,10 +124,6 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
                 results[index] = checkDescription(id,submitID + " description");
             } else if (contains("location",id)) {
                 results[index] = checkDescription(id,submitID + " location");
-            } else if (contains("username",id)) {
-                results[index] = checkRestrictedName(id,submitID + " username");
-            } else if (contains("password",id)) {
-                results[index] = checkRestrictedName(id,submitID + " password");
             } else if (contains("memory",id)) {
                 results[index] = checkNumber(id,submitID + " memory");
             } else if (contains("url",id)) {
