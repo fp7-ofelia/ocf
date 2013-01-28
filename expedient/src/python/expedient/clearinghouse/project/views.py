@@ -377,13 +377,19 @@ def add_member(request, proj_id):
     if request.method == "POST":
         form = AddMemberForm(project=project, giver=request.user, data=request.POST)
         if form.is_valid():
+            user = User.objects.get(id = request.POST['user'] )
             form.save()
-            #Sync LDAP
-            project.save()
+            try:
+                #Sync LDAP
+                project.save()
+            except:
+                logger.warning("User '%s' may have not been added to project '%s'. It could be a bug within LDAP." % (user.username, project.name))
+                DatedMessage.objects.post_message_to_user(
+                "User '%s' may not own the requested permissions. It could be a bug within LDAP." % user.username,
+                request.user, msg_type=DatedMessage.TYPE_ERROR)
+                return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
             #Send mail notification to the user
-            user = User.objects.get(id = request.POST['user'] )
             roles = ', '.join(repr(role.encode('ascii')) for role in ProjectRole.objects.filter( id__in = request.POST.getlist('roles')).values_list('name', flat=True))
-            user = User.objects.get(id = request.POST['user'] )
             #XXX: Not sure about this...  maybe  give_permission_to...
             for aggregate in project._get_aggregates():
                 if not has_permission(user, aggregate, "can_use_aggregate"):
@@ -490,9 +496,11 @@ def remove_member(request, proj_id, user_id):
             if aggNotUsedAnymoreByMember and not has_permission(member, projectAgg, "can_use_aggregate"):
                 projectAgg.remove_from_user(member,"/")
 
-
-	#Sync LDAP
-    	project.save()
+        try:
+            #Sync LDAP
+            project.save()
+        except:
+            logger.warning("User '%s' may have not been deleted from project '%s'. It could be a bug within LDAP." % (member.object.username, project.name))
 
         return HttpResponseRedirect(
             reverse("project_detail", args=[proj_id]))
