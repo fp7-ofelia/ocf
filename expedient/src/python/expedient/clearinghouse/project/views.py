@@ -395,17 +395,19 @@ def add_member(request, proj_id):
                 if not has_permission(user, aggregate, "can_use_aggregate"):
                     aggregate.add_to_user(user,"/")
             try:
+                # Get project detail URL to send via e-mail
+                from expedient.clearinghouse.project import urls
+                project_detail_url = reverse("project_detail", args=[project.id]) or "/"
+                # No "https://" check should be needed if settings are OK
+                site_domain_url = "https://" + Site.objects.get_current().domain + project_detail_url
                 send_mail(
                          settings.EMAIL_SUBJECT_PREFIX + "Project %s membership notification" % (project.name),
-                         "You have been added to Project %s as a %s user. You can now start experimenting by going to https://%s/\n\n" % (project.name, roles, Site.objects.get_current()),
+                         "You have been added to project '%s' as a user with the following roles: %s.\nYou may start experimenting now by going to %s\n\n" % (project.name, roles, site_domain_url),
                          from_email=settings.DEFAULT_FROM_EMAIL,
                          recipient_list=[user.email],
-                         #recipient_list=[settings.ROOT_EMAIL],
                  )
-
             except Exception as e:
-                print e
-                print "User email notification could no be sent"
+                print "User email notification could not be sent. Exception: %s" % str(e)
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 
