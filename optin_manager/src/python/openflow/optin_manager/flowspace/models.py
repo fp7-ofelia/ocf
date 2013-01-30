@@ -48,9 +48,9 @@ class FlowSpace(models.Model):
         elif (self.eth_type_s > 0 or self.eth_type_e < 0xFFFF): 
             expression = expression + ("Eth Type: 0x%x-0x%x, " % (self.eth_type_s,self.eth_type_e)) 
         if (self.vlan_id_s == self.vlan_id_e): 
-            expression = expression + ("VALN id: %d, " % (self.vlan_id_s)) 
+            expression = expression + ("VLAN id: %d, " % (self.vlan_id_s)) 
         elif (self.vlan_id_s > 0 or self.vlan_id_e < 0xFFF): 
-            expression = expression + ("VALN id: %d-%d, " % (self.vlan_id_s,self.vlan_id_e)) 
+            expression = expression + ("VLAN id: %d-%d, " % (self.vlan_id_s,self.vlan_id_e)) 
         if (self.ip_src_s == self.ip_src_e):    
             expression = expression + ("IP Source Addr: %s, " % (int_to_dotted_ip(self.ip_src_s)))
         elif (self.ip_src_s > 0 or self.ip_src_e < 0xFFFFFFFF):    
