@@ -142,7 +142,7 @@ def add_opt_in(request):
 
         ######## XXX Experimental: Show allocated VLANs ######
         allocated_vlans = vlanController.get_allocated_vlans()
-        requested_vlans = vlanController.get_requested_vlans_by_all_experiments() 
+        requested_vlans = vlanController.get_requested_vlans_by_all_experiments()
         ########################################################################################
 
         assigned_priority = profile.max_priority_level - Priority.Strict_Priority_Offset - 1
@@ -247,7 +247,7 @@ def add_opt_in(request):
                                 'form':form,
                                 'upload_form':upload_form,
                                 'requested_vlans':requested_vlans,
-                                'vlan_list_length':len(allocated_vlans)/5,
+                                'vlan_list_length': len(allocated_vlans)/5,
                                 'allocated_vlans':allocated_vlans,
                             },
                     )  
