@@ -22,7 +22,7 @@ from django.forms.util import ErrorList
 from openflow.optin_manager.opts.helper import update_user_opts, opt_fses_outof_exp,\
 update_admin_opts, read_fs
 from helper import accept_user_fs_request, find_supervisor, convert_dict_to_flowspace,\
-send_approve_or_reject_emial, update_fs_approver, send_admin_req_approve_or_reject_email
+send_approve_or_reject_email, update_fs_approver, send_admin_req_approve_or_reject_email
 from django.db import transaction
 import logging
 import re
@@ -674,9 +674,9 @@ def approve_admin(request):
                 for req in accepted_adm_reqs:
                     send_admin_req_approve_or_reject_email(req,True)
                 for req in rejected_fs_reqs:
-                    send_approve_or_reject_emial(req,False)
+                    send_approve_or_reject_email(req,False)
                 for req in accepted_fs_reqs:
-                    send_approve_or_reject_emial(req,True)
+                    send_approve_or_reject_email(req,True)
     
     reqs = RequestedAdminFlowSpace.objects.filter(admin=request.user).order_by('-user')
     reqs_and_conflicts = []
@@ -1004,7 +1004,7 @@ def user_reg_fs(request):
             # send an e-mail confirming the approved flowspaces for user.
             # (if it is set in setting.SEND_EMAIL_WHEN_FLWOSPACE_APPROVED)
             if (SEND_EMAIL_WHEN_FLWOSPACE_APPROVED and len(approved_msg)>0):
-                send_approve_or_reject_emial(approved_msg,True)
+                send_approve_or_reject_email(approved_msg,True)
 
 
             return simple.direct_to_template(request, 
@@ -1083,7 +1083,7 @@ def approve_user(request):
                     
             
                 elif (decision=="reject"):
-                    send_approve_or_reject_emial([op_req],False)
+                    send_approve_or_reject_email([op_req],False)
                     op_req.delete() 
                        
     

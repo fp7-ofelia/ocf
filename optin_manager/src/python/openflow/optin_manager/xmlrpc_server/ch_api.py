@@ -371,8 +371,19 @@ def create_slice(slice_id, project_name, project_description,
                 raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
              
     try:
-        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager "+str(project_name), "Hi Island Manager \n\n A new flowspace request has been made by the project "+str(project_name)+ " slice-name: "+str(slice_name)+"\nYou can add a new Rule for this request at: https://%s/opts/opt_in" % Site.objects.get_current() ,from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
-    except Exception as e:
+        # Get project detail URL to send via e-mail
+        from openflow.optin_manager.opts import urls
+        from django.core.urlresolvers import reverse
+        project_detail_url = reverse("opt_in_experiment") or "/"
+        # No "https://" check should be needed if settings are OK
+        site_domain_url = "https://" + Site.objects.get_current().domain + project_detail_url
+        # Tuple with the requested VLAN range
+        try:
+            vlan_range = "\nVLAN range: %s\n\n" % str((all_efs[0].vlan_id_s, all_efs[0].vlan_id_e))
+        except:
+            vlan_range = "\n\n"
+        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager '"+str(project_name)+"'", "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new Rule for this request at: %s" % site_domain_url, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+    except:
         pass
 
     transaction.commit()       

@@ -158,7 +158,7 @@ def send_mail(to, subject, text):
     mailServer.close()
     return True
 
-def send_approve_or_reject_emial(approved_fs,approve):
+def send_approve_or_reject_email(approved_fs,approve):
     '''
     Sends an e-mail to the user whose flowspace is approved or rejected telling him/her
     about the decision.
@@ -173,13 +173,14 @@ def send_approve_or_reject_emial(approved_fs,approve):
         if (approve):
             text = ""
             if approved_fs[0].user.first_name != "" or approved_fs[0].user.last_name != "":
-                text = text + "Hi %s %s,\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
+                text = text + "Hi, %s %s\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
             else:
-                text = text + "Hi there,\n\n"
+                text = text + "Hi there:\n\n"
                 
-            text = text + "Your flowspace requests listed below has been approved.\n"
-            text = text + "You can control these flowspaces and opt them into or out of available experiments:\n\n"
-            text = text + "Flowspaces: \n"
+            text = text + "Your flowspace requests listed below have been approved.\n"
+            text = text + "You may control these flowspaces and opt them in/out of available experiments.\n\n"
+            text = text + "Flowspaces:\n"
+
             for fs in approved_fs:
                 if hasattr(fs,"approver"):
                     appr = fs.approver
@@ -195,19 +196,19 @@ def send_approve_or_reject_emial(approved_fs,approve):
                 else:
                     approver = "%s"%appr.username
         
-                text = text + "%s\t apprved by %s\n"%(fs,approver)
+                text = text + "%s\t approved by %s\n"%(fs,approver)
                 
             text = text + "\nRegards,\n%s"%SITE_NAME
             return send_mail(approved_fs[0].user.email,"Flowspace Request Approved",text)
         else:
             text = ""
             if approved_fs[0].user.first_name != "" or approved_fs[0].user.last_name != "":
-                text = text + "Hi %s %s,\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
+                text = text + "Hi, %s %s\n\n"%(approved_fs[0].user.first_name,approved_fs[0].user.last_name)
             else:
-                text = text + "Hi there,\n\n"
+                text = text + "Hi there:\n\n"
                 
-            text = text + "Your flowspace requests listed below has been rejected by the admin.\n\n"
-            text = text + "Flowspaces: \n"
+            text = text + "Your flowspace requests listed below have been rejected by the admin.\n\n"
+            text = text + "Flowspaces:\n"
             for fs in approved_fs:
                 if hasattr(fs,"approver"):
                     appr = fs.approver
@@ -242,9 +243,9 @@ def send_admin_req_approve_or_reject_email(admin_req,approve):
         if (approve):
             text = ""
             if admin_req.user.first_name != "" or admin_req.user.last_name != "":
-                text = text + "Hi %s %s,\n\n"%(admin_req.user.first_name,admin_req.user.last_name)
+                text = text + "Hi, %s %s:\n\n"%(admin_req.user.first_name,admin_req.user.last_name)
             else:
-                text = text + "Hi there,\n\n"
+                text = text + "Hi there:\n\n"
                 
             text = text + "Your request for promotion to '%s' admin position has been accepted by "%\
                         (admin_req.requested_position)
@@ -255,16 +256,16 @@ def send_admin_req_approve_or_reject_email(admin_req,approve):
             else:
                 approver = "%s"%admin_req.admin.username
         
-            text = text + "%s. You may now request some flowspace to administrate, add rules and accept user flowspace requests."%approver
+            text = text + "%s. You may request now some flowspace to administrate, add rules and accept user flowspace requests."%approver
                 
             text = text + "\nRegards,\n%s"%SITE_NAME
             return send_mail(admin_req.admin.email,"You are promoted to %s"%admin_req.requested_position,text)
         else:
             text = ""
             if admin_req.user.first_name != "" or admin_req.user.last_name != "":
-                text = text + "Hi %s %s,\n\n"%(admin_req.user.first_name,admin_req.user.last_name)
+                text = text + "Hi, %s %s:\n\n"%(admin_req.user.first_name,admin_req.user.last_name)
             else:
-                text = text + "Hi there,\n\n"
+                text = text + "Hi there:\n\n"
                 
             text = text + "Your request for promotion to '%s' admin position has been rejected by "%\
                         (admin_req.requested_position)
