@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Used to install PyPElib library (after `source lib/dependencies`)
+
+## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
+
