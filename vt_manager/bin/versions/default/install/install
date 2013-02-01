@@ -29,7 +29,7 @@ source $CURRENT_DIRECTORY/lib/pypelib || error "Cannot import PyPElib installati
 /usr/sbin/service apache2 stop
 
 printHeader ">" "Installing remaining dependencies through easy_install..."
-
+warning "easy_install may randomly fail on the installation. This is a common error of easy_install; simply try again installation."
 /usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
 
 printHeader ">" "Enabling macro and ssl module in apache2..."
