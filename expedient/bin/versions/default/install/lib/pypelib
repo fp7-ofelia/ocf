@@ -2,6 +2,8 @@
 
 # Used to install PyPElib library (after `source lib/dependencies`)
 
+warning "PyPElib is going to be installed. You shall be prompted for a series of values (app_label, db_table) that will be REPLACED afterwards so as to integrate it within OCF"
+
 ## PyPElib installation ...
 print "Downloading latest pypelib version..."
 /usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
@@ -11,4 +13,38 @@ print "Installing pypelib_latest_all.deb..."
 
 print "Removing temporary files..."
 rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
+
+## Replacement of PyPElib data (app_label, db_table) to integrate within VT manager
+## XXX: ONLY for INSTALLATION
+DEST="/usr/lib/python2.6/pypelib"
+PYPELIB_DJANGO_PATH="/usr/lib/python2.6/pypelib/persistence/backends/django/"
+FILES="RuleTableModel.py RuleModel.py"
+
+if [ -d $PYPELIB_DJANGO_PATH ]; then
+    tab_space="                "
+    for file in $FILES; do
+        IFS=''
+        if [ -f $PYPELIB_DJANGO_PATH$file ]; then
+            cat $PYPELIB_DJANGO_PATH$file |
+            while read line
+            do
+                lineout=$line
+                if echo "$line" | grep "app_label" >/dev/null; then
+                    lineout="${tab_space}app_label = 'vt_manager'"
+                elif echo "$line" | grep "db_table" >/dev/null; then
+                    if [ $file == "RuleModel.py" ]; then
+                        lineout="${tab_space}db_table = 'pypelib_RuleModel'"
+                    elif [ $file == "RuleTableModel.py" ]; then
+                        lineout="${tab_space}db_table = 'pypelib_RuleTableModel'"
+                    fi
+                fi
+                if echo "$lineout" >/dev/null != ""; then
+                    echo $lineout >> out
+                fi
+            done
+            mv "$PYPELIB_DJANGO_PATH$file" "$PYPELIB_DJANGO_PATH$file".bkp
+            mv out $PYPELIB_DJANGO_PATH$file
+        fi
+    done
+fi
 
