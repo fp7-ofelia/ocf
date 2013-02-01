@@ -24,11 +24,28 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.4.3
+--------------------------------------------------
+Released: 04/02/2013
+
+./ Production ready
+
+Change log:
+
+[*] OFVER: PyPElib and ofver consistency. Issues: 114, 115
+[B] OFVER: ofver not installing PyPElib for fresh installs. Issue 113
+[*] OPT: Add project name to the flowspace granted mail notification. Issue 112
+[B] OPT: Optin is not being updated when a rule for a new experiment is added. Issue 111
+[*] OPT: mispelling in Flowspace messages. Issue 110
+[B] EXP: Email notifications links use IPs addresses instead of URLs. Issue 109
+
+
+--------------------------------------------------
 v0.4.2
 --------------------------------------------------
 Released: 15/01/2013
 
-./ Production ready
+/!\ Outdated
 
 Change log:
 
