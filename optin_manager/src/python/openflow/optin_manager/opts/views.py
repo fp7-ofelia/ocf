@@ -116,10 +116,10 @@ def add_opt_in(request):
 `	The view function for opting in a user or admin flowspace into an experiment
     FOR USER OPTIN:
     request.POST should contain:
-    key: experiemnt: database id of the experiment to opted in
+    key: experiment: database id of the experiment to opted in
     FOR ADMIN OPTIN:
     request.POST should contain:
-    key: experiemnt: database id of the experiment to opted in
+    key: experiment: database id of the experiment to opted in
     key: all flowspace fields as specified in AdminOptInForm
     ''' 
     profile = UserProfile.get_or_create_profile(request.user)
@@ -142,7 +142,7 @@ def add_opt_in(request):
 
         ######## XXX Experimental: Show allocated VLANs ######
         allocated_vlans = vlanController.get_allocated_vlans()
-        requested_vlans = vlanController.get_requested_vlans_by_all_experiments() 
+        requested_vlans = vlanController.get_requested_vlans_by_all_experiments()
         ########################################################################################
 
         assigned_priority = profile.max_priority_level - Priority.Strict_Priority_Offset - 1
@@ -190,22 +190,24 @@ def add_opt_in(request):
                                 allopts = UserOpts.objects.filter(user = request.user).order_by('-priority')
                                 for opt in allopts:
                                     this_opt_fses = opt.optsflowspace_set.all()
+                                    fs_project = opt.experiment.project_name or ""
+                                    fs_slice = opt.experiment.slice_name or ""
                                     fs_description = ""
                                     for fs in this_opt_fses:
                                         if fs_description != "":
-                                            fs_description = fs_description + " & %s"%fs
+                                            fs_description = fs_description + "\n%s"%fs
                                         else:
                                             fs_description = "%s"%fs
+                                site_domain_url = " You may access your slice page at Expedient's site to check the granted Flowspace."
                                 send_mail(
                                          settings.EMAIL_SUBJECT_PREFIX + "Your Flowspace request has been attended",
-                                         "Your Flowspace request has been attended, go to your project and slice page at your Expedient's site to check the Flowspace granted\n\nFlowSpace Granted:\n%s" % fs_description,
+                                         "Your Flowspace request has been attended.%s\n\nProject: %s\nSlice: %s\nFlowspace granted:\n\n%s" % (site_domain_url, fs_project, fs_slice, fs_description),
                                          from_email=settings.DEFAULT_FROM_EMAIL,
                                          recipient_list= [selexp.owner_email],
                                          #recipient_list=[settings.ROOT_EMAIL],
                                  )
                             except Exception as e:
-                                print "User email notification could no be sent"
-                                print e
+                                print "User email notification could not be sent. Exception: %s" % str(e)
 
                             return simple.direct_to_template(request, 
                                 template ="openflow/optin_manager/opts/opt_in_successful_admin.html",
@@ -247,7 +249,7 @@ def add_opt_in(request):
                                 'form':form,
                                 'upload_form':upload_form,
                                 'requested_vlans':requested_vlans,
-                                'vlan_list_length':len(allocated_vlans)/5,
+                                'vlan_list_length': len(allocated_vlans)/5,
                                 'allocated_vlans':allocated_vlans,
                             },
                     )  

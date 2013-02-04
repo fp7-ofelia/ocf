@@ -25,7 +25,8 @@ class LdapProxy:
             ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, settings.LDAP_MASTER_REQCERT)
             ldap.set_option(ldap.OPT_TIMEOUT, settings.LDAP_MASTER_TIMEOUT)
             self.proxy = ldap.initialize (settings.LDAP_MASTER_URI)
-            self.proxy.start_tls_s()
+            if settings.AUTH_LDAP_START_TLS:
+                self.proxy.start_tls_s()
             self.proxy.simple_bind_s(settings.LDAP_MASTER_DN, settings.LDAP_MASTER_PWD)
             logger.debug ("LdapProxy.__init__: Connected to ldapserver %s as %s with CA in %s and with certificate %s and key %s" % (settings.LDAP_MASTER_URI, settings.LDAP_MASTER_DN, settings.LDAP_MASTER_CA, settings.LDAP_MASTER_CERT, settings.LDAP_MASTER_KEY))
         except ldap.LDAPError, error_message:

@@ -52,9 +52,9 @@ class ExperimentFLowSpace(FlowSpace):
         
         pn = ""
         if self.port_number_s == self.port_number_e:
-            pn = ", port number: %d"%self.port_number_s
+            pn = "port number: %d"%self.port_number_s
         elif self.port_number_s > 0 or self.port_number_e < 0xFFFF:
-            pn = ", port number: %d-%d"%(self.port_number_s,self.port_number_e)
+            pn = "port number: %d-%d"%(self.port_number_s,self.port_number_e)
             
         dir = ""
         if self.direction==2:

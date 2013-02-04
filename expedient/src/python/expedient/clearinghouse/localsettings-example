@@ -53,9 +53,10 @@ DATABASE_HOST = "127.0.0.1"
 ISLAND_NAME   = "i2CAT"
 
 #
-# Name and IP you would like to use to access Expedient GUI.
-#
-SITE_DOMAIN = "192.168.254.193"
+# Address and IP you would like to use to access Expedient GUI.
+# SITE_DOMAIN: format is "url[:port]". Do NOT use http[s]:// here.
+# 
+SITE_DOMAIN = "ocf.mydomain.net:1234"
 SITE_IP_ADDR = "192.168.254.193"
 
 #

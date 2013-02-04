@@ -22,13 +22,14 @@ printHeader ">" "Installing dependencies through apt-get..."
 source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies file" $NO_RESCUE
 /usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
 /usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
+source $CURRENT_DIRECTORY/lib/pypelib || error "Cannot import PyPElib installation file" $NO_RESCUE
 
 
 #apt-get start apache => stop it
 /usr/sbin/service apache2 stop
 
 printHeader ">" "Installing remaining dependencies through easy_install..."
-
+warning "easy_install may randomly fail on the installation. This is a common error of easy_install; simply try again installation."
 /usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
 
 printHeader ">" "Enabling macro and ssl module in apache2..."

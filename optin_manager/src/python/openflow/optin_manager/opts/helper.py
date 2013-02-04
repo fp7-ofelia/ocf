@@ -29,6 +29,20 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     fv_args = []
     match_list = []
     for fs in expFS:
+
+        # XXX: lbergesio - This line is to force intersection 
+        # between the requested fs by the user and the one granted by the IM which is already the 
+        # the intesection between the adminFS (normally ALL) and the granted by the IM in the web form.
+        # Most of the times VLAN requested != to the one granted so the fs is not granted nor pushed 
+        # to FV.
+        # This is due to the original goal of optin and since OFELIA uses it in a different way, this
+        # must never happen. So one solution is to replace the VLANS requested by user with the ones
+        # granted by the IM.
+
+        for optedfs in optedFS:
+            fs.vlan_id_e = optedfs.vlan_id_e
+            fs.vlan_id_s = optedfs.vlan_id_s
+
         opted = multi_fs_intersect([fs],optedFS,OptsFlowSpace)
         if (len(opted) > 0):
             intersected = True
@@ -53,7 +67,9 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                             
                     # If there is any intersection, add them to FV
     if (not intersected):
+        print "WARNING!!! User FS request and IM granted FS do not match and no FS is being pushed to FV"
         tmp.delete()
+
         
     return [fv_args,match_list]
         

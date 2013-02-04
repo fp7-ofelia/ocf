@@ -103,6 +103,7 @@ $(document).ready(function(){
 		<br/><br/>
 		<h3>VLAN(s) already allocated:</h3>
                 <div class="roundBlockContainer">
+                        {% if allocated_vlans %}
                         {% for vlan in allocated_vlans %}
                         {% if  forloop.first %}
 			<div class="vlan_list">
@@ -111,7 +112,7 @@ $(document).ready(function(){
 			<div class="expandable" id="vlan_range_{{forloop.counter}}Container"><ul>
 			{%endif%}
 			<li id="il_{{vlan}}" type="disc">{{vlan|safe}}</li>
-                        {% if forloop.counter|divisibleby:vlan_list_length %}</ul></div></div>
+                        {% if vlan_list_length != 0 and forloop.counter|divisibleby:vlan_list_length %}</ul></div></div>
 			<div class="vlan_list">
 			<ul style="margin:7px; padding:0px;">
 			<li><a id="vlan_range_{{forloop.counter}}" class="expandableCtl header_vlan" href="#/">From {{forloop.counter}}... <span class="closed">&#x25BC;</span></a></li></ul>
@@ -119,6 +120,9 @@ $(document).ready(function(){
 			{% endif %}
 			{% if  forloop.last %}</ul></div></div>{%endif%}
                         {% endfor %}
+                        {% else %}
+                        The whole range of VLANs is available (Except the UNALLOWED VLANS).
+                        {% endif %}
                 </div>
 	
 		<label> <h3>FlowSpace to Opt-In: </h3></label>

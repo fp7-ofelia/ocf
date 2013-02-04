@@ -244,7 +244,7 @@ class Project(models.Model):
     
    
     '''
-    LDAP sycnrhonization
+    LDAP synchronization
     '''
  
     def get_netgroup(self):

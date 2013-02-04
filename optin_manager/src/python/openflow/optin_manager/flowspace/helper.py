@@ -108,6 +108,8 @@ def single_fs_intersect(f1,f2,resultModel):
     if (fr.eth_type_s > fr.eth_type_e):
         return None 
 
+# XXX: lbergesio - Original Optin code replace to always return f2 (admin fs) vlan values
+# related with notes in opt_fs_into_exp methond in opts/helper.py
     fr.vlan_id_s = max(f1.vlan_id_s , f2.vlan_id_s )
     fr.vlan_id_e  = min(f1.vlan_id_e , f2.vlan_id_e )
     #print fr
