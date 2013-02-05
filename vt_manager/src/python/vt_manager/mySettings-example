@@ -42,7 +42,10 @@ DATABASE_HOST = "127.0.0.1"
 ISLAND_NAME    = "i2cat"
 
 #
-# IP and port you would like to use to access Expedient GUI.
+# IP and port used to receive the Agent response.
+#
+# WARNING: set a correct address here -- otherwise you will not be
+# able to see the allocated virtualization resources.
 #
 VTAM_IP = "192.168.254.193"
 VTAM_PORT = "8445"
