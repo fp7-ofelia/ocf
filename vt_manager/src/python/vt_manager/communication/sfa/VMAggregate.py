@@ -29,6 +29,7 @@ class VMAggregate:
 	
 	def get_rspec(self, version = None, options={}):
 
+		#XXX: I think this is quite clear
         	version_manager = VersionManager()
         	version = version_manager.get_version(version)
         	rspec_version = version_manager._get_version(version.type, version.version, 'ad')
@@ -42,9 +43,7 @@ class VMAggregate:
 	
 
     	def get_nodes(self, options={}):
-
 	        nodes = VTShell.GetNodes()
-
 		#TODO: Mount Rspec
 	        rspec_nodes = []
 	        for node in nodes:

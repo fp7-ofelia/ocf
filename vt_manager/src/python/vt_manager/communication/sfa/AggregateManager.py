@@ -40,7 +40,7 @@ class AggregateManager:
 
 	#TODO: SFAException??
 	raise Exception("%s authority does not have permissions to list OCF slices" %api.hrn) 
-	
+	#XXX: should this method list vms?
 
     def ListResources(self, api, creds, options):
         call_id = options.get('call_id')
@@ -53,70 +53,84 @@ class AggregateManager:
         return VTSfaDriver.list_resources (creds, options)
 
     def SliverStatus (self, api, xrn, creds, options):
-        call_id = options.get('call_id')
-        if Callids().already_handled(call_id): return {}
+	#XXX: NO Sliver related things
+        #call_id = options.get('call_id')
+        #if Callids().already_handled(call_id): return {}
 
-        xrn = Xrn(xrn,'slice')
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.sliver_status (slice_urn, slice_hrn)
+        #xrn = Xrn(xrn,'slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.sliver_status (slice_urn, slice_hrn)
+	raise Exception("%s authority does not have permissions to list OCF slices" %api.hrn)
 
     def CreateSliver(self, api, xrn, creds, rspec_string, users, options):
-        """
-        Create the sliver[s] (slice) at this aggregate.    
-        Verify HRN and initialize the slice record in PLC if necessary.
-        """
-        call_id = options.get('call_id')
-        if Callids().already_handled(call_id): return ""
+       # """
+       # Create the sliver[s] (slice) at this aggregate.    
+       # Verify HRN and initialize the slice record in PLC if necessary.
+       # """
+       # call_id = options.get('call_id')
+       # if Callids().already_handled(call_id): return ""
 
-        xrn = Xrn(xrn, 'slice')
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
+       #xrn = Xrn(xrn, 'slice')
+       # slice_urn=xrn.get_urn()
+       # slice_hrn=xrn.get_hrn()
 
-        return self.driver.create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options)
+        #return self.driver.create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options)
+	#XXX: OCF VMs will be created using this method probably. All this if the Client's registry allows to pass a createSliver call
+	pass	
 
     def DeleteSliver(self, api, xrn, creds, options):
-        call_id = options.get('call_id')
-        if Callids().already_handled(call_id): return True
+        #call_id = options.get('call_id')
+        #if Callids().already_handled(call_id): return True
 
-        xrn = Xrn(xrn, 'slice')
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.delete_sliver (slice_urn, slice_hrn, creds, options)
+        #xrn = Xrn(xrn, 'slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.delete_sliver (slice_urn, slice_hrn, creds, options)
+	#XXX: If the client can create a VM using CreateSliver then the client should be alble to delete it using DeleteSliver
+	pass
 
     def RenewSliver(self, api, xrn, creds, expiration_time, options):
-        call_id = options.get('call_id')
-        if Callids().already_handled(call_id): return True
+        #call_id = options.get('call_id')
+        #if Callids().already_handled(call_id): return True
 
-        xrn = Xrn(xrn, 'slice')
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.renew_sliver (slice_urn, slice_hrn, creds, expiration_time, options)
+        #xrn = Xrn(xrn, 'slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.renew_sliver (slice_urn, slice_hrn, creds, expiration_time, options)
+	#XXX: I don't know if this method should be allowed, in the positive case,should this methoud execute a DeleteSliver + CreateSliver?
+	pass
 
     ### these methods could use an options extension for at least call_id
     def start_slice(self, api, xrn, creds):
-        xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.start_slice (slice_urn, slice_hrn, creds)
+        #xrn = Xrn(xrn)
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.start_slice (slice_urn, slice_hrn, creds)
+	#XXX: Start a VM
+	pass
 
     def stop_slice(self, api, xrn, creds):
-        xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.stop_slice (slice_urn, slice_hrn, creds)
+        #xrn = Xrn(xrn)
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.stop_slice (slice_urn, slice_hrn, creds)
+	#XXX: Stop a VM
+	pass
 
     def reset_slice(self, api, xrn):
-        xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.reset_slice (slice_urn, slice_hrn)
+        #xrn = Xrn(xrn)
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+        #return self.driver.reset_slice (slice_urn, slice_hrn)
+	#XXX: Reboot vm
+	pass
 
     def GetTicket(self, api, xrn, creds, rspec, users, options):
 
-        xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
+        #xrn = Xrn(xrn)
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
 
         # xxx sounds like GetTicket is dead, but if that gets resurrected we might wish
         # to pass 'users' over to the driver as well
