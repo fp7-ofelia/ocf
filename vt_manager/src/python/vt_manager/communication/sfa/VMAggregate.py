@@ -18,14 +18,14 @@ from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
-from vt_manager.communication.VTShell import VTShell
+from vt_manager.communication.sfa.VTShell import VTShell
 
 import time
 
 class VMAggregate:
 
 	def __init__(self):
-		pass
+		self.shell = VTShell()
 	
 	def get_rspec(self, version = None, options={}):
 
@@ -38,13 +38,14 @@ class VMAggregate:
 
         	nodes = self.get_nodes(options)
         	rspec.version.add_nodes(nodes)
-
+		print '---------Final Rspec',rspec.xml
         	return rspec.toxml()
 	
 
     	def get_nodes(self, options={}):
 
-	        nodes = VTShell.GetNodes()
+	        nodes = self.shell.GetNodes()
+		print '--------Nodes:',nodes
 		#TODO: Mount Rspec
 	        rspec_nodes = []
 	        for node in nodes:
@@ -70,9 +71,10 @@ class VMAggregate:
                 #service = Services({'login': login})
                 #rspec_node['services'] = [service]
             	rspec_nodes.append(rspec_node)
+		print '-------RSpec Nodes:',rspec_nodes
         	return rspec_nodes
 
-	def get_tesbed_info(self):
+	def get_testbed_info(self):
 		#TODO: get True Testbed Info from the AM
-		return {}
+		return {'longitude':None,'latitude':None}
 

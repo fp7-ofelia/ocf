@@ -3,13 +3,14 @@ from vt_manager.communication.sfa.util.xrn import Xrn
 from vt_manager.communication.sfa.util.callids import Callids
 from vt_manager.communication.sfa.util.sfalogging import logger
 
-from vt_manager.communication.VTSfaDriver import VTSfaDriver
+from vt_manager.communication.sfa.VTSfaDriver import VTSfaDriver
 
 class AggregateManager:
 
     ''' SFA AM Class for VM_Manager'''
 
-    def __init__ (self, config): pass
+    def __init__ (self, config):
+	self.driver = VTSfaDriver(None)
 
     # essentially a union of the core version, the generic version (this code) and
     # whatever the driver needs to expose
@@ -49,11 +50,13 @@ class AggregateManager:
         slice_xrn = options.get('geni_slice_urn', None)
         if slice_xrn:
 	    raise Exception("%s authority does not have permissions to list resources from OCF slices" %api.hrn)
-	
-        return VTSfaDriver.list_resources (creds, options)
+		
+        return self.driver.list_resources (creds, options)
 
     def SliverStatus (self, api, xrn, creds, options):
 	#XXX: NO Sliver related things
+	#XXX: Or shows the vm status? 
+
         #call_id = options.get('call_id')
         #if Callids().already_handled(call_id): return {}
 
@@ -136,5 +139,4 @@ class AggregateManager:
         # to pass 'users' over to the driver as well
         return self.driver.get_ticket (slice_urn, slice_hrn, creds, rspec, options)
 
-                                                                                                                                            117,0-1       Bot
 
