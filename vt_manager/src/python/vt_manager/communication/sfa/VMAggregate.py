@@ -1,24 +1,24 @@
-from sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
-from sfa.util.sfatime import utcparse, datetime_to_string
-from sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
+from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string
+from vt_manager.communication.sfa.util.sfalogging import logger
 
-from sfa.rspecs.rspec import RSpec
-from sfa.rspecs.elements.hardware_type import HardwareType
-from sfa.rspecs.elements.node import Node
-from sfa.rspecs.elements.link import Link
-from sfa.rspecs.elements.sliver import Sliver
-from sfa.rspecs.elements.login import Login
-from sfa.rspecs.elements.location import Location
-from sfa.rspecs.elements.interface import Interface
-from sfa.rspecs.elements.services import Services
-from sfa.rspecs.elements.pltag import PLTag
-from sfa.rspecs.elements.lease import Lease
-from sfa.rspecs.elements.granularity import Granularity
-from sfa.rspecs.version_manager import VersionManager
+from vt_manager.communication.sfa.rspecs.rspec import RSpec
+from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
+from vt_manager.communication.sfa.rspecs.elements.node import Node
+from vt_manager.communication.sfa.rspecs.elements.link import Link
+from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
+from vt_manager.communication.sfa.rspecs.elements.login import Login
+from vt_manager.communication.sfa.rspecs.elements.location import Location
+from vt_manager.communication.sfa.rspecs.elements.interface import Interface
+from vt_manager.communication.sfa.rspecs.elements.services import Services
+from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
+from vt_manager.communication.sfa.rspecs.elements.lease import Lease
+from vt_manager.communication.sfa.rspecs.elements.granularity import Granularity
+from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
-from VTShell import VTShell
+from vt_manager.communication.VTShell import VTShell
 
 import time
 
@@ -43,35 +43,36 @@ class VMAggregate:
 	
 
     	def get_nodes(self, options={}):
+
 	        nodes = VTShell.GetNodes()
 		#TODO: Mount Rspec
 	        rspec_nodes = []
 	        for node in nodes:
 	            rspec_node = Node()
-	            site=self.driver.testbedInfo
-	            rspec_node['component_id'] = hostname_to_urn(self.driver.hrn, site['name'], node['hostname'])
-	            rspec_node['component_name'] = node['hostname']
-	            rspec_node['component_manager_id'] = Xrn(self.driver.hrn, 'authority+cm').get_urn()
-        	    rspec_node['authority_id'] = hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
+	            site=self.get_testbed_info()
+		    #TODO: Get HRNs URNs from OFELIA site
+		    #TODO: Define some kind of Hostnames
+	            rspec_node['component_id'] = node.uuid#hostname_to_urn(self.driver.hrn, site['name'], node['hostname'])
+	            rspec_node['component_name'] = node.name#node['hostname']
+	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
+        	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+cm' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 	            rspec_node['exclusive'] = 'false'
-	            rspec_node['hardware_types'] = [HardwareType({'name': 'plab-pc'}), HardwareType({'name': 'pc'})]
+	            rspec_node['hardware_types'] = [HardwareType({'name': 'xenServer'}), HardwareType({'name': 'server'})]
 	             # add site/interface info to nodes.
         	    # assumes that sites, interfaces and tags have already been prepared.
                 if site['longitude'] and site['latitude']:
     	            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
         	    rspec_node['location'] = location
 
-            	if node['node_id'] in slivers:
-                    # add sliver info
-    	            sliver = slivers[node['node_id']]
-                    rspec_node['client_id'] = node['hostname']
-        	    rspec_node['slivers'] = [sliver]
 
                 # slivers always provide the ssh service
-                login = Login({'authentication': 'ssh-keys', 'hostname': node['hostname'], 'port':'22', 'username': slice['slice_name']})
-                service = Services({'login': login})
-                rspec_node['services'] = [service]
+                #login = Login({'authentication': 'ssh-keys', 'hostname': node['hostname'], 'port':'22', 'username': slice['slice_name']})
+                #service = Services({'login': login})
+                #rspec_node['services'] = [service]
             	rspec_nodes.append(rspec_node)
         	return rspec_nodes
 
+	def get_tesbed_info(self):
+		#TODO: get True Testbed Info from the AM
+		return {}
 

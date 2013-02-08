@@ -1,9 +1,9 @@
-from sfa.util.version import version_core
-from sfa.util.xrn import Xrn
-from sfa.util.callids import Callids
-from sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.version import version_core
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.util.callids import Callids
+from vt_manager.communication.sfa.util.sfalogging import logger
 
-from VTSfaDriver import VTSfaDriver
+from vt_manager.communication.VTSfaDriver import VTSfaDriver
 
 class AggregateManager:
 
