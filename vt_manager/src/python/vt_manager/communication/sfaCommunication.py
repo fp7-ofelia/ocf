@@ -16,9 +16,9 @@ URN_TYPE = 'string'
 SUCCESS_TYPE = 'boolean'
 
 
-@rpcmethod(signature=['string', 'string'], url_name="sfa")
-def ping(str, **kwargs):
-    return "PONG: %s" % str
+@rpcmethod(url_name="sfa")
+def ping(challenge):
+    return challenge
 
 
 @rpcmethod(signature=[VERSION_TYPE], url_name="sfa")

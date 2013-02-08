@@ -76,6 +76,7 @@ urlpatterns = patterns('',
     #RPC
     rpc_url(r'^xmlrpc/agent/?$', name='agent'),
     rpc_url(r'^xmlrpc/plugin/?$', name='plugin'),
+    rpc_url(r'^xmlrpc/sfa/?$', name='sfa'),
     #rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 
