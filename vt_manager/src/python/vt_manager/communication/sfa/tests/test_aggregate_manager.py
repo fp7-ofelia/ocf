@@ -19,4 +19,4 @@ print 'Aggregate instance:',agg
 xml = agg.ListResources(None,None,options)
 print '------------------ListResources:',xml
 
-#XXX: Last test was 02/08/2013 with OK results, but uncomplete RSpec( Still missing OS,Virtualization, State, Name, etc. from servers)
+#XXX: Last test was 02/08/2013 with OK results, but uncomplete RSpec( Still missing OS,Virtualization, State, Name, etc. from servers) and not clear the XRN, HRN and URN concepts

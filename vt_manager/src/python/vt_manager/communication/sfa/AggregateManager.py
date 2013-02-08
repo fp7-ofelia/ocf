@@ -106,12 +106,11 @@ class AggregateManager:
 
     ### these methods could use an options extension for at least call_id
     def start_slice(self, api, xrn, creds):
-        #xrn = Xrn(xrn)
-        #slice_urn=xrn.get_urn()
-        #slice_hrn=xrn.get_hrn()
-        #return self.driver.start_slice (slice_urn, slice_hrn, creds)
+        xrn = Xrn(xrn)
+        slice_urn=xrn.get_urn()
+        slice_hrn=xrn.get_hrn()
+        return self.driver.start_slice (slice_urn, slice_hrn, creds)
 	#XXX: Start a VM
-	pass
 
     def stop_slice(self, api, xrn, creds):
         #xrn = Xrn(xrn)
