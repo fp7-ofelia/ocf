@@ -44,57 +44,39 @@ class VTSfaDriver:
 		print 'list_resources Rspec instance:',rspec
        		return rspec
 
-	#TODO: Encapsulate this much better with crud_slice
-	def start_slice(self, slice_urn, slice_hrn, creds):
+	def crud_slice(self,slice_urn,slice_hrn, creds=None, action):
 
 		slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
-		try:
-			#XXX: getSlices should return the server UUID too
-		        slice = self.shell.GetSlice(slicename)
-		except:
-            		raise RecordNotFound(slice_hrn)
-        	# just update the slice enabled tag
-        	if not slice_enabled:
+                try:
+                        #XXX: getSlices should return the server UUID too
+                        slice = self.shell.GetSlice(slicename)
+                except:
+                        raise RecordNotFound(slice_hrn)
+		if action == 'start_slice':
+			return self.__start_slice(slice)
+		elif action == 'stop_slice':
+			return self.__stop_slice(slice)
+		elif action == 'delete_slice':
+			return self.__delete_slice(slice)
+		elif action == 'reset_slice':
+			return self.__reset_slice(slice)
+
+	def __start_slice(self,slice):
+        	if not slice.enabled:
             		self.shell.StartSlice(slice.server.uuid,slice.uuid)
         	return 1
 	
-        def stop_slice(self, slice_urn, slice_hrn, creds):
-
-                slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
-                try:
-                        #XXX: getSlices should return the server UUID too
-                        slice = self.shell.GetSlice(slicename)
-                except:
-                        raise RecordNotFound(slice_hrn)
-                # just update the slice enabled tag
-                if slice_enabled:
+        def __stop_slice(self,slice):
+                if slice.enabled:
                         self.shell.StopSlice(slice.server.uuid,slice.uuid)
                 return 1
 
-	def delete_slice(self, slice_urn, slice_hrn, creds):
-
-                slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
-                try:
-                        #XXX: getSlices should return the server UUID too
-                        slice = self.shell.GetSlice(slicename)
-                except:
-                        raise RecordNotFound(slice_hrn)
-                # just update the slice enabled tag
-                if slice_enabled:
-                        self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
+	def __delete_slice(self,slice):
+                self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
                 return 1
 
-	def reset_slice(self, slice_urn, slice_hrn, creds):
-
-                slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
-                try:
-                        #XXX: getSlices should return the server UUID too
-                        slice = self.shell.GetSlice(slicename)
-                except:
-                        raise RecordNotFound(slice_hrn)
-                # just update the slice enabled tag
-                if slice_enabled:
-                        self.shell.RebootSlice(slice.server.uuid,slice.uuid)
+	def __reset_slice(self,slice):
+                self.shell.RebootSlice(slice.server.uuid,slice.uuid)
                 return 1
 
 

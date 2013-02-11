@@ -90,7 +90,7 @@ class AggregateManager:
         #slice_urn=xrn.get_urn()
         #slice_hrn=xrn.get_hrn()
         #return self.driver.delete_sliver (slice_urn, slice_hrn, creds, options)
-	#XXX: If the client can create a VM using CreateSliver then the client should be alble to delete it using DeleteSliver
+	#XXX: If the client can create a VM using CreateSliver then the client should be able to delete it using DeleteSliver
 	pass
 
     def RenewSliver(self, api, xrn, creds, expiration_time, options):
@@ -109,24 +109,23 @@ class AggregateManager:
         xrn = Xrn(xrn)
         slice_urn=xrn.get_urn()
         slice_hrn=xrn.get_hrn()
-        return self.driver.start_slice (slice_urn, slice_hrn, creds)
+        return self.driver.crud_slice (slice_urn, slice_hrn, creds,action='start_slice')
 	#XXX: Start a VM
 
     def stop_slice(self, api, xrn, creds):
-        #xrn = Xrn(xrn)
-        #slice_urn=xrn.get_urn()
-        #slice_hrn=xrn.get_hrn()
-        #return self.driver.stop_slice (slice_urn, slice_hrn, creds)
+        xrn = Xrn(xrn)
+        slice_urn=xrn.get_urn()
+        slice_hrn=xrn.get_hrn()
+        return self.driver.crud_slice (slice_urn, slice_hrn, creds,action='stop_slice')
 	#XXX: Stop a VM
-	pass
 
     def reset_slice(self, api, xrn):
-        #xrn = Xrn(xrn)
-        #slice_urn=xrn.get_urn()
-        #slice_hrn=xrn.get_hrn()
-        #return self.driver.reset_slice (slice_urn, slice_hrn)
+	#XXX: why does not this method have creds param?
+        xrn = Xrn(xrn)
+        slice_urn=xrn.get_urn()
+        slice_hrn=xrn.get_hrn()
+        return self.driver.crud_slice (slice_urn, slice_hrn,action='reset_slice')
 	#XXX: Reboot vm
-	pass
 
     def GetTicket(self, api, xrn, creds, rspec, users, options):
 
@@ -136,6 +135,7 @@ class AggregateManager:
 
         # xxx sounds like GetTicket is dead, but if that gets resurrected we might wish
         # to pass 'users' over to the driver as well
-        return self.driver.get_ticket (slice_urn, slice_hrn, creds, rspec, options)
+        #return self.driver.get_ticket (slice_urn, slice_hrn, creds, rspec, options)
+        pass 
 
 

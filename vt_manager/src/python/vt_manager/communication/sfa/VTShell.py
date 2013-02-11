@@ -15,6 +15,7 @@ class VTShell:
 
 	#XXX: Slice Methods
 	#XXX: Slice == VM
+	#XXX: We should create an specific sfa action type
 	def GetSlice(self,slicename):
 		#XXX: Don't worry about exceptions, they are treated above(VTSfaDriver class)
 		vm = VirtualMachine.objects.get(name = slicename)
@@ -34,8 +35,9 @@ class VTShell:
 
 	def __crudVM(self,server_uuid,vm_id,action):
 		#XXX: First approach
-		#XXX: The required vars could be obtained by the RSpec or another function
+		#XXX: The required params could be obtained by the RSpec or another function
 		#XXX: We could create some kind of SFAActions in this function.
+		#TODO: In propagate action, is the connection holded until the action in the vm is done? How to do it?
 		#TODO: Raise exceptions to SFA Faults
 		try:
 			VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, action)
