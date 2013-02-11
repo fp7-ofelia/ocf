@@ -3,7 +3,7 @@ import os, sys, logging
 from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
 from vt_manager.communication.sfa.AggregateManager import *
-from vt_manager.communication.sfa.auth.authManager import AuthManager
+from vt_manager.communication.sfa.authManager import AuthManager
 from vt_manager.communication.sfa.util.xrn import urn_to_hrn
 from vt_manager.communication.sfa.util.faults import SfaInvalidArgument
 
@@ -14,7 +14,8 @@ RSPEC_TYPE = 'string'
 VERSION_TYPE = 'struct'
 URN_TYPE = 'string'
 SUCCESS_TYPE = 'boolean'
-
+STATUS_TYPE = 'struct'
+TIME_TYPE = 'string'
 
 @rpcmethod(url_name="sfa")
 def ping(challenge):
@@ -34,7 +35,7 @@ def ListResources(credentials, options, **kwargs):
     valid_creds = Auth.checkCredentials(credentials, 'listnodes', hrn)
 
     if valid_creds:
-	return AggregateManager.ListResources(options)
+        return AggregateManager.ListResources(options)
     else:
         raise SfaInvalidArgument('Invalid Credentials')
 
@@ -63,7 +64,7 @@ def DeleteSliver(slice_urn, credentials, **kwargs):
 
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def SliverStatus(slice_urn, credentials, **kwargs):
-(hrn, type) = urn_to_hrn(slice_urn)
+    (hrn, type) = urn_to_hrn(slice_urn)
     valid_creds = Auth.checkCredentials(credentials, 'sliverstatus', hrn)
 
     if valid_creds:
@@ -74,7 +75,7 @@ def SliverStatus(slice_urn, credentials, **kwargs):
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE], url_name="sfa")
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
-(hrn, type) = urn_to_hrn(slice_urn)
+    (hrn, type) = urn_to_hrn(slice_urn)
     valid_creds = Auth.checkCredentials(credentials, 'renewsliver', hrn)
 
     if valid_creds:
@@ -85,7 +86,7 @@ def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def Shutdown(slice_urn, credentials, **kwargs):
-(hrn, type) = urn_to_hrn(slice_urn)
+    (hrn, type) = urn_to_hrn(slice_urn)
     valid_creds = Auth.checkCredentials(credentials, 'shutdown', hrn)
 
     if valid_creds:

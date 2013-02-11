@@ -56,6 +56,7 @@ class NonExistingDispatcher(Exception):
 
 def get_dispatcher(path, url_name):
     try:
+	print dispatchers.keys()
         dispatcher = dispatchers[url_name]
     except KeyError:
         raise NonExistingDispatcher(path, url_name)
