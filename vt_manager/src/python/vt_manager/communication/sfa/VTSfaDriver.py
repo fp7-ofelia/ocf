@@ -5,7 +5,7 @@ import datetime
 from vt_manager.communication.sfa.util.faults import MissingSfaInfo, UnknownSfaType, \
     RecordNotFound, SfaNotImplemented, SliverDoesNotExist
 
-from vt_manager.communication.sfa.util.sfalogging import logger
+#from vt_manager.communication.sfa.util.sfalogging import logger
 from vt_manager.communication.sfa.util.defaultdict import defaultdict
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string, datetime_to_epoch
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, get_leaf
@@ -25,6 +25,7 @@ from vt_manager.communication.sfa.rspecs.rspec import RSpec
 #from vt_manager.communication.sfa.managers.driver import Driver
 
 from vt_manager.communication.sfa.VMAggregate import VMAggregate
+from vt_manager.communication.sfa.VTShell import VTShell
 
 class VTSfaDriver:
 
@@ -82,6 +83,41 @@ class VTSfaDriver:
                 self.shell.RebootSlice(slice.server.uuid,slice.uuid)
                 return 1
 
+        def create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options):
+		
+		#TODO: Clean input params, check if slice is already created, rspec.		
+
+		#XXX: At the end of the day, this is only for federation, local slices are made in "OCF way"	
+		#XXX: this method should parse a vm rspec, get the main attributes of the vm and send this attributes to the shell.
+		#XXX: should be users? For what?
+		#XXX: What about vm repeated names?	
+
+                #XXX: what is this?--> sfa_peer = slices.get_sfa_peer(slice_hrn)
+
+		#XXX: probably this is not necessary
+                #slice_record=None
+                #if users:
+                #    slice_record = users[0].get('slice_record', {})
+
+                # parse rspec
+
+                rspec = RSpec(rspec_string)
+		#XXX: if we can get the vm paramaters, we can use the shell to create a create vm action
+                requested_attributes = rspec.version.get_slice_attributes()
+		self.shell.CreateSliver(requested_attributes)
+		
+			
+                # ensure slice record exists
+		#XXX: Do we need this?
+                #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
+                # ensure user records exists
+                #users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
+
+		#XXX: We should return something like the input rspec? 
+                return aggregate.get_rspec(slice_xrn=slice_urn, version=rspec.version)
 
 		
+
+	
+			
 

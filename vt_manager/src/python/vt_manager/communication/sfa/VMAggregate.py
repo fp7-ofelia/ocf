@@ -1,6 +1,6 @@
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string
-from vt_manager.communication.sfa.util.sfalogging import logger
+#from vt_manager.communication.sfa.util.sfalogging import logger
 
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
 from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
@@ -50,13 +50,14 @@ class VMAggregate:
 	        rspec_nodes = []
 	        for node in nodes:
 	            rspec_node = Node()
+		    print rspec_node.keys()
 	            site=self.get_testbed_info()
 		    #TODO: Get HRNs URNs from OFELIA site
 		    #TODO: Define some kind of Hostnames
 	            rspec_node['component_id'] = node.uuid#hostname_to_urn(self.driver.hrn, site['name'], node['hostname'])
 	            rspec_node['component_name'] = node.name#node['hostname']
 	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
-        	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+cm' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
+        	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+sa' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 	            rspec_node['exclusive'] = 'false'
 	            rspec_node['hardware_types'] = [HardwareType({'name': 'xenServer'}), HardwareType({'name': 'server'})]
 	             # add site/interface info to nodes.
