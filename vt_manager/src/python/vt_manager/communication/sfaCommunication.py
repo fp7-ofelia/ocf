@@ -61,7 +61,7 @@ def ListResources(api, credentials, options, **kwargs):
         # get slice's hrn from options
         if slice_xrn:
             raise Exception("%s authority does not have permissions to list resources from OCF slices" %api.hrn)
-        return driver.list_resources(credentials, options)
+        return driver.list_resources(options)
 #        return ""
     else:
         raise SfaInvalidArgument('Invalid Credentials')
@@ -86,18 +86,17 @@ def CreateSliver(api, slice_urn, credentials, rspec, users, **kwargs):
     valid_creds = Auth.checkCredentials(creds, 'createsliver', hrn)
 
     if valid_creds:
-        return ""
+        return driver.create_sliver(sliver_urn, rspec, users)
     else:
         raise SfaInvalidArgument('Invalid Credentials')
-
-
+#XXX: deletesliver means delete all the slivers assigned to a slice
 @rpcmethod(signature=[SUCCESS_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def DeleteSliver(api, slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
     valid_creds = Auth.checkCredentials(credentials, 'deletesliver', hrn)
 
     if valid_creds:
-        return ""
+        return driver.delete_slice(slice_urn)
     else:
         raise SfaInvalidArgument('Invalid Credentials')
 
