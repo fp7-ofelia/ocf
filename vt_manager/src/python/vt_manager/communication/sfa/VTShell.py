@@ -44,3 +44,42 @@ class VTShell:
 		except Exception as e:	
 			raise e
 		return 1
+
+	def create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options):
+
+		aggregate = DummyAggregate(self)
+	        slices = DummySlices(self)
+	        sfa_peer = slices.get_sfa_peer(slice_hrn)
+	        slice_record=None
+	        if users:
+        	    slice_record = users[0].get('slice_record', {})
+
+        	# parse rspec
+        	rspec = RSpec(rspec_string)
+        	requested_attributes = rspec.version.get_slice_attributes()
+
+        	# ensure slice record exists
+        	slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
+        	# ensure user records exists
+        	#users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
+
+        	# add/remove slice from nodes
+        	requested_slivers = []
+        	for node in rspec.version.get_nodes_with_slivers():
+            		hostname = None
+            		if node.get('component_name'):
+                		hostname = node.get('component_name').strip()
+            		elif node.get('component_id'):
+                		hostname = xrn_to_hostname(node.get('component_id').strip())
+            		if hostname:
+                		requested_slivers.append(hostname)
+        	requested_slivers_ids = []
+        	for hostname in requested_slivers:
+            		try:
+               			node_id = self.shell.GetNodes({'hostname': hostname})[0]['node_id']
+            		except:
+               			node_id = []
+            		requested_slivers_ids.append(node_id)
+        	nodes = slices.verify_slice_nodes(slice, requested_slivers_ids)
+	
+		return aggregate.get_rspec(slice_xrn=slice_urn, version=rspec.version)

@@ -44,7 +44,10 @@ class VTSfaDriver:
 		print 'list_resources Rspec instance:',rspec
        		return rspec
 
-	def crud_slice(self,slice_urn,slice_hrn, creds=None, action):
+	def crud_slice(self,slice_urn,slice_hrn, creds=None, action=None):
+		
+		#XXX: Slice_hrn: topdomain.subdomain.SliceName
+		#XXX: Slice_urn: urn:publicid:IDN+topdomain:subdomain+slice+SliceName
 
 		slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
                 try:
