@@ -10,7 +10,7 @@ from vt_manager.communication.sfa.util.version import version_core
 from vt_manager.communication.sfa.util.xrn import Xrn
 from vt_manager.communication.sfa.util.callids import Callids
 
-#from vt_manager.communication.sfa.VTSfaDriver import VTSfaDriver
+from vt_manager.communication.sfa.VTSfaDriver import VTSfaDriver
 
 
 # Parameter Types
@@ -23,7 +23,7 @@ SUCCESS_TYPE = 'boolean'
 STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
 API_TYPE = 'struct'
-#driver = VTSfaDriver(None)
+driver = VTSfaDriver(None)
 
 @rpcmethod(signature=['string', 'string'], url_name="sfa")
 def ping(challenge):
@@ -61,8 +61,8 @@ def ListResources(api, credentials, options, **kwargs):
         # get slice's hrn from options
         if slice_xrn:
             raise Exception("%s authority does not have permissions to list resources from OCF slices" %api.hrn)
- #       return driver.list_resources(credentials, options)
-        return ""
+        return driver.list_resources(credentials, options)
+#        return ""
     else:
         raise SfaInvalidArgument('Invalid Credentials')
 
