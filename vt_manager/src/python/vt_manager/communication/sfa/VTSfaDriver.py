@@ -75,7 +75,8 @@ class VTSfaDriver:
                         self.shell.StopSlice(slice.server.uuid,slice.uuid)
                 return 1
 
-	def __delete_slice(self,slice):
+	#XXX: this method shouldn't be private, if someone delete a slice we must "dettach" the resources asigned to this slice 
+	def delete_slice(self,slice):
                 self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
                 return 1
 
@@ -83,7 +84,7 @@ class VTSfaDriver:
                 self.shell.RebootSlice(slice.server.uuid,slice.uuid)
                 return 1
 
-        def create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options):
+        def create_sliver (slice_urn, slice_hrn, rspec_string, users, options):
 		
 		#TODO: Clean input params, check if slice is already created, rspec.		
 

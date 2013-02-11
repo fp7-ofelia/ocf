@@ -22,6 +22,7 @@ from vt_manager.communication.sfa.VTShell import VTShell
 
 import time
 
+#XXX: this class should be like a RspecManager? Should call the VTShell or it should be called in the VTDriver?
 class VMAggregate:
 
 	def __init__(self):
