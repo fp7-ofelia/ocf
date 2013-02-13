@@ -3,7 +3,7 @@ from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_stri
 #from vt_manager.communication.sfa.util.sfalogging import logger
 
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
-from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
+#from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
 from vt_manager.communication.sfa.rspecs.elements.node import Node
 from vt_manager.communication.sfa.rspecs.elements.link import Link
 from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
@@ -14,6 +14,7 @@ from vt_manager.communication.sfa.rspecs.elements.services import Services
 from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
 from vt_manager.communication.sfa.rspecs.elements.lease import Lease
 from vt_manager.communication.sfa.rspecs.elements.granularity import Granularity
+from vt_manager.communication.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
@@ -38,6 +39,7 @@ class VMAggregate:
         	rspec = RSpec(version=rspec_version, user_options=options)
 
         	nodes = self.get_nodes(options)
+		print '---------------------------------------------rspec.version', rspec.version
         	rspec.version.add_nodes(nodes)
 		print '---------Final Rspec',rspec.xml
         	return rspec.toxml()
@@ -60,7 +62,8 @@ class VMAggregate:
 	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
         	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+sa' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 	            rspec_node['exclusive'] = 'false'
-	            rspec_node['hardware_types'] = [HardwareType({'name': 'xenServer'}), HardwareType({'name': 'server'})]
+	            rspec_node['hardware_types'] = [OcfVtServer({'name': 'Server','Memory':'900GB','SO':'Debian4.0','Virtualization_type':'XEN', 'HD':'100TB' })]
+		    rspec_node['sliver_type'] = {'Memory': '900GB','SO':'Debian4.0','virtualization':'XEN'}
 	             # add site/interface info to nodes.
         	    # assumes that sites, interfaces and tags have already been prepared.
                 if site['longitude'] and site['latitude']:

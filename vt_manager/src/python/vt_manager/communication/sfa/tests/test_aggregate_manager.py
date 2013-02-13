@@ -8,7 +8,7 @@ class Options:
 	def __init__(self,callId='fancy-UUID',sliceId=None):
 		self.call_id = callId
 		self.geni_slice_urn = None
-		self.geni_rspec_version = 'pgv2'
+		self.geni_rspec_version = 'OcfVt'
 
 	def get(self,attr,extra=None):
 		return getattr(options,attr)
@@ -19,4 +19,4 @@ print 'Aggregate instance:',agg
 xml = agg.ListResources(None,None,options)
 print '------------------ListResources:',xml
 
-#XXX: Last test was 02/08/2013 with OK results, but uncomplete RSpec( Still missing OS,Virtualization, State, Name, etc. from servers) and not clear the XRN, HRN and URN concepts
+#XXX: Last test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
