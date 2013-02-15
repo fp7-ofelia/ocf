@@ -15,6 +15,8 @@ from sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 from sfa.rspecs.elements.versions.pgv2Interface import PGv2Interface     
 
 
+from vt_manager.communication.sfa.rspecs.elements.range import Range
+from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
 
 from sfa.planetlab.plxrn import xrn_to_hostname
 
@@ -52,7 +54,15 @@ class OcfVtNode:
                 else:
                     available_elem = node_elem.add_element('available', now='false')
             # add services
-            PGv2Services.add_services(node_elem, node.get('services', [])) 
+	    if node.get('services'):
+		for service in node.get('services',[]):
+		   fields = service.fields
+		   s = node_elem.add_element('service', type=str(service.__class__.__name__))
+		   for field in fields:
+			if service[field]:
+				simple_elem = s.add_element(field)#node_elem.add_element(field)
+                        	simple_elem.set_text(service[field])
+            #PGv2Services.add_services(node_elem, node.get('services', [])) 
             # add slivers
             slivers = node.get('slivers', [])
             if not slivers:

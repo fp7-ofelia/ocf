@@ -17,6 +17,9 @@ from vt_manager.communication.sfa.rspecs.elements.granularity import Granularity
 from vt_manager.communication.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
+from vt_manager.communication.sfa.rspecs.elements.range import Range
+from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
+
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
 from vt_manager.communication.sfa.VTShell import VTShell
@@ -46,14 +49,13 @@ class VMAggregate:
 	
 
     	def get_nodes(self, options={}):
-
+		#XXX: When ListRsources, we should return a list of the VTServers with their interfaces and their connected switchs.
 	        nodes = self.shell.GetNodes()
 		print '--------Nodes:',nodes
 		#TODO: Mount Rspec
 	        rspec_nodes = []
 	        for node in nodes:
 	            rspec_node = Node()
-		    print rspec_node.keys()
 	            site=self.get_testbed_info()
 		    #TODO: Get HRNs URNs from OFELIA site
 		    #TODO: Define some kind of Hostnames
@@ -62,7 +64,7 @@ class VMAggregate:
 	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
         	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+sa' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 	            rspec_node['exclusive'] = 'false'
-	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.getName()),
+	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.name),
 								 'operating_system_type':str(node.operatingSystemType),
 								 'operating_system_distribution':str(node.operatingSystemDistribution),
 								 'operating_system_version':str(node.operatingSystemVersion),
@@ -72,7 +74,34 @@ class VMAggregate:
 								 'memory':str(node.memory),
 								 'hdd_space_GB':str(node.discSpaceGB),
 								 'agent_url':str(node.agentURL), })]
-	             # add site/interface info to nodes.
+		    #XXX: I' don't like it
+		    ip_ranges = node.subscribedIp4Ranges.all()
+		    mac_ranges = node.subscribedMacRanges.all()
+		    network_ifaces = node.networkInterfaces.all()
+		    #XXX: I use services because it works well
+		    rspec_node['services'] = list()
+
+		    if ip_ranges:
+			     for ip_range in ip_ranges:
+			     	rspec_node['services'].append(Range({'type':'IP_Range',
+          				       			     'name':ip_range.name,
+							             'start_value': ip_range.startIp,
+							             'end_value': ip_range.endIp}))
+		    if mac_ranges:
+			     for mac_range in mac_ranges:
+			     	rspec_node['services'].append(Range({'type':'MAC_Range',
+                                                                     'name':mac_range.name,
+                                                                     'start_value': mac_range.startMac,
+                                                                     'end_value': mac_range.endMac}))
+		     
+		    if network_ifaces:
+			     for network_iface in network_ifaces:
+			    	rspec_node['services'].append(NetworkInterface({'from_server':node.name,
+				    					        'to_network_interface': network_iface.switchID,
+										'port':str(network_iface.port)}))
+		     
+		   
+	            # add site/interface info to nodes.
         	    # assumes that sites, interfaces and tags have already been prepared.
                 if site['longitude'] and site['latitude']:
     	            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
