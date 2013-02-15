@@ -76,7 +76,7 @@ class VTSfaDriver:
                 return 1
 
 	#XXX: this method shouldn't be private, if someone delete a slice we must "dettach" the resources asigned to this slice 
-	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing
+	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing, delete_slice should remove a vm from the 			  slice, meanwhile deleteSliver probably should remove all the vms from a user.
 	def __delete_slice(self,slice):
                 self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
                 return 1

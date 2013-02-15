@@ -62,8 +62,16 @@ class VMAggregate:
 	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
         	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+sa' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 	            rspec_node['exclusive'] = 'false'
-	            rspec_node['hardware_types'] = [OcfVtServer({'name': 'Server','Memory':'900GB','SO':'Debian4.0','Virtualization_type':'XEN', 'HD':'100TB' })]
-		    rspec_node['sliver_type'] = {'Memory': '900GB','SO':'Debian4.0','virtualization':'XEN'}
+	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.getName()),
+								 'operating_system_type':str(node.operatingSystemType),
+								 'operating_system_distribution':str(node.operatingSystemDistribution),
+								 'operating_system_version':str(node.operatingSystemVersion),
+								 'virtualization_technology':node.virtTech,
+								 'cpus_number':str(node.numberOfCPUs),
+								 'cpu_frequency':str(node.CPUFrequency),
+								 'memory':str(node.memory),
+								 'hdd_space_GB':str(node.discSpaceGB),
+								 'agent_url':str(node.agentURL), })]
 	             # add site/interface info to nodes.
         	    # assumes that sites, interfaces and tags have already been prepared.
                 if site['longitude'] and site['latitude']:

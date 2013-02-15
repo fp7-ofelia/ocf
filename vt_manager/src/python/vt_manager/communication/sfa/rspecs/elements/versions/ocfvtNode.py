@@ -22,7 +22,6 @@ class OcfVtNode:
     @staticmethod
     def add_nodes(xml, nodes):
         node_elems = []
-	print '---------------------------No matter what, Im in ocfnodes!!!'
         for node in nodes:
             node_fields = ['component_manager_id', 'component_id', 'client_id', 'sliver_id', 'exclusive']
             node_elem = xml.add_instance('node', node, node_fields)
@@ -33,8 +32,11 @@ class OcfVtNode:
                 node_elem.set('component_name', component_name)
             # set hardware types
             if node.get('hardware_types'):
-                for hardware_type in node.get('hardware_types', []): 
-                    node_elem.add_instance('hardware_type', hardware_type, OcfVtServer.fields)
+                for hardware_type in node.get('hardware_types', []):
+		    for field in OcfVtServer.fields:	
+		        #node_elem.add_instance(field,{field:hardware_type[field]},[])#XXX Ugly notation
+			simple_elem = node_elem.add_element(field)
+			simple_elem.set_text(hardware_type[field])
             # set location
             if node.get('location'):
                 node_elem.add_instance('location', node['location'], Location.fields)       
