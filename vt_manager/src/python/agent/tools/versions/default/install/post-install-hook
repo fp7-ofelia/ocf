@@ -12,7 +12,7 @@ printHeader "info#" "Using default post-install-hook module..."
 
 #Starting OXAD
 print "Starting OXAD daemon..."
-/usr/sbin/service oxad restart
+$INIT_RUN_CMD
 
 #Testing
 #TODO
