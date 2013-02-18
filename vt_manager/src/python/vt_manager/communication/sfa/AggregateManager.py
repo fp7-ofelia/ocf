@@ -69,18 +69,16 @@ class AggregateManager:
     def CreateSliver(self, api, xrn, creds, rspec_string, users, options):
        # """
        # Create the sliver[s] (slice) at this aggregate.    
-       # Verify HRN and initialize the slice record in PLC if necessary.
        # """
-       # call_id = options.get('call_id')
-       # if Callids().already_handled(call_id): return ""
+       #call_id = options.get('call_id')
+       #if Callids().already_handled(call_id): return ""
 
-       #xrn = Xrn(xrn, 'slice')
-       # slice_urn=xrn.get_urn()
-       # slice_hrn=xrn.get_hrn()
-
-        #return self.driver.create_sliver (slice_urn, slice_hrn, creds, rspec_string, users, options)
+       #XXX:xrn = Xrn(xrn, 'slice')
+       #XXX:slice_leaf = xrn.get_leaf()
+       slice_leaf = None 	
+       return self.driver.create_sliver (slice_leaf,rspec_string, users, options)
 	#XXX: OCF VMs will be created using this method probably. All this if the Client's registry allows to pass a createSliver call
-	pass	
+	#pass	
 
     def DeleteSliver(self, api, xrn, creds, options):
         #call_id = options.get('call_id')
@@ -107,24 +105,27 @@ class AggregateManager:
     ### these methods could use an options extension for at least call_id
     def start_slice(self, api, xrn, creds):
         xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.crud_slice (slice_urn, slice_hrn, creds,action='start_slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+	slice_leaf = xrn.get_leaf()
+        return self.driver.crud_slice (slice_leaf, creds,action='start_slice')
 	#XXX: Start a VM
 
     def stop_slice(self, api, xrn, creds):
         xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.crud_slice (slice_urn, slice_hrn, creds,action='stop_slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+	slice_leaf = xrn.get_leaf()
+        return self.driver.crud_slice (slice_leaf, creds,action='stop_slice')
 	#XXX: Stop a VM
 
     def reset_slice(self, api, xrn):
 	#XXX: why does not this method have creds param?
         xrn = Xrn(xrn)
-        slice_urn=xrn.get_urn()
-        slice_hrn=xrn.get_hrn()
-        return self.driver.crud_slice (slice_urn, slice_hrn,action='reset_slice')
+        #slice_urn=xrn.get_urn()
+        #slice_hrn=xrn.get_hrn()
+	slice_leaf = xrn.get_leaf()
+        return self.driver.crud_slice (slice_leaf,action='reset_slice')
 	#XXX: Reboot vm
 
     def GetTicket(self, api, xrn, creds, rspec, users, options):

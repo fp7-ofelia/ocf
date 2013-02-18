@@ -67,26 +67,17 @@ class OcfVt(RSpecVersion):
 
     def get_slice_attributes(self, network=None):
         slice_attributes = []
-        nodes_with_slivers = self.get_nodes_with_slivers()
-        # TODO: default sliver attributes in the PG rspec?
+        nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
         default_ns_prefix = self.namespaces['default']
-        for node in nodes_with_slivers:
+        for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
                 name=str(sliver_attribute[0])
                 text =str(sliver_attribute[1])
-                attribs = sliver_attribute[2]
-                # we currently only suppor the <initscript> and <flack> attributes
-                if  'info' in name:
-                    attribute = {'name': 'flack_info', 'value': str(attribs), 'node_id': node}
-                    slice_attributes.append(attribute)
-                elif 'initscript' in name:
-                    if attribs is not None and 'name' in attribs:
-                        value = attribs['name']
-                    else:
-                        value = text
-                    attribute = {'name': 'initscript', 'value': value, 'node_id': node}
-                    slice_attributes.append(attribute)
+                #attribs = sliver_attribute[2]
+		#XXX:this could be improved,but I will maintain in this way in order to have consistency with other methods and the general code structure
+                attribute = {'name': name, 'value': text, 'node_id': node}
+                slice_attributes.append(attribute)
 
         return slice_attributes
 

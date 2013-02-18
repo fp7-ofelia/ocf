@@ -42,22 +42,16 @@ class VMAggregate:
         	rspec = RSpec(version=rspec_version, user_options=options)
 
         	nodes = self.get_nodes(options)
-		print '---------------------------------------------rspec.version', rspec.version
         	rspec.version.add_nodes(nodes)
-		print '---------Final Rspec',rspec.xml
         	return rspec.toxml()
 	
-
     	def get_nodes(self, options={}):
-		#XXX: When ListRsources, we should return a list of the VTServers with their interfaces and their connected switchs.
 	        nodes = self.shell.GetNodes()
-		print '--------Nodes:',nodes
-		#TODO: Mount Rspec
 	        rspec_nodes = []
 	        for node in nodes:
 	            rspec_node = Node()
 	            site=self.get_testbed_info()
-		    #TODO: Get HRNs URNs from OFELIA site
+		    #TODO: Get HRNs URNs from OFELIA site or use the method get_leaf() from xrns
 		    #TODO: Define some kind of Hostnames
 	            rspec_node['component_id'] = node.uuid#hostname_to_urn(self.driver.hrn, site['name'], node['hostname'])
 	            rspec_node['component_name'] = node.name#node['hostname']
@@ -80,7 +74,6 @@ class VMAggregate:
 		    network_ifaces = node.networkInterfaces.all()
 		    #XXX: I use services because it works well
 		    rspec_node['services'] = list()
-
 		    if ip_ranges:
 			     for ip_range in ip_ranges:
 			     	rspec_node['services'].append(Range({'type':'IP_Range',
@@ -93,27 +86,15 @@ class VMAggregate:
                                                                      'name':mac_range.name,
                                                                      'start_value': mac_range.startMac,
                                                                      'end_value': mac_range.endMac}))
-		     
 		    if network_ifaces:
 			     for network_iface in network_ifaces:
-			    	rspec_node['services'].append(NetworkInterface({'from_server':node.name,
-				    					        'to_network_interface': network_iface.switchID,
-										'port':str(network_iface.port)}))
-		     
-		   
-	            # add site/interface info to nodes.
-        	    # assumes that sites, interfaces and tags have already been prepared.
+			    	rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
+				    					        'to_network_interface_id': network_iface.switchID,
+										'to_network_interface_port':str(network_iface.port)}))
                 if site['longitude'] and site['latitude']:
     	            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
         	    rspec_node['location'] = location
-
-
-                # slivers always provide the ssh service
-                #login = Login({'authentication': 'ssh-keys', 'hostname': node['hostname'], 'port':'22', 'username': slice['slice_name']})
-                #service = Services({'login': login})
-                #rspec_node['services'] = [service]
             	rspec_nodes.append(rspec_node)
-		print '-------RSpec Nodes:',rspec_nodes
         	return rspec_nodes
 
 	def get_testbed_info(self):

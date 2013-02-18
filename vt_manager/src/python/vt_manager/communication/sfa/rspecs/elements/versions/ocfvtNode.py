@@ -81,13 +81,13 @@ class OcfVtNode:
     def get_nodes(xml, filter={}):
         xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
         node_elems = xml.xpath(xpath)
-        return PGv2Node.get_node_objs(node_elems)
+        return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
         xpath = '//node[count(sliver_type)>0] | //default:node[count(default:sliver_type) > 0]' 
         node_elems = xml.xpath(xpath)        
-        return PGv2Node.get_node_objs(node_elems)
+        return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
     def get_node_objs(node_elems):
@@ -138,7 +138,7 @@ class OcfVtNode:
                 filter['component_id'] = '*%s*' % sliver['component_id']
             if not filter: 
                 continue
-            nodes = PGv2Node.get_nodes(xml, filter)
+            nodes = OcfVtNode.get_nodes(xml, filter)
             if not nodes:
                 continue
             node = nodes[0]
@@ -147,9 +147,9 @@ class OcfVtNode:
     @staticmethod
     def remove_slivers(xml, hostnames):
         for hostname in hostnames:
-            nodes = PGv2Node.get_nodes(xml, {'component_id': '*%s*' % hostname})
+            nodes = OcfVtNode.get_nodes(xml, {'component_id': '*%s*' % hostname})
             for node in nodes:
-                slivers = PGv2SliverType.get_slivers(node.element)
+                slivers = OcfVtSliverType.get_slivers(node.element)
                 for sliver in slivers:
                     node.element.remove(sliver.element) 
 if __name__ == '__main__':

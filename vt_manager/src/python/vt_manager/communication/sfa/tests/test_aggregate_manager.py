@@ -1,4 +1,5 @@
 from vt_manager.communication.sfa.AggregateManager import AggregateManager
+from vt_manager.communication.sfa.tests.example_vm_rspec import rspec as RSPEC
 '''
 This module run tests over the AM locally without xmlrpc or sfa instances
 '''
@@ -16,7 +17,9 @@ class Options:
 options = Options(123456)
 agg = AggregateManager(None)
 print 'Aggregate instance:',agg
-xml = agg.ListResources(None,None,options)
-print '------------------ListResources:',xml
+#xml = agg.ListResources(None,None,options)
+#print '------------------ListResources:',xml
 
 #XXX: Last test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
+
+xml = agg.CreateSliver(None, None, None, RSPEC, None, options)

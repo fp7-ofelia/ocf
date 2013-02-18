@@ -22,15 +22,19 @@ class VTShell:
 		return vm
 
 	def StartSlice(self,server_uuid,vm_uuid):
+		return 1
 		return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_START_TYPE)
 
 	def StopSlice(self,server_uuid,vm_uuid):
+		return 1
 		return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_STOP_TYPE)
 	
 	def RebootSlice(self,server_uuid,vm_uuid):
+		return 1
                 return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_REBOOT_TYPE)
 
 	def DeleteSlice(self,server_uuid,vm_uuid):
+		return 1
                 return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_DELETE_TYPE)
 
 	def __crudVM(self,server_uuid,vm_id,action):

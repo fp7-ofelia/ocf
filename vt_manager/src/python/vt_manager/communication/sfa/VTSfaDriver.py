@@ -45,12 +45,12 @@ class VTSfaDriver:
 		print 'list_resources Rspec instance:',rspec
        		return rspec
 
-	def crud_slice(self,slice_urn,slice_hrn, creds=None, action=None):
-		
+	def crud_slice(self,slice_leaf, creds=None, action=None):
+		#XXX: If we use get_leaf method from Xrn instances we will get the correct name for the slices(vms)	
 		#XXX: Slice_hrn: topdomain.subdomain.SliceName
 		#XXX: Slice_urn: urn:publicid:IDN+topdomain:subdomain+slice+SliceName
 
-		slicename = 'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
+		slicename = slice_leaf #'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
                 try:
                         #XXX: getSlices should return the server UUID too
                         slice = self.shell.GetSlice(slicename)
@@ -76,7 +76,7 @@ class VTSfaDriver:
                 return 1
 
 	#XXX: this method shouldn't be private, if someone delete a slice we must "dettach" the resources asigned to this slice 
-	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing, delete_slice should remove a vm from the 			  slice, meanwhile deleteSliver probably should remove all the vms from a user.
+	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing, delete_slice should remove all vms from the 			  slice, meanwhile deleteSliver probably should remove one vm from a user.
 	def __delete_slice(self,slice):
                 self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
                 return 1
@@ -85,7 +85,7 @@ class VTSfaDriver:
                 self.shell.RebootSlice(slice.server.uuid,slice.uuid)
                 return 1
 
-        def create_sliver (slice_urn, slice_hrn, rspec_string, users, options):
+        def create_sliver (self,slice_leaf,rspec_string, users, options):
 		
 		#TODO: Clean input params, check if slice is already created, rspec.		
 
@@ -100,26 +100,25 @@ class VTSfaDriver:
                 #slice_record=None
                 #if users:
                 #    slice_record = users[0].get('slice_record', {})
-
                 # parse rspec
-
-                rspec = RSpec(rspec_string)
+		print '-------------------------------------------------rspec_string',rspec_string
+                rspec = RSpec(rspec_string,'OcfVt')
+		print '-------------------------------------------------rspec',rspec.elements,rspec.namespaces, rspec.version
 		#XXX: if we can get the vm paramaters, we can use the shell to create a create vm action
                 requested_attributes = rspec.version.get_slice_attributes()
-		self.shell.CreateSliver(requested_attributes)
+		print '-------------------------------------------------RA',requested_attributes
 		
+		self.shell.CreateSliver(requested_attributes)
 			
                 # ensure slice record exists
 		#XXX: Do we need this?
                 #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
                 # ensure user records exists
                 #users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
-
 		#XXX: We should return something like the input rspec? 
                 return aggregate.get_rspec(slice_xrn=slice_urn, version=rspec.version)
 
 		
 
 	
-			
-
+	
