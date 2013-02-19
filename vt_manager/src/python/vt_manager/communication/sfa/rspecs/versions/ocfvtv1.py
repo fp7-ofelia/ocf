@@ -68,6 +68,7 @@ class OcfVt(RSpecVersion):
     def get_slice_attributes(self, network=None):
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
+	print '---------------------NodesWSlivers',nodes_with_slivers
         default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node, network)

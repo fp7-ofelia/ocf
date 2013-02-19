@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from vt_manager.communication.sfa.util.sfalogging import logger
+#from vt_manager.communication.sfa.util.sfalogging import logger
 
 class RSpecVersion:
     type = None

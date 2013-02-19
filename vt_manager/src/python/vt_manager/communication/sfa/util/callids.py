@@ -3,7 +3,7 @@
 import threading
 import time
 
-from vt_manager.communication.sfa.util.sfalogging import logger
+#from vt_manager.communication.sfa.util.sfalogging import logger
 
 """
 Callids: a simple mechanism to remember the call ids served so fas

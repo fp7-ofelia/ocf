@@ -1,7 +1,7 @@
 import os
 from vt_manager.communication.sfa.util.faults import InvalidRSpec, UnsupportedRSpecVersion
 from vt_manager.communication.sfa.rspecs.version import RSpecVersion 
-from vt_manager.communication.sfa.util.sfalogging import logger    
+#from vt_manager.communication.sfa.util.sfalogging import logger    
 
 class VersionManager:
     def __init__(self):
