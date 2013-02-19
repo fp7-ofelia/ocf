@@ -23,7 +23,7 @@
 
 import re
 
-from sfa.util.faults import SfaAPIError
+from vt_manager.communication.sfa.util.faults import SfaAPIError
 
 # for convenience and smoother translation - we should get rid of these functions eventually 
 def get_leaf(hrn): return Xrn(hrn).get_leaf()

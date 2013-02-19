@@ -25,7 +25,7 @@ import dateutil.parser
 import datetime
 import time
 
-from sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.sfalogging import logger
 
 DATEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 

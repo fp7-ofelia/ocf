@@ -6,7 +6,7 @@ import ConfigParser
 import tempfile
 import codecs
 from StringIO import StringIO
-from sfa.util.xml import XML
+from vt_manager.communication.sfa.util.xml import XML
 default_config = \
 """
 """

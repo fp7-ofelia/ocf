@@ -25,7 +25,7 @@
 #
 
 import xmlrpclib
-from sfa.util.genicode import GENICODE
+from vt_manager.communication.sfa.util.genicode import GENICODE
 
 class SfaFault(xmlrpclib.Fault):
     def __init__(self, faultCode, faultString, extra = None):
