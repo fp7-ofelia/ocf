@@ -1,5 +1,5 @@
-from sfa.rspecs.elements.element import Element  
-from sfa.rspecs.elements.pltag import PLTag
+from vt_manager.communication.sfa.rspecs.elements.element import Element  
+from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
 
 class SFAv1PLTag:
     @staticmethod

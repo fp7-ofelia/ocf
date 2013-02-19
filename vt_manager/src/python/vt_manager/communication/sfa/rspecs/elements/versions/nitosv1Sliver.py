@@ -1,9 +1,9 @@
-from sfa.util.xrn import Xrn
-from sfa.util.xml import XmlElement
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.util.xml import XmlElement
 
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.sliver import Sliver
-from sfa.rspecs.elements.versions.nitosv1PLTag import NITOSv1PLTag
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1PLTag import NITOSv1PLTag
 
 from sfa.planetlab.plxrn import PlXrn
 

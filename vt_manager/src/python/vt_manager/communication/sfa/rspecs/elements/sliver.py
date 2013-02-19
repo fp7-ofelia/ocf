@@ -1,4 +1,4 @@
-from sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.element import Element
 
 class Sliver(Element):
     fields = [

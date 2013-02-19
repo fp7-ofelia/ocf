@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
-from sfa.rspecs.sfa_rspec_converter import SfaRSpecConverter
-from sfa.rspecs.rspec import RSpec
-from sfa.rspecs.version_manager import VersionManager
+from vt_manager.communication.sfa.rspecs.pg_rspec_converter import PGRSpecConverter
+from vt_manager.communication.sfa.rspecs.sfa_rspec_converter import SfaRSpecConverter
+from vt_manager.communication.sfa.rspecs.rspec import RSpec
+from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 class RSpecConverter:
 

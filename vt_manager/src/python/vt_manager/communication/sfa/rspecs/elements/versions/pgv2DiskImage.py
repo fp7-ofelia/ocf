@@ -1,5 +1,5 @@
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.disk_image import DiskImage
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.disk_image import DiskImage
 
 class PGv2DiskImage:
 

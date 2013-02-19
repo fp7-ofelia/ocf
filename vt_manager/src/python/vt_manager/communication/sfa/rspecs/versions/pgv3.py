@@ -1,4 +1,4 @@
-from sfa.rspecs.versions.pgv2 import PGv2
+from vt_manager.communication.sfa.rspecs.versions.pgv2 import PGv2
 
 class GENIv3(PGv2):
     type = 'GENI'

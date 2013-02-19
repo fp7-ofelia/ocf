@@ -1,5 +1,5 @@
-from sfa.rspecs.elements.element import Element  
-from sfa.rspecs.elements.fw_rule import FWRule
+from vt_manager.communication.sfa.rspecs.elements.element import Element  
+from vt_manager.communication.sfa.rspecs.elements.fw_rule import FWRule
 
 class PLOSv1FWRule:
     @staticmethod

@@ -1,10 +1,10 @@
 from copy import deepcopy
 from StringIO import StringIO
-from sfa.util.xrn import Xrn
-from sfa.rspecs.version import RSpecVersion
-from sfa.rspecs.elements.versions.pgv2Link import PGv2Link
-from sfa.rspecs.elements.versions.pgv2Node import PGv2Node
-from sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.rspecs.version import RSpecVersion
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Link import PGv2Link
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Node import PGv2Node
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
  
 class PGv2(RSpecVersion):
     type = 'ProtoGENI'
@@ -187,7 +187,7 @@ class PGv2(RSpecVersion):
         """
         Merge contents for specified rspec with current rspec
         """
-        from sfa.rspecs.rspec import RSpec
+        from vt_manager.communication.sfa.rspecs.rspec import RSpec
         # just copy over all the child elements under the root element
         if isinstance(in_rspec, basestring):
             in_rspec = RSpec(in_rspec)
@@ -236,8 +236,8 @@ class PGv2Manifest(PGv2):
 
 
 if __name__ == '__main__':
-    from sfa.rspecs.rspec import RSpec
-    from sfa.rspecs.rspec_elements import *
+    from vt_manager.communication.sfa.rspecs.rspec import RSpec
+    from vt_manager.communication.sfa.rspecs.rspec_elements import *
     r = RSpec('/tmp/pg.rspec')
     r.load_rspec_elements(PGv2.elements)
     r.namespaces = PGv2.namespaces

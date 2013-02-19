@@ -1,9 +1,9 @@
 #!/usr/bin/python 
 from lxml import etree
 from StringIO import StringIO
-from sfa.util.xrn import Xrn, urn_to_hrn
-from sfa.rspecs.rspec import RSpec
-from sfa.rspecs.version_manager import VersionManager
+from vt_manager.communication.sfa.util.xrn import Xrn, urn_to_hrn
+from vt_manager.communication.sfa.rspecs.rspec import RSpec
+from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="xml" indent="no"/>

@@ -1,21 +1,21 @@
-from sfa.util.sfalogging import logger
-from sfa.util.xml import XpathFilter
-from sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.xml import XpathFilter
+from vt_manager.communication.sfa.util.xrn import Xrn
 
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.node import Node
-from sfa.rspecs.elements.sliver import Sliver
-from sfa.rspecs.elements.location import Location
-from sfa.rspecs.elements.hardware_type import HardwareType
-from sfa.rspecs.elements.disk_image import DiskImage
-from sfa.rspecs.elements.interface import Interface
-from sfa.rspecs.elements.bwlimit import BWlimit
-from sfa.rspecs.elements.pltag import PLTag
-from sfa.rspecs.elements.versions.nitosv1Sliver import NITOSv1Sliver
-from sfa.rspecs.elements.versions.nitosv1PLTag import NITOSv1PLTag
-from sfa.rspecs.elements.versions.pgv2Services import PGv2Services
-from sfa.rspecs.elements.lease import Lease
-from sfa.rspecs.elements.channel import Channel
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.node import Node
+from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
+from vt_manager.communication.sfa.rspecs.elements.location import Location
+from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
+from vt_manager.communication.sfa.rspecs.elements.disk_image import DiskImage
+from vt_manager.communication.sfa.rspecs.elements.interface import Interface
+from vt_manager.communication.sfa.rspecs.elements.bwlimit import BWlimit
+from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1Sliver import NITOSv1Sliver
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1PLTag import NITOSv1PLTag
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Services import PGv2Services
+from vt_manager.communication.sfa.rspecs.elements.lease import Lease
+from vt_manager.communication.sfa.rspecs.elements.channel import Channel
 
 
 

@@ -1,15 +1,15 @@
 from copy import deepcopy
 from lxml import etree
 
-from sfa.util.sfalogging import logger
-from sfa.util.xrn import hrn_to_urn, urn_to_hrn
-from sfa.rspecs.version import RSpecVersion
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.versions.pgv2Link import PGv2Link
-from sfa.rspecs.elements.versions.nitosv1Node import NITOSv1Node
-from sfa.rspecs.elements.versions.nitosv1Sliver import NITOSv1Sliver
-from sfa.rspecs.elements.versions.nitosv1Lease import NITOSv1Lease
-from sfa.rspecs.elements.versions.nitosv1Channel import NITOSv1Channel
+from vt_manager.communication.sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.xrn import hrn_to_urn, urn_to_hrn
+from vt_manager.communication.sfa.rspecs.version import RSpecVersion
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Link import PGv2Link
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1Node import NITOSv1Node
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1Sliver import NITOSv1Sliver
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1Lease import NITOSv1Lease
+from vt_manager.communication.sfa.rspecs.elements.versions.nitosv1Channel import NITOSv1Channel
 
 class NITOSv1(RSpecVersion):
     enabled = True
@@ -199,13 +199,13 @@ class NITOSv1(RSpecVersion):
         if not in_rspec:
             return
 
-        from sfa.rspecs.rspec import RSpec
+        from vt_manager.communication.sfa.rspecs.rspec import RSpec
         if isinstance(in_rspec, RSpec):
             rspec = in_rspec
         else:
             rspec = RSpec(in_rspec)
         if rspec.version.type.lower() == 'protogeni':
-            from sfa.rspecs.rspec_converter import RSpecConverter
+            from vt_manager.communication.sfa.rspecs.rspec_converter import RSpecConverter
             in_rspec = RSpecConverter.to_sfa_rspec(rspec.toxml())
             rspec = RSpec(in_rspec)
 
@@ -237,8 +237,8 @@ class NITOSv1(RSpecVersion):
 
 
 if __name__ == '__main__':
-    from sfa.rspecs.rspec import RSpec
-    from sfa.rspecs.rspec_elements import *
+    from vt_manager.communication.sfa.rspecs.rspec import RSpec
+    from vt_manager.communication.sfa.rspecs.rspec_elements import *
     r = RSpec('/tmp/resources.rspec')
     r.load_rspec_elements(SFAv1.elements)
     print r.get(RSpecElements.NODE)

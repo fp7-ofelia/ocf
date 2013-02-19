@@ -1,7 +1,7 @@
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.sliver import Sliver
-from sfa.rspecs.elements.versions.pgv2DiskImage import PGv2DiskImage
-from sfa.rspecs.elements.versions.plosv1FWRule import PLOSv1FWRule
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2DiskImage import PGv2DiskImage
+from vt_manager.communication.sfa.rspecs.elements.versions.plosv1FWRule import PLOSv1FWRule
 
 class PGv2SliverType:
 

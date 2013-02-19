@@ -1,4 +1,4 @@
-from sfa.rspecs.versions.pgv2 import PGv2Ad, PGv2Request, PGv2Manifest
+from vt_manager.communication.sfa.rspecs.versions.pgv2 import PGv2Ad, PGv2Request, PGv2Manifest
 
 class FedericaAd (PGv2Ad):
     enabled = True

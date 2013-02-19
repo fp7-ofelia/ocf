@@ -1,6 +1,6 @@
-from sfa.util.xrn import Xrn
-from sfa.util.xml import XpathFilter
-from sfa.rspecs.elements.interface import Interface
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.util.xml import XpathFilter
+from vt_manager.communication.sfa.rspecs.elements.interface import Interface
 
 class PGv2Interface:
 

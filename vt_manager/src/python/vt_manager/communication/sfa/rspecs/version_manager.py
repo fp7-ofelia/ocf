@@ -1,7 +1,7 @@
 import os
-from sfa.util.faults import InvalidRSpec, UnsupportedRSpecVersion
-from sfa.rspecs.version import RSpecVersion 
-from sfa.util.sfalogging import logger    
+from vt_manager.communication.sfa.util.faults import InvalidRSpec, UnsupportedRSpecVersion
+from vt_manager.communication.sfa.rspecs.version import RSpecVersion 
+from vt_manager.communication.sfa.util.sfalogging import logger    
 
 class VersionManager:
     def __init__(self):
@@ -11,7 +11,7 @@ class VersionManager:
     def load_versions(self):
         path = os.path.dirname(os.path.abspath( __file__ ))
         versions_path = path + os.sep + 'versions'
-        versions_module_path = 'sfa.rspecs.versions'
+        versions_module_path = 'vt_manager.communication.sfa.rspecs.versions'
         valid_module = lambda x: os.path.isfile(os.sep.join([versions_path, x])) \
                         and x.endswith('.py') and x !=  '__init__.py'
         files = [f for f in os.listdir(versions_path) if valid_module(f)]

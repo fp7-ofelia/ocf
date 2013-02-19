@@ -1,8 +1,8 @@
-from sfa.util.xrn import Xrn
-from sfa.rspecs.elements.element import Element
-from sfa.rspecs.elements.link import Link
-from sfa.rspecs.elements.interface import Interface
-from sfa.rspecs.elements.property import Property    
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.rspecs.elements.element import Element
+from vt_manager.communication.sfa.rspecs.elements.link import Link
+from vt_manager.communication.sfa.rspecs.elements.interface import Interface
+from vt_manager.communication.sfa.rspecs.elements.property import Property    
 
 class PGv2Link:
     @staticmethod

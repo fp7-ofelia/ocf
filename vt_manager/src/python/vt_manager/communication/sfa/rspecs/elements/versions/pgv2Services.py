@@ -1,8 +1,8 @@
-from sfa.rspecs.elements.element import Element  
-from sfa.rspecs.elements.execute import Execute  
-from sfa.rspecs.elements.install import Install  
-from sfa.rspecs.elements.services import Services  
-from sfa.rspecs.elements.login import Login
+from vt_manager.communication.sfa.rspecs.elements.element import Element  
+from vt_manager.communication.sfa.rspecs.elements.execute import Execute  
+from vt_manager.communication.sfa.rspecs.elements.install import Install  
+from vt_manager.communication.sfa.rspecs.elements.services import Services  
+from vt_manager.communication.sfa.rspecs.elements.login import Login
 
 class PGv2Services:
     @staticmethod

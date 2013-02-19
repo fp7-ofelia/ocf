@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from sfa.util.xrn import hrn_to_urn
-from sfa.rspecs.rspec import RSpec
-from sfa.rspecs.version_manager import VersionManager
+from vt_manager.communication.sfa.util.xrn import hrn_to_urn
+from vt_manager.communication.sfa.rspecs.rspec import RSpec
+from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 class SfaRSpecConverter:
 

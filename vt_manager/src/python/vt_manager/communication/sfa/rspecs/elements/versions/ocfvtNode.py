@@ -1,18 +1,18 @@
-from sfa.util.xrn import Xrn
-from sfa.util.xml import XpathFilter
+from vt_manager.communication.sfa.util.xrn import Xrn
+from vt_manager.communication.sfa.util.xml import XpathFilter
 
-from sfa.rspecs.elements.node import Node
-from sfa.rspecs.elements.sliver import Sliver
-from sfa.rspecs.elements.location import Location
+from vt_manager.communication.sfa.rspecs.elements.node import Node
+from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
+from vt_manager.communication.sfa.rspecs.elements.location import Location
 from vt_manager.communication.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
-from sfa.rspecs.elements.hardware_type import HardwareType
-from sfa.rspecs.elements.disk_image import DiskImage
-from sfa.rspecs.elements.interface import Interface
-from sfa.rspecs.elements.bwlimit import BWlimit
-from sfa.rspecs.elements.pltag import PLTag
-from sfa.rspecs.elements.versions.pgv2Services import PGv2Services     
-from sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType     
-from sfa.rspecs.elements.versions.pgv2Interface import PGv2Interface     
+from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
+from vt_manager.communication.sfa.rspecs.elements.disk_image import DiskImage
+from vt_manager.communication.sfa.rspecs.elements.interface import Interface
+from vt_manager.communication.sfa.rspecs.elements.bwlimit import BWlimit
+from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Services import PGv2Services     
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType     
+from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Interface import PGv2Interface     
 
 
 from vt_manager.communication.sfa.rspecs.elements.range import Range
@@ -153,7 +153,7 @@ class OcfVtNode:
                 for sliver in slivers:
                     node.element.remove(sliver.element) 
 if __name__ == '__main__':
-    from sfa.rspecs.rspec import RSpec
+    from vt_manager.communication.sfa.rspecs.rspec import RSpec
     #import pdb
     r = RSpec('/tmp/emulab.rspec')
     r2 = RSpec(version = 'OcfVt')

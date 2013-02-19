@@ -1,4 +1,4 @@
-from sfa.util.enumeration import Enum
+from vt_manager.communication.sfa.util.enumeration import Enum
 
 # recognized top level rspec elements
 RSpecElements = Enum(
