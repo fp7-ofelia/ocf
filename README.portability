@@ -1,0 +1,37 @@
+========
+OVERVIEW
+========
+
+The proposed architecture for FIBRE-BR islands in Brasil proposes using
+NetFPGA servers both as virtualization agents and openflow swtiches. As
+such, it is necessary to port the OFELIA Control Framework (OCF) to
+multiple Linux environments. This branches aims to contribute with this
+set of features: portability.
+
+Initial work focus on installing OXA and running it on CentOS 5.x, as
+necessary for the islands, but it can be extended to all components present
+in OCF.
+
+Ideally one should test for FUNCIONALITY during installation, but doing
+so is not feasible considering ofver's simplistic architecture. As such,
+different Linux distributions, package dependencies, and possible
+variations on critical points are verified on ofver case-by-case.
+
+Also, standards compliance is exploited in this branch. LSB tools are used
+throughout ofver, and a LSB-compatible init.d script is provided for
+maximizing portability (that's why most upstream software does not direcly
+include init scripts).
+
+For more information please see the changes in OXA's ofver scripts and
+"osdetect" script.
+
+==================
+TODO / FUTURE WORK
+==================
+
+-> Try to check for funcionality whenever possible / more often
+-> Extend the patches for other OCF components
+    -> Check how Apache configuration differs on various environments
+-> Port components to more environments? (as requested)
+
+-> KVM-compatible OFELIA CF ? (just an idea...)

@@ -1,0 +1,56 @@
+========
+OVERVIEW
+========
+
+OFELIA Control Framework's virtualization agent (OXA) has been sucessfully
+ported to CentOS 5.x. Other components may follow, based on demand. There
+are currently no plans to port any components to CentOS 6.x, as XEN has
+was deprecated in this release and major work in backporting is required.
+
+
+===============
+PRE-PREQUISITES
+===============
+
+-> CentOS 5.x installed (with or without graphical interface)
+
+-> XEN platform installed; XEN kernel installed and booted
+
+-> Extra repositories:
+
+    -> Extra Packages for Enterprise Linux (EPEL)
+    
+        wget http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+        rpm -Uvh epel-release-5*.rpm
+        
+    ->  IUS Community Project (IUS)
+    
+        wget dl.iuscommunity.org/pub/ius/stable/Redhat/5/i386/ius-release-1.0-10.ius.el5.noarch.rpm
+        rpm -Uvh ius-release-*.rpm
+        
+    ->  FIBRE-UFSCAR Repo (temporary location)
+    
+        wget http://www2.comp.ufscar.br/~ricardofg/centos5/fibre-ufscar.repo -O /etc/yum.repos.d/
+        
+        
+-> Package "rhel-lsb" must be installed
+
+    yum install rhel-lsb
+
+
+============
+INSTALLATION
+============
+
+Installing OXA on CentOS is a strightforward process, identical to installing
+it on Debian:
+
+mkdir -p /opt/ofelia/oxa/repository
+cd /opt/ofelia
+# (clone this repository to have a copy of all component's directories here)
+cd oxa/repository
+# (again, clone this repository to have a copy of all components here)
+cd vt_manager/src/python/agent/tools/
+ofver install -f
+
+

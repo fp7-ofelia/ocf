@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Linux distribution name
+OS_DIST=""
+
+# Major and Minor version numbers
+OS_MAJOR=""
+OS_MINOR=""
+
+# Package Manager install command
+PKG_CMD=""
+
+# 'true' if we need to explicitly set Python to version 2.6
+EXPLICIT_PYTHON="none"
+
+INIT_UPDATE_CMD=""
+INIT_RUN_CMD=""
+
+
+do_lsb_detect()
+{
+	OS_DIST=$(/usr/bin/lsb_release -si)
+
+	if [ "$OS_DIST" = "Debian" ]
+	then
+		# Getting the release may return something too generic here
+		# (e.g. in Debian testing; include other distributions if needed)
+		OS_MAJOR=$(/usr/bin/lsb_release -sc)
+	else
+		# Most (all?) other distributions should correctly
+		# follow the LSB spec, however
+		OS_MAJOR=$(/usr/bin/lsb_release -sr | cut -d "." -f 1)
+		OS_MINOR=$(/usr/bin/lsb_release -sr | cut -d "." -f 2)	
+	fi
+	
+}
+
+do_pkg_detect()
+{
+	if [ -e "/usr/bin/apt-get" ]
+	then
+	    PKG_CMD="/usr/bin/apt-get -y install"
+	elif [ -e "/usr/bin/yum" ]
+        then
+	    PKG_CMD="/usr/bin/yum -y install"
+	fi
+}
+
+detect_quirks()
+{
+    if [ "$OS_DIST" = "Debian" ]
+    then
+        DEPENDENCIES=$DEBIAN_DEPENDENCIES
+        INIT_UPDATE_CMD="/usr/sbin/update-rc.d oxad defaults"
+        INIT_RUN_CMD="/usr/sbin/service oxad restart"
+	elif [ "$OS_DIST" = "CentOS" ] && [ "$OS_MAJOR" = "5" ]
+	then
+        # TODO - Warn about repository dependencies
+        warning "Please read about OXA (and OFELIA) + CentOS on file README.CentOS"
+        
+	    DEPENDENCIES=$CENTOS5_DEPENDENCIES
+	    EXPLICIT_PYTHON="2.6"
+	    INIT_UPDATE_CMD="/sbin/chkconfig --add oxad"
+	    INIT_RUN_CMD="/sbin/service oxad restart"
+	else
+	    error "${OS_DIST} ${OS_MAJOR} is not currently supported by OFELIA" $NO_RESCUE
+	fi
+}
+
+
+if [ -x /usr/bin/lsb_release ]
+then
+	do_lsb_detect
+	do_pkg_detect
+	detect_quirks
+else
+	error "Could not detect the distribution using LSB scripts" $NO_RESCUE
+fi
+

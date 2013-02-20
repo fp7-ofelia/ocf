@@ -1,6 +1,17 @@
 #!/bin/bash
 
-ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/oxad /etc/init.d || error "Could not create the symbolic link for oxad"
-ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/OfeliaLauncher.sh /etc/init.d || error "Could not create the symbolic link for OfeliaLauncher.sh"
-/usr/sbin/update-rc.d oxad defaults || warning "It seems oxad update-rc.d has not worked... Take into account if service is not starting itself."
+ln -sf $OXA_DIRECTORY/repository/vt_manager/src/config/agent/oxad-lsb /etc/init.d/oxad || error "Could not create the symbolic link for oxad"
+
+# This file was previously linked (as above), but as non-Debian distributions may
+#  change this file (expliciting the python version or not), it is copied for now
+cp $OXA_DIRECTORY/repository/vt_manager/src/config/agent/OfeliaLauncher.sh /etc/init.d || error "Could not create the symbolic link for OfeliaLauncher.sh"
+
+# If we need to explicity set a Python version for running OXA, do it here
+if [ "$EXPLICIT_PYTHON" != "none" ]
+then
+    sed -i -e "s|/usr/bin/python|/usr/bin/python${EXPLICIT_PYTHON}|" /etc/init.d/OfeliaLauncher.sh 
+fi
+
+# Add to the default runlevel (start oxad at boot)
+$INIT_UPDATE_CMD || warning "It seems oxad could not be set up to start at boot... Take into account if service is not starting itself."
 

@@ -2,6 +2,15 @@
 
 #Used to define package dependencies
 
+# Variable used along other ofver scripts for installation
+# Currently empty; to be assigned by "osdetect" script
+DEPENDENCIES=""
+
+# Debian specific dependencies
 DEBIAN_DEPENDENCIES="python-openssl python-lxml python-libxml2 python-jinja2 python-libxslt1 python-setuptools python-libvirt python-pyparsing build-essential"
+
+# Before install: redhat-lsb
+CENTOS5_DEPENDENCIES="python26 python26-devel pyOpenSSL26 python26-lxml python26-jinja2 python26-distribute libvirt-python26"
+
 
 EASY_INSTALL_DEPENDENCIES="generateDS"
