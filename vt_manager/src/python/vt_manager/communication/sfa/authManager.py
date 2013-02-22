@@ -10,4 +10,4 @@ from sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrusted
 class AuthManager:
 
     def checkCredentials(self, creds, operation, hrn=None):
-	Auth.checkCredentials(creds, operation, hrn)
+	return Auth.checkCredentials(creds, operation, hrn)

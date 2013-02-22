@@ -13,8 +13,8 @@ class OcfVt(RSpecVersion):
     type = 'OcfVt'
     content_type = 'ad'
     version = '1'
-    schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    namespace = 'http://www.protogeni.net/resources/rspec/2'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    #namespace = 'http://www.protogeni.net/resources/rspec/2'
     namespace = None
     content = '*'
     extensions = {}
@@ -43,7 +43,7 @@ class OcfVt(RSpecVersion):
         return PGv2Node.get_nodes(self.xml, filter)
 
     def get_nodes_with_slivers(self):
-        return PGv2Node.get_nodes_with_slivers(self.xml)
+        return OcfVtNode.get_nodes_with_slivers(self.xml)
 
     def add_nodes(self, nodes, check_for_dupes=False):
         return OcfVtNode.add_nodes(self.xml, nodes)
@@ -69,7 +69,7 @@ class OcfVt(RSpecVersion):
         slice_attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
 	print '---------------------NodesWSlivers',nodes_with_slivers
-        default_ns_prefix = self.namespaces['default']
+        #default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node, network)
             for sliver_attribute in sliver_attributes:
@@ -210,14 +210,17 @@ class OcfVt(RSpecVersion):
 class OcfVtAd(OcfVt):
     enabled = True
     content_type = 'ad'
-    schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    template = '<rspec type="advertisement" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    template = '<rspec type="advertisement" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd"/>'
 
 class OcfVtRequest(OcfVt):
     enabled = True
     content_type = 'request'
-    schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
-    template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    template = '<rspec type="advertisement" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd"/>'
+
+    #schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
+    #template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
 
 class OcfVtManifest(OcfVt):
     enabled = True

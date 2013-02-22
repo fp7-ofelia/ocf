@@ -85,8 +85,13 @@ class OcfVtNode:
 
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
-        xpath = '//node[count(sliver_type)>0] | //default:node[count(default:sliver_type) > 0]' 
-        node_elems = xml.xpath(xpath)        
+        #xpath = '//node[count(sliver-type)>0] | //default:node[count(default:sliver-type) > 0]' 
+	xpath = '//rspec/node'
+	print '------------------------------------------GetNodesWithSlivers'
+	print xml.__dict__
+        node_elems = xml.xpath(xpath)
+	
+	print 'Node_elems:',node_elems[0].element
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
@@ -94,7 +99,8 @@ class OcfVtNode:
         nodes = []
         for node_elem in node_elems:
             node = Node(node_elem.attrib, node_elem)
-            nodes.append(node) 
+            nodes.append(node)
+	    print  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',node_elem.attrib 
             if 'component_id' in node_elem.attrib:
                 node['authority_id'] = Xrn(node_elem.attrib['component_id']).get_authority_urn()
             
