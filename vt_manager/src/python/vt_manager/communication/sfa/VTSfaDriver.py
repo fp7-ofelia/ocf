@@ -93,20 +93,15 @@ class VTSfaDriver:
 		#XXX: this method should parse a vm rspec, get the main attributes of the vm and send this attributes to the shell.
 		#XXX: should be users? For what?
 		#XXX: What about vm repeated names?	
-
                 #XXX: what is this?--> sfa_peer = slices.get_sfa_peer(slice_hrn)
-
 		#XXX: probably this is not necessary
                 #slice_record=None
                 #if users:
                 #    slice_record = users[0].get('slice_record', {})
                 # parse rspec
-		print '-------------------------------------------------rspec_string',rspec_string
                 rspec = RSpec(rspec_string,'OcfVt')
-		print '-------------------------------------------------rspec',rspec.elements,rspec.namespaces, rspec.version
 		#XXX: if we can get the vm paramaters, we can use the shell to create a create vm action
                 requested_attributes = rspec.version.get_slice_attributes()
-		print '-------------------------------------------------RA',requested_attributes
 		
 		self.shell.CreateSliver(requested_attributes)
 			
@@ -115,8 +110,10 @@ class VTSfaDriver:
                 #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
                 # ensure user records exists
                 #users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
-		#XXX: We should return something like the input rspec? 
-                return aggregate.get_rspec(slice_xrn=slice_urn, version=rspec.version)
+		#XXX: should we return something like the input rspec?
+		#XXX: We should return a manifest rspec
+		#TODO: SetUp a manifest RSpec
+                return self.aggregate.get_rspec(slice_leaf=slice_leaf, version=rspec.version)
 
 		
 

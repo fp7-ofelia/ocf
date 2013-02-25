@@ -19,6 +19,8 @@ from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
 from vt_manager.communication.sfa.rspecs.elements.range import Range
 from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
+from vt_manager.communication.sfa.rspecs.elements.vm import VM
+from vt_manager.communication.sfa.rspecs.elements.vm_interface import VMInterface
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
@@ -32,17 +34,21 @@ class VMAggregate:
 	def __init__(self):
 		self.shell = VTShell()
 	
-	def get_rspec(self, version = None, options={}):
+	def get_rspec(self, version=None, slice_leaf=None, options={}):
 
 		#XXX: I think this is quite clear
         	version_manager = VersionManager()
         	version = version_manager.get_version(version)
-        	rspec_version = version_manager._get_version(version.type, version.version, 'ad')
+		if slice_leaf:
+		    rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
+		else:
+        	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
 
         	rspec = RSpec(version=rspec_version, user_options=options)
 
         	nodes = self.get_nodes(options)
         	rspec.version.add_nodes(nodes)
+		print '--------------------------------------------------------RSPEC',rspec.toxml()
         	return rspec.toxml()
 	
     	def get_nodes(self, options={}):
@@ -94,6 +100,24 @@ class VMAggregate:
                 if site['longitude'] and site['latitude']:
     	            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
         	    rspec_node['location'] = location
+		
+		#TODO:complete slivers part for manifest RSpecs
+		slices = self.shell.GetSlices(node.uuid)
+		if slices:
+		    for vm in slices:
+			if vm.interfaces:
+				ifaces = list()
+				for interface in vm.interfaces:
+					ifaces.append(interface)
+		    	rspec_node['slivers'].append(VM({'name':vm.name,
+						  'memory-mb':vm.memory,
+						  'operating-system-type':vm.operatingSystemType, 
+                                                  'operating-system-distribution':vm.operatingSystemDistribution,
+                                                  'operating-system-version':str(vm.operatingSystemVersion),
+                                                  'virtualization-technology':vm.virtTech,
+						  'interfaces':VMInterface(ifaces),
+						  }))
+		
             	rspec_nodes.append(rspec_node)
         	return rspec_nodes
 

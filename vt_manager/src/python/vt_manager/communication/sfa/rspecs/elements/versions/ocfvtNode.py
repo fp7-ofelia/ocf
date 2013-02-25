@@ -17,6 +17,7 @@ from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Interface import 
 
 from vt_manager.communication.sfa.rspecs.elements.range import Range
 from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
+from  vt_manager.communication.sfa.rspecs.elements.versions.ocfvtSlivers import OcfVtSlivers
 
 from sfa.planetlab.plxrn import xrn_to_hostname
 
@@ -65,8 +66,13 @@ class OcfVtNode:
             #PGv2Services.add_services(node_elem, node.get('services', [])) 
             # add slivers
             slivers = node.get('slivers', [])
-            if not slivers:
-		pass
+            if slivers:
+		for sliver in slivers:
+			s = node_elem.add_element('sliver', type=str(sliver.__class__.__name__))
+			for field in fields:
+				simple_elem = s.add_element(field)#node_elem.add_element(field)
+                                simple_elem.set_text(service[field])
+
                 # we must still advertise the available sliver types
                 #slivers = Sliver({'type': 'plab-vserver'})
                 # we must also advertise the available initscripts
@@ -87,11 +93,7 @@ class OcfVtNode:
     def get_nodes_with_slivers(xml, filter={}):
         #xpath = '//node[count(sliver-type)>0] | //default:node[count(default:sliver-type) > 0]' 
 	xpath = '//rspec/node'
-	print '------------------------------------------GetNodesWithSlivers'
-	print xml.__dict__
         node_elems = xml.xpath(xpath)
-	
-	print 'Node_elems:',node_elems[0].element
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
@@ -100,35 +102,41 @@ class OcfVtNode:
         for node_elem in node_elems:
             node = Node(node_elem.attrib, node_elem)
             nodes.append(node)
-	    print  'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',node_elem.attrib 
+	   
             if 'component_id' in node_elem.attrib:
                 node['authority_id'] = Xrn(node_elem.attrib['component_id']).get_authority_urn()
             
             # get hardware types
-            hardware_type_elems = node_elem.xpath('./default:hardware_type | ./hardware_type')
+            hardware_type_elems = node_elem.xpath('./hardware_type | ./default:hardware_type')
             node['hardware_types'] = [hw_type.get_instance(HardwareType) for hw_type in hardware_type_elems]
             
             # get location
-            location_elems = node_elem.xpath('./default:location | ./location')
+            location_elems = node_elem.xpath('./location | ./default:location')
             locations = [location_elem.get_instance(Location) for location_elem in location_elems]
             if len(locations) > 0:
                 node['location'] = locations[0]
 
             # get interfaces
-            iface_elems = node_elem.xpath('./default:interface | ./interface')
+            iface_elems = node_elem.xpath('./interface | ./default:interface')
             node['interfaces'] = [iface_elem.get_instance(Interface) for iface_elem in iface_elems]
 
             # get services
-            node['services'] = PGv2Services.get_services(node_elem)
+	    service_elems = node_elem.xpath('./services | ./default:service')
+	    if service_elems:
+            	node['services'] = PGv2Services.get_services(node_elem)
             
             # get slivers
-            node['slivers'] = PGv2SliverType.get_slivers(node_elem)    
-            available_elems = node_elem.xpath('./default:available | ./available')
+	    sliver_elems = node_elem.xpath('./slivers | ./default:slivers')
+	    if sliver_elems:
+                node['slivers'] = OcfVtSlivers.get_slivers(sliver_elems)
+	
+            available_elems = node_elem.xpath('./available | ./default:available')
             if len(available_elems) > 0 and 'name' in available_elems[0].attrib:
                 if available_elems[0].attrib.get('now', '').lower() == 'true': 
                     node['boot_state'] = 'boot'
                 else: 
                     node['boot_state'] = 'disabled' 
+
         return nodes
 
 

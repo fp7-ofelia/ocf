@@ -20,6 +20,9 @@ print 'Aggregate instance:',agg
 #xml = agg.ListResources(None,None,options)
 #print '------------------ListResources:',xml
 
-#XXX: Last test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
+#XXX: Last ListResources() test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
 
 xml = agg.CreateSliver(None, None, None, RSPEC, None, options)
+
+#XXX: Last CreateSliver() test was 02/25/2013 with OK results. The test does not get any parametre from VTShell yet, but the RSpec parsing(v1) is OK. The CreateSliver and GetSlice VTShell functions should be implemented working with slice_leaf parametre in order to check the manifest response RSpec.
+

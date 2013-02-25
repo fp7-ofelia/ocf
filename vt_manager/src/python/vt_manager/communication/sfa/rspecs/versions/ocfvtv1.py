@@ -54,32 +54,21 @@ class OcfVt(RSpecVersion):
 
     # Slivers
     
-    def get_sliver_attributes(self, hostname, network=None):
-        nodes = self.get_nodes({'component_id': '*%s*' %hostname})
-        attribs = []
-        if nodes is not None and isinstance(nodes, list) and len(nodes) > 0:
-            node = nodes[0]
-            sliver = node.xpath('./default:sliver_type', namespaces=self.namespaces)
-            if sliver is not None and isinstance(sliver, list) and len(sliver) > 0:
-                sliver = sliver[0]
-                #attribs = self.attributes_list(sliver)
+    def get_sliver_attributes(self,node):
+	#XXX:I will get node[slivers] and the node ids to get all the information to create a vm.
+	attribs = dict()
+	attribs.update({'slivers':node['slivers'],'component_id':node['component_id'],'component_name':node['component_name']})
+
+
         return attribs
 
     def get_slice_attributes(self, network=None):
-        slice_attributes = []
+	slice_attributes= list()
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
-	print '---------------------NodesWSlivers',nodes_with_slivers
         #default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
-            sliver_attributes = self.get_sliver_attributes(node, network)
-            for sliver_attribute in sliver_attributes:
-                name=str(sliver_attribute[0])
-                text =str(sliver_attribute[1])
-                #attribs = sliver_attribute[2]
-		#XXX:this could be improved,but I will maintain in this way in order to have consistency with other methods and the general code structure
-                attribute = {'name': name, 'value': text, 'node_id': node}
-                slice_attributes.append(attribute)
-
+            sliver_attributes = self.get_sliver_attributes(node)
+	    slice_attributes.append(sliver_attributes)
         return slice_attributes
 
     def attributes_list(self, elem):

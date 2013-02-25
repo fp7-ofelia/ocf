@@ -49,7 +49,9 @@ class VTShell:
 			raise e
 		return 1
 
-	def CreateSliver (vm_params):
+	def CreateSliver(self,vm_params):
 		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send only to the agent.
  
+		pass
+	def GetSlices(server_id,user=None):
 		pass
