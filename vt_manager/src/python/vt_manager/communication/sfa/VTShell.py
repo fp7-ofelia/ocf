@@ -18,24 +18,33 @@ class VTShell:
 	#XXX: We should create an specific sfa action type
 	def GetSlice(self,slicename):
 		#XXX: Don't worry about exceptions, they are treated above(VTSfaDriver class)
-		vm = VirtualMachine.objects.get(name = slicename)
-		return vm
+		#TODO: what happens with the names? There are not easier ways to obtain a vm and a server?
 
-	def StartSlice(self,server_uuid,vm_uuid):
-		return 1
-		return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_START_TYPE)
+		name = slicename # or uuid...
+		servers = self.GetNodes()
+		for server in servers:
+			child_server = server.getChildObject()
+			vm = child_server.getVMs(name=name)
+			if vm:
+				return {'node_id':server.uuid,'slice_id':vm.id}
+		
+		raise Exception("Record not found")
 
-	def StopSlice(self,server_uuid,vm_uuid):
+	def StartSlice(self,server_uuid,vm_id):
 		return 1
-		return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_STOP_TYPE)
+		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
+
+	def StopSlice(self,server_uuid,vm_id):
+		return 1
+		return self.__crudVM(server_id,vm_id,Action.PROVISIONING_VM_STOP_TYPE)
 	
-	def RebootSlice(self,server_uuid,vm_uuid):
+	def RebootSlice(self,server_uuid,vm_id):
 		return 1
-                return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_REBOOT_TYPE)
+                return self.__crudVM(server_id,vm_uuid,Action.PROVISIONING_VM_REBOOT_TYPE)
 
-	def DeleteSlice(self,server_uuid,vm_uuid):
+	def DeleteSlice(self,server_uuid,vm_id):
 		return 1
-                return self.__crudVM(server_uuid,vm_uuid,Action.PROVISIONING_VM_DELETE_TYPE)
+                return self.__crudVM(server_id,vm_id,Action.PROVISIONING_VM_DELETE_TYPE)
 
 	def __crudVM(self,server_uuid,vm_id,action):
 		#XXX: First approach
@@ -50,8 +59,10 @@ class VTShell:
 		return 1
 
 	def CreateSliver(self,vm_params):
-		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send only to the agent.
+		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
  
 		pass
 	def GetSlices(server_id,user=None):
+		#XXX: Get all the vms from a node and from an specific user
+		
 		pass

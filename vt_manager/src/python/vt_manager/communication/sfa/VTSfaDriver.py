@@ -67,29 +67,29 @@ class VTSfaDriver:
 
 	def __start_slice(self,slice):
         	if not slice.enabled:
-            		self.shell.StartSlice(slice.server.uuid,slice.uuid)
+            		self.shell.StartSlice(slice['node_id'],slice['slice_id'])
         	return 1
 	
         def __stop_slice(self,slice):
                 if slice.enabled:
-                        self.shell.StopSlice(slice.server.uuid,slice.uuid)
+                        self.shell.StopSlice(slice['node_id'],slice['slice_id'])
                 return 1
 
 	#XXX: this method shouldn't be private, if someone delete a slice we must "dettach" the resources asigned to this slice 
 	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing, delete_slice should remove all vms from the 			  slice, meanwhile deleteSliver probably should remove one vm from a user.
 	def __delete_slice(self,slice):
-                self.shell.DeleteSlice(slice.server.uuid,slice.uuid)
+                self.shell.DeleteSlice(slice['node_id'],slice['slice_id'])
                 return 1
 
 	def __reset_slice(self,slice):
-                self.shell.RebootSlice(slice.server.uuid,slice.uuid)
+                self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
                 return 1
 
         def create_sliver (self,slice_leaf,rspec_string, users, options):
 		
 		#TODO: Clean input params, check if slice is already created, rspec.		
 
-		#XXX: At the end of the day, this is only for federation, local slices are made in "OCF way"	
+		#XXX: At the end of the day, this is only for federation, local slices are made by the "OCF way"	
 		#XXX: this method should parse a vm rspec, get the main attributes of the vm and send this attributes to the shell.
 		#XXX: should be users? For what?
 		#XXX: What about vm repeated names?	

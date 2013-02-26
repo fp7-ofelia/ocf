@@ -40,6 +40,7 @@ class VMAggregate:
         	version_manager = VersionManager()
         	version = version_manager.get_version(version)
 		if slice_leaf:
+		    #Manifest RSpec will be used when somebody creates an sliver, returning the resources of this AM and the vm(s) requested by the user.
 		    rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
