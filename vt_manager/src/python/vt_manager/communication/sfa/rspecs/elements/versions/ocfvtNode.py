@@ -19,7 +19,9 @@ from vt_manager.communication.sfa.rspecs.elements.range import Range
 from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
 from  vt_manager.communication.sfa.rspecs.elements.versions.ocfvtSlivers import OcfVtSlivers
 
-from sfa.planetlab.plxrn import xrn_to_hostname
+#from sfa.planetlab.plxrn import xrn_to_hostname
+def xrn_to_hostname(a=None,b=None):
+	return a
 
 class OcfVtNode:
     @staticmethod

@@ -4,6 +4,7 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.sfa.vm_utils.Translator import Translator
 
+from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 
 class VMSfaManager:
 
@@ -23,6 +24,7 @@ class VMSfaManager:
 	    for vm in vms['slivers']:
                 print '-------------VMSfaManager-----------getActionInstance'
       	        print '------------------------------------VM:',vm
+		print '------------------------------------server_id:',server_id
 		server = VTServer.objects.get(uuid = server_id)
 	        VMSfaManager.setDefaultVMParameters(vm,server)
                 actionClass = copy.deepcopy(actionClassEmpty)
@@ -33,8 +35,8 @@ class VMSfaManager:
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
 
-	return 1   	
-	#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
+	   	
+		return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
     @staticmethod
     def setDefaultVMParameters(vm,server):
