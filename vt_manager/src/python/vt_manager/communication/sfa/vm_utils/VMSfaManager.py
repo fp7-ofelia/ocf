@@ -7,8 +7,11 @@ from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.sfa.vm_utils.Translator import Translator
 
 from vt_manager.utils.ServiceThread import ServiceThread
+from vt_manager.utils.UrlUtils import UrlUtils
 
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
+from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
+from vt_manager.communication.northCommInterface import sendSFA
 
 class VMSfaManager:
 
@@ -38,9 +41,15 @@ class VMSfaManager:
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
-
+		
+		print '-------------VMSfaManager----------BeforeProvisioning'
 		#TODO: hold the connection in order to maintain the synchronous SFA connection
-	   	ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
+		with threading.Lock():
+		    print '----------------CALLBACK_URL:',UrlUtils.getOwnCallbackURL()
+	   	    #ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, UrlUtils.getOwnCallbackURL())
+		    #DispatcherLauncher.processXmlQuery(rspec)
+                    sendSFA(UrlUtils.getOwnCallbackURL(),rspec)		    
+       		print '-------------VMSfaManager----------AfterProvisioning'
 		return 1
 		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
@@ -54,8 +63,8 @@ class VMSfaManager:
         vm['uuid'] = str(uuid.uuid4())
         #vm['serverID'] = server_id #XXX: Vms already have this parameter.
         vm['state'] = "on queue"
-        vm['slice-id'] = None #TODO: check if we should use these parameters.
-        vm['slice-name']= None #
+        vm['slice-id'] = 'slice-id' #TODO: check if we should use these parameters.
+        vm['slice-name']= 'slice-name' #
 
         #assign same virt technology as the server where vm created
         #XXX: VirtTech can be passed with a full SFA RSpec... or should we "configure" the virtTech here?
@@ -63,9 +72,9 @@ class VMSfaManager:
 	vm['server-id'] = server.getUUID()
 
         #XXX: This is not necessary for SFA, I hope, probably we could assign some special IDs to save the vms
-        vm['project-id'] = None
-        vm['project-name'] = None
-        vm['aggregate-id'] = None
+        vm['project-id'] = 'project-id'
+        vm['project-name'] = 'project-name'
+        vm['aggregate-id'] = 'aggregate-id'
 
         #assign parameters according to selected disc image
         #XXX: Disc Image Conf set default for now 

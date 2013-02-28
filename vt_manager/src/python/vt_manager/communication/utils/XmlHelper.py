@@ -46,15 +46,23 @@ class XmlCrafter(object):
     def craftXML(XMLclass):
         print "Crafting Model..."
         try:
+            print '---------XMLHELPER'
+	    print 'XMLclass:',XMLclass
             xml = StringIO()
+            print '--------xml',xml
             xml.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+            print '---------xml---write'
             XMLclass.export(xml, level=0)
+            print 'XML--------EXPort'
             print "Crafting of the XML Class concluded without significant errors."
             xmlString = xml.getvalue()
+            print 'xml.getVAlue()'
             xml.close()
             return xmlString
         except Exception as e:
             #TODO: add more info
+	    print 'uoooooooops'
+	    print e
             print >> sys.stderr, e
             raise XMLParsingException("Could not craft Model; traceback\n")
 

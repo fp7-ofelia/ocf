@@ -24,7 +24,7 @@ class Translator:
         VMxmlClass.xen_configuration.hd_setup_type = VMdict['hd-setup-type']
         VMxmlClass.xen_configuration.hd_origin_path = VMdict['hd-origin-path']
         VMxmlClass.xen_configuration.virtualization_setup_type = VMdict['virtualization-setup-type']
-        VMxmlClass.xen_configuration.memory_mb = VMdict['memory-mb']
+        VMxmlClass.xen_configuration.memory_mb = int(VMdict['memory-mb'])
 
 
     @staticmethod
