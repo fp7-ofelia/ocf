@@ -1,8 +1,12 @@
 import copy
 import uuid
+import threading
+
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.sfa.vm_utils.Translator import Translator
+
+from vt_manager.utils.ServiceThread import ServiceThread
 
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 
@@ -35,8 +39,10 @@ class VMSfaManager:
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
 
-	   	
-		return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
+		#TODO: hold the connection in order to maintain the synchronous SFA connection
+	   	ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
+		return 1
+		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
     @staticmethod
     def setDefaultVMParameters(vm,server):
