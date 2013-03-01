@@ -2,7 +2,7 @@ import copy
 import uuid
 import threading
 
-from vt_manager.communication.utils.XmlHelper import XmlHelper
+from vt_manager.communication.utils.XmlHelper import XmlHelper, XmlCrafter
 from vt_manager.models.VTServer import VTServer
 from vt_manager.communication.sfa.vm_utils.Translator import Translator
 
@@ -11,7 +11,7 @@ from vt_manager.utils.UrlUtils import UrlUtils
 
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
-from vt_manager.communication.northCommInterface import sendSFA
+#from vt_manager.communication.northCommInterface import sendSFA
 
 class VMSfaManager:
 
@@ -29,9 +29,6 @@ class VMSfaManager:
         for vms in servers_slivers:
 	    server_id = vms['component_id']
 	    for vm in vms['slivers']:
-                print '-------------VMSfaManager-----------getActionInstance'
-      	        print '------------------------------------VM:',vm
-		print '------------------------------------server_id:',server_id
 		server = VTServer.objects.get(uuid = server_id)
 	        VMSfaManager.setDefaultVMParameters(vm,server)
                 actionClass = copy.deepcopy(actionClassEmpty)
@@ -41,24 +38,18 @@ class VMSfaManager:
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
-		
-		print '-------------VMSfaManager----------BeforeProvisioning'
+
+			
 		#TODO: hold the connection in order to maintain the synchronous SFA connection
 		with threading.Lock():
-		    print '----------------CALLBACK_URL:',UrlUtils.getOwnCallbackURL()
-	   	    #ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, UrlUtils.getOwnCallbackURL())
+	   	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, UrlUtils.getOwnCallbackURL())
 		    #DispatcherLauncher.processXmlQuery(rspec)
-                    sendSFA(UrlUtils.getOwnCallbackURL(),rspec)		    
-       		print '-------------VMSfaManager----------AfterProvisioning'
+                    #sendSFA(UrlUtils.getOwnCallbackURL(),rspec)		    
 		return 1
 		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
     @staticmethod
     def setDefaultVMParameters(vm,server):
-	
-	print '-------------VMSfaManager-----------setDefaultVMParameters'
-	print '------------------------------------vm',vm
-	print '------------------------------------vm.keys()',vm.keys()
    
         vm['uuid'] = str(uuid.uuid4())
         #vm['serverID'] = server_id #XXX: Vms already have this parameter.

@@ -2,7 +2,7 @@ rspec ='''
 <rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="advertisement" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd" expires="2013-02-18T12:15:30Z" generated="2013-02-18T11:15:30Z">
 	<node component_manager_id="ocf.i2cat.vtmanager:c9883c61-16df-49cc-a8ea-8768d9b517a4authority+cm" component_id="58f565eb-b289-48aa-b4ac-61bc27cf1dea" exclusive="false" component_name="c9883c61-16df-49cc-a8ea-8768d9b517a4">
 		<slivers>
-			<name>mySFAVM</name>
+			<name>mySFAVM2</name>
 			<uuid>myuuid</uuid>
 			<project-id>project1</project-id> 
 			<slice-id>slice1</slice-id> 
@@ -26,6 +26,8 @@ rspec ='''
 				</interface>
 				<interface>
 					<name>eth1</name>
+					<ip>192.168.0.2</ip>
+					<mask>255.255.255.0</mask>
 				</interface>
 			</interfaces>
 		</slivers>
