@@ -179,8 +179,13 @@ SITE_DOMAIN = 'expedient.site:8445'
 #
 # Basic authentication urls
 #
+# XXX: This does not seem to "substract" the sites allowed in SITE_LOCKDOWN_EXCEPTIONS,
+# under the same path that the ones set here, so better to add here one by one.
 BASIC_AUTH_URLS = (
-    r'^/xmlrpc/.*',
+    #r'^/xmlrpc/.*',
+    r'^/xmlrpc/?$',
+    r'^/xmlrpc/plugin/?$',
+    r'^/xmlrpc/agent/?$',
 )
 
 #
@@ -192,6 +197,7 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
+    r'^/xmlrpc/sfa/?$',
 )
 
 #
