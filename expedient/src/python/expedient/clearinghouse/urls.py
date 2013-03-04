@@ -5,6 +5,7 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
+#from expedient.common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
 
 
 ''' Theme Management '''
@@ -98,6 +99,9 @@ urlpatterns += patterns('',
     get_static_url("root_media"),
     #get_static_url("/favicon.ico","/img/favicon.ico")
 )
+
+# URLs for static content in plugins
+urlpatterns += settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
 
 '''
 Static theme content

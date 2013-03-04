@@ -286,7 +286,10 @@
     	
   {% if openflow_aggs or planetlab_aggs %}
     {% if agg.available %}
-		<input type="button" onClick='document.location="{% url html_plugin_bookOpenflow slice.id %}"' value="Book Openflow resources" />
+                <!--<form method="POST" action="{% url book_openflow slice.id %}" style="display:inline">{% csrf_token %}
+        	    <input type="submit" value="Book Openflow resources" />
+		</form>-->
+	        <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
     {% else %}
 		<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />
     {% endif %}

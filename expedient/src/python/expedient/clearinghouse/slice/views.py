@@ -21,6 +21,8 @@ from vt_plugin.models import VM
 logger = logging.getLogger("SliceViews")
 import uuid
 from  expedient.clearinghouse.slice.utils import parseFVexception
+# PLUGIN LOADER
+from expedient.clearinghouse.settings import PLUGIN_LOADER
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 
@@ -116,6 +118,102 @@ def delete(request, slice_id):
             extra_context={"object": slice},
         )
 
+# XXX Moved from UI area...
+def home(request, slice_id):
+    """
+    Display the list of all the resources  
+    """
+
+    slice = get_object_or_404(Slice, id=slice_id)
+    # Not being currently used
+    if request.method == "POST":
+        from django.http import HttpResponseForbidden
+        slice.modified = True
+        slice.save()
+        # Dependency problems in the original code       
+#        return HttpResponseRedirect(reverse("html_plugin_flowspace",
+#                                            args=[slice_id]))
+        return HttpResponseForbidden("Access to slice details page via POST is forbidden")
+
+    else:
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+
+        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+        of_aggs = \
+            slice.aggregates.filter(aggs_filter)
+        pl_aggs = \
+            slice.aggregates.filter(
+                leaf_name=PlanetLabAggregate.__name__.lower())
+
+        vt_aggs = \
+            slice.aggregates.filter(
+                leaf_name=VtPlugin.__name__.lower())
+        for agg in vt_aggs:
+            vtPlugin = agg.as_leaf_class()
+            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+
+        gfs_list=[]
+        for of_agg in of_aggs:
+            # Checks that each OF AM is available prior to ask for granted flowspaces
+            if of_agg.available:
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+                gfs_list.append([of_agg.id,gfs])
+
+        n_islands, d3_nodes, d3_links = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+        tree_rsc_ids = _get_tree_ports(of_aggs, pl_aggs)
+
+        fsquery=FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+
+        return simple.direct_to_template(
+            request,
+            template="expedient/clearinghouse/slice/detail.html",
+            extra_context={
+                "n_islands": n_islands,
+                "d3_nodes": d3_nodes,
+                "d3_links": d3_links,
+                "tree_rsc_ids": tree_rsc_ids,
+                "openflow_aggs": of_aggs,
+                "planetlab_aggs": pl_aggs,
+                "vt_aggs": vt_aggs,
+                "slice": slice,
+                "checked_ids": checked_ids,
+                "allfs": fsquery,
+                "gfs_list": gfs_list,
+                "ofswitch_class": OpenFlowSwitch,
+                "planetlab_node_class": PlanetLabNode,
+                "breadcrumbs": (
+                    ("Home", reverse("home")),
+                    ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                    ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                    #("Resource visualization panel ", reverse("slice_home", args=[slice_id])),
+                )
+            },
+        )
+
+# XXX: REMOVE SINCE IT IS NOW IN 'TOPOLOGYGENERATOR'
+#def node_get_adequate_group(node, assigned_groups):
+#    try:
+#        if assigned_groups:
+#            for group in assigned_groups:
+#                # If some other type was assigned the same group, increment group for current type
+#                if node["aggregate"] == group["aggregate"]:
+#                    node["group"] = group["group"]
+#                else:
+#                    node["group"] = assigned_groups[len(assigned_groups)-1]["group"]+1
+#        else:
+#            node["group"] = 0
+#        new_entry = {"group": node["group"], "aggregate": node["aggregate"]}
+#        # List of sublists: [aggregate, group]
+#        if new_entry not in assigned_groups:
+#            assigned_groups.append(new_entry)
+#    except:
+#        pass
+#    return [node, assigned_groups]
+
 def detail(request, slice_id):
     '''Show information about the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
@@ -123,12 +221,9 @@ def detail(request, slice_id):
     must_have_permission(request.user, slice.project, "can_view_project")
     
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
-    vms_list = VM.objects.filter(sliceId = slice.uuid)
-    from openflow.plugin.models import OpenFlowSliceInfo
-    try:
-        controller_url = OpenFlowSliceInfo.objects.get(slice=slice).controller_url
-    except:
-        controller_url= "Not set"
+    # Need to get the whole list of templates for adding resources to the slice...
+    from expedient.clearinghouse.settings import TEMPLATE_RESOURCES
+    from expedient.clearinghouse.settings import PLUGIN_LOADER
     extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
@@ -136,19 +231,30 @@ def detail(request, slice_id):
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
             ),
             "resource_list": resource_list,
-            "vms_list": vms_list,
-	    "controller_url":controller_url 
+            "plugin_template_list": TEMPLATE_RESOURCES,
+            "plugins_path": PLUGIN_LOADER.plugins_path
     }
-    from expedient.ui.html.views import getUIdata
-    #extra_context+=getUIdata(request,slice)
-    
+
+    # 'GNU'
+    #from expedient.clearinghouse.settings import PLUGIN_LOADER
+    from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
+    plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
+
+#    # ORIGINAL
+#    plugin_context = PLUGIN_LOADER.load_ui_data(slice)
+#    # Calculate each node's group depending on its aggregate manager ID. User should
+#    # not have any knowledge of island and therefore should not set the group by itself
+#    assigned_groups = []
+#    for node in plugin_context['d3_nodes']:
+#        [node, assigned_groups] = node_get_adequate_group(node, assigned_groups)
+
     return list_detail.object_detail(
         request,
         Slice.objects.all(),
         object_id=slice_id,
         template_name=TEMPLATE_PATH+"/detail.html",
         template_object_name="slice",
-	extra_context=dict(extra_context.items()+getUIdata(request,slice).items())
+	extra_context=dict(extra_context.items()+plugin_context.items())
     )
     
 def start(request, slice_id):

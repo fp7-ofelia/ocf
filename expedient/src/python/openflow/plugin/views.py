@@ -27,8 +27,22 @@ from forms import NonOpenFlowStaticConnectionForm
 from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 
+#OF PLUGIN
+from openflow.plugin.vlans import *
+from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
+    OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
+    OpenFlowConnection, NonOpenFlowConnection
+from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
+    PlanetLabAggregate
+
+# NEWBIES - Order them later
+from expedient.clearinghouse.project.models import Project
+from django import forms
+from django.forms.models import modelformset_factory
+
+
 logger = logging.getLogger("OpenFlow plugin views")
-TEMPLATE_PATH = "openflow/plugin"
+#TEMPLATE_PATH = "openflow/plugin"
 
 @require_objs_permissions_for_view(
     perm_names=["can_add_aggregate"],
@@ -124,7 +138,7 @@ def aggregate_crud(request, agg_id=None):
     available = aggregate.check_status() if agg_id else False
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/aggregate_crud.html",
+        template="aggregate_crud.html",
         extra_context={
             "agg_form": agg_form,
             "client_form": client_form,
@@ -157,7 +171,7 @@ def aggregate_add_links(request, agg_id):
     )
     
 def handle_add_links(request, aggregate,
-                     template=TEMPLATE_PATH+"/aggregate_add_links.html",
+                     template="aggregate_add_links.html",
                      extra_context={}):
     """Perform the actual request."""
 
@@ -319,7 +333,7 @@ def add_controller_to_slice(request, agg_id, slice_id):
     return generic_crud(
         request, id, OpenFlowSliceInfo,
         form_class=OpenFlowSliceInfoForm,
-        template=TEMPLATE_PATH+"/aggregate_add_to_slice.html",
+        template="aggregate_add_to_slice.html",
         redirect=lambda instance: next if next else reverse(
             "slice_detail", args=[slice.id]),
         extra_context={"creating": creating,
@@ -330,4 +344,553 @@ def add_controller_to_slice(request, agg_id, slice_id):
         post_save=post_save,
         success_msg=lambda instance: "Successfully added OpenFlow controller to slice %s" % (slice.name),
     )
+
+def book_openflow(request, slice_id):
+    """
+    Display the list of planetlab and openflow aggregates and their resources.
+    On submit, create slivers and make reservation.
+    """
+
+    slice = get_object_or_404(Slice, id=slice_id)
+    enable_simple_mode = not check_existing_flowspace_in_slice(slice)
+
+    if request.method == "POST":
+        _update_openflow_resources(request, slice)
+        _update_planetlab_resources(request, slice)
+
+        slice.modified = True
+        slice.save()
+        free_vlan = 'None'
+        alertMessage = ''
+
+        fsmode = request.POST['fsmode']
+        if fsmode == 'simple' and enable_simple_mode:
+            try:
+                free_vlan = calculate_free_vlan(slice)
+            except Exception as e:
+                fsmode = 'failed'
+                DatedMessage.objects.post_message_to_user(
+                         "Could not find free vlan to slice your experiment in all the affected AMs",
+                         request.user, msg_type=DatedMessage.TYPE_ERROR,
+                     )
+                alertMessage = "Could not find free vlan to slice your experiment in all the affected AMs. It has been switched to advanced mode, choose your flowspace and wait for the admins decision."
+            #return HttpResponseRedirect(reverse("html_plugin_flowspace", args=[slice_id, fsmode, free_vlan, alertMessage]))  
+  
+            return flowspace(request, slice_id, fsmode, free_vlan, alertMessage)
+        else:
+            return HttpResponseRedirect(reverse("flowspace",
+                                            args=[slice_id]))
+    else:
+#        checked_ids = list(OpenFlowInterface.objects.filter(
+#            slice_set=slice).values_list("id", flat=True))
+#        checked_ids.extend(PlanetLabNode.objects.filter(
+#            slice_set=slice).values_list("id", flat=True))
+
+
+
+#        from expedient.ui.html.views import get_ui_data
+#        ui_context = get_ui_data(slice)
+#        print "\n\n\n\n****** ui_context: %s\n\n\n\n" % str(ui_context)
+
+
+
+#        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+#                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+#        of_aggs = \
+#            slice.aggregates.filter(aggs_filter)
+#        pl_aggs = \
+#            slice.aggregates.filter(
+#                leaf_name=PlanetLabAggregate.__name__.lower())
+#
+#        vt_aggs = \
+#            slice.aggregates.filter(
+#                leaf_name=VtPlugin.__name__.lower())
+#
+#        for agg in vt_aggs:
+#            vtPlugin = agg.as_leaf_class()
+#            askForAggregateResources(vtPlugin, projectUUID = Project.objects.filter(id = slice.project_id)[0].uuid, sliceUUID = slice.uuid)
+#
+##        vm = VM.objects.filter(sliceId=slice.uuid)        
+#
+#        n_islands, d3_nodes, d3_links = get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice_id)
+#        tree_rsc_ids = get_tree_ports(of_aggs, pl_aggs)
+
+        ui_extra_context = {
+#            "n_islands": n_islands,
+#            "d3_nodes": d3_nodes,
+#            "d3_links": d3_links,
+#            "tree_rsc_ids": tree_rsc_ids,
+#            "openflow_aggs": of_aggs,
+#            "planetlab_aggs": pl_aggs,
+#            "vt_aggs": vt_aggs,
+#            "slice": slice,
+#            "checked_ids": get_checked_ids(slice),
+#            "ofswitch_class": OpenFlowSwitch,
+#            "planetlab_node_class": PlanetLabNode,
+            "enable_simple_mode":enable_simple_mode,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                #("Resource visualization panel ", reverse("slice_home", args=[slice_id])),
+                ("Allocate Openflow and PlanetLab resources", reverse("book_openflow", args=[slice_id])),
+            )
+        }
+
+        # Need to show topology for own plugin? Call to main method to get EVERY resource
+#        from expedient.ui.html.views import get_ui_data
+        from expedient.clearinghouse.slice.views import get_ui_data
+        return simple.direct_to_template(
+            request,
+#            template="expedient/clearinghouse/slice/select_resources.html",
+            template = "select_resources.html",
+            extra_context = dict(get_ui_data(slice).items() + ui_extra_context.items()),
+#            extra_context = ui_extra_context,
+        )
+
+def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
+    """
+    Add flowspace.
+    """
+    slice = get_object_or_404(Slice, id=slice_id)
+
+    class SliverMultipleChoiceField(forms.ModelMultipleChoiceField):
+        def label_from_instance(self, obj):
+            return "%s" % obj.resource.as_leaf_class()
+
+        def widget_attrs(self, widget):
+            return {"class": "wide"}
+
+    def formfield_callback(f):
+        if f.name == "slivers":
+            return SliverMultipleChoiceField(
+                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+        else:
+            return f.formfield()
+
+    # create a formset to handle all flowspaces
+    FSFormSet = modelformset_factory(
+        model=FlowSpaceRule,
+        formfield_callback=formfield_callback,
+        can_delete=True,
+        extra=2,
+    )
+
+    if request.method == "POST":
+        continue_to_start_slice = False
+        if fsmode == 'advanced':
+            formset = FSFormSet(
+                request.POST,
+                queryset=FlowSpaceRule.objects.filter(
+                    slivers__slice=slice).distinct(),
+            )
+            if formset.is_valid():
+                formset.save()
+                continue_to_start_slice = True
+        elif fsmode == 'simple':
+            #create a simple flowspacerule containing only the vlans tags and the OF ports
+            try:
+                create_simple_slice_vlan_based(free_vlan[0], slice)
+                continue_to_start_slice = True
+            except Exception as e:
+                #continue_to_start_slice flag will deal with this
+                pass
+        else:
+             formset = FSFormSet(
+                 queryset=FlowSpaceRule.objects.filter(
+                     slivers__slice=slice).distinct(),
+             )
+
+        if continue_to_start_slice:
+            slice.modified = True
+            slice.save()
+            exp=""
+            try:
+                if slice.started:
+                    #slice.stop(request.user)
+                    slice.start(request.user)
+            except Exception as e:
+                exp=str(e)
+            finally:
+                if exp:
+                     DatedMessage.objects.post_message_to_user(
+                         "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
+                         request.user, msg_type=DatedMessage.TYPE_WARNING,
+                     )
+                else:
+                    DatedMessage.objects.post_message_to_user(
+                        "Successfully set flowspace for slice %s" % slice.name,
+                        request.user, msg_type=DatedMessage.TYPE_SUCCESS,
+                    )
+            if fsmode == 'simple':
+                return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+            else:
+                return HttpResponseRedirect(request.path)
+
+
+    elif request.method == "GET":
+        formset = FSFormSet(
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
+        )
+
+    else:
+        return HttpResponseNotAllowed("GET", "POST")
+
+    done = PlanetLabSliver.objects.filter(slice=slice).count() == 0
+
+    return simple.direct_to_template(
+        request,
+        template="select_flowspace.html",
+        extra_context={
+            "slice": slice,
+            "fsformset": formset,
+            "alertMessage":alertMessage,
+            "done": done,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                #("HTML UI - Choose Resources", reverse("slice_home", args=[slice_id])),
+                ("Choose Flowspace", reverse("flowspace", args=[slice_id])),
+            ),
+        },
+    )
+
+'''
+Update resources
+'''
+
+def _update_openflow_resources(request, slice):
+    """
+    Process the request to add/remove openflow resources from slice.
+    """
+    iface_ids = map(int, request.POST.getlist("selected_ifaces"))
+    ifaces = OpenFlowInterface.objects.filter(id__in=iface_ids)
+    # TODO: Send message if id not found.
+    # get or create slivers for the ifaces in the slice.
+    for iface in ifaces:
+        # make sure all the selected interfaces are added
+        sliver, created = OpenFlowInterfaceSliver.objects.get_or_create(
+            slice=slice, resource=iface)
+        if created:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully added interface %s to slice %s" % (
+                    iface, slice.name),
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    # Delete all unselected interfaces
+    to_del = OpenFlowInterfaceSliver.objects.exclude(
+        resource__id__in=iface_ids).filter(slice=slice)
+    to_del.delete()
+
+def _update_planetlab_resources(request, slice):
+    """
+    Process the request to add/remove planetlab resources from slice.
+    """
+    node_ids = map(int, request.POST.getlist("selected_nodes"))
+    nodes = PlanetLabNode.objects.filter(id__in=node_ids)
+    # TODO: Send message if id not found.
+    # get or create slivers for the nodes in the slice.
+    for node in nodes:
+        # make sure all the selected interfaces are added
+        sliver, created = PlanetLabSliver.objects.get_or_create(
+            slice=slice, resource=node)
+        if created:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully added %s to slice %s" % (
+                    node, slice.name),
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    # Delete all unselected interfaces
+    to_del = PlanetLabSliver.objects.exclude(
+        resource__id__in=node_ids).filter(slice=slice)
+    to_del.delete()
+
+###
+# Topology to show in the Expedient
+#
+
+def get_checked_ids(slice):
+    checked_ids = []
+    try:
+        checked_ids = list(OpenFlowInterface.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+        checked_ids.extend(PlanetLabNode.objects.filter(
+            slice_set=slice).values_list("id", flat=True))
+    except:
+        pass
+    return checked_ids
+
+def get_controller_url(slice):
+    try:
+        controller_url = OpenFlowSliceInfo.objects.get(slice=slice).controller_url
+    except:
+        controller_url= "Not set"
+    return controller_url
+
+# Avoid non-available OF AMs
+def get_openflow_aggregates(slice):
+#    aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+#                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+    aggs_filter = ((Q(leaf_name=OpenFlowAggregate.__name__.lower()) & Q(available = True)) |
+                    (Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()) & Q(available = True)))
+    return slice.aggregates.filter(aggs_filter)
+
+def get_planetlab_aggregates(slice):
+    return slice.aggregates.filter(leaf_name=PlanetLabAggregate.__name__.lower())
+
+def get_gfs(slice):
+    gfs_list=[]
+    try:
+        of_aggs = get_openflow_aggregates(slice)
+        for of_agg in of_aggs:
+            # Checks that each OF AM is available prior to ask for granted flowspaces
+            if of_agg.available:
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+                gfs_list.append([of_agg.id,gfs])
+    except:
+        pass
+    return gfs_list
+
+def get_node_description(node):
+    description = "<strong>Switch Datapath ID: " + node['name'] + "</strong><br/><br/>"
+    if len(node['connection']):
+        description += "<strong>Connections:</strong><br/>"
+        for connection in node['connection']:
+            description += "<strong>&#149; Port " + connection['src_port'] + "</strong> to Switch " + connection['target_datapath'] + " at port " + connection['target_port']+"<br/>";
+    return description
+
+def get_nodes_links(slice):
+    nodes = []
+    links = []
+
+    id_to_idx = {}
+    agg_ids = []
+
+    n_islands = 0
+
+    of_aggs = get_openflow_aggregates(slice)
+    pl_aggs = get_planetlab_aggregates(slice)
+
+    # Getting image for the nodes
+    try:
+        image_url = reverse('img_media_openflow', args=("switch-tiny.png",))
+    except:
+        image_url = 'switch-tiny.png'
+
+    #Openflow devices
+#    openflowSwitches = dict()
+    for i, agg in enumerate(of_aggs):
+        agg_ids.append(agg.pk)
+        switches = OpenFlowSwitch.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+        for s in switches:
+            id_to_idx[s.id] = len(nodes)
+            nodes.append(dict(
+                # ORIGINAL
+                #name = s.name, value = s.id, group = i, aggregate = agg.pk,
+                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
+                name = s.name, value = s.id, aggregate = agg.pk, type = "OpenFlow switch", description = "",
+                image = image_url, available = agg.available, connection = [], loc = agg.location)
+            )
+#            openflowSwitches[s.datapath_id] = len(nodes)-1
+
+    #One island per OF AM
+    n_islands = len(of_aggs)
+
+    # Getting image for the nodes
+    try:
+        image_url = reverse('img_media_vt_plugin', args=("host-tiny.png",))
+    except:
+        image_url = 'host-tiny.png'
+
+    #Planelab nodes 
+    for i, agg in enumerate(pl_aggs):
+        agg_ids.append(agg.pk)
+        pl_nodes = PlanetLabNode.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+        for n in pl_nodes:
+            id_to_idx[n.id] = len(nodes)
+            nodes.append(dict(
+                #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
+                #same group. Will planetlab be supported at the end?
+                # ORIGINAL
+                #name = n.name, value = n.id, group = -1, aggregate = agg.pk, type = "pl_agg",
+                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
+                name = n.name, value = n.id, aggregate = agg.pk, type = "PlanetLab node",
+                description = "", image = image_url, available = agg.available, loc = agg.location)
+                #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
+            )
+
+    # get all connections with both interfaces in wanted aggregates
+    of_cnxn_qs = OpenFlowConnection.objects.filter(
+        src_iface__aggregate__id__in=agg_ids,
+        src_iface__available=True,
+        dst_iface__aggregate__id__in=agg_ids,
+        dst_iface__available=True,
+    )
+
+    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+        of_iface__aggregate__id__in=agg_ids,
+        resource__id__in=id_to_idx.keys(),
+        of_iface__available=True,
+        resource__available=True,
+    )
+
+    sliceUUID = Slice.objects.get(id=slice.id).uuid
+    for node in nodes:
+        try:
+           for cnxn in of_cnxn_qs:
+               cnx_exists=False
+               if node["value"] == cnxn.src_iface.switch.id:
+                   for old_cnx in node["connection"]:
+                       if (old_cnx["target_datapath"] == str(cnxn.dst_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.dst_iface.port_num)) :
+                           cnx_exists=True
+                           break
+                   if not cnx_exists:
+                       node["connection"].append(dict(
+                       src_port = str(cnxn.src_iface.port_num),
+                       target_port =  str(cnxn.dst_iface.port_num),
+                       target_datapath = str(cnxn.dst_iface.switch.datapath_id)))
+               elif node["value"] == cnxn.dst_iface.switch.id:
+                   for old_cnx in node["connection"]:
+                       if (old_cnx["target_datapath"] == str(cnxn.src_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.src_iface.port_num)):
+                          cnx_exists=True
+                          break
+                   if not cnx_exists :
+                       node["connection"].append(dict(
+                       target_port = str(cnxn.src_iface.port_num),
+                       src_port = str(cnxn.dst_iface.port_num),
+                       target_datapath = str(cnxn.src_iface.switch.datapath_id)))
+           # Add description for every node
+           node["description"] = get_node_description(node)
+        except Exception as e:
+            pass
+
+    for cnxn in of_cnxn_qs:
+        #XXX: change me
+        try:
+            links.append(
+                dict(
+                    source = id_to_idx[cnxn.src_iface.switch.id],
+                    #src_datapath=cnxn.src_iface.switch.datapath_id,
+                    #src_port=cnxn.src_iface.port_num,
+                    target = id_to_idx[cnxn.dst_iface.switch.id],
+                    #target_datapath=cnxn.dst_iface.switch.datapath_id,
+                    #target_port=cnxn.dst_iface.port_num,
+                   value = "rsc_id_%s-rsc_id_%s" % (
+                        cnxn.src_iface.id, cnxn.dst_iface.id
+                    ),
+                )
+            )
+        except:
+            pass
+    for cnxn in non_of_cnxn_qs:
+        links.append(
+            dict(
+                source = id_to_idx[cnxn.of_iface.switch.id],
+                target = id_to_idx[cnxn.resource.id],
+                value = "rsc_id_%s-rsc_id_%s" % (
+                    cnxn.of_iface.id, cnxn.resource.id
+                ),
+            )
+        )
+        links.append(
+            dict(
+                target = id_to_idx[cnxn.of_iface.switch.id],
+                source = id_to_idx[cnxn.resource.id],
+                value = "rsc_id_%s-rsc_id_%s" % (
+                    cnxn.resource.id, cnxn.of_iface.id
+                ),
+            )
+        )
+    return [nodes, links, n_islands]
+
+def get_tree_ports(of_aggs, pl_aggs):
+    """Implements Kruskal's algorihm to find a min spanning tree"""
+
+    # Set of interfaces in the tree
+    tree = set()
+
+    # Clusters is a mapping from a node id to the cluster
+    # of ids it is connected to given the connections found
+    # so far in the tree.
+    clusters = {}
+
+    # aggregate ids
+    of_agg_ids = of_aggs.values_list("id", flat=True)
+    pl_agg_ids = pl_aggs.values_list("id", flat=True)
+
+    # Get the set of all openflow connections in network
+    of_cnxn_qs = OpenFlowConnection.objects.filter(
+        src_iface__aggregate__id__in=of_agg_ids,
+        src_iface__available=True,
+        dst_iface__aggregate__id__in=of_agg_ids,
+        dst_iface__available=True,
+    )
+
+    # For each connection in the network
+    for cnxn in of_cnxn_qs:
+        # check if the endpoints' switches are in the same cluster
+        a = cnxn.src_iface.switch.id
+        b = cnxn.dst_iface.switch.id
+        if a in clusters and b in clusters and clusters[a] == clusters[b]:
+            continue
+        # if not, then add the connection to the tree
+        tree.add(cnxn.src_iface.id)
+        tree.add(cnxn.dst_iface.id)
+        if a not in clusters:
+            clusters[a] = set([a])
+        if b not in clusters:
+            clusters[b] = set([b])
+
+        # merge the two clusters together
+        merged_cluster = clusters[a] | clusters[b]
+
+        for x in merged_cluster:
+            clusters[x] = merged_cluster
+
+    # get the set of non openflow connections in the aggregates
+    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
+        of_iface__aggregate__id__in=of_agg_ids,
+        of_iface__available=True,
+        resource__aggregate__id__in=pl_agg_ids,
+        resource__available=True,
+    )
+
+    # add the ports that are connected to the planetlab nodes
+    iface_ids = list(non_of_cnxn_qs.values_list("of_iface__id", flat=True))
+    tree.update(iface_ids)
+    tree.update(
+        PlanetLabNode.objects.filter(
+            aggregate__id__in=pl_agg_ids,
+            available=True,
+        ).values_list("id", flat=True),
+    )
+
+    # return the list of interface ids
+    return list(tree)
+
+def get_ui_data(slice):
+    """
+    Hook method. Use this very same name so Expedient can get the resources for every plugin.
+    """
+    ui_context = dict()
+    try:
+        ui_context['checked_ids'] = get_checked_ids(slice)
+        ui_context['controller_url'] = get_controller_url(slice)
+        ui_context['allfs'] = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        ui_context['planetlab_aggs'] = get_planetlab_aggregates(slice)
+        ui_context['openflow_aggs'] = get_openflow_aggregates(slice)
+        ui_context['gfs_list'] = get_gfs(slice)
+        ui_context['ofswitch_class'] = OpenFlowSwitch
+        ui_context['planetlab_node_class'] = PlanetLabNode
+        ui_context['tree_rsc_ids'] = get_tree_ports(ui_context['openflow_aggs'], ui_context['planetlab_aggs'])
+        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
+    except Exception as e:
+        print "[ERROR] Problem loading UI data for plugin 'openflow'. Details: %s" % str(e)
+    return ui_context
 

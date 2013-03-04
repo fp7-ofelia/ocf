@@ -238,7 +238,7 @@ $(document).ready(function(){
 })
 </script>
 
-<script src="{% url js_media 'topology.js' %}"></script>
+<script src="{% url js_media_openflow 'loop_detection.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -326,8 +326,8 @@ $(document).ready(function(){
 </div>
 
 <div id="procsteps" class="steps">
-    1. <a href="{% url html_plugin_bookOpenflow slice.id %} "style="font-weight: bold;">Select OpenFlow Ports</a>
-    2. <a href="{% url html_plugin_flowspace slice.id %}" id="link_go_next">Select/Modify Flowspace</a>
+    1. <a href="{% url book_openflow slice.id %} "style="font-weight: bold;">Select OpenFlow Ports</a>
+    2. <a href="{% url flowspace slice.id %}" id="link_go_next">Select/Modify Flowspace</a>
 </div>
 </div>
 {% endif %}

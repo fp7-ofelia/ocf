@@ -988,7 +988,7 @@ class Tests(SettingsTestCase):
         # check the select resources page
         self.client.login(
             username=self.su, password="password")
-        resp = self.client.get(reverse("html_plugin_home", args=[slice.id]))
+        resp = self.client.get(reverse("slice_home", args=[slice.id]))
 
         self.assertEqual(resp.status_code, 200)
         d = pq(resp.content, parser="html")

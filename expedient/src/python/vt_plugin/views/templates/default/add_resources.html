@@ -249,7 +249,8 @@ Type:
           </table>
           <div id = "vms_table">
             {% if server.vms.all%}
-            {% include "expedient/clearinghouse/slice/list_vms.html" %}
+            {% include "list_resources.html" %}
+            {# {% include "expedient/clearinghouse/slice/list_vms.html" %} #}
             {% endif %}
           </div>
       </div>

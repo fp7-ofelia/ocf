@@ -11,19 +11,19 @@ from utils import append_to_local_setting
 #    r'^/dummyom/.*',
 #]
 
-#VT_AM
-BASIC_AUTH_URLS = [
-    r'^/dummyom/.*',
-    #r'^/xmlrpc/vt_am/.*'
-    r'^/vt_plugin/xmlrpc/vt_am.*'
-]
+###VT_AM
+##BASIC_AUTH_URLS = [
+###    r'^/dummyom/.*',
+##    #r'^/xmlrpc/vt_am/.*'
+##    r'^/vt_plugin/xmlrpc/vt_am.*'
+##]
 
 '''List of URL regular expressions that accept HTTP Basic Authentication.
 
 This is used to enable some tests to work.
 
 '''
-append_to_local_setting("BASIC_AUTH_URLS", BASIC_AUTH_URLS, globals())
+##append_to_local_setting("BASIC_AUTH_URLS", BASIC_AUTH_URLS, globals())
 
 SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/register/.*$',
@@ -45,7 +45,8 @@ append_to_local_setting(
 )
 
 UI_PLUGINS = [
-    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
+# Used prior to deletion...
+#    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
     ('expedient.ui.rspec.plugin', 'rspec_mgr', 'expedient.ui.rspec.urls'),
 ]
 '''List of UI plugins that are enabled in Expedient.
@@ -67,13 +68,13 @@ This is a list of 3-tuples:
 '''
 append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 
-# Installed Aggregate Models
-AGGREGATE_PLUGINS = [
-    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
-#    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
-#    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
-    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
-]
+### Installed Aggregate Models
+##AGGREGATE_PLUGINS = [
+##    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
+###    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
+###    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+##    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
+##]
 '''List of aggregate plugins that are enabled in Expedient.
 
 This is a list of 3-tuples:
@@ -88,7 +89,7 @@ This is a list of 3-tuples:
        included in URLConf and that contains all the plugin's URLs.
 
 '''
-append_to_local_setting("AGGREGATE_PLUGINS", AGGREGATE_PLUGINS, globals())
+##append_to_local_setting("AGGREGATE_PLUGINS", AGGREGATE_PLUGINS, globals())
 
 SLICE_EXPIRATION_CHECK_INTERVAL = 3600
 '''How often should we check for expired slices?

@@ -20,6 +20,7 @@ from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
 from expedient.clearinghouse.defaultsettings.ldapSettings import *
+from expedient.clearinghouse.defaultsettings.plugin import *
 
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS

@@ -69,9 +69,17 @@ Show
 </div>
 </div>
 
+<!--
+<script type="text/javascript">
+    var nIslands = {{ n_islands }};
+    //FIXME: problematic because of "'" (&#38;)
+    //var d3_nodes = {{ d3_nodes }};
+</script>
+<script src="{% url js_media 'topology.js' %}"></script>
+-->
 <script type="text/javascript">
 /* d3 data */
-var nIslands = {{ nIslands}},
+var nIslands = {{ n_islands}},
     pad = 5,
     width = 740,
     height = 400
@@ -111,18 +119,55 @@ function pEllipse(set){
                 return Math.pow((p[0]-cx),2)/Math.pow(rx,2) + Math.pow((p[1]-cy),2)/Math.pow(ry,2);
         };
 
-	cx = (set.x1 + set.x0)/2;
-	rx = ((set.x1 - set.x0)/2 + (set.y1 - set.y0)/2)/2;
-	cy = (set.y1 + set.y0)/2;
-	ry = (set.y1 - set.y0)/2;
+        d = 2;
+
+        try {
+            //alert("pEllipse => x0: " + set.x0 + ", x1: " + set.x1 + "; y0: " + set.y0 + ", y1: " + set.y1);
+	    cx = (set.x1 + set.x0)/2;
+	    rx = ((set.x1 - set.x0)/2 + (set.y1 - set.y0)/2)/2;
+	    cy = (set.y1 + set.y0)/2;
+	    ry = (set.y1 - set.y0)/2;
 	
-	d = 2;
-	while (d>1){
+	    while (d>1) {
         	p = [randomXToY(set.x0, set.x1), randomXToY(set.y0, set.y1) ];
 		d = getDistance(p);	
-	}
+	    }
+        } catch(err) {
+            p = [];
+        }
 	return p;
 }
+
+
+/* Code used for calculating groups/islands within frontend */
+/*
+var assigned_groups = [];
+
+function adequate_group(node_aggregate) {
+    var node_group = 0;
+    for(var group in assigned_groups) {
+        // If some other type was assigned the same group, increment group for current type
+        if (node_aggregate == assigned_groups[group].aggregate) {
+            node_group = assigned_groups[group].group;
+        } else {
+            node_group = assigned_groups[assigned_groups.length-1].group+1;
+        }
+    }
+    // List of sublists: [aggregate, group]
+    assigned_groups[node_group] = {group: node_group, aggregate: node_aggregate};
+    return node_group;
+}
+
+function get_group_from_aggregate(aggregate) {
+    obtained_group = -1;
+    for(var group in assigned_groups) {
+        if (assigned_groups[group].aggregate == aggregate) {
+            obtained_group = assigned_groups[group].group;
+        }
+    }
+    return obtained_group;
+}
+*/
 
 var epoints= [
                 {% for node in d3_nodes %}
@@ -133,96 +178,38 @@ var epoints= [
 var data = {
     nodes: [
         {% for node in d3_nodes %}
-        //{nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", type:"{{ node.type }}", y: randomXToY(foci[{{ node.group }}].y0 , foci[{{ node.group }}].y1),x : randomXToY(foci[{{ node.group }}].x0 , foci[{{ node.group }}].x1), fixed:true, radius:10, color:"",
-        {nodeValue:"{{ node.value }}", nodeName:"{{ node.name }}", group:"{{ node.group }}", loc: "{{node.loc}}", type:"{{ node.type }}", fixed:false, radius:10, available:"{{ node.available }}", color:"",
-		{% if node.type == "vt_agg"  %}
-			nodeVms: {{node.vmNames|safe }},
-			nodeVmInterfaces: {{ node.vmInterfaces|safe}}
-		{%endif%}
-		{% if node.type == "of_agg"  %}
-			nodeConnections:{{node.connection|safe}}
-		{% endif %}
-		 }{% if not forloop.last %},{% endif %}
+        {
+            nodeValue: "{{ node.value }}", nodeName: "{{ node.name }}", image: "{{ node.image }}", color: "",
+            /* Code used for calculating groups/islands within frontend */
+            /*group: adequate_group({{ node.aggregate }}),*/
+            group: "{{ node.group }}", aggregate: {{ node.aggregate }},
+            loc: "{{ node.loc }}", type: "{{ node.type }}",
+            description: "{{ node.description }}", fixed: false, radius: 10, available: "{{ node.available }}",
+        }
+        {% if not forloop.last %},{% endif %}
         {% endfor %}
-    ],
+    ], 
+    /* Carolina: should have only index'es inside "source" and "target" and then access "nodes" to save
+    space (2 objects per link); but there are some problems when adding links to the force topology in D3.js*/
     links: [
         {% for link in d3_links %}
-        {source:{{ link.src }}, target:{{ link.target }}, value:"{{ link.value }}"}{% if not forloop.last %},{% endif %}
+            { source: {{ link.source }}, target: {{ link.target }}, value: "{{ link.value }}" }
+            {% if not forloop.last %},{% endif %}
         {% endfor %}
 	
     ],
 }
 
-/* Harcoded data for testing */
+/* Code used for calculating groups/islands within frontend */
+/*
+var epoints= [
+                {% for node in d3_nodes %}
+                        points = pEllipse(foci[get_group_from_aggregate({{ node.aggregate }})]),
+                {% endfor %}
+        ]
+*/
+
 /* Useful functions*/
-
-function get_node_info_formated(d){
-	type = get_node_type(d);
-	    if(type == "openflow") {
-			var nameString = "<b>Switch Datapath ID: "+d.nodeName+"</b><br><br>";
-			if(d.nodeConnections.length>0){
-				connectionsString = "<b>Connections:</b><br>";
-				for (i=0;i<d.nodeConnections.length;i++){
-					connectionsString = connectionsString + "<b>·Port "+d.nodeConnections[i]['src_port']+"</b> to Switch "+d.nodeConnections[i]['target_datapath']+" at Port "+d.nodeConnections[i]['target_port']+"<br>";
-				}
-			}
-			else{
-				connectionsString = "";
-			}
-            return nameString+connectionsString ;
-        } else if(type == "planetlab") {
-            return nameString;
-        } else if(type == "vtserver") {
-			var nameString = "<b>Server: "+d.nodeName+"</b><br><br>";			
-			if (d.nodeVms.length > 0){
-				var vmListString = "<b>VMs ("+d.nodeVms.length+"):</b><br clear=left>";
-				for (i=0;i<d.nodeVms.length;i++){
-					vmListString = vmListString + d.nodeVms[i];
-					if (i < d.nodeVms.length-1){
-						vmListString = vmListString + ", ";
-					}
-					else{
-						vmListString = vmListString +"<br clear = left><br clear=left>";
-					}
-				}
-			}
-            else{
-                vmListString =  "<b>No VMs in this Server </b></br><br clear=left>"  
-            } 
-			var vmInterfacesString = "<b>VMs Interfaces:</b><br clear=left>"
-			for (i=0;i<d.nodeVmInterfaces.length;i++){
-	           vmInterfacesString = vmInterfacesString + "· "+"<b>"+d.nodeVmInterfaces[i]['name']+"</b> to Switch: "+d.nodeVmInterfaces[i]['switch']+ " at port: "+d.nodeVmInterfaces[i]['port']+"<br clear=left>"; 
-	         }
-	        return nameString + vmListString+vmInterfacesString;
-        }
-
-
-}
-
-function get_node_type(d) {
-    if(d.type == "of_agg") {
-        return "openflow";
-    } else if(d.type == "pl_agg") {
-        return "planetlab";
-    } else if (d.type == "vt_agg"){
-	return "vtserver"
-    }else{
-        return "unknown";
-    }
-}
-
-function getNodeImage(d){
-        type = get_node_type(d);
-        if(type == "openflow") {
-            return "{% url img_media 'switch-tiny.png' %}";
-        } else if(type == "planetlab") {
-            return "{% url img_media 'host-tiny.png' %}";
-        } else if(type == "vtserver") {
-            return "{% url img_media 'server-tiny.png' %}";
-        } else {
-            return "{% url img_media 'inactive.png' %}";
-        }
-}
 
 function getLinkStyle(d, attr){
         rsc_ids = d.value.split("-");
@@ -264,29 +251,18 @@ function getLinkStyle(d, attr){
 
 
 function getBaseNodeColor(d){
-	type = get_node_type(d);
-	if (type == "openflow") {
-               return d3.rgb(d.color.toString());
-        } else if (type == "planetlab") {
-                return d3.rgb(d.color.toString()).darker(0.75);
-        } else if (type == "vtserver") {
-                return d3.rgb(d.color.toString()).darker(1.5);
-        } else {
-		return d3.rgb("#FFFFFF");
-	}
+        var group = 0;
+        group = d.group;
+        return d3.rgb(d.color.toString().toString()).darker(.15*group);
 }
 
 function getNodeCircleStyle(d, attr){
-        type = get_node_type(d);
         selected_len = $(":checkbox:checked.node_id_"+d.nodeValue).length;
         all_len = $(":checkbox:.node_id_"+d.nodeValue).length;
 	selected_server = $(".server_node_"+d.nodeValue+".connected").length;
         if(attr == "drag"){
                 return d3.rgb(d.color.toString()).brighter(5);
 	}else if(attr=="click"){
-		 if (type == "vtserver" && selected_server != 0){
-			return d3.rgb(d.color.toString()).darker(5);
-		 }
 		 if(selected_len == all_len) {
                         $(":checkbox:checked.node_id_"+d.nodeValue).click();
 			return getBaseNodeColor(d);
@@ -295,15 +271,11 @@ function getNodeCircleStyle(d, attr){
 			return d3.rgb(d.color.toString()).darker(5);
                 }
         }else if (attr == "dragstop" && selected_len == 0){
-		if(type == "vtserver" && selected_server != 0)
-                      return d3.rgb(d.color.toString()).darker(5);
 		return getBaseNodeColor(d);
         }else{
                         if (attr == "fill"){
                                 return getBaseNodeColor(d);
                         } else{
-				if(type == "vtserver" && selected_server != 0)
-		                        return d3.rgb(d.color.toString()).darker(5);
 				if (selected_len != 0){
 	                                return d3.rgb(d.color.toString()).darker(5);
 				}else{
@@ -410,12 +382,6 @@ function click(){
     }
 }
 
-/* Check topology loops*/
-function checkTopologyLoops(d) {
-    //TODO verify loops in topology and warn user
-    //alert(d.nodeConnections);
-}
-
 /* Redraw canvas - not bound to zoom behaviour */
 function redraw() {
 //  trans=[(Math.round(width/cur_zoom) - width)/2, (Math.round(height/cur_zoom) - height)/2];
@@ -466,6 +432,7 @@ var svg = d3.select("#target")
 
 // DATA VARIABLES
 var nodes = data.nodes;
+// Set color for each node
 nodes.forEach(function(d) {
     if (d.available != "False") {
         d.color = color(d.group%nIslands);
@@ -574,7 +541,7 @@ node.append("circle")
     .style("fill", function(d){return getNodeCircleStyle(d, "fill");});
 
 node.append("image")
-    .attr("xlink:href", function (d) { return getNodeImage(d); })
+    .attr("xlink:href", function (d) { return d.image; })
     .attr("x", -8)
     .attr("y", -8)
     .attr("width", 16)
@@ -587,23 +554,13 @@ node.append("text")
     .text(function(d) { return d.name });
 
 node.on("mouseover", function (d, i){
-		type = get_node_type(d);
-	        desc = "Unknown"
-	        if(type == "openflow") {
-	            desc = "OpenFlow switch";
-	        } else if(type == "planetlab") {
-	            desc = "PlanetLab node";
-	        } else if(type == "vtserver") {
-	            desc = "Virtualized server";
-	        }
-	                tooltip.show(get_node_info_formated(d));
-	    
-	        $("#selected_node_info").html("Selected " + desc + ": " + d.nodeName + " at " + d.loc);
+	        //tooltip.show(get_node_info_formated(d));
+                // Ugly hack to decode HTML
+	        tooltip.show($('<div/>').html(d.description).text());
+	        $("#selected_node_info").html("Selected " + d.type + ": " + d.nodeName + " at " + d.loc);
 	        $("#selected_node_info").css("background-color", d.color );
 	        $("#selected_node_info").css("text-shadow", "-3px 2px 4px #eee");
 	        $("#selected_node_info").show();
-
-
 	}
 	)
 	.on("mouseout", function() {
@@ -628,23 +585,37 @@ var grav = 0.008 * nx * ny;
 
 force.on("tick", function(e){
     var k = grav * e.alpha;
+    var node_groups = {}
+
+    // Adjust K colliding factor
+    $.each(data.nodes, function(i, n){
+        if (node_groups[n.group] == undefined) {
+            node_groups[n.group] = 1;
+        } else {
+            node_groups[n.group] += 1;
+        }
+    });
+
     data.nodes.forEach(function(o, i){
 	var fact = 1;
-	var node_type = get_node_type(o);
-	if(node_type == "openflow" || node_type == "planetlab"){
-	    fact = 3;
-	} else if(node_type == "vtserver"){
-	    fact = 2;
-	}
-	//When there are few nodes, avoid them to stay too far away from the center. Also, when there are so many nodes avoid them to stay too near each others 
+        // Dumb hack: limit expansion through #nodes
+        if (node_groups[o.group] >= 10) {
+            fact = Math.floor(node_groups[o.group]/10);
+        } else {
+            fact = o.group+1;
+        }
+	// Carolina: when there are few nodes, avoid them to stay too far away from the center
+        // AND when there are so many nodes avoid them to stay too near each others 
 	if(qNodes[o.group] < 5){
 	    fact = fact * 2;
-	}
-	else{
+	} else {
 	    fact = fact/2;
 	}
-	o.y += k * fact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
-	o.x += k * fact * qNodes[o.group] * ((dataislands[o.group].cx) - o.x);
+        try {
+	    o.y += k * fact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
+	    o.x += k * fact * qNodes[o.group] * ((dataislands[o.group].cx) - o.x);
+        } catch (err) {
+        }
     });
 
     node.each(collide(.5));
@@ -708,18 +679,9 @@ ilabels.transition()
            .delay(1500)
            .style("opacity",0)
            .duration(3000);
-//xxx lbergesio: not needed if scrolling is done with d3
-//iellipses.transition()
-//	.delay(4500)
-//	.style("display", "none");
-
 }
 
 function regroup(){
-/*	for (i=0; i<nodes.length; i++){
-		nodes[i].x = nodeInitialPos[i][0];
-		nodes[i].y = nodeInitialPos[i][1];
-	}*/
 	force.resume();
 	animate();
 }
@@ -761,10 +723,5 @@ $("#link_zoom_in").click(function(){
 $("#link_zoom_out").click(function(){
   $("#target, svg, g").css("cursor", "url({%url img_media 'zoomout.png' %}),auto" );
 });
-
-
-
-//XXX lbergesio: Try to find how to allow scrolling within d3
-//$("#target").bind("mousewheel", function (event){ if (window.event.wheelDelta > 0) { window.scrollBy(0,-55); } else { window.scrollBy(0,55); } });
 
 </script>

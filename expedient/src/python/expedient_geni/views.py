@@ -17,9 +17,13 @@ from expedient_geni.utils import get_user_cert_fname, get_user_urn,\
 from django.http import HttpResponseRedirect, HttpResponse
 from expedient.common.messaging.models import DatedMessage
 from expedient_geni.forms import UploadCertForm
+from expedient.clearinghouse.slice.models import Slice
 
 logger = logging.getLogger("expedient_geni.views")
-TEMPLATE_PATH = "expedient_geni"
+
+#TEMPLATE_PATH = "expedient_geni"
+#from expedient.clearinghouse.settings import PLUGIN_LOADER
+#TEMPLATE_DIRS = PLUGIN_LOADER.plugin_settings.get("expedient_geni").get("paths").get("template_dirs").replace("'","")
 
 def aggregate_create(request, agg_model,
                      redirect=lambda inst: reverse("home")):
@@ -55,7 +59,7 @@ def aggregate_create(request, agg_model,
     
     return generic_crud(
         request, obj_id=None, model=agg_model,
-        template=TEMPLATE_PATH+"/aggregate_crud.html",
+        template="aggregate_crud.html",
         redirect=redirect,
         form_class=geni_aggregate_form_factory(agg_model),
         pre_save=pre_save,
@@ -86,7 +90,7 @@ def aggregate_edit(request, agg_id, agg_model,
     
     return generic_crud(
         request, obj_id=agg_id, model=agg_model,
-        template=TEMPLATE_PATH+"/aggregate_crud.html",
+        template="aggregate_crud.html",
         template_object_name="aggregate",
         redirect=redirect,
         post_save=post_save,
@@ -113,7 +117,7 @@ def user_cert_manage(request, user_id):
     
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/user_cert_manage.html",
+        template="user_cert_manage.html",
         extra_context={
             "curr_user": user,
             "cert": cert,
@@ -144,7 +148,7 @@ def user_cert_generate(request, user_id):
     
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/user_cert_generate.html",
+        template="user_cert_generate.html",
         extra_context={
             "curr_user": user,
         },
@@ -200,9 +204,57 @@ def user_cert_upload(request, user_id):
 
     return simple.direct_to_template(
         request,
-        template=TEMPLATE_PATH+"/user_cert_upload.html",
+        template="user_cert_upload.html",
         extra_context={
             "curr_user": user,
             "form": form,
         }
     )
+
+def sshkeys(request, slice_id):
+    """
+    Show links to download ssh keys. Regenerate keys on submit.
+    """
+    slice = get_object_or_404(Slice, id=slice_id)
+
+    if request.method == "POST":
+        slice.geni_slice_info.generate_ssh_keys()
+        slice.geni_slice_info.save()
+        slice.modified = True
+        slice.save()
+        return HttpResponseRedirect(request.path)
+
+    return simple.direct_to_template(
+        request,
+        template="sshkeys.html",
+        extra_context={
+            "slice":slice,
+            "breadcrumbs": (
+                ("Home", reverse("home")),
+                ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
+                ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
+                #("HTML UI - Choose Resources", reverse("slice_home", args=[slice_id])),
+                ("Choose Flowspace", reverse("flowspace", args=[slice_id])),
+                ("Download SSH Keys", reverse("gcf_sshkeys", args=[slice_id])),
+            ),
+        }
+    )
+
+# Currently returns empty SSH key files
+def sshkey_file(request, slice_id, type):
+    """
+    Send a file.
+    """
+    slice = get_object_or_404(Slice, id=slice_id)
+    if type != "ssh_public_key" and type != "ssh_private_key":
+        raise Exception("Unknown request for file %s" % type)
+
+    data = getattr(slice.geni_slice_info, type)
+
+    filename = "id_rsa"
+    if type == "ssh_public_key": filename = filename + ".pub"
+
+    response = HttpResponse(data, mimetype="application/x-download")
+    response["Content-Disposition"] = 'attachment;filename=%s' % filename
+    return response
+
