@@ -5,7 +5,9 @@ from vt_manager.models.Action import Action
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
+from vt_manager.utils.ServiceThread import ServiceThread
 
+import threading
 class VTShell:
 
         def __init__(self):
@@ -65,14 +67,17 @@ class VTShell:
 		
 		threads = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
-		for provisioningRSpec in provisioningRspecs:
-		    thread = SfaCommunicator(provisioningRSpec.action[0].id,threading.Event())
-		    threads.append(ServiceThread.startMethodInNewThread(thread.start,provisionningRSpec))
+		for provisioningRSpec in provisioningRSpecs:
+		    thread = SfaCommunicator(provisioningRSpec.action[0].id,threading.Event(),provisioningRSpec)
+		    #ServiceThread.startMethodInNewThread(thread.start,thread)
+		    threads.append(thread)
+		    thread.start()
+		    print '-------done-------'
 
 		for thread in threads:
 		    thread.join()
 			
-		
+		print '-------------------not here please'	
 		return 1
  
 	def GetSlices(server_id,user=None):

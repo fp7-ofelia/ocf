@@ -29,14 +29,14 @@ class VMSfaManager:
 	    for vm in vms['slivers']:
 		server = VTServer.objects.get(uuid = server_id)
 	        VMSfaManager.setDefaultVMParameters(vm,server)
-		actionClass = copy.deepcopy(rspec.query.provisioning.action[0])
+		actionClass = copy.deepcopy(actionClassEmpty)
                 actionClass.id = uuid.uuid4()
                 Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
 		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
-		rspecs.append(rspec.query.provisioning)
+		provisioningRSpecs.append(rspec.query.provisioning)
 
 			
 	return provisioningRSpecs

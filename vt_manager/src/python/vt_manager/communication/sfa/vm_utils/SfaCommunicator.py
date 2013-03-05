@@ -1,26 +1,30 @@
 import threading
 from vt_manager.utils.ServiceThread import ServiceThread
+from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
+
+
 
 class SfaCommunicator(threading.Thread):
 
     _SFALockers  = dict()
     SFAUrl = 'SFA.OCF.VTM'
 
-    def __init__(self, actionID,event):
+    def __init__(self, actionID,event,rspec):
         threading.Thread.__init__(self)
 	self.actionID = actionID
 	self.event = event
+	self.rspec = rspec
 
-    def run(self,provisioningRSpec):
-        SfaCommunicator._lockers[self.actionID] = self.event
-	self.DispatchProvisioningAction(self,provisioningRSpec)
+    def run(self):
+        SfaCommunicator._SFALockers[self.actionID] = self.event
+	self.DispatchProvisioningAction()
         #self.event.wait()
 	#TODO: Do something here
 	return
 
-    def DispatchProvisioningAction(self,provisioningRSpec):
+    def DispatchProvisioningAction(self):
 	try:
-	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec, self.SFAUrl)
+	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,self.rspec, self.SFAUrl)
 	    self.__lock()
 	except Exception as e:
 	    SfaCommunicator.__release(self.actionID)
