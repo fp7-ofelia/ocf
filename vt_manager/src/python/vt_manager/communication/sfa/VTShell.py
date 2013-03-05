@@ -4,6 +4,7 @@ from vt_manager.models.Action import Action
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
+from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 
 class VTShell:
 
@@ -62,13 +63,16 @@ class VTShell:
 	def CreateSliver(self,vm_params):
 		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
 		
-		print '--------------------VT_SHELL->CreateSliver'
-		print '--------------------vm_params', vm_params
+		threads = list()
+		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
+		for provisioningRSpec in provisioningRspecs:
+		    thread = SfaCommunicator(provisioningRSpec.action[0].id,threading.Event())
+		    threads.append(ServiceThread.startMethodInNewThread(thread.start,provisionningRSpec))
+
+		for thread in threads:
+		    thread.join()
+			
 		
-		provisioningRSpec = VMSfaManager.getActionInstance(vm_params)
-		SFACommunicator.start(provisioningRSpec)
-		
-		print '--------------------VT_SHELL->CreateSliver->OK!'
 		return 1
  
 	def GetSlices(server_id,user=None):

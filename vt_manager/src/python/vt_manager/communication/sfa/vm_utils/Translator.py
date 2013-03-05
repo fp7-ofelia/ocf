@@ -27,7 +27,7 @@ class Translator:
     @staticmethod
     def VMdicIfacesToClass(ifaces, IfaceXmlClass):
 	
-	ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
+#	ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
 	#IfaceXmlClass.interface.pop()
 	for iface in ifaces:
 	    ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])

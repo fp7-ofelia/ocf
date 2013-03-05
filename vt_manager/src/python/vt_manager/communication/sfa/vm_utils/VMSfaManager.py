@@ -19,33 +19,27 @@ class VMSfaManager:
 
     @staticmethod
     def getActionInstance(servers_slivers):
-	
+	provisioningRSpecs = list()
 	rspec = XmlHelper.getSimpleActionQuery()
 	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
         rspec.query.provisioning.action.pop()
-	
-	
         for vms in servers_slivers:
 	    server_id = vms['component_id']
 	    for vm in vms['slivers']:
 		server = VTServer.objects.get(uuid = server_id)
 	        VMSfaManager.setDefaultVMParameters(vm,server)
-                actionClass = copy.deepcopy(actionClassEmpty)
+		actionClass = copy.deepcopy(rspec.query.provisioning.action[0])
                 actionClass.id = uuid.uuid4()
                 Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
 		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
+		rspecs.append(rspec.query.provisioning)
 
 			
-		#TODO: hold the connection in order to maintain the synchronous SFA connection
-		with threading.Lock():
-	   	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, UrlUtils.getOwnCallbackURL())
-		    #DispatcherLauncher.processXmlQuery(rspec)
-                    #sendSFA(UrlUtils.getOwnCallbackURL(),rspec)		    
-		return 1
+	return provisioningRSpecs
 		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
     @staticmethod
