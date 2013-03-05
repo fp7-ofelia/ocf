@@ -65,7 +65,8 @@ class VTShell:
 		print '--------------------VT_SHELL->CreateSliver'
 		print '--------------------vm_params', vm_params
 		
-		VMSfaManager.getActionInstance(vm_params)
+		provisioningRSpec = VMSfaManager.getActionInstance(vm_params)
+		SFACommunicator.start(provisioningRSpec)
 		
 		print '--------------------VT_SHELL->CreateSliver->OK!'
 		return 1

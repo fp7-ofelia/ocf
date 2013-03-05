@@ -1,0 +1,96 @@
+from threading import Thread, Lock, Event
+from time import sleep
+
+class Driver():
+
+	_lockers = {}
+	_cosa=""
+
+	@staticmethod
+	def _lock(action_id):
+#		if not action_id in Driver._lockers:
+#			Driver._lockers[action_id]=Lock()	
+#
+#		Driver._lockers[action_id].acquire()
+		Driver._lockers[action_id]=Event()
+		print "LOCKER 0"
+                print Driver._lockers[action_id]
+
+	@staticmethod
+	def _unlock(action_id):
+#		if action_id in Driver._lockers:
+#			Driver._lockers[action_id].release()
+#                        del Driver._lockers[action_id]
+		Driver._lockers[action_id].set()
+		#Driver._lockers[action_id].clear()
+	
+	@staticmethod
+	def doRequest(action_id):
+		Driver._lock(action_id)
+		print "LOCKER"
+		print Driver._lockers[action_id]
+                print "LA COSA  1 VALE: %s" % Driver._cosa 
+		ServiceThread.startMethodInNewThread(testMethod, 15)
+#		with Driver._lockers[action_id]:
+                print "LOCKER EN DOREQUEST:"
+		print Driver._lockers[action_id]
+                Driver._lockers[action_id].wait()
+                Driver._cosa = "doRequest"
+                print "LA COSA 4 VALE: %s" % Driver._cosa
+		return "SALGO DEL DOREQUEST CON ACTION ID: %s" % action_id
+
+
+	@staticmethod
+	def doResponse(action_id):
+                Driver._cosa="doResponse"
+                print "LA COSA $ VALE %s" %Driver._cosa 
+		print "voy a sacar el lock en 10s"
+		sleep(10)
+                print "LOCKER EN DORESPONSE:"
+		print Driver._lockers[action_id]
+		Driver._unlock(action_id)
+		return
+
+class ServiceThread(Thread):
+
+        __method = None
+        __param = None
+        callBackURL=None
+        requestUser =None
+
+        @staticmethod
+        def startMethodInNewThread(servmethod,param, requestUser = None, url = None):
+                thread = ServiceThread()
+                thread.callBackURL = url
+                thread.requestUser = requestUser
+                thread.startMethod(servmethod,param)
+        def startMethod(self,servmethod,param):
+                self.__method = servmethod
+                self.__param = param
+                self.start()
+
+        def run(self):
+                self.__method(self.__param)
+
+
+def test():
+	print "EMPEZAMOS"
+	print "LLAMO a do Response('0')"
+	ServiceThread.startMethodInNewThread(Driver.doResponse, '0')
+	print Driver._lockers	
+	print "LLAMO a salida = Driver.doRequest(0)"
+	salida = Driver.doRequest('0')
+        print Driver._lockers
+	print "SALIDA 1 vale AHORA: %s" % salida
+
+	#Driver.doResponse('0')
+
+	print "SALIDA 2 vale AHORA %s" % salida
+	print Driver._lockers
+
+def testMethod(timer):
+	Driver._cosa = "thestMethod"
+        print "LA COSA  2 VALE: %s" % Driver._cosa 
+	sleep(timer)
+
+test() 
