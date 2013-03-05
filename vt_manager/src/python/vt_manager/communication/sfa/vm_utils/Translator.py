@@ -5,9 +5,6 @@ class Translator:
 
     @staticmethod
     def VMdictToClass(VMdict, VMxmlClass):
-
-	print '---------------Translator------------------VMdictToClass'
-	print '-------------------------------------------VMdict:',VMdict
       
         VMxmlClass.name = VMdict['name']
         VMxmlClass.uuid = VMdict['uuid']
@@ -24,16 +21,16 @@ class Translator:
         VMxmlClass.xen_configuration.hd_setup_type = VMdict['hd-setup-type']
         VMxmlClass.xen_configuration.hd_origin_path = VMdict['hd-origin-path']
         VMxmlClass.xen_configuration.virtualization_setup_type = VMdict['virtualization-setup-type']
-        VMxmlClass.xen_configuration.memory_mb = VMdict['memory-mb']
+        VMxmlClass.xen_configuration.memory_mb = int(VMdict['memory-mb'])
 
 
     @staticmethod
     def VMdicIfacesToClass(ifaces, IfaceXmlClass):
 	
 	ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
-	IfaceXmlClass.interface.pop()
+	#IfaceXmlClass.interface.pop()
 	for iface in ifaces:
-
+	    ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
 	    ifaceClassEmpty.gw = iface['gw']
 	    ifaceClassEmpty.mac = iface['mac']
 	    ifaceClassEmpty.name = iface['name']
@@ -41,8 +38,9 @@ class Translator:
 	    ifaceClassEmpty.dns2 = iface['dns2']
 	    ifaceClassEmpty.ip = iface['ip']
 	    ifaceClassEmpty.mask = iface['mask']
-	    
+		
             IfaceXmlClass.interface.append(ifaceClassEmpty)
-	    
+
+        IfaceXmlClass.interface.pop(0) # Deleting the empty interface instance       
 
  	
