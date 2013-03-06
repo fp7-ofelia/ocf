@@ -5,6 +5,9 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 import logging
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.controller.actions.ActionController import ActionController
+
+from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
+
 class ProvisioningResponseDispatcher():
 
 	'''
@@ -25,6 +28,8 @@ class ProvisioningResponseDispatcher():
 			'''
 			If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
 			'''
+			if actionModel.getCallBackUrl == SfaComunicator.SFAUrl:
+				return SfaCommunicator.ResponseActionRecieved(actionModel.getUUID(),actionModel.getStatus())
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
