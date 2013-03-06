@@ -68,15 +68,14 @@ class VTShell:
 		threads = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
 		for provisioningRSpec in provisioningRSpecs:
-		    thread = SfaCommunicator(provisioningRSpec.action[0].id,threading.Event(),provisioningRSpec)
+		    event = threading.Event()
+		    thread = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
 		    #ServiceThread.startMethodInNewThread(thread.start,thread)
 		    threads.append(thread)
 		    thread.start()
 		    print '-------done-------'
-
-		for thread in threads:
-		    thread.join()
-			
+		#for thread in threads:
+		#   thread.join()
 		print '-------------------not here please'	
 		return 1
  

@@ -11,7 +11,6 @@ from vt_manager.utils.UrlUtils import UrlUtils
 
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
-#from vt_manager.communication.northCommInterface import sendSFA
 
 class VMSfaManager:
 
@@ -38,7 +37,7 @@ class VMSfaManager:
                 rspec.query.provisioning.action.append(actionClass)
 		provisioningRSpecs.append(rspec.query.provisioning)
 
-			
+		print XmlCrafter.craftXML(rspec.query.provisioning)			
 	return provisioningRSpecs
 		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
