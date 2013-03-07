@@ -1,8 +1,7 @@
 import sys
 
-from sfa.trust.auth import Auth
-from sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrustedRoots, PermissionError, \
-    BadRequestHash, ConnectionKeyGIDMismatch, SfaPermissionDenied
+from vt_manager.communication.sfa.trust.auth import Auth
+from vt_manager.communication.sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrustedRoots, PermissionError, BadRequestHash, ConnectionKeyGIDMismatch, SfaPermissionDenied
 
 
 #Check if the given Credentials have rights on the aggregate
@@ -10,4 +9,5 @@ from sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrusted
 class AuthManager:
 
     def checkCredentials(self, creds, operation, hrn=None):
-	return Auth.checkCredentials(creds, operation, hrn)
+	result = Auth.checkCredentials(creds, operation, hrn)
+	return result

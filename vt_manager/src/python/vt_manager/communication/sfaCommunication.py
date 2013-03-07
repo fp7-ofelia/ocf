@@ -5,6 +5,7 @@ from vt_manager.common.rpc4django import *
 from vt_manager.communication.sfa.authManager import AuthManager
 from vt_manager.communication.sfa.util.xrn import urn_to_hrn
 from vt_manager.communication.sfa.util.faults import SfaInvalidArgument
+from vt_manager.communication.sfa.trust.auth import Auth
 
 from vt_manager.communication.sfa.util.version import version_core
 from vt_manager.communication.sfa.util.xrn import Xrn
@@ -22,53 +23,53 @@ URN_TYPE = 'string'
 SUCCESS_TYPE = 'boolean'
 STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
-API_TYPE = 'struct'
 driver = VTSfaDriver(None)
+auth = Auth(None, None)
 
 @rpcmethod(signature=['string', 'string'], url_name="sfa")
 def ping(challenge):
     return challenge
 
 
-@rpcmethod(signature=[VERSION_TYPE, API_TYPE], url_name="sfa")
-def GetVersion(api):
-    xrn=Xrn(api.hrn)
+@rpcmethod(signature=[VERSION_TYPE], url_name="sfa")
+def GetVersion():
+   # xrn=Xrn(api.hrn)
     version = version_core()
     version_generic = {
         'interface':'aggregate',
         'sfa': 2,
         'geni_api': 2,
-        'geni_api_versions': {'2': 'http://%s:%s' % (api.config.SFA_AGGREGATE_HOST, api.config.SFA_AGGREGATE_PORT)},
-        'hrn':xrn.get_hrn(),
-        'urn':xrn.get_urn(),
+        'geni_api_versions': '2',#: 'http://%s:%s' % (api.config.SFA_AGGREGATE_HOST, api.config.SFA_AGGREGATE_PORT)},
+    #    'hrn':xrn.get_hrn(),
+    #    'urn':xrn.get_urn(),
     }
     version.update(version_generic)
-    testbed_version = driver.aggregate_version()
-    version.update(testbed_version)
+ #   testbed_version = driver.aggregate_version()
+ #   version.update(testbed_version)
     return version
 
 
-@rpcmethod(signature=[RSPEC_TYPE, API_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
-def ListResources(api, credentials, options, **kwargs):
+@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
+def ListResources(credentials, options, **kwargs):
     # get slice's hrn from options    
-    slice_xrn = options.get('geni_slice_urn', None)
-    (hrn, _) = urn_to_hrn(slice_xrn)
-    valid_creds = Auth.checkCredentials(credentials, 'listnodes', hrn)
+#    slice_xrn = options.get('geni_slice_urn', None)
+#    (hrn, _) = urn_to_hrn(slice_xrn)
+#    valid_creds = auth.checkCredentials(credentials, 'listnodes', hrn)
 
-    if valid_creds:
-        call_id = options.get('call_id')
-        if Callids().already_handled(call_id): return ""
+#    if valid_creds:
+    call_id = options.get('call_id')
+    if Callids().already_handled(call_id): return ""
         # get slice's hrn from options
-        if slice_xrn:
-            raise Exception("%s authority does not have permissions to list resources from OCF slices" %api.hrn)
-        return driver.list_resources(options)
+#        if slice_xrn:
+#            raise Exception("authority does not have permissions to list resources from OCF slices")
+#        return ""#driver.list_resources(options)
 #        return ""
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
+#    else:
+#        raise SfaInvalidArgument('Invalid Credentials')
+    return driver.list_resources(credentials, options)
 
-
-@rpcmethod(signature=[API_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
-def ListSlices(self, api, creds, options):
+@rpcmethod(signature=[CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
+def ListSlices(self, creds, options):
     #call_id = options.get('call_id')
     #if Callids().already_handled(call_id): return []
     #return self.driver.list_slices (creds, options)
@@ -80,20 +81,21 @@ def ListSlices(self, api, creds, options):
     #XXX: should this method list vms?
 
 
-@rpcmethod(signature=[RSPEC_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
-def CreateSliver(api, slice_urn, credentials, rspec, users, **kwargs):
+@rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
+def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     hrn, type = urn_to_hrn(slice_urn)
-    valid_creds = Auth.checkCredentials(creds, 'createsliver', hrn)
+    valid_creds = AuthManager.checkCredentials(creds, 'createsliver', hrn)
 
     if valid_creds:
         return driver.create_sliver(sliver_urn, rspec, users)
     else:
         raise SfaInvalidArgument('Invalid Credentials')
+
 #XXX: deletesliver means delete all the slivers assigned to a slice
-@rpcmethod(signature=[SUCCESS_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
-def DeleteSliver(api, slice_urn, credentials, **kwargs):
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
+def DeleteSliver(slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = Auth.checkCredentials(credentials, 'deletesliver', hrn)
+    valid_creds = AuthManager.checkCredentials(credentials, 'deletesliver', hrn)
 
     if valid_creds:
         return driver.delete_slice(slice_urn)
@@ -101,10 +103,10 @@ def DeleteSliver(api, slice_urn, credentials, **kwargs):
         raise SfaInvalidArgument('Invalid Credentials')
 
 
-@rpcmethod(signature=[STATUS_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
-def SliverStatus(api, slice_urn, credentials, **kwargs):
+@rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
+def SliverStatus(slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = Auth.checkCredentials(credentials, 'sliverstatus', hrn)
+    valid_creds = AuthManager.checkCredentials(credentials, 'sliverstatus', hrn)
 
     if valid_creds:
         #XXX: NO Sliver related things
@@ -122,10 +124,10 @@ def SliverStatus(api, slice_urn, credentials, **kwargs):
         raise SfaInvalidArgument('Invalid Credentials')
 
 
-@rpcmethod(signature=[SUCCESS_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE], url_name="sfa")
-def RenewSliver(api, slice_urn, credentials, expiration_time, **kwargs):
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE], url_name="sfa")
+def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = Auth.checkCredentials(credentials, 'renewsliver', hrn)
+    valid_creds = AuthManager.checkCredentials(credentials, 'renewsliver', hrn)
 
     if valid_creds:
         return ""
@@ -133,10 +135,10 @@ def RenewSliver(api, slice_urn, credentials, expiration_time, **kwargs):
         raise SfaInvalidArgument('Invalid Credentials')
 
 
-@rpcmethod(signature=[SUCCESS_TYPE, API_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
-def Shutdown(api, slice_urn, credentials, **kwargs):
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
+def Shutdown(slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = Auth.checkCredentials(credentials, 'shutdown', hrn)
+    valid_creds = AuthManager.checkCredentials(credentials, 'shutdown', hrn)
 
     if valid_creds:
         return ""

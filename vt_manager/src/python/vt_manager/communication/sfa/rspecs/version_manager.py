@@ -47,8 +47,11 @@ class VersionManager:
 	    for version in self.versions:
 	    	print '-----------------------------------Self.Versions:',version, i
 		i += 1 
-	    print 'using default version:', self.versions[11]
-	    retval = self.versions[9]
+	    print 'using default version:', self.versions[1]
+	    #print 'using defaul version:', self.versions[11]
+	    #retval = self.versions[9] 
+	    #XXX: Both changed due to index error
+	    retval = self.versions[0]
 	    #XXX: Testing Mode, uncoment the line below when not testing
             #raise UnsupportedRSpecVersion("[%s %s %s] is not suported here"% (type, version_num, content_type))
         return retval
