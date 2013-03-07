@@ -104,7 +104,7 @@ class VTSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		
 		self.shell.CreateSliver(requested_attributes)
-			
+		print '-----In heaven everithing is fine... In heaven everything is fine... in heaven...'	
                 # ensure slice record exists
 		#XXX: Do we need this?
                 #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)

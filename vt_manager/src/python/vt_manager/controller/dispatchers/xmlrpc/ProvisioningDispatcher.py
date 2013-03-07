@@ -21,7 +21,6 @@ class ProvisioningDispatcher():
 		for action in provisioning.action:
 			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
-			print threading.currentThread().__dict__
 			try:
 				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
 			except Exception as e:
@@ -60,9 +59,11 @@ class ProvisioningDispatcher():
 			        print '-------------------------------------------------------------------------------------------------'	
 				if threading.currentThread().callBackURL == 'SFA.OCF.VTM':
 					print '-----------actionModel.uuid',actionModel.uuid
-					threading.currentThread.event.wait()
+					threading.currentThread().event.wait()
+					print 'wait OKEY'
 					#SfaCommunicator.ActionRecieved(actionModel.uuid)
 			except Exception as e:
+				print 'EEEEEEXXXXXXCCCCCEEEEEPPPTTTIIIIOOOOONNNN:',e
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					# If the VM creation was interrupted in the network
 					# configuration, the created VM won't be returned

@@ -8,6 +8,7 @@ from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicato
 from vt_manager.utils.ServiceThread import ServiceThread
 
 import threading
+import time
 class VTShell:
 
         def __init__(self):
@@ -70,12 +71,14 @@ class VTShell:
 		for provisioningRSpec in provisioningRSpecs:
 		    event = threading.Event()
 		    thread = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
-		    #ServiceThread.startMethodInNewThread(thread.start,thread)
+		    #ServiceThread.startMethodInNewThread(thread.start,None)
 		    threads.append(thread)
 		    thread.start()
+		    thread.join()
 		    print '-------done-------'
-		#for thread in threads:
-		#   thread.join()
+			
+				
+		print 'this should be the last print'
 		print '-------------------not here please'	
 		return 1
  
@@ -83,3 +86,14 @@ class VTShell:
 		#XXX: Get all the vms from a node and from an specific user
 		
 		pass
+
+class MainThread(threading.Thread):
+
+	def __init__(self,event):
+		threading.Thread.__init__(self)
+		self.event = event
+
+	def run(self):
+		
+		self.Thread__Block
+		print 'this should not appear'
