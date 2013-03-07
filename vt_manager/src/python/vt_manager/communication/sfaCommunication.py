@@ -13,6 +13,8 @@ from vt_manager.communication.sfa.util.callids import Callids
 
 from vt_manager.communication.sfa.VTSfaDriver import VTSfaDriver
 
+#Only for testing before the methods are implemented in VTSfaDriver
+from vt_manager.communication.sfa.AggregateManager import AggregateManager
 
 # Parameter Types
 CREDENTIALS_TYPE = 'array' # of strings
@@ -25,6 +27,7 @@ STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
 driver = VTSfaDriver(None)
 auth = Auth(None, None)
+am = AggregateManager(None)
 
 @rpcmethod(signature=['string', 'string'], url_name="sfa")
 def ping(challenge):
@@ -52,8 +55,8 @@ def GetVersion():
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def ListResources(credentials, options, **kwargs):
     # get slice's hrn from options    
-#    slice_xrn = options.get('geni_slice_urn', None)
-#    (hrn, _) = urn_to_hrn(slice_xrn)
+    slice_xrn = options.get('geni_slice_urn', None)
+    (hrn, _) = urn_to_hrn(slice_xrn)
 #    valid_creds = auth.checkCredentials(credentials, 'listnodes', hrn)
 
 #    if valid_creds:
@@ -66,7 +69,10 @@ def ListResources(credentials, options, **kwargs):
 #        return ""
 #    else:
 #        raise SfaInvalidArgument('Invalid Credentials')
-    return driver.list_resources(credentials, options)
+    if not slice_xrn:
+        return driver.list_resources(credentials, options)
+    else:
+	return ""
 
 @rpcmethod(signature=[CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def ListSlices(self, creds, options):
@@ -84,12 +90,7 @@ def ListSlices(self, creds, options):
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     hrn, type = urn_to_hrn(slice_urn)
-    valid_creds = AuthManager.checkCredentials(creds, 'createsliver', hrn)
-
-    if valid_creds:
-        return driver.create_sliver(sliver_urn, rspec, users)
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
+    return am.CreateSliver(sliver_urn, rspec, users)
 
 #XXX: deletesliver means delete all the slivers assigned to a slice
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
