@@ -722,7 +722,6 @@ table.servers tr.even{
     background-color: #AAA;
     border:0px!important;
 }
-
 table.servers tr.odd{
     /*background-color: #C0E7F3;*/
     background-color: #999;
@@ -747,14 +746,17 @@ table.vms th {
     text-align:left;
     border:0px;
 }
-
 table.vms td{
     padding : 4px;
     text-align:left;
     border:0px!important;
     color:#000;
 }
-
+table.vms td.ssh_vm_details {
+    background: #fff;
+    color: #444;
+    padding-left: 25px;
+}
 table.vms tr{
 }
 table.vms tr.even{
