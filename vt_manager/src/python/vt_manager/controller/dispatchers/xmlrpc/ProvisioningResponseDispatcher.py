@@ -7,7 +7,7 @@ from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.controller.actions.ActionController import ActionController
 
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
-
+from vt_manager.common.middleware.thread_local import thread_locals, pull
 class ProvisioningResponseDispatcher():
 
 	'''
@@ -33,7 +33,13 @@ class ProvisioningResponseDispatcher():
 			print '-----------actionModel.getCallBackUrl',actionModel.callBackUrl
 			if str(actionModel.callBackUrl) == str(SfaCommunicator.SFAUrl): #Avoiding unicodes
 				print '---------------------------The thread should be released now...'
-				return SfaCommunicator.ResponseActionRecieved(actionModel.getUUID(),actionModel.getStatus())
+				#event = pull(str(action.id))
+				event = pull('12345')
+				print '-----------------------------YEEEEEEESSSSS'
+				print thread_locals.stack
+				event.send('continueeeee')
+				return
+				#return SfaCommunicator.ResponseActionRecieved(actionModel.getUUID(),actionModel.getStatus())
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)

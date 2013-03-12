@@ -54,17 +54,8 @@ class ProvisioningDispatcher():
 				else :
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
                                 print '----------------here here here---------------------------------------------------------------------------------'
-				#XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
-			        print '-------------------------------------------------------------------------------------------------'	
-				if threading.currentThread().callBackURL == 'SFA.OCF.VTM':
-					print '-----------actionModel.uuid',actionModel.uuid
-					print thread_locals.stack
-					dic = pull('12345')
-					print '-------------------------dic',dic
-					#dic.send('continue')
-					#threading.currentThread().event.send('Continue now')
-					print 'wait OKEY'
-					#SfaCommunicator.ActionRecieved(actionModel.uuid)
+				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
+				return
 			except Exception as e:
 				print 'EEEEEEXXXXXXCCCCCEEEEEPPPTTTIIIIOOOOONNNN:',e
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
@@ -76,7 +67,7 @@ class ProvisioningDispatcher():
 						controller.deleteVM(vm)
 					except Exception as e:
 						print "Could not delete VM. Exception: %s" % str(e)
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
+				#XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
 
 		logging.debug("PROVISIONING FINISHED...")
 

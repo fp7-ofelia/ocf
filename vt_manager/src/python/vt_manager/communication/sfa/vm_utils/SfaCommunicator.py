@@ -32,10 +32,13 @@ class SfaCommunicator(multiprocessing.Process):
 	ST = ServiceThread()
 	ST.callBackURL = self.SFAUrl
 	#ST.event = self.event
+	print 'thread_locals',thread_locals.stack
 	push('12345',self.event)
+	push(str(self.actionID),self.event)
 	print thread_locals.stack
         ST.startMethod(ProvisioningDispatcher.processProvisioning,self.rspec)
 	ST.join()
         print 'end of dispatching'
+        return
 	
 

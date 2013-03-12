@@ -70,7 +70,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'vt_manager.common.middleware.basicauth.HTTPBasicAuthMiddleware',
     'vt_manager.common.middleware.sitelockdown.SiteLockDown',
-    'vt_manager.common.middleware.thread_local',
+    'vt_manager.common.middleware.thread_local.threadlocal',
 )
 
 #

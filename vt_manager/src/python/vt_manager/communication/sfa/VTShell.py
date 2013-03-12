@@ -9,6 +9,8 @@ from vt_manager.utils.ServiceThread import ServiceThread
 
 import threading
 import time
+from vt_manager.common.middleware.thread_local import thread_locals, push
+
 class VTShell:
 
         def __init__(self):
@@ -64,21 +66,31 @@ class VTShell:
 		return 1
 
 	def CreateSliver(self,vm_params):
+		from vt_manager.communication.sfa.tests.response import response
 		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
 		from multiprocessing import Pipe
+		from vt_manager.communication.utils.XmlHelper import *
+                from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher as prd
+
 		processes = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
 		for provisioningRSpec in provisioningRSpecs:
 		    waiter,event = Pipe()
+		    push('12345',event)
 		    process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
 		    #ServiceThread.startMethodInNewThread(thread.start,None)
 		    processes.append(process)
 		    process.start()
-		    #thread.join()
+		    #process.join()
 		    print '-------done-------'
 			
 		print 'recieving I hope'
-		waiter.recv()	
+                xml = XmlHelper.parseXmlString(response)
+		ST = ServiceThread()
+		ST.callBackURL = 'SFA.OCF.VTM'
+		ST.startMethod(prd.processXmlResponse,xml)
+		waiter.recv()
+		#process.join()	
 		print 'this should be the last print'
 		print '-------------------not here please'	
 		return 1
