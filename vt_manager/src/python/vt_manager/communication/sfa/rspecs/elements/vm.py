@@ -4,6 +4,7 @@ class VM(Element):
     fields = [
         'name',
         'uuid',
+	'state',
         'project-id',
         'slice-id',
         'operating-system-type',

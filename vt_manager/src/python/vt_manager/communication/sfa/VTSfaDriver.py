@@ -37,10 +37,8 @@ class VTSfaDriver:
 	def list_resources (self,creds, options):
 
 		version_manager = VersionManager()
-        	# get the rspec's return format from options
         	rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
         	version_string = "rspec_%s" % (rspec_version)
-	        #aggregate = VMAggregate()
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
 		print 'list_resources Rspec instance:',rspec
        		return rspec
@@ -57,33 +55,13 @@ class VTSfaDriver:
                 except:
                         raise RecordNotFound(slice_hrn)
 		if action == 'start_slice':
-			return self.__start_slice(slice)
+			return self.shell.StartSlice(slice['node_id'],slice['slice_id'])
 		elif action == 'stop_slice':
-			return self.__stop_slice(slice)
+			return self.shell.StopSlice(slice['node_id'],slice['slice_id'])
 		elif action == 'delete_slice':
-			return self.__delete_slice(slice)
+			return self.shell.DeleteSlice(slice['node_id'],slice['slice_id'])
 		elif action == 'reset_slice':
-			return self.__reset_slice(slice)
-
-	def __start_slice(self,slice):
-        	if not slice.enabled:
-            		self.shell.StartSlice(slice['node_id'],slice['slice_id'])
-        	return 1
-	
-        def __stop_slice(self,slice):
-                if slice.enabled:
-                        self.shell.StopSlice(slice['node_id'],slice['slice_id'])
-                return 1
-
-	#XXX: this method shouldn't be private, if someone delete a slice we must "dettach" the resources asigned to this slice 
-	#XXX omoya: In VMManager slices are VM's, the methods deleteSlice and deleteSlivers are quite confusing, delete_slice should remove all vms from the 			  slice, meanwhile deleteSliver probably should remove one vm from a user.
-	def __delete_slice(self,slice):
-                self.shell.DeleteSlice(slice['node_id'],slice['slice_id'])
-                return 1
-
-	def __reset_slice(self,slice):
-                self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
-                return 1
+			return self.self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
 
         def create_sliver (self,slice_leaf,rspec_string, users, options):
 		
@@ -104,15 +82,13 @@ class VTSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		
 		self.shell.CreateSliver(requested_attributes)
-		print '-----In heaven everithing is fine... In heaven everything is fine... in heaven...'	
+		print '-----In heaven everything is fine... In heaven everything is fine... in heaven...'	
                 # ensure slice record exists
 		#XXX: Do we need this?
                 #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
                 # ensure user records exists
                 #users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
-		#XXX: should we return something like the input rspec?
 		#XXX: We should return a manifest rspec
-		#TODO: SetUp a manifest RSpec
                 return self.aggregate.get_rspec(slice_leaf=slice_leaf, version=rspec.version)
 
 		

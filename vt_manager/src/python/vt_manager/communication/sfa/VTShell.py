@@ -65,19 +65,20 @@ class VTShell:
 
 	def CreateSliver(self,vm_params):
 		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
-		
-		threads = list()
+		from multiprocessing import Pipe
+		processes = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
 		for provisioningRSpec in provisioningRSpecs:
-		    event = threading.Event()
-		    thread = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
+		    waiter,event = Pipe()
+		    process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
 		    #ServiceThread.startMethodInNewThread(thread.start,None)
-		    threads.append(thread)
-		    thread.start()
-		    thread.join()
+		    processes.append(process)
+		    process.start()
+		    #thread.join()
 		    print '-------done-------'
 			
-				
+		print 'recieving I hope'
+		waiter.recv()	
 		print 'this should be the last print'
 		print '-------------------not here please'	
 		return 1
@@ -87,13 +88,3 @@ class VTShell:
 		
 		pass
 
-class MainThread(threading.Thread):
-
-	def __init__(self,event):
-		threading.Thread.__init__(self)
-		self.event = event
-
-	def run(self):
-		
-		self.Thread__Block
-		print 'this should not appear'

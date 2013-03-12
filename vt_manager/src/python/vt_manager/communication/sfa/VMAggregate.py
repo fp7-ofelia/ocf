@@ -55,7 +55,9 @@ class VMAggregate:
     	def get_nodes(self, options={}):
 	        nodes = self.shell.GetNodes()
 	        rspec_nodes = []
+		print '--------------------------------------------------------------Nodes',nodes
 	        for node in nodes:
+		    
 	            rspec_node = Node()
 	            site=self.get_testbed_info()
 		    #TODO: Get HRNs URNs from OFELIA site or use the method get_leaf() from xrns
@@ -98,19 +100,20 @@ class VMAggregate:
 			    	rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
 				    					        'to_network_interface_id': network_iface.switchID,
 										'to_network_interface_port':str(network_iface.port)}))
-                if site['longitude'] and site['latitude']:
-    	            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
-        	    rspec_node['location'] = location
+                    if site['longitude'] and site['latitude']:
+    	                location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
+        	        rspec_node['location'] = location
 		
-		#TODO:complete slivers part for manifest RSpecs
-		slices = self.shell.GetSlices(node.uuid)
-		if slices:
-		    for vm in slices:
-			if vm.interfaces:
-				ifaces = list()
+		    #TODO:complete slivers part for manifest RSpecs
+		    slices = self.shell.GetSlices(node.uuid)
+		    if slices:
+		        for vm in slices:
+			    if vm.interfaces:
+			  	ifaces = list()
 				for interface in vm.interfaces:
 					ifaces.append(interface)
-		    	rspec_node['slivers'].append(VM({'name':vm.name,
+		    	    rspec_node['slivers'].append(VM({'name':vm.name,
+						  'statate':vm.state,
 						  'memory-mb':vm.memory,
 						  'operating-system-type':vm.operatingSystemType, 
                                                   'operating-system-distribution':vm.operatingSystemDistribution,
@@ -119,7 +122,7 @@ class VMAggregate:
 						  'interfaces':VMInterface(ifaces),
 						  }))
 		
-            	rspec_nodes.append(rspec_node)
+            	    rspec_nodes.append(rspec_node)
         	return rspec_nodes
 
 	def get_testbed_info(self):

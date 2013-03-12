@@ -6,6 +6,7 @@ class ServiceThread(Thread):
 	__param = None
 	callBackURL=None
 	event = None
+
 	@staticmethod
 	def startMethodInNewThread(servmethod,param,url = None):
 		thread = ServiceThread()	

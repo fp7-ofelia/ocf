@@ -11,6 +11,7 @@ from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.policies.RuleTableManager import RuleTableManager
 
 #from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
+from vt_manager.common.middleware.thread_local import thread_locals, pull
 
 class ProvisioningDispatcher():
   
@@ -24,10 +25,8 @@ class ProvisioningDispatcher():
 			try:
 				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
 			except Exception as e:
-				a = str(e)
-				if len(a)>200:
-					a = a[0:199]
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a )))
+				MAX_CHARS_ALLOWED = 200
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,str(e)[0:MAX_CHARS_ALLOWED-1])))
 				return None
 			try:
 				controller = VTDriver.getDriver(action.server.virtualization_type)
@@ -55,11 +54,15 @@ class ProvisioningDispatcher():
 				else :
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
                                 print '----------------here here here---------------------------------------------------------------------------------'
-				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
+				#XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
 			        print '-------------------------------------------------------------------------------------------------'	
 				if threading.currentThread().callBackURL == 'SFA.OCF.VTM':
 					print '-----------actionModel.uuid',actionModel.uuid
-					threading.currentThread().event.wait()
+					print thread_locals.stack
+					dic = pull('12345')
+					print '-------------------------dic',dic
+					#dic.send('continue')
+					#threading.currentThread().event.send('Continue now')
 					print 'wait OKEY'
 					#SfaCommunicator.ActionRecieved(actionModel.uuid)
 			except Exception as e:

@@ -1,10 +1,11 @@
 import threading
 from vt_manager.utils.ServiceThread import ServiceThread
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
+from vt_manager.common.middleware.thread_local import thread_locals, push
+import multiprocessing
 
 
-
-class SfaCommunicator(threading.Thread):
+class SfaCommunicator(multiprocessing.Process):
 
     _SFALockers  = dict()
     SFAUrl = 'SFA.OCF.VTM'
@@ -12,7 +13,7 @@ class SfaCommunicator(threading.Thread):
     
 
     def __init__(self, actionID,event,rspec):
-        threading.Thread.__init__(self)
+        multiprocessing.Process.__init__(self)
 	self.actionID = actionID
 	self.event = event
 	self.rspec = rspec
@@ -28,37 +29,13 @@ class SfaCommunicator(threading.Thread):
         print 'dispatching Action'
         print self.SFAUrl
         self.callBackURL = self.SFAUrl
-        ProvisioningDispatcher.processProvisioning(self.rspec)
+	ST = ServiceThread()
+	ST.callBackURL = self.SFAUrl
+	#ST.event = self.event
+	push('12345',self.event)
+	print thread_locals.stack
+        ST.startMethod(ProvisioningDispatcher.processProvisioning,self.rspec)
+	ST.join()
         print 'end of dispatching'
 	
-
-    @staticmethod
-    def __lock(actionID):
-	try:
-	    print SfaCommunicator._SFALockers
-	    SfaCommunicator._SFALockers[actionID].wait()
-	except Exception as e:
-	    print 'SFALockers:',SfaCommunicator._SFALockers
-            raise e
-
-    @staticmethod
-    def __release(actionID):
-	try:
-	    SfaCommunicator._SFALockers[actionID].set()
-	    del SfaCommunicator._SFALockers[actionID]
-	except Exception as e:
-	    print 'SFALockers:',SfaCommunicator._SFALockers
-	    raise e
-
-    @staticmethod
-    def ActionRecieved(actionID):
-	SfaCommunicator.__lock(actionID)
-	return
-
-    @staticmethod
-    def ResponseActionRecieved(actionID,actionStatus):
-        SfaCommunicator.__release(actionID)
-	#XXX: could we get the true action status?
-	return
-	#TODO: do something if necessary
 
