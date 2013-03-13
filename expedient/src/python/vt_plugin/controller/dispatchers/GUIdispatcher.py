@@ -436,7 +436,7 @@ def get_nodes_links(slice, chosen_group=None):
                             #source = len(nodes)+7-1-1,
                             # XXX: ORIGINAL Y FIXME --> OBTENER EL ID EQUIVALENTE EN D3.js ES CLAVE!!!
                             #source = len(nodes)-1,
-                            source = str(port_id),
+                            source = str(n.id),
                             value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
                             #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
                             #value=inter.ifaceName+":"+str(inter.port)
