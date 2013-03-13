@@ -52,8 +52,10 @@ class VTSfaDriver:
                 try:
                         #XXX: getSlices should return the server UUID too
                         slice = self.shell.GetSlice(slicename)
-                except:
-                        raise RecordNotFound(slice_hrn)
+			print slice
+                except Exception as e:
+			print "exception:",e
+                        raise RecordNotFound(slice_leaf)
 		if action == 'start_slice':
 			return self.shell.StartSlice(slice['node_id'],slice['slice_id'])
 		elif action == 'stop_slice':
@@ -61,7 +63,7 @@ class VTSfaDriver:
 		elif action == 'delete_slice':
 			return self.shell.DeleteSlice(slice['node_id'],slice['slice_id'])
 		elif action == 'reset_slice':
-			return self.self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
+			return self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
 
         def create_sliver (self,slice_leaf,rspec_string, users, options):
 		

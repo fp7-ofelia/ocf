@@ -108,7 +108,8 @@ class AggregateManager:
         #slice_urn=xrn.get_urn()
         #slice_hrn=xrn.get_hrn()
 	slice_leaf = xrn.get_leaf()
-        return self.driver.crud_slice (slice_leaf, creds,action='start_slice')
+	print slice_leaf
+        return self.driver.crud_slice(slice_leaf, creds,action='start_slice')
 	#XXX: Start a VM
 
     def stop_slice(self, api, xrn, creds):

@@ -37,26 +37,29 @@ class VTShell:
 		for server in servers:
 			child_server = server.getChildObject()
 			vm = child_server.getVMs(name=name)
-			if vm:
-				return {'node_id':server.uuid,'slice_id':vm.id}
+			for v in vm:
+				print 'aaaaa'
+				print v.id,v.name
+			if vm[0]:
+				return {'node_id':server.uuid,'slice_id':vm[0].id}
 		
 		raise Exception("Record not found")
 
 	def StartSlice(self,server_uuid,vm_id):
-		return 1
+		#return 1
 		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
 
 	def StopSlice(self,server_uuid,vm_id):
-		return 1
-		return self.__crudVM(server_id,vm_id,Action.PROVISIONING_VM_STOP_TYPE)
+		#return 1
+		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_STOP_TYPE)
 	
 	def RebootSlice(self,server_uuid,vm_id):
-		return 1
-                return self.__crudVM(server_id,vm_uuid,Action.PROVISIONING_VM_REBOOT_TYPE)
+		#return 1
+                return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_REBOOT_TYPE)
 
 	def DeleteSlice(self,server_uuid,vm_id):
-		return 1
-                return self.__crudVM(server_id,vm_id,Action.PROVISIONING_VM_DELETE_TYPE)
+		#return 1
+                return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_DELETE_TYPE)
 
 	def __crudVM(self,server_uuid,vm_id,action):
 		#XXX: First approach

@@ -32,6 +32,6 @@ print 'Aggregate instance:',agg
 #process.start()
 #ST = ServiceThread()
 #test_response()
-xml = agg.CreateSliver(None, None, None, RSPEC, None, options)
+#xml = agg.CreateSliver(None, None, None, RSPEC, None, options)
 #XXX: Last CreateSliver() test was 02/25/2013 with OK results. The test does not get any parametre from VTShell yet, but the RSpec parsing(v1) is OK. The CreateSliver and GetSlice VTShell functions should be implemented working with slice_leaf parametre in order to check the manifest response RSpec.
-
+xml = agg.delete_slice(None, 'topdomain.subdomain.a')
