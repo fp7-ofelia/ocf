@@ -775,10 +775,17 @@ def get_nodes_links(slice):
         try:
             links.append(
                 dict(
-                    source = id_to_idx[cnxn.src_iface.switch.id],
+                    source = str(cnxn.src_iface.switch.id),
+                    # XXX: ORIGINAL
+                    #source = id_to_idx[cnxn.src_iface.switch.id],
+
                     #src_datapath=cnxn.src_iface.switch.datapath_id,
                     #src_port=cnxn.src_iface.port_num,
-                    target = id_to_idx[cnxn.dst_iface.switch.id],
+
+                    target = str(cnxn.dst_iface.switch.id),
+                    # XXX: ORIGINAL
+                    #target = id_to_idx[cnxn.dst_iface.switch.id],
+
                     #target_datapath=cnxn.dst_iface.switch.datapath_id,
                     #target_port=cnxn.dst_iface.port_num,
                    value = "rsc_id_%s-rsc_id_%s" % (
@@ -791,8 +798,12 @@ def get_nodes_links(slice):
     for cnxn in non_of_cnxn_qs:
         links.append(
             dict(
-                source = id_to_idx[cnxn.of_iface.switch.id],
-                target = id_to_idx[cnxn.resource.id],
+                source = str(cnxn.of_iface.switch.id),
+                # XXX: ORIGINAL
+                #source = id_to_idx[cnxn.of_iface.switch.id],
+                target = str(cnxn.resource.id),
+                # XXX: ORIGINAL
+                #target = id_to_idx[cnxn.resource.id],
                 value = "rsc_id_%s-rsc_id_%s" % (
                     cnxn.of_iface.id, cnxn.resource.id
                 ),
@@ -800,8 +811,12 @@ def get_nodes_links(slice):
         )
         links.append(
             dict(
-                target = id_to_idx[cnxn.of_iface.switch.id],
-                source = id_to_idx[cnxn.resource.id],
+                target = str(cnxn.of_iface.switch.id),
+                # XXX: ORIGINAL
+                #target = id_to_idx[cnxn.of_iface.switch.id],
+                source = str(cnxn.resource.id),
+                # XXX: ORIGINAL
+                #source = id_to_idx[cnxn.resource.id],
                 value = "rsc_id_%s-rsc_id_%s" % (
                     cnxn.resource.id, cnxn.of_iface.id
                 ),

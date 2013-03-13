@@ -15,6 +15,9 @@ class TopologyGenerator():
 
     @staticmethod
     def node_get_adequate_group(node, assigned_groups):
+        """
+        Computes each node group through its aggregate manager ID.
+        """
         try:
             if assigned_groups:
                 for group in assigned_groups:

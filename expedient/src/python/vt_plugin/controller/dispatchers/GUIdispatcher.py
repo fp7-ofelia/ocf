@@ -286,7 +286,22 @@ def get_nodes_links(slice, chosen_group=None):
     links = []
 
     agg_ids = []
+    id_to_idx = {}
     n_islands = 0
+
+    ### ANOTHER "MAYBE PROBLEMATIC CODE"
+    openflowSwitches = dict()
+    nodes_test = []
+    from openflow.plugin.views import get_openflow_aggregates
+    of_aggs = get_openflow_aggregates(slice)
+    for i, agg in enumerate(of_aggs):
+        switches = OpenFlowSwitch.objects.filter(
+            aggregate__pk=agg.pk,
+            available=True,
+        )
+        for s in switches:
+            nodes_test.append(s.id)
+            openflowSwitches[s.datapath_id] = len(nodes_test)-1
 
 #    ### PROBLEMATIC CODE!
 #    id_to_idx = {}
@@ -361,40 +376,73 @@ def get_nodes_links(slice, chosen_group=None):
             )
             serverGroupSet=False
 
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: openflowSwitches"
+            print "-------> openflow switches!!!!!!!!!!!!!!!!!: %s" % str(openflowSwitches)
+#            for sw in openflowSwitches:
+#                print "-------> switch: %s" % str(sw)
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end: openflowSwitches"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: ifaces for server: %s" % str(n.name)
+
             # FIXME: Cuando entra en los links, todo peta...
             # For every interface of the server
             for j,inter in enumerate(n.ifaces.all()):
                 #first check datapathId exists.
                 try:
-                    print "************************************** doing some link search... switch.id = %s" % str(inter.switchID)
-                    # XXX: REMOVE -- OLD
-#                    sId = openflowSwitches[inter.switchID]
+                    print "\n\n**********************************************"
+                    print "+ inter = %s" % str(inter)
+                    print "+ inter.ifaceName = %s" % str(inter.ifaceName)
+                    print "+ inter.switchID = %s" % str(inter.switchID)
+                    print "+ inter.port = %s" % str(inter.port)
 #                    print "************************************** source ID (OLD!): %s" % str(sId)
 #                    pId = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
 #                    print "************************************** target ID (OLD!): %s" % str(pId)
 
 
-#                    openFlowSwitch = OpenFlowSwitch.objects.get(name = inter.switchID)
-                    openFlowSwitch = Resource.objects.get(name = inter.switchID)
-                    print "************************************** openflowswitch: %s" % str(openFlowSwitch)
-#                    sId = openFlowSwitch.id
-                    # FIXME -> HACER QUE SE PUEDA ENLAZAR DE UNO A OTRO CON LAS IDs REALES
-                    sId = j
-                    print "************************************** source ID: %s" % str(sId)
-                    pId = openFlowSwitch.openflowinterface_set.get(port_num=inter.port).id
-                    print "************************************** target ID: %s" % str(pId)
-                except:
+                    # Factor comun
+                    openFlowSwitch = OpenFlowSwitch.objects.get(name = inter.switchID)
+                    #openFlowSwitch = Resource.objects.get(name = inter.switchID)
+                    #print "************************************** openflowswitch: %s, id: %s" % (str(openFlowSwitch), str(inter.switchID))
+                    # XXX: NUEVO --> PRUEBA CON IDs DE RECURSOS
+                    switch_id = openFlowSwitch.id
+                    # XXX: ORIGINAL ----> REEMPLAZAR POR ESTE (** PILLA ID DE NODOS EN D3, A PARTIR DE 0 **)
+                    #switch_id = openflowSwitches[inter.switchID]
+                    print "+ sId: %s" % str(switch_id)
+                    #sId = j
+                    #print "************************************** proto target: %s, port: %s, name: %s" % (str(openFlowSwitch.openflowswitch.openflowinterface_set), str(inter.port), str(inter.ifaceName))
+                    #pId = openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).id
+
+                    # XXX: ORIGINAL
+                    port_id = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
+                    #port_id = openFlowSwitch.openflowinterface_set.get(port_num=inter.port).id
+                    print "+ pId: %s\n\n" % str(port_id)
+                    #print "************************************** target id: %s, name: %s" % (str(pId), str(openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).name))
+
+
+
+#                except:
+                except Exception as e:
+                    print "/////////////////////////////// exception! %s" % str(e)
                     continue
+                print "**********************************************\n\n"
                 print "************************************** CHECKPOINT #0"
+#                from expedient.common.utils.plugins.topologygenerator import TopologyGenerator
+#                # TODO: GUARDAR EN UNA INSTANCIA SUPERIOR ALGO QUE ESTE AL CORRIENTE DE CADA LINK, ETC
+#                # TAL Y COMO ESTA HECHO TOPOLOGYGENERATOR NO SE PUEDE HACER ESTO... CAMBIAR!
+#                print "\n\n\n\n\n ******* links: %s\n\n\n\n\n" % str(TopologyGenerator.plugin_ui_data['d3_links'])
                 links.append(
                         dict(
-                            target = sId,
-                            source = len(nodes)-1,
-                            value = "rsc_id_" + str(pId) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
+                            target = str(switch_id),
+                            # XXX: TEST MUY CHORRAS -> BORRAR
+                            #source = len(nodes)+7-1-1,
+                            # XXX: ORIGINAL Y FIXME --> OBTENER EL ID EQUIVALENTE EN D3.js ES CLAVE!!!
+                            #source = len(nodes)-1,
+                            source = str(port_id),
+                            value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
                             #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
                             #value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
+
                 # When the server has >= 1 interfaces, set 'serverGroupSet' to True
                 print "************************************** CHECKPOINT #1"
                 if (not serverGroupSet):
@@ -403,232 +451,30 @@ def get_nodes_links(slice, chosen_group=None):
                     serverGroupSet = True
                 print "************************************** CHECKPOINT #2"
 
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start links"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> links: %s" % str(links)
+#            for l in links:
+#                try:
+#                    print "----------------------------> %s to %s" % (l.source.nodeName, l.target.nodeName)
+#                except:
+#                    pass
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end links"
+
+
+            # XXX TEST!
+            #links = [{'source': 'Foix', 'target': 4, 'value': 'rsc_id_346-eth2:1'}, {'source': 'Foix', 'target': 0, 'value': 'rsc_id_331-eth3:1'}, {'source': 'Verdaguer', 'target': 5, 'value': 'rsc_id_360-eth2:1'}, {'source': 'Verdaguer', 'target': 1, 'value': 'rsc_id_360-eth3:1'}]
+
+            # **** How links should be ****
+#            links = [{'source': 7, 'target': 4, 'value': 'rsc_id_346-eth2:1'}, {'source': 7, 'target': 6, 'value': 'rsc_id_327-eth3:1'}, {'source': 8, 'target': 3, 'value': 'rsc_id_342-eth2:1'}, {'source': 8, 'target': 0, 'value': 'rsc_id_360-eth3:1'}]
+
             # When the previous flag is set to True, add island
             if (not serverGroupSet and not serverInSameIsland):
                 #Add n_islands since there is an Island with VM AM but no OF AM
                 n_islands += 1
                 # This groups servers of the same VT AM in the same island
                 serverInSameIsland = True
-            print "************************************** CHECKPOINT #3"
+            print "************************************** CHECKPOINT #3. n_islands = %s" % str(n_islands)
     return [nodes, links, n_islands]
-
-# XXX: REMOVE... ONLY FOR TESTS
-def _get_nodes_links(of_aggs, pl_aggs,vt_aggs, slice_id):
-    """
-    Get nodes and links usable by d3.
-    """
-    nodes = []
-    links = []
-
-    id_to_idx = {}
-    agg_ids = []
-   
-    nIslands = 0
-
-    #Openflow devices
-    #XXX: botch
-    openflowSwitches = dict() 
-    for i, agg in enumerate(of_aggs):
-        agg_ids.append(agg.pk)
-        switches = OpenFlowSwitch.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-        for s in switches:
-            id_to_idx[s.id] = len(nodes)
-            agg_pk = agg.pk or 0
-            nodes.append(dict( 
-                name=s.name, value=s.id, aggregate=agg_pk, type="of_agg", description="", image="", available=agg.available, connection=[], loc=agg.location)
-            )
-	    openflowSwitches[s.datapath_id] = len(nodes)-1
-   
-    #One island per OF AM
-    nIslands = len(of_aggs)
-
-    #Planelab nodes 
-    for i, agg in enumerate(pl_aggs):
-        agg_ids.append(agg.pk)
-        pl_nodes = PlanetLabNode.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-        for n in pl_nodes:
-            id_to_idx[n.id] = len(nodes)
-            agg_pk = agg.pk or 0
-            nodes.append(dict(
-                #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
-                #same group. Will planetlab be supported at the end?
-                name=n.name, value=n.id, aggregate=agg_pk or 0,type="pl_agg", description="", image="", available=agg.available, loc=agg.location)
-                #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
-            )
-
-
-    print "\n\n\n\n CHECKPOINT #1 \n\n\n\n"
-
-    # get all connections with both interfaces in wanted aggregates
-    of_cnxn_qs = OpenFlowConnection.objects.filter(
-        src_iface__aggregate__id__in=agg_ids,
-        src_iface__available=True,
-        dst_iface__aggregate__id__in=agg_ids,
-        dst_iface__available=True,
-    )
-
-    non_of_cnxn_qs = NonOpenFlowConnection.objects.filter(
-        of_iface__aggregate__id__in=agg_ids,
-        resource__id__in=id_to_idx.keys(),
-        of_iface__available=True,
-        resource__available=True,
-    )
-
-    print "\n\n\n\n CHECKPOINT #2 \n\n\n\n"
-
-    sliceUUID = Slice.objects.get(id=slice_id).uuid
-    for node in nodes:
-        try:
-           for cnxn in of_cnxn_qs:
-               cnx_exists=False
-               if node["value"] == cnxn.src_iface.switch.id:
-                   for old_cnx in node["connection"]:
-                       if (old_cnx["target_datapath"] == str(cnxn.dst_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.dst_iface.port_num)) :
-                           cnx_exists=True
-                           break
-                   if not cnx_exists:
-                       node["connection"].append(dict(
-                       src_port = str(cnxn.src_iface.port_num),
-                       target_port =  str(cnxn.dst_iface.port_num),
-                       target_datapath = str(cnxn.dst_iface.switch.datapath_id)))
-               elif node["value"] == cnxn.dst_iface.switch.id:
-                   for old_cnx in node["connection"]:
-                       if (old_cnx["target_datapath"] == str(cnxn.src_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.src_iface.port_num)):
-                          cnx_exists=True
-                          break
-                   if not cnx_exists :
-                       node["connection"].append(dict(
-                       target_port = str(cnxn.src_iface.port_num),
-                       src_port = str(cnxn.dst_iface.port_num),
-                       target_datapath = str(cnxn.src_iface.switch.datapath_id)))
-        except Exception as e:
-            pass
-    
-    print "\n\n\n\n CHECKPOINT #3 \n\n\n\n"
-
-    for cnxn in of_cnxn_qs:
-        #XXX: change me
-        try:
-            src_link = id_to_idx[cnxn.src_iface.switch.id] or 0
-            links.append(
-                dict(
-                    src=src_link,
-                    #src_datapath=cnxn.src_iface.switch.datapath_id,
-                    #src_port=cnxn.src_iface.port_num,
-                    target=id_to_idx[cnxn.dst_iface.switch.id],
-                    #target_datapath=cnxn.dst_iface.switch.datapath_id,
-                    #target_port=cnxn.dst_iface.port_num,
-                   value="rsc_id_%s-rsc_id_%s" % (
-                        cnxn.src_iface.id, cnxn.dst_iface.id
-                    ),
-                )
-            )
-        except:
-            pass
-
-    print "\n\n\n\n CHECKPOINT #4 \n\n\n\n"
-
-    for cnxn in non_of_cnxn_qs:
-        src_link = id_to_idx[cnxn.of_iface.switch.id] or 0
-        links.append(
-            dict(
-                src=src_link,
-                target=id_to_idx[cnxn.resource.id],
-                value="rsc_id_%s-rsc_id_%s" % (
-                    cnxn.of_iface.id, cnxn.resource.id
-                ),
-            )
-        )
-        src_link = id_to_idx[cnxn.resource.id] or 0
-        links.append(
-            dict(
-                target=id_to_idx[cnxn.of_iface.switch.id],
-                src=src_link,
-                value="rsc_id_%s-rsc_id_%s" % (
-                    cnxn.resource.id, cnxn.of_iface.id
-                ),
-            )
-        )
-
-    print "\n\n\n\n CHECKPOINT #5 \n\n\n\n"
-
-    # For every Virtualization AM
-    for i, agg in enumerate(vt_aggs):
-        agg_ids.append(agg.pk)
-        vt_servers = VTServer.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-
-        serverInSameIsland = False
-
-        # For every server of the Virtualization AM
-        for n in vt_servers:
-            vmNames = []
-            for name in  n.vms.all().filter(sliceId = sliceUUID).values_list('name', flat=True):
-                vmNames.append(str(name))
-            vmInterfaces = []
-            j=1 #FIXME XXX: eth0 is mgmt 
-            for inter in n.getNetworkInterfaces():
-		inter = inter[1] #WTF: why QuerySet is not iterable straight away, and have to wrap it via enumerate
-                if not inter.isMgmt: 
-                    vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
-                    j+=1
-                    agg_pk = agg.pk or 0
-            nodes.append(dict(
-                    #XXX: lbergesio: Removed len(pl_aggs) to matche vt_aggs con of_aggs in the 
-                    #same group. Will planetlab be supported at the end?
-                    name=n.name, value=n.id, description="", image="", aggregate=agg_pk,type="vt_agg", available=agg.available, vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
-                    #name=n.name, value=n.uuid, group=i+len(of_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
-                    #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
-            )
-            serverGroupSet=False
-
-            print "\n\n\n\n CHECKPOINT #6 \n\n\n\n"
-
-            # For every interface of the server
-            for j,inter in enumerate(n.ifaces.all()):
-		#first check datapathId exists.
-                try:
-                    sId= openflowSwitches[inter.switchID]
-                    pId = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
-                except:
-                    continue
-                src_link = len(nodes)-1 or 0
-                links.append(
-                        dict(
-                            target=sId,
-                            src=src_link,
-                            value="rsc_id_"+str(pId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
-                            #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
-                            #value=inter.ifaceName+":"+str(inter.port)
-                            ),
-                     )
-
-                print "\n\n\n\n CHECKPOINT #6 1/2 \n\n\n\n"
-
-                # When the server has >= 1 interfaces, set 'serverGroupSet' to True
-                if (not serverGroupSet):
-                    # Gives an error, but thanks to this everything works...
-                    nodes[len(nodes)-1]["group"]=nodes[sId]["group"]
-                    serverGroupSet = True
-
-            # When the previous flag is set to True, add island
-            if(not serverGroupSet and not serverInSameIsland):
-                #Add nIslands since there is an Island with VM AM but no OF AM
-                nIslands += 1
-                # This groups servers of the same VT AM in the same island
-                serverInSameIsland = True
-
-    print "\n\n\n\n CHECKPOINT #7 \n\n\n\n"
-
-    return [nodes, links, nIslands]
 
 def get_ui_data(slice):
     """

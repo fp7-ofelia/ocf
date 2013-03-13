@@ -30,7 +30,7 @@ def get_nodes_links(slice):
             image = image_url, available = True, loc = "Barcelona")
         )
 
-    # Danger: hacking the whole topology links, test only
+    # XXX DANGER!! Hacking the whole topology links, test only
     sample_resource_links = [[0,0],[0,1],[0,2],[0,3],[0,4],[4,5]]
     links = []
     for link in sample_resource_links:
@@ -47,7 +47,8 @@ def get_nodes_links(slice):
                 ),
         )
 
-    return [nodes, links, 1]
+#    return [nodes, links, 1]
+    return [nodes, [], 1]
 
 def get_ui_data(slice):
     """
