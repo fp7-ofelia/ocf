@@ -45,13 +45,13 @@ class TopologyGenerator():
         plugins in a dictionary with nodes, links and total number of islands. This data
         will be sent to the topology visor, shown in the slice view.
         """
-        def get_node_index(id, nodes):
+        def get_node_index(id, agg_id, nodes):
             print "id: %s" % id
+            print "agg_id: %s" % agg_id
             r=None
-            agg_id, r_id= id.split('-')
             for index,node in enumerate(nodes):
                 print "NODE: %s" % node['value']
-                if str(r_id) == str(node['value']) and str(agg_id) == str(node['aggregate']):
+                if str(id) == str(node['value']) and str(agg_id) == str(node['aggregate']):
                     r = index
                     break
             if r:
@@ -101,8 +101,8 @@ class TopologyGenerator():
             print node['name']
         try:
             for link in plugin_ui_data['d3_links']:
-                link['target'] = get_node_index(link['target'], plugin_ui_data['d3_nodes'])
-                link['source'] = get_node_index(link['source'], plugin_ui_data['d3_nodes'])
+                link['target'] = get_node_index(link['target'], link['target_agg_id'],plugin_ui_data['d3_nodes'])
+                link['source'] = get_node_index(link['source'], link['source_agg_id'], plugin_ui_data['d3_nodes'])
         except Exception as e:
             print e
         #print "LEODEBUG 2\n\n"

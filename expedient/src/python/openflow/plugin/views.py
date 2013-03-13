@@ -775,14 +775,16 @@ def get_nodes_links(slice):
         try:
             links.append(
                 dict(
-                    source = str(cnxn.src_iface.switch.aggregate_id)+'-'+str(cnxn.src_iface.switch.id),
+                    source = str(cnxn.src_iface.switch.id),
+                    source_agg_id = str(cnxn.src_iface.switch.aggregate_id),
                     # XXX: ORIGINAL
                     #source = id_to_idx[cnxn.src_iface.switch.id],
 
                     #src_datapath=cnxn.src_iface.switch.datapath_id,
                     #src_port=cnxn.src_iface.port_num,
 
-                    target = str(cnxn.dst_iface.switch.aggregate_id)+'-'+str(cnxn.dst_iface.switch.id),
+                    target = str(cnxn.dst_iface.switch.id),
+                    target_agg_id = str(cnxn.dst_iface.switch.aggregate_id),
                     # XXX: ORIGINAL
                     #target = id_to_idx[cnxn.dst_iface.switch.id],
 
