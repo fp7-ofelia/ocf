@@ -776,7 +776,6 @@ def get_nodes_links(slice):
             links.append(
                 dict(
                     source = str(cnxn.src_iface.switch.id),
-                    source_agg_id = str(cnxn.src_iface.switch.aggregate_id),
                     # XXX: ORIGINAL
                     #source = id_to_idx[cnxn.src_iface.switch.id],
 
@@ -784,7 +783,6 @@ def get_nodes_links(slice):
                     #src_port=cnxn.src_iface.port_num,
 
                     target = str(cnxn.dst_iface.switch.id),
-                    target_agg_id = str(cnxn.dst_iface.switch.aggregate_id),
                     # XXX: ORIGINAL
                     #target = id_to_idx[cnxn.dst_iface.switch.id],
 
