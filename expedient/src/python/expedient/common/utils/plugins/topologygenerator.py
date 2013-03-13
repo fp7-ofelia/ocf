@@ -48,9 +48,10 @@ class TopologyGenerator():
         def get_node_index(id, nodes):
             print "id: %s" % id
             r=None
+            agg_id, r_id= id.split('-')
             for index,node in enumerate(nodes):
                 print "NODE: %s" % node['value']
-                if str(id) == str(node['value']):
+                if str(r_id) == str(node['value']) and str(agg_id) == str(node['aggregate']):
                     r = index
                     break
             if r:

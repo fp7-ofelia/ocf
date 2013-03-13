@@ -431,12 +431,12 @@ def get_nodes_links(slice, chosen_group=None):
 #                print "\n\n\n\n\n ******* links: %s\n\n\n\n\n" % str(TopologyGenerator.plugin_ui_data['d3_links'])
                 links.append(
                         dict(
-                            target = str(switch_id),
+                            target = str(openFlowSwitch.aggregate_id)+'-'+str(openFlowSwitch.id),
                             # XXX: TEST MUY CHORRAS -> BORRAR
                             #source = len(nodes)+7-1-1,
                             # XXX: ORIGINAL Y FIXME --> OBTENER EL ID EQUIVALENTE EN D3.js ES CLAVE!!!
                             #source = len(nodes)-1,
-                            source = str(n.id),
+                            source = str(agg.id)+'-'+str(n.id),
                             value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
                             #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
                             #value=inter.ifaceName+":"+str(inter.port)
