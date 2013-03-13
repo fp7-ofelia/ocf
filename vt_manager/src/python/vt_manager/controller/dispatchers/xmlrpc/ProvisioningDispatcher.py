@@ -11,7 +11,7 @@ from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.policies.RuleTableManager import RuleTableManager
 
 #from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
-from vt_manager.common.middleware.thread_local import thread_locals, pull
+#from vt_manager.common.middleware.thread_local import thread_locals, pull
 
 class ProvisioningDispatcher():
   
@@ -44,20 +44,16 @@ class ProvisioningDispatcher():
 				#PROVISIONING CREATE
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					try:
-						print 'lalalalaalalal'
 						vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
 					except:
-						print 'nononono'
 						vm = None
 						raise
 				#PROVISIONING DELETE, START, STOP, REBOOT
 				else :
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
-                                print '----------------here here here---------------------------------------------------------------------------------'
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
 				return
 			except Exception as e:
-				print 'EEEEEEXXXXXXCCCCCEEEEEPPPTTTIIIIOOOOONNNN:',e
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					# If the VM creation was interrupted in the network
 					# configuration, the created VM won't be returned
@@ -76,20 +72,13 @@ class ProvisioningDispatcher():
 	def __createVM(controller, actionModel, action):
         
 		try:
-			print 1
 			actionModel.checkActionIsPresentAndUnique()
-			print 2
 			Server, VMmodel = controller.getServerAndCreateVM(action)
-			print 3
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
-			print 4
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
-			print 5
 			actionModel.callBackUrl = threading.currentThread().callBackURL
-			print 6
 			actionModel.save()
-			print 7
 			return VMmodel
 		except Exception as e:
 			print e

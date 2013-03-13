@@ -38,6 +38,10 @@ class Translator:
 	    ifaceClassEmpty.dns2 = iface['dns2']
 	    ifaceClassEmpty.ip = iface['ip']
 	    ifaceClassEmpty.mask = iface['mask']
+	    if 'ismgmt' in iface.keys():
+	    	ifaceClassEmpty.ismgmt = iface['ismgmt']
+	    else:
+		ifaceClassEmpty.ismgmt = 'false'
 		
             IfaceXmlClass.interface.append(ifaceClassEmpty)
 

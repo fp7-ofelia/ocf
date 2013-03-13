@@ -2,22 +2,10 @@ from vt_manager.communication.sfa.AggregateManager import AggregateManager
 from vt_manager.communication.sfa.tests.example_vm_rspec import rspec as RSPEC
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningResponseDispatcher import ProvisioningResponseDispatcher as prd
-from multiprocessing import Process
 from vt_manager.utils.ServiceThread import *
 '''
 This module run tests over the AM locally without xmlrpc or sfa instances
 '''
-
-def test_response(a=None):
-
-    from vt_manager.communication.sfa.tests.response import response
-    import time
-    xml = XmlHelper.parseXmlString(response)
-    ST = ServiceThread()
-    ST.callBackURL = 'SFA.OCF.VT'
-    ST.startMethod(prd.processResponse,xml)
-    ST.join()
-    print 'doneee'
 
 
 class Options:

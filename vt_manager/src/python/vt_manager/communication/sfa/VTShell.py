@@ -9,7 +9,12 @@ from vt_manager.utils.ServiceThread import ServiceThread
 
 import threading
 import time
-from vt_manager.common.middleware.thread_local import thread_locals, push
+
+from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
+from vt_manager.utils.UrlUtils import UrlUtils
+#XXX:To implement SfaCommunicator for a better use of SFA CreateSliver and Start/Stop/Delete/Update slice
+#from vt_manager.common.middleware.thread_local import thread_locals, push
+#from multiprocessing import Pipe
 
 class VTShell:
 
@@ -66,33 +71,18 @@ class VTShell:
 		return 1
 
 	def CreateSliver(self,vm_params):
-		from vt_manager.communication.sfa.tests.response import response
 		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
-		from multiprocessing import Pipe
-		from vt_manager.communication.utils.XmlHelper import *
-                from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher as prd
 
-		processes = list()
+		#processes = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
 		for provisioningRSpec in provisioningRSpecs:
-		    waiter,event = Pipe()
-		    push('12345',event)
-		    process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
-		    #ServiceThread.startMethodInNewThread(thread.start,None)
-		    processes.append(process)
-		    process.start()
-		    #process.join()
-		    print '-------done-------'
+		    #waiter,event = Pipe()
+		    #process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
+		    #processes.append(process)
+		    #process.start()
+                    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,UrlUtils.getOwnCallbackURL())
 			
-		print 'recieving I hope'
-                xml = XmlHelper.parseXmlString(response)
-		ST = ServiceThread()
-		ST.callBackURL = 'SFA.OCF.VTM'
-		ST.startMethod(prd.processXmlResponse,xml)
-		waiter.recv()
-		#process.join()	
-		print 'this should be the last print'
-		print '-------------------not here please'	
+		#waiter.recv()
 		return 1
  
 	def GetSlices(server_id,user=None):

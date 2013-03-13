@@ -28,18 +28,10 @@ class ProvisioningResponseDispatcher():
 			'''
 			If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
 			'''
-			print '--------------------------Monitoring Response Dispatcher'
-			print '-----------actionModel.__dict__', actionModel.__dict__
-			print '-----------actionModel.getCallBackUrl',actionModel.callBackUrl
-			if str(actionModel.callBackUrl) == str(SfaCommunicator.SFAUrl): #Avoiding unicodes
-				print '---------------------------The thread should be released now...'
-				#event = pull(str(action.id))
-				event = pull('12345')
-				print '-----------------------------YEEEEEEESSSSS'
-				print thread_locals.stack
-				event.send('continueeeee')
-				return
-				#return SfaCommunicator.ResponseActionRecieved(actionModel.getUUID(),actionModel.getStatus())
+			#if str(actionModel.callBackUrl) == str(SfaCommunicator.SFAUrl): #Avoiding unicodes
+			#	event = pull(str(action.id))
+			#	event.send('continue')
+			#	return
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)

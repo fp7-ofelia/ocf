@@ -69,6 +69,8 @@ class OcfVtSlivers:
 	ifaces = list()
 	for interface in interfaces:
 	    iface = VMInterface()
+	    if interface.attrib:
+	        iface.update(interface.attrib)
 	    for iface_attr in interface:
 	        if iface_attr.tag in iface.fields and iface_attr.text:
 		    iface[iface_attr.tag] = iface_attr.text
