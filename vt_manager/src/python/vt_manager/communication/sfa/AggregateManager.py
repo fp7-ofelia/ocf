@@ -38,12 +38,14 @@ class AggregateManager:
 	raise Exception("External authorities do not have permissions to list OCF slices") 
 
     def ListResources(self, api, creds, options):
+	opts = dict()
         slice_xrn = options.get('geni_slice_urn', None)
         if slice_xrn:
 	    xrn = Xrn(slice_xrn,'slice')
 	    slice_leaf = xrn.get_leaf()
-            options['slice'] = slice_leaf
-        return self.driver.list_resources (creds, options)
+            opts['slice'] = slice_leaf
+	opts['geni_rspec_version'] = options.get('geni_rspec_version')
+        return self.driver.list_resources (creds, opts)
 
     def SliverStatus (self, api, xrn, creds, options):
         xrn = Xrn(xrn,'slice')

@@ -1,4 +1,5 @@
 from vt_manager.models.VirtualMachine import VirtualMachine
+from vt_manager.models.VTServer import VTServer
 from vt_manager.models.Action import Action
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
@@ -41,7 +42,7 @@ class VTShell:
 			child_server = server.getChildObject()
 			vms = child_server.getVMs(sliceName=name)
 			for vm in vms:
-				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'node-id':server.uuid, 'node-name':server.name}
+				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'node-id':server.uuid, 'node-name':server.name})
 			        	
 		slices['vms'] = List
 		return slices	
