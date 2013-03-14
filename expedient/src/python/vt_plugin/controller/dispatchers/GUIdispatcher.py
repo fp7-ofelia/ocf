@@ -26,6 +26,8 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.messaging.context_processors import messaging
 from expedient.common.messaging.models import DatedMessage
 
+from expedient.common.utils.plugins.plugincommunicator import *
+
 # XXX: MAY REMOVE. Remove OpenFlow dependency
 import logging
 from pprint import pformat
@@ -403,7 +405,12 @@ def get_nodes_links(slice, chosen_group=None):
                     #openFlowSwitch = Resource.objects.get(name = inter.switchID)
                     #print "************************************** openflowswitch: %s, id: %s" % (str(openFlowSwitch), str(inter.switchID))
                     # XXX: NUEVO --> PRUEBA CON IDs DE RECURSOS
-                    switch_id = openFlowSwitch.id
+
+                    #switch_id = openFlowSwitch.id
+                    switch_id = PluginCommunicator.get_object_id("openflow", "OpenFlowSwitch", name=inter.switchID)
+
+
+
                     # XXX: ORIGINAL ----> REEMPLAZAR POR ESTE (** PILLA ID DE NODOS EN D3, A PARTIR DE 0 **)
                     #switch_id = openflowSwitches[inter.switchID]
                     print "+ sId: %s" % str(switch_id)
@@ -412,7 +419,13 @@ def get_nodes_links(slice, chosen_group=None):
                     #pId = openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).id
 
                     # XXX: ORIGINAL
-                    port_id = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
+
+                    #port_id = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
+                    port_id = PluginCommunicator.get_object_id("openflow", "OpenFlowInterface", switch=switch_id, port_num=inter.port)
+
+
+
+
                     #port_id = openFlowSwitch.openflowinterface_set.get(port_num=inter.port).id
                     print "+ pId: %s\n\n" % str(port_id)
                     #print "************************************** target id: %s, name: %s" % (str(pId), str(openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).name))
