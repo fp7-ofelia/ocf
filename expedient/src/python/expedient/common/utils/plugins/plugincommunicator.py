@@ -24,21 +24,18 @@ class PluginCommunicator():
         	"""
 		Retrieves the id of a model belonging to another plugin.
         	"""
-
 		try:
 			plugins_modules = settings.PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
 			p_agg = plugins_modules.split('.')[-1]
 			p_models_path = '.'.join(plugins_modules.split('.')[:-1])
-	
 			try:
 				model = getattr(__import__(p_models_path,fromlist=[klass]), klass)
 			except:	
 				try:  
 					model = getattr(__import__(p_models_path+'.'+klass,fromlist=[klass]), klass)
 				except:
-					pass
+					pass	
 			object = model.objects.get(**kwargs)
-			
 			if object != None:
 				return object
 		

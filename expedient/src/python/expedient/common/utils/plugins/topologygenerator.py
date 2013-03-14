@@ -93,24 +93,36 @@ class TopologyGenerator():
         plugin_ui_data['n_islands'] = 0
         plugin_ui_data_aux = dict()
 
-        def get_d3_index_from_resource_id(resource_id):
-            """
-            Retrieves D3.js index node from the Resource ID.
-            """
-#            print "Looking for resource_id: %s" % resource_id
-            d3_index = None
-#            print "Looking into nodes..."
-            for index,node in enumerate(plugin_ui_data['d3_nodes']):
-#                print "%s" % node['value']
-                if str(resource_id) == str(node['value']):
-                    # If d3_index = None, return 'None' instead
-                    d3_index = index
-#                    print ">> found index: %s" % str(index)
+#        def get_d3_index_from_resource_id(resource_id):
+#            """
+#            Retrieves D3.js index node from the Resource ID.
+#            """
+##            print "Looking for resource_id: %s" % resource_id
+#            d3_index = None
+##            print "Looking into nodes..."
+#            for index,node in enumerate(plugin_ui_data['d3_nodes']):
+##                print "%s" % node['value']
+#                if str(resource_id) == str(node['value']):
+#                    # If d3_index = None, return 'None' instead
+#                    d3_index = index
+##                    print ">> found index: %s" % str(index)
+#                    break
+##            if not d3_index:
+##                print "************** not found => None"
+##            print "\n\n"
+#            return d3_index
+
+        def get_node_index(id, nodes):
+            r=None
+            for index,node in enumerate(nodes):
+                if str(id) == str(node['value']):
+                    r = index
                     break
-#            if not d3_index:
-#                print "************** not found => None"
-#            print "\n\n"
-            return d3_index
+#            if r:
+#                return r
+#            else:
+#                return 0
+            return r
 
         for plugin in PluginLoader.plugin_settings:
             try:
@@ -142,7 +154,6 @@ class TopologyGenerator():
                 print "[ERROR] Problem loading UI data inside PluginLoader. Details: %s" % str(e)
 
         # Update links ids to the index of the node in the array to match D3 requirements
-#        print "LEODEBUG\n\n"
 #        for link in plugin_ui_data['d3_links']:
 #            print link
 #        for node in plugin_ui_data['d3_nodes']:
@@ -151,8 +162,8 @@ class TopologyGenerator():
         # Convert Resource IDs into D3.js IDs
         try:
             for index, link in enumerate(plugin_ui_data['d3_links']):
-                link['source'] = get_d3_index_from_resource_id(link['source'])
-                link['target'] = get_d3_index_from_resource_id(link['target'])
+                link['source'] = get_node_index(link['source'], plugin_ui_data['d3_nodes'])
+                link['target'] = get_node_index(link['target'], plugin_ui_data['d3_nodes'])
                 # When some ending point does not exist, remove the link so D3 does not draw it
 #                print "\n\n **************** source: %s, target: %s" % (str(link['source']), str(link['target']))
 #                print "\n\n\n\n\n********!!!!!!!!!! old plugin_ui_data['links']: %s\n\n" % str(plugin_ui_data['d3_links'])

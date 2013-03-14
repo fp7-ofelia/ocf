@@ -362,81 +362,20 @@ def get_nodes_links(slice, chosen_group=None):
 
             # FIXME: Cuando entra en los links, todo peta...
             # For every interface of the server
-            for j,inter in enumerate(n.ifaces.all()):
+            for j,inter in enumerate(n.ifaces.filter(isMgmt = False)):
                 #first check datapathId exists.
                 try:
-#                    print "\n\n**********************************************"
-#                    print "+ inter = %s" % str(inter)
-#                    print "+ inter.ifaceName = %s" % str(inter.ifaceName)
-#                    print "+ inter.switchID = %s" % str(inter.switchID)
-#                    print "+ inter.port = %s" % str(inter.port)
-
-
-#                    print "************************************** source ID (OLD!): %s" % str(sId)
-#                    pId = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
-#                    print "************************************** target ID (OLD!): %s" % str(pId)
-
-
-                    # Factor comun
-                    #openFlowSwitch = OpenFlowSwitch.objects.get(name = inter.switchID)
-                    #openFlowSwitch = Resource.objects.get(name = inter.switchID)
-                    #print "************************************** openflowswitch: %s, id: %s" % (str(openFlowSwitch), str(inter.switchID))
-                    # XXX: NUEVO --> PRUEBA CON IDs DE RECURSOS
-
-                    #switch_id = openFlowSwitch.id
                     switch_id = PluginCommunicator.get_object_id("openflow", "OpenFlowSwitch", name=inter.switchID)
-
-
-
-                    # XXX: ORIGINAL ----> REEMPLAZAR POR ESTE (** PILLA ID DE NODOS EN D3, A PARTIR DE 0 **)
-                    #switch_id = openflowSwitches[inter.switchID]
-#                    print "+ sId: %s" % str(switch_id)
-
-
-                    #sId = j
-                    #print "************************************** proto target: %s, port: %s, name: %s" % (str(openFlowSwitch.openflowswitch.openflowinterface_set), str(inter.port), str(inter.ifaceName))
-                    #pId = openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).id
-
-                    # XXX: ORIGINAL
-
-                    #port_id = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
                     port_id = PluginCommunicator.get_object_id("openflow", "OpenFlowInterface", switch=switch_id, port_num=inter.port)
-
-
-
-
-                    #port_id = openFlowSwitch.openflowinterface_set.get(port_num=inter.port).id
-#                    print "+ pId: %s\n\n" % str(port_id)
-
-
-                    #print "************************************** target id: %s, name: %s" % (str(pId), str(openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).name))
-
-
-
-#                except:
                 except Exception as e:
                     print "/////////////////////////////// exception! %s" % str(e)
                     continue
-#                print "**********************************************\n\n"
-#                print "************************************** CHECKPOINT #0"
-
-
-#                from expedient.common.utils.plugins.topologygenerator import TopologyGenerator
-#                # TODO: GUARDAR EN UNA INSTANCIA SUPERIOR ALGO QUE ESTE AL CORRIENTE DE CADA LINK, ETC
-#                # TAL Y COMO ESTA HECHO TOPOLOGYGENERATOR NO SE PUEDE HACER ESTO... CAMBIAR!
-#                print "\n\n\n\n\n ******* links: %s\n\n\n\n\n" % str(TopologyGenerator.plugin_ui_data['d3_links'])
+	
                 links.append(
                         dict(
-                            target = str(openFlowSwitch.id),
-#                            target_agg_id = str(openFlowSwitch.aggregate_id),
-                            # XXX: TEST MUY CHORRAS -> BORRAR
-                            #source = len(nodes)+7-1-1,
-                            # XXX: ORIGINAL Y FIXME --> OBTENER EL ID EQUIVALENTE EN D3.js ES CLAVE!!!
-                            #source = len(nodes)-1,
+                            target = str(switch_id),
                             source = str(n.id),
                             value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
-                            #value="rsc_id_"+str(sId)+"-"+str(inter.ifaceName)+":"+str(inter.port)
-                            #value=inter.ifaceName+":"+str(inter.port)
                             ),
                      )
 
