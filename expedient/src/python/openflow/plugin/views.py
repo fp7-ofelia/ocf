@@ -441,13 +441,16 @@ def book_openflow(request, slice_id):
 #        from expedient.ui.html.views import get_ui_data
 
 #        from expedient.clearinghouse.slice.views import get_ui_data
-        from expedient.common.utils.plugins.topologygenerator import TopologyGenerator
+#        from expedient.common.utils.plugins.topologygenerator import TopologyGenerator
+        from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
         return simple.direct_to_template(
             request,
 #            template="expedient/clearinghouse/slice/select_resources.html",
             template = "select_resources.html",
 #            extra_context = dict(get_ui_data(slice).items() + ui_extra_context.items()),
-            extra_context = dict(TopologyGenerator.load_ui_data(slice).items() + ui_extra_context.items()),
+
+#            extra_context = dict(TopologyGenerator.load_ui_data(slice).items() + ui_extra_context.items()),
+            extra_context = dict(TOPOLOGY_GENERATOR.load_ui_data(slice).items() + ui_extra_context.items()),
         )
 
 def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):

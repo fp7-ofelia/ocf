@@ -358,7 +358,6 @@ def get_nodes_links(slice, chosen_group=None):
 
 #            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: ifaces for server: %s" % str(n.name)
 
-            # FIXME: Cuando entra en los links, todo peta...
             # For every interface of the server
             for j,inter in enumerate(n.ifaces.all()):
                 #first check datapathId exists.
@@ -400,12 +399,21 @@ def get_nodes_links(slice, chosen_group=None):
 
 
 
-#                except:
                 except Exception as e:
-                    print "/////////////////////////////// exception! %s" % str(e)
+#                    print "[WARNING] Problem retrieving links insde plugin 'vt_plugin'. Details: %s" % str(e)
                     continue
-#                print "**********************************************\n\n"
-#                print "************************************** CHECKPOINT #0"
+
+
+            ### TEST
+#            try:
+##                from expedient.common.utils.plugins.pluginloader import PluginLoader
+#                from expedient.clearinghouse.settings import PLUGIN_LOADER as PluginLoader
+#                print "\n\n\n\n\n\n\n\n plugin_loader.settings: %s\n\n\n\n\n\n\n\n" % str(PluginLoader.plugin_settings.get("openflow"))
+#                print "\n\n\n\n\n\n\n\n plugin_loader.settings: %s\n\n\n\n\n\n\n\n" % str(PluginLoader.plugin_settings.get("openflow").get("general").get("get_ui_data_class"))
+#            except Exception as e:
+#                print "************************** exception!!!!!!!!! %s ******" % str(e)
+
+
 
 
 #                from expedient.common.utils.plugins.topologygenerator import TopologyGenerator

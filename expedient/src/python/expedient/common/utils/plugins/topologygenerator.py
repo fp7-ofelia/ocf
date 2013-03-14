@@ -5,6 +5,8 @@ Loads UI data for every plugin and returns a dictionary with all the data.
 @author: CarolinaFernandez
 """
 
+from expedient.clearinghouse.resources.models import Resource
+from django.core.mail import send_mail
 from pluginloader import PluginLoader
 from utils import Singleton
 
@@ -13,34 +15,69 @@ class TopologyGenerator():
     # Allows only one instance of this class
     __metaclass__ = Singleton
 
-#    # Keeps track of every resource and its corresponding AM
-#    am_resources = []
+    @staticmethod
+    def check_link_consistency(links, nodes, user, slice):
+        """
+        Checks consistency across links.
+        In a link ( A - <link> - B), if any of the endpoints A or B
+        do not exist, <link> is removed from the list.
+        """
+        inconsistent_links = []
+        inconsistent_links_message = ""
+        try:
+            for index, link in enumerate(links):
+                source_link = link['source']
+                target_link = link['target']
 
-#    ### COMMON METHODS: BEGIN
-#    @staticmethod
-#    def craft_resource_id(resource_id, aggregate_id):
-#        try:
-#            return "%s-%s" % (str(aggregate_id), str(resource_id))
-#        except:
-#            return resource_id
-#
-#    @staticmethod
-#    def get_aggregate_id(resource_id):
-#        aggregate_id = 0
-#        try:
-#            aggregate_id = resource_id[:resource_id.index("-")] or 0
-#        except:
-#            pass
-#        return aggregate_id
-#
-#    @staticmethod
-#    def get_resource_id(resource_id):
-#        try:
-#            resource_id = resource_id[resource_id.index("-")+1:] or resource_id
-#        except:
-#            pass
-#        return resource_id
-#    ### COMMON METHODS: END
+                # Convert Resource IDs into D3.js IDs
+                try:
+                   link['source'] = TopologyGenerator.get_d3_index_from_resource_id(link['source'], nodes)
+                   link['target'] = TopologyGenerator.get_d3_index_from_resource_id(link['target'], nodes)
+                except Exception as e:
+                    print "[WARNING] Problem retrieving D3 IDs inside TopologyGenerator. Details: %s" % str(e)
+
+                # Check consistency. If node A or B do not exist, remove link
+                if not (link['source'] != None and link['target'] != None):
+                    source_node = Resource.objects.get(id = source_link)
+                    target_node = Resource.objects.get(id = target_link)
+                    inconsistent_links.append({"source_id": source_link, "source_name": source_node.name, "source_aggregate_id": source_node.aggregate.pk or "", "source_aggregate_name": source_node.aggregate.name or "", "target_id": target_link, "target_name": target_node.name or "", "target_aggregate_id": target_node.aggregate.pk or "", "target_aggregate_name": target_node.aggregate.name or ""})
+                    links.pop(index)
+        except Exception as e:
+            print "[WARNING] Problem checking link consistency inside TopologyGenerator. Details: %s" % str(e)
+
+        # Craft message to send via e-mail
+        if inconsistent_links:
+            for link in inconsistent_links:
+                inconsistent_links_message += "SOURCE\n"
+                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n" % (link['source_id'], link['source_name'], link['source_aggregate_id'], link['source_aggregate_name'])
+                inconsistent_links_message += "TARGET\n"
+                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n\n" % (link['target_id'], link['target_name'], link['target_aggregate_id'], link['target_aggregate_name'])
+            try:
+                from django.conf import settings
+                # XXX DESCOMENTAR AL SUBIR A [PRE]PRODUCCION
+#                send_mail(settings.EMAIL_SUBJECT_PREFIX + " Inconsistent links at slice '%s': Expedient" % str(slice.name), "Hi, Island Manager\n\nThis is a warning to notify about some inconsistent links within a topology. This may be happening because a plugin or Aggregate Manager references a node not present in the Aggregate Managers chosen for this slice.\n\nProject: %s\nSlice: %s\nProblematic links:\n\n%s" % (slice.project.name, slice.name, str(inconsistent_links)), from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[user.email],)
+            except Exception as e:
+                print "[WARNING] Problem sending e-mail to user '%s' (email: %s) with information about link inconsistency inside TopologyGenerator. Details: %s" % (user.username, user.email, str(e))
+
+    @staticmethod
+    def compute_number_islands(plugin_ui_data):
+        return 3
+
+    @staticmethod
+    def get_d3_index_from_resource_id(resource_id, nodes):
+        """
+        Retrieves D3.js index node from the Resource ID.
+        """
+        d3_index = None
+        print "resource id: %s" % str(resource_id)
+        for index,node in enumerate(nodes):
+            print "current node: %s" % str(node['value'])
+            if str(resource_id) == str(node['value']):
+                # If d3_index = None, return 'None' instead
+                d3_index = index
+                break
+        print "new node ID: %s\n\n" % str(d3_index)
+        return d3_index
 
     @staticmethod
     def node_get_adequate_group(node, assigned_groups):
@@ -63,22 +100,6 @@ class TopologyGenerator():
                 assigned_groups.append(new_entry)
         except:
             pass
-        #return [node, assigned_groups]
-#        return node
-
-#    @staticmethod
-#    def resource_set_adequate_id(node, assigned_groups):
-#        resource_id = node['value']
-#        try:
-#            resource_id = node['value']
-#            aggregate_id = node['aggregate']
-#            if aggregate_id not in [resources.get('a') for resources in TopologyGenerator.am_resources]:
-#                TopologyGenerator.am_resources.append({"aggregate": aggregate_id, "resources": []})
-#            TopologyGenerator.am_resources[aggregate_id]
-#            node['value'] = TopologyGenerator.craft_resource_id(resource_id, aggregate_id)
-#        except Exceptions as e:
-#            pass
-#        return resource_id
 
     @staticmethod
     def load_ui_data(slice):
@@ -92,25 +113,6 @@ class TopologyGenerator():
         plugin_ui_data['d3_links'] = []
         plugin_ui_data['n_islands'] = 0
         plugin_ui_data_aux = dict()
-
-        def get_d3_index_from_resource_id(resource_id):
-            """
-            Retrieves D3.js index node from the Resource ID.
-            """
-#            print "Looking for resource_id: %s" % resource_id
-            d3_index = None
-#            print "Looking into nodes..."
-            for index,node in enumerate(plugin_ui_data['d3_nodes']):
-#                print "%s" % node['value']
-                if str(resource_id) == str(node['value']):
-                    # If d3_index = None, return 'None' instead
-                    d3_index = index
-#                    print ">> found index: %s" % str(index)
-                    break
-#            if not d3_index:
-#                print "************** not found => None"
-#            print "\n\n"
-            return d3_index
 
         for plugin in PluginLoader.plugin_settings:
             try:
@@ -131,39 +133,22 @@ class TopologyGenerator():
                     # not have any knowledge of island and therefore should not set the group by itself
                     assigned_groups = []
                     for node in plugin_ui_data['d3_nodes']:
-                        #node = TopologyGenerator.node_get_adequate_group(node, assigned_groups)
                         TopologyGenerator.node_get_adequate_group(node, assigned_groups)
-                        # Set proper ID ('agg<aggregate.pk>_<resource.id>') for each resource
-#                        node['value'] = TopologyGenerator.resource_set_adequate_id(node['value'], assigned_groups)
 
-                # TODO: Perform check over the links between the nodes! Consistency!!
                 plugin_ui_data = dict(plugin_ui_data_aux.items() + plugin_ui_data.items())
+                print "\n\n\n\n plugin_ui_data['d3_links']: %s\n\n\n\n" % str(plugin_ui_data['d3_links'])
+                # TODO
+#                plugin_ui_data['n_islands'] = TopologyGenerador.compute_number_islands(plugin_ui_data)
             except Exception as e:
-                print "[ERROR] Problem loading UI data inside PluginLoader. Details: %s" % str(e)
+                print "[ERROR] Problem loading UI data inside TopologyGenerator. Details: %s" % str(e)
 
-        # Update links ids to the index of the node in the array to match D3 requirements
-#        print "LEODEBUG\n\n"
-#        for link in plugin_ui_data['d3_links']:
-#            print link
-#        for node in plugin_ui_data['d3_nodes']:
-#            print node['name']
+        # Check link consistency
+        from django.contrib.auth.models import User
+        user = User.objects.get(username='carolina')
+        # XXX DESCOMENTAR AL SUBIR A [PRE]PRODUCCION
+#        user = User.objects.filter(is_superuser=True)[0]
+        TopologyGenerator.check_link_consistency(plugin_ui_data['d3_links'], plugin_ui_data['d3_nodes'], user, slice)
+        print "\n\n\n\n plugin_ui_data['d3_links'] (II): %s\n\n\n\n" % str(plugin_ui_data['d3_links'])
 
-        # Convert Resource IDs into D3.js IDs
-        try:
-            for index, link in enumerate(plugin_ui_data['d3_links']):
-                link['source'] = get_d3_index_from_resource_id(link['source'])
-                link['target'] = get_d3_index_from_resource_id(link['target'])
-                # When some ending point does not exist, remove the link so D3 does not draw it
-#                print "\n\n **************** source: %s, target: %s" % (str(link['source']), str(link['target']))
-#                print "\n\n\n\n\n********!!!!!!!!!! old plugin_ui_data['links']: %s\n\n" % str(plugin_ui_data['d3_links'])
-
-                if not (link['source'] != None and link['target'] != None):
-                    plugin_ui_data['d3_links'].pop(index)
-#                    print "\n\n************** deleting link!!! new plugin_ui_data['links']: %s\n\n\n\n\n" % str(plugin_ui_data['d3_links'])
-        except Exception as e:
-            print "[WARNING] Problem retrieving D3 IDs inside PluginLoader. Details: %s" % str(e)
-        #print "LEODEBUG 2\n\n"
-        #print plugin_ui_data['d3_links'][0]
-        #print plugin_ui_data['d3_nodes'][0]
         return plugin_ui_data
 
