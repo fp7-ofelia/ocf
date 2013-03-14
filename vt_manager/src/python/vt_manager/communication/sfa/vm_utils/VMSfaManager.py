@@ -37,32 +37,22 @@ class VMSfaManager:
                 rspec.query.provisioning.action.append(actionClass)
 		provisioningRSpecs.append(rspec.query.provisioning)
 
-		print XmlCrafter.craftXML(rspec.query.provisioning)			
 	return provisioningRSpecs
-		#return ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)	
 	
     @staticmethod
     def setDefaultVMParameters(vm,server):
    
         vm['uuid'] = str(uuid.uuid4())
-        #vm['serverID'] = server_id #XXX: Vms already have this parameter.
         vm['state'] = "on queue"
-        vm['slice-id'] = 'slice-id' #TODO: check if we should use these parameters.
-        vm['slice-name']= 'slice-name' #
-
+        vm['slice-id'] = str(uuid.uuid4()) 
+        vm['slice-name']= 'slice-name' 
         #assign same virt technology as the server where vm created
-        #XXX: VirtTech can be passed with a full SFA RSpec... or should we "configure" the virtTech here?
         vm['virtualization-type'] = server.getVirtTech()
 	vm['server-id'] = server.getUUID()
-
-        #XXX: This is not necessary for SFA, I hope, probably we could assign some special IDs to save the vms
-        vm['project-id'] = 'project-id'
+        vm['project-id'] = str(uuid.uuid4())
         vm['project-name'] = 'project-name'
         vm['aggregate-id'] = 'aggregate-id'
-
         #assign parameters according to selected disc image
-        #XXX: Disc Image Conf set default for now 
-        #vm['disc-image'] == 'default' #XXX Where is this parameter?
         vm['operating-system-type'] = 'GNU/Linux'
         vm['operating-system-version'] = '6.0'
         vm['operating-system-distribution'] = 'Debian'

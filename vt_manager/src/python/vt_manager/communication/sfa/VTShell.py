@@ -1,4 +1,3 @@
-from vt_manager.models.VTServer import VTServer
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.models.Action import Action
 
@@ -21,52 +20,45 @@ class VTShell:
         def __init__(self):
                 pass
 
-	def GetNodes(self):
+	def GetNodes(self,slice = None):
 		servers = VTServer.objects.all()
-		return servers
+		if not slice: 
+		    return servers
+		else:
+		    slice_servers = list()
+		    for server in servers:
+                        if server.getChildObject().getVMs(sliceName=slice):
+			    slice_servers.append(server)
+                    return slice_servers
 
-	#XXX: Slice Methods
-	#XXX: Slice == VM
-	#XXX: We should create an specific sfa action type
 	def GetSlice(self,slicename):
-		#XXX: Don't worry about exceptions, they are treated above(VTSfaDriver class)
-		#TODO: what happens with the names? There are not easier ways to obtain a vm and a server?
 
 		name = slicename # or uuid...
 		servers = self.GetNodes()
+		slices = dict()
 		for server in servers:
+			List = list()
 			child_server = server.getChildObject()
-			vm = child_server.getVMs(name=name)
-			for v in vm:
-				print 'aaaaa'
-				print v.id,v.name
-			if vm[0]:
-				return {'node_id':server.uuid,'slice_id':vm[0].id}
-		
-		raise Exception("Record not found")
+			vms = child_server.getVMs(sliceName=name)
+			for vm in vms:
+				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'node-id':server.uuid, 'node-name':server.name}
+			        	
+		slices['vms'] = List
+		return slices	
 
 	def StartSlice(self,server_uuid,vm_id):
-		#return 1
 		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
 
 	def StopSlice(self,server_uuid,vm_id):
-		#return 1
 		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_STOP_TYPE)
 	
 	def RebootSlice(self,server_uuid,vm_id):
-		#return 1
                 return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_REBOOT_TYPE)
 
 	def DeleteSlice(self,server_uuid,vm_id):
-		#return 1
                 return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_DELETE_TYPE)
 
 	def __crudVM(self,server_uuid,vm_id,action):
-		#XXX: First approach
-		#XXX: The required params could be obtained by the RSpec or another function
-		#XXX: We could create some kind of SFAActions in this function.
-		#TODO: In propagate action, is the connection holded until the action in the vm is done? How to do it?
-		#TODO: Raise exceptions to SFA Faults
 		try:
 			VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, action)
 		except Exception as e:	
@@ -74,8 +66,6 @@ class VTShell:
 		return 1
 
 	def CreateSliver(self,vm_params):
-		#XXX: My idea here is to use the dict structure vm_params to create a provisioning rspec and send it only to the agent.
-
 		#processes = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
 		for provisioningRSpec in provisioningRSpecs:
@@ -84,12 +74,10 @@ class VTShell:
 		    #processes.append(process)
 		    #process.start()
                     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,UrlUtils.getOwnCallbackURL())
-			
 		#waiter.recv()
 		return 1
  
 	def GetSlices(server_id,user=None):
-		#XXX: Get all the vms from a node and from an specific user
-		
+		#TODO: Get all the vms from a node and from an specific user
 		pass
 

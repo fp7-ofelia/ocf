@@ -1,6 +1,5 @@
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string
-#from vt_manager.communication.sfa.util.sfalogging import logger
 
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
 #from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
@@ -49,13 +48,15 @@ class VMAggregate:
 
         	nodes = self.get_nodes(options)
         	rspec.version.add_nodes(nodes)
-		print '--------------------------------------------------------RSPEC',rspec.toxml()
         	return rspec.toxml()
 	
     	def get_nodes(self, options={}):
-	        nodes = self.shell.GetNodes()
+
+		if 'slice' in options.keys():
+			nodes = self.shell.GetNodes(options['slice'])
+		else:
+	        	nodes = self.shell.GetNodes()
 	        rspec_nodes = []
-		print '--------------------------------------------------------------Nodes',nodes
 	        for node in nodes:
 		    
 	            rspec_node = Node()

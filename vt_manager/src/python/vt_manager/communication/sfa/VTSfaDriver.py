@@ -44,56 +44,42 @@ class VTSfaDriver:
        		return rspec
 
 	def crud_slice(self,slice_leaf, creds=None, action=None):
-		#XXX: If we use get_leaf method from Xrn instances we will get the correct name for the slices(vms)	
-		#XXX: Slice_hrn: topdomain.subdomain.SliceName
-		#XXX: Slice_urn: urn:publicid:IDN+topdomain:subdomain+slice+SliceName
 
-		slicename = slice_leaf #'getSliceNameFromHrn'#XXX:hrn_to_dummy_slicename(slice_hrn)
+		slicename = slice_leaf 
                 try:
-                        #XXX: getSlices should return the server UUID too
                         slice = self.shell.GetSlice(slicename)
-			print slice
                 except Exception as e:
-			print "exception:",e
                         raise RecordNotFound(slice_leaf)
-		if action == 'start_slice':
-			return self.shell.StartSlice(slice['node_id'],slice['slice_id'])
-		elif action == 'stop_slice':
-			return self.shell.StopSlice(slice['node_id'],slice['slice_id'])
-		elif action == 'delete_slice':
-			return self.shell.DeleteSlice(slice['node_id'],slice['slice_id'])
-		elif action == 'reset_slice':
-			return self.shell.RebootSlice(slice['node_id'],slice['slice_id'])
+		for vm in slice['vms']:
+			if action == 'start_slice':
+				self.shell.StartSlice(vm['node-id'],vm['vm-id'])
+			elif action == 'stop_slice':
+				self.shell.StopSlice(vm['node-id'],vm['vm-id'])
+			elif action == 'delete_slice':
+				self.shell.DeleteSlice(vm['node-id'],vm['vm-id'])
+			elif action == 'reset_slice':
+				self.shell.RebootSlice(vm['node-id'],vm['vm-id'])
+		return 1
 
         def create_sliver (self,slice_leaf,rspec_string, users, options):
 		
-		#TODO: Clean input params, check if slice is already created, rspec.		
-
-		#XXX: At the end of the day, this is only for federation, local slices are made by the "OCF way"	
-		#XXX: this method should parse a vm rspec, get the main attributes of the vm and send this attributes to the shell.
-		#XXX: should be users? For what?
-		#XXX: What about vm repeated names?	
-                #XXX: what is this?--> sfa_peer = slices.get_sfa_peer(slice_hrn)
-		#XXX: probably this is not necessary
-                #slice_record=None
-                #if users:
-                #    slice_record = users[0].get('slice_record', {})
-                # parse rspec
                 rspec = RSpec(rspec_string,'OcfVt')
-		#XXX: if we can get the vm paramaters, we can use the shell to create a create vm action
                 requested_attributes = rspec.version.get_slice_attributes()
-		
+		requested_attributes['project-name'] = users[0]['slice_record']['authority']
+		requested_attributes['slice-name'] = slice_leaf	
 		self.shell.CreateSliver(requested_attributes)
-		print '-----In heaven everything is fine... In heaven everything is fine... in heaven...'	
-                # ensure slice record exists
-		#XXX: Do we need this?
-                #slice = slices.verify_slice(slice_hrn, slice_record, sfa_peer, options=options)
-                # ensure user records exists
-                #users = slices.verify_users(slice_hrn, slice, users, sfa_peer, options=options)
-		#XXX: We should return a manifest rspec
                 return self.aggregate.get_rspec(slice_leaf=slice_leaf, version=rspec.version)
+	
+	def sliver_status(self,slice_leaf,creds,options):
+
+		slice = self.shell.GetSlice(slicename)	
+		result = dict()
+		List = list()
+		for vm in slice['vms']:
+    			List.append({'vm-name':vm['vm-name'],'vm-state': vm['vm.state'], 'node-name': vm['node-name']})
+		result['virtual-machines'] = List
+		return result
+			
 
 		
-
-	
 	
