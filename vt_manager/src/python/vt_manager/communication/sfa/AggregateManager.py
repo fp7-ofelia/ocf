@@ -71,6 +71,7 @@ class AggregateManager:
     def start_slice(self, api, xrn, creds):
         xrn = Xrn(xrn)
 	slice_leaf = xrn.get_leaf()
+	print slice_leaf
         return self.driver.crud_slice(slice_leaf, creds,action='start_slice')
 
     def stop_slice(self, api, xrn, creds):
