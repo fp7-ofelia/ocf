@@ -45,10 +45,8 @@ class TopologyGenerator():
         will be sent to the topology visor, shown in the slice view.
         """
         def get_node_index(id, nodes):
-            print "id: %s" % id
             r=None
             for index,node in enumerate(nodes):
-                print "NODE: %s" % node['value']
                 if str(id) == str(node['value']):
                     r = index
                     break
@@ -92,19 +90,11 @@ class TopologyGenerator():
 
         # Update links ids to the index of the node in the array to match D3 requirements
 
-        print "LEODEBUG\n\n"
-        for link in plugin_ui_data['d3_links']:
-            print link
-        for node in plugin_ui_data['d3_nodes']:
-            print node['name']
         try:
             for link in plugin_ui_data['d3_links']:
                 link['target'] = get_node_index(link['target'], plugin_ui_data['d3_nodes'])
                 link['source'] = get_node_index(link['source'], plugin_ui_data['d3_nodes'])
         except Exception as e:
             print e
-        #print "LEODEBUG 2\n\n"
-        #print plugin_ui_data['d3_links'][0]
-        #print plugin_ui_data['d3_nodes'][0]
         return plugin_ui_data
 
