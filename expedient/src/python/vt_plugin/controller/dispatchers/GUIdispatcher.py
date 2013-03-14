@@ -291,46 +291,19 @@ def get_nodes_links(slice, chosen_group=None):
     id_to_idx = {}
     n_islands = 0
 
-    ### ANOTHER "MAYBE PROBLEMATIC CODE"
-    openflowSwitches = dict()
-    nodes_test = []
-    from openflow.plugin.views import get_openflow_aggregates
-    of_aggs = get_openflow_aggregates(slice)
-    for i, agg in enumerate(of_aggs):
-        switches = OpenFlowSwitch.objects.filter(
-            aggregate__pk=agg.pk,
-            available=True,
-        )
-        for s in switches:
-            nodes_test.append(s.id)
-            openflowSwitches[s.datapath_id] = len(nodes_test)-1
-
-#    ### PROBLEMATIC CODE!
-#    id_to_idx = {}
-#    #FIXME: dependency against OpenFlow plugin!!!!!! MAYBE HANDLE THE #GROUP INSIDE JAVASCRIPT?
+#    ### ANOTHER "MAYBE PROBLEMATIC CODE"
+#    openflowSwitches = dict()
+#    nodes_test = []
 #    from openflow.plugin.views import get_openflow_aggregates
 #    of_aggs = get_openflow_aggregates(slice)
-##    chosen_group = len(of_aggs)
-#
-#    #Openflow devices
-#    #XXX: botch
-#    openflowSwitches = dict() 
 #    for i, agg in enumerate(of_aggs):
-#        agg_ids.append(agg.pk)
 #        switches = OpenFlowSwitch.objects.filter(
 #            aggregate__pk=agg.pk,
 #            available=True,
 #        )
 #        for s in switches:
-#            id_to_idx[s.id] = len(nodes)
-#            nodes.append(dict( 
-#                name=s.name, value=s.id, aggregate=agg.pk, type="OpenFlow Aggregate",
-#                available=agg.available, description="", connection=[], loc=agg.location)
-#            )
-#            openflowSwitches[s.datapath_id] = len(nodes)-1
-#    print "************************** openflowSwitches: %s" % str(openflowSwitches)
-#    nodes = []
-#    ### END OF PROBLEMATIC CODE!
+#            nodes_test.append(s.id)
+#            openflowSwitches[s.datapath_id] = len(nodes_test)-1
 
     vt_aggs = get_vm_aggregates(slice)
 
@@ -378,30 +351,34 @@ def get_nodes_links(slice, chosen_group=None):
             )
             serverGroupSet=False
 
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: openflowSwitches"
-            print "-------> openflow switches!!!!!!!!!!!!!!!!!: %s" % str(openflowSwitches)
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: openflowSwitches"
+#            print "-------> openflow switches!!!!!!!!!!!!!!!!!: %s" % str(openflowSwitches)
 #            for sw in openflowSwitches:
 #                print "-------> switch: %s" % str(sw)
 #            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end: openflowSwitches"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: ifaces for server: %s" % str(n.name)
+
+
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: ifaces for server: %s" % str(n.name)
 
             # FIXME: Cuando entra en los links, todo peta...
             # For every interface of the server
             for j,inter in enumerate(n.ifaces.all()):
                 #first check datapathId exists.
                 try:
-                    print "\n\n**********************************************"
-                    print "+ inter = %s" % str(inter)
-                    print "+ inter.ifaceName = %s" % str(inter.ifaceName)
-                    print "+ inter.switchID = %s" % str(inter.switchID)
-                    print "+ inter.port = %s" % str(inter.port)
+#                    print "\n\n**********************************************"
+#                    print "+ inter = %s" % str(inter)
+#                    print "+ inter.ifaceName = %s" % str(inter.ifaceName)
+#                    print "+ inter.switchID = %s" % str(inter.switchID)
+#                    print "+ inter.port = %s" % str(inter.port)
+
+
 #                    print "************************************** source ID (OLD!): %s" % str(sId)
 #                    pId = OpenFlowSwitch.objects.get(name = inter.switchID).openflowinterface_set.get(port_num=inter.port).id
 #                    print "************************************** target ID (OLD!): %s" % str(pId)
 
 
                     # Factor comun
-                    openFlowSwitch = OpenFlowSwitch.objects.get(name = inter.switchID)
+                    #openFlowSwitch = OpenFlowSwitch.objects.get(name = inter.switchID)
                     #openFlowSwitch = Resource.objects.get(name = inter.switchID)
                     #print "************************************** openflowswitch: %s, id: %s" % (str(openFlowSwitch), str(inter.switchID))
                     # XXX: NUEVO --> PRUEBA CON IDs DE RECURSOS
@@ -413,7 +390,9 @@ def get_nodes_links(slice, chosen_group=None):
 
                     # XXX: ORIGINAL ----> REEMPLAZAR POR ESTE (** PILLA ID DE NODOS EN D3, A PARTIR DE 0 **)
                     #switch_id = openflowSwitches[inter.switchID]
-                    print "+ sId: %s" % str(switch_id)
+#                    print "+ sId: %s" % str(switch_id)
+
+
                     #sId = j
                     #print "************************************** proto target: %s, port: %s, name: %s" % (str(openFlowSwitch.openflowswitch.openflowinterface_set), str(inter.port), str(inter.ifaceName))
                     #pId = openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).id
@@ -427,7 +406,9 @@ def get_nodes_links(slice, chosen_group=None):
 
 
                     #port_id = openFlowSwitch.openflowinterface_set.get(port_num=inter.port).id
-                    print "+ pId: %s\n\n" % str(port_id)
+#                    print "+ pId: %s\n\n" % str(port_id)
+
+
                     #print "************************************** target id: %s, name: %s" % (str(pId), str(openFlowSwitch.openflowswitch.openflowinterface_set.get(port_num=inter.port).name))
 
 
@@ -436,8 +417,10 @@ def get_nodes_links(slice, chosen_group=None):
                 except Exception as e:
                     print "/////////////////////////////// exception! %s" % str(e)
                     continue
-                print "**********************************************\n\n"
-                print "************************************** CHECKPOINT #0"
+#                print "**********************************************\n\n"
+#                print "************************************** CHECKPOINT #0"
+
+
 #                from expedient.common.utils.plugins.topologygenerator import TopologyGenerator
 #                # TODO: GUARDAR EN UNA INSTANCIA SUPERIOR ALGO QUE ESTE AL CORRIENTE DE CADA LINK, ETC
 #                # TAL Y COMO ESTA HECHO TOPOLOGYGENERATOR NO SE PUEDE HACER ESTO... CAMBIAR!
@@ -445,7 +428,7 @@ def get_nodes_links(slice, chosen_group=None):
                 links.append(
                         dict(
                             target = str(openFlowSwitch.id),
-                            target_agg_id = str(openFlowSwitch.aggregate_id),
+#                            target_agg_id = str(openFlowSwitch.aggregate_id),
                             # XXX: TEST MUY CHORRAS -> BORRAR
                             #source = len(nodes)+7-1-1,
                             # XXX: ORIGINAL Y FIXME --> OBTENER EL ID EQUIVALENTE EN D3.js ES CLAVE!!!
@@ -458,21 +441,16 @@ def get_nodes_links(slice, chosen_group=None):
                      )
 
                 # When the server has >= 1 interfaces, set 'serverGroupSet' to True
-                print "************************************** CHECKPOINT #1"
+#                print "************************************** CHECKPOINT #1"
                 if (not serverGroupSet):
                     # ORIGINAL
 #                    nodes[len(nodes)-1]["group"] = nodes[sId]["group"]
                     serverGroupSet = True
-                print "************************************** CHECKPOINT #2"
+#                print "************************************** CHECKPOINT #2"
 
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start links"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> links: %s" % str(links)
-#            for l in links:
-#                try:
-#                    print "----------------------------> %s to %s" % (l.source.nodeName, l.target.nodeName)
-#                except:
-#                    pass
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end links"
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start links"
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> links: %s" % str(links)
+#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end links"
 
 
             # XXX TEST!
@@ -487,7 +465,7 @@ def get_nodes_links(slice, chosen_group=None):
                 n_islands += 1
                 # This groups servers of the same VT AM in the same island
                 serverInSameIsland = True
-            print "************************************** CHECKPOINT #3. n_islands = %s" % str(n_islands)
+#            print "************************************** CHECKPOINT #3. n_islands = %s" % str(n_islands)
     return [nodes, links, n_islands]
 
 def get_ui_data(slice):

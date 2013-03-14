@@ -175,12 +175,21 @@ var epoints= [
                 {% endfor %}
         ]
 /* XXX: test */
-/*var sauss = {{ d3_links }};
-console.log("d3_links: " + sauss.replace(/&/g, ''));*/
-{% for link in d3_links %}
+/*{% for link in d3_links %}
     console.log("link.source: " + {{ link.source }});
     console.log("link.target: " + {{ link.target }});
-{% endfor %}
+{% endfor %}*/
+
+// GET D3 INDEX FROM RESOURCE ID
+/*function get_d3index_from_resourceid(node_value) {
+    obtained_index = 0;
+    for (var node in data.nodes) {
+        if (node.nodeValue == node_value) {
+            obtained_index = node.index;
+        }
+    }
+    return obtained_index;
+}*/
 
 var data = {
     nodes: [
@@ -201,12 +210,32 @@ var data = {
     links: [
         {% for link in d3_links %}
             { source: {{ link.source }}, target: {{ link.target }}, value: "{{ link.value }}" }
+            /*{ source: get_d3index_from_resourceid({{ link.source }}),
+              target: get_d3index_from_resourceid({{ link.target }}), value: "{{ link.value }}" }*/
             /*{ source: 7, target: 8, value: "{{ link.value }}" }*/
             {% if not forloop.last %},{% endif %}
         {% endfor %}
 	
     ],
 }
+
+// GET D3 INDEX FROM RESOURCE ID
+/*function get_d3index_from_resourceid(node_value) {
+    obtained_index = 0;
+    for (var node in data.nodes) {
+        if (node.nodeValue == node_value) {
+            obtained_index = node.index;
+        }
+    }
+    return obtained_index;
+}
+
+for (li = 0; li < data.links.length; li++) {
+    console.log("bleeergh: " + data.links[li]);
+    console.log("checking ids (source: " + data.links[li].source + "), (target: " + data.links[li].target + ")");
+    data.links[li].source = get_d3index_from_resourceid(data.links[li].source);
+    data.links[li].target = get_d3index_from_resourceid(data.links[li].target);
+}*/
 
 /* Code used for calculating groups/islands within frontend */
 /*
@@ -451,11 +480,11 @@ nodes.forEach(function(d) {
 
 var links = data.links;
 
-console.log("before FORCE: ");
+/*console.log("before FORCE: ");
 for (ki = 0; ki < links.length; ki ++) {
     console.log("link [source] #" + ki + " '" + links[ki].source.nodeName + "': " + links[ki].source.index);
     console.log("link [target] #" + ki + " '" + links[ki].target.nodeName + "': " + links[ki].target.index);
-}
+}*/
 
 var force = d3.layout.force()
     .gravity(0)
