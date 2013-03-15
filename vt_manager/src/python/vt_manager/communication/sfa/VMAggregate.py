@@ -41,16 +41,17 @@ class VMAggregate:
 		if slice_leaf:
 		    #Manifest RSpec will be used when somebody creates an sliver, returning the resources of this AM and the vm(s) requested by the user.
 		    rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
+		    options['slice']=slice_leaf
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
 
         	rspec = RSpec(version=rspec_version, user_options=options)
 
-        	nodes = self.get_nodes(options)
+        	nodes = self.get_nodes(options,slice_leaf)
         	rspec.version.add_nodes(nodes)
         	return rspec.toxml()
 	
-    	def get_nodes(self, options={}):
+    	def get_nodes(self, options={},slice_leaf = None):
 
 		if 'slice' in options.keys():
 			nodes = self.shell.GetNodes(options['slice'])
@@ -106,22 +107,15 @@ class VMAggregate:
         	        rspec_node['location'] = location
 		
 		    #TODO:complete slivers part for manifest RSpecs
-		    slices = self.shell.GetSlices(node.uuid)
+		    slices = self.shell.GetSlice(slice_leaf)
+		    slivers = list()
 		    if slices:
-		        for vm in slices:
-			    if vm.interfaces:
-			  	ifaces = list()
-				for interface in vm.interfaces:
-					ifaces.append(interface)
-		    	    rspec_node['slivers'].append(VM({'name':vm.name,
-						  'statate':vm.state,
-						  'memory-mb':vm.memory,
-						  'operating-system-type':vm.operatingSystemType, 
-                                                  'operating-system-distribution':vm.operatingSystemDistribution,
-                                                  'operating-system-version':str(vm.operatingSystemVersion),
-                                                  'virtualization-technology':vm.virtTech,
-						  'interfaces':VMInterface(ifaces),
+		        for vm in slices['vms']:
+			    if vm['node-name'] == node.name:
+		    	    	slivers.append(VM({'name':vm['vm-name'],
+			        	           'state':vm['vm-state'],
 						  }))
+			rspec_node['slivers'] = slivers
 		
             	    rspec_nodes.append(rspec_node)
         	return rspec_nodes

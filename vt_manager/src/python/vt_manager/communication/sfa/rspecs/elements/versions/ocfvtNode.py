@@ -70,10 +70,12 @@ class OcfVtNode:
             slivers = node.get('slivers', [])
             if slivers:
 		for sliver in slivers:
+			fields = sliver.fields
 			s = node_elem.add_element('sliver', type=str(sliver.__class__.__name__))
 			for field in fields:
-				simple_elem = s.add_element(field)#node_elem.add_element(field)
-                                simple_elem.set_text(service[field])
+				if sliver[field]:
+					simple_elem = s.add_element(field)#node_elem.add_element(field)
+                                	simple_elem.set_text(sliver[field])
 
                 # we must still advertise the available sliver types
                 #slivers = Sliver({'type': 'plab-vserver'})

@@ -37,8 +37,8 @@ class VTShell:
 		name = slicename # or uuid...
 		servers = self.GetNodes()
 		slices = dict()
+		List = list()
 		for server in servers:
-			List = list()
 			child_server = server.getChildObject()
 			vms = child_server.getVMs(sliceName=name)
 			for vm in vms:
@@ -66,15 +66,15 @@ class VTShell:
 			raise e
 		return 1
 
-	def CreateSliver(self,vm_params):
+	def CreateSliver(self,vm_params,projectName,sliceName):
 		#processes = list()
-		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params)
+		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
 		for provisioningRSpec in provisioningRSpecs:
 		    #waiter,event = Pipe()
 		    #process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
 		    #processes.append(process)
 		    #process.start()
-                    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,UrlUtils.getOwnCallbackURL())
+                    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
 		#waiter.recv()
 		return 1
  

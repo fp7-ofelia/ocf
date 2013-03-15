@@ -1,11 +1,12 @@
 rspec ='''
 <rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="advertisement" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd" expires="2013-02-18T12:15:30Z" generated="2013-02-18T11:15:30Z">
-	<node component_manager_id="ocf.i2cat.vtmanager:c9883c61-16df-49cc-a8ea-8768d9b517a4authority+cm" component_name="58f565eb-b289-48aa-b4ac-61bc27cf1dea" exclusive="false" component_id="c9883c61-16df-49cc-a8ea-8768d9b517a4">
+	<node component_manager_id="ocf.i2cat.vtmanager:c9883c61-16df-49cc-a8ea-8768d9b517a4authority+cm" component_id="58f565eb-b289-48aa-b4ac-61bc27cf1dea" exclusive="false" component_name="c9883c61-16df-49cc-a8ea-8768d9b517a4">
 		<slivers>
 			<name>mySFAVM2</name>
 			<uuid>myuuid</uuid>
 			<project-id>project1</project-id> 
-			<slice-id>slice1</slice-id> 
+			<slice-id>slice1</slice-id>
+			<slice-name>SFATest</slice-name> 
 			<operating-system-type>GNU/Linux</operating-system-type>
 			<operating-system-version>5.0</operating-system-version>
 			<operating-system-distribution>Debian</operating-system-distribution>
@@ -23,11 +24,6 @@ rspec ='''
 					<gw>192.168.0.100</gw>
 					<dns1>195.235.113.3</dns1>
 					<dns2>80.58.0.33</dns2>
-				</interface>
-				<interface>
-					<name>eth1</name>
-					<ip>192.168.0.2</ip>
-					<mask>255.255.255.0</mask>
 				</interface>
 			</interfaces>
 		</slivers>

@@ -40,7 +40,6 @@ class VTSfaDriver:
         	rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
         	version_string = "rspec_%s" % (rspec_version)
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
-		print 'list_resources Rspec instance:',rspec
        		return rspec
 
 	def crud_slice(self,slice_leaf, creds=None, action=None):
@@ -50,6 +49,7 @@ class VTSfaDriver:
                         slice = self.shell.GetSlice(slicename)
                 except Exception as e:
                         raise RecordNotFound(slice_leaf)
+
 		for vm in slice['vms']:
 			if action == 'start_slice':
 				self.shell.StartSlice(vm['node-id'],vm['vm-id'])
@@ -65,18 +65,18 @@ class VTSfaDriver:
 		
                 rspec = RSpec(rspec_string,'OcfVt')
                 requested_attributes = rspec.version.get_slice_attributes()
-		requested_attributes['project-name'] = users[0]['slice_record']['authority']
-		requested_attributes['slice-name'] = slice_leaf	
-		self.shell.CreateSliver(requested_attributes)
+		projectName = users[0]['slice_record']['authority']
+		sliceName = slice_leaf	
+		self.shell.CreateSliver(requested_attributes,projectName,sliceName)
                 return self.aggregate.get_rspec(slice_leaf=slice_leaf, version=rspec.version)
 	
 	def sliver_status(self,slice_leaf,creds,options):
 
-		slice = self.shell.GetSlice(slicename)	
+		slice = self.shell.GetSlice(slice_leaf)	
 		result = dict()
 		List = list()
 		for vm in slice['vms']:
-    			List.append({'vm-name':vm['vm-name'],'vm-state': vm['vm.state'], 'node-name': vm['node-name']})
+    			List.append({'vm-name':vm['vm-name'],'vm-state': vm['vm-state'], 'node-name': vm['node-name']})
 		result['virtual-machines'] = List
 		return result
 			

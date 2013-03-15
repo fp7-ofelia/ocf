@@ -3,6 +3,7 @@ from vt_manager.communication.sfa.tests.example_vm_rspec import rspec as RSPEC
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningResponseDispatcher import ProvisioningResponseDispatcher as prd
 from vt_manager.utils.ServiceThread import *
+from vt_manager.communication.sfa.tests.hardcoded_vars import users as USERS
 '''
 This module run tests over the AM locally without xmlrpc or sfa instances
 '''
@@ -19,7 +20,7 @@ class Options:
 		return getattr(options,attr)
 
 
-
+users = USERS
 options = Options(123456)
 agg = AggregateManager(None)
 print 'Aggregate instance:',agg
@@ -32,10 +33,13 @@ print 'Aggregate instance:',agg
 
 #XXX: Last ListResources() test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
 
-#xml = agg.CreateSliver(None, None, None, RSPEC, None, options)
+xml = agg.CreateSliver(None, 'SFATest', None, RSPEC, users, None)
+print xml
 #XXX: Last CreateSliver() test was 02/25/2013 with OK results. The test does not get any parametre from VTShell yet, but the RSpec parsing(v1) is OK. The CreateSliver and GetSlice VTShell functions should be implemented working with slice_leaf parametre in order to check the manifest response RSpec.
 
-xml = agg.start_slice(None,'SFATest',None)
-
+#xml = agg.start_slice(None,'SFATest',None)
+#xml = agg.reset_slice(None,'SFATest')
+#xml = agg.SliverStatus(None,'SFATest',None,None)
+#print xml
 
 

@@ -4,15 +4,15 @@ import copy
 class Translator:
 
     @staticmethod
-    def VMdictToClass(VMdict, VMxmlClass):
+    def VMdictToClass(VMdict, VMxmlClass,projectName,sliceName):
       
         VMxmlClass.name = VMdict['name']
         VMxmlClass.uuid = VMdict['uuid']
         VMxmlClass.status = VMdict['state']
         VMxmlClass.project_id = VMdict['project-id']
-        VMxmlClass.project_name = VMdict['project-name']
+        VMxmlClass.project_name = projectName #VMdict['project-name']
         VMxmlClass.slice_id = VMdict['slice-id']
-        VMxmlClass.slice_name = VMdict['slice-name']
+        VMxmlClass.slice_name = sliceName #VMdict['slice-name']
         VMxmlClass.operating_system_type = VMdict['operating-system-type']
         VMxmlClass.operating_system_version = VMdict['operating-system-version']
         VMxmlClass.operating_system_distribution = VMdict['operating-system-distribution']

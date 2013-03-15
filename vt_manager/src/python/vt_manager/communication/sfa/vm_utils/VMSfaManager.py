@@ -17,7 +17,7 @@ class VMSfaManager:
     '''Class to pass the VM parameters to an RSpec Instance for ProvisioningDisaptcher'''
 
     @staticmethod
-    def getActionInstance(servers_slivers):
+    def getActionInstance(servers_slivers,projectName,sliceName):
 	provisioningRSpecs = list()
 	rspec = XmlHelper.getSimpleActionQuery()
 	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
@@ -30,7 +30,7 @@ class VMSfaManager:
 	        VMSfaManager.setDefaultVMParameters(vm,server)
 		actionClass = copy.deepcopy(actionClassEmpty)
                 actionClass.id = uuid.uuid4()
-                Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
+                Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0],projectName,sliceName)
 		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
