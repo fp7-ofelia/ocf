@@ -32,8 +32,20 @@ class VMAggregate:
 
 	def __init__(self):
 		self.shell = VTShell()
+
+	@staticmethod
+	def FilterList(myfilter, mylist):
+    		result = []
+    		result.extend(mylist)
+    		for item in mylist:
+         		for key in myfilter.keys():
+                 		if myfilter[key] != item[key]:
+                     			result.remove(item)
+              			        break
+    		return result
+
 	
-	def get_rspec(self, version=None, slice_leaf=None, options={}):
+	def get_rspec(self, version=None, slice_leaf=None, projectName=None ,created_vms=[],options={}):
 
 		#XXX: I think this is quite clear
         	version_manager = VersionManager()
@@ -47,11 +59,12 @@ class VMAggregate:
 
         	rspec = RSpec(version=rspec_version, user_options=options)
 
-        	nodes = self.get_nodes(options,slice_leaf)
+        	nodes = self.get_nodes(options,slice_leaf,projectName,created_vms)
         	rspec.version.add_nodes(nodes)
+		print '------------------------------------------------------------------------------',rspec.toxml()
         	return rspec.toxml()
 	
-    	def get_nodes(self, options={},slice_leaf = None):
+    	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[]):
 
 		if 'slice' in options.keys():
 			nodes = self.shell.GetNodes(options['slice'])
@@ -107,8 +120,14 @@ class VMAggregate:
         	        rspec_node['location'] = location
 		
 		    #TODO:complete slivers part for manifest RSpecs
-		    slices = self.shell.GetSlice(slice_leaf)
-		    slivers = list()
+		    slices = list()
+		    cVMs = dict()
+		    if slice_leaf:
+			slices = (self.shell.GetSlice(slice_leaf,projectName))
+			print slices
+		    	#createdVMs = (VMAggregate.FilterList({'slice-name':slice_leaf},created_vms))
+			#cVMs['vms'] = createdVMs
+		    slivers = list() 
 		    if slices:
 		        for vm in slices['vms']:
 			    if vm['node-name'] == node.name:
