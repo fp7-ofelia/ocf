@@ -2,35 +2,41 @@
 
 {% block title %}{% if create %}Add Virtualization Aggregate{% else %}Update Virtualization Aggregate {{ aggregate.name }}{% endif %}.{% endblock title %}
 
-{% block head %}
-<style>
-	/* OpenFlow stuff */
-	table.openflow_create {
-		width:70%;
-		margin-left:15%;
-		margin-right:15%;
-	}
-	table.openflow_create th {
-	    text-align:right;
-	}
-	table.openflow_create tr {
-	    text-align:left;
-	}
-	table.openflow_create input[type='textarea'], input[type='text'] {
-	    width:335px;
-	}
-	table.openflow_create #id_description {
-		height:75px;
-	}
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="main">
 	<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
-	<table class="formtable_noborder openflow_create">
-	{{ agg_form.as_table }}
-	{{ client_form.as_table }}
+	<table class="formtable_noborder aggregate_create">
+
+	{# {{ agg_form.as_table }} #}
+
+        {# Aggregate Manager information #}
+        {% if agg_form.non_field_errors %}
+            <tr><td></td><td>{{ agg_form.non_field_errors }}</td></tr>
+        {% endif %}
+        {% for field in agg_form %}
+            {% if field.errors %}
+                <tr><td></td><td>{{ field.errors }}</td></tr>
+            {% endif %}
+            <tr>
+                <th> {{ field.label_tag }}:</th>
+                <td>
+                    {% if field.name == 'location' %}
+                        <ul id="warninglist_id_location" class="warning">
+                            <li>
+                                <img src="{% url img_media 'exclamation_mark_15x15.png' %}" /> {{ field.help_text }}
+                            </li>
+                        </ul>
+                    {% endif %}
+                    {{ field }} {{ field.help_text }}
+                </td>
+            </tr>
+        {% endfor %}
+
+        {# Client information #}
+        {% if client_form.non_field_errors %}
+            <tr><td></td><td>{{ client_form.non_field_errors }}</td></tr>
+        {% endif %}
+        {{ client_form.as_table }}
 
 	<!--
 	{% if not create %}	

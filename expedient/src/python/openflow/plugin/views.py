@@ -423,7 +423,7 @@ def book_openflow(request, slice_id):
 #            "openflow_aggs": of_aggs,
 #            "planetlab_aggs": pl_aggs,
 #            "vt_aggs": vt_aggs,
-#            "slice": slice,
+            "slice": slice,
 #            "checked_ids": get_checked_ids(slice),
 #            "ofswitch_class": OpenFlowSwitch,
 #            "planetlab_node_class": PlanetLabNode,
@@ -450,6 +450,7 @@ def book_openflow(request, slice_id):
 #            extra_context = dict(get_ui_data(slice).items() + ui_extra_context.items()),
 
 #            extra_context = dict(TopologyGenerator.load_ui_data(slice).items() + ui_extra_context.items()),
+            # TopologyGenerator class instance
             extra_context = dict(TOPOLOGY_GENERATOR.load_ui_data(slice).items() + ui_extra_context.items()),
         )
 
@@ -827,7 +828,8 @@ def get_nodes_links(slice):
                 ),
             )
         )
-    return [nodes, links, n_islands]
+#    return [nodes, links, n_islands]
+    return [nodes, links]
 
 def get_tree_ports(of_aggs, pl_aggs):
     """Implements Kruskal's algorihm to find a min spanning tree"""
@@ -909,7 +911,8 @@ def get_ui_data(slice):
         ui_context['ofswitch_class'] = OpenFlowSwitch
         ui_context['planetlab_node_class'] = PlanetLabNode
         ui_context['tree_rsc_ids'] = get_tree_ports(ui_context['openflow_aggs'], ui_context['planetlab_aggs'])
-        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
+#        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
+        ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
     except Exception as e:
         print "[ERROR] Problem loading UI data for plugin 'openflow'. Details: %s" % str(e)
     return ui_context

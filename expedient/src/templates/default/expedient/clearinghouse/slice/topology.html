@@ -198,7 +198,7 @@ var data = {
             nodeValue: "{{ node.value }}", nodeName: "{{ node.name }}", image: "{{ node.image }}", color: "",
             /* Code used for calculating groups/islands within frontend */
             /*group: adequate_group({{ node.aggregate }}),*/
-            group: "{{ node.group }}", aggregate: {{ node.aggregate }},
+            group: {{ node.group }}, aggregate: {{ node.aggregate }},
             loc: "{{ node.loc }}", type: "{{ node.type }}",
             description: "{{ node.description }}", fixed: false, radius: 10, available: "{{ node.available }}",
         }

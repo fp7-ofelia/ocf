@@ -377,13 +377,14 @@ def get_nodes_links(slice, chosen_group=None):
                             ),
                      )
 
-                # When the server has >= 1 interfaces, set 'serverGroupSet' to True
-#                print "************************************** CHECKPOINT #1"
-                if (not serverGroupSet):
-                    # ORIGINAL
-#                    nodes[len(nodes)-1]["group"] = nodes[sId]["group"]
-                    serverGroupSet = True
-#                print "************************************** CHECKPOINT #2"
+# ==== OLD ====
+#                # When the server has >= 1 interfaces, set 'serverGroupSet' to True
+##                print "************************************** CHECKPOINT #1"
+#                if (not serverGroupSet):
+#                    # ORIGINAL
+##                    nodes[len(nodes)-1]["group"] = nodes[sId]["group"]
+#                    serverGroupSet = True
+##                print "************************************** CHECKPOINT #2"
 
 #            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start links"
 #            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> links: %s" % str(links)
@@ -396,14 +397,20 @@ def get_nodes_links(slice, chosen_group=None):
             # **** How links should be ****
 #            links = [{'source': 7, 'target': 4, 'value': 'rsc_id_346-eth2:1'}, {'source': 7, 'target': 6, 'value': 'rsc_id_327-eth3:1'}, {'source': 8, 'target': 3, 'value': 'rsc_id_342-eth2:1'}, {'source': 8, 'target': 0, 'value': 'rsc_id_360-eth3:1'}]
 
-            # When the previous flag is set to True, add island
-            if (not serverGroupSet and not serverInSameIsland):
-                #Add n_islands since there is an Island with VM AM but no OF AM
-                n_islands += 1
-                # This groups servers of the same VT AM in the same island
-                serverInSameIsland = True
+
+# ==== OLD ====
+#            # When the previous flag is set to True, add island
+#            if (not serverGroupSet and not serverInSameIsland):
+#                #Add n_islands since there is an Island with VM AM but no OF AM
+#                n_islands += 1
+#                # This groups servers of the same VT AM in the same island
+#                serverInSameIsland = True
+
+
+
 #            print "************************************** CHECKPOINT #3. n_islands = %s" % str(n_islands)
-    return [nodes, links, n_islands]
+#    return [nodes, links, n_islands]
+    return [nodes, links]
 
 def get_ui_data(slice):
     """
@@ -413,7 +420,8 @@ def get_ui_data(slice):
     try:
         ui_context['vms_list'] = get_vms_list(slice)
         ui_context['vt_aggs'] = get_vm_aggregates(slice)
-        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
+#        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
+        ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
 
 #        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) | Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
 #        of_aggs = slice.aggregates.filter(aggs_filter)
