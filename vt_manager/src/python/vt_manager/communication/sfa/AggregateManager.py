@@ -50,18 +50,21 @@ class AggregateManager:
     def SliverStatus (self, api, xrn, creds, options):
         xrn = Xrn(xrn,'slice')
 	slice_leaf = xrn.get_leaf()
-	return self.driver.sliver_status(slice_leaf,creds,options)
+	authority = xrn.get_authority_hrn()
+	return self.driver.sliver_status(slice_leaf,authority,creds,options)
 
     def CreateSliver(self, api, xrn, creds, rspec_string, users, options):
        xrn = Xrn(xrn, 'slice')
        slice_leaf = xrn.get_leaf()
-       return self.driver.create_sliver (slice_leaf,rspec_string, users, options)
+       authority = xrn.get_authority_hrn()
+       return self.driver.create_sliver (slice_leaf,authority,rspec_string, users, options)
 
     def DeleteSliver(self, api, xrn, creds, options):
 	#TODO: Check the options or xrn to get a single vm.
         xrn = Xrn(xrn)
         slice_leaf = xrn.get_leaf()
-        return self.driver.crud_slice(slice_leaf, creds,action='delete_slice')
+	authority = xrn.get_authority_hrn()
+        return self.driver.crud_slice(slice_leaf,authority,creds,action='delete_slice')
 
     def RenewSliver(self, api, xrn, creds, expiration_time, options):
 	#XXX: this method should extend the expiration time of the slices
@@ -71,18 +74,20 @@ class AggregateManager:
     def start_slice(self, api, xrn, creds):
         xrn = Xrn(xrn)
 	slice_leaf = xrn.get_leaf()
-	print slice_leaf
-        return self.driver.crud_slice(slice_leaf, creds,action='start_slice')
+	authority = xrn.get_authority_hrn()
+        return self.driver.crud_slice(slice_leaf,authority,creds,action='start_slice')
 
     def stop_slice(self, api, xrn, creds):
         xrn = Xrn(xrn)
 	slice_leaf = xrn.get_leaf()
-        return self.driver.crud_slice (slice_leaf, creds,action='stop_slice')
+	authority = xrn.get_authority_hrn()
+        return self.driver.crud_slice (slice_leaf,authority, creds,action='stop_slice')
 
     def reset_slice(self, api, xrn):
         xrn = Xrn(xrn)
 	slice_leaf = xrn.get_leaf()
-        return self.driver.crud_slice (slice_leaf,action='reset_slice')
+	authority = xrn.get_authority_hrn()
+        return self.driver.crud_slice (slice_leaf,authority,action='reset_slice')
 
     def GetTicket(self, api, xrn, creds, rspec, users, options):
 	# ticket is dead.

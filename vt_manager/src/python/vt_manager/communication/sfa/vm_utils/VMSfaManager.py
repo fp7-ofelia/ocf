@@ -42,9 +42,9 @@ class VMSfaManager:
 	
     @staticmethod
     def setDefaultVMParameters(vm,server,projectName,sliceName):
-        VM = VirtualMachine.objects.get(projectNAme = projectName)
+        VM = VirtualMachine.objects.filter(projectName = projectName)
 	if VM:
-		vm['project-id'] = VM[0].projectID
+		vm['project-id'] = VM[0].projectId
 	else:
 		vm['project-id'] = str(uuid.uuid4())	
 

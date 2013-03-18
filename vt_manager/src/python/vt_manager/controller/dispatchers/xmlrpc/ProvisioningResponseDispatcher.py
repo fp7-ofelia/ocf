@@ -60,6 +60,8 @@ class ProvisioningResponseDispatcher():
 
 				try:
 					logging.debug("Sending response to Plugin in sendAsync")
+					if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+					    return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:
 						controller.deleteVM(vm)

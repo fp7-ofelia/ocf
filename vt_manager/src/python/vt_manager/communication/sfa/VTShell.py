@@ -21,18 +21,19 @@ class VTShell:
         def __init__(self):
                 pass
 
-	def GetNodes(self,slice = None):
+	def GetNodes(self,slice=None,authority=None):
 		servers = VTServer.objects.all()
 		if not slice: 
 		    return servers
 		else:
 		    slice_servers = list()
 		    for server in servers:
-                        if server.getChildObject().getVMs(sliceName=slice):
+			vms = server.getChildObject().getVMs(sliceName=slice, projectName = authority)
+                        if vms:
 			    slice_servers.append(server)
                     return slice_servers
 
-	def GetSlice(self,slicename):
+	def GetSlice(self,slicename,authority):
 
 		name = slicename # or uuid...
 		servers = self.GetNodes()
@@ -40,7 +41,7 @@ class VTShell:
 		List = list()
 		for server in servers:
 			child_server = server.getChildObject()
-			vms = child_server.getVMs(sliceName=name)
+			vms = child_server.getVMs(sliceName=name, projectName = authority)
 			for vm in vms:
 				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'node-id':server.uuid, 'node-name':server.name})
 			        	
