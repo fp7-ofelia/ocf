@@ -14,7 +14,7 @@ from vt_manager.communication.sfa.util.callids import Callids
 from vt_manager.communication.sfa.VTSfaDriver import VTSfaDriver
 
 #Only for testing before the methods are implemented in VTSfaDriver
-from vt_manager.communication.sfa.AggregateManager import AggregateManager
+#from vt_manager.communication.sfa.AggregateManager import AggregateManager
 
 # Parameter Types
 CREDENTIALS_TYPE = 'array' # of strings
@@ -27,7 +27,6 @@ STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
 driver = VTSfaDriver(None)
 auth = Auth(None, None)
-am = AggregateManager(None)
 
 @rpcmethod(signature=['string', 'string'], url_name="sfa")
 def ping(challenge):
@@ -37,18 +36,20 @@ def ping(challenge):
 @rpcmethod(signature=[VERSION_TYPE], url_name="sfa")
 def GetVersion():
    # xrn=Xrn(api.hrn)
-    version = version_core()
-    version_generic = {
-        'interface':'aggregate',
-        'sfa': 2,
-        'geni_api': 2,
-        'geni_api_versions': '2',#: 'http://%s:%s' % (api.config.SFA_AGGREGATE_HOST, api.config.SFA_AGGREGATE_PORT)},
+   # version = version_core()
+   # version_generic = {
+   #     'interface':'aggregate',
+   #     'sfa': 2,
+   #     'geni_api': 2,
+   #     'geni_api_versions': '2',#: 'http://%s:%s' % (api.config.SFA_AGGREGATE_HOST, api.config.SFA_AGGREGATE_PORT)},
     #    'hrn':xrn.get_hrn(),
     #    'urn':xrn.get_urn(),
-    }
-    version.update(version_generic)
+    #}
+    #version.update(version_generic)
  #   testbed_version = driver.aggregate_version()
  #   version.update(testbed_version)
+    version = {'urn': 'urn:publicid:IDN+top+dummy', 'hostname': 'OfeliaSDKr1', 'code_tag': '2.1-23', 'hrn': 'top.dummy', 'testbed': 'Ofelia', 'geni_api_versions': {'2': 'http://192.168.254.170:8445'}, 'interface': 'aggregate', 'geni_api': 2, 'geni_ad_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'code_url': 'git://git.onelab.eu/sfa.git@sfa-2.1-23', 'geni_request_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'sfa': 2}
+
     return version
 
 
@@ -60,8 +61,8 @@ def ListResources(credentials, options, **kwargs):
 #    valid_creds = auth.checkCredentials(credentials, 'listnodes', hrn)
 
 #    if valid_creds:
-    call_id = options.get('call_id')
-    if Callids().already_handled(call_id): return ""
+#    call_id = options.get('call_id')
+#    if Callids().already_handled(call_id): return ""
         # get slice's hrn from options
 #        if slice_xrn:
 #            raise Exception("authority does not have permissions to list resources from OCF slices")
@@ -69,10 +70,7 @@ def ListResources(credentials, options, **kwargs):
 #        return ""
 #    else:
 #        raise SfaInvalidArgument('Invalid Credentials')
-    if not slice_xrn:
-        return driver.list_resources(credentials, options)
-    else:
-	return ""
+    return driver.list_resources(credentials, options)
 
 @rpcmethod(signature=[CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def ListSlices(self, creds, options):
@@ -83,66 +81,40 @@ def ListSlices(self, creds, options):
     #XXX:This method shoud raise an exeption, these AM methods will only be executed by federated SMs.
 
     #TODO: SFAException??
-    raise Exception("%s authority does not have permissions to list OCF slices" %api.hrn)
     #XXX: should this method list vms?
-
+    return ""
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     hrn, type = urn_to_hrn(slice_urn)
-    return am.CreateSliver(sliver_urn, rspec, users)
+    return ""#am.CreateSliver(sliver_urn, rspec, users)
 
 #XXX: deletesliver means delete all the slivers assigned to a slice
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def DeleteSliver(slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = AuthManager.checkCredentials(credentials, 'deletesliver', hrn)
-
-    if valid_creds:
-        return driver.delete_slice(slice_urn)
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
-
+    return driver.delete_slice(slice_urn)
 
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def SliverStatus(slice_urn, credentials, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = AuthManager.checkCredentials(credentials, 'sliverstatus', hrn)
+    #XXX: NO Sliver related things
+    #XXX: Or shows the vm status? 
 
-    if valid_creds:
-        #XXX: NO Sliver related things
-        #XXX: Or shows the vm status? 
+    #call_id = options.get('call_id')
+    #if Callids().already_handled(call_id): return {}
 
-        #call_id = options.get('call_id')
-        #if Callids().already_handled(call_id): return {}
-
-        #xrn = Xrn(xrn,'slice')
-        #slice_urn=xrn.get_urn()
-        #slice_hrn=xrn.get_hrn()
-        #return self.driver.sliver_status (slice_urn, slice_hrn)
-        raise Exception("%s authority does not have permissions to list OCF slices" %api.hrn)
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
-
+    #xrn = Xrn(xrn,'slice')
+    #slice_urn=xrn.get_urn()
+    #slice_hrn=xrn.get_hrn()
+    #return self.driver.sliver_status (slice_urn, slice_hrn)
+    return ""
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE], url_name="sfa")
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
     (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = AuthManager.checkCredentials(credentials, 'renewsliver', hrn)
-
-    if valid_creds:
-        return ""
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
-
+    return ""
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
 def Shutdown(slice_urn, credentials, **kwargs):
-    (hrn, type) = urn_to_hrn(slice_urn)
-    valid_creds = AuthManager.checkCredentials(credentials, 'shutdown', hrn)
-
-    if valid_creds:
-        return ""
-    else:
-        raise SfaInvalidArgument('Invalid Credentials')
-
+    return ""
