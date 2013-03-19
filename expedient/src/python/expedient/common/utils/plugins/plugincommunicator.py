@@ -22,13 +22,15 @@ class PluginCommunicator():
         #TODO: FILTRAR LOS RECURSOS POR SLICE. NO SE DEBE PERMITIR SOLICITAR RECURSOS DE AGGREGATES
         # QUE NO SE HAYAN "METIDO" EN LA SLICE PREVIAMENTE.
 	@staticmethod
-	def get_object(plugin_type, klass, **kwargs):
+	def get_object(slice, plugin_type, klass, **kwargs):
         	"""
 		Retrieves the id of a model belonging to another plugin.
         	"""
 		try:
 			plugins_modules = settings.PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
 			p_agg = plugins_modules.split('.')[-1]
+			print "LEODEBUG"
+			print p_agg
 			p_models_path = '.'.join(plugins_modules.split('.')[:-1])
 			try:
 				model = getattr(__import__(p_models_path,fromlist=[klass]), klass)
@@ -38,7 +40,7 @@ class PluginCommunicator():
 				except:
 					pass	
 			object = model.objects.get(**kwargs)
-			if object != None:
+			if object != None and object.aggregate in slice._get_aggregates():
 				return object
 		
 		except Exception,e:
@@ -48,10 +50,10 @@ class PluginCommunicator():
 
 
 	@staticmethod
-	def get_object_id(plugin_type, klass, **kwargs):	
+	def get_object_id(slice, plugin_type, klass, **kwargs):	
 		
 		try:
-			return PluginCommunicator.get_object(plugin_type, klass, **kwargs).id
+			return PluginCommunicator.get_object(slice, plugin_type, klass, **kwargs).id
 		except:
 			return None
 		

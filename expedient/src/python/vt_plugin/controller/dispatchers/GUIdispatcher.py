@@ -364,8 +364,8 @@ def get_nodes_links(slice, chosen_group=None):
             for j,inter in enumerate(n.ifaces.filter(isMgmt = False)):
                 #first check datapathId exists.
                 try:
-                    switch_id = PluginCommunicator.get_object_id("openflow", "OpenFlowSwitch", name=inter.switchID)
-                    port_id = PluginCommunicator.get_object_id("openflow", "OpenFlowInterface", switch=switch_id, port_num=inter.port)
+                    switch_id = PluginCommunicator.get_object_id(slice, "openflow", "OpenFlowSwitch", name=inter.switchID)
+                    port_id = PluginCommunicator.get_object_id(slice,"openflow", "OpenFlowInterface", switch=switch_id, port_num=inter.port)
                 except Exception as e:
 #                    print "[WARNING] Problem retrieving links insde plugin 'vt_plugin'. Details: %s" % str(e)
                     continue

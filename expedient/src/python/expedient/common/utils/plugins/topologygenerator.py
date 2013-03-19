@@ -411,7 +411,7 @@ class TopologyGenerator():
 
         # Check link consistency
         from django.contrib.auth.models import User
-        user = User.objects.get(username='carolina')
+        user = User.objects.get(username='expedient')
         # XXX DESCOMENTAR AL SUBIR A [PRE]PRODUCCION
 #        user = User.objects.filter(is_superuser=True)[0]
         plugin_ui_data['d3_links'] = TopologyGenerator.check_link_consistency(plugin_ui_data['d3_links'], plugin_ui_data['d3_nodes'], user, slice)
