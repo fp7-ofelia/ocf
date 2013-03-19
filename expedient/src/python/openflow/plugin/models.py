@@ -279,6 +279,27 @@ production networks, and is currently deployed in several universities.
             logger.info("XML RPC call failed to aggregate %s" % self.name)
             traceback.print_exc()
             raise
+
+    def change_slice_controller(self,slice):
+        try:
+            slice.openflowsliceinfo.controller_url
+        except:
+            import traceback
+            logger.info("Can't change slice  %s 's controller url because it is not started yet." % slicename)
+            logger.error(traceback.format_exc())
+            raise Exception("Can't change slice  %s 's controller url because it is not started yet." % slicename)
+
+        try:
+            print "LEODEBUG CALLING OPTIN"
+            return self.client.proxy.change_slice_controller(
+                self._get_slice_id(slice), 
+                slice.openflowsliceinfo.controller_url,)
+        except Exception as ret_exception:
+            import traceback
+            logger.info("XML RPC call to aggregate %s failed." % self.name)
+            logger.error(traceback.format_exc())
+            raise
+
     
 class OpenFlowSwitch(resource_models.Resource):
     datapath_id = models.CharField(max_length=100, unique=True)

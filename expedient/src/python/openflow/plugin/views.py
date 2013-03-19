@@ -316,6 +316,14 @@ def add_controller_to_slice(request, agg_id, slice_id):
 
     def post_save(instance, created):
         give_permission_to("can_use_aggregate", aggregate, slice)
+        if not created:
+            try:
+                print "LEODEBUG POST SAVE"
+                aggregate.change_slice_controller(slice)
+            except Exception,e:
+                error_msg = str(e)
+                print e
+
     return generic_crud(
         request, id, OpenFlowSliceInfo,
         form_class=OpenFlowSliceInfoForm,

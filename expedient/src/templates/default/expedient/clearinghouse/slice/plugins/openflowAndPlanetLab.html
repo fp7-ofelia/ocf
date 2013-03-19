@@ -275,7 +275,7 @@
 	<td>
 		<b>{{controller_url}}</b>
 		<form method="POST" action="{% url slice_update_agg slice.id agg.id %}" style="display:inline">{% csrf_token %}
-        	<input type="submit" value="Set controller" />
+        	<input type="submit" value={%if controller_url != "Not set" %}"Update controller"{%else%}"Set controller"{%endif%} />
 		</form>
  	</td>
    </tr>
