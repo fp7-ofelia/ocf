@@ -753,9 +753,21 @@ table.vms td{
     color:#000;
 }
 table.vms td.ssh_vm_details {
-    background: #fff;
-    color: #444;
+    font-style: italic;
+    padding-bottom: 0px;
     padding-left: 25px;
+    padding-top: 0px;
+    text-align: right !important;
+}
+table.vms tr.even td.ssh_vm_details,
+table.vms tr.odd td.ssh_vm_details {
+    color: #888;
+}
+table.vms td.ssh_vm_details_common {
+    background: #bbb;
+    color: #444;
+    font-style: italic;
+    text-align: center !important;
 }
 table.vms tr{
 }
@@ -1019,8 +1031,6 @@ div.aggregateManager table.aggregateManagerDetail {
 div.aggregateManager table.aggregateManagerDetail td {
 	text-align:left;
 	vertical-align:middle;
-	border-bottom:1px solid #DDD;
-}
 div.aggregateManager table.aggregateManagerDetail .label {
 	font-size:11px;
 	padding-top:2px;

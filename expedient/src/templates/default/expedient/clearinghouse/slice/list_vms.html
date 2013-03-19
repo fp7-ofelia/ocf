@@ -81,13 +81,27 @@
                 </tr>
 
 		<!-- Begin VM's SSH details -->
-		<tr>
+                {% if vm.ifaces.all|length > 0 %} {# Show only when VM interfaces available #}
+		<tr class = "{% cycle 'odd' 'even' %}">
 		    <td colspan="6" class="ssh_vm_details">
-                        <em><strong>SSH access:</strong> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} (password: your user password)<br/>To access as root just type <strong>su</strong> inside (password: <strong>openflow</strong>)</em>
+                        <strong>SSH access:</strong> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} (password: your user password)
 		    </td>
 		</tr>
+                {% endif %}
                 <!-- End VM's SSH details -->
             {% endif %}
             {% endfor %}
+
+            <!-- Begin common VM SSH detail -->
+            {% load servers %} {# Loads Jinja filters for servers - in order to check #VMs #}
+            {% if server|number_vms_inside_server_for_slice:slice.uuid > 0 %} {# If some VM exists, show message #}
+            <tr>
+		<td colspan="6" class="ssh_vm_details_common">
+                    <strong>SSH common details</strong>: to access as root just type <strong>su</strong> inside (password: <strong>openflow</strong>)
+                 </td>
+             </tr>
+             {% endif %}
+             <!-- End common VM SSH detail -->
+
            </table>
 
