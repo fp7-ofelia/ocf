@@ -45,7 +45,7 @@ class VMAggregate:
     		return result
 
 	
-	def get_rspec(self, version=None, slice_leaf=None, projectName=None ,created_vms=[],options={}):
+	def get_rspec(self, version=None, slice_leaf=None, projectName=None ,created_vms=[],new_nodes=[], options={}):
 
 		#XXX: I think this is quite clear
         	version_manager = VersionManager()
@@ -59,14 +59,15 @@ class VMAggregate:
 
         	rspec = RSpec(version=rspec_version, user_options=options)
 
-        	nodes = self.get_nodes(options,slice_leaf,projectName,created_vms)
+        	nodes = self.get_nodes(options,slice_leaf,projectName,created_vms,new_nodes)
         	rspec.version.add_nodes(nodes)
         	return rspec.toxml()
 	
-    	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[]):
-
+    	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
 		if 'slice' in options.keys():
-			nodes = self.shell.GetNodes(options['slice'])
+			nodes = self.shell.GetNodes(options['slice'],projectName)
+			if not nodes:
+				nodes = new_nodes
 		else:
 	        	nodes = self.shell.GetNodes()
 	        rspec_nodes = []
@@ -91,42 +92,42 @@ class VMAggregate:
 								 'memory':str(node.memory),
 								 'hdd_space_GB':str(node.discSpaceGB),
 								 'agent_url':str(node.agentURL), })]
-		    #XXX: I' don't like it
-		    ip_ranges = node.subscribedIp4Ranges.all()
-		    mac_ranges = node.subscribedMacRanges.all()
-		    network_ifaces = node.networkInterfaces.all()
-		    #XXX: I use services because it works well
-		    rspec_node['services'] = list()
-		    if ip_ranges:
+		    if not slice_leaf:
+		    	#XXX: I' don't like it
+		    	ip_ranges = node.subscribedIp4Ranges.all()
+		    	mac_ranges = node.subscribedMacRanges.all()
+		    	network_ifaces = node.networkInterfaces.all()
+		    	#XXX: I use services because it works well
+		    	rspec_node['services'] = list()
+		    	if ip_ranges:
 			     for ip_range in ip_ranges:
 			     	rspec_node['services'].append(Range({'type':'IP_Range',
           				       			     'name':ip_range.name,
 							             'start_value': ip_range.startIp,
 							             'end_value': ip_range.endIp}))
-		    if mac_ranges:
+		    	if mac_ranges:
 			     for mac_range in mac_ranges:
 			     	rspec_node['services'].append(Range({'type':'MAC_Range',
                                                                      'name':mac_range.name,
                                                                      'start_value': mac_range.startMac,
                                                                      'end_value': mac_range.endMac}))
-		    if network_ifaces:
+		    	if network_ifaces:
 			     for network_iface in network_ifaces:
 			    	rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
 				    					        'to_network_interface_id': network_iface.switchID,
 										'to_network_interface_port':str(network_iface.port)}))
-                    if site['longitude'] and site['latitude']:
-    	                location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
-        	        rspec_node['location'] = location
+                    	if site['longitude'] and site['latitude']:
+    	                	location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
+        	        	rspec_node['location'] = location
 		
-		    #TODO:complete slivers part for manifest RSpecs
+			    #TODO:complete slivers part for manifest RSpecs
 		    slices = list()
 		    cVMs = dict()
 		    if slice_leaf:
 			slices = (self.shell.GetSlice(slice_leaf,projectName))
-			print '--------------------------------------------',slices
+			
 		    	
 		    	slices['vms'].extend(VMAggregate.FilterList({'slice-name':slice_leaf},created_vms))
-			print '---------------------------------------------',slices
 			#cVMs['vms'] = createdVMs
 		    slivers = list() 
 		    if slices:

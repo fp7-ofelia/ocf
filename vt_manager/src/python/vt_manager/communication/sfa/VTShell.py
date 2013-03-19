@@ -21,8 +21,12 @@ class VTShell:
         def __init__(self):
                 pass
 
-	def GetNodes(self,slice=None,authority=None):
+	def GetNodes(self,slice=None,authority=None,uuid=None):
 		servers = VTServer.objects.all()
+		if uuid:
+			for server in servers:
+				if str(server.uuid) == str(uuid):
+					return server
 		if not slice: 
 		    return servers
 		else:

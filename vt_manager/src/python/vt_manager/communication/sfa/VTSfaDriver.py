@@ -68,13 +68,15 @@ class VTSfaDriver:
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf	
 		self.shell.CreateSliver(requested_attributes,projectName,sliceName)
-		print requested_attributes
 		created_vms = list()
+		nodes = list()
 		for slivers in requested_attributes:
 			for vm in slivers['slivers']:
-				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':vm['slice-name'],'node-name':'Foix'})
-		print created_vms
-                return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms)
+				node = self.shell.GetNodes(uuid=vm['server-id'])
+				if not node in nodes:
+					nodes.append(node)
+				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':slice_leaf,'node-name':'Foix'})
+		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms,new_nodes=nodes)
 	
 	def sliver_status(self,slice_leaf,authority,creds,options):
 
