@@ -22,9 +22,9 @@
                 <th> {{ field.label_tag }}:</th>
                 <td>
                     {% if field.name == 'location' %}
-                        <ul id="warninglist_id_location" class="warning">
+                        <ul id="warninglist_id_location" class="warning" style="list-style-image: url('{% url img_media 'warning.png' %}');">
                             <li>
-                                <img src="{% url img_media 'exclamation_mark_15x15.png' %}" /> {{ field.help_text }}
+                                {{ field.help_text }}
                             </li>
                         </ul>
                     {% endif %}

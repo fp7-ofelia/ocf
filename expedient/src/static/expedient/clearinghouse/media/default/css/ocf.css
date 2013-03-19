@@ -507,13 +507,16 @@ table.msg_table .error, .errorlist {
 }
 .warninglist, ul[id^="warninglist"] {
     border-radius: 7px;
-    color: #B27121 !important;
+    /*color: #B27121 !important;*/
+    color: #382885 !important;
     font-style: italic;
     font-weight: bold;
-    list-style-type: none;
+    /*list-style-type: none;*/
+    /*list-style-image: url('/static/media/default/img/warning.png');*/
     margin-bottom: 5px;
     padding-bottom: 5px;
-    padding-left: 7px;
+    /*padding-left: 7px;*/
+    padding-left: 30px;
     padding-top: 5px;
     padding-right: 7px;
 }
