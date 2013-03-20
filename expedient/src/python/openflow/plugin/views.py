@@ -318,8 +318,11 @@ def add_controller_to_slice(request, agg_id, slice_id):
         give_permission_to("can_use_aggregate", aggregate, slice)
         if not created:
             try:
-                print "LEODEBUG POST SAVE"
-                aggregate.change_slice_controller(slice)
+                #aggregate.change_slice_controller(slice)
+                for agg in Aggregate.objects.all():
+                    agg = agg.as_leaf_class()
+                    if agg.leaf_name == "OpenFlowAggregate":
+                        agg.change_slice_controller(slice)
             except Exception,e:
                 error_msg = str(e)
                 print e

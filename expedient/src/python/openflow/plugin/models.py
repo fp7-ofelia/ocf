@@ -290,7 +290,6 @@ production networks, and is currently deployed in several universities.
             raise Exception("Can't change slice  %s 's controller url because it is not started yet." % slicename)
 
         try:
-            print "LEODEBUG CALLING OPTIN"
             return self.client.proxy.change_slice_controller(
                 self._get_slice_id(slice), 
                 slice.openflowsliceinfo.controller_url,)
