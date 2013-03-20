@@ -24,7 +24,7 @@ users = USERS
 options = Options(123456)
 agg = AggregateManager(None)
 print 'Aggregate instance:',agg
-#xml = agg.ListResources(None,None,options)
+xml = agg.ListResources(None,None,options)
 #print '------------------ListResources:',xml
 #options.geni_slice_urn = 'slice-name'
 #print 'Second List Resources'
@@ -33,7 +33,7 @@ print 'Aggregate instance:',agg
 
 #XXX: Last ListResources() test was 02/13/2013 with OK results, the first temptative of OCF rspecs are done(based in PGv2). OCF Rspecs need to be improved and clearify the XRN, HRN and URN concepts in order to offer the correct notation for aggregates, component managers, slices etc. 
 #
-xml = agg.CreateSliver(None, xrn, None, RSPEC, users, None)
+#xml = agg.CreateSliver(None, xrn, None, RSPEC, users, None)
 #print xml
 #XXX: Last CreateSliver() test was 02/25/2013 with OK results. The test does not get any parametre from VTShell yet, but the RSpec parsing(v1) is OK. The CreateSliver and GetSlice VTShell functions should be implemented working with slice_leaf parametre in order to check the manifest response RSpec.
 
