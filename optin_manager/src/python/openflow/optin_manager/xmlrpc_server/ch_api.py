@@ -442,7 +442,28 @@ def delete_slice(sliceid, **kwargs):
     single_exp.delete()
     
     return ""
-    
+
+@check_user
+@rpcmethod(signature=['string', 'string', 'array'])
+def change_slice_controller(slice_id, controller_url, **kwargs):
+    '''
+    Changes the slice controller url.
+    '''
+    complete_list = []
+    fv = FVServerProxy.objects.all()[0]
+    try:
+        params = controller_url.split(':') 
+        experiment = Experiment.objects.get(slice_id = slice_id)
+        slice_name= experiment.get_fv_slice_name()
+        fv.proxy.api.changeSlice(slice_name,'controller_hostname', params[1])
+        fv.proxy.api.changeSlice(slice_name,'controller_port', params[2])
+        experiment.controller_url = controller_url
+    except Exception, exc:
+        import traceback
+        traceback.print_exc()
+        raise Exception(parseFVexception(exc,"FV could not update slice controller URL:"))
+    return ""
+
 @check_user
 @check_fv_set
 @rpcmethod(signature=['array'])
