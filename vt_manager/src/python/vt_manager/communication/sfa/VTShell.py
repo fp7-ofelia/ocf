@@ -27,6 +27,7 @@ class VTShell:
 			for server in servers:
 				if str(server.uuid) == str(uuid):
 					return server
+			return None
 		if not slice: 
 		    return servers
 		else:

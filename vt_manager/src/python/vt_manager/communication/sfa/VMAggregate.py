@@ -66,21 +66,21 @@ class VMAggregate:
     	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
 		if 'slice' in options.keys():
 			nodes = self.shell.GetNodes(options['slice'],projectName)
+			print '------------firstNodes',nodes
 			if not nodes:
 				nodes = new_nodes
+			print 'entra por el if'
 		else:
 	        	nodes = self.shell.GetNodes()
 	        rspec_nodes = []
+		print '-------------------------------------------------------------------------------------------------Nodes:',nodes
 	        for node in nodes:
 		    
 	            rspec_node = Node()
 	            site=self.get_testbed_info()
-		    #TODO: Get HRNs URNs from OFELIA site or use the method get_leaf() from xrns
-		    #TODO: Define some kind of Hostnames
 	            rspec_node['component_id'] = hrn_to_urn('ocf.i2cat.vt_manager'+'.'+str(node.name),'node')
 	            rspec_node['component_name'] = node.name#node['hostname']
 	            rspec_node['component_manager_id'] = hrn_to_urn('ocf.i2cat.vt_manager','authority')
-        	    #rspec_node['authority_id'] = hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
 		    rspec_node['hostname'] = str(node.name).lower() + '.ctx.i2cat.net'
 	            rspec_node['exclusive'] = 'false'
 	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.name),
@@ -94,11 +94,9 @@ class VMAggregate:
 								 'hdd_space_GB':str(node.discSpaceGB),
 								 'agent_url':str(node.agentURL), })]
 		    if not slice_leaf:
-		    	#XXX: I' don't like it
 		    	ip_ranges = node.subscribedIp4Ranges.all()
 		    	mac_ranges = node.subscribedMacRanges.all()
 		    	network_ifaces = node.networkInterfaces.all()
-		    	#XXX: I use services because it works well
 		    	rspec_node['services'] = list()
 		    	if ip_ranges:
 			     for ip_range in ip_ranges:
@@ -121,7 +119,6 @@ class VMAggregate:
     	                	location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
         	        	rspec_node['location'] = location
 		
-			    #TODO:complete slivers part for manifest RSpecs
 		    slices = list()
 		    cVMs = dict()
 		    if slice_leaf:

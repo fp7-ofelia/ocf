@@ -66,13 +66,16 @@ class VTSfaDriver:
                 rspec = RSpec(rspec_string,'OcfVt')
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority#users[0]['slice_record']['authority']
-		sliceName = slice_leaf	
-		self.shell.CreateSliver(requested_attributes,projectName,sliceName)
+		sliceName = slice_leaf
+		print '---------------requested_attributes', requested_attributes
+		#self.shell.CreateSliver(requested_attributes,projectName,sliceName)
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:
+			node = self.shell.GetNodes(uuid=slivers['component_id'])
 			for vm in slivers['slivers']:
-				node = self.shell.GetNodes(uuid=vm['server-id'])
+				#node = self.shell.GetNodes(uuid=vm['server-id'])
+				print '---------------(uuid=vm["server-id"]',vm['server-id']  
 				if not node in nodes:
 					nodes.append(node)
 				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':slice_leaf,'node-name':'Foix'})
