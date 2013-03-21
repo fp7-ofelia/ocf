@@ -13,7 +13,7 @@ class OcfVt(RSpecVersion):
     type = 'OcfVt'
     content_type = 'ad'
     version = '1'
-    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
     #namespace = 'http://www.protogeni.net/resources/rspec/2'
     namespace = None
     content = '*'
@@ -22,21 +22,10 @@ class OcfVt(RSpecVersion):
 
     # Networks
     def get_networks(self):
-        network_names = set()
-        nodes = self.xml.xpath('//default:node[@component_manager_id] | //node[@component_manager_id]', namespaces=self.namespaces)
-        for node in nodes:
-            if 'component_manager_id' in node.attrib:
-                network_urn = node.get('component_manager_id')
-                if network_urn.startswith("urn:"):
-                    network_hrn = Xrn(network_urn).get_hrn()
-                else:
-                    # some component_manager_ids are hrns instead of urns??
-                    network_hrn = network_urn
-                network_names.add(network_hrn)
-        network_names = list(network_names)
-        networks = [{"name": x} for x in network_names]
+        network_elems = self.xml.xpath('//rspec/network')
+        networks = [network_elem.get_instance(fields=['name', 'slice']) for \
+                    network_elem in network_elems]
         return networks
-
     # Nodes
 
     def get_nodes(self, filter=None):
@@ -199,8 +188,8 @@ class OcfVt(RSpecVersion):
 class OcfVtAd(OcfVt):
     enabled = True
     content_type = 'ad'
-    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    template = '<rspec type="advertisement" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    template = '<rspec type="advertisement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
 
 class OcfVtRequest(OcfVt):
     enabled = True

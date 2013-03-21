@@ -77,10 +77,11 @@ class VMAggregate:
 	            site=self.get_testbed_info()
 		    #TODO: Get HRNs URNs from OFELIA site or use the method get_leaf() from xrns
 		    #TODO: Define some kind of Hostnames
-	            rspec_node['component_id'] = node.uuid#hostname_to_urn(self.driver.hrn, site['name'], node['hostname'])
+	            rspec_node['component_id'] = hrn_to_urn('ocf.i2cat.vt_manager'+'.'+str(node.name),'node')
 	            rspec_node['component_name'] = node.name#node['hostname']
-	            rspec_node['component_manager_id'] = 'ocf.i2cat.vtmanager:'+node.uuid+'authority+cm'#Xrn(self.driver.hrn, 'authority+cm').get_urn()
-        	    rspec_node['authority_id'] = 'urn:publicid:IDN+i2cat.net+authority+sa' #hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
+	            rspec_node['component_manager_id'] = hrn_to_urn('ocf.i2cat.vt_manager','authority')
+        	    #rspec_node['authority_id'] = hrn_to_urn(DummyXrn.site_hrn(self.driver.hrn, site['name']), 'authority+sa')
+		    rspec_node['hostname'] = str(node.name).lower() + '.ctx.i2cat.net'
 	            rspec_node['exclusive'] = 'false'
 	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.name),
 								 'operating_system_type':str(node.operatingSystemType),

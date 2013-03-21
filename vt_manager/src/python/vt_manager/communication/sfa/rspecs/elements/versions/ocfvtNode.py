@@ -26,16 +26,29 @@ def xrn_to_hostname(a=None,b=None):
 class OcfVtNode:
     @staticmethod
     def add_nodes(xml, nodes):
+
+        network_elems = xml.xpath('//network')
+        if len(network_elems) > 0:
+            network_elem = network_elems[0]
+        elif len(nodes) > 0 and nodes[0].get('component_manager_id'):
+            network_urn = nodes[0]['component_manager_id']
+            network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
+        else:
+            network_elem = xml
+
         node_elems = []
         for node in nodes:
             node_fields = ['component_manager_id', 'component_id', 'client_id', 'sliver_id', 'exclusive']
-            node_elem = xml.add_instance('node', node, node_fields)
+            node_elem = network_elem.add_instance('node',node,node_fields)#xml.add_instance('node', node, node_fields)
             node_elems.append(node_elem)
             # set component name
             if node.get('component_id'):
-                component_name = xrn_to_hostname(node['component_id'])
+                component_name = node['component_id']
                 node_elem.set('component_name', component_name)
             # set hardware types
+	    if node.get('hostname'):
+	    		simple_elem = node_elem.add_element('hostname')
+                        simple_elem.set_text(node['hostname'])
             if node.get('hardware_types'):
                 for hardware_type in node.get('hardware_types', []):
 		    for field in OcfVtServer.fields:	
