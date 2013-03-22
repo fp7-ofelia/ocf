@@ -14,7 +14,7 @@ class ConfParser():
 
     from localsettings import SRC_DIR
     # Note: surround inside list whenever treated as a unit
-    plugins_path = join_paths([SRC_DIR, "python"])
+    plugins_path = join_paths([SRC_DIR, "python", "plugins"])
 
     @staticmethod
     def parse_config(plugin_name, path="./settings.conf"):

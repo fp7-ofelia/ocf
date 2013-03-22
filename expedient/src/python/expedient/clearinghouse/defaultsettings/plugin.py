@@ -17,7 +17,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = "expedient.clearinghouse.settings"
 from common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
 from common.utils.plugins.topologygenerator import TopologyGenerator as TOPOLOGY_GENERATOR
 
-PLUGIN_LOADER.set_plugins_path("/opt/ofelia/expedient/src/python/")
+PLUGIN_LOADER.set_plugins_path("/opt/ofelia/expedient/src/python/plugins/")
 PLUGIN_SETTINGS = PLUGIN_LOADER.load_settings()
 
 """

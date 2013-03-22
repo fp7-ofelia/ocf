@@ -41,6 +41,9 @@ from django import forms
 from django.forms.models import modelformset_factory
 
 
+from expedient.common.utils.plugins.resources.node import Node
+from expedient.common.utils.plugins.resources.link import Link
+
 logger = logging.getLogger("OpenFlow plugin views")
 #TEMPLATE_PATH = "openflow/plugin"
 
@@ -658,10 +661,15 @@ def get_gfs(slice):
     return gfs_list
 
 def get_node_description(node):
-    description = "<strong>Switch Datapath ID: " + node['name'] + "</strong><br/><br/>"
-    if len(node['connection']):
+#    description = "<strong>Switch Datapath ID: " + node['name'] + "</strong><br/><br/>"
+#    if len(node['connection']):
+#        description += "<strong>Connections:</strong><br/>"
+#        for connection in node['connection']:
+#            description += "<strong>&#149; Port " + connection['src_port'] + "</strong> to Switch " + connection['target_datapath'] + " at port " + connection['target_port']+"<br/>";
+    description = "<strong>Switch Datapath ID: " + node.name + "</strong><br/><br/>"
+    if len(node.connection):
         description += "<strong>Connections:</strong><br/>"
-        for connection in node['connection']:
+        for connection in node.connection:
             description += "<strong>&#149; Port " + connection['src_port'] + "</strong> to Switch " + connection['target_datapath'] + " at port " + connection['target_port']+"<br/>";
     return description
 
@@ -693,13 +701,25 @@ def get_nodes_links(slice):
         )
         for s in switches:
             id_to_idx[s.id] = len(nodes)
-            nodes.append(dict(
-                # ORIGINAL
-                #name = s.name, value = s.id, group = i, aggregate = agg.pk,
-                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
-                name = s.name, value = s.id, aggregate = agg.pk, type = "OpenFlow switch", description = "",
-                image = image_url, available = agg.available, connection = [], loc = agg.location)
-            )
+            # ===== NEW VERSION =====
+            nodes.append(Node(name = s.name, value = s.id, description = "", type = "OpenFlow switch",
+                              image = image_url, aggregate = agg,
+                              # Extra paramaters for OpenFlow nodes
+                              connection = []
+                              )
+                        )
+
+#            # ===== NORMAL =====
+#            nodes.append(dict(
+#                # ORIGINAL
+#                #name = s.name, value = s.id, group = i, aggregate = agg.pk,
+#                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
+#                name = s.name, value = s.id, aggregate = agg.pk, type = "OpenFlow switch", description = "",
+#                image = image_url, available = agg.available, location = agg.location,
+#                connection = [])
+#            )
+
+
 #            openflowSwitches[s.datapath_id] = len(nodes)-1
 
     #One island per OF AM
@@ -720,16 +740,23 @@ def get_nodes_links(slice):
         )
         for n in pl_nodes:
             id_to_idx[n.id] = len(nodes)
-            nodes.append(dict(
-                #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
-                #same group. Will planetlab be supported at the end?
-                # ORIGINAL
-                #name = n.name, value = n.id, group = -1, aggregate = agg.pk, type = "pl_agg",
-                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
-                name = n.name, value = n.id, aggregate = agg.pk, type = "PlanetLab node",
-                description = "", image = image_url, available = agg.available, loc = agg.location)
-                #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
-            )
+            # ===== NEW VERSION =====
+            nodes.append(Node(name = s.name, value = s.id, description = "", type = "PlanetLab node",
+                              image = image_url, aggregate = agg
+                             )
+                        )
+
+#            # ===== NORMAL =====
+#            nodes.append(dict(
+#                #XXX: lbergesio: pl_agg nodes set to group -1 to match vt_aggs con of_aggs in the 
+#                #same group. Will planetlab be supported at the end?
+#                # ORIGINAL
+#                #name = n.name, value = n.id, group = -1, aggregate = agg.pk, type = "pl_agg",
+#                # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
+#                name = n.name, value = n.id, aggregate = agg.pk, type = "PlanetLab node",
+#                description = "", image = image_url, available = agg.available, loc = agg.location)
+#                #name=n.name, value=n.id, group=i+len(of_aggs), type="pl_agg" )
+#            )
 
     # get all connections with both interfaces in wanted aggregates
     of_cnxn_qs = OpenFlowConnection.objects.filter(
@@ -751,83 +778,112 @@ def get_nodes_links(slice):
         try:
            for cnxn in of_cnxn_qs:
                cnx_exists=False
-               if node["value"] == cnxn.src_iface.switch.id:
-                   for old_cnx in node["connection"]:
+#               if node["value"] == cnxn.src_iface.switch.id:
+               if node.value == cnxn.src_iface.switch.id:
+                   #for old_cnx in node["connection"]:
+                   for old_cnx in node.connection:
                        if (old_cnx["target_datapath"] == str(cnxn.dst_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.dst_iface.port_num)) :
                            cnx_exists=True
                            break
                    if not cnx_exists:
-                       node["connection"].append(dict(
+#                       node["connection"].append(dict(
+                       node.connection.append(dict(
                        src_port = str(cnxn.src_iface.port_num),
                        target_port =  str(cnxn.dst_iface.port_num),
                        target_datapath = str(cnxn.dst_iface.switch.datapath_id)))
-               elif node["value"] == cnxn.dst_iface.switch.id:
-                   for old_cnx in node["connection"]:
+#               elif node["value"] == cnxn.dst_iface.switch.id:
+               elif node.value == cnxn.dst_iface.switch.id:
+#                   for old_cnx in node["connection"]:
+                   for old_cnx in node.connection:
                        if (old_cnx["target_datapath"] == str(cnxn.src_iface.switch.datapath_id) and old_cnx["target_port"] == str(cnxn.src_iface.port_num)):
                           cnx_exists=True
                           break
                    if not cnx_exists :
-                       node["connection"].append(dict(
+#                       node["connection"].append(dict(
+                       node.connection.append(dict(
                        target_port = str(cnxn.src_iface.port_num),
                        src_port = str(cnxn.dst_iface.port_num),
                        target_datapath = str(cnxn.src_iface.switch.datapath_id)))
            # Add description for every node
-           node["description"] = get_node_description(node)
+#           node["description"] = get_node_description(node)
+           node.description = get_node_description(node)
         except Exception as e:
-            pass
+            print "\n\n\n[EXCEPTIOOOOOOOOOOOOOOOON] Details: %s\n\n\n" % str(e)
 
     for cnxn in of_cnxn_qs:
         #XXX: change me
         try:
-            links.append(
-                dict(
-                    source = str(cnxn.src_iface.switch.id),
-                    # XXX: ORIGINAL
-                    #source = id_to_idx[cnxn.src_iface.switch.id],
+#            # ===== PREVIOUS VERSION =====
+#            links.append(
+#                dict(
+#                    source = str(cnxn.src_iface.switch.id),
+#                    # XXX: ORIGINAL
+#                    #source = id_to_idx[cnxn.src_iface.switch.id],
+#
+#                    #src_datapath=cnxn.src_iface.switch.datapath_id,
+#                    #src_port=cnxn.src_iface.port_num,
+#
+#                    target = str(cnxn.dst_iface.switch.id),
+#                    # XXX: ORIGINAL
+#                    #target = id_to_idx[cnxn.dst_iface.switch.id],
+#
+#                    #target_datapath=cnxn.dst_iface.switch.datapath_id,
+#                    #target_port=cnxn.dst_iface.port_num,
+#                   value = "rsc_id_%s-rsc_id_%s" % (
+#                        cnxn.src_iface.id, cnxn.dst_iface.id
+#                    ),
+#                )
+#            )
 
-                    #src_datapath=cnxn.src_iface.switch.datapath_id,
-                    #src_port=cnxn.src_iface.port_num,
-
-                    target = str(cnxn.dst_iface.switch.id),
-                    # XXX: ORIGINAL
-                    #target = id_to_idx[cnxn.dst_iface.switch.id],
-
-                    #target_datapath=cnxn.dst_iface.switch.datapath_id,
-                    #target_port=cnxn.dst_iface.port_num,
-                   value = "rsc_id_%s-rsc_id_%s" % (
-                        cnxn.src_iface.id, cnxn.dst_iface.id
-                    ),
-                )
-            )
+            # ===== NEW VERSION =====
+            links.append(Link(source = str(cnxn.src_iface.switch.id), target = str(cnxn.dst_iface.switch.id),
+                             value = "rsc_id_%s-rsc_id_%s" % (cnxn.src_iface.id, cnxn.dst_iface.id)
+                             )
+                        )
+#            print "\n\n**** last element (1): %s\n\n" % str(links[-1])
         except:
             pass
     for cnxn in non_of_cnxn_qs:
-        links.append(
-            dict(
-                source = str(cnxn.of_iface.switch.id),
-                # XXX: ORIGINAL
-                #source = id_to_idx[cnxn.of_iface.switch.id],
-                target = str(cnxn.resource.id),
-                # XXX: ORIGINAL
-                #target = id_to_idx[cnxn.resource.id],
-                value = "rsc_id_%s-rsc_id_%s" % (
-                    cnxn.of_iface.id, cnxn.resource.id
-                ),
-            )
-        )
-        links.append(
-            dict(
-                target = str(cnxn.of_iface.switch.id),
-                # XXX: ORIGINAL
-                #target = id_to_idx[cnxn.of_iface.switch.id],
-                source = str(cnxn.resource.id),
-                # XXX: ORIGINAL
-                #source = id_to_idx[cnxn.resource.id],
-                value = "rsc_id_%s-rsc_id_%s" % (
-                    cnxn.resource.id, cnxn.of_iface.id
-                ),
-            )
-        )
+#        # ===== PREVIOUS VERSION =====
+#        links.append(
+#            dict(
+#                source = str(cnxn.of_iface.switch.id),
+#                # XXX: ORIGINAL
+#                #source = id_to_idx[cnxn.of_iface.switch.id],
+#                target = str(cnxn.resource.id),
+#                # XXX: ORIGINAL
+#                #target = id_to_idx[cnxn.resource.id],
+#                value = "rsc_id_%s-rsc_id_%s" % (
+#                    cnxn.of_iface.id, cnxn.resource.id
+#                ),
+#            )
+#        )
+#        links.append(
+#            dict(
+#                target = str(cnxn.of_iface.switch.id),
+#                # XXX: ORIGINAL
+#                #target = id_to_idx[cnxn.of_iface.switch.id],
+#                source = str(cnxn.resource.id),
+#                # XXX: ORIGINAL
+#                #source = id_to_idx[cnxn.resource.id],
+#                value = "rsc_id_%s-rsc_id_%s" % (
+#                    cnxn.resource.id, cnxn.of_iface.id
+#                ),
+#            )
+#        )
+        # ===== NEW VERSION =====
+        # Two-way link
+        links.append(Link(source = str(cnxn.of_iface.switch.id), target = str(cnxn.resource.id),
+                         value = "rsc_id_%s-rsc_id_%s" % (cnxn.of_iface.id, cnxn.resource.id)
+                         )
+                    )
+#        print "\n\n**** last element (2): %s\n\n" % str(links[-1])
+        links.append(Link(source = str(cnxn.resource.id), target = str(cnxn.of_iface.switch.id),
+                         value = "rsc_id_%s-rsc_id_%s" % (cnxn.resource.id, cnxn.of_iface.id)
+                         )
+                    )
+#        print "\n\n**** last element (3): %s\n\n" % str(links[-1])
+
 #    return [nodes, links, n_islands]
     return [nodes, links]
 

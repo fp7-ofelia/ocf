@@ -5,14 +5,31 @@ Defines the fields for the nodes sent to the TopologyGenerator.
 @author: CarolinaFernandez
 """
 
-class Node():
+class Node(object):
 
-    def __init__(self, name, type, description, image, aggregate_id, available, location):
+    def __init__(self, name, value, description, type, image, aggregate, **kwargs):
+#    def __init__(self, **kwargs):
+        # Adds news keys as attributes
+        self.__dict__.update(kwargs)
+        # Removes older kwarg's
+        [ self.__dict__.pop(kwarg) if kwarg not in kwargs else kwarg for kwarg in self.__dict__ ]
+
+        # May replace some values (e.g. 'aggregate')
+#        self.name = kwargs['name']
+#        self.value = kwargs['value']
+#        self.description = kwargs['description']
+#        self.type = kwargs['type']
+#        self.image = kwargs['image']
+#        self.aggregate = kwargs['aggregate'].pk
+#        self.available = kwargs['aggregate'].available
+#        self.location = kwargs['aggregate'].location
+
         self.name = name
-        self.type = type
+        self.value = value
         self.description = description
+        self.type = type
         self.image = image
-        self.aggregate = aggregate_id
-        self.available = available
-        self.location = location
+        self.aggregate = aggregate.pk
+        self.available = aggregate.available
+        self.location = aggregate.location
 

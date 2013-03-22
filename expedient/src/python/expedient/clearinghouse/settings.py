@@ -85,7 +85,8 @@ else:
     loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
 
 
-
+# Set path for plugins (set at 'defaultsettings/plugin.py')
+sys.path.append(PLUGIN_LOADER.plugins_path)
 
 
 #GENI CONTROL FRAMEWORK SETTINGS (NOT NEEDED AT THIS MOMENT)

@@ -198,8 +198,8 @@ var data = {
             nodeValue: "{{ node.value }}", nodeName: "{{ node.name }}", image: "{{ node.image }}", color: "",
             /* Code used for calculating groups/islands within frontend */
             /*group: adequate_group({{ node.aggregate }}),*/
-            group: {{ node.group }}, aggregate: {{ node.aggregate }},
-            loc: "{{ node.loc }}", type: "{{ node.type }}",
+            group: {{ node.group }}, /*aggregate: {{ node.aggregate }},*/
+            location: "{{ node.location }}", type: "{{ node.type }}",
             description: "{{ node.description }}", fixed: false, radius: 10, available: "{{ node.available }}",
         }
         {% if not forloop.last %},{% endif %}
@@ -508,13 +508,13 @@ nodeInitialPos = []
 for (i = 0; i< nodes.length; i++){
 	nodeInitialPos[i] = [nodes[i].x, nodes[i].y];
 	if (islandsLocs[nodes[i].group] == EMPTY_ISLAND){
-		islandsLocs[nodes[i].group] = nodes[i].loc;
+		islandsLocs[nodes[i].group] = nodes[i].location;
 	}
 }
 
 var dataislands = []
 for (i = 0; i< nIslands; i++){
-	dataislands[i] = {rx: (aw/2 + ah/2)/2, ry: ah/2, cx:(foci[i].x0+foci[i].x1)/2, cy:(foci[i].y0+foci[i].y1)/2, group: i, loc: islandsLocs[i]};
+	dataislands[i] = {rx: (aw/2 + ah/2)/2, ry: ah/2, cx:(foci[i].x0+foci[i].x1)/2, cy:(foci[i].y0+foci[i].y1)/2, group: i, location: islandsLocs[i]};
 }
 
 var islands = svg.selectAll(".island")
@@ -539,7 +539,7 @@ var ilabels = islands.append("text")
       .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
       .style("opacity",1)
       .style("cursor", "default")
-      .text(function(d) { return d.loc });
+      .text(function(d) { return d.location });
 
 //First ellipse animation on startup
 animate();
@@ -600,7 +600,7 @@ node.on("mouseover", function (d, i){
 	        //tooltip.show(get_node_info_formated(d));
                 // Ugly hack to decode HTML
 	        tooltip.show($('<div/>').html(d.description).text());
-	        $("#selected_node_info").html("Selected " + d.type + ": " + d.nodeName + " at " + d.loc);
+	        $("#selected_node_info").html("Selected " + d.type + ": " + d.nodeName + " at " + d.location);
 	        $("#selected_node_info").css("background-color", d.color );
 	        $("#selected_node_info").css("text-shadow", "-3px 2px 4px #eee");
 	        $("#selected_node_info").show();
@@ -708,7 +708,7 @@ ilabels.attr("text-anchor", "middle")
       .attr("x", function(d){ return d.cx})
       .attr("font-color", function(d) { return d3.rgb(color(d.group%nIslands)).darker(5); })
       .style("opacity",1)
-      .text(function(d) { return d.loc });
+      .text(function(d) { return d.location });
 
 iellipses.transition()
                 .style("stroke-width",3)

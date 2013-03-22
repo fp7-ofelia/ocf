@@ -16,7 +16,7 @@ class PluginLoader():
     plugin_settings = {}
     from localsettings import SRC_DIR
     # Note: surround inside list whenever treated as a unit
-    plugins_path = join_paths([SRC_DIR, "python"])
+    plugins_path = join_paths([SRC_DIR, "python", "plugins"])
 
     @staticmethod
     def generate_static_content_urls(media_url = ""):

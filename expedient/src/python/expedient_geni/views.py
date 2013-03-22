@@ -233,7 +233,7 @@ def sshkeys(request, slice_id):
                 ("Home", reverse("home")),
                 ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-                #("HTML UI - Choose Resources", reverse("slice_home", args=[slice_id])),
+                #("HTML UI - Choose Resources", reverse("html_plugin_home", args=[slice_id])),
                 ("Choose Flowspace", reverse("flowspace", args=[slice_id])),
                 ("Download SSH Keys", reverse("gcf_sshkeys", args=[slice_id])),
             ),

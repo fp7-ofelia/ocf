@@ -10,6 +10,7 @@ from utils import append_to_local_setting
 import ldap
 
 sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/python')
+#sys.path.append(os.path.dirname(__file__)+'/../../../plugins')
 
 try:
     from localsettings import SRC_DIR as location
@@ -183,7 +184,7 @@ INSTALLED_APPS = [
     'expedient_geni',
     'expedient_geni.planetlab',
     'expedient_geni.gopenflow',
-# PREVIOUSLY USED
+# PREVIOUSLY USED - EXISTS NO MORE
 #    'expedient.ui.html',
     'expedient.ui.rspec',
 ##    'vt_plugin',

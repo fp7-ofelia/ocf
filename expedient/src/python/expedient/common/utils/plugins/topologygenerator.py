@@ -18,7 +18,6 @@ class TopologyGenerator():
     # Structure to save groups/islands and their assigned resources
     assigned_groups = []
 
-    # TODO Separar en 2 clases: 1 para topo_index; otra para los enlaces (solo usar nombre, no depender de ID)
     # XXX: OBTENER LA ID DEL NODO A PARTIR DEL NOMBRE, QUE ES UNICO Y NO SE MODIFICA...
     @staticmethod
     def check_link_consistency(links, nodes, user, slice):
@@ -65,7 +64,7 @@ class TopologyGenerator():
 
                 # Check consistency. If both nodes A and B exist, add link to structure
                 if str(source_node['res_id']) != "None" and str(target_node['res_id']) != "None":
-#                    print "----> OK link: %s <---"  % str(link)
+#                    print "[OK] ********** link: %s"  % str(link)
                     consistent_links.append(link)
                 # Otherwise, notify about this missing (and any other) to the Island Manager
                 else:
@@ -73,6 +72,7 @@ class TopologyGenerator():
 #                    print "-----> [BEFORE] REMOVING INDEX: %s FROM LINKS: %s" % (str(index), str(links))
 #                    links.pop(index)
 #                    print "-----> [AFTER] REMOVING INDEX: %s FROM LINKS: %s" % (str(index), str(links))
+#                    print "[REMOVE] ******** link: %s" % str(link)
 
                     # Get data for e-mail
                     try:
@@ -324,6 +324,7 @@ class TopologyGenerator():
 
         # Iterate over each plugin to get its nodes and links
         for plugin in PluginLoader.plugin_settings:
+#            print "\n\n\n\n\n\n\n\n\n\n PLUGIN: %s \n\n\n\n\n\n\n\n\n\n" % str(plugin)
             try:
                 plugin_method = "%s_get_ui_data" % str(plugin)
                 plugin_import = PluginLoader.plugin_settings.get(plugin).get("general").get("get_ui_data_class")
@@ -331,11 +332,40 @@ class TopologyGenerator():
                 if plugin_import:
                     #exec(plugin_import)
                     tmp = __import__(plugin_import, globals(), locals(), ['get_ui_data'], 0)
-                    locals()[plugin_method] = getattr(tmp, 'get_ui_data')
+                    try:
+                        # 1st - get method inside interface ('Plugin'), if present
+                        locals()[plugin_method] = getattr(tmp.Plugin, 'get_ui_data')
+                    except:
+                        # 2nd - get method directly from module
+                        locals()[plugin_method] = getattr(tmp, 'get_ui_data')
+                    # A dictionary is expected to be returned
                     plugin_ui_data_aux = locals()[plugin_method](slice)
-                    # Not so happy to need this post-processing after the plugin's data retrieval...
-                    [ plugin_ui_data['d3_nodes'].append(node) for node in plugin_ui_data_aux.get("nodes", []) ]
-                    [ plugin_ui_data['d3_links'].append(link) for link in plugin_ui_data_aux.get("links", []) ]
+#                    print "=========================================================="
+#                    print "nodes: %s" % str(plugin_ui_data_aux["nodes"])
+#                    print "links: %s" % str(plugin_ui_data_aux["links"])
+#                    print "=========================================================="
+
+#                    print "----------------------------------------------------------------------------------"
+#                    print "plugin_ui_data_aux____0: %s" % str(plugin_ui_data_aux)
+#                    print "----------------------------------------------------------------------------------"
+
+                    # Each Node/Link object's dictionary from the list is retrieved
+                    try:
+                        [ plugin_ui_data['d3_nodes'].append(node.__dict__) for node in plugin_ui_data_aux.get("nodes", []) ]
+#                    print "***************************************************** wawatwawatfsatsfatwa **************"
+                    except:
+                        pass
+#                    for enlace in plugin_ui_data_aux.get("links", []):
+#                        print "************************ enlace (recibido): %s" % str(enlace)
+#                        try:
+#                            print "************************ enlace (recibido) dict: %s" % str(enlace.__dict__)
+#                        except Exception as e:
+#                            print "exception...... details: %s" % str(e)
+                    try:
+                        [ plugin_ui_data['d3_links'].append(link.__dict__) for link in plugin_ui_data_aux.get("links", []) ]
+#                    print "125164217562415627415624125641275614267815289178925178291526412713251629142691271524672812"
+                    except:
+                        pass
 #                    plugin_ui_data['n_islands'] = plugin_ui_data['n_islands'] + plugin_ui_data_aux.get("n_islands",0)
 
                     # Calculate each node's group depending on its aggregate manager ID. User should
@@ -344,8 +374,14 @@ class TopologyGenerator():
 #                    for node in plugin_ui_data['d3_nodes']:
 #                        TopologyGenerator.node_get_island(node)
 
+#                print "----------------------------------------------------------------------------------"
+#                print "plugin_ui_data: %s" % str(plugin_ui_data)
+#                print "plugin_ui_data_aux: %s" % str(plugin_ui_data_aux)
+#                print "----------------------------------------------------------------------------------"
                 plugin_ui_data = dict(plugin_ui_data_aux.items() + plugin_ui_data.items())
 #                print "\n\n\n\n plugin_ui_data['d3_links']: %s\n\n\n\n" % str(plugin_ui_data['d3_links'])
+
+#                print "/////////////////////////////// ASJKAGSAJKGAHSJASJK ///////////////////////////////"
 
 #                # TODO
 #                plugin_ui_data['n_islands'] = TopologyGenerator.compute_number_islands(plugin_ui_data)
