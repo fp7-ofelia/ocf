@@ -69,12 +69,12 @@ This is a list of 3-tuples:
 append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 
 ### Installed Aggregate Models
-##AGGREGATE_PLUGINS = [
+AGGREGATE_PLUGINS = [
 ##    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
-###    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
-###    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
+    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
 ##    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
-##]
+]
 '''List of aggregate plugins that are enabled in Expedient.
 
 This is a list of 3-tuples:
@@ -89,7 +89,7 @@ This is a list of 3-tuples:
        included in URLConf and that contains all the plugin's URLs.
 
 '''
-##append_to_local_setting("AGGREGATE_PLUGINS", AGGREGATE_PLUGINS, globals())
+append_to_local_setting("AGGREGATE_PLUGINS", AGGREGATE_PLUGINS, globals())
 
 SLICE_EXPIRATION_CHECK_INTERVAL = 3600
 '''How often should we check for expired slices?
