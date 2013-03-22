@@ -161,10 +161,37 @@
         </div>
 <!-- Common expandable tooltip -->
 <div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-{# Aggregate details - loads templates from plugins #}
-{% for plugin_addresources in plugin_template_list %}
-        {% include plugin_addresources %}
-{% endfor %}
+
+{# Begin: Aggregate details - loads templates from plugins - partial templates #}
+{% if plugin_template_list_network %}
+  <h2 class="resourcesh2">
+    <a id="networkResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
+      Network resources
+      <span class="opened">&#x25B2;</span>
+    </a>
+  </h2>
+  <div id="networkResourcesContainer" class="expandable">
+  {% for plugin_addresources in plugin_template_list_network %}
+    {% include plugin_addresources %}
+  {% endfor %}
+  </div>
+{% endif %}
+
+{% if plugin_template_list_computation %}
+  <h2 class="resourcesh2">
+    <a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
+      Computational resources
+      <span class="opened">&#x25B2;</span>
+    </a>
+  </h2>
+  <div id="computationalResourcesContainer" class="expandable">
+  {% for plugin_addresources in plugin_template_list_computation %}
+    {% include plugin_addresources %}
+  {% endfor %}
+{% endif %}
+</div>
+{# End: Aggregate details #}
+
 
 {# Show message when no aggregates are added to the slice #}
 {% with slice.aggregates.all as aggregate_list %}

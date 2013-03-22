@@ -81,14 +81,12 @@
 
 
 {# OPENFLOW #}
-{% if openflow_aggs %}
-<h2 class="resourcesh2"><a id="networkResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">Network resources (Openflow) <span class="opened">&#x25B2;</span></a></h2>
-<div id="networkResourcesContainer" class="expandable" >
-{% endif %}
-
 {% for agg in openflow_aggs %}
 <table><tr>
-<td><h2><a id="ofam_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">&bull; OpenFlow Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a></h2></td>
+<td>
+  <h2><a id="ofam_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">&bull; OpenFlow Aggregate: {{ agg.name }} <span class="opened">&#x25B2;</span></a>
+  </h2>
+</td>
 <td> </td>
 </tr></table>
 <div id="ofam_{{agg.id}}Container" class="aggregateManager expandable" >
@@ -311,11 +309,6 @@
 {% empty %}
   <!--<p>There are no OpenFlow aggregates in the slice. </p>-->
 {% endfor %}
-
-{% if openflow_aggs %}
-</div><!-- id="networkResourcesContainer"--> 
-{% endif %}
-
 
 
 {% endblock content %}

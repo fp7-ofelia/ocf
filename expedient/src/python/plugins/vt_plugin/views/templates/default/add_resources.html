@@ -107,18 +107,7 @@
 
 {% block content %}
 
-{% if vt_aggs %}
-<h2 class="resourcesh2">
-  <a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
-    Computational resources (Virtual Machines) 
-    <span class="opened">
-      &#x25B2;
-    </span>
-  </a>
-</h2>
-
-<div id="computationalResourcesContainer" class="expandable">
-  {% for agg in vt_aggs %}
+{% for agg in vt_aggs %}
     <h2>
       <a id="vtm_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">
         &bull; Virt. Aggregate: {{ agg.name }} 
@@ -312,11 +301,6 @@ Type:
 </div>
 
 {% endfor %}
-</div>
-
-<!-- Computational resources div -->
-{% endif %}
-</div>
 
 <!-- aggregateManager container -->
 {% endblock %}

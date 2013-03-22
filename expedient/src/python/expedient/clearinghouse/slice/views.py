@@ -222,8 +222,26 @@ def detail(request, slice_id):
     
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
     # Need to get the whole list of templates for adding resources to the slice...
-    from expedient.clearinghouse.settings import TEMPLATE_RESOURCES
+#    from expedient.clearinghouse.settings import TEMPLATE_RESOURCES
     from expedient.clearinghouse.settings import PLUGIN_LOADER
+
+    template_list_computation = []
+    template_list_network = []
+    for plugin in PLUGIN_LOADER.plugin_settings:
+        try:
+            plugin_dict = PLUGIN_LOADER.plugin_settings.get(plugin)
+            # Get templates according to the plugin category ('computation' or 'network')
+#            print "plugin: %s, resource_type: %s" % (str(plugin), plugin_dict.get("general").get("resource_type"))
+            if plugin_dict.get("general").get("resource_type") == "computation":
+                template_list_computation.append(plugin_dict.get("paths").get("template_resources"))
+            elif plugin_dict.get("general").get("resource_type") == "network":
+                template_list_network.append(plugin_dict.get("paths").get("template_resources"))
+        except Exception as e:
+            print "[WARNING] Could not obtain template to add resources to slides in plugin '%s'. Details: %s" % (str(plugin), str(e))
+
+#    print "plugin_template_list_computation: %s" % str(template_list_computation)
+#    print "plugin_template_list_network: %s" % str(template_list_network)
+
     extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
@@ -231,7 +249,9 @@ def detail(request, slice_id):
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
             ),
             "resource_list": resource_list,
-            "plugin_template_list": TEMPLATE_RESOURCES,
+#            "plugin_template_list": TEMPLATE_RESOURCES,
+            "plugin_template_list_network": template_list_network,
+            "plugin_template_list_computation": template_list_computation,
             "plugins_path": PLUGIN_LOADER.plugins_path
     }
 
