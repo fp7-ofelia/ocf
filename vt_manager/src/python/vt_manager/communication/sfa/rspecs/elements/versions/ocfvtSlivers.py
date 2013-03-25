@@ -50,7 +50,8 @@ class OcfVtSlivers:
         for sliver_elem in sliver_elems:
             sliver = VM()
 	    vm_attrs = sliver.fields
-	    vm_ifaces = vm_attrs.pop(vm_attrs.index('interfaces'))
+	    if 'interfaces' in vm_attrs:
+	        vm_ifaces = vm_attrs.pop(vm_attrs.index('interfaces'))
 	    for sliver_attr in sliver_elem:
 		if sliver_attr.tag == 'interfaces':
 		    sliver[sliver_attr.tag] = OcfVtSlivers.get_interfaces(list(sliver_attr))

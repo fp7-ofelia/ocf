@@ -109,8 +109,11 @@ class OcfVtNode:
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
         #xpath = '//node[count(sliver-type)>0] | //default:node[count(default:sliver-type) > 0]' 
-	xpath = '//rspec/node'
+	xpath = '//rspec/network/node'
         node_elems = xml.xpath(xpath)
+	if not node_elems:
+		node_elems = xml.xpath('//RSpec/network/node')
+	print '....................................... nodel_elems.........................',node_elems
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
@@ -143,7 +146,7 @@ class OcfVtNode:
             	node['services'] = PGv2Services.get_services(node_elem)
             
             # get slivers
-	    sliver_elems = node_elem.xpath('./slivers | ./default:slivers')
+	    sliver_elems = node_elem.xpath('./sliver | ./default:slivers')
 	    if sliver_elems:
                 node['slivers'] = OcfVtSlivers.get_slivers(sliver_elems)
 	
@@ -153,6 +156,7 @@ class OcfVtNode:
                     node['boot_state'] = 'boot'
                 else: 
                     node['boot_state'] = 'disabled' 
+	print '...........................nodes......................', nodes
 
         return nodes
 

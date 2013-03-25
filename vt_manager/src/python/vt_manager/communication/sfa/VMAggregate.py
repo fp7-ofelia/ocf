@@ -61,6 +61,8 @@ class VMAggregate:
 
         	nodes = self.get_nodes(options,slice_leaf,projectName,created_vms,new_nodes)
         	rspec.version.add_nodes(nodes)
+		print 'RSPEEEEEC'
+		print rspec.toxml()
         	return rspec.toxml()
 	
     	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
@@ -124,8 +126,9 @@ class VMAggregate:
 		    if slice_leaf:
 			slices = (self.shell.GetSlice(slice_leaf,projectName))
 			
-		    	
-		    	slices['vms'].extend(VMAggregate.FilterList({'slice-name':slice_leaf},created_vms))
+		    	print '--------------------------------------------------------------',slices['vms']	
+			print created_vms
+		    	slices['vms'].extend(VMAggregate.FilterList({'slice-name':slice_leaf,'node-name':node.name},created_vms))
 			#cVMs['vms'] = createdVMs
 		    slivers = list() 
 		    if slices:

@@ -54,9 +54,11 @@ class OcfVt(RSpecVersion):
     def get_slice_attributes(self, network=None):
 	slice_attributes= list()
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
+	print '....................nodes with slivers........................', nodes_with_slivers
         #default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node)
+	    print '.................sliver attributes......', sliver_attributes
 	    slice_attributes.append(sliver_attributes)
         return slice_attributes
 
@@ -203,8 +205,8 @@ class OcfVtRequest(OcfVt):
 class OcfVtManifest(OcfVt):
     enabled = True
     content_type = 'manifest'
-    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
-    template = '<rspec type="manifest" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
+    template = '<rspec type="manifest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
      
 
 

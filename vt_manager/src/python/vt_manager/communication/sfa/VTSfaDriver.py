@@ -64,6 +64,8 @@ class VTSfaDriver:
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
 		
                 rspec = RSpec(rspec_string,'OcfVt')
+		print '...................................................................................................................................................................................................................................................................................................................................'
+		print rspec.toxml()
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf
@@ -72,13 +74,17 @@ class VTSfaDriver:
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:
+			print "--------------------------------------------------------------slivers['component_id']:", slivers['component_id']
 			node = self.shell.GetNodes(uuid=slivers['component_id'])
 			for vm in slivers['slivers']:
 				#node = self.shell.GetNodes(uuid=vm['server-id'])
 				print '---------------(uuid=vm["server-id"]',vm['server-id']  
 				if not node in nodes:
 					nodes.append(node)
-				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':slice_leaf,'node-name':'Foix'})
+				print 'nodes----------------------', nodes
+				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
+			print created_vms
+		
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms,new_nodes=nodes)
 	
 	def sliver_status(self,slice_leaf,authority,creds,options):
