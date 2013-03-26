@@ -22,10 +22,15 @@ class SampleResource(Resource):
     Sample Resource
     '''
 
-    #name = models.CharField(max_length = 1024, default="")
-    uuid = models.CharField(max_length = 1024, default = "")
+    class Meta:
+        """Meta Class for your model."""
+        app_label = 'sample_resource'
+
+#    uuid = models.CharField(max_length = 1024, default = "")
+
 #    memory = models.IntegerField(blank = True, null=True, validators=[validate_memory])    
   #  cpuNumber = models.IntegerField(blank = True, null=True)
+
     temperature = models.FloatField(validators=[validators.MinLengthValidator(0)])
     temperature_scale = models.CharField(max_length = 10, choices = TEMPERATURE_SCALE_CHOICES,
 #                        default = "celsius", validators = [validate_temperature_scale],
@@ -46,15 +51,11 @@ class SampleResource(Resource):
 #    hdOriginPath = models.CharField(max_length = 1024, default="")    
 #    virtualizationSetupType = models.CharField(max_length = 20, choices = VIRTUALIZATION_SETUP_TYPE_CHOICES,
 #                                               validators=[validate_virtualizationSetupType],verbose_name = "Virtualization Setup Type")
-    ifaces = models.ManyToManyField("iFace", blank = True, null = True)
+    interfaces = models.ManyToManyField("SampleResourceInterface", blank = True, null = True)
     
 #    disc_image = models.CharField(max_length = 20, choices = DISC_IMAGE_CHOICES,validators=[validate_discImage],
 #                                  verbose_name = "Disc Image")
     
-    class Meta:
-        """Meta Class for your model."""
-        app_label = 'sample_resource'
-
 
 #    def setMemory(self,memory):
 #        self.memory = memory
@@ -211,8 +212,23 @@ class SampleResource(Resource):
 
     def complete_delete(self):
         self.action_set.clear()
-        for iface in self.ifaces.all():
-            self.ifaces.remove(iface)
-            iface.delete()
+        for interface in self.interfaces.all():
+            self.interfaces.remove(interface)
+            interface.delete()
         super(SampleResource, self).delete()
+
+class SampleResourceInterface(models.Model): 
+
+    class Meta:
+        """Meta Class for your model."""
+        app_label = 'sample_resource' 
+
+    name = models.CharField(max_length = 32, default="", blank = True, null=True)
+    mac = models.CharField(max_length = 17, default="", blank = True, null=True)
+    ip = models.IPAddressField(blank = True, null=True)
+    gw = models.IPAddressField(blank = True, null=True)
+    mask = models.IPAddressField(blank = True, null=True)
+    dns1 = models.IPAddressField(blank = True, null=True)
+    dns2 = models.IPAddressField(blank = True, null=True)
+    bridge_interface = models.CharField(max_length = 32, default="", blank = True, null=True)
 

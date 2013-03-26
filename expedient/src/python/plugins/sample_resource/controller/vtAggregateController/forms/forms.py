@@ -5,18 +5,18 @@ Created on Apr 29, 2010
 '''
 
 from django import forms
-from vt_plugin.models import VtPlugin
+from vt_plugin.models import SampleResourcePlugin
 from expedient.common.utils import create_or_update
 from django.forms.models import ModelChoiceField
 from vt_plugin.models import xmlrpcServerProxy
 
-class VTAggregateForm(forms.ModelForm):
+class SampleResourceAggregateForm(forms.ModelForm):
     '''
     A form to create and edit OpenFlow Aggregates.
     '''
 
     class Meta:
-        model = VtPlugin
+        model = SampleresourcePlugin
         #exclude = ['client', 'owner', 'users', "leaf_name"]
         exclude = ['client', 'owner', 'users', 'available']
 

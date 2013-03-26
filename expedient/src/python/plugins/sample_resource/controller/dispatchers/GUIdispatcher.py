@@ -10,15 +10,15 @@ from django.core.urlresolvers import reverse
 from django import forms
 
 import copy
-from vt_plugin.models import VtPlugin, VTServer, VM, Action
-from vt_plugin.forms.VM import VMModelForm
-from vt_manager.communication.utils.XmlHelper import XmlHelper
-from vt_plugin.utils.Translator import Translator
+from sample_resource.models import SampleResourcePlugin, SampleResource
+from sample_resource.forms.SampleResource import SampleResourceModelForm
+#from vt_manager.communication.utils.XmlHelper import XmlHelper
+#from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
-from vt_plugin.utils.ServiceThread import *
-from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
-from vt_plugin.controller.VMcontroller.VMcontroller import *
-from vt_plugin.utils.ServiceThread import *
+#from vt_plugin.utils.ServiceThread import *
+#from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
+#from vt_plugin.controller.VMcontroller.VMcontroller import *
+#from vt_plugin.utils.ServiceThread import *
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.messaging.context_processors import messaging
 from expedient.common.messaging.models import DatedMessage
@@ -58,19 +58,19 @@ def resource_crud(request, slice_id, server_id):
     error_crud = ""
     serv = get_object_or_404(VTServer, id = server_id)
     slice = get_object_or_404(Slice, id = slice_id)
-    virtualmachines = VM.objects.filter(sliceId=slice.uuid)
+    virtualmachines = SampleResources.objects.filter(slice_id=slice.uuid)
 
     # Creates a model based on VM
-    VMModelFormAux = modelformset_factory(
-        VM, can_delete=False, form=VMModelForm,
-        fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
+    SampleResourceModelFormAux = modelformset_factory(
+        SampleResource, can_delete=False, form=SampleResourceModelForm,
+        fields=["name", "temperature_scale", "interfaces"],
     )
 
     try:
         if request.method == "POST":
             if 'create_new_vms' in request.POST:
                 # "Done" pressed ==> send xml to AM
-                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
+                formset = SampleResourceModelFormAux(request.POST, queryset=virtualmachines)
                 if formset.is_valid():
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
@@ -83,7 +83,7 @@ def resource_crud(request, slice_id, server_id):
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
-            formset = VMModelFormAux(queryset=VM.objects.none())
+            formset = SampleResourceModelFormAux(queryset=SampleResource.objects.none())
 
     except ValidationError as e:
         # Django exception message handling is different to Python's...
@@ -112,7 +112,7 @@ def manage_vm(request, slice_id, vm_id, action_type):
 
     "Manages the actions executed over VMs at url manage resources."
 
-    vm = VM.objects.get(id = vm_id)
+    vm = SampleResource.objects.get(id = vm_id)
     #if action_type == 'stop' : action_type = 'hardStop'
     rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
@@ -146,7 +146,7 @@ def check_vms_status(request, slice_id):
     slice = get_object_or_404(Slice, id=slice_id)
     sr_aggs = \
             slice.aggregates.filter(
-                leaf_name=VtPlugin.__name__.lower())
+                leaf_name=SampleResourcePlugin.__name__.lower())
     for agg in sr_aggs:
         for server in agg.resource_set.all():
             if server.leaf_name == 'VTServer':
@@ -187,7 +187,7 @@ def startStopSlice(action,uuid):
 
     "Manages the actions executed over VMs at url manage resources."
     try: 
-        vmsToStart = VM.objects.filter(sliceId = uuid)
+        vmsToStart = SampleResource.objects.filter(slice_id = uuid)
     
         #if action_type == 'stop' : action_type = 'hardStop'
         globalRspec = XmlHelper.getSimpleActionSpecificQuery(action, "dummy")
@@ -222,10 +222,10 @@ def update_messages(request):
 #
 
 def get_sr_list(slice):
-    return VM.objects.filter(sliceId = slice.uuid)
+    return SampleResource.objects.filter(slice_id = slice.uuid)
 
 def get_sr_aggregates(slice):
-    sr_aggs = slice.aggregates.filter(leaf_name=VtPlugin.__name__.lower())
+    sr_aggs = slice.aggregates.filter(leaf_name=SampleResourcePlugin.__name__.lower())
     try:
         from vt_plugin.controller.vtAggregateController.vtAggregateController import askForAggregateResources
         for agg in sr_aggs:
@@ -234,7 +234,8 @@ def get_sr_aggregates(slice):
             askForAggregateResources(vtPlugin, projectUUID = project_uuid, sliceUUID = slice.uuid)
     except:
         pass
-    return sr_aggs
+#    return sr_aggs
+    return []
 
 def get_node_description(node):
     description = "<strong>Sample Resource: " + node.name + "</strong><br/><br/>"
@@ -266,7 +267,7 @@ def get_nodes_links(slice, chosen_group=None):
 #            nodes_test.append(s.id)
 #            openflowSwitches[s.datapath_id] = len(nodes_test)-1
 
-    sr_aggs = get_vm_aggregates(slice)
+    sr_aggs = get_sr_aggregates(slice)
 
     # Getting image for the nodes
     # FIXME: avoid to ask the user for the complete name of the method here! he should NOT know it
@@ -288,7 +289,7 @@ def get_nodes_links(slice, chosen_group=None):
         # For every server of the Virtualization AM
         for n in vt_servers:
             vmNames = []
-            for name in  n.vms.all().filter(sliceId = slice.uuid).values_list('name', flat=True):
+            for name in  n.vms.all().filter(slice_id = slice.uuid).values_list('name', flat=True):
                 vmNames.append(str(name))
             vmInterfaces = []
             j=1 #FIXME XXX: eth0 is mgmt 
@@ -378,7 +379,7 @@ def get_ui_data(slice):
 
 
     except Exception as e:
-        print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
+        print "[ERROR] Problem loading UI data for plugin 'sample_resource'. Details: %s" % str(e)
     return ui_context
 
 #from expedient.common.utils.plugins.plugininterface import PluginInterface
@@ -395,6 +396,6 @@ def get_ui_data(slice):
 #            ui_context['sr_aggs'] = get_sr_aggregates(slice)
 #            ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
 #        except Exception as e:
-#            print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
+#            print "[ERROR] Problem loading UI data for plugin 'sample_resource'. Details: %s" % str(e)
 #        return ui_context
 

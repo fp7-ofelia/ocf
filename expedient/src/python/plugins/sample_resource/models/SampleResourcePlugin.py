@@ -16,7 +16,7 @@ class SampleResourcePlugin(Aggregate):
         app_label = 'sample_resource'
         verbose_name = "Sample Resource Aggregate"
     
-    client = models.OneToOneField('xmlrpcServerProxy', editable = False, blank = True, null = True)
+#    client = models.OneToOneField('xmlrpcServerProxy', editable = False, blank = True, null = True)
 
 
     #def start_slice(self, slice):
@@ -46,7 +46,7 @@ class SampleResourcePlugin(Aggregate):
         sample_resources = self.resource_set.filter_for_class(SampleResource).filter(sampleresource__projectId=project.uuid)
         offending_slices = []
         for resource in sample_resources:
-            offending_slices.append(str(resource.SampleResource.getSliceName()))
+            offending_slices.append(str(resource.SampleResource.get_slice_name()))
         # Aggregate has VMs in slices -> stop slices and remove aggregate from there where possible
         if offending_slices:
             for slice in project.slice_set.all():
