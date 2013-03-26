@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Thu Mar 21 18:00:46 2013 by generateDS.py version 2.4c.
+# Generated Tue Jun 28 13:33:53 2011 by generateDS.py version 2.3b.
 #
 
 import sys
@@ -112,6 +112,13 @@ supermod.server_type.subclass = server_typeSub
 # end class server_typeSub
 
 
+class server_status_typeSub(supermod.server_status_type):
+    def __init__(self, valueOf_=None):
+        super(server_status_typeSub, self).__init__(valueOf_, )
+supermod.server_status_type.subclass = server_status_typeSub
+# end class server_status_typeSub
+
+
 class virtual_machine_typeSub(supermod.virtual_machine_type):
     def __init__(self, name=None, uuid=None, status=None, project_id=None, project_name=None, slice_id=None, slice_name=None, operating_system_type=None, operating_system_version=None, operating_system_distribution=None, server_id=None, virtualization_type=None, xen_configuration=None):
         super(virtual_machine_typeSub, self).__init__(name, uuid, status, project_id, project_name, slice_id, slice_name, operating_system_type, operating_system_version, operating_system_distribution, server_id, virtualization_type, xen_configuration, )
@@ -152,41 +159,6 @@ class user_typeSub(supermod.user_type):
         super(user_typeSub, self).__init__(name, password, )
 supermod.user_type.subclass = user_typeSub
 # end class user_typeSub
-
-
-class cpu_typeSub(supermod.cpu_type):
-    def __init__(self, user=None, sys=None, idle=None):
-        super(cpu_typeSub, self).__init__(user, sys, idle, )
-supermod.cpu_type.subclass = cpu_typeSub
-# end class cpu_typeSub
-
-
-class memory_typeSub(supermod.memory_type):
-    def __init__(self, used=None, free=None, total=None, buffers=None):
-        super(memory_typeSub, self).__init__(used, free, total, buffers, )
-supermod.memory_type.subclass = memory_typeSub
-# end class memory_typeSub
-
-
-class hd_space_typeSub(supermod.hd_space_type):
-    def __init__(self, partition=None):
-        super(hd_space_typeSub, self).__init__(partition, )
-supermod.hd_space_type.subclass = hd_space_typeSub
-# end class hd_space_typeSub
-
-
-class partition_typeSub(supermod.partition_type):
-    def __init__(self, name=None, size=None, used=None, available=None, used_ratio=None):
-        super(partition_typeSub, self).__init__(name, size, used, available, used_ratio, )
-supermod.partition_type.subclass = partition_typeSub
-# end class partition_typeSub
-
-
-class server_status_typeSub(supermod.server_status_type):
-    def __init__(self, cpu=None, memory=None, hd_space=None):
-        super(server_status_typeSub, self).__init__(cpu, memory, hd_space, )
-supermod.server_status_type.subclass = server_status_typeSub
-# end class server_status_typeSub
 
 
 class monitoring_typeSub(supermod.monitoring_type):
@@ -251,9 +223,9 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -270,9 +242,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
-        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(sys.stdout, 0, name_=rootTag,
+##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -287,11 +259,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from ??? import *\n\n')
-    sys.stdout.write('import ??? as model_\n\n')
-    sys.stdout.write('rootObj = model_.rspec(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from ??? import *\n\n')
+##     sys.stdout.write('import ??? as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rspec(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
+##     sys.stdout.write(')\n')
     return rootObj
 
 

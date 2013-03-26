@@ -106,6 +106,9 @@ PROVISIONING
 		</xs:sequence>
 	</xs:complexType>
 
+	<!-- Server status -->
+	<xs:complexType name="server-status-type">
+	</xs:complexType>
 
 	<xs:complexType name="virtual-machine-type">
 		<xs:sequence>
@@ -244,46 +247,6 @@ PROVISIONING
 	</xs:complexType>
 
 
-	<xs:complexType name="cpu-type">
-                <xs:sequence>
-			<xs:element name="user" type="xs:float" />
-			<xs:element name="sys" type="xs:float" />
-			<xs:element name="idle" type="xs:float" />
-                </xs:sequence>
-        </xs:complexType>
-
-	<xs:complexType name="memory-type">
-                <xs:sequence>
-                        <xs:element name="used" type="xs:integer" />
-                        <xs:element name="free" type="xs:integer" />
-                        <xs:element name="total" type="xs:integer" />
-                        <xs:element name="buffers" type="xs:integer" />
-                </xs:sequence>
-        </xs:complexType>
-
-	<xs:complexType name="hd-space-type">
-                <xs:sequence>
-                        <xs:element name="partition" type="partition-type" maxOccurs="unbounded" />
-                </xs:sequence>
-        </xs:complexType>
-
-	<xs:complexType name="partition-type">
-                <xs:sequence>
-                        <xs:element name="name" type="xs:string"/>
-                        <xs:element name="size" type="xs:integer"/>
-                        <xs:element name="used" type="xs:integer"/>
-                        <xs:element name="available" type="xs:integer"/>
-                        <xs:element name="used-ratio" type="xs:float"/>
-                </xs:sequence>
-        </xs:complexType>
-
-	<xs:complexType name="server-status-type">
-                <xs:sequence>
-                        <xs:element name="cpu" type="cpu-type" />
-			<xs:element name="memory" type="memory-type" />
-			<xs:element name="hd-space" type="hd-space-type" />
-                </xs:sequence>
-        </xs:complexType>
 <!--
 
 MONITORING
@@ -314,7 +277,6 @@ MONITORING
 	<xs:simpleType name="monitoring-action-types">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="listActiveVMs" />
-			<xs:enumeration value="statics" />
 			<!-- Add Other actionType here -->
 		</xs:restriction>
 	</xs:simpleType>

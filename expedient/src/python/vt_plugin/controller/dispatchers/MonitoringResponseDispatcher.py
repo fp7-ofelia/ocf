@@ -5,7 +5,7 @@ from vt_plugin.models import VM
 class MonitoringResponseDispatcher():
 
     '''
-    Handles all the VT AM vm provisioning responses and all the actions that go 
+    Handles all the VT AM vm monitoring responses and all the actions that go 
     from the VT AM to the VT Plugin
     '''
 

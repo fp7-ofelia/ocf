@@ -1,11 +1,13 @@
 '''
 	@author: msune
-	
-	Monitoring dispatcher. Selects appropiate Driver for VT tech
+	@author: lbergesio
+
+	Monitoring dispatcher. Selects appropiate Driver for VT tech or for server system in general
 '''
 
 from communications.XmlRpcClient import XmlRpcClient
 from utils.Logger import Logger
+from monitoring.ServerMonitoring import ServerMonitoring
 
 class MonitoringDispatcher: 
 	
@@ -27,7 +29,8 @@ class MonitoringDispatcher:
 		#Gathering information
 		if action.type_ == "listActiveVMs":
 			return dispatcher.listActiveVMs(action.id,server)
-
+		elif action.type_ == "statics":
+			return dispatcher.serverStatics(server)
 		raise Exception("Unknown action type")
 
 
@@ -58,4 +61,14 @@ class MonitoringDispatcher:
 	@staticmethod
 	def listActiveVMs(id,server):
 		raise Exception("Abstract method cannot be called")	
+
+	@staticmethod
+	def serverStatics(server):
+		try:
+			server = ServerMonitoring.getTopStatics(server)
+			server = ServerMonitoring.getDfStatics(server)
+		except Exception as e:
+			MonitoringDispatcher.logger.error(str(e))
+			raise e
+		
 
