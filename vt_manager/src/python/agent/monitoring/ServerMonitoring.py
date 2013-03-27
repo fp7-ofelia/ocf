@@ -9,6 +9,8 @@
 import subprocess
 import re 
 
+class ServerMonitoring:
+
 	@staticmethod
 	def getTopStatics(server):
 		task=subprocess.Popen('top -n1 | egrep "(Cpu|Mem)"',shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -48,7 +50,7 @@ import re
 		out, err=task.communicate()
 
 		## Parsing ##
-		out = out.split('\n')i
+		out = out.split('\n')
 		out = [o.split() for o in out if o is not '']
 		#[['/dev/sda5', '18491260', '14654748', '2897200', '84%', '/'], 
 		#['/dev/sda3', '223734304', '123910524', '99823780', '56%', '/media/OS']]
