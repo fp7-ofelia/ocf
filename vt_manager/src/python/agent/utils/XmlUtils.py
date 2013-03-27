@@ -84,3 +84,7 @@ class XmlUtils(object):
 		#return XmlParser.parseXML(open('utils/xml/emptyResponse.xml','r').read())
 
 
+        @staticmethod
+        def getEmptyStaticsMonitoringResponseObject():
+                with open(os.path.dirname(__file__)+'/xml/emptyStaticsMonitoringResponse.xml','r') as fxml:
+                        return XmlParser.parseXML(fxml.read())

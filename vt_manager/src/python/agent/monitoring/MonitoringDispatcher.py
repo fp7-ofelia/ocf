@@ -30,7 +30,7 @@ class MonitoringDispatcher:
 		if action.type_ == "listActiveVMs":
 			return dispatcher.listActiveVMs(action.id,server)
 		elif action.type_ == "statics":
-			return dispatcher.serverStatics(server)
+			return dispatcher.serverStatics(action.id, server)
 		raise Exception("Unknown action type")
 
 
@@ -63,12 +63,14 @@ class MonitoringDispatcher:
 		raise Exception("Abstract method cannot be called")	
 
 	@staticmethod
-	def serverStatics(server):
+	def serverStatics(action_id, server):
 		try:
 			server = ServerMonitoring.getTopStatics(server)
 			server = ServerMonitoring.getDfStatics(server)
+                        XmlRpcClient.sendAsyncStaticsMonitoring(action_id,"SUCCESS",server)
 		except Exception as e:
 			MonitoringDispatcher.logger.error(str(e))
-			raise e
+                        XmlRpcClient.sendAsyncMonitoringActionStatus(action_id,"FAILED",str(e))
+			return
 		
 
