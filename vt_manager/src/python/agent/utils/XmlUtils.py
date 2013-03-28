@@ -31,6 +31,7 @@ class XmlParser(object):
 	def parseXML(rawXML):
 		#XmlParser.logger.debug("Parsing XML...")
 		try:			
+            		XmlParser.logger.error(rawXML) 
 			object = vtRspecInterface.parseString(rawXML)   	
 			#XmlParser.logger.debug("Parsing of XML concluded without significant errors.")
 			return object 
@@ -85,6 +86,6 @@ class XmlUtils(object):
 
 
         @staticmethod
-        def getEmptyStaticsMonitoringResponseObject():
-                with open(os.path.dirname(__file__)+'/xml/emptyStaticsMonitoringResponse.xml','r') as fxml:
+        def getEmptyStatisticsMonitoringResponseObject():
+                with open(os.path.dirname(__file__)+'/xml/emptyStatisticsMonitoringResponse.xml','r') as fxml:
                         return XmlParser.parseXML(fxml.read())

@@ -76,6 +76,7 @@ def processXmlQuery(notificationCallBackUrl,xml):
 #		logger.debug(xml)
 		rspecValue = XmlParser.parseXML(xml)
 	except Exception as e:
+                logger.error("LEODEBUG PETO EN PROCESS")
 		logger.error(e)	
 		raise e
 

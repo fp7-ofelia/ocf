@@ -67,14 +67,19 @@ class XmlRpcClient:
 	@staticmethod
 	def __craftMonitoringResponseXml(actionId,status,server):
 	
-		rspec = XmlUtils.getEmptyStaticsMonitoringResponseObject()
-		
+		rspec = XmlUtils.getEmptyStatisticsMonitoringResponseObject()
+		logger.error("LEODEBUG RESPEC TO CRAFT")
+		logger.error(rspec)
+                logger.error(rspec.response)
+		logger.error(rspec.response.monitoring)
+		logger.error(rspec.response.monitoring.action[0])
+		logger.error(rspec.response.monitoring.action[0].server)
+		logger.error(server)
 		rspec.response.monitoring.action[0].id = actionId
-		rspec.response.monitoring.action[0].type_ = "statics"
+		rspec.response.monitoring.action[0].type_ = "statistics"
 		rspec.response.monitoring.action[0].status = status
-		#rspec.response.monitoring.action[0].description = description
-		rspec.response.monitoring.action[0].server = []
-		rspec.response.monitoring.action[0].server=append(server)
+		rspec.response.monitoring.action[0].description = "" 
+		rspec.response.monitoring.action[0].server = server
 		return XmlCrafter.craftXML(rspec)	
 
 
@@ -107,10 +112,10 @@ class XmlRpcClient:
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))
 
 	@staticmethod
-	def sendAsyncStaticsMonitoring(action_id, status, server_statics):
-		XmlRpcClient.logger.debug("Sending asynchronous "+status+" statics monitoring message to: "+threading.current_thread().callBackURL)
+	def sendAsyncStatisticsMonitoring(action_id, status, server_statistics):
+		XmlRpcClient.logger.debug("Sending asynchronous "+status+" statistics monitoring message to: "+threading.current_thread().callBackURL)
                 server = xmlrpclib.Server(threading.current_thread().callBackURL)
-                XmlRpcClient.logger.debug(XmlRpcClient.__crafStaticstMonitoringResponseXml(actionId,status, server_statics))
-                server.sendAsync(XmlRpcClient.__craftStaticsMonitoringResponseXml(actionId,status,server_statics))
+                XmlRpcClient.logger.debug(XmlRpcClient.__crafStatisticsMonitoringResponseXml(actionId,status, server_statistics))
+                server.sendAsync(XmlRpcClient.__craftStatisticsMonitoringResponseXml(actionId,status,server_statistics))
                 XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 

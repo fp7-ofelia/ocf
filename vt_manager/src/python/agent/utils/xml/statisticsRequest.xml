@@ -1,0 +1,33 @@
+<rspec>
+<query>
+        <monitoring>
+                <action type="statistics" id="9191">
+                        <server>
+                                <virtualization-type>xen</virtualization-type>
+                                <status>
+                                        <cpu>
+                                                <user>0.0</user>
+                                                <sys>0.0</sys>
+                                                <idle>0</idle>
+                                        </cpu>
+                                        <memory>
+                                                <used>0</used>
+                                                <free>0</free>
+                                                <total>0</total>
+                                                <buffers>0</buffers>
+                                        </memory>
+                                        <hd-space>
+                                                <partition>
+                                                        <name>0</name>
+                                                        <size>0</size>
+                                                        <used>0</used>
+                                                        <available>0</available>
+                                                        <used-ratio>0.0</used-ratio>
+                                                </partition>
+                                        </hd-space>
+                                </status>
+                        </server>
+                </action>
+        </monitoring>
+</query>
+</rspec>

@@ -314,7 +314,7 @@ MONITORING
 	<xs:simpleType name="monitoring-action-types">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="listActiveVMs" />
-			<xs:enumeration value="statics" />
+			<xs:enumeration value="statistics" />
 			<!-- Add Other actionType here -->
 		</xs:restriction>
 	</xs:simpleType>

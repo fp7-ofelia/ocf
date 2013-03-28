@@ -8,20 +8,40 @@
 
 import subprocess
 import re 
+import copy
+from utils.Logger import Logger
+#from settings.settingsLoader import *
+#from settings.settingsLoader import FILEHD_NICE_PRIORITY,OXA_FILEHD_IONICE_CLASS, OXA_FILEHD_IONICE_PRIORITY
 
 class ServerMonitoring:
 
-	@staticmethod
-	def getTopStatics(server):
-		task=subprocess.Popen('top -n1 | egrep "(Cpu|Mem)"',shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		out, err=task.communicate()
+	logger = Logger.getLogger()
 
+#	@staticmethod
+#        def subprocessCall(command, priority=OXA_FILEHD_NICE_PRIORITY, ioPriority=OXA_FILEHD_IONICE_PRIORITY, ioClass=OXA_FILEHD_IONICE_CLASS, stdout=None):
+#                try:
+#                        wrappedCmd = '/usr/bin/nice -n '+str(priority)+' /usr/bin/ionice -c '+str(ioClass)+' -n '+str(ioPriority)+' '+command
+#                        FileHdManager.logger.debug('Executing: '+wrappedCmd)
+#                        subprocess.check_call(wrappedCmd, shell=True, stdout=stdout)
+#                except Exception as e:
+#                        ServerMonitoring.logger.error('Unable to execute command: '+command)
+#                        raise e
+	@staticmethod
+	def getTopStatistics(server):
+		try:
+			task=subprocess.Popen('/usr/bin/top -b -n1 | /bin/egrep "(Cpu|Mem)"',shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			out, err=task.communicate()
+                        if err:
+				raise Exception(err)
+		except:
+			raise	
+			
 		## Parsing ##
 		out = out.split('\n')
 		for i,o in enumerate(out):
 			out[i] = re.sub('\x1b.*?(m|$|\[K)', '', o) 	
 
-
+		ServerMonitoring.logger.error(out)
 		## Populating server-rspec structure ##
 		## out2 = [
 		## 'Cpu(s):  7.3%us,  1.9%sy,  0.0%ni, 89.8%id,  0.9%wa,  0.0%hi,  0.0%si,  0.0%st', 
@@ -36,11 +56,13 @@ class ServerMonitoring:
 		mem.total = out[1][0]
 		mem.buffers = out[1][3]
 
+		ServerMonitoring.logger.error(server)
+
 		return server
 
 
 	@staticmethod
-	def getTopStatics(server):
+	def getDfStatistics(server):
 		exceptions = ["none", "tmpfs", "udev"]
 		cmd = "df | tail -n +2 "
 		for exc in exceptions:

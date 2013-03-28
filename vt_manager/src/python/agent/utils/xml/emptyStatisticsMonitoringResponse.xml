@@ -2,11 +2,11 @@
 <rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
 <response>
         <monitoring>
-                <action id="leo" type="statics">
+                <action id="leo" type="statiststiics">
 			<server>
-				<name>"papaww"</name>
-				<id>"isdada"</id>
-				<uuid>"asdad"</uuid>
+				<name>"none"</name>
+				<id>"none"</id>
+				<uuid>"none"</uuid>
 				<virtual-machines>
 					<virtual-machine>
 						<name></name>
@@ -30,13 +30,6 @@
 						<partition>
 							<name>2</name> 
 							<size>2</size> 
-							<used>2</used>
-							<available>2</available>
-							<used-ratio>0.4</used-ratio>
-						</partition>
-						<partition>
-							<name>2</name>
-							<size>2</size>
 							<used>2</used>
 							<available>2</available>
 							<used-ratio>0.4</used-ratio>

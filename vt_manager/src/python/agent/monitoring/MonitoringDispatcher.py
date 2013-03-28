@@ -29,26 +29,29 @@ class MonitoringDispatcher:
 		#Gathering information
 		if action.type_ == "listActiveVMs":
 			return dispatcher.listActiveVMs(action.id,server)
-		elif action.type_ == "statics":
-			return dispatcher.serverStatics(action.id, server)
+		elif action.type_ == "statistics":
+			MonitoringDispatcher.logger.error("LEODEBUG TENGO EL DISPATCHER DE XEN Y STATICS")
+			return dispatcher.serverStatistics(action.id, server)
 		raise Exception("Unknown action type")
 
 
 	@staticmethod
 	def processMonitoring(monitoring):
 
+		MonitoringDispatcher.logger.error("iNTRO EN EL PROCESSMONITORING")	
 		for action in monitoring.action:
 			server = action.server
 			try:
 				dispatcher = MonitoringDispatcher.__getMonitoringDispatcher(server.virtualization_type)	
 			except Exception as e:
 				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"FAILED",str(e))
+				MonitoringDispatcher.logger.error("LEODEBUG PETA EN EL PROCESSMONITORING")	
 				MonitoringDispatcher.logger.error(str(e))	
 				return
 
 			try:
 				#Send async notification
-				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"ONGOING","")
+				#XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"ONGOING","")
 				MonitoringDispatcher.logger.debug("After sending ongoing")	
 				MonitoringDispatcher.__dispatchAction(dispatcher,action,server)	
 			except Exception as e:
@@ -63,14 +66,16 @@ class MonitoringDispatcher:
 		raise Exception("Abstract method cannot be called")	
 
 	@staticmethod
-	def serverStatics(action_id, server):
+	def serverStatistics(action_id, server):
 		try:
-			server = ServerMonitoring.getTopStatics(server)
-			server = ServerMonitoring.getDfStatics(server)
-                        XmlRpcClient.sendAsyncStaticsMonitoring(action_id,"SUCCESS",server)
+			MonitoringDispatcher.logger.error("ENTRO DE SERVERSTATICS")
+			server = ServerMonitoring.getTopStatistics(server)
+			server = ServerMonitoring.getDfStatistics(server)
+			MonitoringDispatcher.logger.error("SALGO DE SERVERSTATICS")
+                        #XmlRpcClient.sendAsyncStatisticsMonitoring(action_id,"SUCCESS",server)
 		except Exception as e:
 			MonitoringDispatcher.logger.error(str(e))
-                        XmlRpcClient.sendAsyncMonitoringActionStatus(action_id,"FAILED",str(e))
+                        #XmlRpcClient.sendAsyncMonitoringActionStatus(action_id,"FAILED",str(e))
 			return
 		
 
