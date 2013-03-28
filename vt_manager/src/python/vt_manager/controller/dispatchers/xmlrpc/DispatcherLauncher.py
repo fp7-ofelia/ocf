@@ -29,3 +29,7 @@ class DispatcherLauncher():
 	@staticmethod
 	def processInformation(remoteHashValue, projectUUID ,sliceUUID):
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)
+
+	@rpcmethod(url_name="plugin")
+	def statistics():
+		return getattr (DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
