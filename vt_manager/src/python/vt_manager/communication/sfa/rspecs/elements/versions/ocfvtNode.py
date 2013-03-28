@@ -114,6 +114,7 @@ class OcfVtNode:
 	if not node_elems:
 		node_elems = xml.xpath('//RSpec/network/node')
 	print '....................................... nodel_elems.........................',node_elems
+	print xml.__dict__
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
