@@ -64,18 +64,25 @@ class ServerMonitoring:
 	@staticmethod
 	def getDfStatistics(server):
 		exceptions = ["none", "tmpfs", "udev"]
-		cmd = "df | tail -n +2 "
+		cmd = "/bin/df | /usr/bin/tail -n +2 "
 		for exc in exceptions:
-			cmd = cmd + " | grep -v "+exc
+			cmd = cmd + " | /bin/grep -v "+exc
 
-		task=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		out, err=task.communicate()
-
+		try:
+			task=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			out, err=task.communicate()
+                       
+			if err:
+				raise Exception(err)
+		except:
+			raise	
 		## Parsing ##
+		ServerMonitoring.logger.error(out)
 		out = out.split('\n')
 		out = [o.split() for o in out if o is not '']
 		#[['/dev/sda5', '18491260', '14654748', '2897200', '84%', '/'], 
 		#['/dev/sda3', '223734304', '123910524', '99823780', '56%', '/media/OS']]
+		ServerMonitoring.logger.error(out)
 		model_partition = copy.deepcopy(server.status.hd_space.partition[0])
 		partition = server.status.hd_space.partition
 		partition.pop()
@@ -88,7 +95,7 @@ class ServerMonitoring:
 			part.available = o[3]
 			part.used_ratio = o[4].replace('%','')
 			partition.append(part)
-
+		ServerMonitoring.logger.error("LEODEBUG RATIO: "+str(partition[0].used_ratio))
 		return server
 
 			

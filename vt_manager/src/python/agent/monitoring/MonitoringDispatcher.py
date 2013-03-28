@@ -51,7 +51,7 @@ class MonitoringDispatcher:
 
 			try:
 				#Send async notification
-				#XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"ONGOING","")
+				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"ONGOING","")
 				MonitoringDispatcher.logger.debug("After sending ongoing")	
 				MonitoringDispatcher.__dispatchAction(dispatcher,action,server)	
 			except Exception as e:
@@ -68,14 +68,12 @@ class MonitoringDispatcher:
 	@staticmethod
 	def serverStatistics(action_id, server):
 		try:
-			MonitoringDispatcher.logger.error("ENTRO DE SERVERSTATICS")
 			server = ServerMonitoring.getTopStatistics(server)
 			server = ServerMonitoring.getDfStatistics(server)
-			MonitoringDispatcher.logger.error("SALGO DE SERVERSTATICS")
-                        #XmlRpcClient.sendAsyncStatisticsMonitoring(action_id,"SUCCESS",server)
+                        XmlRpcClient.sendAsyncStatisticsMonitoring(action_id,"SUCCESS",server)
 		except Exception as e:
 			MonitoringDispatcher.logger.error(str(e))
-                        #XmlRpcClient.sendAsyncMonitoringActionStatus(action_id,"FAILED",str(e))
+                        XmlRpcClient.sendAsyncMonitoringActionStatus(action_id,"FAILED",str(e))
 			return
 		
 
