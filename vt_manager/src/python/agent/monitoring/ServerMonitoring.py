@@ -41,7 +41,6 @@ class ServerMonitoring:
 		for i,o in enumerate(out):
 			out[i] = re.sub('\x1b.*?(m|$|\[K)', '', o) 	
 
-		ServerMonitoring.logger.error(out)
 		## Populating server-rspec structure ##
 		## out2 = [
 		## 'Cpu(s):  7.3%us,  1.9%sy,  0.0%ni, 89.8%id,  0.9%wa,  0.0%hi,  0.0%si,  0.0%st', 
@@ -56,7 +55,6 @@ class ServerMonitoring:
 		mem.total = out[1][0]
 		mem.buffers = out[1][3]
 
-		ServerMonitoring.logger.error(server)
 
 		return server
 
@@ -77,12 +75,10 @@ class ServerMonitoring:
 		except:
 			raise	
 		## Parsing ##
-		ServerMonitoring.logger.error(out)
 		out = out.split('\n')
 		out = [o.split() for o in out if o is not '']
 		#[['/dev/sda5', '18491260', '14654748', '2897200', '84%', '/'], 
 		#['/dev/sda3', '223734304', '123910524', '99823780', '56%', '/media/OS']]
-		ServerMonitoring.logger.error(out)
 		model_partition = copy.deepcopy(server.status.hd_space.partition[0])
 		partition = server.status.hd_space.partition
 		partition.pop()
@@ -95,7 +91,6 @@ class ServerMonitoring:
 			part.available = o[3]
 			part.used_ratio = o[4].replace('%','')
 			partition.append(part)
-		ServerMonitoring.logger.error("LEODEBUG RATIO: "+str(partition[0].used_ratio))
 		return server
 
 			

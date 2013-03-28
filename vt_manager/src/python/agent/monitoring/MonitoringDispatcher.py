@@ -30,7 +30,6 @@ class MonitoringDispatcher:
 		if action.type_ == "listActiveVMs":
 			return dispatcher.listActiveVMs(action.id,server)
 		elif action.type_ == "statistics":
-			MonitoringDispatcher.logger.error("LEODEBUG TENGO EL DISPATCHER DE XEN Y STATICS")
 			return dispatcher.serverStatistics(action.id, server)
 		raise Exception("Unknown action type")
 
@@ -38,14 +37,12 @@ class MonitoringDispatcher:
 	@staticmethod
 	def processMonitoring(monitoring):
 
-		MonitoringDispatcher.logger.error("iNTRO EN EL PROCESSMONITORING")	
 		for action in monitoring.action:
 			server = action.server
 			try:
 				dispatcher = MonitoringDispatcher.__getMonitoringDispatcher(server.virtualization_type)	
 			except Exception as e:
 				XmlRpcClient.sendAsyncMonitoringActionStatus(action.id,"FAILED",str(e))
-				MonitoringDispatcher.logger.error("LEODEBUG PETA EN EL PROCESSMONITORING")	
 				MonitoringDispatcher.logger.error(str(e))	
 				return
 

@@ -68,13 +68,6 @@ class XmlRpcClient:
 	def __craftMonitoringResponseXml(actionId,status,server):
 	
 		rspec = XmlUtils.getEmptyStatisticsMonitoringResponseObject()
-		logger.error("LEODEBUG RESPEC TO CRAFT")
-		logger.error(rspec)
-                logger.error(rspec.response)
-		logger.error(rspec.response.monitoring)
-		logger.error(rspec.response.monitoring.action[0])
-		logger.error(rspec.response.monitoring.action[0].server)
-		logger.error(server)
 		rspec.response.monitoring.action[0].id = actionId
 		rspec.response.monitoring.action[0].type_ = "statistics"
 		rspec.response.monitoring.action[0].status = status
