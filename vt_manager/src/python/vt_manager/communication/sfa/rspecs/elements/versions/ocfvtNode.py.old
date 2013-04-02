@@ -17,9 +17,7 @@ from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Interface import 
 
 from vt_manager.communication.sfa.rspecs.elements.range import Range
 from vt_manager.communication.sfa.rspecs.elements.network_interface import NetworkInterface
-from vt_manager.communication.sfa.rspecs.elements.versions.ocfvtSlivers import OcfVtSlivers
-
-#from sfa.util.sfalogging import logger
+from  vt_manager.communication.sfa.rspecs.elements.versions.ocfvtSlivers import OcfVtSlivers
 
 #from sfa.planetlab.plxrn import xrn_to_hostname
 def xrn_to_hostname(a=None,b=None):
@@ -29,7 +27,7 @@ class OcfVtNode:
     @staticmethod
     def add_nodes(xml, nodes):
 
-	network_elems = xml.xpath('//network')
+        network_elems = xml.xpath('//network')
         if len(network_elems) > 0:
             network_elem = network_elems[0]
         elif len(nodes) > 0 and nodes[0].get('component_manager_id'):
@@ -38,21 +36,19 @@ class OcfVtNode:
         else:
             network_elem = xml
 
-	
         node_elems = []
         for node in nodes:
             node_fields = ['component_manager_id', 'component_id', 'client_id', 'sliver_id', 'exclusive']
-            node_elem = network_elem.add_instance('node', node, node_fields)
+            node_elem = network_elem.add_instance('node',node,node_fields)#xml.add_instance('node', node, node_fields)
             node_elems.append(node_elem)
             # set component name
             if node.get('component_id'):
-                component_name = xrn_to_hostname(node['component_id'])
+                component_name = node['component_id']
                 node_elem.set('component_name', component_name)
-	    if node.get('hostname'):
-                        simple_elem = node_elem.add_element('hostname')
-                        simple_elem.set_text(node['hostname'])
             # set hardware types
-	    
+	    if node.get('hostname'):
+	    		simple_elem = node_elem.add_element('hostname')
+                        simple_elem.set_text(node['hostname'])
             if node.get('hardware_types'):
                 for hardware_type in node.get('hardware_types', []):
 		    for field in OcfVtServer.fields:	
@@ -106,9 +102,8 @@ class OcfVtNode:
 
     @staticmethod
     def get_nodes(xml, filter={}):
-        #xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
-        xpath = '//rspec/network/node'
-	node_elems = xml.xpath(xpath)
+        xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
+        node_elems = xml.xpath(xpath)
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
@@ -118,6 +113,8 @@ class OcfVtNode:
         node_elems = xml.xpath(xpath)
 	if not node_elems:
 		node_elems = xml.xpath('//RSpec/network/node')
+	print '....................................... nodel_elems.........................',node_elems
+	print xml.__dict__
         return OcfVtNode.get_node_objs(node_elems)
 
     @staticmethod
@@ -160,6 +157,7 @@ class OcfVtNode:
                     node['boot_state'] = 'boot'
                 else: 
                     node['boot_state'] = 'disabled' 
+	print '...........................nodes......................', nodes
 
         return nodes
 

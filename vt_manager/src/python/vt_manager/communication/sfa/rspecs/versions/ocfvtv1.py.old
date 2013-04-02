@@ -7,13 +7,13 @@ from vt_manager.communication.sfa.rspecs.version import RSpecVersion
 #from vt_manager.communication.sfa.rspecs.elements.versions.pgv2Node import PGv2Node
 #from vt_manager.communication.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 
-from  vt_manager.communication.sfa.rspecs.elements.versions.ocfvtNode import OcfVtNode
+from vt_manager.communication.sfa.rspecs.elements.versions.ocfvtNode import OcfVtNode
  
 class OcfVt(RSpecVersion):
     type = 'OcfVt'
     content_type = 'ad'
     version = '1'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd' #'/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
     #namespace = 'http://www.protogeni.net/resources/rspec/2'
     namespace = None
     content = '*'
@@ -23,14 +23,13 @@ class OcfVt(RSpecVersion):
     # Networks
     def get_networks(self):
         network_elems = self.xml.xpath('//rspec/network')
- 
         networks = [network_elem.get_instance(fields=['name', 'slice']) for \
                     network_elem in network_elems]
         return networks
     # Nodes
 
     def get_nodes(self, filter=None):
-        return OcfVtNode.get_nodes(self.xml, filter)
+        return PGv2Node.get_nodes(self.xml, filter)
 
     def get_nodes_with_slivers(self):
         return OcfVtNode.get_nodes_with_slivers(self.xml)
@@ -55,11 +54,11 @@ class OcfVt(RSpecVersion):
     def get_slice_attributes(self, network=None):
 	slice_attributes= list()
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
-	print 'slice attributes'
-	print nodes_with_slivers
+	print '....................nodes with slivers........................', nodes_with_slivers
         #default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node)
+	    print '.................sliver attributes......', sliver_attributes
 	    slice_attributes.append(sliver_attributes)
         return slice_attributes
 
@@ -136,19 +135,15 @@ class OcfVt(RSpecVersion):
     # Links
 
     def get_links(self, network=None):
-	return []
         return PGv2Link.get_links(self.xml)
 
     def get_link_requests(self):
-	pass
         return PGv2Link.get_link_requests(self.xml)  
 
     def add_links(self, links):
-	return []
         PGv2Link.add_links(self.xml.root, links)
 
     def add_link_requests(self, link_tuples, append=False):
-	pass
         PGv2Link.add_link_requests(self.xml.root, link_tuples, append)
 
     # Leases
@@ -165,7 +160,7 @@ class OcfVt(RSpecVersion):
         """
         Merge contents for specified rspec with current rspec
         """
-        from sfa.rspecs.rspec import RSpec
+        from vt_manager.communication.sfa.rspecs.rspec import RSpec
         # just copy over all the child elements under the root element
         if isinstance(in_rspec, basestring):
             in_rspec = RSpec(in_rspec)
@@ -195,26 +190,23 @@ class OcfVt(RSpecVersion):
 class OcfVtAd(OcfVt):
     enabled = True
     content_type = 'ad'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd'#'/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    template = '<rspec type="advertisement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
-    #template = '<rspec type="advertisement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    template = '<rspec type="advertisement" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
 
 class OcfVtRequest(OcfVt):
     enabled = True
     content_type = 'request'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/vm_schema.xsd'#'/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/vm_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd "/>'
-    #template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd "/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
+    template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd"/>'
+
     #schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
     #template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
 
 class OcfVtManifest(OcfVt):
     enabled = True
     content_type = 'manifest'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd' #'/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
-    template = '<rspec type="manifest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
-    #template = '<rspec type="manifest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
-#    template = '<rspec type="manifest" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
+    schema = '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
+    template = '<rspec type="manifest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/server_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd"/>'
      
 
 
