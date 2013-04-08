@@ -173,12 +173,15 @@ class XML:
         parse rspec into etree
         """
         parser = etree.XMLParser(remove_blank_text=True)
+	print parser
+	print xml
         try:
             tree = etree.parse(xml, parser)
         except IOError:
             # 'rspec' file doesnt exist. 'rspec' is proably an xml string
             try:
                 tree = etree.parse(StringIO(xml), parser)
+		print StringIO(xml),xml
             except Exception, e:
                 raise InvalidXML(str(e))
         root = tree.getroot()

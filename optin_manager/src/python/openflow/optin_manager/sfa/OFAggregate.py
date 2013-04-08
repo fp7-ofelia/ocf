@@ -16,21 +16,18 @@ from openflow.optin_manager.sfa.rspecs.elements.granularity import Granularity
 from openflow.optin_manager.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 
-from openflow.optin_manager.sfa.rspecs.elements.range import Range
-from openflow.optin_manager.sfa.rspecs.elements.network_interface import NetworkInterface
-from openflow.optin_manager.sfa.rspecs.elements.vm import VM
-from openflow.optin_manager.sfa.rspecs.elements.vm_interface import VMInterface
+from openflow.optin_manager.sfa.openflow_utils.foam_rspec_lib import getAdvertisement
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
-from openflow.optin_manager.sfa.VTShell import VTShell
+from openflow.optin_manager.sfa.OFShell import OFShell
 
 import time
 
 class OFAggregate:
 
 	def __init__(self):
-		self.shell = VTShell()
+		self.shell = OFShell()
 
 	@staticmethod
 	def FilterList(myfilter, mylist):
@@ -55,11 +52,13 @@ class OFAggregate:
 		    options['slice']=slice_leaf
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
-
+		    nodes = self.shell.GetNodes()
+		    of_xml = getAdvertisement(nodes)
+		    
         	rspec = RSpec(version=rspec_version, user_options=options)
-
-        	nodes = self.get_nodes(options,slice_leaf,projectName)
-        	rspec.version.add_nodes(nodes)
+		print '-------------------------------------------------------------------------------------------rspec',rspec
+        	#nodes = self.get_nodes(options,slice_leaf,projectName)
+        	rspec.version.add_nodes(of_xml)
         	return rspec.toxml()
 	
     	def get_nodes(self, options={},slice_leaf = None,projectName=None):
@@ -75,7 +74,7 @@ class OFAggregate:
 	            rspec_node['exclusive'] = 'false'
 	            rspec_node['hardware_types'] = [OpenFlowSitch({'component_id':  hrn_to_urn('ocf.i2cat.vt_manager' + '.' + node['dpid'], 'node'),
 								   'component_manager_id': hrn_to_urn('ocf.i2cat.optin_manager','authority'),
-							 	   'dpid':node['dpid']
+							 	   'dpid':node['dpid'],
 								   'port':node['ports']
 								  })]
 		    if slice_leaf:

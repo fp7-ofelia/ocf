@@ -6,7 +6,6 @@ class OpenFlowSwitch(Element):
         'component_id',
         'component_manager_id',
 	'dpid',
-	'port_name',
-	'port_num',
+	'port',
     ]
 

@@ -12,8 +12,8 @@ from openflow.optin_manager.sfa.util.cache import Cache
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 from openflow.optin_manager.sfa.rspecs.rspec import RSpec
 
-from openflow.optin_manager.sfa.VMAggregate import VMAggregate
-from openflow.optin_manager.sfa.VTShell import VTShell
+from openflow.optin_manager.sfa.OFAggregate import OFAggregate
+from openflow.optin_manager.sfa.OFShell import OFShell
 
 class OFSfaDriver:
 
@@ -25,9 +25,11 @@ class OFSfaDriver:
 	def list_resources (self,creds, options):
 
 		version_manager = VersionManager()
-        	rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
+        	#rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
+		rspec_version = 'OcfOf'
         	version_string = "rspec_%s" % (rspec_version)
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
+		print '.............................................................................................',rspec
        		return rspec
 
 	def crud_slice(self,slice_leaf,authority,creds=None, action=None):
