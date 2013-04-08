@@ -1,6 +1,6 @@
 import threading
 import time
-from openflow.optin_manager import xmlrpc_server
+#from openflow.optin_manager import xmlrpc_server
 from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace, MatchStruct
