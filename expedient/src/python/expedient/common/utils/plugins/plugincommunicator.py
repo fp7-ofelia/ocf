@@ -3,11 +3,10 @@
 @author: leonardo.bergesio@i2cat.net
 """
 
-import os
-from utils import join_paths, Singleton
-#from pluginloader import PluginLoader
 from django.conf import settings 
 from django.db.models import Q
+from utils import join_paths, Singleton
+import os
 
 class PluginCommunicator():
 
@@ -33,8 +32,6 @@ class PluginCommunicator():
         try:
             plugins_modules = settings.PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
             p_agg = plugins_modules.split('.')[-1]
-#            print "LEODEBUG"
-#            print p_agg
             p_models_path = '.'.join(plugins_modules.split('.')[:-1])
             try:
                 model = getattr(__import__(p_models_path,fromlist=[klass]), klass)
@@ -49,7 +46,6 @@ class PluginCommunicator():
                 return object
         except Exception,e:
             print "[ERROR] PluginCommunicator could not obtain object. Details: %s " % str(e)
-#            print "********************* I am searching for params: (plugin_type: %s, class: %s, **kwargs: %s)" % (plugin_type, klass, kwargs)
             return None
 
     @staticmethod
@@ -58,4 +54,4 @@ class PluginCommunicator():
             return PluginCommunicator.get_object(slice, plugin_type, klass, **kwargs).id
         except:
             return None
-        
+ 

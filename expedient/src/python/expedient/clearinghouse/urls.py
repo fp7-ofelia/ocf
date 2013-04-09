@@ -100,8 +100,16 @@ urlpatterns += patterns('',
     #get_static_url("/favicon.ico","/img/favicon.ico")
 )
 
-# URLs for static content in plugins
-urlpatterns += settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
+try:
+    # URLs for static content in plugins
+    urlpatterns += settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
+except:
+    try:
+        # XXX: PLUGIN_LOADER is not set yet in django.conf.settings? Why?
+        import settings as common_settings
+        urlpatterns += common_settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
+    except Exception as e:
+        print "[ERROR] Problem adding URLs for plugins inside expedient.clearinghouse.urls. Details: %s" % str(e)
 
 '''
 Static theme content
@@ -115,3 +123,4 @@ urlpatterns += patterns('',
     get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
     get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
 )
+

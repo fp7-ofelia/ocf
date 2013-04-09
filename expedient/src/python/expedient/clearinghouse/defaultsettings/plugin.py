@@ -7,7 +7,7 @@ Loads plugin settings in Expedient environment.
 
 import os
 import sys
-config=__import__('django.conf')
+config = __import__('django.conf')
 settings = config.conf.settings
 
 #print sys.path
@@ -20,7 +20,7 @@ settings = config.conf.settings
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 # Import Django environment variables to be used inside PluginLoader class
 os.environ['DJANGO_SETTINGS_MODULE'] = "expedient.clearinghouse.settings"
-#from plugins.pluginloader import PluginLoader as PLUGIN_LOADER
+
 from common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
 from common.utils.plugins.topologygenerator import TopologyGenerator as TOPOLOGY_GENERATOR
 
@@ -54,6 +54,5 @@ for (plugin, plugin_settings) in PLUGIN_SETTINGS.iteritems():
                     setting_value = [setting_value]
                 conf_setting += setting_value
             except Exception as e:
-                print "WARNING: Could not load setting : %s" % setting.upper()
-                print e
+                print "[WARNING] Problem loading setting '%s' inside plugin.py. Details: %s" % (setting.upper(), str(e))
 

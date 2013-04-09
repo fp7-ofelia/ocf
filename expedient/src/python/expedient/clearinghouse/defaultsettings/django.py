@@ -14,7 +14,6 @@ sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/pyt
 
 try:
     from localsettings import SRC_DIR as location
-    #sys.path.append("/home/user/ofelia-git/expedient/src/python/")
     sys.path.append(location)
 except ImportError:
     try:
@@ -180,17 +179,16 @@ INSTALLED_APPS = [
     'expedient.clearinghouse.slice',
     'expedient.clearinghouse.users',
     'expedient.clearinghouse.permissionmgmt',
-##    'openflow.plugin',
+#    'openflow.plugin',
     'expedient_geni',
     'expedient_geni.planetlab',
     'expedient_geni.gopenflow',
-# PREVIOUSLY USED - EXISTS NO MORE
 #    'expedient.ui.html',
     'expedient.ui.rspec',
-##    'vt_plugin',
-##    'vt_plugin.communication',
-###### For Testing #######################
-##    'openflow.dummyom',
+#    'vt_plugin',
+#    'vt_plugin.communication',
+#    'openflow.dummyom',
+#    'sample_resource',
 ]
 append_to_local_setting(
     "INSTALLED_APPS", INSTALLED_APPS, globals(), at_start=True,
