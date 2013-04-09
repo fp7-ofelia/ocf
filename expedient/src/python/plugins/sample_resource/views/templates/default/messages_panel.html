@@ -1,8 +1,0 @@
-<table class="msg_table">
-                        {% for msg in messages %}
-                        <tr class="{{ msg.type }} {% if forloop.first %}new_message{% else %}old_message{% endif %}">
-                            <td>{{ msg.msg_text }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-

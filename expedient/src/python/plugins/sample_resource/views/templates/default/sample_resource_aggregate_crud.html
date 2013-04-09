@@ -1,6 +1,6 @@
-{% extends "vt_plugin_base.html" %}
+{% extends "base.html" %}
 
-{% block title %}{% if create %}Add Virtualization Aggregate{% else %}Update Virtualization Aggregate {{ aggregate.name }}{% endif %}.{% endblock title %}
+{% block title %}{% if create %}Add SampleResource Aggregate{% else %}Update SampleResource Aggregate {{ aggregate.name }}{% endif %}.{% endblock title %}
 
 {% block content %}
 <div class="main">
@@ -23,7 +23,7 @@
                     {% if field.name == 'location' %}
                         <ul id="warninglist_id_location" class="warning">
                             <li>
-                                <img src="{% url img_media 'exclamation_mark_15x15.png' %}" /> {{ field.help_text }}
+                                <img src="{% url img_media 'warning.png' %}" /> {{ field.help_text }}
                             </li>
                         </ul>
                     {% endif %}
