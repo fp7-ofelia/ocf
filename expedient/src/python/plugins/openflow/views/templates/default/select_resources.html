@@ -348,9 +348,12 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
       <th class="dpid">Datapath ID</th>
       <th class="ports">Connections (Port and Remote Port)</th>
     </tr>
-    {% for rsc in agg.resource_set.all %}
-    {% if rsc.available and rsc|leaf_class_is:ofswitch_class %}
-    {% with rsc.as_leaf_class as switch %}
+    {% with agg.resource_set.all as resource_set %}
+        {% regroup resource_set|dictsort:"name" by name as resource_set_ordered %}
+    {% for rsc in resource_set_ordered %}
+        {% with rsc.list.0 as rsc %}
+            {% if rsc.available and rsc|leaf_class_is:ofswitch_class %}
+            {% with rsc.as_leaf_class as switch %}
     <tr class="body openflow">
       <td class="dpid"><a name="switch_{{ switch.id }}">{{ switch.datapath_id }}</a></td>
       <td class="ports">
@@ -416,7 +419,9 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
     </tr>
     {% endwith %}
     {% endif %}
+    {% endwith %}
     {% endfor %}
+    {% endwith %}
   </table>
 </div>
 {% empty %}

@@ -1,18 +1,7 @@
-import shlex, subprocess
-from StringIO import StringIO
 from django.db import models
-from django.db.models.fields import IPAddressField
-import paramiko
-from paramiko.rsakey import RSAKey
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.resources.models import Resource, Sliver
-from expedient.common.utils.modelfields import LimitedIntegerField
-from expedient.common.middleware import threadlocals
-from expedient.clearinghouse.utils import post_message_to_current_user
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.slice.models import Slice
-from vt_plugin.models import *
+#from django.db.models.fields import IPAddressField
 from expedient.clearinghouse.resources.models import Resource
+from vt_plugin.models import *
 from vt_plugin.utils.validators import *
 
 DISC_IMAGE_CHOICES = (
@@ -33,7 +22,6 @@ class VM(Resource):
     virtual machine class
     '''
 
-    #name = models.CharField(max_length = 1024, default="")
     uuid = models.CharField(max_length = 1024, default="")
     memory = models.IntegerField(blank = True, null=True, validators=[validate_memory])
     
@@ -42,7 +30,6 @@ class VM(Resource):
     operatingSystemType = models.CharField(max_length = 512, default="")
     operatingSystemVersion = models.CharField(max_length = 512, default="")
     operatingSystemDistribution = models.CharField(max_length = 512, default="")
-
 
     projectId = models.CharField(max_length = 1024, default="")
     projectName = models.CharField(max_length = 1024, default="")

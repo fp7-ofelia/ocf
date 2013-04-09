@@ -21,10 +21,6 @@ from expedient.clearinghouse.slice.models import Slice
 
 logger = logging.getLogger("expedient_geni.views")
 
-#TEMPLATE_PATH = "expedient_geni"
-#from expedient.clearinghouse.settings import PLUGIN_LOADER
-#TEMPLATE_DIRS = PLUGIN_LOADER.plugin_settings.get("expedient_geni").get("paths").get("template_dirs").replace("'","")
-
 def aggregate_create(request, agg_model,
                      redirect=lambda inst: reverse("home")):
     '''

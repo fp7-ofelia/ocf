@@ -988,7 +988,7 @@ class Tests(SettingsTestCase):
         # check the select resources page
         self.client.login(
             username=self.su, password="password")
-        resp = self.client.get(reverse("slice_home", args=[slice.id]))
+        resp = self.client.get(reverse("slice_detail", args=[slice.id]))
 
         self.assertEqual(resp.status_code, 200)
         d = pq(resp.content, parser="html")
@@ -1002,7 +1002,7 @@ class Tests(SettingsTestCase):
         
         # check the select flowspace page
         resp = self.client.get(
-            reverse("html_plugin_flowspace", args=[slice.id]))
+            reverse("flowspace", args=[slice.id]))
         self.assertEqual(resp.status_code, 200)
         d = pq(resp.content, parser="html")
         tables = d("table.saved")

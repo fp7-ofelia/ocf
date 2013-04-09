@@ -14,25 +14,16 @@ from vt_plugin.models import VtPlugin, VTServer, VM, Action
 from vt_plugin.forms.VM import VMModelForm
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
-import xmlrpclib, uuid
-from vt_plugin.utils.ServiceThread import *
-from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
-from vt_plugin.controller.VMcontroller.VMcontroller import *
-from vt_plugin.utils.ServiceThread import *
+from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
+from vt_plugin.controller.VMcontroller.VMcontroller import VMcontroller
+from vt_plugin.utils.ServiceThread import ServiceThread
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.messaging.context_processors import messaging
 from expedient.common.messaging.models import DatedMessage
 
-from expedient.common.utils.plugins.plugincommunicator import *
-
-# XXX: CHECK IF REMOVE IS OK
 from expedient.clearinghouse.slice.models import Slice
 from expedient.clearinghouse.project.models import Project
-#from openflow.plugin.vlans import *
-# XXX: END OF MAY REMOVE SECTION
-
-from expedient.clearinghouse.resources.models import Resource
-
+from expedient.common.utils.plugins.plugincommunicator import PluginCommunicator
 from expedient.common.utils.plugins.resources.node import Node
 from expedient.common.utils.plugins.resources.link import Link
 
@@ -55,7 +46,6 @@ def goto_create_vm(request, slice_id, agg_id):
         else:
             return HttpResponseRedirect("/")
 
-#TODO: put the plugin code in plugin package!!!
 def virtualmachine_crud(request, slice_id, server_id):
 
     """Show a page that allows user to add VMs to the VT server."""
@@ -79,7 +69,6 @@ def virtualmachine_crud(request, slice_id, server_id):
                     instances = formset.save(commit=False)
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
-#                    return HttpResponseRedirect(reverse("slice_home",
                     return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
@@ -107,7 +96,6 @@ def virtualmachine_crud(request, slice_id, server_id):
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
                     ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
-#                   #("Resource visualization panel ", reverse("slice_home", args=[slice_id])),
                     ("Create VM in server %s" %serv.name, reverse("virtualmachine_crud", args=[slice_id, server_id])),
                 )
         })
@@ -137,7 +125,6 @@ def manage_vm(request, slice_id, vm_id, action_type):
         vm.state = 'creating...'
     vm.save()
     #go to manage resources again
-    #return HttpResponseRedirect(reverse("slice_home",args=[slice_id]))
     response = HttpResponse("")
     return response
 
