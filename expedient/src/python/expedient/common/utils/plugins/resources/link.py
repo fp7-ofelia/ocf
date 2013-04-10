@@ -14,10 +14,6 @@ class Link(object):
         [ self.__dict__.pop(kwarg) if kwarg not in kwargs else kwarg for kwarg in self.__dict__ ]
 
         # May replace some values (e.g. 'aggregate')
-#        self.source = kwargs['source']
-#        self.target = kwargs['target']
-#        self.value = kwargs['value']
-
         self.source = source
         self.target = target
         self.value = value
