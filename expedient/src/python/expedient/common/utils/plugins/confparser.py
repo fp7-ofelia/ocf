@@ -30,7 +30,6 @@ class ConfParser():
             for section in confparser.sections():
                 settings[section] = {}
                 for (key,val) in confparser.items(section):
-                    #settings[section][key] = val
                     # Any Python structure inside a string is to be converted into the desired structure
                     settings[section][key] = ast.literal_eval(val)
                     # Postprocessing: complete content folders with each plugin absolute path

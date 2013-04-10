@@ -1,4 +1,7 @@
 """
+Intermediary for the AM resources, so each plugin may access the resources
+corresponding to another AM. Data needed: plugin name, class name, search filter.
+
 @date: Mar 13, 2013
 @author: leonardo.bergesio@i2cat.net
 """

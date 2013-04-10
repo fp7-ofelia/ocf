@@ -37,13 +37,6 @@ class PluginLoader():
                 )
         return urlpatterns
 
-    # FIXME: add method to get ID from given plugin.model whose
-    # attribute = filter (so, so) and probably use a Foreign Key (if
-    # one wants to get all the interfaces connected to a switch, etc)
-    @staticmethod
-    def get_id_from_element(plugin, model, attribute, filter, foreign_key=None):
-        pass
-
     @staticmethod
     def load_settings(path=None):
         """
@@ -103,39 +96,6 @@ class PluginLoader():
         plugin_name = path.split("/")[-1]
         path = path + "/settings.conf"
         return ConfParser.parse_config(plugin_name, path)
-
-#    @staticmethod
-#    def load_ui_data(slice):
-#        """
-#        Calls the method 'get_ui_data' present in each plugin and mix the data for all
-#        plugins in a dictionary with nodes, links and total number of islands. This data
-#        will be sent to the topology visor, shown in the slice view.
-#        """
-#        plugin_ui_data = dict()
-#        plugin_ui_data['d3_nodes'] = []
-#        plugin_ui_data['d3_links'] = []
-#        plugin_ui_data['n_islands'] = 0
-#        plugin_ui_data_aux = dict()
-#
-#        for plugin in PluginLoader.plugin_settings:
-#            try:
-#                plugin_method = "%s_get_ui_data" % str(plugin)
-#                plugin_import = PluginLoader.plugin_settings.get(plugin).get("general").get("get_ui_data_class")
-#                # Check that plugin does have a method to get UI data
-#                if plugin_import:
-#                    #exec(plugin_import)
-#                    tmp = __import__(plugin_import, globals(), locals(), ['get_ui_data'], 0)
-#                    locals()[plugin_method] = getattr(tmp, 'get_ui_data')
-#                    plugin_ui_data_aux = locals()[plugin_method](slice)
-#
-#                    # Not so happy to need this post-processing after the plugin's data retrieval...
-#                    [ plugin_ui_data['d3_nodes'].append(node) for node in plugin_ui_data_aux['nodes'] ]
-#                    [ plugin_ui_data['d3_links'].append(link) for link in plugin_ui_data_aux['links'] ]
-#                    plugin_ui_data['n_islands'] = plugin_ui_data['n_islands'] + plugin_ui_data_aux['n_islands']
-#                plugin_ui_data = dict(plugin_ui_data_aux.items() + plugin_ui_data.items())
-#            except Exception as e:
-#                print "[ERROR] Problem loading UI data inside PluginLoader. Details: %s" % str(e)
-#        return plugin_ui_data
 
     @staticmethod
     def set_plugins_path(plugins_path):

@@ -19,7 +19,6 @@ class PluginInterface(object):
         try:
             ui_context['nodes'] = get_nodes(slice)
             ui_context['links'] = get_links(slice)
-            print "nodes: %s\nlinks: %s" % (str(ui_context['nodes']), str(ui_context['links']))
         except Exception as e:
             print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
         return ui_context

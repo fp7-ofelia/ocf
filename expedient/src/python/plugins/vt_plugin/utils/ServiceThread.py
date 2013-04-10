@@ -1,7 +1,10 @@
 from threading import Thread
 
 class ServiceThread(Thread):
-	
+
+        # TODO: import from expedient.common.utils.ServiceThread,
+        # adapt arguments being passed (these will be a tuple now)
+        # and remove this class.
 	__method = None	
 	__param = None
 	callBackURL=None
