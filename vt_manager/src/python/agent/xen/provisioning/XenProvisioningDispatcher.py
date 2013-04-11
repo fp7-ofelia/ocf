@@ -5,6 +5,7 @@ from xen.provisioning.VMConfigurator import VMConfigurator
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher
 from communications.XmlRpcClient import XmlRpcClient
 from utils.Logger import Logger
+from utils.AgentExceptions import *
 
 '''
 	@author: msune
@@ -53,8 +54,10 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			except:
 				pass
 			try:
-				#Delete VM disc and conf file
-				XenProvisioningDispatcher.deleteVM(id,vm)
+				#Delete VM disc and conf file if the error is not due because
+				#the VM already exists
+				if not isinstance(e,VMalreadyExists):
+					XenProvisioningDispatcher.deleteVM(id,vm)
 			except:
 				pass
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
