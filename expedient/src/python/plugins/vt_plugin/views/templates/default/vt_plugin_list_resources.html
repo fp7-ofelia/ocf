@@ -29,7 +29,6 @@
             {% for vm in server.vms.all %}
             {% if server.uuid == vm.serverID and vm.sliceId == slice.uuid %}
                 <tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
-                  <!--<td width="25px" style="background-color: #CCC"></td>-->
                   <td>
                     <img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="{% url img_media 'question_mark_15x15.png' %}">  {{ vm.name }}
 					<div class="tooltip" id="vm_ssh_help_{{vm.id}}">

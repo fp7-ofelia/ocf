@@ -134,7 +134,7 @@ def aggregate_crud(request, agg_id=None):
     available = aggregate.check_status() if agg_id else False
     return simple.direct_to_template(
         request,
-        template="aggregate_crud.html",
+        template="openflow_aggregate_crud.html",
         extra_context={
             "agg_form": agg_form,
             "client_form": client_form,
@@ -167,7 +167,7 @@ def aggregate_add_links(request, agg_id):
     )
     
 def handle_add_links(request, aggregate,
-                     template="aggregate_add_links.html",
+                     template="openflow_aggregate_add_links.html",
                      extra_context={}):
     """Perform the actual request."""
 
@@ -327,7 +327,7 @@ def add_controller_to_slice(request, agg_id, slice_id):
     return generic_crud(
         request, id, OpenFlowSliceInfo,
         form_class=OpenFlowSliceInfoForm,
-        template="aggregate_add_to_slice.html",
+        template="openflow_aggregate_add_to_slice.html",
         redirect=lambda instance: next if next else reverse(
             "slice_detail", args=[slice.id]),
         extra_context={"creating": creating,
@@ -389,7 +389,7 @@ def book_openflow(request, slice_id):
         from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
         return simple.direct_to_template(
             request,
-            template = "select_resources.html",
+            template = "openflow_select_resources.html",
             # TopologyGenerator class instance
             extra_context = dict(TOPOLOGY_GENERATOR.load_ui_data(slice).items() + ui_extra_context.items()),
         )
@@ -487,7 +487,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
 
     return simple.direct_to_template(
         request,
-        template="select_flowspace.html",
+        template="openflow_select_flowspace.html",
         extra_context={
             "slice": slice,
             "fsformset": formset,

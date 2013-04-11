@@ -208,11 +208,6 @@ Type:
                   
                   
                   <tr class = "odd">
-                    <!--  
-<td>
-<input type = "radio" name = "server_id" value = "{{server.id}}" checked/>
-</td>
--->
                  <td>
                    {{ server.name }}
                  </td>
@@ -238,8 +233,7 @@ Type:
           </table>
           <div id = "vms_table">
             {% if server.vms.all%}
-            {% include "list_resources.html" %}
-            {# {% include "expedient/clearinghouse/slice/list_vms.html" %} #}
+            {% include "vt_plugin_list_resources.html" %}
             {% endif %}
           </div>
       </div>

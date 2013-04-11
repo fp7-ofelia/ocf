@@ -89,7 +89,7 @@ def virtualmachine_crud(request, slice_id, server_id):
         return HttpResponseRedirect(reverse("home"))
 
     return simple.direct_to_template(
-        request, template="aggregate_add_virtualmachines.html",
+        request, template="vt_plugin_aggregate_add_virtualmachines.html",
         extra_context={"virtual_machines": virtualmachines, "exception": error_crud,
                         "server_name": serv.name, "formset": formset,"slice":slice,
                         "breadcrumbs": (
@@ -204,7 +204,7 @@ def startStopSlice(action,uuid):
 def update_messages(request):
     return simple.direct_to_template(
         request,
-        template="messages_panel.html",
+        template="vt_plugin_messages_panel.html",
         extra_context=messaging(request),
     )
 

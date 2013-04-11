@@ -10,7 +10,6 @@
 //			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250,function() {
 //  			$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);	
 //			});
-			//alert("#"+$(this).attr('id')+"Container");
 			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
 			if(jQuery("span", this).attr("class") == "closed"){
 				jQuery("span", this).html("&#x25B2;");
@@ -284,9 +283,6 @@
     	
   {% if openflow_aggs or planetlab_aggs %}
     {% if agg.available %}
-                <!--<form method="POST" action="{% url book_openflow slice.id %}" style="display:inline">{% csrf_token %}
-        	    <input type="submit" value="Book Openflow resources" />
-		</form>-->
 	        <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
     {% else %}
 		<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />

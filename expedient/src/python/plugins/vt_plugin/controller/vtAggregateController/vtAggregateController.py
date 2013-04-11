@@ -101,7 +101,7 @@ def aggregate_crud(request, agg_id=None):
 
     return simple.direct_to_template(
         request,
-        template="aggregate_crud.html",
+        template="vt_plugin_aggregate_crud.html",
         extra_context=extra_context_dict
     )
         
