@@ -170,7 +170,7 @@ class TopologyGenerator():
         for plugin in PluginLoader.plugin_settings:
             try:
                 plugin_method = "%s_get_ui_data" % str(plugin)
-                plugin_import = PluginLoader.plugin_settings.get(plugin).get("general").get("get_ui_data_class")
+                plugin_import = PluginLoader.plugin_settings.get(plugin).get("general").get("get_ui_data_location")
                 # Check that plugin does have a method to get UI data
                 if plugin_import:
                     #exec(plugin_import)
