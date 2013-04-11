@@ -33,7 +33,7 @@ def as_is_slugify(value):
     return value
 
 #cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]):(?P<port>\d+)$")
-cntrlr_url_re = re.compile(r"(tcp|ssl):[\w\.]*:(?P<port>\d*)")# J.F. Mingorance-Puga, March 28, 2011
+cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)")# J.F. Mingorance-Puga, March 28, 2011
 def validate_controller_url(value):
     def error():
         raise ValidationError(
@@ -43,10 +43,17 @@ def validate_controller_url(value):
             code="invalid",
         )
 
+    def self_fv_error():
+        raise ValidationError(
+            u"Invalid controller URL. You can not use the Island FlowVisor as your controller.",code="invalid",
+        )
+
     m = cntrlr_url_re.match(value)
     if m:
         port = m.group("port")
-        if not port:
+	if m.group("address") == "127.0.0.1" or m.group("address") == settings.SITE_IP_ADDR or m.group("address") == settings.SITE_DOMAIN:
+            self_fv_error()
+        elif not port:
             error()
         else:
             port = int(port)
