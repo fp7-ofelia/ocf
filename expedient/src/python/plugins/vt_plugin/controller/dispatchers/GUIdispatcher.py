@@ -253,20 +253,6 @@ def get_nodes_links(slice, chosen_group=None):
     id_to_idx = {}
     n_islands = 0
 
-#    ### ANOTHER "MAYBE PROBLEMATIC CODE"
-#    openflowSwitches = dict()
-#    nodes_test = []
-#    from openflow.plugin.views import get_openflow_aggregates
-#    of_aggs = get_openflow_aggregates(slice)
-#    for i, agg in enumerate(of_aggs):
-#        switches = OpenFlowSwitch.objects.filter(
-#            aggregate__pk=agg.pk,
-#            available=True,
-#        )
-#        for s in switches:
-#            nodes_test.append(s.id)
-#            openflowSwitches[s.datapath_id] = len(nodes_test)-1
-
     vt_aggs = get_vm_aggregates(slice)
 
     # Getting image for the nodes
@@ -298,41 +284,12 @@ def get_nodes_links(slice, chosen_group=None):
                 if not inter.isMgmt:
                     vmInterfaces.append(dict(name="eth"+str(j), switch=str(inter.switchID), port=str(inter.port)))
                     j+=1
-#            # ===== NEW VERSION =====
             nodes.append(Node(name = n.name, value = n.id, description = get_node_description(n, vmNames, vmInterfaces),
                               type = "Virtualized server", image = image_url, aggregate = agg,
                               # Extra parameters for VM nodes (will be used to show connections to switches)
                               vmNames = vmNames, vmInterfaces = vmInterfaces
                              )
                         )
-
-            # ===== NORMAL =====
-#            nodes.append(dict(
-#                    #XXX: lbergesio: Removed len(pl_aggs) to match vt_aggs with of_aggs in the 
-#                    #same group. Will planetlab be supported at the end?
-#                    # ORIGINAL
-#                    #name = n.name, value=n.id, group = i+chosen_group, aggregate = agg.pk,
-#                    # Carolina: users shall not be left the choice to choose group/island; otherwise collision may arise
-#                    name = n.name, value = n.id, aggregate = agg.pk, type = "Virtualized server",
-#                    description = get_node_description(n, vmNames, vmInterfaces), image = image_url,
-#                    available = agg.available, location = agg.location)
-##                    vmNames = vmNames, vmInterfaces = vmInterfaces)
-#                    #name=n.name, value=n.id, group=i+len(of_aggs), type="vt_agg", available=agg.available, vmNames=vmNames, vmInterfaces=vmInterfaces, loc=agg.location)
-#                    # Older
-#                    #name=n.name, value=n.uuid, group=i+len(of_aggs)+len(pl_aggs), type="vt_agg", vmNames=vmNames, vmInterfaces=vmInterfaces)
-#            )
-#            serverGroupSet=False
-
-
-
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: openflowSwitches"
-#            print "-------> openflow switches!!!!!!!!!!!!!!!!!: %s" % str(openflowSwitches)
-#            for sw in openflowSwitches:
-#                print "-------> switch: %s" % str(sw)
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end: openflowSwitches"
-
-
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> begin: ifaces for server: %s" % str(n.name)
 
             # For every interface of the server
             for j,inter in enumerate(n.ifaces.filter(isMgmt = False)):
@@ -343,57 +300,16 @@ def get_nodes_links(slice, chosen_group=None):
                 except Exception as e:
 #                    print "[WARNING] Problem retrieving links insde plugin 'vt_plugin'. Details: %s" % str(e)
                     continue
-                # ===== NEW VERSION =====
                 links.append(Link(source = str(n.id), target = str(switch_id),
                                  value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
                                  )
                             )
-
-                # ===== PREVIOUS VERSION =====
-#                links.append(
-#                        dict(
-#                            target = str(switch_id),
-#                            source = str(n.id),
-#                            value = "rsc_id_" + str(port_id) + "-" + str(inter.ifaceName) + ":" + str(inter.port)
-#                            ),
-#                     )
-
-
-# ==== OLD ====
-#                # When the server has >= 1 interfaces, set 'serverGroupSet' to True
-##                print "************************************** CHECKPOINT #1"
-#                if (not serverGroupSet):
-#                    # ORIGINAL
-##                    nodes[len(nodes)-1]["group"] = nodes[sId]["group"]
-#                    serverGroupSet = True
-##                print "************************************** CHECKPOINT #2"
-
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start links"
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> links: %s" % str(links)
-#            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> end links"
-
-
-            # XXX TEST!
-            #links = [{'source': 'Foix', 'target': 4, 'value': 'rsc_id_346-eth2:1'}, {'source': 'Foix', 'target': 0, 'value': 'rsc_id_331-eth3:1'}, {'source': 'Verdaguer', 'target': 5, 'value': 'rsc_id_360-eth2:1'}, {'source': 'Verdaguer', 'target': 1, 'value': 'rsc_id_360-eth3:1'}]
-
-            # **** How links should be ****
-#            links = [{'source': 7, 'target': 4, 'value': 'rsc_id_346-eth2:1'}, {'source': 7, 'target': 6, 'value': 'rsc_id_327-eth3:1'}, {'source': 8, 'target': 3, 'value': 'rsc_id_342-eth2:1'}, {'source': 8, 'target': 0, 'value': 'rsc_id_360-eth3:1'}]
-
-
-# ==== OLD ====
-#            # When the previous flag is set to True, add island
-#            if (not serverGroupSet and not serverInSameIsland):
-#                #Add n_islands since there is an Island with VM AM but no OF AM
-#                n_islands += 1
-#                # This groups servers of the same VT AM in the same island
-#                serverInSameIsland = True
-
-
-
-#            print "************************************** CHECKPOINT #3. n_islands = %s" % str(n_islands)
-#    return [nodes, links, n_islands]
     return [nodes, links]
 
+#from expedient.common.utils.plugins.plugininterface import PluginInterface
+
+#class Plugin(PluginInterface):
+#    @staticmethod
 def get_ui_data(slice):
     """
     Hook method. Use this very same name so Expedient can get the resources for every plugin.
@@ -402,36 +318,8 @@ def get_ui_data(slice):
     try:
         ui_context['vms_list'] = get_vms_list(slice)
         ui_context['vt_aggs'] = get_vm_aggregates(slice)
-#        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = get_nodes_links(slice)
         ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
-
-#        aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) | Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
-#        of_aggs = slice.aggregates.filter(aggs_filter)
-#        pl_aggs = slice.aggregates.filter(leaf_name=PlanetLabAggregate.__name__.lower())
-#        vt_aggs = get_vm_aggregates(slice)
-#        ui_context['nodes'], ui_context['links'], ui_context['n_islands'] = _get_nodes_links(of_aggs, pl_aggs, vt_aggs, slice.id)
-#        print "\n\n\n\nui_context['nodes'] = %s" % str(ui_context['nodes'])
-#        print "\n\n\n\nui_context['links'] = %s" % str(ui_context['links'])
-
-
     except Exception as e:
         print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
     return ui_context
-
-from expedient.common.utils.plugins.plugininterface import PluginInterface
-
-class Plugin(PluginInterface):
-    @staticmethod
-    def get_ui_data(slice):
-        """
-        Hook method. Use this very same name so Expedient can get the resources for every plugin.
-        """
-        ui_context = dict()
-        try:
-            ui_context['vms_list'] = get_vms_list(slice)
-            ui_context['vt_aggs'] = get_vm_aggregates(slice)
-            ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
-        except Exception as e:
-            print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
-        return ui_context
 
