@@ -12,7 +12,7 @@ from expedient.common.utils.views import generic_crud
 from sample_resource.controller.resource import SampleResource as SampleResourceController
 from sample_resource.forms.SampleResource import SampleResource as SampleResourceModelForm
 from sample_resource.models import SampleResource as SampleResourceModel,\
-    SampleResourcePlugin as SampleResourcePluginModel
+    SampleResourceAggregate as SampleResourceAggregateModel
 
 import copy
 import logging
@@ -91,7 +91,7 @@ def get_sr_list(slice):
 def get_sr_aggregates(slice):
     sr_aggs = []
     try:
-        sr_aggs = slice.aggregates.filter(leaf_name=SampleResourcePluginModel.__name__.lower())
+        sr_aggs = slice.aggregates.filter(leaf_name=SampleResourceAggregateModel.__name__.lower())
     except:
         pass
     return sr_aggs

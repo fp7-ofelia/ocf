@@ -10,7 +10,7 @@ from lxml import etree
 from sample_resource.controller.resource import SampleResource as SampleResourceController
 from sample_resource.forms.SampleResourceAggregate import SampleResourceAggregate as SampleResourceAggregateForm
 from sample_resource.forms.xmlrpcServerProxy import xmlrpcServerProxy as xmlrpcServerProxyForm
-from sample_resource.models.SampleResourcePlugin import SampleResourcePlugin as SampleResourceAggregate
+from sample_resource.models.SampleResourceAggregate import SampleResourceAggregate as SampleResourceAggregateModel
 from sample_resource.models.SampleResource import SampleResource as SampleResourceModel
 import xmlrpclib
 
@@ -25,7 +25,7 @@ def aggregate_crud(request, agg_id=None):
     Create/update a SampleResource Aggregate.
     '''
     if agg_id != None:
-        aggregate = get_object_or_404(SampleResourceAggregate, pk=agg_id)
+        aggregate = get_object_or_404(SampleResourceAggregateModel, pk=agg_id)
         client = aggregate.client
     else:
         aggregate = None
@@ -130,7 +130,7 @@ def aggregate_crud(request, agg_id=None):
     )
 
 def delete_resources(agg_id):
-    resource_set = SampleResourceAggregate.objects.get(id = agg_id).resource_set.all()
+    resource_set = SampleResourceAggregateModel.objects.get(id = agg_id).resource_set.all()
     for resource in resource_set:
         resource.delete()
 
@@ -143,7 +143,7 @@ def sync_am_resources(agg_id, xmlrpc_server):
     resources = xmlrpc_server.get_resources()
     context = etree.iterparse(BytesIO(resources))
     delete_resources(agg_id)
-    aggregate = SampleResourceAggregate.objects.get(id = agg_id)
+    aggregate = SampleResourceAggregateModel.objects.get(id = agg_id)
     for slice in aggregate.slice_set:
         # File (nodes)
         for action, elem in context:

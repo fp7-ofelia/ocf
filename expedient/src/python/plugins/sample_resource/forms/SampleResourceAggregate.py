@@ -5,7 +5,7 @@ Created on Apr 2, 2013
 '''
 
 from django import forms
-from sample_resource.models import SampleResourcePlugin as SampleResourceAggregateModel
+from sample_resource.models import SampleResourceAggregate as SampleResourceAggregateModel
 
 class SampleResourceAggregate(forms.ModelForm):
     '''

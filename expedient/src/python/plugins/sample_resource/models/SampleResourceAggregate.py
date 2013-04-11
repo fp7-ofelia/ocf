@@ -4,10 +4,10 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.shortcuts import must_have_permission
 from sample_resource.models.SampleResource import SampleResource
 
-# Sample Resource Plugin class
-class SampleResourcePlugin(Aggregate):
+# SampleResource Aggregate class
+class SampleResourceAggregate(Aggregate):
     '''
-    SampleResource Plugin that communicates the SampleResource Aggregate Manager with Expedient
+    SampleResource Aggregate Plugin that communicates the SampleResource Aggregate Manager with Expedient
     '''
     # Sample Resource Aggregate information field
     information = "An aggregate of sample resources"
