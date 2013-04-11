@@ -30,10 +30,13 @@ class PluginLoader():
         urlpatterns = []
         for plugin in PluginLoader.plugin_settings:
             for url_type in ["img", "css", "js"]:
+                content_route = PluginLoader.plugin_settings.get(plugin).get("paths").get("relative__%s_dirs" % url_type)
                 urlpatterns += patterns('',
-                    url(r'^%s%s/%s/(?P<path>.*)$' % (str(plugin), media_url, url_type),
+#                    url(r'^%s%s/%s/(?P<path>.*)$' % (str(plugin), media_url, url_type),
+                    url(r'^%s%s/%s/(?P<path>.*)$' % (str(plugin), media_url, content_route),
                     'django.views.static.serve',
-                    {'document_root': "/%s%s%s/%s" % (PluginLoader.plugins_path, str(plugin), media_url, url_type)}, name="%s_media_%s" % (url_type, str(plugin)))
+#                    {'document_root': "/%s%s%s/%s" % (PluginLoader.plugins_path, str(plugin), media_url, url_type)}, name="%s_media_%s" % (url_type, str(plugin)))
+                    {'document_root': "/%s%s/%s" % (PluginLoader.plugins_path, str(plugin), content_route)}, name="%s_media_%s" % (url_type, str(plugin)))
                 )
         return urlpatterns
 

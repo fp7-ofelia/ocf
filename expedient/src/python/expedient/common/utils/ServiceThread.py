@@ -25,5 +25,8 @@ class ServiceThread(Thread):
     def run(self):
         # self.__params is a tuple of arguments. The asterisk ("*")
         # converts this tuple into a series of arguments
-        self.__method(*self.__params)
+        try:
+            self.__method(*self.__params)
+        except Exception as e:
+            print "[WARNING] ServiceThread could not execute %s(%s). Details: %s" % (str(self.__method), str(self.__params), str(e))
 

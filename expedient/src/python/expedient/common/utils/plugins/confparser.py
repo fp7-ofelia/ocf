@@ -32,8 +32,9 @@ class ConfParser():
                 for (key,val) in confparser.items(section):
                     # Any Python structure inside a string is to be converted into the desired structure
                     settings[section][key] = ast.literal_eval(val)
-                    # Postprocessing: complete content folders with each plugin absolute path
+                    # Postprocessing: complete content folders with each plugin absolute path (keeps a copy previously)
                     if section == "paths":
+                        settings[section]["relative__%s" % key] = settings[section][key]
                         settings[section][key] = ConfParser.parse_path(plugin_name, settings[section][key])
         except Exception as e:
             print "[WARNING] Exception parsing configuration file '%s'. Details: %s" % (str(path), str(e))
