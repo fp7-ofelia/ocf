@@ -53,14 +53,12 @@ class OcfOf(RSpecVersion):
 
     def get_slice_attributes(self, network=None):
 	slice_attributes= list()
-        nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
-	print 'slice attributes'
-	print nodes_with_slivers
+        nodes_with_slivers = self.get_nodes_with_slivers()
+	from pprint import pprint
+	print 'slice attributes----------------------------------------------------------------------------------------'
+	pprint(nodes_with_slivers)
         #default_ns_prefix = self.namespaces['default']
-        for node in nodes_with_slivers: #TODO: Ensure this method works
-            sliver_attributes = self.get_sliver_attributes(node)
-	    slice_attributes.append(sliver_attributes)
-        return slice_attributes
+        return nodes_with_slivers
 
     def attributes_list(self, elem):
         opts = []
@@ -200,11 +198,8 @@ class OcfOfAd(OcfOf):
 class OcfOfRequest(OcfOf):
     enabled = True
     content_type = 'request'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/vm_schema.xsd'#'/opt/ofelia/vt_manager/src/python/openflow.optin_manager/sfa/tests/vm_schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/vm_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd "/>'
-    #template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 /opt/ofelia/vt_manager/src/python/openflow.optin_manager/sfa/tests/vm_schema.xsd http://www.protogeni.net/resources/rspec/2/ad.xsd "/>'
-    #schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
-    #template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
+    schema = 'http://www.geni.net/resources/rspec/3/request.xsd'
+    template = '<rspec xmlns="http://www.geni.net/resources/rspec/3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/3" xs:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd http://www.geni.net/resources/rspec/ext/openflow/3 http://www.geni.net/resources/rspec/ext/openflow/3/of-resv.xsd" type="request" />'
 
 class OcfOfManifest(OcfOf):
     enabled = True

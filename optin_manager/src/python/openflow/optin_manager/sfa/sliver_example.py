@@ -1,11 +1,4 @@
-<rspec xmlns="http://www.geni.net/resources/rspec/3"
-        xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/3"
-        xs:schemaLocation="http://www.geni.net/resources/rspec/3
-              http://www.geni.net/resources/rspec/3/request.xsd
-              http://www.geni.net/resources/rspec/ext/openflow/3
-              http://www.geni.net/resources/rspec/ext/openflow/3/of-resv.xsd"
-    type="request">
+rspec = '''<rspec  xmlns="http://www.geni.net/resources/rspec/3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/3" xs:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/ext/openflow/3 http://www.geni.net/resources/rspec/ext/openflow/3/of-resv.xsd" type="request">
    <openflow:sliver email="a@b.com" description="OF request example">
       <openflow:controller url="tcp:192.168.1.1" type="primary"/>
        <openflow:group name="fs1">
@@ -42,4 +35,4 @@
           </openflow:packet>
           </openflow:match>
    </openflow:sliver>
-</rspec>	
+</rspec>'''	

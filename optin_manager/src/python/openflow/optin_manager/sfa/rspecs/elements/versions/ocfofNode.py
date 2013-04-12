@@ -42,13 +42,118 @@ class OcfOfNode:
 
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
+	print '-----------------------------------------------',xml
         #xpath = '//node[count(sliver-type)>0] | //default:node[count(default:sliver-type) > 0]' 
-	xpath = '//rspec/network/node'
-        node_elems = xml.xpath(xpath)
-	if not node_elems:
-		node_elems = xml.xpath('//RSpec/network/node')
-        return OcfOfNode.get_node_objs(node_elems)
+	xpath = '//rspec/network/sliver'
+	xpath = '//default:rspec/openflow:sliver' #XXX TEST ONLY!!
+	print xml.xpath('/rspec')
+	print xml.xpath('//default:rspec')[0].getchildren() 
+	print xml.xpath('//default:rspec/openflow:sliver')
+	print xml.__dict__
+        sliver_elems = xml.xpath(xpath)
+	if not sliver_elems:
+		sliver_elems = xml.xpath('//RSpec/network/sliver')
+	print '--------------------------------------------------------sliver_elems:',sliver_elems
+        return OcfOfNode.get_sliver_elems(sliver_elems)
 
+    @staticmethod
+    def get_sliver_elems(sliver_elems):
+	slivers = list()
+	for sliver in sliver_elems:
+	    sliver_dict = dict()
+	    sliver_dict.update(OcfOfNode._get_attrib_dict(sliver))
+	    sliver_dict['controller'] = OcfOfNode.getControllers(sliver.xpath('./openflow:controller'))
+	    sliver_dict['group'] = OcfOfNode.getGroups(sliver.xpath('./openflow:group')) 
+	    sliver_dict['match'] = OcfOfNode.getMatchs(sliver.xpath('./openflow:match'))
+	    slivers.append(sliver_dict)
+	print 'final_dict', slivers
+	return slivers
+
+    @staticmethod
+    def _get_attrib_dict(element):
+	if isinstance(element,list):
+	   if len(element)>0:
+		element = element[0]
+	   else:
+		return {}
+	element_dict = dict()
+	for attr in element.attrib.keys():
+                element_dict[attr] = element.attrib[attr]
+	return element_dict
+		
+    @staticmethod
+    def getControllers(controller_elems):
+	controllers = list()
+	for controller in controller_elems:
+	    controller_dict = OcfOfNode._get_attrib_dict(controller)
+	    controllers.append(controller_dict)
+	return controllers
+
+    @staticmethod
+    def getGroups(group_elems):
+	groups = list()
+	group_dict = dict()
+	for group in group_elems:
+	    group_dict.update(OcfOfNode._get_attrib_dict(group))
+	    group_dict['datapath'] = OcfOfNode.getDatapaths(group.xpath('./openflow:datapath'))
+	    groups.append(group_dict)	
+	return groups
+
+    @staticmethod
+    def getDatapaths(datapath_elems):
+	datapaths = list()
+        for dp in datapath_elems:
+	    dp_dict = dict()
+	    dp_dict.update(OcfOfNode._get_attrib_dict(dp))
+	    dp_dict['ports'] = OcfOfNode.getPorts(dp.xpath('./openflow:port'))
+	    datapaths.append(dp_dict)
+	return datapaths
+	    
+    @staticmethod
+    def getPorts(port_elems):
+	ports = list()
+	for port in port_elems:
+	    port_dict = OcfOfNode._get_attrib_dict(port)
+	    ports.append(port_dict)
+	return ports
+		
+    @staticmethod
+    def getMatchs(match_elems):
+	matchs = list()
+	match_dict = dict()
+	for match in match_elems:
+	    match_dict['use-group'] = OcfOfNode.getUseGroups(match.xpath('./openflow:use-group'))
+	    match_dict['datapath'] = OcfOfNode.getDatapaths(match.xpath('./openflow:datapath')) 
+	    match_dict['packet'] = OcfOfNode.getPackets(match.xpath('./openflow:packet'))
+	    matchs.append(match_dict)
+	return matchs
+
+    @staticmethod
+    def getUseGroups(use_elements):
+	use_groups = list()
+        for use_group in use_elements:
+		use_dict = OcfOfNode._get_attrib_dict(use_group)
+		use_groups.append(use_dict)
+	return use_groups
+
+    @staticmethod
+    def getPackets(packet_elems):
+	packets = list()
+	for packet in packet_elems:
+            packet_dict = dict()
+	    packet_dict['dl_src'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:dl_src'))
+	    packet_dict['dl_dst'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:dl_dst'))
+	    packet_dict['dl_type'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:dl_type'))
+	    packet_dict['dl_vlan'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:dl_vlan'))
+	    packet_dict['nw_src'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:nw_src'))
+	    packet_dict['nw_dst'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:nw_dst'))
+	    packet_dict['nw_proto'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:nw_proto'))
+	    packet_dict['tp_src'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:tp_src'))
+	    packet_dict['tp_dst'] = OcfOfNode._get_attrib_dict(packet.xpath('./openflow:tp_dst'))
+	    packets.append(packet_dict)
+	return packets
+	    
+	
     @staticmethod
     def get_node_objs(node_elems):
         nodes = []

@@ -2,9 +2,12 @@ import threading
 import time
 from openflow.optin_manager import xmlrpc_server
 from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
-from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
-    UserOpts, OptsFlowSpace, MatchStruct
+
 import re
+
+from openflow.optin_manager.sfa.openflow_utils.CreateOFSliver import CreateOFSliver
+from openflow.optin_manager.sfa.openflow_utils.rspec3_to_expedient import get_fs_from_group 
+from openflow.optin_manager.opts.models import Experiment
 
 class OFShell:
 
@@ -55,14 +58,11 @@ class OFShell:
 
 		return link_list
 
-	
-
 	def GetNodes(self,slice=None,authority=None,uuid=None):
 		flow_visor = None#FVServerProxy.objects.all()[0]
 		switch_list = self.get_switches(flow_visor)
 		link_list = self.get_links(flow_visor)
 		return {'switches':switch_list, 'links':link_list}
-		
 
 	def GetSlice(self,slicename,authority):
 
@@ -84,7 +84,18 @@ class OFShell:
 	def DeleteSlice(self):
 		pass
 
-	def CreateSliver(self):
+	def CreateSliver(self, requested_attributes, slice_leaf, project_name):
+                #e = Experiment.objects.filter(slice_id=slice_id)
+                project_description = 'blablabla'
+                slice_id = 'URN:'+slice_leaf
+		print requested_attributes
+                for rspec_attrs in requested_attributes:
+                    switch_slivers = get_fs_from_group(rspec_attrs['match'], rspec_attrs['group'])
+                    controller = rspec_attrs['controller'][0]['url']
+                    email = rspec_attrs['email']
+                    email_pass = ''
+                    CreateOFSliver(slice_id, project_name,project_description ,slice_leaf, 'slice_description',controller, email, email_pass, switch_slivers)
+		    
+                    
+		print 'switch_slivers', switch_slivers
 		return 1
- 
-

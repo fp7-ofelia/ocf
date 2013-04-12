@@ -17,22 +17,20 @@ from openflow.optin_manager.sfa.OFShell import OFShell
 
 class OFSfaDriver:
 
-	def __init__ (self, config):
+	def __init__ (self, config=None):
 		self.aggregate = OFAggregate()
 		self.shell = OFShell()
 
-
-	def list_resources (self,creds, options):
+	def list_resources (self,creds,options):
 
 		version_manager = VersionManager()
         	#rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
 		rspec_version = 'OcfOf'
         	version_string = "rspec_%s" % (rspec_version)
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
-		print '.............................................................................................',rspec
        		return rspec
 
-	def crud_slice(self,slice_leaf,authority,creds=None, action=None):
+	def crud_slice (self,slice_leaf,authority,creds=None, action=None):
 
 		slicename = slice_leaf 
                 try:
@@ -51,12 +49,13 @@ class OFSfaDriver:
 		return 1
 
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
-		
+		print '------------------------------------------------------------------------------creating sliver'	
                 rspec = RSpec(rspec_string,'OcfOf')
+		print 'RSPEC Parsed --------------------------------------------------------------------------'
                 requested_attributes = rspec.version.get_slice_attributes()
-		projectName = authority#users[0]['slice_record']['authority']
+		projectName = authority
 		sliceName = slice_leaf
-		self.shell.CreateSliver()
+		self.shell.CreateSliver(requested_attributes,slice_leaf,projectName)
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:

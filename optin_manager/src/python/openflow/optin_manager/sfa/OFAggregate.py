@@ -43,7 +43,6 @@ class OFAggregate:
 	
 	def get_rspec(self, version=None, slice_leaf=None, projectName=None, options={}):
 
-		#XXX: I think this is quite clear
         	version_manager = VersionManager()
         	version = version_manager.get_version(version)
 		if slice_leaf:
@@ -56,7 +55,6 @@ class OFAggregate:
 		    of_xml = getAdvertisement(nodes)
 		    
         	rspec = RSpec(version=rspec_version, user_options=options)
-		print '-------------------------------------------------------------------------------------------rspec',rspec
         	#nodes = self.get_nodes(options,slice_leaf,projectName)
         	rspec.version.add_nodes(of_xml)
         	return rspec.toxml()
