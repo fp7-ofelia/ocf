@@ -222,7 +222,7 @@ def create(request):
     except Exception as e:
         if isinstance(e,ldap.LDAPError):
             DatedMessage.objects.post_message_to_user(
-                "Project have been created but only locally since LDAP is not reachable. You will not be able to add users to the project until connection is restored.",
+                "Project has been created but only locally since LDAP is not reachable. You will not be able to add users to the project until connection is restored.",
                 request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
             DatedMessage.objects.post_message_to_user(
