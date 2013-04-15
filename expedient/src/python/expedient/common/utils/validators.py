@@ -5,9 +5,12 @@ Created on Jul 17, 2010
 '''
 
 from django.core.validators import RegexValidator
+from django import forms
 import re
 
 ASCII_RE = "^([0-9a-zA-Z\-\_\ ])+$"
+# Need to set Unicode string in order to locate accented characters
+DESCRIPTION_FORBIDDEN_RE = ur'[\u00C0-\u017F]+' #"/^[\u00C0-\u017F]+$/"
 IP_RE = "^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}(/\d?\d)?$"
 MAC_RE = "^([\dA-Fa-f]{2}:){5}[\dA-Fa-f]{2}$"
 NUMBER_RE = "^([0-9])+$"
@@ -26,6 +29,11 @@ asciiValidator = RegexValidator(re.compile(ASCII_RE),
 descriptionValidator = RegexValidator(re.compile(TEXT_RE),
                         u"Please do not use accented characters and avoid using \'@\'.",
                         "invalid")
+
+def descriptionLightValidator(description):
+    # Raise ValidationError if regexp does match (some accents present)
+    if re.search(re.compile(DESCRIPTION_FORBIDDEN_RE, re.UNICODE), description):
+        raise forms.ValidationError(u"Please do not use accented characters.", "invalid")
 
 numberValidator = RegexValidator(re.compile(NUMBER_RE),
                         u"Please use numbers only.",
