@@ -18,16 +18,45 @@
 </style>
 <script src="{% url js_media 'jquery.blockUI.js' %}"></script>
 <script>
+        function getLoadingMsg(action) {
+            var grantedFlowspace = 0;
+            if ($("[id^=grantedFlowspace][id$=Container]").length > 0 || 
+                $(".grantedFlowspaceHeader").length > 0) {
+                    grantedFlowspace = 1;
+                }
+
+            var flowspaceWarning = 'confirmWrapper("';
+            if (action == "start_update") {
+                {% if slice.started %}
+                    if (grantedFlowspace) {
+                        flowspaceWarning += "Updating";
+                    }
+                {% else %}
+                    return eval('showLoadingMsg("Loading...");');
+                {% endif %}
+            } else if (action == "stop") {
+                if (grantedFlowspace) {
+                    flowspaceWarning += "Stopping";
+                }
+            }
+            if (grantedFlowspace) {
+                flowspaceWarning += ' the slice will cause all granted flowspaces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to stop the slice?");';
+                return eval(flowspaceWarning);
+            } else {
+                return "";
+            }
+        }
+
 	function showLoadingMsg(message){
 		//TODO:Show message
 		 $.blockUI({ css: { 
 		            border: 'none', 
 		            padding: '15px', 
-       			  backgroundColor: '#000', 
-           	 	'-webkit-border-radius': '10px', 
-            		'-moz-border-radius': '10px', 
- 		           opacity: .5, 
-         		   color: '#fff' 
+       			    backgroundColor: '#000', 
+                	 	'-webkit-border-radius': '10px', 
+                		'-moz-border-radius': '10px', 
+ 	       	            opacity: .5, 
+         		    color: '#fff' 
         		} });
 	}
 	function confirmWrapper(message){
@@ -92,11 +121,7 @@
 								<input 
 								type="submit" 
 								value="{% if slice.started %}Update {% else %}Start{% endif %} Slice"
-								{%if slice.started %}
-								onClick='return confirmWrapper("Updating the slice will cause all granted flowsapces to be deleted in the Flowvisor, and require approval the updated flowspaces. Are you sure you want to update the slice?");'
-								{%else%}
-								onClick='showLoadingMsg("Loading...");'
-								{%endif%}
+								onClick = "return getLoadingMsg('start_update');"
 							/>
 			    			</form>
 			    		</td>
@@ -106,7 +131,7 @@
 							type="submit"
 							value="Stop Slice"
 							{% if not slice.started %} disabled {% endif %}
-							onClick='return confirmWrapper("Stopping the slice will cause all granted flowsapces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to stop the slice?");'
+							onClick = "return getLoadingMsg('stop');"
 							/>
 				    		</form>
 		    			</td>
