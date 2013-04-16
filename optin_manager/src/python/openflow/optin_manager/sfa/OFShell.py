@@ -87,11 +87,11 @@ class OFShell:
 	def CreateSliver(self, requested_attributes, slice_leaf, project_name):
                 #e = Experiment.objects.filter(slice_id=slice_id)
                 project_description = 'blablabla'
-                slice_id = 'URN:'+slice_leaf
+                slice_id = 'bhbbsndvisndvibsfbsodibvb' #'URNN_'+slice_leaf
 		print requested_attributes
                 for rspec_attrs in requested_attributes:
                     switch_slivers = get_fs_from_group(rspec_attrs['match'], rspec_attrs['group'])
-                    controller = rspec_attrs['controller'][0]['url']
+                    controller = rspec_attrs['controller'][0]['url']+':9999'
                     email = rspec_attrs['email']
                     email_pass = ''
                     CreateOFSliver(slice_id, project_name,project_description ,slice_leaf, 'slice_description',controller, email, email_pass, switch_slivers)

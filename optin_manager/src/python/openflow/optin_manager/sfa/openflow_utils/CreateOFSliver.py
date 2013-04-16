@@ -3,14 +3,14 @@ from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 from django.db import transaction
 from django.conf import settings
 from openflow.optin_manager.xmlrpc_server.ch_api import convert_star, om_ch_translate
-
+from openflow.optin_manager.flowspace.utils import parseFVexception
 
 '''Same "create_slice" function from xmlrpc_server/ch_api.py without decorators'''
 
 def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_description,controller_url,owner_email,owner_password,switch_slivers,**kwargs):
 
     e = Experiment.objects.filter(slice_id=slice_id)
-    
+     
     if (e.count()>0):
         old_e = e[0]
         old_fv_name = old_e.get_fv_slice_name()
@@ -64,7 +64,6 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
                     om_start ="%s_s"%(om_name)
                     om_end ="%s_e"%(om_name)
 
-                    print'\n\n',ch_start, ch_end, om_start, om_end,type(fs[ch_start]),'\n\n'
                     try:
                         setattr(efs,om_start,from_str(fs[ch_start]))
                     except:
@@ -74,9 +73,10 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
                     except:
                         setattr(efs,om_end,from_str(int(fs[ch_end],16)))
                 all_efs.append(efs)
-    
+   		print 'ha acabado esto' 
         
-    fv = FVServerProxy.objects.all()[0]  
+    fv = FVServerProxy.objects.all()[0]
+    print 'ha conectado con el fv',update_exp  
     if (update_exp):
         # delete previous experiment from FV
         try:
@@ -100,7 +100,8 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
             raise Exception("While trying to update experiment, FV returned False on the delete previous experiment step")
             
     # create the new experiment on FV
-    try:    
+    try:   
+        print 'e.get_fv_slice_name()',e.get_fv_slice_name() 
         fv_success = fv.proxy.api.createSlice(
             "%s" % e.get_fv_slice_name(),
             "%s" % owner_password,
@@ -153,6 +154,7 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
                 raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
              
     try:
+        print 'estara por aqui??...'
         # Get project detail URL to send via e-mail
         from openflow.optin_manager.opts import urls
         from django.core.urlresolvers import reverse
@@ -168,6 +170,6 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
     except:
         pass
 
-    transaction.commit()       
+    #transaction.commit()       
     return {'error_msg': "",'switches': []}
 

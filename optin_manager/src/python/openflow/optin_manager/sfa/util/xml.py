@@ -2,8 +2,8 @@
 from types import StringTypes
 from lxml import etree
 from StringIO import StringIO
-from sfa.util.faults import InvalidXML
-from sfa.rspecs.elements.element import Element
+from openflow.optin_manager.sfa.util.faults import InvalidXML
+from openflow.optin_manager.sfa.rspecs.elements.element import Element
 
 # helper functions to help build xpaths
 class XpathFilter:
