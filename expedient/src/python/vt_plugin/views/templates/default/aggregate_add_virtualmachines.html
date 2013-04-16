@@ -10,8 +10,6 @@
 	<h1>Create a new Virtual Machine in server <span class="highlight">{{ server_name }}</span></h1>
 	
 	<form method="post" action="">{% csrf_token %}
-    	{{ formset.management_form }}
-		{% for form in formset.forms %}
             <table class="separator-table">
                 <tr>
                     <td id="error_td" colspan="2">
@@ -26,7 +24,6 @@
                   {% endif %}
                 {% endfor %}
             </table>
-        {% endfor %}
 		<div id = "buttons" class="center"> 
 			<input type="submit" id="form_create_VM" name="create_new_vms" value="Done" /> |
 			<a href="{% url slice_detail slice.id %}">Cancel</a>
