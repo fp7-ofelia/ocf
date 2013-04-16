@@ -55,29 +55,33 @@ def virtualmachine_crud(request, slice_id, server_id):
     virtualmachines = VM.objects.filter(sliceId=slice.uuid)
 
     # Creates a model based on VM
-    VMModelFormAux = modelformset_factory(
-        VM, can_delete=False, form=VMModelForm,
-        fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
-    )
+    #VMModelFormAux = modelformset_factory(
+   #     VM, can_delete=False, form=VMModelForm,
+   #     fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"],
+   # )
 
     try:
         if request.method == "POST":
             if 'create_new_vms' in request.POST:
                 # "Done" pressed ==> send xml to AM
-                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
-                if formset.is_valid():
-                    instances = formset.save(commit=False)
+                #formset = VMModelFormAux(request.POST, queryset=virtualmachines)
+                form = VMModelForm(request.POST)
+                #if formset.is_valid():
+                if form.is_valid():
+                    instance = form.save(commit=False)
                     #create virtualmachines from received formulary
-                    VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
+                    VMcontroller.processVMCreation(instance, serv.uuid, slice, request.user)
 #                    return HttpResponseRedirect(reverse("html_plugin_home",
                     return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
+                    if "VM already exists" in form.errors[0]:
+                        raise ValidationError("It already exists a VM with the same name in the same slice. Please choose another name", code="invalid",)
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
-            formset = VMModelFormAux(queryset=VM.objects.none())
+            form = VMModelForm()
 
     except ValidationError as e:
         # Django exception message handling is different to Python's...
@@ -92,7 +96,7 @@ def virtualmachine_crud(request, slice_id, server_id):
     return simple.direct_to_template(
         request, template="aggregate_add_virtualmachines.html",
         extra_context={"virtual_machines": virtualmachines, "exception": error_crud,
-                        "server_name": serv.name, "formset": formset,"slice":slice,
+                        "server_name": serv.name, "form": form,"slice":slice,
                         "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),

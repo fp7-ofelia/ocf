@@ -13,45 +13,47 @@ class VMcontroller():
     "manages creation of VMs from the input of a given VM formulary"
     
     @staticmethod
-    def processVMCreation(instances, server_id, slice, requestUser):
-        
+    def processVMCreation(instance, server_id, slice, requestUser):
+
+        if VM.objects.filter(sliceId = slice.uuid, name =instance.name):
+            raise ValidationError("Another VM with name %s already exists in this slice. Please choose a new name" % instance.name)
         rspec = XmlHelper.getSimpleActionQuery()
         actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
         rspec.query.provisioning.action.pop()
-        for instance in instances:
-            instance.uuid = uuid.uuid4()
-            instance.serverID = server_id
-            instance.state = "on queue"
-            instance.sliceId = slice.uuid
-            instance.sliceName= slice.name
 
-            #assign same virt technology as the server where vm created
-            s = VTServer.objects.get(uuid = server_id)
-            instance.virtTech = s.virtTech
-            instance.projectId = slice.project.uuid
-            instance.projectName = slice.project.name
-            instance.aggregate_id = s.aggregate_id
-            #assign parameters according to selected disc image
-            #TODO get the rest of image choices! 
-            if instance.disc_image == 'test':
-                instance.operatingSystemType = 'GNU/Linux'
-                instance.operatingSystemVersion = '6.0'
-                instance.operatingSystemDistribution = 'Debian'
-                instance.hdOriginPath = "default/test/lenny"
-            if instance.disc_image == 'default':
-                instance.operatingSystemType = 'GNU/Linux'
-                instance.operatingSystemVersion = '6.0'
-                instance.operatingSystemDistribution = 'Debian'
-                instance.hdOriginPath = "default/default.tar.gz"
+        instance.uuid = uuid.uuid4()
+        instance.serverID = server_id
+        instance.state = "on queue"
+        instance.sliceId = slice.uuid
+        instance.sliceName= slice.name
 
-            actionClass = copy.deepcopy(actionClassEmpty)
-            actionClass.id = uuid.uuid4()
-            Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])
-            server = VTServer.objects.get(uuid = server_id)
-            actionClass.server.uuid = server_id
-            actionClass.server.virtualization_type = server.getVirtTech()
-            rspec.query.provisioning.action.append(actionClass)
+        #assign same virt technology as the server where vm created
+        s = VTServer.objects.get(uuid = server_id)
+        instance.virtTech = s.virtTech
+        instance.projectId = slice.project.uuid
+        instance.projectName = slice.project.name
+        instance.aggregate_id = s.aggregate_id
+        #assign parameters according to selected disc image
+        #TODO get the rest of image choices! 
+        if instance.disc_image == 'test':
+            instance.operatingSystemType = 'GNU/Linux'
+            instance.operatingSystemVersion = '6.0'
+            instance.operatingSystemDistribution = 'Debian'
+            instance.hdOriginPath = "default/test/lenny"
+        if instance.disc_image == 'default':
+            instance.operatingSystemType = 'GNU/Linux'
+            instance.operatingSystemVersion = '6.0'
+            instance.operatingSystemDistribution = 'Debian'
+            instance.hdOriginPath = "default/default.tar.gz"
+
+        actionClass = copy.deepcopy(actionClassEmpty)
+        actionClass.id = uuid.uuid4()
+        Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])
+        server = VTServer.objects.get(uuid = server_id)
+        actionClass.server.uuid = server_id
+        actionClass.server.virtualization_type = server.getVirtTech()
+        rspec.query.provisioning.action.append(actionClass)
          
         ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
 
