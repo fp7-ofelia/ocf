@@ -6,24 +6,19 @@ Created on Aug 19, 2010
 '''
 from utils import append_to_local_setting
 
-#ORIGINAL
-#BASIC_AUTH_URLS = [
-#    r'^/dummyom/.*',
-#]
-
 #VT_AM
-BASIC_AUTH_URLS = [
-    r'^/dummyom/.*',
-    #r'^/xmlrpc/vt_am/.*'
-    r'^/vt_plugin/xmlrpc/vt_am.*'
-]
+##BASIC_AUTH_URLS = [
+##    r'^/dummyom/.*',
+#    #r'^/xmlrpc/vt_am/.*'
+#    r'^/vt_plugin/xmlrpc/vt_am.*'
+##]
 
 '''List of URL regular expressions that accept HTTP Basic Authentication.
 
 This is used to enable some tests to work.
 
 '''
-append_to_local_setting("BASIC_AUTH_URLS", BASIC_AUTH_URLS, globals())
+##append_to_local_setting("BASIC_AUTH_URLS", BASIC_AUTH_URLS, globals())
 
 SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/register/.*$',
@@ -32,7 +27,6 @@ SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/password/reset/.*$',
     r'^/img/.*',
     r'^/css/.*',
-#ORIGINA NOT COMMENTED
 #    r'^/static/media/.*',
 #    r'.*/xmlrpc/?',
 ]
@@ -45,7 +39,7 @@ append_to_local_setting(
 )
 
 UI_PLUGINS = [
-    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
+#    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
     ('expedient.ui.rspec.plugin', 'rspec_mgr', 'expedient.ui.rspec.urls'),
 ]
 '''List of UI plugins that are enabled in Expedient.
@@ -67,12 +61,12 @@ This is a list of 3-tuples:
 '''
 append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 
-# Installed Aggregate Models
+# Installed Aggregate Models [leave variable here to avoid problems]
 AGGREGATE_PLUGINS = [
-    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
-#    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
-#    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
-    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
+#    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
+##    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
+##    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+#    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
 ]
 '''List of aggregate plugins that are enabled in Expedient.
 

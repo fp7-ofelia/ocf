@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block head %}
+<script>
+	$(document).ready(function() {
+		$("table.fulltable td").css("padding", "1px 1px 1px 1px");
+		$("input[type=text]").css("width", "280px");
+                if ("{{alertMessage}}" != ""){
+			alert("{{alertMessage}}");
+		}
+	})
+</script>
+<style>
+	table.fulltable input[type=text] {
+		width: 70px;
+	}
+	span.next_link {
+		font-weight: bold;
+	}
+	select.wide {
+		width: 600px;
+	}
+	div.errors {
+		font-weight: bold;
+		color: #a70000;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="procsteps" class="steps center">
+    1. <a href="{% url book_openflow slice.id %}">Select OpenFlow Ports</a>
+    2. <a href="{% url flowspace slice.id %}" style="font-weight: bold;">Select/Modify Flowspace</a>
+</div>
+
+<div class="main">
+    
+    <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
+    
+	<div class="help_text">
+	<p>Each table below describes a class of traffic you would like your
+	controller to receive. Each field is specified as
+	a range. Empty cells mean any value. The tables are OR'ed together
+	to produce a rule.</p>
+
+	<p>For example, if you want to receive all incoming and
+	outgoing port 80 traffic, then you will need two tables. In the first, you
+	would set the "TCP/UDP Destination" field to 80. In the second,
+	you would set the "TCP/UDP Source" field to 80.</p>
+
+	<p>Empty tables are unused. If you need more space, you can click "Save",
+	and additional empty tables will be displayed.</p>
+	</div>
+
+	<br />
+	<br />
+	
+    <form class="form" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
+    	{{ fsformset.management_form }}
+		{% for form in fsformset.forms %}
+			{% for hidden in form.hidden_fields %}
+				{{ hidden }}
+			{% endfor %}
+		{% endfor %}
+		<div class="center">
+	   		{% for form in fsformset.forms %}
+			<h2>Flowspace {{ forloop.counter }} ({% if form.initial %}saved{% else %}unsaved{% endif %})</h2>
+			<div class="errors">{{ form.non_field_errors }}</div>
+	    	<table class="fulltable formtable {% if form.initial %}saved{% endif %}">
+	    		<thead>
+	    			<tr><th>Field</th><th>From</th><th>To</th></tr>
+	    		</thead>
+	    		<tbody>
+		            <tr>
+		            	<th><strong>MAC Source</strong></th>
+		            	<td>
+		            		{{ form.dl_src_start.errors }}
+		            		{{ form.dl_src_start.label_tag }}
+		            		{{ form.dl_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_src_end.errors }}
+		            		{{ form.dl_src_end.label_tag }}
+		            		{{ form.dl_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>MAC Destination</strong></th>
+		            	<td>
+		            		{{ form.dl_dst_start.errors }}
+		            		{{ form.dl_dst_start.label_tag }}
+		            		{{ form.dl_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_dst_end.errors }}
+		            		{{ form.dl_dst_end.label_tag }}
+		            		{{ form.dl_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>Ethernet Type</strong></th>
+		            	<td>
+		            		{{ form.dl_type_start.errors }}
+		            		{{ form.dl_type_start.label_tag }}
+		            		{{ form.dl_type_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.dl_type_end.errors }}
+		            		{{ form.dl_type_end.label_tag }}
+		            		{{ form.dl_type_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>VLAN ID</strong></th>
+		            	<td>
+		            		{{ form.vlan_id_start.errors }}
+		            		{{ form.vlan_id_start.label_tag }}
+		            		{{ form.vlan_id_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.vlan_id_end.errors }}
+		            		{{ form.vlan_id_end.label_tag }}
+		            		{{ form.vlan_id_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Source</strong></th>
+		            	<td>
+		            		{{ form.nw_src_start.errors }}
+		            		{{ form.nw_src_start.label_tag }}
+		            		{{ form.nw_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_src_end.errors }}
+		            		{{ form.nw_src_end.label_tag }}
+		            		{{ form.nw_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Destination</strong></th>
+		            	<td>
+		            		{{ form.nw_dst_start.errors }}
+		            		{{ form.nw_dst_start.label_tag }}
+		            		{{ form.nw_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_dst_end.errors }}
+		            		{{ form.nw_dst_end.label_tag }}
+		            		{{ form.nw_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>IP Protocol</strong></th>
+		            	<td>
+		            		{{ form.nw_proto_start.errors }}
+		            		{{ form.nw_proto_start.label_tag }}
+		            		{{ form.nw_proto_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.nw_proto_end.errors }}
+		            		{{ form.nw_proto_end.label_tag }}
+		            		{{ form.nw_proto_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>TCP/UDP Source</strong></th>
+		            	<td>
+		            		{{ form.tp_src_start.errors }}
+		            		{{ form.tp_src_start.label_tag }}
+		            		{{ form.tp_src_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.tp_src_end.errors }}
+		            		{{ form.tp_src_end.label_tag }}
+		            		{{ form.tp_src_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>TCP/UDP Destination</strong></th>
+		            	<td>
+		            		{{ form.tp_dst_start.errors }}
+		            		{{ form.tp_dst_start.label_tag }}
+		            		{{ form.tp_dst_start }}
+		            	</td>
+		            	<td>
+		            		{{ form.tp_dst_end.errors }}
+		            		{{ form.tp_dst_end.label_tag }}
+		            		{{ form.tp_dst_end }}
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><strong>Ports</strong></th>
+		            	<td COLSPAN="2">
+		            		{{ form.slivers.errors }}
+		            		{{ form.slivers.label_tag }}
+		            		{{ form.slivers }}
+		            	</td>
+		            </tr>
+					<tr>
+						<th><strong>Delete?</strong></th>
+						<td COLSPAN="2">
+							{{ form.DELETE }}
+						</td>
+					</tr>
+		        </tbody>
+	        </table>
+			<br/>
+	        {% endfor %}
+            <input id='submit' type="submit" value="Save" 
+		{%if slice.started %}onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted. Are you sure you want to save a new FlowSpace?");'
+		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace.");'
+		{% endif%}/>
+			<span class="next_link">
+				| <a href="{% url flowspace slice.id %}">Clear</a> | 
+				{% if done %}
+				<a href="{% url slice_detail slice.id %}" onClick='return confirm("Flowspace must be saved before exiting. Are you sure you are done?");'>Done</a>
+				{% else %}
+				<a href="{% url gcf_sshkeys slice.id %}">Next</a>
+				{% endif %}
+			</span>
+        </div>
+    </form>
+</div>
+{% endblock %}
