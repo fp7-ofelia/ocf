@@ -97,7 +97,7 @@ class LDAPPasswordResetForm(PasswordResetForm):
         Generates a one-use only link for resetting password and sends to the user.
         A minimal exception control is implemented to avoid problems with e-mail.
         """
-        from django.core.mail import send_mail
+        from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
         for user in self.users_cache:
             if not domain_override:
                 current_site = Site.objects.get_current()
