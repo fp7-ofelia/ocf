@@ -110,8 +110,6 @@
 		        {{ slice.expiration_date }}-->
 	   		</td>
 			<td width="27%">
-				<!--Slice {% if not slice.started %}<strong>not</strong>{% endif %} started.<br>
-				Slice {% if not slice.modified %}<strong>not</strong>{% endif %} modified.<br>-->
 		    	<a href="{% url slice_update slice.id %}">Edit</a> slice basic information.<br>
 		    	<a href="{% url slice_delete slice.id %}">Delete</a> slice.
 				<table style="margin-top:5px;">
@@ -149,11 +147,9 @@
 {# List of aggregates #}
     <div class="detail_section">
 	    <h1> Slice AMs and resource details 
-            <!--<h1>Add Aggregates Managers to slice -->
                         <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
                 </h1>
 		<center>
-		<!--<div id="addAggregate" class="aggregateManager addAggregateManager" onclick='document.location="{% url slice_add_agg slice.id %}"'> -->
 		<div id="addAggregate" class="button" onclick='document.location="{% url slice_add_agg slice.id %}"'> 
 		<a href="#/" class="noMouseOver"><span style="font-size:25px;font-weight:bold;vertical-align:middle">+</span><span style="vertical-align:middle"> Add an Agregate Manager to the current slice</span></a>
 		</div>
@@ -190,18 +186,45 @@
         </div>
 <!-- Common expandable tooltip -->
 <div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-{# Aggregate details #}
-{% include "slice/plugins/openflowAndPlanetLab.html" %}
-{% include "slice/plugins/vt.html" %}
+
+{# Begin: Aggregate details - loads templates from plugins - partial templates #}
+{% if plugin_template_list_network %}
+  <h2 class="resourcesh2">
+    <a id="networkResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
+      Network resources
+      <span class="opened">&#x25B2;</span>
+    </a>
+  </h2>
+  <div id="networkResourcesContainer" class="expandable">
+  {% for plugin_addresources in plugin_template_list_network %}
+    {% include plugin_addresources %}
+  {% endfor %}
+  </div>
+{% endif %}
+
+{% if plugin_template_list_computation %}
+  <h2 class="resourcesh2">
+    <a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
+      Computational resources
+      <span class="opened">&#x25B2;</span>
+    </a>
+  </h2>
+  <div id="computationalResourcesContainer" class="expandable">
+  {% for plugin_addresources in plugin_template_list_computation %}
+    {% include plugin_addresources %}
+  {% endfor %}
+{% endif %}
+</div>
+{# End: Aggregate details #}
+
 
 {# Show message when no aggregates are added to the slice #}
 {% with slice.aggregates.all as aggregate_list %}
                         {% if not aggregate_list.count %}
 			<center>
                         <p style="font-size:12px;margin-bottom:65px;width:400px;">
-                                This slice has no aggregates added to it. To be able to
-                                reserve resources on aggregates, you will need to add aggregates to
-                                the slice...
+                                This slice has no aggregates added to it. To be able to reserve
+                                resources on aggregates, you shall add aggregates first ...
                         </p>
 			</center>
                         {% endif %}

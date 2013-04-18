@@ -23,10 +23,10 @@ from expedient.clearinghouse.roles.models import ProjectRole,\
 from expedient.common.permissions.models import ObjectPermission,\
     PermissionOwnership, Permittee
 from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
+from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 import uuid   
-from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 import ldap 
@@ -407,7 +407,7 @@ def add_member(request, proj_id):
                          recipient_list=[user.email],
                  )
             except Exception as e:
-                print "User email notification could not be sent. Exception: %s" % str(e)
+                print "[WARNING] User e-mail notification could not be sent. Details: %s" % str(e)
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block head %}
+<style>
+	div.steps {
+		padding: 4px;
+		font-weight: bold;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="steps center">
+	1. <a href="{% url slice_detail slice.id %}">Select Host and OpenFlow Resources</a>
+	2. <a href="{% url flowspace slice.id %}">Select/Modify Flowspace</a>
+	3. <a href="{% url gcf_sshkeys slice.id %}">Get SSH keys</a>
+</div>
+
+<h1>Download SSH Private and Public keys for slice {{ slice.name }}</h1>
+
+<div>
+	The login user name to the PlanetLab nodes is: {{ slice.geni_slice_info.login_username }}.
+</div>
+
+<ul>
+	<li><a href="{% url gcf_sshkeys_private slice.id %}">Private Key</a></li>
+	<li><a href="{% url gcf_sshkeys_public slice.id %}">Public Key</a></li>
+</ul>
+<form method="post" action=".">{% csrf_token %}
+	<input type="submit" value="Regenerate" />
+</form>
+
+<div class="center">
+	<h4><a href="{% url slice_detail slice.id %}">Done</a></h4>
+</div>
+{% endblock %}

@@ -14,6 +14,9 @@ from django.views.generic.simple import direct_to_template
 from expedient.common.permissions.models import PermissionRequest,\
     ObjectPermission
 from expedient.common.messaging.models import DatedMessage
+from expedient.clearinghouse.project.views import create, create_project_roles
+from expedient.clearinghouse.project.models import Project
+import uuid
 
 TEMPLATE_PATH = "permissionmgmt"
 
@@ -57,7 +60,7 @@ def permissions_dashboard(request):
         request.session["approved_req_ids"] = approved_req_ids
         request.session["delegatable_req_ids"] = delegatable_req_ids
         request.session["denied_req_ids"] = denied_req_ids
-        
+
         return HttpResponseRedirect(reverse(confirm_requests))
     
     else:
@@ -91,26 +94,76 @@ def confirm_requests(request):
     if request.method == "POST":
         # check if confirmed and then do actions.
         if request.POST.get("post", "no") == "yes":
-            for req, delegate in approved_reqs:
-                req.allow(can_delegate=delegate)
-                DatedMessage.objects.post_message_to_user(
-                    "Request for permission %s for object %s approved."
-                    % (req.requested_permission.permission.name,
-                       req.requested_permission.target),
-                    user=req.requesting_user,
-                    sender=req.permission_owner,
-                    msg_type=DatedMessage.TYPE_SUCCESS)
-
             for req in denied_reqs:
                 req.deny()
+#                DatedMessage.objects.post_message_to_user(
+#                    "Request for permission %s for object %s denied."
+#                    % (req.requested_permission.permission.name,
+#                       req.requested_permission.target),
+#                    user=req.requesting_user,
+#                    sender=req.permission_owner,
+#                    msg_type=DatedMessage.TYPE_WARNING)
+
+                posted_message = "Request for %s denied." % str(req.requested_permission.target).capitalize()
+                if req.requested_permission.permission.name == "can_create_project":
+                    # Removes "* Project name: "
+                    try:
+                        project_name = req.message.split("||")[0].strip()[16:]
+                    except:
+                        pass
+                    posted_message = "Request for project %s creation denied." % project_name
+                # -------------------------------------------
+                # It is not about permission granting anymore
+                # -------------------------------------------
                 DatedMessage.objects.post_message_to_user(
-                    "Request for permission %s for object %s denied."
-                    % (req.requested_permission.permission.name,
-                       req.requested_permission.target),
-                    user=req.requesting_user,
-                    sender=req.permission_owner,
-                    msg_type=DatedMessage.TYPE_WARNING)
-                
+                    posted_message,
+                    user = req.requesting_user,
+                    sender = req.permission_owner,
+                    msg_type = DatedMessage.TYPE_WARNING)
+
+            for req, delegate in approved_reqs:
+                # --------------------------------------------------------
+                # Do NOT grant permission to create projects in the future
+                # --------------------------------------------------------
+#                req.allow(can_delegate=delegate)
+                req.deny()
+#                DatedMessage.objects.post_message_to_user(
+#                    "Request for permission %s for object %s approved."
+#                    % (req.requested_permission.permission.name,
+#                       req.requested_permission.target),
+#                    user=req.requesting_user,
+#                    sender=req.permission_owner,
+#                    msg_type=DatedMessage.TYPE_SUCCESS)
+
+                posted_message = "Request for %s approved." % str(req.requested_permission.target).capitalize()
+                # ---------------------------------------
+                # Project will be created in a direct way
+                # ---------------------------------------
+                if req.requested_permission.permission.name == "can_create_project":
+                    project = Project()
+                    project.uuid = uuid.uuid4()
+                    try:
+                        message = req.message.split("||")
+                        # Removes "* Project name: "
+                        project.name = message[0].strip()[16:]
+                        # Removes "* Project description: "
+                        project.description = message[3].strip()[23:]
+                        posted_message = "Successfully created project %s." % project.name
+                    except:
+                        # If some parsing error were to occur, set random name and description
+                        import random
+                        nonce = str(random.randrange(10000))
+                        project.name = "Project_" % nonce
+                        project.description = "Description_" % nonce
+                        posted_message = "Project %s created, but you might need to edit it." % project.name
+                    project.save()
+                    create_project_roles(project, req.requesting_user)
+                DatedMessage.objects.post_message_to_user(
+                    posted_message,
+                    user = req.requesting_user,
+                    sender = req.permission_owner,
+                    msg_type = DatedMessage.TYPE_SUCCESS)
+
         # After this post we will be done with all this information
         del request.session["approved_req_ids"]
         del request.session["delegatable_req_ids"]

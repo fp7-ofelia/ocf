@@ -64,8 +64,8 @@ No information available.
     description = models.TextField(default="")
     location = models.CharField(
         "Geographic Location", max_length=200, default="",
-        help_text="This should be a location that can be found using "
-        "Google Maps")
+        help_text="AMs within the same island must "
+        " share the exact same location.")
     available = models.BooleanField(
         "Available", default=True,
         help_text="Do you want to make this\

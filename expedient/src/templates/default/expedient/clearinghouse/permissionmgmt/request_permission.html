@@ -7,7 +7,7 @@
 <script type="text/javascript" src="{% url js_media 'jquery-ui.min.js' %}"></script>
 
 <style>
-img#perm_help {
+img.perm_help {
         width:15px;
         height:15px;
 }
@@ -18,12 +18,13 @@ img#perm_help {
 <script>
         $(document).ready(function() {
                 /* add tooltip to question mark */
-                $("img#perm_help").tooltip({
-                        tip: "div#perm_mgmt_help",
-            position: "top center",
-            cancelDefault: true,
-            relative: true,
-            offset: [0,110]
+                $("img[id^=perm][id$=help_img]").tooltip({
+                    /*tip: "div[id^=perm_][id$=_help]",*/
+                    tip: this.id,
+                    position: "top center",
+                    cancelDefault: true,
+                    relative: true,
+                    offset: [0,110]
                 });
         });
         $(function(){
@@ -43,9 +44,11 @@ img#perm_help {
                 to perform this action. The description of this permission is:
                 "{{ obj_perm.permission.description }}".
                 <br /><br />
-                If you would like to request this permission
+                <!--If you would like to request this permission
                 from a user who has the authority to give it to you, select a user
-                from the list below and click the "Request" button.
+                from the list below and click the "Request" button.-->
+                If you would like to exert the action associated to that permission, fill 
+                the form with appropriate information and click the "Request" button.
         </div>
         <br />
     <form action="" method="post">{% csrf_token %}
@@ -55,14 +58,22 @@ img#perm_help {
 			    {% if perm_name != obj_perm.permission.name or field.name != "permission_owner" %}
 				<tr><th colspan="2">{{ field.errors }}</th></tr>
 				<tr><th>{{ field.label_tag }}
-				    {% if field.name == "message" %}
-					{% if obj_perm.permission.name == "can_create_project"%}
-					    <img id="perm_help" src="{% url img_media 'question_mark_15x15.png' %}" />
-		                            <div class="tooltip" id="perm_mgmt_help">
-		                            Please provide a descriptive name and a short description of the project.
-		                            <br /><br />
-		                            Make sure you have set your afiliation in your user profile, or specify it in the message.
-		                          </div>
+	        	            {% if obj_perm.permission.name == "can_create_project"%}
+                                        {% if field.name == "name" or field.name == "organization" or field.name == "message" %}
+                                            <img id="perm_{{field.name}}_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+                                            <div class="tooltip perm_help" id="perm_{{field.name}}_help">
+					{% endif %}
+                                        {% if field.name == "name" %}
+                                              Provide a descriptive name for the project.
+                                        {% endif %}
+                                        {% if field.name == "organization" %}
+                                              Make sure you set your affiliation.
+                                        {% endif %}
+                                        {% if field.name == "message" %}
+                                              Provide a short description for the project.
+                                        {% endif %}
+					{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
+					    </div>
 					{% endif %}
 				    {% endif %}
 				: </th><td>{{ field }}</td>
@@ -70,14 +81,6 @@ img#perm_help {
 				{% endif %}
 			{% endfor %}
 		</table>
-<!--			{% if obj_perm.permission.name == "can_create_project" %}
-			<img id="perm_help" src="{% url img_media 'question_mark_15x15.png' %}" />
-			<div class="tooltip" id="perm_mgmt_help">
-			Please provide a descriptive name and a short description of the project.
-	                <br /><br />
-			Make sure you have set your afiliation in your user profile.
-			</div>
-			{% endif %} -->
 	    <div>
 		    <input type="submit" value="Request" />
 		    <input type="button" onclick="javascript:document.location='{% url home %}'" value="Cancel" />

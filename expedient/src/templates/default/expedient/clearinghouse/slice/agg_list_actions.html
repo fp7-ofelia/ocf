@@ -1,6 +1,0 @@
-{% load ch_extras %}
-{% if am.leaf_name == "OpenFlowAggregate" %}
-<form method="POST" action="{% url slice_update_agg slice.id am.id %}">{% csrf_token %}
-	<input type="submit" value="set controller" />
-</form>
-{% endif %}
