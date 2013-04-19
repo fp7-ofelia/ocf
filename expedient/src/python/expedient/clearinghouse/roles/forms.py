@@ -140,7 +140,7 @@ class ProjectRoleForm(forms.ModelForm):
             
         for perm_pk in initial_role_pks:
             if perm_pk not in new_obj_permissions_pks and\
-            not has_permission(self.user, self.project, "can_remove_member"):
+            not has_permission(self.user, self.project, "can_remove_members"):
                 perm = ObjectPermission.objects.get(pk=perm_pk)
                 raise forms.ValidationError(
                     "You tried to remove permission '%s' for target '%s' "
