@@ -216,12 +216,15 @@ h2 {
 	}
 
 .resourcesh2 {
-	color:#666;
-	margin-top:28px;
-	text-align:right;
-	font-size:15px;
-	font-style:italic;
 	border-bottom: 1px solid #ddd;
+	color: #666;
+	font-size: 15px;
+	font-style: italic;
+	margin-top: 28px;
+	text-align: right;
+}
+a.resourcesh2 {
+        cursor: pointer;
 }
 h2.pagetitle {
 	margin-top: 30px;
