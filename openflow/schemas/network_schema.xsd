@@ -1,4 +1,4 @@
-xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="/opt/foamofelia/ofelia/foam/schemas/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="/opt/foamofelia/ofelia/foam/schemas/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="datapath">
     <xs:complexType>
       <xs:sequence>
