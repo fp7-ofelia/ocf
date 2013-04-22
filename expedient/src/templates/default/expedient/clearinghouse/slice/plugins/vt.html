@@ -44,8 +44,14 @@
 <script>
     function updateVMparams(data,index){
         $("#td_vm_actions"+index).children().replaceWith(data.actions[index]);
-        $("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");
+	if (data.ips[index] != ""){
+        	$("#td_vm_ip"+index).children().replaceWith("<div>"+ data.ips[index]+"</div>");
+        	$("#td_vm_ssh"+index).children().replaceWith("<div><strong>SSH access:</strong> ~# ssh {{request.user}}@"+data.ips[index]+" (password: your user password)</div>");
+	}
     }
+
+                        "<strong>SSH access:</strong> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} (password: your user password"
+
 
     function updateVMstatus(){
         $.getJSON("../../../vt_plugin/vms_status/"+{{slice.id}}+"/", function(data){

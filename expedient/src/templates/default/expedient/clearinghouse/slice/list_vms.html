@@ -81,13 +81,14 @@
                 </tr>
 
 		<!-- Begin VM's SSH details -->
+		<tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
+		    <td id=td_vm_ssh{{vm.id}} colspan="6" class="ssh_vm_details"><div>
                 {% if vm.ifaces.all|length > 0 %} {# Show only when VM interfaces available #}
-		<tr class = "{% cycle 'odd' 'even' %}">
-		    <td colspan="6" class="ssh_vm_details">
                         <strong>SSH access:</strong> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} (password: your user password)
+                {% endif %}
+			</div>
 		    </td>
 		</tr>
-                {% endif %}
                 <!-- End VM's SSH details -->
             {% endif %}
             {% endfor %}
