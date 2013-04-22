@@ -36,43 +36,59 @@
 {% block content %}
 <div class="main">
 	{% if approved_reqs %}
-    <h2>The following permission requests will be approved:</h2>
+    <!--<h2>The following permission requests will be approved:</h2>-->
+    <h2>The following requests will be approved:</h2>
 	<ul>
 		{% for req, delegatable in approved_reqs %}
 		<li>
-			Permission
+			<!--Permission
 			<a class="perm_name" id="name_{{ req.id }}" href="#">
 				{{ req.requested_permission.permission.name }}
-			</a>
-			requested by {{ req.requesting_user }} for object
-			{{ req.requested_permission.target }} will be granted to 
+			</a>-->
+                        {{ req.requested_permission.target|title }}
+			requested by {{ req.requesting_user }} <!--for object
+			{{ req.requested_permission.target }}--> will be granted. <!--to 
 			{{ req.permittee }}. {{ req.permittee }} 
 			{% if delegatable %}<strong>will</strong>{% else %}will
 			<strong>not</strong>{% endif %} be able to further give permission
-			to other objects.
-			<div class="tooltip" id="tip_{{ req.id }}">
+			to other objects.-->
+			<!--<div class="tooltip" id="tip_{{ req.id }}">
 				{{ req.requested_permission.permission.description }}
-			</div>
+			</div>-->
+                        <a class="perm_name" id="name_{{ req.id }}" href="#">
+                            See details
+                        </a>
+                        <div class="tooltip" id="tip_{{ req.id }}">
+                                {{ req.message }}
+                        </div>
 		</li>
 		{% endfor %}
 	</ul>
 	{% endif %}
 
 	{% if denied_reqs %}
-    <h2>The following permission requests will be denied:</h2>
+    <!--<h2>The following permission requests will be denied:</h2>-->
+    <h2>The following requests will be denied:</h2>
 	<ul>
 		{% for req in denied_reqs %}
 		<li>
-			Permission 
+			<!--Permission 
 			<a class="perm_name" id="name_{{ req.id }}" href="#">
 				{{ req.requested_permission.permission.name }}
-			</a>
-			requested by {{ req.requesting_user }} for {{ req.permittee }} to
+			</a>-->
+                        {{ req.requested_permission.target|title }}
+			requested by {{ req.requesting_user }} <!--for {{ req.permittee }} to
 			use object
-			{{ req.requested_permission.target }} will be denied.
-			<div class="tooltip" id="tip_{{ req.id }}">
+			{{ req.requested_permission.target }}--> will be denied.
+			<!--<div class="tooltip" id="tip_{{ req.id }}">
 				{{ req.requested_permission.permission.description }}
-			</div>
+			</div>-->
+                        <a class="perm_name" id="name_{{ req.id }}" href="#">
+                            See details
+                        </a>
+                        <div class="tooltip" id="tip_{{ req.id }}">
+                                {{ req.message }}
+                        </div>
 		</li>
 		{% endfor %}
 	</ul>

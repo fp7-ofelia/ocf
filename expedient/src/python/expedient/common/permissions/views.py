@@ -15,7 +15,7 @@ from expedient.common.permissions.forms import PermissionRequestForm, ProjectReq
 from expedient.common.messaging.models import DatedMessage
 from django.contrib.auth.models import User
 import logging
-from django.core.mail import send_mail
+from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import QueryDict
@@ -111,7 +111,6 @@ def request_permission(always_redirect_to=None,
 
         # Get the object permission name
         perm_name = obj_perm.permission.name 
-        perm_name = obj_perm.permission.name
 
         # Get the users who can delegate the permission
         if permission_owners_func:
@@ -133,9 +132,11 @@ def request_permission(always_redirect_to=None,
                                              permittee=permittee,
                                              requested_permission=obj_perm)
 
+            posted_message = "permission %s" % permission.name
             if perm_name == "can_create_project":
                 form = ProjectRequestForm(user_qs, request.POST,
                                          instance=perm_request)
+                posted_message = "project %s" % str(request.POST["name"])
             else:
                 form = PermissionRequestForm(user_qs, request.POST,
                                          instance=perm_request)
@@ -143,12 +144,12 @@ def request_permission(always_redirect_to=None,
                 # Post a permission request for the permission owner
                 perm_request = form.save()
                 DatedMessage.objects.post_message_to_user(
-                    "Sent request for permission %s to user %s" %
-                    (permission.name, perm_request.permission_owner),
+                    "Sent request for %s to user %s" %
+                    (posted_message, perm_request.permission_owner),
                     user=request.user, msg_type=DatedMessage.TYPE_SUCCESS)
                 try:
                      send_mail(
-                         settings.EMAIL_SUBJECT_PREFIX + "Request for permission %s from user %s" % (permission.name,request.user),
+                         settings.EMAIL_SUBJECT_PREFIX + "Request for %s from user %s" % (posted_message, request.user),
                          "You have a new request for permission %s from user %s (%s). Please go to the Permission Management section in your Dashboard to manage it: https://%s\n\n Original User Message:\n\"%s\"" % (permission.name,request.user, request.user.email, settings.SITE_IP_ADDR, perm_request.message),
                          from_email=settings.DEFAULT_FROM_EMAIL,
                          recipient_list=[perm_request.permission_owner.email],

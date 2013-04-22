@@ -17,7 +17,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.views.generic import GenericViewError
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
+from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 
 def list_msgs(request, number=None):
@@ -99,7 +99,7 @@ def create_message(request, model=None, template_name=None,
                              #recipient_list=[settings.ROOT_EMAIL],
                      )
                 except Exception as e:
-                    print "User email notification could no be sent"
+                    print "[WARNING] User e-mail notification could not be sent. Details: %s" % str(e)
 
             return create_update.redirect(post_save_redirect, new_object)
     else:

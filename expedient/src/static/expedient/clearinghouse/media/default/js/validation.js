@@ -93,7 +93,8 @@ function checkAllResultsOK(results) {
 function checkDropDownSelected(fieldID) {
     var result = false;
     var field = $("#" + fieldID);
-    if ($("#" + fieldID).attr("selectedIndex") <= 0) {
+    /*if ($("#" + fieldID).attr("selectedIndex") <= 0) {*/ // Does not allow multiple selects
+    if ($("#" + fieldID).val() == "") {
         if (!doErrorlistExists(field.attr("id"))) {
             prependErrorlist(field.attr("id"), "Please select one option.");
         }

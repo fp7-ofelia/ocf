@@ -28,49 +28,57 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     
     fv_args = []
     match_list = []
-    for fs in expFS:
+    some_exception = False
 
-        # XXX: lbergesio - This line is to force intersection 
-        # between the requested fs by the user and the one granted by the IM which is already the 
-        # the intesection between the adminFS (normally ALL) and the granted by the IM in the web form.
-        # Most of the times VLAN requested != to the one granted so the fs is not granted nor pushed 
-        # to FV.
-        # This is due to the original goal of optin and since OFELIA uses it in a different way, this
-        # must never happen. So one solution is to replace the VLANS requested by user with the ones
-        # granted by the IM.
+    try:
+        for fs in expFS:
 
-        for optedfs in optedFS:
-            fs.vlan_id_e = optedfs.vlan_id_e
-            fs.vlan_id_s = optedfs.vlan_id_s
+            # XXX: lbergesio - This line is to force intersection 
+            # between the requested fs by the user and the one granted by the IM which is already the 
+            # the intesection between the adminFS (normally ALL) and the granted by the IM in the web form.
+            # Most of the times VLAN requested != to the one granted so the fs is not granted nor pushed 
+            # to FV.
+            # This is due to the original goal of optin and since OFELIA uses it in a different way, this
+            # must never happen. So one solution is to replace the VLANS requested by user with the ones
+            # granted by the IM.
 
-        opted = multi_fs_intersect([fs],optedFS,OptsFlowSpace)
-        if (len(opted) > 0):
-            intersected = True
-            for opt in opted:
-                opt.opt = tmp
-                opt.dpid = fs.dpid
-                opt.port_number_s = int(fs.port_number_s)
-                opt.port_number_e = int(fs.port_number_e)
-                opt.direction = fs.direction
-                opt.save()
-                #make Match struct
-                matches = range_to_match_struct(opt)
-                for single_match in matches:
-                    match = MatchStruct(match = single_match, priority = priority*Priority.Priority_Scale, fv_id=0, optfs=opt)
-                    match.save()
-                    match_list.append(match)
-                    #TODO 4 is hard coded
-                    fv_arg = {"operation":"ADD", "priority":"%d"%match.priority,
-                                    "dpid":match.optfs.dpid,"match":match.match,
-                                    "actions":"Slice=%s:4"%match.optfs.opt.experiment.get_fv_slice_name()}
-                    fv_args.append(fv_arg)
+            for optedfs in optedFS:
+                fs.vlan_id_e = optedfs.vlan_id_e
+                fs.vlan_id_s = optedfs.vlan_id_s
+
+            opted = multi_fs_intersect([fs],optedFS,OptsFlowSpace)
+            if (len(opted) > 0):
+                intersected = True
+                for opt in opted:
+                    opt.opt = tmp
+                    opt.dpid = fs.dpid
+                    opt.port_number_s = int(fs.port_number_s)
+                    opt.port_number_e = int(fs.port_number_e)
+                    opt.direction = fs.direction
+                    opt.save()
+                    #make Match struct
+                    matches = range_to_match_struct(opt)
+                    for single_match in matches:
+                        match = MatchStruct(match = single_match, priority = priority*Priority.Priority_Scale, fv_id=0, optfs=opt)
+                        match.save()
+                        match_list.append(match)
+                        #TODO 4 is hard coded
+                        fv_arg = {"operation":"ADD", "priority":"%d"%match.priority,
+                                        "dpid":match.optfs.dpid,"match":match.match,
+                                        "actions":"Slice=%s:4"%match.optfs.opt.experiment.get_fv_slice_name()}
+                        fv_args.append(fv_arg)
                             
-                    # If there is any intersection, add them to FV
+                        # If there is any intersection, add them to FV
+    except Exception as e:
+        # If some exception was raised, delete the tmp object and raise another exception
+        tmp.delete()
+        some_exception = str(e)
+        raise Exception(some_exception)
+
     if (not intersected):
         print "WARNING!!! User FS request and IM granted FS do not match and no FS is being pushed to FV"
         tmp.delete()
 
-        
     return [fv_args,match_list]
         
 
