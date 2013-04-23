@@ -15,7 +15,7 @@ from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
 from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.shortcuts import give_permission_to, has_permission
+from expedient.common.permissions.shortcuts import give_permission_to, has_permission, must_have_permission
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
 from expedient.clearinghouse.roles.models import ProjectRole,\
@@ -247,7 +247,8 @@ def update(request, proj_id, iframe=False):
     '''Update information about a project'''
     
     project = get_object_or_404(Project, id=proj_id)
-    
+    must_have_permission(request.user, project, "can_edit_project") 
+
     def redirect(instance):
         if iframe:
             return reverse("project_list")
