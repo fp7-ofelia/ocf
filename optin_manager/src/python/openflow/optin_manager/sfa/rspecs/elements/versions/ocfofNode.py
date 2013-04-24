@@ -32,7 +32,23 @@ class OcfOfNode:
         for node in nodes:
 	    network_elem.append(node)
         return nodes
+    
+    @staticmethod
+    def add_slivers(xml, of_xml):
+        network_elems = xml.xpath('//network')
+        if len(network_elems) > 0:
+            network_elem = network_elems[0]
+        else:
+            network_urn = 'ocf_of'
+            network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
 
+        slivers = of_xml.xpath('//rspec/*')
+        print '------------------------------------------------------------------------------------------------------------------slivers'
+        print slivers[0].attrib
+        print network_elem
+        for sliver in slivers:
+            network_elem.append(sliver)
+        return slivers
     @staticmethod
     def get_nodes(xml, filter={}):
         #xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
@@ -196,25 +212,6 @@ class OcfOfNode:
                     node['boot_state'] = 'disabled' 
 
         return nodes
-
-
-    @staticmethod
-    def add_slivers(xml, slivers):
-        component_ids = []
-        for sliver in slivers:
-            filter = {}
-            if isinstance(sliver, str):
-                filter['component_id'] = '*%s*' % sliver
-                sliver = {}
-            elif 'component_id' in sliver and sliver['component_id']:
-                filter['component_id'] = '*%s*' % sliver['component_id']
-            if not filter: 
-                continue
-            nodes = OcfOfNode.get_nodes(xml, filter)
-            if not nodes:
-                continue
-            node = nodes[0]
-            PGv2SliverType.add_slivers(node, sliver)
 
     @staticmethod
     def remove_slivers(xml, hostnames):

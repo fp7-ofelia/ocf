@@ -15,9 +15,9 @@ Functions used in FOAM and adapted to optin in order to make the minimal changes
 '''
 
 
-OFNSv3 = "/opt/foamofelia/ofelia/foam/schemas/"
-OFNSv4 = "/opt/foamofelia/ofelia/foam/schemas/"
-PGNS = "/opt/foamofelia/ofelia/foam/schemas/"
+OFNSv3 = "https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas"
+OFNSv4 = "https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas"
+PGNS = "https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas"
 XSNS = "http://www.w3.org/2001/XMLSchema-instance"
 
 def getAdvertisement (nodes):
@@ -98,5 +98,29 @@ def generateSwitchComponentID (dpid, tag = None):
   return "urn:publicid:IDN+openflow:optin_manager:%s+datapath+%s" % (tag, dpid)
 
 
+def getManifest(slivers, slice_leaf):
+  NSMAP = {None: "%s" % (PGNS),
+          "xs" : "%s" % (XSNS),
+          "openflow" : "%s" % (OFNSv3)}
+
+  rspec = ET.Element("rspec", nsmap = NSMAP)
+  rspec.attrib["{%s}schemaLocation" % (XSNS)] = PGNS + " " \
+              "http://www.geni.net/resources/rspec/3/ad.xsd " + \
+              OFNSv3 + " " \
+              "http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd"
+  rspec.attrib["type"] = "manifest"
 
 
+  for sliver in slivers:
+     od = ET.SubElement(rspec, "sliver")
+     od.attrib["slice"] = slice_leaf
+     od.attrib["description"] = sliver['description']
+     od.attrib["email"] = sliver['email']
+     od.attrib["status"] = 'Pending to approval'
+
+  xml = StringIO()
+  print 'XML))))))))))))))))))))))))))',ET.ElementTree(rspec).write(xml)
+  
+  import xml.etree.ElementTree as AT
+  print AT.dump(rspec)
+  return rspec

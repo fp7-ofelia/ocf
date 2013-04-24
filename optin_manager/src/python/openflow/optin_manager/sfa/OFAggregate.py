@@ -16,7 +16,7 @@ from openflow.optin_manager.sfa.rspecs.elements.granularity import Granularity
 from openflow.optin_manager.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 
-from openflow.optin_manager.sfa.openflow_utils.foam_rspec_lib import getAdvertisement
+from openflow.optin_manager.sfa.openflow_utils.foam_rspec_lib import getAdvertisement, getManifest
 
 #from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
 
@@ -48,15 +48,20 @@ class OFAggregate:
 		if slice_leaf:
 		    #Manifest RSpec will be used when somebody creates an sliver, returning the resources of this AM and the vm(s) requested by the user.
 		    rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
-		    options['slice']=slice_leaf
+		    options['slice'] = slice_leaf
+                    of_xml = getManifest(options['slivers'],slice_leaf)
+                    rspec = RSpec(version=rspec_version, user_options=options)
+                    rspec.version.add_slivers(of_xml)
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
-		    nodes = self.shell.GetNodes()
+                    if options['slice_urn']:
+		        nodes = self.shell.GetNodes(options['slice_urn'])
+                    else:
+                        nodes = self.shell.GetNodes()
 		    of_xml = getAdvertisement(nodes)
-		    
-        	rspec = RSpec(version=rspec_version, user_options=options)
-        	#nodes = self.get_nodes(options,slice_leaf,projectName)
-        	rspec.version.add_nodes(of_xml)
+		    rspec = RSpec(version=rspec_version, user_options=options)
+                    rspec.version.add_nodes(of_xml)
+
         	return rspec.toxml()
 	
     	def get_nodes(self, options={},slice_leaf = None,projectName=None):

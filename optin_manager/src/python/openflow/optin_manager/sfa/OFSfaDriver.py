@@ -21,12 +21,13 @@ class OFSfaDriver:
 		self.aggregate = OFAggregate()
 		self.shell = OFShell()
 
-	def list_resources (self,creds,options):
+	def list_resources (self,slice_urn=None, slice_leaf=None, creds=[], options={},):
 
 		version_manager = VersionManager()
-        	#rspec_version = version_manager.get_version(options.get('geni_rspec_version'))
 		rspec_version = 'OcfOf'
         	version_string = "rspec_%s" % (rspec_version)
+                if slice_urn:
+                    options['slice_urn'] = slice_urn
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
        		return rspec
 
@@ -49,19 +50,14 @@ class OFSfaDriver:
 		return 1
 
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
-		print '------------------------------------------------------------------------------creating sliver'	
                 rspec = RSpec(rspec_string,'OcfOf')
-		print 'RSPEC Parsed --------------------------------------------------------------------------'
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority
 		sliceName = slice_leaf
-		self.shell.CreateSliver(requested_attributes,slice_leaf,projectName)
-		created_vms = list()
-		nodes = list()
-		for slivers in requested_attributes:
-			node = self.shell.GetNodes()
-		
-		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version)
+		#self.shell.CreateSliver(requested_attributes,slice_leaf,projectName)
+	        options['slivers'] = requested_attributes
+            	
+		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
 	
 	def sliver_status(self,slice_leaf,authority,creds,options):
 
