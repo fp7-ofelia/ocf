@@ -51,7 +51,9 @@ class PermissionCheckboxTableSelectMultiple(CheckboxSelectMultiple):
         
         # Normalize to strings
         str_values = set([force_unicode(v) for v in value])
-        for i, (option_value, option_label) in enumerate(chain(self.choices, choices)):
+        # Original code: multiple permissions were being shown
+#        for i, (option_value, option_label) in enumerate(chain(self.choices, choices)):
+        for i, (option_value, option_label) in enumerate(chain(set(chain(self.choices, choices)))):
             # If an ID attribute was given, add a numeric index as a suffix,
             # so that the checkboxes don't all have the same ID attribute.
             if has_id:
@@ -131,13 +133,14 @@ class ProjectRoleForm(forms.ModelForm):
         self.fields["obj_permissions"].queryset = self.obj_permissions
         
     def clean_obj_permissions(self):
+
         new_obj_permissions = self.cleaned_data["obj_permissions"]
         new_obj_permissions_pks = [p.pk for p in new_obj_permissions]
         initial_role_pks = self.fields["obj_permissions"].initial
 
         if not initial_role_pks:
             return new_obj_permissions
-            
+ 
         for perm_pk in initial_role_pks:
             if perm_pk not in new_obj_permissions_pks and\
             not has_permission(self.user, self.project, "can_remove_members"):
@@ -148,6 +151,16 @@ class ProjectRoleForm(forms.ModelForm):
                     "but you do not have permission to remove members "
                     "so you cannot remove permissions from roles either."
                     % (perm.permission.name, perm.target))
-            
+
         return new_obj_permissions
-        
+
+    def save(self, commit = False):
+        """
+        Update instance with the new checked permissions.
+        """
+        instance = super(ProjectRoleForm, self).save(commit=False)
+        instance.obj_permissions = self.cleaned_data["obj_permissions"]
+        if commit:
+            instance.save()
+        return instance
+

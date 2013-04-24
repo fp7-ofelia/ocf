@@ -89,10 +89,7 @@ def delete(request, slice_id):
     try:
         must_have_permission(request.user, slice, "can_delete_slices")
     except Exception,e:
-        try:
-            must_have_permission(request.user, project, "can_delete_slices")
-        except Exception,e2:
-            raise e if e else e2
+        must_have_permission(request.user, project, "can_delete_slices")
 
     if request.method == "POST":
         stop(request, slice_id)
@@ -137,6 +134,13 @@ def detail(request, slice_id):
         except Exception as e:
             print "[WARNING] Could not obtain template to add resources to slides in plugin '%s'. Details: %s" % (str(plugin), str(e))
 
+    from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
+    plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
+
+    if not plugin_context['d3_nodes'] or not plugin_context['d3_links']:
+        template_list_computation = []
+        template_list_network = []
+
     extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
@@ -148,9 +152,6 @@ def detail(request, slice_id):
             "plugin_template_list_computation": template_list_computation,
             "plugins_path": PLUGIN_LOADER.plugins_path,
     }
-
-    from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
-    plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
 
     return list_detail.object_detail(
         request,

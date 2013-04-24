@@ -4,6 +4,7 @@ Your login is: {{ login }}
 
 Please use the password you provided in the registration process.
 
+Be also aware that in order to ask for a project or to be part of one, you shall log in at least once.
 
 Best regards
   Your Ofelia Team
