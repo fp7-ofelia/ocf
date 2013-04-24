@@ -7,7 +7,7 @@ import re
 
 from openflow.optin_manager.sfa.openflow_utils.CreateOFSliver import CreateOFSliver
 from openflow.optin_manager.sfa.openflow_utils.rspec3_to_expedient import get_fs_from_group 
-from openflow.optin_manager.opts.models import Experiment
+from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 
 class OFShell:
 
@@ -18,8 +18,7 @@ class OFShell:
 	def get_switches(flow_visor, used_switches=[]):
 		complete_list = []
     		try:
-			raise ""
-        		#switches = flow_visor.get_switches()
+        		switches = flow_visor.get_switches()
     		except Exception as e:
         		#import traceback
         		#traceback.print_exc()
@@ -44,9 +43,7 @@ class OFShell:
 	def get_links(flow_visor):
 		complete_list = []
                 try:
-			raise ""
-                        #links = flow_visor.get_links()
-		
+                        links = flow_visor.get_links()
 		except Exception as e:
 			#import traceback
                         #traceback.print_exc()
@@ -61,15 +58,17 @@ class OFShell:
 
 	def GetNodes(self,slice_urn=None,authority=None):
                 flow_visor = None#FVServerProxy.objects.all()[0] #XXX: Test_Only
-                if slice_urn:
+                if not slice_urn:
 		    switch_list = self.get_switches(flow_visor)
 		    link_list = self.get_links(flow_visor)
 		    return {'switches':switch_list, 'links':link_list}
                 else:
                     nodes = list()
-                    experiments = Experiment.objects.get(slice_id=slice_urn)
+                    experiments = Experiment.objects.filter(slice_id=slice_urn)
+                    if not isinstance(experiments, list):
+                        experiments = [experiments]
                     for experiment in experiments:
-                        expfs = ExperimentFlowSpace.objects.get(exp = experiment.id)
+                        expfs = ExperimentFLowSpace.objects.get(exp = experiment.id)
                         if not expfs.dpid in nodes:
                             nodes.append(expfs.dpid)
                     switches = self.get_switches(flow_visor, used_switches)
@@ -103,5 +102,5 @@ class OFShell:
                     controller = rspec_attrs['controller'][0]['url']
                     email = rspec_attrs['email']
                     email_pass = ''
-                    CreateOFSliver(slice_id, authority, project_description ,slice_leaf, 'slice_description',controller, email, email_pass, switch_slivers)
+                    CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
 		return 1

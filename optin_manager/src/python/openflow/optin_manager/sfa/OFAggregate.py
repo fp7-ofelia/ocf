@@ -54,7 +54,7 @@ class OFAggregate:
                     rspec.version.add_slivers(of_xml)
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
-                    if options['slice_urn']:
+                    if 'slice_urn' in options.keys() :
 		        nodes = self.shell.GetNodes(options['slice_urn'])
                     else:
                         nodes = self.shell.GetNodes()

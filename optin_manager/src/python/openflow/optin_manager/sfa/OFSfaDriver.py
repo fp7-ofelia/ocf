@@ -54,7 +54,7 @@ class OFSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority
 		sliceName = slice_leaf
-		#self.shell.CreateSliver(requested_attributes,slice_leaf,projectName)
+		self.shell.CreateSliver(requested_attributes,slice_leaf,projectName)
 	        options['slivers'] = requested_attributes
             	
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
