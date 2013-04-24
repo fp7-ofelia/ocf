@@ -561,7 +561,6 @@ def get_granted_flowspace(slice_id, **kwargs):
     def parse_granted_flowspaces(gfs):
         gfs_list=[] 
         for fs in gfs:
-            print fs
             fs_dict = dict(
                 flowspace=dict(),
                 openflow=dict()
@@ -596,7 +595,8 @@ def get_granted_flowspace(slice_id, **kwargs):
             existing_fs = False
             for prev_dict in gfs_list:
                 if fs_dict['flowspace'] == prev_dict['flowspace']:
-                    prev_dict['openflow'].append(openflow_dict)
+                    if openflow_dict not in prev_dict['openflow']:
+                        prev_dict['openflow'].append(openflow_dict)                        
                     existing_fs = True
                     break
             if not existing_fs:
