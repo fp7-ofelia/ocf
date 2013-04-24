@@ -196,7 +196,8 @@
 	    </div>
 
     	     <div id="grantedFlowspace{{agg.id}}Container" class="expandable">
-		{% for f in gfs.1 %}<!-- flowspace level-->
+		{% for fs_list in gfs.1 %}<!-- flowspace level-->
+                {% with  fs_list.0 as f %}
             <table class="flowspace">
                 <tr class="odd">
                 <td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
@@ -241,6 +242,7 @@
 						{% endfor %}
     		        </td>
     		    </tr>
+		{% endwith %}
 		{% endwith %}
 		{% endwith %}
 		</table>

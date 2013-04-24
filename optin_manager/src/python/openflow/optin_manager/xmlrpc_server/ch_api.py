@@ -561,6 +561,7 @@ def get_granted_flowspace(slice_id, **kwargs):
     def parse_granted_flowspaces(gfs):
         gfs_list=[] 
         for fs in gfs:
+            print fs
             fs_dict = dict(
                 flowspace=dict(),
                 openflow=dict()
@@ -586,7 +587,6 @@ def get_granted_flowspace(slice_id, **kwargs):
                                      tp_src_e=fs.tp_src_e,
                                      tp_dst_e=fs.tp_dst_e,
                                  )
-            
             openflow_dict=dict(
                                     dpid=fs.dpid, 
                                     direction=fs.direction, 
@@ -608,15 +608,13 @@ def get_granted_flowspace(slice_id, **kwargs):
     try:
         #TODO: Check 100% that only with slice_id (domain+slice.id) is enough not to crash with some other clearinghouse connected to the optin
         exp = Experiment.objects.filter(slice_id = slice_id)
+        gfs = []			
         if exp and len(exp) == 1:
             opts = exp[0].useropts_set.all()
             if opts:
-                gfs = opts[0].optsflowspace_set.all()
-                gfs = parse_granted_flowspaces(gfs)
-            else:
-                gfs = []
-        else:
-            gfs = []			
+                for opt in opts:
+                    gfs_temp = opt.optsflowspace_set.all()
+                    gfs.append(parse_granted_flowspaces(gfs_temp))
     except Exception,e:
         import traceback
         traceback.print_exc()
