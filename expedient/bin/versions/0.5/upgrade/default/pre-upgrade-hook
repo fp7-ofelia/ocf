@@ -1,0 +1,75 @@
+#!/bin/bash
+
+###
+#       @author: CarolinaFernandez
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.5 pre-upgrade-hook module..."
+
+#Check for OFELIA installation
+OFELIA="none"
+
+local TMP_PATH=$PWD
+local SRC_DIR=/opt/ofelia
+
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an official OFELIA island installation (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not a valid option. Please answer yes/no"
+        fi
+    done
+
+
+print "Configuring GIT repository for GitHub..."
+
+# When installing for OFELIA community, check that user has not
+# already R/W permissions before updating its GIT configuration file
+if [[ $OFELIA == "1" ]] && [[ `git config --get-regexp url "git@github.com:fp7-ofelia/ocf.git|https://github.com/fp7-ofelia/ocf.git"` == "" ]]; then
+
+    # Comment every line if not already commented
+    sed -i '/^#/! s/^/#/g' $SRC_DIR/.git/config
+
+    # Add 'core' section
+    if [[ `git config --get-regexp "core"` == "" ]]; then
+        git config --add core.repositoryformatversion 0
+        git config --add core.filemode true
+        git config --add core.bare false
+        git config --add core.logallrefupdates true
+    fi
+
+    if [[ `git config --get-regexp "remote.origin"` == "" ]]; then
+        # Add 'remote' repository
+        git config --add remote.fetch "+refs/heads/*:refs/remotes/origin/*"
+        # R/W access for OFELIA developers (non-OFELIA community will
+        # have "git://github.com/fp7-ofelia/ocf.git" already)
+        git config --add remote.url "git@github.com:fp7-ofelia/ocf.git"
+        git config --rename-section remote 'remote "origin"'
+    fi
+
+    if [[ `git config --get-regexp "ofelia.stable"` == "" ]]; then
+        # Add 'ofelia.stable' branch
+        git config --add branch.ofelia.stable.remote "origin"
+        git config --add branch.ofelia.stable.merge "refs/heads/ofelia.stable"
+    fi
+
+    if [[ `git config --get-regexp "ofelia.development"` == "" ]]; then
+        # Add 'ofelia.development' branch
+        git config --add branch.ofelia.development.remote "origin"
+        git config --add branch.ofelia.development.merge "refs/heads/ofelia.development"
+    fi
+fi
+
+cd $TMP_PATH

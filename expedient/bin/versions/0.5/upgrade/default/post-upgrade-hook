@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###
-#       @author:lbergesio, CarolinaFernandez
+#       @author: CarolinaFernandez
 #       @organization: i2CAT
 #       @project: Ofelia FP7
 #       @description: post-upgrade-hook module  
@@ -13,6 +13,8 @@ printHeader "info#" "Using specific 0.5 post-upgrade-hook module..."
 # Move original plugin folders inside temp folder
 TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
 SRC_DIR=/opt/ofelia/expedient
+
+print "Performing backup of old plugin folders..."
 
 if [ -d $SRC_DIR/src/python/vt_plugin ] || [ -d $SRC_DIR/src/python/openflow ]; then
     # Creates series of subdirectories all of a sudden
@@ -27,4 +29,3 @@ fi
 if [ -d $SRC_DIR/src/python/openflow ]; then
     mv $SRC_DIR/src/python/openflow $TMP_DIR/expedient/src/python/openflow || error "Maybe some directory is not present?"
 fi
-
