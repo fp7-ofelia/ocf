@@ -25,10 +25,16 @@ class OFShell:
         		#raise Exception(parseFVexception(e))
 			#XXX: this is what we have...
 			switches = [('00:00:00:00:00:00:00:09', {'nPorts': '3', 'portList': '65534,1,2', 'portNames': 'dp0(65534),s9-eth1(1),s9-eth2(2)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57545', 'dpid': '00:00:00:00:00:00:00:09'}), ('00:00:00:00:00:00:00:0a', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's10-eth3(3),s10-eth2(2),dp1(65534),s10-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57546', 'dpid': '00:00:00:00:00:00:00:0a'}), ('00:00:00:00:00:00:00:0d', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's13-eth3(3),s13-eth2(2),dp4(65534),s13-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57549', 'dpid': '00:00:00:00:00:00:00:0d'}), ('00:00:00:00:00:00:00:0e', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's14-eth3(3),s14-eth2(2),dp5(65534),s14-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57550', 'dpid': '00:00:00:00:00:00:00:0e'}), ('00:00:00:00:00:00:00:0f', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's15-eth3(3),s15-eth2(2),dp6(65534),s15-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57551', 'dpid': '00:00:00:00:00:00:00:0f'}), ('00:00:00:00:00:00:00:0b', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's11-eth3(3),s11-eth2(2),dp2(65534),s11-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57552', 'dpid': '00:00:00:00:00:00:00:0b'}), ('00:00:00:00:00:00:00:0c', {'nPorts': '4', 'portList': '3,2,65534,1', 'portNames': 's12-eth3(3),s12-eth2(2),dp3(65534),s12-eth1(1)', 'remote': '/10.216.12.5:6633-->/10.216.126.8:57553', 'dpid': '00:00:00:00:00:00:00:0c'})] 
+		print '---------------------SWITCHES,SWITCHES',switches
+                print '---------------------USED SWS', used_switches
     		for switch in switches:
+                        print switch[0]
                         if len(used_switches)>0:
-                             	if not switch in switches:
+                             	if not switch[0] in used_switches:
+                                    print '--------------------------continue'
                                     continue
+                        print '-------------por aqui no continues'
+                        print switch
 			port_list = switch[1]['portNames'].split(',')
 			print port_list
 			ports = list()
@@ -57,7 +63,7 @@ class OFShell:
 		return link_list
 
 	def GetNodes(self,slice_urn=None,authority=None):
-                flow_visor = None#FVServerProxy.objects.all()[0] #XXX: Test_Only
+                flow_visor = FVServerProxy.objects.all()[0] #XXX: Test_Only
                 if not slice_urn:
 		    switch_list = self.get_switches(flow_visor)
 		    link_list = self.get_links(flow_visor)
@@ -65,13 +71,14 @@ class OFShell:
                 else:
                     nodes = list()
                     experiments = Experiment.objects.filter(slice_id=slice_urn)
-                    if not isinstance(experiments, list):
-                        experiments = [experiments]
                     for experiment in experiments:
-                        expfs = ExperimentFLowSpace.objects.get(exp = experiment.id)
-                        if not expfs.dpid in nodes:
-                            nodes.append(expfs.dpid)
-                    switches = self.get_switches(flow_visor, used_switches)
+                        expfss = ExperimentFLowSpace.objects.filter(exp = experiment.id)
+                        for expfs in expfss:
+                            if not expfs.dpid in nodes:
+                                nodes.append(expfs.dpid)
+                    nodes=['00:00:00:00:00:00:00:09']#XXX: Hack for now 
+                    switches = self.get_switches(flow_visor, nodes)
+                    print '-----------------------------------------------------SWITCHES', switches
                     return {'switches':switches, 'links':[]}
 
 	def GetSlice(self,slicename,authority):
