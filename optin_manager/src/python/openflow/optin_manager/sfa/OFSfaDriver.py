@@ -31,23 +31,23 @@ class OFSfaDriver:
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
        		return rspec
 
-	def crud_slice (self,slice_leaf,authority,creds=None, action=None):
+	def crud_slice (self,slice_urn,authority,creds=None, action=None):
 
-		slicename = slice_leaf 
                 try:
-                        slice = self.shell.GetSlice(slicename,authority)
+		    if action == 'start_slice':
+		        self.shell.StartSlice()
+		    elif action == 'stop_slice':
+			self.shell.StopSlice()
+	       	    elif action == 'delete_slice':
+			self.shell.DeleteSlice()
+		    elif action == 'reset_slice':
+			self.shell.RebootSlice()
+
+                    return 1
+
                 except Exception as e:
                         raise RecordNotFound(slice_leaf)
-
-		if action == 'start_slice':
-			self.shell.StartSlice()
-		elif action == 'stop_slice':
-			self.shell.StopSlice()
-		elif action == 'delete_slice':
-			self.shell.DeleteSlice()
-		elif action == 'reset_slice':
-			self.shell.RebootSlice()
-		return 1
+	
 
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
                 rspec = RSpec(rspec_string,'OcfOf')
@@ -60,10 +60,7 @@ class OFSfaDriver:
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
 	
 	def sliver_status(self,slice_leaf,authority,creds,options):
-
-		slice = self.shell.GetSlice(slice_leaf,authority)	
-		result = dict()
-		List = list()
+		result = OFShell.SliverStatus(slice_urn)
 		return result
 			
 

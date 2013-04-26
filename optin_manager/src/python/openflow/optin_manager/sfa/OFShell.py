@@ -2,6 +2,8 @@ import threading
 import time
 import re
 from openflow.optin_manager.sfa.openflow_utils.CreateOFSliver import CreateOFSliver
+from openflow.optin_manager.sfa.openflow_utils.sliver_status import get_sliver_status
+from openflow.optin_manager.sfa.openflow_utils.delete_slice import delete_slice
 from openflow.optin_manager.sfa.openflow_utils.rspec3_to_expedient import get_fs_from_group 
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
@@ -24,7 +26,7 @@ class OFShell:
                              	if not switch[0] in used_switches:
                                     continue
                         if int(switch[1]['nPorts']) == 0:
-                            raise Exception("The switch with dpid:%s has a connection problem. The OCF Island Manager is already informed, please try again later" % str(switch[0]))
+                            raise Exception("The switch with dpid:%s has a connection problem and the OCF Island Manager has already been informed. Please try again later." % str(switch[0]))
                             #TODO: Send Mail to the Island Manager Here.
 			port_list = switch[1]['portNames'].split(',')
 			ports = list()
@@ -65,25 +67,40 @@ class OFShell:
                     switches = self.get_switches(flow_visor, nodes)
                     return {'switches':switches, 'links':[]}
 
-	def GetSlice(self,slicename,authority):
+	#def GetSlice(self,slicename,authority):
+        #
+	#	name = slicename 
+	#	nodes = self.GetNodes()
+	#	slices = dict()
+	#	List = list()
+	#	return slices	
 
-		name = slicename # or uuid...
-		nodes = self.GetNodes()
-		slices = dict()
-		List = list()
-		return slices	
+	def StartSlice(self, slice_urn):
+                #Look if the slice exists and return True or RecordNotFound
+		experiements = Experiment.objects.filter(slice_id=slice_urn)
+                if len(experiments) > 0:
+                    return True
+                else:
+                    raise ""
 
-	def StartSlice(self):
-		pass
-
-	def StopSlice(self):
-		pass
+	def StopSlice(self, slice_urn):
+                #Look if the slice exists and return True or RecordNotFound
+                experiements = Experiment.objects.filter(slice_id=slice_urn)
+                if len(experiments) > 0:
+                    return True
+                else:
+                    raise ""
 	
-	def RebootSlice(self):
-		pass
+	def RebootSlice(self, slice_urn):
+                return self.StartSlice(slice_urn)
+	
 
 	def DeleteSlice(self):
-		pass
+                try:
+                    delete_slice(slice_urn)
+                    return 1  
+                except:
+                    raise ""
 
 	def CreateSliver(self, requested_attributes, slice_urn, authority):
                 project_description = 'SFA Project from %s' %authority
@@ -95,3 +112,9 @@ class OFShell:
                     email_pass = ''
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
 		return 1
+
+        def SliverStatus(self, slice_urn):
+            granted_fs = get_sliver_status(slice_urn)
+            return granted_fs
+
+       
