@@ -14,23 +14,29 @@ printHeader "info#" "Using specific 0.5 pre-upgrade-hook module..."
 OFELIA="none"
 # Move original plugin folders inside temp folder
 TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
-SRC_DIR=/opt/ofelia
+
+# OFELIA installation: 2 folders up for GIT config, 3 for getting to modules
+SRC_DIR=../..
+if [[ "$PWD" == *oxa/repository* ]]; then
+    # OXAD installation: 5 folders up for GIT config, 6 for getting to modules
+    SRC_DIR=../../../../..
+fi
 
 # Removes old plugin folders before restarting Apache
 print "Performing backup of old plugin folders..."
 
-if [ -d $SRC_DIR/expedient/src/python/vt_plugin ] || [ -d $SRC_DIR/expedient/src/python/openflow ]; then
+if [ -d $SRC_DIR/../expedient/src/python/vt_plugin ] || [ -d $SRC_DIR/../expedient/src/python/openflow ]; then
     # Creates series of subdirectories all of a sudden
     mkdir -p $TMP_DIR/expedient/src/python/
 fi
 
 # Moving basic plugins from old directory to new location to avoid loading their *.pyc files
-if [ -d $SRC_DIR/expedient/src/python/vt_plugin ]; then
-    mv $SRC_DIR/expedient/src/python/vt_plugin $TMP_DIR/expedient/src/python/vt_plugin || error "Maybe some directory is not present?"
+if [ -d $SRC_DIR/../expedient/src/python/vt_plugin ]; then
+    mv $SRC_DIR/../expedient/src/python/vt_plugin $TMP_DIR/expedient/src/python/vt_plugin || error "Maybe some directory is not present?"
 fi
 
-if [ -d $SRC_DIR/expedient/src/python/openflow ]; then
-    mv $SRC_DIR/expedient/src/python/openflow $TMP_DIR/expedient/src/python/openflow || error "Maybe some directory is not present?"
+if [ -d $SRC_DIR/../expedient/src/python/openflow ]; then
+    mv $SRC_DIR/../expedient/src/python/openflow $TMP_DIR/expedient/src/python/openflow || error "Maybe some directory is not present?"
 fi
 
 
@@ -57,36 +63,38 @@ print "Configuring GIT repository for GitHub..."
 # already R/W permissions before updating its GIT configuration file
 if [[ $OFELIA == "1" ]] && [[ `git config --get-regexp url "git@github.com:fp7-ofelia/ocf.git|https://github.com/fp7-ofelia/ocf.git"` == "" ]]; then
 
-    # Comment every line if not already commented
-    sed -i '/^#/! s/^/#/g' $SRC_DIR/.git/config
+    if [ -f $SRC_DIR/.git/config ]; then
+        # Comment every line if not already commented
+        sed -i '/^#/! s/^/#/g' $SRC_DIR/.git/config
 
-    # Add 'core' section
-    if [[ `git config --get-regexp "core"` == "" ]]; then
-        git config --add core.repositoryformatversion 0
-        git config --add core.filemode true
-        git config --add core.bare false
-        git config --add core.logallrefupdates true
-    fi
+        # Add 'core' section
+        if [[ `git config --get-regexp "core"` == "" ]]; then
+            git config --add core.repositoryformatversion 0
+            git config --add core.filemode true
+            git config --add core.bare false
+            git config --add core.logallrefupdates true
+        fi
 
-    if [[ `git config --get-regexp "remote.origin"` == "" ]]; then
-        # Add 'remote' repository
-        git config --add remote.fetch "+refs/heads/*:refs/remotes/origin/*"
-        # R/W access for OFELIA developers (non-OFELIA community will
-        # have "git://github.com/fp7-ofelia/ocf.git" already)
-        git config --add remote.url "git@github.com:fp7-ofelia/ocf.git"
-        git config --rename-section remote 'remote "origin"'
-    fi
+        if [[ `git config --get-regexp "remote.origin"` == "" ]]; then
+            # Add 'remote' repository
+            git config --add remote.fetch "+refs/heads/*:refs/remotes/origin/*"
+            # R/W access for OFELIA developers (non-OFELIA community will
+            # have "git://github.com/fp7-ofelia/ocf.git" already)
+            git config --add remote.url "git@github.com:fp7-ofelia/ocf.git"
+            git config --rename-section remote 'remote "origin"'
+        fi
 
-    if [[ `git config --get-regexp "ofelia.stable"` == "" ]]; then
-        # Add 'ofelia.stable' branch
-        git config --add branch.ofelia.stable.remote "origin"
-        git config --add branch.ofelia.stable.merge "refs/heads/ofelia.stable"
-    fi
+        if [[ `git config --get-regexp "ofelia.stable"` == "" ]]; then
+            # Add 'ofelia.stable' branch
+            git config --add branch.ofelia.stable.remote "origin"
+            git config --add branch.ofelia.stable.merge "refs/heads/ofelia.stable"
+        fi
 
-    if [[ `git config --get-regexp "ofelia.development"` == "" ]]; then
-        # Add 'ofelia.development' branch
-        git config --add branch.ofelia.development.remote "origin"
-        git config --add branch.ofelia.development.merge "refs/heads/ofelia.development"
+        if [[ `git config --get-regexp "ofelia.development"` == "" ]]; then
+            # Add 'ofelia.development' branch
+            git config --add branch.ofelia.development.remote "origin"
+            git config --add branch.ofelia.development.merge "refs/heads/ofelia.development"
+        fi
     fi
 fi
 
