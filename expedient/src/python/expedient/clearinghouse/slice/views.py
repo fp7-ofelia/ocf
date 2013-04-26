@@ -137,9 +137,9 @@ def detail(request, slice_id):
     from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
     plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
 
-    if not plugin_context['d3_nodes'] or not plugin_context['d3_links']:
-        template_list_computation = []
-        template_list_network = []
+#    if not plugin_context['d3_nodes'] or not plugin_context['d3_links']:
+#        template_list_computation = []
+#        template_list_network = []
 
     extra_context={
             "breadcrumbs": (
