@@ -12,9 +12,27 @@ printHeader "info#" "Using specific 0.5 pre-upgrade-hook module..."
 
 #Check for OFELIA installation
 OFELIA="none"
+# Move original plugin folders inside temp folder
+TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
+SRC_DIR=/opt/ofelia
 
-local TMP_PATH=$PWD
-local SRC_DIR=/opt/ofelia
+# Removes old plugin folders before restarting Apache
+print "Performing backup of old plugin folders..."
+
+if [ -d $SRC_DIR/expedient/src/python/vt_plugin ] || [ -d $SRC_DIR/expedient/src/python/openflow ]; then
+    # Creates series of subdirectories all of a sudden
+    mkdir -p $TMP_DIR/expedient/src/python/
+fi
+
+# Moving basic plugins from old directory to new location to avoid loading their *.pyc files
+if [ -d $SRC_DIR/expedient/src/python/vt_plugin ]; then
+    mv $SRC_DIR/expedient/src/python/vt_plugin $TMP_DIR/expedient/src/python/vt_plugin || error "Maybe some directory is not present?"
+fi
+
+if [ -d $SRC_DIR/expedient/src/python/openflow ]; then
+    mv $SRC_DIR/expedient/src/python/openflow $TMP_DIR/expedient/src/python/openflow || error "Maybe some directory is not present?"
+fi
+
 
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop
@@ -72,4 +90,3 @@ if [[ $OFELIA == "1" ]] && [[ `git config --get-regexp url "git@github.com:fp7-o
     fi
 fi
 
-cd $TMP_PATH
