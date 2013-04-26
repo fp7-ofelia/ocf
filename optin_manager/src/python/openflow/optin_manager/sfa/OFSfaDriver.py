@@ -35,18 +35,19 @@ class OFSfaDriver:
 
                 try:
 		    if action == 'start_slice':
-		        self.shell.StartSlice()
+		        self.shell.StartSlice(slice_urn)
 		    elif action == 'stop_slice':
-			self.shell.StopSlice()
+			self.shell.StopSlice(slice_urn)
 	       	    elif action == 'delete_slice':
-			self.shell.DeleteSlice()
+			self.shell.DeleteSlice(slice_urn)
 		    elif action == 'reset_slice':
-			self.shell.RebootSlice()
+			self.shell.RebootSlice(slice_urn)
 
                     return 1
 
                 except Exception as e:
-                        raise RecordNotFound(slice_leaf)
+                        print e
+                        raise RecordNotFound(slice_urn)
 	
 
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
@@ -59,8 +60,8 @@ class OFSfaDriver:
             	
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
 	
-	def sliver_status(self,slice_leaf,authority,creds,options):
-		result = OFShell.SliverStatus(slice_urn)
+	def sliver_status(self,slice_urn,authority,creds,options):
+		result = self.shell.SliverStatus(slice_urn)
 		return result
 			
 

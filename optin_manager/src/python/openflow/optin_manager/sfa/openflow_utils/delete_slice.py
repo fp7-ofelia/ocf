@@ -1,20 +1,21 @@
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace, MatchStruct
 
 def delete_slice(slice_urn):
-
     try:
-        single_exp = Experiment.objects.get(slice_id = sliceid)
+        single_exp = Experiment.objects.get(slice_id = slice_urn)
     except Experiment.DoesNotExist:
-        return "" #RecordNotFound exception
+        raise "" #RecordNotFound exception
 
-    fv = FVServerProxy.objects.all()[0]
-    try:
-        success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
-    except Exception,e:
-        if "slice does not exist" in str(e):
-            success = True
-        else:
-            raise "" #TODO: think how to solve this. 
+    #Expedient's Stuff nothing related with SFA
+    #fv = FVServerProxy.objects.all()[0]
+    #try:
+    #    success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
+    #except Exception,e:
+    #    
+    #    if "slice does not exist" in str(e):
+    #        success = True
+    #    else:
+    #        raise "" #TODO: think how to solve this. 
 
     # get all flowspaces opted into this exp
     ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
@@ -32,6 +33,5 @@ def delete_slice(slice_urn):
     ExperimentFLowSpace.objects.filter(exp = single_exp).delete()
 
     single_exp.delete()
-
     return 1
 

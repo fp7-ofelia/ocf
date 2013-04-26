@@ -1,4 +1,5 @@
 from openflow.optin_manager.opts.models import Experiment
+from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 
 ''' Same get_granted_flowspace function from xmlrpc_srver without decorators'''
 

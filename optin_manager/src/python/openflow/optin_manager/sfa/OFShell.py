@@ -77,7 +77,9 @@ class OFShell:
 
 	def StartSlice(self, slice_urn):
                 #Look if the slice exists and return True or RecordNotFound
-		experiements = Experiment.objects.filter(slice_id=slice_urn)
+		print 'SLICE_URN',slice_urn, type(slice_urn)	
+		experiments = Experiment.objects.filter(slice_id=str(slice_urn))
+                print experiments
                 if len(experiments) > 0:
                     return True
                 else:
@@ -85,7 +87,7 @@ class OFShell:
 
 	def StopSlice(self, slice_urn):
                 #Look if the slice exists and return True or RecordNotFound
-                experiements = Experiment.objects.filter(slice_id=slice_urn)
+                experiments = Experiment.objects.filter(slice_id=slice_urn)
                 if len(experiments) > 0:
                     return True
                 else:
@@ -95,7 +97,7 @@ class OFShell:
                 return self.StartSlice(slice_urn)
 	
 
-	def DeleteSlice(self):
+	def DeleteSlice(self, slice_urn):
                 try:
                     delete_slice(slice_urn)
                     return 1  
@@ -114,7 +116,7 @@ class OFShell:
 		return 1
 
         def SliverStatus(self, slice_urn):
-            granted_fs = get_sliver_status(slice_urn)
+            granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
             return granted_fs
 
        
