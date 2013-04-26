@@ -216,12 +216,15 @@ h2 {
 	}
 
 .resourcesh2 {
-	color:#666;
-	margin-top:28px;
-	text-align:right;
-	font-size:15px;
-	font-style:italic;
 	border-bottom: 1px solid #ddd;
+	color: #666;
+	font-size: 15px;
+	font-style: italic;
+	margin-top: 28px;
+	text-align: right;
+}
+a.resourcesh2 {
+        cursor: pointer;
 }
 h2.pagetitle {
 	margin-top: 30px;
@@ -505,6 +508,21 @@ table.msg_table .error, .errorlist {
         padding-top: 5px;
 	padding-right: 7px;
 }
+.warninglist, ul[id^="warninglist"] {
+    border-radius: 7px;
+    /*color: #B27121 !important;*/
+    color: #382885 !important;
+    font-style: italic;
+    font-weight: bold;
+    /*list-style-type: none;*/
+    /*list-style-image: url('/static/media/default/img/warning.png');*/
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    /*padding-left: 7px;*/
+    padding-left: 30px;
+    padding-top: 5px;
+    padding-right: 7px;
+}
 
 table.msg_table .warning {
         color:#FFBF00;
@@ -722,7 +740,6 @@ table.servers tr.even{
     background-color: #AAA;
     border:0px!important;
 }
-
 table.servers tr.odd{
     /*background-color: #C0E7F3;*/
     background-color: #999;
@@ -747,14 +764,29 @@ table.vms th {
     text-align:left;
     border:0px;
 }
-
 table.vms td{
     padding : 4px;
     text-align:left;
     border:0px!important;
     color:#000;
 }
-
+table.vms td.ssh_vm_details {
+    font-style: italic;
+    padding-bottom: 0px;
+    padding-left: 25px;
+    padding-top: 0px;
+    text-align: right !important;
+}
+table.vms tr.even td.ssh_vm_details,
+table.vms tr.odd td.ssh_vm_details {
+    color: #888;
+}
+table.vms td.ssh_vm_details_common {
+    background: #bbb;
+    color: #444;
+    font-style: italic;
+    text-align: center !important;
+}
 table.vms tr{
 }
 table.vms tr.even{
@@ -1017,12 +1049,29 @@ div.aggregateManager table.aggregateManagerDetail {
 div.aggregateManager table.aggregateManagerDetail td {
 	text-align:left;
 	vertical-align:middle;
-	border-bottom:1px solid #DDD;
-}
 div.aggregateManager table.aggregateManagerDetail .label {
 	font-size:11px;
 	padding-top:2px;
 	vertical-align:top!important;
+}
+
+/* Aggregate Manager add/create */
+table.aggregate_create {
+        width:70%;
+        margin-left:15%;
+        margin-right:15%;
+}
+table.aggregate_create th {
+        text-align:right;
+}
+table.aggregate_create tr {
+        text-align:left;
+}
+table.aggregate_create input[type='textarea'], input[type='text'] {
+        width:335px;
+}
+table.aggregate_create #id_description {
+        height:75px;
 }
 
 /* Loading blockUI */

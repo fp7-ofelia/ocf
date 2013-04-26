@@ -442,7 +442,28 @@ def delete_slice(sliceid, **kwargs):
     single_exp.delete()
     
     return ""
-    
+
+@check_user
+@rpcmethod(signature=['string', 'string', 'array'])
+def change_slice_controller(slice_id, controller_url, **kwargs):
+    '''
+    Changes the slice controller url.
+    '''
+    complete_list = []
+    fv = FVServerProxy.objects.all()[0]
+    try:
+        params = controller_url.split(':') 
+        experiment = Experiment.objects.get(slice_id = slice_id)
+        slice_name= experiment.get_fv_slice_name()
+        fv.proxy.api.changeSlice(slice_name,'controller_hostname', params[1])
+        fv.proxy.api.changeSlice(slice_name,'controller_port', params[2])
+        experiment.controller_url = controller_url
+    except Exception, exc:
+        import traceback
+        traceback.print_exc()
+        raise Exception(parseFVexception(exc,"FV could not update slice controller URL:"))
+    return ""
+
 @check_user
 @check_fv_set
 @rpcmethod(signature=['array'])
@@ -565,7 +586,6 @@ def get_granted_flowspace(slice_id, **kwargs):
                                      tp_src_e=fs.tp_src_e,
                                      tp_dst_e=fs.tp_dst_e,
                                  )
-            
             openflow_dict=dict(
                                     dpid=fs.dpid, 
                                     direction=fs.direction, 
@@ -575,7 +595,8 @@ def get_granted_flowspace(slice_id, **kwargs):
             existing_fs = False
             for prev_dict in gfs_list:
                 if fs_dict['flowspace'] == prev_dict['flowspace']:
-                    prev_dict['openflow'].append(openflow_dict)
+                    if openflow_dict not in prev_dict['openflow']:
+                        prev_dict['openflow'].append(openflow_dict)                        
                     existing_fs = True
                     break
             if not existing_fs:
@@ -587,15 +608,13 @@ def get_granted_flowspace(slice_id, **kwargs):
     try:
         #TODO: Check 100% that only with slice_id (domain+slice.id) is enough not to crash with some other clearinghouse connected to the optin
         exp = Experiment.objects.filter(slice_id = slice_id)
+        gfs = []			
         if exp and len(exp) == 1:
             opts = exp[0].useropts_set.all()
             if opts:
-                gfs = opts[0].optsflowspace_set.all()
-                gfs = parse_granted_flowspaces(gfs)
-            else:
-                gfs = []
-        else:
-            gfs = []			
+                for opt in opts:
+                    gfs_temp = opt.optsflowspace_set.all()
+                    gfs.append(parse_granted_flowspaces(gfs_temp))
     except Exception,e:
         import traceback
         traceback.print_exc()

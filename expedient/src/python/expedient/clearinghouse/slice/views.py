@@ -3,7 +3,7 @@ Created on Jun 17, 2010
 
 @author: jnaous
 '''
-from django.views.generic import create_update, list_detail, simple
+from django.views.generic import list_detail, simple
 from django.core.urlresolvers import reverse, get_callable
 from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
@@ -17,10 +17,10 @@ from forms import SliceCrudForm
 from django.conf import settings
 import logging
 from expedient.common.permissions.shortcuts import must_have_permission, give_permission_to
-from vt_plugin.models import VM
 logger = logging.getLogger("SliceViews")
 import uuid
 from  expedient.clearinghouse.slice.utils import parseFVexception
+from expedient.clearinghouse.settings import PLUGIN_LOADER
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 
@@ -89,10 +89,7 @@ def delete(request, slice_id):
     try:
         must_have_permission(request.user, slice, "can_delete_slices")
     except Exception,e:
-        try:
-            must_have_permission(request.user, project, "can_delete_slices")
-        except Exception,e2:
-            raise e if e else e2
+        must_have_permission(request.user, project, "can_delete_slices")
 
     if request.method == "POST":
         stop(request, slice_id)
@@ -120,15 +117,30 @@ def detail(request, slice_id):
     '''Show information about the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
 
-    must_have_permission(request.user, slice.project, "can_view_project")
-    
+    must_have_permission(request.user, slice.project, "can_view_project")    
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
-    vms_list = VM.objects.filter(sliceId = slice.uuid)
-    from openflow.plugin.models import OpenFlowSliceInfo
-    try:
-        controller_url = OpenFlowSliceInfo.objects.get(slice=slice).controller_url
-    except:
-        controller_url= "Not set"
+
+    template_list_computation = []
+    template_list_network = []
+    for plugin in PLUGIN_LOADER.plugin_settings:
+        try:
+            plugin_dict = PLUGIN_LOADER.plugin_settings.get(plugin)
+            # Get templates according to the plugin category ('computation' or 'network')
+            # instead of directly using "TEMPLATE_RESOURCES" settings
+            if plugin_dict.get("general").get("resource_type") == "computation":
+                template_list_computation.append(plugin_dict.get("paths").get("template_resources"))
+            elif plugin_dict.get("general").get("resource_type") == "network":
+                template_list_network.append(plugin_dict.get("paths").get("template_resources"))
+        except Exception as e:
+            print "[WARNING] Could not obtain template to add resources to slides in plugin '%s'. Details: %s" % (str(plugin), str(e))
+
+    from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
+    plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
+
+#    if not plugin_context['d3_nodes'] or not plugin_context['d3_links']:
+#        template_list_computation = []
+#        template_list_network = []
+
     extra_context={
             "breadcrumbs": (
                 ("Home", reverse("home")),
@@ -136,19 +148,18 @@ def detail(request, slice_id):
                 ("Slice %s" % slice.name, reverse("slice_detail", args=[slice_id])),
             ),
             "resource_list": resource_list,
-            "vms_list": vms_list,
-	    "controller_url":controller_url 
+            "plugin_template_list_network": template_list_network,
+            "plugin_template_list_computation": template_list_computation,
+            "plugins_path": PLUGIN_LOADER.plugins_path,
     }
-    from expedient.ui.html.views import getUIdata
-    #extra_context+=getUIdata(request,slice)
-    
+
     return list_detail.object_detail(
         request,
         Slice.objects.all(),
         object_id=slice_id,
         template_name=TEMPLATE_PATH+"/detail.html",
         template_object_name="slice",
-	extra_context=dict(extra_context.items()+getUIdata(request,slice).items())
+	extra_context=dict(extra_context.items()+plugin_context.items())
     )
     
 def start(request, slice_id):
@@ -183,7 +194,7 @@ def start(request, slice_id):
                      request.user, msg_type=DatedMessage.TYPE_SUCCESS)
             else:
                 DatedMessage.objects.post_message_to_user(
-                    "Slice %s was started, but some AMs could not be started. Double check your VMs staus" % slice.name,
+                    "Slice %s was started, but some AMs could not be started. Double check your VMs status" % slice.name,
                      request.user, msg_type=DatedMessage.TYPE_SUCCESS)
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     else:

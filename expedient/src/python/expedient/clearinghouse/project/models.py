@@ -15,7 +15,7 @@ from django.db import transaction
 import uuid
 import string
 import re
-from expedient.common.utils.validators import *
+from expedient.common.utils.validators import asciiValidator, descriptionLightValidator
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -75,7 +75,7 @@ class Project(models.Model):
     objects = ProjectManager()
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
-    description = models.TextField(validators=[descriptionValidator])
+    description = models.TextField(validators=[descriptionLightValidator])
     uuid = models.CharField(max_length=200, default = "", unique=True, editable =False)
     '''
     save = permissions_save_override(

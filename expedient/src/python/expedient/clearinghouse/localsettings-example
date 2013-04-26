@@ -53,7 +53,7 @@ DATABASE_HOST = "127.0.0.1"
 ISLAND_NAME   = "i2CAT"
 
 #
-# Address and IP you would like to use to access Expedient GUI.
+# Address and IP you would like to use for e-mails sent to users and Island Manager.
 # SITE_DOMAIN: format is "url[:port]". Do NOT use http[s]:// here.
 # 
 SITE_DOMAIN = "ocf.mydomain.net:1234"

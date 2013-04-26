@@ -68,19 +68,33 @@ def update(request, role_id):
     must_have_permission(request.user, role.project, "can_edit_roles")
 
     permittee = Permittee.objects.get_as_permittee(request.user)
-    
+
     initial_set = list(role.obj_permissions.values_list("pk", flat=True))
-    
+
     # Get the permissions that the user can delegate to others as well
-    # as the ones that are already in the role.
+    # as the ones that are already in the role. Obtain DISTINCT values.
     obj_permissions = ObjectPermission.objects.filter_from_instance(
         role.project).filter(
             Q(permissionownership__permittee=permittee,
               permissionownership__can_delegate=True) |
             Q(id__in=initial_set)
-        )
-    
+        ).distinct()
+
     project_url = reverse("project_detail", args=[role.project.id])
+
+    # Use to update the permissions in the ProjectRole object so
+    # users with that role are affected from the time this is updated
+    def post_save(instance, created):
+        from expedient.clearinghouse.roles.models import ObjectPermission
+        new_obj_permissions_pks = [ p.pk for p in instance.obj_permissions.all() ]
+        for permission in obj_permissions:
+            # Add and delete permissions accordingly...
+            try:
+                instance.remove_permission(permission)
+            except:
+                pass
+            if permission.pk in new_obj_permissions_pks:
+                instance.add_permission(permission)
 
     return generic_crud(
         request,
@@ -100,7 +114,8 @@ def update(request, role_id):
                 ("Project %s" % role.project.name, project_url),
                 ("Update Role %s" % role.name, request.path),
             )
-        }
+        },
+        post_save = post_save,
     )
 
 def delete(request, role_id):

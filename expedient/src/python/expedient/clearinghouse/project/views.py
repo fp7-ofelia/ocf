@@ -15,7 +15,7 @@ from expedient.common.utils.views import generic_crud
 from expedient.common.messaging.models import DatedMessage
 from django.db.models import Q
 from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.shortcuts import give_permission_to, has_permission
+from expedient.common.permissions.shortcuts import give_permission_to, has_permission, must_have_permission
 from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
 from expedient.clearinghouse.roles.models import ProjectRole,\
@@ -23,10 +23,10 @@ from expedient.clearinghouse.roles.models import ProjectRole,\
 from expedient.common.permissions.models import ObjectPermission,\
     PermissionOwnership, Permittee
 from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
+from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 import uuid   
-from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 import ldap 
@@ -222,7 +222,7 @@ def create(request):
     except Exception as e:
         if isinstance(e,ldap.LDAPError):
             DatedMessage.objects.post_message_to_user(
-                "Project have been created but only locally since LDAP is not reachable. You will not be able to add users to the project until connection is restored.",
+                "Project has been created but only locally since LDAP is not reachable. You will not be able to add users to the project until connection is restored.",
                 request.user, msg_type=DatedMessage.TYPE_ERROR)
         else:
             DatedMessage.objects.post_message_to_user(
@@ -247,7 +247,8 @@ def update(request, proj_id, iframe=False):
     '''Update information about a project'''
     
     project = get_object_or_404(Project, id=proj_id)
-    
+    must_have_permission(request.user, project, "can_edit_project") 
+
     def redirect(instance):
         if iframe:
             return reverse("project_list")
@@ -407,7 +408,7 @@ def add_member(request, proj_id):
                          recipient_list=[user.email],
                  )
             except Exception as e:
-                print "User email notification could not be sent. Exception: %s" % str(e)
+                print "[WARNING] User e-mail notification could not be sent. Details: %s" % str(e)
             
             return HttpResponseRedirect(reverse("project_detail", args=[proj_id]))
 

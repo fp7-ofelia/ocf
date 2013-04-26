@@ -24,11 +24,36 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.5
+--------------------------------------------------
+Released: 26/04/2013
+
+./ Production ready
+
+Change log:
+
+[B] EXP: Role permissions not being updated for users with that role. Issue 148
+[B] EXP: Permission error when project owner edits other's roles. Issue 141
+[*] EXP: Mail delivery may take too long under some circumstances. Issue 139
+[*] EXP: Add VMs names in the same slice validation. Issue 138
+[*] EXP: Redesign the permission management for project creation. Issue 127
+[*] EXP: Project description validator is too restrictive. Issue 126
+[*] EXP: Setting loopback interface as slice controller can crash FlowVisor. Issue 125
+[*] EXP: Warning massage when stoping a slice. Issue 124
+[B] OPT: Small error in the used VLANs lists in the add rule page. Issue 123
+[B] OPT: Optin error handling flowspace request. Issue 122
+[*] EXP, OPT: Allow updating the slice controller without having to start/update it. Issue 121
+[*] EXP: Change in VM's SSH details. Issue 120
+[*] AGN: Differentiate exceptions when creating VMs. Issue 119
+[+] EXP: Refactoring of Expedient plugin system. Issue 68
+
+
+--------------------------------------------------
 v0.4.3
 --------------------------------------------------
 Released: 04/02/2013
 
-./ Production ready
+/!\ Outdated
 
 Change log:
 

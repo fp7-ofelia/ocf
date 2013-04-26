@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load ch_extras %}
+
+{% block title %}OpenFlow Slice Information for Slice {{ slice.name }}{% endblock title %}
+
+{% block content %}
+<div class="main">
+	<div class="title">
+		<h1>OpenFlow Information for Slice <font class="highlight">{{ slice.name }}</font></h1>
+	</div>
+	<div class="form_div">
+		<img align="bottom" src="{% url img_media 'warning.png' %}" />
+		The following settings will apply to <strong>all</strong> OpenFlow
+		aggregates in the same slice automatically. There is no need to update the slice if it is started. 
+		<form action="" method="POST">{% csrf_token %}
+			<table class="formtable">
+			{{ form.as_table }}
+			</table>  
+			<div class="center">
+				<input type="submit" value="Save" />
+                                <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock content %}

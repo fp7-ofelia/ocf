@@ -13,6 +13,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from openflow.optin_manager.opts.vlans.vlanController import vlanController
 from django.contrib.sites.models import Site
+from math import ceil as math_ceil
     
 def change_priority(request):
     '''
@@ -176,9 +177,9 @@ def add_opt_in(request):
                     if len(intersected_flowspace) == 0:
                         error_msg.append("Selected flowspace doesn't have any intersection with admin FS")
                 if len(error_msg)==0:
-                    [fv_args,match_list] = opt_fs_into_exp(intersected_flowspace,
-                                selexp,request.user,assigned_priority,True)
                     try:
+                        [fv_args,match_list] = opt_fs_into_exp(intersected_flowspace,
+                                selexp,request.user,assigned_priority,True)
                         fv = FVServerProxy.objects.all()[0]
                         try:
                             if len(fv_args) > 0:
@@ -249,8 +250,11 @@ def add_opt_in(request):
                                 'form':form,
                                 'upload_form':upload_form,
                                 'requested_vlans':requested_vlans,
-                                'vlan_list_length': len(allocated_vlans)/5,
-                                'allocated_vlans':allocated_vlans,
+                                # Carolina: ceil function to take into account 0-indexed range [0,4095]
+                                # has 1 more element that would be normally displaced to another column
+                                # (not 5 columns anymore). Displace one element per column to fit.
+                                'vlan_list_length': math_ceil(len(allocated_vlans)/5.0),
+                                'allocated_vlans': allocated_vlans,
                             },
                     )  
                     

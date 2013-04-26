@@ -128,10 +128,13 @@ class ObjectPermission(models.Model):
         # Is someone delegating the permission?
         if giver:
             giver = Permittee.objects.get_as_permittee(giver)
-    
+
             # check that the giver can give ownership
             can_give = Permittee.objects.filter_for_obj_permission(
-                self, can_delegate=True).filter(
+#                self, can_delegate=True).filter(
+                # No need to find for some one that CAN actually delegate...
+                # Permissions already take care of this.
+                self, can_delegate=False).filter(
                     id=giver.id).count() > 0
                 
             if not can_give:

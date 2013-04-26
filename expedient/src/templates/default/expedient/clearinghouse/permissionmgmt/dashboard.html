@@ -36,7 +36,7 @@ table#permission_request_table {
 		});
 		
 		/* code to enable/disable delegation checkbox on clicking approve */
-		$('input.action').click(function() {
+		/*$('input.action').click(function() {
 			req_id = $(this).attr("value");
 			checked = $('input.action[name=approved][value='+req_id+']').attr("checked");
 			if(!checked) {
@@ -44,7 +44,7 @@ table#permission_request_table {
 			} else {
 				$('input[name=delegate][value='+req_id+']').removeAttr("disabled");
 			}
-		});
+		});*/
 		
 		/* add tooltip to permission name */
 		$("a.perm_name").each(function(){
@@ -78,7 +78,7 @@ table#permission_request_table {
 				<tr>
 					<th><img height="15px" src="{% url img_media 'active.png' %}" title="Approve" /></th>
 					<th><img height="15px" src="{% url img_media 'inactive.png' %}" title="Deny" /></th>
-					<th>Delegate</th>
+					<!--<th>Delegate</th>-->
 					<th>Requester</th>
 					<th>Permission Name</th>
 					<th>On Behalf Of</th>
@@ -97,10 +97,10 @@ table#permission_request_table {
 						class="action"
 						name="denied" value="{{ req.id }}" />
 					</td>
-					<td>
+					<!--<td>
 						<input type="checkbox" name="delegate"
 						value="{{ req.id }}" disabled="true" />
-					</td>
+					</td>-->
 					<td>
 						{{ req.requesting_user }}
 					</td>

@@ -130,12 +130,12 @@ class MemberForm(forms.Form):
     def clean_roles(self):
         """
         Make sure that no roles have been taken out unless the
-        user has the "can_remove_member" permission.
+        user has the "can_remove_members" permission.
         """
         roles = self.cleaned_data["roles"]
         for role in self.initial_roles:
             if role not in roles and\
-            not has_permission(self.giver, self.project, "can_remove_member"):
+            not has_permission(self.giver, self.project, "can_remove_members"):
                 raise forms.ValidationError(
                     "You tried to remove role '%s' from the user, "
                     "but you do not have permission to remove members "

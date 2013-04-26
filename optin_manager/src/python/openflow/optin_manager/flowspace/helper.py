@@ -224,15 +224,21 @@ def range_to_match_struct(rangeFS):
     @type rangeFS: a supeclass of OpenFlow class
     @return: a list of strings corresponding to the equivalent match struct elements
     '''
+    range_too_big = False
+    exception_range = ""
+    import sys
     match = {}
     for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
         om_start = "%s_s" % om_name
         om_end = "%s_e" % om_name
         match[of_name] = []
+        # Some value must be within the boundaries
         if (getattr(rangeFS,om_start) > 0 or getattr(rangeFS,om_end) < 2**width-1):
+            # Same value
             if (getattr(rangeFS,om_start) == getattr(rangeFS,om_end)):
                 match[of_name].append(to_str(getattr(rangeFS,om_start)))
             else:
+                # Ports
                 if (attr_name == "nw_src" or attr_name == "nw_dst"):
                     ips = getattr(rangeFS,om_start)
                     ipe = getattr(rangeFS,om_end)
@@ -244,8 +250,28 @@ def range_to_match_struct(rangeFS):
                                 ips = (ips| (2**(i-1) - 1 )) + 1
                                 break
                 else:
-                    for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)+1):
-                        match[of_name].append(to_str(value))
+                    # Different factor for 32b or 64b OS's
+                    factor_avoid_overflow = 1
+                    # XXX: A maximum number of MACs is set to be processed in FlowVisor
+                    # avoiding overflow on its Java heap space (Xms: 100M, Xmx: 1000M
+                    # currently) and also avoiding a lot of time processing
+                    # (current maximum takes around 11 minutes)
+                    if (sys.maxsize <= 2**31-1):
+                        factor_avoid_overflow = 1/5e6 # Allows circa 429 MACs
+                    elif (sys.maxsize <= 2**63-1):
+                        factor_avoid_overflow = 1/2e16 # Allows circa 461 MACs, e.g. [00:..:00, 00:..:FF]
+                    # Avoid huge ranges of numbers (e.g. MACs) or to prevent Java heap space problems
+                    if (getattr(rangeFS,om_end)+1-getattr(rangeFS,om_start) > (sys.maxsize*factor_avoid_overflow)):
+                        range_too_big = True
+                        exception_range = "[%s, %s]" % (str(om_start), str(om_end))
+                        break
+                    # Compute range otherwise
+                    else:
+                        for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)+1):
+                            match[of_name].append(to_str(value))
+
+    if range_too_big:
+        raise Exception("Range too big for values '%s'" % exception_range)
                         
     #Now try to combine different of_name(s) together:
     all_match = [""]
@@ -259,7 +285,7 @@ def range_to_match_struct(rangeFS):
                     new_match.append("%s,%s=%s"%(elem,key,value))
         if len(match[key]) > 0:
             all_match = new_match
- 
+
     return all_match
 
 def singlefs_is_subset_of(singleFS, multiFS):

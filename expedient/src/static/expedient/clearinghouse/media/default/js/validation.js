@@ -1,4 +1,5 @@
-var DESCRIPTION_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)\!\?\"\'\r\n])+$/;
+var DESCRIPTION_FORBIDDEN_RE = /^[\u00C0-\u017F]+$/;
+var DESCRIPTION_RESTRICTED_RE = /^([0-9a-zA-Z\-\_\ \.\,\;\[\]\{\}\=\#\$\%\&\/\(\)\!\?\"\'\r\n])+$/;
 var NOTBLANK_RE = /^.+$/;
 var NUMBER_RE = /^([0-9])+$/;
 var RESOURCE_RE = /^([0-9a-zA-Z\-\_\ \.])+$/;
@@ -41,9 +42,26 @@ function checkWithRegExp(fieldID, regExp, errorMessage) {
     return result;
 }
 
-/* Generic validation */
 function checkDescription(id, resourceName) {
-    return checkWithRegExp(id, DESCRIPTION_RE, "Check that the " + resourceName + " has ASCII characters only.");
+    var fieldContent = $("#" + id).val();
+    var errorMessage = "Check that the " + resourceName + " does not contain accented characters.";
+    for (i = 0; i <= fieldContent.length-1; i++) {
+        if (DESCRIPTION_FORBIDDEN_RE.test(fieldContent[i])) {
+            if (!doErrorlistExists(id)) {
+                removeErrorlist(id);
+                prependErrorlist(id, errorMessage);
+            }
+            return false;
+        }
+    }
+    // If no errors detected, clean any possible error message
+    removeErrorlist(id);
+    return true;
+}
+
+/* Generic validation */
+function checkRestrictedDescription(id, resourceName) {
+    return checkWithRegExp(id, DESCRIPTION_RESTRICTED_RE, "Check that the " + resourceName + " has ASCII characters only.");
 }
 
 function checkNotBlank(id, resourceName) {
@@ -75,7 +93,8 @@ function checkAllResultsOK(results) {
 function checkDropDownSelected(fieldID) {
     var result = false;
     var field = $("#" + fieldID);
-    if ($("#" + fieldID).attr("selectedIndex") <= 0) {
+    /*if ($("#" + fieldID).attr("selectedIndex") <= 0) {*/ // Does not allow multiple selects
+    if ($("#" + fieldID).val() == "") {
         if (!doErrorlistExists(field.attr("id"))) {
             prependErrorlist(field.attr("id"), "Please select one option.");
         }
@@ -95,7 +114,14 @@ function contains(substring, string) {
 
 /* Bind validation check to the submit button */
 $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create], :button[id^=form_update]").click(function() {
-    // First, submit ID
+    // First, get the form 'referer' (e.g. project, slice, etc) - to apply different validations if needed
+    formID = "";
+    try {
+        formID = $(this).attr("id");
+    } catch(err) {
+    }
+
+    // Second, submit ID
     var submitID = $(this).attr("id") || "";
     if (contains("form_create_", submitID)) {
         submitID = submitID.split('form_create_').slice(1).join('')
@@ -103,7 +129,7 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
         submitID = submitID.split('form_update_').slice(1).join('')
     }
 
-    // Second, all other input IDs
+    // Third, all other input IDs
     var id = "";
     var type = "";
     var results = Array();
@@ -120,10 +146,12 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
                 results[index] = checkRestrictedName(id,submitID + " name");
             } else if (contains("name",id)) {
                 results[index] = checkName(id,submitID + " name");
-            } else if (contains("description",id)) {
+            } else if (contains("description",id) && (formID.indexOf("project") > - 1 || formID.indexOf("slice") > -1)) {
                 results[index] = checkDescription(id,submitID + " description");
+            } else if (contains("description",id)) {
+                results[index] = checkRestrictedDescription(id,submitID + " description");
             } else if (contains("location",id)) {
-                results[index] = checkDescription(id,submitID + " location");
+                results[index] = checkRestrictedDescription(id,submitID + " location");
             } else if (contains("memory",id)) {
                 results[index] = checkNumber(id,submitID + " memory");
             } else if (contains("url",id)) {

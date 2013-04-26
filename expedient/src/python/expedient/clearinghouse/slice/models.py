@@ -12,13 +12,13 @@ import logging, uuid
 from django.db.models import signals
 from expedient.common.messaging.models import DatedMessage
 import traceback
-from django.core.mail import send_mail
+from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 from expedient.common.timer.models import Job
-from expedient.common.timer.exceptions import JobAlreadyScheduled
+#from expedient.common.timer.exceptions import JobAlreadyScheduled
 from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
-from expedient.common.utils.validators import *
+from expedient.common.utils.validators import asciiValidator, descriptionLightValidator
 from expedient.clearinghouse.slice.utils import *
 
 logger = logging.getLogger("slice.models")
@@ -51,7 +51,7 @@ class Slice(models.Model):
     '''
     
     name = models.CharField(max_length=200, unique=True, validators=[asciiValidator])
-    description = models.TextField(validators=[descriptionValidator])
+    description = models.TextField(validators=[descriptionLightValidator])
     project = models.ForeignKey(Project)
     owner = models.ForeignKey(User, related_name="owned_slices")
     started = models.BooleanField(default=False, editable=False)
