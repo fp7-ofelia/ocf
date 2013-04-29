@@ -110,17 +110,12 @@ def getManifest(slivers, slice_leaf):
               "http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd"
   rspec.attrib["type"] = "manifest"
 
-
   for sliver in slivers:
-     od = ET.SubElement(rspec, "sliver")
-     od.attrib["slice"] = slice_leaf
-     od.attrib["description"] = sliver['description']
-     od.attrib["email"] = sliver['email']
-     od.attrib["status"] = 'Pending to approval'
+      od = ET.SubElement(rspec, "sliver")
+      od.attrib["slice"] = slice_leaf
+      od.attrib["description"] = sliver['description']
+      od.attrib["email"] = sliver['email']
+      od.attrib["status"] = 'Pending to approval'
 
-  xml = StringIO()
-  print 'XML))))))))))))))))))))))))))',ET.ElementTree(rspec).write(xml)
-  
-  import xml.etree.ElementTree as AT
-  print AT.dump(rspec)
+   
   return rspec

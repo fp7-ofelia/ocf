@@ -26,7 +26,7 @@ class OcfOfNode:
             network_elem = network_elems[0]
         else:
             network_urn = 'ocf_of' 
-            network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
+            network_elem = xml #xml.add_element('network', name = Xrn(network_urn).get_hrn())
 
 	nodes = of_xml.xpath('//rspec/*')
         for node in nodes:
@@ -43,33 +43,21 @@ class OcfOfNode:
             network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
 
         slivers = of_xml.xpath('//rspec/*')
-        print '------------------------------------------------------------------------------------------------------------------slivers'
-        print slivers[0].attrib
-        print network_elem
         for sliver in slivers:
             network_elem.append(sliver)
         return slivers
     @staticmethod
     def get_nodes(xml, filter={}):
-        #xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
         xpath = '//rspec/network/node'
 	node_elems = xml.xpath(xpath)
         return OcfOfNode.get_node_objs(node_elems)
 
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
-	print '-----------------------------------------------',xml
-        #xpath = '//node[count(sliver-type)>0] | //default:node[count(default:sliver-type) > 0]' 
 	xpath = '//rspec/network/sliver'
-	xpath = '//default:rspec/openflow:sliver' #XXX TEST ONLY!!
-	print xml.xpath('/rspec')
-	print xml.xpath('//default:rspec')[0].getchildren() 
-	print xml.xpath('//default:rspec/openflow:sliver')
-	print xml.__dict__
         sliver_elems = xml.xpath(xpath)
 	if not sliver_elems:
 		sliver_elems = xml.xpath('//RSpec/network/sliver')
-	print '--------------------------------------------------------sliver_elems:',sliver_elems
         return OcfOfNode.get_sliver_elems(sliver_elems)
 
     @staticmethod
@@ -82,7 +70,6 @@ class OcfOfNode:
 	    sliver_dict['group'] = OcfOfNode.getGroups(sliver.xpath('./openflow:group')) 
 	    sliver_dict['match'] = OcfOfNode.getMatchs(sliver.xpath('./openflow:match'))
 	    slivers.append(sliver_dict)
-	print 'final_dict', slivers
 	return slivers
 
     @staticmethod

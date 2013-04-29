@@ -15,8 +15,11 @@ class OFShell:
 	
 	@staticmethod
 	def get_switches(flow_visor, used_switches=[]):
+                print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaquiiiiiiiiiiiiiiiiiiiiiiiiiiiiii'
+                print flow_visor, used_switches
 		complete_list = []
     		try:
+                        raise""
         		switches = flow_visor.get_switches()
     		except Exception as e:
                         #XXX:Test-Only
@@ -33,13 +36,15 @@ class OFShell:
 			for port in port_list:
 				match = re.match(r'[\s]*(.*)\((.*)\)', port)
 				ports.append({'port_name':match.group(1), 'port_num':match.group(2)})
-
+                        complete_list.append({'dpid':switch[0], 'ports':ports})
+		print complete_list
 		return complete_list
 
 	@staticmethod
 	def get_links(flow_visor):
 		complete_list = []
                 try:
+                        raise ""
                         links = flow_visor.get_links()
 		except Exception as e:
                         #XXX:Test-Only

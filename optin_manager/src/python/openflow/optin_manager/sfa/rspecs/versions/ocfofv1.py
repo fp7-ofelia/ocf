@@ -21,7 +21,6 @@ class OcfOf(RSpecVersion):
 
     # Networks
     def get_networks(self):
-        #network_elems = self.xml.xpath('//rspec/network')
         network_elems = self.xml.xpath('//default:rspec/default:network')
         networks = [network_elem.get_instance(fields=['name', 'slice']) for \
                     network_elem in network_elems]
@@ -57,10 +56,6 @@ class OcfOf(RSpecVersion):
     def get_slice_attributes(self, network=None):
 	slice_attributes= list()
         nodes_with_slivers = self.get_nodes_with_slivers()
-	from pprint import pprint
-	print 'slice attributes----------------------------------------------------------------------------------------'
-	pprint(nodes_with_slivers)
-        #default_ns_prefix = self.namespaces['default']
         return nodes_with_slivers
 
     def attributes_list(self, elem):
@@ -78,8 +73,6 @@ class OcfOf(RSpecVersion):
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         PGv2Node.remove_slivers(self.xml, slivers) 
-
-    # Links
 
     def get_links(self, network=None):
 	return []
@@ -124,7 +117,6 @@ class OcfOf(RSpecVersion):
                 self.xml.xpath('//rspec')[0].append(network)
         else: 
             nodes = in_rspec.version.get_nodes()
-            # protogeni rspecs need to advertise the availabel sliver types
             for node in nodes: 
                 if not node.has_key('sliver') or not node['sliver']:
                     node['sliver'] = {'name': 'plab-vserver'}
@@ -148,8 +140,8 @@ class OcfOf(RSpecVersion):
 class OcfOfAd(OcfOf):
     enabled = True
     content_type = 'ad'
-    schema ='/opt/foamofelia/ofelia/foam/schemas/ad.xsd'
-    template = '<rspec type="advertisement" xmlns="https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xmlns:openflow="/opt/foamofelia/ofelia/foam/schemas/" xs:schemaLocation="/opt/foamofelia/ofelia/foam/schemas/ https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd  http://www.geni.net/resources/rspec/3/ad.xsd https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/network_schema.xsd" />'
+    schema ='https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd'
+    template = '<rspec type="advertisement" xmlns="https://github.com/fp7-ofelia/ocf/tree/ocf.rspecs/openflow/schemas" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xmlns:openflow="https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas" xs:schemaLocation="https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd  http://www.geni.net/resources/rspec/3/ad.xsd https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/network_schema.xsd" />'
 
 class OcfOfRequest(OcfOf):
     enabled = True

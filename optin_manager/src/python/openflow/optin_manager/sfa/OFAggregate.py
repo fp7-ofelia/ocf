@@ -61,7 +61,6 @@ class OFAggregate:
 		    of_xml = getAdvertisement(nodes)
 		    rspec = RSpec(version=rspec_version, user_options=options)
                     rspec.version.add_nodes(of_xml)
-
         	return rspec.toxml()
 	
     	def get_nodes(self, options={},slice_leaf = None,projectName=None):
