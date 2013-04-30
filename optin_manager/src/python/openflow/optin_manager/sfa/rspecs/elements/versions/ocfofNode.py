@@ -47,7 +47,7 @@ class OcfOfNode:
 
     @staticmethod
     def get_nodes_with_slivers(xml, filter={}):
-	xpath = '//rspec/network/sliver'
+	xpath = '//default:rspec/openflow:sliver'
         sliver_elems = xml.xpath(xpath)
 	if not sliver_elems:
 		sliver_elems = xml.xpath('//RSpec/network/sliver')
