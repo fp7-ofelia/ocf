@@ -2,10 +2,6 @@ from copy import deepcopy
 from StringIO import StringIO
 from openflow.optin_manager.sfa.util.xrn import Xrn
 from openflow.optin_manager.sfa.rspecs.version import RSpecVersion
-#from openflow.optin_manager.sfa.rspecs.versions.pgv2 import PGv2
-#from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Link import PGv2Link
-#from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Node import PGv2Node
-#from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 
 from  openflow.optin_manager.sfa.rspecs.elements.versions.ocfvtNode import OcfVtNode
  
@@ -13,12 +9,11 @@ class OcfVt(RSpecVersion):
     type = 'OcfVt'
     content_type = 'ad'
     version = '1'
-    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd' #'/opt/ofelia/vt_manager/src/python/openflow.optin_manager/sfa/tests/schema.xsd'#'http://www.protogeni.net/resources/rspec/2/ad.xsd'
-    #namespace = 'http://www.protogeni.net/resources/rspec/2'
+    schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'
     namespace = None
     content = '*'
     extensions = {}
-    namespaces = None #dict(extensions.items() + [('default', namespace)])
+    namespaces = None 
 
     # Networks
     def get_networks(self):
@@ -55,8 +50,6 @@ class OcfVt(RSpecVersion):
     def get_slice_attributes(self, network=None):
 	slice_attributes= list()
         nodes_with_slivers = self.get_nodes_with_slivers() #TODO: Ensure this method works
-	print 'slice attributes'
-	print nodes_with_slivers
         #default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers: #TODO: Ensure this method works
             sliver_attributes = self.get_sliver_attributes(node)

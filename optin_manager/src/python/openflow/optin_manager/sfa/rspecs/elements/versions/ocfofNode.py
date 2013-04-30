@@ -3,13 +3,6 @@ from openflow.optin_manager.sfa.util.xml import XpathFilter
 
 from openflow.optin_manager.sfa.rspecs.elements.node import Node
 from openflow.optin_manager.sfa.rspecs.elements.sliver import Sliver
-from openflow.optin_manager.sfa.rspecs.elements.location import Location
-from openflow.optin_manager.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
-from openflow.optin_manager.sfa.rspecs.elements.hardware_type import HardwareType
-from openflow.optin_manager.sfa.rspecs.elements.disk_image import DiskImage
-from openflow.optin_manager.sfa.rspecs.elements.interface import Interface
-from openflow.optin_manager.sfa.rspecs.elements.bwlimit import BWlimit
-from openflow.optin_manager.sfa.rspecs.elements.pltag import PLTag
 from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Services import PGv2Services     
 from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType     
 from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Interface import PGv2Interface     

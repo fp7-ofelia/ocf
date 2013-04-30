@@ -109,6 +109,9 @@ def getManifest(slivers, slice_leaf):
               OFNSv3 + " " \
               "http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd"
   rspec.attrib["type"] = "manifest"
+  if len(slivers) == 0:
+      od = ET.SubElement(rspec, "sliver")
+      od.attrib["slice"] = "No sliver/s requested"
 
   for sliver in slivers:
       od = ET.SubElement(rspec, "sliver")

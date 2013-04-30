@@ -15,17 +15,14 @@ class VersionManager:
         valid_module = lambda x: os.path.isfile(os.sep.join([versions_path, x])) \
                         and x.endswith('.py') and x !=  '__init__.py'
         files = [f for f in os.listdir(versions_path) if valid_module(f)]
-	print '--------------------Files:',files
         for filename in files:
             basename = filename.split('.')[0]
             module_path = versions_module_path +'.'+basename
-	    print basename,module_path, versions_module_path
 	    try:
             	module = __import__(module_path, fromlist=module_path)
 	    except:
 		#XXX I do not really understand why the otrer modules works except the OCF module	
 	        module = __import__('vt_manager.communication.'+module_path, fromlist='vt_manager.communication.'+module_path)
-	    print 'done'
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
                 if hasattr(attr, 'version') and hasattr(attr, 'enabled') and attr.enabled == True:
@@ -42,18 +39,7 @@ class VersionManager:
                         ### sounds like we should be glad with the first match, not the last one
                         break
         if not retval:
-	    print 'version Not Found'
-	    i = 0
-	    for version in self.versions:
-	    	print '-----------------------------------Self.Versions:',version, i
-		i += 1 
-	    print 'using default version:', self.versions[1]
-	    #print 'using defaul version:', self.versions[11]
-	    #retval = self.versions[9] 
-	    #XXX: Both changed due to index error
-	    retval = self.versions[0]
-	    #XXX: Testing Mode, uncoment the line below when not testing
-            #raise UnsupportedRSpecVersion("[%s %s %s] is not suported here"% (type, version_num, content_type))
+            raise UnsupportedRSpecVersion("[%s %s %s] is not suported here"% (type, version_num, content_type))
         return retval
 
     def get_version(self, version=None):

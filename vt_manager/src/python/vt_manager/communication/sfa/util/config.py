@@ -300,18 +300,13 @@ DO NOT EDIT. This file was automatically generated at
     def __getattr__(self, attr):
 	print self.config.__dict__.keys()
         return getattr(self.config, attr)
-	#print '----------------------------------------------------------------------------------------------------------',attr
-	#return "/var/lib/sfa"
 
 if __name__ == '__main__':
     filename = None
-    print 'ahora'
     if len(sys.argv) > 1:
-	print 'entra'
         filename = sys.argv[1]
         config = Config(filename)
     else:    
-	print 'no entra'
         config = Config()
     config.dump()
     

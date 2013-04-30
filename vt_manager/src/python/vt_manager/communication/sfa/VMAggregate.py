@@ -2,17 +2,11 @@ from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string
 
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
-#from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
 from vt_manager.communication.sfa.rspecs.elements.node import Node
-from vt_manager.communication.sfa.rspecs.elements.link import Link
 from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
-from vt_manager.communication.sfa.rspecs.elements.login import Login
 from vt_manager.communication.sfa.rspecs.elements.location import Location
 from vt_manager.communication.sfa.rspecs.elements.interface import Interface
 from vt_manager.communication.sfa.rspecs.elements.services import Services
-from vt_manager.communication.sfa.rspecs.elements.pltag import PLTag
-from vt_manager.communication.sfa.rspecs.elements.lease import Lease
-from vt_manager.communication.sfa.rspecs.elements.granularity import Granularity
 from vt_manager.communication.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 
@@ -21,13 +15,10 @@ from vt_manager.communication.sfa.rspecs.elements.network_interface import Netwo
 from vt_manager.communication.sfa.rspecs.elements.vm import VM
 from vt_manager.communication.sfa.rspecs.elements.vm_interface import VMInterface
 
-#from sfa.dummy.dummyxrn import DummyXrn, hostname_to_urn, hrn_to_dummy_slicename, slicename_to_hrn
-
 from vt_manager.communication.sfa.VTShell import VTShell
 
 import time
 
-#XXX: this class should be like a RspecManager? Should call the VTShell or it should be called in the VTDriver?
 class VMAggregate:
 
 	def __init__(self):
@@ -47,7 +38,6 @@ class VMAggregate:
 	
 	def get_rspec(self, version=None, slice_leaf=None, projectName=None ,created_vms=[],new_nodes=[], options={}):
 
-		#XXX: I think this is quite clear
         	version_manager = VersionManager()
         	version = version_manager.get_version(version)
 		if slice_leaf:
@@ -61,21 +51,16 @@ class VMAggregate:
 
         	nodes = self.get_nodes(options,slice_leaf,projectName,created_vms,new_nodes)
         	rspec.version.add_nodes(nodes)
-		print 'RSPEEEEEC'
-		print rspec.toxml()
         	return rspec.toxml()
 	
     	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
 		if 'slice' in options.keys():
 			nodes = self.shell.GetNodes(options['slice'],projectName)
-			print '------------firstNodes',nodes
 			if not nodes:
 				nodes = new_nodes
-			print 'entra por el if'
 		else:
 	        	nodes = self.shell.GetNodes()
 	        rspec_nodes = []
-		print '-------------------------------------------------------------------------------------------------Nodes:',nodes
 	        for node in nodes:
 		    
 	            rspec_node = Node()
@@ -126,8 +111,6 @@ class VMAggregate:
 		    if slice_leaf:
 			slices = (self.shell.GetSlice(slice_leaf,projectName))
 			
-		    	print '--------------------------------------------------------------',slices['vms']	
-			print created_vms
 		    	slices['vms'].extend(VMAggregate.FilterList({'slice-name':slice_leaf,'node-name':node.name},created_vms))
 			#cVMs['vms'] = createdVMs
 		    slivers = list() 

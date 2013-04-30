@@ -1,7 +1,5 @@
 from openflow.optin_manager.sfa.rspecs.elements.element import Element
 from openflow.optin_manager.sfa.rspecs.elements.sliver import Sliver
-from openflow.optin_manager.sfa.rspecs.elements.vm import VM
-from openflow.optin_manager.sfa.rspecs.elements.vm_interface import VMInterface
 from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2DiskImage import PGv2DiskImage
 from openflow.optin_manager.sfa.rspecs.elements.versions.plosv1FWRule import PLOSv1FWRule
 
@@ -41,43 +39,6 @@ class OcfOfSlivers:
                     attrib_dict = eval(tag['value'])
                     for (key, value) in attrib_dict.items():
                         attrib_elem.set(key, value)                
-    @staticmethod
-    def get_slivers(sliver_elems, filter={}):
-        #xpath = './default:sliver_type | ./sliver_type'
-        #sliver_elems = xml.xpath(xpath)
-	#XXX: We have virtual-machines here
-        slivers = []
-        for sliver_elem in sliver_elems:
-            sliver = VM()
-	    vm_attrs = sliver.fields
-	    if 'interfaces' in vm_attrs:
-	        vm_ifaces = vm_attrs.pop(vm_attrs.index('interfaces'))
-	    for sliver_attr in sliver_elem:
-		if sliver_attr.tag == 'interfaces':
-		    sliver[sliver_attr.tag] = OcfOfSlivers.get_interfaces(list(sliver_attr))
-
-		elif sliver_attr.tag in vm_attrs and sliver_attr.text:
-		    sliver[sliver_attr.tag] = sliver_attr.text	
-
-		else:
-		    continue
-		
-	    slivers.append(sliver)	
-        return slivers
-	
-    @staticmethod
-    def get_interfaces(interfaces):
-	ifaces = list()
-	for interface in interfaces:
-	    iface = VMInterface()
-	    if interface.attrib:
-	        iface.update(interface.attrib)
-	    for iface_attr in interface:
-	        if iface_attr.tag in iface.fields and iface_attr.text:
-		    iface[iface_attr.tag] = iface_attr.text
-	    ifaces.append(iface)
-	return ifaces
-
     @staticmethod
     def get_sliver_attributes(xml, filter={}):
         return []             

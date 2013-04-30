@@ -5,24 +5,13 @@ import datetime
 from vt_manager.communication.sfa.util.faults import MissingSfaInfo, UnknownSfaType, \
     RecordNotFound, SfaNotImplemented, SliverDoesNotExist
 
-#from vt_manager.communication.sfa.util.sfalogging import logger
 from vt_manager.communication.sfa.util.defaultdict import defaultdict
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string, datetime_to_epoch
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, get_leaf
 from vt_manager.communication.sfa.util.cache import Cache
 
-# one would think the driver should not need to mess with the SFA db, but..
-#from vt_manager.communication.sfa.storage.alchemy import dbsession
-#from vt_manager.communication.sfa.storage.model import RegRecord
-
-# used to be used in get_ticket
-#from sfa.trust.sfaticket import SfaTicket
-
 from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
-
-# the driver interface, mostly provides default behaviours
-#from vt_manager.communication.sfa.managers.driver import Driver
 
 from vt_manager.communication.sfa.VMAggregate import VMAggregate
 from vt_manager.communication.sfa.VTShell import VTShell
@@ -64,26 +53,19 @@ class VTSfaDriver:
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
 		
                 rspec = RSpec(rspec_string,'OcfVt')
-		print '...................................................................................................................................................................................................................................................................................................................................'
-		print rspec.toxml()
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf
-		print '---------------requested_attributes', requested_attributes
 		#self.shell.CreateSliver(requested_attributes,projectName,sliceName)
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:
-			print "--------------------------------------------------------------slivers['component_id']:", slivers['component_id']
 			node = self.shell.GetNodes(uuid=slivers['component_id'])
 			for vm in slivers['slivers']:
 				#node = self.shell.GetNodes(uuid=vm['server-id'])
-				print '---------------(uuid=vm["server-id"]',vm['server-id']  
 				if not node in nodes:
 					nodes.append(node)
-				print 'nodes----------------------', nodes
 				created_vms.append({'vm-name':vm['name'],'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
-			print created_vms
 		
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms,new_nodes=nodes)
 	

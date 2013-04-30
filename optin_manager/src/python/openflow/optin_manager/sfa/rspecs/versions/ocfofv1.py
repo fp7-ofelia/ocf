@@ -2,10 +2,7 @@ from copy import deepcopy
 from StringIO import StringIO
 from openflow.optin_manager.sfa.util.xrn import Xrn
 from openflow.optin_manager.sfa.rspecs.version import RSpecVersion
-#from openflow.optin_manager.sfa.rspecs.versions.pgv2 import PGv2
 #from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Link import PGv2Link
-#from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2Node import PGv2Node
-#from openflow.optin_manager.sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 
 from  openflow.optin_manager.sfa.rspecs.elements.versions.ocfofNode import OcfOfNode
  
@@ -71,32 +68,24 @@ class OcfOf(RSpecVersion):
     def add_default_sliver_attribute(self, name, value, network=None):
         pass
 
-    def remove_slivers(self, slivers, network=None, no_dupes=False):
-        PGv2Node.remove_slivers(self.xml, slivers) 
-
     def get_links(self, network=None):
 	return []
-        return PGv2Link.get_links(self.xml)
 
     def get_link_requests(self):
-	pass
-        return PGv2Link.get_link_requests(self.xml)  
+        return []  
 
     def add_links(self, links):
 	return []
-        PGv2Link.add_links(self.xml.root, links)
 
     def add_link_requests(self, link_tuples, append=False):
-	pass
-        PGv2Link.add_link_requests(self.xml.root, link_tuples, append)
-
+	return []
     # Leases
 
     def get_leases(self, filter=None):
-        pass
+        return []
 
     def add_leases(self, leases, network = None, no_dupes=False):
-        pass
+        return []
 
     # Utility
 
