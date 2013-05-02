@@ -8,9 +8,13 @@ from openflow.optin_manager.sfa.openflow_utils.rspec3_to_expedient import get_fs
 from openflow.optin_manager.sfa.util.xrn import Xrn
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
+#TODO: Uncomment when merge
+#from expedient.common.utils.mail import send_mail
+from django.conf import settings 
+
 
 #XXX TEST
-#from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
+from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
 
 class OFShell:
 
@@ -30,6 +34,7 @@ class OFShell:
                              	if not switch[0] in used_switches:
                                     continue
                         if int(switch[1]['nPorts']) == 0:
+                            #send_mail('SFA OptinManager Error', 'There are some errors related with switches: GetSwitches() returned 0 ports.',settings.ROOT_EMAIL, [settings.ROOT_EMAIL])
                             raise Exception("The switch with dpid:%s has a connection problem and the OCF Island Manager has already been informed. Please try again later." % str(switch[0]))
                             #TODO: Send Mail to the Island Manager Here.
 			port_list = switch[1]['portNames'].split(',')
@@ -38,7 +43,6 @@ class OFShell:
 				match = re.match(r'[\s]*(.*)\((.*)\)', port)
 				ports.append({'port_name':match.group(1), 'port_num':match.group(2)})
                         complete_list.append({'dpid':switch[0], 'ports':ports})
-		print complete_list
 		return complete_list
 
 	@staticmethod
@@ -126,5 +130,6 @@ class OFShell:
                 sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
             return granted_fs
+
 
        
