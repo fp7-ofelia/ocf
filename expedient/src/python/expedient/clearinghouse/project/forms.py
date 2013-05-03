@@ -112,9 +112,13 @@ class MemberForm(forms.Form):
 
         super(MemberForm, self).__init__(*args, **kwargs)
         
-        self.fields["roles"].queryset = \
-            ProjectRole.objects.filter_for_can_delegate(
-                giver, project=project)
+#        self.fields["roles"].queryset = \
+#            ProjectRole.objects.filter_for_can_delegate(
+#                giver, project=project)
+
+        # Allow not only the giver but everyone with 'can_edit_roles'
+        # permission to update other's roles
+        self.fields["roles"].queryset = ProjectRole.objects.filter(project=project)
     
         permittee = Permittee.objects.get_as_permittee(user)
     

@@ -159,7 +159,13 @@ class ProjectRoleForm(forms.ModelForm):
         Update instance with the new checked permissions.
         """
         instance = super(ProjectRoleForm, self).save(commit=False)
-        instance.obj_permissions = self.cleaned_data["obj_permissions"]
+        # ProjectRole may have not been committed yet, lacking therefore of PK
+        # If that is the case, do not try to add the object permissions in the
+        # same way this is done for the update
+        try:
+            instance.obj_permissions = self.cleaned_data["obj_permissions"]
+        except:
+            pass
         if commit:
             instance.save()
         return instance
