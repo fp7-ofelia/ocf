@@ -12,34 +12,27 @@ printHeader "info#" "Using specific 0.5 pre-upgrade-hook module..."
 
 #Check for OFELIA installation
 OFELIA="none"
+GITHUB_READY=1
 # Move original plugin folders inside temp folder
+if [ ! -d /opt/tmp/ ]; then
+	mkdir -p /opt/tmp/
+fi
 TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
+local TMP_PATH=$PWD
 
 # OFELIA installation: 2 folders up for GIT config, 3 for getting to modules
-SRC_DIR=../..
+OFELIA_DIR="/opt/ofelia"
 if [[ "$PWD" == *oxa/repository* ]]; then
     # OXAD installation: 5 folders up for GIT config, 6 for getting to modules
-    SRC_DIR=../../../../..
+    OFELIA_DIR="opt/ofelia/oxa/repository"
 fi
 
-# Removes old plugin folders before restarting Apache
-print "Performing backup of old plugin folders..."
+# SSH keys by default
+git_remote_url="git@github.com:fp7-ofelia/ocf.git"
+git_authentication_method="y"
+git_username=""
 
-if [ -d $SRC_DIR/../expedient/src/python/vt_plugin ] || [ -d $SRC_DIR/../expedient/src/python/openflow ]; then
-    # Creates series of subdirectories all of a sudden
-    mkdir -p $TMP_DIR/expedient/src/python/
-fi
-
-# Moving basic plugins from old directory to new location to avoid loading their *.pyc files
-if [ -d $SRC_DIR/../expedient/src/python/vt_plugin ]; then
-    mv $SRC_DIR/../expedient/src/python/vt_plugin $TMP_DIR/expedient/src/python/vt_plugin || error "Maybe some directory is not present?"
-fi
-
-if [ -d $SRC_DIR/../expedient/src/python/openflow ]; then
-    mv $SRC_DIR/../expedient/src/python/openflow $TMP_DIR/expedient/src/python/openflow || error "Maybe some directory is not present?"
-fi
-
-
+# Backup current OCF data
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop
 
@@ -57,44 +50,52 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
     done
 
 
-print "Configuring GIT repository for GitHub..."
-
-# When installing for OFELIA community, check that user has not
-# already R/W permissions before updating its GIT configuration file
-if [[ $OFELIA == "1" ]] && [[ `git config --get-regexp url "git@github.com:fp7-ofelia/ocf.git|https://github.com/fp7-ofelia/ocf.git"` == "" ]]; then
-
-    if [ -f $SRC_DIR/.git/config ]; then
-        # Comment every line if not already commented
-        sed -i '/^#/! s/^/#/g' $SRC_DIR/.git/config
-
-        # Add 'core' section
-        if [[ `git config --get-regexp "core"` == "" ]]; then
-            git config --add core.repositoryformatversion 0
-            git config --add core.filemode true
-            git config --add core.bare false
-            git config --add core.logallrefupdates true
-        fi
-
-        if [[ `git config --get-regexp "remote.origin"` == "" ]]; then
-            # Add 'remote' repository
-            git config --add remote.fetch "+refs/heads/*:refs/remotes/origin/*"
-            # R/W access for OFELIA developers (non-OFELIA community will
-            # have "git://github.com/fp7-ofelia/ocf.git" already)
-            git config --add remote.url "git@github.com:fp7-ofelia/ocf.git"
-            git config --rename-section remote 'remote "origin"'
-        fi
-
-        if [[ `git config --get-regexp "ofelia.stable"` == "" ]]; then
-            # Add 'ofelia.stable' branch
-            git config --add branch.ofelia.stable.remote "origin"
-            git config --add branch.ofelia.stable.merge "refs/heads/ofelia.stable"
-        fi
-
-        if [[ `git config --get-regexp "ofelia.development"` == "" ]]; then
-            # Add 'ofelia.development' branch
-            git config --add branch.ofelia.development.remote "origin"
-            git config --add branch.ofelia.development.merge "refs/heads/ofelia.development"
-        fi
-    fi
+if [[ `git config --get-regexp origin "fp7-ofelia/ocf.git"` == "" ]]; then
+	GITHUB_READY=0
 fi
+
+if [[ $GITHUB_READY == 0 ]]; then
+	print "Generating current repository backup.."
+	mv $OFELIA_DIR $TMP_DIR || error "Could not backup OCF data from '$SRC_DIR' to '$TMP_DIR'"
+
+	# Clone new Github repository (authentication depends on $OFELIA={0,1})
+	if [[ $OFELIA == "1" ]]; then
+	    while true; do
+	        read -p "> How do you prefer to authenticate against the repository? SSH keys (y) or via HTTPS (n): " git_authentication_method
+	        case $git_authentication_method in
+	            [Yy]* ) break;;
+	            [Nn]* ) read -p "> You may set your GitHub username now, if you wish: " git_username;
+	                    if [[ $git_username != "" ]]; then
+	                        git_username=$git_username"@";
+	                    fi
+	                    git_remote_url="https://${git_username}github.com/fp7-ofelia/ocf.git"; break;;
+	                * ) echo "Please answer 'y' or 'n' to use SSH keys or HTTP respectively.";;
+	        esac
+	    done
+	    # Read/write access (SSH keys or HTTPS, depends on user's choice)
+	    git clone $git_remote_url $OFELIA_DIR || error "Could not retrieve data from GitHub repository"
+	else
+	    # Read access
+	    git clone git://github.com/fp7-ofelia/ocf.git $OFELIA_DIR || error "Could not retrieve data from GitHub repository"
+	fi
+
+	cd $OFELIA_DIR
+	git checkout ofelia.stable || error "Could not switch to stable branch"
+	# Synchronizes repositories: old data from private repository with new data from GitHub repository
+	rsync -aPp --exclude=.git $TMP_DIR/* ./
+fi
+
+# Removes old plugin folders before restarting Apache
+print "Removing old plugin folders..."
+
+# Moving basic plugins from old directory to new location to avoid loading their *.pyc files
+if [ -d $OFELIA_DIR/expedient/src/python/vt_plugin ]; then
+	rm -r $OFELIA_DIR/expedient/src/python/vt_plugin || error "Could not remove old plugin 'vt_plugin'"
+fi
+
+if [ -d $OFELIA_DIR/expedient/src/python/openflow ]; then
+        rm -r $OFELIA_DIR/expedient/src/python/openflow || error "Could not remove old plugin 'openflow'"
+fi
+
+cd $TMP_PATH 
 
