@@ -28,6 +28,15 @@ class PluginLoader():
         """
         from django.conf.urls.defaults import patterns, url
         urlpatterns = []
+
+        # 'plugins_path' already setted before but just checking
+        # for format since that is very important
+        default_plugins_path = PluginLoader.plugins_path
+        if default_plugins_path[0] == "/":
+            default_plugins_path = default_plugins_path[1:]
+        if default_plugins_path[-1] == "/":
+            default_plugins_path = default_plugins_path[:-1]
+
         for plugin in PluginLoader.plugin_settings:
             for url_type in ["img", "css", "js"]:
                 content_route = PluginLoader.plugin_settings.get(plugin).get("paths").get("relative__%s_dirs" % url_type)
@@ -36,7 +45,7 @@ class PluginLoader():
                     url(r'^%s%s/%s/(?P<path>.*)$' % (str(plugin), media_url, content_route),
                     'django.views.static.serve',
 #                    {'document_root': "/%s%s%s/%s" % (PluginLoader.plugins_path, str(plugin), media_url, url_type)}, name="%s_media_%s" % (url_type, str(plugin)))
-                    {'document_root': "/%s%s/%s" % (PluginLoader.plugins_path, str(plugin), content_route)}, name="%s_media_%s" % (url_type, str(plugin)))
+                    {'document_root': "/%s/%s/%s" % (default_plugins_path, str(plugin), content_route)}, name="%s_media_%s" % (url_type, str(plugin)))
                 )
         return urlpatterns
 

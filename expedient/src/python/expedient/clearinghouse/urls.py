@@ -5,7 +5,6 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
-#from expedient.common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
 
 
 ''' Theme Management '''
@@ -13,7 +12,33 @@ from django.views.generic.simple import direct_to_template
 from expedient.common.utils.ExpedientThemeManager import ExpedientThemeManager
 ExpedientThemeManager.initialize()
 
+""" Plugin system """
+from expedient.common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
+from expedient.common.utils.plugins.topologygenerator import TopologyGenerator as TOPOLOGY_GENERATOR
 
+if not PLUGIN_LOADER.plugin_settings:
+    PLUGIN_SETTINGS = PLUGIN_LOADER.load_settings()
+    # Iterate over loaded settings to add them to the locals() namespace
+    for (plugin, plugin_settings) in PLUGIN_SETTINGS.iteritems():
+        for (section, section_settings) in plugin_settings.iteritems():
+            for (setting, setting_value) in section_settings.iteritems():
+                if hasattr(settings, setting.upper()):
+                    conf_setting = getattr(settings, setting.upper())
+                else:
+#                    setattr(settings, setting.upper(), list()) 
+#                    conf_setting = getattr(settings, setting.upper())
+                    conf_setting = list()
+                try:
+                    if not isinstance(setting_value, list):
+                        setting_value = [setting_value]
+                    if setting_value != conf_setting and setting_value not in conf_setting:
+                        conf_setting += setting_value
+
+                except Exception as e:
+                    print "[WARNING] Problem loading setting '%s' inside urls.py. Details: %s" % (setting.upper(), str(e))
+
+# This *must* be an absolute path in order for static content to be loaded
+#PLUGIN_LOADER.set_plugins_path("/opt/ofelia/expedient/src/python/plugins/")
 
 admin.autodiscover()
 
@@ -102,14 +127,9 @@ urlpatterns += patterns('',
 
 try:
     # URLs for static content in plugins
-    urlpatterns += settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
-except:
-    try:
-        # XXX: PLUGIN_LOADER is not set yet in django.conf.settings? Why?
-        import settings as common_settings
-        urlpatterns += common_settings.PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
-    except Exception as e:
-        print "[ERROR] Problem adding URLs for plugins inside expedient.clearinghouse.urls. Details: %s" % str(e)
+    urlpatterns += PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
+except Exception as e:
+    print "[ERROR] Problem adding URLs for plugins inside expedient.clearinghouse.urls. Details: %s" % str(e)
 
 '''
 Static theme content

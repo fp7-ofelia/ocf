@@ -6,10 +6,11 @@ corresponding to another AM. Data needed: plugin name, class name, search filter
 @author: leonardo.bergesio@i2cat.net
 """
 
-from django.conf import settings 
+#from django.conf import settings 
 from django.db.models import Q
 from utils import join_paths, Singleton
 import os
+from urls import PLUGIN_LOADER
 
 class PluginCommunicator():
 
@@ -33,7 +34,8 @@ class PluginCommunicator():
              AM test") was previously added to slice "tests".
         """
         try:
-            plugins_modules = settings.PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
+#            plugins_modules = settings.PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
+            plugins_modules = PLUGIN_LOADER.plugin_settings.get(plugin_type).get("general").get("aggregate_plugins")[0]
             p_agg = plugins_modules.split('.')[-1]
             p_models_path = '.'.join(plugins_modules.split('.')[:-1])
             try:

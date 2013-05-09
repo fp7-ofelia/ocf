@@ -19,8 +19,8 @@ import logging
 from expedient.common.permissions.shortcuts import must_have_permission, give_permission_to
 logger = logging.getLogger("SliceViews")
 import uuid
-from  expedient.clearinghouse.slice.utils import parseFVexception
-from expedient.clearinghouse.settings import PLUGIN_LOADER
+from expedient.clearinghouse.slice.utils import parseFVexception
+from expedient.clearinghouse.urls import PLUGIN_LOADER, TOPOLOGY_GENERATOR
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 
@@ -134,7 +134,6 @@ def detail(request, slice_id):
         except Exception as e:
             print "[WARNING] Could not obtain template to add resources to slides in plugin '%s'. Details: %s" % (str(plugin), str(e))
 
-    from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
     plugin_context = TOPOLOGY_GENERATOR.load_ui_data(slice)
 
 #    if not plugin_context['d3_nodes'] or not plugin_context['d3_links']:
