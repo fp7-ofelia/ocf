@@ -53,9 +53,6 @@
 	and additional empty tables will be displayed.</p>
 	</div>
 
-	<br />
-	<br />
-	
     <form class="form" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
 		{% for form in fsformset.forms %}
