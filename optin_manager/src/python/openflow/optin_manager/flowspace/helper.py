@@ -224,9 +224,6 @@ def range_to_match_struct(rangeFS):
     @type rangeFS: a supeclass of OpenFlow class
     @return: a list of strings corresponding to the equivalent match struct elements
     '''
-    range_too_big = False
-    exception_range = ""
-    import sys
     match = {}
     for attr_name, (to_str, from_str, width, om_name, of_name) in om_ch_translate.attr_funcs.items():
         om_start = "%s_s" % om_name
@@ -250,29 +247,30 @@ def range_to_match_struct(rangeFS):
                                 ips = (ips| (2**(i-1) - 1 )) + 1
                                 break
                 else:
-                    # Different factor for 32b or 64b OS's
-                    factor_avoid_overflow = 1
-                    # XXX: A maximum number of MACs is set to be processed in FlowVisor
-                    # avoiding overflow on its Java heap space (Xms: 100M, Xmx: 1000M
-                    # currently) and also avoiding a lot of time processing
-                    # (current maximum takes around 11 minutes)
-                    if (sys.maxsize <= 2**31-1):
-                        factor_avoid_overflow = 1/5e6 # Allows circa 429 MACs
-                    elif (sys.maxsize <= 2**63-1):
-                        factor_avoid_overflow = 1/2e16 # Allows circa 461 MACs, e.g. [00:..:00, 00:..:FF]
-                    # Avoid huge ranges of numbers (e.g. MACs) or to prevent Java heap space problems
-                    if (getattr(rangeFS,om_end)+1-getattr(rangeFS,om_start) > (sys.maxsize*factor_avoid_overflow)):
-                        range_too_big = True
-                        exception_range = "[%s, %s]" % (str(om_start), str(om_end))
-                        break
-                    # Compute range otherwise
-                    else:
-                        for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)+1):
-                            match[of_name].append(to_str(value))
+                    # If not full range, check that range is not too big
+                    if not check_full_range(om_name, getattr(rangeFS,om_start), getattr(rangeFS,om_end)):
+                        # Different factor for 32b or 64b OS's
+                        factor_avoid_overflow = 1
+                        # A limited number of rules should be set in FlowVisor avoiding
+                        # overflow on its Java heap space (Xms: 100M, Xmx: 1000M currently)
+                        # and also avoiding a lot of time processing (around 11 minutes now)
+                        import sys
+                        if (sys.maxsize <= 2**31-1):
+                            factor_avoid_overflow = 1/5e6 # Allows circa 429 MACs
+                        elif (sys.maxsize <= 2**63-1):
+                            factor_avoid_overflow = 1/2e16 # Allows circa 461 MACs, e.g. [00:..:00, 00:..:FF]
 
-    if range_too_big:
-        raise Exception("Range too big for values '%s'" % exception_range)
-                        
+                        # Avoid huge ranges of numbers (e.g. MACs) or to prevent Java heap space problems
+                        # The whole range of VLANs is permitted
+                        if (getattr(rangeFS,om_end)+1-getattr(rangeFS,om_start) > (sys.maxsize*factor_avoid_overflow) and om_name != "vlan_id"):
+                            range_too_big = True
+                            exception_range = "[%s, %s]" % (str(om_start), str(om_end))
+                            raise Exception("Range too big for values '%s'" % exception_range)
+                        # Compute range otherwise
+                        else:
+                            for value in range(getattr(rangeFS,om_start), getattr(rangeFS, om_end)+1):
+                                match[of_name].append(to_str(value))
+
     #Now try to combine different of_name(s) together:
     all_match = [""]
     for key in match.keys():
@@ -287,6 +285,24 @@ def range_to_match_struct(rangeFS):
             all_match = new_match
 
     return all_match
+
+def check_full_range(om_name, range_start, range_end):
+    """
+    Detects if some field from rangeFS has the
+    highest length (e.g.: 0.0.0.0 - 255.255.255.255)
+    """
+    condition = False
+    if om_name == "mac_src" or om_name == "mac_dst":
+        condition = (range_start == "00:00:00:00:00:00" and range_end.upper() == "FF:FF:FF:FF:FF:FF")
+    elif om_name == "ip_src" or om_name == "ip_dst":
+        condition = (range_start == "0.0.0.0" and range_end == "255.255.255.255")
+    elif om_name == "eth_type":
+        condition = (range_start == "0" and range_end == "65535")
+    elif om_name == "ip_proto":
+        condition = (range_start == "0" and range_end == "255")
+    elif om_name == "tp_src" or om_name == "tp_dst":
+        condition = (range_start == "0" and range_end == "65535")
+    return condition
 
 def singlefs_is_subset_of(singleFS, multiFS):
     '''
