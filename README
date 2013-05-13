@@ -24,49 +24,53 @@ INSTALLING OCF
 1. Requirements
 ---------------
 
-* One (or more) GNU/Linux Debian-like* system.
-* One (or more) GNU/Linux Debian-like* systems to be virtualized by XEN (For VM
-Manager installations only).
+* One (or more) GNU/Linux Debian-based distros
+* One (or more) GNU/Linux Debian-based distros to be virtualized by XEN
+(Virtualization Manager installations only)
+* The following packages:
+  * Python 2.6
+  * Django 1.2.3
+  * MySQL server
 
-Note: for none Debian-like OSs you will have to manually install components since
-OCF ofver-based [http://code.google.com/p/ofver/] installation scripts only
-support Debian-like OSs currently.
+Note: for non Debian-based distros you shall install components manually
+since the installation scripts for the OCF upgrading system (a.k.a. OFVER) 
+[http://code.google.com/p/ofver/] supports Debian-based distros only.
 
 
 2. Installation for Expedient, Optin and VM Manager
 ---------------------------------------------------
 
-2.1 Install mysql server
+2.1 Install MySQL server
 
     apt-get install mysql-server
 
-2.2 For each component create (example expedient) its own database. Use 
-    strong passwords.
+2.2 For each component (e.g. expedient) create its own database.
+    Use strong passwords.
 
     mysql -p
-    mysql> CREATE DATABASE expedient342;
+    mysql> CREATE DATABASE expedient;
     Query OK, 1 row affected (0.00 sec)
-    mysql> grant all on expedient342.* to userName@127.0.0.1 identified by 'password';
+    mysql> GRANT ALL ON expedient.* TO userName@127.0.0.1 IDENTIFIED BY 'password';
     Query OK, 0 rows affected (0.00 sec)
 
-2.3 If not already cloned, clone the OCF repository under folder /opt/:
+2.3 If not done already, clone the OCF repository under folder /opt:
 
     cd /opt
     git clone https://github.com/fp7-ofelia/ocf.git ofelia
 
-    Alternatively you can download the tarball and uncompress it to /opt/
+    Alternatively you can download the tarball and uncompress it to /opt
 
-2.4 Trigger ofver [http://code.google.com/p/ofver/] installation by 
-    doing for each component:
+2.4 Trigger OFVER installation by performing the following as a root user for
+    each component:
 
     cd /opt/ofelia/{COMPONENT_NAME}/bin
     ./ofver install
 
-    Where {COMPONENT_NAME} is either: expedient, optin or vt_manager
+    Where {COMPONENT_NAME} is either: expedient, optin_manager or vt_manager
     The following actions will take place:
 
     * Install dependencies
-    * Build Certificates (see Note 1)
+    * Build Certificates (see Note #1)
     * Configure Apache
     * Set file permissions
     * Modify the localsettings.py or mySettings.py depending on the 
@@ -86,12 +90,15 @@ support Debian-like OSs currently.
 3. Upgrade instructions
 -----------------------
 
-For all the components the upgrade procedure is the following:
+The upgrade procedure is to be run by a root user and is very much the 
+same for each component.
+
+For all the common components {expedient, optin_manager, vt_manager}:
 
     cd /opt/ofelia/{COMPONENT_NAME}/bin
     ./ofver upgrade
 
-or for the OXAD:
+or for the OXAD (XEN agent for virtualization purposes):
 
     cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
     ./ofver upgrade
@@ -103,8 +110,8 @@ or for the OXAD:
 Please have a look to Manuals [https://github.com/fp7-ofelia/ocf/wiki/Manuals]
 for further component configuration.
 
-You can use -f force flag on ofver to force installations/upgrades. Take a look
-at ./ofver -h help information for more details.
+You can use -f force flag on OFVER to force installation/upgrade. Take a look
+at ./ofver -h for more details.
 
 
 ===============
@@ -112,4 +119,4 @@ FURTHER READING
 ===============
 
 For more information about configuration, troubleshooting, contribution and
-more please visit https://github.com/fp7-ofelia/ocf/wiki
+so on please visit https://github.com/fp7-ofelia/ocf/wiki
