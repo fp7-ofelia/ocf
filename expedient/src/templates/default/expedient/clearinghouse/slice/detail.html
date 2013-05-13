@@ -26,6 +26,7 @@
                 }
 
             var flowspaceWarning = 'confirmWrapper("';
+            console.log("action: " + action);
             if (action == "start_update") {
                 {% if slice.started %}
                     if (grantedFlowspace) {
@@ -40,10 +41,10 @@
                 }
             }
             if (grantedFlowspace) {
-                flowspaceWarning += ' the slice will cause all granted flowspaces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to stop the slice?");';
+                flowspaceWarning += ' the slice will cause all granted flowspaces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to ' + action + ' the slice?");';
                 return eval(flowspaceWarning);
             } else {
-                return "";
+                return eval('showLoadingMsg("Loading...");');
             }
         }
 
@@ -60,8 +61,9 @@
         		} });
 	}
 	function confirmWrapper(message){
-		
+	        console.log("Within confirmWrapper");	
 		value = confirm(message);
+                console.log("Value: " + value);
 		if (value){
 			showLoadingMsg("Loading...");
 		}
@@ -118,7 +120,7 @@
 				    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
 								<input 
 								type="submit" 
-								value="{% if slice.started %}Update {% else %}Start{% endif %} Slice"
+								value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
 								onClick = "return getLoadingMsg('start_update');"
 							/>
 			    			</form>
