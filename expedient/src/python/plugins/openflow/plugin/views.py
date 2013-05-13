@@ -398,7 +398,7 @@ def book_openflow(request, slice_id):
         }
 
         # Need to show topology for own plugin? Call to main method to get EVERY resource
-        from expedient.clearinghouse.settings import TOPOLOGY_GENERATOR
+        from expedient.clearinghouse.urls import TOPOLOGY_GENERATOR
         return simple.direct_to_template(
             request,
             template = "openflow_select_resources.html",
@@ -436,6 +436,11 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
 
     if request.method == "POST":
         continue_to_start_slice = False
+        # Default formset
+        formset = FSFormSet(
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
+        )
         if fsmode == 'advanced':
             formset = FSFormSet(
                 request.POST,
@@ -450,14 +455,9 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             try:
                 create_simple_slice_vlan_based(free_vlan[0], slice)
                 continue_to_start_slice = True
-            except Exception as e:
+            except:
                 #continue_to_start_slice flag will deal with this
                 pass
-        else:
-             formset = FSFormSet(
-                 queryset=FlowSpaceRule.objects.filter(
-                     slivers__slice=slice).distinct(),
-             )
 
         if continue_to_start_slice:
             slice.modified = True

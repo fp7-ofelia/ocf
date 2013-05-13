@@ -12,32 +12,51 @@
 	})
 </script>
 <style>
-	table.fulltable input[type=text] {
-		width: 70px;
-	}
-	span.next_link {
-		font-weight: bold;
-	}
-	select.wide {
-		width: 600px;
-	}
-	div.errors {
-		font-weight: bold;
-		color: #a70000;
-	}
+table.fulltable input[type=text] {
+    width: 70px;
+}
+span.next_link {
+    font-weight: bold;
+}
+select.wide {
+    width: 600px;
+}
+div.errors {
+    color: #a70000;
+    font-weight: bold;
+}
+
+div.steps {
+    background-color: #EEE;
+    border: 1px solid #CCC;
+    border-radius: 0px 0px 25px 25px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0px;
+    -moz-border-radius: 0px 0px 25px 25px;
+    padding: 10px;
+    vertical-align: middle;
+    -webkit-border-radius: 0px 0px 25px 25px;
+    width: 400px;
+}
+
+.center {
+    text-align: center;
+}
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="main">
+    
+    <h1 style="margin-bottom:0px;">Set FlowSpace for Slice {{ slice.name }}</h1>
+    
 <div id="procsteps" class="steps center">
     1. <a href="{% url book_openflow slice.id %}">Select OpenFlow Ports</a>
     2. <a href="{% url flowspace slice.id %}" style="font-weight: bold;">Select/Modify Flowspace</a>
 </div>
 
-<div class="main">
-    
-    <h1>Set FlowSpace for Slice {{ slice.name }}</h1>
-    
 	<div class="help_text">
 	<p>Each table below describes a class of traffic you would like your
 	controller to receive. Each field is specified as
@@ -53,9 +72,6 @@
 	and additional empty tables will be displayed.</p>
 	</div>
 
-	<br />
-	<br />
-	
     <form class="form" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
 		{% for form in fsformset.forms %}

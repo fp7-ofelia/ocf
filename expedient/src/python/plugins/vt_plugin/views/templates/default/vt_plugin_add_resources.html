@@ -84,7 +84,7 @@
             if(!confirm(" Are you sure you want to delete VM '"+vmName+"'?"))
                 return; 
         }
-        $.getJSON("../../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action);
+        $.getJSON("../../../vt_plugin/manage_vm/"+sliceId+"/"+vmId+"/"+action+"/");
         updateVMstatus();
     }
 
