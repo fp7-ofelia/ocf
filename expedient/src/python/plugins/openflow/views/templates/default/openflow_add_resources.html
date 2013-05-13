@@ -208,10 +208,10 @@
     		    <tr class = "even">
     		       <td>
 						{%if  not fs.mac_src_s == "00:00:00:00:00:00" or not fs.mac_src_e == "ff:ff:ff:ff:ff:ff" %}
-    		            MAC Source: {{ fs.mac_src_s }} {% if not fs.mac_src_s == fs.mac_src_e %}- {{ fs.mac_src_e }}{%endif%}<br />
+    		            MAC Source: {{ fs.mac_src_s }} {% if not fs.mac_src_s == fs.mac_src_e %} - {{ fs.mac_src_e }}{%endif%}<br />
 						{%endif%}
 						{%if  not fs.mac_dst_s == "00:00:00:00:00:00" or not fs.mac_dst_e == "ff:ff:ff:ff:ff:ff" %}
-    		            MAC Destination: {{ fs.mac_dst_s }} {% if not fs.mac_dst_s == fs.mac_dst_e %}- {{ fs.mac_dst_e }}{%endif%}<br />
+    		            MAC Destination: {{ fs.mac_dst_s }} {% if not fs.mac_dst_s == fs.mac_dst_e %} - {{ fs.mac_dst_e }}{%endif%}<br />
 						{%endif%}
 						{%if  not fs.eth_type_s == 0 or not fs.eth_type_e == 65535 %}
     		            Ethernet Type: {{ fs.eth_type_s }} {{ fs.eth_type_e }}<br />
@@ -238,7 +238,7 @@
 						<td>
 						{% for of in of_list %}
 						<!-- {{ of.direction }} is available also -->
-    		            <strong>OpenFlow Switch:</strong> {{ of.dpid }} -<strong>Port</strong> {{ of.port_number_s }}<!---{{ of.port_number_e }}--><br />
+    		            <strong>OpenFlow Switch:</strong> {{ of.dpid }} - <strong>Port</strong> {{ of.port_number_s }}<!---{{ of.port_number_e }}--><br />
 						{% endfor %}
     		        </td>
     		    </tr>
