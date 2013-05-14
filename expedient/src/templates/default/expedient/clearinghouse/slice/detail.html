@@ -26,7 +26,6 @@
                 }
 
             var flowspaceWarning = 'confirmWrapper("';
-            console.log("action: " + action);
             if (action == "start_update") {
                 {% if slice.started %}
                     if (grantedFlowspace) {
@@ -61,9 +60,7 @@
         		} });
 	}
 	function confirmWrapper(message){
-	        console.log("Within confirmWrapper");	
 		value = confirm(message);
-                console.log("Value: " + value);
 		if (value){
 			showLoadingMsg("Loading...");
 		}
