@@ -22,9 +22,9 @@ local TMP_PATH=$PWD
 
 # OFELIA installation: 2 folders up for GIT config, 3 for getting to modules
 OFELIA_DIR="/opt/ofelia"
-if [[ "$PWD" == *oxa/repository* ]]; then
+if [[ "$PWD" == "/opt/ofelia/oxa/bin" ]]; then
     # OXAD installation: 5 folders up for GIT config, 6 for getting to modules
-    OFELIA_DIR="opt/ofelia/oxa/repository"
+    OFELIA_DIR="/opt/ofelia/oxa/repository"
 fi
 
 # SSH keys by default
