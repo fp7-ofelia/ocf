@@ -28,10 +28,12 @@ class Action(models.Model):
 	##Monitoring
 	#Servers
 	MONITORING_SERVER_VMS_TYPE="listActiveVMs"
+	MONITORING_SERVER_STATISTICS_TYPE="statistics"
 	
 	__monitoringTypes = (
 		#Server
 		MONITORING_SERVER_VMS_TYPE,	
+		MONITORING_SERVER_STATISTICS_TYPE,	
 	)
 	
 	#VMs

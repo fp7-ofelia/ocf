@@ -5,7 +5,7 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.resourcesHash import resourcesHash
 
 
-class InformationDispatcher():
+class MonitoringDispatcher():
 
 
 	@staticmethod

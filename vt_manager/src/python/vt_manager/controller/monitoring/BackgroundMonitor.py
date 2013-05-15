@@ -2,6 +2,7 @@ from vt_manager.models.VTServer import VTServer
 import uuid
 from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
 from vt_manager.controller.monitoring.SessionMonitoringThread import SessionMonitoringThread
+from vt_manager.controller.monitoring.StatisticsMonitoringThread import StatisticsMonitoringThread
 import time
 import threading
 #from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
@@ -36,6 +37,10 @@ class BackgroundMonitor():
         SessionMonitoringThread.monitorSessionInNewThread()
 
     @staticmethod
+    def __monitorStatistics():
+        StatisticsMonitoringThread.monitorSessionInNewThread()
+
+    @staticmethod
     def monitor():
         sessionMultipler = 0
         while True:
@@ -44,6 +49,7 @@ class BackgroundMonitor():
             if sessionMultipler % SESSION_MULTIPLIER == 0:
                       sessionMultipler = 0
                       BackgroundMonitor.__monitorSessions()
+                      BackgroundMonitor.__monitorStatistics()
             else:
                 sessionMultipler +=1
             time.sleep(settings.MONITORING_INTERVAL)	

@@ -1,6 +1,6 @@
 from django.db import models
 
-class resourcesHash(models.Model):
+class StatisticsPartition(models.Model):
 
     class Meta:
         """Meta Class for your model."""
@@ -11,6 +11,6 @@ class resourcesHash(models.Model):
     size = models.IntegerField(blank = True, null=True,  default="", editable = False)
     used = models.IntegerField(blank = True, null=True,  default="", editable = False)
     available = models.IntegerField(blank = True, null=True,  default="", editable = False)
-    used_ratio = models.DecimalField(max_digits = 5, , max_decimal = 3, default="", editable = False)
+    used_ratio = models.DecimalField(max_digits = 5, decimal_places = 3, default="", editable = False)
 
 

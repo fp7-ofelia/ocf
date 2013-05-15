@@ -124,7 +124,11 @@ class XmlHelper(object):
 	        simpleRspec =  XmlHelper.parseXmlString(openVMs.read())
         return simpleRspec
 
-
+    @staticmethod
+    def getStatisticsQuery():
+        with open(os.path.dirname(__file__)+'/xml/statisticsQuery.xml','r') as openStats:
+                simpleRspec =  XmlHelper.parseXmlString(openStats.read())
+        return simpleRspec
 
     @staticmethod
     def craftSimpleActionQuery(SimpleRspec, status, description):
