@@ -139,13 +139,13 @@ print "Downloading dependencies [pyparsing]..."
 /usr/bin/apt-get -y install python-pyparsing || error "Could not install dependencies (apt-get)"
 
 print "Downloading latest pypelib version..."
-/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+/usr/bin/wget https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb || error "Could not download pypelib latest version from https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb. Do you have connectivity?"
 
 print "Installing pypelib_latest_all.deb..."
 /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
 
 print "Removing temporary files..."
-rm pypelib_latest_all.deb || "Could not remove pypelib_latest_all.deb"
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
 
 #cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exit anymore?"
 cd $TMP_PATH

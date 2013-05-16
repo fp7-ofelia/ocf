@@ -18,12 +18,13 @@ class TopologyGenerator():
     assigned_groups = []
 
     @staticmethod
-    def check_link_consistency(links, nodes, user, slice):
+    def check_link_consistency(links, nodes, slice):
         """
         Checks consistency across links.
         Given a link ( A - <link> - B), if any of the endpoints A or B
         do not exist, <link> is removed from the list.
         """
+        from django.conf import settings
         consistent_links = []
         inconsistent_links = []
         inconsistent_links_message = ""
@@ -87,8 +88,12 @@ class TopologyGenerator():
                 inconsistent_links_message += "TARGET\n"
                 inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n\n" % (link['target_id'], link['target_name'], link['target_aggregate_id'], link['target_aggregate_name'])
 
+            from django.contrib.auth.models import User
             try:
-                from django.conf import settings
+                user = User.objects.get(settings.ROOT_USERNAME)
+            except:
+                user = User.objects.filter(is_superuser=True)[0]
+            try:
                 from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
                 # Use thread to avoid slow page load when server is unresponsive
                 send_mail(settings.EMAIL_SUBJECT_PREFIX + " Inconsistent links at slice '%s': Expedient" % str(slice.name), "Hi, Island Manager\n\nThis is a warning to notify about some inconsistent links within a topology. This may be happening because a plugin or Aggregate Manager references a node not present in the Aggregate Managers chosen for this slice.\n\nProject: %s\nSlice: %s\nProblematic links:\n\n%s" % (slice.project.name, slice.name, str(inconsistent_links)), from_email = settings.DEFAULT_FROM_EMAIL, recipient_list = [user.email],)
@@ -208,10 +213,7 @@ class TopologyGenerator():
                 print "[WARNING] Problem retrieving Topology indices inside TopologyGenerator. Details: %s" % str(e)
 
         # Check link consistency
-        from django.contrib.auth.models import User
-        user = User.objects.get(username='expedient')
-
-        plugin_ui_data['d3_links'] = TopologyGenerator.check_link_consistency(plugin_ui_data['d3_links'], plugin_ui_data['d3_nodes'], user, slice)
+        plugin_ui_data['d3_links'] = TopologyGenerator.check_link_consistency(plugin_ui_data['d3_links'], plugin_ui_data['d3_nodes'], slice)
         plugin_ui_data['d3_nodes'] = TopologyGenerator.get_island_for_nodes(plugin_ui_data['d3_nodes'])
         plugin_ui_data['n_islands'] = TopologyGenerator.compute_number_islands(plugin_ui_data['d3_nodes'])
         return plugin_ui_data
