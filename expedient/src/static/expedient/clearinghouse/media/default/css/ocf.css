@@ -510,15 +510,11 @@ table.msg_table .error, .errorlist {
 }
 .warninglist, ul[id^="warninglist"] {
     border-radius: 7px;
-    /*color: #B27121 !important;*/
     color: #382885 !important;
     font-style: italic;
     font-weight: bold;
-    /*list-style-type: none;*/
-    /*list-style-image: url('/static/media/default/img/warning.png');*/
     margin-bottom: 5px;
     padding-bottom: 5px;
-    /*padding-left: 7px;*/
     padding-left: 30px;
     padding-top: 5px;
     padding-right: 7px;
@@ -569,7 +565,6 @@ iframe {
 }
 
 div.mgmt_actions {
-	/*border: 1px solid #E0E8FF;*/
 	border: 1px solid #CCC;
 	background-color: #eee;
 	float: right;
@@ -578,8 +573,6 @@ div.mgmt_actions {
 div.slicemgmt_actions {
 	border: 1px solid #CCC;
 	background-color: #eee;
-	
-/*	border: 1px solid #E0E8FF;*/
 	margin-top:-10px;
 }
 div.proj_description {
@@ -629,10 +622,8 @@ div.form_error_msgs {
 }
 
 div.messages {
-/*	float: right; */
 	border: 1px solid #E0E8FF;
 	width: 100%;
-/*	height: 63px;*/
 	position: relative;
 	top: -15px;
 	overflow: hidden;
@@ -676,7 +667,6 @@ tr.warning {
 }
 
 tr.success {
-/*	font-size:11px;*/
 	color:green;
 }
 
@@ -730,18 +720,15 @@ table.servers td{
 table.servers th {
     padding : 4px;
     border:0px;
-    /*background-color: #8ED6EA;*/
-    background-color: /*#CEF6F5;*/ #333;
+    background-color: #333;
     color: #eee;  
     text-align:left;
 }
 table.servers tr.even{
-    /*background-color: #A6DEEE;*/
     background-color: #AAA;
     border:0px!important;
 }
 table.servers tr.odd{
-    /*background-color: #C0E7F3;*/
     background-color: #999;
     border:0px!important;
 }
@@ -758,7 +745,7 @@ table.vms{
 }
 
 table.vms th {
-    background-color: /*#CEF6F5;*/ #666;  
+    background-color: #666;  
     color: #fff;
     padding : 4px;
     text-align:left;
@@ -1049,6 +1036,7 @@ div.aggregateManager table.aggregateManagerDetail {
 div.aggregateManager table.aggregateManagerDetail td {
 	text-align:left;
 	vertical-align:middle;
+}
 div.aggregateManager table.aggregateManagerDetail .label {
 	font-size:11px;
 	padding-top:2px;
