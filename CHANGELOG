@@ -26,12 +26,13 @@ VERSIONS
 --------------------------------------------------
 v0.5
 --------------------------------------------------
-Released: 17/05/2013
+Released: 21/05/2013
 
 ./ Production ready
 
 Change log:
 
+[B] AGN, OFVER: Missing settings for agent. Issue 162
 [B] EXP: Referencing same requested flowspaces to show the ones granted. Issue 159
 [B] EXP: Plugin system interferes with basic authentication for AMs. Issue 158
 [B] EXP: Exception booking flowspace in simple mode. Issue 155
