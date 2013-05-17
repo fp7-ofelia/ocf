@@ -1,6 +1,7 @@
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.Action import Action
 import logging
+from vt_manager.controller.monitoring.StatisticsMonitor import StatisticsMonitor
 
 class MonitoringResponseDispatcher():
 
@@ -10,8 +11,6 @@ class MonitoringResponseDispatcher():
 
 	@staticmethod
 	def processResponse(rspec):
-	
-		print "-------------------> Monitoring!!!!!"
 	
 		for action in rspec.response.monitoring.action:
 			print action
@@ -44,13 +43,14 @@ class MonitoringResponseDispatcher():
 			elif action.type_ == "statistics":
 				if action.status == "ONGOING":
 					#ONGOING
+					logging.debug("LEODEBUG LLEGO UN ONGOING\n\n\n\n\n")
 					actionModel.setStatus(Action.ONGOING_STATUS)
 					return
 				elif action.status == "SUCCESS":
-					from vt_manager.controller.monitoring.StatisticsMonitor import StatisticsMonitor
-
-					VMMonitor.processUpdateVMsList(server,action.server.virtual_machines)
-					StatisticMonitor.storeStatistics(action.server)
+					logging.debug("LEODEBUG ACTION QUE LLEGA")
+					logging.error(XmlHelper.craftXmlClass(rspec))	
+					logging.debug(action.server)
+					StatisticsMonitor.storeStatistics(action.server)
 					actionModel.destroy()
                                 elif action.status == "FAILED":
                                         actionModel.setStatus(Action.FAILED_STATUS)

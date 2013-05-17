@@ -1,4 +1,3 @@
-from threading import Thread
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.controller.actions.ActionController import ActionController
@@ -7,7 +6,6 @@ from vt_manager.utils.UrlUtils import UrlUtils
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
 import xmlrpclib, threading, logging, copy
-from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.ServerStatistics import ServerStatistics
 
 '''
@@ -20,9 +18,10 @@ class StatisticsMonitor():
 	@staticmethod
 	def updateStatistics():
 		#Recover controlled servers
+		print "LEODEBUG ENTRA EN UPDATESTATISTICS"
 		logging.debug("Enter updateStatistics")
 		servers = VTDriver.getAllServers()	
-		empty_query = XmlHelper.getStaticsQuery()
+		empty_query = XmlHelper.getStatisticsQuery()
 		
 		for server in servers:
 			try:
@@ -34,12 +33,14 @@ class StatisticsMonitor():
 	        	        query.query.monitoring.action[0].id = action.getUUID()
 				query.query.monitoring.action[0].server.virtualization_type = server.getid = server.getVirtTech()
 		                XmlRpcClient.callRPCMethod(server.getAgentURL(),"send",UrlUtils.getOwnCallbackURL(),0,server.agentPassword,XmlHelper.craftXmlClass(query))
-			except:
+			except Exception as e:
 				print "Could not request server %s statistics" % server.name	
+				print e
 
 	@staticmethod
 	def storeStatistics(server):
-		logging.debug("Enter storeStatistics")
+		logging.debug("LEODEBUG Enter storeStatistics")
+		logging.debug(server.id)
 		serverobj = VTDriver.getServerByUUID(server.uuid)
 		record = server.stats.all()
 		if len(record) > 1:

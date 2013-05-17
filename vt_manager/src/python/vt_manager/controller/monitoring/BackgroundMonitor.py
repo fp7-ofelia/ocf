@@ -38,7 +38,7 @@ class BackgroundMonitor():
 
     @staticmethod
     def __monitorStatistics():
-        StatisticsMonitoringThread.monitorSessionInNewThread()
+        StatisticsMonitoringThread.monitorStatisticsInNewThread()
 
     @staticmethod
     def monitor():

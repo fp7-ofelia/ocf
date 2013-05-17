@@ -1,8 +1,5 @@
 from threading import Thread
-import random 
-from vt_manager.models.VTServer import VTServer
-from vt_manager.communication.XmlRpcClient import XmlRpcClient
-from vt_manager.controller.monitoring.VMMonitor import VMMonitor
+from vt_manager.controller.monitoring.StatisticsMonitor import StatisticsMonitor
 '''
 	author:msune
 	Agent monitoring thread
@@ -13,7 +10,6 @@ MONITORING_INTERVAL_FACTOR=0.95
 class StatisticsMonitoringThread(Thread):
 	
 	__method = None
-	__param = None
 
 	'''
 	Make sure Agent is up and running
@@ -21,7 +17,7 @@ class StatisticsMonitoringThread(Thread):
 	'''
 		
 
-	def __updateStatistics(self):
+	def __updateStatisticsStatus(self):
 		try:
 			StatisticsMonitor.updateStatistics()
 		except Exception as e:
@@ -29,15 +25,14 @@ class StatisticsMonitoringThread(Thread):
 			print e
 		
 	@staticmethod
-	def monitorAgentInNewThread(param):
+	def monitorStatisticsInNewThread():
 		thread = StatisticsMonitoringThread()	
-		thread.startMethod(param)
+		thread.startMethod()
 		return thread
 
-	def startMethod(self,param):
-		self.__method = self.__updateStatisticsStatus 
-		self.__param = param
+	def startMethod(self):
+		self.__method = self.__updateStatisticsStatus
 		self.start()
 
 	def run(self):	
-		self.__method(self.__param)			
+		self.__method()			

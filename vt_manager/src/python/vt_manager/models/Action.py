@@ -59,7 +59,7 @@ class Action(models.Model):
 		#Monitoring
 		#Server
 		MONITORING_SERVER_VMS_TYPE,	
-		
+		MONITORING_SERVER_STATISTICS_TYPE,	
 		##Provisioning
 		#VM
 		PROVISIONING_VM_CREATE_TYPE,
