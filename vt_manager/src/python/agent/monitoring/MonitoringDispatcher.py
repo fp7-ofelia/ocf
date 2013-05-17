@@ -36,9 +36,12 @@ class MonitoringDispatcher:
 
 	@staticmethod
 	def processMonitoring(monitoring):
-
+		MonitoringDispatcher.logger.error("LEODEBUG PROCESSMONITORING")
 		for action in monitoring.action:
 			server = action.server
+			MonitoringDispatcher.logger.error("LEODEBUG \n\n\n")
+			MonitoringDispatcher.logger.error(action)
+			MonitoringDispatcher.logger.error(server)
 			try:
 				dispatcher = MonitoringDispatcher.__getMonitoringDispatcher(server.virtualization_type)	
 			except Exception as e:
@@ -64,6 +67,9 @@ class MonitoringDispatcher:
 
 	@staticmethod
 	def serverStatistics(action_id, server):
+		MonitoringDispatcher.logger.error("LEODEBUG SERVERSTATISTICS")
+		MonitoringDispatcher.logger.error(str(action_id))
+		MonitoringDispatcher.logger.error("LEODEBUG SERVERSTATISTICS")
 		try:
 			server = ServerMonitoring.getTopStatistics(server)
 			server = ServerMonitoring.getDfStatistics(server)
