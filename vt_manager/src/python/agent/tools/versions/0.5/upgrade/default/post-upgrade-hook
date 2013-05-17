@@ -98,6 +98,6 @@ if [[ -f $OXA_SETTINGS_FILE ]]; then
 fi
 
 # Restarting agent 
-#print "Starting oxad..."
-#/usr/sbin/service oxad restart
+print "Starting oxad..."
+/usr/sbin/service oxad restart
 
