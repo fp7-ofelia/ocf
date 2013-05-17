@@ -180,6 +180,7 @@ def confirm_requests(request):
                         post_message = "Successfully created project %s" % project.name
                         project.save()
                         create_project_roles(project, req.requesting_user)
+                        project.save()
                         email_header = "Approved project request for '%s'" % project_name
                         email_body = "Your request for the creation of project '%s' has been approved." % project_name
                     except Exception as e:
