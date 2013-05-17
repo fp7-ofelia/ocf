@@ -28,6 +28,9 @@ class ServerMonitoring:
 #                        raise e
 	@staticmethod
 	def getTopStatistics(server):
+		ServerMonitoring.logger.error("ENTRO EN GET TOP STATS")
+		ServerMonitoring.logger.error(str(server))
+		ServerMonitoring.logger.error(str(server.status))
 		try:
 			task=subprocess.Popen('/usr/bin/top -b -n1 | /bin/egrep "(Cpu|Mem)"',shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			out, err=task.communicate()

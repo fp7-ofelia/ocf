@@ -17,6 +17,9 @@ Ofelia XEN Agent user settings file.
 #
 XMLRPC_SERVER_PASSWORD="changeMe"
 
+
+
+
 ### Section 2: Optional OXA settings
 #
 # Optional settings for the Agent. Uncomment to override settings.

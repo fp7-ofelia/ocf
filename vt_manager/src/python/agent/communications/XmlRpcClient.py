@@ -65,6 +65,23 @@ class XmlRpcClient:
 		return XmlCrafter.craftXML(rspec) 
 	
 	@staticmethod
+	def __craftStatisticsMonitoringResponseXml(actionId,status,serverInfo):
+	
+		rspec = XmlUtils.getEmptyStatisticsMonitoringResponseObject()
+		
+		rspec.response.monitoring.action[0].id = actionId
+		rspec.response.monitoring.action[0].status = status
+		rspec.response.monitoring.action[0].type_ = "statistics"
+		
+		server = server_type()
+		rspec.response.monitoring.action[0].server = server
+		server.name = serverInfo.name
+		server.id = serverInfo.id
+		server.uuid = serverInfo.uuid
+		
+		return XmlCrafter.craftXML(rspec) 
+
+	@staticmethod
 	def __craftMonitoringResponseXml(actionId,status,server):
 	
 		rspec = XmlUtils.getEmptyStatisticsMonitoringResponseObject()
@@ -105,10 +122,10 @@ class XmlRpcClient:
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))
 
 	@staticmethod
-	def sendAsyncStatisticsMonitoring(action_id, status, server_statistics):
+	def sendAsyncStatisticsMonitoring(actionId, status, server_statistics):
 		XmlRpcClient.logger.debug("Sending asynchronous "+status+" statistics monitoring message to: "+threading.current_thread().callBackURL)
                 server = xmlrpclib.Server(threading.current_thread().callBackURL)
-                XmlRpcClient.logger.debug(XmlRpcClient.__crafStatisticsMonitoringResponseXml(actionId,status, server_statistics))
+                XmlRpcClient.logger.debug(XmlRpcClient.__craftStatisticsMonitoringResponseXml(actionId,status, server_statistics))
                 server.sendAsync(XmlRpcClient.__craftStatisticsMonitoringResponseXml(actionId,status,server_statistics))
                 XmlRpcClient.logger.debug("Sent ("+threading.current_thread().callBackURL+")")
 
