@@ -18,14 +18,9 @@ if [ ! -d /opt/tmp/ ]; then
 	mkdir -p /opt/tmp/
 fi
 TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
-local TMP_PATH=$PWD
-
-# OFELIA installation: 2 folders up for GIT config, 3 for getting to modules
+TMP_PATH=$PWD
+# Determine OFELIA directory to perform migration for data in repository
 OFELIA_DIR="/opt/ofelia"
-if [[ "$PWD" == "/opt/ofelia/oxa/bin/tools" ]]; then
-    # OXAD installation: 5 folders up for GIT config, 6 for getting to modules
-    OFELIA_DIR="/opt/ofelia/oxa/repository"
-fi
 
 # SSH keys by default
 git_remote_url="git@github.com:fp7-ofelia/ocf.git"
