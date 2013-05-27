@@ -66,7 +66,13 @@
                 if (tr_table.id != 'table_vms_list_header'){
                     var vmIdValue = tr_table.id.substring(5);
                     if (!data.status[vmIdValue]) {
-                            $("#tr_vm"+vmIdValue).remove();
+                        // If there are no more VMs present in the server (other than one to be removed),
+                        // delete all SSH particular and common details
+                        if ($("#tr_vm"+vmIdValue).closest("table#table_vms_list").find('tr[id^="tr_vm"]').not('tr[id$='+vmIdValue+']').length == 0) {
+                            $("#tr_vm"+vmIdValue).nextUntil().remove();
+                        }
+                        // Delete the VM row
+                        $("#tr_vm"+vmIdValue).remove();
                     }
                 }
             }
