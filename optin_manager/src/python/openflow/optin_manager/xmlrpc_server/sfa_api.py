@@ -31,17 +31,12 @@ def ping(challenge):
 
 @rpcmethod(signature=[VERSION_TYPE], url_name="optin_sfa")
 def GetVersion(api=None, options={}):
-    print 'Hello you are using SFA'
-    #version = {'urn': 'urn:publicid:IDN+top+dummy', 'hostname': 'OfeliaSDKr1', 'code_tag': '2.1-23', 'hrn': 'top.dummy', 'testbed': 'Ofelia', 'geni_api_versions': {'2': 'https://192.168.254.170:8443/xmlrpc/sfa/'}, 'interface': 'aggregate', 'geni_api': 2, 'geni_ad_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'code_url': 'git://git.onelab.eu/sfa.git@sfa-2.1-23', 'geni_request_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'sfa': 2}
-    print 'sending version to the SM'
     version = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': {'urn': 'urn:publicid:IDN+optin', 'hostname': 'OfeliaSDKR1', 'code_tag': '2.1-23', 'hrn': 'ocf.optin', 'testbed': 'Ofelia', 'geni_api_versions': {'2': 'http://192.168.254.170:8443/xmlrpc/sfa/'}, 'interface': 'aggregate', 'geni_api': 2, 'geni_ad_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'code_url': 'git://git.onelab.eu/sfa.git@sfa-2.1-23', 'geni_request_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'sfa': 2}}
     return version
 
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def ListResources(credentials, options, **kwargs):
-    print '------------------Creds',credentials
-    print '-----------------------options',options
     slice_xrn = options.get('geni_slice_urn', None)
     if slice_xrn:
 	xrn = Xrn(slice_xrn,'slice')
@@ -55,7 +50,6 @@ def ListResources(credentials, options, **kwargs):
     if options.has_key('geni_compressed') and options['geni_compressed'] == True:
         rspec = zlib.compress(rspec).encode('base64')
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
-    print '---------------------rspec:', rspec
     return to_return #driver.list_resources(slice_urn,slice_leaf,credentials, options)
 
 @rpcmethod(signature=[CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
@@ -64,11 +58,9 @@ def ListSlices(self, creds, options):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, options):
-    print '--------------------------HELLO CREATESLIVER'
     xrn = Xrn(slice_urn, 'slice')
     slice_leaf = xrn.get_leaf()
     authority = xrn.get_authority_hrn()
-    print '----------------------------------------Create Sliver Call---------------------------------------------'
     rspec = driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
