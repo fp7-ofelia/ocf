@@ -28,9 +28,6 @@ class ServerMonitoring:
 #                        raise e
 	@staticmethod
 	def getTopStatistics(server):
-		ServerMonitoring.logger.error("ENTRO EN GET TOP STATS")
-		ServerMonitoring.logger.error(str(server))
-		ServerMonitoring.logger.error(str(server.status))
 		try:
 			task=subprocess.Popen('/usr/bin/top -b -n1 | /bin/egrep "(Cpu|Mem)"',shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			out, err=task.communicate()
@@ -42,22 +39,41 @@ class ServerMonitoring:
 		## Parsing ##
 		out = out.split('\n')
 		for i,o in enumerate(out):
-			out[i] = re.sub('\x1b.*?(m|$|\[K)', '', o) 	
+			ot = re.sub('\x1b.*?(m|$|\[K)', '', o)
+			ot = ot.replace('Cpu(s):','').replace(' ','')
+			ot = ot.replace('Mem:','')
+			ot = ot.split(',')
+			for j,ot2 in enumerate(ot):
+				m = re.compile("%..").findall(ot2)
+				if m:
+					ot2 = ot2.replace(m[0],'')
+				ot[j] =  re.match('[0-9]*\.*[0-9]*', ot2 ).group(0)
+			out[i] = ot
+			ServerMonitoring.logger.error(out[i][0])
 
 		## Populating server-rspec structure ##
 		## out2 = [
 		## 'Cpu(s):  7.3%us,  1.9%sy,  0.0%ni, 89.8%id,  0.9%wa,  0.0%hi,  0.0%si,  0.0%st', 
 		## 'Mem:   4019680k total,  3640424k used,   379256k free,   322516k buffers', '']
+		ServerMonitoring.logger.error("\n\n\nLEODEBUG OUTPUT")
+		ServerMonitoring.logger.error(out)
 		cpu = server.status.cpu
-		cpu.user = out[0][0]				
-		cpu.sys= out[0][1]				
-		cpu.idle = out[0][3]				
+		cpu.user = float(out[0][0])
+		cpu.sys= float(out[0][1])
+		cpu.idle = float(out[0][3])
 		mem = server.status.memory
-		mem.used = out[1][1]
-		mem.free = out[1][2]
-		mem.total = out[1][0]
-		mem.buffers = out[1][3]
-
+		mem.used = long(out[1][1])
+		mem.free = long(out[1][2])
+		mem.total = long(out[1][0])
+		mem.buffers = long(out[1][3])
+		ServerMonitoring.logger.error("\n\n\nLEODEBUG OUTPUT COMANDO")
+		ServerMonitoring.logger.error(str(cpu.user))
+		ServerMonitoring.logger.error(str(cpu.sys))
+		ServerMonitoring.logger.error(str(cpu.idle))
+		ServerMonitoring.logger.error(str(mem.used))
+		ServerMonitoring.logger.error(str(mem.free))
+		ServerMonitoring.logger.error(str(mem.total))
+		ServerMonitoring.logger.error(str(mem.buffers))
 
 		return server
 
@@ -89,10 +105,10 @@ class ServerMonitoring:
 		for o in out:
 			part = copy.deepcopy(model_partition)
 			part.name = o[0]
-			part.size= o[1]
-			part.used = o[2]
-			part.available = o[3]
-			part.used_ratio = o[4].replace('%','')
+			part.size= long(o[1])
+			part.used = long(o[2])
+			part.available = long(o[3])
+			part.used_ratio = int(o[4].replace('%',''))
 			partition.append(part)
 		return server
 

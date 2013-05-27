@@ -18,8 +18,6 @@ class StatisticsMonitor():
 	@staticmethod
 	def updateStatistics():
 		#Recover controlled servers
-		print "LEODEBUG ENTRA EN UPDATESTATISTICS"
-		logging.debug("Enter updateStatistics")
 		servers = VTDriver.getAllServers()	
 		empty_query = XmlHelper.getStatisticsQuery()
 		
@@ -39,8 +37,6 @@ class StatisticsMonitor():
 
 	@staticmethod
 	def storeStatistics(server):
-		logging.debug("LEODEBUG Enter storeStatistics")
-		logging.debug(server.id)
 		serverobj = VTDriver.getServerByUUID(server.uuid)
 		record = server.stats.all()
 		if len(record) > 1:
