@@ -20,7 +20,7 @@ from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
 from expedient.clearinghouse.defaultsettings.ldapSettings import *
-#from expedient.clearinghouse.defaultsettings.plugin import *
+from expedient.clearinghouse.defaultsettings.plugin import *
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
 
@@ -82,11 +82,6 @@ if DEBUG:
     loggingconf.set_up(logging.DEBUG, LOGGING_LEVELS)
 else:
     loggingconf.set_up(logging.INFO, LOGGING_LEVELS)
-
-
-# Set path for plugins (set at 'expedient/common/utils/plugins/pluginloader.py')
-#sys.path.append(PLUGIN_LOADER.plugins_path)
-sys.path.append(os.path.join(SRC_DIR,"python","plugins"))
 
 
 #GENI CONTROL FRAMEWORK SETTINGS (NOT NEEDED AT THIS MOMENT)

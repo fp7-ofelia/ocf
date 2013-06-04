@@ -7,9 +7,8 @@ from vt_plugin.controller.dispatchers.MonitoringResponseDispatcher import Monito
 @rpcmethod(signature=['string'], url_name = 'vt_am')
 def sendAsync(xml):
     
-    "method that will be used by the VT AM to send inputs to the VT Plugin"
+    """method that will be used by the VT AM to send inputs to the VT Plugin"""
     
-    print "SENDASYNC"
     rspec = XmlHelper.parseXmlString(xml)
     if rspec.response.monitoring:
         ServiceThread.startMethodInNewThread(MonitoringResponseDispatcher.processResponse ,rspec.response.monitoring)
