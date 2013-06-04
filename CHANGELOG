@@ -26,12 +26,13 @@ VERSIONS
 --------------------------------------------------
 v0.5
 --------------------------------------------------
-Released: 23/05/2013
+Released: 04/06/2013
 
 ./ Production ready
 
 Change log:
 
+[B] EXP, VTA: Settings not accessible from manage.py. Issue 163
 [B] AGN, OFVER: Missing settings for agent. Issue 162
 [B] EXP: Referencing same requested flowspaces to show the ones granted. Issue 159
 [B] EXP: Plugin system interferes with basic authentication for AMs. Issue 158
