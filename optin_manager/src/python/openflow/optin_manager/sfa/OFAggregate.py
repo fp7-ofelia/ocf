@@ -24,6 +24,7 @@ class OFAggregate:
                     of_xml = getManifest(options['slivers'],slice_leaf)
                     rspec = RSpec(version=rspec_version, user_options=options)
                     rspec.version.add_slivers(of_xml)
+                    print '------------------------------------------FINAL MANIFEST RSPEC--------------------------------', rspec.toxml()
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
                     if 'slice_urn' in options.keys() :

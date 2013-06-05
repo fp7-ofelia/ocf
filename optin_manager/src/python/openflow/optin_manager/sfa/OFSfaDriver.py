@@ -31,7 +31,7 @@ class OFSfaDriver:
 	        rspec =  self.aggregate.get_rspec(version=rspec_version,options=options)
        		return rspec
 
-	def crud_slice (self,slice_urn,authority,creds=None, action=None):
+	def crud_slice (self,slice_urn,authority,action=None):
 
                 try:
 		    if action == 'start_slice':
@@ -54,12 +54,12 @@ class OFSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority
 		sliceName = slice_leaf
-		self.shell.CreateSliver(requested_attributes,slice_urn,projectName)
+		#self.shell.CreateSliver(requested_attributes,slice_urn,projectName)
 	        options['slivers'] = requested_attributes
             	
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
 	
-	def sliver_status(self,slice_urn,authority,creds,options):
+	def sliver_status(self,slice_urn,authority,options):
 		result = self.shell.SliverStatus(slice_urn)
 		return result
 			

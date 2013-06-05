@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xmlns:sig="http://www.w3.org/2000/09/xmldsig#">
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="sig.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <!--
+    
+    EMULAB-COPYRIGHT
+    Copyright (c) 2005-2007 University of Utah and the Flux Group.
+    All rights reserved.
+    
+  -->
+  <!--
+    
+    Definition of common data structures used for representing topologies -
+    shared between vtop (virtual topology) and ptop (physical topology)
+    formats.
+    
+  -->
+  <xs:element name="node_type">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="NodeTypeContents">
+          <xs:attribute name="type_name" use="required">
+            <xs:annotation>
+              <xs:documentation>Name of the type - will almost certainly not be unique</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="type_slots" use="required">
+            <xs:annotation>
+              <xs:documentation>How many virtual nodes of this type this physical node can
+handle.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:union>
+                <xs:simpleType>
+                  <xs:restriction base="xs:integer">
+                    <xs:minInclusive value="0"/>
+                  </xs:restriction>
+                </xs:simpleType>
+                <xs:simpleType>
+                  <xs:restriction base="xs:token">
+                    <xs:enumeration value="unlimited"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:union>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="static">
+            <xs:annotation>
+              <xs:documentation>element unlimited { empty }?,
+A flag that indicates that this physical node *always*
+has this type - a node is only allowed to have one dynamic
+(ie. not flagged as static) type at a time, but any number
+of static types at a time
+element static { empty }?</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:token">
+                <xs:enumeration value="true"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="NodeTypeContents">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" ref="field"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:group name="LinkTypeSpec">
+    <xs:annotation>
+      <xs:documentation>Link types are currently just a siple string. They will almost certainly 
+have to get more complicated, for two reasons:
+    First, I want to allow virtual links to specify more than one type, so
+      that we can ask for links that are, say, 'ethernet or loopback'
+    Second, I want to have a lot more control over links that get mapped to
+      multi-hop paths
+TODO: MAYBE this should be combined with NodeTypeSpec</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="link_type">
+        <xs:complexType>
+          <xs:attribute name="type_name" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="LinkEndPoints">
+    <xs:annotation>
+      <xs:documentation>A link has two endpoints. Right now, they are order
+independent. But they might become order-dependant later.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="source_interface"/>
+      <xs:element ref="destination_interface"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="source_interface" type="InterfaceSpec">
+    <xs:annotation>
+      <xs:documentation>First interface for this link</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="destination_interface" type="InterfaceSpec">
+    <xs:annotation>
+      <xs:documentation>Second interface for this link</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:group name="LinkCharacteristics">
+    <xs:annotation>
+      <xs:documentation>Link characterstics which affect traffic.
+TODO: In the future, the bandwidth, latency, and packet loss will be
+moved to features and/or properties</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="bandwidth"/>
+      <xs:element ref="latency"/>
+      <xs:element ref="packet_loss"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="bandwidth">
+    <xs:annotation>
+      <xs:documentation>Bandwidth of the link in kbps</xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:float">
+        <xs:minExclusive value="0.0"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="latency">
+    <xs:annotation>
+      <xs:documentation>Latency of the link in ms</xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:float">
+        <xs:minInclusive value="0.0"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="packet_loss">
+    <xs:annotation>
+      <xs:documentation>Static packet loss probability of the link as a fraction
+(ie. 0.01 == 1%)</xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:float">
+        <xs:minInclusive value="0.0"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="fd">
+    <xs:complexType>
+      <xs:attribute name="fd_name" use="required">
+        <xs:annotation>
+          <xs:documentation>Name of this feature or desire
+element fd_name { text },</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="fd_weight" use="required">
+        <xs:annotation>
+          <xs:documentation>Weight assocated with the feature or desire
+element fd_weight { xsd:float },</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="violatable">
+        <xs:annotation>
+          <xs:documentation>A flag indicating whether or not a failure to match the desire with a
+a feature is a constraint violation
+element violatable { empty }?,</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="true"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="global_operator">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="OnceOnly"/>
+            <xs:enumeration value="FirstFree"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="local_operator">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="+"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="GlobalSpec">
+    <xs:annotation>
+      <xs:documentation>GlobalSpec = element global {
+	element operator { "OnceOnly" | "FirstFree" }
+}</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="global_operator" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="OnceOnly"/>
+          <xs:enumeration value="FirstFree"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="LocalSpec">
+    <xs:annotation>
+      <xs:documentation>LocalSpec = element local {
+	element operator { "+" }
+	attribute local_operator { "+" }
+}</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="local_operator" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="+"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:complexType name="InterfaceSpec">
+    <xs:annotation>
+      <xs:documentation>Interfaces
+InterfaceSpec = element interface { InterfaceContents }</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" ref="property"/>
+    </xs:sequence>
+    <xs:attribute name="node_name" use="required"/>
+    <xs:attribute name="interface_name" use="required"/>
+    <xs:attribute name="physical_node_name"/>
+    <xs:attribute name="physical_interface_name"/>
+  </xs:complexType>
+  <xs:group name="InterfaceContents">
+    <xs:sequence>
+      <xs:element ref="node_name"/>
+      <xs:element ref="interface_name"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" ref="property">
+        <xs:annotation>
+          <xs:documentation>Properties of the interface</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="node_name" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Name of the node, which must match one of the nodes in this topology</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="interface_name" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Name of the interface itself</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="property">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="property_name"/>
+        <xs:element ref="property_value"/>
+        <xs:element ref="property_penalty"/>
+        <xs:element minOccurs="0" ref="violatable"/>
+      </xs:sequence>
+      <xs:attribute name="global_operator">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="OnceOnly"/>
+            <xs:enumeration value="FirstFree"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="local_operator">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="+"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="property_name" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Name of this property</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="property_value" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>Value associated with this property
+TODO: Add ranges and other types from rspec</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="property_penalty">
+    <xs:annotation>
+      <xs:documentation>The penalty associated with this property</xs:documentation>
+    </xs:annotation>
+    <xs:simpleType>
+      <xs:restriction base="xs:float">
+        <xs:minInclusive value="0.0"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="violatable">
+    <xs:annotation>
+      <xs:documentation>If this flag is present, not having the property is considered a violation</xs:documentation>
+    </xs:annotation>
+    <xs:complexType/>
+  </xs:element>
+</xs:schema>

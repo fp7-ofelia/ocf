@@ -25,15 +25,17 @@ class OFShell:
 	def get_switches(flow_visor, used_switches=[]):
 		complete_list = []
     		try:
+                        raise ""
         		switches = flow_visor.get_switches()
     		except Exception as e:
                         #XXX:Test-Only
-			#switches = test_switches 
+			switches = test_switches 
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
                                     continue
                         if int(switch[1]['nPorts']) == 0:
+                            #TODO: Uncomment when merge with ofelia.development
                             #send_mail('SFA OptinManager Error', 'There are some errors related with switches: GetSwitches() returned 0 ports.',settings.ROOT_EMAIL, [settings.ROOT_EMAIL])
                             raise Exception("The switch with dpid:%s has a connection problem and the OCF Island Manager has already been informed. Please try again later." % str(switch[0]))
                             #TODO: Send Mail to the Island Manager Here.
@@ -49,10 +51,11 @@ class OFShell:
 	def get_links(flow_visor):
 		complete_list = []
                 try:
+                        raise ""
                         links = flow_visor.get_links()
 		except Exception as e:
                         #XXX:Test-Only
-			#links = test_links 
+			links = test_links 
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
@@ -129,6 +132,7 @@ class OFShell:
                 slice_leaf = xrn.get_leaf()
                 sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
+            print "Granted FS:", granted_fs
             return granted_fs
 
 
