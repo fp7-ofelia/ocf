@@ -3,7 +3,7 @@ from django.conf import settings
 
 class MetaSfaRegistry:
   
-    sfa_gid_location = '/sfa/trusted_roots/ocf_of.gid'
+    sfa_gid_location = '/sfa/jfed_roots/ocf_of.gid'
 
     def __init__(self, config=None):
         self.gid = settings.CONF_DIR + self.sfa_gid_location

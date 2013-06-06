@@ -44,7 +44,7 @@ class Auth:
                 valid.append(cred)
             except Exception as e:
                 cred_obj=Credential(string=cred)
-                #error = sys.exc_info()[:2]
+                error = e#sys.exc_info()[:2]
                 continue
         if not len(valid):
             raise InsufficientRights('Access denied: %s' % (str(error)))
