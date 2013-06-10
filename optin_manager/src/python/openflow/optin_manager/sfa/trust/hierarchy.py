@@ -130,6 +130,7 @@ class Hierarchy:
         hrn, type = urn_to_hrn(xrn) 
         (directory, gid_filename, privkey_filename) = \
             self.get_auth_filenames(hrn)
+        print directory, gid_filename, privkey_filename
         
         return os.path.exists(gid_filename) and os.path.exists(privkey_filename) 
 
