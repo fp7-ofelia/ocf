@@ -58,9 +58,11 @@ SITE_DOMAIN = "ocf.mydomain.net:2345"
 SITE_IP_ADDR = "192.168.254.193"
 
 #
-# VLANs management.
+# VLANS not allowed: when simple OF slices are requested, Optin offers VLAN tags
+# in the normal range [1-4095] except for those tags in VLANS_UNALLOWED.
 #
 UNALLOWED_VLANS = []
+
 
 ##
 ## Theme Manager 
@@ -78,9 +80,3 @@ UNALLOWED_VLANS = []
 # for further information on how to install new themes for OCF.
 #
 THEME = 'default'
-
-#
-# VLANS not allowed: When simple OF slices are requested, Optin offers VLAN tags.
-# in tha normal [1-4095] range except of those tags in VLANS_UNALLOWED
-#
-UNALLOWED_VLANS=[]
