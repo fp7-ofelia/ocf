@@ -141,7 +141,7 @@ class Hierarchy:
     # @param xrn the human readable name of the authority to create (urn will be converted to hrn) 
     # @param create_parents if true, also create the parents if they do not exist
 
-    def create_auth(self, xrn, create_parents=False):
+    def create_auth(self, xrn, create_parents=False, subject=None):
         hrn, type = urn_to_hrn(str(xrn))
 
         # create the parent authority if necessary
@@ -166,7 +166,7 @@ class Hierarchy:
             pkey = Keypair(create = True)
             pkey.save_to_file(privkey_filename)
 
-        gid = self.create_gid(xrn, create_uuid(), pkey)
+        gid = self.create_gid(xrn, create_uuid(), pkey,subject=subject)
         gid.save_to_file(gid_filename, save_parents=True)
 
     def create_top_level_auth(self, hrn=None):
@@ -220,7 +220,7 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey, CA=False, email=None):
+    def create_gid(self, xrn, uuid, pkey, CA=False, email=None, subject=None):
         hrn, type = urn_to_hrn(xrn)
         if not type:
             type = 'authority'
@@ -229,7 +229,9 @@ class Hierarchy:
         # If xrn was a hrn instead of a urn, then the gid's urn will be
         # of type None 
         urn = hrn_to_urn(hrn, type)
-        gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn, email=email)
+        if not subject:
+            subject = hrn
+        gid = GID(subject=subject, uuid=uuid, hrn=hrn, urn=urn, email=email)
         # is this a CA cert
         if hrn == self.config.SFA_INTERFACE_HRN or not parent_hrn:
             # root or sub authority  
