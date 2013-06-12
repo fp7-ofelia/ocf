@@ -1,3 +1,5 @@
 from openflow.optin_manager.sfa.MetaSfaRegistry import MetaSfaRegistry
 
-MetaSfaRegistry().get_credential('ocf')
+def create_credential(xrn):
+    MetaSfaRegistry().get_credential(xrn)
+
