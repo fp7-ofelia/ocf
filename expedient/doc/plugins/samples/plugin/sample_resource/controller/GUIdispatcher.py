@@ -122,7 +122,7 @@ def get_nodes_links(slice, chosen_group=None):
 
     # For every SampleResource AM
     for i, sr_agg in enumerate(sr_aggs):
-        sr_agg = sr_agg.sampleresourceplugin
+        sr_agg = sr_agg.sampleresourceaggregate
         # Iterates over every SampleResource contained within the slice
         for sr in sr_agg.get_resources(slice.id):
             sr = sr.sampleresource
