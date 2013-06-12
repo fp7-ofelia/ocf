@@ -41,6 +41,7 @@ def ping(challenge):
 @rpcmethod(signature=[VERSION_TYPE], url_name="optin_sfa")
 def GetVersion(api=None, options={}):
     version = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': {'urn': 'urn:publicid:IDN+optin', 'hostname': 'OfeliaSDKR1', 'code_tag': '2.1-23', 'hrn': 'ocf.optin', 'testbed': 'Ofelia', 'geni_api_versions': {'2': 'http://192.168.254.170:8443/xmlrpc/sfa/'}, 'interface': 'aggregate', 'geni_api': 2, 'geni_ad_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'code_url': 'git://git.onelab.eu/sfa.git@sfa-2.1-23', 'geni_request_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'sfa': 2}}
+    print 'Returning Version'
     return version
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
@@ -56,6 +57,7 @@ def ListSlices(self, creds, options):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, options):
+    print credentials
     CSCredVal(slice_urn,credentials,users,options)
     rspec = aggregate.CreateSliver(slice_urn,rspec,users,options)
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
