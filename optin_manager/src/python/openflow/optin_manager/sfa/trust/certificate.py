@@ -448,7 +448,7 @@ class Certificate:
                 req = crypto.X509Req()
                 reqSubject = req.get_subject()
                 if (isinstance(subject, dict)):
-                    for key in reqSubject.keys():
+                    for key in subject.keys():
                         setattr(reqSubject, key, subject[key])
                 else:
                     setattr(reqSubject, "CN", subject)
@@ -487,6 +487,11 @@ class Certificate:
     def get_subject(self, which="CN"):
         x = self.cert.get_subject()
         return getattr(x, which)
+    
+    def get_extended_subject(self):
+        x = self.cert.get_subject()
+        subject = dict()
+        return dict(x.get_components())
 
     ##
     # Get a pretty-print subject name of the certificate

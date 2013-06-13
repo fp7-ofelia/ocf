@@ -141,7 +141,7 @@ class Hierarchy:
     # @param xrn the human readable name of the authority to create (urn will be converted to hrn) 
     # @param create_parents if true, also create the parents if they do not exist
 
-    def create_auth(self, xrn, create_parents=False, subject=None):
+    def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(str(xrn))
 
         # create the parent authority if necessary
@@ -166,7 +166,7 @@ class Hierarchy:
             pkey = Keypair(create = True)
             pkey.save_to_file(privkey_filename)
 
-        gid = self.create_gid(xrn, create_uuid(), pkey,subject=subject)
+        gid = self.create_gid(xrn, create_uuid(), pkey)
         gid.save_to_file(gid_filename, save_parents=True)
 
     def create_top_level_auth(self, hrn=None):
@@ -220,7 +220,7 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey, CA=False, email=None, subject=None):
+    def create_gid(self, xrn, uuid, pkey, CA=False, email=None):
         hrn, type = urn_to_hrn(xrn)
         if not type:
             type = 'authority'
@@ -229,6 +229,7 @@ class Hierarchy:
         # If xrn was a hrn instead of a urn, then the gid's urn will be
         # of type None 
         urn = hrn_to_urn(hrn, type)
+        subject = self.get_subject(hrn)
         if not subject:
             subject = hrn
         gid = GID(subject=subject, uuid=uuid, hrn=hrn, urn=urn, email=email)
@@ -238,7 +239,7 @@ class Hierarchy:
             gid.set_intermediate_ca(True)
         elif type and 'authority' in type:
             # authority type
-            gid.set_intermediate_ca(True)
+            gid.set_intermediate_ca(False)
         elif CA:
             gid.set_intermediate_ca(True)
         else:
@@ -248,11 +249,12 @@ class Hierarchy:
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
-            gid.set_issuer(pkey, hrn)
+            gid.set_issuer(pkey, subject)
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            gid.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
+            parent_gid = parent_auth_info.get_gid_object()
+            gid.set_issuer(parent_auth_info.get_pkey_object(), parent_gid.get_extended_subject())
             gid.set_parent(parent_auth_info.get_gid_object())
 
         gid.set_pubkey(pkey)
@@ -261,7 +263,27 @@ class Hierarchy:
 
         return gid
 
-    ##
+    def get_subject(self,hrn):
+        if len(hrn.split('.'))>1:
+            subject = {'CN':'i2cat.fp7-ofelia.eu',
+                       'C':'SP',
+                       'ST':'Catalunya',
+                       'L':'Barcelona',
+                       'O':'i2CAT',
+                       'OU':'DANA',
+                      }
+        else:
+            subject = {'CN':'ca.i2cat.fp7-ofelia.eu',
+                       'C':'SP',
+                       'ST':'Catalunya',
+                       'L':'Barcelona',
+                       'O':'i2CAT',
+                       'OU':'DANA',
+                      }
+        return subject
+
+
+   ##
     # Refresh a GID. The primary use of this function is to refresh the
     # the expiration time of the GID. It may also be used to change the HRN,
     # UUID, or Public key of the GID.
@@ -270,7 +292,6 @@ class Hierarchy:
     # @param hrn if !=None, change the hrn
     # @param uuid if !=None, change the uuid
     # @param pubkey if !=None, change the public key
-
     def refresh_gid(self, gid, xrn=None, uuid=None, pubkey=None):
         # TODO: compute expiration time of GID, refresh it if necessary
         gid_is_expired = False
