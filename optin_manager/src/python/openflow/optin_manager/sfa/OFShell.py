@@ -11,7 +11,7 @@ from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVS
 #TODO: Uncomment when merge
 #from expedient.common.utils.mail import send_mail
 from django.conf import settings 
-
+from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
 
 #XXX TEST
 from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
@@ -122,7 +122,9 @@ class OFShell:
                     controller = rspec_attrs['controller'][0]['url']
                     email = rspec_attrs['email']
                     email_pass = ''
-                    CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
+
+                    ServiceThread.startMethodInNewThread(CreateOFSliver,[slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers])
+                    #CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
 		return 1
 
         def SliverStatus(self, slice_urn):
@@ -132,7 +134,6 @@ class OFShell:
                 slice_leaf = xrn.get_leaf()
                 sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
-            print "Granted FS:", granted_fs
             return granted_fs
 
 
