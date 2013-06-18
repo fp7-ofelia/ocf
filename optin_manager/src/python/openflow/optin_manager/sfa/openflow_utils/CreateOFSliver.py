@@ -4,6 +4,7 @@ from django.db import transaction
 from django.conf import settings
 from openflow.optin_manager.xmlrpc_server.ch_api import convert_star, om_ch_translate
 from openflow.optin_manager.flowspace.utils import parseFVexception
+from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
 
 '''Same "create_slice" function from xmlrpc_server/ch_api.py without decorators'''
 
@@ -73,10 +74,8 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
                     except:
                         setattr(efs,om_end,from_str(int(fs[ch_end],16)))
                 all_efs.append(efs)
-   		print 'ha acabado esto' 
         
     fv = FVServerProxy.objects.all()[0]
-    print 'ha conectado con el fv',update_exp  
     if (update_exp):
         # delete previous experiment from FV
         try:
@@ -101,7 +100,6 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
             
     # create the new experiment on FV
     try:   
-        print 'e.get_fv_slice_name()',e.get_fv_slice_name() 
         fv_success = fv.proxy.api.createSlice(
             "%s" % e.get_fv_slice_name(),
             "%s" % owner_password,
@@ -154,7 +152,6 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
                 raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
              
     try:
-        print 'estara por aqui??...'
         # Get project detail URL to send via e-mail
         from openflow.optin_manager.opts import urls
         from django.core.urlresolvers import reverse

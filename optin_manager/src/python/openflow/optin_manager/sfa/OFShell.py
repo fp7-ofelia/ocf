@@ -25,11 +25,11 @@ class OFShell:
 	def get_switches(flow_visor, used_switches=[]):
 		complete_list = []
     		try:
-                        raise ""
+                        #raise ""
         		switches = flow_visor.get_switches()
     		except Exception as e:
                         #XXX:Test-Only
-			switches = test_switches 
+			#switches = test_switches 
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
@@ -51,11 +51,11 @@ class OFShell:
 	def get_links(flow_visor):
 		complete_list = []
                 try:
-                        raise ""
+                        #raise ""
                         links = flow_visor.get_links()
 		except Exception as e:
                         #XXX:Test-Only
-			links = test_links 
+			#links = test_links 
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
@@ -123,8 +123,9 @@ class OFShell:
                     email = rspec_attrs['email']
                     email_pass = ''
 
-                    ServiceThread.startMethodInNewThread(CreateOFSliver,[slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers])
-                    #CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
+                    #ServiceThread.startMethodInNewThread(CreateOFSliver,[slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers])
+                    CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
+                   
 		return 1
 
         def SliverStatus(self, slice_urn):

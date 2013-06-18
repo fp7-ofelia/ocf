@@ -14,7 +14,7 @@ class ServiceThread(Thread):
                 if not isinstance(params,list):
                 	params = [params]
 		thread.startMethod(servmethod,params)
-	def startMethod(self,servmethod,param):
+	def startMethod(self,servmethod,params):
 		self.__method = servmethod
 		self.__params = params
 		self.start()
