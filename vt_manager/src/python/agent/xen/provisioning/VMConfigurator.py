@@ -21,7 +21,7 @@ class VMConfigurator():
 			if configurator == MediacatVMConfigurator.getIdentifier():
 				return MediacatVMConfigurator;
 			elif configurator == SpirentCentOSVMConfigurator.getIdentifier():
-				return MediacatVMConfigurator;
+				return SpirentCenOSVMConfigurator;
 	
 		else:
 			if os.lower() == "debian" or os.lower() == "ubuntu":

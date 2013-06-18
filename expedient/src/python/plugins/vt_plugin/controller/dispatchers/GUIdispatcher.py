@@ -76,8 +76,6 @@ def virtualmachine_crud(request, slice_id, server_id):
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
-                    print "LEODEBUG CHECKPOINT"
-                    print form.errors 
                     if "VM already exists" in form.errors[0]:
                         raise ValidationError("It already exists a VM with the same name in the same slice. Please choose another name", code="invalid",)
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)

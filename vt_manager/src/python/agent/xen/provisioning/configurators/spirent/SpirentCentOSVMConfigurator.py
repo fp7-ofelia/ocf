@@ -6,7 +6,7 @@ import subprocess
 import re
 
 from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_REDHAT_INTERFACES_FILE_LOCATION,OXA_REDHAT_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
+from settings.settingsLoader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION, OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
 from utils.Logger import Logger
 
 
@@ -21,7 +21,7 @@ class SpirentCentOSVMConfigurator:
 		
 		#Interfaces
 		for inter in vm.xen_configuration.interfaces.interface  :
-			iFile = os.open(OXA_RED_HAT_INTERFACES_LOCATION+"ifcfg-"+inter.name)
+			iFile = os.open(OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-"+inter.name)
 
 			interfaceString = "DEVICE="+inter.name+"\n"+\
 					"HWADDR="+inter.mac+"\n"+\
@@ -77,7 +77,7 @@ class SpirentCentOSVMConfigurator:
 		try:
 			try:
 				#Remove all files under/etc/sysconfig/network-scripts/ifcfg-*
-				os.system("rm -f "+OXA_RED_HAT_INTERFACES_LOCATION+"ifcfg-*")			 
+				os.system("rm -f "+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-*")			 
 				SpirentCentOSVMConfigurator.__configureInterfacesFiles(vm)
 			except Exception as e:
 				pass

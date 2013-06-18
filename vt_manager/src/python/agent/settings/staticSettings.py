@@ -70,7 +70,7 @@ OXA_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
 OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION="/etc/security/access.conf"
 
 '''RedHat-family usual file locations'''
-OXA_RED_HAT_INTERFACES_LOCATION = "/etc/sysconfig/network-scripts/"
-OXA_RED_HAT_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
-OXA_RED_HAT_HOSTNAME_FILE_LOCATION="/etc/hostname"
+OXA_REDHAT_INTERFACES_FILE_LOCATION = "/etc/sysconfig/network-scripts/"
+OXA_REDHAT_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
+OXA_REDHAT_HOSTNAME_FILE_LOCATION="/etc/hostname"
 
