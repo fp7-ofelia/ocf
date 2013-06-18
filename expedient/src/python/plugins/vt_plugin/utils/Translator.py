@@ -51,7 +51,8 @@ class Translator():
         VMmodel.aggregate_id = agg_id    
         #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id    
         #TODO: hablar con leo sobre incluir una variable disc_image para las vms...
-        VMmodel.disc_image = 'Default'
+        #VMmodel.disc_image = 'Default'
+        VMmodel.setDiskImage(VMxmlClass.disk_image);
         
         if save is "save":
             VMmodel.save()
@@ -77,6 +78,7 @@ class Translator():
             VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHDoriginPath()
             VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
             VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
+            VMxmlClass.xen_configuration.memory_mb = VMmodel.get()
         except Exception as e:
 			print e
 			return

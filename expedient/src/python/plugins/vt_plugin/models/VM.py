@@ -6,6 +6,7 @@ from vt_plugin.utils.validators import *
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
+                        ('spirent','Spirent'),
                         #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
@@ -198,6 +199,12 @@ class VM(Resource):
 
     def getVirtualizationSetupType(self):
         return self.virtualizationSetupType
+
+    def setDiskImage(self, image):
+        self.disc_image = image
+
+    def gettDiskImage(self):
+        return self.disc_image 
 
     def delete(self):
         self.action_set.clear()
