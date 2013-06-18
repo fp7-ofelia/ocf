@@ -64,6 +64,7 @@ class xmlrpcServerProxyForm(forms.ModelForm):
 
 DISC_IMAGE_CHOICES = (
             ('default', 'Default'),
+            ('spirent', 'Spirent'),
             ('other', 'Other'),                      
                       )
 
