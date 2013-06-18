@@ -10,18 +10,17 @@ from settings.settingsLoader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD
 from utils.Logger import Logger
 
 
+
 class SpirentCentOSVMConfigurator:
 	
 	logger = Logger.getLogger()
 
 	''' Private methods '''
 	@staticmethod
-	def __configureInterfacesFile(vm):
-		#Loopback
-		
+	def __configureInterfacesFile(vm, path):
 		#Interfaces
 		for inter in vm.xen_configuration.interfaces.interface  :
-			iFile = os.open(OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-"+inter.name)
+			iFile = os.open(path+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-"+inter.name, w)
 
 			interfaceString = "DEVICE="+inter.name+"\n"+\
 					"HWADDR="+inter.mac+"\n"+\
@@ -77,8 +76,8 @@ class SpirentCentOSVMConfigurator:
 		try:
 			try:
 				#Remove all files under/etc/sysconfig/network-scripts/ifcfg-*
-				os.system("rm -f "+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-*")			 
-				SpirentCentOSVMConfigurator.__configureInterfacesFiles(vm)
+				os.system("rm -f "+path+"/"+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-*")			 
+				SpirentCentOSVMConfigurator.__configureInterfacesFiles(vm, path)
 			except Exception as e:
 				pass
 
@@ -93,6 +92,16 @@ class SpirentCentOSVMConfigurator:
 				SpirentCentOSVMConfigurator.__configureHostname(vm, openhost)
 		except Exception as e:
 			SpirentCentOSVMConfigurator.logger.error("Could not configure hostname;skipping.. - "+str(e))
+
+	@staticmethod
+	def _configureTestPorts(vm,path):
+		try:
+			pass	
+		except Exception as e:
+			SpirentCentOSVMConfigurator.logger.error("Could not configure test ports... - "+str(e))
+			raise e
+
+	
 
 	#Public methods
 	@staticmethod
@@ -121,3 +130,7 @@ class SpirentCentOSVMConfigurator:
 		#Configure Hostname
 		SpirentCentOSVMConfigurator._configureHostName(vm,path)
 		SpirentCentOSVMConfigurator.logger.info("Hostname configured successfully...")
+
+		#Configure Test-Ports
+		SpirentCentOSVMConfigurator._configureTestPorts(vm,path)
+		SpirentCentOSVMConfigurator.logger.info("Test-ports configured successfully...")

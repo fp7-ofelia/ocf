@@ -165,11 +165,11 @@ class FileFullHdManager(object):
 	def clone(vm):
 
 		##Check file existance in CACHE		
-		#FileFullHdManager.logger.debug("Checking:"+FileHdManager.getHdPath(vm))
+		#FileFullHdManager.logger.debug("Checking:"+FileFullHdManager.getHdPath(vm))
 		if os.path.exists(FileFullHdManager.getHdPath(vm)):
 			raise VMalreadyExists("Another VM with the same name exists in the same project and slice:"+FileFullHdManager.debugVM(vm))
 
-		#FileFullHdManager.logger.debug("Checking:"+FileHdManager.getRemoteHdPath(vm))
+		#FileFullHdManager.logger.debug("Checking:"+FileFullHdManager.getRemoteHdPath(vm))
 		##Check file existance in REMOTE 
 		if os.path.exists(FileFullHdManager.getRemoteHdPath(vm)):
 			raise VMalreadyExists("Another VM with the same name exists in the same project and slice:"+FileFullHdManager.debugVM(vm))
@@ -215,7 +215,7 @@ class FileFullHdManager(object):
 			os.makedirs(path)		
 	
 		vm_path=FileFullHdManager.getHdPath(vm)
-		FileFullHdManager.subprocessCall('/bin/mount -o loop '+str(vm_path)+" "+str(path))	
+		FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
 	
 		return path
 
@@ -249,9 +249,9 @@ class FileFullHdManager(object):
 			except Exception as e:
 				pass
 			#Move all files
-			shutil.move(FileFullHdManager.getHdPath(vm),FileHdManager.getRemoteHdPath(vm)) 
-			shutil.move(FileFullHdManager.getSwapPath(vm),FileHdManager.getRemoteSwapPath(vm))
-			shutil.move(FileFullHdManager.getConfigFilePath(vm),FileHdManager.getRemoteConfigFilePath(vm)) 
+			shutil.move(FileFullHdManager.getHdPath(vm),FileFullHdManager.getRemoteHdPath(vm)) 
+			shutil.move(FileFullHdManager.getSwapPath(vm),FileFullHdManager.getRemoteSwapPath(vm))
+			shutil.move(FileFullHdManager.getConfigFilePath(vm),FileFullHdManager.getRemoteConfigFilePath(vm)) 
 		else:
 			raise Exception("Cannot find VM in CACHE FS"+FileFullHdManager.debugVM(vm) )	
 	
@@ -273,9 +273,9 @@ class FileFullHdManager(object):
 				pass
 	
 			#Move all files
-			shutil.move(FileFullHdManager.getRemoteHdPath(vm),FileHdManager.getHdPath(vm)) 
-			shutil.move(FileFullHdManager.getRemoteSwapPath(vm),FileHdManager.getSwapPath(vm))
-			shutil.move(FileFullHdManager.getRemoteConfigFilePath(vm),FileHdManager.getConfigFilePath(vm))
+			shutil.move(FileFullHdManager.getRemoteHdPath(vm),FileFullHdManager.getHdPath(vm)) 
+			shutil.move(FileFullHdManager.getRemoteSwapPath(vm),FileFullHdManager.getSwapPath(vm))
+			shutil.move(FileFullHdManager.getRemoteConfigFilePath(vm),FileFullHdManager.getConfigFilePath(vm))
 			
 		else:
 			raise Exception("Cannot find VM in REMOTE FS"+FileFullHdManager.debugVM(vm))
