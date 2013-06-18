@@ -27,15 +27,16 @@ class ActionController():
 		#tempVMclass.uuid = actionModel.getObjectUUID()
 		#action.server.virtual_machines[0] = tempVMclass
 
+	@staticmethod
+	def completeConfiguratorInActionRspec(xen_configuration):
 	### TODO:CHECK How to add the configurator in the xml
-	#	action.server.virtual_machines[0].uuid = actionModel.getObjectUUID()
-	#	vm_path = action.server.virtual_machines[0].xen_configuration.hd_origin_path
-	#	if vm_path == "default/default.tar.gz":
-	#		action.server.virtual_machines[0].xen_configuration.configurator=""
-	#	elif vm_path == "spirent/spirentSTCVM.img":
-	#		action.server.virtual_machines[0].xen_configuration.configurator="SpirentCentOSVMConfigurator"
-	#	else:
-	#		action.server.virtual_machines[0].xen_configuration.configurator=""
+		vm_path = xen_configuration.hd_origin_path
+		if vm_path == "default/default.tar.gz":
+			xen_configuration.configurator=""
+		elif vm_path == "spirent/spirentSTCVM.img":
+			xen_configuration.configurator="SpirentCentOSVMConfigurator"
+		else:
+			xen_configuration.configurator=""
 
 
 	#XXX: Why are these two functions here? Do not beling to the Action, aren't they?

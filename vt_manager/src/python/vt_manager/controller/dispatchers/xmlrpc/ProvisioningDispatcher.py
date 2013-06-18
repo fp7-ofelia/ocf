@@ -77,6 +77,7 @@ class ProvisioningDispatcher():
 		try:
 			actionModel.checkActionIsPresentAndUnique()
 			Server, VMmodel = controller.getServerAndCreateVM(action)
+			ActionController.completeConfiguratorInActionRspec(action.server.virtual_machines[0].xen_configuration)
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
