@@ -52,7 +52,7 @@ class VMcontroller():
             instance.operatingSystemVersion = '6.2'
             instance.operatingSystemDistribution = 'CentOS'
             instance.hdOriginPath = "spirent/spirent_template.img"
-            instance.virtualization_setup_type = "HVM"
+            instance.virtualization_setup_type = "hvm"
 
         actionClass = copy.deepcopy(actionClassEmpty)
         actionClass.id = uuid.uuid4()
