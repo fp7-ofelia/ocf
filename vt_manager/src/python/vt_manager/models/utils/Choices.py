@@ -19,11 +19,13 @@ class OSDistClass():
 	OS_DIST_TYPE_DEBIAN = "Debian"
 	OS_DIST_TYPE_UBUNTU = "Ubuntu"
 	OS_DIST_TYPE_REDHAT = "RedHat"
+	OS_DIST_TYPE_CENTOS = "CentOS"
 	
 	OS_DIST_CHOICES = (
 		(OS_DIST_TYPE_DEBIAN, 'Debian'),
 		(OS_DIST_TYPE_UBUNTU, 'Ubuntu'),
 		(OS_DIST_TYPE_REDHAT, 'RedHat'),
+		(OS_DIST_TYPE_CENTOS, 'CentOS'),
 	)
 	@staticmethod	
 	def validateOSDist(value):
@@ -37,10 +39,12 @@ class OSVersionClass():
 
 	OS_VERSION_TYPE_50 = "5.0"
 	OS_VERSION_TYPE_60 = "6.0"
+	OS_VERSION_TYPE_62 = "6.2"
 	
 	OS_VERSION_CHOICES = (
 		(OS_VERSION_TYPE_50, '5.0'),
 		(OS_VERSION_TYPE_60, '6.0'),
+		(OS_VERSION_TYPE_62, '6.2'),
 	)
 	@staticmethod
 	def validateOSVersion(value):
