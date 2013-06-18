@@ -41,6 +41,7 @@ class MonitoringResponseDispatcher():
 				elif action.status == "FAILED":
 					actionModel.setStatus(Action.FAILED_STATUS)	
 			elif action.type_ == "statistics":
+				actionModel = Action.getAndCheckActionByUUID(action.id)
 				if action.status == "ONGOING":
 					#ONGOING
 					logging.debug("LEODEBUG LLEGO UN ONGOING\n\n\n\n\n")

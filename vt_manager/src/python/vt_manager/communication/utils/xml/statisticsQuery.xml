@@ -3,6 +3,7 @@
         <monitoring>
                 <action type="statistics" id="changeme">
                         <server>
+                                <uuid>changeMe</uuid>
                                 <virtualization-type>changeMe</virtualization-type>
 			<status>
                                         <cpu>

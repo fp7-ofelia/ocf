@@ -30,6 +30,7 @@ class StatisticsMonitor():
 	
 	        	        query.query.monitoring.action[0].id = action.getUUID()
 				query.query.monitoring.action[0].server.virtualization_type = server.getid = server.getVirtTech()
+				logging.debug("LEODEBUG QUERY:\n"+XmlHelper.craftXmlClass(query))
 		                XmlRpcClient.callRPCMethod(server.getAgentURL(),"send",UrlUtils.getOwnCallbackURL(),0,server.agentPassword,XmlHelper.craftXmlClass(query))
 			except Exception as e:
 				print "Could not request server %s statistics" % server.name	
@@ -37,6 +38,7 @@ class StatisticsMonitor():
 
 	@staticmethod
 	def storeStatistics(server):
+		print "LEODEBUG LLEGA EL SERVIDOR CON UUID :%s" %server.uuid
 		serverobj = VTDriver.getServerByUUID(server.uuid)
 		record = server.stats.all()
 		if len(record) > 1:
