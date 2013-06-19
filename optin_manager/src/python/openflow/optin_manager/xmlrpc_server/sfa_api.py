@@ -17,7 +17,7 @@ from openflow.optin_manager.sfa.methods.SliverStatus import SliverStatus as SSCr
 from openflow.optin_manager.sfa.methods.DeleteSliver import DeleteSliver as DSCredVal
 from openflow.optin_manager.sfa.methods.Start import Start as StartCredVal
 from openflow.optin_manager.sfa.methods.Stop import Stop as StopCredVal
-
+from openflow.optin_manager.sfa.sfa_config import config as CONFIG
 import zlib
 
 # Parameter Types
@@ -40,8 +40,10 @@ def ping(challenge):
 
 @rpcmethod(signature=[VERSION_TYPE], url_name="optin_sfa")
 def GetVersion(api=None, options={}):
-    version = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': {'urn': 'urn:publicid:IDN+optin', 'hostname': 'OfeliaSDKR1', 'code_tag': '2.1-23', 'hrn': 'ocf.optin', 'testbed': 'Ofelia', 'geni_api_versions': {'2': 'http://192.168.254.170:8443/xmlrpc/sfa/'}, 'interface': 'aggregate', 'geni_api': 2, 'geni_ad_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'code_url': 'git://git.onelab.eu/sfa.git@sfa-2.1-23', 'geni_request_rspec_versions': [{'namespace': None, 'version': '1', 'type': 'OcfVt', 'extensions': [], 'schema': '/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd'}], 'sfa': 2}}
-    print 'Returning Version'
+    #TODO: Better presentation
+    #TODO: Add complete GENI ouptut structures, GENI error codes, exceptions, etc.
+    version = {'output':'', 'geni_api': 2, 'code':{'am_type':'sfa', 'geni_code':0}, 'value': {'urn':CONFIG.URN, 'hostname':CONFIG.HOSTNAME, 'code_tag':CONFIG.CODE_TAG, 'hrn':CONFIG.HRN, 'testbed':CONFIG.TESTBED, 'geni_api_versions': CONFIG.GENI_API_VERSIONS, 'interface':CONFIG.INTERFACE, 'geni_api':int(CONFIG.GENI_API_VERSION), 'geni_ad_rspec_versions': CONFIG.GENI_AD_RSPEC_VERSIONS, 'code_url': CONFIG.CODE_URL, 'geni_request_rspec_versions': CONFIG.GENI_REQUEST_RSPEC_VERSIONS,'sfa':int(CONFIG.SFA_VERSION), 'f4f_describe_testbed':CONFIG.DESCRIBE_TESTBED, 'f4f_testbed_homepage':CONFIG.TESTBED_HOMEPAGE, 'f4f_testbed_picture':CONFIG.TESTBED_PICTURE, 'f4f_endorsed_tools':CONFIG.ENDORSED_TOOLS}} 
+
     return version
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
