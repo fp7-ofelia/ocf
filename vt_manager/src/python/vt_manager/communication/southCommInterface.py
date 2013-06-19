@@ -13,10 +13,6 @@ from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import Dispatch
 def sendAsync(xml):
 	logging.debug("sendAsync lauched")
 	rspec = XmlHelper.parseXmlString(xml)
-	print "RSPEC"
-	print "------------------------------------------------"
-	print xml
-	print "------------------------------------------------"
 	ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlResponse ,rspec)
 	#ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse , rspec)
 	return
