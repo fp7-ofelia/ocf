@@ -1,4 +1,5 @@
 from vt_manager.models.Action import Action
+from vt_manager.models.XenVM import IMAGE_CONFIGURATORS
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 import uuid, copy
 
@@ -31,11 +32,14 @@ class ActionController():
 	def completeConfiguratorInActionRspec(xen_configuration):
 	### TODO:CHECK How to add the configurator in the xml
 		vm_path = xen_configuration.hd_origin_path
-		if vm_path == "default/default.tar.gz":
-			xen_configuration.configurator=""
-		elif vm_path == "spirent/spirentSTCVM.img":
-			xen_configuration.configurator="SpirentCentOSVMConfigurator"
-		else:
+		try:
+			 xen_configuration.configurator = IMAGE_CONFIGURATORS[vm_path]
+		except:
+	#	if vm_path == "default/default.tar.gz":
+	#		xen_configuration.configurator=""
+	#	elif vm_path == "spirent/spirentSTCVM.img":
+	#		xen_configuration.configurator="SpirentCentOSVMConfigurator"
+	#	else:
 			xen_configuration.configurator=""
 
 
