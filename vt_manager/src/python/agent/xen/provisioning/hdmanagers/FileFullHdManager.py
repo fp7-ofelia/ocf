@@ -181,7 +181,7 @@ class FileFullHdManager(object):
 				template_path=FileFullHdManager.getTemplatesPath(vm)+vm.xen_configuration.hd_origin_path
 				#template_swap_path=FileFullHdManager.getTemplatesPath(vm)+vm.xen_configuration.hd_origin_path+"_swap"
 				vm_path=FileFullHdManager.getHdPath(vm)
-				swap_path=FileFullHdManager.getSwapPath(vm)
+				#swap_path=FileFullHdManager.getSwapPath(vm)
 
 				FileFullHdManager.logger.debug("Trying to clone from:"+template_path+"->>"+vm_path)
 
@@ -203,7 +203,7 @@ class FileFullHdManager(object):
 		if not FileFullHdManager.isVMinRemoteFS(vm):
 			FileFullHdManager.moveVMToRemoteFS(vm)
 		os.remove(FileFullHdManager.getRemoteHdPath(vm)) 
-		os.remove(FileFullHdManager.getRemoteSwapPath(vm)) 
+		#os.remove(FileFullHdManager.getRemoteSwapPath(vm)) 
 		os.remove(FileFullHdManager.getRemoteConfigFilePath(vm)) 
 			
 	#Mount/umount routines

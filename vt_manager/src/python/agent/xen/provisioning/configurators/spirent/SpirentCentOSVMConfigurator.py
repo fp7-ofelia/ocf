@@ -47,14 +47,14 @@ class SpirentCentOSVMConfigurator:
 	@staticmethod
 	def __createConfigFile(vm,env):
                 template_name = "spirentSTCVMTemplate.pt"
-                template = env.get_template(template_name)	
+               	template = env.get_template(template_name)	
 
 		#Set vars&render		
 		output = template.render(
 		kernelImg=OXA_XEN_SERVER_KERNEL,
 		initrdImg=OXA_XEN_SERVER_INITRD,
 		hdFilePath=HdManager.getHdPath(vm),
-		swapFilePath=HdManager.getSwapPath(vm),
+		#swapFilePath=HdManager.getSwapPath(vm),
 		vm=vm)	
 			
 		#write file
@@ -109,9 +109,8 @@ class SpirentCentOSVMConfigurator:
 
 		#get env
 		template_dirs = []
-		template_dirs.append(os.path.join(os.path.dirname(__file__), 'templates/'))
+		template_dirs.append(os.path.join(os.path.dirname(__file__),'../templates/'))
 		env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dirs))
-
 		if vm.xen_configuration.hd_setup_type == "file-full-image" and vm.xen_configuration.virtualization_setup_type == "hvm" :
 			SpirentCentOSVMConfigurator.__createConfigFile(vm,env)
 		else:
