@@ -4,7 +4,7 @@ from openflow.optin_manager.sfa.rspecs.elements.node import Node
 from openflow.optin_manager.sfa.rspecs.elements.login import Login
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 from openflow.optin_manager.sfa.openflow_utils.foam_rspec_lib import getAdvertisement, getManifest
-from openflow.optin_manager.sfa.OFShell import OFShell
+from openflow.optin_manager.sfa.drivers.OFShell import OFShell
 
 import time
 
@@ -24,7 +24,6 @@ class OFAggregate:
                     of_xml = getManifest(options['slivers'],slice_leaf)
                     rspec = RSpec(version=rspec_version, user_options=options)
                     rspec.version.add_slivers(of_xml)
-                    print '------------------------------------------FINAL MANIFEST RSPEC--------------------------------', rspec.toxml()
 		else:
         	    rspec_version = version_manager._get_version(version.type, version.version, 'ad')
                     if 'slice_urn' in options.keys() :

@@ -25,12 +25,12 @@ class OFShell:
 	def get_switches(flow_visor, used_switches=[]):
 		complete_list = []
     		try:
-                        #raise ""
+                        raise ""
         		switches = flow_visor.get_switches()
     		except Exception as e:
                         #XXX:Test-Only
-			#switches = test_switches
-                        raise e 
+			switches = test_switches
+                        #raise e 
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
@@ -52,12 +52,12 @@ class OFShell:
 	def get_links(flow_visor):
 		complete_list = []
                 try:
-                        #raise ""
+                        raise ""
                         links = flow_visor.get_links()
 		except Exception as e:
                         #XXX:Test-Only
-			#links = test_links 
-                        raise e
+			links = test_links 
+                        #raise e
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})

@@ -12,8 +12,8 @@ from openflow.optin_manager.sfa.util.cache import Cache
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 from openflow.optin_manager.sfa.rspecs.rspec import RSpec
 
-from openflow.optin_manager.sfa.OFAggregate import OFAggregate
-from openflow.optin_manager.sfa.OFShell import OFShell
+from openflow.optin_manager.sfa.drivers.OFAggregate import OFAggregate
+from openflow.optin_manager.sfa.drivers.OFShell import OFShell
 
 class OFSfaDriver:
 
@@ -54,7 +54,7 @@ class OFSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority
 		sliceName = slice_leaf
-		self.shell.CreateSliver(requested_attributes,slice_urn,projectName)
+		#self.shell.CreateSliver(requested_attributes,slice_urn,projectName)
 	        options['slivers'] = requested_attributes
             	
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)

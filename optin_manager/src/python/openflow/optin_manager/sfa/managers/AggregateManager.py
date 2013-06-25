@@ -3,7 +3,7 @@ from openflow.optin_manager.sfa.util.xrn import Xrn
 from openflow.optin_manager.sfa.util.callids import Callids
 from openflow.optin_manager.sfa.util.sfalogging import logger
 
-from openflow.optin_manager.sfa.OFSfaDriver import OFSfaDriver
+from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver
 
 from openflow.optin_manager.sfa.util.faults import MissingSfaInfo, UnknownSfaType, \
     RecordNotFound, SfaNotImplemented, SliverDoesNotExist

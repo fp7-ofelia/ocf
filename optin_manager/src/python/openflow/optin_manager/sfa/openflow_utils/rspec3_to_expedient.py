@@ -142,36 +142,3 @@ def get_group_names(used_groups):
     return group_names
 	
 
-#print 'TESTS---->'
-#print 'cidr_ip_to_range'
-#print {'value':'192.168.254.0/24'}
-#print cidr_ip_to_range({'value':'192.168.254.0/24'})
-#print {'value':'10.1.0.0/22'}
-#print cidr_ip_to_range({'value':'10.1.0.0/22'})
-
-
-
-
-
-a = [{'datapath_id': '00:00:00:00:00:00:00:0e',
-    'flowspace': [{'dl_dst_end': '*',
-                 'dl_dst_start': '*',
-                 'dl_src_end': '*',
-                 'dl_src_start': '*',
-                 'dl_type_end': '*',
-                 'dl_type_start': '*',
-                 'id': 37,
-                 'nw_dst_end': '*',
-                 'nw_dst_start': '*',
-                 'nw_proto_end': '*',
-                 'nw_proto_start': '*',
-                 'nw_src_end': '*',
-                 'nw_src_start': '*',
-                 'port_num_end': 3,
-                 'port_num_start': 3,
-                 'tp_dst_end': '*',
-                 'tp_dst_start': '*',
-                 'tp_src_end': '*',
-                 'tp_src_start': '*',
-                 'vlan_id_end': 2,
-                 'vlan_id_start': 2}]},]

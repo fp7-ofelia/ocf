@@ -8,7 +8,7 @@ import os.path
 from StringIO import StringIO
 
 from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
-from openflow.optin_manager.sfa.OFShell import OFShell
+#from openflow.optin_manager.sfa.drivers.OFShell import OFShell
 
 '''
 Functions used in FOAM and adapted to optin in order to make the minimal changes to add the SFA plugin to FOAM

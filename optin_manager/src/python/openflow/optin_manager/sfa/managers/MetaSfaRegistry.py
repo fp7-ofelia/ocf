@@ -24,9 +24,3 @@ class MetaSfaRegistry:
         return [gid]
 
 
-    def get_credential(self, xrn, kind="authority"):
-        hrn,type = urn_to_hrn(xrn)
-        hierarchy = Hierarchy()
-        credential = hierarchy.get_auth_cred(xrn, kind)
-        filename = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/credentials/%s.cred' %hrn
-        credential.save_to_file(filename, save_parents=True, filep=None)
