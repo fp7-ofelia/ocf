@@ -3,13 +3,14 @@ import os, sys, logging
 from openflow.common.rpc4django import rpcmethod
 from openflow.common.rpc4django import *
 from openflow.optin_manager.sfa.util.xrn import urn_to_hrn
-from openflow.optin_manager.sfa.util.faults import SfaInvalidArgument
+from openflow.optin_manager.sfa.util.faults import SfaInvalidArgument, OCFSfaPermissionDenied, OCFSfaError
 from openflow.optin_manager.sfa.util.version import version_core
 from openflow.optin_manager.sfa.util.xrn import Xrn
 
-from openflow.optin_manager.sfa.OFSfaDriver import OFSfaDriver
-from openflow.optin_manager.sfa.MetaSfaRegistry import MetaSfaRegistry
-from openflow.optin_manager.sfa.AggregateManager import AggregateManager
+
+#from openflow.optin_manager.sfa.OFSfaDriver import OFSfaDriver
+from openflow.optin_manager.sfa.managers.MetaSfaRegistry import MetaSfaRegistry
+from openflow.optin_manager.sfa.managers.AggregateManager import AggregateManager
 
 from openflow.optin_manager.sfa.methods.ListResources import ListResources as LRCredVal
 from openflow.optin_manager.sfa.methods.CreateSliver import CreateSliver as CSCredVal
@@ -29,7 +30,7 @@ URN_TYPE = 'string'
 SUCCESS_TYPE = 'boolean'
 STATUS_TYPE = 'struct'
 TIME_TYPE = 'string'
-driver = OFSfaDriver(None)
+#driver = OFSfaDriver(None)
 registry = MetaSfaRegistry(None)
 aggregate = AggregateManager(None)
 
@@ -37,19 +38,45 @@ aggregate = AggregateManager(None)
 def ping(challenge):
     return challenge
 
-
 @rpcmethod(signature=[VERSION_TYPE], url_name="optin_sfa")
 def GetVersion(api=None, options={}):
     #TODO: Better presentation
     #TODO: Add complete GENI ouptut structures, GENI error codes, exceptions, etc.
-    version = {'output':'', 'geni_api': 2, 'code':{'am_type':'sfa', 'geni_code':0}, 'value': {'urn':CONFIG.URN, 'hostname':CONFIG.HOSTNAME, 'code_tag':CONFIG.CODE_TAG, 'hrn':CONFIG.HRN, 'testbed':CONFIG.TESTBED, 'geni_api_versions': CONFIG.GENI_API_VERSIONS, 'interface':CONFIG.INTERFACE, 'geni_api':int(CONFIG.GENI_API_VERSION), 'geni_ad_rspec_versions': CONFIG.GENI_AD_RSPEC_VERSIONS, 'code_url': CONFIG.CODE_URL, 'geni_request_rspec_versions': CONFIG.GENI_REQUEST_RSPEC_VERSIONS,'sfa':int(CONFIG.SFA_VERSION), 'f4f_describe_testbed':CONFIG.DESCRIBE_TESTBED, 'f4f_testbed_homepage':CONFIG.TESTBED_HOMEPAGE, 'f4f_testbed_picture':CONFIG.TESTBED_PICTURE, 'f4f_endorsed_tools':CONFIG.ENDORSED_TOOLS}} 
+    version = {'output':'', 
+               'geni_api': 2, 
+               'code':  {'am_type':'sfa', 
+                         'geni_code':0
+                        }, 
+               'value': {'urn':CONFIG.URN, 
+                         'hostname':CONFIG.HOSTNAME, 
+                         'code_tag':CONFIG.CODE_TAG, 
+                         'hrn':CONFIG.HRN, 
+                         'testbed':CONFIG.TESTBED, 
+                         'geni_api_versions': CONFIG.GENI_API_VERSIONS, 
+                         'interface':CONFIG.INTERFACE, 
+                         'geni_api':int(CONFIG.GENI_API_VERSION), 
+                         'geni_ad_rspec_versions': CONFIG.GENI_AD_RSPEC_VERSIONS, 
+                         'code_url': CONFIG.CODE_URL, 
+                         'geni_request_rspec_versions': CONFIG.GENI_REQUEST_RSPEC_VERSIONS,
+                         'sfa':int(CONFIG.SFA_VERSION), 
+                         #F4F required params
+                         'f4f_describe_testbed':CONFIG.DESCRIBE_TESTBED, 
+                         'f4f_testbed_homepage':CONFIG.TESTBED_HOMEPAGE, 
+                         'f4f_testbed_picture':CONFIG.TESTBED_PICTURE, 
+                         'f4f_endorsed_tools':CONFIG.ENDORSED_TOOLS,
+                        },
+               } 
 
     return version
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def ListResources(credentials, options, **kwargs):
-    LRCredVal(credentials,options)
-    rspec = aggregate.ListResources(options=options)
+    LRCredVal(credentials,options) #Credential Validations already implement SFA/GENI Exceptions 
+    try: 
+        rspec = aggregate.ListResources(options=options)
+    except Exception as e:
+        raise OCFSfaError(e,'ListResources')
+  
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.list_resources(slice_urn,slice_leaf,credentials, options)
 
@@ -59,12 +86,10 @@ def ListSlices(self, creds, options):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, options):
-    print credentials
     CSCredVal(slice_urn,credentials,users,options)
     rspec = aggregate.CreateSliver(slice_urn,rspec,users,options)
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
-
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def DeleteSliver(slice_urn, credentials,options,**kwargs):
@@ -110,7 +135,7 @@ def reset_slice(xrn):
     slice_leaf = xrn.get_leaf()
     slice_urn = xrn.get_urn()
     authority = xrn.get_authority_hrn()
-    slice_action = driver.crud_slice (slice_urn,authority,action='reset_slice')
+    slice_action = aggregate.crud_slice (slice_urn,authority,action='reset_slice')
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': slice_action} #driver.crud_slice (slice_urn,authority,action='reset_slice')
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE], url_name="optin_sfa")

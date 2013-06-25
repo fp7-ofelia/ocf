@@ -36,6 +36,7 @@ class Auth:
         
     def checkCredentials(self, creds, operation, hrn = None):
         valid = []
+        error = None
         if not isinstance(creds, list):
             creds = [creds]
         for cred in creds:
@@ -47,6 +48,8 @@ class Auth:
                 error = e#sys.exc_info()[:2]
                 continue
         if not len(valid):
+            if not error:
+                error = "No valid credentials found" 
             raise InsufficientRights('Access denied: %s' % (str(error)))
         
         return valid

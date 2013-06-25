@@ -33,6 +33,18 @@ class SfaFault(xmlrpclib.Fault):
             faultString += ": " + str(extra)
         xmlrpclib.Fault.__init__(self, faultCode, faultString)
 
+class OCFSfaPermissionDenied(SfaFault):
+    def __init__(self,value='',extra = None):
+        self.faultString = "Permission denied: %s" % value
+        self.code = GENICODE.FORBIDDEN
+        SfaFault.__init__(self, self.code, self.faultString, extra)
+
+class OCFSfaError(SfaFault):
+    def __init__(self,value='',method='',extra = None):
+        self.faultString = "Error in method %s %s" % (method, value) 
+        self.code = GENICODE.ERROR
+        SfaFault.__init__(self, self.code, self.faultString, extra)
+
 class SfaInvalidAPIMethod(SfaFault):
     def __init__(self, method, interface = None, extra = None):
         faultString = "Invalid method " + method
