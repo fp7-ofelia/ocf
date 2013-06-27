@@ -6,16 +6,15 @@ def delete_slice(slice_urn):
     except Experiment.DoesNotExist:
         raise "" #RecordNotFound exception
 
-    #Expedient's Stuff nothing related with SFA
-    #fv = FVServerProxy.objects.all()[0]
-    #try:
-    #    success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
-    #except Exception,e:
-    #    
-    #    if "slice does not exist" in str(e):
-    #        success = True
-    #    else:
-    #        raise "" #TODO: think how to solve this. 
+    fv = FVServerProxy.objects.all()[0]
+    try:
+        success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
+    except Exception,e:
+        
+        if "slice does not exist" in str(e):
+            success = True
+       else:
+            raise "" #TODO: think how to solve this. 
 
     # get all flowspaces opted into this exp
     ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)

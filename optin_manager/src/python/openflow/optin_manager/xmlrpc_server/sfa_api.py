@@ -40,8 +40,8 @@ def ping(challenge):
 
 @rpcmethod(signature=[VERSION_TYPE], url_name="optin_sfa")
 def GetVersion(api=None, options={}):
-    #TODO: Better presentation
     #TODO: Add complete GENI ouptut structures, GENI error codes, exceptions, etc.
+    #FIXME: SFA seems not accept the error GENI structure when exceptions are rised.
     version = {'output':'', 
                'geni_api': 2, 
                'code':  {'am_type':'sfa', 
@@ -87,14 +87,22 @@ def ListSlices(self, creds, options):
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def CreateSliver(slice_urn, credentials, rspec, users, options):
     CSCredVal(slice_urn,credentials,users,options)
-    rspec = aggregate.CreateSliver(slice_urn,rspec,users,options)
+    try:
+        rspec = aggregate.CreateSliver(slice_urn,rspec,users,options)
+    except Exception as e:
+        raise OCFSfaError(e,'CreateSliver')
+        
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def DeleteSliver(slice_urn, credentials,options,**kwargs):
     DSCredVal(slice_urn,credentials,options)
-    rspec = aggregate.DeleteSliver(slice_urn,options)
+    try:
+        rspec = aggregate.DeleteSliver(slice_urn,options)
+    except Exception as e:
+        raise OCFSfaError(e,'DeleteSliver')
+
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.crud_slice(slice_urn,authority,credentials,action='delete_slice')
 
@@ -102,7 +110,11 @@ def DeleteSliver(slice_urn, credentials,options,**kwargs):
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def SliverStatus(slice_urn, credentials, options):
     SSCredVal(slice_urn,credentials,options)
-    struct = aggregate.SliverStatus(slice_urn,options)
+    try:
+        struct = aggregate.SliverStatus(slice_urn,options)
+    except Exception as e:
+        raise OCFSfaError(e,'SliverStatus')
+
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': struct}
     return to_return#driver.sliver_status(slice_urn,authority,credentials,options)
 
@@ -120,13 +132,19 @@ def Shutdown(slice_urn, credentials, **kwargs):
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def Start(xrn, credentials, **kwargs):
     StartCredVal(xrn,credentials)
-    slice_action = aggregate.start_slice(xrn)
+    try:
+        slice_action = aggregate.start_slice(xrn)
+    except Exception as e:
+        raise OCFSfaError(e,'Start')
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': slice_action} #driver.crud_slice(slice_urn,authority,credentials,action='start_slice')
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def Stop(xrn, credentials):
     StopCredVal(xrn,credentials)
-    slice_action = aggregate.stop_slice (xrn)
+    try:
+        slice_action = aggregate.stop_slice (xrn)
+    except Exception as e:
+        raise OCFSfaError(e,'Stop')  
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': slice_action}#driver.crud_slice (slice_urn,authority,credentials,action='stop_slice')
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE], url_name="optin_sfa")

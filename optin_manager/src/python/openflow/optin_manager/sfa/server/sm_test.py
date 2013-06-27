@@ -116,4 +116,4 @@ s = SfaServerProxy('https://192.168.254.188:12346','/opt/ofelia/optin_manager/sr
 
 #print s.get_trusted_certs([credential.read()],{'cached': True, 'list_leases': 'resources', 'geni_rspec_version': {'type': 'SFA', 'version': '1', 'namespace': None, 'extensions': [], 'schema': None}, 'rspec_version': {'namespace': None, 'version': '1', 'type': 'SFA', 'extensions': [], 'schema': None}, 'call_id': 'urn:uuid:57a5ce8d-a668-497c-8e91-ba5c4b42d415'})
 
-print s.get_trusted_certs(credential.read())
+print s.get_trusted_certs('aaa')#credential.read())

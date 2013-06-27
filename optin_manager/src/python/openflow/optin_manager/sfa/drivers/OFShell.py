@@ -25,12 +25,12 @@ class OFShell:
 	def get_switches(flow_visor, used_switches=[]):
 		complete_list = []
     		try:
-                        raise ""
+                        #raise ""
         		switches = flow_visor.get_switches()
     		except Exception as e:
                         #XXX:Test-Only
-			switches = test_switches
-                        #raise e 
+			#switches = test_switches
+                        raise e 
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
@@ -52,12 +52,12 @@ class OFShell:
 	def get_links(flow_visor):
 		complete_list = []
                 try:
-                        raise ""
+                        #raise ""
                         links = flow_visor.get_links()
 		except Exception as e:
                         #XXX:Test-Only
-			links = test_links 
-                        #raise e
+			#links = test_links 
+                        raise e
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
@@ -117,6 +117,10 @@ class OFShell:
                     raise ""
 
 	def CreateSliver(self, requested_attributes, slice_urn, authority):
+                fv = flow_visor = FVServerProxy.objects.all()[0]
+                available_switches = self.get_switches(fv)
+                if not self.check_req_switches(available_switches, requested_attributes)
+                    raise Exception("The Requested Switches on the RSpec do not match with the available switches of this island. Please check the datapath IDs")
                 project_description = 'SFA Project from %s' %authority
                 slice_id = slice_urn
                 for rspec_attrs in requested_attributes:
@@ -139,5 +143,11 @@ class OFShell:
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
             return granted_fs
 
-
+        def check_req_switches(self, available_switches, requested_attributes):
+            for switch in available_switches:
+                if not switch in reqested_switches:
+                    return False
+            
+            return True
+                
        

@@ -53,8 +53,9 @@ class AggregateManager:
     def DeleteSliver(self, xrn, options):
         xrn = Xrn(xrn)
         slice_leaf = xrn.get_leaf()
+        slice_urn = xrn.get_urn()
 	authority = xrn.get_authority_hrn()
-        return self.driver.crud_slice(slice_leaf,authority,action='delete_slice')
+        return self.driver.crud_slice(slice_urn,authority,action='delete_slice')
 
     def RenewSliver(self,xrn, creds, expiration_time, options):
 	#XXX: this method should extend the expiration time of the slices

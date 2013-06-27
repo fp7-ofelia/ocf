@@ -18,7 +18,7 @@ class OcfOfNode:
         if len(network_elems) > 0:
             network_elem = network_elems[0]
         else:
-            network_urn = 'ocf_of' 
+            network_urn = 'ocf.ofam' 
             network_elem = xml #xml.add_element('network', name = Xrn(network_urn).get_hrn())
 
 	nodes = of_xml.xpath('//rspec/*')
@@ -32,7 +32,7 @@ class OcfOfNode:
         if len(network_elems) > 0:
             network_elem = network_elems[0]
         else:
-            network_urn = 'ocf_of'
+            network_urn = 'ocf.ofam'
             network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
 
         slivers = of_xml.xpath('//rspec/*')
