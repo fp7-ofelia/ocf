@@ -12,7 +12,7 @@ for auth in authority_list:
 
 
 
-create_credential(conf.AUTHORITY_XRN.split('.')[0]) #creating credentials for top level authority avoiding problems for now.
+#create_credential(conf.AUTHORITY_XRN.split('.')[0]) #creating credentials for top level authority avoiding problems for now.
 
 
 
