@@ -13,7 +13,7 @@ def delete_slice(slice_urn):
         
         if "slice does not exist" in str(e):
             success = True
-       else:
+        else:
             raise "" #TODO: think how to solve this. 
 
     # get all flowspaces opted into this exp

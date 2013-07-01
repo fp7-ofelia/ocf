@@ -22,15 +22,9 @@ class OFShell:
                 pass
 	
 	@staticmethod
-	def get_switches(flow_visor, used_switches=[]):
+	def get_switches(used_switches=[]):
 		complete_list = []
-    		try:
-                        #raise ""
-        		switches = flow_visor.get_switches()
-    		except Exception as e:
-                        #XXX:Test-Only
-			#switches = test_switches
-                        raise e 
+                switches = self.get_raw_switches()
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
@@ -49,15 +43,8 @@ class OFShell:
 		return complete_list
 
 	@staticmethod
-	def get_links(flow_visor):
-		complete_list = []
-                try:
-                        #raise ""
-                        links = flow_visor.get_links()
-		except Exception as e:
-                        #XXX:Test-Only
-			#links = test_links 
-                        raise e
+	def get_links():
+                links = self.get_raw_links()
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
@@ -65,10 +52,9 @@ class OFShell:
 		return link_list
 
 	def GetNodes(self,slice_urn=None,authority=None):
-                flow_visor = FVServerProxy.objects.all()[0] #XXX: Test_Only
                 if not slice_urn:
-		    switch_list = self.get_switches(flow_visor)
-		    link_list = self.get_links(flow_visor)
+		    switch_list = self.get_switches()
+		    link_list = self.get_links()
 		    return {'switches':switch_list, 'links':link_list}
                 else:
                     nodes = list()
@@ -117,10 +103,6 @@ class OFShell:
                     raise ""
 
 	def CreateSliver(self, requested_attributes, slice_urn, authority):
-                fv = flow_visor = FVServerProxy.objects.all()[0]
-                available_switches = self.get_switches(fv)
-                if not self.check_req_switches(available_switches, requested_attributes)
-                    raise Exception("The Requested Switches on the RSpec do not match with the available switches of this island. Please check the datapath IDs")
                 project_description = 'SFA Project from %s' %authority
                 slice_id = slice_urn
                 for rspec_attrs in requested_attributes:
@@ -128,8 +110,8 @@ class OFShell:
                     controller = rspec_attrs['controller'][0]['url']
                     email = rspec_attrs['email']
                     email_pass = ''
-
-                    #ServiceThread.startMethodInNewThread(CreateOFSliver,[slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers])
+                    if not self.check_req_switches(switch_slivers):
+                        raise Exception("The Requested OF Switches on the RSpec do not match with the available OF switches of this island. Please check the datapath IDs of your Request RSpec.")
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
                    
 		return 1
@@ -143,11 +125,32 @@ class OFShell:
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
             return granted_fs
 
-        def check_req_switches(self, available_switches, requested_attributes):
-            for switch in available_switches:
-                if not switch in reqested_switches:
+        def check_req_switches(self, switch_slivers):
+            available_switches = self.get_raw_switches()
+            for sliver in switch_slivers: 
+                found = False
+                for switch in available_switches:
+                    if str(sliver['datapath_id']) == str(switch[0]): #Avoiding Unicodes
+                        found = True
+                        break
+                if found == False:
                     return False
-            
             return True
-                
-       
+
+        def get_raw_switches(self):
+             try: 
+                 fv =  FVServerProxy.objects.all()[0]
+                 switches = fv.get_switches()
+             except Exception as e:
+                 #switches = test_switches
+                 raise e
+             return switches
+
+        def get_raw_links(self):
+             try:
+                 fv = FVServerProxy.objects.all()[0]  
+                 links = fv.get_links
+             except Exception as e:
+                 #links = test_links
+                 raise e
+             return links
