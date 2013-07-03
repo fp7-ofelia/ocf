@@ -7,7 +7,7 @@ from openflow.optin_manager.sfa.trust.auth import Auth
 
 class ListResources:
 
-    def __init__(self, creds, options):
+    def __init__(self, creds, options, **kwargs):
        
         # client must specify a version
         if not options.get('geni_rspec_version'):

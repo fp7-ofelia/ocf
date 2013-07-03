@@ -5,7 +5,7 @@ from openflow.optin_manager.sfa.trust.auth import Auth
 
 class CreateSliver:
 
-    def __init__(self, slice_xrn, creds, users, options):
+    def __init__(self, slice_xrn, creds, users, options, **kwargs):
 
         hrn, type = urn_to_hrn(slice_xrn)
 
