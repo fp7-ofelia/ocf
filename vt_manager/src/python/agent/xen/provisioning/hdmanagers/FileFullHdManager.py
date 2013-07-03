@@ -250,7 +250,7 @@ class FileFullHdManager(object):
 				pass
 			#Move all files
 			shutil.move(FileFullHdManager.getHdPath(vm),FileFullHdManager.getRemoteHdPath(vm)) 
-			shutil.move(FileFullHdManager.getSwapPath(vm),FileFullHdManager.getRemoteSwapPath(vm))
+			#shutil.move(FileFullHdManager.getSwapPath(vm),FileFullHdManager.getRemoteSwapPath(vm))
 			shutil.move(FileFullHdManager.getConfigFilePath(vm),FileFullHdManager.getRemoteConfigFilePath(vm)) 
 		else:
 			raise Exception("Cannot find VM in CACHE FS"+FileFullHdManager.debugVM(vm) )	
@@ -274,7 +274,7 @@ class FileFullHdManager(object):
 	
 			#Move all files
 			shutil.move(FileFullHdManager.getRemoteHdPath(vm),FileFullHdManager.getHdPath(vm)) 
-			shutil.move(FileFullHdManager.getRemoteSwapPath(vm),FileFullHdManager.getSwapPath(vm))
+			#shutil.move(FileFullHdManager.getRemoteSwapPath(vm),FileFullHdManager.getSwapPath(vm))
 			shutil.move(FileFullHdManager.getRemoteConfigFilePath(vm),FileFullHdManager.getConfigFilePath(vm))
 			
 		else:
