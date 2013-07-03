@@ -45,8 +45,8 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 
-from sfa.util.faults import CertExpired, CertMissingParent, CertNotSignedByParent
-from sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.util.faults import CertExpired, CertMissingParent, CertNotSignedByParent
+#from vt_manager.communication.sfa.util.vt_manager.communication.sfa.ogging import logger
 
 glo_passphrase_callback = None
 
@@ -109,9 +109,8 @@ def convert_public_key(key):
     try:
         k.load_pubkey_from_file(ssl_fn)
         return k
-    except:
-        logger.log_exc("convert_public_key caught exception")
-        raise
+    except Exception as e:
+        raise e
     finally:
         # remove the temporary files
         if os.path.exists(ssh_fn):
@@ -446,7 +445,7 @@ class Certificate:
                 req = crypto.X509Req()
                 reqSubject = req.get_subject()
                 if (isinstance(subject, dict)):
-                    for key in reqSubject.keys():
+                    for key in subject.keys():
                         setattr(reqSubject, key, subject[key])
                 else:
                     setattr(reqSubject, "CN", subject)
@@ -485,6 +484,11 @@ class Certificate:
     def get_subject(self, which="CN"):
         x = self.cert.get_subject()
         return getattr(x, which)
+    
+    def get_extended_subject(self):
+        x = self.cert.get_subject()
+        subject = dict()
+        return dict(x.get_components())
 
     ##
     # Get a pretty-print subject name of the certificate
@@ -609,7 +613,6 @@ class Certificate:
     # Sign the certificate using the issuer private key and issuer subject previous set with set_issuer().
 
     def sign(self):
-        logger.debug('certificate.sign')
         assert self.cert != None
         assert self.issuerSubject != None
         assert self.issuerKey != None
@@ -695,7 +698,6 @@ class Certificate:
 
         # verify expiration time
         if self.cert.has_expired():
-            logger.debug("verify_chain: NO, Certificate %s has expired" % self.get_printable_subject())
             raise CertExpired(self.get_printable_subject(), "client cert")
 
         # if this cert is signed by a trusted_cert, then we are set
@@ -703,25 +705,16 @@ class Certificate:
             if self.is_signed_by_cert(trusted_cert):
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.cert.has_expired():
-                    logger.debug("verify_chain: YES. Cert %s signed by trusted cert %s"%(
-                            self.get_printable_subject(), trusted_cert.get_printable_subject()))
                     return trusted_cert
                 else:
-                    logger.debug("verify_chain: NO. Cert %s is signed by trusted_cert %s, but that signer is expired..."%(
-                            self.get_printable_subject(),trusted_cert.get_printable_subject()))
                     raise CertExpired(self.get_printable_subject()," signer trusted_cert %s"%trusted_cert.get_printable_subject())
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
-            logger.debug("verify_chain: NO. %s has no parent and issuer %s is not in %d trusted roots"%(self.get_printable_subject(), self.get_issuer(), len(trusted_certs)))
             raise CertMissingParent(self.get_printable_subject() + ": Issuer %s is not one of the %d trusted roots, and cert has no parent." % (self.get_issuer(), len(trusted_certs)))
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
-            logger.debug("verify_chain: NO. %s is not signed by parent %s, but by %s"%\
-                             (self.get_printable_subject(), 
-                              self.parent.get_printable_subject(), 
-                              self.get_issuer()))
             raise CertNotSignedByParent("%s: Parent %s, issuer %s"\
                                             % (self.get_printable_subject(), 
                                                self.parent.get_printable_subject(),
@@ -734,14 +727,10 @@ class Certificate:
         # Ugly - cert objects aren't parsed so we need to read the
         # extension and hope there are no other basicConstraints
         if not self.parent.isCA and not (self.parent.get_extension('basicConstraints') == 'CA:TRUE'):
-            logger.warn("verify_chain: cert %s's parent %s is not a CA" % \
-                            (self.get_printable_subject(), self.parent.get_printable_subject()))
             raise CertNotSignedByParent("%s: Parent %s not a CA" % (self.get_printable_subject(),
                                                                     self.parent.get_printable_subject()))
 
         # if the parent isn't verified...
-        logger.debug("verify_chain: .. %s, -> verifying parent %s"%\
-                         (self.get_printable_subject(),self.parent.get_printable_subject()))
         self.parent.verify_chain(trusted_certs)
 
         return
@@ -752,7 +741,6 @@ class Certificate:
         triples=[]
         m2x509 = X509.load_cert_string(self.save_to_string())
         nb_extensions=m2x509.get_ext_count()
-        logger.debug("X509 had %d extensions"%nb_extensions)
         for i in range(nb_extensions):
             ext=m2x509.get_ext_at(i)
             triples.append( (ext.get_name(), ext.get_value(), ext.get_critical(),) )

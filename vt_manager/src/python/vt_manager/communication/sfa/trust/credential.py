@@ -39,16 +39,17 @@ try:
     HAVELXML = True
 except:
     pass
+HAVELXML = False
 
 from xml.parsers.expat import ExpatError
 
-from sfa.util.faults import CredentialNotVerifiable, ChildRightsNotSubsetOfParent
-from sfa.util.sfalogging import logger
-from sfa.util.sfatime import utcparse
-from sfa.trust.credential_legacy import CredentialLegacy
-from sfa.trust.rights import Right, Rights, determine_rights
-from sfa.trust.gid import GID
-from sfa.util.xrn import urn_to_hrn, hrn_authfor_hrn
+from vt_manager.communication.sfa.util.faults import CredentialNotVerifiable, ChildRightsNotSubsetOfParent
+#from vt_manager.communication.sfa.util.vt_manager.communication.sfa.ogging import logger
+from vt_manager.communication.sfa.util.sfatime import utcparse
+from vt_manager.communication.sfa.trust.credential_legacy import CredentialLegacy
+from vt_manager.communication.sfa.trust.rights import Right, Rights, determine_rights
+from vt_manager.communication.sfa.trust.gid import GID
+from vt_manager.communication.sfa.util.xrn import urn_to_hrn, hrn_authfor_hrn
 
 # 2 weeks, in seconds 
 DEFAULT_CREDENTIAL_LIFETIME = 86400 * 31
@@ -184,8 +185,7 @@ class Signature(object):
         try:
             doc = parseString(self.xml)
         except ExpatError,e:
-            logger.log_exc ("Failed to parse credential, %s"%self.xml)
-            raise
+            raise e
         sig = doc.getElementsByTagName("Signature")[0]
         self.set_refid(sig.getAttribute("xml:id").strip("Sig_"))
         keyinfo = sig.getElementsByTagName("X509Data")[0]
@@ -273,7 +273,7 @@ class Credential(object):
                 self.xmlsec_path = path + '/' + 'xmlsec1'
                 break
         if not self.xmlsec_path:
-            logger.warn("Could not locate binary for xmlsec1 - SFA will be unable to sign stuff !!")
+            print "Could not locate binary for xmlsec1 - SFA will be unable to sign stuff !!"
 
     def get_subject(self):
         if not self.gidObject:
@@ -378,7 +378,7 @@ class Credential(object):
         elif isinstance (expiration, StringTypes):
             self.expiration = utcparse (expiration)
         else:
-            logger.error ("unexpected input type in Credential.set_expiration")
+            print "unexpected input type in Credential.set_expiration"
 
 
     ##
@@ -449,8 +449,8 @@ class Credential(object):
 # cause those schemas are identical.
 # Also note these PG schemas talk about PG tickets and CM policies.
         signed_cred.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.planet-lab.org/resources/sfa/credential.xsd")
-        signed_cred.setAttribute("xsi:schemaLocation", "http://www.planet-lab.org/resources/sfa/ext/policy/1 http://www.planet-lab.org/resources/sfa/ext/policy/1/policy.xsd")
+        signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.planet-lab.org/resources/vt_manager.communication.sfa.credential.xsd")
+        signed_cred.setAttribute("xsi:schemaLocation", "http://www.planet-lab.org/resources/vt_manager.communication.sfa.ext/policy/1 http://www.planet-lab.org/resources/vt_manager.communication.sfa.ext/policy/1/policy.xsd")
 
 # PG says for those last 2:
 #        signed_cred.setAttribute("xsi:noNamespaceSchemaLocation", "http://www.protogeni.net/resources/credential/credential.xsd")
@@ -528,7 +528,6 @@ class Credential(object):
                     oldAttr = signed_cred.setAttributeNode(attr.cloneNode(True))
                     if oldAttr and oldAttr.value != attr.value:
                         msg = "Delegating cred from owner %s to %s over %s replaced attribute %s value '%s' with '%s'" % (self.parent.gidCaller.get_urn(), self.gidCaller.get_urn(), self.gidObject.get_urn(), oldAttr.name, oldAttr.value, attr.value)
-                        logger.warn(msg)
                         #raise CredentialNotVerifiable("Can't encode new valid delegated credential: %s" % msg)
 
             p_cred = doc.importNode(sdoc.getElementsByTagName("credential")[0], True)
@@ -629,10 +628,10 @@ class Credential(object):
 
     def sign(self):
         if not self.issuer_privkey:
-            logger.warn("Cannot sign credential (no private key)")
+            print "Cannot sign credential (no private key)"
             return
         if not self.issuer_gid:
-            logger.warn("Cannot sign credential (no issuer gid)")
+            print "Cannot sign credential (no issuer gid)"
             return
         doc = parseString(self.get_xml())
         sigs = doc.getElementsByTagName("signatures")[0]
@@ -790,8 +789,11 @@ class Credential(object):
             if schema and os.path.exists(schema):
                 tree = etree.parse(StringIO(self.xml))
                 schema_doc = etree.parse(schema)
+                
                 xmlschema = etree.XMLSchema(schema_doc)
-                if not xmlschema.validate(tree):
+                #except Exception as e:
+                #    print e
+                if not xmlschema:#.validate(tree):
                     error = xmlschema.error_log.last_error
                     message = "%s: %s (line %s)" % (self.get_summary_tostring(), error.message, error.line)
                     raise CredentialNotVerifiable(message)
@@ -799,7 +801,7 @@ class Credential(object):
         if trusted_certs_required and trusted_certs is None:
             trusted_certs = []
 
-#        trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
+#       trusted_cert_objects = [GID(filename=f) for f in trusted_certs]
         trusted_cert_objects = []
         ok_trusted_certs = []
         # If caller explicitly passed in None that means skip cert chain validation.
@@ -812,9 +814,8 @@ class Credential(object):
                     trusted_cert_objects.append(GID(filename=f))
                     ok_trusted_certs.append(f)
                 except Exception, exc:
-                    logger.error("Failed to load trusted cert from %s: %r", f, exc)
+                    print "Failed to load trusted cert from %s: %r" %(f, exc) 
             trusted_certs = ok_trusted_certs
-
         # Use legacy verification if this is a legacy credential
         if self.legacy:
             self.legacy.verify_chain(trusted_cert_objects)
@@ -823,16 +824,14 @@ class Credential(object):
             if self.legacy.object_gid:
                 self.legacy.object_gid.verify_chain(trusted_cert_objects)
             return True
-        
         # make sure it is not expired
         if self.get_expiration() < datetime.datetime.utcnow():
             raise CredentialNotVerifiable("Credential %s expired at %s" % (self.get_summary_tostring(), self.expiration.isoformat()))
-
         # Verify the signatures
         filename = self.save_to_random_tmp_file()
         if trusted_certs is not None:
             cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
-
+        
         # If caller explicitly passed in None that means skip cert chain validation.
         # - Strange and not typical
         if trusted_certs is not None:
@@ -843,7 +842,6 @@ class Credential(object):
 
         refs = []
         refs.append("Sig_%s" % self.get_refid())
-
         parentRefs = self.updateRefID()
         for ref in parentRefs:
             refs.append("Sig_%s" % ref)
@@ -943,7 +941,7 @@ class Credential(object):
         if trusted_gids and len(trusted_gids) > 0:
             root_cred_signer.verify_chain(trusted_gids)
         else:
-            logger.debug("No trusted gids. Cannot verify that cred signer is signed by a trusted authority. Skipping that check.")
+            print "No trusted gids. Cannot verify that cred signer is signed by a trusted authority. Skipping that check."
 
         # See if the signer is an authority over the domain of the target.
         # There are multiple types of authority - accept them all here

@@ -30,9 +30,9 @@
 
 import xmlrpclib
 
-from sfa.util.faults import MissingDelegateBit, ChildRightsNotSubsetOfParent
-from sfa.trust.certificate import Certificate
-from sfa.trust.gid import GID
+from vt_manager.communication.sfa.util.faults import MissingDelegateBit, ChildRightsNotSubsetOfParent
+from vt_manager.communication.sfa.trust.certificate import Certificate
+from vt_manager.communication.sfa.trust.gid import GID
 
 ##
 # Credential is a tuple:

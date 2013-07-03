@@ -3,20 +3,19 @@
 #
 import sys
 
-from sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrustedRoots, PermissionError, \
+from vt_manager.communication.sfa.util.faults import InsufficientRights, MissingCallerGID, MissingTrustedRoots, PermissionError, \
     BadRequestHash, ConnectionKeyGIDMismatch, SfaPermissionDenied
-from sfa.util.sfalogging import logger
-from sfa.util.config import Config
-from sfa.util.xrn import get_authority
+#from vt_manager.communication.sfa.util.config import Config
+from vt_manager.communication.sfa.util.xrn import get_authority
 
-from sfa.trust.gid import GID
-from sfa.trust.rights import Rights
-from sfa.trust.certificate import Keypair, Certificate
-from sfa.trust.credential import Credential
-from sfa.trust.trustedroots import TrustedRoots
-from sfa.trust.hierarchy import Hierarchy
-from sfa.trust.sfaticket import SfaTicket
-
+from vt_manager.communication.sfa.trust.gid import GID
+from vt_manager.communication.sfa.trust.rights import Rights
+from vt_manager.communication.sfa.trust.certificate import Keypair, Certificate
+from vt_manager.communication.sfa.trust.credential import Credential
+from vt_manager.communication.sfa.trust.trustedroots import TrustedRoots
+from vt_manager.communication.sfa.trust.hierarchy import Hierarchy
+from vt_manager.communication.sfa.trust.sfaticket import SfaTicket
+from vt_manager.communication.sfa.sfa_config import config as CONFIG
 
 class Auth:
     """
@@ -26,33 +25,32 @@ class Auth:
     def __init__(self, peer_cert = None, config = None ):
         self.peer_cert = peer_cert
         self.hierarchy = Hierarchy()
-        if not config:
-            self.config = Config()
+        #if not config:
+        self.config = CONFIG#Config()
         self.load_trusted_certs()
 
     def load_trusted_certs(self):
-        self.trusted_cert_list = TrustedRoots(self.config.get_trustedroots_dir()).get_list()
-        self.trusted_cert_file_list = TrustedRoots(self.config.get_trustedroots_dir()).get_file_list()
-
-        
+        self.trusted_cert_list = TrustedRoots(self.config.TRUSTED_ROOTS_DIR).get_list()
+        self.trusted_cert_file_list = TrustedRoots(self.config.TRUSTED_ROOTS_DIR).get_file_list()
+         
         
     def checkCredentials(self, creds, operation, hrn = None):
         valid = []
+        error = None
         if not isinstance(creds, list):
             creds = [creds]
-        logger.debug("Auth.checkCredentials with %d creds"%len(creds))
         for cred in creds:
             try:
                 self.check(cred, operation, hrn)
                 valid.append(cred)
-            except:
+            except Exception as e:
                 cred_obj=Credential(string=cred)
-                logger.debug("failed to validate credential - dump=%s"%cred_obj.dump_string(dump_parents=True))
-                error = sys.exc_info()[:2]
+                error = e#sys.exc_info()[:2]
                 continue
-            
         if not len(valid):
-            raise InsufficientRights('Access denied: %s -- %s' % (error[0],error[1]))
+            if not error:
+                error = "No valid credentials found" 
+            raise InsufficientRights('Access denied: %s' % (str(error)))
         
         return valid
         
@@ -75,13 +73,12 @@ class Auth:
        
         # validate the client cert if it exists
         if self.peer_cert:
-            self.verifyPeerCert(self.peer_cert, self.client_gid)                   
-
+            self.verifyPeerCert(self.peer_cert, self.client_gid)
+  
         # make sure the client is allowed to perform the operation
         if operation:
             if not self.client_cred.can_perform(operation):
                 raise InsufficientRights(operation)
-
         if self.trusted_cert_list:
             self.client_cred.verify(self.trusted_cert_file_list, self.config.SFA_CREDENTIAL_SCHEMA)
         else:
@@ -94,7 +91,7 @@ class Auth:
             target_hrn = self.object_gid.get_hrn()
             if not hrn == target_hrn:
                 raise PermissionError("Target hrn: %s doesn't match specified hrn: %s " % \
-                                       (target_hrn, hrn) )       
+                                       (target_hrn, hrn) )    
         return True
 
     def check_ticket(self, ticket):
@@ -246,7 +243,6 @@ class Auth:
         rl = Rights()
         type = reg_record.type
 
-        logger.debug("entering determine_user_rights with record %s and caller_hrn %s"%(reg_record, caller_hrn))
 
         if type == 'slice':
             # researchers in the slice are in the DB as-is

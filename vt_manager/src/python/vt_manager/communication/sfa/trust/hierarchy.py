@@ -13,15 +13,15 @@
 
 import os
 
-from sfa.util.faults import MissingAuthority
-from sfa.util.sfalogging import logger
-from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
-from sfa.trust.certificate import Keypair
-from sfa.trust.credential import Credential
-from sfa.trust.gid import GID, create_uuid
-from sfa.util.config import Config
-from sfa.trust.sfaticket import SfaTicket
-
+from vt_manager.communication.sfa.util.faults import MissingAuthority
+#from vt_manager.communication.sfa.util.vt_manager.communication.sfa.ogging import logger
+from vt_manager.communication.sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, urn_to_hrn
+from vt_manager.communication.sfa.trust.certificate import Keypair
+from vt_manager.communication.sfa.trust.credential import Credential
+from vt_manager.communication.sfa.trust.gid import GID, create_uuid
+from vt_manager.communication.sfa.sfa_config import config
+from vt_manager.communication.sfa.trust.sfaticket import SfaTicket
+from vt_manager.communication.sfa.setUp import setup_config as auth_config
 ##
 # The AuthInfo class contains the information for an authority. This information
 # includes the GID, private key, and database connection information.
@@ -98,10 +98,8 @@ class Hierarchy:
     #
     # @param basedir the base directory to store the hierarchy in
 
-    def __init__(self, basedir = None, config = None):
-	if not config:
-            config = Config()
-	self.config = config
+    def __init__(self, basedir = None):
+        self.config = config
         if not basedir:
             basedir = os.path.join(self.config.SFA_DATA_DIR, "authorities")
         self.basedir = basedir
@@ -132,6 +130,7 @@ class Hierarchy:
         hrn, type = urn_to_hrn(xrn) 
         (directory, gid_filename, privkey_filename) = \
             self.get_auth_filenames(hrn)
+        print directory, gid_filename, privkey_filename
         
         return os.path.exists(gid_filename) and os.path.exists(privkey_filename) 
 
@@ -144,7 +143,6 @@ class Hierarchy:
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(str(xrn))
-        logger.debug("Hierarchy: creating authority: %s"% hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
@@ -163,7 +161,6 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            logger.debug("using existing key %r for authority %r"%(privkey_filename,hrn))
             pkey = Keypair(filename = privkey_filename)
         else:
             pkey = Keypair(create = True)
@@ -199,7 +196,6 @@ class Hierarchy:
     def get_auth_info(self, xrn):
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
-            logger.warning("Hierarchy: missing authority - xrn=%s, hrn=%s"%(xrn,hrn))
             raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, ) = \
@@ -224,7 +220,7 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey, CA=False):
+    def create_gid(self, xrn, uuid, pkey, CA=False, email=None):
         hrn, type = urn_to_hrn(xrn)
         if not type:
             type = 'authority'
@@ -233,14 +229,17 @@ class Hierarchy:
         # If xrn was a hrn instead of a urn, then the gid's urn will be
         # of type None 
         urn = hrn_to_urn(hrn, type)
-        gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn)
+        subject = self.get_subject(hrn)
+        if not subject:
+            subject = hrn
+        gid = GID(subject=subject, uuid=uuid, hrn=hrn, urn=urn, email=email)
         # is this a CA cert
         if hrn == self.config.SFA_INTERFACE_HRN or not parent_hrn:
             # root or sub authority  
             gid.set_intermediate_ca(True)
         elif type and 'authority' in type:
             # authority type
-            gid.set_intermediate_ca(True)
+            gid.set_intermediate_ca(False)
         elif CA:
             gid.set_intermediate_ca(True)
         else:
@@ -250,11 +249,12 @@ class Hierarchy:
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
-            gid.set_issuer(pkey, hrn)
+            gid.set_issuer(pkey, subject)
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            gid.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
+            parent_gid = parent_auth_info.get_gid_object()
+            gid.set_issuer(parent_auth_info.get_pkey_object(), parent_gid.get_extended_subject())
             gid.set_parent(parent_auth_info.get_gid_object())
 
         gid.set_pubkey(pkey)
@@ -263,7 +263,15 @@ class Hierarchy:
 
         return gid
 
-    ##
+    def get_subject(self,hrn):
+        if len(hrn.split('.'))>1:
+            subject = auth_config.SUBJECT
+        else:
+            subject = auth_config.PARENT_SUBJECT 
+        return subject
+
+
+   ##
     # Refresh a GID. The primary use of this function is to refresh the
     # the expiration time of the GID. It may also be used to change the HRN,
     # UUID, or Public key of the GID.
@@ -272,7 +280,6 @@ class Hierarchy:
     # @param hrn if !=None, change the hrn
     # @param uuid if !=None, change the uuid
     # @param pubkey if !=None, change the public key
-
     def refresh_gid(self, gid, xrn=None, uuid=None, pubkey=None):
         # TODO: compute expiration time of GID, refresh it if necessary
         gid_is_expired = False

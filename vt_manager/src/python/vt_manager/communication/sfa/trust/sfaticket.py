@@ -4,8 +4,8 @@
 
 import xmlrpclib
 
-from sfa.trust.certificate import Certificate
-from sfa.trust.gid import GID
+from vt_manager.communication.sfa.trust.certificate import Certificate
+from vt_manager.communication.sfa.trust.gid import GID
 
 # Ticket is tuple:
 #   (gidCaller, gidObject, attributes, rspec, delegate)

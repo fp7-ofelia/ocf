@@ -1,8 +1,8 @@
 import os.path
 import glob
 
-from sfa.trust.gid import GID
-from sfa.util.sfalogging import logger
+from vt_manager.communication.sfa.trust.gid import GID
+#from vt_manager.communication.sfa.util.vt_manager.communication.sfa.ogging import logger
 
 class TrustedRoots:
     
@@ -22,6 +22,7 @@ class TrustedRoots:
         gid.save_to_file(fn)
 
     def get_list(self):
+        print 'self.get_file_list():',self.get_file_list()
         gid_list = [GID(filename=cert_file) for cert_file in self.get_file_list()]
         return gid_list
 
@@ -33,8 +34,8 @@ class TrustedRoots:
                 if self.has_supported_extension(cert_file):
                     file_list.append(cert_file) 
                 else:
-                    logger.warning("File %s ignored - supported extensions are %r"%\
-                                       (cert_file,TrustedRoots.supported_extensions))
+                    print "File %s ignored - supported extensions are %r"%\
+                                       (cert_file,TrustedRoots.supported_extensions)
         return file_list
 
     def has_supported_extension (self,path):
