@@ -56,7 +56,7 @@ class VTSfaDriver:
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf
-		#self.shell.CreateSliver(requested_attributes,projectName,sliceName)
+		self.shell.CreateSliver(requested_attributes,projectName,sliceName)
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:
