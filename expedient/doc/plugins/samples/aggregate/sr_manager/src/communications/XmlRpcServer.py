@@ -1,3 +1,11 @@
+"""
+Implements the server functionality (connection,
+authentication, etc).
+
+@date: Jun 12, 2013
+@author: Laszlo Nagy, msune, CarolinaFernandez
+"""
+
 """SecureXMLRPCServer.py - simple XML RPC server supporting SSL.
 
 Based on this article: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/81549
@@ -16,7 +24,9 @@ from communications import XmlRpcAPI
 from OpenSSL import SSL
 from utils.Logger import Logger
 
-from settings.settingsLoader import XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LISTEN_PORT,XMLRPC_SERVER_KEYFILE,XMLRPC_SERVER_CERTFILE
+from settings import XMLRPC_SERVER_USER, XMLRPC_SERVER_PASSWORD, \
+                     XMLRPC_SERVER_LISTEN_HOST,XMLRPC_SERVER_LISTEN_PORT, \
+                     XMLRPC_SERVER_KEYFILE,XMLRPC_SERVER_CERTFILE
 
 
 class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
@@ -50,7 +60,40 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
-        
+
+    '''
+    Request Handler that verifies username and password passed to
+    XML RPC server in HTTP URL sent by client.
+    '''
+    # this is the method we must override
+    def parse_request(self):
+        if SimpleXMLRPCServer.SimpleXMLRPCRequestHandler.parse_request(self):
+            if self.authenticate(self.headers):
+                return True
+        else:
+            self.send_error(401, 'Authentication failed')
+            return False
+
+    def authenticate(self, headers):
+        """
+        Authenticates the headers against the credentials set in the
+        configuration file. This method overrides the one with the
+        same name in SimpleXMLRPCRequestHandler.
+
+        @return whether authentication was successful or not
+		"""
+        try:
+            from base64 import b64decode
+            (basic, _, encoded) = headers.get('Authorization').partition(' ')
+            assert basic == 'Basic', 'Only basic authentication supported'
+            encodedByteString = encoded.encode()
+            decodedBytes = b64decode(encodedByteString)
+            decodedString = decodedBytes.decode()
+            (username, _, password) = decodedString.partition(':')
+            return (username == XMLRPC_SERVER_USER and password == XMLRPC_SERVER_PASSWORD)
+        except:
+            return False
+
     def do_POST(self):
         """Handles the HTTPS POST request.
 

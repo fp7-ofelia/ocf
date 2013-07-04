@@ -1,3 +1,12 @@
+"""
+Controller for the SampleResource object.
+Performs the operations to create, update and
+delete such objects.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 from sample_resource.models.SampleResource import SampleResource as SampleResourceModel
 from sample_resource.utils.validators import validate_resource_name
 import decimal, random
@@ -8,7 +17,7 @@ class SampleResource():
     """
     
     @staticmethod
-    def create(instance, slice, aggregate_id):
+    def create(instance, aggregate_id, slice=None):
         try:
             if all(x in instance.__dict__ for x in ["name", "temperature_scale"]):
                 sr = SampleResourceModel()
@@ -22,10 +31,11 @@ class SampleResource():
                     # Normal form
                     sr.set_temperature(decimal.Decimal(random.randrange(1000))/1000)
                 sr.set_temperature_scale(instance.__dict__['temperature_scale'])
-                sr.set_project_id(slice.project.id)
-                sr.set_project_name(slice.project.name)
-                sr.set_slice_id(slice.id)
-                sr.set_slice_name(slice.name)
+                if slice:
+                    sr.set_project_id(slice.project.id)
+                    sr.set_project_name(slice.project.name)
+                    sr.set_slice_id(slice.id)
+                    sr.set_slice_name(slice.name)
                 sr.save()
         except Exception as e:
             if "Duplicate entry" in str(e):

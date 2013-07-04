@@ -1,3 +1,10 @@
+"""
+Keeps the dummy AM server running.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 from communications.XmlRpcServer import XmlRpcServer
 
 def main():

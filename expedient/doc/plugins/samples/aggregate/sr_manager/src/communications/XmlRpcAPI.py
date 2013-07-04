@@ -1,11 +1,18 @@
+"""
+Defines the dummy AM API.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 from controller.ResourceController import ResourceController
 import string
 
-"""
-Allowed methods on the XMLRPC server
-"""
-
 class xmlrpc_wrappers:
+    """
+    Allowed methods on the XMLRPC server
+    """
+
     def __init__(self, callback_function = None):
         self.callback_function = callback_function
 

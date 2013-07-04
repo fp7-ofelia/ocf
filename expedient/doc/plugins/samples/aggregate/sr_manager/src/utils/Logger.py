@@ -1,9 +1,14 @@
+"""
+Configuration for the logger.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 import logging
 import threading 
-
-
 #Get log level
-from settings.settingsLoader import LOG_LEVEL 
+from settings import LOG_LEVEL 
 
 #Configure logger
 log_level= ""
@@ -19,10 +24,6 @@ else:
 	log_level = logging.DEBUG
 
 threadId="main"
-try:
-	threadId = threading.current_thread().OXAId
-except:
-	pass
 
 logging.basicConfig(format='%(asctime)s [%(threadName)s>%(filename)s:%(lineno)d] %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p', level=log_level)
 

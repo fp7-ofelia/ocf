@@ -1,3 +1,11 @@
+"""
+Graphical user interface functionalities for the
+SampleResource Aggregate Manager.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -124,7 +132,7 @@ def get_nodes_links(slice, chosen_group=None):
     for i, sr_agg in enumerate(sr_aggs):
         sr_agg = sr_agg.sampleresourceaggregate
         # Iterates over every SampleResource contained within the slice
-        for sr in sr_agg.get_resources(slice.id):
+        for sr in sr_agg.get_resources():
             sr = sr.sampleresource
             nodes.append(Node(
                 # Users shall not be left the choice to choose group/island; otherwise collision may arise
@@ -145,7 +153,6 @@ def get_nodes_links(slice, chosen_group=None):
                         value = "rsc_id_%s-rsc_id_%s" % (sr.id, connection.id)
                         ),
                 )
-
     return [nodes, links]
 
 #from expedient.common.utils.plugins.plugininterface import PluginInterface

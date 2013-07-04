@@ -1,8 +1,10 @@
-'''
-Created on Apr 2, 2013
+"""
+Model for the SampleResource aggregate.
+It defines the fields that will be used in the CRUD form.
 
+@date: Apr 2, 2013
 @author: CarolinaFernandez
-'''
+"""
 
 from django import forms
 from sample_resource.models import SampleResourceAggregate as SampleResourceAggregateModel
