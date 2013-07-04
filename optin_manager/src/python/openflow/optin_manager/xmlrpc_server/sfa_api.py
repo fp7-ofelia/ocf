@@ -7,17 +7,11 @@ from openflow.optin_manager.sfa.util.faults import SfaInvalidArgument, OCFSfaPer
 from openflow.optin_manager.sfa.util.version import version_core
 from openflow.optin_manager.sfa.util.xrn import Xrn
 
-
 #from openflow.optin_manager.sfa.OFSfaDriver import OFSfaDriver
 from openflow.optin_manager.sfa.managers.MetaSfaRegistry import MetaSfaRegistry
 from openflow.optin_manager.sfa.managers.AggregateManager import AggregateManager
 
-from openflow.optin_manager.sfa.methods.ListResources import ListResources as LRCredVal
-from openflow.optin_manager.sfa.methods.CreateSliver import CreateSliver as CSCredVal
-from openflow.optin_manager.sfa.methods.SliverStatus import SliverStatus as SSCredVal
-from openflow.optin_manager.sfa.methods.DeleteSliver import DeleteSliver as DSCredVal
-from openflow.optin_manager.sfa.methods.Start import Start as StartCredVal
-from openflow.optin_manager.sfa.methods.Stop import Stop as StopCredVal
+from openflow.optin_manager-sfa.methods.permission_manager import PermissionManager
 from openflow.optin_manager.sfa.sfa_config import config as CONFIG
 import zlib
 
@@ -33,6 +27,7 @@ TIME_TYPE = 'string'
 #driver = OFSfaDriver(None)
 registry = MetaSfaRegistry(None)
 aggregate = AggregateManager(None)
+pm = PermissionManager()
 
 @rpcmethod(signature=['string', 'string'], url_name="optin_sfa")
 def ping(challenge):
@@ -70,36 +65,37 @@ def GetVersion(api=None, options={}):
     return version
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
-def ListResources(credentials, options, **kwargs):
-    LRCredVal(credentials,options) #Credential Validations already implement SFA/GENI Exceptions 
-    try: 
-        rspec = aggregate.ListResources(options=options)
-    except Exception as e:
-        raise OCFSfaError(e,'ListResources')
+def ListResources(creds, options, **kwargs):
+    pm.check_permissions('ListResources',locals()) 
+    #try: 
+    rspec = aggregate.ListResources(options=options)
+    #except Exception as e:
+    #    raise OCFSfaError(e,'ListResources')
   
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.list_resources(slice_urn,slice_leaf,credentials, options)
 
 @rpcmethod(signature=[CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
-def ListSlices(self, creds, options):
+def ListSlices(creds, options):
     raise Exception("SFA users do not have permission to list OCF slices")
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
-def CreateSliver(slice_urn, credentials, rspec, users, options):
-    CSCredVal(slice_urn,credentials,users,options)
-    try:
-        rspec = aggregate.CreateSliver(slice_urn,rspec,users,options)
-    except Exception as e:
-        raise OCFSfaError(e,'CreateSliver')
+def CreateSliver(slice_xrn, creds, rspec, users, options):
+    pm.check_permissions('CreateSliver',locals())    
+    #try:
+    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,options)
+    #except Exception as e:
+    #    raise OCFSfaError(e,'CreateSliver')
         
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
-def DeleteSliver(slice_urn, credentials,options,**kwargs):
-    DSCredVal(slice_urn,credentials,options)
+def DeleteSliver(xrn, creds,options,**kwargs):
+    pm.check_permissions('DeleteSliver',locals())
+    #DSCredVal(slice_urn,credentials,options)
     try:
-        rspec = aggregate.DeleteSliver(slice_urn,options)
+        rspec = aggregate.DeleteSliver(xrn,options)
     except Exception as e:
         raise OCFSfaError(e,'DeleteSliver')
 
@@ -108,10 +104,11 @@ def DeleteSliver(slice_urn, credentials,options,**kwargs):
 
 
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
-def SliverStatus(slice_urn, credentials, options):
-    SSCredVal(slice_urn,credentials,options)
+def SliverStatus(slice_xrn, creds, options):
+    pm.check_permissions('SliverStatus',locals()) 
+    #SSCredVal(slice_urn,credentials,options)
     try:
-        struct = aggregate.SliverStatus(slice_urn,options)
+        struct = aggregate.SliverStatus(slice_xrn,options)
     except Exception as e:
         raise OCFSfaError(e,'SliverStatus')
 
@@ -119,19 +116,19 @@ def SliverStatus(slice_urn, credentials, options):
     return to_return#driver.sliver_status(slice_urn,authority,credentials,options)
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE], url_name="optin_sfa")
-def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
+def RenewSliver(slice_xrn, creds, expiration_time, **kwargs):
     #XXX: this method should extend the expiration time of the slices
     #TODO: Implement some kind of expiration date model for slices
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': True} #True
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
-def Shutdown(slice_urn, credentials, **kwargs):
+def Shutdown(slice_xrn, creds, **kwargs):
     #TODO: What this method should do? Where is called?
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': True} #True
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
-def Start(xrn, credentials, **kwargs):
-    StartCredVal(xrn,credentials)
+def Start(xrn, creds, **kwargs):
+    pm.check_permissions('Start',locals())
     try:
         slice_action = aggregate.start_slice(xrn)
     except Exception as e:
@@ -139,8 +136,8 @@ def Start(xrn, credentials, **kwargs):
     return {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': slice_action} #driver.crud_slice(slice_urn,authority,credentials,action='start_slice')
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
-def Stop(xrn, credentials):
-    StopCredVal(xrn,credentials)
+def Stop(xrn, creds):
+    pm.check_permissions('Stop',locals())
     try:
         slice_action = aggregate.stop_slice (xrn)
     except Exception as e:
