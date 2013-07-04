@@ -62,7 +62,7 @@ Show
     <img alt="Zoom out" title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;" />
   </a>
   &nbsp;
-  <a id="link_zoom_out" href="javascript: zoomReset()">
+  <a id="link_zoom_reset" href="javascript: zoomReset()">
     <img alt="Zoom reset" title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;" />
   </a>
   &nbsp;
@@ -79,7 +79,7 @@ Show
 -->
 <script type="text/javascript">
 /* d3 data */
-var nIslands = {{ n_islands}},
+var nIslands = {{ n_islands }},
     pad = 5,
     width = 740,
     height = 400

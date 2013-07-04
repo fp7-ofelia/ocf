@@ -41,7 +41,7 @@ class AgentMonitoringThread(Thread):
 					server.save()
 		except Exception as e:
 			#If fails for some reason mark as unreachable
-			print "Could not reach server %s. Will be set as unavailable "
+			print "Could not reach server %s. Will be set as unavailable " % str(server.name)
 			print e
 			server.setAvailable(False)
 			server.save()

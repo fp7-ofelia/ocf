@@ -161,27 +161,6 @@
                         might be prompted for additional information that the aggregate
                         needs about your slice.
                 </div>
-		<!--	
-                <div class="aggregate_list">
-                        {% with slice.aggregates.all as aggregate_list %}
-                        {% if aggregate_list.count %}
-                                {% with "slice/agg_list_actions.html" as action_template %}
-                                        {% include "aggregate/list_table.html" %}
-                                {% endwith %}
-                        {% else %}
-                        <p>
-                                This slice has no aggregates added to it. To be able to
-                                reserve resources on aggregates, you will need to add aggregates to
-                                the slice.
-                        </p>
-                        {% endif %}
-                        {% endwith %}
-                    <div class="center">
-                        <input type="button" value="Add Aggregates"
-                        onclick='document.location="{% url slice_add_agg slice.id %}"' />
-                    </div>
-		
-                </div>-->	
         </div>
 
 {# Show message when no aggregates are added to the slice #}
