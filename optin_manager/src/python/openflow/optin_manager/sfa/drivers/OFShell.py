@@ -24,7 +24,7 @@ class OFShell:
 	@staticmethod
 	def get_switches(used_switches=[]):
 		complete_list = []
-                switches = self.get_raw_switches()
+                switches = OFShell().get_raw_switches()
     		for switch in switches:
                         if len(used_switches)>0:
                              	if not switch[0] in used_switches:
@@ -44,7 +44,7 @@ class OFShell:
 
 	@staticmethod
 	def get_links():
-                links = self.get_raw_links()
+                links = OFShell().get_raw_links()
 		link_list = list()
 		for link in links:
 			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
@@ -149,7 +149,7 @@ class OFShell:
         def get_raw_links(self):
              try:
                  fv = FVServerProxy.objects.all()[0]  
-                 links = fv.get_links
+                 links = fv.get_links()
              except Exception as e:
                  #links = test_links
                  raise e

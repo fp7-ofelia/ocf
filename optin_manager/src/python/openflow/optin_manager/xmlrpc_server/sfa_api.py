@@ -11,7 +11,7 @@ from openflow.optin_manager.sfa.util.xrn import Xrn
 from openflow.optin_manager.sfa.managers.MetaSfaRegistry import MetaSfaRegistry
 from openflow.optin_manager.sfa.managers.AggregateManager import AggregateManager
 
-from openflow.optin_manager-sfa.methods.permission_manager import PermissionManager
+from openflow.optin_manager.sfa.methods.permission_manager import PermissionManager
 from openflow.optin_manager.sfa.sfa_config import config as CONFIG
 import zlib
 
