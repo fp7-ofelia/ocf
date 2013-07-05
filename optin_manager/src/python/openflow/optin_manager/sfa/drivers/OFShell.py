@@ -102,7 +102,7 @@ class OFShell:
                 except:
                     raise ""
 
-	def CreateSliver(self, requested_attributes, slice_urn, authority):
+	def CreateSliver(self, requested_attributes, slice_urn, authority,expiration):
                 project_description = 'SFA Project from %s' %authority
                 slice_id = slice_urn
                 for rspec_attrs in requested_attributes:
@@ -113,7 +113,8 @@ class OFShell:
                     if not self.check_req_switches(switch_slivers):
                         raise Exception("The Requested OF Switches on the RSpec do not match with the available OF switches of this island. Please check the datapath IDs of your Request RSpec.")
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
-                   
+                    #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
+                    ExpirationComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
 		return 1
 
         def SliverStatus(self, slice_urn):

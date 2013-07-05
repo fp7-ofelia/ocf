@@ -43,12 +43,14 @@ class AggregateManager:
 	authority = xrn.get_authority_hrn()
 	return self.driver.sliver_status(slice_leaf,authority,options)
 
-    def CreateSliver(self, xrn, rspec_string, users, options):
+    def CreateSliver(self, xrn, rspec_string, users,creds options):
+       #XXX: How can the expiration time be checked?
        xrn = Xrn(xrn, 'slice')
        slice_urn = xrn.get_urn()
        slice_leaf = xrn.get_leaf()
        authority = xrn.get_authority_hrn()
-       return self.driver.create_sliver (slice_urn,slice_leaf,authority,rspec_string, users, options)
+       expiration_date =  self.driver.get_expiration_date(slice_hrn, creds)
+       return self.driver.create_sliver (slice_urn,slice_leaf,authority,rspec_string, users, options, expiration_date)
 
     def DeleteSliver(self, xrn, options):
         xrn = Xrn(xrn)

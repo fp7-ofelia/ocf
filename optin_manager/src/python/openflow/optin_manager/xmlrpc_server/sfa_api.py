@@ -83,7 +83,7 @@ def ListSlices(creds, options):
 def CreateSliver(slice_xrn, creds, rspec, users, options):
     pm.check_permissions('CreateSliver',locals())    
     #try:
-    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,options)
+    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,creds,options)
     #except Exception as e:
     #    raise OCFSfaError(e,'CreateSliver')
         

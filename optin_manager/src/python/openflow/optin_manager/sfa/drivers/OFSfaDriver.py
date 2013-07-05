@@ -8,6 +8,7 @@ from openflow.optin_manager.sfa.util.defaultdict import defaultdict
 from openflow.optin_manager.sfa.util.sfatime import utcparse, datetime_to_string, datetime_to_epoch
 from openflow.optin_manager.sfa.util.xrn import Xrn, hrn_to_urn, get_leaf
 from openflow.optin_manager.sfa.util.cache import Cache
+from openflow.optin_manager.sfa.trust.credential import Credential
 
 from openflow.optin_manager.sfa.rspecs.version_manager import VersionManager
 from openflow.optin_manager.sfa.rspecs.rspec import RSpec
@@ -49,12 +50,12 @@ class OFSfaDriver:
                         raise RecordNotFound(slice_urn)
 	
 
-        def create_sliver (self,slice_urn,slice_leaf,authority,rspec_string, users, options):
+        def create_sliver (self,slice_urn,slice_leaf,authority,rspec_string, users, options, expiration):
                 rspec = RSpec(rspec_string,'OcfOf')
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority
 		sliceName = slice_leaf
-		self.shell.CreateSliver(requested_attributes,slice_urn,projectName)
+		self.shell.CreateSliver(requested_attributes,slice_urn,projectName,expiration)
 	        options['slivers'] = requested_attributes
             	
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,options=options)
@@ -62,8 +63,14 @@ class OFSfaDriver:
 	def sliver_status(self,slice_urn,authority,options):
 		result = self.shell.SliverStatus(slice_urn)
 		return result
-			
 
+        def get_expiration_date(slice_hrn, creds):
+        	for cred in creds:
+                	credential = Credential(string=cred)
+                    	if credential.get_gid_caller().get_hrn() == slice_hrn:
+                        	return credential.get_expiration()
+                return None 
+                	
 		
 	
 
