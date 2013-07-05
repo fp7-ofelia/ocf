@@ -1,6 +1,7 @@
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.models.VTServer import VTServer
 from vt_manager.models.Action import Action
+from vt_manager.models.expiring_components import ExpiringComponents
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
@@ -72,7 +73,7 @@ class VTShell:
 			raise e
 		return 1
 
-	def CreateSliver(self,vm_params,projectName,sliceName):
+	def CreateSliver(self,vm_params,projectName,sliceName,expiration):
 		#processes = list()
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
 		for provisioningRSpec in provisioningRSpecs:
@@ -81,6 +82,9 @@ class VTShell:
 		    #processes.append(process)
 		    #process.start()
                     ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
+                    if expiration:
+                        ExpiringComponents.objects.create(slice=sliceName, authority=projectName, expires=expiration).save()
+                         
 		#waiter.recv()
 		return 1
  

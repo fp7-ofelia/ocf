@@ -61,6 +61,10 @@ class ProvisioningResponseDispatcher():
 				try:
 					logging.debug("Sending response to Plugin in sendAsync")
 					if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+                                            if failedOnCreate:
+                                                expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
+                                                if len(expirning_slices)  == 1:
+                                                    expiring_slices[0].delete()
 					    return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:

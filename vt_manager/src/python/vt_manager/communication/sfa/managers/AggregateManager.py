@@ -15,23 +15,6 @@ class AggregateManager:
     def __init__ (self, config=None):
 	self.driver = VTSfaDriver(None)
 
-    def GetVersion(self, api, options):
-	
-	#XXX: for now the version will be like this
-        xrn=Xrn(api.hrn)
-        version = version_core()
-        version_generic = {
-            'interface':'aggregate',
-            'sfa': 2,
-            'geni_api': 2,
-            'geni_api_versions': {'2': 'http://%s:%s' % (api.config.SFA_AGGREGATE_HOST, api.config.SFA_AGGREGATE_PORT)},
-            'hrn':xrn.get_hrn(),
-            'urn':xrn.get_urn(),
-            }
-        version.update(version_generic)
-        testbed_version = self.driver.aggregate_version()
-        version.update(testbed_version)
-        return version
 
     def ListSlices(self, api, creds, options):
 	raise Exception("External authorities do not have permissions to list OCF slices") 
@@ -53,11 +36,13 @@ class AggregateManager:
 	authority = xrn.get_authority_hrn()
 	return self.driver.sliver_status(slice_leaf,authority,options)
 
-    def CreateSliver(self, xrn, rspec_string, users, options):
+    def CreateSliver(self,xrn,rspec_string,users,creds,options):
         xrn = Xrn(xrn, 'slice')
         slice_leaf = xrn.get_leaf()
+        slice_hrn = xrn.get_hrn()
         authority = xrn.get_authority_hrn()
-        return self.driver.create_sliver (slice_leaf,authority,rspec_string, users, options)
+        expiration_date = self.driver.get_expiration(creds, slice_hrn)
+        return self.driver.create_sliver (slice_leaf,authority,rspec_string, users, options, expiration_date)
 
     def DeleteSliver(self, xrn, options):
 	#TODO: Check the options or xrn to get a single vm.

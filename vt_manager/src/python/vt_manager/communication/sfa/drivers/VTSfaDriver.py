@@ -9,6 +9,7 @@ from vt_manager.communication.sfa.util.defaultdict import defaultdict
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string, datetime_to_epoch
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, get_leaf
 from vt_manager.communication.sfa.util.cache import Cache
+from vt_manager.communication.sfa.trust.credential import Credential
 
 from vt_manager.communication.sfa.rspecs.version_manager import VersionManager
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
@@ -50,13 +51,13 @@ class VTSfaDriver:
 				self.shell.RebootSlice(vm['node-id'],vm['vm-id'])
 		return 1
 
-        def create_sliver (self,slice_leaf,authority,rspec_string, users, options):
+        def create_sliver (self,slice_leaf,authority,rspec_string, users, options, expiration_date):
 		
                 rspec = RSpec(rspec_string,'OcfVt')
                 requested_attributes = rspec.version.get_slice_attributes()
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf
-		self.shell.CreateSliver(requested_attributes,projectName,sliceName)
+		self.shell.CreateSliver(requested_attributes,projectName,sliceName,expiration_date)
 		created_vms = list()
 		nodes = list()
 		for slivers in requested_attributes:
@@ -79,6 +80,12 @@ class VTSfaDriver:
 		result['virtual-machines'] = List
 		return result
 			
-
-		
+        def get_expiration(self,creds,slice_hrn):
+                for cred in creds:
+                	credential = Credential(string=cred)
+                    	if credential.get_gid_caller().get_hrn() == slice_hrn:
+                        	return credential.get_expiration()
+                return None 
+                
+                		
 	

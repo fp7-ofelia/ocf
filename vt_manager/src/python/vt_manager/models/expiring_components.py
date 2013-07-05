@@ -17,4 +17,3 @@ class ExpiringComponents(models.Model):
         self.expires = new_expiration
         self.save()
 
-

@@ -72,7 +72,7 @@ def ListSlices(self, creds, options):
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def CreateSliver(slice_xrn, creds, rspec, users, options):
     pm.check_permissions('CreateSliver',locals())
-    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,options)
+    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,creds,options)
     #xrn = Xrn(slice_urn, 'slice')
     #slice_leaf = xrn.get_leaf()
     #authority = xrn.get_authority_hrn()
