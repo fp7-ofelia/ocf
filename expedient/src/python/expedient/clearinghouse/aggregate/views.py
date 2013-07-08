@@ -35,7 +35,7 @@ def list(request, agg_id=None):
     create url.
     '''
     
-    qs = Aggregate.objects.all()
+    qs = Aggregate.objects.all().order_by('name')
     
     if request.method == "GET":
         form = AggregateTypeForm()
@@ -145,19 +145,7 @@ def status_img_url(request, agg_id):
     fail = HttpResponse(reverse("img_media", args=["inactive.png"]))
     
     try:
-        # Check aggregate status and update model if it changed
-        agg_status = aggregate.as_leaf_class().check_status()
-        # Already being taken care of in 
-        # expedient/src/python/expedient/clearinghouse/monitoring/AggregateMonitoringThread.py
-
-#        if agg_status != aggregate.available:
-#            aggregate.available = agg_status
-##        if request.user in User.objects.filter(is_superuser=True):
-#        if request.user.has_perm(ExpedientPermission.objects.get(name="can_edit_aggregate")):
-#            if agg_status != aggregate.available:
-#                aggregate.available = agg_status
-#                aggregate.save()
-        if agg_status:
+        if aggregate.as_leaf_class().check_status():
             return success
         else:
             return fail
