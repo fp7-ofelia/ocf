@@ -14,9 +14,11 @@ urlpatterns = urlpatterns + patterns('vt_plugin.controller.dispatchers.GUIdispat
     url(r'^virtualmachine_crud/(?P<slice_id>\d+)/(?P<server_id>\d+)/$', 'virtualmachine_crud', name='virtualmachine_crud'),
     url(r'^vms_status/(?P<slice_id>\d+)/$', 'check_vms_status', name='check_vms_status'),
     url(r'^update_messages/$', 'update_messages', name='update_messages'),
+    url(r'^vms/remove/(?P<vm_id>\d+)/$', 'remove_vm', name="remove_vm"),
+    url(r'^vms/remove/all/$', 'remove_all_vms', name="remove_all_vms"),
+	# Use plugin prefix before method name to differentiate from other plugins
+    url(r'^administration/$', 'get_administration_data', name="vt_plugin_administration"),
 )
-
-
 
 
 urlpatterns = urlpatterns + patterns('',

@@ -5,92 +5,39 @@
 {% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
 
 {% block head %}
-<style>
-	#resources_table {
-	    width: 100%;
-	}
-	#resource_list {
-	    width: 100%;
-	}
-	.table_div td,th {
-	    text-align: center;
-	}
-</style>
+<link href="{% url css_media 'slice.css' %}" type="text/css" rel="stylesheet" />
+<link href="{% url css_media 'slice.topology.css' %}" type="text/css" rel="stylesheet" />
+<script src="{% url js_media 'slice.js' %}"></script>
 <script src="{% url js_media 'jquery.blockUI.js' %}"></script>
-<script>
-        function getLoadingMsg(action) {
-            var grantedFlowspace = 0;
-            if ($("[id^=grantedFlowspace][id$=Container]").length > 0 || 
-                $(".grantedFlowspaceHeader").length > 0) {
-                    grantedFlowspace = 1;
-                }
-
-            var flowspaceWarning = 'confirmWrapper("';
-            if (action == "start_update") {
-                {% if slice.started %}
-                    if (grantedFlowspace) {
-                        flowspaceWarning += "Updating";
-                    }
-                {% else %}
-                    return eval('showLoadingMsg("Loading...");');
-                {% endif %}
-            } else if (action == "stop") {
-                if (grantedFlowspace) {
-                    flowspaceWarning += "Stopping";
-                }
-            }
-            if (grantedFlowspace) {
-                flowspaceWarning += ' the slice will cause all granted flowspaces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to ' + action + ' the slice?");';
-                return eval(flowspaceWarning);
-            } else {
-                return eval('showLoadingMsg("Loading...");');
-            }
-        }
-
-	function showLoadingMsg(message){
-		//TODO:Show message
-		 $.blockUI({ css: { 
-		            border: 'none', 
-		            padding: '15px', 
-       			    backgroundColor: '#000', 
-                	 	'-webkit-border-radius': '10px', 
-                		'-moz-border-radius': '10px', 
- 	       	            opacity: .5, 
-         		    color: '#fff' 
-        		} });
-	}
-	function confirmWrapper(message){
-		value = confirm(message);
-		if (value){
-			showLoadingMsg("Loading...");
-		}
-		return value;
-	}
-	$(document).ready(function() {
-		$("#aggs_help_img").tooltip({
-			tip: "#aggs_help_div"
-		});
-		$(".expandableTooltipable").tooltip({
-			tip: "#expandableHelp"
-		});
-	});
-</script>
 {% endblock %}
 
 {% block content %}
 <div class="main">
-	<div class="title">
+	<div class="title" style="width: 100%;">
 		<h1>Slice <font class="highlight">{{ slice.name }}</font> in Project <font class="highlight">{{ slice.project.name }}</font></h1>
 	</div>
-		<div class="slicemgmt_actions">
+
+	<div class="mgmt_actions">
+			<p><a href="{% url slice_update slice.id %}">Edit</a> information |
+			<a href="{% url slice_delete slice.id %}">Delete</a></p>
+		</div>
+
+	<div class="slice_description">
+		{{ slice.description }}
+		<!--XXX:Expiration method needs review
+			<h2>Expires:</h2>
+			{{ slice.expiration_date }}-->
+	</div>
+
+	<div class="slicemgmt_actions">
 	   	<table width="100%" id="slicemgmt_table">
 			<tr>
-				<th><h2>Slice status</h2></th>
-				<th><h2>Description</h2></th>
-				<th><h2>Management</h2></th>
+				<th width="20%"><h2>Slice status</h2></th>
+				<th width="*"></th>
+				<th width="20%"><h2>Management</h2></th>
 			</tr>
 			<tr>
-			<td style="text-align:center">
+			<td width="20%" style="text-align:center">
 				{% if not slice.started %}
 					<img src="{% url img_media 'inactive.png' %}" alt="Slice not started" title="Slice not started">
 				{%else%}
@@ -102,52 +49,41 @@
 				{% endif %}
 
 			</td>
-			<td width="57%" style="font-size:11px;vertical-align:top">
-		        <i>{{ slice.description }}</i>
-			<!--		XXX:Expiration method needs review
-		        <h2>Expires:</h2>
-		        {{ slice.expiration_date }}-->
-	   		</td>
-			<td width="27%">
-		    	<a href="{% url slice_update slice.id %}">Edit</a> slice basic information.<br>
-		    	<a href="{% url slice_delete slice.id %}">Delete</a> slice.
-				<table style="margin-top:5px;">
-	    			<tr>
-	    				<td>
-				    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
-								<input 
-								type="submit" 
-								value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
-								onClick = "return getLoadingMsg('start_update');"
-							/>
-			    			</form>
-			    		</td>
-			    		<td>
-				    		<form action="{% url slice_stop slice.id %}" method="POST">{% csrf_token %}
-							<input
-							type="submit"
-							value="Stop Slice"
-							{% if not slice.started %} disabled {% endif %}
-							onClick = "return getLoadingMsg('stop');"
-							/>
-				    		</form>
-		    			</td>
-		    		</tr>
-			    	</table>
+			<td width="*"></td>
+			<td width="20%" style="text-align:center">
+					<form style="display: inline !important;" action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
+					<input 
+					type="submit" 
+					value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
+					class="slice_action_button {% if slice.started %}update_slice_button{% else %}start_slice_button{% endif %}"
+					onClick = "return getLoadingMsg('start_update', '{{ slice.started }}');"
+					title="{% if slice.started %}Update{% else %}Start{% endif %} slice to allocate resources"
+					/>
+					</form>
+					<form style="display: inline !important;" action="{% url slice_stop slice.id %}" method="POST">{% csrf_token %}
+					<input
+					type="submit"
+					value="Stop Slice"
+					class="slice_action_button stop_slice_button"
+					{% if not slice.started %} disabled {% endif %}
+					onClick = "return getLoadingMsg('stop', '{{ slice.started }}');"
+					title="Stop slice to deallocate resources"
+					/>
+					</form>
 			</td>
 			</tr>
-			</table>
-		</div><!-- mgmt actions -->
-    </div><!-- detail section -->
+		</table>
+	</div><!-- mgmt actions -->
+</div><!-- detail section -->
 
 {# Topology #}
 {% include "slice/topology.html" %}
 
 {# List of aggregates #}
-    <div class="detail_section">
-	    <h1> Slice AMs and resource details 
-                        <img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-                </h1>
+	<div class="detail_section">
+		<h1> Slice AMs and resource details 
+						<img id="aggs_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+				</h1>
 		<center>
 		<div id="addAggregate" class="button" onclick='document.location="{% url slice_add_agg slice.id %}"'> 
 		<a href="#/" class="noMouseOver"><span style="font-size:25px;font-weight:bold;vertical-align:middle">+</span><span style="vertical-align:middle"> Add an Agregate Manager to the current slice</span></a>
@@ -165,47 +101,47 @@
 
 {# Show message when no aggregates are added to the slice #}
 {% with slice.aggregates.all as aggregate_list %}
-    {% if not aggregate_list.count %}
-        <center>
-            <p style="font-size:12px;margin-bottom:65px;width:400px;">
-                This slice has no aggregates added to it. To be able to reserve
-                resources on aggregates, you shall add aggregates first ...
-            </p>
+	{% if not aggregate_list.count %}
+		<center>
+			<p style="font-size:12px;margin-bottom:65px;width:400px;">
+				This slice has no aggregates added to it. To be able to reserve
+				resources on aggregates, you shall add aggregates first ...
+			</p>
 	</center>
-    {% else %}
-        <!-- Common expandable tooltip -->
-        <div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
+	{% else %}
+		<!-- Common expandable tooltip -->
+		<div class="tooltip" id="expandableHelp" style="font-size:normal"> Click on the arrow to expand/collapse</div>
 
-        {# Begin: Aggregate details - loads templates from plugins - partial templates #}
-        {% if plugin_template_list_network %}
-          <h2 class="resourcesh2">
-            <a id="networkResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
-              Network resources
-              <span class="opened">&#x25B2;</span>
-            </a>
-          </h2>
-          <div id="networkResourcesContainer" class="expandable">
-          {% for plugin_addresources in plugin_template_list_network %}
-            {% include plugin_addresources %}
-          {% endfor %}
-          </div>
-        {% endif %}
+		{# Begin: Aggregate details - loads templates from plugins - partial templates #}
+		{% if plugin_template_list_network %}
+		  <h2 class="expandable_header">
+			<a id="networkResources" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+			  Network resources
+			  <span class="opened">&#x25B2;</span>
+			</a>
+		  </h2>
+		  <div id="networkResourcesContainer" class="expandable">
+		  {% for plugin_addresources in plugin_template_list_network %}
+			{% include plugin_addresources %}
+		  {% endfor %}
+		  </div>
+		{% endif %}
 
-        {% if plugin_template_list_computation %}
-          <h2 class="resourcesh2">
-            <a id="computationalResources" class="expandableTooltipable expandableCtl resourcesh2" ref="#/">
-              Computational resources
-              <span class="opened">&#x25B2;</span>
-            </a>
-          </h2>
-          <div id="computationalResourcesContainer" class="expandable">
-          {% for plugin_addresources in plugin_template_list_computation %}
-            {% include plugin_addresources %}
-          {% endfor %}
-        {% endif %}
-        </div>
-        {# End: Aggregate details #}
-    {% endif %}
+		{% if plugin_template_list_computation %}
+		  <h2 class="expandable_header">
+			<a id="computationalResources" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+			  Computational resources
+			  <span class="opened">&#x25B2;</span>
+			</a>
+		  </h2>
+		  <div id="computationalResourcesContainer" class="expandable">
+		  {% for plugin_addresources in plugin_template_list_computation %}
+			{% include plugin_addresources %}
+		  {% endfor %}
+		{% endif %}
+		</div>
+		{# End: Aggregate details #}
+	{% endif %}
 {% endwith %}
  
 {% endblock content %}

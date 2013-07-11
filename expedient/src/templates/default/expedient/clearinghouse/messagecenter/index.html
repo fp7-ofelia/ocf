@@ -1,18 +1,26 @@
 {% extends "base.html" %}
 
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% url css_media 'notifications.css' %}" />
+{% endblock %}
+
 {% block content %}
 
-{% block messages %}
-{% endblock %}
+{% block messages %}{% endblock %}
+
 <h1>Message center: Messages & Logs</h1>
 
 <h2>Last messages:</h2>
     <div class="logs">
-	        <iframe class="dynsized" name="aggregates" src="{% url messaging_all %}" scrolling="no" frameborder="0" width="100%">
-	           <p>Your browser does not support iframes.</p>
-        	</iframe>
-    	     </div>
+		<div id="messages_list"></div>
+	</div>
+</div>
 
-
+<script type="text/javascript">
+	/* Asynchronous calls to insert data into different layers */
+	$.get("{% url messaging_all %}", function(data) {
+		$("#messages_list").html(data);
+	});
+</script>
 
 {% endblock %}

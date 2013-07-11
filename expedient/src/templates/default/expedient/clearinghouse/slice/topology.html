@@ -4,53 +4,34 @@
 	</a>
 </h2>
 
-
 <script src="{% url js_media 'tooltip.topology.js' %}"></script>
 <script src="{% url js_media 'd3.v2.min.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
 
-<style>
-  .link {
-    stroke: #ccc;
-    stroke-width:1px;
-  }
-  
-  .node {
-    stroke-width:2px;
-  }
-  .node text {
-    pointer-events: none;
-    font: 10px sans-serif;
-  }
-</style>
-
 {#Render#}
-<div id="topologyContainer" class="expandable" style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+<div id="topologyContainer" class="expandable">
+  <div id="selected_node_info">
     Tip: Move cursor over the icons to get extra information...
   </div>
   {%if not d3_nodes %}
-  <a href="#addAggregate">
-    <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
+  <a href="#addAggregate" id="topologyAddAggregate">
       Nothing to show yet. Add Aggregates to the slice.
-    </div>
   </a>
   {% endif %}
   <div id="target">
   </div>
   <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
-    
   <a href="javascript: regroup()">
     <img alt="Group" title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle" />
   </a>
   &nbsp;
   <a id="link_zoom_in" href="javascript: zoomIn(0.25)">
-    <img alt="Zoom in" title="Zoom in" src="{% url img_media 'zoomin.png' %}" style="height:16px;text-align:middle" />
+    <img alt="Zoom in" title="Zoom in" src="{% url img_media 'zoomin.png' %}" />
   </a>
   &nbsp;
   <a id="link_zoom_out" href="javascript: zoomOut(0.25)">
-    <img alt="Zoom out" title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;" />
+    <img alt="Zoom out" title="Zoom out"src="{% url img_media 'zoomout.png' %}" />
   </a>
   &nbsp;
   <a id="link_zoom_reset" href="javascript: zoomReset()">
@@ -235,75 +216,12 @@ function getNodesIsland(d){
     return nNodes;
 }
 
-/* Zooming routines */
-
-cur_zoom = 1;
-zoom_in_active = false;
-zoom_out_active = false;
-
-function zoomIn(zoom){
-    if(zoom_in_active == false && zoom_out_active == false){
-	$("#link_zoom_in img").css("background-color", "#666");
-	cur_zoom = cur_zoom + zoom;
-	zoom_in_active = true;
-    }
-
-    else if(zoom_in_active == true){
-	cur_zoom = cur_zoom - zoom;
-	$("#link_zoom_in img").css("background-color", "");
-	$("#target, svg, g").css("cursor", "move");
-	zoom_in_active = false;
-    }
-
-    else{
-	cur_zoom = cur_zoom + zoom + zoom;
-	$("#link_zoom_out img").css("background-color", "");
-	$("#link_zoom_in img").css("background-color", "#666");
-	zoom_out_active = false;
-	zoom_in_active = true;
-    }
-}
-
-function zoomOut(zoom){
-    if(zoom_out_active == false && zoom_in_active == false){
-	if((cur_zoom - zoom) >0){
-	    $("#link_zoom_out img").css("background-color", "#666");
-            cur_zoom = cur_zoom - zoom;
-	    zoom_out_active = true;
-        }
-	else{
-	    $("#target, svg, g").css("cursor", "move");
-	}
-    }	
-    else if(zoom_out_active == true){
-	cur_zoom = cur_zoom + zoom;
-	$("#link_zoom_out img").css("background-color", "");
-	$("#target, svg, g").css("cursor", "move");
-	zoom_out_active = false;
-    }
-
-    else{
-	cur_zoom = cur_zoom - zoom;
-	zoom_out_active = false;
-        $("#link_zoom_in img").css("background-color", "");
-	if((cur_zoom - zoom) > 0){
-	    $("#link_zoom_out img").css("background-color", "#666");
-	    zoom_out_active = true;
-	}
-	else{
-	    $("#target, svg, g").css("cursor", "move");
-	}
-    }
-}
-
 function zoomReset(){
     cur_zoom = 0.99;
     posx = 0;
     posy = 0;
     return redraw();
 }
-
-
 
 function click(){
     if (zoom_in_active == true || zoom_out_active == true){
@@ -380,7 +298,6 @@ nodes.forEach(function(d) {
         d.color = "#CCC";
     }
 });
-
 var links = data.links;
 
 var force = d3.layout.force()
@@ -658,13 +575,6 @@ function collide(alpha) {
   };
 };
 
-$("#link_zoom_in").click(function(){
-  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomin.png' %}),auto");
-});
-
-$("#link_zoom_out").click(function(){
-  $("#target, svg, g").css("cursor", "url({%url img_media 'zoomout.png' %}),auto" );
-});
-
 </script>
+<script src="{% url js_media 'slice.topology.js' %}"></script>
 

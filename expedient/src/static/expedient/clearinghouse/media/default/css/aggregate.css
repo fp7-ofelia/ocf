@@ -1,0 +1,11 @@
+#aggregates_list {
+	text-align: center;
+}
+
+/* Overrides settings for the
+administration page */
+#aggregates_list div#content {
+	padding-bottom: 0px !important;
+	padding-top: 10px !important;
+}
+

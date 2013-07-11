@@ -26,11 +26,11 @@
 
 
 {% if planetlab_aggs %}
-<h2 class="resourcesh2">Select PlanetLab Nodes</h2>
+<h2 class="expandable_header">Select PlanetLab Nodes</h2>
 {% endif %}
 
 {% for agg in planetlab_aggs %}
-<h2 class="resourcesh2">&bull; PlanetLab Aggregate {{ agg.name }}</h2>
+<h2 class="expandable_header">&bull; PlanetLab Aggregate {{ agg.name }}</h2>
 <div class="aggregateManager">
 <div id="am_location">
 	Aggregate physical location: <b>{{ agg.location }}.</b>
