@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 from interfaces.networkinterface import NetworkInterface
 
-from resources.server import VTServer
+from resources.vtserver import VTServer
 from resources.vm import VirtualMachine
 from resources.vmexpires import VMExpires
 from resources.vmallocated import VMAllocated
@@ -20,6 +20,8 @@ from ranges.macrange import MacRange
 import utils.vtexceptions as vt_exception
 from utils.xrn import hrn_to_urn, urn_to_hrn, get_leaf, get_authority
 
+
+'''@author: SergioVidiella'''
 
 class VTResourceManager(object):
     config = pm.getService("config")
@@ -300,11 +302,4 @@ VTAMDB_ENGINE = pm.getService('config').get('vtamrm.dbpath')
 db_engine = create_engine(VTAMDB_ENGINE, pool_recycle=6000)
 db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False) # the class which can create sessions (factory pattern)
 db_session = scoped_session(db_session_factory) # still a session creator, but it will create _one_ session per thread and delegate all method calls to it
-Base = declarative_base() # get the base class for the ORM, which includes the metadata object (collection of table descriptions)
-
-# We should limit the session's scope (lifetime) to one request. Yet, here we have a different solution.
-# In order to avoid side effects (from someone changing a database object), we expunge_all() objects when we hand out objects to other classes.
-# So, we can leave the session as it is, because there are no objects in it anyway.
-
-Base.metadata.create_all(db_engine) # create the tables if they are not there yet
 

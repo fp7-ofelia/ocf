@@ -6,7 +6,7 @@ from utils.commonbase import Base
 '''@author: SergioVidiella'''
 
 
-class VTServerIpRange(Base):
+class VTServerMacRange(Base):
     """Subscribed Mac ranges to the VTServer's."""
 
     __tablename__ = 'vt_manager_vtserver_subscribedMacRanges'

@@ -333,15 +333,15 @@ class VTServer(Base):
     def setMgmtBridge(self,name,macStr):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):
             nInter = self.networkInterfaces.filter(isMgmt=True,isBridge=True)
-            	if nInter.count() == 1:
-                    mgmt = nInter.get()
-                    mgmt.setName(name)
-                    mgmt.setMacStr(macStr)
-		elif nInter.count() == 0:
-                    mgmt = NetworkInterface.createServerMgmtBridge(name,macStr)
-                    self.networkInterfaces.add(mgmt)
-                else:
-                    raise Exception("Unexpected length of managment NetworkInterface query")
+            if nInter.count() == 1:
+            	mgmt = nInter.get()
+                mgmt.setName(name)
+                mgmt.setMacStr(macStr)
+	    elif nInter.count() == 0:
+                mgmt = NetworkInterface.createServerMgmtBridge(name,macStr)
+                self.networkInterfaces.add(mgmt)
+            else:
+                raise Exception("Unexpected length of managment NetworkInterface query")
 
     #Network data bridges
     def addDataBridge(self,name,macStr,switchId,port):

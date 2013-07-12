@@ -18,7 +18,7 @@ class Ip4Slot(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     ip = Column(String(15), nullable=False)
-    ipRange_id = Column(Integer, ForeignKey('Ip4Range', 'vt_manager_ip4range.id'))
+    ipRange_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
     ipRange = association_proxy('ip4range_ips', 'ip4range')
     isExcluded = Column(TINYINT(1))
     comment = Column(String(1024))

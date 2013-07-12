@@ -13,8 +13,8 @@ class VTServerNetworkInterfaces(Base):
     __tablename__ = 'vt_manager_vtserver_networkInterfaces'
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id')
-    networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface')
+    vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
+    networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
 
     server = relationship("VTServer", backref=backref("vtserver_networkintefaces", cascade="all, delete-orphan"))
     networkinterface = relationship("NetworkInterface")

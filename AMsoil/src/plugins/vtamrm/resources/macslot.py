@@ -17,7 +17,7 @@ class MacSlot(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     mac = Column(String(17), nullable=False)
-    macRange_id = Column(Integer, ForeignKey('MacRange', 'vt_manager_macrange.id'))
+    macRange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
     macRange = association_proxy('macrange_macs', 'macrange')
     isExcluded = Column(TINYINT(1))
     comment = Column(String(1024))
