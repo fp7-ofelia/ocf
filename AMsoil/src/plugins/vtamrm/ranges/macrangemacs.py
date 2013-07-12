@@ -3,7 +3,9 @@ from sqlalchemy.orm import relationship, backref
 
 from utils.commonbase import Base
 
-'''@author: svidiella'''
+
+'''@author: SergioVidiella'''
+
 
 class MacRangeMacs(Base):
     """Relation between Mac's and MacRange"""

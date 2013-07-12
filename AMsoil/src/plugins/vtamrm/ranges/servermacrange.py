@@ -1,14 +1,20 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
-Base = declarative_base()
+from utils.commonbase import Base
 
-class VTServerMacRange(Base):
-    """Please see the Database wiki page."""
+'''@author: SergioVidiella'''
+
+
+class VTServerIpRange(Base):
+    """Subscribed Mac ranges to the VTServer's."""
+
     __tablename__ = 'vt_manager_vtserver_subscribedMacRanges'
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = Column(Integer, nullable=False)
-    macrange_id = Column(Integer, nullable=False)
+    vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
+    macrange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
+
+    server = relationship("VTServer", backref=backref("vtserver_subscribed_macranges", cascade="all, delete-orphan"))
+    subscribedMacRange = relationship("MacRange")
 

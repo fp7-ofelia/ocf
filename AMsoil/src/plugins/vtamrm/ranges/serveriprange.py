@@ -1,13 +1,20 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.dialects.mysql import TINYINT, BIGINT
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
-Base = declarative_base()
+from utils.commonbase import Base
+
+'''@author: SergioVidiella'''
+
 
 class VTServerIpRange(Base):
-    """Please see the Database wiki page."""
+    """Subscribed IP4 ranges to the VTServer's."""
+
     __tablename__ = 'vt_manager_vtserver_subscribedIp4Ranges'
+
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = Column(Integer, nullable=False)
-    ip4range_id = Column(Integer, nullable=False)
+    vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
+    ip4range_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
+
+    server = relationship("VTServer", backref=backref("vtserver_subscribed_ip4ranges", cascade="all, delete-orphan"))
+    subscribedIp4Range = relationship("Ip4Range")
 

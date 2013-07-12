@@ -7,7 +7,9 @@ from utils.commonbase import Base
 from utils.ip4utils import IP4Utils
 from resources.ip4slot import Ip4Slot
 
-'''@author: svidiella'''
+
+'''@author: SergioVidiella'''
+
 
 class Ip4Range(Base):
     """Ip4Range."""
@@ -31,7 +33,7 @@ class Ip4Range(Base):
     dns2 = Column(String(15))
 
     #Pool of ips both assigned and excluded (particular case of assignment)
-    ips = association_proxy('ipiprange', 'ip')
+    ips = association_proxy('ip_iprange', 'ip')
     nextAvailableIp = Column(String(15))
 
     #Statistics

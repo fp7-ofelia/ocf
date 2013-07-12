@@ -9,7 +9,9 @@ from utils.commonbase import Base
 from utils.ethernetutils import EthernetUtils
 from resources.macslot import MacSlot
 
-'''@author: svidiella'''
+
+'''@author: SergioVidiella'''
+
 
 class MacRange(Base):
     """MacRange."""

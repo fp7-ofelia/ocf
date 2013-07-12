@@ -1,14 +1,22 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.dialects.mysql import TINYINT, BIGINT
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, backref
 
-Base = declarative_base()
+from utils.commonbase import Base
+
+
+'''@author: SergioVidiella'''
+
 
 class VTServerNetworkInterfaces(Base):
-    """Please see the Database wiki page."""
+    """Network interfaces related to a VTServer."""
+
     __tablename__ = 'vt_manager_vtserver_networkInterfaces'
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = Column(Integer, nullable=False)
-    networkinterface_id = Column(Integer, nullable=False)
+    vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id')
+    networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface')
+
+    server = relationship("VTServer", backref=backref("vtserver_networkintefaces", cascade="all, delete-orphan"))
+    networkinterface = relationship("NetworkInterface")
+
 

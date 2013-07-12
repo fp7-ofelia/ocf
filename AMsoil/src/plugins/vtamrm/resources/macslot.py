@@ -8,7 +8,7 @@ import inspect
 from utils.commonbase import Base
 from utils.ethernetutils import EthernetUtils
 
-'''@author: svidiella'''
+'''@author: SergioVidiella'''
 
 class MacSlot(Base):
     """MacSlot Class."""

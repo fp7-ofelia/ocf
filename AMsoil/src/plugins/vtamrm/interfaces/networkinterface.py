@@ -10,7 +10,8 @@ from utils.commonbase import Base
 from resources.macslot import MacSlot
 
 
-'''@author: svidiella'''
+'''@author: SergioVidiella'''
+
 
 class NetworkInterface(Base):
     """Network interface model."""

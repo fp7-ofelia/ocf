@@ -9,7 +9,7 @@ from utils.commonbase import Base
 from utils.ip4utils import IP4Utils
 
 
-'''@author: svidiella'''
+'''@author: SergioVidiella'''
 
 class Ip4Slot(Base):
     """Ip4Slot Class."""
