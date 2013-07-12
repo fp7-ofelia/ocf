@@ -1,0 +1,4 @@
+*.crt
+*.key
+am.nginx.conf
+*.db

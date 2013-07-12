@@ -1,0 +1,9 @@
+{
+  "name" : "Policy Manager",
+  "author" : "Leonardo Bergesio",
+  "author-email" : "leonardo.bergesio@i2cat.net",
+  "version" : 1,
+  "implements" : ["policy"],
+  "loads-after" : [],
+  "requires" : []
+}

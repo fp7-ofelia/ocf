@@ -1,0 +1,9 @@
+{
+  "name" : "Worker client and server",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["worker"],
+  "loads-after" : ["config"],
+  "requires" : []
+}

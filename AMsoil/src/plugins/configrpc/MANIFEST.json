@@ -1,0 +1,9 @@
+{
+  "name" : "Local config RPC",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["configrpc"],
+  "loads-after" : ["xmlrpc", "config"],
+  "requires" : []
+}

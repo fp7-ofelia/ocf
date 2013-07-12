@@ -1,0 +1,9 @@
+{
+  "name" : "DHCP (Test) resource manager",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["dhcpresourcemanager", "dhcpexceptions"],
+  "loads-after" : ["config", "worker"],
+  "requires" : []
+}

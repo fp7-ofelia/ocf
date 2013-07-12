@@ -1,0 +1,9 @@
+{
+  "name" : "RPC Registry",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["rpcserver", "xmlrpc"],
+  "loads-after" : ["config"],
+  "requires" : []
+}

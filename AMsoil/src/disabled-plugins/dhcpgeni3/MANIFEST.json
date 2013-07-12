@@ -1,0 +1,9 @@
+{
+  "name" : "DHCP (Test) delegate for GENI AM API v3",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : [],
+  "loads-after" : ["geniv3handler", "geniv3delegatebase", "geniv3exceptions", "dhcpresourcemanager", "dhcpexceptions", "config"],
+  "requires" : []
+}

@@ -1,0 +1,8 @@
+*.pyc
+.DS_Store
+*.swp
+*.swo
+log/*
+_deployment
+rmpyc.sh
+TODO.txt
