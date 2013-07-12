@@ -33,12 +33,14 @@ input {
         max-width:200px;
 }
 
-
 #page {
-	background-color: white;
+    background-color: #fff;
 	border: 1px solid #959596;
+    padding: 10px 0 0 0;
+    width: 85%;
+    margin: auto;
 	text-align: left;
-	}
+    }
 
 #header {
 	background-color: #CCDDDD;
@@ -64,7 +66,7 @@ input {
 
 #top_logo {
     margin: 0 auto;
-    width: 95em;
+    width: 85%;
 }
 
 #top_version {
@@ -76,22 +78,29 @@ input {
     text-align: right;
     margin-bottom: 6px;
     margin-top: -15px;
+    margin-right: -1px;
 }
 
-#top_menu_options a, .top_menu_options a:active, .top_menu_options a:visited, .top_menu_options a:hover {
+#top_menu_options a,
+.top_menu_options a:active,
+.top_menu_options a:visited,
+.top_menu_options a:hover {
     background-color : #555;
     /*border: 1px solid white;*/
     border: 0px;
+    box-shadow: inset 0px 1px 0px 0px #333 !important;
     color: #fff;
     font-size: 1.3em;
     font-weight: lighter;
     margin: 0px;
+    moz-box-shadow: inset 0px 1px 0px 0px #333 !important;
     padding: 7px 15px 7px 15px;
     position: relative;
     text-align: center;
     text-decoration: none;
-    text-shadow: black 0px -2px 0, black 2px 0 0;
+    text-shadow: #333 0 -2px 0, #333 1px 0 0;
     width: 100px;
+    -webkit-box-shadow: inset 0px 1px 0px 0px #333 !important;
 }
 
 .widecolumn .entry p {
@@ -196,19 +205,11 @@ body {
 	padding: 0;
 	}
 
-#page {
-	background-color: #fff;	
-	padding: 10px 0 0 0;
-	width: 95em;
-	margin: auto;
-	border: 1px solid #959596;
-	}
-
 #header {
 	
 	margin: 0 0 0 1px;
 	padding: 0;	
-	width: 95em;
+	width: 85%;
 	background-color: #CCDDCC;
 	}
 
@@ -221,7 +222,8 @@ body {
 #footer {
 	margin: 5px auto 10px;
 	padding: 0px;
-	width: 95em;
+	width: 85%;
+	margin-bottom: 50px;
 }
 
 #footer p {
@@ -883,12 +885,12 @@ div.aggregateManager {
 	margin-top:0px;
 	margin-bottom:10px;
 	background-color:#EEE;
-    	border: 1px solid #CCC;
-    	-moz-border-radius: 0px 25px 25px 25px;
-    	-webkit-border-radius: 0px 25px 25px 25px;
-    	border-radius:  0px 25px 25px 25px;
+   	border: 1px solid #CCC;
+   	-moz-border-radius: 0px 25px 25px 25px;
+   	-webkit-border-radius: 0px 25px 25px 25px;
+   	border-radius: 0px 25px 25px 25px;
 	display:inline-block;
-	width:720px;
+	width: 97%;
 	text-align:center;
 	vertical-align:middle;
 	padding:10px;

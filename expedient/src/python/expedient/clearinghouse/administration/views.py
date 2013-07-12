@@ -22,15 +22,6 @@ LOG_N_LAST_LINES = 250
 # Color for the log headers (e.g. date, type of message, ip)
 LOG_HEADER_COLOR = "#444"
 
-def check_super_user(request):
-	"""
-	Access control for user accessing the administration.
-	This check has been copied from original Expedient source.
-
-	@return exception if user is not super user
-	"""
-	must_have_permission(request.user, User, "can_manage_users")
-
 def home(request):
 	"""
 	Shows the Expedient administration panel.
@@ -38,7 +29,7 @@ def home(request):
 	@param request HTTP request
 	@return string template for administration panel
 	"""
-	check_super_user(request)
+	must_have_permission(request.user, User, "can_manage_users")
 
 	# Iterate over each plugin to get its administration data
 	plugin_administration_methods = []
@@ -89,7 +80,7 @@ def view_log(request, module_name):
 	@param string name of module
 	@return string log contents for a given module
 	"""
-	check_super_user(request)
+	must_have_permission(request.user, User, "can_manage_users")
 
 	log_content = ""
 	found_group = ""
@@ -122,7 +113,7 @@ def remove_log(request, module_name, option):
 	@param string name of module
 	@return redirection back to the administration home
 	"""
-	check_super_user(request)
+	must_have_permission(request.user, User, "can_manage_users")
 
 	module_log_path = get_module_log_path(module_name)
 	try:

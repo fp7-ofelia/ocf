@@ -19,7 +19,11 @@
 	</h2>
 
 	<div id="adminAggregatesContainer" class="expandable close">
-		<h2>Add to Expedient</h2>
+		<h2>Manage aggregates</h2>
+		<p>
+			You may add, edit or delete aggregates to Expedient.
+		</p>
+
 		<div id="aggregates_list" class="aggregates"></div>
 		<!--<div class="aggregates_list" class="aggregates">
 			<iframe class="dynsized" name="aggregates" src="{% url aggregate_all %}" scrolling="no" frameborder="no" width="100%">
@@ -73,10 +77,9 @@
 			</iframe>
 		</div>-->
 
-		<h2>Manage users</h2>
+		<h2><a href="{% url users_home %}">Manage users</a></h2>
 		<div id="users_list" class="users"></div>
 
-		<h2><a href="{% url users_home %}">Manage Users</a></h2>
 		<p>
 			Click on the link to manage users on Expedient. You will need to have
 			the "can_manage_users" permission to be able to access this

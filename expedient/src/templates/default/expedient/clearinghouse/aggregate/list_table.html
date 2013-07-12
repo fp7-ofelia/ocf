@@ -19,7 +19,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 <div class="table_div">
 	<table class="fulltable" id="aggregates_table">
 		<tr>
-			<th class="logo">Logo</th>
+			<!--<th class="logo">Logo</th>-->
             <th class="name">Name</th>
             <th class="type">Type</th>
 			<th class="location">Location</th>
@@ -38,7 +38,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 		{% else %}
 		<tr>
         {% endif %}
-			<td class="logo">{{ am.get_logo_url }}</td>
+			<!--<td class="logo">{#{{ am.get_logo_url }}#}</td>-->
 			<td class="name">{{ am.name }}</td>
 			<td class="type">
 				{% with am.get_aggregates_url as the_url %}

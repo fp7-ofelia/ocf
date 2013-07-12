@@ -10,19 +10,26 @@
 
 /* Buttons for management options: start/update/stop slice */
 .slice_action_button {
-	text-shadow: #ccc 1px 1px 0px !important;
+	/*text-shadow: #ccc 1px 1px 0px !important;*/
+	text-shadow: none !important;
 }
 
 .start_slice_button {
 	background: #4d4 !important;
 	border: 1px solid #282 !important;
+	box-shadow: inset 0px 1px 0px 0px #5e5 !important;
+	moz-box-shadow: inset 0px 1px 0px 0px #5e5 !important;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #5e5 !important;
 }
 .start_slice_button:hover {
 	background: #5e5 !important;
 }
 .update_slice_button {
 	background: #ac0 !important;
-	border: 1px solid #340 !important;
+	border: 1px solid #8a0 !important;
+	box-shadow: inset 0px 1px 0px 0px #bd1 !important;
+	moz-box-shadow: inset 0px 1px 0px 0px #bd1 !important;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #bd1 !important;
 }
 .update_slice_button:hover {
 	background: #bd0 !important;
@@ -30,6 +37,9 @@
 .stop_slice_button {
 	background: #d44 !important;
 	border: 1px solid #822 !important;
+	box-shadow: inset 0px 1px 0px 0px #e55 !important;
+	moz-box-shadow: inset 0px 1px 0px 0px #e55 !important;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #e55 !important;
 }
 .stop_slice_button:hover {
 	background: #e55 !important;
