@@ -3,7 +3,7 @@ Created on Aug 3, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.models import Permittee
+from common.permissions.models import Permittee
 from django.contrib.contenttypes.models import ContentType
 from django import template
 

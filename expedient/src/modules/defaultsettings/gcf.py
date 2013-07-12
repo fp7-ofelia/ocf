@@ -8,7 +8,7 @@ from os.path import join
 from django import CONF_DIR
 
 try:
-    from localsettings import *
+    from modules.localsettings import *
 except ImportError:
     pass
 
@@ -47,7 +47,7 @@ GCF_X509_CRED_DIR = join(CONF_DIR, "gcf-x509.cred")
 '''The location of credentials used by expedient for the GCF.'''
 
 try:
-    from localsettings import *
+    from modules.localsettings import *
 except ImportError:
     pass
 

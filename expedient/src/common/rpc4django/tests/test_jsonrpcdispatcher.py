@@ -7,7 +7,7 @@ JSON RPC Dispatcher Tests
 '''
 
 import unittest
-from expedient.common.rpc4django.jsonrpcdispatcher import *
+from common.rpc4django.jsonrpcdispatcher import *
 
 class TestJSONRPCDispatcher(unittest.TestCase):
 

@@ -5,10 +5,10 @@ Created on Jun 1, 2010
 '''
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
-from expedient.common.permissions.shortcuts import must_have_permission,\
+from common.permissions.shortcuts import must_have_permission,\
     give_permission_to
-from expedient.common.middleware import threadlocals
-from expedient.common.permissions.models import ObjectPermission
+from common.middleware import threadlocals
+from common.permissions.models import ObjectPermission
 
 def get_user_from_req(request, *args, **kwargs):
     '''

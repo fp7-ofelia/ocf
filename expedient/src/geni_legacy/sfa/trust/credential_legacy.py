@@ -34,11 +34,11 @@
 
 import xmlrpclib
 
-from sfa.trust.certificate import Certificate
-from sfa.trust.rights import *
-from sfa.trust.gid import *
-from sfa.util.faults import *
-from sfa.util.sfalogging import *
+from geni_legacy.sfa.trust.certificate import Certificate
+from geni_legacy.sfa.trust.rights import *
+from geni_legacy.sfa.trust.gid import *
+from geni_legacy.sfa.util.faults import *
+from geni_legacy.sfa.util.sfalogging import *
 
 ##
 # Credential is a tuple:

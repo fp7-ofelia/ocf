@@ -6,7 +6,7 @@ Created on Jul 17, 2010
 import logging
 from django import forms
 from django import core
-from expedient.common.utils import validators
+from common.utils import validators
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger("common.utils.formfields")

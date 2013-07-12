@@ -305,14 +305,14 @@ for documenting our methods and classes. We use Epydoc_ for documenting code
 and automatically generating API docs from the code. Feel free to use whatever
 you like, but please document your code thoroughly.
 
-.. _`Resource`: ../api/expedient.clearinghouse.resources.models.Resource-class.html
-.. _`Sliver`: ../api/expedient.clearinghouse.resources.models.Sliver-class.html
-.. _`Slice`: ../api/expedient.clearinghouse.slice.models.Slice-class.html
-.. _`start_slice`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html#start_slice
-.. _`stop_slice`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html#stop_slice
-.. _threadlocals: ../api/expedient.common.middleware.threadlocals-module.html
-.. _messaging: ../api/expedient.common.messaging-module.html
-.. _`post_message_to_current_user`: ../api/expedient.clearinghouse.utils-module.html#post_message_to_current_user
+.. _`Resource`: ../api/modules.resources.models.Resource-class.html
+.. _`Sliver`: ../api/modules.resources.models.Sliver-class.html
+.. _`Slice`: ../api/modules.slice.models.Slice-class.html
+.. _`start_slice`: ../api/modules.aggregate.models.Aggregate-class.html#start_slice
+.. _`stop_slice`: ../api/modules.aggregate.models.Aggregate-class.html#stop_slice
+.. _threadlocals: ../api/common.middleware.threadlocals-module.html
+.. _messaging: ../api/common.messaging-module.html
+.. _`post_message_to_current_user`: ../api/modules.utils-module.html#post_message_to_current_user
 .. _Epydoc: http://epydoc.sourceforge.net/
 
 Writing Views and Templates
@@ -426,7 +426,7 @@ one of which is the messages that you see at the top of each page:
 .. literalinclude:: sshaggregate/views.py
    :lines: 56-58
 
-.. _`generic_crud`: ../api/expedient.common.utils.views-module.html#generic_crud
+.. _`generic_crud`: ../api/common.utils.views-module.html#generic_crud
 .. _`generic views`: http://docs.djangoproject.com/en/dev/ref/generic-views/
 .. _`modelformset_factory`: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#model-formsets
 .. _`RequestContext`: http://docs.djangoproject.com/en/dev/ref/templates/api/#subclassing-context-requestcontext
@@ -610,8 +610,8 @@ documentation for more information::
         ('sshaggregate.models.SSHAggregate', 'sshaggregate', 'sshaggregate.urls'),
     ]
 
-.. _`Aggregate`: ../api/expedient.clearinghouse.aggregate.models.Aggregate-class.html
-.. _`AGGREGATE_PLUGINS`: ../api/expedient.clearinghouse.defaultsettings.expedient-module.html#AGGREGATE_PLUGINS
+.. _`Aggregate`: ../api/modules.aggregate.models.Aggregate-class.html
+.. _`AGGREGATE_PLUGINS`: ../api/modules.defaultsettings.expedient-module.html#AGGREGATE_PLUGINS
 
 Testing
 -------
@@ -660,10 +660,10 @@ First, we create a class that inherits from the :class:`django.test.TestCase`:
    :end-before: # start constants
 
 Expedient also provides a different class you can inherit from,
-`expedient.common.tests.manager.SettingsTestCase`_. This test case allows you
+`common.tests.manager.SettingsTestCase`_. This test case allows you
 to easily change settings in the test case to, for example, add new
 django apps that are used in testing. Take a look at
-`expedient.clearinghouse.aggregate.tests.tests`_ for an example on how it is
+`modules.aggregate.tests.tests`_ for an example on how it is
 used.
 
 Next, we define some constants that are used in testing. These are the names
@@ -868,6 +868,6 @@ test, you need to make sure that :mod:`sshaggregate` is in your
 PYTHONPATH. Then you can use the :command:`test` management command to run the
 :mod:`sshaggregate` test suite.
 
-.. _`expedient.common.tests.manager.SettingsTestCase`: ../api/expedient.common.tests.manager.SettingsTestCase-class.html
-.. _`expedient.clearinghouse.aggregate.tests.tests`: ../api/expedient.clearinghouse.aggregate.tests.tests-module.html
-.. _`test_get_and_post_form`: ../api/expedient.common.tests.client-module.html#test_get_and_post_form
+.. _`common.tests.manager.SettingsTestCase`: ../api/common.tests.manager.SettingsTestCase-class.html
+.. _`modules.aggregate.tests.tests`: ../api/modules.aggregate.tests.tests-module.html
+.. _`test_get_and_post_form`: ../api/common.tests.client-module.html#test_get_and_post_form

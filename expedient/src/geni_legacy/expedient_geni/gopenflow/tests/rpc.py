@@ -3,15 +3,15 @@ Created on Oct 6, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 import xmlrpclib
 import logging
 from geni import CredentialVerifier
 from django.conf import settings
 from decorator import decorator
 from openflow.plugin.gapi import gapi
-from expedient.clearinghouse.slice.models import Slice
-from expedient_geni.gopenflow.tests.models import DummyOFAggregate
+from modules.slice.models import Slice
+from geni_legacy.expedient_geni.gopenflow.tests.models import DummyOFAggregate
 
 logger = logging.getLogger("openflow.plugin.gapi.rpc")
 

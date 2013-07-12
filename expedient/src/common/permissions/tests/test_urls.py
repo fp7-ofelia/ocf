@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse
 from models import PermissionTestClass
 
 urlpatterns = patterns("",
-    (r"^permissions/", include("expedient.common.permissions.urls")),
+    (r"^permissions/", include("common.permissions.urls")),
     url(r"^tests/test_view_crud/$", test_view_create, name="test_view_crud"),
     url(r"^tests/test_view_crud/(?P<obj_id>\d+)/$", test_view_update, name="test_view_update"),
     url(r"^tests/test_view_x2/(?P<obj_id>\d+)/$", test_view_x2, name="test_view_x2"),

@@ -5,15 +5,15 @@ Created on Aug 3, 2010
 '''
 from django.test import TestCase
 from django.contrib.auth.models import User
-from expedient.clearinghouse.project.models import Project
-from expedient.common.middleware import threadlocals
-from expedient.clearinghouse.roles.models import ProjectRole
-from expedient.common.permissions.shortcuts import create_permission,\
+from modules.project.models import Project
+from common.middleware import threadlocals
+from modules.roles.models import ProjectRole
+from common.permissions.shortcuts import create_permission,\
     has_permission
-from expedient.common.permissions.models import ObjectPermission,\
+from common.permissions.models import ObjectPermission,\
     PermissionOwnership
-from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
-from expedient.clearinghouse.roles.utils import get_users_for_role
+from common.permissions.exceptions import PermissionCannotBeDelegated
+from modules.roles.utils import get_users_for_role
 
 class TestModels(TestCase):
     def setUp(self):

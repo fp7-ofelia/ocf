@@ -11,13 +11,13 @@ from django.core.urlresolvers import reverse
 from django.views.generic import simple
 from django.db.models import Q
 from django.views.generic.simple import direct_to_template
-from expedient.common.permissions.models import PermissionRequest,\
+from common.permissions.models import PermissionRequest,\
     ObjectPermission
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.project.views import create, create_project_roles
-from expedient.clearinghouse.project.models import Project
+from common.messaging.models import DatedMessage
+from modules.project.views import create, create_project_roles
+from modules.project.models import Project
 import uuid
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 
 TEMPLATE_PATH = "permissionmgmt"

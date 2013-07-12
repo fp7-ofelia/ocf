@@ -14,7 +14,7 @@ class PluginLoader():
     # Allows only one instance of this class
     __metaclass__ = Singleton
     plugin_settings = {}
-    from localsettings import SRC_DIR
+    from modules.localsettings import SRC_DIR
     # Note: surround inside list whenever treated as a unit
     plugins_path = join_paths([SRC_DIR, "python", "plugins"])
 

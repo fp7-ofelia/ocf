@@ -5,12 +5,12 @@ Created on Jul 29, 2010
 '''
 from django.test import TestCase
 from django.contrib.auth.models import User
-from expedient.common.permissions.shortcuts import create_permission,\
+from common.permissions.shortcuts import create_permission,\
     give_permission_to, has_permission
-from expedient.common.permissions.models import PermissionRequest,\
+from common.permissions.models import PermissionRequest,\
     Permittee, ObjectPermission
 from django.core.urlresolvers import reverse
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.client import test_get_and_post_form
 
 class RequestsTests(TestCase):
     def setUp(self):

@@ -15,7 +15,7 @@ logger = logging.getLogger("permissions.middleware")
 class PermissionMiddleware(object):
     """
     Middleware to catch PermissionDenied exceptions thrown by the
-    L{expedient.common.permissions} app and redirects to the permission URL
+    L{common.permissions} app and redirects to the permission URL
     if found. Also checks views and URLs for permission exceptions.
     """
     

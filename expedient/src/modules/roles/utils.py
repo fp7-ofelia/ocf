@@ -4,8 +4,8 @@ Created on Aug 9, 2010
 @author: jnaous
 '''
 from django.contrib.auth.models import User
-from expedient.common.permissions.models import Permittee
-from expedient.clearinghouse.roles.models import ProjectRole
+from common.permissions.models import Permittee
+from modules.roles.models import ProjectRole
 
 def get_users_for_role(role, can_delegate=False):
     """Get all the users that have the role.

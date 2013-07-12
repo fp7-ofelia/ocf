@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import MultipleObjectsReturned
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.permissions.shortcuts import must_have_permission
+from modules.aggregate.models import Aggregate
+from common.permissions.shortcuts import must_have_permission
 from sample_resource.models.SampleResource import SampleResource
 
 # SampleResource Aggregate class

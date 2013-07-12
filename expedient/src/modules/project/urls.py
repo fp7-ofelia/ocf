@@ -3,7 +3,7 @@
 '''
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('expedient.clearinghouse.project.views',
+urlpatterns = patterns('modules.project.views',
     url(r'^list/$', 'list', name='project_list'),
     url(r'^create/$', 'create', name="project_create"),
     url(r'^update/(?P<proj_id>\d+)/$', 'update', name="project_update"),

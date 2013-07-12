@@ -5,9 +5,9 @@ Created on Aug 22, 2010
 '''
 from os.path import join, dirname
 
-PYTHON_DIR = join(dirname(__file__), "../../..")
+PYTHON_DIR = join(dirname(__file__), "../")
 OM_PROJECT_DIR = join(PYTHON_DIR, "openflow/optin_manager")
-CH_PROJECT_DIR = join(PYTHON_DIR, "expedient/clearinghouse")
+CH_PROJECT_DIR = join(PYTHON_DIR, "modules/")
 GCF_DIR = join(PYTHON_DIR, "gcf")
 SSL_DIR = join(dirname(__file__), "ssl")
 

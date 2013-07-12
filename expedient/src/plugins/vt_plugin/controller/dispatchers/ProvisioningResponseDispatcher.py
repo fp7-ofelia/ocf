@@ -7,10 +7,10 @@ from vt_manager.communication.utils.XmlHelper import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
-from expedient.common.messaging.models import DatedMessage
+from common.messaging.models import DatedMessage
 from vt_plugin.controller.vtAggregateController import vtAggregateController
 from vt_plugin.models.VtPlugin import VtPlugin
-from expedient.clearinghouse.project.models import Project
+from modules.project.models import Project
 
 class ProvisioningResponseDispatcher():
 

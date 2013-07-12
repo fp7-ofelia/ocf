@@ -8,7 +8,7 @@ Contains functions to login and manage forms.
 import urllib, urllib2, cookielib
 import logging
 from pprint import pformat
-logger = logging.getLogger("expedient.common.tests.client")
+logger = logging.getLogger("common.tests.client")
 
 def fake_login(client, user):
     """Setup the client to appear logged in even if it isn't.

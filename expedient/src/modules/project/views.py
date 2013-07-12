@@ -9,21 +9,21 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
-from expedient.clearinghouse.aggregate.models import Aggregate
+from modules.aggregate.models import Aggregate
 import logging
-from expedient.common.utils.views import generic_crud
-from expedient.common.messaging.models import DatedMessage
+from common.utils.views import generic_crud
+from common.messaging.models import DatedMessage
 from django.db.models import Q
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.shortcuts import give_permission_to, has_permission, must_have_permission
-from expedient.common.permissions.utils import get_queryset, get_user_from_req,\
+from common.permissions.decorators import require_objs_permissions_for_view
+from common.permissions.shortcuts import give_permission_to, has_permission, must_have_permission
+from common.permissions.utils import get_queryset, get_user_from_req,\
     get_queryset_from_class
-from expedient.clearinghouse.roles.models import ProjectRole,\
+from modules.roles.models import ProjectRole,\
     ProjectRoleRequest
-from expedient.common.permissions.models import ObjectPermission,\
+from common.permissions.models import ObjectPermission,\
     PermissionOwnership, Permittee
-from expedient.clearinghouse.project.forms import AddMemberForm, MemberForm
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from modules.project.forms import AddMemberForm, MemberForm
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 import uuid   
@@ -397,7 +397,7 @@ def add_member(request, proj_id):
                     aggregate.add_to_user(user,"/")
             try:
                 # Get project detail URL to send via e-mail
-                from expedient.clearinghouse.project import urls
+                from modules.project import urls
                 project_detail_url = reverse("project_detail", args=[project.id]) or "/"
                 # No "https://" check should be needed if settings are OK
                 site_domain_url = "https://" + Site.objects.get_current().domain + project_detail_url

@@ -17,15 +17,15 @@ from vt_plugin.utils.Translator import Translator
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_plugin.controller.VMcontroller.VMcontroller import VMcontroller
 from vt_plugin.utils.ServiceThread import ServiceThread
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.messaging.context_processors import messaging
-from expedient.common.messaging.models import DatedMessage
+from modules.aggregate.models import Aggregate
+from common.messaging.context_processors import messaging
+from common.messaging.models import DatedMessage
 
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.project.models import Project
-from expedient.common.utils.plugins.plugincommunicator import PluginCommunicator
-from expedient.common.utils.plugins.resources.node import Node
-from expedient.common.utils.plugins.resources.link import Link
+from modules.slice.models import Slice
+from modules.project.models import Project
+from common.utils.plugins.plugincommunicator import PluginCommunicator
+from common.utils.plugins.resources.node import Node
+from common.utils.plugins.resources.link import Link
 
 def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
@@ -310,7 +310,7 @@ def get_nodes_links(slice, chosen_group=None):
                             )
     return [nodes, links]
 
-#from expedient.common.utils.plugins.plugininterface import PluginInterface
+#from common.utils.plugins.plugininterface import PluginInterface
 
 #class Plugin(PluginInterface):
 #    @staticmethod

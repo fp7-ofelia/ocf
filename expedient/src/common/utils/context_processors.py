@@ -3,7 +3,7 @@ def contextSettingsInTemplate(request):
 	from os.path import dirname, join
 	from django.core.urlresolvers import reverse
 
-	vf = open(join(dirname(__file__), '../../../../../.currentVersion'),'r')
+	vf = open(join(dirname(__file__), '../../../.currentVersion'),'r')
 	softwareVersion = vf.read()
 
 	if not request.user.is_anonymous() and request.user.password == '!':

@@ -16,5 +16,5 @@ def rpc_url(regex, kwargs=None, name=None, prefix='',
         if kwargs == None:
             kwargs = {}
         kwargs["url_name"] = name
-    view = "expedient.common.rpc4django.views.serve_rpc_request"
+    view = "common.rpc4django.views.serve_rpc_request"
     return url(regex, view, kwargs, name, prefix)

@@ -6,26 +6,26 @@ Created on Jul 4, 2010
 
 import re
 from django.db import models
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.utils import certtransport
+from modules.aggregate.models import Aggregate
+from common.utils import certtransport
 from django.conf import settings
 import xmlrpclib
-from expedient.clearinghouse.slice.models import Slice
-from expedient_geni.utils import create_slice_urn, create_x509_cert,\
+from modules.slice.models import Slice
+from geni_legacy.expedient_geni.utils import create_slice_urn, create_x509_cert,\
     create_slice_credential, get_or_create_user_cert, get_user_key_fname,\
     get_user_cert_fname, get_ch_urn
 from django.db.models import signals
 import logging
 import traceback
 from urlparse import urlparse
-from expedient.common.utils.transport import TestClientTransport
-from sfa.trust.gid import GID
-from expedient.common.tests.utils import test_to_http
-from expedient.common.middleware import threadlocals
-from expedient.common.timer.models import Job
-from expedient.common.timer.exceptions import JobAlreadyScheduled
+from common.utils.transport import TestClientTransport
+from geni_legacy.sfa.trust.gid import GID
+from common.tests.utils import test_to_http
+from common.middleware import threadlocals
+from common.timer.models import Job
+from common.timer.exceptions import JobAlreadyScheduled
 
-logger = logging.getLogger("expedient_geni.models")
+logger = logging.getLogger("geni_legacy.expedient_geni.models")
 
 SSH_KEY_SIZE = 2048
 
@@ -248,7 +248,7 @@ class GENIAggregate(Aggregate):
             
         
     #####################################################################
-    # Overrides from expedient.clearinghouse.aggregate.models.Aggregate #
+    # Overrides from modules.aggregate.models.Aggregate #
     #####################################################################
 
     def check_status(self):
@@ -295,7 +295,7 @@ class GENIAggregate(Aggregate):
         aggregate.
         
         @param slice: The slice to change into a reservation RSpec
-        @type slice: L{expedient.clearinghouse.slice.models.Slice}
+        @type slice: L{modules.slice.models.Slice}
         """
         raise NotImplementedError()
     

@@ -6,16 +6,16 @@ Created on Jun 11, 2010
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from expedient.common.tests.manager import SettingsTestCase
-from expedient.clearinghouse.aggregate.tests.models import DummyAggregate,\
+from common.tests.manager import SettingsTestCase
+from modules.aggregate.tests.models import DummyAggregate,\
     DummyResource, DummySliceEvent
-from expedient.common.middleware import threadlocals
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.permissions.exceptions import PermissionDenied
-from expedient.common.tests.client import test_get_and_post_form
-from expedient.clearinghouse.resources.models import Sliver
-from expedient.clearinghouse.utils import start_test_slice,\
+from common.middleware import threadlocals
+from common.permissions.shortcuts import give_permission_to
+from modules.aggregate.models import Aggregate
+from common.permissions.exceptions import PermissionDenied
+from common.tests.client import test_get_and_post_form
+from modules.resources.models import Sliver
+from modules.utils import start_test_slice,\
     add_dummy_agg_to_test_settings
 
 class Tests(SettingsTestCase):

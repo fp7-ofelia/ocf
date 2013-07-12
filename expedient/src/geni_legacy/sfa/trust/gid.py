@@ -29,9 +29,9 @@
 ### $URL$
 import xmlrpclib
 import uuid
-from sfa.trust.certificate import Certificate
-from sfa.util.namespace import *
-from sfa.util.sfalogging import logger
+from geni_legacy.sfa.trust.certificate import Certificate
+from geni_legacy.sfa.util.namespace import *
+from geni_legacy.sfa.util.sfalogging import logger
 
 ##
 # Create a new uuid. Returns the UUID as a string.

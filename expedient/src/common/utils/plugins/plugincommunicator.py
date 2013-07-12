@@ -10,7 +10,7 @@ corresponding to another AM. Data needed: plugin name, class name, search filter
 from django.db.models import Q
 from utils import join_paths, Singleton
 import os
-from urls import PLUGIN_LOADER
+from modules.urls import PLUGIN_LOADER
 
 class PluginCommunicator():
 

@@ -2,20 +2,20 @@
 @author: jnaous
 '''
 from django.db import models
-from expedient.common.permissions.models import Permittee, ObjectPermission
-from expedient.common.permissions.utils import permissions_save_override,\
+from common.permissions.models import Permittee, ObjectPermission
+from common.permissions.utils import permissions_save_override,\
     permissions_delete_override
-from expedient.clearinghouse.aggregate.models import Aggregate
+from modules.aggregate.models import Aggregate
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
-from expedient.common.ldapproxy.models import LdapProxy
+from modules.aggregate.utils import get_aggregate_classes
+from common.ldapproxy.models import LdapProxy
 from django.conf import settings
 from django.db import transaction
 import uuid
 import string
 import re
-from expedient.common.utils.validators import asciiValidator, descriptionLightValidator
+from common.utils.validators import asciiValidator, descriptionLightValidator
 
 class ProjectManager(models.Manager):
     """Manager for L{Project} instances.
@@ -152,13 +152,13 @@ class Project(models.Model):
     
     def _get_researchers(self):
         """Get all users who have the 'researcher' role for the project"""
-        from expedient.clearinghouse.roles.models import ProjectRole
+        from modules.roles.models import ProjectRole
         return ProjectRole.objects.get_users_with_role('researcher', self)
     researchers=property(_get_researchers)
     
     def _get_owners(self):
         """Get all users who have the 'owner' role for the project"""
-        from expedient.clearinghouse.roles.models import ProjectRole
+        from modules.roles.models import ProjectRole
         return ProjectRole.objects.get_users_with_role('owner', self)
     owners=property(_get_owners)
     
@@ -178,7 +178,7 @@ class Project(models.Model):
     members_as_permittees=property(_get_permittees)
 
     def _getSlices(self):
-	from expedient.clearinghouse.slice.models import Slice
+	from modules.slice.models import Slice
         return Slice.objects.filter(project=self)
     
     def __unicode__(self):

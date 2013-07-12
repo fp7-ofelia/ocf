@@ -9,9 +9,9 @@ SRC_DIR = join(dirname(__file__), '../../../')
 sys.path.append(SRC_DIR)
 
 from unittest import TestCase
-from expedient.common.tests.commands import call_env_command, Env
+from common.tests.commands import call_env_command, Env
 from openflow.tests import test_settings
-from expedient.common.tests.utils import wrap_xmlrpc_call
+from common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
 import random
 from pprint import pprint
@@ -339,7 +339,7 @@ class OMTests(TestCase):
                 "FlowSpace associated with experiment slice_id" +\
                 "=%d has not deleted completely" % i)            
     def test_optin(self):
-        from expedient.common.tests.client import Browser
+        from common.tests.client import Browser
         from openflow.optin_manager.opts.models import UserOpts, OptsFlowSpace 
         from openflow.optin_manager.opts.models import AdminFlowSpace, UserFlowSpace,Experiment, ExperimentFLowSpace
         from django.contrib.auth.models import User

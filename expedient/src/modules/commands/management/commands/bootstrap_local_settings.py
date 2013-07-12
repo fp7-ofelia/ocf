@@ -9,7 +9,7 @@ import pkg_resources
 import os
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
-from expedient.clearinghouse.commands.utils import bootstrap_local_settings
+from modules.commands.utils import bootstrap_local_settings
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (

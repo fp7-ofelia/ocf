@@ -6,23 +6,23 @@ Created on Aug 19, 2010
 '''
 import sys, traceback
 
-from expedient.clearinghouse.defaultsettings.django import *
-from expedient.clearinghouse.defaultsettings.database import *
-from expedient.clearinghouse.defaultsettings.admins import *
-from expedient.clearinghouse.defaultsettings.email import *
-from expedient.clearinghouse.defaultsettings.expedient import *
-from expedient.clearinghouse.defaultsettings.logging import *
-from expedient.clearinghouse.defaultsettings.gcf import *
-from expedient.clearinghouse.defaultsettings.messaging import *
-from expedient.clearinghouse.defaultsettings.openflow import *
-from expedient.clearinghouse.defaultsettings.site import *
-from expedient.clearinghouse.defaultsettings.xmlrpc import *
-from expedient.clearinghouse.defaultsettings.openflowtests import *
-from expedient.clearinghouse.defaultsettings.tests import *
-from expedient.clearinghouse.defaultsettings.ldapSettings import *
-from expedient.clearinghouse.defaultsettings.plugin import *
+from modules.defaultsettings.django import *
+from modules.defaultsettings.database import *
+from modules.defaultsettings.admins import *
+from modules.defaultsettings.email import *
+from modules.defaultsettings.expedient import *
+from modules.defaultsettings.logging import *
+from modules.defaultsettings.gcf import *
+from modules.defaultsettings.messaging import *
+from modules.defaultsettings.openflow import *
+from modules.defaultsettings.site import *
+from modules.defaultsettings.xmlrpc import *
+from modules.defaultsettings.openflowtests import *
+from modules.defaultsettings.tests import *
+from modules.defaultsettings.ldapSettings import *
+from modules.defaultsettings.plugin import *
 # Import the list of required variables
-from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
+from modules.defaultsettings.required import REQUIRED_SETTINGS
 
 # Try getting importing the secret key from a secret_key module
 try:
@@ -39,7 +39,7 @@ except ImportError:
 # Now import the local settings
 try:
     # do the import here to check that the path exists before doing anything
-    from localsettings import *
+    from modules.localsettings import *
     
     # Delete all the default required settings
     _modname = globals()['__name__']
@@ -49,7 +49,7 @@ try:
             delattr(_this_mod, var)
 
     # now import again to re-insert the deleted settings
-    from localsettings import *
+    from modules.localsettings import *
 
     # check that all the required settings are set
     for item in REQUIRED_SETTINGS:
@@ -58,7 +58,7 @@ try:
                 raise Exception(
                     "Missing required setting %s. See the "
                     "documentation for this setting at "
-                    "expedient.clearinghouse.defaultsettings.%s"
+                    "modules.defaultsettings.%s"
                     % (var, item[0])
                 )
 
@@ -75,7 +75,7 @@ except ImportError as e:
         raise
 
 # Logging
-from expedient.common import loggingconf
+from common import loggingconf
 import logging
 
 if DEBUG:

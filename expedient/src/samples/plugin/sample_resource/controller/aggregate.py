@@ -11,9 +11,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.generic import simple
-from expedient.clearinghouse.utils import post_message_to_current_user
-from expedient.common.messaging.models import DatedMessage
-from expedient.common.permissions.shortcuts import give_permission_to
+from modules.utils import post_message_to_current_user
+from common.messaging.models import DatedMessage
+from common.permissions.shortcuts import give_permission_to
 from io import BytesIO
 from lxml import etree
 from sample_resource.controller.resource import SampleResource as SampleResourceController

@@ -19,11 +19,11 @@ settings = config.conf.settings
 # Enable imports under this folder
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 # Import Django environment variables to be used inside PluginLoader class
-os.environ['DJANGO_SETTINGS_MODULE'] = "expedient.clearinghouse.settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = "modules.settings"
 
 
 # Set path for plugins (set at 'expedient/common/utils/plugins/pluginloader.py')
-PLUGINS_PATH = os.path.join(settings.SRC_DIR,"python","plugins")
+PLUGINS_PATH = os.path.join(settings.SRC_DIR,"plugins")
 #sys.path.append(PLUGIN_LOADER.plugins_path)
 sys.path.append(os.path.join(PLUGINS_PATH))
 

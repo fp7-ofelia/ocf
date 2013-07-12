@@ -25,7 +25,7 @@ URN creation and verification utilities.
 '''
 
 import re
-from sfa.util.namespace import URN_PREFIX
+from geni_legacy.sfa.util.namespace import URN_PREFIX
 
 class URN(object):
     """ 

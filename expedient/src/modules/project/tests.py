@@ -5,23 +5,23 @@ Created on Jun 11, 2010
 '''
 
 import logging
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from models import Project
 from pyquery import PyQuery as pq
-from expedient.common.middleware import threadlocals
-from expedient.common.permissions.shortcuts import give_permission_to,\
+from common.middleware import threadlocals
+from common.permissions.shortcuts import give_permission_to,\
     has_permission
 from django.conf import settings
-from expedient.clearinghouse.aggregate.tests.models import DummyAggregate,\
+from modules.aggregate.tests.models import DummyAggregate,\
     DummyResource, DummySliceEvent
-from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
-from expedient.common.tests.client import test_get_and_post_form
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.resources.models import Sliver
-from expedient.clearinghouse.roles.models import ProjectRole
-from expedient.clearinghouse.utils import add_dummy_agg_to_test_settings,\
+from modules.aggregate.utils import get_aggregate_classes
+from common.tests.client import test_get_and_post_form
+from modules.slice.models import Slice
+from modules.resources.models import Sliver
+from modules.roles.models import ProjectRole
+from modules.utils import add_dummy_agg_to_test_settings,\
     start_test_slice
 
 logger = logging.getLogger("ProjectTests")

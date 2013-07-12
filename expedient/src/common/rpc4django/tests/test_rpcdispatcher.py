@@ -10,8 +10,8 @@ import base64
 import unittest
 from xmlrpclib import Fault, Binary
 from xml.dom.minidom import parseString
-from expedient.common.rpc4django.rpcdispatcher import *
-from expedient.common.rpc4django.jsonrpcdispatcher import *
+from common.rpc4django.rpcdispatcher import *
+from common.rpc4django.jsonrpcdispatcher import *
 
 BINARY_STRING = '\x97\xd2\xab\xc8\xfc\x98\xad'
 

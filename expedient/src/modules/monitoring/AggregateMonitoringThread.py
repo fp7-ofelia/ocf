@@ -1,6 +1,6 @@
 from threading import Thread
-from expedient.clearinghouse.aggregate.models import *
-from expedient.clearinghouse.monitoring.XmlRpcClient import XmlRpcClient
+from modules.aggregate.models import *
+from modules.monitoring.XmlRpcClient import XmlRpcClient
 
 '''
 author:msune

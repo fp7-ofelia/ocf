@@ -5,7 +5,7 @@ from django import template
 from django.template import TemplateSyntaxError
 from django.template.defaulttags import URLNode
 
-from expedient.common.utils.ExpedientThemeManager import ExpedientThemeManager
+from common.utils.ExpedientThemeManager import ExpedientThemeManager
 
 '''
         @author: omoya

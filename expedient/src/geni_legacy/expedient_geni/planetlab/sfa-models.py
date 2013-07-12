@@ -4,8 +4,8 @@ Created on Jul 4, 2010
 @author: jnaous
 '''
 from django.db import models
-from expedient.clearinghouse.resources.models import Resource, Sliver
-from expedient_geni.models import GENIAggregate, GENISliceInfo
+from modules.resources.models import Resource, Sliver
+from geni_legacy.expedient_geni.models import GENIAggregate, GENISliceInfo
 from xml.etree import cElementTree as et
 import calendar
 from exceptions import RSpecParsingException, NameConflictException
@@ -119,7 +119,7 @@ class PlanetLabNetwork(Resource):
         @keyword slice: Optional. Slice for which we are producing this RSpec.
             Specifying the slice will set the <sliver /> tag for PlanetLab
             nodes that are part of the slice.
-        @type slice: L{expedient.clearinghouse.slice.models.Slice}.
+        @type slice: L{modules.slice.models.Slice}.
         @return: the NetSpec element
         @rtype: C{xml.etree.ElementTree.Element}
         """

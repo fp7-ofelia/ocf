@@ -7,10 +7,10 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db.models import Q
-from expedient.common.permissions.exceptions import \
+from common.permissions.exceptions import \
     PermissionRegistrationConflict, PermissionDoesNotExist,\
     UnexpectedParameterType
-from expedient.common.utils.managers import GenericObjectManager
+from common.utils.managers import GenericObjectManager
 import logging
 
 logger = logging.getLogger("permissions.managers")
@@ -151,7 +151,7 @@ class ExpedientPermissionManager(models.Manager):
         if not self.are_checks_enabled():
             return (None, None)
         
-        from expedient.common.permissions.models import Permittee, \
+        from common.permissions.models import Permittee, \
             ObjectPermission
         
         permittee = Permittee.objects.get_as_permittee(permittee)
@@ -213,7 +213,7 @@ class ExpedientPermissionManager(models.Manager):
         @return: the same permission.
         @rtype: L{ExpedientPermission}
         """
-        from expedient.common.permissions.models import ExpedientPermission
+        from common.permissions.models import ExpedientPermission
         
         if isinstance(permission, str):
             try:
@@ -254,7 +254,7 @@ class ObjectPermissionManager(GenericObjectManager):
             a C{Model} instance).
         @rtype: (L{ExpedientPermission}, C{Model})
         """
-        from expedient.common.permissions.models import ExpedientPermission
+        from common.permissions.models import ExpedientPermission
 
         if not isinstance(obj_or_class, models.Model):
             # assume it's a model class, so get the contenttype for it.
@@ -316,7 +316,7 @@ class ObjectPermissionManager(GenericObjectManager):
             object permissions.
         @type permittee: C{Model} instance not necessarily a L{Permittee}
         """
-        from expedient.common.permissions.models import Permittee
+        from common.permissions.models import Permittee
         
         permittee = Permittee.objects.get_as_permittee(permittee)
 
@@ -386,7 +386,7 @@ class PermitteeManager(GenericObjectManager):
             give the permission to others.
         @type can_delegate: C{bool} default False.
         """
-        from expedient.common.permissions.models import ObjectPermission
+        from common.permissions.models import ObjectPermission
 
         try:
             obj_permission = ObjectPermission.objects.get_for_object_or_class(
@@ -440,7 +440,7 @@ class PermitteeManager(GenericObjectManager):
         @return: the L{Permittee} instance pointing to the object.
         @rtype: L{Permittee}
         """
-        from expedient.common.permissions.models import Permittee
+        from common.permissions.models import Permittee
         
         if isinstance(obj, Permittee):
             return obj
@@ -469,9 +469,9 @@ class PermissionOwnershipManager(models.Manager):
         @param owner: The permittee currently owning the permission.
         @type owner: L{Permittee} or C{Model} instance.
         """
-        from expedient.common.permissions.models import Permittee
-        from expedient.common.permissions.models import ObjectPermission
-        from expedient.common.permissions.models import PermissionOwnership
+        from common.permissions.models import Permittee
+        from common.permissions.models import ObjectPermission
+        from common.permissions.models import PermissionOwnership
         
         try:
             obj_permission =\
@@ -503,7 +503,7 @@ class PermissionOwnershipManager(models.Manager):
         @param owner: The permittee currently owning the permission.
         @type owner: L{Permittee} or C{Model} instance.
         """
-        from expedient.common.permissions.models import PermissionOwnership
+        from common.permissions.models import PermissionOwnership
         
         try:
             po = self.get_ownership(permission, obj_or_class, owner)
@@ -521,7 +521,7 @@ class PermissionOwnershipManager(models.Manager):
         @param owner: The permittee currently owning the permissions.
         @type owner: L{Permittee} or C{Model} instance.
         """
-        from expedient.common.permissions.models import Permittee
+        from common.permissions.models import Permittee
 
         permittee = Permittee.objects.get_as_permittee(owner)
         

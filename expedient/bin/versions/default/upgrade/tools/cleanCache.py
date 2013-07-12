@@ -17,7 +17,7 @@ sys.stdout = sys.stderr
 
 PYTHON_DIR = join(dirname(__file__), '../../../../../src/python')
 PLUGINS_DIR = join(dirname(__file__), '../../../../../src/python/plugins')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'modules.settings'
 #os.environ['DJANGO_SETTINGS_MODULE'] = sys.argv[2]
 sys.path.insert(0,PLUGINS_DIR)
 sys.path.insert(0,PYTHON_DIR)

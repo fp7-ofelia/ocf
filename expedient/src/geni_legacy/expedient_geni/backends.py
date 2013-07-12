@@ -6,11 +6,11 @@ Created on Aug 12, 2010
 import logging
 import traceback
 from django.contrib.auth.backends import RemoteUserBackend
-from sfa.trust.gid import GID
-from expedient_geni.utils import get_user_urn, urn_to_username
-from geni.util.urn_util import URN
+from geni_legacy.sfa.trust.gid import GID
+from geni_legacy.expedient_geni.utils import get_user_urn, urn_to_username
+from geni_legacy.geni.util.urn_util import URN
 
-logger = logging.getLogger("expedient_geni.backends")
+logger = logging.getLogger("geni_legacy.expedient_geni.backends")
 
 def get_username_from_cert(cert_string):
     try:

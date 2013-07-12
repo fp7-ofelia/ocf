@@ -8,15 +8,15 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.extendable.models import Extendable
-from expedient.common.permissions.shortcuts import \
+from common.extendable.models import Extendable
+from common.permissions.shortcuts import \
     give_permission_to, delete_permission, must_have_permission, has_permission,\
     get_permittee_from_threadlocals
-from expedient.common.permissions.models import Permittee
-from expedient.common.permissions.utils import permissions_save_override,\
+from common.permissions.models import Permittee
+from common.permissions.utils import permissions_save_override,\
     permissions_delete_override
-from expedient.common.permissions.decorators import require_obj_permissions_for_method
-from expedient.common.permissions.exceptions import PermissionDenied
+from common.permissions.decorators import require_obj_permissions_for_method
+from common.permissions.exceptions import PermissionDenied
 
 logger = logging.getLogger("aggregate.models")
 
@@ -103,7 +103,7 @@ No information available.
     
     def _get_slice_set(self):
         """Gets the list of slices allowed to use the aggregate"""
-        from expedient.clearinghouse.slice.models import Slice
+        from modules.slice.models import Slice
         return Permittee.objects.filter_for_class_and_permission_name(
             klass=Slice,
             permission="can_use_aggregate",
@@ -183,7 +183,7 @@ No information available.
         C{give_permission} function to give the project
         the "can_use_aggregate" permission::
             
-            from expedient.common.permissions.shortcuts import \
+            from common.permissions.shortcuts import \
                 give_permission_to
             
             give_permission_to("can_use_aggregate", self.as_leaf_class(), project)
@@ -220,7 +220,7 @@ No information available.
         Similar to L{add_to_project} but does the reverse, deleting the
         permission from the project using::
         
-            from expedient.common.permissions.shortcuts import \
+            from common.permissions.shortcuts import \
                 delete_permission
                 
             delete_permission("can_use_aggregate", self.as_leaf_class(), project)

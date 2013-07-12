@@ -17,7 +17,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.views.generic import GenericViewError
 from django.contrib import messages
 from django.contrib.auth.models import User
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 
 def list_msgs(request, number=None):

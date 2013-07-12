@@ -13,29 +13,29 @@ from django.conf import settings
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterface,\
     OpenFlowInterfaceSliver, FlowSpaceRule, OpenFlowConnection,\
     NonOpenFlowConnection, OpenFlowSwitch, OpenFlowSliceInfo
-from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
+from common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 import logging
 from django.core.urlresolvers import reverse
-from expedient.common.tests.client import test_get_and_post_form, parse_form
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.slice.models import Slice
+from common.tests.client import test_get_and_post_form, parse_form
+from modules.project.models import Project
+from modules.slice.models import Slice
 from base64 import b64decode
 import pickle
-from expedient.common.tests.manager import SettingsTestCase
-from expedient.clearinghouse.resources.models import Resource
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.common.middleware import threadlocals
+from common.tests.manager import SettingsTestCase
+from modules.resources.models import Resource
+from modules.aggregate.models import Aggregate
+from common.permissions.shortcuts import give_permission_to
+from common.middleware import threadlocals
 from openflow.plugin.gapi import rspec as rspec_mod
-from expedient_geni.utils import create_x509_cert, get_user_urn
-from expedient_geni import clearinghouse
-from expedient.clearinghouse.users.models import UserProfile
+from geni_legacy.expedient_geni.utils import create_x509_cert, get_user_urn
+from geni_legacy.expedient_geni import clearinghouse
+from modules.users.models import UserProfile
 import random
 from sfa.trust import credential
-from expedient_geni.models import GENISliceInfo
+from geni_legacy.expedient_geni.models import GENISliceInfo
 import xmlrpclib
-from expedient.common.utils.transport import TestClientTransport
-from expedient.common.utils import create_or_update
+from common.utils.transport import TestClientTransport
+from common.utils import create_or_update
 from geni.util.urn_util import publicid_to_urn
 from xmlrpclib import Fault
 
@@ -91,7 +91,7 @@ class Tests(SettingsTestCase):
         # add the test application
         self.settings_manager.set(
             OPENFLOW_OTHER_RESOURCES=(
-                ("expedient.clearinghouse.resources", "Resource"),
+                ("modules.resources", "Resource"),
             ),
             DEBUG_PROPAGATE_EXCEPTIONS=True,
         )

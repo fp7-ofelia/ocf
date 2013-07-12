@@ -3,23 +3,23 @@
 '''
 from datetime import datetime, timedelta
 from django.db import models
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.aggregate.models import Aggregate
+from modules.project.models import Project
+from modules.aggregate.models import Aggregate
 from django.contrib.auth.models import User
-from expedient.common.permissions.models import ObjectPermission, Permittee
-from expedient.clearinghouse.aggregate.utils import get_aggregate_classes
+from common.permissions.models import ObjectPermission, Permittee
+from modules.aggregate.utils import get_aggregate_classes
 import logging, uuid
 from django.db.models import signals
-from expedient.common.messaging.models import DatedMessage
+from common.messaging.models import DatedMessage
 import traceback
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
-from expedient.common.timer.models import Job
-#from expedient.common.timer.exceptions import JobAlreadyScheduled
-from expedient.common.utils.modelfields import LimitedDateTimeField
-from expedient.common.middleware import threadlocals
-from expedient.common.utils.validators import asciiValidator, descriptionLightValidator
-from expedient.clearinghouse.slice.utils import *
+from common.timer.models import Job
+#from common.timer.exceptions import JobAlreadyScheduled
+from common.utils.modelfields import LimitedDateTimeField
+from common.middleware import threadlocals
+from common.utils.validators import asciiValidator, descriptionLightValidator
+from modules.slice.utils import *
 
 logger = logging.getLogger("slice.models")
 

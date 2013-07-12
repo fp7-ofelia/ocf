@@ -36,7 +36,7 @@ def pop_frame():
     try:
         _thread_locals.d_stack.pop(get_tpid_key())
     except KeyError:
-        print "[WARNING] Exception at 'expedient.common.middleware.threadlocals.ThreadLocals': tried to access to permittees stack when it was already empty. This may happen because an incorrect URL (request.url) was requested and Django's CommonMiddleware forwarded it to a new one without processing the request in this middleware."
+        print "[WARNING] Exception at 'common.middleware.threadlocals.ThreadLocals': tried to access to permittees stack when it was already empty. This may happen because an incorrect URL (request.url) was requested and Django's CommonMiddleware forwarded it to a new one without processing the request in this middleware."
         pass
 
 def get_thread_locals():
@@ -82,7 +82,7 @@ class ThreadLocals(object):
     request object and saves them in thread local storage."""
 
     def __init__(self):
-        from expedient.clearinghouse.permissionmgmt.models import get_project, get_slice, get_user
+        from modules.permissionmgmt.models import get_project, get_slice, get_user
         self.__parsers = {}
         self.add_parser("user", get_user)
         self.add_parser("project", get_project)
@@ -107,7 +107,7 @@ class ThreadLocals(object):
                 d[kw] = func(request)
             push_frame(**d)
         except Exception as e:
-            print "[WARNING] Exception at 'expedient.common.middleware.threadlocals.ThreadLocals': tried to execute unknown function: %s" % str(e)
+            print "[WARNING] Exception at 'common.middleware.threadlocals.ThreadLocals': tried to execute unknown function: %s" % str(e)
         return None
         
     def process_response(self, request, response):

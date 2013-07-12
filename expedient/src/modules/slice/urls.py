@@ -5,7 +5,7 @@ Created on Jun 17, 2010
 '''
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('expedient.clearinghouse.slice.views',
+urlpatterns = patterns('modules.slice.views',
     url(r'^detail/(?P<slice_id>\d+)/$', 'detail', name='slice_detail'),
     url(r'^create/(?P<proj_id>\d+)/$', 'create', name='slice_create'),
     url(r'^update/(?P<slice_id>\d+)/$', 'update', name='slice_update'),

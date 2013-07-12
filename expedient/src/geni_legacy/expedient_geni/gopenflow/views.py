@@ -4,11 +4,11 @@ Created on Oct 12, 2010
 @author: jnaous
 '''
 from django.shortcuts import get_object_or_404
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from geni_legacy.expedient_geni.gopenflow.models import GCFOpenFlowAggregate
 from openflow.plugin.views import handle_add_links, handle_add_to_slice
 from django.core.urlresolvers import reverse
-from expedient.clearinghouse.slice.models import Slice
-import expedient_geni.views as eg_views
+from modules.slice.models import Slice
+import geni_legacy.expedient_geni.views as eg_views
 
 def aggregate_add_links(request, agg_id):
     """

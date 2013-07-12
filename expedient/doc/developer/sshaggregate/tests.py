@@ -5,10 +5,10 @@ from paramiko.rsakey import RSAKey
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from expedient.clearinghouse.slice.models import Slice
-from expedient.common.permissions.models import ExpedientPermission
-from expedient.clearinghouse.project.models import Project
-from expedient.common.tests.client import test_get_and_post_form
+from modules.slice.models import Slice
+from common.permissions.models import ExpedientPermission
+from modules.project.models import Project
+from common.tests.client import test_get_and_post_form
 from sshaggregate.views import aggregate_add_servers, aggregate_crud
 from sshaggregate.models import SSHAggregate, SSHServer, SSHServerSliver,\
     SSHSliceInfo

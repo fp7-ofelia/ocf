@@ -6,11 +6,11 @@ Created on Sep 13, 2010
 import os
 import re
 from django.conf import settings
-from geni.util.urn_util import URN
-from geni.util.cert_util import create_cert
-from sfa.trust.gid import GID
+from geni_legacy.geni.util.urn_util import URN
+from geni_legacy.geni.util.cert_util import create_cert
+from geni_legacy.sfa.trust.gid import GID
 from django.core.urlresolvers import reverse
-from geni.util import cred_util
+from geni_legacy.geni.util import cred_util
 import uuid
 
 def get_user_cert_fname(user):
@@ -138,7 +138,7 @@ def read_cert_from_file(cert_fname):
     return cert
 
 def describe_ui_plugin(slice):
-    """Describes the UI plugin according to L{expedient.clearinghouse.defaultsettings.expedient.UI_PLUGINS}."""
+    """Describes the UI plugin according to L{modules.defaultsettings.expedient.UI_PLUGINS}."""
     return ("GCF RSpec Plugin",
             "Allows the user to modify the slice by uploading"
             " RSpecs or to download an RSpec of the slice.",

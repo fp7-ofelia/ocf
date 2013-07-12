@@ -7,15 +7,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import get_callable
 from django.views.generic import simple
-from expedient.common.permissions.exceptions import PermissionDenied
-from expedient.common.permissions.models import ExpedientPermission,\
+from common.permissions.exceptions import PermissionDenied
+from common.permissions.models import ExpedientPermission,\
     PermissionRequest, Permittee, ObjectPermission
-from expedient.common.permissions.utils import get_object_from_ids
-from expedient.common.permissions.forms import PermissionRequestForm, ProjectRequestForm
-from expedient.common.messaging.models import DatedMessage
+from common.permissions.utils import get_object_from_ids
+from common.permissions.forms import PermissionRequestForm, ProjectRequestForm
+from common.messaging.models import DatedMessage
 from django.contrib.auth.models import User
 import logging
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import QueryDict

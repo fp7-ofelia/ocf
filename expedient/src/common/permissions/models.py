@@ -7,8 +7,8 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
-from expedient.common.permissions.exceptions import PermissionCannotBeDelegated
-from expedient.common.permissions.managers import ExpedientPermissionManager,\
+from common.permissions.exceptions import PermissionCannotBeDelegated
+from common.permissions.managers import ExpedientPermissionManager,\
     ObjectPermissionManager, PermitteeManager, PermissionOwnershipManager
 
 import logging

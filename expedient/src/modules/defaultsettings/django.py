@@ -9,11 +9,11 @@ import pkg_resources
 from utils import append_to_local_setting
 import ldap
 
-sys.path.append(os.path.dirname(__file__)+'/../../../../../../vt_manager/src/python')
+sys.path.append(os.path.dirname(__file__)+'/../../../../vt_manager/src/python')
 #sys.path.append(os.path.dirname(__file__)+'/../../../plugins')
 
 try:
-    from localsettings import SRC_DIR as location
+    from modules.localsettings import SRC_DIR as location
     sys.path.append(location)
 except ImportError:
     try:
@@ -32,7 +32,7 @@ SRC_DIR = location
 '''Base location of non-python source files.'''
 
 try:
-    from localsettings import CONF_DIR as location
+    from modules.localsettings import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
     location = "/etc/expedient"
@@ -45,9 +45,9 @@ Example: /etc/expedient/
 '''
 
 try:
-    from localsettings import STATIC_DOC_ROOT as location
+    from modules.localsettings import STATIC_DOC_ROOT as location
 except ImportError:
-    location = os.path.join(SRC_DIR, "static", "expedient", "clearinghouse")
+    location = os.path.join(SRC_DIR, "static")
 
 STATIC_DOC_ROOT = location
 '''Location of static content.
@@ -76,18 +76,19 @@ USE_I18N = False
 to load the internationalization machinery.'''
 
 try:
-    from localsettings import *
+    from modules.localsettings import *
 except ImportError:
     pass
 
-MEDIA_ROOT = os.path.join(STATIC_DOC_ROOT, "media")
+#MEDIA_ROOT = os.path.join(STATIC_DOC_ROOT, "media")
+MEDIA_ROOT = STATIC_DOC_ROOT
 '''Absolute path to the directory that holds media.
 Example: "/home/media/media.lawrence.com/"'''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static/media/default'
+MEDIA_URL = '/static/default'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -110,18 +111,18 @@ append_to_local_setting(
     "TEMPLATE_LOADERS", TEMPLATE_LOADERS, globals())
 
 MIDDLEWARE_CLASSES = [
-#    'expedient.common.middleware.exceptionprinter.ExceptionPrinter',
+#    'common.middleware.exceptionprinter.ExceptionPrinter',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
-    'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
-    'expedient.common.middleware.sitelockdown.SiteLockDown',
-    'expedient.common.middleware.threadlocals.ThreadLocals',
-    'expedient.common.permissions.middleware.PermissionMiddleware',
-    'expedient_geni.middleware.CreateUserGID',
+    'common.middleware.basicauth.HTTPBasicAuthMiddleware',
+    'common.middleware.sitelockdown.SiteLockDown',
+    'common.middleware.threadlocals.ThreadLocals',
+    'common.permissions.middleware.PermissionMiddleware',
+    'geni_legacy.expedient_geni.middleware.CreateUserGID',
 ]
 append_to_local_setting(
     "MIDDLEWARE_CLASSES", MIDDLEWARE_CLASSES, globals(), at_start=True,
@@ -129,7 +130,7 @@ append_to_local_setting(
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'expedient_geni.backends.GENIRemoteUserBackend',
+    'geni_legacy.expedient_geni.backends.GENIRemoteUserBackend',
 ]
 if ENABLE_LDAP_BACKEND:
     AUTHENTICATION_BACKENDS.insert(1,'django_auth_ldap.backend.LDAPBackend')
@@ -138,12 +139,13 @@ append_to_local_setting(
     "AUTHENTICATION_BACKENDS", AUTHENTICATION_BACKENDS, globals(),
 )
   
-ROOT_URLCONF = 'expedient.clearinghouse.urls'
+ROOT_URLCONF = 'modules.urls'
 
 TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates/default'),
-    os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
-    os.path.join(SRC_DIR, 'templates/default/expedient/common'),
+#    os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
+#    os.path.join(SRC_DIR, 'templates/default/expedient/common'),
+    os.path.join(SRC_DIR, 'templates/default/common'),
 ##    os.path.join(SRC_DIR, 'python/vt_plugin/views/templates/default'),
 ]
 append_to_local_setting(
@@ -152,7 +154,7 @@ append_to_local_setting(
 
 
 INSTALLED_APPS = [
-    'expedient.clearinghouse.firstapp', # Must remain first!
+    'modules.firstapp', # Must remain first!
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -162,29 +164,29 @@ INSTALLED_APPS = [
     'autoslug',
     'registration',
     'django_evolution',
-    'expedient.common.timer',
-    'expedient.common.permissions',
-    'expedient.common.breadcrumbs',
-    'expedient.common.rpc4django',
-    'expedient.common.utils',
-    'expedient.common.extendable',
-    'expedient.common.xmlrpc_serverproxy',
-    'expedient.common.messaging',
-    'expedient.common.defaultsite',
-    'expedient.clearinghouse.commands',
-    'expedient.clearinghouse.aggregate',
-    'expedient.clearinghouse.roles',
-    'expedient.clearinghouse.project',
-    'expedient.clearinghouse.resources',
-    'expedient.clearinghouse.slice',
-    'expedient.clearinghouse.users',
-    'expedient.clearinghouse.permissionmgmt',
+    'common.timer',
+    'common.permissions',
+    'common.breadcrumbs',
+    'common.rpc4django',
+    'common.utils',
+    'common.extendable',
+    'common.xmlrpc_serverproxy',
+    'common.messaging',
+    'common.defaultsite',
+    'modules.commands',
+    'modules.aggregate',
+    'modules.roles',
+    'modules.project',
+    'modules.resources',
+    'modules.slice',
+    'modules.users',
+    'modules.permissionmgmt',
 #    'openflow.plugin',
-    'expedient_geni',
-    'expedient_geni.planetlab',
-    'expedient_geni.gopenflow',
+    'geni_legacy.expedient_geni',
+    'geni_legacy.expedient_geni.planetlab',
+    'geni_legacy.expedient_geni.gopenflow',
 #    'expedient.ui.html',
-    'expedient.ui.rspec',
+    'ui.rspec',
 #    'vt_plugin',
 #    'vt_plugin.communication',
 #    'openflow.dummyom',
@@ -210,8 +212,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     'django.core.context_processors.request',
-    'expedient.common.messaging.context_processors.messaging',
-    'expedient.common.utils.context_processors.contextSettingsInTemplate',
+    'common.messaging.context_processors.messaging',
+    'common.utils.context_processors.contextSettingsInTemplate',
 ]
 append_to_local_setting(
     "TEMPLATE_CONTEXT_PROCESSORS", TEMPLATE_CONTEXT_PROCESSORS, globals())
@@ -222,7 +224,7 @@ DEBUG = True
 '''Enable/Disable debugging mode. See Django docs on this setting.'''
 
 try:
-    from localsettings import *
+    from modules.localsettings import *
 except ImportError:
     pass
 

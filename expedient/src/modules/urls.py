@@ -9,12 +9,12 @@ from django.views.generic.simple import direct_to_template
 
 ''' Theme Management '''
 
-from expedient.common.utils.ExpedientThemeManager import ExpedientThemeManager
+from common.utils.ExpedientThemeManager import ExpedientThemeManager
 ExpedientThemeManager.initialize()
 
 """ Plugin system """
-from expedient.common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
-from expedient.common.utils.plugins.topologygenerator import TopologyGenerator as TOPOLOGY_GENERATOR
+from common.utils.plugins.pluginloader import PluginLoader as PLUGIN_LOADER
+from common.utils.plugins.topologygenerator import TopologyGenerator as TOPOLOGY_GENERATOR
 
 if not PLUGIN_LOADER.plugin_settings:
     PLUGIN_SETTINGS = PLUGIN_LOADER.load_settings()
@@ -43,23 +43,23 @@ if not PLUGIN_LOADER.plugin_settings:
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', 'expedient.clearinghouse.views.home', name='home'),
+    url(r'^$', 'views.home', name='home'),
     url(r'^help/$',
         direct_to_template,
         {'template': 'help/index.html'},
         name='help'),
 
 #    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),    
-    (r'^users/', include('expedient.clearinghouse.users.urls')),
-    (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
-    (r'^project/', include('expedient.clearinghouse.project.urls')),
-    (r'^slice/', include('expedient.clearinghouse.slice.urls')),
-    (r'^expedient_geni/', include('expedient_geni.urls')),
-    (r'^messages/', include('expedient.common.messaging.urls')),
-    (r'^permissions/', include('expedient.common.permissions.urls')),
-    (r'^roles/', include('expedient.clearinghouse.roles.urls')),
-    (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
-    (r'^messagecenter/',include('expedient.clearinghouse.messagecenter.urls')),
+    (r'^users/', include('modules.users.urls')),
+    (r'^aggregate/', include('modules.aggregate.urls')),
+    (r'^project/', include('modules.project.urls')),
+    (r'^slice/', include('modules.slice.urls')),
+    (r'^geni_legacy.expedient_geni/', include('geni_legacy.expedient_geni.urls')),
+    (r'^messages/', include('common.messaging.urls')),
+    (r'^permissions/', include('common.permissions.urls')),
+    (r'^roles/', include('modules.roles.urls')),
+    (r'^permissionmgmt/', include('modules.permissionmgmt.urls')),
+    (r'^messagecenter/',include('modules.messagecenter.urls')),
     (r'^admin/', include(admin.site.urls)),
 
 )
@@ -67,17 +67,17 @@ urlpatterns = patterns('',
 # Password reset url
 urlpatterns += patterns('',
     url(r'^accounts/password/reset/$',
-        'expedient.clearinghouse.users.views.my_password_reset',
+        'modules.users.views.my_password_reset',
         name='my_password_reset'),
     )
 #Registration urls depending on ALLOW_LOCAL_REGISTRATION flag
 if settings.ALLOW_LOCAL_REGISTRATION == True:
     urlpatterns += patterns('',
     url(r'^accounts/register/$',
-        'expedient.clearinghouse.users.views.register',
+        'modules.users.views.register',
         name='registration_register'),
     url(r'^accounts/activate/(?P<activation_key>\w+)/$',
-        'expedient.clearinghouse.users.views.activate',
+        'modules.users.views.activate',
         name='registration_activate'),
     url(r'^accounts/register/complete/$',
         direct_to_template,
@@ -129,7 +129,7 @@ try:
     # URLs for static content in plugins
     urlpatterns += PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
 except Exception as e:
-    print "[ERROR] Problem adding URLs for plugins inside expedient.clearinghouse.urls. Details: %s" % str(e)
+    print "[ERROR] Problem adding URLs for plugins inside modules.urls. Details: %s" % str(e)
 
 '''
 Static theme content

@@ -5,9 +5,9 @@ Created on Jun 11, 2010
 '''
 from django.db import models
 from django.db.models.signals import pre_delete
-from expedient.clearinghouse.resources.models import Resource
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.slice.models import Slice
+from modules.resources.models import Resource
+from modules.aggregate.models import Aggregate
+from modules.slice.models import Slice
 
 class DummyAggregate(Aggregate):
     def create_resources(self):

@@ -18,18 +18,18 @@ import xmlrpclib
 from openflow.tests import test_settings as settings
 from openflow.tests.helpers import parse_rspec, create_random_resv, \
     kill_old_procs
-from expedient.common.utils.certtransport import SafeTransportWithCert
-from expedient.common.tests.commands import call_env_command, Env
+from common.utils.certtransport import SafeTransportWithCert
+from common.tests.commands import call_env_command, Env
 
 ch_env = Env(settings.CH_PROJECT_DIR)
 ch_env.switch_to()
 
 if settings.SHOW_PROCESSES_IN_XTERM:
-    from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
+    from common.tests.utils import run_cmd_in_xterm as run_cmd
 else:
-    from expedient.common.tests.utils import run_cmd
-from expedient.common.tests.utils import wrap_xmlrpc_call, drop_to_shell
-from expedient.common.tests.client import Browser
+    from common.tests.utils import run_cmd
+from common.tests.utils import wrap_xmlrpc_call, drop_to_shell
+from common.tests.client import Browser
 
 import logging
 logger = logging.getLogger("openflow.tests.gapi")
@@ -326,7 +326,7 @@ class GAPITests(TestCase):
         """
         from openflow.plugin.models import OpenFlowSwitch
         from openflow.dummyom.models import DummyOMSlice
-        from expedient.clearinghouse.slice.models import Slice
+        from modules.slice.models import Slice
         
         # get the resources
         slice_urn, cred = self.create_ch_slice()
@@ -372,7 +372,7 @@ class GAPITests(TestCase):
         """
         Tests that we can create a sliver.
         """
-        from expedient.clearinghouse.slice.models import Slice
+        from modules.slice.models import Slice
         from openflow.dummyom.models import DummyOMSlice
         
         # get the resources

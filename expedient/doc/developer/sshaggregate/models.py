@@ -4,13 +4,13 @@ from django.db import models
 from django.db.models.fields import IPAddressField
 import paramiko
 from paramiko.rsakey import RSAKey
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.resources.models import Resource, Sliver
-from expedient.common.utils.modelfields import LimitedIntegerField
-from expedient.common.middleware import threadlocals
-from expedient.clearinghouse.utils import post_message_to_current_user
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.slice.models import Slice
+from modules.aggregate.models import Aggregate
+from modules.resources.models import Resource, Sliver
+from common.utils.modelfields import LimitedIntegerField
+from common.middleware import threadlocals
+from modules.utils import post_message_to_current_user
+from common.messaging.models import DatedMessage
+from modules.slice.models import Slice
 
 # SSHServer class
 class SSHServer(Resource):

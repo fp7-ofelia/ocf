@@ -3,14 +3,14 @@ Created on Oct 1, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 import xmlrpclib
 import logging
-from geni import CredentialVerifier
+from geni_legacy.geni import CredentialVerifier
 from django.conf import settings
 from decorator import decorator
 from openflow.plugin.gapi import gapi
-from expedient.clearinghouse.slice.models import Slice
+from modules.slice.models import Slice
 from openflow.plugin.gapi.gapi import DuplicateSliceNameException
 
 logger = logging.getLogger("openflow.plugin.gapi.rpc")

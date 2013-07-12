@@ -4,28 +4,28 @@ Created on Oct 6, 2010
 @author: jnaous
 '''
 from django.conf import settings
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from django.contrib.auth.models import User
-from expedient.common.middleware import threadlocals
+from common.middleware import threadlocals
 from openflow.dummyom.models import DummyOM
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.client import test_get_and_post_form
 from django.core.urlresolvers import reverse
-from expedient_geni.gopenflow.tests.models import DummyOFAggregate
+from geni_legacy.expedient_geni.gopenflow.tests.models import DummyOFAggregate
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowSliceInfo
-from expedient.common.rpc4django import views as rpc4django_views
+from common.rpc4django import views as rpc4django_views
 
 from rpc import *
 from openflow.plugin.gapi.rspec import parse_external_rspec, create_resv_rspec
-from expedient.common.utils import create_or_update
-from expedient.clearinghouse.users.models import UserProfile
-from expedient.clearinghouse.project.models import Project
+from common.utils import create_or_update
+from modules.users.models import UserProfile
+from modules.project.models import Project
 import random
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
-from expedient_geni.models import GENISliceInfo
+from geni_legacy.expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from geni_legacy.expedient_geni.models import GENISliceInfo
 
-MOD = "expedient_geni.gopenflow"
+MOD = "geni_legacy.expedient_geni.gopenflow"
 
 class Tests(SettingsTestCase):
     urls = MOD + ".tests.urls"

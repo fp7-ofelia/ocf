@@ -10,15 +10,15 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from expedient.clearinghouse.roles.models import ProjectRole,\
+from modules.roles.models import ProjectRole,\
     ProjectRoleRequest
-from expedient.clearinghouse.roles.utils import get_users_for_role
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.roles.forms import SelectRoleForm, ProjectRoleForm
-from expedient.common.utils.views import generic_crud
-from expedient.common.permissions.models import ObjectPermission, Permittee
-from expedient.common.permissions.shortcuts import must_have_permission
+from modules.roles.utils import get_users_for_role
+from common.messaging.models import DatedMessage
+from modules.project.models import Project
+from modules.roles.forms import SelectRoleForm, ProjectRoleForm
+from common.utils.views import generic_crud
+from common.permissions.models import ObjectPermission, Permittee
+from common.permissions.shortcuts import must_have_permission
 
 TEMPLATE_PATH="roles"
 
@@ -85,7 +85,7 @@ def update(request, role_id):
     # Use to update the permissions in the ProjectRole object so
     # users with that role are affected from the time this is updated
     def post_save(instance, created):
-        from expedient.clearinghouse.roles.models import ObjectPermission
+        from modules.roles.models import ObjectPermission
         new_obj_permissions_pks = [ p.pk for p in instance.obj_permissions.all() ]
         for permission in obj_permissions:
             # Add and delete permissions accordingly...

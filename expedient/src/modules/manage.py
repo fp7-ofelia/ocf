@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 from os.path import dirname, join
 import sys
-sys.path.insert(0, join(dirname(__file__), "../.."))
+#sys.path.insert(0, join(dirname(__file__), ".."))
+sys.path.insert(0, dirname(__file__))
 
-import expedient.clearinghouse.settings as settings
+import modules.settings as settings
 from django.core.management import execute_manager
 
 def main():

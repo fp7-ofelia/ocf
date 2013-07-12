@@ -29,9 +29,9 @@ import logging
 import xmlrpclib
 import sys
 
-import sfa.trust.credential as cred
-import sfa.trust.gid as gid
-import sfa.trust.rights as rights
+import geni_legacy.sfa.trust.credential as cred
+import geni_legacy.sfa.trust.gid as gid
+import geni_legacy.sfa.trust.rights as rights
 
 class CredentialVerifier(object):
     """Utilities to verify signed credentials from a given set of 

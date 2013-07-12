@@ -7,17 +7,17 @@ Created on Dec 3, 2009
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
-from expedient.clearinghouse import users
+from modules import users
 from django.views.generic import create_update, simple
 from django.contrib import auth
-from expedient.common.permissions.shortcuts import must_have_permission,\
+from common.permissions.shortcuts import must_have_permission,\
     give_permission_to
 from registration import views as registration_views
-from expedient.clearinghouse.users.forms import FullRegistrationForm
+from modules.users.forms import FullRegistrationForm
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.views import password_reset
-from expedient.clearinghouse.users.forms import LDAPPasswordResetForm
+from modules.users.forms import LDAPPasswordResetForm
 
 def home(request):
     '''show list of users and form for adding users'''
@@ -158,7 +158,7 @@ def register(request):
 	    request,
             form_class=FullRegistrationForm)
     except Exception as e:
-        print "[ERROR] Exception at 'expedient.clearinghouse.users.views': user '%s' (%s) could not fully register. RegistrationForm module returned: %s" % (request.POST['username'], request.POST['email'], str(e))
+        print "[ERROR] Exception at 'modules.users.views': user '%s' (%s) could not fully register. RegistrationForm module returned: %s" % (request.POST['username'], request.POST['email'], str(e))
         return simple.direct_to_template(
             request,
             template='registration/registration_incomplete.html',

@@ -4,9 +4,9 @@ Created on Jul 4, 2010
 @author: jnaous
 '''
 from django.db import models
-from expedient.clearinghouse.resources.models import Resource, Sliver
-from expedient_geni.models import GENIAggregate, GENISliceInfo
-from expedient.common.utils import create_or_update
+from modules.resources.models import Resource, Sliver
+from geni_legacy.expedient_geni.models import GENIAggregate, GENISliceInfo
+from common.utils import create_or_update
 from xml.etree import cElementTree as et
 import logging
 from datetime import datetime

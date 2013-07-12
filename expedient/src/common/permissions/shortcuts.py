@@ -4,12 +4,12 @@ Created on Jul 30, 2010
 @author: jnaous
 '''
 import logging
-from expedient.common.permissions.models import ExpedientPermission,\
+from common.permissions.models import ExpedientPermission,\
     ObjectPermission, PermissionOwnership
-from expedient.common.middleware import threadlocals
-from expedient.common.permissions.exceptions import PermitteeNotInThreadLocals,\
+from common.middleware import threadlocals
+from common.permissions.exceptions import PermitteeNotInThreadLocals,\
     PermissionDenied, NonePermitteeException
-from expedient.common.permissions.middleware import PermissionMiddleware
+from common.permissions.middleware import PermissionMiddleware
 
 logger = logging.getLogger("permissions.shortcuts")
 

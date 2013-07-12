@@ -36,7 +36,8 @@ import xml.dom.minidom as minidom
 import xmlrpclib
 import zlib
 
-import geni
+# ???
+#import geni
 from SecureXMLRPCServer import SecureXMLRPCServer
 
 
@@ -205,7 +206,8 @@ class Resource(object):
     def urn(self):
         # User in SliverStatus
         publicid = 'IDN %s//resource//%s_%s' % (RESOURCE_NAMESPACE, self._type, str(self._id))
-        return geni.publicid_to_urn(publicid)
+#        return geni.publicid_to_urn(publicid)
+        return publicid_to_urn(publicid)
 
     def toxml(self):
         template = ('<resource><urn>%s</urn><type>%s</type><id>%s</id>'
@@ -263,7 +265,8 @@ class ReferenceAggregateManager(object):
     def __init__(self, root_cert):
         self._slivers = dict()
         self._resources = [Resource(x, 'Nothing') for x in range(10)]
-        self._cred_verifier = geni.CredentialVerifier(root_cert)
+#        self._cred_verifier = geni.CredentialVerifier(root_cert)
+        self._cred_verifier = CredentialVerifier(root_cert)
         self.max_lease = datetime.timedelta(days=REFAM_MAXLEASE_DAYS)
         self.logger = logging.getLogger('gcf-am.reference')
 

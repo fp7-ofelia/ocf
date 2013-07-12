@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import signals
-from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
 from django.conf import settings
 
 class DatedMessageManager(models.Manager):

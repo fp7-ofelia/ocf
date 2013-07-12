@@ -6,7 +6,7 @@ Created on Oct 6, 2010
 from django.db import models
 from django.conf import settings
 from openflow.plugin.gapi import gapi, rspec
-from geni.util.urn_util import publicid_to_urn
+from geni_legacy.geni.util.urn_util import publicid_to_urn
 
 OTHER_BASENAME ="test//test"
 OTHER_PREFIX = publicid_to_urn(

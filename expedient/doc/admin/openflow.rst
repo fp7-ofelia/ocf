@@ -96,4 +96,4 @@ The XMLRPC URL for the GENI API is of the form
 ``https://<expedient.host>:<port>/openflow/gapi/``.
 The trailing slash is important.
 
-.. _settings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.gcf-module.html
+.. _settings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.gcf-module.html

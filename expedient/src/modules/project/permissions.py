@@ -3,10 +3,10 @@ Created on Aug 3, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.shortcuts import create_permission
-from expedient.clearinghouse.permissionmgmt.utils import \
+from common.permissions.shortcuts import create_permission
+from modules.permissionmgmt.utils import \
     request_permission_wrapper
-from expedient.clearinghouse.roles.views import make_request
+from modules.roles.views import make_request
 
 def run():
     create_permission(

@@ -7,7 +7,7 @@ Created on Apr 29, 2010
 from django import forms
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from openflow.plugin.models import OpenFlowInterface, NonOpenFlowConnection
-from expedient.common.utils import create_or_update
+from common.utils import create_or_update
 from django.forms.models import ModelChoiceField
 
 class OpenFlowAggregateForm(forms.ModelForm):

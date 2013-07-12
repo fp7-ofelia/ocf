@@ -5,7 +5,7 @@ Created on Oct 17, 2012
 '''
 
 from openflow.plugin.models import OpenFlowInterfaceSliver, FlowSpaceRule,OpenFlowAggregate
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from geni_legacy.expedient_geni.gopenflow.models import GCFOpenFlowAggregate
 from django.db.models import Q
 
 VLAN_TAG_SUBSET = 10

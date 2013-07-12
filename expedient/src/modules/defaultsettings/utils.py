@@ -4,7 +4,7 @@ Created on Feb 14, 2011
 @author: jnaous
 '''
 import sys
-sys.path.append("/opt/ofelia/expedient/src/python/expedient/clearinghouse/")
+sys.path.append("/opt/ofelia/expedient/src/")
 
 def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     """Set or update a setting by adding items to it.
@@ -29,7 +29,7 @@ def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     @return: the value of the new setting.
     """
     
-    import localsettings
+    from modules import localsettings
     setting = getattr(localsettings, "EXTRA_%s" % setting_name, [])
     v = l + setting if at_start else setting + l
     _modname = globals_dict['__name__']
@@ -38,7 +38,7 @@ def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     return v
 
 def get_or_set_default(setting_name, default, globals_dict):
-    """Get or set a default setting from localsettings.
+    """Get or set a default setting from modules.localsettings.
     
     If the setting with name C{setting_name} is in localsettings, then
     use that as the default value. Otherwise, use C{default}. This function
@@ -53,7 +53,7 @@ def get_or_set_default(setting_name, default, globals_dict):
     
     @return: The value that was set.
     """
-    import localsettings
+    from modules import localsettings
     if hasattr(localsettings, setting_name):
         v = getattr(localsettings, setting_name)
     else:

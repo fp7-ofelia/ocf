@@ -56,7 +56,7 @@ class ExpedientThemeManager():
 		
 		#loading url templatetag
 		from django.template.loader import add_to_builtins
-		add_to_builtins('expedient.common.utils.templatetags.url')
+		add_to_builtins('common.utils.templatetags.url')
 	
 	@staticmethod
 	def setThemeTemplateDirs():

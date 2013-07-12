@@ -6,7 +6,7 @@ Created on Jul 18, 2010
 import logging
 from django.db import models
 import formfields
-from expedient.common.utils.formfields import validate_datetime
+from common.utils.formfields import validate_datetime
 
 logger = logging.getLogger("common.utils.modelfields")
 

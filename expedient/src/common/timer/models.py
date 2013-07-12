@@ -8,7 +8,7 @@ import sys
 from django.db import models
 from utils import stringify_func
 from datetime import datetime, timedelta
-from expedient.common.timer.exceptions import JobAlreadyScheduled,\
+from common.timer.exceptions import JobAlreadyScheduled,\
     JobNotScheduled
 from django.core.urlresolvers import get_callable
 from django.db.models.signals import post_syncdb
@@ -24,7 +24,7 @@ class JobManager(models.Manager):
         See L{JobManager.schedule}.
         
         """
-        from expedient.common.timer import models as timer_app
+        from common.timer import models as timer_app
 
         uid = "schedule_post_syncdb_job_%s_%s" % (period, callable_func.__name__)
 

@@ -9,8 +9,8 @@ import sys
 import MySQLdb
 from optparse import OptionParser
 
-from expedient.clearinghouse.defaultsettings.django import CONF_DIR
-from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
+from modules.defaultsettings.django import CONF_DIR
+from modules.defaultsettings.required import REQUIRED_SETTINGS
 
 def bootstrap_local_settings(conf_dir=CONF_DIR):
     """
@@ -88,7 +88,7 @@ def bootstrap_expedient_mysql():
     
     sys.path.append(options.confdir)
     
-    import expedient.clearinghouse.settings as settings
+    import modules.settings as settings
     
     create_user(
         options.root_username,

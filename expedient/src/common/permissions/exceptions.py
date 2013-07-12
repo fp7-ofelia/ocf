@@ -66,7 +66,7 @@ class PermissionDenied(PermissionException):
     Raised when a permission is denied/not found.
     """
     def __init__(self, perm_name, target, permittee, allow_redirect=True):
-        from expedient.common.permissions.models import Permittee
+        from common.permissions.models import Permittee
         if not isinstance(target, models.Model):
             # assume class
             target = ContentType.objects.get_for_model(target)

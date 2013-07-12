@@ -4,7 +4,7 @@ Created on Apr 29, 2010
 @author: jnaous
 '''
 from django import forms
-from expedient.clearinghouse.aggregate.utils import get_aggregate_types
+from modules.aggregate.utils import get_aggregate_types
 
 class ContentTypeChoiceField(forms.ModelChoiceField):
     """Create a label from the verbose name of the class"""

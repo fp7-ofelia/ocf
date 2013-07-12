@@ -7,22 +7,22 @@ Created on Apr 26, 2010
 import re
 from django.db import models
 from django.conf import settings
-from expedient.clearinghouse.resources import models as resource_models
-from expedient.clearinghouse.slice import models as slice_models
-from expedient.clearinghouse.aggregate import models as aggregate_models
-from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
+from modules.resources import models as resource_models
+from modules.slice import models as slice_models
+from modules.aggregate import models as aggregate_models
+from common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 from django.core.urlresolvers import reverse
 from django.utils.datetime_safe import datetime
 from autoslug.fields import AutoSlugField
 from django.db.models import signals
 from django.contrib.sites.models import Site
 import logging
-from expedient.common.utils import create_or_update, modelfields
-from expedient.clearinghouse.slice.models import Slice
+from common.utils import create_or_update, modelfields
+from modules.slice.models import Slice
 from django.db.models.aggregates import Count
 from django.core.exceptions import ValidationError
-from expedient.common.timer.models import Job
-from expedient.common.timer.exceptions import JobAlreadyScheduled
+from common.timer.models import Job
+from common.timer.exceptions import JobAlreadyScheduled
 from random import randrange
 
 logger = logging.getLogger("OpenflowModels")
@@ -206,7 +206,7 @@ production networks, and is currently deployed in several universities.
         that the OM understands.
         
         @param slice: The slice to get slivers from
-        @type slice: L{expedient.clearinghouse.slice.models.Slice}
+        @type slice: L{modules.slice.models.Slice}
         @return: C{dict} containing a mapping from datapath ids in the aggregate
             to flowspaces on that switch.
         @rtype: C{dict}

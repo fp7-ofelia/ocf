@@ -4,9 +4,9 @@ Created on Jul 27, 2010
 @author: jnaous
 '''
 from django.core.urlresolvers import resolve
-from expedient.common.middleware.threadlocals import add_parser
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.slice.models import Slice
+from common.middleware.threadlocals import add_parser
+from modules.project.models import Project
+from modules.slice.models import Slice
 
 def get_user(request):
     return request.user

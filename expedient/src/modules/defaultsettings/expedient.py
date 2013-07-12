@@ -40,7 +40,7 @@ append_to_local_setting(
 
 UI_PLUGINS = [
 #    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
-    ('expedient.ui.rspec.plugin', 'rspec_mgr', 'expedient.ui.rspec.urls'),
+    ('ui.rspec.plugin', 'rspec_mgr', 'ui.rspec.urls'),
 ]
 '''List of UI plugins that are enabled in Expedient.
 
@@ -48,7 +48,7 @@ This is a list of 3-tuples:
 
     1. The first element is the absolute path to a callable that describes
         the plugin. It should take as input an
-        L{expedient.clearinghouse.slice.models.Slice} instance and return a
+        L{modules.slice.models.Slice} instance and return a
         tuple (plugin name, plugin description, url to go to for access)
        
     2. The second element is the prefix that is prepended to all urls for
@@ -64,8 +64,8 @@ append_to_local_setting("UI_PLUGINS", UI_PLUGINS, globals())
 # Installed Aggregate Models [leave variable here to avoid problems]
 AGGREGATE_PLUGINS = [
 #    ('openflow.plugin.models.OpenFlowAggregate', "openflow", "openflow.plugin.urls"),
-##    ('expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "expedient_geni.planetlab.urls"),
-##    ('expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "expedient_geni.gopenflow.urls"),
+##    ('geni_legacy.expedient_geni.planetlab.models.PlanetLabAggregate', "planetlab", "geni_legacy.expedient_geni.planetlab.urls"),
+##    ('geni_legacy.expedient_geni.gopenflow.models.GCFOpenFlowAggregate', "gopenflow", "geni_legacy.expedient_geni.gopenflow.urls"),
 #    ('vt_plugin.models.VtPlugin', "vt_plugin","vt_plugin.urls"),
 ]
 '''List of aggregate plugins that are enabled in Expedient.

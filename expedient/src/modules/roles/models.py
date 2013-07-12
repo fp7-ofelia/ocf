@@ -7,10 +7,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import F, Count
-from expedient.clearinghouse.project.models import Project
-from expedient.common.permissions.models import ObjectPermission, Permittee,\
+from modules.project.models import Project
+from common.permissions.models import ObjectPermission, Permittee,\
     PermissionOwnership
-from expedient.common.messaging.models import DatedMessage
+from common.messaging.models import DatedMessage
 
 class ProjectRoleManager(models.Manager):
     """Manager for L{ProjectRole} instances."""

@@ -97,7 +97,7 @@ class LDAPPasswordResetForm(PasswordResetForm):
         Generates a one-use only link for resetting password and sends to the user.
         A minimal exception control is implemented to avoid problems with e-mail.
         """
-        from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+        from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
         for user in self.users_cache:
             if not domain_override:
                 current_site = Site.objects.get_current()
@@ -122,4 +122,4 @@ class LDAPPasswordResetForm(PasswordResetForm):
                 send_mail(("Password reset for user %s in %s") % (user.username,site_name),
                     t.render(Context(c)), None, [user.email])
             except Exception as e:
-                print "[ERROR] Exception at 'expedient.clearinghouse.users.forms': user '%s' (%s) could not fully reset its password. LDAPPasswordResetForm returned: %s" % (user.username, user.email, str(e))
+                print "[ERROR] Exception at 'modules.users.forms': user '%s' (%s) could not fully reset its password. LDAPPasswordResetForm returned: %s" % (user.username, user.email, str(e))

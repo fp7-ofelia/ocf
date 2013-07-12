@@ -6,7 +6,7 @@ XML RPC Dispatcher Tests
 
 import unittest
 import xmlrpclib
-from expedient.common.rpc4django.xmlrpcdispatcher import *
+from common.rpc4django.xmlrpcdispatcher import *
 
 class TestXMLRPCDispatcher(unittest.TestCase):
 

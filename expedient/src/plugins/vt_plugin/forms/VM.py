@@ -5,7 +5,7 @@ Created on Jan 14, 2013
 '''
 
 from django import forms
-from expedient.common.utils.validators import resourceVMNameValidator
+from common.utils.validators import resourceVMNameValidator
 from vt_plugin.models.VM import VM
 
 class VMModelForm(forms.models.ModelForm):

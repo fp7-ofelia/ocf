@@ -6,7 +6,7 @@ Created on Apr 29, 2010
 
 from django import forms
 from vt_plugin.models import VtPlugin
-from expedient.common.utils import create_or_update
+from common.utils import create_or_update
 from django.forms.models import ModelChoiceField
 from vt_plugin.models import xmlrpcServerProxy
 

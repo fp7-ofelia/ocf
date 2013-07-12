@@ -2,10 +2,10 @@
 @author: jnaous
 '''
 from django.db import models
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.common.extendable.models import Extendable
-from expedient.clearinghouse.slice.models import Slice
-from expedient.common.utils.validators import asciiValidator
+from modules.aggregate.models import Aggregate
+from common.extendable.models import Extendable
+from modules.slice.models import Slice
+from common.utils.validators import asciiValidator
 from datetime import datetime
 from django.core.exceptions import ValidationError
 import re

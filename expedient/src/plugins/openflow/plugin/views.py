@@ -11,32 +11,32 @@ from django.db.models import Q
 from django.db.models.loading import cache
 from django.conf import settings
 from django import forms
-from expedient.common.messaging.models import DatedMessage
-from expedient.common.utils.views import generic_crud
-from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.utils import \
+from common.messaging.models import DatedMessage
+from common.utils.views import generic_crud
+from common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyForm
+from common.permissions.decorators import require_objs_permissions_for_view
+from common.permissions.utils import \
     get_queryset_from_class, get_user_from_req, get_queryset
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.resources.models import Resource
-from expedient.clearinghouse.aggregate.models import Aggregate
+from modules.slice.models import Slice
+from modules.resources.models import Resource
+from modules.aggregate.models import Aggregate
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from models import NonOpenFlowConnection
 from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
-from expedient.common.permissions.shortcuts import give_permission_to,\
+from common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 
 from openflow.plugin.vlans import *
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
-from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
+from geni_legacy.expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
-from expedient.common.utils.plugins.resources.node import Node
-from expedient.common.utils.plugins.resources.link import Link
+from common.utils.plugins.resources.node import Node
+from common.utils.plugins.resources.link import Link
 
 logger = logging.getLogger("OpenFlow plugin views")
 
@@ -398,7 +398,7 @@ def book_openflow(request, slice_id):
         }
 
         # Need to show topology for own plugin? Call to main method to get EVERY resource
-        from expedient.clearinghouse.urls import TOPOLOGY_GENERATOR
+        from modules.urls import TOPOLOGY_GENERATOR
         return simple.direct_to_template(
             request,
             template = "openflow_select_resources.html",

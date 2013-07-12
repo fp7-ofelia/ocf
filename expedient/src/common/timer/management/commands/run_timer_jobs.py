@@ -5,12 +5,12 @@ Created on Feb 16, 2011
 '''
 
 from django.core.management.base import NoArgsCommand
-from expedient.common.timer.models import Job
+from common.timer.models import Job
 from datetime import datetime
 
 class Command(NoArgsCommand):
     help = "This command runs the jobs that are" \
-        " scheduled using the expedient.common.timer app."
+        " scheduled using the common.timer app."
 
     def handle_noargs(self, **options):
         now = datetime.now()

@@ -10,13 +10,13 @@ OPENFLOW_GCF_BASE_SUFFIX = "openflow"
 '''The suffix appended to the URN of OpenFlow resources exposed through the GENI-API.
 
 This gets concatenated with 
-L{expedient.clearinghouse.defaultsettings.gcf.GCF_BASE_NAME} to produce
+L{modules.defaultsettings.gcf.GCF_BASE_NAME} to produce
 the full HRN used for the URNs. Default is "openflow".
 
 '''
 
 OPENFLOW_OTHER_RESOURCES = (
-    ("expedient_geni.planetlab", "PlanetLabNode"),
+    ("geni_legacy.expedient_geni.planetlab", "PlanetLabNode"),
 )
 '''Which types of non-OpenFlow resources do OpenFlow Interface connect to?
 

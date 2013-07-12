@@ -5,7 +5,7 @@ Created on Jun 9, 2010
 '''
 from django.db import models
 from ..decorators import require_obj_permissions_for_method
-from expedient.common.middleware import threadlocals
+from common.middleware import threadlocals
 
 def user_parse_func(request):
     return request.user

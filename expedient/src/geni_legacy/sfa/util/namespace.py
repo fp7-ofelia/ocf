@@ -25,7 +25,7 @@
 ### $Id$
 ### $URL$
 
-from sfa.util.faults import *
+from geni_legacy.sfa.util.faults import *
 URN_PREFIX = "urn:publicid:IDN"
 
 def get_leaf(hrn):

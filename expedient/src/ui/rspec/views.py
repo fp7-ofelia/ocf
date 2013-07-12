@@ -4,16 +4,16 @@ Created on Oct 6, 2010
 @author: jnaous
 '''
 # TODO: Also show the slice URN
-from expedient.clearinghouse.slice.models import Slice
+from modules.slice.models import Slice
 from django.shortcuts import get_object_or_404
-from expedient.ui.rspec.forms import UploadRSpecForm
+from ui.rspec.forms import UploadRSpecForm
 from openflow.plugin.gapi.rspec import create_resv_rspec
 from openflow.plugin.gapi import gapi, rspec
-from expedient_geni.models import GENISliceInfo
-from expedient.common.messaging.models import DatedMessage
+from geni_legacy.expedient_geni.models import GENISliceInfo
+from common.messaging.models import DatedMessage
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple
-from expedient.common.permissions.shortcuts import must_have_permission
+from common.permissions.shortcuts import must_have_permission
 
 TEMPLATE_PATH="rspec"
 

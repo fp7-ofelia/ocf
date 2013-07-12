@@ -4,19 +4,19 @@
 from django.views.generic import list_detail, create_update, simple
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404,\
     HttpResponse
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.aggregate.forms import AggregateTypeForm
+from modules.aggregate.models import Aggregate
+from modules.aggregate.forms import AggregateTypeForm
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-from expedient.common.messaging.models import DatedMessage
+from common.messaging.models import DatedMessage
 import logging
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
-from expedient.common.permissions.utils import get_user_from_req, get_queryset,\
+from common.permissions.decorators import require_objs_permissions_for_view
+from common.permissions.utils import get_user_from_req, get_queryset,\
     get_queryset_from_class, get_leaf_queryset, get_object_from_ids
 from django.contrib.auth.models import User
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.slice.models import Slice
+from modules.project.models import Project
+from modules.slice.models import Slice
 import traceback
 
 logger = logging.getLogger("AggregateViews")

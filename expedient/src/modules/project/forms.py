@@ -4,12 +4,12 @@ Created on Jun 17, 2010
 @author: jnaous
 '''
 from django import forms
-from expedient.clearinghouse.project.models import Project
+from modules.project.models import Project
 from django.contrib.auth.models import User
-from expedient.clearinghouse.roles.models import ProjectRole
-from expedient.common.permissions.models import Permittee
-from expedient.common.permissions.shortcuts import has_permission
-from expedient.clearinghouse.roles.forms import RoleModelMultipleChoiceField
+from modules.roles.models import ProjectRole
+from common.permissions.models import Permittee
+from common.permissions.shortcuts import has_permission
+from modules.roles.forms import RoleModelMultipleChoiceField
 
 class ProjectCreateForm(forms.ModelForm):
     """

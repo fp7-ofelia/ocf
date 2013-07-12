@@ -1,4 +1,4 @@
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 import testsubmod
 
 @rpcmethod(signature=['int', 'int', 'int'])

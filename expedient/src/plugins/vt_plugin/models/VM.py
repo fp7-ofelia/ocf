@@ -1,6 +1,6 @@
 from django.db import models
 #from django.db.models.fields import IPAddressField
-from expedient.clearinghouse.resources.models import Resource
+from modules.resources.models import Resource
 from vt_plugin.models import *
 from vt_plugin.utils.validators import *
 

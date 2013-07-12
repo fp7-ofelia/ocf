@@ -8,12 +8,12 @@ from models import GENIAggregate
 import logging
 import traceback
 from django.conf import settings
-from sfa.trust.gid import GID
-from sfa.trust.certificate import Keypair
-from expedient_geni.utils import get_user_key_fname, get_user_cert_fname,\
+from geni_legacy.sfa.trust.gid import GID
+from geni_legacy.sfa.trust.certificate import Keypair
+from geni_legacy.expedient_geni.utils import get_user_key_fname, get_user_cert_fname,\
     get_trusted_cert_filenames
 
-logger = logging.getLogger("expedient_geni.forms")
+logger = logging.getLogger("geni_legacy.expedient_geni.forms")
 
 def _clean_x_file_factory(name):
     """Factory to create functions that check file size"""

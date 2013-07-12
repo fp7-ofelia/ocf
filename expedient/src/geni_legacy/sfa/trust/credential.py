@@ -33,13 +33,13 @@ import os
 import datetime
 from xml.dom.minidom import Document, parseString
 from tempfile import mkstemp
-from sfa.trust.certificate import Keypair
-from sfa.trust.credential_legacy import CredentialLegacy
-from sfa.trust.rights import *
-from sfa.trust.gid import *
-from sfa.util.faults import *
+from geni_legacy.sfa.trust.certificate import Keypair
+from geni_legacy.sfa.trust.credential_legacy import CredentialLegacy
+from geni_legacy.sfa.trust.rights import *
+from geni_legacy.sfa.trust.gid import *
+from geni_legacy.sfa.util.faults import *
 
-from sfa.util.sfalogging import logger
+from geni_legacy.sfa.util.sfalogging import logger
 from dateutil.parser import parse
 
 

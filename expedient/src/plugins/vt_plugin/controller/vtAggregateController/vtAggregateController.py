@@ -3,12 +3,12 @@ from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views.generic import simple
-from expedient.common.utils.views import generic_crud
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.utils import post_message_to_current_user
+from common.utils.views import generic_crud
+from common.messaging.models import DatedMessage
+from modules.aggregate.models import Aggregate
+from modules.utils import post_message_to_current_user
 from vt_plugin.controller.vtAggregateController.forms.forms import *
-from expedient.common.permissions.shortcuts import give_permission_to,\
+from common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 import logging, xmlrpclib, os

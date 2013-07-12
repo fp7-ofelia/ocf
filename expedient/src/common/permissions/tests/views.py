@@ -9,10 +9,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import create_update
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from expedient.common.permissions.utils import get_queryset_from_class
-from expedient.common.permissions.utils import get_user_from_req, get_queryset
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.common.permissions.decorators import require_objs_permissions_for_view
+from common.permissions.utils import get_queryset_from_class
+from common.permissions.utils import get_user_from_req, get_queryset
+from common.permissions.shortcuts import give_permission_to
+from common.permissions.decorators import require_objs_permissions_for_view
 from models import PermissionTestClass
 
 @require_objs_permissions_for_view(

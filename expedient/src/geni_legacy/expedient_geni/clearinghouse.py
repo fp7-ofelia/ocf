@@ -32,15 +32,15 @@ Created on Oct 2, 2010
 #----------------------------------------------------------------------
 
 import logging
-from geni.util.urn_util import URN
-from expedient_geni.utils import get_slice_urn, create_x509_cert,\
+from geni_legacy.geni.util.urn_util import URN
+from geni_legacy.expedient_geni.utils import get_slice_urn, create_x509_cert,\
     create_slice_credential, create_user_credential, create_slice_urn
 import traceback
-from sfa.trust import gid
-from expedient_geni.backends import get_username_from_cert
+from geni_legacy.sfa.trust import gid
+from geni_legacy.expedient_geni.backends import get_username_from_cert
 from django.contrib.auth.models import User
 
-logger = logging.getLogger("expedient_geni.clearinghouse")
+logger = logging.getLogger("geni_legacy.expedient_geni.clearinghouse")
 
 class BadURNException(Exception):
     """Raised if the URN is not one the CH would generate."""

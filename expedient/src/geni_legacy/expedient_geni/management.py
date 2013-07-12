@@ -7,11 +7,11 @@ from django.conf import settings
 import os
 import logging
 from django.db.models import signals
-from expedient_geni.utils import get_ch_urn, create_x509_cert, create_slice_urn,\
+from geni_legacy.expedient_geni.utils import get_ch_urn, create_x509_cert, create_slice_urn,\
     create_slice_credential
-from sfa.trust.gid import GID
+from geni_legacy.sfa.trust.gid import GID
 
-logger = logging.getLogger("expedient_geni.management")
+logger = logging.getLogger("geni_legacy.expedient_geni.management")
 
 def create_expedient_certs():
     """

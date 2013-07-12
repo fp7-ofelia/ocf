@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
-from expedient.common.rpc4django.utils import rpc_url
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django.utils import rpc_url
+from common.rpc4django import rpcmethod
 
 urlpatterns = patterns('vt_plugin.controller.vtAggregateController.vtAggregateController',
     url(r'^aggregate/create/$', 'aggregate_crud', name='vt_plugin_aggregate_create'),

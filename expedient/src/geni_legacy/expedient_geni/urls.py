@@ -3,7 +3,7 @@
 '''
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('expedient_geni.views',
+urlpatterns = patterns('geni_legacy.expedient_geni.views',
     # Certificate management
     url(r'^certs/manage/(?P<user_id>\d+)/$', 'user_cert_manage', name='gcf_cert_manage'),
     url(r'^certs/create/(?P<user_id>\d+)/$', 'user_cert_generate', name='gcf_cert_generate'),

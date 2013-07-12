@@ -4,12 +4,12 @@ Created on Sep 13, 2010
 @author: jnaous
 '''
 import logging
-from expedient_geni.models import GENIAggregate, GENISliceInfo
+from geni_legacy.expedient_geni.models import GENIAggregate, GENISliceInfo
 from openflow.plugin.models import \
     create_or_update_switches, create_or_update_links, get_raw_topology
 from openflow.plugin.gapi.rspec import create_resv_rspec, parse_external_rspec
-from expedient.common.middleware import threadlocals
-from expedient.common.permissions.shortcuts import must_have_permission
+from common.middleware import threadlocals
+from common.permissions.shortcuts import must_have_permission
 from django.core.urlresolvers import reverse
 
 logger = logging.getLogger("gopenflow.models")

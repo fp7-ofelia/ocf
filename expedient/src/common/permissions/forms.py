@@ -5,7 +5,7 @@ Created on Jun 10, 2010
 '''
 from django import forms
 from django.contrib.auth.models import User
-from expedient.common.utils.validators import *
+from common.utils.validators import *
 from models import PermissionRequest
 
 class PermissionRequestForm(forms.ModelForm):

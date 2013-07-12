@@ -3,7 +3,7 @@ Created on Feb 16, 2011
 
 @author: jnaous
 '''
-from expedient.common.timer.utils import stringify_func
+from common.timer.utils import stringify_func
 
 class TimerException(Exception): pass
 
@@ -11,7 +11,7 @@ class JobAlreadyScheduled(TimerException):
     """Raised when a job is scheduled twice.
     
     @ivar conflicting_job: the job that already exists.
-    @type conflicting_job: L{expedient.common.timer.models.Job}
+    @type conflicting_job: L{common.timer.models.Job}
     """
     
     def __init__(self, conflicting_job):

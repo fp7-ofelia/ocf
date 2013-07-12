@@ -7,7 +7,7 @@ Created on Sep 25, 2010
 
 import sys
 import os
-from expedient.clearinghouse.commands.utils import bootstrap_local_settings
+from modules.commands.utils import bootstrap_local_settings
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 def usage():

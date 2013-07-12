@@ -3,7 +3,7 @@ Created on Aug 2, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.views import request_permission
+from common.permissions.views import request_permission
 
 def request_permission_wrapper(*args, **kwargs):
     return request_permission(

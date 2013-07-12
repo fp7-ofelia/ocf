@@ -35,10 +35,10 @@ import os
 
 import dateutil.parser
 from SecureXMLRPCServer import SecureXMLRPCServer
-import geni.util.cred_util as cred_util
-import geni.util.cert_util as cert_util
-import geni.util.urn_util as urn_util
-import sfa.trust.gid as gid
+import util.cred_util as cred_util
+import util.cert_util as cert_util
+import util.urn_util as urn_util
+import geni_legacy.sfa.trust.gid as gid
 
 
 # Substitute eg "openflow//stanford"

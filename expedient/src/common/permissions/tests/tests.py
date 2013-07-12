@@ -8,19 +8,19 @@ import logging
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.middleware import threadlocals
+from common.middleware import threadlocals
 from ..models import ExpedientPermission, PermissionRequest, Permittee
 from ..exceptions import PermissionDenied, PermissionCannotBeDelegated
 from ..views import request_permission
 from ..shortcuts import create_permission, give_permission_to
 from views import other_perms_view, add_perms_view
 from models import PermissionTestClass
-from expedient.common.tests import manager as test_mgr
-from expedient.common.permissions.models import ObjectPermission,\
+from common.tests import manager as test_mgr
+from common.permissions.models import ObjectPermission,\
     PermissionOwnership
-from expedient.common.permissions.shortcuts import must_have_permission,\
+from common.permissions.shortcuts import must_have_permission,\
     has_permission
-from expedient.common.permissions.templatetags.permissions import has_obj_perm,\
+from common.permissions.templatetags.permissions import has_obj_perm,\
     as_class
 
 def _request_perm_wrapper(*args, **kwargs):
@@ -81,7 +81,7 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
         from django.conf import settings
         self.settings_manager.set(
             INSTALLED_APPS=settings.INSTALLED_APPS + [
-                'expedient.common.permissions.tests',
+                'common.permissions.tests',
             ],
         )
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
@@ -348,15 +348,15 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             self.assertTrue(obj in permitted)
 
 class TestRequests(test_mgr.SettingsTestCase):
-    urls = 'expedient.common.permissions.tests.test_urls'
+    urls = 'common.permissions.tests.test_urls'
     
     def setUp(self):
         self.settings_manager.set(INSTALLED_APPS=(
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
-            'expedient.common.permissions',
-            'expedient.common.permissions.tests',
+            'common.permissions',
+            'common.permissions.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         self.logger = logging.getLogger("TestRequests")

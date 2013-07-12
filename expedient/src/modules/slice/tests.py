@@ -5,15 +5,15 @@ Created on Feb 16, 2011
 '''
 from datetime import datetime, timedelta
 from django.conf import settings
-from expedient.common.tests.manager import SettingsTestCase
-from expedient.clearinghouse.utils import add_dummy_agg_to_test_settings,\
+from common.tests.manager import SettingsTestCase
+from modules.utils import add_dummy_agg_to_test_settings,\
     add_test_aggregate_to_project, start_test_slice
-from expedient.common.tests.client import test_get_and_post_form
-from expedient.clearinghouse.slice.models import Slice
-from expedient.common.middleware import threadlocals
+from common.tests.client import test_get_and_post_form
+from modules.slice.models import Slice
+from common.middleware import threadlocals
 from django.core.management import call_command
-from expedient.clearinghouse.aggregate.tests.models import DummySliceEvent
-from expedient.common.timer.models import Job
+from modules.aggregate.tests.models import DummySliceEvent
+from common.timer.models import Job
 
 class Tests(SettingsTestCase):
     def setUp(self):

@@ -5,14 +5,14 @@ Created on Feb 16, 2011
 '''
 from django.test import TestCase
 from datetime import datetime
-from expedient.common.timer.models import Job
+from common.timer.models import Job
 from time import sleep
-from expedient.common.timer.exceptions import JobAlreadyScheduled,\
+from common.timer.exceptions import JobAlreadyScheduled,\
     JobNotScheduled
 from django.core.management import call_command
 import logging
 from django.db.models.signals import post_syncdb
-from expedient.common.timer import models as timer_app
+from common.timer import models as timer_app
 
 logger = logging.getLogger("timer.tests")
 
@@ -43,7 +43,7 @@ class Tests(TestCase):
     
     def test_methods(self):
         Job.objects.exclude(
-            callable_name__regex=r'expedient.common.timer.tests.job.?_call$',
+            callable_name__regex=r'common.timer.tests.job.?_call$',
         ).delete()
         # create jobs
         Job.objects.schedule(4, job1_call)

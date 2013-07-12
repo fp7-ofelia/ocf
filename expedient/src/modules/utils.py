@@ -5,16 +5,16 @@ Created on Nov 9, 2010
 '''
 from datetime import datetime, timedelta
 from django.conf import settings
-from expedient.common.messaging.models import DatedMessage
-from expedient.common.middleware import threadlocals
+from common.messaging.models import DatedMessage
+from common.middleware import threadlocals
 from django.contrib.auth.models import User
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.project.models import Project
-from expedient.common.tests.client import test_get_and_post_form
-from expedient.clearinghouse.slice.models import Slice
-from expedient.clearinghouse.resources.models import Sliver
-from expedient.clearinghouse.roles.models import ProjectRole
+from common.permissions.shortcuts import give_permission_to
+from modules.aggregate.models import Aggregate
+from modules.project.models import Project
+from common.tests.client import test_get_and_post_form
+from modules.slice.models import Slice
+from modules.resources.models import Sliver
+from modules.roles.models import ProjectRole
 
 def post_message_to_current_user(msg_text, sender=None,
                                  msg_type=DatedMessage.TYPE_ANNOUNCE):
@@ -40,17 +40,17 @@ def post_message_to_current_user(msg_text, sender=None,
 def add_dummy_agg_to_test_settings(test):
     """Adds the dummy aggregate test models to the installed apps of the test.
     
-    C{test} must be a child of L{expedient.common.tests.manager.SettingsTestCase}.
+    C{test} must be a child of L{common.tests.manager.SettingsTestCase}.
     
     """
     from django.conf import settings
     test.settings_manager.set(
         INSTALLED_APPS=settings.INSTALLED_APPS + \
-        ["expedient.clearinghouse.aggregate.tests"],
+        ["modules.aggregate.tests"],
         AGGREGATE_PLUGINS=settings.AGGREGATE_PLUGINS + \
-            [("expedient.clearinghouse.aggregate.tests.models.DummyAggregate",
+            [("modules.aggregate.tests.models.DummyAggregate",
               "dummy_agg",
-              "expedient.clearinghouse.aggregate.tests.urls"),
+              "modules.aggregate.tests.urls"),
             ],
         DEBUG_PROPAGATE_EXCEPTIONS=True,
     )    
@@ -75,7 +75,7 @@ def give_test_permissions(test):
     
 def create_test_aggregates(test):
 
-    from expedient.clearinghouse.aggregate.tests.models import DummyAggregate
+    from modules.aggregate.tests.models import DummyAggregate
     
     give_test_permissions(test)
     
@@ -214,7 +214,7 @@ def add_test_aggregate_to_slice(test):
     
 def add_resources_to_test_slice(test):
     
-    from expedient.clearinghouse.aggregate.tests.models import DummyResource
+    from modules.aggregate.tests.models import DummyResource
 
     add_test_aggregate_to_slice(test)
     
@@ -239,7 +239,7 @@ def start_test_slice(test):
     researcher member, creates a slice, add all dummy resources to slice,
     and starts it.
     
-    C{test} must be a child of L{expedient.common.tests.manager.SettingsTestCase}.
+    C{test} must be a child of L{common.tests.manager.SettingsTestCase}.
     
     """
     

@@ -4,7 +4,7 @@ Created on Jun 9, 2010
 @author: jnaous
 '''
 from django.conf.urls.defaults import *
-from expedient.common.rpc4django.utils import rpc_url
+from common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns("",
     rpc_url(r"^RPC2/$", name="serve_rpc_request", use_name_for_dispatch=False),

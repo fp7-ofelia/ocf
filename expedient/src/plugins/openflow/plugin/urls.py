@@ -2,7 +2,7 @@
 @author: jnaous
 '''
 from django.conf.urls.defaults import patterns, url
-from expedient.common.rpc4django.utils import rpc_url
+from common.rpc4django.utils import rpc_url
 
 urlpatterns = patterns('openflow.plugin.views',
 #    url(r'^$', 'home', name='openflow_home'),

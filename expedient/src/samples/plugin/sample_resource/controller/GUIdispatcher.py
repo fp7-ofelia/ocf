@@ -10,13 +10,13 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
-from expedient.clearinghouse.aggregate.models import Aggregate
-from expedient.clearinghouse.slice.models import Slice
-from expedient.common.messaging.models import DatedMessage
-from expedient.common.utils.plugins.plugincommunicator import *
-from expedient.common.utils.plugins.resources.link import Link
-from expedient.common.utils.plugins.resources.node import Node
-from expedient.common.utils.views import generic_crud
+from modules.aggregate.models import Aggregate
+from modules.slice.models import Slice
+from common.messaging.models import DatedMessage
+from common.utils.plugins.plugincommunicator import *
+from common.utils.plugins.resources.link import Link
+from common.utils.plugins.resources.node import Node
+from common.utils.views import generic_crud
 from sample_resource.controller.resource import SampleResource as SampleResourceController
 from sample_resource.forms.SampleResource import SampleResource as SampleResourceModelForm
 from sample_resource.models import SampleResource as SampleResourceModel,\
@@ -155,7 +155,7 @@ def get_nodes_links(slice, chosen_group=None):
                 )
     return [nodes, links]
 
-#from expedient.common.utils.plugins.plugininterface import PluginInterface
+#from common.utils.plugins.plugininterface import PluginInterface
 #
 #class Plugin(PluginInterface):
 #    @staticmethod

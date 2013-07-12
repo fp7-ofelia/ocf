@@ -5,7 +5,7 @@ Loads UI data for every plugin and returns a dictionary with all the data.
 @author: CarolinaFernandez
 """
 
-from expedient.clearinghouse.resources.models import Resource
+from modules.resources.models import Resource
 from pluginloader import PluginLoader
 from utils import Singleton
 
@@ -94,7 +94,7 @@ class TopologyGenerator():
             except:
                 user = User.objects.filter(is_superuser=True)[0]
             try:
-                from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+                from common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
                 # Use thread to avoid slow page load when server is unresponsive
                 send_mail(settings.EMAIL_SUBJECT_PREFIX + " Inconsistent links at slice '%s': Expedient" % str(slice.name), "Hi, Island Manager\n\nThis is a warning to notify about some inconsistent links within a topology. This may be happening because a plugin or Aggregate Manager references a node not present in the Aggregate Managers chosen for this slice.\n\nProject: %s\nSlice: %s\nProblematic links:\n\n%s" % (slice.project.name, slice.name, str(inconsistent_links)), from_email = settings.DEFAULT_FROM_EMAIL, recipient_list = [user.email],)
             except Exception as e:
@@ -134,7 +134,7 @@ class TopologyGenerator():
         """
         Computes each node island/group through its aggregate manager ID and location.
         """
-        from expedient.clearinghouse.aggregate.models import Aggregate
+        from modules.aggregate.models import Aggregate
         try:
             for node in nodes:
                 am = Aggregate.objects.get(id = node["aggregate"])

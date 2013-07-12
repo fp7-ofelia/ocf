@@ -5,21 +5,21 @@ import os
 import logging
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from expedient.common.utils.views import generic_crud
+from common.utils.views import generic_crud
 from forms import geni_aggregate_form_factory
-from expedient.common.permissions.shortcuts import give_permission_to,\
+from common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.views.generic import simple
-from expedient_geni.utils import get_user_cert_fname, get_user_urn,\
+from geni_legacy.expedient_geni.utils import get_user_cert_fname, get_user_urn,\
     get_user_key_fname, create_x509_cert, read_cert_from_file
 from django.http import HttpResponseRedirect, HttpResponse
-from expedient.common.messaging.models import DatedMessage
-from expedient_geni.forms import UploadCertForm
-from expedient.clearinghouse.slice.models import Slice
+from common.messaging.models import DatedMessage
+from geni_legacy.expedient_geni.forms import UploadCertForm
+from modules.slice.models import Slice
 
-logger = logging.getLogger("expedient_geni.views")
+logger = logging.getLogger("geni_legacy.expedient_geni.views")
 
 def aggregate_create(request, agg_model,
                      redirect=lambda inst: reverse("home")):

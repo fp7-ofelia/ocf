@@ -3,13 +3,13 @@ Created on Oct 8, 2010
 
 @author: jnaous
 '''
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 from django.conf import settings
 import os
-from expedient_geni.utils import get_user_cert_fname, get_user_key_fname
+from geni_legacy.expedient_geni.utils import get_user_cert_fname, get_user_key_fname
 from django.contrib.auth.models import User
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.client import test_get_and_post_form
 
 def try_unlink(fname):
     try:

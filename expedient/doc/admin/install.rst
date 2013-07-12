@@ -96,25 +96,25 @@ documentation`_. Below is a list of the settings that need to be changed:
 
 Now to make sure that the syntax is correct, do the following::
 
-    $ PYTHONPATH=/etc/expedient python -c "import localsettings"
+    $ PYTHONPATH=/etc/expedient python -c "from modules import localsettings"
 
 If you get errors, go back to localsettings.py and fix them.
 
-.. _defaultsettings documentation: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+.. _defaultsettings documentation: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings-module.html
 
-.. _admins: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.admins-module.html
+.. _admins: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.admins-module.html
 
-.. _email: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.email-module.html
+.. _email: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.email-module.html
 
-.. _gcf: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.gcf-module.html
+.. _gcf: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.gcf-module.html
 
-.. _site: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.site-module.html
+.. _site: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.site-module.html
 
-.. _openflow: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.openflow-module.html
+.. _openflow: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.openflow-module.html
 
-.. _openflowtests: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.openflowtests-module.html
+.. _openflowtests: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.openflowtests-module.html
 
-.. _database: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings.database-module.html
+.. _database: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings.database-module.html
 
 .. _admin-rpm-install-database:
 
@@ -353,7 +353,7 @@ understand all the available settings. The created settings in
 :file:`localsettings.py` are the minimal ones required, and they
 need to be set.
 
-.. _defaultsettings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/expedient.clearinghouse.defaultsettings-module.html
+.. _defaultsettings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings-module.html
 
 .. _admin-git-install-database:
 
@@ -376,7 +376,7 @@ For step 1 above on an OpenSuSE installation, look at :ref:`admin-rpm-install-da
 For step 2 above, you can use an Expedient function::
 
     $ cd expedient/src/python
-    $ PYTHONPATH=.:expedient/clearinghouse python -c 'from expedient.clearinghouse import settings; from expedient.clearinghouse.commands.utils import create_user; create_user("<DB root username>", "<DB root password>", settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME, settings.DATABASE_HOST or "localhost")'
+    $ PYTHONPATH=.:expedient/clearinghouse python -c 'from modules import settings; from modules.commands.utils import create_user; create_user("<DB root username>", "<DB root password>", settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME, settings.DATABASE_HOST or "localhost")'
 
 Replace ``<DB root username>`` and ``<DB root password>`` with your
 database's root username and password. This will probably be

@@ -3,7 +3,7 @@ Created on May 1, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 from models import OpenFlowAggregate
 
 # TODO: change this to be protected by some authentication

@@ -6,9 +6,9 @@ Created on Oct 7, 2010
 
 import re
 from django.core.management.base import NoArgsCommand
-from expedient.clearinghouse.project.models import Project
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
-from expedient_geni.models import GENISliceInfo
+from modules.project.models import Project
+from geni_legacy.expedient_geni.gopenflow.models import GCFOpenFlowAggregate
+from geni_legacy.expedient_geni.models import GENISliceInfo
 try:
     from json import load
 except ImportError:
@@ -18,14 +18,14 @@ from openflow.plugin.models import OpenFlowAggregate, OpenFlowInterfaceSliver,\
     OpenFlowSliceInfo, FlowSpaceRule, OpenFlowInterface
 from optparse import make_option
 from django.test import Client
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.client import test_get_and_post_form
 from django.core.urlresolvers import reverse
 from urlparse import urlsplit, urlunsplit
-from expedient.clearinghouse.project.views import create_project_roles
+from modules.project.views import create_project_roles
 from django.contrib.auth.models import User
-from expedient.clearinghouse.slice.models import Slice
-from expedient.common.permissions.shortcuts import give_permission_to
-from expedient.common.middleware import threadlocals
+from modules.slice.models import Slice
+from common.permissions.shortcuts import give_permission_to
+from common.middleware import threadlocals
 
 def assert_redirection(response, expected_url):
     assert(response.status_code == 302)

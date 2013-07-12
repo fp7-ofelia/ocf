@@ -1,5 +1,5 @@
 from django.db import models
-from expedient.clearinghouse.resources.models import Resource
+from modules.resources.models import Resource
 from sample_resource.utils.validators import TEMPERATURE_SCALE_CHOICES, validate_resource_name, validate_temperature_scale
 
 class SampleResource(Resource):

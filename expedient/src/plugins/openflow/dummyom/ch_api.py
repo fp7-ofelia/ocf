@@ -3,11 +3,11 @@ Created on May 13, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint, pformat
 from models import DummyOM, DummyOMSlice, DummyCallBackProxy
-from expedient.common.utils import create_or_update
+from common.utils import create_or_update
 from decorator import decorator
 from base64 import b64encode
 import pickle

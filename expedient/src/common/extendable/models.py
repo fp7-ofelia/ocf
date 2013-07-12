@@ -5,7 +5,7 @@ import logging
 from django.db import models
 from django.db.models.base import ModelBase
 from django.utils.importlib import import_module
-from expedient.common.tests.utils import drop_to_shell
+from common.tests.utils import drop_to_shell
 
 logger = logging.getLogger("extendable.models")
 

@@ -8,13 +8,13 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
-from expedient.clearinghouse.roles.models import ProjectRoleRequest, \
+from modules.roles.models import ProjectRoleRequest, \
     ProjectRole
-from expedient.common.permissions.models import ObjectPermission
+from common.permissions.models import ObjectPermission
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxInput
 from django.utils.encoding import force_unicode
-from expedient.common.permissions.shortcuts import has_permission
-from expedient.common.middleware import threadlocals
+from common.permissions.shortcuts import has_permission
+from common.middleware import threadlocals
 
 class RoleModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):

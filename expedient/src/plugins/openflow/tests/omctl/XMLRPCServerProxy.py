@@ -1,5 +1,5 @@
 '''
-NOTE: This is the same code as expedient.common.xmlrpc_serverproxy 
+NOTE: This is the same code as common.xmlrpc_serverproxy 
 with some changes to make it independent from Django Models.model
 so that it can be used independently.
 '''
@@ -9,10 +9,10 @@ import binascii
 from omctl_settings import *
 from datetime import timedelta, datetime
 import time
-from expedient.common.utils.transport import TestClientTransport
+from common.utils.transport import TestClientTransport
 from urlparse import urlparse
 import xmlrpclib
-from expedient.common.tests.utils import test_to_http
+from common.tests.utils import test_to_http
 
 def get_max_password_len():
     # M2Crypto does not like it when header fields are large. Creates bad

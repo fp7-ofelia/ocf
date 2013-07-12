@@ -1,7 +1,7 @@
 from XMLRPCServerProxy import PasswordXMLRPCServerProxy
-from expedient.common.tests.utils import wrap_xmlrpc_call
+from common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
-from expedient.common.tests.client import Browser
+from common.tests.client import Browser
 
 
 def help_msg(command=None):

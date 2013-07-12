@@ -5,8 +5,8 @@ Created on Jun 11, 2010
 '''
 from django.views.generic import create_update
 from models import DummyAggregate
-from expedient.clearinghouse.aggregate.tests.forms import DummyAggForm
-from expedient.common.utils.views import generic_crud
+from modules.aggregate.tests.forms import DummyAggForm
+from common.utils.views import generic_crud
 
 def create(request):
 

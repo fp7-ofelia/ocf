@@ -8,19 +8,19 @@ from django.core.urlresolvers import reverse, get_callable
 from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponseRedirect, HttpResponseNotAllowed
-from expedient.common.utils.views import generic_crud
-from expedient.common.messaging.models import DatedMessage
-from expedient.clearinghouse.project.models import Project
-from expedient.clearinghouse.aggregate.models import Aggregate
+from common.utils.views import generic_crud
+from common.messaging.models import DatedMessage
+from modules.project.models import Project
+from modules.aggregate.models import Aggregate
 from models import Slice
 from forms import SliceCrudForm
 from django.conf import settings
 import logging
-from expedient.common.permissions.shortcuts import must_have_permission, give_permission_to
+from common.permissions.shortcuts import must_have_permission, give_permission_to
 logger = logging.getLogger("SliceViews")
 import uuid
-from expedient.clearinghouse.slice.utils import parseFVexception
-from expedient.clearinghouse.urls import PLUGIN_LOADER, TOPOLOGY_GENERATOR
+from modules.slice.utils import parseFVexception
+from modules.urls import PLUGIN_LOADER, TOPOLOGY_GENERATOR
 
 TEMPLATE_PATH = "expedient/clearinghouse/slice"
 

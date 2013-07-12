@@ -46,9 +46,9 @@ from OpenSSL import crypto
 import M2Crypto
 from M2Crypto import X509
 from tempfile import mkstemp
-from sfa.util.sfalogging import logger
-from sfa.util.namespace import urn_to_hrn
-from sfa.util.faults import *
+from geni_legacy.sfa.util.sfalogging import logger
+from geni_legacy.sfa.util.namespace import urn_to_hrn
+from geni_legacy.sfa.util.faults import *
 
 def convert_public_key(key):
     keyconvert_path = "/usr/bin/keyconvert.py"
