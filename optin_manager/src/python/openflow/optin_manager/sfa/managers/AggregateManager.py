@@ -11,7 +11,7 @@ import zlib
 
 class AggregateManager:
 
-    ''' SFA AM Class for VM_Manager'''
+    '''SFA AM Class for VM_Manager'''
 
     def __init__ (self, config):
 	self.driver = OFSfaDriver(None)
@@ -43,7 +43,7 @@ class AggregateManager:
 	authority = xrn.get_authority_hrn()
 	return self.driver.sliver_status(slice_leaf,authority,options)
 
-    def CreateSliver(self, xrn, rspec_string, users,creds options):
+    def CreateSliver(self, xrn, rspec_string, users,creds, options):
        #XXX: How can the expiration time be checked?
        xrn = Xrn(xrn, 'slice')
        slice_urn = xrn.get_urn()
