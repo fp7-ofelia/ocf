@@ -78,7 +78,7 @@ class NetworkInterface(Base):
     @validates('name')
     def validate_name(self, key, name):
         try:
-	    validators.resourceNameValidator(name)
+	    validators.resource_name_validator(name)
 	    return name
 	except Exception as e:
             raise e
@@ -86,7 +86,7 @@ class NetworkInterface(Base):
     @validates('mac')
     def validate_mac(self, key, mac):
 	try:
-	    validators.macValidator(mac)
+	    validators.mac_validator(mac)
 	    return mac
 	except Exception as e:
 	    raise e
@@ -94,7 +94,7 @@ class NetworkInterface(Base):
     @validates('switchID')
     def validate_switchID(self, key, switchID):
 	try:
-	    validators.datapathValidator(switchID)
+	    validators.datapath_validator(switchID)
 	    return switchID
 	except Exception as e:
 	    raise e
@@ -102,7 +102,7 @@ class NetworkInterface(Base):
     @validates('port')
     def validate_port(self, key, port):
 	try:
-	    validators.NumberValidator(port)
+	    validators.number_validator(port)
 	    return port
 	except Exception as e:
 	    raise e

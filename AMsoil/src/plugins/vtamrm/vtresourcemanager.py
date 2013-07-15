@@ -8,7 +8,7 @@ from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 from interfaces.networkinterface import NetworkInterface
 
 from resources.vtserver import VTServer
-from resources.vm import VirtualMachine
+from resources.virtualmachine import VirtualMachine
 from resources.vmexpires import VMExpires
 from resources.vmallocated import VMAllocated
 
@@ -60,7 +60,7 @@ class VTResourceManager(object):
 	    return None
 	ip_range = list()
 	for ip_range_id in ip_range_ids:
-	    ip_range_record = db_session.query(IpRange).filter(Ip4Range.id == int(ip_range_id.ip4range_id)).all()
+	    ip_range_record = db_session.query(Ip4Range).filter(Ip4Range.id == int(ip_range_id.ip4range_id)).all()
 	    if not ip_range_record:
 		db_session.expunge_all()
 		return None
@@ -92,7 +92,7 @@ class VTResourceManager(object):
 	    return None
 	network_interfaces = list()
 	for network_interface_id in network_interface_ids:
-	    network_interface = db_session.query(NetworkInterfaces).filter(NetworkInterfaces.id == int(network_interface_id.networkinterface_id)).filter(NetworkInterfaces.isBridge == 1).all()
+	    network_interface = db_session.query(NetworkInterface).filter(NetworkInterface.id == int(network_interface_id.networkinterface_id)).filter(NetworkInterface.isBridge == 1).all()
 	    if network_interface:
 	        interfaces = list()
 	        for interface in network_interface:

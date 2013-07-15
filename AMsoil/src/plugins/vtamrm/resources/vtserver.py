@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -73,7 +72,7 @@ class VTServer(Base):
     @validates('name')
     def validate_name(self, key, name):
         try:
-	    validators.resourceNameValidator(name)
+	    validators.resource_name_validator(name)
             return name
         except Exception as e:
             raise e
@@ -121,7 +120,7 @@ class VTServer(Base):
     @validates('agentPassword')
     def validate_agentpassword(self, key, agent_password):
         try:
-            validators.resourceNameValidator(agent_password)
+            validators.resource_name_validator(agent_password)
             return agent_password
         except Exception as e:
             raise e
@@ -144,9 +143,19 @@ class VTServer(Base):
     	#Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
 
+    def destroy(self):
+    	with MutexStore.getObjectLock(self.getLockIdentifier()):
+	    if self.vms.all().count()>0:
+            	raise Exception("Cannot destroy a server which hosts VMs. Delete VMs first")
+	    #Delete associated interfaces
+            for interface in self.networkInterfaces.all():
+            	interface.destroy()
+		#Delete instance
+                self.delete()
+
     '''Getters and Setters'''
     def setName(self, name):
-	validators.resourceNameValidator(name)
+	validators.resource_name_validator(name)
         self.name = name
 
     def getName(self):

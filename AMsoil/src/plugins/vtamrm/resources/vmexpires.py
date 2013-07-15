@@ -4,12 +4,16 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from datetime import datetime, timedelta
 
-Base = declarative_base()
+from utils.commonbase import Base
+
+
+'''@author: SergioVidiella'''
 
 class VMExpires(Base):
-    """Please see the Database wiki page."""
+    """Expiration time of the Virtual Machine (only GeniV3)."""
     __tablename__ = 'vt_manager_virtualmachine_expires'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    vm_id = Column(Integer)
+    #XXX: should be a ForeignKey, this class should have the vms as an attribute?
+    vm_id = Column(Integer, nullable=False)
     expires = Column(Date)
