@@ -170,7 +170,6 @@ class VTResourceManager(object):
 	     db_session.expunge(vm)
 	     deleted_vm = self._destroy_vm_with_expiration(vm.id)
 	else:
-	     db_session.expunge(vm)
 	     vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
 	     deleted_vm = dict()
 	     if vm != None:

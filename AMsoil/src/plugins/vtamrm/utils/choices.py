@@ -53,19 +53,3 @@ class VirtTypeClass():
             if value in tuple:
                 return  
         raise Exception("Virtualization Type not valid")
-
-
-class PossibleTypesClass():
-    @staticmethod
-    def validate_type(value):
-	if value not in settings.POSSIBLE_TYPES:
-	    raise Exception("Action type not valid")
-	return
-
-
-class PossibleStatusClass():
-    @staticmethod
-    def validate_status(value):
-	if value not in settings.POSSIBLE_STATUS:
-	   raise Exception("Action status not valid")
-	return

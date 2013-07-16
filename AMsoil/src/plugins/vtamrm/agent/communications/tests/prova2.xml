@@ -1,0 +1,41 @@
+<rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
+<query>
+    <provisioning>
+        <action type="create" id="testcreate">
+	<server>
+            <virtual-machines>
+                <name>LeoTest</name>
+                <uuid>LeoUUID</uuid>
+                <project-id>NONE</project-id>
+                <project-name>NONE</project-name>
+                <slice-id>NONE</slice-id>
+                <slice-name>NONE</slice-name>
+                <operating-system-type>GNU/Linux</operating-system-type>
+                <operating-system-version>5.0</operating-system-version>
+                <operating-system-distribution>Debian</operating-system-distribution>
+                <virtualization-type>xen</virtualization-type>
+                <server-id>Foix</server-id>
+                <xen-configuration>
+                    <hd-setup-type>file-image</hd-setup-type>
+                    <hd-size-mb>8200</hd-size-mb>
+                    <hd-origin-path>default/default.tar.gz</hd-origin-path>
+                    <virtualization-setup-type>paravirtualization</virtualization-setup-type>
+                        <memory-mb>512</memory-mb>
+                    <interfaces>
+                        <interface ismgmt="true">
+                            <name>NONE</name>
+                            <mac>NONE</mac>
+                            <ip>192.168.0.1</ip>
+                            <mask>255.255.255.0</mask>
+                            <gw>192.168.0.100</gw>
+                            <dns1>195.235.113.3</dns1>
+                            <dns2>80.58.0.33</dns2>
+                        </interface>
+                    </interfaces>
+                </xen-configuration>
+            </virtual-machines>
+	</server>
+        </action>
+    </provisioning>
+</query>
+</rspec>
