@@ -9,8 +9,7 @@ import pkg_resources
 from utils import append_to_local_setting
 import ldap
 
-sys.path.append(os.path.dirname(__file__)+'/../../../../vt_manager/src/python')
-#sys.path.append(os.path.dirname(__file__)+'/../../../plugins')
+sys.path.append(os.getcwd() + '/../../vt_manager/src/python')
 
 try:
     from local import SRC_DIR as location

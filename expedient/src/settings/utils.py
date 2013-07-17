@@ -29,7 +29,7 @@ def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     @return: the value of the new setting.
     """
     
-    from settings import local
+    import local
     setting = getattr(local, "EXTRA_%s" % setting_name, [])
     v = l + setting if at_start else setting + l
     _modname = globals_dict['__name__']
