@@ -79,8 +79,8 @@ MIDDLEWARE_CLASSES = (
 # RPC following http://packages.python.org/rpc4django/usage/auth.html
 #
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
     'vt_manager.common.backends.remoteuser.NoCreateRemoteUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
 )
 
@@ -119,6 +119,7 @@ ADMIN_MEDIA_PREFIX = '/admin/media/'
 # Installed apps
 #
 INSTALLED_APPS = (
+    'vt_manager.common.longer_username',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
