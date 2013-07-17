@@ -7,18 +7,18 @@ Views Tests
 import unittest
 import xmlrpclib
 from rpc4django.jsonrpcdispatcher import json, JSONRPC_SERVICE_ERROR
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 
 class TestRPCViews(SettingsTestCase):
 
-    urls = "expedient.common.rpc4django.tests.test_urls"
+    urls = "common.rpc4django.tests.test_urls"
     
     def setUp(self):
         self.settings_manager.set(
             INSTALLED_APPS=(
-                "expedient.common.rpc4django",
-                "expedient.common.rpc4django.tests.testmod",
+                "common.rpc4django",
+                "common.rpc4django.tests.testmod",
             ),
             MIDDLEWARE_CLASSES=(
                 'django.middleware.common.CommonMiddleware',

@@ -1,6 +1,6 @@
 
 from django.conf import settings
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from django.core.urlresolvers import reverse
 import logging
 from django.contrib.auth.models import User
@@ -8,7 +8,7 @@ from openflow.optin_manager.opts.models import UserFlowSpace,\
         Experiment,ExperimentFLowSpace, UserOpts, OptsFlowSpace, MatchStruct
 import random
 from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
-from expedient.common.tests.client import Browser, test_get_and_post_form
+from common.tests.client import Browser, test_get_and_post_form
 from openflow.optin_manager.users.models import UserProfile, Priority
 from openflow.optin_manager.dummyfv.models import DummyFV, DummyFVRule
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy

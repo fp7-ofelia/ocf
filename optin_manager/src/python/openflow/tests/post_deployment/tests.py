@@ -10,13 +10,13 @@ PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
-from expedient.common.utils.certtransport import SafeTransportWithCert
+from common.utils.certtransport import SafeTransportWithCert
 import xmlrpclib
 from openflow.tests.helpers import parse_rspec, Flowspace
 from openflow.tests.helpers import create_random_resv
-from expedient.common.tests.utils import drop_to_shell
+from common.tests.utils import drop_to_shell
 import logging
-from expedient.common import loggingconf
+from common import loggingconf
 loggingconf.set_up(logging.DEBUG) # Change logging.INFO for less output
 
 logger = logging.getLogger("PostDeploymentTest")

@@ -13,7 +13,7 @@ from ..exceptions import PermissionDenied, PermissionCannotBeDelegated
 from ..views import request_permission
 from views import other_perms_view, add_perms_view
 from models import PermissionTestClass
-from expedient.common.tests import manager as test_mgr
+from common.tests import manager as test_mgr
 
 import logging
 
@@ -84,8 +84,8 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
-            'expedient.common.permissions',
-            'expedient.common.permissions.tests',
+            'common.permissions',
+            'common.permissions.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         logging_set_up(LOGGING_LEVEL)
@@ -213,15 +213,15 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
                            giver=self.u2, delegatable=True)
 
 class TestRequests(test_mgr.SettingsTestCase):
-    urls = 'expedient.common.permissions.tests.test_urls'
+    urls = 'common.permissions.tests.test_urls'
     
     def setUp(self):
         self.settings_manager.set(INSTALLED_APPS=(
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
-            'expedient.common.permissions',
-            'expedient.common.permissions.tests',
+            'common.permissions',
+            'common.permissions.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         logging_set_up(LOGGING_LEVEL)

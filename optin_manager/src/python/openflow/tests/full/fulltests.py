@@ -11,14 +11,14 @@ PYTHON_DIR = join(dirname(__file__), "../../../")
 sys.path.append(PYTHON_DIR)
 
 from unittest import TestCase
-from expedient.common.utils.certtransport import SafeTransportWithCert
-from expedient.common.tests.client import Browser
+from common.utils.certtransport import SafeTransportWithCert
+from common.tests.client import Browser
 from openflow.tests import test_settings
 import xmlrpclib, re
 from openflow.tests.helpers import kill_old_procs, parse_rspec
 from openflow.tests.helpers import create_random_resv
-from expedient.common.tests.commands import call_env_command, Env
-from expedient.common.tests.utils import drop_to_shell, wrap_xmlrpc_call
+from common.tests.commands import call_env_command, Env
+from common.tests.utils import drop_to_shell, wrap_xmlrpc_call
 
 import logging
 logger = logging.getLogger(__name__)
@@ -263,9 +263,9 @@ class FullIntegration(TestCase):
         Run a command in a subprocess, return the new process.
         """
         if test_settings.SHOW_PROCESSES_IN_XTERM:
-            from expedient.common.tests.utils import run_cmd_in_xterm as run_cmd
+            from common.tests.utils import run_cmd_in_xterm as run_cmd
         else:
-            from expedient.common.tests.utils import run_cmd
+            from common.tests.utils import run_cmd
             
         if wait:
             return run_cmd(cmd).wait()
@@ -575,7 +575,7 @@ class FullIntegration(TestCase):
         """
         Test a user opting in.
         """
-        from expedient.common.tests.client import Browser
+        from common.tests.client import Browser
         
         #create an experiment through CH
         self.create_sliver_core(fs_randomness=False)
@@ -602,7 +602,7 @@ class FullIntegration(TestCase):
         
         
         # test if FV has the expected flowspace match entries
-        from expedient.common.tests.utils import run_cmd
+        from common.tests.utils import run_cmd
         fvctl = run_cmd(
             "sh %s/scripts/fvctl.sh listFlowSpace" % (
                 test_settings.FLOWVISOR_DIR,
@@ -626,7 +626,7 @@ class FullIntegration(TestCase):
         """
         Test a user opting in.
         """
-        from expedient.common.tests.client import Browser
+        from common.tests.client import Browser
         from openflow.optin_manager.opts.models import Experiment,ExperimentFLowSpace
         import random
                 

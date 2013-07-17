@@ -1,16 +1,16 @@
-from expedient.common.tests.manager import SettingsTestCase
-from expedient.common.tests.utils import wrap_xmlrpc_call
+from common.tests.manager import SettingsTestCase
+from common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
 from openflow.optin_manager.users.models import UserProfile
 from django.contrib.auth.models import User
-from expedient.common.utils.transport import TestClientTransport
-from expedient.common.xmlrpc_serverproxy.models import BasicAuthServerProxy
+from common.utils.transport import TestClientTransport
+from common.xmlrpc_serverproxy.models import BasicAuthServerProxy
 from openflow.optin_manager.dummyfv.models import DummyFV,DummyFVDevice, DummyFVRule,\
          DummyFVSlice   
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 import logging
 import random
-from expedient.common.tests.client import Browser, test_get_and_post_form
+from common.tests.client import Browser, test_get_and_post_form
 from django.core.urlresolvers import reverse
 from openflow.optin_manager.opts.models import Experiment,ExperimentFLowSpace, \
     UserFlowSpace, UserOpts, OptsFlowSpace, MatchStruct

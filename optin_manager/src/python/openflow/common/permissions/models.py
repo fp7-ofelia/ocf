@@ -7,7 +7,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
-from expedient.common.utils.managers import GenericObjectManager
+from common.utils.managers import GenericObjectManager
 from exceptions import PermissionDoesNotExist
 
 class ExpedientPermissionManager(models.Manager):

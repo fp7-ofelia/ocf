@@ -1,5 +1,5 @@
-from expedient.common.tests.manager import SettingsTestCase
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.manager import SettingsTestCase
+from common.tests.client import test_get_and_post_form
 from django.contrib.auth.models import User
 from openflow.optin_manager.users.models import UserProfile
 from django.core.urlresolvers import reverse

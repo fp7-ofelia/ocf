@@ -4,7 +4,7 @@ Created on Jul 17, 2010
 @author: jnaous
 '''
 from django import forms
-from expedient.common.utils import validators
+from common.utils import validators
 
 class MACAddressField(forms.CharField):
     """

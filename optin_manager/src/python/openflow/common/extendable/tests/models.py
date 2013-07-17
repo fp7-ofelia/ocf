@@ -2,7 +2,7 @@
 @author jnaous
 '''
 from django.db import models
-from expedient.common.extendable.models import Extendable
+from common.extendable.models import Extendable
 
 class OtherModel(models.Model): pass
 

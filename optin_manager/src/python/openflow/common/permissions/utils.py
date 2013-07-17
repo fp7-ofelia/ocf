@@ -4,13 +4,13 @@ Created on Jun 1, 2010
 @author: jnaous
 '''
 from django.db import models
-from expedient.common.permissions.models import \
+from common.permissions.models import \
     ExpedientPermission, PermissionInfo, ObjectPermission, PermissionUser
 from django.contrib.contenttypes.models import ContentType
-from expedient.common.permissions.exceptions import PermissionCannotBeDelegated,\
+from common.permissions.exceptions import PermissionCannotBeDelegated,\
     PermissionRegistrationConflict, PermissionDoesNotExist
 from django.http import Http404
-from expedient.common.permissions.middleware import PermissionMiddleware
+from common.permissions.middleware import PermissionMiddleware
 
 def _stringify_func(f):
     if callable(f):

@@ -1,5 +1,5 @@
 from django.db import models
-from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
+from common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 
 class FVServerProxy(PasswordXMLRPCServerProxy):
     name = models.CharField("FV name",max_length = 40)

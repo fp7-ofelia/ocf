@@ -4,7 +4,7 @@ Created on May 15, 2010
 @author: jnaous
 '''
 from pprint import pprint
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 from decorator import decorator
 from openflow.optin_manager.dummyfv.models import DummyFVSlice, DummyFVDevice,\
     DummyFVLink, DummyFVRule, DummyFV

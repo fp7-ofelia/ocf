@@ -3,7 +3,7 @@ Created on Apr 26, 2010
 
 @author: jnaous
 '''
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
@@ -511,7 +511,7 @@ def register_topology_callback(url, cookie, **kwargs):
     '''
     Store some information for the topology callback.
     '''
-    from expedient.common import utils
+    from common import utils
 
     attrs = {'url': url, 'cookie': cookie}
     filter_attrs = {'username': kwargs['user'].username}

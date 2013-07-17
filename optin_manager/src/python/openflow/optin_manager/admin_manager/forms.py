@@ -1,7 +1,7 @@
 from django import forms
 import re
 from openflow.optin_manager.admin_manager.models import AutoApproveServerProxy
-from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyFormHelperAddin
+from common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyFormHelperAddin
 import logging
 
 logger = logging.getLogger("AdminManagerForms")

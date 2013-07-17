@@ -1,7 +1,7 @@
 '''
 @author jnaous
 '''
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from models import OtherModel, OtherModelRel, TestChild, TestOtherChild, \
     TestParent, YetAnotherModel
 
@@ -9,8 +9,8 @@ class Tests(SettingsTestCase):
     def setUp(self):
         self.settings_manager.set(INSTALLED_APPS=(
             'django.contrib.contenttypes',
-            'expedient.common.extendable',
-            'expedient.common.extendable.tests',
+            'common.extendable',
+            'common.extendable.tests',
         ))
         self.settings_manager.set(DEBUG_PROPAGATE_EXCEPTIONS=True)
         self.parent = TestParent.objects.create()

@@ -3,13 +3,15 @@
 @author: jnaous
 '''
 # Django settings for Expedient project.
+import inspect
 import os
 import sys
 import pkg_resources
 from utils import append_to_local_setting
 import ldap
 
-sys.path.append(os.getcwd() + '/../../vt_manager/src/python')
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+sys.path.append(current_dir + '/../../../vt_manager/src/python')
 
 try:
     from local import SRC_DIR as location

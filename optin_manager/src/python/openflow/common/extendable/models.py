@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db.models import signals
 from django.db.models.base import ModelBase
-from expedient.common.utils.managers import GenericObjectManager
+from common.utils.managers import GenericObjectManager
 
 def _extendable_post_save(sender, **kwargs):
     '''Add the content_object if not already present'''

@@ -11,7 +11,7 @@ from django.contrib.sites.models import Site
 from django.http import HttpResponse
 from django.conf import settings
 import re
-from expedient.common.middleware.utils import RegexMatcher
+from common.middleware.utils import RegexMatcher
 
 def basic_challenge(realm = None):
     if realm is None:

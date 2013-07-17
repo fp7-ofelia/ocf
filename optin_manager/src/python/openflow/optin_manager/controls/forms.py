@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from openflow.optin_manager.users.models import UserProfile
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
-from expedient.common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyFormHelperAddin
+from common.xmlrpc_serverproxy.forms import PasswordXMLRPCServerProxyFormHelperAddin
 import logging
 
 logger = logging.getLogger("ControlsForms")

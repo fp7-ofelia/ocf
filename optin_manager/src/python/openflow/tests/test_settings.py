@@ -69,6 +69,6 @@ TIMEOUT = 20                      # Time to wait for processes to run and for
 # basic settings sanity checks
 assert(len(FLOWVISORS) == len(MININET_VMS))
 
-from expedient.common import loggingconf
+from common import loggingconf
 import logging
 loggingconf.set_up(logging.DEBUG) # Change logging.INFO for less output

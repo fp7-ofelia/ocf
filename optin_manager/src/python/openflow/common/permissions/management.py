@@ -29,7 +29,7 @@ def _import_module(name, app_name):
 def run(sender, **kwargs):
     if run.installed_permissions:
         _import_module("permissions", sender.__name__.split(".models")[0])
-    elif sender.__name__.startswith("expedient.common.permissions"):
+    elif sender.__name__.startswith("common.permissions"):
         run.installed_permissions = True
         for mod in run.waiting_for_permissions:
             _import_module("permissions", mod.__name__.split(".models")[0])

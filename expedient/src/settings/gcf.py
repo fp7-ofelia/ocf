@@ -12,6 +12,8 @@ try:
 except ImportError:
     pass
 
+CONF_DIR_CERTS = join(CONF_DIR, "..", "modules")
+
 GCF_BASE_NAME = "stanford//expedient"
 '''The domain name used in URNs when creating certificates mainly.
 
@@ -34,16 +36,16 @@ Default (and required by convention) is "authority+am".
 '''
 
 # Location of GENI x509 certs and keys
-GCF_X509_TRUSTED_CERT_DIR = join(CONF_DIR, "gcf-x509-trusted.crt")
+GCF_X509_TRUSTED_CERT_DIR = join(CONF_DIR_CERTS, "gcf-x509-trusted.crt")
 '''The location of trusted root certificates used by expedient for the GCF.'''
 
-GCF_X509_USER_CERT_DIR = join(CONF_DIR, "gcf-x509-user.crt")
+GCF_X509_USER_CERT_DIR = join(CONF_DIR_CERTS, "gcf-x509-user.crt")
 '''The location of saved user certificates used by expedient for the GCF.'''
 
-GCF_X509_KEY_DIR = join(CONF_DIR, "gcf-x509.key")
+GCF_X509_KEY_DIR = join(CONF_DIR_CERTS, "gcf-x509.key")
 '''The location of keys used by expedient for the GCF.'''
 
-GCF_X509_CRED_DIR = join(CONF_DIR, "gcf-x509.cred")
+GCF_X509_CRED_DIR = join(CONF_DIR_CERTS, "gcf-x509.cred")
 '''The location of credentials used by expedient for the GCF.'''
 
 try:

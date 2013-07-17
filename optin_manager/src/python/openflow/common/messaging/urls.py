@@ -7,7 +7,7 @@ Created on Apr 27, 2010
 from django.conf.urls.defaults import patterns, url
 from django.conf import settings
 
-urlpatterns = patterns('expedient.common.messaging.views',
+urlpatterns = patterns('common.messaging.views',
     url(r'^list/$', 'list_msgs', {'number': settings.NUM_LATEST_MSGS}, name='messaging_latest'),
     url(r'^list/$', 'list_msgs', name='messaging_all'),
     url(r'^list/(?P<number>\d+)/$', 'list_msgs', name='messaging_subset'),

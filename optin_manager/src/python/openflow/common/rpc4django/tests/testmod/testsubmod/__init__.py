@@ -1,4 +1,4 @@
-from expedient.common.rpc4django import rpcmethod
+from common.rpc4django import rpcmethod
 
 @rpcmethod(signature=['int', 'int', 'int'])
 def power(a, b):

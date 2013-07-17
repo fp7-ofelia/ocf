@@ -12,7 +12,7 @@ from ..utils import get_user_from_req, get_queryset
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import create_update
 from django.core.urlresolvers import reverse
-from expedient.common.permissions.utils import give_permission_to,\
+from common.permissions.utils import give_permission_to,\
     get_queryset_from_class
 from django.contrib.csrf.middleware import csrf_exempt
 

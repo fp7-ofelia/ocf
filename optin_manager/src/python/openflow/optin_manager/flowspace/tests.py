@@ -1,4 +1,4 @@
-from expedient.common.tests.manager import SettingsTestCase
+from common.tests.manager import SettingsTestCase
 from openflow.optin_manager.flowspace.models import FlowSpace
 from openflow.optin_manager.flowspace.helper import single_fs_intersect,\
 multi_fs_intersect, singlefs_is_subset_of, multifs_is_subset_of

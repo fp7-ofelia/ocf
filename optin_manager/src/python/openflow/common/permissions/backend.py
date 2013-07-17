@@ -3,7 +3,7 @@ Created on May 31, 2010
 
 @author: jnaous
 '''
-from expedient.common.permissions.models import ExpedientPermission
+from common.permissions.models import ExpedientPermission
 
 class ExpedientPermissionsBackend(object):
     """Django backend for object permissions. Needs Django 1.2.
@@ -12,7 +12,7 @@ class ExpedientPermissionsBackend(object):
 
         AUTHENTICATION_BACKENDS = (
             'django.contrib.auth.backends.ModelBackend',
-            'expedient.common.permissions.backend.ExpedientPermissionsBackend',
+            'common.permissions.backend.ExpedientPermissionsBackend',
         )
     """
     supports_object_permissions = True

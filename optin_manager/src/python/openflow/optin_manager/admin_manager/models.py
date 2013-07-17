@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib import auth
 from openflow.optin_manager.flowspace.models import FlowSpace
-from expedient.common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
+from common.xmlrpc_serverproxy.models import PasswordXMLRPCServerProxy
 
 class RequestedAdminFlowSpace(FlowSpace):
     '''

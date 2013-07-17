@@ -5,7 +5,7 @@ Created on Jul 19, 2010
 '''
 from django.core.urlresolvers import reverse
 from django.test import Client
-from expedient.common.tests.client import test_get_and_post_form
+from common.tests.client import test_get_and_post_form
 from django.contrib.auth.models import User
 from pyquery import PyQuery as pq
 from openflow.plugin.models import OpenFlowInterface, NonOpenFlowConnection

@@ -8,7 +8,7 @@ from os.path import dirname, join
 import pkg_resources
 import sys, os
 
-sys.path.append(os.path.dirname(__file__)+'/../../../../../../expedient/src/python')
+sys.path.append(os.path.dirname(__file__)+'/../../../../../../expedient/src')
 
 try:
     from localsettings import SRC_DIR as location
@@ -90,13 +90,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
-    'expedient.common.middleware.basicauth.HTTPBasicAuthMiddleware',
-    'expedient.common.middleware.sitelockdown.SiteLockDown',
+    'common.middleware.basicauth.HTTPBasicAuthMiddleware',
+    'common.middleware.sitelockdown.SiteLockDown',
 )
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'expedient.common.backends.remoteuser.NoCreateRemoteUserBackend',
+    'common.backends.remoteuser.NoCreateRemoteUserBackend',
 )
 
 ROOT_URLCONF = 'openflow.optin_manager.urls'
@@ -122,9 +122,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django_extensions',
-    'expedient.common.rpc4django',
-    'expedient.common.xmlrpc_serverproxy',
-    'expedient.common.defaultsite',
+    'common.rpc4django',
+    'common.xmlrpc_serverproxy',
+    'common.defaultsite',
     'registration',
     'django_evolution',
     'openflow.optin_manager.commands',

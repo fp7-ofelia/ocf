@@ -10,7 +10,7 @@ import binascii
 from django.conf import settings
 from datetime import timedelta, datetime
 import time
-from expedient.common.utils.transport import TestClientTransport
+from common.utils.transport import TestClientTransport
 from urlparse import urlparse
 from django.contrib.auth.models import User
 import xmlrpclib

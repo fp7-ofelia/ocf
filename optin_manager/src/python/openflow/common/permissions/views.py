@@ -5,13 +5,13 @@ Created on Jun 6, 2010
 '''
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-from expedient.common.permissions.exceptions import PermissionDenied
-from expedient.common.permissions.models import ExpedientPermission,\
+from common.permissions.exceptions import PermissionDenied
+from common.permissions.models import ExpedientPermission,\
     PermissionRequest, PermissionUser
-from expedient.common.permissions.utils import get_object_from_ids,\
+from common.permissions.utils import get_object_from_ids,\
     register_permission_for_obj_or_class
 from django.core.urlresolvers import get_callable
-from expedient.common.permissions.forms import PermissionRequestForm
+from common.permissions.forms import PermissionRequestForm
 from django.views.generic import simple, create_update
 from django.contrib.auth.models import User
 
