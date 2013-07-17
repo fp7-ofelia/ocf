@@ -1,5 +1,5 @@
 #!/usr/bin/python
-'''Script to create a skeleton localsettings.py file.
+'''Script to create a skeleton local.py settings file.
 Created on Sep 25, 2010
 
 @author: jnaous
@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 def usage():
     print "%s <conf_dir>" % sys.argv[0]
     print "    <conf_dir> is the location where you want to create a"
-    print "    skeleton localsettings.py file."
+    print "    skeleton local.py settings file."
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

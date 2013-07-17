@@ -19,6 +19,9 @@ find /opt/ofelia/expedient/src/geni_legacy/ -type f | xargs perl -pi -e 's/from 
 #find /opt/ofelia/expedient/ -type f | xargs perl -pi -e 's/geni_legacy\.geni_legacy\.expedient_geni/geni_legacy\.expedient_geni/g'
 
 
+# Fix imports from settings
+find /opt/ofelia/expedient/ -type f | xargs perl -pi -e 's/modules\.settings/settings/g'
+
 # Fix imports from localsettings (might be not necessary if 'modules' is added to system paths)
 find /opt/ofelia/expedient/ -type f | xargs perl -pi -e 's/from localsettings/from modules\.localsettings/g'
 find /opt/ofelia/expedient/ -type f | xargs perl -pi -e 's/import localsettings/from modules import localsettings/g'

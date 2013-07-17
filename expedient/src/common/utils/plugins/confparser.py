@@ -12,43 +12,46 @@ import ConfigParser
 
 class ConfParser():
 
-    from modules.localsettings import SRC_DIR
-    # Note: surround inside list whenever treated as a unit
-    plugins_path = join_paths([SRC_DIR, "python", "plugins"])
+	# XXX Use django.conf for imports
+	from django.conf import settings
+#	from settings.local import SRC_DIR
+	# Note: surround inside list whenever treated as a unit
+#	plugins_path = join_paths([SRC_DIR, "python", "plugins"])
+	plugins_path = join_paths([settings.SRC_DIR, "plugins"])
 
-    @staticmethod
-    def parse_config(plugin_name, path="./settings.conf"):
-        """
-        Reads and parses every setting defined in the 'settings.conf' within
-        the plugin that goes under the name 'plugin_name'.
-        """
-        ConfParser.plugin_name = plugin_name
-        settings = {}
-        try:
-            confparser = ConfigParser.RawConfigParser()
-            confparser.readfp(open(path))
-            for section in confparser.sections():
-                settings[section] = {}
-                for (key,val) in confparser.items(section):
-                    # Any Python structure inside a string is to be converted into the desired structure
-                    settings[section][key] = ast.literal_eval(val)
-                    # Postprocessing: complete content folders with each plugin absolute path (keeps a copy previously)
-                    if section == "paths":
-                        settings[section]["relative__%s" % key] = settings[section][key]
-                        settings[section][key] = ConfParser.parse_path(plugin_name, settings[section][key])
-        except Exception as e:
-            print "[WARNING] Exception parsing configuration file '%s'. Details: %s" % (str(path), str(e))
-        return settings
+	@staticmethod
+	def parse_config(plugin_name, path="./settings.conf"):
+		"""
+		Reads and parses every setting defined in the 'settings.conf' within
+		the plugin that goes under the name 'plugin_name'.
+		"""
+		ConfParser.plugin_name = plugin_name
+		settings = {}
+		try:
+			confparser = ConfigParser.RawConfigParser()
+			confparser.readfp(open(path))
+			for section in confparser.sections():
+				settings[section] = {}
+				for (key,val) in confparser.items(section):
+					# Any Python structure inside a string is to be converted into the desired structure
+					settings[section][key] = ast.literal_eval(val)
+					# Postprocessing: complete content folders with each plugin absolute path (keeps a copy previously)
+					if section == "paths":
+						settings[section]["relative__%s" % key] = settings[section][key]
+						settings[section][key] = ConfParser.parse_path(plugin_name, settings[section][key])
+		except Exception as e:
+			print "[WARNING] Exception parsing configuration file '%s'. Details: %s" % (str(path), str(e))
+		return settings
 
-    @staticmethod
-    def parse_path(plugin_name, plugin_path):
-        """
-        Transforms the plugin path (along with the plugin name) into an
-        absolute URL, taking into account the location of the plugin folders.
-        """ 
-        try:
-            plugin_path = join_paths([[ConfParser.plugins_path], plugin_name, plugin_path])
-        except Exception as e:
-            print "[WARNING] Exception parsing settings from section 'paths'. Details: %s" % str(e)
-        return plugin_path
+	@staticmethod
+	def parse_path(plugin_name, plugin_path):
+		"""
+		Transforms the plugin path (along with the plugin name) into an
+		absolute URL, taking into account the location of the plugin folders.
+		""" 
+		try:
+			plugin_path = join_paths([[ConfParser.plugins_path], plugin_name, plugin_path])
+		except Exception as e:
+			print "[WARNING] Exception parsing settings from section 'paths'. Details: %s" % str(e)
+		return plugin_path
 

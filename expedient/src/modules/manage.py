@@ -4,7 +4,7 @@ import sys
 #sys.path.insert(0, join(dirname(__file__), ".."))
 sys.path.insert(0, dirname(__file__))
 
-import modules.settings as settings
+import settings
 from django.core.management import execute_manager
 
 def main():

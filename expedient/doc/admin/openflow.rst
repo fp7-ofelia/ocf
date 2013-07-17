@@ -82,7 +82,7 @@ Apache that verifies that the certificate chain for incoming users are
 correct.
 
 These certificates are installed wherever the ``GCF_X509_TRUSTED_CERT_DIR`` (see
-settings_) in your :file:`localsettings.py` points. For a default
+settings_) in your settings :file:`locals.py` points. For a default
 install, this would be
 :file:`/etc/expedient/gcf-x509-trusted.crt`. Copy the new certificate
 there. The next step is to link that certificate using its hash in the

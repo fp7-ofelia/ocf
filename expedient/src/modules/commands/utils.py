@@ -9,24 +9,24 @@ import sys
 import MySQLdb
 from optparse import OptionParser
 
-from modules.defaultsettings.django import CONF_DIR
-from modules.defaultsettings.required import REQUIRED_SETTINGS
+from settings.django import CONF_DIR
+from settings.required import REQUIRED_SETTINGS
 
 def bootstrap_local_settings(conf_dir=CONF_DIR):
     """
-    Create a localsettings module in C{conf_dir}.
+    Create a local settings module in C{conf_dir}.
     
-    @keyword conf_dir: location of the localsettings.py file. Defaults
+    @keyword conf_dir: location of the local.py settings file. Defaults
         to CONF_DIR.
     """
     conf_dir = os.path.abspath(conf_dir)
-    loc = os.path.join(conf_dir, "localsettings.py")
+    loc = os.path.join(conf_dir, "local.py")
     pkg_resources.ensure_directory(loc)
     if os.access(loc, os.F_OK):
-        print "ERROR: Found localsettings already. "\
+        print "ERROR: Found local settings already. "\
             "Cowardly refusing to overwrite."
         return
-    print "Creating skeleton localsettings.py file. in %s" % conf_dir
+    print "Creating skeleton local.py settings file. in %s" % conf_dir
     f = open(loc, mode="w")
     # write the conf dir location
     f.write("CONF_DIR = '%s'\n" % conf_dir)
@@ -68,7 +68,7 @@ def bootstrap_expedient_mysql():
         "--confdir",
         action="store", type="string", dest="confdir",
         default="/etc/expedient",
-        help="Location of the localsettings file. [default: %default]",
+        help="Location of the local settings file. [default: %default]",
     )
     parser.add_option(
         "--root",
@@ -88,7 +88,7 @@ def bootstrap_expedient_mysql():
     
     sys.path.append(options.confdir)
     
-    import modules.settings as settings
+    import settings
     
     create_user(
         options.root_username,

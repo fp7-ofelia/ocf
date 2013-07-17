@@ -11,7 +11,7 @@ from django.core.management import call_command
 class Command(NoArgsCommand):
     help = "Calls all the management commands needed to set up " \
         "Expedient after installing an egg or getting source from git " \
-        "and writing local settings. You need to already have localsettings "\
+        "and writing local settings. You need to already have local settings "\
         "in your PYTHONPATH."
 
     def handle_noargs(self, **options):

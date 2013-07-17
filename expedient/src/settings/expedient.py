@@ -40,7 +40,7 @@ append_to_local_setting(
 
 UI_PLUGINS = [
 #    ('expedient.ui.html.plugin', 'html_ui', 'expedient.ui.html.urls'),
-    ('ui.rspec.plugin', 'rspec_mgr', 'ui.rspec.urls'),
+    ('modules.rspec.plugin', 'rspec_mgr', 'modules.rspec.urls'),
 ]
 '''List of UI plugins that are enabled in Expedient.
 

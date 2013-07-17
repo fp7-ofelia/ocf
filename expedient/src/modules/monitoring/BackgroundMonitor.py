@@ -4,7 +4,7 @@ from modules.monitoring.AggregateMonitoringThread import AggregateMonitoringThre
 from modules.monitoring.SessionMonitoringThread import SessionMonitoringThread
 import time
 import threading
-from modules.settings import MONITORING_INTERVAL 
+from settings import MONITORING_INTERVAL 
 from vt_plugin.models import *
 
 '''

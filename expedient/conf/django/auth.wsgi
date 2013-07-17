@@ -7,15 +7,12 @@ PYTHON_DIR = join(dirname(__file__), '../../src/')
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'modules.settings'
-
-# changed 19.04.2011, ak, tr
-#sys.path.append(PYTHON_DIR)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 sys.path.insert(0, PYTHON_DIR)
 
 from django.contrib.auth.models import User
 from django import db
-from modules.settings import ROOT_PASSWORD, ROOT_USERNAME
+from settings import ROOT_PASSWORD, ROOT_USERNAME
 from modules.aggregate.models import *
 
 def check_password(environ, user, password):

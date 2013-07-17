@@ -134,7 +134,7 @@ doctest:
 
 apidocs:
 	PYTHONPATH=$(SRCDIR) \
-	DJANGO_SETTINGS_MODULE=modules.settings \
+	DJANGO_SETTINGS_MODULE=settings \
 	epydoc -v --html -o $(BUILDDIR)/html/api --name Expedient \
 	--url http://yuba.stanford.edu/~jnaous/expedient/ \
 	--graph classtree \

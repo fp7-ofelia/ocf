@@ -1,10 +1,10 @@
-'''
-Default Expedient settings
+"""
+Default Expedient settings.
 
 Created on Aug 18, 2010
 
 @author: dcolle, msune, CarolinaFernandez
-'''
+"""
 
 #
 # Based upon the Apache server configuration files.
@@ -16,9 +16,10 @@ Created on Aug 18, 2010
 #
 
 #
-# Directories for the Expedient sources and the configuration file.
+# Directories for the Expedient configuration 
+# file and sources, respectively.
 #
-CONF_DIR = '/opt/ofelia/expedient/src/python/expedient/clearinghouse'
+CONF_DIR = '/opt/ofelia/expedient/src/settings'
 SRC_DIR = '/opt/ofelia/expedient/src'
 
 #

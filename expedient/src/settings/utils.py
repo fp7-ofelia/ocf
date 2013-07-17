@@ -9,9 +9,9 @@ sys.path.append("/opt/ofelia/expedient/src/")
 def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     """Set or update a setting by adding items to it.
     
-    If a setting with name C{EXTRA_%s} % C{setting_name} exists in C{localsettings}
+    If a setting with name C{EXTRA_%s} % C{setting_name} exists in C{local}
     then this function will add append list C{l} to the value of
-    EXTRA_C{setting_name}. The setting in C{localsettings} must be a list.
+    EXTRA_C{setting_name}. The setting in C{local} must be a list.
     This function will actually set the value in the module, so no need to
     reset it.
     
@@ -29,8 +29,8 @@ def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     @return: the value of the new setting.
     """
     
-    from modules import localsettings
-    setting = getattr(localsettings, "EXTRA_%s" % setting_name, [])
+    from settings import local
+    setting = getattr(local, "EXTRA_%s" % setting_name, [])
     v = l + setting if at_start else setting + l
     _modname = globals_dict['__name__']
     _caller_mod = sys.modules[_modname]
@@ -38,9 +38,9 @@ def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     return v
 
 def get_or_set_default(setting_name, default, globals_dict):
-    """Get or set a default setting from modules.localsettings.
+    """Get or set a default setting from settings.local.
     
-    If the setting with name C{setting_name} is in localsettings, then
+    If the setting with name C{setting_name} is in the local settings, then
     use that as the default value. Otherwise, use C{default}. This function
     will actually set the value in the module, so no need to reset it.
     
@@ -53,9 +53,9 @@ def get_or_set_default(setting_name, default, globals_dict):
     
     @return: The value that was set.
     """
-    from modules import localsettings
-    if hasattr(localsettings, setting_name):
-        v = getattr(localsettings, setting_name)
+    from settings import local
+    if hasattr(local, setting_name):
+        v = getattr(local, setting_name)
     else:
         v = default
 

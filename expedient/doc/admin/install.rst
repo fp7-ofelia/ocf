@@ -96,9 +96,9 @@ documentation`_. Below is a list of the settings that need to be changed:
 
 Now to make sure that the syntax is correct, do the following::
 
-    $ PYTHONPATH=/etc/expedient python -c "from modules import localsettings"
+    $ PYTHONPATH=/etc/expedient python -c "from settings import local"
 
-If you get errors, go back to localsettings.py and fix them.
+If you get errors, go back to local.py settings file and fix them.
 
 .. _defaultsettings documentation: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings-module.html
 
@@ -346,11 +346,11 @@ Run the following command to create a skeleton :file:`localsetting.py` file::
     $ cd expedient/src/python
     $ PYTHONPATH=. python expedient/clearinghouse/bootstrap_local_settings.py expedient/clearinghouse/
 
-Then edit the newly-created :file:`expedient/clearinghouse/localsettings.py` using your favorite editor.
+Then edit the newly-created :file:`settings/local.py` using your favorite editor.
 
 Take a look at the settings under defaultsettings_ to
 understand all the available settings. The created settings in
-:file:`localsettings.py` are the minimal ones required, and they
+:file:`local.py` are the minimal ones required, and they
 need to be set.
 
 .. _defaultsettings: http://yuba.stanford.edu/~jnaous/expedient/docs/api/modules.defaultsettings-module.html

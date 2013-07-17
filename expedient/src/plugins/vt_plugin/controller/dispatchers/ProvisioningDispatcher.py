@@ -6,7 +6,7 @@ from vt_plugin.models import *
 from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, threading, logging
-from modules.settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR
+from settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR
 
 #PLUGIN_URL = 'https://'+ROOT_USERNAME+':'+ROOT_PASSWORD+'@'+SITE_IP_ADDR+'/vt_plugin/xmlrpc/vt_am/'
 

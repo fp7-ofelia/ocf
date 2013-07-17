@@ -1,28 +1,30 @@
-'''Pull all the default settings and then all overrides.
+"""
+Load every settings file and override afterwards.
 
-Created on Aug 19, 2010
+Created on Jul 17, 2013
 
-@author: jnaous
-'''
+@author: jnaous, CarolinaFernandez
+"""
+
 import sys, traceback
 
-from modules.defaultsettings.django import *
-from modules.defaultsettings.database import *
-from modules.defaultsettings.admins import *
-from modules.defaultsettings.email import *
-from modules.defaultsettings.expedient import *
-from modules.defaultsettings.logging import *
-from modules.defaultsettings.gcf import *
-from modules.defaultsettings.messaging import *
-from modules.defaultsettings.openflow import *
-from modules.defaultsettings.site import *
-from modules.defaultsettings.xmlrpc import *
-from modules.defaultsettings.openflowtests import *
-from modules.defaultsettings.tests import *
-from modules.defaultsettings.ldapSettings import *
-from modules.defaultsettings.plugin import *
+from django import *
+from database import *
+from admins import *
+from email import *
+from expedient import *
+from logdata import *
+from gcf import *
+from messaging import *
+from openflow import *
+from site import *
+from xmlrpc import *
+from openflowtests import *
+from tests import *
+from ldapdata import *
+from plugin import *
 # Import the list of required variables
-from modules.defaultsettings.required import REQUIRED_SETTINGS
+from required import REQUIRED_SETTINGS
 
 # Try getting importing the secret key from a secret_key module
 try:
@@ -39,7 +41,7 @@ except ImportError:
 # Now import the local settings
 try:
     # do the import here to check that the path exists before doing anything
-    from modules.localsettings import *
+    from local import *
     
     # Delete all the default required settings
     _modname = globals()['__name__']
@@ -49,7 +51,7 @@ try:
             delattr(_this_mod, var)
 
     # now import again to re-insert the deleted settings
-    from modules.localsettings import *
+    from local import *
 
     # check that all the required settings are set
     for item in REQUIRED_SETTINGS:
@@ -58,16 +60,16 @@ try:
                 raise Exception(
                     "Missing required setting %s. See the "
                     "documentation for this setting at "
-                    "modules.defaultsettings.%s"
+                    "%s"
                     % (var, item[0])
                 )
 
 except ImportError as e:
-    if "No module named localsettings" in "%s" % e:
+    if "No module named local" in "%s" % e:
         print(
-            "ERROR: No localsettings module defined. Please run the "
+            "ERROR: No local module defined. Please run the "
             " 'bootstrap_local_settings' command if you have not yet "
-            "created a localsettings module and add the parent "
+            "created a local module and add the parent "
             "directory to your PYTHONPATH. Proceeding with missing "
             "required settings."
         )

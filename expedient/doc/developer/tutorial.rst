@@ -568,7 +568,7 @@ Update Settings
 ...............
 
 First, we need to add the plugin to the list of installed
-apps. Edit your :file:`localsettings.py` file to do
+apps. Edit your :file:`local.py` file to do
 so. Eventually, if the plugin makes it into the Expedient
 distribution, the settings that you modify here will be added to
 the default settings. We will need to edit two settings.
@@ -576,13 +576,13 @@ the default settings. We will need to edit two settings.
 Default Settings
 ^^^^^^^^^^^^^^^^
 
-All the settings you put in the :file:`localsettings.py` appear in Django's
+All the settings you put in the :file:`local.py` appear in Django's
 :mod:`settings` module. So if your application has some default settings that
 you would like to add, you will need to add a line similar to::
 
     from sshaggregate.defaultsettings import *
 
-at the top of the :file:`localsettings.py` file. 
+at the top of the :file:`local.py` file. 
 
 You can append additional list items to almost all of the default
 settings that are lists. Below we show an example of how this is
@@ -593,7 +593,7 @@ specify next is appended to the setting's list value.
 INSTALLED_APPS
 ^^^^^^^^^^^^^^
 
-Add the following line to your :file:`localsettings.py`::
+Add the following line to your :file:`local.py`::
 
     EXTRA_INSTALLED_APPS = [
         'sshaggregate',

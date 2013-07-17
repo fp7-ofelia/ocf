@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(__file__)+'/../../../../vt_manager/src/python')
 #sys.path.append(os.path.dirname(__file__)+'/../../../plugins')
 
 try:
-    from modules.localsettings import SRC_DIR as location
+    from local import SRC_DIR as location
     sys.path.append(location)
 except ImportError:
     try:
@@ -32,7 +32,7 @@ SRC_DIR = location
 '''Base location of non-python source files.'''
 
 try:
-    from modules.localsettings import CONF_DIR as location
+    from local import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
     location = "/etc/expedient"
@@ -45,7 +45,7 @@ Example: /etc/expedient/
 '''
 
 try:
-    from modules.localsettings import STATIC_DOC_ROOT as location
+    from local import STATIC_DOC_ROOT as location
 except ImportError:
     location = os.path.join(SRC_DIR, "static")
 
@@ -76,7 +76,7 @@ USE_I18N = False
 to load the internationalization machinery.'''
 
 try:
-    from modules.localsettings import *
+    from local import *
 except ImportError:
     pass
 
@@ -186,7 +186,7 @@ INSTALLED_APPS = [
     'geni_legacy.expedient_geni.planetlab',
     'geni_legacy.expedient_geni.gopenflow',
 #    'expedient.ui.html',
-    'ui.rspec',
+    'modules.rspec',
 #    'vt_plugin',
 #    'vt_plugin.communication',
 #    'openflow.dummyom',
@@ -224,7 +224,7 @@ DEBUG = True
 '''Enable/Disable debugging mode. See Django docs on this setting.'''
 
 try:
-    from modules.localsettings import *
+    from local import *
 except ImportError:
     pass
 
