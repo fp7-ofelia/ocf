@@ -15,7 +15,7 @@ SRC_DIR=/opt/ofelia/expedient/
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exists anymore?"
+cd $SRC_DIR/src/ || error "Target directory does not exists anymore?"
 
 #Syncing DB
 printHeader ">" "Syncing Database..."

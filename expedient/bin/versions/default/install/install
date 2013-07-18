@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###
-#       @author: msune
+#   @author: msune, CarolinaFernandez
 #	@organization: i2CAT
 #	@project: Ofelia FP7
 #	@description: install module 
@@ -45,12 +45,12 @@ source $CURRENT_DIRECTORY/lib/ssl
 #Create symbolic links
 printHeader ">" "Creating symbolic links for the vhost files in apache sites-enabled folder..." 
 
-ln -sf $SRC_DIR/src/config/expedient/common/apache/vhost-macros.conf /etc/apache2/conf.d/ || error "Cannot create vhost-macros symbolic link"
-ln -sf $SRC_DIR/src/config/expedient/clearinghouse/apache/vhost-clearinghouse.conf /etc/apache2/sites-available/expedient.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
+ln -sf $SRC_DIR/src/conf/apache/vhost-macros.conf /etc/apache2/conf.d/ || error "Cannot create vhost-macros symbolic link"
+ln -sf $SRC_DIR/src/conf/apache/vhost-clearinghouse.conf /etc/apache2/sites-available/expedient.conf || error "Cannot create symbolic link in /etc/apache2/sites-available/ for the expedient vhost file..."
 ln -sf /etc/apache2/sites-available/expedient.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
 
 #Create application folder for error log
-mkdir -p /var/log/apache2/expedient/clearinghouse
+mkdir -p /var/log/ofelia/expedient
 #If it does not exist, expedient creates it with root user and then it crashes
 touch /var/log/sfa_access.log
 
@@ -62,7 +62,7 @@ source $CURRENT_DIRECTORY/lib/django-db
 
 #Change permissions of the code
 printHeader ">" "Setting correct file permissions..."
-chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
+chmod -f a+w $SRC_DIR/src/modules/gcf-x509*
 chown -f $APACHE_USER $SRC_DIR/src/ -R
 chown -f $APACHE_USER /var/log/sfa_access.log
 

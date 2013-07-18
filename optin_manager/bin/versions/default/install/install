@@ -53,7 +53,7 @@ ln -sf $SRC_DIR/src/config/openflow/optin_manager/apache/vhost-optinmgr.conf /et
 ln -sf /etc/apache2/sites-available/optinmgr.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
 
 #Create application folder for error log
-mkdir -p /var/log/apache2/openflow/optin_manager
+mkdir -p /var/log/ofelia/optin_manager
 
 #Change permissions of the code
 #printHeader ">" "Setting correct file permissions..."

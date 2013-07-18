@@ -54,7 +54,7 @@ ln -sf $SRC_DIR/src/config/vt_manager/apache/vhost-vt.conf /etc/apache2/sites-av
 ln -sf /etc/apache2/sites-available/vt_manager.conf /etc/apache2/sites-enabled/ || error "Cannot create symbolic link in /etc/apache2/sites-enabled to enable vhost..."
 
 #Create application folder for error log
-mkdir -p /var/log/apache2/vt_manager
+mkdir -p /var/log/ofelia/vt_manager
 
 #Change permissions of the code 
 printHeader ">" "Setting correct file permissions..."
