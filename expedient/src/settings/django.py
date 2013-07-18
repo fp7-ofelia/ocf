@@ -46,11 +46,12 @@ Example: /etc/expedient/
 '''
 
 try:
-    from local import STATIC_DOC_ROOT as location
+    from local import STATIC_DOC_ROOT as static_location
 except ImportError:
-    location = os.path.join(SRC_DIR, "static")
+    static_location = os.path.join(SRC_DIR, "../static")
+    static_location = '/opt/ofelia/expedient/static'
 
-STATIC_DOC_ROOT = location
+STATIC_DOC_ROOT = static_location
 '''Location of static content.
 
 Example: /srv/www/expedient/
@@ -89,7 +90,7 @@ Example: "/home/media/media.lawrence.com/"'''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static/default'
+MEDIA_URL = '../static/default'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -142,8 +143,10 @@ append_to_local_setting(
   
 ROOT_URLCONF = 'modules.urls'
 
+
+
 TEMPLATE_DIRS = [
-    os.path.join(SRC_DIR, 'templates/default'),
+    os.path.join(SRC_DIR, 'templates/default/'),
 #    os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
 #    os.path.join(SRC_DIR, 'templates/default/expedient/common'),
     os.path.join(SRC_DIR, 'templates/default/common'),

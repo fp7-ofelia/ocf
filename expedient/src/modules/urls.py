@@ -46,7 +46,7 @@ urlpatterns = patterns('',
     url(r'^$', 'views.home', name='home'),
     url(r'^help/$',
         direct_to_template,
-        {'template': 'help/index.html'},
+        {'template': 'index.html'},
         name='help'),
 
 #    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),    
@@ -116,7 +116,6 @@ def get_static_url(name, path=""):
         'django.views.static.serve',
         {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
     return url(*static_file_tuple, name=name)
-
 urlpatterns += patterns('',
     get_static_url("img_media", '/img'),
     get_static_url("css_media", '/css'),
@@ -143,4 +142,3 @@ urlpatterns += patterns('',
     get_static_url(css_theme_tuple[0],css_theme_tuple[1]),
     get_static_url(js_theme_tuple[0],js_theme_tuple[1]),
 )
-
