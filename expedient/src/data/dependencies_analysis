@@ -1,0 +1,61 @@
+Used within expedient?
+
+Folder /opt/ofelia/expedient/src/modules/commands/management/commands
+=====================================================================
+
+
+File bootstrap_local_setting.py
+-------------------------------
+./doc/admin/install.rst:    $ PYTHONPATH=. python expedient/clearinghouse/bootstrap_local_settings.py expedient/clearinghouse/
+./src/settings/__init__.py:            " 'bootstrap_local_settings' command if you have not yet "
+./src/modules/bootstrap_local_settings.py:from modules.commands.utils import bootstrap_local_settings
+./src/modules/bootstrap_local_settings.py:    bootstrap_local_settings(conf_dir=conf_dir)
+./src/modules/commands/management/commands/bootstrap_local_settings.py:from modules.commands.utils import bootstrap_local_settings
+./src/modules/commands/management/commands/bootstrap_local_settings.py:        bootstrap_local_settings(conf_dir=conf_dir)
+./src/modules/commands/utils.py:def bootstrap_local_settings(conf_dir=CONF_DIR):
+
+
+File create_default_root.py
+---------------------------
+./doc/admin/install.rst:    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_default_root
+./doc/admin/install.rst:    $ python expedient/clearinghouse/manage.py create_default_root
+
+
+File create_dummy_oms.py
+------------------------
+-
+
+File create_secret_key.py
+-------------------------
+./doc/admin/install.rst:    $ sudo PYTHONPATH=/etc/expedient expedient_manage create_secret_key
+./doc/admin/install.rst:    $ python expedient/clearinghouse/manage.py create_secret_key
+./src/settings/__init__.py:        "Please run the 'create_secret_key' manage.py command to create "
+./src/modules/commands/management/commands/setup_expedient.py:        call_command("create_secret_key")
+
+
+File install_cert_makefile.py
+-----------------------------
+./src/settings/xmlrpc.py:Use the management command install_cert_makefile to such a Makefile
+./src/modules/commands/management/commands/setup_expedient.py:        call_command("install_cert_makefile")
+
+
+File load_openflow_data.py
+--------------------------
+-
+
+
+File setup_expedient.py
+-----------------------
+./bin/versions/default/install/lib/django-db:python manage.py setup_expedient || warning "Could not create secret key..
+
+
+File setup_media.py
+-------------------
+./src/modules/commands/management/commands/setup_expedient.py:        call_command("setup_media")
+
+
+File test_expedient.py
+----------------------
+./doc/admin/install.rst:    $ PYTHONPATH=/etc/expedient expedient_manage test_expedient
+./doc/admin/install.rst:    $ python expedient/clearinghouse/manage.py test_expedient
+
