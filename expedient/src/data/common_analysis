@@ -1,0 +1,192 @@
+Folder /opt/ofelia/expedient/src/common/extendable/
+===================================================
+
++ inheritance.py
+  - Dependencies: Used by ./expedient/src/common/extendable/utils.py
+  - Internal work: Generator over all subclasses of a given class, in depth first order.
+
++ models.py
+  - Dependencies: Used by ./expedient/src/modules/resources/models.py, ./expedient/src/modules/aggregate/models.py and ./expedient/src/common/extendable/tests/models.py.
+  - Internal work: Enables an instance to be obtained as its class's farthest descendant. Slices and resources are Extendable objects. Also, there are a metaclass for the extendable objects and a manager for them.
+
++ utils.py
+  - Dependencies: No dependencies.
+  - Internal work: Get the subclasses of a given class.
+
++ views.py
+  - Empty file.
+
+
+
+Folder /opt/ofelia/expedient/src/common/extendable/tests/
+=========================================================
+
++ models.py
+  - Depedencies: ./expedient/src/common/extendable/tests/tests.py.
+  - Internal work: Just some functions for testing /opt/ofelia/expedient/src/common/extendable/models.py.
+
++ tests.py
+  - Dependencies: No dependencies.
+  - Internal work: Just some tests.
+
+
+
+Folder /opt/ofelia/expedient/src/common/breadcrumbs/templatetags/
+=================================================================
+
++ breadcrumbs.py
+  - Dependencies: Not imported directly in any file, but referenced as a context variable in many files, specially views and html functions.
+  - Internal work: If "breadcrumbs" is in the context, use that as the trail and store in session. If it is not, then use the trail from the session.
+
+
+
+Folder /opt/ofelia/expedient/src/common/defaultsite/
+====================================================
+
++ settings.py
+  - Dependencies: No dependencies.
+  - Internal work: Set some site settings to the default values.
+
++ management.py
+  - Dependencies: No dependencies
+  - Internal work: Create the default site that will be added to the settings.
+
+
+
+Folder /opt/ofelia/expedient/src/common/backends/
+=================================================
+
++ remoteuser.py
+  - Dependencies: No dependencies.
+  - Internal work: Unknown remote users are not created.
+
+
+
+Folder /opt/ofelia/expedient/src/common/xmlrpc_serverproxy/
+===========================================================
+
++ models.py
+  - Dependencies: used by /opt/ofelia/expedient/src/common/xmlrpc_serverproxy/admin.py and ./expedient/src/plugins/openflow/plugin/models.py
+  - Internal work: Password, certificates and availability utilities of the XMLRPCServer.
+
++ admin.py
+  - Dependencies: No depedencies.
+  - Internal work: Register the password of the XMLRPCServer
+
++ forms.py
+  - Dependencies: used by ./expedient/src/plugins/openflow/plugin/views.py
+  - Internal work: PasswordXMLRPCServer helpers and utilities.
+
+
+
+Folder /opt/ofelia/expedient/src/common/utils/
+===============================================
+
++ certtransport.py
+  - Dependencies: ./expedient/src/plugins/openflow/tests/gapi/gapi.py, ./expedient/src/plugins/openflow/tests/post_deployment/tests.py, ./expedient/src/plugins/openflow/tests/full/fulltests.py, ./expedient/src/geni_legacy/expedient_geni/models.py.
+  - Internal work: Just some functions for making a safe connection with certificates.
+
++ context_processors.py
+  - Dependencies: ./expedient/src/settings/django.py
+  - Internal work: Set some settings in the template.
+
++ ExpedientThemeManager.py
+  - Dependencies: ./expedient/src/modules/urls.py, ./expedient/src/common/utils/templatetags/url.py.
+  - Internal work: OCF Expedient User Theme Manager (Oscar can give more details if it is necessary).
+
++ formfields.py
+  - Depedencies: ./expedient/src/common/utils/modelfields.py
+  - Internal work: validate the form of the input data (MAC and IP adresses, ...).
+
++ mail.py
+  - Depedencies: ./expedient/src/modules/slice/models.py, ./expedient/src/modules/users/forms.py, ./expedient/src/modules/project/views.py, ./expedient/src/modules/permissionmgmt/views.py, ./expedient/src/common/messaging/models.py, ./expedient/src/common/messaging/views.py, ./expedient/src/common/permissions/views.py, ./expedient/src/common/utils/plugins/topologygenerator.py
+  - Internal work: Wrapper for the send_mail method within django.core.mail.
+
++ managers.py
+  - Dependencies: ./expedient/src/common/permissions/managers.py
+  - Internal work: Adds methods to retrieve generic objects when the model uses the contenttypes framework.
+
++ modelfields.py
+  - Dependencies: ./expedient/src/plugins/vt_plugin/models/VTServer.py, ./expedient/src/modules/slice/models.py, ./expedient/doc/developer/sshaggregate/models.py.
+  - Internal work: Some field validators (mac, ip, ...).
+
++ ServiceThread.py
+  - Dependencies: ./expedient/src/common/utils/mail.py
+  - Internal work: Stard new method as a Thread. This code seems to be duplicated...
+
++ transport.py
+  - Depedencies: ./expedient/src/plugins/openflow/plugin/tests.py, ./expedient/src/plugins/openflow/tests/omctl/XMLRPCServerProxy.py, ./expedient/src/geni_legacy/expedient_geni/models.py, ./expedient/src/common/xmlrpc_serverproxy/models.py.
+  - Internal work: Handles connections to XML-RPC server through Django test client.
+
++ validators.py
+  - Dependencies: ./expedient/src/samples/plugin/sample_resource/controller/resource.py, ./expedient/src/samples/plugin/sample_resource/forms/SampleResource.py, ./expedient/src/plugins/vt_plugin/forms/VM.py, ./expedient/src/plugins/vt_plugin/models/VM.py, ./expedient/src/samples/plugin/sample_resource/models/SampleResource.py, ./expedient/src/modules/slice/models.py, ./expedient/src/modules/project/models.py, ./expedient/src/modules/resources/models.py, ./expedient/src/common/permissions/forms.py, ./expedient/doc/samples/plugin/sample_resource/controller/resource.py.
+  - Internal work: Some validators for names, mac, ips,... There is the same in the vt_manager but better done...
+
++ views.py
+  - Dependencies: ./expedient/src/samples/plugin/sample_resource/controller/GUIdispatcher.py, ./expedient/src/plugins/openflow/plugin/views.py, ./expedient/src/plugins/vt_plugin/controller/vtAggregateController/vtAggregateController.py, ./expedient/src/modules/slice/views.py, ./expedient/src/modules/roles/views.py, ./expedient/src/modules/project/views.py, ./expedient/src/modules/aggregate/tests/views.py, ./expedient/src/geni_legacy/expedient_geni/views.py, ./expedient/doc/samples/plugin/sample_resource/controller/GUIdispatcher.py, ./expedient/doc/developer/sshaggregate/views.py.
+  - Internal work: Generic way to create/update a bit more advanced than the django's generic views.
+
+
+
+Folder /opt/ofelia/expedient/src/common/middleware/
+====================================================
+
++ basicauth.py
+  - Dependencies: ./expedient/src/settings/django.py
+  - Internal work: Only HTTPBasicAuthMiddleware is used. Middleware that logs in users using HTTP Basic Authnetication.
+
++ exceptionprinter.py
+  - Dependencies: ./expedient/src/settings/django.py.
+  - Internal work: A printer for exception (obviously).
+
++ sitelockdown.py
+  - Dependencies: ./expedient/src/settings/django.py.
+  - Internal work: This middleware class will force almost every request coming from Django to be authenticated, or it will redirect the user to a login page.
+
++ threadlocals.py
+  - Dependencies: ./expedient/src/common/permissions/utils.py, ./expedient/src/common/permissions/shortcuts.py, ./expedient/src/common/permissions/tests/models.py,./expedient/src/common/permissions/tests/tests.py, ./expedient/src/settings/django.py, ./expedient/doc/developer/sshaggregate/models.py.
+  - Internal work: Management of the permissions dictionary, depending on the current thread and its containing process.
+
++ utils.py
+  - Dependencies: ./expedient/src/common/middleware/basicauth.py, /expedient/src/common/middleware/sitelockdown.py
+  - Internal work: Reads a list of regular expressions from a setting and adds a method to match any of the regular expressions. Parent class of basicauth and sitelockdown.
+
+
+
+Folder /opt/ofelia/expedient/src/common/messaging/
+===================================================
+
+- Copy here Tanya's file
+
+
+Folder /opt/ofelia/expedient/src/common/timer/
+==============================================
+
++ exceptions.py
+  - Dependencies: ./expedient/src/common/timer/models.py, ./expedient/src/geni_legacy/expedient_geni/models.py, ./expedient/src/modules/slice/models, ./expedient/src/plugins/openflow/plugin/models.py.
+  - Internal work: Some exceptions classes... (obviously again).
+
++ models.py
+  - Dependencies: ./expedient/src/plugins/openflow/plugin/models.py, ./expedient/src/modules/slice/models.py, ./expedient/src/modules/slice/tests.py, ./expedient/src/geni_legacy/expedient_geni/models.py, ./expedient/src/common/timer/tests.py, ./expedient/src/common/timer/management/commands/run_timer_jobs.py, ./expedient/src/common/timer/exceptions.py
+  - Internal work: Defines models for the timer app.
+
++ utils.py
+  - Dependencies: ./expedient/src/common/timer/exceptions.py
+  - Internal work: Just a simple helper function.
+
++ tests.py
+  - Dependencies: No dependencies.
+  - Internal work: Some tests.
+
++ models_or
+  - Seems to be the original models.py python code.
+
+
+
+Folder /opt/ofelia/expedient/src/common/timer/management/command/
+==================================================================
+
++ run_timer_jobs.py
+  - Dependencies: ./expedient/src/modules/slice/tests.py, ./expedient/src/common/timer/tests.py and referenced in ./expedient/doc/admin/install.rst
+  - Internal work: Run the jobs that are scheduled using the common.timer app.
+
