@@ -5,35 +5,37 @@ Folder /opt/ofelia/expedient/src/modules/commands/management/commands
   - Dependencies: No dependencies, only refereced in ./doc/admin/install.rst (installation guide).
   - Internal work: Creates a default root user. This root user is specified by the settings parameteres settings.ROOT_USERNAME (%s), settings.ROOT_PASSWORD (%s), settings.ROOT_EMAIL (%s). If the user already exists it will be promoted as superuser.
 
-
 + create_dummy_oms.py
   - Dependencies: No dependencies.
   - Internal work: It just generates some dummy managers for testing.
-
 
 + create_secret_key.py
   - Dependencies: Refered in ./doc/admin/install.rst (installation guide), and as a warning in the settings. Called by setup_expedient.py.
   - Internal work: Genereates a secret key. It seems to be usefull, due to the secret key is necessary for the settings.
 
-
 + bootstrap_local_settings.py
   - Dependencies: No dependencies.
   - Internal work: Bootstrap a local settings file, ./src/modules/bootstrap_local_settings.py seems to do the same functionality.
-
 
 + setup_expedient.py
   - Dependencies: No dependencies.
   - Inernal work: Call some commands (create_secret_key, install_cert_makefile, setup_media) to set up the expedient.
 
-
 + setup_media.py
   - Dependencies: Called by setup_expedient.py.
   - Internal work: Link static content to settings.STATIC_DOC_ROOT
 
-
 + install_cert_makefile.py
   - Dependencies: Called by setup_expedient.py. Referenced at ./src/settings/xmlrpc.py.
   - Internal work: create a Makefile into settings.XMLRPC_TRUSTED_CA_PATH
+
++ load_openflow_data.py
+  - Dependencies: No dependencies
+  - Internal work: Load serialized data for re-use in database migration (slices, aggregates, projects, ...).
+
++ test_expedient.py
+  - Dependencies: Referenced in ./doc/admin/install.rst (installation guide).
+  - Internal work: Run the tests specified in settings.TEST_APPS.
 
 
 
@@ -42,3 +44,9 @@ Folder /opt/ofelia/expedient/src/modules/commands/
 
 + models.py
   - Empty folder. 
+
++ utils.py
+  - Dependencies: Used by ./expedient/src/modules/bootstrap_local_settings.py and referenced in ./expedient/doc/admin/install.rst
+  - Internal work: Contain some functions, for settings creation or create/delete a new user, but only bootstrap_local_settings is imported in the expedient.
+
+
