@@ -19,7 +19,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
 
-# Set path for plugins (set at 'expedient/common/utils/plugins/pluginloader.py')
+# Set path for plugins (set at 'common/utils/plugins/pluginloader.py')
 PLUGINS_PATH = os.path.join(settings.SRC_DIR,"plugins")
 sys.path.append(os.path.join(PLUGINS_PATH))
 

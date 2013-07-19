@@ -239,7 +239,7 @@ def confirm_requests(request):
         del request.session["delegatable_req_ids"]
         del request.session["denied_req_ids"]
         
-        return HttpResponseRedirect(reverse("home"))
+        return HttpResponseRedirect(reverse("administration_home"))
     
     else:
         return direct_to_template(

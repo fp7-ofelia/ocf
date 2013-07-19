@@ -24,7 +24,7 @@ def home(request):
     
     must_have_permission(request.user, User, "can_manage_users")
     
-    user_list = auth.models.User.objects.all()
+    user_list = auth.models.User.objects.all().order_by('username')
     
     if request.method == "GET":
         pwd_form = auth.forms.UserCreationForm()

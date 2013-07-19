@@ -51,15 +51,15 @@ class AddMemberForm(forms.Form):
         super(AddMemberForm, self).__init__(*args, **kwargs)
         
         self.fields["user"].queryset = User.objects.exclude(
-            id__in=list(project.members.values_list("id", flat=True)))
+            id__in=list(project.members.values_list("id", flat=True))).order_by('username')
         
         if giver.is_superuser:
             self.fields["roles"].queryset = \
-                ProjectRole.objects.filter(project=project)
+                ProjectRole.objects.filter(project=project).order_by('name')
         else:
             self.fields["roles"].queryset = \
                 ProjectRole.objects.filter_for_can_delegate(
-                    giver, project=project)
+                    giver, project=project).order_by('name')
         
         self.project = project
         self.giver = giver
@@ -86,7 +86,7 @@ class MemberForm(forms.Form):
     """
     
     roles = RoleModelMultipleChoiceField(
-        ProjectRole.objects.all(), widget=forms.CheckboxSelectMultiple,
+        ProjectRole.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple,
         help_text="Select the roles that the user should have in this project."
     )
     delegate = forms.BooleanField(required=False,

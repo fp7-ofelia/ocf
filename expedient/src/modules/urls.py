@@ -42,14 +42,17 @@ if not PLUGIN_LOADER.plugin_settings:
 
 admin.autodiscover()
 
+#urlpatterns = patterns('',
+#    url(r'^$', 'views.home', name='home'),
+#    url(r'^help/$',
+#        direct_to_template,
+#        {'template': 'index.html'},
+#        name='help'),
+
 urlpatterns = patterns('',
     url(r'^$', 'views.home', name='home'),
-    url(r'^help/$',
-        direct_to_template,
-        {'template': 'index.html'},
-        name='help'),
-
 #    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),    
+    (r'^administration/', include('modules.administration.urls')),
     (r'^users/', include('modules.users.urls')),
     (r'^aggregate/', include('modules.aggregate.urls')),
     (r'^project/', include('modules.project.urls')),
@@ -60,6 +63,7 @@ urlpatterns = patterns('',
     (r'^roles/', include('modules.roles.urls')),
     (r'^permissionmgmt/', include('modules.permissionmgmt.urls')),
     (r'^messagecenter/',include('modules.messagecenter.urls')),
+    (r'^help/',include('modules.help.urls')),
     (r'^admin/', include(admin.site.urls)),
 
 )
@@ -116,6 +120,7 @@ def get_static_url(name, path=""):
         'django.views.static.serve',
         {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
     return url(*static_file_tuple, name=name)
+
 urlpatterns += patterns('',
     get_static_url("img_media", '/img'),
     get_static_url("css_media", '/css'),

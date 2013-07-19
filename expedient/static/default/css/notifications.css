@@ -1,0 +1,74 @@
+div#messages_list {
+    font-size: 0.9em !important;
+}
+
+table.msg_table {
+    border-spacing: 0px;
+    border: 0px;
+    margin: 0px 0px;
+    padding: 0px;
+    width: 100%;
+}
+
+table.msg_table td, th.select_checkbox {
+    padding: 4px 6px; 
+    vertical-align: top;
+}
+
+table.msg_table thead td {
+	font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
+}
+
+table.msg_table tr th {
+	border-bottom: 1px solid #000;
+}
+
+table.msg_table tr td {
+	border-bottom: 1px solid #CCC;
+}
+
+table.msg_table .select_checkbox {
+    width: 2%;
+}
+
+table.msg_table .type {
+    width: 15%;
+}
+
+table.msg_table .date {
+    width: 15%;
+}
+
+table.msg_table .time {
+    width: 10%;
+}
+
+table.msg_table td.msg_text {
+    text-align: left;
+}
+
+table.msg_table .error, .errorlist {
+	color: #9a1b1b;
+}
+
+table.msg_table .warning {
+    color: #FFBF00;
+}
+
+table.msg_table .error {
+    font-weight: bold;
+}
+
+table.msg_table .success {
+    color: green;
+}
+
+div.messages table.msg_table td {
+	border: none;
+	margin: 0px;
+	padding-top: 2px;
+	padding-bottom: 1px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
