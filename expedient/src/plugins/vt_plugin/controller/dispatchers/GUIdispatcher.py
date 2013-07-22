@@ -156,7 +156,7 @@ def check_vms_status(request, slice_id):
                         </div>"
                     elif  vm.state == "created (stopped)" :
                         actionsHtmlCode =\
-						"<div>\
+                        "<div>\
                         <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
                         <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
                         </div>"
@@ -187,7 +187,7 @@ def startStopSlice(action,uuid):
     
         #if action_type == 'stop' : action_type = 'hardStop'
         globalRspec = XmlHelper.getSimpleActionSpecificQuery(action, "dummy")
-    	globalRspec.query.provisioning.action.pop()
+        globalRspec.query.provisioning.action.pop()
         for vm in vmsToStart:
             rspec = XmlHelper.getSimpleActionSpecificQuery(action, vm.serverID)
             Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
@@ -197,7 +197,7 @@ def startStopSlice(action,uuid):
     
         for vm in vmsToStart:
             if action == 'start':
-            	vm.state = 'starting...'
+                vm.state = 'starting...'
             elif action == 'stop':
                 vm.state = 'stopping'
             vm.save()
@@ -211,6 +211,87 @@ def update_messages(request):
         request,
         template="vt_plugin_messages_panel.html",
         extra_context=messaging(request),
+    )
+
+###
+# Administration panel to show in Expedient's light administration panel
+#
+
+def remove_vm(request, vm_id):
+    """
+    Communicates with vt_plugin in order to delete a VM, given its ID.
+
+    @param request HTTP request
+    @param int Expedient identifier for VM
+    @raise exception if VM could not be removed
+    @return redirect to administration home
+    """
+    message_center_notification = "VM could not be removed"
+    try:
+        p = subprocess.Popen(["python","%s/vt_plugin/tests/deleteVM.py" % str(settings.PLUGINS_PATH),str(vm_id)], 
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err:
+            message_center_notification = str(err.split("\n")[-2])
+            raise Exception
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Administration info for vt_plugin: VM with id %s removed successfully" % str(vm_id),
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Administration error for vt_plugin: %s" % message_center_notification,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+    return HttpResponseRedirect(reverse("administration_home"))
+
+def remove_all_vms(request):
+    """
+    Communicates with vt_plugin in order to delete all the VMs.
+
+    @param request HTTP request
+    @return redirect to administration home
+    """
+    message_center_notification = "could not delete every VM"
+    try:
+        p = subprocess.Popen(["python","%s/vt_plugin/tests/deleteAllVMs.py" % str(settings.PLUGINS_PATH)], 
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err:
+            message_center_notification = str(err.split("\n")[-2])
+            raise Exception
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Administration info for vt_plugin: all VMs have been successfully deleted",
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Administration error for vt_plugin: %s" % message_center_notification,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+    return HttpResponseRedirect(reverse("administration_home"))
+
+def get_administration_data(request):
+    """
+    Shows the administration panel for the plugin.
+
+    @param request HTTP request
+    @return string template data to shows administration features for this plugin
+    """
+    from vt_plugin.forms.remove_vm import RemoveVM
+
+    if request.method == "POST":
+        form_vm = RemoveVM(request.POST)
+        if form_vm.is_valid():
+            vm_id = form_vm.cleaned_data["vm_id"]
+            return HttpResponseRedirect(reverse("remove_vm", args=[vm_id]))
+    else:
+        form_vm = RemoveVM()
+
+    return simple.direct_to_template(
+        request,
+        template="vt_plugin_administration.html",
+        extra_context={
+            "form_stalled_vms": form_vm,
+        },
     )
 
 ###
