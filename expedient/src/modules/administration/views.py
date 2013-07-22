@@ -8,14 +8,14 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.views.generic import simple
-from common.permissions.shortcuts import has_permission, must_have_permission
+#from common.permissions.shortcuts import has_permission, must_have_permission
 from common.utils.plugins.pluginloader import PluginLoader
 import re
 import subprocess
 #import logging
 #logger = logging.getLogger("Administration")
 
-TEMPLATE_PATH = "templates"
+TEMPLATE_PATH = "administration"#"templates/default"
 # Indicates the Nth last lines to be read from any log.
 # Same as 'tail -LOG_N_LAST_LINES <log_file>'
 LOG_N_LAST_LINES = 250
@@ -29,7 +29,7 @@ def home(request):
 	@param request HTTP request
 	@return string template for administration panel
 	"""
-	must_have_permission(request.user, User, "can_manage_users")
+	#must_have_permission(request.user, User, "can_manage_users")
 
 	# Iterate over each plugin to get its administration data
 	plugin_administration_methods = []
@@ -80,7 +80,7 @@ def view_log(request, module_name):
 	@param string name of module
 	@return string log contents for a given module
 	"""
-	must_have_permission(request.user, User, "can_manage_users")
+	#must_have_permission(request.user, User, "can_manage_users")
 
 	log_content = ""
 	found_group = ""
@@ -113,7 +113,7 @@ def remove_log(request, module_name, option):
 	@param string name of module
 	@return redirection back to the administration home
 	"""
-	must_have_permission(request.user, User, "can_manage_users")
+	#must_have_permission(request.user, User, "can_manage_users")
 
 	module_log_path = get_module_log_path(module_name)
 	try:

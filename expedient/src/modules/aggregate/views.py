@@ -11,9 +11,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from common.messaging.models import DatedMessage
 import logging
-from common.permissions.decorators import require_objs_permissions_for_view
-from common.permissions.utils import get_user_from_req, get_queryset,\
-    get_queryset_from_class, get_leaf_queryset, get_object_from_ids
+#from common.permissions.decorators import require_objs_permissions_for_view
+#from common.permissions.utils import get_user_from_req, get_queryset,\
+#    get_queryset_from_class, get_leaf_queryset, get_object_from_ids
 from django.contrib.auth.models import User
 from modules.project.models import Project
 from modules.slice.models import Slice
@@ -21,13 +21,13 @@ import traceback
 
 logger = logging.getLogger("AggregateViews")
 
-TEMPLATE_PATH = "expedient/clearinghouse/aggregate"
+TEMPLATE_PATH = "aggregate/"
 
-@require_objs_permissions_for_view(
-	perm_names=["can_add_aggregate"],
-	permittee_func=get_user_from_req,
-	target_func=get_queryset_from_class(Aggregate),
-	methods=["POST"])
+#@require_objs_permissions_for_view(
+#	perm_names=["can_add_aggregate"],
+#	permittee_func=get_user_from_req,
+#	target_func=get_queryset_from_class(Aggregate),
+#	methods=["POST"])
 def list(request, agg_id=None):
 	'''
 	Get a list of aggregates. agg_id specifies id to highlight. On POST,
@@ -57,12 +57,11 @@ def list(request, agg_id=None):
 			'highlight_id': agg_id,
 		},
 	)
-
-@require_objs_permissions_for_view(
-	perm_names=["can_edit_aggregate"],
-	permittee_func=get_user_from_req,
-	target_func=get_leaf_queryset(Aggregate, "agg_id"),
-	methods=["GET", "POST"])
+#@require_objs_permissions_for_view(
+#	perm_names=["can_edit_aggregate"],
+#	permittee_func=get_user_from_req,
+#	target_func=get_leaf_queryset(Aggregate, "agg_id"),
+#	methods=["GET", "POST"])
 def delete(request, agg_id):
 	"""
 	Display a confirmation page then stop all slices and delete the aggregate.

@@ -22,7 +22,7 @@ import uuid
 from modules.slice.utils import parseFVexception
 from modules.urls import PLUGIN_LOADER, TOPOLOGY_GENERATOR
 
-TEMPLATE_PATH = "expedient/clearinghouse/slice"
+TEMPLATE_PATH = "slice"
 
 def create(request, proj_id):
     '''Create a slice'''

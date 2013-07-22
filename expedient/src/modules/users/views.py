@@ -53,7 +53,7 @@ def home(request):
         
     return simple.direct_to_template(
         request,
-        template='expedient/clearinghouse/users/home.html',
+        template= 'users/home.html', #'expedient/clearinghouse/users/home.html',
         extra_context={
             'user_list': user_list,
             'pwd_form': pwd_form,
@@ -115,7 +115,7 @@ def detail(request, user_id=None):
     
     return simple.direct_to_template(
         request,
-        template='expedient/clearinghouse/users/detail.html',
+        template='users/detail.html',#'expedient/clearinghouse/users/detail.html',
         extra_context={
             'curr_user': user,
             'slices': slice_set,
@@ -135,7 +135,7 @@ def saved(request, user_id):
     print user.id
     return simple.direct_to_template(
         request,
-        template='expedient/clearinghouse/users/saved.html',
+        template='users/detail.html',#'expedient/clearinghouse/users/saved.html',
         extra_context={
             'curr_user': user,
         },
@@ -149,7 +149,7 @@ def delete(request, user_id):
         auth.models.User,
         reverse("users_home"),
         user_id,
-        template_name="expedient/clearinghouse/users/confirm_delete.html",
+        template_name='users/detail.html',#"expedient/clearinghouse/users/confirm_delete.html",
     )
 
 def register(request):

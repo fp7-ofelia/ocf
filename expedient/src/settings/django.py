@@ -144,13 +144,16 @@ append_to_local_setting(
 ROOT_URLCONF = 'modules.urls'
 
 
-
 TEMPLATE_DIRS = [
     os.path.join(SRC_DIR, 'templates/default/'),
-#    os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
-#    os.path.join(SRC_DIR, 'templates/default/expedient/common'),
-    os.path.join(SRC_DIR, 'templates/default/common'),
-##    os.path.join(SRC_DIR, 'python/vt_plugin/views/templates/default'),
+    #os.path.join(SRC_DIR, 'modules/'),
+    #os.path.join(SRC_DIR, 'modules/aggregate/templates/default/'),
+    #os.path.join(SRC_DIR, 'modules/project/templates/default'),
+
+    #os.path.join(SRC_DIR, 'templates/default/expedient/clearinghouse'),
+    #os.path.join(SRC_DIR, 'templates/default/expedient/common'),
+    #os.path.join(SRC_DIR, 'templates/common'),
+    #os.path.join(SRC_DIR, 'python/vt_plugin/views/templates/default'),
 ]
 append_to_local_setting(
     "TEMPLATE_DIRS", TEMPLATE_DIRS, globals(),

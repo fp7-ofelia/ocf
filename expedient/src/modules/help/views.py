@@ -16,7 +16,7 @@ def home(request):
 	"""
 	return direct_to_template(
 		request,
-		template="templates/index.html",
+		template="help/index.html",#"templates/index.html",
 		extra_context = {
 		"messages": "",
 			"breadcrumbs": (

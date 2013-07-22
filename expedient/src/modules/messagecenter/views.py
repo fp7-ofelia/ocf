@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 def home(request):
 	return direct_to_template(
         	request,
-	        template='expedient/clearinghouse/messagecenter/index.html',
+	        template= 'messagecenter/index.html',#'expedient/clearinghouse/messagecenter/index.html',
         	extra_context={
 		    "messages": "",
 	            "breadcrumbs": (

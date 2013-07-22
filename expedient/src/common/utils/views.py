@@ -5,9 +5,10 @@ Created on Jun 18, 2010
 '''
 from django.shortcuts import get_object_or_404
 from django.views.generic.create_update import get_model_and_form_class
-from django.views.generic import simple
+from django.views.generic import simple, list_detail
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from common.messaging.models import DatedMessage
+from common.utils.ExpedientThemeManager import ExpedientThemeManager
 
 def generic_crud(request, obj_id, model, template, redirect,
                  extra_context={}, form_class=None, extra_form_params={},
@@ -77,3 +78,13 @@ def generic_crud(request, obj_id, model, template, redirect,
         extra_context=context,
         form=form,
     )
+
+def direct_to_template_wrapper(request, template, extra_context={}, form=None):
+     wrapped_template = ExpedientThemeManager.get_theme_template(template)
+     return simple.direct_to_template(request, template=wrapped_template, extra_context=extra_context, form=form)
+
+def list_detail_wrapper(request, queryset,template_name, template_object_name, extra_context={}, form=None):
+     print '------------------------------------------------------------------------------OKEY'
+     wrapped_template = ExpedientThemeManager.get_theme_template(template_name)
+     print '_______________------------------------_________________-------------------CHECK ME:',wrapped_template
+     return list_detail.object_list(request=request,queryset=queryset, template_name=wrapped_template,template_object_name=template_object_name, extra_context=extra_context)
