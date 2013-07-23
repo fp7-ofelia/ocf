@@ -35,7 +35,7 @@
 
           <tr>
             <td class="label">
-              Status: {{ agg.available }}
+              Status:
             </td>
             <td>
               {% if not agg.available %}
@@ -88,7 +88,7 @@
         Remove from slice:
       </td>
       <td>
-        <form name="slice_remove_agg_{{ slice.id }}_1" method="POST" action="{% url slice_remove_agg slice.id 1 %}" onsubmit="javascript: return confirm('Are you sure you want to remove AM \'{{ agg.name }}\' from slice \'{{ slice.name }}\'?');">{% csrf_token %}
+        <form name="slice_remove_agg_{{ slice.id }}_{{ agg.id }}" method="POST" action="{% url slice_remove_agg slice.id agg.id %}" onsubmit="javascript: return confirm('Are you sure you want to remove AM \'{{ agg.name }}\' from slice \'{{ slice.name }}\'?');">{% csrf_token %}
             <input type="submit" value="Remove AM" />
         </form>
       </td>

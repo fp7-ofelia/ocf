@@ -1,3 +1,12 @@
+"""
+Controller for the SampleResource aggregate.
+Performs aggregate CRUD operations and the
+synchronization with the resources it contains.
+
+@date: Jun 12, 2013
+@author: CarolinaFernandez
+"""
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -43,10 +52,11 @@ def aggregate_crud(request, agg_id=None):
             data=request.POST, instance=aggregate)
         client_form = xmlrpcServerProxyForm(
             data=request.POST, instance=client)
+
         if client_form.is_valid() and agg_form.is_valid():
             # Ping is tried after every field check
             client = client_form.save(commit=False)
-            s = xmlrpclib.Server("https://" + client.url[8:])
+            s = xmlrpclib.Server('https://'+client.username+':'+client.password+'@'+client.url[8:])
             try:
                 s.ping('ping')
             except:
@@ -62,7 +72,9 @@ def aggregate_crud(request, agg_id=None):
                 aggregate.client = client
                 aggregate.save()
                 agg_form.save_m2m()
-
+                aggregate.save()
+                # Update agg_id to sync its resources
+                agg_id = aggregate.pk
                 # Get resources from SampleResource AM's xmlrpc server every time the AM is updated
                 try:
                     do_sync = True
@@ -86,7 +98,6 @@ def aggregate_crud(request, agg_id=None):
                     )
                     extra_context_dict['errors'] = warning
 
-                aggregate.save()
                 give_permission_to(
                    "can_use_aggregate",
                    aggregate,
@@ -106,6 +117,7 @@ def aggregate_crud(request, agg_id=None):
                 return HttpResponseRedirect("/")
     else:
         return HttpResponseNotAllowed("GET", "POST")
+
 
     if not errors:
         extra_context_dict['available'] = aggregate.check_status() if agg_id else False
@@ -144,51 +156,52 @@ def sync_am_resources(agg_id, xmlrpc_server):
     context = etree.iterparse(BytesIO(resources))
     delete_resources(agg_id)
     aggregate = SampleResourceAggregateModel.objects.get(id = agg_id)
-    for slice in aggregate.slice_set:
-        # File (nodes)
-        for action, elem in context:
-            node_name = ""
-            instance = am_resource()
-            children_context = elem.iterchildren()
-            # Node (tags)
-            for elem in children_context:
-                if "connection" not in elem.tag:
-                    setattr(instance, elem.tag, elem.text)
-                    if elem.tag == "name":
-                        node_name = elem.text
-                elif elem.tag == "connections":
-                    connections[node_name] = []
-                    connections_context = elem.iterchildren()
-                    for connection in connections_context:
-                        connections[node_name].append(connection.text)
-            try:
-                if instance:
-                    SampleResourceController.create(instance, slice, agg_id)
-            except:
-                try:
-                    failed_resources.append(instance.name)
-                except:
-                    pass
-
-        # Connections between SampleResources are computed later, when all nodes have been created 
+#    for slice in aggregate.slice_set:
+    # File (nodes)
+    for action, elem in context:
+        node_name = ""
+        instance = am_resource()
+        children_context = elem.iterchildren()
+        # Node (tags)
+        for elem in children_context:
+            if "connection" not in elem.tag:
+                setattr(instance, elem.tag, elem.text)
+                if elem.tag == "name":
+                    node_name = elem.text
+            elif elem.tag == "connections":
+                connections[node_name] = []
+                connections_context = elem.iterchildren()
+                for connection in connections_context:
+                    connections[node_name].append(connection.text)
         try:
-            for node, node_connections in connections.iteritems():
-                connections_aux = []
-                for connection in node_connections:
-                    try:
-                        # Linked to another SampleResources
-                        res = SampleResourceModel.objects.get(name = connection)
-                        if res:
-                            connections_aux.append(res)
-                    except:
-                       pass
-                connections[node] = connections_aux
-                # Setting connections on resource with name as in 'node' var
-                node_resource = SampleResourceModel.objects.get(name = node)
-                node_resource.set_connections(connections[node])
-                node_resource.save()
+            if instance:
+#                SampleResourceController.create(instance, agg_id, slice)
+                SampleResourceController.create(instance, agg_id)
         except:
-            pass
+            try:
+                failed_resources.append(instance.name)
+            except:
+                pass
+
+    # Connections between SampleResources are computed later, when all nodes have been created 
+    try:
+        for node, node_connections in connections.iteritems():
+            connections_aux = []
+            for connection in node_connections:
+                try:
+                    # Linked to another SampleResources
+                    res = SampleResourceModel.objects.get(name = connection)
+                    if res:
+                        connections_aux.append(res)
+                except:
+                   pass
+            connections[node] = connections_aux
+            # Setting connections on resource with name as in 'node' var
+            node_resource = SampleResourceModel.objects.get(name = node)
+            node_resource.set_connections(connections[node])
+            node_resource.save()
+    except:
+        pass
 
     return failed_resources
 
