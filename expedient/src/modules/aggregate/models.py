@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from common.extendable.models import Extendable
+from common.api.clearinghouse import Clearinghouse
 #from common.permissions.shortcuts import \
 #    give_permission_to, delete_permission, must_have_permission, has_permission,\
 #    get_permittee_from_threadlocals
@@ -90,28 +91,35 @@ No information available.
     def __unicode__(self):
         return u'Aggregate %s' % self.name
     
-    #def _get_managers(self):
-    #    """Gets the list of users who have the "can_edit_aggregate" permission
-    #    for this aggregate as a C{QuerySet} of C{User} objects.
-    #    """
+    def _get_managers(self):
+        """Gets the list of users who have the "can_edit_aggregate" permission
+        for this aggregate as a C{QuerySet} of C{User} objects.
+        """
+        #XXX: this info is not relevant, basically we are asking who are the IMs
+        return Clearinghouse.get_island_managers()
     #    return Permittee.objects.filter_for_class_and_permission_name(
     #        klass=User,
     #        permission="can_edit_aggregate",
     #        target_obj_or_class=self,
     #    )
-    #managers = property(_get_managers)
+    managers = property(_get_managers)
     
-    #def _get_slice_set(self):
-    #    """Gets the list of slices allowed to use the aggregate"""
+    def _get_slice_set(self):
+        """Gets the list of slices allowed to use the aggregate"""
+        #XXX: This is not a permission this is a policy. This only has sense when "private"/"premium" AMs appear.
+        #FIXME: For now is bypassed to all slices. By the way, what credentials should we use for that?
+        return Clearinghouse().get_slices(self)
     #    from modules.slice.models import Slice
     #    return Permittee.objects.filter_for_class_and_permission_name(
     #        klass=Slice,
     #        permission="can_use_aggregate",
     #        target_obj_or_class=self,
     #    )
-    #slice_set = property(_get_slice_set)
-        
-        
+    slice_set = property(_get_slice_set)
+    @staticmethod    
+    def get_aggregates():
+        return Aggregate.objects.all()
+    
     def check_status(self):
         """Checks whether the aggregate is available or not.
         
@@ -202,7 +210,10 @@ No information available.
         """
         
         logger.debug("adding aggregate to project")
-        
+
+        #XXX: My understanding here again is that only Principal Investigators are able to place AMs in projects(Sub-authorities)
+        #XXX: We must be careful here, we have to take into account the AMs selected in sub-authorities in order to not make broadcasted calls to federated AMs.
+        #:XXX The view must handle the permissions, since there we can get the user requesting that information         
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         
         prefix = self.__class__.get_url_name_prefix()
@@ -229,6 +240,10 @@ No information available.
         this function stops all slices in the project before removing the
         aggregate. Subclasses should also stop slices.
         """
+
+        #XXX: My understanding here again is that only Principal Investigators are able to place AMs in projects(Sub-authorities)
+        #XXX: We must be careful here, we have to take into account the AMs selected in sub-authorities in order to not make broadcasted calls to federated AMs. This list must be updated.
+        #XXX: The view must handle the permissions, since there we can get the user requesting that information         
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         
         prefix = self.__class__.get_url_name_prefix()
@@ -252,6 +267,8 @@ No information available.
         """
         Works exactly the same as L{add_to_project} but for a slice.
         """
+        #XXX: We need PIs here.
+
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
         
@@ -268,6 +285,8 @@ No information available.
         """
         Works exactly the same as L{add_to_project} but for a slice.
         """
+         #XXX: We need PIs also
+
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
 
@@ -287,6 +306,7 @@ No information available.
         It stops the slice if not overridden. Subclasses should stop the
         slice before removing the permission.
         """
+        #XXX: Again, PIs
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
 
@@ -307,6 +327,7 @@ No information available.
         """
         Works exactly the same as L{add_to_project} but for a user.
         """
+        #XXX: What are the reasons to add AMs to users?
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_user_add" % prefix,
@@ -321,6 +342,7 @@ No information available.
         Works exactly the same as L{remove_from_project} but for a user.
         Does not stop any slices.
         """
+        #XXX: What are the reasons to delete AMs from users
         prefix = self.__class__.get_url_name_prefix()
         try:
             return reverse("%s_aggregate_user_remove" % prefix,
@@ -336,6 +358,7 @@ No information available.
         Subclasses overriding this method should call the parent class
         to ensure permission checks.
         """
+        #XXX: We need to use credentials provided by the CH.
         #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
         #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
         #must_have_permission("slice", self.as_leaf_class(), "can_use_aggregate")
@@ -347,6 +370,7 @@ No information available.
         Subclasses overriding this method should call the parent class
         to ensure permission checks.
         """
+        #XXX: We need credentials, these methods should be deprecated since they only manage the permissions, not credentials
         #user = get_permittee_from_threadlocals("user")
         can_use = True#has_permission(
             #user, self.as_leaf_class(), "can_use_aggregate")

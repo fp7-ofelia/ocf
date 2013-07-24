@@ -11,13 +11,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from common.messaging.models import DatedMessage
 import logging
-#from common.permissions.decorators import require_objs_permissions_for_view
+from common.permissions.decorators import require_objs_permissions_for_view
 #from common.permissions.utils import get_user_from_req, get_queryset,\
 #    get_queryset_from_class, get_leaf_queryset, get_object_from_ids
+from common.permissions.utils import get_queryset_from_class, get_user_from_req
 from django.contrib.auth.models import User
 from modules.project.models import Project
 from modules.slice.models import Slice
+from common.api.clearinghouse import Clearinghouse
 import traceback
+
 
 logger = logging.getLogger("AggregateViews")
 
@@ -34,17 +37,21 @@ def list(request, agg_id=None):
 	get the type of aggregate to be created and redirect to that model's
 	create url.
 	'''
-	
+	#XXX: Even if everyone has permission to list the aggregates, maybe a good idea to check the permissions here.
+        #FIXME: Get username from request
+        Clearinghouse().check_role(request.POST.get('user'),'admin')
+        	
 	qs = Aggregate.objects.all().order_by('name')
 	
 	if request.method == "GET":
 		form = AggregateTypeForm()
-	elif request.method == "POST":
+        elif request.method == "POST": 
 		form = AggregateTypeForm(request.POST)
 		if form.is_valid():
 			model = form.cleaned_data["type"].model_class()
 			return HttpResponseRedirect(model.get_create_url())
 	else:
+                #get_queryset_from_class(Aggregate) 
 		return HttpResponseNotAllowed("GET", "POST")
 	
 	return list_detail.object_list(
@@ -66,6 +73,10 @@ def delete(request, agg_id):
 	"""
 	Display a confirmation page then stop all slices and delete the aggregate.
 	"""
+        #XXX: I understand that only admins are allowed to delete AMs
+        #FIXME: get user
+        Clearinghouse().check_role(request.POST.get('user'),'admin')
+        
 	next = request.GET.get("next", None) or reverse("home")
 	aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
 	# Stop all slices using the aggregate
@@ -110,30 +121,33 @@ def get_can_use_permission(request, permission, permittee,
 	For project, slice, or user permittees, call the corresponding
 	add_to_* method of the target aggregate.
 	"""
-	assert(isinstance(target_obj_or_class, Aggregate))
-	assert(
-		isinstance(permittee, User) or
-		isinstance(permittee, Project) or
-		isinstance(permittee, Slice)
-	)
-	assert(permission.name == "can_use_aggregate")
+        #:XXX Deprecated
+        pass
 
-	aggregate = target_obj_or_class
-	
-	try:
-		next = request.session["breadcrumbs"][-1][1]
-	except IndexError:
-		next = redirect_to or reverse("home")
-	
-	if isinstance(permittee, Project):
-		return HttpResponseRedirect(
-			aggregate.as_leaf_class().add_to_project(permittee, next))
-	elif isinstance(permittee, Slice):
-		return HttpResponseRedirect(
-			aggregate.as_leaf_class().add_to_slice(permittee, next))
-	else: # isinstance(permittee, User)
-		return HttpResponseRedirect(
-			aggregate.as_leaf_class().add_to_user(permittee, next))
+#	assert(isinstance(target_obj_or_class, Aggregate))
+#	assert(
+#		isinstance(permittee, User) or
+#		isinstance(permittee, Project) or
+#		isinstance(permittee, Slice)
+#	)
+#	assert(permission.name == "can_use_aggregate")
+#
+#	aggregate = target_obj_or_class
+#	
+#	try:
+#		next = request.session["breadcrumbs"][-1][1]
+#	except IndexError:
+#		next = redirect_to or reverse("home")
+#	
+#	if isinstance(permittee, Project):
+#		return HttpResponseRedirect(
+#			aggregate.as_leaf_class().add_to_project(permittee, next))
+#	elif isinstance(permittee, Slice):
+#		return HttpResponseRedirect(
+#			aggregate.as_leaf_class().add_to_slice(permittee, next))
+#	else: # isinstance(permittee, User)
+#		return HttpResponseRedirect(
+#			aggregate.as_leaf_class().add_to_user(permittee, next))
 
 def status_img_url(request, agg_id):
 	"""Get the url for the status image of the aggregate"""
