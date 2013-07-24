@@ -1,0 +1,301 @@
+Folder /opt/ofelia/expedient/src/geni_legacy/sfa/trust/
+========================================================
+
++ certificate.py
+  - Dependencies: ./src/geni_legacy/geni/util/cert_util.py, ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/sfa/trust/gid.py, ./src/geni_legacy/sfa/trust/credential_legacy.py, ./src/geni_legacy/expedient_geni/forms.py, ./src/geni_legacy/expedient_geni/utils.py.
+  - Internal work: Generate, load, verify credentials and keypars.
+
++ credential_legacy.py
+  - Dependencies: ./src/geni_legacy/sfa/trust/credential.py.
+  - Internal work: Implements SFA Credentials. Credentials are layered on top of certificates, and are essentially a certificate that stores a tuple of parameters.
+
++ credential.py
+  - Dependencies: ./src/plugins/openflow/tests/gapi/gapi.py, ./src/plugins/openflow/tests/post_deployment/tests.py, ./src/plugins/openflow/tests/full/fulltests.py, ./src/geni_legacy/geni/util/cred_util.py, ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/expedient_geni/utils.py.
+  - Internal work: Implements SFA Credentials. Credentials are signed XML files that assign a subject gid privileges to an object gid.
+
++ gid.py
+  - Dependencies: ./src/geni_legacy/geni/ch.py, ./src/geni_legacy/geni/util/cert_util.py, ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/sfa/trust/credential_legacy.py, ./src/geni_legacy/expedient_geni/forms.py, ./src/geni_legacy/expedient_geni/models.py, ./src/geni_legacy/expedient_geni/utils.py, ./src/geni_legacy/expedient_geni/backends.py, ./src/geni_legacy/expedient_geni/management.py.
+  - Internal work: Implements SFA GID. GIDs are based on certificates, and the GID class is a descendant of the certificate class.
+
++ rights.py
+  - Dependencies: ./src/geni_legacy/geni/util/cred_util.py, ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/sfa/trust/credential_legacy.py.
+  - Internal work: This Module implements rights and lists of rights for the SFA. Rights are implemented by two classes: Right - represents a single right. RightList - represents a list of rights. A right may allow several different operations. For example, the "info" right allows "listslices", "listcomponentresources", etc.
+
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/sfa/util/
+========================================================
+
++ faults.py
+  - Dependencies: ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/sfa/trust/credential_legacy.py, ./src/geni_legacy/sfa/trust/certificate.py, ./src/geni_legacy/sfa/util/namespace.py.
+  - Internal work: SFA API faults.
+
++ namespace.py
+  - Dependencies: ./src/geni_legacy/geni/util/urn_util.py, ./src/geni_legacy/sfa/trust/gid.py, ./src/geni_legacy/sfa/trust/certificate.py.
+  - Internal work: Sfa namespaces utilies, hrn_to_urn, urn_to_hrn, get_leaf, get_authority, ...
+
++ sfalogging.py
+  - Dependencies: ./src/geni_legacy/sfa/trust/credential.py, ./src/geni_legacy/sfa/trust/gid.py, ./src/geni_legacy/sfa/trust/credential_legacy.py, ./src/geni_legacy/sfa/trust/certificate.py. 
+  - Internal work: Logging for sfa.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/geni/
+===================================================
+
++ am.py
+  - Dependencies: No dependencies.
+  - Internal work: The GPO Reference Aggregate Manager, showing how to implement the GENI AM API. This AggregateManager has only fake resources. Invoked from gcf-am.py. The GENI AM API is defined in the AggregateManager class.
+
++ ca.py
+  - Dependencies: No dependencies.
+  - Internal work: Sample code showing how to use openssl libraries to generate certificates. Obsolete and unused, but useful reference code.
+
++ ch.py
+  - Dependencies: No dependencies.
+  - Internal work: Reference GENI GCF Clearinghouse. Uses SFA Certificate and credential objects. Run from gcf-ch.py. Will produce signed user credentials from a GID, return a list of aggregates read from a config file, and create a new Slice Credential.
+
++ config.py
+  - Dependencies: No dependencies.
+  - Internal work: Read the config file into a dictionary where each section of the config is its own sub-dictionary.
+
++ SecureXMLRPCServer.py
+  - Dependencies: ./src/geni_legacy/geni/ch.py, ./src/geni_legacy/geni/am.py, ./doc/samples/aggregate/sr_manager/src/communications/XmlRpcServer.py.
+  - Internal work: A simple XML RPC server supporting SSL. Based on this article: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/81549.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/geni/util/
+========================================================
+
++ cert_util.py
+  - Dependencies: ./src/geni_legacy/geni/ch.py, ./src/geni_legacy/expedient_geni/utils.py.
+  - Internal work: Certificate (GID in SFA terms) creation and verification utilities.
+
++ cred_util.py
+  - Dependencies: ./src/geni_legacy/geni/ch.py, ./src/geni_legacy/geni/__init__.py, ./src/geni_legacy/expedient_geni/utils.py
+  - Internal work: Credential creation and verification utilities.
+
++ secure_xmlrpc_client.py
+  - Dependencies: ./src/geni_legacy/geni/__init__.py.
+  - Internal work: Sample client for talking XMLRPC over SSL supplying a client X509 identity certificate.
+
++ urn_util.py
+  - Dependencies: ./src/plugins/openflow/plugin/gapi/rspec.py, ./src/plugins/openflow/plugin/tests.py, ./src/geni_legacy/geni/ch.py, ./src/geni_legacy/geni/__init__.py, ./src/geni_legacy/geni/util/cert_util.py, ./src/geni_legacy/expedient_geni/utils.py, ./src/geni_legacy/expedient_geni/gopenflow/tests/models.py, ./src/geni_legacy/expedient_geni/backends.py, ./src/geni_legacy/expedient_geni/clearinghouse.py.
+  - Internal work: URN creation and verification utilities.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/expedient_geni/
+=============================================================
+
++ backends.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/clearinghouse.py, expedient/src/settings/django.py.
+  - Internal work: Gets usernme from certificate string. Extends the RemoteUserBackend to create GENI users. Authenticates users if the magic word "MagicWord" is given as credentials.
+
++ forms.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Factory to create functions that check file size. Form to upload a certificate and its corresponding key.
+
++ middleware.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Middleware to create GIDs for users who login and do not have one.
+
++ permissions.py
+  - Dependencies: No dependencies.
+  - Internal work: Creates user permissions.
+
++ rpc.py
+  - Dependencies: No dependencies.
+  - Internal work: Creates, deletes slices; creates user credentials, lists aggregates, all of it through clearing house.
+
++ urls.py
+  - Dependencies: No dependencies.
+  - Internal work: Defines url patterns.
+
++ clearinghouse.py
+  - Dependencies: expedient/src/plugins/openflow/plugin/tests.py, expedient/src/geni_legacy/expedient_geni/rpc.py.
+  - Internal work: Functionality of the GENI Clearinghouse: manage slices, create user credentials, list aggregates
+
++ management.py
+  - Dependencies: No dependencies.
+  - Internal work: Create the expedient certificate and keys for use in GENI API. Create a slice cred that can be used to list resources. Check to see if the gid cert, keys, and credentials are readable, and create them if not.
+
++ models.py
+  - Dependencies: expedient/src/plugins/openflow/plugin/gapi/gapi.py, expedient/src/plugins/openflow/plugin/tests.py, expedient/src/modules/commands/management/commands/load_openflow_data.py, expedient/src/modules/rspec/views.py, expedient/src/geni_legacy/expedient_geni/gopenflow/models.py, expedient/src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, expedient/src/geni_legacy/expedient_geni/planetlab/models.py, expedient/src/geni_legacy/expedient_geni/planetlab/sfa-models.py.
+  - Internal work: Defines slice container class. Implements a generic GCF-based aggregate manager to simplify adding GCF-based plugins. Sliver and slive management.
+
++ tests.py
+  - Dependencies: No dependencies.
+  - Internal work: Test user login.
+
++ utils.py
+  - Dependencies: expedient/src/plugins/openflow/plugin/tests.py, expedient/src/geni_legacy/expedient_geni/forms.py, expedient/src/geni_legacy/expedient_geni/models.py, expedient/src/geni_legacy/expedient_geni/middleware.py, expedient/src/geni_legacy/expedient_geni/backends.py, expedient/src/geni_legacy/expedient_geni/management.py, expedient/src/geni_legacy/expedient_geni/tests.py, expedient/src/geni_legacy/expedient_geni/views.py, expedient/src/geni_legacy/expedient_geni/clearinghouse.py.
+  - Internal work: General utilities for getting filenames etc of user and slice certificates, credentials, etc.
+
++ views.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/gopenflow/views.py, expedient/src/geni_legacy/expedient_geni/views.py, expedient/src/geni_legacy/expedient_geni/planetlab/urls.py, expedient/src/geni_legacy/expedient_geni/urls.py.
+  - Internal work: Create/edit GENI aggregates, manage user certificates, ssh keys.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/expedient_geni/views/templates/default/
+=====================================================================================
+
++ aggregate_crud.html
+  - Dependencies: No dependencies.
+  - Internal work: Html to show aggregates with possibility to create/update/delete/cancel. 
+
++ sshkeys.html
+  - Dependencies: /expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Html code for interface for download of ssh keys for slices.
+
++ user_cert_generate.html
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Html code for an interface for generating certificate.
+
++ user_cert_manage.html
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Html code for an interface for managing certificates.
+
++ user_cert_upload.html
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Html code for uploading certificates and keys for username.
+
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/expedient_geni/gopenflow/
+=======================================================================
+
++ models.py 
+  - Dependencies: expedient/src/plugins/openflow/plugin/vlans.py, expedient/src/plugins/openflow/plugin/gapi/rspec.py, expedient/src/plugins/openflow/plugin/views.py, expedient/src/modules/commands/management/commands/load_openflow_data.py, expedient/src/geni_legacy/expedient_geni/gopenflow/models.py, expedient/src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, expedient/src/geni_legacy/expedient_geni/gopenflow/urls.py, expedient/src/settings/expedient.py, optin_manager/bin/versions/default/upgrade/tools/prova.
+  - Internal work: Contains models for OpenFlow aggregates available through the GENI API.
+
++ urls.py
+  - Dependencies: No dependencies.
+  - Internal work: Defines url patterns.
+
++ views.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/gopenflow/urls.py, expedient/src/plugins/openflow/plugin/tests.py, expedient/src/plugins/openflow/plugin/urls.py, expedient/src/plugins/openflow/tests/gapi/gapi.py, expedient/src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, expedient/src/geni_legacy/expedient_geni/gopenflow/urls.py.
+  - Internal work: Show views to manage agregates.
+
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/expedient_geni/gopenflow/tests/
+=============================================================================
+
++ __init__.py
+  - Dependencies: No dependencies.
+  - Internal work: Contains tests of the app's functionality.
+
++ models.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/gopenflow/tests/rpc.py, expedient/src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py.
+  - Internal work: Defines dummy aggregate class.
+
++ rpc.py
+  - Dependencies: No dependencies.
+  - Internal work: RPC manage sliver.
+
++ urls.py
+  - Dependencies: No dependencies.
+  - Internal work: Defines url patterns.
+
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/expedient_geni/planetlab/
+=======================================================================
+
++ exceptions.py
+  - Dependencies: expedient/src/geni_legacy/expedient_geni/planetlab/sfa-models.py.
+  - Internal work: Defines RspecParsingException and NameConflictException exceptions.
+
++ models.py
+  - Dependencies: expedient/src/plugins/openflow/plugin/views.py, expedient/src/geni_legacy/expedient_geni/planetlab/sfa-models.py, expedient/src/geni_legacy/expedient_geni/planetlab/urls.py, expedient/src/settings/expedient.py.
+  - Internal work: Defines planetlab sliver, planetlab node, planetlab aggregate and operations on them.
+
++ sfa-models.py
+  - Dependencies: No dependencies.
+  - Internal work: Defines classes PlanetLabSliceInfo, PlanetLabNetwork, PlanetLabNode, PlanetLabInterface, PlanetLabNodeSliver, PlanetLabNetworkSliver, PlanetLabAggregate.
+
++ urls.py
+  - Dependencies: No dependencies.
+  - Internal work: Defines urlpatterns.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/omnilib/omnispec/
+===============================================================
+
++ omnispec.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/rspec_pg.py, expedient/src/geni_legacy/omnilib/omnispec/rspec_gcf.py, expedient/src/geni_legacy/omnilib/omnispec/rspec_of, expedient/src/geni_legacy/omnilib/omnispec/rspec_sfa.py.
+  - Internal work: Defines OmniSpec and OmniResource classes.
+
++ rspec_gcf.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/__init__.py, ./expedient/src/geni_legacy/omnilib/omnispec/translation.py.
+  - Internal work: Converts gcf omnispec to rspec and the other way round.
+
++ rspec_pg.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/__init__.py, expedient/src/geni_legacy/omnilib/omnispec/translation.py.
+  - Internal work: Converts between pg omnispec and rspec, adds nodes and links to root, adds options.
+
++ rspec_of.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/__init__.py, expedient/src/geni_legacy/omnilib/omnispec/translation.py.
+  - Internal work: Converts between OpenFlow omnispec and rspec, adds nodes and links to root, adds options.
+
++ rspec_sfa.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/__init__.py, expedient/src/geni_legacy/omnilib/omnispec/translation.py.
+  - Internal work: Converts between sfa omnispec and rspec, adds nodes and links to root, adds options.
+
++ translation.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/omnispec/__init__.py, expedient/src/geni_legacy/omnilib/omnispec/translation.py.
+  - Internal work: Translate the given RSpec from the given AM URN to an OSpec and return it, or throw an Exception if we cannot, and translates also in the opposite direction through an outside module.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/omnilib/util/
+===========================================================
+
++ namespace.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/frameworks/framework_pg.py.
+  - Internal work: Returns long or short urn's after testing for existence, presence of urn prefix etc.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/omnilib/xmlrpc/
+=============================================================
+
++ client.py
+  - Dependencies: ./expedient/src/geni_legacy/omnilib/frameworks/framework_sfa.py, ./expedient/src/geni_legacy/omnilib/frameworks/framework_of.py, ./expedient/src/geni_legacy/omnilib/frameworks/framework_pg.py, ./expedient/src/geni_legacy/omnilib/frameworks/framework_gcf.py.
+  - Internal work: Defines class SafeTransportWithCert.
+
+
+
+Folder /opt/ofelia/expedient/src/geni_legacy/omnilib/frameworks/
+=================================================================
+
++ framework_base.py
+  - Dependencies: expedient/src/geni_legacy/omnilib/frameworks/framework_sfa.py, expedient/src/geni_legacy/omnilib/frameworks/framework_of.py, expedient/src/geni_legacy/omnilib/frameworks/framework_pg.py, expedient/src/geni_legacy/omnilib/frameworks/framework_gcf.py.
+  - Internal work: Defines class Framework_Base. Framework_Base is an abstract class that identifies the minimal set of functions that must be implemented in order to add a control framework to omni.
+
++ framework_gcf.py
+  - Dependencies: No dependencies.
+  - Internal work: Define framework class for gcf and operations to perform on it.
+
++ framework_of.py 
+  - Dependencies: No dependencies.
+  - Internal work: Define framework class for of and operations to perform on it.
+
++ framework_pg.py
+  - Dependencies: No dependencies.
+  - Internal work: Define framework class for pg and operations to perform on it.
+
++ framework_sfa.py
+  - Dependencies: No dependencies.
+  - Internal work: Define framework class for sfa and operations to perform on it.
+
+
+

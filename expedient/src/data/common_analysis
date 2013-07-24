@@ -1,3 +1,12 @@
+Folder /opt/ofelia/expedient/src/common/
+=========================================
+
++ logginconf.py
+  - Dependencies: ./src/settings/__init__.py, ./src/plugins/openflow/tests/test_settings.py, ./src/plugins/openflow/tests/post_deployment/tests.py.
+  - Internal work: Setup logging for the system.
+
+
+
 Folder /opt/ofelia/expedient/src/common/extendable/
 ===================================================
 
@@ -16,16 +25,11 @@ Folder /opt/ofelia/expedient/src/common/extendable/
 + views.py
   - Empty file.
 
-
-
-Folder /opt/ofelia/expedient/src/common/extendable/tests/
-=========================================================
-
-+ models.py
++ tests/models.py
   - Depedencies: ./expedient/src/common/extendable/tests/tests.py.
   - Internal work: Just some functions for testing /opt/ofelia/expedient/src/common/extendable/models.py.
 
-+ tests.py
++ tests/tests.py
   - Dependencies: No dependencies.
   - Internal work: Just some tests.
 
@@ -156,7 +160,35 @@ Folder /opt/ofelia/expedient/src/common/middleware/
 Folder /opt/ofelia/expedient/src/common/messaging/
 ===================================================
 
-- Copy here Tanya's file
++ admin.py
+  - Dependencies: No dependencies.
+  - Internal work: Calls register function of admin module using argument from models module.
+
++ context_processors.py
+  - Dependencies: ./expedient/src/plugins/vt_plugin/controller/dispatchers/GUIdispatcher.py.
+  - Internal work: Defines function messaging in which if user is authenticated, returns all the messages for user ordered by datetime, retrieved from DateMessage structure from imported models module. If user is not authenticated, returns empty structure.
+
++ forms.py
+  - Dependencies: expedient/src/common/messaging/views.py.
+  - Internal work: In class MessageForm instantiates a message form using django forms . Defines  messageForm structure with msg_text textarea field and users container structure. Also defines metadata class to describe the mentioned class within the class itself. Defines another class, MessageFormNoIM, and sets its type field appropriately.
+
++ models.py
+  - Dependencies: ./expedient/src/samples/plugin/sample_resource/controller/aggregate.py, ./expedient/src/samples/plugin/sample_resource/controller/GUIdispatcher.py, ./expedient/src/plugins/openflow/plugin/views.py, ./expedient/src/plugins/openflow/plugin/views.py, ./expedient/src/common/messaging/views.py, ./expedient/src/common/messaging/context_processors.py, ./src/modules/utils.py, ./src/modules/slice/models.py, ./src/modules/slice/views.py, ./doc/developer/sshaggregate/views.py, ./src/common/utils/views.py, ./src/common/messaging/forms.py.
+  - Internal work: Manager of the messages (create/delete messages, send and get them).
+  
++ tests.py 
+  - Dependencies: No dependencies.
+  - Internal work: Defines a simple arithmetic equality test.
+
++ urls.py 
+  - Dependencies: Refered in ./doc/developer/tutorial.rst.
+  - Internal work: Defines url patterns.
+
++ views.py
+  - Dependencies: src/common/messaging/urls.py.
+  - Internal work: messages utils (create/send/list messages).
+
+
 
 
 Folder /opt/ofelia/expedient/src/common/timer/
@@ -181,12 +213,158 @@ Folder /opt/ofelia/expedient/src/common/timer/
 + models_or
   - Seems to be the original models.py python code.
 
-
-
-Folder /opt/ofelia/expedient/src/common/timer/management/command/
-==================================================================
-
-+ run_timer_jobs.py
-  - Dependencies: ./expedient/src/modules/slice/tests.py, ./expedient/src/common/timer/tests.py and referenced in ./expedient/doc/admin/install.rst
++ management/command/run_timer_jobs.py
+  - Dependencies: ./expedient/src/modules/slice/tests.py, ./expedient/src/common/timer/tests.py and referenced in ./expedient/doc/admin/install.rst.
   - Internal work: Run the jobs that are scheduled using the common.timer app.
 
+
+
+Folder /opt/ofelia/expedient/src/common/rpc4django/
+===================================================
+
++ jsonrpcdispatcher.py
+  - Dependencies: ./src/common/rpc4django/rpcdispatcher.py, ./src/common/rpc4django/tests/test_jsonrpcdispatcher.py, ./src/common/rpc4django/tests/test_xmlrpcdispatcher.py, ./src/common/rpc4django/tests/test_jsonrpcdispatcher.py, ./src/common/rpc4django/tests/test_jsonrpcdispatcher.py, ./src/common/rpc4django/tests/test_jsonrpcdispatcher.py, ./src/common/rpc4django/tests/test_jsonrpcdispatcher.py.
+  - Internal work: Encode and decode jsonrpc messages, dispatch the requested method with the passed parameters, and return any response or error.
+
++ models.py
+  - This is currently required for python manage.py test rpc4django to run. See: http://code.djangoproject.com/ticket/7198.
+
++ rpcdispatcher.py
+  - Dependencies: ./src/geni_legacy/expedient_geni/rpc.py, ./src/common/rpc4django/views.py, ./src/common/rpc4django/__init__.py, ./src/common/rpc4django/tests/test_rpcdispatcher.py, ./src/common/rpc4django/tests/__init__.py.
+  - Internal work: This module contains the classes necessary to handle both `jsonrpc <http://json-rpc.org/>`_ and `xmlrpc <http://www.xmlrpc.com/>`_ requests. It also contains a decorator to mark methods as rpc methods.
+
++ utils.py
+  - Dependencies: ./src/plugins/openflow/plugin/urls.py, ./src/plugins/openflow/dummyom/urls.py, ./src/plugins/vt_plugin/urls.py, ./src/geni_legacy/expedient_geni/gopenflow/tests/urls.py, ./src/geni_legacy/expedient_geni/planetlab/urls.py, ./src/common/rpc4django/views.py, ./src/common/rpc4django/tests/test_urls.py.
+  - Internal work: Wrapper around C{django.conf.urls.defaults.url} to add the C{name} parameter to C{kwargs} as "url_name", and to automatically assign the C{view}. C{use_name_for_dispatch} controls whether or not to add C{name} to C{kwargs}.
+
++ views.py
+  - Dependencies: ./src/common/rpc4django/utils.py, ./src/common/rpc4django/tests/test_rpcviews.py, ./src/common/rpc4django/tests/test_urls.py, ./src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, ./src/common/rpc4django/tests/test_rpcviews.py.
+  - Internal work: This module contains the method serve_rpc_request which is intended to be called from the urls.py module of a `django <http://www.djangoproject.com/>`_ project. It should be called like this from urls.py: rpc_url(r'^RPC2$', name="my_url_name"). Defines restrictions as constants. These restrictions can change the functionality of rpc4django but they are completely optional see the rpc4django documentation for more details. Gets a list of the installed django applications; these will be scanned for @rpcmethod decorators
+
++ xmlrpcdispatcher.py
+  - Dependencies: ./src/common/rpc4django/rpcdispatcher.py, ./src/common/rpc4django/tests/test_xmlrpcdispatcher.py.
+  - Internal work: Encodes and decodes XMLRPC messages, dispatches to the requested method and returns any responses or errors in encoded XML. This class is modified from the built-in python version so that it can also pass the HttpRequest object from the underlying request.
+
++ templates/rpc4django/rpcmethod_summary.html
+  - Dependencies: ./src/common/rpc4django/views.py, ./src/common/rpc4django/tests/test_rpcviews.py.
+  - Internal work: Css styling for rpc method classes sends ajax request from http xml object and shows alert with the response html table of rpc methods with links to method and to its help page.
+
++ templatetags/rpctags.py
+  - Dependencies: ./src/common/rpc4django/templates/rpc4django/rpcmethod_summary.html.
+  - Internal work: Creates a template tag that can handle restructured text.
+
++ tests/test_jsonrpcdispatcher.py
+  - Dependencies: No dependencies.
+  - Internal work: Contains functions to perform: add, factorial, unicode_ret (return unicode of value), kwargstest (test kwargs exist), test_kwargs(self), test_unicode, test_dipatch_success, test_method_error, test_dispatch_paramserror, test_dispatch_nomethod, test_dispatch_badrequest.
+
++ tests/test_rpcdispatcher.py
+  - Dependencies: No dependencies.
+  - Internal work: Test the rpcdispatcher functionalities.
+
++ tests/test_rpcviews.py
+  - Dependencies: No dependencies.
+  - Internal work: Test the rpcviews functionalities.
+
++ tests/test_xmlrpcdispatcher.py
+  - Dependencies: No dependencies.
+  - Internal work: Test the xmlrpcdispatcher functionalities.
+
++ tests/testmod/models.py
+  - Empty file.
+
++ tests/testmod/testsubmod/
+  - Empty folder.
+
+
+
+Folder /opt/ofelia/expedient/src/common/permissions/
+====================================================
+
++ admin.py
+  - Dependencies: No dependencies.
+  - Internal work: Register some permission models in django.
+
++ backend.py
+  - Dependencies: No dependencies.
+  - Internal work: Django backend for object permissions. 
+
++ management.py
+  - Dependencies: No dependencies.
+  - Internal work: Look for permissions.run in each app and call it. This function will wait till the last installed app, and then search for all permissions modules, and try to call a C{run} function in them if found.
+
++ decorators.py
+  - Dependencies: ./src/plugins/openflow/plugin/views.py, ./src/modules/project/views.py, ./src/modules/aggregate/models.py, ./src/modules/aggregate/views.py, ./src/common/permissions/tests/views.py.
+  - Internal work: Some permission decorators.
+
++ exceptions.py
+  - Dependencies: /src/modules/roles/tests.py, ./src/modules/aggregate/models.py, ./src/modules/aggregate/tests/tests.py, ./src/common/permissions/models.py, ./src/common/permissions/views.py, ./src/common/permissions/shortcuts.py, ./src/common/permissions/managers.py, ./src/common/permissions/shortcuts.py, ./src/common/permissions/middleware.py.
+  - Internal work: Permission exceptions.
+
++ forms.py
+  - Dependencies: ./src/common/permissions/views.py.
+  - Internal work: Forms used in project creation and request permissions from another user.
+
++ managers.py
+  - Dependencies: ./src/common/permissions/models.py.
+  - Internal work: An expedient expedient permissions manager. Implements methods for checking for missing permissions.
+
++ middleware.py
+  - Dependencies: ./src/common/permissions/shortcuts.py, ./src/settings/django.py.
+  - Internal work: Middleware to catch PermissionDenied exceptions thrown by the L{common.permissions} app and redirects to the permission URL if found. Also checks views and URLs for permission exceptions.
+
++ models.py
+  - Dependencies: ./src/modules/slice/models.py, ./src/modules/roles/forms.py, ./src/modules/roles/models.py, ./src/modules/roles/utils.py, ./src/modules/roles/tests.py, ./src/modules/roles/views.py, ./src/modules/project/forms.py, ./src/modules/project/models.py, ./src/modules/project/views.py, ./src/modules/aggregate/models.py, ./src/modules/permissionmgmt/tests.py, ./src/modules/permissionmgmt/views.py, ./src/common/permissions/templatetags/permissions.py, ./src/common/permissions/utils.py, ./src/common/permissions/backend.py, ./src/common/permissions/views.py, ./src/common/permissions/exceptions.py, ./src/common/permissions/shortcuts.py, ./src/common/permissions/managers.py, ./src/common/permissions/tests/tests.py.
+  - Internal work: Django permission models.
+
++ shortcuts.py
+  - Dependencies: ./src/plugins/openflow/plugin/gapi/gapi.py, ./src/plugins/openflow/plugin/tests.py, ./src/plugins/openflow/plugin/views.py, ./src/plugins/vt_plugin/controller/vtAggregateController/vtAggregateController.py, ./src/plugins/vt_plugin/models/VtPlugin.py, ./src/modules/commands/management/commands/load_openflow_data.py, ./src/modules/utils.py, ./src/modules/slice/views.py, ./src/modules/roles/forms.py, ./src/modules/roles/tests.py, ./src/modules/roles/views.py, ./src/modules/users/permissions.py, ./src/modules/users/views.py, ./src/modules/rspec/views.py, ./src/modules/administration/views.py, ./src/modules/project/forms.py, ./src/modules/project/permissions.py, ./src/modules/project/tests.py, ./src/modules/project/views.py, ./src/modules/aggregate/models.py, ./src/modules/aggregate/models.py, ./src/modules/aggregate/permissions.py, ./src/modules/aggregate/tests/tests.py, ./src/modules/permissionmgmt/tests.py, ./src/geni_legacy/expedient_geni/gopenflow/models.py, ./src/geni_legacy/expedient_geni/permissions.py, ./src/geni_legacy/expedient_geni/views.py.
+  - Internal work: Methods for a simple usage of the permissions.
+
++ urls.py
+  - Dependencies: No dependencies.
+  - Internal work: Url patterns for permissions.
+
++ utils.py
+  - Dependencies: ./src/plugins/openflow/plugin/views.py, ./src/modules/project/models.py, ./src/modules/project/views.py, ./src/modules/aggregate/models.py, ./src/modules/aggregate/views.py, ./src/common/permissions/views.py, ./src/common/permissions/tests/views.py.
+  - Internal work: Some usefull functions to get callable functions or override permissions.
+
++ views.py
+  - Dependencies: ./src/modules/permissionmgmt/utils.py, ./src/common/permissions/urls.py
+  - Internal work: Request permissions, redirect permissions and raise permission errors.
+
++ templates/empty.html
+  - Empty file
+
++ templatetags/permissions.py
+  - Dependencies: ./src/common/permissions/tests/tests.py
+  - Internal work: Get object permissions.
+
+
+
+Folder /opt/ofelia/expedient/src/common/ldapproxy/
+===================================================
+
++ models.py
+  - Dependencies: ./src/settings/ldapdata.py, ./src/settings/local-example.
+  - Internal work: Wrapper class to talk to the LDAP MASTER server.
+
+
+
+Folder /opt/ofelia/expedient/src/common/tests/
+===============================================
+
++ client.py
+  - Dependencies: ./src/plugins/openflow/plugin/tests.py, ./src/plugins/openflow/tests/gapi/gapi.py, ./src/plugins/openflow/tests/omctl/helpers.py, ./src/plugins/openflow/tests/full/fulltests.py, ./src/plugins/openflow/tests/om/om.py, ./src/modules/commands/management/commands/load_openflow_data.py, ./src/modules/utils.py, ./src/modules/slice/tests.py, ./src/modules/project/tests.py, ./src/modules/aggregate/tests/tests.py, ./src/modules/permissionmgmt/tests.py, ./src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, ./src/geni_legacy/expedient_geni/tests.py, ./doc/developer/sshaggregate/tests.py, ./doc/developer/tutorial.rst.
+  - Internal work: Contains functions to login and manage forms.
+
++ commands.py
+  - Dependencies: ./src/plugins/openflow/tests/gapi/gapi.py, ./src/plugins/openflow/tests/full/fulltests.py, ./src/plugins/openflow/tests/manual_test/manual.py, ./src/plugins/openflow/tests/om/om.py.
+  - Internal work: Call environment commands and used to switch between different django environments.
+
++ manager.py
+  - Dependencies: ./src/plugins/openflow/plugin/tests.py, ./src/modules/utils.py, ./src/modules/slice/tests.py, ./src/modules/project/tests.py, ./src/modules/aggregate/tests/tests.py, ./src/geni_legacy/expedient_geni/gopenflow/tests/__init__.py, ./src/geni_legacy/expedient_geni/tests.py, ./src/common/rpc4django/tests/test_rpcviews.py, ./src/common/extendable/tests/tests.py.
+  - Internal work: Can modify some Django settings temporarily for a test and then revert them to their original values later. Automatically handles resyncing the DB if INSTALLED_APPS is modified. There is a test case that does not flush the database.
+
++ utils.py
+  - Dependencies: ./src/plugins/openflow/plugin/gapi/rspec.py, ./src/plugins/openflow/tests/gapi/gapi.py, ./src/plugins/openflow/tests/post_deployment/tests.py, ./src/plugins/openflow/tests/omctl/helpers.py, ./src/plugins/openflow/tests/omctl/XMLRPCServerProxy.py, ./src/plugins/openflow/tests/full/fulltests.py, ./src/plugins/openflow/tests/manual_test/manual.py, ./src/plugins/openflow/tests/om/om.py, ./src/geni_legacy/expedient_geni/models.py, ./src/common/xmlrpc_serverproxy/models.py, ./src/common/extendable/models.py.
+  - Internal work: some utilities for tests, like return a url with "test" scheme replaced by "http", runs a command in a subprocess xterm or keep trying the xmlrpc call until a timeout occurs on errors that are not xmlrpclib Faults.
