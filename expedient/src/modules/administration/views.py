@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.views.generic import simple
 #from common.permissions.shortcuts import has_permission, must_have_permission
 from common.utils.plugins.pluginloader import PluginLoader
+from common.api.clearinghouse import Clearinghouse
 import re
 import subprocess
 #import logging
@@ -29,6 +30,7 @@ def home(request):
 	@param request HTTP request
 	@return string template for administration panel
 	"""
+        Clearinghouse().check_role(request.user,'admin')
 	#must_have_permission(request.user, User, "can_manage_users")
 
 	# Iterate over each plugin to get its administration data
@@ -60,6 +62,7 @@ def get_module_log_path(module_name):
 	@param string name of a module
 	@return string complete path to the log file for a given module
 	"""
+        Clearinghouse().check_role(request.user,'admin')
 	module_log_path = ""
 	try:
 		if module_name == "expedient":
@@ -80,6 +83,8 @@ def view_log(request, module_name):
 	@param string name of module
 	@return string log contents for a given module
 	"""
+        
+        Clearinghouse().check_role(request.user,'admin')
 	#must_have_permission(request.user, User, "can_manage_users")
 
 	log_content = ""
@@ -113,6 +118,8 @@ def remove_log(request, module_name, option):
 	@param string name of module
 	@return redirection back to the administration home
 	"""
+        
+        Clearinghouse().check_role(request.user,'admin')
 	#must_have_permission(request.user, User, "can_manage_users")
 
 	module_log_path = get_module_log_path(module_name)
