@@ -31,7 +31,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 import ldap 
 from django.contrib.sites.models import Site
-
+from common.api.clearinghouse import Clearinghouse
 
 logger = logging.getLogger("project.views")
 
@@ -61,7 +61,10 @@ DEFAULT_RESEARCHER_PERMISSIONS = [
 def list(request):
     '''Show list of projects'''
     
-    qs = Project.objects.get_for_user(request.user).order_by('id')
+    #XXX: Is the CH able to retrieve all the existing projects? 
+     
+    #qs = Project.objects.get_for_user(request.user).order_by('id')
+    qs = Clearinghouse().get_subauthorities(filter={'user':request.user})
     
     return list_detail.object_list(
         request,
@@ -70,20 +73,26 @@ def list(request):
         template_object_name="project",
     )
 
-@require_objs_permissions_for_view(
-    perm_names=["can_delete_slices"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-    methods=["GET", "POST"],
-)
-@require_objs_permissions_for_view(
-    perm_names=["can_delete_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-    methods=["GET", "POST"],
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_delete_slices"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#    methods=["GET", "POST"],
+#)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_delete_project"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#    methods=["GET", "POST"],
+#)
 def delete(request, proj_id):
     '''Delete the project'''
+
+    #XXX: There are only 2 roles that can delete a project: Admin and the PIs owners of that project. In theroy, The PI credentials should be signed by the project (subauthority), it seems quite easy to check that. For now I leave the CH call like this.
+    #FIXME: Check if is required some kind of filter to dismiss those pis not owners of this project.
+    Clearinghouse().check_role(request.user,'pi')
+
+    #XXX: I'm not sure if the CH is going to instantiate Projects, Aggregates or Slices
     project = get_object_or_404(Project, id=proj_id)
     if request.method == "POST":
         try:
@@ -104,6 +113,8 @@ def delete(request, proj_id):
                 request.user, msg_type=DatedMessage.TYPE_ERROR)
         return HttpResponseRedirect(reverse("home"))
     else:
+        #XXX: Maybe we can add a more generic call like:
+        #XXX: AM API GET RESOURCES 
         from vt_plugin.models.VM import VM
         if VM.objects.filter(projectId = project.uuid):
             DatedMessage.objects.post_message_to_user(
@@ -117,13 +128,19 @@ def delete(request, proj_id):
             extra_context={"object": project},
         )
 
-@require_objs_permissions_for_view(
-    perm_names=["can_view_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_view_project"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def detail(request, proj_id):
     '''Show information about the project'''
+    #XXX: This should need a permission.
+    Clearinghouse().check_role(request.user,'researcher') #The user must beleong to the project
+
+    #XXX: Probably this needs a total refactor, we need a call to get all the records
+    #Clearinighouse.list(project_hrn)
+   
     project = get_object_or_404(Project, id=proj_id)
     role_reqs = ProjectRoleRequest.objects.filter(
         giver=request.user, requested_role__project=project)
@@ -151,6 +168,7 @@ def detail(request, proj_id):
 
 def create_project_roles(project, user):
     """Create the default roles in a project."""
+    #XXX DEPRECATED!
 
     owner_role = ProjectRole.objects.create(
         name="owner",
@@ -189,19 +207,22 @@ def create_project_roles(project, user):
         can_delegate=True,
     )
 
-@require_objs_permissions_for_view(
-    perm_names=["can_create_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset_from_class(Project),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_create_project"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset_from_class(Project),
+#)
 def create(request):
     '''Create a new project'''
+    
+    #XXX: Again we need roles here:
+    Clearinghouse().check_role(request.user,'pi')
    
     def post_save(instance, created):
         # Create default roles in the project
 	#Generate UUID: fixes caching problem on model default value
 	instance.uuid = uuid.uuid4()
-	create_project_roles(instance, request.user)
+	#create_project_roles(instance, request.user)
 	instance.save()
 	#if settings.LDAP_STORE_PROJECTS:
 	#        instance.sync_netgroup_ldap()
@@ -239,22 +260,25 @@ def create(request):
 
 
  
-@require_objs_permissions_for_view(
-    perm_names=["can_view_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
-@require_objs_permissions_for_view(
-    perm_names=["can_edit_project"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-    methods=["POST"],
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_view_project"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_edit_project"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#    methods=["POST"],
+#)
 def update(request, proj_id, iframe=False):
     '''Update information about a project'''
+ 
+    #XXX: Chek if the user is a PI
+    Clearinghouse().check_role(request.user,'pi')
     
     project = get_object_or_404(Project, id=proj_id)
-    must_have_permission(request.user, project, "can_edit_project") 
+    #must_have_permission(request.user, project, "can_edit_project") 
 
     def redirect(instance):
         if iframe:
@@ -279,14 +303,17 @@ def update(request, proj_id, iframe=False):
         success_msg = lambda instance: "Successfully updated project %s." % instance.name,
     )
 
-@require_objs_permissions_for_view(
-    perm_names=["can_add_aggregates"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_add_aggregates"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def add_aggregate(request, proj_id):
     '''Add/remove aggregates to/from a project'''
-    
+
+    #XXX: Careful here, we must identify what are the selected AM by the PI.
+    #XXX: Check the permissions
+    Clearinghouse().check_role(request.user, 'pi')    
     project = get_object_or_404(Project, id=proj_id)
     aggregate_list = Aggregate.objects.exclude(
         id__in=project.aggregates.all().values_list("id", flat=True))
@@ -316,24 +343,26 @@ def add_aggregate(request, proj_id):
             raise Http404
 
         aggregate = get_object_or_404(Aggregate, id=agg_id).as_leaf_class()
-
+        #XXX: Not needed anymore
         #Look for the users in the project and give them permission to use the new AM.
-        for member in project.members.exclude(is_superuser=True):
-            #if not has_permission(member, project, "can_delete_slices"):
-            give_permission_to("can_use_aggregate", aggregate, member, giver=None, can_delegate=False)
+        #for member in project.members.exclude(is_superuser=True):
+        #    #if not has_permission(member, project, "can_delete_slices"):
+        #    give_permission_to("can_use_aggregate", aggregate, member, giver=None, can_delegate=False)
 
         return HttpResponseRedirect(aggregate.add_to_project(
             project, reverse("project_add_agg", args=[proj_id])))
     else:
         return HttpResponseNotAllowed("GET", "POST")
     
-@require_objs_permissions_for_view(
-    perm_names=["can_add_aggregates"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_add_aggregates"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def update_aggregate(request, proj_id, agg_id):
     '''Update any info stored at the aggregate'''
+    #XXX: Permissions
+    Clearinghouse().check_role(request.user, 'researcher')
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
@@ -345,13 +374,16 @@ def update_aggregate(request, proj_id, agg_id):
     else:
         return HttpResponseNotAllowed(["POST"])
 
-@require_objs_permissions_for_view(
-    perm_names=["can_remove_aggregates"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_remove_aggregates"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def remove_aggregate(request, proj_id, agg_id):
     """Remove the aggregate from the project"""
+    #XXX: PI permissions.
+    Clearinghouse().check_role(request.user,'pi')
+     
     project = get_object_or_404(Project, id=proj_id)
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=project.aggregates.values_list(
@@ -372,13 +404,16 @@ def remove_aggregate(request, proj_id, agg_id):
     else:
         return HttpResponseNotAllowed(["POST"])
 
-@require_objs_permissions_for_view(
-    perm_names=["can_add_members"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_add_members"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def add_member(request, proj_id):
     """Add a member to the project"""
+
+    #XXX: this call should be deprecated, the correct one should be get record
+    #Clearinghouse().get_record(hrn)
     
     project = get_object_or_404(Project, id=proj_id)
     
@@ -436,37 +471,41 @@ def add_member(request, proj_id):
         },
     )
     
-@require_objs_permissions_for_view(
-    perm_names=["can_add_members"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_add_members"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def update_member(request, proj_id, user_id):
     """Update a member's roles"""
-    
+   
+    #XXX: This should be an add record call
+    #XXX: User Permissions
+    Clearinghouse().get_role(request.user, 'pi')
+
     project = get_object_or_404(Project, id=proj_id)
     member = get_object_or_404(User, id=user_id)
     
     if request.method == "POST":
-        form = MemberForm(
-            project=project, user=member,
-            giver=request.user, data=request.POST)
+    #    form = MemberForm(
+    #        project=project, user=member,
+    #        giver=request.user, data=request.POST)
         
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(
+    #    if form.is_valid():
+    #        form.save()
+         return HttpResponseRedirect(
                 reverse("project_detail", args=[proj_id]))
 
-    else:
-        form = MemberForm(
-            project=project, user=member,
-            giver=request.user)
+    #else:
+    #    form = MemberForm(
+    #        project=project, user=member,
+    #        giver=request.user)
     
     return simple.direct_to_template(
         request,
         template=TEMPLATE_PATH+"/update_member.html",
         extra_context={
-            "form": form,
+            #"form": form,
             "project": project,
             "member": member,
             "breadcrumbs": (
@@ -477,34 +516,39 @@ def update_member(request, proj_id, user_id):
         },
     )
     
-@require_objs_permissions_for_view(
-    perm_names=["can_remove_members"],
-    permittee_func=get_user_from_req,
-    target_func=get_queryset(Project, "proj_id"),
-)
+#@require_objs_permissions_for_view(
+#    perm_names=["can_remove_members"],
+#    permittee_func=get_user_from_req,
+#    target_func=get_queryset(Project, "proj_id"),
+#)
 def remove_member(request, proj_id, user_id):
     """Kick a member out by stripping his roles"""
-    
+    #XXX Easy as remove record call.
+    #XXX First the user permissions
+    Clearinghouse().get_role(request.user, 'pi')
+    #FIXME:
+    #Clearinghouse().delete_record(hrn)
     project = get_object_or_404(Project, id=proj_id)
     member = get_object_or_404(User, id=user_id)
 
     if request.method == "POST":
-        member = Permittee.objects.get_as_permittee(member)
+        Clearinghouse().remove_user_record()
+    #    member = Permittee.objects.get_as_permittee(member)
         # Remove the roles
-        for role in ProjectRole.objects.filter(project=project):
-            role.remove_from_permittee(member)
+    #    for role in ProjectRole.objects.filter(project=project):
+    #        role.remove_from_permittee(member)
         # Remove other permissions
-        PermissionOwnership.objects.delete_all_for_target(project, member)
+    #    PermissionOwnership.objects.delete_all_for_target(project, member)
 
         #Remove can_use_aggregate if user is not member of any other project using the aggregates of this project
-        for projectAgg in project._get_aggregates():
-            aggNotUsedAnymoreByMember=1
-            for p in Project.objects.exclude(id=project.id):
-                if projectAgg in p._get_aggregates() and unicode(member) in p.members.values_list("username", flat=True):
-                    aggNotUsedAnymoreByMember=0
-                    break;
-            if aggNotUsedAnymoreByMember and not has_permission(member, projectAgg, "can_use_aggregate"):
-                projectAgg.remove_from_user(member,"/")
+     #   for projectAgg in project._get_aggregates():
+     #       aggNotUsedAnymoreByMember=1
+     #       for p in Project.objects.exclude(id=project.id):
+     #           if projectAgg in p._get_aggregates() and unicode(member) in p.members.values_list("username", flat=True):
+     #               aggNotUsedAnymoreByMember=0
+     #               break;
+     #       if aggNotUsedAnymoreByMember and not has_permission(member, projectAgg, "can_use_aggregate"):
+     #           projectAgg.remove_from_user(member,"/")
 
         try:
             #Sync LDAP
