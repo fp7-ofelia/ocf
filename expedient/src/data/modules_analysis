@@ -1,0 +1,30 @@
+Folder /opt/ofelia/expedient/src/modules/resources/
+====================================================
+
++ admin.py
+  - Dependencies: No dependencies. 
+  - Internal work: Imports admin, resource, sliver models and registers modules with admin site.
+
++ models.py
+  - Dependencies: ./src/plugins/openflow/plugin/models.py.
+  - Internal work: Contain resource and sliver models.
+
+
+
+Folder /opt/ofelia/expedient/src/modules/rspec/
+===============================================
+
++ __init__.py
+  - Plugs in, (or navigates to?) Slice by slice id (which looks like it might be a url).
+
++ forms.py
+  - Dependencies: ./expedient/src/modules/rspec/views.py.
+  - Internal work:  Uploads specific form.
+
++ views.py
+  - Dependencies: ./src/modules/rpsec/urls.py
+  - Internal work: Download and upload rspecs and show buttons to do so
+
++ templates/home.html
+  - Dependencies: ./src/modules/rspec/views.py
+  - Internal work: HTML page to upload a reservation RSpec to modify your slice or you can download the advertisement RSpec available in this Expedient or download the reservation RSpec for the current slice.

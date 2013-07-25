@@ -1,0 +1,53 @@
+Folder /opt/ofelia/expedient/src/modules/gcf-x509-trusted.crt/
+===============================================================
+
++ ch.crt
+  - Dependencies: ./expedient/src/plugins/openflow/tests/gapi/gapi.py, ./expedient/src/plugins/openflow/tests/full/fulltests.py, ./optin_manager/src/python/openflow/tests/full/fulltests.py, ./expedient/src/settings/gcf.py.
+  - Internal work: Contains the text value of a certificate.
+
+
+
+Folder /opt/ofelia/expedient/src/modules/gcf-x509-user.crt/
+============================================================
+
++ Files: user_x509_cbermudo.crt, user_x509_leo.crt, user_x509_tester.crt, user_x509_xml.crt, user_x509_carolina.crt, user_x509_expedient.crt, user_x509_root.crt, user_x509_testingmail.crt. 
+  - Dependencies: No dependencies.
+  - Internal work: User specific certificate files.
+
+
+
+Folder /opt/ofelia/expedient/src/modules/gcf-x509-user.crt/gcf-x509-user.crt/
+==============================================================================
+
++ Files: user_x509_expedient.crt, user_x509_leo.crt, user_x509_root.crt, user_x509_tester.crt, user_x509_testingmail.crt, user_x509_xml.crt.
+  - Dependencies: No dependencies.
+  - Internal work: Contain specific user certificates.
+
+
+
+File /opt/ofelia/expedient/src/modules/ldap.ssl/ca.crt contains a certificate.
+
+
+
+Folder /opt/ofelia/expedient/src/modules/xmlrpc-ssl.crt/
+=========================================================
+
+Contain individual user certificates. All certificate files seem to be generated automatically on the user level, and sometimes a nested hierarchy of folders contained a Makefile and certificate files is created. The following files seem to work with certificate files.
+
+Dependencies:
+./src/plugins/openflow/tests/gapi/gapi.py
+./src/samples/aggregate/sr_manager/src/settings.py
+./src/plugins/openflow/tests/post_deployment/tests.py
+./src/plugins/openflow/tests/omctl/omctl_settings.py
+./src/plugins/openflow/tests/omctl/XMLRPCServerProxy.py
+./src/plugins/openflow/tests/full/fulltests.py
+./src/plugins/openflow/tests/ssl/Makefile
+./src/modules/xmlrpc-ssl.crt/Makefile
+./src/modules/xmlrpc-ssl.crt/xmlrpc-ssl.crt/Makefile
+./src/geni_legacy/expedient_geni/utils.py
+./src/common/xmlrpc_serverproxy/models.py: 
+./src/settings/gcf.py
+./src/settings/ldapdata.py
+./src/settings/local-example
+./src/settings/xmlrpc.py
+
