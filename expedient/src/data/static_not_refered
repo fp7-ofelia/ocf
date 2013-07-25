@@ -1,0 +1,33 @@
+Not refered files
+=================
+
+/opt/ofelia/expedient/static/egeni.css  
+/opt/ofelia/expedient/static/egeni-iframe.css
+/opt/ofelia/expedient/static/default/css/themes/redmond/jquery.ui.all.css		  	  
+/opt/ofelia/expedient/static/default/img/black.png 
+/opt/ofelia/expedient/static/default/img/switch-5406zl.png      
+/opt/ofelia/expedient/static/default/img/switch.png	   
+/opt/ofelia/expedient/static/default/img/white_big.png
+/opt/ofelia/expedient/static/default/img/question_mark.png	       
+/opt/ofelia/expedient/static/default/img/switch-cat6500.png     
+/opt/ofelia/expedient/static/default/img/tiny_arrow.png	   
+/opt/ofelia/expedient/static/default/img/white.png
+/opt/ofelia/expedient/static/default/img/aggregate-tiny.png     	   
+/opt/ofelia/expedient/static/default/img/slice.png		       
+/opt/ofelia/expedient/static/default/img/switch-juniper.png     
+/opt/ofelia/expedient/static/default/img/users-tiny.png	   
+/opt/ofelia/expedient/static/default/img/black_arrow_big.png  
+/opt/ofelia/expedient/static/default/img/favicon.ico    		    
+/opt/ofelia/expedient/static/default/img/slice-tiny.png	       
+/opt/ofelia/expedient/static/default/img/switch-nec-ip8800.png  	   
+/opt/ofelia/expedient/static/default/img/black_arrow.png            
+/opt/ofelia/expedient/static/default/img/status-question.jpg        
+/opt/ofelia/expedient/static/default/img/switch-netfpga.png     
+/opt/ofelia/expedient/static/default/img/white_arrow_big.png  
+/opt/ofelia/expedient/static/default/img/black_big.png	     	    
+/opt/ofelia/expedient/static/default/img/ofelia.png		      
+/opt/ofelia/expedient/static/default/img/switch-nf2.png	      
+/opt/ofelia/expedient/static/default/img/white_arrow.png
+/opt/ofelia/expedient/static/default/js/jquery.colorbox-min.js  
+
+*/opt/ofelia/expedient/static/default/img/index.js not referenced, but might be used by default
