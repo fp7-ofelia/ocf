@@ -62,7 +62,6 @@ def get_module_log_path(module_name):
 	@param string name of a module
 	@return string complete path to the log file for a given module
 	"""
-        Clearinghouse().check_role(request.user,'admin')
 	module_log_path = ""
 	try:
 		if module_name == "expedient":

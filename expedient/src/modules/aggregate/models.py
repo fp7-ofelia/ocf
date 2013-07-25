@@ -10,9 +10,9 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.contenttypes.models import ContentType
 from common.extendable.models import Extendable
 from common.api.clearinghouse import Clearinghouse
-#from common.permissions.shortcuts import \
-#    give_permission_to, delete_permission, must_have_permission, has_permission,\
-#    get_permittee_from_threadlocals
+from common.permissions.shortcuts import \
+    give_permission_to, delete_permission, must_have_permission, has_permission,\
+    get_permittee_from_threadlocals
 #from common.permissions.models import Permittee
 #from common.permissions.utils import permissions_save_override,\
 #    permissions_delete_override
@@ -223,7 +223,9 @@ No information available.
                                    'proj_id': project.id})+"?next=%s" % next
         except NoReverseMatch:
             logger.debug("Giving permission to use aggregate to %s" % project)
+            #XXX: We have to go deep in these methods. They are assigning the aggregates to the slices.
             #give_permission_to("can_use_aggregate", self.as_leaf_class(), project)
+            Clearinghouse().add_aggregate_to_project("can_use_aggregate", self.as_leaf_class(), project)
             return next
         
     def remove_from_project(self, project, next):

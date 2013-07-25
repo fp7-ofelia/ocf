@@ -100,6 +100,12 @@ class Clearinghouse:
         #returns a list of useres with researcher role
         pass
 
+    def add_aggregate_to_project(self,permission,aggregate,project):
+        from common.permissions.shortcuts import \
+    give_permission_to, delete_permission, must_have_permission, has_permission,\
+    get_permittee_from_threadlocals
+        give_permission_to(permission,aggregate,project) 
+
 
     """
     Functions to deprecate
