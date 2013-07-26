@@ -262,6 +262,8 @@ No information available.
                     pass
                 # Carolina: remove permision for aggregate in every slice inside the project
                 self.remove_from_slice(slice, next)
+
+            Clearinghouse().delete_from_instance("can_use_aggregate",self.as_leaf_class(),project) 
             #delete_permission("can_use_aggregate", self.as_leaf_class(), project)
             return next
         
@@ -280,6 +282,8 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
+            #XXX: Clearinghouse call
+            Clearinghouse.add_aggregate_to_slice("can_use_aggregate",self.as_leaf_class,slice)
             #give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
@@ -289,8 +293,8 @@ No information available.
         """
          #XXX: We need PIs also
 
-        #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
-        #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
 
         prefix = self.__class__.get_url_name_prefix()
         try:
@@ -298,7 +302,7 @@ No information available.
                            kwargs={'agg_id': self.id,
                                    'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
-            #give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
+            give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
 
@@ -322,6 +326,7 @@ No information available.
                 self.as_leaf_class().stop_slice(slice)
             except:
                 pass
+            Clearinghouse().remove_from_instance("can_use_aggregates", self.as_leaf_class(),slice)
             #delete_permission("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 

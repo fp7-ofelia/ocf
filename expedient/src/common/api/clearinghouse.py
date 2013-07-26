@@ -100,16 +100,24 @@ class Clearinghouse:
         #returns a list of useres with researcher role
         pass
 
+    """
+    Functions to deprecate
+    """
+  
+    def remove_from_instance(self,permission,instance, from_instance):
+        from common.permissions.shortcuts import delete_permission
+        delete_permission("can_use_aggregate", instance, from_instance)
+
     def add_aggregate_to_project(self,permission,aggregate,project):
         from common.permissions.shortcuts import \
     give_permission_to, delete_permission, must_have_permission, has_permission,\
     get_permittee_from_threadlocals
         give_permission_to(permission,aggregate,project) 
 
+    def add_aggregate_to_slice(slef,permission,aggregate,slice):
+        from common.permissions.shortcuts import give_permission_to
+        give_permission_to(permission,aggregate,slice)
 
-    """
-    Functions to deprecate
-    """
     def remove_user_record(user,project):
         from modules.roles.models import ProjectRole,ProjectRoleRequest
         from common.permissions.models import ObjectPermission,PermissionOwnership, Permittee

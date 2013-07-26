@@ -255,7 +255,7 @@ def add_aggregate(request, slice_id):
     
     slice = get_object_or_404(Slice, id=slice_id)
     
-    must_have_permission(request.user, slice.project, "can_edit_slices")
+    #must_have_permission(request.user, slice.project, "can_edit_slices")
     
     aggregate_list = slice.project.aggregates.exclude(
         id__in=slice.aggregates.values_list("id", flat=True))
