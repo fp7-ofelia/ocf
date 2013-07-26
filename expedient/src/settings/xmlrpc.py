@@ -6,7 +6,8 @@ Created on Aug 18, 2010
 from os.path import join
 from django import CONF_DIR
 
-XMLRPC_TRUSTED_CA_PATH = join(CONF_DIR, 'xmlrpc-ssl.crt')
+TRUSTED_DIR = join(CONF_DIR, 'trust')
+XMLRPC_TRUSTED_CA_PATH = join(TRUSTED_DIR, 'xmlrpc-ssl.crt')
 '''The path that contains the certificates for trusted CAs. This folder must
 contain a Makefile to keep hashed symbolic links to the
 certificates up-to-date.
