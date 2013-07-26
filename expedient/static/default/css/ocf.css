@@ -20,13 +20,13 @@ img, div { behavior: url(/media/js/iepngfix.htc) }
 
 body {
 	/*font-size: 62.5%;*/ /* Resets 1em to 10px */
-	font-size: 70%;
+	font-size: 70% !important;
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-	background-color: #8ccdf8;
+	background-color: #8ccdf8 !important;
 	color: #333;
-	text-align: center;
-	margin: 0px;
-	padding: 0px;
+	text-align: center !important;
+	margin: 0px !important;
+	padding: 0px !important;
 	}
 
 input {
@@ -37,7 +37,7 @@ input {
     background-color: #fff;
 	border: 1px solid #959596;
     padding: 10px 0 0 0;
-    width: 85%;
+    width: 85% !important;
     margin: auto;
 	text-align: left;
     }
