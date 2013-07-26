@@ -12,7 +12,7 @@ try:
 except ImportError:
     pass
 
-CONF_DIR_CERTS = join(CONF_DIR, "..", "modules")
+CONF_DIR_CERTS = join(CONF_DIR, "..", "trust")
 
 GCF_BASE_NAME = "stanford//expedient"
 '''The domain name used in URNs when creating certificates mainly.
