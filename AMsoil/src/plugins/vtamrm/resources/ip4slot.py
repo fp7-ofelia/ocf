@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship, backref
 
 import inspect
 
@@ -19,7 +18,7 @@ class Ip4Slot(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     ip = Column(String(15), nullable=False)
     ipRange_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
-    ipRange = association_proxy('ip4range_ips', 'ip4range')
+    ipRange = relationship('Ip4Range')
     isExcluded = Column(TINYINT(1))
     comment = Column(String(1024))
 

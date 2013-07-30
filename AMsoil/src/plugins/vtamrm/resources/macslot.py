@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 import inspect
 
@@ -18,7 +17,7 @@ class MacSlot(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     mac = Column(String(17), nullable=False)
     macRange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
-    macRange = association_proxy('macrange_macs', 'macrange')
+    macRange = relationship("MacRange")
     isExcluded = Column(TINYINT(1))
     comment = Column(String(1024))
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 
 from utils.commonbase import Base
 
@@ -16,6 +16,5 @@ class Ip4RangeIps(Base):
     ip4slot_id = Column(Integer, ForeignKey('vt_manager_ip4slot.id'))
     ip4range_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
 
-    ip4range = relationship("Ip4Range", backref=backref("ip_iprange", cascade="all, delete-orphan"))
-    ip4slot = relationshitp("Ip4Slot", backref=backref("ip4range_ips"))
+    ip4slot = relationship("Ip4Slot")
 

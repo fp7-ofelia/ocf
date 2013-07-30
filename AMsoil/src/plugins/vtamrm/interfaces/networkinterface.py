@@ -8,6 +8,9 @@ from utils import validators
 from utils.commonbase import Base
 
 from resources.macslot import MacSlot
+from resources.ip4slot import Ip4Slot
+from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
+from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
 
 
 '''@author: SergioVidiella'''
@@ -22,13 +25,13 @@ class NetworkInterface(Base):
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     name = Column(String(128), nullable=False)
     mac_id = Column(Integer, ForeignKey('vt_manager_macslot.id'))
-    mac = relationship(MacSlot, backref='interface')
-    ip4s = association_proxy('networkinterface_ip4s', 'ip4slot')
+    mac = relationship("MacSlot", backref='networkinterface_macs')
+    ip4s = relationship("NetworkInterfaceIp4s", primaryjoin="NetworkInterfaceIp4s.networkinterface_id==NetworkInterface.id", backref="networkinterface_ips")
     isMgmt = Column(TINYINT(1), nullable=False)
     isBridge = Column(TINYINT(1), nullable=False)
 
     '''Interfaces connectivy'''
-    connectedTo = association_proxy('networkinterface_connectedTo', 'from_networkinterface') 
+    connectedTo = relationship("NetworkInterfaceConnectedTo", primaryjoin="NetworkInterfaceConnectedTo.from_networkinterface_id==NetworkInterface.id", backref="from_networkinterface")
 
     '''Physical connection details for bridged interfaces''' 
     switchID = Column(String(23))

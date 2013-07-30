@@ -1,8 +1,8 @@
 from pypelib.RuleTable import RuleTable
 from pypelib.utils.Exceptions import *
-from ControllerMappings import ControllerMappings
+from controllermappings import ControllerMappings
 from threading import Thread, Lock
-from utils.PolicyLogger import PolicyLogger
+from utils.policylogger import PolicyLogger
 #CBA
 import uuid
 

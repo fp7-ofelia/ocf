@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 from utils.commonbase import Base
 from utils.ip4utils import IP4Utils
 from resources.ip4slot import Ip4Slot
+from ranges.ip4rangeips import Ip4RangeIps
 
 
 '''@author: SergioVidiella'''
@@ -32,13 +32,12 @@ class Ip4Range(Base):
     dns1 = Column(String(15))
     dns2 = Column(String(15))
 
-    #Pool of ips both assigned and excluded (particular case of assignment)
-    ips = association_proxy('ip_iprange', 'ip')
-    nextAvailableIp = Column(String(15))
-
     #Statistics
-    numberOfSlots = BIGINT(20)
+    numberOfSlots = Column(BIGINT(20))
     
+    #Pool of ips both assigned and excluded (particular case of assignment)
+    nextAvailableIp = Column(String(15))
+    ip4s = relationship("Ip4RangeIps")
 
     @staticmethod
     def constructor(name, startIp, endIp, netmask, gw, dns1, dns2, isGlobal=True):

@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
-from sqlalchemy.orm import validates
-from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates, relationship, backref
 
 import uuid
 import inspect
@@ -12,12 +11,16 @@ from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClas
 from utils.mutexstore import MutexStore
 
 from interfaces.networkinterface import NetworkInterface
+from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 
+from ranges.servermacrange import VTServerMacRange
+from ranges.serveriprange import VTServerIpRange
 from ranges.macrange import MacRange
 from ranges.ip4range import Ip4Range 
 
 
 '''@author: SergioVidiella'''
+
 
 
 def validateAgentURLwrapper(url):
@@ -59,11 +62,11 @@ class VTServer(Base):
     url = Column(String(200))
 
     '''Network interfaces'''
-    networkInterfaces = association_proxy('vtserver_networkinterfaces', 'networkinterface')
+    networkInterfaces = relationship("VTServerNetworkInterfaces", backref="vtserver")
 
     '''Other networking parameters'''
-    subscribedMacRanges = association_proxy('vtserver_subscribed_macranges', 'macrange')
-    subscribedIp4Ranges = association_proxy('vtserver_subscribed_ip4ranges', 'ip4range')
+    subscribedMacRanges = relationship("VTServerMacRange", backref="vtserver")
+    subscribedIp4Ranges = relationship("VTServerIpRange", backref="vtserver")
 
     ''' Mutex over the instance '''
     mutex = None

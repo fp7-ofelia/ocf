@@ -1,13 +1,13 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 import inspect
 
 from utils.commonbase import Base
 from utils.ethernetutils import EthernetUtils
 from resources.macslot import MacSlot
+from ranges.macrangemacs import MacRangeMacs
 
 
 '''@author: SergioVidiella'''
@@ -29,7 +29,7 @@ class MacRange(Base):
     endMac = Column(String(17), nullable=False)
 
     #Pool of ips both assigned and excluded (particular case of assignment)
-    macs = association_proxy('mac_macrange', 'macslot')
+    macs = relationship("MacRangeMacs")
     nextAvailableMac = Column(String(17))
 
     #Statistics

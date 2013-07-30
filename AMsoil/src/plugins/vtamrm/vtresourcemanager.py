@@ -39,67 +39,18 @@ class VTResourceManager(object):
         self.worker.addAsReccurring("vtresourcemanager", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
         self.worker.addAsReccurring("vtresourcemanager", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
 
-    def GetNodes(self,slice=None,authority=None,uuid=None):
-	servers = db_session.query(VTServer).all()
+
+    def get_servers(self, uuid=None):
+        servers = db_session.query(VTServer).all()
         if uuid:
             for server in servers:
                 if str(server.uuid) == str(uuid):
-		    db_session.expunge_all()
+                    db_session.expunge_all()
                     return server
-	    db_session.expunge_all()
+            db_session.expunge_all()
             return None
-        else:    
-	    db_session.expunge_all()
-	    return servers
-
-
-    def GetIpRange(self,vt_server_id):
-	ip_range_ids = db_session.query(VTServerIpRange).filter(VTServerIpRange.vtserver_id == vt_server_id).all()
-	if not ip_range_ids:
-	    db_session.expunge_all()
-	    return None
-	ip_range = list()
-	for ip_range_id in ip_range_ids:
-	    ip_range_record = db_session.query(Ip4Range).filter(Ip4Range.id == int(ip_range_id.ip4range_id)).all()
-	    if not ip_range_record:
-		db_session.expunge_all()
-		return None
-	    ip_range.append({'startIp':ip_range_record[0].startIp, 'endIp':ip_range_record[0].endIp})
-	db_session.expunge_all()
-	return ip_range
-
-
-    def GetMacRange(self,vt_server_id):
-	mac_range_ids = db_session.query(VTServerMacRange).filter(VTServerMacRange.vtserver_id == vt_server_id).all()
-	if not mac_range_ids:
-	    db_session.expunge_all()
-	    return None
-	mac_range = list()
-	for mac_range_id in mac_range_ids:
-	    mac_range_record = db_session.query(MacRange).filter(MacRange.id == int(mac_range_id.macrange_id)).all()
-	    if not mac_range_record:
-		db_session.expunge_all()
-		return None
-	    mac_range.append({'startMac':mac_range_record[0].startMac, 'endMac':mac_range_record[0].endMac})
-	db_session.expunge_all()
-	return mac_range
-	
-
-    def GetNetworkInterfaces(self,vt_server_id):
-	network_interface_ids = db_session.query(VTServerNetworkInterfaces).filter(VTServerNetworkInterfaces.vtserver_id == vt_server_id).all()
-	if not network_interface_ids:
-	    db_session.expunge_all()
-	    return None
-	network_interfaces = list()
-	for network_interface_id in network_interface_ids:
-	    network_interface = db_session.query(NetworkInterface).filter(NetworkInterface.id == int(network_interface_id.networkinterface_id)).filter(NetworkInterface.isBridge == 1).all()
-	    if network_interface:
-	        interfaces = list()
-	        for interface in network_interface:
-		    interfaces.append({'isMgmt':interface.isMgmt, 'name':interface.name, 'port':int(interface.port) if interface.port else None, 'switchID': interface.switchID})
-	        network_interfaces.append(interfaces)
-	db_session.expunge_all()
-	return network_interfaces
+        else:
+            return servers
 
 
     def reserve_vms(self, vms, slice_urn, end_time):

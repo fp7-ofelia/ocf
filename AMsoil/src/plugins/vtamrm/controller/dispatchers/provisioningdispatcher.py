@@ -1,5 +1,3 @@
-from vt_manager.controller.drivers.VTDriver import VTDriver
-
 import xmlrpclib, threading, logging, copy
 
 from utils.action import Action
@@ -8,8 +6,9 @@ from utils.urlutils import UrlUtils
 
 from communication.xmlrpcclient import XmlRpcClient
 
-from controller.actioncontroller import ActionController
-from controller.ruletablemanager import RuleTableManager
+from controller.actions.actioncontroller import ActionController
+from controller.policies.ruletablemanager import RuleTableManager
+from controller.drivers.vtdriver import VTDriver
 
 class ProvisioningDispatcher():
   

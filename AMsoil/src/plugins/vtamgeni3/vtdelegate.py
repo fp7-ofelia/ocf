@@ -4,7 +4,11 @@ import amsoil.core.pluginmanager as pm
 
 import xml.etree.ElementTree as ET
 
-from xrn import *
+from util.xrn import *
+
+
+'''@author: SergioVidiella'''
+
 
 GENIv3DelegateBase = pm.getService('geniv3delegatebase')
 geni_ex = pm.getService('geniv3exceptions')
@@ -33,73 +37,67 @@ class VTDelegate(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         return {'vtam' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd'} # /ad.xsd
 
-    def is_single_allocation(self):
+    def is_single_allocatioNetworkInterfaceConnectedTon(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         return False
-
+    
     def get_allocation_mode(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         return 'geni_many'
 
-    #TODO: implement all the methods for VT AM
     def list_resources(self, client_cert, credentials, geni_available):
 	"""Documentation see [geniv3rpc] GENIv3DelegateBase."""
 	#check if the certificate and credentials are correct for this method
 	#self.auth(client_cert, credentials, None, ('listslices',))
-
 	root_node = self.lxml_ad_root()
 	E = self.lxml_ad_element_maker('vtam')
-	nodes = self._resource_manager.GetNodes()
+        servers = self._resource_manager.get_servers()
 	r = E.network()
-	for node in nodes:
-	    if int(node.available) is 0 and geni_available: continue
+	for server in servers:
+	    if int(server.available) is 0 and geni_available: continue
 	    else:
 	        n = E.node()
-            	n.append(E.name(node.name))
-	    	n.append(E.available("True" if int(node.available) is 1 else "False"))
-  	    	n.append(E.operating_system_type(node.operatingSystemType))
-	    	n.append(E.operating_system_distribution(node.operatingSystemDistribution))
-	    	n.append(E.operating_system_version(node.operatingSystemVersion))
-	    	n.append(E.virtualization_technology(node.virtTech))
-	    	n.append(E.cpus_number("0" if not node.numberOfCPUs else node.numberOfCPUs))
-	    	n.append(E.cpu_frequency("0" if not node.CPUFrequency else node.CPUFrequency))
-	    	n.append(E.memory("0" if not node.memory else node.memory))
-	    	n.append(E.hdd_space_GB("0" if not node.discSpaceGB else node.discSpaceGB))
-	    	n.append(E.discSpaceGB(node.agentURL))
+            	n.append(E.name(server.name))
+	    	n.append(E.available("True" if int(server.available) is 1 else "False"))
+  	    	n.append(E.operating_system_type(server.operatingSystemType))
+	    	n.append(E.operating_system_distribution(server.operatingSystemDistribution))
+	    	n.append(E.operating_system_version(server.operatingSystemVersion))
+	    	n.append(E.virtualization_technology(server.virtTech))
+	    	n.append(E.cpus_number("0" if not server.numberOfCPUs else server.numberOfCPUs))
+	    	n.append(E.cpu_frequency("0" if not server.CPUFrequency else server.CPUFrequency))
+	    	n.append(E.memory("0" if not server.memory else server.memory))
+	    	n.append(E.hdd_space_GB("0" if not server.discSpaceGB else server.discSpaceGB))
+	    	n.append(E.agent_url(server.agentURL))
 	    
-	    	ip_range = self._resource_manager.GetIpRange(int(node.id))	    
-	    	if ip_range:
-		    for ips in ip_range:
+		if server.subscribedIp4Ranges: 
+		    for ips in server.subscribedIp4Ranges:
 		    	ip = E.service(type='Range')
 		    	ip.append(E.type("IpRange"))
 		    	ip.append(E.name("IpRange"))
-		    	ip.append(E.start_value(ips['startIp']))
-		    	ip.append(E.end_value(ips['endIp']))
+		    	ip.append(E.start_value(ips.subscribed_ip4_range.startIp))
+		    	ip.append(E.end_value(ips.subscribed_ip4_range.endIp))
 		    	n.append(ip)
 
-		mac_range = self._resource_manager.GetMacRange(int(node.id))
-	        if mac_range:
-		    for macs in mac_range:
+		if server.subscribedMacRanges:
+		    for macs in server.subscribedMacRanges:
 		    	mac = E.service(type="Range")
 		    	mac.append(E.type("MacRange"))
 		    	mac.append(E.name("MacRange"))
-		    	mac.append(E.start_value(macs['startMac']))
-		    	mac.append(E.end_value(macs['endMac']))
+		    	mac.append(E.start_value(macs.subscribed_mac_range.startMac))
+		    	mac.append(E.end_value(macs.subscribed_mac_range.endMac))
 		    	n.append(mac)
 
-		network_interfaces = self._resource_manager.GetNetworkInterfaces(int(node.id))
-	    	if network_interfaces:
-		    for network_interface in network_interfaces:
-		    	for interfaces in network_interface:
-		            interface = E.service(type="Network")
-		            interface.append(E.type("Interface"))
-		            interface.append(E.server_interface_name(interfaces['name']))
-		            interface.append(E.isMgmt(str(interfaces['isMgmt'])))
-		            if interfaces['switchID']:
-		    	    	interface.append(E.interface_switch_id(interfaces['switchID']))
-		            if interfaces['port']:
-		    	    	interface.append(E.interface_port(str(interfaces['port']))) 
-		            n.append(interface)		
+    		if server.networkInterfaces:
+		    for network_interface in server.networkInterfaces:
+		    	interface = E.service(type="Network")
+		        interface.append(E.type("Interface"))
+		        interface.append(E.server_interface_name(network_interface.networkinterface.name))
+	            	interface.append(E.isMgmt(str(network_interface.networkinterface.isMgmt)))
+		        if network_interface.networkinterface.switchID:
+		    	    interface.append(E.interface_switch_id(network_interface.networkinterface.switchID))
+		        if network_interface.networkinterface.port:
+		    	    interface.append(E.interface_port(str(network_interface.networkinterface.port))) 
+		        n.append(interface)		
 
 	        r.append(n)
 	root_node.append(r)

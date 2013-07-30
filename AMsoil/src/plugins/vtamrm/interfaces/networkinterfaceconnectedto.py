@@ -14,5 +14,5 @@ class NetworkInterfaceConnectedTo(Base):
     from_networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
     to_networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
 
-    to_networkinterface = relationship("NetworkInterface", backref=backref("to_networkinterface")
+    to_networkinterface = relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="from_networkinterface")
 

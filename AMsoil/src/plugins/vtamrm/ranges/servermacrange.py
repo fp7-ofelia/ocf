@@ -15,6 +15,5 @@ class VTServerMacRange(Base):
     vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
     macrange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
 
-    server = relationship("VTServer", backref=backref("vtserver_subscribed_macranges", cascade="all, delete-orphan"))
-    subscribedMacRange = relationship("MacRange")
+    subscribed_mac_range = relationship("MacRange", backref="vtserver_association")
 

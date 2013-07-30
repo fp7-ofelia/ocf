@@ -15,6 +15,5 @@ class VTServerIpRange(Base):
     vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
     ip4range_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
 
-    server = relationship("VTServer", backref=backref("vtserver_subscribed_ip4ranges", cascade="all, delete-orphan"))
-    subscribedIp4Range = relationship("Ip4Range")
+    subscribed_ip4_range = relationship("Ip4Range", backref="vtserver_association")
 
