@@ -1,12 +1,20 @@
 from utils.action import Action
 from utils.xmlhelper import XmlHelper
 import uuid, copy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from utils.commonbase import ENGINE
+
 
 class ActionController():
-	
+
+	db_engine = create_engine(ENGINE, pool_recycle=6000)
+	db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
+	db_session = scoped_session(db_session_factory)
+
 	@staticmethod
 	def getAction(uuid):
-		actions = Action.objects.filter(uuid = uuid)
+		actions = db_session.query(Action).filter(Action.uuid==uuid).all()
 		print actions
 		if actions.count() ==  1:
 			return actions[0]

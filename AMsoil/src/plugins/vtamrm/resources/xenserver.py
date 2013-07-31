@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from sqlalchemy.orm import validates
-from sqlalchemy.ext.associationproxy import association_proxy
 
-from resources.vtserver import VTServer
-
+from utils.commonbase import Base
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 
@@ -15,15 +13,16 @@ from utils.mutexstore import MutexStore
 def validateAgentURLwrapper():
         VTServer.validateAgentURL()
 
-class XenServer(VTServer):
+class XenServer(Base):
     """Virtualization Server Class."""
         
     __tablename__ = 'vt_manager_xenserver'
+    __table_args__ = {'extend_existing':True}
 
-    vtserver_ptr_id = Column(Integer, primary_key=True)
+    vtserver_ptr_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'), primary_key=True)
 
-    ''' VMs array '''
-    vms = association_proxy('xenserver_xenvms', 'xenvm')
+    '''VMs array'''
+    vms = relationship("XenServerVMs", backref="xenserver")
 
     '''Private methods'''
     def __tupleContainsKey(tu,key):

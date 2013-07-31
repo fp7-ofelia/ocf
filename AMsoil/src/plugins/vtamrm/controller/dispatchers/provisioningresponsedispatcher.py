@@ -1,0 +1,112 @@
+from utils.xmlhelper import XmlHelper
+from utils.action import Action
+from resources.virtualmachine import VirtualMachine
+from controller.drivers.vtdriver import VTDriver
+import logging
+from communication.xmlrpcclient import XmlRpcClient
+from controller.actions.actioncontroller import ActionController
+
+
+class ProvisioningResponseDispatcher():
+
+	'''
+	Handles the Agent responses when action status changes
+	'''
+
+	@staticmethod
+	def processResponse(rspec):
+		logging.debug("PROCESSING RESPONSE proocessResponse() STARTED...")
+		for action in rspec.response.provisioning.action:
+
+			try:
+				actionModel = ActionController.getAction(action.id)
+			except Exception as e:
+				logging.error("No action in DB with the incoming uuid\n%s", e)
+				return
+
+			'''
+			If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
+			'''
+
+			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
+				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
+				actionModel.status = action.status
+				actionModel.description = action.description
+
+				#Complete information required for the Plugin: action type and VM
+				ActionController.completeActionRspec(action, actionModel)
+
+				#XXX:Implement this method or some other doing this job
+				vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
+				controller=VTDriver.getDriver(vm.vtserver.getVirtTech())
+				failedOnCreate = 0
+				if actionModel.getStatus() == Action.SUCCESS_STATUS:
+					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm)
+
+				elif actionModel.getStatus() == Action.ONGOING_STATUS:
+					ProvisioningResponseDispatcher.__updateVMafterONGOING(actionModel, vm)
+
+				elif actionModel.getStatus() == Action.FAILED_STATUS:
+					failedOnCreate = ProvisioningResponseDispatcher.__updateVMafterFAILED(actionModel, vm)
+
+				else:
+					vm.setState(VirtualMachine.UNKNOWN_STATE)
+
+
+				try:
+					logging.debug("Sending response to Plugin in sendAsync")
+					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
+					if failedOnCreate == 1:
+						controller.deleteVM(vm)
+				except Exception as e:
+					logging.error("Could not connect to Plugin in sendAsync\n%s",e)
+					return
+			
+			#If response is for a finished action
+		
+			else:
+				try:
+					#XXX: What should be done if this happen?
+					logging.error("Received response for an action in wrong state\n")
+					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
+				except Exception as e:
+					logging.error(e)
+					return
+	@staticmethod
+	def __updateVMafterSUCCESS(actionModel, vm):
+		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+			vm.setState(VirtualMachine.CREATED_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_START_TYPE or actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
+			vm.setState(VirtualMachine.RUNNING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_STOP_TYPE:
+			vm.setState(VirtualMachine.STOPPED_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_DELETE_TYPE:
+			controller = VTDriver.getDriver(vm.vtserver.getVirtTech())
+			controller.deleteVM(vm)
+	
+	@staticmethod
+	def __updateVMafterONGOING(actionModel, vm):
+		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+			vm.setState(VirtualMachine.CREATING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_START_TYPE:
+			vm.setState(VirtualMachine.STARTING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_STOP_TYPE:
+			vm.setState(VirtualMachine.STOPPING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_DELETE_TYPE:
+			vm.setState(VirtualMachine.DELETING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
+			vm.setState(VirtualMachine.REBOOTING_STATE)
+
+	@staticmethod
+	def __updateVMafterFAILED(actionModel, vm):
+		if  actionModel.getType() == Action.PROVISIONING_VM_START_TYPE:
+			vm.setState(VirtualMachine.STOPPED_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_STOP_TYPE:
+			vm.setState(VirtualMachine.RUNNING_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_REBOOT_TYPE:
+			vm.setState(VirtualMachine.STOPPED_STATE)
+		elif actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+			failedOnCreate = 1	#VM is deleted after sending response to the Plugin because callBackUrl is required
+			return failedOnCreate
+		else:
+			vm.setState(VirtualMachine.FAILED_STATE)

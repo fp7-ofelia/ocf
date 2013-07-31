@@ -1,13 +1,16 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.orm import validates
-from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates, relationship, backref
 
 import inspect
 
 from utils.commonbase import Base
 from utils import validators
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
+
+from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
+
+from resources.xenvm import XenVM
 
 
 '''@author: SergioVidiella'''
@@ -21,6 +24,8 @@ class VirtualMachine(Base):
     __childClasses = (
     	'XenVM',
     )
+
+    xenvm = relationship("XenVM", backref="vm")
 
     ''' General parameters '''
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -45,7 +50,7 @@ class VirtualMachine(Base):
     operatingSystemDistribution = Column(String(512), nullable=False, default="")
 
     '''Networking'''
-    networkInterfaces = association_proxy('vm_networkinterfaces', 'networkinterface')
+    networkInterfaces = relationship("VMNetworkinterfaces", backref="vm")
 
     '''Other'''
     callBackURL = Column(String(200))

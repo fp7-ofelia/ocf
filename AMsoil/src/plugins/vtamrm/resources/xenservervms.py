@@ -16,7 +16,6 @@ class XenServerVMs(Base):
     xenserver_id = Column(Integer, ForeignKey('vt_manager_xenserver.id'))
     xenvm_id = Column(Integer, ForeignKey('vt_manager_xenvm.id'))
 
-    xenserver = relationship("XenServer", backref=backref("xenserver_vms", cascade="all, delete-orphan"))
-    xenvm = relationship("XenVM", backref=backref("vm_server"))
+    xenvm = relationship("XenVM", backef="xenserver_associations")
 
 

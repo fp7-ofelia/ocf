@@ -18,6 +18,8 @@ from ranges.serveriprange import VTServerIpRange
 from ranges.macrange import MacRange
 from ranges.ip4range import Ip4Range 
 
+from resources.xenserver import XenServer
+
 
 '''@author: SergioVidiella'''
 
@@ -34,6 +36,8 @@ class VTServer(Base):
     __childClasses = (
     'XenServer',
        )
+    
+    xenserver = relationship("XenServer", backref="vtserver")
 
     '''General attributes'''
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -132,7 +136,7 @@ class VTServer(Base):
     def getChildObject(self):
    	for childClass in self.__childClasses:
             try:
-            	return self.__getattribute__(childClass.lower())
+            	return self.__getattribute__(childClass.lower())[0]
             except Exception:
                 pass
             

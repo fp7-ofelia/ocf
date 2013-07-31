@@ -1,16 +1,14 @@
 import os
 import sys
-from utils.servicethread import *
 
 from utils.servicethread import *
 from utils.xmlhelper import XmlHelper
 from utils.httputils import HttpUtils
 from resources.virtualmachine import VirtualMachine
 from controller.actions.actioncontroller import ActionController
-from utils.servicethread import *
+
 
 class VTDriver():
-
 
 	CONTROLLER_TYPE_XEN = "xen"
 	__possibleVirtTechs = [CONTROLLER_TYPE_XEN]
@@ -91,24 +89,40 @@ class VTDriver():
 
 	@staticmethod
 	def getServerById(id):
-		from vt_manager.models.VTServer import VTServer
+		from resources.vtserver import VTServer
+		from sqlalchemy import create_engine
+                from sqlalchemy.orm import scoped_session, sessionmaker
+                from utils.commonbase import ENGINE
+
+                db_engine = create_engine(ENGINE, pool_recycle=6000)
+                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
+                db_session = scoped_session(db_session_factory)
+
 		try:
-			return VTServer.objects.get(id=id).getChildObject()
+			return db_session.query(VTServer)filter(VTServer.id==id).first().getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 		
 	@staticmethod
 	def getServerByUUID(uuid):
 		try:
-			from vt_manager.models.VTServer import VTServer
-			return VTServer.objects.get(uuid=uuid).getChildObject()
+			from resources.vtserver import VTServer
+			from sqlalchemy import create_engine
+	                from sqlalchemy.orm import scoped_session, sessionmaker
+        	        from utils.commonbase import ENGINE
+
+                	db_engine = create_engine(ENGINE, pool_recycle=6000)
+                	db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
+                	db_session = scoped_session(db_session_factory)
+
+			return db_session.query(VTServer).filter(VTServer.uuid==uuid).getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 
 	@staticmethod
 	def getVMsInServer(server):
 		try:
-			return server.vms.all()
+			return server.vms
 		except:
 			raise Exception("Could not recover server VMs")
 
@@ -118,17 +132,33 @@ class VTDriver():
 	
 	@staticmethod	
 	def getVMbyUUID(uuid):
+        	from sqlalchemy import create_engine
+                from sqlalchemy.orm import scoped_session, sessionmaker
+                from utils.commonbase import ENGINE
+
+                db_engine = create_engine(ENGINE, pool_recycle=6000)
+                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
+                db_session = scoped_session(db_session_factory)
+
 		try:
-			return VirtualMachine.objects.get(uuid = uuid).getChildObject()
+			return db_session.query(VirtualMachine).filter(VirtualMachine.uuid==uuid).getChildObject()
 		except:
-			raise
+			raise Exception("VM does not exist or uuid not unique")
 
 	@staticmethod
 	def getVMbyId(id):
+		from sqlalchemy import create_engine
+                from sqlalchemy.orm import scoped_session, sessionmaker
+                from utils.commonbase import ENGINE
+
+                db_engine = create_engine(ENGINE, pool_recycle=6000)
+                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
+                db_session = scoped_session(db_session_factory)
+
 		try:
-			return VirtualMachine.objects.get(id = id).getChildObject()
+			return db_session.query(VirtualMachine).filter(VirtualMachine.id==id).getChildObject()
 		except:
-			raise
+			raise Exception("Server does not exist or id not unique")
 
 	def deleteVM():
 		raise Exception("Method not callable for Driver Class")
@@ -138,6 +168,7 @@ class VTDriver():
 	
 
 	def getServers(self):
+		#XXX: Same as getAllServers()?
 		return self.ServerClass.objects.all()
 
 	@staticmethod
@@ -196,9 +227,17 @@ class VTDriver():
 
 	@staticmethod
 	def PropagateActionToProvisioningDispatcher(vm_id, serverUUID, action):
-		from vt_manager.communication.utils.XmlHelper import XmlHelper
-		from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
-		vm = VirtualMachine.objects.get(id=vm_id).getChildObject()
+		from utils.xmlhelper import XmlHelper
+		from controller.dispatchers.dispatcherlauncher import DispatcherLauncher
+		from sqlalchemy import create_engine
+                from sqlalchemy.orm import scoped_session, sessionmaker
+                from utils.commonbase import ENGINE
+
+		db_engine = create_engine(ENGINE, pool_recycle=6000)
+                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
+                db_session = scoped_session(db_session_factory)
+
+		vm = db_session.query(VirtualMachine).filter(VirtualMachine.id=vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
 		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)
