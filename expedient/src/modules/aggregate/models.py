@@ -263,7 +263,7 @@ No information available.
                 # Carolina: remove permision for aggregate in every slice inside the project
                 self.remove_from_slice(slice, next)
 
-            Clearinghouse().delete_from_instance("can_use_aggregate",self.as_leaf_class(),project) 
+            Clearinghouse().remove_from_instance("can_use_aggregate",self.as_leaf_class(),project) 
             #delete_permission("can_use_aggregate", self.as_leaf_class(), project)
             return next
         
