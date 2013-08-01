@@ -3,7 +3,8 @@ import os
 import sys
 from common.messaging.models import DatedMessage
 from vt_plugin.models import *
-from vt_plugin.utils.ServiceThread import *
+from common.utils.ServiceThread import ServiceThread
+#from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, threading, logging
 from settings import ROOT_USERNAME, ROOT_PASSWORD, SITE_IP_ADDR

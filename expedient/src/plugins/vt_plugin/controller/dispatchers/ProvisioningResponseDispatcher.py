@@ -4,7 +4,8 @@ import os
 import sys
 from vt_plugin.models import *
 from vt_manager.communication.utils.XmlHelper import *
-from vt_plugin.utils.ServiceThread import *
+from common.utils.ServiceThread import ServiceThread
+#from vt_plugin.utils.ServiceThread import *
 from vt_plugin.utils.Translator import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 from common.messaging.models import DatedMessage

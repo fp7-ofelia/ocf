@@ -16,7 +16,8 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_plugin.controller.VMcontroller.VMcontroller import VMcontroller
-from vt_plugin.utils.ServiceThread import ServiceThread
+from common.utils.ServiceThread import ServiceThread
+#from vt_plugin.utils.ServiceThread import ServiceThread
 from modules.aggregate.models import Aggregate
 from common.messaging.context_processors import messaging
 from common.messaging.models import DatedMessage
