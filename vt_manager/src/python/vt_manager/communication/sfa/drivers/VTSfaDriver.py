@@ -55,6 +55,7 @@ class VTSfaDriver:
 		
                 rspec = RSpec(rspec_string,'OcfVt')
                 requested_attributes = rspec.version.get_slice_attributes()
+                requested_attributes = self.shell.convert_to_uuid(requested_attributes) #Converts component_id URNs to UUIDs
 		projectName = authority#users[0]['slice_record']['authority']
 		sliceName = slice_leaf
 		self.shell.CreateSliver(requested_attributes,projectName,sliceName,expiration_date)

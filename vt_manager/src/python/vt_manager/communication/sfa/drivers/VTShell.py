@@ -3,6 +3,8 @@ from vt_manager.models.VTServer import VTServer
 from vt_manager.models.Action import Action
 from vt_manager.models.expiring_components import ExpiringComponents
 
+from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, get_leaf
+
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
@@ -92,3 +94,8 @@ class VTShell:
 		#TODO: Get all the vms from a node and from an specific user
 		pass
 
+        def convert_to_uuid(self,requested_attributes):
+                for slivers in requested_attributes:
+                        servers = VTServer.objects.filter(name=get_leaf(slivers['component_id']))
+		        slivers['component_id'] = servers[0].uuid
+                return requested_attributes
