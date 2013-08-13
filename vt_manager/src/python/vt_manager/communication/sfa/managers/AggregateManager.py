@@ -6,7 +6,7 @@ from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver
 
 from vt_manager.communication.sfa.util.faults import MissingSfaInfo, UnknownSfaType, \
     RecordNotFound, SfaNotImplemented, SliverDoesNotExist
-
+import zlib
 
 class AggregateManager:
 
