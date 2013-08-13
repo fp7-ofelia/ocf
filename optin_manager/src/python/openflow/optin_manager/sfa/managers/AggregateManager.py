@@ -48,8 +48,9 @@ class AggregateManager:
        xrn = Xrn(xrn, 'slice')
        slice_urn = xrn.get_urn()
        slice_leaf = xrn.get_leaf()
+       slice_hrn = xrn.get_hrn()
        authority = xrn.get_authority_hrn()
-       expiration_date =  self.driver.get_expiration_date(slice_hrn, creds)
+       expiration_date =  self.driver.get_expiration_date(slice_hrn, creds)# XXX: AM may require get slice_expiration from the registry 
        return self.driver.create_sliver (slice_urn,slice_leaf,authority,rspec_string, users, options, expiration_date)
 
     def DeleteSliver(self, xrn, options):

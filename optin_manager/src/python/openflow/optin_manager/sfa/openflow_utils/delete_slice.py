@@ -1,11 +1,14 @@
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace, UserOpts, OptsFlowSpace, MatchStruct
+from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVServerProxy
 
 def delete_slice(slice_urn):
     try:
+        mult_exp = Experiment.objects.all()
+        for exp in mult_exp:
+            print exp.slice_id
         single_exp = Experiment.objects.get(slice_id = slice_urn)
     except Experiment.DoesNotExist:
         raise "" #RecordNotFound exception
-
     fv = FVServerProxy.objects.all()[0]
     try:
         success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
