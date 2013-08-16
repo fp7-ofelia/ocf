@@ -96,7 +96,7 @@ No information available.
         for this aggregate as a C{QuerySet} of C{User} objects.
         """
         #XXX: this info is not relevant, basically we are asking who are the IMs
-        return Clearinghouse.get_island_managers()
+        return Clearinghouse().get_island_managers()
     #    return Permittee.objects.filter_for_class_and_permission_name(
     #        klass=User,
     #        permission="can_edit_aggregate",
@@ -283,7 +283,7 @@ No information available.
                                    'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
             #XXX: Clearinghouse call
-            Clearinghouse.add_aggregate_to_slice("can_use_aggregate",self.as_leaf_class,slice)
+            Clearinghouse().add_aggregate_to_slice("can_use_aggregate",self.as_leaf_class,slice)
             #give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 

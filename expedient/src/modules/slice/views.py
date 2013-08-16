@@ -17,6 +17,7 @@ from forms import SliceCrudForm
 from django.conf import settings
 import logging
 from common.permissions.shortcuts import must_have_permission, give_permission_to
+from common.api.clearinghouse import Clearinghouse
 logger = logging.getLogger("SliceViews")
 import uuid
 from modules.slice.utils import parseFVexception
@@ -28,7 +29,8 @@ def create(request, proj_id):
     '''Create a slice'''
     project = get_object_or_404(Project, id=proj_id)
     
-    must_have_permission(request.user, project, "can_create_slices")
+    Clearinghouse().check_role(request.user, 'pi')
+    #XXX:must_have_permission(request.user, project, "can_create_slices")
     
     def pre_save(instance, created):
         instance.project = project
@@ -41,7 +43,8 @@ def create(request, proj_id):
     
     #use to give the can_delete_slices over the slice to the creator and the owners of the project 
     def post_save(instance, created):
-	give_permission_to("can_delete_slices", instance, instance.owner, giver=None, can_delegate=False)
+        Clearinghouse().add_to_instance("can_delete_slices", instance, instance.owner, giver=None, can_delegate=False) 
+	#give_permission_to("can_delete_slices", instance, instance.owner, giver=None, can_delegate=False)
 #	for projectOwner in instance.project._get_owners():
 #		give_permission_to("can_delete_slices", instance, projectOwner, giver=None, can_delegate=False)	
 
@@ -65,7 +68,8 @@ def update(request, slice_id):
     '''Update a slice's information'''
     
     project = get_object_or_404(Project, slice__pk=slice_id)
-    must_have_permission(request.user, project, "can_edit_slices")
+    Clearinghouse().check_role(request.user, 'pi')
+    #XXX:must_have_permission(request.user, project, "can_edit_slices")
 
     return generic_crud(
         request, slice_id, Slice,
@@ -86,10 +90,12 @@ def delete(request, slice_id):
     
     #Slice can edited and used by anyone in the project, but only the owner of the slice
     #or the project's owner can delete it
-    try:
-        must_have_permission(request.user, slice, "can_delete_slices")
-    except Exception,e:
-        must_have_permission(request.user, project, "can_delete_slices")
+    #XXX:There are no problem if we use default roles.
+    Clearinghouse().check_role(request.user,'pi') 
+    #try:
+    #    must_have_permission(request.user, slice, "can_delete_slices")
+    #except Exception,e:
+    #    must_have_permission(request.user, project, "can_delete_slices")
 
     if request.method == "POST":
         stop(request, slice_id)
@@ -117,7 +123,8 @@ def detail(request, slice_id):
     '''Show information about the slice'''
     slice = get_object_or_404(Slice, id=slice_id)
 
-    must_have_permission(request.user, slice.project, "can_view_project")    
+    Clearinghouse().check_role(request.user, 'researcher')
+    #must_have_permission(request.user, slice.project, "can_view_project")    
     resource_list = [rsc.as_leaf_class() for rsc in slice.resource_set.all()]
 
     template_list_computation = []
@@ -165,7 +172,8 @@ def start(request, slice_id):
     '''Start the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
     
-    must_have_permission(request.user, slice.project, "can_start_slices")
+    Clearinghouse().check_role(request.user, 'pi')
+    #XXX:must_have_permission(request.user, slice.project, "can_start_slices")
     
     if request.method == "POST":
 
@@ -202,8 +210,9 @@ def start(request, slice_id):
 def stop(request, slice_id):
     '''Stop the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
-    
-    must_have_permission(request.user, slice.project, "can_stop_slices")
+
+    Clearinghouse.check_role(request.user, 'pi')    
+    #must_have_permission(request.user, slice.project, "can_stop_slices")
     
     if request.method == "POST":
         try:
@@ -255,6 +264,8 @@ def add_aggregate(request, slice_id):
     
     slice = get_object_or_404(Slice, id=slice_id)
     
+    #XXX: Caution here, this behavior is different from SFA federation behaviour.
+    Clearinghouse().check_role(request.user, 'pi')
     #must_have_permission(request.user, slice.project, "can_edit_slices")
     
     aggregate_list = slice.project.aggregates.exclude(
@@ -295,7 +306,8 @@ def update_aggregate(request, slice_id, agg_id):
     
     slice = get_object_or_404(Slice, id=slice_id)
 
-    must_have_permission(request.user, slice.project, "can_edit_slices")
+    Clearinghouse().check_role(request.user,'pi')
+    #XXX:must_have_permission(request.user, slice.project, "can_edit_slices")
     
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(
@@ -311,8 +323,9 @@ def update_aggregate(request, slice_id, agg_id):
 def remove_aggregate(request, slice_id, agg_id):
 
     slice = get_object_or_404(Slice, id=slice_id)
-
-    must_have_permission(request.user, slice.project, "can_edit_slices")
+   
+    Clearinghouse.check_role(request.user, 'pi')
+    #XXX:must_have_permission(request.user, slice.project, "can_edit_slices")
     
     aggregate = get_object_or_404(
         Aggregate, id=agg_id, id__in=slice.aggregates.values_list(

@@ -106,7 +106,11 @@ class Clearinghouse:
   
     def remove_from_instance(self,permission,instance, from_instance):
         from common.permissions.shortcuts import delete_permission
-        delete_permission("can_use_aggregate", instance, from_instance)
+        delete_permission(permission, instance, from_instance)
+
+    def add_to_instance(self,permission,instance,instance_owner,giver=None,can_delegate=False):
+        from common.permissions.shortcuts import give_permission_to
+        give_permission_to(permission,instance,instance_owner,giver,can_delegate)
 
     def add_aggregate_to_project(self,permission,aggregate,project):
         from common.permissions.shortcuts import \
