@@ -45,7 +45,7 @@ body {
 #content {
 	font-size: 1.2em;
 	border-style: none;
-	min-height: 180px !important;
+	/*min-height: 180px !important;*/
 	}
 
 .widecolumn .entry p {
@@ -832,7 +832,7 @@ table.msg_table {
     border: 0px;
     margin: 0px 0px;
     padding: 0px;
-    width: 730px;
+    width: 100%; /*730px;*/
 }
 
 table.msg_table td {
