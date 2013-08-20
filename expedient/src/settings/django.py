@@ -210,7 +210,7 @@ AUTH_PROFILE_MODULE = "users.UserProfile"
 ACCOUNT_ACTIVATION_DAYS = 3
 '''Number of days account activation links are valid.'''
 
-AGGREGATE_LOGOS_DIR = "aggregate_logos/"
+AGGREGATE_LOGOS_DIR = "aggregate_logos/default/img/aggregates/"
 '''Directory relative to MEDIA_ROOT where all aggregate logos are uploaded.'''
 
 TEMPLATE_CONTEXT_PROCESSORS = [
