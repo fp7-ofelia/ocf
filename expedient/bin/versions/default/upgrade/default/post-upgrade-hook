@@ -10,6 +10,11 @@
 #inform user
 printHeader "info#" "Using default post-upgrade-hook module..."
 
+#Create secret key (if needed) after settings have been set
+if [ ! -f /opt/ofelia/expedient/src/settings/secret_key.py ]; then
+    python /opt/ofelia/expedient/src/manage.py create_secret_key || warning "Please run the 'create_secret_key' manage.py command to create a new secret key. Do this only after setting up your local settings. If you are not yet running the production server, you can ignore this error."
+fi
+
 #Starting apache
 print "Starting apache2..."
 /usr/sbin/service apache2 start
