@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<rspec xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="advertisement" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/tests/vm_schema.xsd" expires="2013-03-20T08:44:34Z" generated="2013-03-20T07:44:34Z">
+  <node component_manager_id="ocf.i2cat.vtmanager:c9883c61-16df-49cc-a8ea-8768d9b517a4authority+cm" component_id="c9883c61-16df-49cc-a8ea-8768d9b517a4" exclusive="false" component_name="c9883c61-16df-49cc-a8ea-8768d9b517a4">
+    <name>foix</name>
+    <operating_system_type>GNU/Linux</operating_system_type>
+    <operating_system_distribution>Debian</operating_system_distribution>
+    <operating_system_version>6.0</operating_system_version>
+    <virtualization_technology>xen</virtualization_technology>
+    <cpus_number>8</cpus_number>
+    <cpu_frequency>2500</cpu_frequency>
+    <memory>900</memory>
+    <hdd_space_GB>5000.0</hdd_space_GB>
+    <agent_url>https://84.88.40.12:9229/</agent_url>
+    <service type="Range">
+      <type>IP_Range</type>
+      <name>Range prueba</name>
+      <start_value>10.0.0.1</start_value>
+      <end_value>10.0.0.100</end_value>
+    </service>
+    <service type="Range">
+      <type>IP_Range</type>
+      <name>prueba 2</name>
+      <start_value>10.0.0.200</start_value>
+      <end_value>10.0.0.254</end_value>
+    </service>
+    <service type="Range">
+      <type>MAC_Range</type>
+      <name>prueba</name>
+      <start_value>02:03:FF:FF:FF:00</start_value>
+      <end_value>02:03:FF:FF:FF:FF</end_value>
+    </service>
+    <service type="NetworkInterface">
+      <from_server_interface_name>eth1.999</from_server_interface_name>
+      <to_network_interface_id>OFSwitch001</to_network_interface_id>
+      <to_network_interface_port>2</to_network_interface_port>
+    </service>
+    <service type="NetworkInterface">
+      <from_server_interface_name>eth2</from_server_interface_name>
+      <to_network_interface_id>lak</to_network_interface_id>
+      <to_network_interface_port>5</to_network_interface_port>
+    </service>
+    <service type="NetworkInterface">
+      <from_server_interface_name>eth3</from_server_interface_name>
+      <to_network_interface_id>OFSwitch002</to_network_interface_id>
+      <to_network_interface_port>23</to_network_interface_port>
+    </service>
+  </node>
+  <node component_manager_id="ocf.i2cat.vtmanager:36700b0c-11b5-4601-bde5-a26d07552f30authority+cm" component_id="36700b0c-11b5-4601-bde5-a26d07552f30" exclusive="false" component_name="36700b0c-11b5-4601-bde5-a26d07552f30">
+    <name>Dummy</name>
+    <operating_system_type>GNU/Linux</operating_system_type>
+    <operating_system_distribution>Debian</operating_system_distribution>
+    <operating_system_version>6.0</operating_system_version>
+    <virtualization_technology>xen</virtualization_technology>
+    <cpus_number>None</cpus_number>
+    <cpu_frequency>None</cpu_frequency>
+    <memory>None</memory>
+    <hdd_space_GB>None</hdd_space_GB>
+    <agent_url>https://84.88.40.12:9229/</agent_url>
+    <service type="NetworkInterface">
+      <from_server_interface_name>NoMac</from_server_interface_name>
+      <to_network_interface_port>None</to_network_interface_port>
+    </service>
+  </node>
+</rspec>
+

@@ -8,6 +8,7 @@ admin.autodiscover()
 from vt_manager.utils.ThemeManager import ThemeManager
 from vt_manager.communication.southCommInterface import *
 from vt_manager.communication.northCommInterface import *
+from vt_manager.communication.sfaCommunication import *
 
 '''
 Load Themes
@@ -76,6 +77,7 @@ urlpatterns = patterns('',
     #RPC
     rpc_url(r'^xmlrpc/agent/?$', name='agent'),
     rpc_url(r'^xmlrpc/plugin/?$', name='plugin'),
+    rpc_url(r'^xmlrpc/sfa/?$', name='sfa'),
     #rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 

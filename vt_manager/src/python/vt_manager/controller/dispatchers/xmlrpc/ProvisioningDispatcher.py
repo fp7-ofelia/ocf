@@ -10,6 +10,9 @@ from vt_manager.controller.actions.ActionController import ActionController
 
 from vt_manager.controller.policies.RuleTableManager import RuleTableManager
 
+#from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
+#from vt_manager.common.middleware.thread_local import thread_locals, pull
+
 class ProvisioningDispatcher():
   
  
@@ -19,20 +22,14 @@ class ProvisioningDispatcher():
 		for action in provisioning.action:
 			actionModel = ActionController.ActionToModel(action,"provisioning")
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
-
 			try:
 				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
 			except Exception as e:
-				a = str(e)
-				if len(a)>200:
-					a = a[0:199]
-				
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,a )))
+				MAX_CHARS_ALLOWED = 200
+				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action,str(e)[0:MAX_CHARS_ALLOWED-1])))
 				return None
 			try:
-				
 				controller = VTDriver.getDriver(action.server.virtualization_type)
-
 				#XXX:Change this when xml schema is updated
 				server = VTDriver.getServerByUUID(action.server.uuid)
 				#if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
@@ -54,8 +51,8 @@ class ProvisioningDispatcher():
 				#PROVISIONING DELETE, START, STOP, REBOOT
 				else :
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
-
-				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
+				return
 			except Exception as e:
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					# If the VM creation was interrupted in the network
@@ -66,7 +63,7 @@ class ProvisioningDispatcher():
 						controller.deleteVM(vm)
 					except Exception as e:
 						print "Could not delete VM. Exception: %s" % str(e)
-				XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
+				#XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
 
 		logging.debug("PROVISIONING FINISHED...")
 
@@ -80,9 +77,11 @@ class ProvisioningDispatcher():
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
+			actionModel.callBackUrl = threading.currentThread().callBackURL
 			actionModel.save()
 			return VMmodel
-		except:
+		except Exception as e:
+			print e
 			raise
 
 	@staticmethod

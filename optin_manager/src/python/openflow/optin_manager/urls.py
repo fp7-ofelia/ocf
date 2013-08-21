@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
+from expedient.common.rpc4django.utils import rpc_url
 
 from openflow.common.utils.OptinThemeManager import OptinThemeManager
 OptinThemeManager.initialize()
@@ -28,6 +29,10 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
 
     (r'^accounts/', include('registration.urls')),
+
+    # sfa
+    rpc_url(r'^xmlrpc/sfa/?$', name='optin_sfa'),
+
 )
 
 #static_file_tuple = (r'^%s/(?P<path>.*)$' % settings.MEDIA_URL[1:],

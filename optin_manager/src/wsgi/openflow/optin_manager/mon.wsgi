@@ -13,5 +13,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'openflow.optin_manager.settings'
 sys.path.insert(0,PYTHON_DIR)
 
 from openflow.optin_manager.monitoring.BackgroundMonitor import BackgroundMonitor
+from openflow.optin_manager.monitoring.backgorund_expiration_monitoring import BackgorundExpirationMonitoring
 BackgroundMonitor.monitor()
+BackgroundExpirationMonitoring.monitor()
 

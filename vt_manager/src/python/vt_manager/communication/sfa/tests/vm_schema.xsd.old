@@ -1,0 +1,59 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">  
+ <xs:element name="rspec">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="node">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="slivers">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="name"/>
+                    <xs:element type="xs:string" name="uuid"/>
+                    <xs:element type="xs:string" name="project-id"/>
+                    <xs:element type="xs:string" name="slice-id"/>
+                    <xs:element type="xs:string" name="operating-system-type"/>
+                    <xs:element type="xs:float" name="operating-system-version"/>
+                    <xs:element type="xs:string" name="operating-system-distribution"/>
+                    <xs:element type="xs:string" name="server-id"/>
+                    <xs:element type="xs:string" name="hd-setup-type"/>
+                    <xs:element type="xs:string" name="hd-origin-path"/>
+                    <xs:element type="xs:string" name="virtualization-setup-type"/>
+                    <xs:element type="xs:short" name="memory-mb"/>
+                    <xs:element name="interfaces">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="interface" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:string" name="name"/>
+                                <xs:element type="xs:string" name="mac" minOccurs="0"/>
+                                <xs:element type="xs:string" name="ip" minOccurs="0"/>
+                                <xs:element type="xs:string" name="mask" minOccurs="0"/>
+                                <xs:element type="xs:string" name="gw" minOccurs="0"/>
+                                <xs:element type="xs:string" name="dns1" minOccurs="0"/>
+                                <xs:element type="xs:string" name="dns2" minOccurs="0"/>
+                              </xs:sequence>
+                              <xs:attribute type="xs:string" name="ismgmt" use="optional"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="component_manager_id"/>
+            <xs:attribute type="xs:string" name="component_id"/>
+            <xs:attribute type="xs:string" name="exclusive"/>
+            <xs:attribute type="xs:string" name="component_name"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="type"/>
+      <xs:attribute type="xs:dateTime" name="expires"/>
+      <xs:attribute type="xs:dateTime" name="generated"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
