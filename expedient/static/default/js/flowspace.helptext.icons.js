@@ -1,7 +1,11 @@
 /* For FlowSpace editing only */
 $(document).ready(function() {
 	if (document.URL.indexOf("flowspace") > -1) {
+		/*
+		// jQuery tools 1.2.3 (does not work as of 1.2.7)
 		var numRows = Math.floor($("table.formtable>tbody>tr:nth-child>td:nth-child(3)").size()/2);
+		*/
+		var numRows = Math.floor($("table.formtable>tbody>tr>td:nth-child(3)").size()/2);
 		for (index=1; index<=numRows; index++) {
 			var labels = $("table.formtable>tbody>tr:nth-child(" + index + ")>td").find('label');
 			var text = "";
