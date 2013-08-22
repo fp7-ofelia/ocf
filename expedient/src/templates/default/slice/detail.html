@@ -5,82 +5,20 @@
 {% block title %}Slice {{ slice.name }} in Project {{ slice.project.name }}{% endblock title %}
 
 {% block head %}
-<style>
-	#resources_table {
-	    width: 100%;
-	}
-	#resource_list {
-	    width: 100%;
-	}
-	.table_div td,th {
-	    text-align: center;
-	}
-</style>
+<link href="{% url css_media 'slice.css' %}" type="text/css" rel="stylesheet" />
+<link href="{% url css_media 'slice.topology.css' %}" type="text/css" rel="stylesheet" />
+<script src="{% url js_media 'slice.js' %}"></script>
 <script src="{% url js_media 'jquery.blockUI.js' %}"></script>
-<script>
-        function getLoadingMsg(action) {
-            var grantedFlowspace = 0;
-            if ($("[id^=grantedFlowspace][id$=Container]").length > 0 || 
-                $(".grantedFlowspaceHeader").length > 0) {
-                    grantedFlowspace = 1;
-                }
-
-            var flowspaceWarning = 'confirmWrapper("';
-            if (action == "start_update") {
-                {% if slice.started %}
-                    if (grantedFlowspace) {
-                        flowspaceWarning += "Updating";
-                    }
-                {% else %}
-                    return eval('showLoadingMsg("Loading...");');
-                {% endif %}
-            } else if (action == "stop") {
-                if (grantedFlowspace) {
-                    flowspaceWarning += "Stopping";
-                }
-            }
-            if (grantedFlowspace) {
-                flowspaceWarning += ' the slice will cause all granted flowspaces to be deleted in the Flowvisor, and require approval for new requests. Are you sure you want to ' + action + ' the slice?");';
-                return eval(flowspaceWarning);
-            } else {
-                return eval('showLoadingMsg("Loading...");');
-            }
-        }
-
-	function showLoadingMsg(message){
-		//TODO:Show message
-		 $.blockUI({ css: { 
-		            border: 'none', 
-		            padding: '15px', 
-       			    backgroundColor: '#000', 
-                	 	'-webkit-border-radius': '10px', 
-                		'-moz-border-radius': '10px', 
- 	       	            opacity: .5, 
-         		    color: '#fff' 
-        		} });
-	}
-	function confirmWrapper(message){
-		value = confirm(message);
-		if (value){
-			showLoadingMsg("Loading...");
-		}
-		return value;
-	}
-	$(document).ready(function() {
-		$("#aggs_help_img").tooltip({
-			tip: "#aggs_help_div"
-		});
-		$(".expandableTooltipable").tooltip({
-			tip: "#expandableHelp"
-		});
-	});
-</script>
 {% endblock %}
 
 {% block content %}
 <div class="main">
 	<div class="title">
 		<h1>Slice <font class="highlight">{{ slice.name }}</font> in Project <font class="highlight">{{ slice.project.name }}</font></h1>
+	</div>
+	<div class="mgmt_actions">
+		<p><a href="{% url slice_update slice.id %}">Edit</a> basic information</p>
+		<p><a href="{% url slice_delete slice.id %}">Delete</a> slice</p>
 	</div>
 		<div class="slicemgmt_actions">
 	   	<table width="100%" id="slicemgmt_table">
@@ -102,31 +40,39 @@
 				{% endif %}
 
 			</td>
-			<td width="57%" style="font-size:11px;vertical-align:top">
+			<td width="54%" style="font-size:11px;vertical-align:top">
 		        <i>{{ slice.description }}</i>
 			<!--		XXX:Expiration method needs review
 		        <h2>Expires:</h2>
 		        {{ slice.expiration_date }}-->
 	   		</td>
-			<td width="27%">
-		    	<a href="{% url slice_update slice.id %}">Edit</a> slice basic information.<br>
-		    	<a href="{% url slice_delete slice.id %}">Delete</a> slice.
+			<td width="30%">
 				<table style="margin-top:5px;">
 	    			<tr>
 	    				<td>
 				    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}
-								<input 
+							<input 
 								type="submit" 
-								value="{% if slice.started %}Update{% else %}Start{% endif %} Slice"
-								onClick = "return getLoadingMsg('start_update');"
+							{% if not slice.started %}
+								style="background-image: url({% url img_media 'play.png' %});"
+								value="Start Slice"
+								class="slice_action_button start_slice_button"
+							{% else %}
+								style="background-image: url({% url img_media 'reload.png' %}); width: 120px !important;"
+								value="Update Slice"
+								class="slice_action_button update_slice_button"
+							{% endif %}
+							onClick = "return getLoadingMsg('start_update');"
 							/>
 			    			</form>
 			    		</td>
 			    		<td>
 				    		<form action="{% url slice_stop slice.id %}" method="POST">{% csrf_token %}
 							<input
+							style="background-image: url({% url img_media 'stop.png' %})"
 							type="submit"
 							value="Stop Slice"
+							class="slice_action_button stop_slice_button"
 							{% if not slice.started %} disabled {% endif %}
 							onClick = "return getLoadingMsg('stop');"
 							/>
