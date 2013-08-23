@@ -5,8 +5,8 @@ from vt_plugin.models import VtPlugin, VTServer, VM, Action
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 import xmlrpclib, uuid
-from common.utils.ServiceThread import ServiceThread
-#from vt_plugin.utils.ServiceThread import *
+#from common.utils.ServiceThread import ServiceThread
+from vt_plugin.utils.ServiceThread import *
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import *
 
 class VMcontroller():
