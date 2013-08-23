@@ -47,7 +47,8 @@
 		        {{ slice.expiration_date }}-->
 	   		</td>
 			<td width="30%">
-				<table style="margin-top:5px;">
+				<table style="margin-top:5px;" align="center">
+
 	    			<tr>
 	    				<td>
 				    		<form action="{% url slice_start slice.id %}" method="POST">{% csrf_token %}

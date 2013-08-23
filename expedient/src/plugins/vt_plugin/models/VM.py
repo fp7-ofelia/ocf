@@ -16,6 +16,8 @@ VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),
                         #('hvm','HVM'),
                       )
+MEMORY_RANGE = ( 128, 1024 )
+
 class VM(Resource):
     
     '''

@@ -3,6 +3,33 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
+<link rel="stylesheet" type="text/css" href="{% url css_media_vt_plugin 'slider.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% url css_media_vt_plugin 'jquery.ui.noimages.css' %}" />
+<script type="text/javascript" src="{% url js_media 'jquery-ui.min.js' %}"></script>
+<script>
+  $(function() {
+	// Hides default memory input, use it to store the value from the slider
+	$("#id_memory").hide();
+	// Creates new div to restrict the slider width
+	$("#id_memory").parent().append("<div id=\"id_memory_slider\"/>");
+	// Appends new input to show chosen Mb
+	$("#id_memory").parent().append("<span id=\"id_memory_slider_mbs\"/>");
+    $("#id_memory_slider").slider({
+      range: "min",
+      value: {{ min_disk_memory }},
+      min: {{ min_disk_memory }},
+      max: {{ max_disk_memory }},
+      slide: function( event, ui ) {
+		// Callback function
+        $( "#id_memory_slider_mbs" ).html( ui.value + "Mb" );
+		$( 'input[id="id_memory"]' ).attr( 'value', ui.value );
+      }
+    });
+	// Initial values
+	$("#id_memory").val($("#id_memory_slider").slider("value"));
+    $("#id_memory_slider_mbs").html($("#id_memory").val() + "Mb");
+  });
+</script>
 {% endblock %}
 
 {% block content %}
@@ -31,3 +58,4 @@
 	</form>
 </div>
 {% endblock content %}
+
