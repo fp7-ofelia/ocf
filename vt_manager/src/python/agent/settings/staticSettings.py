@@ -74,3 +74,4 @@ OXA_REDHAT_INTERFACES_FILE_LOCATION = "/etc/sysconfig/network-scripts/"
 OXA_REDHAT_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
 OXA_REDHAT_HOSTNAME_FILE_LOCATION="/etc/hostname"
 
+

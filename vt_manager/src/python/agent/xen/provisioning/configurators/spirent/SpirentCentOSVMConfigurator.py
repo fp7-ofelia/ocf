@@ -6,7 +6,8 @@ import subprocess
 import re
 
 from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION, OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
+from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION,OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, OXA_SPIRENT_NPORTS_PER_GROUP, OXA_SPIRENT_NTPSERVER, OXA_SPIRENT_NPORTGROUPS, OXA_SPIRENT_LSERVER
+
 from utils.Logger import Logger
 
 
@@ -63,7 +64,55 @@ class SpirentCentOSVMConfigurator:
 		cfile.write(output)
 		cfile.close()
 
+	@staticmethod
+	def __configureTestPorts(vm, configFile):
+		configString = "[CFG]\n"
+		#Interfaces
+		for inter in vm.xen_configuration.interfaces.interface  :
 
+			if inter.ismgmt:
+				#is a mgmt interface
+				configString += "ADMIN_PORT="+inter.name+"\n"
+			else:
+				configString += "TEST_PORT="+inter.name+"\n"
+
+		configFile.write(configString+"[END]")			 
+
+	@staticmethod
+	def __configureAdmin(vm, configFile):
+		configString = ""
+		gwString = ""
+		for iface in vm.xen_configuration.interfaces.interface:
+			if iface.ismgmt:
+				inter = iface;
+				break;
+
+		if OXA_SPIRENT_NPORTS_PER_GROUP == "":
+			raise Exception("OXA_SPIRENT_NPORTS_PER_GROUP variable not set")
+		configString += "NPORTS_PER_GROUP="+OXA_SPIRENT_NPORTS_PER_GROUP+"\n"
+		if OXA_SPIRENT_NTPSERVER == "":
+			raise Exception("OXA_SPIRENT_NTPSERVER variable not set")
+		configString += "NTPSERVER="+OXA_SPIRENT_NTPSERVER+"\n"
+		configString += "HOSTNAME="+vm.name+"\n"
+		configString +=	"IPADDR="+inter.ip+"\n"
+		configString += "PROMISC=on\n"
+		configString += "DRIVERMODE=sockets\n"
+		configString += "NETMASK="+inter.mask+"\n"
+		configString += "ADDR_MODE=static\n"
+		configString += "PORT_SPEED=1000M\n"
+		configString += "DEVICE=\n"
+		if OXA_SPIRENT_NPORTGROUPS == "":
+			raise Exception("OXA_SPIRENT_NPORTGROUPS variable not set")
+		configString += "NPORTGROUPSP="+OXA_SPIRENT_NPORTGROUPS+"\n"
+		if OXA_SPIRENT_LSERVER == "":
+			raise Exception("OXA_SPIRENT_LSERVER variable not set")
+		configString += "LSERVERP="+OXA_SPIRENT_NTPSERVER+"\n"
+		if inter.gw != None:
+			gwString = inter.gw
+		configString += "GATEWAY="+gwString+"\n"
+
+		configFile.write(configString)
+			
 
 	''' Public methods '''
 
@@ -96,13 +145,24 @@ class SpirentCentOSVMConfigurator:
 
 	@staticmethod
 	def _configureTestPorts(vm,path):
+		configPath = "/mnt/spirent/chassis/conf/stca.ini"
 		try:
-			pass	
+			with open(path+configPath,'w') as configFile:
+				SpirentCentOSVMConfigurator.__configureTestPorts(vm, configFile)
 		except Exception as e:
 			SpirentCentOSVMConfigurator.logger.error("Could not configure test ports... - "+str(e))
 			raise e
 
 	
+	@staticmethod
+	def _configureAdmin(vm,path):
+		configPath = "/mnt/spirent/chassis/conf/admin.conf"
+		try:
+			with open(path+configPath,'w') as configFile:
+				SpirentCentOSVMConfigurator.__configureAdmin(vm, configFile)
+		except Exception as e:
+			SpirentCentOSVMConfigurator.logger.error("Could not configure admin file... - "+str(e))
+			raise e
 
 	#Public methods
 	@staticmethod
@@ -134,3 +194,7 @@ class SpirentCentOSVMConfigurator:
 		#Configure Test-Ports
 		SpirentCentOSVMConfigurator._configureTestPorts(vm,path)
 		SpirentCentOSVMConfigurator.logger.info("Test-ports configured successfully...")
+
+		#Configure Admin file
+		SpirentCentOSVMConfigurator._configureAdmin(vm,path)
+		SpirentCentOSVMConfigurator.logger.info("Admin file configured successfully...")
