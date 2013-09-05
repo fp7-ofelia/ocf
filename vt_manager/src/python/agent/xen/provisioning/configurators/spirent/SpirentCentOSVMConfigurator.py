@@ -20,7 +20,9 @@ class SpirentCentOSVMConfigurator:
 	def __configureInterfacesFile(vm, path):
 		#Interfaces
 		for inter in vm.xen_configuration.interfaces.interface  :
-			iFile = os.open(path+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-"+inter.name, w)
+
+			iFile =	open(path+OXA_REDHAT_INTERFACES_FILE_LOCATION+"ifcfg-"+inter.name, "w")
+
 
 			interfaceString = "DEVICE="+inter.name+"\n"+\
 					"HWADDR="+inter.mac+"\n"+\
@@ -35,7 +37,6 @@ class SpirentCentOSVMConfigurator:
 					interfaceString +="GATEWAY="+inter.gw+"\n"
 				interfaceString +="\n"
 
-				
 			iFile.write(interfaceString)			 
 			os.close(iFile)
 
@@ -76,7 +77,7 @@ class SpirentCentOSVMConfigurator:
 		try:
 			try:
 				#Remove all files under/etc/sysconfig/network-scripts/ifcfg-*
-				os.system("rm -f "+path+"/"+OXA_REDHAT_INTERFACES_LOCATION+"ifcfg-*")			 
+				os.system("rm -f "+path+"/"+OXA_REDHAT_INTERFACES_FILE_LOCATION+"ifcfg-*")			 
 				SpirentCentOSVMConfigurator.__configureInterfacesFile(vm, path)
 			except Exception as e:
 				pass
