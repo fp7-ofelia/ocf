@@ -51,7 +51,7 @@ class Translator():
         VMmodel.aggregate_id = agg_id    
         #VMmodel.aggregate_id = VTServer.objects.get(uuid = VMxmlClass.server_id).aggregate_id    
         #TODO: hablar con leo sobre incluir una variable disc_image para las vms...
-        VMmodel.disc_image = 'Default'
+        #VMmodel.disc_image = 'Default'
         
         if save is "save":
             VMmodel.save()

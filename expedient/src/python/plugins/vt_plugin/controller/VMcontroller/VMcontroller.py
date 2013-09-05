@@ -46,6 +46,13 @@ class VMcontroller():
             instance.operatingSystemVersion = '6.0'
             instance.operatingSystemDistribution = 'Debian'
             instance.hdOriginPath = "default/default.tar.gz"
+            instance.virtualization_setup_type = "paravirtualization"
+        if instance.disc_image == 'spirent':
+            instance.operatingSystemType = 'GNU/Linux'
+            instance.operatingSystemVersion = '6.2'
+            instance.operatingSystemDistribution = 'CentOS'
+            instance.hdOriginPath = "spirent/spirentSTCVM.img"
+            instance.virtualization_setup_type = "hvm"
 
         actionClass = copy.deepcopy(actionClassEmpty)
         actionClass.id = uuid.uuid4()

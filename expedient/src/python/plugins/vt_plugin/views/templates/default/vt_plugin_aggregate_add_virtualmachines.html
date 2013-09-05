@@ -3,6 +3,35 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#id_disc_image").change(function(){
+            	if (document.getElementById("id_disc_image").value == "spirent"){
+			document.getElementById("id_hdSetupType").value="file-full-image";
+			document.getElementById("id_virtualizationSetupType").value="hvm";
+			document.getElementById("id_hdSetupType").disabled=true;
+			document.getElementById("id_virtualizationSetupType").disabled=true;
+		}
+            	else if (document.getElementById("id_disc_image").value == "default"){
+			document.getElementById("id_hdSetupType").value="file-image";
+			document.getElementById("id_virtualizationSetupType").value="paravirtualization";
+			document.getElementById("id_hdSetupType").disabled=true;
+			document.getElementById("id_virtualizationSetupType").disabled=true;
+		}
+		else{
+			document.getElementById("id_hdSetupType").disabled=false;
+			document.getElementById("id_virtualizationSetupType").disabled=false;
+		};        
+		$("#form_create_VM").click(function(){
+			document.getElementById("id_hdSetupType").disabled=false;
+                        document.getElementById("id_virtualizationSetupType").disabled=false;
+		});
+	});
+});
+</script>
+
+
 {% endblock %}
 
 {% block content %}

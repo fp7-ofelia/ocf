@@ -1,4 +1,5 @@
 from xen.provisioning.configurators.ofelia.OfeliaDebianVMConfigurator import OfeliaDebianVMConfigurator
+from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
 from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
 from utils.Logger import Logger
 
@@ -19,6 +20,9 @@ class VMConfigurator():
 		if configurator and configurator != "":
 			if configurator == MediacatVMConfigurator.getIdentifier():
 				return MediacatVMConfigurator;
+			elif configurator == SpirentCentOSVMConfigurator.getIdentifier():
+				return SpirentCentOSVMConfigurator;
+	
 		else:
 			if os.lower() == "debian" or os.lower() == "ubuntu":
 				return OfeliaDebianVMConfigurator

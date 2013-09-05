@@ -25,7 +25,7 @@ from __init__ import version
 # but they are completely optional
 # see the rpc4django documentation for more details
 LOG_REQUESTS_RESPONSES = getattr(settings,
-                                 'RPC4DJANGO_LOG_REQUESTS_RESPONSES', True)
+                                 'RPC4DJANGO_LOG_REQUESTS_RESPONSES', False) #original true
 RESTRICT_INTROSPECTION = getattr(settings,
                                  'RPC4DJANGO_RESTRICT_INTROSPECTION', False)
 RESTRICT_JSON = getattr(settings, 'RPC4DJANGO_RESTRICT_JSONRPC', False)
@@ -56,7 +56,6 @@ class NonExistingDispatcher(Exception):
 
 def get_dispatcher(path, url_name):
     try:
-	print dispatchers.keys()
         dispatcher = dispatchers[url_name]
     except KeyError:
         raise NonExistingDispatcher(path, url_name)
