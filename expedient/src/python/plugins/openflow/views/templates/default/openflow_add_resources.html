@@ -22,8 +22,10 @@
 	});
 
 	</script>
-{# PLANETLAB #}
 
+{% load flowspace %} {# Loads Jinja filters for FlowSpaces #}
+
+{# PLANETLAB #}
 
 {% if planetlab_aggs %}
 <h2 class="resourcesh2">Select PlanetLab Nodes</h2>
@@ -118,8 +120,9 @@
 
 	{% if checked_ids %}
 	<div style="padding-top:20px;">
- 	  {% if allfs %}
-
+	{# Original: shows every flowspace in the slice #}
+	{#{% if allfs %}#}
+	{% if allfs|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
 		<tr>
@@ -257,11 +260,11 @@
 			{%endif%}
 		{% endif %}
 	{% endfor %} <!-- fs in gfs_list -->
-	<!-- END -->		
+	<!-- END -->
+{% else %}
+	<p>No Flowspace requested through this OpenFlow manager.</p>
+{% endif %}
 
- 	{% else %}
-              <p>There is no Flowspace in the Slice. </p>
-   {% endif %}
 {% else %} {#Should never reach this#}
 {%endif%} {#Checked IDs#}
 
