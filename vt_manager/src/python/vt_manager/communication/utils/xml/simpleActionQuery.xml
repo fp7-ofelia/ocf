@@ -21,6 +21,7 @@
 						<hd-setup-type>NONE</hd-setup-type>
 						<hd-size-mb>8200</hd-size-mb>
 						<hd-origin-path>NONE</hd-origin-path>
+						<configurator>NONE</configurator>
 						<virtualization-setup-type>NONE</virtualization-setup-type>
 						<memory-mb>1</memory-mb>
 						<interfaces>

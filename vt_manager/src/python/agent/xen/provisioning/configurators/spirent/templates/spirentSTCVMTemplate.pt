@@ -1,29 +1,31 @@
-{% block body %}
-
 # Configuration file template for Ofelia CF XEN agent
+{% block body %}
 
 #
 #  Kernel + memory size
 #
-kernel      = '{{ kernelImg }}'
-ramdisk     = '{{ initrdImg }}'
+kernel = "hvmloader"
+builder = 'hvm'
 
-extra = 'console=hvc0 xencons=tty'
-
+#
 memory      = '{{ vm.xen_configuration.memory_mb }}'
+#extra = 'console=hvc0 xencons=tty'
+
 
 #CPUS
-vcpus = 1
+vcpus = 2
 
 #
 #  Disk device(s).
 #
-root        = '/dev/xvda1 ro'
+#root		= '/dev/xvda1 ro'
+
 disk        = [
-                  'file:{{ hdFilePath }},xvda1,w',
-                  'file:{{ swapFilePath }},xvda2,w',
+                  'file:{{ hdFilePath }},hda,w'
               ]
 
+device_model	= 'qemu-dm'
+boot = 'cda'
 
 #
 #  Hostname
@@ -40,7 +42,8 @@ uuid = '{{ vm.uuid }}'
 dhcp='off'
 ##Interfaces 
 
-vif = [{% for interface in vm.xen_configuration.interfaces.interface %}' mac={{ interface.mac }}, bridge={%if interface.ismgmt%}eth2{%else%}eth1{%endif%} ',{% endfor %}]
+vif = [{% for interface in vm.xen_configuration.interfaces.interface %}' mac={{interface.mac }}, bridge={{interface.switch_id}}',{% endfor %}]
+
 
 #
 #  Behaviour

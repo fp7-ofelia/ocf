@@ -11,7 +11,7 @@ from vt_plugin.models.VM import VM
 class VMModelForm(forms.models.ModelForm):
 
     class Meta:
-        fields=["name", "memory","disc_image", "hdSetupType", "virtualizationSetupType"]
+        fields=["disc_image", "name", "memory", "hdSetupType", "virtualizationSetupType"]
         model = VM
 
     def clean_name(self):

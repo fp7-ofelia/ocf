@@ -1,4 +1,5 @@
 from vt_manager.models.Action import Action
+from vt_manager.models.XenVM import IMAGE_CONFIGURATORS
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 import uuid, copy
 
@@ -26,7 +27,21 @@ class ActionController():
 		#tempVMclass = XmlHelper.getProcessingResponse('dummy', None , 'dummy').response.provisioning.action[0].server.virtual_machines[0]
 		#tempVMclass.uuid = actionModel.getObjectUUID()
 		#action.server.virtual_machines[0] = tempVMclass
-		action.server.virtual_machines[0].uuid = actionModel.getObjectUUID()
+
+	@staticmethod
+	def completeConfiguratorInActionRspec(xen_configuration):
+	### TODO:CHECK How to add the configurator in the xml
+		vm_path = xen_configuration.hd_origin_path
+		try:
+			 xen_configuration.configurator = IMAGE_CONFIGURATORS[vm_path]
+		except:
+	#	if vm_path == "default/default.tar.gz":
+	#		xen_configuration.configurator=""
+	#	elif vm_path == "spirent/spirentSTCVM.img":
+	#		xen_configuration.configurator="SpirentCentOSVMConfigurator"
+	#	else:
+			xen_configuration.configurator=""
+
 
 	#XXX: Why are these two functions here? Do not beling to the Action, aren't they?
 
