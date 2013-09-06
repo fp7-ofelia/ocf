@@ -32,6 +32,7 @@ class ControllerMappings():
 				 	"vm.name": "metaObj.server.virtual_machines[0].get_name()",
                                 	"vm.uuid": "metaObj.server.virtual_machines[0].get_uuid()",
 					"vm.status":"metaObj.server.virtual_machines[0].get_status()",
+					"vm.hd_origin_path":"metaObj.server.virtual_machines[0].get_hd_origin_path()",
 					"vm.operating_system_type":"metaObj.server.virtual_machines[0].get_operating_system_type()",
 					"vm.operating_system_version":"metaObj.server.virtual_machines[0].get_operating_system_version()",
 					"vm.operating_system_distribution":"metaObj.server.virtual_machines[0].get_operating_system_distribution()",
