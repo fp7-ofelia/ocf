@@ -1,23 +1,18 @@
 {% load ch_extras %}
 {% block content %}
 	<script type="text/javascript">
-	jQuery(document).ready(function() {
-		//jQuery(".expandable").hide();
-	 
-		jQuery(".expandableCtl").click(function()
+	$(document).ready(function() {
+		$(".expandableCtl").click(function()
 		{
 			elementName = "#"+$(this).attr('id')+"Container";
-//			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250,function() {
-//  			$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);	
-//			});
-			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
-			if(jQuery("span", this).attr("class") == "closed"){
-				jQuery("span", this).html("&#x25B2;");
+			$("#"+$(this).attr('id')+"Container").slideToggle(250);
+			if($("span", this).attr("class") == "closed") {
+				$("span", this).html("&#x25B2;");
 				$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
-			}else{
-				jQuery("span", this).html("&#x25BC;");
+			} else {
+				$("span", this).html("&#x25BC;");
 			}
-			jQuery("span", this).toggleClass("opened closed");
+			$("span", this).toggleClass("opened closed");
 	  	});
 	});
 
@@ -262,7 +257,7 @@
 	{% endfor %} <!-- fs in gfs_list -->
 	<!-- END -->
 {% else %}
-	<p>No Flowspace requested through this OpenFlow manager.</p>
+	<p>No Flowspace requested through this OpenFlow AM.</p>
 {% endif %}
 
 {% else %} {#Should never reach this#}
