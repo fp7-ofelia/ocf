@@ -62,14 +62,3 @@ class xmlrpcServerProxyForm(forms.ModelForm):
         p = self._meta.model(**d)
         return self.cleaned_data
 
-DISC_IMAGE_CHOICES = (
-            ('default', 'Default'),
-            ('spirent', 'Spirent'),
-            ('other', 'Other'),                      
-                      )
-
-class CreateVMForm(forms.Form):
-
-    ale = forms.CharField()
-    memory = forms.IntegerField()
-    disc_image = forms.ChoiceField(choices= DISC_IMAGE_CHOICES)
