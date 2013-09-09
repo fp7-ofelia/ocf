@@ -37,37 +37,24 @@ class XenServer(VTServer):
 		if not isinstance(interface,NetworkInterface):
 			raise Exception("Cannot add an interface if is not a NetworkInterface object instance")	
 		
-	'''Constructors'''
-	
+	'''Constructor'''
 	@staticmethod
-	def constructor(name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
+	def constructor(name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True):
 		self = XenServer()
-		try:
-			self.setName(name)
-			self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-			self.setOSType(osType)
-			self.setOSDistribution(osDistribution)
-			self.setOSVersion(osVersion)
-			self.setAgentURL(agentUrl)
-			self.setAgentPassword(agentPassword)
-		
-			self.doSave = save
-			if save:
-				self.save()
-			return self
-		except Exception as e:
-			print e
-			self.destroy()
-			raise e
+		self.updateServer(name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True)
 
 	'''Updater'''
-	def updateServer(self,name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
+	def updateServer(self,name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True):
 		try:
 			self.setName(name)
 			self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
 			self.setOSType(osType)
 			self.setOSDistribution(osDistribution)
 			self.setOSVersion(osVersion)
+			self.setNumberOfCPUs(nCPUs)
+			self.setCPUFrequency(CPUfreq)
+			self.setMemory(memory)
+			self.setDiscSpaceGB(size)
 			self.setAgentURL(agentUrl)
 			self.setAgentPassword(agentPassword)
 			
@@ -88,14 +75,12 @@ class XenServer(VTServer):
 				inter.destroy()
 			self.delete()
 	
-		
 	''' Public interface methods '''
 
 	def getVMs(self,**kwargs):
 		return self.vms.filter(**kwargs)
 	def getVM(self,**kwargs):
 		return self.vms.get(kwargs)
-	
 	
 	def createVM(self,name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save=True):
 		with MutexStore.getObjectLock(self.getLockIdentifier()):
@@ -112,7 +97,6 @@ class XenServer(VTServer):
 			self.autoSave()
 			return vm
 
-
 	def deleteVM(self,vm):
 		with MutexStore.getObjectLock(self.getLockIdentifier()):	
 			if vm not in self.vms.all():
@@ -120,5 +104,4 @@ class XenServer(VTServer):
 			self.vms.remove(vm)
 			vm.destroy()	
 			self.autoSave()
-
 

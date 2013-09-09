@@ -52,9 +52,7 @@ def servers_crud(request, server_id=None):
 	except Exception as e:
 		print e
 		pass
-
 	
-
 	serverFormClass = HttpUtils.getFormFromModel(VTServer)
 	ifaceFormClass = HttpUtils.getFormFromModel(NetworkInterface)
 	IfaceFormSetClass = modelformset_factory(NetworkInterface)
@@ -68,7 +66,7 @@ def servers_crud(request, server_id=None):
 		#serverForm = serverFormClass(instance=server)
 		serverForm = ServerForm(instance=server, prefix ="server")
 
-		if server  != None:
+		if server != None:
 			mgmt = server.getNetworkInterfaces().filter(isMgmt = True)
 			if mgmt:
 				mgmt = mgmt.get()
@@ -85,7 +83,6 @@ def servers_crud(request, server_id=None):
 			mgmtIfaceForm = MgmtBridgeForm(prefix ="mgmtBridge")
 			ifaceformset = IfaceFormSetClass(queryset= NetworkInterface.objects.none())
 			
-
 	elif request.method == "POST":
 		#serverForm = serverFormClass(request.POST, instance=server)
 		serverForm = ServerForm(request.POST, instance=server, prefix ="server")

@@ -13,8 +13,9 @@ class ServerForm(forms.ModelForm):
     # Form widgets: HTML representation of fields
     class Meta:
         model = VTServer
-        exclude = ('numberofCPUs', 'memory', 'CPUFrequency',
-            'discSpaceGB', 'url', 'subscribedMacRanges', 'subscribedIp4Ranges')
+        # XXX Comment/Delete last line to show fields for server specs
+        exclude = ('url', 'subscribedMacRanges', 'subscribedIp4Ranges',
+                   'numberOfCPUs', 'CPUFrequency', 'memory', 'discSpaceGB')
 
     # Validation and so on
     def clean(self):
@@ -22,7 +23,7 @@ class ServerForm(forms.ModelForm):
         password = self.cleaned_data.get('agentPassword', None)
         confirm_password = self.cleaned_data.get('agentPasswordConfirm', None)
         if password and confirm_password and (password != confirm_password):
-            raise forms.ValidationError("Passwords don't match")
+            raise forms.ValidationError("Passwords do not match")
         # Remove fields that are not in the Model to avoid any mismatch when synchronizing
         d = dict(self.cleaned_data)
         if "agentPasswordConfirm" in d:

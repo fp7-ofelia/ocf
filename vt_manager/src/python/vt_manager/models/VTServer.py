@@ -26,7 +26,7 @@ class VTServer(models.Model):
 
 
 	__childClasses = (
-    	'XenServer',
+		'XenServer',
 	  )
 
 
@@ -45,17 +45,17 @@ class VTServer(models.Model):
 	virtTech = models.CharField(choices = VirtTechClass.VIRT_TECH_CHOICES, max_length = 512, verbose_name = "Virtualization Technology",validators=[VirtTechClass.validateVirtTech])
 	
 	''' Hardware '''
-	numberOfCPUs = models.IntegerField(blank = True, null=True,editable = False)
-	CPUFrequency = models.IntegerField(blank = True, null=True,editable = False)
-	memory = models.IntegerField(blank = True, null=True,editable = False)
-	discSpaceGB = models.FloatField(blank = True, null=True, editable = False)
+	numberOfCPUs = models.IntegerField(blank = True, null=True, verbose_name = "Number of CPUs")
+	CPUFrequency = models.IntegerField(blank = True, null=True, verbose_name = "CPU frequency (GB)")
+	memory = models.IntegerField(blank = True, null=True, verbose_name = "Memory (GB)")
+	discSpaceGB = models.FloatField(blank = True, null=True, verbose_name = "Size (GB)")
 
 	''' Agent fields'''
 	agentURL = models.URLField(verify_exists = False, verbose_name = "URL of the Server Agent", validators=[validateAgentURLwrapper], help_text="URL of the agent daemon running in the server. It should be https://DOMAIN_OR_IP:9229")
-	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent Password", validators=[validators.resourceNameValidator])
+	agentPassword = models.CharField(blank=True,null=True,max_length=128, verbose_name="Agent password", validators=[validators.resourceNameValidator])
 
 	url = models.URLField(verify_exists = False, verbose_name = "URL of the Server", editable = False, blank = True)
-    
+	
 	''' Network interfaces'''
 	networkInterfaces = models.ManyToManyField('NetworkInterface', blank = True, null = False, editable = False)
 	
@@ -78,15 +78,14 @@ class VTServer(models.Model):
 	##Private methods
 
 	def getChildObject(self):
-	    for childClass in self.__childClasses:
-      		try:
-        		return self.__getattribute__(childClass.lower())
-      		except Exception:
-      		#except eval(childClass).DoesNotExist:
+		for childClass in self.__childClasses:
+	  		try:
+				return self.__getattribute__(childClass.lower())
+	  		except Exception:
+	  		#except eval(childClass).DoesNotExist:
 				pass
-        		#return self
-
-
+				#return self
+	
 	def __tupleContainsKey(tu,key):
 		for val in tu:
 			if val[0] == key:
@@ -102,24 +101,40 @@ class VTServer(models.Model):
 		return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
  
 	##Public methods
+
 	''' Getters and setters '''
 	def setName(self, name):
-        	self.name = name
+		self.name = name
 		self.autoSave()
 	def getName(self):
-        	return self.name
+		return self.name
 	def setUUID(self, uuid):
 		#XXX	
-        	self.uuid = uuid
+		self.uuid = uuid
 		self.autoSave()
 	def getUUID(self):
-        	return self.uuid
-	def setMemory(self,memory):
-		#XXX	
+		return self.uuid
+	def setNumberOfCPUs(self, cpus):
+		self.numberOfCPUs = cpus
+		self.autoSave()
+	def getNumberOfCPUs(self):
+		return self.numberOfCPUs
+	def setMemory(self, memory):
 		self.memory = memory
+		self.autoSave()
+	def getCPUFrequency(self):
+		return self.CPUFrequency
+	def setCPUFrequency(self, frequency):
+		self.CPUFrequency = frequency
 		self.autoSave()
 	def getMemory(self):
 		return self.memory
+	def setDiscSpaceGB(self, space):
+		self.discSpaceGB = space
+		self.autoSave()
+	def getDiscSpaceGB(self):
+		return self.discSpaceGB
+
 	@staticmethod
 	def validateAgentURL(url):
 			#Hard lookup; make sure that Agent is running and at the same time URL is correct:
@@ -277,9 +292,6 @@ class VTServer(models.Model):
 			raise Exception("Could not allocate Ip4 address for the VM over subscribed ranges")
 	
 		return ipObj
-
-	
-
 	
 	''' VM interfaces and VM creation methods '''
 	def __createEnslavedDataVMNetworkInterface(self,serverInterface):
@@ -291,7 +303,6 @@ class VTServer(models.Model):
 		#Enslave it	
 		serverInterface.attachInterfaceToBridge(interface)	
 		return interface
-
 	
 	def __createEnslavedMgmtVMNetworkInterface(self,serverInterface):
 		#Obtain 
