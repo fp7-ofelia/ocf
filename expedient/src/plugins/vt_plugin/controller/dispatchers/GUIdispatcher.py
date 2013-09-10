@@ -115,7 +115,7 @@ def manage_vm(request, slice_id, vm_id, action_type):
     rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
     Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
 
-    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
+    ServiceThread.start_method_new_thread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
 
     #set temporally status
     #vm.state = "on queue"
@@ -194,7 +194,7 @@ def startStopSlice(action,uuid):
             Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
             globalRspec.query.provisioning.action.append(copy.deepcopy(rspec.query.provisioning.action[0]))
     
-        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,globalRspec.query.provisioning, None)
+        ServiceThread.start_method_new_thread(ProvisioningDispatcher.processProvisioning,globalRspec.query.provisioning, None)
     
         for vm in vmsToStart:
             if action == 'start':

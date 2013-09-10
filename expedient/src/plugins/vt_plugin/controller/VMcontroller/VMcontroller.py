@@ -63,6 +63,6 @@ class VMcontroller():
         actionClass.server.virtualization_type = server.getVirtTech()
         rspec.query.provisioning.action.append(actionClass)
          
-        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
+        ServiceThread.start_method_new_thread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, requestUser)
 
 

@@ -12,9 +12,9 @@ def sendAsync(xml):
     
     rspec = XmlHelper.parseXmlString(xml)
     if rspec.response.monitoring:
-        ServiceThread.startMethodInNewThread(MonitoringResponseDispatcher.processResponse ,rspec.response.monitoring)
+        ServiceThread.start_method_new_thread(MonitoringResponseDispatcher.processResponse ,rspec.response.monitoring)
     if rspec.response.provisioning:
-	ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse ,rspec.response.provisioning)
+	ServiceThread.start_method_new_thread(ProvisioningResponseDispatcher.processResponse ,rspec.response.provisioning)
     return ""
 
 
