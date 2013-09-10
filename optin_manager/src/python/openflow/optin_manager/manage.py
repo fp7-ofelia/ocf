@@ -2,7 +2,7 @@
 from os.path import dirname, join
 import sys
 sys.path.append(join(dirname(__file__), "../.."))
-sys.path.append(join(dirname(__file__), "../../../../../expedient/src/python"))
+sys.path.append(join(dirname(__file__), "../../../../../expedient/src/"))
 
 
 from django.core.management import execute_manager
