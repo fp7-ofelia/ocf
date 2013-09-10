@@ -283,7 +283,7 @@ No information available.
                                    'slice_id': slice.id})+"?next=%s" % next
         except NoReverseMatch:
             #XXX: Clearinghouse call
-            Clearinghouse().add_aggregate_to_slice("can_use_aggregate",self.as_leaf_class,slice)
+            Clearinghouse().add_aggregate_to_slice("can_use_aggregate",self.as_leaf_class(),slice)
             #give_permission_to("can_use_aggregate", self.as_leaf_class(), slice)
             return next
 
@@ -293,8 +293,8 @@ No information available.
         """
          #XXX: We need PIs also
 
-        must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
-        must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
+        #must_have_permission("user", self.as_leaf_class(), "can_use_aggregate")
+        #must_have_permission("project", self.as_leaf_class(), "can_use_aggregate")
 
         prefix = self.__class__.get_url_name_prefix()
         try:

@@ -211,7 +211,7 @@ def stop(request, slice_id):
     '''Stop the slice on POST'''
     slice = get_object_or_404(Slice, id=slice_id)
 
-    Clearinghouse.check_role(request.user, 'pi')    
+    Clearinghouse().check_role(request.user, 'pi')    
     #must_have_permission(request.user, slice.project, "can_stop_slices")
     
     if request.method == "POST":
