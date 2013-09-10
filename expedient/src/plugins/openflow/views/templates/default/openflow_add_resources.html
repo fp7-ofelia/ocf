@@ -1,29 +1,26 @@
 {% load ch_extras %}
 {% block content %}
 	<script type="text/javascript">
-	jQuery(document).ready(function() {
-		//jQuery(".expandable").hide();
-	 
-		jQuery(".expandableCtl").click(function()
+	$(document).ready(function() {
+		$(".expandableCtl").click(function()
 		{
 			elementName = "#"+$(this).attr('id')+"Container";
-//			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250,function() {
-//  			$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);	
-//			});
-			jQuery("#"+$(this).attr('id')+"Container").slideToggle(250);
-			if(jQuery("span", this).attr("class") == "closed"){
-				jQuery("span", this).html("&#x25B2;");
+			$("#"+$(this).attr('id')+"Container").slideToggle(250);
+			if($("span", this).attr("class") == "closed") {
+				$("span", this).html("&#x25B2;");
 				$('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
-			}else{
-				jQuery("span", this).html("&#x25BC;");
+			} else {
+				$("span", this).html("&#x25BC;");
 			}
-			jQuery("span", this).toggleClass("opened closed");
+			$("span", this).toggleClass("opened closed");
 	  	});
 	});
 
 	</script>
-{# PLANETLAB #}
 
+{% load flowspace %} {# Loads Jinja filters for FlowSpaces #}
+
+{# PLANETLAB #}
 
 {% if planetlab_aggs %}
 <h2 class="resourcesh2">Select PlanetLab Nodes</h2>
@@ -118,8 +115,9 @@
 
 	{% if checked_ids %}
 	<div style="padding-top:20px;">
- 	  {% if allfs %}
-
+	{# Original: shows every flowspace in the slice #}
+	{#{% if allfs %}#}
+	{% if allfs|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
 		<tr>
@@ -257,11 +255,11 @@
 			{%endif%}
 		{% endif %}
 	{% endfor %} <!-- fs in gfs_list -->
-	<!-- END -->		
+	<!-- END -->
+{% else %}
+	<p>No Flowspace requested through this OpenFlow AM.</p>
+{% endif %}
 
- 	{% else %}
-              <p>There is no Flowspace in the Slice. </p>
-   {% endif %}
 {% else %} {#Should never reach this#}
 {%endif%} {#Checked IDs#}
 
@@ -279,28 +277,42 @@
  	</td>
    </tr>
   {#Actions#}
-  <tr>
-	<td class="label" width="150px">Actions:</td>
+  {# {% if openflow_aggs or planetlab_aggs %} #}
+  {% if agg.available %}
+    <tr>
+	<td class="label">Actions:</td>
 	<td>
     	
-  {% if openflow_aggs or planetlab_aggs %}
-    {% if agg.available %}
 	        <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
-    {% else %}
-		<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />
-    {% endif %}
-  {% endif %}
+    {# {% else %} #}
+		<!--<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />-->
+  {# {% endif %} #}
   	</td>
   </tr>
+  {% endif %}
+
   <!--Remove AM-->
-  <tr>
-        <td class="label" width="150px">Remove from slice:</td>
+  {% if agg.available %}
+    <tr>
+        <td class="label">Remove from slice:</td>
         <td>
             <form name="slice_remove_agg_{{ slice.id }}_{{ agg.id }}" method="POST" action="{% url slice_remove_agg slice.id agg.id %}" onsubmit="javascript: return confirm('Are you sure you want to remove AM \'{{ agg.name }}\' from slice \'{{ slice.name }}\'?');">{% csrf_token %}
-                <input type="submit" value="Remove AM" />
+                    <input type="submit" value="Remove AM" />
             </form>
         </td>
   </tr>
+  {% endif %}
+
+  {% if not agg.available %}
+  <tr>
+      <td colspan="3">
+          <p style="font-size:10px">
+              <img style="height:12px;" src="{% url img_media 'inactive.png' %}" alt="AM is not available" title="AM is not available">
+              AM is not available: resources cannot be booked neither can this AM be removed from this slice.
+          </p>
+      </td>
+  </tr>
+  {% endif %}
   </table> <!-- Table details -->
 
 </div> <!-- aggregateManager container -->

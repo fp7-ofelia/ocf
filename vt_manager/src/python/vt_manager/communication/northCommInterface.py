@@ -8,6 +8,9 @@ from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
+#TODO: Provisional import to make test with VTPlanner. Use SFA API whe stable
+from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
+
 import copy
 from threading import Thread
 
@@ -36,3 +39,15 @@ def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 	
 	v,s = getattr (DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
 	return v,s
+
+@rpcmethod(url_name="plugin")
+def ListResourcesAndNodes(slice_urn='None'):
+
+	am = AggregateManager()
+        options = dict()
+  
+        if not slice_urn == 'None':
+        	options = {"geni_slice_urn":slice_urn}
+        
+        print '-----------OPTIONS',options
+        return AggregateManager().ListResources(options)

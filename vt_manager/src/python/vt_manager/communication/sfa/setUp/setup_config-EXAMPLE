@@ -1,0 +1,24 @@
+#This file contains the main vars required to set up an OCF authority. 
+#There are 3 required vars:
+##AUTHORITY_XRN: XRN string of the authority to create
+##SUBJECT: Dict containing the certificate subject of the subauthorities to create
+##PARENT_SUBJECT: Dict containing the certificate subject of the top level authority. 
+
+
+AUTHORITY_XRN = 'ocf.ofam'
+SUBJECT = {'CN':'OfeliaSDKR1',
+           'C':'SP',
+           'ST':'Catalunya',
+           'L':'Barcelona',
+           'O':'i2CAT',
+           'OU':'DANA',
+          }
+
+PARENT_SUBJECT = {'CN':'OfeliaSDKR1',
+                  'C':'SP',
+                  'ST':'Catalunya',
+                  'L':'Barcelona',
+                  'O':'i2CAT',
+                  'OU':'DANA',
+                 }
+

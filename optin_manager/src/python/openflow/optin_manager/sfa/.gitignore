@@ -1,0 +1,6 @@
+credentials/*
+my_roots/authorities/*
+jfed_roots/*
+trusted_roots/*
+setUp/setup_config.py
+

@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'openflow.optin_manager.admin_manager',
     'openflow.optin_manager.xmlrpc_server',
     'openflow.optin_manager.controls',
+    'openflow.optin_manager.sfa',
 ###### For Testing #######################
     'openflow.optin_manager.dummyfv',
 )

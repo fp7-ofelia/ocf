@@ -5,6 +5,9 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 import logging
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.controller.actions.ActionController import ActionController
+
+from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
+from vt_manager.common.middleware.thread_local import thread_locals, pull
 class ProvisioningResponseDispatcher():
 
 	'''
@@ -25,6 +28,10 @@ class ProvisioningResponseDispatcher():
 			'''
 			If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
 			'''
+			#if str(actionModel.callBackUrl) == str(SfaCommunicator.SFAUrl): #Avoiding unicodes
+			#	event = pull(str(action.id))
+			#	event.send('continue')
+			#	return
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
@@ -53,6 +60,12 @@ class ProvisioningResponseDispatcher():
 
 				try:
 					logging.debug("Sending response to Plugin in sendAsync")
+					if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+                                            if failedOnCreate:
+                                                expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
+                                                if len(expirning_slices)  == 1:
+                                                    expiring_slices[0].delete()
+					    return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:
 						controller.deleteVM(vm)

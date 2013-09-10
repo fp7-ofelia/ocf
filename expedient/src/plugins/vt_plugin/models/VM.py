@@ -6,15 +6,17 @@ from vt_plugin.utils.validators import *
 
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
+                        ('spirent','Spirent'),
                         #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('file-image','File Image'),
                         #('logical-volume-image','Logical Volume'),
+                        ('file-full-image','File Image with Partitions'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),
-                        #('hvm','HVM'),
+                        ('hvm','HVM'),
                       )
 class VM(Resource):
     
@@ -198,6 +200,12 @@ class VM(Resource):
 
     def getVirtualizationSetupType(self):
         return self.virtualizationSetupType
+
+    def setDiskImage(self, image):
+        self.disc_image = image
+
+    def gettDiskImage(self):
+        return self.disc_image 
 
     def delete(self):
         self.action_set.clear()

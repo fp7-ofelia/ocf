@@ -63,9 +63,15 @@ OXA_FILEHD_DD_BS_KB=32
 OXA_XEN_SERVER_KERNEL="/boot/vmlinuz-2.6.32-5-xen-amd64"
 OXA_XEN_SERVER_INITRD="/boot/initrd.img-2.6.32-5-xen-amd64"
 
-'''Debian usual file locations'''
+'''Debian-family usual file locations'''
 OXA_DEBIAN_INTERFACES_FILE_LOCATION = "/etc/network/interfaces"
 OXA_DEBIAN_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
 OXA_DEBIAN_HOSTNAME_FILE_LOCATION="/etc/hostname"
 OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION="/etc/security/access.conf"
+
+'''RedHat-family usual file locations'''
+OXA_REDHAT_INTERFACES_FILE_LOCATION = "/etc/sysconfig/network-scripts/"
+OXA_REDHAT_UDEV_FILE_LOCATION = "/etc/udev/rules.d/70-persistent-net.rules"
+OXA_REDHAT_HOSTNAME_FILE_LOCATION="/etc/hostname"
+
 

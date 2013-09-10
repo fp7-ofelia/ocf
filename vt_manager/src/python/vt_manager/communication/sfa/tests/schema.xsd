@@ -1,0 +1,125 @@
+<xs:schema  xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:rspec="http://www.protogeni.net/resources/rspec/2" elementFormDefault="qualified">
+	<xs:element name="rspec" type="rspec:RSpecContents"/>
+	<xs:complexType name="RSpecContents">
+		<xs:sequence>
+			<xs:element name="node" type="NodeContents"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NodeContents">
+		<xs:sequence>
+                        <xs:element name="sliver" type="virtual-machine-type"/>
+                </xs:sequence>
+		<xs:attribute name="component_id" use="required"/>
+		<xs:attribute name="component_manager_id" use="required"/>
+		<xs:attribute name="component_name"/>
+		<xs:attribute name="exclusive" use="required" type="xs:boolean"/>
+	</xs:complexType>
+
+	<xs:complexType name="virtual-machine-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="operating-system-type" type="os-type-type" />
+			<xs:element name="operating-system-version" type="os-type-type" />
+			<xs:element name="operating-system-distribution" type="os-distro-type" />
+			<xs:element name="virtualization-type" type="virtualization-type" /> 
+			<xs:element name="hd-setup-type" type="xen-hd-setup-type" />
+                        <xs:element name="hd-size-mb" type="xs:integer" />
+                        <xs:element name="hd-origin-path" type="xs:string" />
+                        <xs:element name="configurator" type="xs:string" />
+                        <xs:element name="virtualization-setup-type" type="xen-virtualization-setup-type" />
+                        <xs:element name="memory-mb" type="xs:integer" />
+                        <xs:element name="interfaces" type="interfaces-type" />
+                        <xs:element name="users" type="users-type" />
+                </xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="os-type-type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="GNU/Linux" />
+			<xs:enumeration value="BSD" />
+			<xs:enumeration value="Windows" />
+			<!-- Add Other types here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="os-distro-type">
+		<xs:restriction base="xs:string">
+			<!-- Linux -->
+			<xs:enumeration value="Debian" />
+			<xs:enumeration value="Red Hat" />
+			<xs:enumeration value="Slackware" />
+			<xs:enumeration value="OpenSUSE" />
+			<!-- BSD -->
+			<xs:enumeration value="FreeBSD" />
+			<xs:enumeration value="OpenBSD" />
+			<xs:enumeration value="NetBSD" />
+
+			<!-- Add Other types here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="virtualization-type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="xen" />
+			<xs:enumeration value="kvm" />
+			<xs:enumeration value="vserver" />
+			<xs:enumeration value="openvz" />
+			<!-- Add Other types here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<xs:simpleType name="xen-virtualization-setup-type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="paravirtualization" />
+			<xs:enumeration value="hardware-assisted-virtualization" />
+			<!-- Add Other types here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="xen-hd-setup-type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="file-image" />
+			<xs:enumeration value="logical-volume-image" />
+			<!-- Add Other types here -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="interfaces-type">
+		<xs:sequence>
+			<xs:element name="interface" type="interface-type" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="interface-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="mac" type="xs:string" />
+			<xs:element name="ip" type="xs:string" />
+			<xs:element name="mask" type="xs:string" />
+			<xs:element name="gw" type="xs:string" />
+			<xs:element name="dns1" type="xs:string" />
+			<xs:element name="dns2" type="xs:string" />
+			<!-- Interface connection -->
+			<xs:element name="switch-id" type="xs:string" />
+			<xs:element name="switch-port" type="xs:string" />
+		</xs:sequence>
+		<xs:attribute name="ismgmt" type="xs:boolean" />
+	</xs:complexType>
+
+
+	<xs:complexType name="users-type">
+		<xs:sequence>
+			<xs:element name="user" type="user-type" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="user-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="password" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
+

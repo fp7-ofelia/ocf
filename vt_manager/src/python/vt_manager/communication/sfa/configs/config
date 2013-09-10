@@ -1,0 +1,9 @@
+[sfa]
+interface_hrn = vt_ocf
+data_dir = /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/
+generic_flavour = dummy
+credential_schema = /opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/configs/credential.xsd
+api_loglevel = 0
+session_key_path = /var/lib/sfa/session_keys
+max_slice_renew = 60
+
