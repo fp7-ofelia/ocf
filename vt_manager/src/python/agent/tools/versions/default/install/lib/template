@@ -1,10 +1,9 @@
 #!/bin/bash
 
-
 function downloadTemplate
 {
         echo "" 
-        print "OK of everything is correct, this  may take a while (approx. 1.2GB)..."
+        print "OK of everything is correct, this  may take a while (approx. 1.3GB)..."
         if [ $OFELIA == 1 ];then
 	mv $OXA_DIRECTORY/cache/templates/default/default.tar.gz $OXA_DIRECTORY/cache/templates/default/default.tar.gz.old
         /usr/bin/wget --progress=bar:force --no-check-certificate --user=$USERNAME --password=$PASSWORD --output-document $OXA_DIRECTORY/cache/templates/default/default.tar.gz  https://alpha.fp7-ofelia.eu/storage/images/xen/templates/Debian/0.11/default.tar.gz || ( rm $OXA_DIRECTORY/cache/templates/default/default.tar.gz && mv $OXA_DIRECTORY/cache/templates/default/default.tar.gz.old $OXA_DIRECTORY/cache/templates/default/default.tar.gz && error "Cannot download template from storage system!!! Previous template was restored." )

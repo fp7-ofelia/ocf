@@ -24,7 +24,7 @@ class XenDriver(VTDriver):
 			raise	
 
 	def getServerAndCreateVM(self,action):
-       
+	   
 		try: 
 			Server = XenServer.objects.get(uuid = action.server.uuid )
 			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
@@ -41,16 +41,24 @@ class XenDriver(VTDriver):
 				HttpUtils.getFieldInPost(request,VTServer, "operatingSystemType"),
 				HttpUtils.getFieldInPost(request,VTServer, "operatingSystemDistribution"),
 				HttpUtils.getFieldInPost(request,VTServer, "operatingSystemVersion"),
+				HttpUtils.getFieldInPost(request,VTServer, "numberOfCPUs"),
+				HttpUtils.getFieldInPost(request,VTServer, "CPUFrequency"),
+				HttpUtils.getFieldInPost(request,VTServer, "memory"),
+				HttpUtils.getFieldInPost(request,VTServer, "discSpaceGB"),
 				HttpUtils.getFieldInPost(request,VTServer, "agentURL"),
 				save=True)
 		else:
 			return XenServer.constructor(HttpUtils.getFieldInPost(request,VTServer, "name"),
-									HttpUtils.getFieldInPost(request,VTServer, "operatingSystemType"),
-									HttpUtils.getFieldInPost(request,VTServer, "operatingSystemDistribution"),
-									HttpUtils.getFieldInPost(request,VTServer, "operatingSystemVersion"),
-									HttpUtils.getFieldInPost(request,VTServer, "agentURL"),
-									save=True)
-		
+							HttpUtils.getFieldInPost(request,VTServer, "operatingSystemType"),
+							HttpUtils.getFieldInPost(request,VTServer, "operatingSystemDistribution"),
+							HttpUtils.getFieldInPost(request,VTServer, "operatingSystemVersion"),
+							HttpUtils.getFieldInPost(request,VTServer, "numberOfCPUs"),
+							HttpUtils.getFieldInPost(request,VTServer, "CPUFrequency"),
+							HttpUtils.getFieldInPost(request,VTServer, "memory"),
+							HttpUtils.getFieldInPost(request,VTServer, "discSpaceGB"),
+							HttpUtils.getFieldInPost(request,VTServer, "agentURL"),
+							save=True)
+	
 	def crudServerFromInstance(self,instance):
 		server = XenServer.objects.filter(uuid = instance.getUUID())
 		if len(server)==1:
@@ -59,6 +67,10 @@ class XenDriver(VTDriver):
 						instance.getOSType(),
 						instance.getOSDistribution(),
 						instance.getOSVersion(),
+						instance.getNumberOfCPUs(),
+						instance.getCPUFrequency(),
+						instance.getMemory(),
+						instance.getDiscSpaceGB(),
 						instance.getAgentURL(),
 						instance.getAgentPassword(),
 						save = True)
@@ -67,6 +79,10 @@ class XenDriver(VTDriver):
 								instance.getOSType(),
 								instance.getOSDistribution(),
 								instance.getOSVersion(),
+								instance.getNumberOfCPUs(),
+								instance.getCPUFrequency(),
+								instance.getMemory(),
+								instance.getDiscSpaceGB(),
 								instance.getAgentURL(),
 								instance.getAgentPassword(),
 								save=True)
@@ -85,6 +101,7 @@ class XenDriver(VTDriver):
 		osVersion = VMxmlClass.operating_system_version
 		osDist = VMxmlClass.operating_system_distribution
 		memory = VMxmlClass.xen_configuration.memory_mb
+		# XXX
 		callBackUrl = callBackURL
 		hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
 		hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path

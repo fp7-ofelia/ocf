@@ -25,6 +25,13 @@ VIRTUALIZATION_SETUP_TYPE = (
        	(VIRTUALIZATION_SETUP_TYPE_HAV, 'Hardware-assisted virtualization'),
 )
 
+
+IMAGE_CONFIGURATORS = {
+			'default/default.tar.gz':'',
+			'spirent/spirentSTCVM.img':'SpirentCentOSVMConfigurator',
+			}
+	
+
 '''
 Ugly wrappers due to Django limitation on the validators
 '''

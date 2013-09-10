@@ -62,20 +62,19 @@
 					<th class="roles">Roles</th>
 					<th class="actions">Actions</th>
 				</tr>
-				{% for member in project.members_as_permittees.all %}
+				{% for member, data in member_roles.items %}
 				<tr class="body">
-					<td class="username">{{ member.object.username }}</td>
+					<td class="username">{{ member }}</td>
 					<td class="roles">
-						{% for role in member.projectrole_set.all %}
-						{% if role.project == project %}
-						<div class="role_desc val">{{ role.name }}</div>
-						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
-						{% endif %}
+						{% for role in data.roles %}
+							<div class="role_desc val">{{ role.name }}</div>
+							<div class="role_desc description">{{ role.description }}</div>
+							{% if not forloop.last %}, {% endif %}
 						{% endfor %}
 					</td>
 					<td class="actions">
-						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>,
-						<a href="{% url project_member_update project.id member.object_id %}">update</a>
+                        <a href="{% url project_member_remove project.id data.id %}">remove</a>,
+                        <a href="{% url project_member_update project.id data.id %}">update</a>
 					</td>
 				</tr>
 				{% endfor %}

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xmlns:sig="http://www.w3.org/2000/09/xmldsig#">
+  <xs:include schemaLocation="top.xsd"/>
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="sig.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <!--
+    
+    EMULAB-COPYRIGHT
+    Copyright (c) 2008 University of Utah and the Flux Group.
+    All rights reserved.
+    
+  -->
+  <!--
+    
+    Common definitions for advertisements, requests, and tickets
+    
+  -->
+  <xs:element name="node" type="NodeContents"/>
+  <xs:element name="link" type="LinkContents"/>
+  <xs:complexType name="NodeContents">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="subnode_of"/>
+      <xs:group ref="NodeTypeList"/>
+      <xs:element ref="interface"/>
+    </xs:choice>
+    <xs:attribute name="virtualization_type">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="raw"/>
+          <xs:enumeration value="trellis-vserver"/>
+          <xs:enumeration value="planetlab-vserver"/>
+          <xs:enumeration value="emulab-vnode"/>
+          <xs:enumeration value="bgpmux"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:element name="subnode_of" type="xs:string"/>
+  <xs:element name="interface">
+    <xs:complexType/>
+  </xs:element>
+  <xs:complexType name="LinkContents">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:group ref="LinkType"/>
+      <xs:element ref="interface_ref"/>
+    </xs:choice>
+    <xs:attribute name="virtualization_type">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="raw"/>
+          <xs:enumeration value="trellis-vserver"/>
+          <xs:enumeration value="planetlab-vserver"/>
+          <xs:enumeration value="emulab-vnode"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:element name="interface_ref">
+    <xs:complexType/>
+  </xs:element>
+  <xs:group name="NodeTypeList">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" ref="node_type"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="LinkType">
+    <xs:sequence>
+      <xs:element name="link_type">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="unbounded" ref="field"/>
+          </xs:sequence>
+          <xs:attribute name="name"/>
+          <xs:attribute name="type_name"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+  <xs:element name="field">
+    <xs:complexType>
+      <xs:attribute name="key" use="required"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="VirtualName">
+    <xs:attribute name="virtual_id" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="ComponentName">
+    <xs:attribute name="component_manager_uuid"/>
+    <xs:attribute name="component_manager_urn"/>
+    <xs:attribute name="component_name"/>
+    <xs:attribute name="component_uuid"/>
+    <xs:attribute name="component_urn"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="ComponentInterfaceDeclName">
+    <xs:attribute name="component_id" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="ComponentInterfaceRefName">
+    <xs:attribute name="component_node_uuid"/>
+    <xs:attribute name="component_node_urn"/>
+    <xs:attribute name="component_interface_id" use="required"/>
+  </xs:attributeGroup>
+  <xs:element name="location">
+    <xs:complexType>
+      <xs:attribute name="country" use="required"/>
+      <xs:attribute name="longitude"/>
+      <xs:attribute name="latitude"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="rspec" type="RSpecContents"/>
+  <xs:complexType name="RSpecContents">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="node"/>
+      <xs:element ref="link"/>
+    </xs:choice>
+    <xs:attribute name="generated" type="xs:dateTime"/>
+    <xs:attribute name="generated_by"/>
+    <xs:attribute name="valid_until" type="xs:dateTime"/>
+  </xs:complexType>
+</xs:schema>

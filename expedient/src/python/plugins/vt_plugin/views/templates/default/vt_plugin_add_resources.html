@@ -233,13 +233,14 @@ Type:
               </td>
               <td>
                 {{ server.freeCpu }}
+                {#{{ server.numberOfCPUs }} x {{ server.CPUFrequency }}#}
               </td>
               <td>
                 {{ server.memory }}
               </td>
               <td>
-                
                 {{ server.freeDiscSpace }}
+                {#{{ server.discSpaceGB }}#}
               </td>
           </tr>
           </table>

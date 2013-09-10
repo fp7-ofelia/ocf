@@ -2,7 +2,7 @@
 
 #Used to define package dependencies
 
-DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod-macro python-setuptools python-django python-mysqldb python-django-extensions python-ldap python-openssl python-m2crypto python-dateutil python-decorator python-paramiko build-essential python-imaging python-django-registration python-configobj python-pyparsing"
+DEBIAN_DEPENDENCIES="apache2 openssl ssl-cert libapache2-mod-wsgi libapache2-mod-macro python-setuptools python-django python-mysqldb python-django-extensions python-ldap python-openssl python-m2crypto python-dateutil python-decorator python-paramiko build-essential python-imaging python-django-registration python-configobj python-pyparsing python-lxml"
 
 EASY_INSTALL_DEPENDENCIES="django-evolution django-autoslug django_auth_ldap==1.0.19"
 

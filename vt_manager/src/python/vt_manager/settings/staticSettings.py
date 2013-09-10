@@ -70,6 +70,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'vt_manager.common.middleware.basicauth.HTTPBasicAuthMiddleware',
     'vt_manager.common.middleware.sitelockdown.SiteLockDown',
+    'vt_manager.common.middleware.thread_local.threadlocal',
 )
 
 #
@@ -78,8 +79,8 @@ MIDDLEWARE_CLASSES = (
 # RPC following http://packages.python.org/rpc4django/usage/auth.html
 #
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
     'vt_manager.common.backends.remoteuser.NoCreateRemoteUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
     'django.contrib.auth.backends.RemoteUserBackend',
 )
 
@@ -118,6 +119,7 @@ ADMIN_MEDIA_PREFIX = '/admin/media/'
 # Installed apps
 #
 INSTALLED_APPS = (
+    'vt_manager.common.longer_username',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -179,8 +181,13 @@ SITE_DOMAIN = 'expedient.site:8445'
 #
 # Basic authentication urls
 #
+# XXX: This does not seem to "substract" the sites allowed in SITE_LOCKDOWN_EXCEPTIONS,
+# under the same path that the ones set here, so better to add here one by one.
 BASIC_AUTH_URLS = (
-    r'^/xmlrpc/.*',
+    #r'^/xmlrpc/.*',
+    r'^/xmlrpc/?$',
+    r'^/xmlrpc/plugin/?$',
+    r'^/xmlrpc/agent/?$',
 )
 
 #
@@ -192,6 +199,7 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
+    r'^/xmlrpc/sfa/?$',
 )
 
 #

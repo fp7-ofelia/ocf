@@ -167,7 +167,7 @@ def check_vms_status(request, slice_id):
                         <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
                         </div>"
                     else:
-                        actionsHtmlCode = "<div><img src=\"/static/media/default/img/loading.gif\" align=\"absmiddle\"></div>"
+                        actionsHtmlCode = "<div><img src='/static/media/default/img/loading.gif' align=\"absmiddle\"></div>"
                     vmsActionsHtmlCodes[str(vm.id)] = actionsHtmlCode
                     try:
                         vmsIP[str(vm.id)]= vm.ifaces.get(isMgmt = True).ip

@@ -1,0 +1,52 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="rspec">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="network">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="node" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="name"/>
+                    <xs:element type="xs:string" name="operating_system_type"/>
+                    <xs:element type="xs:string" name="operating_system_distribution"/>
+                    <xs:element type="xs:float" name="operating_system_version"/>
+                    <xs:element type="xs:string" name="virtualization_technology"/>
+                    <xs:element type="xs:string" name="cpus_number"/>
+                    <xs:element type="xs:string" name="cpu_frequency"/>
+                    <xs:element type="xs:string" name="memory"/>
+                    <xs:element type="xs:string" name="hdd_space_GB"/>
+                    <xs:element type="xs:string" name="agent_url"/>
+                    <xs:element name="service" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="type" minOccurs="0"/>
+                          <xs:element type="xs:string" name="name" minOccurs="0"/>
+                          <xs:element type="xs:string" name="start_value" minOccurs="0"/>
+                          <xs:element type="xs:string" name="end_value" minOccurs="0"/>
+                          <xs:element type="xs:string" name="from_server_interface_name" minOccurs="0"/>
+                          <xs:element type="xs:string" name="to_network_interface_id" minOccurs="0"/>
+                          <xs:element type="xs:string" name="to_network_interface_port" minOccurs="0"/>
+                        </xs:sequence>
+                        <xs:attribute type="xs:string" name="type" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="component_manager_id" use="optional"/>
+                  <xs:attribute type="xs:string" name="component_id" use="optional"/>
+                  <xs:attribute type="xs:string" name="exclusive" use="optional"/>
+                  <xs:attribute type="xs:string" name="component_name" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="type"/>
+      <xs:attribute type="xs:dateTime" name="expires"/>
+      <xs:attribute type="xs:dateTime" name="generated"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

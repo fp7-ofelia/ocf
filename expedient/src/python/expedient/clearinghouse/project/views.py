@@ -61,7 +61,7 @@ DEFAULT_RESEARCHER_PERMISSIONS = [
 def list(request):
     '''Show list of projects'''
     
-    qs = Project.objects.get_for_user(request.user)
+    qs = Project.objects.get_for_user(request.user).order_by('id')
     
     return list_detail.object_list(
         request,
@@ -127,6 +127,12 @@ def detail(request, proj_id):
     project = get_object_or_404(Project, id=proj_id)
     role_reqs = ProjectRoleRequest.objects.filter(
         giver=request.user, requested_role__project=project)
+    # Structure with members, ids and roles to pass to project template
+    permittees = project.members_as_permittees.all()
+    member_roles = dict()
+    for permittee in permittees:
+        member_roles[str(permittee.object.username)] = {"id": str(permittee.object.id), 
+						"roles": permittee.projectrole_set.filter(project__name=project.name)}
     return list_detail.object_detail(
         request,
         Project.objects.all(),
@@ -135,6 +141,7 @@ def detail(request, proj_id):
         template_object_name="project",
         extra_context={
             "role_requests": role_reqs,
+            "member_roles": member_roles,
             "breadcrumbs": (
                 ("Home", reverse("home")),
                 ("Project %s" % project.name, reverse("project_detail", args=[project.id])),

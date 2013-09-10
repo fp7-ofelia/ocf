@@ -19,7 +19,7 @@ SITE_LOCKDOWN_EXCEPTIONS = (
     r'^/img/.*',
     r'^/css/.*',
     r'^/static/media/.*',
-    #r'.*/xmlrpc/?',
+    r'^/xmlrpc/sfa/$',
 )
 
 DOMAIN_SCHEME = "https"

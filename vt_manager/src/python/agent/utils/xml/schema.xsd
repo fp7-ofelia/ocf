@@ -160,6 +160,7 @@ PROVISIONING
 			<xs:enumeration value="Red Hat" />
 			<xs:enumeration value="Slackware" />
 			<xs:enumeration value="OpenSUSE" />
+			<xs:enumeration value="CentOS" />
 			<!-- BSD -->
 			<xs:enumeration value="FreeBSD" />
 			<xs:enumeration value="OpenBSD" />
@@ -196,7 +197,7 @@ PROVISIONING
 	<xs:simpleType name="xen-virtualization-setup-type">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="paravirtualization" />
-			<xs:enumeration value="hardware-assisted-virtualization" />
+			<xs:enumeration value="hvm" />
 			<!-- Add Other types here -->
 		</xs:restriction>
 	</xs:simpleType>
@@ -205,6 +206,7 @@ PROVISIONING
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="file-image" />
 			<xs:enumeration value="logical-volume-image" />
+			<xs:enumeration value="full-file-image" />
 			<!-- Add Other types here -->
 		</xs:restriction>
 	</xs:simpleType>

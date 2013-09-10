@@ -1,0 +1,24 @@
+ <rspec>
+        <network name="ocf_of">
+        	<nodes>
+                    <openflow:datapath component_id="urn:publicid:IDN+openflow:ocf_of+datapath:01:02:03:04:05:06:07:08"
+			               component_manager_id="urn:publicid:IDN+openflow:ocf_of:i2cat.ocf_of+authority+am"
+				       dpid = "01:02:03:04:05:06:07:08">        
+		       <openflow:port name="eth0" num="0"/>
+		       <openflow:port name="eth1" num="1"/>
+                    </openflow:datapath>
+		    <openflow:datapath component_id="urn:publicid:IDN+openflow:ocf_of+datapath:01:02:03:04:05:06:07:09"
+                                       component_manager_id="urn:publicid:IDN+openflow:ocf_of:i2cat.ocf_of+authority+am"
+                                       dpid = "01:02:03:04:05:06:07:09">
+                       <openflow:port name="eth0" num="0"/>
+                       <openflow:port name="eth1" num="1"/>
+                    </openflow:datapath>
+                </nodes>
+                <links>
+                    <link
+                     src_urn="urn:publicid:IDN+openflow:ocf_of+datapath:01:02:03:04:05:06:07:08+port:0"
+                     dst_urn="urn:publicid:IDN+openflow:ocf_of+datapath:01:02:03:04:05:06:07:09+port:0"
+                    />
+                </links>
+	</network>
+</rspec>

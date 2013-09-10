@@ -8,7 +8,8 @@ function installSSLCertificates(){
 
 	local DAYS=3650
 
-	mkdir /etc/apache2/ssl.crt/ /etc/apache2/ssl.key/ /etc/apache2/ssl.crl || warning "Could not mkdir ssl directories under /etc/apache2 (maybe already there?). Proceeding with installation..."
+	mkdir /etc/apache2/ssl.crt/ /etc/apache2/ssl.crt/ca_clients/ /etc/apache2/ssl.key/ /etc/apache2/ssl.crl || warning "Could not mkdir ssl directories under /etc/apache2 (maybe already there?). Proceeding with installation..."
+	touch /etc/apache2/ssl.crt/ca_clients.crt || warning "Could not touch ca_clients file under /etc/apache2/ssl.crt (maybe already there?). Proceeding with installation..."
 
 	print ""
 	print "Generating CA certificate..."

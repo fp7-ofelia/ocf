@@ -585,12 +585,12 @@ def get_controller_url(slice):
     return controller_url
 
 def get_openflow_aggregates(slice):
-#    aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
-#                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
+    aggs_filter = (Q(leaf_name=OpenFlowAggregate.__name__.lower()) |
+                       Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()))
     # Avoid non-available OF AMs
-    aggs_filter_available = ((Q(leaf_name=OpenFlowAggregate.__name__.lower()) & Q(available = True)) |
-                    (Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()) & Q(available = True)))
-    return slice.aggregates.filter(aggs_filter_available)
+#    aggs_filter_available = ((Q(leaf_name=OpenFlowAggregate.__name__.lower()) & Q(available = True)) |
+#                    (Q(leaf_name=GCFOpenFlowAggregate.__name__.lower()) & Q(available = True)))
+    return slice.aggregates.filter(aggs_filter)
 
 def get_planetlab_aggregates(slice):
     return slice.aggregates.filter(leaf_name=PlanetLabAggregate.__name__.lower())

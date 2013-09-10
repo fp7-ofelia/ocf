@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Tue Jun 28 13:33:53 2011 by generateDS.py version 2.3b.
+# Generated Tue Jun 18 13:01:57 2013 by generateDS.py version 2.4c.
 #
 
 import sys
@@ -223,9 +223,9 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     doc = None
     return rootObj
 
@@ -242,9 +242,9 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('<?xml version="1.0" ?>\n')
-##     rootObj.export(sys.stdout, 0, name_=rootTag,
-##         namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
+    sys.stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(sys.stdout, 0, name_=rootTag,
+        namespacedef_='http://www.fp7-ofelia.eu/CF/vt_am/rspec')
     return rootObj
 
 
@@ -259,11 +259,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-##     sys.stdout.write('#from ??? import *\n\n')
-##     sys.stdout.write('import ??? as model_\n\n')
-##     sys.stdout.write('rootObj = model_.rspec(\n')
-##     rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
-##     sys.stdout.write(')\n')
+    sys.stdout.write('#from ??? import *\n\n')
+    sys.stdout.write('import ??? as model_\n\n')
+    sys.stdout.write('rootObj = model_.rspec(\n')
+    rootObj.exportLiteral(sys.stdout, 0, name_="rspec")
+    sys.stdout.write(')\n')
     return rootObj
 
 
