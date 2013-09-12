@@ -18,8 +18,11 @@ from django.http import HttpResponseRedirect, HttpResponse
 from common.messaging.models import DatedMessage
 from geni_legacy.expedient_geni.forms import UploadCertForm
 from modules.slice.models import Slice
+from common.messaging.models import DatedMessage
 
 logger = logging.getLogger("geni_legacy.expedient_geni.views")
+
+TEMPLATE_PATH = "geni/"
 
 def aggregate_create(request, agg_model,
                      redirect=lambda inst: reverse("home")):
@@ -55,7 +58,7 @@ def aggregate_create(request, agg_model,
     
     return generic_crud(
         request, obj_id=None, model=agg_model,
-        template="aggregate_crud.html",
+        template=TEMPLATE_PATH+"aggregate_crud.html",
         redirect=redirect,
         form_class=geni_aggregate_form_factory(agg_model),
         pre_save=pre_save,
@@ -86,7 +89,7 @@ def aggregate_edit(request, agg_id, agg_model,
     
     return generic_crud(
         request, obj_id=agg_id, model=agg_model,
-        template="aggregate_crud.html",
+        template=TEMPLATE_PATH+"aggregate_crud.html",
         template_object_name="aggregate",
         redirect=redirect,
         post_save=post_save,
@@ -113,7 +116,7 @@ def user_cert_manage(request, user_id):
     
     return simple.direct_to_template(
         request,
-        template="user_cert_manage.html",
+        template=TEMPLATE_PATH+"user_cert_manage.html",
         extra_context={
             "curr_user": user,
             "cert": cert,
@@ -144,7 +147,7 @@ def user_cert_generate(request, user_id):
     
     return simple.direct_to_template(
         request,
-        template="user_cert_generate.html",
+        template=TEMPLATE_PATH+"user_cert_generate.html",
         extra_context={
             "curr_user": user,
         },
@@ -159,11 +162,17 @@ def user_cert_download(request, user_id):
     
     cert_fname = get_user_cert_fname(user)
     
-    response = HttpResponse(open(cert_fname,'r').read(),
+    try:
+        response = HttpResponse(open(cert_fname,'r').read(),
                             mimetype='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s' % cert_fname
-    return response
-    
+        response['Content-Disposition'] = 'attachment; filename=%s' % cert_fname
+        return response
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Certificate for user '%s' is not available" % str(request.user), user=request.user, msg_type=DatedMessage.TYPE_WARNING,
+        )
+        return user_cert_manage(request, user_id)
+ 
 def user_key_download(request, user_id):
     """Download a GCF key."""
     
@@ -173,11 +182,17 @@ def user_key_download(request, user_id):
     
     key_fname = get_user_key_fname(user)
     
-    response = HttpResponse(open(key_fname,'r').read(),
+    try:
+        response = HttpResponse(open(key_fname,'r').read(),
                             mimetype='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s' % key_fname
-    return response
-            
+        response['Content-Disposition'] = 'attachment; filename=%s' % key_fname
+        return response
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Key for user '%s' is not available" % str(request.user), user=request.user, msg_type=DatedMessage.TYPE_WARNING,
+        )
+        return user_cert_manage(request, user_id)
+
 def user_cert_upload(request, user_id):
     """Upload a key and certificate"""
     
@@ -200,7 +215,7 @@ def user_cert_upload(request, user_id):
 
     return simple.direct_to_template(
         request,
-        template="user_cert_upload.html",
+        template=TEMPLATE_PATH+"user_cert_upload.html",
         extra_context={
             "curr_user": user,
             "form": form,
@@ -222,7 +237,7 @@ def sshkeys(request, slice_id):
 
     return simple.direct_to_template(
         request,
-        template="sshkeys.html",
+        template=TEMPLATE_PATH+"sshkeys.html",
         extra_context={
             "slice":slice,
             "breadcrumbs": (

@@ -1,25 +1,27 @@
 {% load breadcrumbs %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
 	<head>
 		<title>
 			OFELIA - {% block title %}Expedient{% endblock %}
 		</title>
+		<meta charset="UTF-8">
 
 		<link rel="icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
 		<link rel="shortcut icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
 
-		<link rel="stylesheet" type="text/css" href="{% url css_media 'ocf.css' %}" />
-		<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+		<link rel="stylesheet" href="{% url css_media 'ocf.css' %}" />
+		<link rel="stylesheet" href="{% url css_media 'tooltip.css' %}" />
 
-		<script type="text/javascript" src="{% url js_media 'jquery.min.js' %}"></script>
-		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
-		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
-		<script type="text/javascript" src="{% url js_media 'iframe.js' %}"></script>
-		<script type="text/javascript" src="{% url js_media 'base.helptext.icons.js' %}"></script>
+		<script src="{% url js_media 'jquery.min.js' %}"></script>
+		<script src="{% url js_media 'jquery.tools.min.js' %}"></script>
+		<script src="{% url js_media 'tooltip.funcs.js' %}"></script>
+		<script src="{% url js_media 'common.js' %}"></script>
+		<script src="{% url js_media 'iframe.js' %}"></script>
+		<script src="{% url js_media 'base.helptext.icons.js' %}"></script>
 
 		<!-- simple frame busting -->
-		<script type="text/javascript">
+		<script>
 			/**
 			 * Move the help text in formtable classes to a new separate column.
 			 */
@@ -38,72 +40,74 @@
 				    {% include "fixformtable.js" %};
 			});
 		</script>
-		<script type="text/javascript" src="{% url js_media 'flowspace.helptext.icons.js' %}"></script>
+		<script src="{% url js_media 'flowspace.helptext.icons.js' %}"></script>
 
 		{% block head %}{% endblock %}
 	</head>
 	<body>
-		<div id="top_logo">
-			<div style="text-align: left;">
+		<header>
+			<div style="text-align: left; position: absolute; margin-left: 59px;">
 				<a href="{% url home %}" title="Dashboard">
 					<img src="{% url img_media 'logo_expedient.png' %}" />
 				</a>
 			</div>
-			<div id="top_version">
-				Software version <strong>{{softwareVersion}}</strong>
-			</div>
-			<div id="top_island" class="small">
+			<div id="top_island" class="small" style="position: absolute; margin-top: 0px; right: 0px; align: right; float: right; text-align: right;">
 				{% if request.user %}
 					{% if request.user.username %}
 						<strong>{{ request.user.username }}</strong> at 
 					{% endif %}
-					<strong>{{islandName}} </strong>'s island
+					<strong>{{islandName}} </strong>'s island (<strong>v{{softwareVersion}}</strong>)
 				{% endif %}
 			</div>
 			<div id="top_menu_options">
+				<ul>
 				{% if request.user.username %}
-					<a href="{% url home %}" alt="Dashboard">
-						Dashboard
-					</a>
+					<li>
+						<a href="{% url home %}" alt="Dashboard">Dashboard</a>
+					</li>
 					{# Loads Jinja filters for ch_extras - in order to check superuser #}
 					{% load ch_extras %}
 					{% if request.user|is_super_user %}
-						<a href="{% url administration_home %}" alt="Administration">
-							Administration
-						</a>
+						<li>
+							<a href="{% url administration_home %}" alt="Administration">Administration</a>
+						</li>
 					{% endif %}
 					{% if messages %}
-						<a href="{% url messaging_center %}" alt="Notifications">
-							Notifications
-						</a>
+						<li>
+							<a href="{% url messaging_center %}" alt="Notifications">Notifications</a>
+						</li>
 					{% endif %}
-					<a href={%if ldapUser %}"{{ ofregURL }}"{% else %}"{% url users_my_detail %}"{% endif %} alt="Account settings">
-						Account
-					</a>
-					<a href="{% url help_home %}">
-						Help
-					</a>
-					<a href="{% url auth_logout %}">
-						Logout
-					</a>
+					<li>
+						<a href={%if ldapUser %}"{{ ofregURL }}"{% else %}"{% url users_my_detail %}"{% endif %} alt="Account settings">Account</a>
+					</li>
+					<li>
+						<a href="{% url help_home %}">Help</a>
+					</li>
+					<li>
+						<a href="{% url auth_logout %}">Logout</a>
+					</li>
 				{% else %}
 					{% if allowLocalRegistration == 1 %}
-						<a href="{% url my_password_reset %}">
-							Password reset
-						</a>
-						<a href="{% url registration_register %}">
-							Register
-						</a>
+						<li>
+							<a href="{% url auth_login %}">Log in</a>
+						</li>
+						<li>
+							<a href="{% url registration_register %}">Register</a>
+						</li>
+						<li>
+							<a href="{% url my_password_reset %}">Password reset</a>
+						</li>
 					{% endif %}
 				{% endif %}
+				</ul>
 			</div>
-		</div>
+		</header>
 
 		<div id="page">
 			<div id="content">
-                <div class="breadcrumbs">
+                <nav style="background-image: url({% url img_media 'navigation.png' %});">
                     {% breadcrumbs %}
-                </div>
+                </nav>
 				{% block messages %}
 					{% if messages %}
 						<div id="messages" class="messages" style="margin-top: 20px;">
@@ -121,12 +125,16 @@
 			</div>
 		</div>
 
-		<div id="footer">
+		<footer>
 			Expedient by <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">Stanford University</a> and <a href="http://www.i2cat.net/">i2CAT foundation</a>
 			&copy; 2011-2013 <a href="http://www.fp7-ofelia.eu/" target="_blank">FP7 OFELIA project</a> &amp; <a href="http://www.fibre-ict.eu/" target="_blank">FP7 FIBRE project</a>. <br/>
 			 OFELIA and FIBRE are funded by the European Comission (EC) in the 7th framework programme and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
-		</div>
+		</footer>
 		<!-- Validation in the end waits for the forms to be loaded -->
-		<script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+		<script src="{% url js_media 'validation.js' %}"></script>
+		<!-- Highlights selected links from top menu -->
+		<script>
+			isSelectedLink('#top_menu_options ul a', '{{request.META.PATH_INFO}}');
+		</script>
 	</body>
 </html>

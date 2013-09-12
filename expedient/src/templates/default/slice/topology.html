@@ -1,24 +1,17 @@
-<h2>
+<!--<h2>
 	<a id="topology" class="expandableTooltipable expandableCtl" ref="#/">
         Topology <span class="opened"> &#x25B2;</span>
-        </a>
-</h2>
+    </a>
+</h2>-->
+<h2>Topology</h2>
 
-
-<script src="{% url js_media 'tooltip.topology.js' %}">
-</script>
-<script src="{% url js_media 'd3.v2.min.js' %}">
-</script>
-<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
-
+<link rel="stylesheet" href="{% url css_media 'tooltip.topology.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'tooltip.css' %}" />
 <style>
-  
   .link {
     stroke: #ccc;
     stroke-width:1px;
   }
-  
   .node {
     stroke-width:2px;
   }
@@ -26,16 +19,17 @@
     pointer-events: none;
     font: 10px sans-serif;
   }
-  
 </style>
+<script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<script src="{% url js_media 'd3.v2.min.js' %}"></script>
 
 {#Render#}
-<div id="topologyContainer" class="expandable" style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+<div id="topologyContainer" class="expandable">
+  <div id="selected_node_info">
     Tip: Move cursor over the icons to get extra information...
   </div>
   {%if not d3_nodes %}
-  <a href="#addAggregate">
+  <a href="#aggregate_add_to_slice">
     <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
       Nothing to show yet. Add Aggregates to the slice.
     </div>
@@ -43,7 +37,7 @@
   {% endif %}
   <div id="target">
   </div>
-  <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+  <div id="topology_options_menu">
     
     <!--
 <a href="#" onClick="return showAllInfo()"/>
@@ -70,18 +64,18 @@ Show
 </div>
 
 <!--
-<script type="text/javascript">
+<script>
     var nIslands = {{ n_islands }};
     //FIXME: problematic because of "'" (&#38;)
     //var d3_nodes = {{ d3_nodes }};
 </script>
 <script src="{% url js_media 'topology.js' %}"></script>
 -->
-<script type="text/javascript">
+<script>
 /* d3 data */
 var nIslands = {{ n_islands}},
     pad = 5,
-    width = 740,
+    width = parseInt($("#topologyContainer").css("width")), /* Obtain width from container */
     height = 400
 
 //Islands area generation
@@ -607,7 +601,7 @@ node.on("mouseover", function (d, i){
 	}
 	)
 	.on("mouseout", function() {
-			$("#selected_node_info").css("background-color", "#DDDDDD");
+			$("#selected_node_info").css("background-color", "#ebf5ff");
 			//$("#selected_node_info").hide()
                         tooltip.hide();
                 })

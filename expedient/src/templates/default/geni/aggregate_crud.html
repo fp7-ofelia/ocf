@@ -4,7 +4,7 @@
 
 {% block head %}
 {% if not create %}
-<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
+<script src="{% url js_media 'agg_status.js' %}"></script>
 <script>
 	$(document).ready(function() {
 		get_status({{ aggregate.id }}, "{% url aggregate_status_img aggregate.id %}");

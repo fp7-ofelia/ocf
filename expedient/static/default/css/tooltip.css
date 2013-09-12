@@ -1,86 +1,49 @@
 .tooltip {
-	display:none;
-	background-color:#111111;
-	border:0px;
-	padding:10px 10px;
-	width:200px;
-	color:#fff;
-	text-align:left;
-	font-size:10px;
+	background-color: #c5cfd8; /*#b0c4ff;*/
+	border: 1px solid #9fa4a8;
+	border-radius: 6px;
+	/* color: #fff; */
+	display: none;
+	font-size: .9em;
+	max-width: 400px;
+	min-width: 250px;
+	padding: 10px 10px;
+	text-align: left;
+	/*opacity: 0.85;*/
 	/* outline radius for mozilla/firefox only */
-	-moz-box-shadow:0 0 10px #000;
-	-webkit-box-shadow:0 0 2px #000;
-	-moz-border-radius: 15px 15px 15px 0px;
-    	-webkit-border-radius: 15px 15px 15px 0px;
-     	border-radius:  10px 10px 10px 4px;
-	opacity:0.85;
+	-moz-box-shadow:0 0 2px #132c60;
+	-webkit-box-shadow:0 0 2px #132c60;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
 	/* IE 8 */
-  	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
+  	/*-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";*/
   	/* IE 5-7 */
-  	filter: alpha(opacity=85);
+  	/*filter: alpha(opacity=85);*/
 	/* Netscape */
-  	-moz-opacity: 0.85;
+  	/*-moz-opacity: 0.85;*/
   	/* Safari 1.x */
-  	-khtml-opacity: 0.85;
-
+  	/*-khtml-opacity: 0.85;*/
 }
 .tooltiptable {
 	border: none;
 	border-collapse: collapse;
 }
-.tooltiptable tbody td, tbody th{
+.tooltiptable tbody td,
+.tooltipable tbody th {
 	border: none;
 	border-collapse: collapse;
 }
+/* Separate 1st row (th) from 2nd (td) */
+.tooltiptable tbody th {
+	padding-right: 5px;
+}
+
+/* Links*/
 .tooltip a {
-	color: #FFF;
-	text-decoration:underline;
+	/*color: #fff;*/
+	text-decoration: underline;
 }
 .tooltip a:hover {
-	text-decoration:none;
+	text-decoration: none;
 }
-
-.animatedTooltip{
-    position:relative;
-    top:-50px;
-    right:-1000px;
-	background-color:#111111;
-	border:0px;
-	padding:10px 10px;
-	width:200px;
-	color:#fff;
-	text-align:left;
-	font-size:10px;
-	/* outline radius for mozilla/firefox only */
-	-moz-box-shadow:0 0 10px #000;
-	-webkit-box-shadow:0 0 2px #000;
-	-moz-border-radius: 15px 15px 15px 0px;
-    	-webkit-border-radius: 15px 15px 15px 0px;
-     	border-radius:  10px 10px 10px 4px;
-	opacity:0.85;
-	/* IE 8 */
-  	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
-  	/* IE 5-7 */
-  	filter: alpha(opacity=85);
-	/* Netscape */
-  	-moz-opacity: 0.85;
-  	/* Safari 1.x */
-  	-khtml-opacity: 0.85;
-     -webkit-transition: all 1.5s ease-in-out;
-     -o-transition: all 1.5s ease-in-out;
-     -moz-transition: all 1.5s ease-in-out;
-     transition: all 1.5s ease-in-out;
-     margin-left: -220px; /* Fast visual fix */
-}
-
-.animatedTooltip a {
-    color: white;
-    float: right;
-}
-
-.animatedTooltipChange {
-    float:right;
-    right:-75px;
-}
-
 

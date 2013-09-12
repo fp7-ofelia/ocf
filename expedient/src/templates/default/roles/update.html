@@ -21,12 +21,12 @@
 	allowed to give to other users.
 	
 	<form action="" method="POST">{% csrf_token %}
-		<table class="formtable_noborder">
+		<table class="formtable">
 			{{ form.as_table }}
 		</table>
 		<div class="center">
 			<input type="submit" value="Update" />
-			<a href="{% before_last_link breadcrumbs %}">Cancel</a>
+			<input type="button" value="Cancel" onclick="document.location='{% before_last_link breadcrumbs %}'"/>
 		</div>
 	</form>
 </div>

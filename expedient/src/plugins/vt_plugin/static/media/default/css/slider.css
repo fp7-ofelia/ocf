@@ -1,0 +1,9 @@
+#id_memory_slider {
+	float: left;
+	width: 65%;
+}
+#id_memory_slider_mbs {
+	float: right;
+	font-weight: bold;
+}
+

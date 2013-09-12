@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="stylesheet" type="text/css" href="{% url css_media 'aggregate.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% url css_media 'permission.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'aggregate.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'permission.css' %}" />
 {% endblock %}
 {% block messages %}{% endblock %}
 
@@ -10,15 +10,15 @@
 <div class="main">
 
 	<!-- Aggregates expandable tooltip -->
-	<div class="tooltip" id="expandableHelpAggregates" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-	<h2 class="expandable_header">
-		<a id="adminAggregates" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+	<div class="tooltip" id="expandableHelpAggregates" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminAggregates" class="expandableTooltipable expandableCtl" ref="#/">
 			Island Aggregate Managers
 			<span class="opened">&#x25B2;</span>
 		</a>
 	</h2>
 
-	<div id="adminAggregatesContainer" class="expandable close">
+	<div id="adminAggregatesContainer" class="expandable_admin close">
 		<h2>Manage aggregates</h2>
 		<p>
 			You may add, edit or delete aggregates to Expedient.
@@ -45,15 +45,15 @@
 	</div>
 
 	<!-- Users and Permissions expandable tooltip -->
-	<div class="tooltip" id="expandableHelpUsers" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-	<h2 class="expandable_header">
-		<a id="adminUsersPermissions" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+	<div class="tooltip" id="expandableHelpUsers" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminUsersPermissions" class="expandableTooltipable expandableCtl" ref="#/">
 			Users & Permissions
 			<span class="opened">&#x25B2;</span>
 		</a>
 	</h2>
 
-	<div id="adminUsersPermissionsContainer" class="expandable close">
+	<div id="adminUsersPermissionsContainer" class="expandable_admin close">
 		<h2>Manage permissions</h2>
 		<p>
 			When an Expedient user needs permission to do something, and she does
@@ -88,16 +88,16 @@
 	</div>
 
 	<!-- Monitoring expandable tooltip -->
-	<div class="tooltip" id="expandableHelpMonitoring" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-	<h1 class="expandable_header">
-		<a id="adminMonitoring" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+	<div class="tooltip" id="expandableHelpMonitoring" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminMonitoring" class="expandableTooltipable expandableCtl" ref="#/">
 			Monitoring
 			<span class="opened">&#x25B2;</span>
 		</a>
-	</h1>
+	</h2>
 
-	<div id="adminMonitoringContainer" class="expandable close">
-		<h2>Logs</h2>
+	<div id="adminMonitoringContainer" class="expandable_admin close">
+		<h3>Logs</h3>
 
 		<p>
 			Click on <strong>view</strong> to check every module's log on a new tab.
@@ -144,27 +144,26 @@
 	</div>
 
 	<!-- Plug-ins expandable tooltip -->
-	<div class="tooltip" id="expandableHelpPlugins" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-	<h1 class="expandable_header">
-		<a id="adminPlugins" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+	<div class="tooltip" id="expandableHelpPlugins" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminPlugins" class="expandableTooltipable expandableCtl" ref="#/">
 			Plug-ins
 			<span class="opened">&#x25B2;</span>
 		</a>
-	</h1>
+	</h2>
 
-	<div id="adminPluginsContainer" class="expandable close">
-		<h1>Plug-ins</h1>
+	<div id="adminPluginsContainer" class="expandable_admin close">
 		{% for plugin_administration_data in plugin_administration_methods %}
 			{% with plugin_administration_data.0 as plugin_name %}
 			{% with plugin_administration_data.1 as plugin_administration_method %}
-				<div class="tooltip" id="expandableHelp{{ plugin_name }}" style="font-size:normal"> Click on the arrow to expand/collapse</div>
-				<h1 class="expandable_header">
-					<a id="admin{{ plugin_name }}" class="expandableTooltipable expandableCtl expandable_header" ref="#/">
+				<div class="tooltip" id="expandableHelp{{ plugin_name }}" style="font-size:normal"> Click to expand/collapse</div>
+				<h3 class="resources_aggregate">
+					<a id="admin{{ plugin_name }}" class="expandableTooltipable expandableCtl resources" ref="#/">
 						{{ plugin_name }}
 						<span class="opened">&#x25B2;</span>
 					</a>
-				</h1>
-				<div id="admin{{ plugin_name }}Container" class="expandable close">
+				</h3>
+				<div id="admin{{ plugin_name }}Container" class="aggregateManager expandable_admin close">
 					<iframe class="dynsized" name="plugin_{{ plugin_name }}" src="..{{ plugin_administration_method }}" scrolling="no" frameborder="no" width="100%">
 						<p>Your browser does not support iframes.</p>
 					</iframe>
@@ -176,7 +175,7 @@
 
 </div>
 
-<script type="text/javascript">
+<script>
 	/* Asynchronous calls to insert data into different layers */
 	$.get("{% url aggregate_all %}", function(data) {
 		$("#aggregates_list").html(data);

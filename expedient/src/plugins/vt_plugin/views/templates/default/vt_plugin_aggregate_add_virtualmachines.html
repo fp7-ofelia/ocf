@@ -3,36 +3,59 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
-
-<script type="text/javascript">
-	$(document).ready(function() {
-		$("#id_disc_image").change(function(){
-            	if (document.getElementById("id_disc_image").value == "spirent"){
-			document.getElementById("id_hdSetupType").value="file-full-image";
-			document.getElementById("id_virtualizationSetupType").value="hvm";
-			document.getElementById("id_memory").value="1024";
-			document.getElementById("id_hdSetupType").disabled=true;
-			document.getElementById("id_hdSetupType").disabled=true;
-		}
-            	else if (document.getElementById("id_disc_image").value == "default"){
-			document.getElementById("id_hdSetupType").value="file-image";
-			document.getElementById("id_virtualizationSetupType").value="paravirtualization";
-			document.getElementById("id_hdSetupType").disabled=true;
-			document.getElementById("id_virtualizationSetupType").disabled=true;
-		}
-		else{
-			document.getElementById("id_hdSetupType").disabled=false;
-			document.getElementById("id_virtualizationSetupType").disabled=false;
-		};        
-		$("#form_create_VM").click(function(){
-			document.getElementById("id_hdSetupType").disabled=false;
+<link rel="stylesheet" href="{% url css_media_vt_plugin 'slider.css' %}" />
+<link rel="stylesheet" href="{% url css_media_vt_plugin 'jquery.ui.noimages.css' %}" />
+<script src="{% url js_media 'jquery-ui.min.js' %}"></script>
+<script>
+        $(document).ready(function() {
+                $("#id_disc_image").change(function(){
+                if (document.getElementById("id_disc_image").value == "spirent"){
+                        document.getElementById("id_hdSetupType").value="file-full-image";
+                        document.getElementById("id_virtualizationSetupType").value="hvm";
+                        document.getElementById("id_memory").value="1024";
+                        document.getElementById("id_hdSetupType").disabled=true;
+                        document.getElementById("id_hdSetupType").disabled=true;
+                }
+                else if (document.getElementById("id_disc_image").value == "default"){
+                        document.getElementById("id_hdSetupType").value="file-image";
+                        document.getElementById("id_virtualizationSetupType").value="paravirtualization";
+                        document.getElementById("id_hdSetupType").disabled=true;
+                        document.getElementById("id_virtualizationSetupType").disabled=true;
+                }
+                else{
+                        document.getElementById("id_hdSetupType").disabled=false;
                         document.getElementById("id_virtualizationSetupType").disabled=false;
-		});
-	});
+                };
+                $("#form_create_VM").click(function(){
+                        document.getElementById("id_hdSetupType").disabled=false;
+                        document.getElementById("id_virtualizationSetupType").disabled=false;
+                });
+        });
 });
+
+  $(function() {
+	// Hides default memory input, use it to store the value from the slider
+	$("#id_memory").hide();
+	// Creates new div to restrict the slider width
+	$("#id_memory").parent().append("<div id=\"id_memory_slider\"/>");
+	// Appends new input to show chosen Mb
+	$("#id_memory").parent().append("<span id=\"id_memory_slider_mbs\"/>");
+    $("#id_memory_slider").slider({
+      range: "min",
+      value: {{ min_disk_memory }},
+      min: {{ min_disk_memory }},
+      max: {{ max_disk_memory }},
+      slide: function( event, ui ) {
+		// Callback function
+        $( "#id_memory_slider_mbs" ).html( ui.value + "Mb" );
+		$( 'input[id="id_memory"]' ).attr( 'value', ui.value );
+      }
+    });
+	// Initial values
+	$("#id_memory").val($("#id_memory_slider").slider("value"));
+    $("#id_memory_slider_mbs").html($("#id_memory").val() + "Mb");
+  });
 </script>
-
-
 {% endblock %}
 
 {% block content %}
@@ -61,3 +84,4 @@
 	</form>
 </div>
 {% endblock content %}
+

@@ -131,8 +131,9 @@ production networks, and is currently deployed in several universities.
         '''
         Update the set of available switches.
         '''
+		## NOT USED
         # switches already in the DB.
-        current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
+#        current_switches = OpenFlowSwitch.objects.filter(aggregate=self)
         
         switches = {}
         for switch_info in active_switches_raw:

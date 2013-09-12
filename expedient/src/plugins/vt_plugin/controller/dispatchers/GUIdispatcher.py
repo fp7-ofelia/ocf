@@ -11,13 +11,14 @@ from django import forms
 
 import copy
 from vt_plugin.models import VtPlugin, VTServer, VM, Action
+from vt_plugin.models.VM import MEMORY_RANGE as VM_MEMORY_RANGE
 from vt_plugin.forms.VM import VMModelForm
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_plugin.controller.VMcontroller.VMcontroller import VMcontroller
-from common.utils.ServiceThread import ServiceThread
-#from vt_plugin.utils.ServiceThread import ServiceThread
+#from common.utils.ServiceThread import ServiceThread
+from vt_plugin.utils.ServiceThread import ServiceThread
 from modules.aggregate.models import Aggregate
 from common.messaging.context_processors import messaging
 from common.messaging.models import DatedMessage
@@ -96,8 +97,14 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     return simple.direct_to_template(
         request, template="vt_plugin_aggregate_add_virtualmachines.html",
-        extra_context={"virtual_machines": virtualmachines, "exception": error_crud,
-                        "server_name": serv.name, "form": form,"slice":slice,
+        extra_context={
+						"virtual_machines": virtualmachines,
+						"min_disk_memory": VM_MEMORY_RANGE[0],
+						"max_disk_memory": VM_MEMORY_RANGE[1],
+						"exception": error_crud,
+                        "server_name": serv.name, 
+						"form": form,
+						"slice": slice,
                         "breadcrumbs": (
                     ("Home", reverse("home")),
                     ("Project %s" % slice.project.name, reverse("project_detail", args=[slice.project.id])),
