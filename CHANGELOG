@@ -26,11 +26,11 @@ VERSIONS
 --------------------------------------------------
 v0.6
 --------------------------------------------------
-Released: 10/09/2013
+Released: 12/09/2013
 
 Change log:
 
-[+] EXP: Requested flowspace for an AM showing for every other AM. Issue 161
+[*] EXP: Requested flowspace for an AM showing for every other AM. Issue 161
 [+] EXP, VTA: Support for Spirent VM templates
 [*] VTA: Improved north communication interface for VT planner
 [+] OPT, VTA: Added SFA API for each AM
