@@ -1,5 +1,5 @@
 from vt_manager.communication.sfa.setUp.authority_create import create_authority
-from vt_manager.communication.sfa.setUp import setup_config as conf
+#from vt_manager.communication.sfa.setUp import setup_config as conf
 
 
 authority_list =  conf.AUTHORITY_XRN.split('.')

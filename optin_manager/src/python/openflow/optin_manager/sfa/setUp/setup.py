@@ -1,6 +1,7 @@
 from openflow.optin_manager.sfa.setUp.credential_create import create_credential
 from openflow.optin_manager.sfa.setUp.authority_create import create_authority
-from openflow.optin_manager.sfa.setUp import setup_config as conf
+#XXX: Use the Clearinghouse
+#from openflow.optin_manager.sfa.setUp import setup_config as conf
 
 
 authority_list =  conf.AUTHORITY_XRN.split('.')

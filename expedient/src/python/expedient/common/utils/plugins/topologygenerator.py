@@ -26,8 +26,8 @@ class TopologyGenerator():
         """
         from django.conf import settings
         consistent_links = []
-        inconsistent_links = []
-        inconsistent_links_message = ""
+#        inconsistent_links = []
+#        inconsistent_links_message = ""
         nodes_length = len(nodes)
         try:
             for link in links:
@@ -76,29 +76,29 @@ class TopologyGenerator():
                         target_node['agg_id'] = ""
                         target_node['agg_name'] = ""
 
-                    inconsistent_links.append({"source_id": source_node['id'], "source_name": source_node['name'], "source_aggregate_id": source_node['agg_id'], "source_aggregate_name": source_node['agg_name'], "target_id": target_node['id'], "target_name": target_node['name'], "target_aggregate_id": target_node['agg_id'], "target_aggregate_name": target_node['agg_name']})
+#                    inconsistent_links.append({"source_id": source_node['id'], "source_name": source_node['name'], "source_aggregate_id": source_node['agg_id'], "source_aggregate_name": source_node['agg_name'], "target_id": target_node['id'], "target_name": target_node['name'], "target_aggregate_id": target_node['agg_id'], "target_aggregate_name": target_node['agg_name']})
         except Exception as e:
             print "[WARNING] Problem checking link consistency inside TopologyGenerator. Details: %s" % str(e)
 
-        # Craft message to send via e-mail
-        if inconsistent_links:
-            for link in inconsistent_links:
-                inconsistent_links_message += "SOURCE\n"
-                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n" % (link['source_id'], link['source_name'], link['source_aggregate_id'], link['source_aggregate_name'])
-                inconsistent_links_message += "TARGET\n"
-                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n\n" % (link['target_id'], link['target_name'], link['target_aggregate_id'], link['target_aggregate_name'])
-
-            from django.contrib.auth.models import User
-            try:
-                user = User.objects.get(settings.ROOT_USERNAME)
-            except:
-                user = User.objects.filter(is_superuser=True)[0]
-            try:
-                from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
-                # Use thread to avoid slow page load when server is unresponsive
-                send_mail(settings.EMAIL_SUBJECT_PREFIX + " Inconsistent links at slice '%s': Expedient" % str(slice.name), "Hi, Island Manager\n\nThis is a warning to notify about some inconsistent links within a topology. This may be happening because a plugin or Aggregate Manager references a node not present in the Aggregate Managers chosen for this slice.\n\nProject: %s\nSlice: %s\nProblematic links:\n\n%s" % (slice.project.name, slice.name, str(inconsistent_links)), from_email = settings.DEFAULT_FROM_EMAIL, recipient_list = [user.email],)
-            except Exception as e:
-                print "[WARNING] Problem sending e-mail to user '%s' (email: %s) with information about link inconsistency inside TopologyGenerator. Details: %s" % (user.username, user.email, str(e))
+#        # Craft message to send via e-mail
+#        if inconsistent_links:
+#            for link in inconsistent_links:
+#                inconsistent_links_message += "SOURCE\n"
+#                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n" % (link['source_id'], link['source_name'], link['source_aggregate_id'], link['source_aggregate_name'])
+#                inconsistent_links_message += "TARGET\n"
+#                inconsistent_links_message += "id: %s\nname: %s\naggregate id: %s\naggregate name: %s\n\n" % (link['target_id'], link['target_name'], link['target_aggregate_id'], link['target_aggregate_name'])
+#
+#            from django.contrib.auth.models import User
+#            try:
+#                user = User.objects.get(settings.ROOT_USERNAME)
+#            except:
+#                user = User.objects.filter(is_superuser=True)[0]
+#            try:
+#                from expedient.common.utils.mail import send_mail # Wrapper for django.core.mail__send_mail
+#                # Use thread to avoid slow page load when server is unresponsive
+#                send_mail(settings.EMAIL_SUBJECT_PREFIX + " Inconsistent links at slice '%s': Expedient" % str(slice.name), "Hi, Island Manager\n\nThis is a warning to notify about some inconsistent links within a topology. This may be happening because a plugin or Aggregate Manager references a node not present in the Aggregate Managers chosen for this slice.\n\nProject: %s\nSlice: %s\nProblematic links:\n\n%s" % (slice.project.name, slice.name, str(inconsistent_links)), from_email = settings.DEFAULT_FROM_EMAIL, recipient_list = [user.email],)
+#            except Exception as e:
+#                print "[WARNING] Problem sending e-mail to user '%s' (email: %s) with information about link inconsistency inside TopologyGenerator. Details: %s" % (user.username, user.email, str(e))
         return consistent_links
 
     @staticmethod

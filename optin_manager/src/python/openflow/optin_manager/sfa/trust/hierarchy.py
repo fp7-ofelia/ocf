@@ -21,7 +21,8 @@ from openflow.optin_manager.sfa.trust.credential import Credential
 from openflow.optin_manager.sfa.trust.gid import GID, create_uuid
 from openflow.optin_manager.sfa.sfa_config import config
 from openflow.optin_manager.sfa.trust.sfaticket import SfaTicket
-from openflow.optin_manager.sfa.setUp import setup_config as auth_config
+#XXX:Use the ClearingHouse
+#from openflow.optin_manager.sfa.setUp import setup_config as auth_config
 ##
 # The AuthInfo class contains the information for an authority. This information
 # includes the GID, private key, and database connection information.
