@@ -21,7 +21,7 @@ from vt_manager.communication.sfa.trust.credential import Credential
 from vt_manager.communication.sfa.trust.gid import GID, create_uuid
 from vt_manager.communication.sfa.sfa_config import config
 from vt_manager.communication.sfa.trust.sfaticket import SfaTicket
-from vt_manager.communication.sfa.setUp import setup_config as auth_config
+#from vt_manager.communication.sfa.setUp import setup_config as auth_config
 ##
 # The AuthInfo class contains the information for an authority. This information
 # includes the GID, private key, and database connection information.
