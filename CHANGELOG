@@ -24,11 +24,32 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.*
+--------------------------------------------------
+Released: xx/xx/2013
+
+Change log:
+
+[*] EXP: New UI style
+
+
+--------------------------------------------------
+v0.6
+--------------------------------------------------
+Released: 10/09/2013
+
+Change log:
+
+[+] EXP: Requested flowspace for an AM showing for every other AM. Issue 161
+[+] EXP, VTA: Support for Spirent VM templates
+[*] VTA: Improved north communication interface for VT planner
+[+] OPT, VTA: Added SFA API for each AM
+
+
+--------------------------------------------------
 v0.5
 --------------------------------------------------
 Released: 04/06/2013
-
-./ Production ready
 
 Change log:
 
@@ -60,8 +81,6 @@ v0.4.3
 --------------------------------------------------
 Released: 04/02/2013
 
-/!\ Outdated
-
 Change log:
 
 [*] OFVER: PyPElib and ofver consistency. Issues: 114, 115
@@ -77,8 +96,6 @@ v0.4.2
 --------------------------------------------------
 Released: 15/01/2013
 
-/!\ Outdated
-
 Change log:
 
 [B] EXP : Mail notifications not arriving. Issue 106
@@ -91,8 +108,6 @@ v0.4.1
 --------------------------------------------------
 Released: 07/01/2013
 
-/!\ Outdated
-
 Change log:
 
 [B] OFVER : Fixed bug raleted with backup restoration. Issue 104
@@ -104,8 +119,6 @@ Change log:
 v0.4
 --------------------------------------------------
 Released: 04/01/2013
-
-/!\ Outdated
 
 Change log:
 
@@ -145,8 +158,6 @@ v0.3
 --------------------------------------------------
 Released: 25/09/2012
 
-/!\ Outdated
-
 Change log:
 
 [*] EXP : Migration from protovis to d3 to display topology. Several improvements and enhancements in resources visualization and selection facing intrafederation. Issue 26
@@ -170,9 +181,6 @@ Known issues/TODOs:
 v0.3RC1
 --------------------------------------------------
 Released: 03/09/2012
-
-/!\ Not for production
-/!\ Outdated
 
 Change log:
 
@@ -199,10 +207,7 @@ Known issues/TODOs:
 --------------------------------------------------
 v0.21.1
 --------------------------------------------------
-
 Released: 06/06/2012
-
-/!\ Outdated
 
 Change log:
 
@@ -226,8 +231,6 @@ Known issues/TODOs:
 v0.21
 --------------------------------------------------
 Released: 24/05/2012
-
-/!\ Outdated
 
 Change log:
 
@@ -254,8 +257,6 @@ v0.2
 --------------------------------------------------
 Released: 16/05/2012
 
-/!\ Outdated
-
 Change log:
 
 [B] OFVER : Installation process checked. Permissions reorganization script checked.
@@ -277,9 +278,6 @@ Known issues/TODOs:
 v0.2RC1
 --------------------------------------------------
 Released: 19/04/2012
-
-/!\ Outdated
-/!\ Not for production
 
 Change log:
 
@@ -313,8 +311,6 @@ v0.14.2
 --------------------------------------------------
 Released: 23/03/2012
 
-/!\ Outdated
-
 Change log:
 
 [B] EXP : Exception messaged raised by VT AM when it is not able to connect the agent treated in Message Panel.
@@ -345,8 +341,6 @@ v0.14.1
 --------------------------------------------------
 Released: 13/12/2011
 
-/!\ Outdated
-
 Change log:
 
 [B] EXP : Fixed bug: Project owners and members correctly displayed in Dashboard.
@@ -366,8 +360,6 @@ Known issues/TODOs:
 v0.14
 --------------------------------------------------
 Released: 16/11/2011
-
-/!\ Outdated
 
 Change log:
 
@@ -392,8 +384,6 @@ Known issues/TODOs:
 v0.13
 --------------------------------------------------
 Released: 07/10/2011
-
-/!\ Outdated
 
 Change log:
 
@@ -429,8 +419,6 @@ v0.12
 --------------------------------------------------
 Released: 12/08/2011
 
-/!\ Outdated
-
 Change log:
 
 [B] EXP : Fixed bug Expedient was sometimes caching UUIDs of projects and slices, causing duplicated and non random UUID assignation.
@@ -463,8 +451,6 @@ v0.11
 --------------------------------------------------
 Released: 03/08/2011
 
-/!\ Outdated
-
 Change log:
 
 [B] EXP : Fixed bug when adding an OF AM and it has no flowvisor set.
@@ -487,8 +473,6 @@ Missing Features:
 v0.1
 --------------------------------------------------
 Released: 22/07/2011
-
-/!\ Outdated
 
 Change log:
 
@@ -522,8 +506,6 @@ Missing Features:
 v0.1RC2
 --------------------------------------------------
 Released: 23/06/2011
-
-/!\ Outdated
 
 Change log:
 
@@ -568,8 +550,6 @@ v0.1RC1
 --------------------------------------------------
 Released: 18/04/2011
 
-/!\ Outdated
-
 Change log:
 
 [B] Lots of bug fixing
@@ -595,8 +575,6 @@ Known issues/TODOs:
 v0.1Alpha
 --------------------------------------------------
 Released: 15/03/2011
-
-/!\ Outdated
 
 Change log:
 
