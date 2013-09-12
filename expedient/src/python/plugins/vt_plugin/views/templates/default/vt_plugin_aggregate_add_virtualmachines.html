@@ -11,21 +11,21 @@
 				$("#id_hdSetupType").val("file-full-image");
 				$("#id_virtualizationSetupType").val("hvm");
 				$("#id_memory").val("1024");
-				$("#id_hdSetupType").attr("disabled","true");	/* XXX: use .prop instead of .attr for jQuery 1.6+) */
-				$("#id_virtualizationSetupType").attr("disabled","true");
+				$("#id_hdSetupType").attr("disabled","disabled");	/* XXX: use .prop instead of .attr for jQuery 1.6+) */
+				$("#id_virtualizationSetupType").attr("disabled","disabled");
 			} else if ($("#id_disc_image").val() == "default") {
 				$("#id_hdSetupType").val("file-image");
 				$("#id_virtualizationSetupType").val("paravirtualization");
-				$("#id_hdSetupType").attr("disabled","true");
-				$("#id_virtualizationSetupType").attr("disabled","true");
+				$("#id_memory").val("");
+				$("#id_hdSetupType").attr("disabled","disabled");
+				$("#id_virtualizationSetupType").attr("disabled","disabled");
 			} else {
-				console.log("---");
-				$("#id_hdSetupType").attr("disabled","false");
-				$("#id_virtualizationSetupType").attr("disabled","false");
+				$("#id_hdSetupType").attr("disabled","");
+				$("#id_virtualizationSetupType").attr("disabled","");
 			};        
 			$("#form_create_VM").click(function(){
-				$("#id_hdSetupType").attr("disabled","false");
-				$("#id_virtualizationSetupType").attr("disabled","false");
+				$("#id_hdSetupType").attr("disabled","");
+				$("#id_virtualizationSetupType").attr("disabled","");
 		});
 	});
 });
