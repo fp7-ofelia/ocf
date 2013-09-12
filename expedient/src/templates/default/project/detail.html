@@ -170,14 +170,14 @@
 	
 	<div class="role_requests">
 		<table class="fulltable" id="role_request_table">
-			<tr>
+			<tr class="head">
 				<th>Requester</th>
 				<th>Requested Role</th>
 				<th>Message</th>
 				<th>Actions</th>
 			</tr>
 			{% for req in role_requests %}
-			<tr>
+			<tr class="body">
 				<td>
 					{% with req.requester as user %}
 					<span class="req_user val">{{ user.username }}</span>

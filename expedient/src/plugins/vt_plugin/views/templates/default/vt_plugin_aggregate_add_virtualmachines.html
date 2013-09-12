@@ -3,9 +3,9 @@
 {% block title %}Add Virtual Machine at server {{ server_name }}.{% endblock title %}
 
 {% block head %}
-<link rel="stylesheet" type="text/css" href="{% url css_media_vt_plugin 'slider.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% url css_media_vt_plugin 'jquery.ui.noimages.css' %}" />
-<script type="text/javascript" src="{% url js_media 'jquery-ui.min.js' %}"></script>
+<link rel="stylesheet" href="{% url css_media_vt_plugin 'slider.css' %}" />
+<link rel="stylesheet" href="{% url css_media_vt_plugin 'jquery.ui.noimages.css' %}" />
+<script src="{% url js_media 'jquery-ui.min.js' %}"></script>
 <script>
   $(function() {
 	// Hides default memory input, use it to store the value from the slider

@@ -169,7 +169,7 @@ h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar
 	font: 1em 'Lucida Grande', Verdana, Arial, Sans-Serif;
 	}
 
-small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, strike {
+small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, del {
 	color: #777;
 	}
 
@@ -177,7 +177,7 @@ code {
 	font: 1.1em 'Courier New', Courier, Fixed;
 	}
 
-acronym, abbr, span.caps
+abbr, span.caps
 {
 	font-size: 0.9em;
 	letter-spacing: .07em;
@@ -222,7 +222,7 @@ body {
 #page {
 	background-color: #FFFFFF;	
 	padding: 10px 0 0 0;
-	width: 800px;
+/*	width: 800px;*/
 	margin: auto;
 	border: 1px solid #959596;
 	}
@@ -609,11 +609,11 @@ select {
 
 
 /* Begin Various Tags & Classes */
-acronym, abbr, span.caps {
+abbr, span.caps {
 	cursor: help;
 	}
 
-acronym, abbr {
+abbr {
 	border-bottom: 1px dashed #999;
 	}
 

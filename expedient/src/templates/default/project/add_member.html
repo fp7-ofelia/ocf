@@ -18,12 +18,12 @@
 	</div>
 	<div class="member_form">
 		<form action="." method="post">{% csrf_token %}
-			<table class="formtable_noborder">
+			<table class="formtable">
 				{{ form.as_table }}
 			</table>
 			<div class="center">
 				<input type="submit" value="Add" />
-				<a href="{{ breadcrumbs.1.1 }}">Cancel</a>
+				<input type="button" value="Cancel" onclick="document.location='{{ breadcrumbs.1.1 }}'" />
 			</div>
 		</form>
 	</div>

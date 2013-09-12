@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="stylesheet" type="text/css" href="{% url css_media 'project.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'project.css' %}" />
 {% endblock %}
 
 {% block messages %}{% endblock %}
 
 {% block content %}
 <div class="main">
-	<h1>Welcome, <font class="highlight">{{ request.user.username }}</font>!</h1>
 
 	{% if messages %}
 	<h2>Messages & Logs</h2>
@@ -29,7 +28,7 @@
     <div id="projects_list" class="ajax_div projects_div"></div>
 </div>
 
-<script type="text/javascript">
+<script>
 	/* Asynchronous calls to insert data into different layers */
 	$.get("{% url project_list %}", function(data) {
 		$("#projects_list").html(data);
