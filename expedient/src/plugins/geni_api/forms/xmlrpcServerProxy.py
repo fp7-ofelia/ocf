@@ -30,7 +30,7 @@ class xmlrpcServerProxy(forms.ModelForm):
     class Meta:
         model = xmlrpcServerProxy
         # Defines all the fields in the model by ORDER
-        fields = ('url')
+        fields = ('url',)
         # Form widgets: HTML representation of fields
         #widgets = {
         #    # Shows the password
