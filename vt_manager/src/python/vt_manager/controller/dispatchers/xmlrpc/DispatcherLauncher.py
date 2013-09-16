@@ -11,6 +11,9 @@ from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *                                               
 import threading                                                                             
 
+#XXX: Sync Thread for VTPlanner
+from vt_manager.utils import SyncThread
+
 class DispatcherLauncher():
 	
 	@staticmethod
@@ -26,6 +29,13 @@ class DispatcherLauncher():
 		if not rspec.query.provisioning == None :
 			ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
     
+	def processXmlQuerySync(rspec):
+	    #check if provisioning / monitoring / etc
+            if not rspec.query.provisioning == None :
+		thread = SyncThread(ProvisioningDispatcher.processProvisioningSync, rspec.query.provisioning, threading.currentThread().callBackURL)
+		thread.join()
+
+
 	@staticmethod
 	def processInformation(remoteHashValue, projectUUID ,sliceUUID):
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)
