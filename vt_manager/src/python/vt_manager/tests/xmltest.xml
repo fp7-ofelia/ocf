@@ -1,0 +1,45 @@
+<rspec http://www.fp7-ofelia.eu/CF/vt_am/rspec>
+     <query>
+         <provisioning>
+             <action type="create" id="this is an id">
+                 <server>
+                     <uuid>testuuid</uuid>
+                     <virtualization-type>NONE</virtualization-type>
+                     <virtual-machines>
+                         <name>OKtest</name>
+                         <uuid>NONE</uuid>
+                         <project-id>NONE</project-id>
+                         <project-name>NONE</project-name>
+                         <slice-id>NONE</slice-id>
+                         <slice-name>NONE</slice-name>
+                         <operating-system-type>NONE</operating-system-type>
+                         <operating-system-version>NONE</operating-system-version>
+                         <operating-system-distribution>NONE</operating-system-distribution>
+                         <virtualization-type>NONE</virtualization-type>
+                         <xen-configuration>
+                             <hd-setup-type>NONE</hd-setup-type>
+                             <hd-size-mb>8200</hd-size-mb>
+                             <hd-origin-path>NONE</hd-origin-path>
+                             <configurator>NONE</configurator>
+                             <virtualization-setup-type>NONE</virtualization-setup-type>
+                             <memory-mb>1</memory-mb>
+                             <interfaces>
+                                 <interface ismgmt="true">
+                                     <name>NONE</name>
+                                     <mac>NONE</mac>
+                                     <ip>NONE</ip>
+                                     <mask>NONE</mask>
+                                     <gw>NONE</gw>
+                                     <dns1>NONE</dns1>
+                                     <dns2>NONE</dns2>
+                                     <switch-id>NONE</switch-id>
+                                 </interface>
+                             </interfaces>
+                         </xen-configuration>
+                     </virtual-machines>
+                 </server>
+             </action>
+         </provisioning>
+     </query>
+</rspec>
+

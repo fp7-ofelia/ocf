@@ -1,11 +1,10 @@
 from vt_manager.models import *
-from vt_manager.communication.utils.XmlUtils import *
 import xmlrpclib
 
 am = xmlrpclib.Server('https://expedient:expedient@192.168.254.193:8445/xmlrpc/plugin')
-xml = xmlFileToString('communication/utils/queryCreate.xml')
+xml = open('/opt/ofelia/vt_manager/src/python/vt_manager/tests/xmltest.xml', 'r').read()
 
-am.send_sync("https://expedient:expedient@192.168.254.193/vt_plugin/xmlrpc/vt_am/",xml)
+am.send_sync("https://expedient:expedient@llull.ctx.i2cat.net:3443/vt_plugin/xmlrpc/vt_am/",xml)
 
 
 
