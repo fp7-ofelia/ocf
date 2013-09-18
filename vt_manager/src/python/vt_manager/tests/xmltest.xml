@@ -1,28 +1,32 @@
+<?xml version="1.0"?>
 <rspec http://www.fp7-ofelia.eu/CF/vt_am/rspec>
+<rspec>
      <query>
          <provisioning>
-             <action type="create" id="this is an id">
+             <action type="create" id="ee962150-a742-478c-8d83-708f07245a34">
                  <server>
-                     <uuid>testuuid</uuid>
-                     <virtualization-type>NONE</virtualization-type>
+                     <uuid>6c91fef3-bea3-47bf-a671-1403c2f4df0a</uuid>
+                     <virtualization-type>xen</virtualization-type>
                      <virtual-machines>
-                         <name>OKtest</name>
-                         <uuid>NONE</uuid>
-                         <project-id>NONE</project-id>
-                         <project-name>NONE</project-name>
-                         <slice-id>NONE</slice-id>
-                         <slice-name>NONE</slice-name>
-                         <operating-system-type>NONE</operating-system-type>
-                         <operating-system-version>NONE</operating-system-version>
-                         <operating-system-distribution>NONE</operating-system-distribution>
-                         <virtualization-type>NONE</virtualization-type>
+                         <name>okokokok</name>
+                         <uuid>2ebd65f5-83d3-493d-8b1b-8916d4ae7f1a</uuid>
+                         <status>on queue</status>
+                         <project-id>a7230121-7a8d-42c7-8ad7-0ffd4947af55</project-id>
+                         <project-name>myProject</project-name>
+                         <slice-id>caddd72b-7441-4c3f-970d-299a4245b599</slice-id>
+                         <slice-name>testSliceOscarLostNumber</slice-name>
+                         <operating-system-type>GNU/Linux</operating-system-type>
+                         <operating-system-version>6.0</operating-system-version>
+                         <operating-system-distribution>Debian</operating-system-distribution>
+                         <server-id>6c91fef3-bea3-47bf-a671-1403c2e4df0a</server-id>
+                         <virtualization-type>xen</virtualization-type>
                          <xen-configuration>
-                             <hd-setup-type>NONE</hd-setup-type>
+                             <hd-setup-type>file-image</hd-setup-type>
                              <hd-size-mb>8200</hd-size-mb>
-                             <hd-origin-path>NONE</hd-origin-path>
+                             <hd-origin-path>default/default.tar.gz</hd-origin-path>
                              <configurator>NONE</configurator>
-                             <virtualization-setup-type>NONE</virtualization-setup-type>
-                             <memory-mb>1</memory-mb>
+                             <virtualization-setup-type>paravirtualization</virtualization-setup-type>
+                             <memory-mb>128</memory-mb>
                              <interfaces>
                                  <interface ismgmt="true">
                                      <name>NONE</name>
