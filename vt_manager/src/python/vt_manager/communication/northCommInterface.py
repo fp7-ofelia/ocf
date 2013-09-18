@@ -11,6 +11,9 @@ from vt_manager.common.rpc4django import *
 #TODO: Provisional import to make test with VTPlanner. Use SFA API whe stable
 from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
 
+#XXX: Sync Thread for VTPlanner
+from vt_manager.utils import SyncThread
+
 import copy
 from threading import Thread
 
@@ -28,6 +31,21 @@ def send(callBackUrl, xml):
 		return
 	ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery ,rspec, url = callBackUrl)
 	return
+
+
+@rpcmethod(url_name="plugin")
+def send_sync(callBackUrl, xml):
+    try:
+		logging.debug("XML RECEIVED: \n%s" % xml)
+		rspec = XmlHelper.parseXmlString(xml)
+    except Exception as e:
+		logging.error("sendSync() could not parse \n")
+		logging.error(e)
+		return
+    thread = SyncThread(DispatcherLauncher.processXmlQuerySync, rspec, url = callBackUrl)
+    thread.join()
+    return
+
 
 @rpcmethod(url_name="plugin")    
 def ping(challenge):

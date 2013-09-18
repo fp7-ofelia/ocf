@@ -6,27 +6,26 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		$("#id_disc_image").change(function(){
-            	if (document.getElementById("id_disc_image").value == "spirent"){
-			document.getElementById("id_hdSetupType").value="file-full-image";
-			document.getElementById("id_virtualizationSetupType").value="hvm";
-			document.getElementById("id_memory").value="1024";
-			document.getElementById("id_hdSetupType").disabled=true;
-			document.getElementById("id_hdSetupType").disabled=true;
-		}
-            	else if (document.getElementById("id_disc_image").value == "default"){
-			document.getElementById("id_hdSetupType").value="file-image";
-			document.getElementById("id_virtualizationSetupType").value="paravirtualization";
-			document.getElementById("id_hdSetupType").disabled=true;
-			document.getElementById("id_virtualizationSetupType").disabled=true;
-		}
-		else{
-			document.getElementById("id_hdSetupType").disabled=false;
-			document.getElementById("id_virtualizationSetupType").disabled=false;
-		};        
-		$("#form_create_VM").click(function(){
-			document.getElementById("id_hdSetupType").disabled=false;
-                        document.getElementById("id_virtualizationSetupType").disabled=false;
+		$("#id_disc_image").change(function() {
+           	if ($("#id_disc_image").val() == "spirent") {
+				$("#id_hdSetupType").val("file-full-image");
+				$("#id_virtualizationSetupType").val("hvm");
+				$("#id_memory").val("1024");
+				$("#id_hdSetupType").attr("disabled","disabled");	/* XXX: use .prop instead of .attr for jQuery 1.6+) */
+				$("#id_virtualizationSetupType").attr("disabled","disabled");
+			} else if ($("#id_disc_image").val() == "default") {
+				$("#id_hdSetupType").val("file-image");
+				$("#id_virtualizationSetupType").val("paravirtualization");
+				$("#id_memory").val("128");
+				$("#id_hdSetupType").attr("disabled","disabled");
+				$("#id_virtualizationSetupType").attr("disabled","disabled");
+			} else {
+				$("#id_hdSetupType").attr("disabled","");
+				$("#id_virtualizationSetupType").attr("disabled","");
+			};        
+			$("#form_create_VM").click(function(){
+				$("#id_hdSetupType").attr("disabled","");
+				$("#id_virtualizationSetupType").attr("disabled","");
 		});
 	});
 });
