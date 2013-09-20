@@ -33,3 +33,6 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
         fi
     done
 
+print "Downloading dependencies [python-lxml]..."
+/usr/bin/apt-get -y install python-lxml || error "Could not install dependencies (apt-get)"
+
