@@ -189,7 +189,34 @@ class VTDelegate(GENIv3DelegateBase):
 
     def renew(self, urns, client_cert, credentials, expiration_time, best_effort):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-	return "Dummy delegate working! Renew"   
+	# this code is similar to the provision call
+        # TODO honor best effort
+	vms = list()
+        for urn in urns:
+            if (self.urn_type(urn) == 'slice'):
+                #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('renewsliver',)) # authenticate for each given slice
+                slice_vms = self._resource_manager.vms_in_slice(urn)
+		if slice_vms:
+                    for vm in slice_vms: # extend the vm expiration time, so we have a longer timeout.
+                    	try:
+                            self._resource_manager.extend_vm_expiration(vm['urn'], expiration_time)
+                    	except vt_ex.VTMaxVMDurationExceeded as e:
+                            raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (str(e),))
+              	    vms.extend(slice_vms)
+	    elif (self.urn_type(urn) == 'sliver')
+		try:
+		    vm, state = self._resource_manager.verify_vm(urn)
+		    if vm:
+		    	self._resource_manager.extend_vm_expiration(urn, expiration_time)
+			vms.extend(vm)
+		except vt_ex.VTMaxVMDurationExceeded as e:
+                        raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (str(e),))
+            else:
+                raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
+
+        return [self._get_sliver_status_hash(vm, True, True, "") for vm in vms]
+
+
  
     def provision(self, urns, client_cert, credentials, best_effort, end_time, geni_users):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
@@ -260,19 +287,17 @@ class VTDelegate(GENIv3DelegateBase):
     def _get_manifest_rspec(self, nodes):
         E = self.lxml_manifest_element_maker('vtam')
         manifest = self.lxml_manifest_root()
+	#XXX: Add more information about the AM? 
         for key in nodes.keys():
             # assemble manifest
-            server = E.node(component_manager_id = key)
+            server = E.node(server = key)
+	    #XXX: More information about the server? urn? id?
 	    #server.append(component_id = node['server_urn'])
-	    #server.append(exclusive = "false")
-	    #server.append(component_name = node['server_urn'])
-	    #server.append(E.hostname(hrn_to_urn(node['hostname'], 'sliver')))    
-	
+	    server.append(exclusive = "true")
 	    for sliver in nodes[key]:
 	    	vm = E.sliver(type = 'VM')
 		vm.append(E.name(sliver['name']))
 	        server.append(vm)
-            # TODO add more info here
             manifest.append(server)
         return self.lxml_to_string(manifest)
 

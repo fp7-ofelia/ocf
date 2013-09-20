@@ -1,10 +1,12 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship, backref
 
 from utils.commonbase import Base
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
+
+from resources.xenservervms import XenServerVMs
 
 
 '''@author: SergioVidiella'''
@@ -22,7 +24,7 @@ class XenServer(Base):
     vtserver_ptr_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'), primary_key=True)
 
     '''VMs array'''
-    vms = relationship("XenServerVMs", backref="xenserver")
+    vms = relationship("XenServerVMs")
 
     '''Private methods'''
     def __tupleContainsKey(tu,key):

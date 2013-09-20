@@ -8,14 +8,14 @@ from utils.commonbase import Base
 
 
 class XenServerVMs(Base):
-     """Relation between Xen Virtual Machines and Xen Virtualization Server"""
+    """Relation between Xen Virtual Machines and Xen Virtualization Server"""
 
     __tablename__ = 'vt_manager_xenserver_vms'
 
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    xenserver_id = Column(Integer, ForeignKey('vt_manager_xenserver.id'))
-    xenvm_id = Column(Integer, ForeignKey('vt_manager_xenvm.id'))
+    xenserver_id = Column(Integer, ForeignKey('vt_manager_xenserver.vtserver_ptr_id'))
+    xenvm_id = Column(Integer, ForeignKey('vt_manager_xenvm.virtualmachine_ptr_id'))
 
-    xenvm = relationship("XenVM", backef="xenserver_associations")
+    xenvm = relationship("XenVM", backref="xenserver_associations")
 
 

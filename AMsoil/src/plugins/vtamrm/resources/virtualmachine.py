@@ -50,7 +50,7 @@ class VirtualMachine(Base):
     operatingSystemDistribution = Column(String(512), nullable=False, default="")
 
     '''Networking'''
-    networkInterfaces = relationship("VMNetworkinterfaces", backref="vm")
+    networkInterfaces = relationship("VMNetworkInterfaces")
 
     '''Other'''
     callBackURL = Column(String(200))

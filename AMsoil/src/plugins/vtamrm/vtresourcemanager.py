@@ -53,6 +53,18 @@ class VTResourceManager(object):
             return servers
 
 
+    def vms_in_slice(self, slice_urn):
+	pass
+
+
+    def verify_vm(self, vm_urn):
+	pass
+
+
+    def extend_vm_expiration(self, vm_urn, expiration_time):
+	pass 
+
+
     def reserve_vms(self, vms, slice_urn, end_time):
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         if hrn_type != 'slice' or slice_hrn == None:
@@ -104,7 +116,7 @@ class VTResourceManager(object):
 	for vm in vms:
 	    vm_hrn = vm.projectId + '.' + slice_name + '.' + vm.name
 	    vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-	    deleted_vm = self.delete_vm(vm_urn)
+	    deleted_vm = self.delete_vm(vm_urn, get_leaf(urn_to_hrn(slice_urn)))
 	    deleted_vms.append(deleted_vm)
 	db_session.expunge_all()
 	return deleted_vms
@@ -122,11 +134,17 @@ class VTResourceManager(object):
 	     deleted_vm = self._destroy_vm_with_expiration(vm.id)
 	else:
 	     vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
-	     deleted_vm = dict()
 	     if vm != None:
 		db_session.expunge(vm)
 		deleted_vm = self._unnallocate_vm(vm.id)
+		if not deleted_vm:
+		    deleted_vm = dict()
+		    deleted_vm = dict()
+                    deleted_vm['name'] = vm_urn
+                    deleted_vm['expires'] = None
+                    deleted_vm['error'] = "The requested VM doesn't exists, it may have expired"
 	     else:
+		deleted_vm = dict()
 		deleted_vm['name'] = vm_urn
 		deleted_vm['expires'] = None
 		deleted_vm['error'] = "The requested VM doesn't exists, it may have expired"
@@ -152,7 +170,11 @@ class VTResourceManager(object):
 	    db_session.commit()
 	    db_session.expunge(vm_expires)
 	    #TODO:somehow get the server_uuid or receive it from the params
-	    self._destroy_vm(vm_id, server_uuid)
+	    deleted_vm = self._destroy_vm(vm_id, server_uuid)
+	    return deleted_vm
+	else:
+	    return None
+
 
 
     def _destroy_vm(self, vm_id, server_uuid):

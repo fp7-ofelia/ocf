@@ -24,33 +24,33 @@ class XenVM(Base):
 
     @staticmethod
     def constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType):
-       self =  XenVM()
-            try:
-            	#Set common fields
-                self.vm.setName(name)
-                self.vm.setUUID(uuid)
-                self.vm.setProjectId(projectId)
-		self.vm.setProjectName(projectName)
-                self.vm.setSliceId(sliceId)
-                self.vm.setSliceName(sliceName)
-                self.vm.setOSType(osType)
-                self.vm.setOSVersion(osVersion)
-                self.vm.setOSDistribution(osDist)
-                self.vm.setMemory(memory)
-                self.vm.setDiscSpaceGB(discSpaceGB)
-                self.vm.setNumberOfCPUs(numberOfCPUs)
-                self.vm.setCallBackURL(callBackUrl)
-                self.vm.setState(self.UNKNOWN_STATE)
-                for interface in interfaces:
-                    self.vm.networkInterfaces.add(interface)
-                #Xen parameters
-                self.hdSetupType = hdSetupType
-                self.hdOriginPath = hdOriginPath
-                self.virtualizationSetupType = virtSetupType
-	    except Exception as e:
-                self.destroy()
-                print e
-                raise e
+	self =  XenVM()
+	try:
+	    #Set common fields
+            self.vm.setName(name)
+            self.vm.setUUID(uuid)
+            self.vm.setProjectId(projectId)
+	    self.vm.setProjectName(projectName)
+            self.vm.setSliceId(sliceId)
+            self.vm.setSliceName(sliceName)
+            self.vm.setOSType(osType)
+            self.vm.setOSVersion(osVersion)
+            self.vm.setOSDistribution(osDist)
+            self.vm.setMemory(memory)
+            self.vm.setDiscSpaceGB(discSpaceGB)
+            self.vm.setNumberOfCPUs(numberOfCPUs)
+            self.vm.setCallBackURL(callBackUrl)
+            self.vm.setState(self.UNKNOWN_STATE)
+            for interface in interfaces:
+            	self.vm.networkInterfaces.add(interface)
+            #Xen parameters
+            self.hdSetupType = hdSetupType
+            self.hdOriginPath = hdOriginPath
+            self.virtualizationSetupType = virtSetupType
+	except Exception as e:
+            self.destroy()
+            print e
+            raise e
 	return self
 
     '''Destructor'''
