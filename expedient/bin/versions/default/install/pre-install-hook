@@ -10,10 +10,12 @@
 #inform user
 printHeader "info#" "Using default pre-install-hook module..."
 
+# Create certificate folder for SFA GIDs
+mkdir -p /etc/apache2/ssl.crt/ca_clients
+
 #shutdown apache
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop || warning "Could not stop apache"
-
 
 #Check if installations is for OFELIA or not
 OFELIA="none"

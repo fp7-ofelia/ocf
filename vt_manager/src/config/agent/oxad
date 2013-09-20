@@ -25,6 +25,13 @@ if [ ! -x "$DAEMON" ]; then
 }
 fi
 
+# Is the service already running? If so, capture the process ID
+if [ -f $PIDFILE ]; then
+	PID=`cat $PIDFILE`
+else
+	PID=""
+fi
+
 # Define LSB log_* functions.
 # Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
 . /lib/lsb/init-functions
@@ -56,8 +63,25 @@ do_stop()
 	#   other if a failure occurred
 	start-stop-daemon --stop --signal 2 --retry 5 --quiet --pidfile $PIDFILE 
 	RETVAL="$?"
+	if [ "${PID}" != "" ]; then
+		kill ${PID}
+	fi
+        rm -f ${PIDFILE}
 	[ "$RETVAL" = 2 ] && return 2
 	return "$RETVAL"
+}
+
+#
+# Function that checks the status of the service
+#
+do_check_status()
+{
+	if [ "${PID}" != "" ]; then
+		STATUS="running (pid $PID)"
+	else
+		STATUS="NOT running"
+	fi
+	echo "$DESC $NAME is $STATUS."
 }
 
 case "$1" in
@@ -95,8 +119,13 @@ case "$1" in
 		;;
 	esac
 	;;
+
+  status)
+	do_check_status; exit $?
+	;;
+
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
 	exit 3
 	;;
 esac
