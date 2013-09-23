@@ -1,0 +1,9 @@
+{
+  "name" : "GENI v3 API RPC",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["geniv3handler", "geniv3delegatebase", "geniv3exceptions"],
+  "loads-after" : ["xmlrpc", "config"],
+  "requires" : []
+}

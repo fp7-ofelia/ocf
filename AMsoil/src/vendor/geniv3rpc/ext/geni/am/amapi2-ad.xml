@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Validate with rspeclint:
+  rspeclint http://www.geni.net/resources/rspec/3 \
+            http://www.geni.net/resources/rspec/3/ad.xsd amapi2-ad.xml
+-->
+<rspec xmlns="http://www.geni.net/resources/rspec/3"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd"
+       type="advertisement">
+  <node component_manager_id="urn:publicid:IDN+emulab.geni.emulab.net+authority+am"
+        component_name="pc160"
+        component_id="urn:publicid:IDN+emulab.geni.emulab.net+node+pc160"
+        exclusive="false">
+    <available now="true"/>
+  </node>
+</rspec>

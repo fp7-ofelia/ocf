@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Resources at AM:
+	URN: urn:publicid:IDN+geni-in-a-box.net+authority+cm
+	URL: http://geni-in-a-box.net:8001
+ -->
+<rspec expires="2013-12-20T22:26:14Z" type="advertisement" xmlns="http://www.geni.net/resources/rspec/3" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd" >
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc101" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc101" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc101:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc101:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc101:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc101:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc102" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc102" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc102:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc102:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc102:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc102:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc103" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc103" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc103:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc103:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc103:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc103:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc104" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc104" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc104:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc104:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc104:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc104:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc105" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc105" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc105:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc105:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc105:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc105:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+  <node component_id="urn:publicid:IDN+geni-in-a-box.net+node+pc106" component_manager_id="urn:publicid:IDN+geni-in-a-box.net+authority+cm" component_name="pc106" exclusive="true">    
+      <hardware_type name="openVZ container">      
+      </hardware_type>    
+      <sliver_type name="virtual-pc">      
+      <disk_image description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      <disk_image default="true" description="Standard 32-bit Fedora 15 image" name="urn:publicid:IDN+geni-in-a-box.net+image:FEDORA15-STD" os="Fedora" version="15"/>      
+      </sliver_type>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc106:eth0" role="control">      
+          <emulab:interface name="eth0"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc106:eth1" role="experimental">      
+          <emulab:interface name="eth2"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc106:eth2" role="experimental">      
+          <emulab:interface name="eth3"/>      
+      </interface>    
+      <interface component_id="urn:publicid:IDN+geni-in-a-box.net+interface+pc106:eth3" role="experimental">      
+          <emulab:interface name="eth1"/>      
+      </interface>
+      <location country="Molvania" />    
+  </node>  
+</rspec>

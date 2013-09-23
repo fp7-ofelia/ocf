@@ -1,0 +1,9 @@
+{
+  "name" : "eMailer",
+  "author" : "Tom Rothe",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["mailer"],
+  "loads-after" : [],
+  "requires" : []
+}

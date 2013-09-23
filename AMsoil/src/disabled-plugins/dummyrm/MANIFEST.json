@@ -1,9 +1,0 @@
-{
-  "name" : "Dummy (Test) resource manager",
-  "author" : "Sergio Vidiella",
-  "author-email" : "sergio.vidiella@i2cat.net",
-  "version" : 1,
-  "implements" : ["dummyresourcemanager", "dummyexceptions"],
-  "loads-after" : ["config", "worker"],
-  "requires" : []
-}

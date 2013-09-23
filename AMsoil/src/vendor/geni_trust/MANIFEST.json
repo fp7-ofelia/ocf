@@ -1,0 +1,9 @@
+{
+  "name" : "SFA/GENI based Authentication/Authorization Tools (via X509 certificates and XML Digital Signature credentials)",
+  "author" : "Tom Rothe (with a lot of code from gcf/PlanetLab)",
+  "author-email" : "tom.rothe@eict.de",
+  "version" : 1,
+  "implements" : ["geniutil", "genicertificate", "genicredential"],
+  "loads-after" : [],
+  "requires" : []
+}
