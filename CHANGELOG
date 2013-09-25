@@ -30,10 +30,10 @@ Released: 20/09/2013
 
 Change log:
 
+[+] OPT, VTA: Add SFA API for each AM. Issue 172
+[*] VTA: Improve north communication interface for VT planner. Issue 171
+[+] EXP, VTA: Support for Spirent VM templates. Issue 170
 [*] EXP: Requested flowspace for an AM showing for every other AM. Issue 161
-[+] EXP, VTA: Support for Spirent VM templates
-[*] VTA: Improved north communication interface for VT planner
-[+] OPT, VTA: Added SFA API for each AM
 
 --------------------------------------------------
 v0.5
