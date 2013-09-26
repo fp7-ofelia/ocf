@@ -140,13 +140,11 @@ def check_vms_status(request, slice_id):
     vmsActionsHtmlCodes = {}
     vmsIP = {}
     slice = get_object_or_404(Slice, id=slice_id)
-    vt_aggs = \
-            slice.aggregates.filter(
-                leaf_name=VtPlugin.__name__.lower())
+    vt_aggs = slice.aggregates.filter(leaf_name=VtPlugin.__name__.lower())
     for agg in vt_aggs:
         for server in agg.resource_set.all():
             if server.leaf_name == 'VTServer':
-                for vm in server.as_leaf_class().vms.all():
+                for vm in server.as_leaf_class().vms.all().filter(sliceId = slice.uuid):
                     vmsStatus[str(vm.id)]= vm.state
                     if vm.state == "running":
                         actionsHtmlCode =\
