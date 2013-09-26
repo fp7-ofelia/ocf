@@ -19,6 +19,8 @@ class VTDelegate(GENIv3DelegateBase):
 	A Delegate for the VT AM 
     """
 
+    URN_PREFIX = 'urn:DHCP_AM'
+
     def __init__(self):
         super(VTDelegate, self).__init__()
         self._resource_manager = pm.getService("vtresourcemanager")
@@ -190,8 +192,17 @@ class VTDelegate(GENIv3DelegateBase):
     def renew(self, urns, client_cert, credentials, expiration_time, best_effort):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
 	# this code is similar to the provision call
-        # TODO honor best effort
+	if best_effort is True:
+	   ex_flag = True
+	   for urn in urns:
+		if self.urn_type(urn) is 'slice' or 'sliver':
+		    ex_flag = False
+	   if ex_flag is True:
+		raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
+	if self._resource_manager.check_expiration_time(expiration_time) is False:
+	    raise geni_ex.GENIv3BadArgsError("VMs can not be extended that long")
 	vms = list()
+	expirations = list()
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('renewsliver',)) # authenticate for each given slice
@@ -199,13 +210,29 @@ class VTDelegate(GENIv3DelegateBase):
 		if slice_vms:
                     for vm in slice_vms: # extend the vm expiration time, so we have a longer timeout.
                     	try:
-                            ext_vms = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
+                            ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
+			    expirations.append(last_expiration)
                     	except vt_ex.VTMaxVMDurationExceeded as e:
-                            raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (str(e),))
-              	    vms.extend(ext_vms)
+			    if best_effort is True:
+				ext_vm['geni_error'] = "VM can not be extended that long"
+			    else: 
+				for vm, expiration in vms, expirations:
+				    try:
+				    	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+				    except vt_ex.VTMaxVMDurationExceeded as e:
+					pass
+                            	raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
+              	    	vms.append(ext_vm)
 		else:
-		     geni_ex.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
+		     if best_effort is False:
+			for vm, expiration in vms, expirations:
+                            try:
+                            	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                            except vt_ex.VTMaxVMDurationExceeded as e:
+                                pass
+		     	raise geni_ex.GENIv3BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
 	    elif (self.urn_type(urn) == 'sliver'):
+		#XXX: continue best_effort at this point
 		try:
 		    vm, state = self._resource_manager.verify_vm(urn)
 		    if vm:
@@ -225,6 +252,7 @@ class VTDelegate(GENIv3DelegateBase):
     def provision(self, urns, client_cert, credentials, best_effort, end_time, geni_users):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
         {geni_users} is not relevant here."""
+	#TODO: honor best_effort
 	for urn in urns:
 	    #first we check the type of the urn
 	    name, urn_type = urn_to_hrn(urn)
@@ -254,6 +282,47 @@ class VTDelegate(GENIv3DelegateBase):
         return self._get_manifest_rspec(vms), sliver_list
 
 
+    def perform_operational_action(self, urns, client_cert, credentials, action, best_effort):
+	#TODO: honor best_effort
+	vms = list()
+        for urn in urns:
+            if (self.urn_type(urn) == 'slice'):
+                #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
+                slice_vms = self._resource_manager.vms_in_slice(urn)
+                if not slice_vms:
+                    raise geni_ex.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+		for vm in slice_vms:
+		    if (action == self.OPERATIONAL_ACTION_START):
+                    	started_vm = self._resource_manager.start_vm(vm['name'])
+			vms.extend(started_vm)
+		    elif (action == self.OPERATIONAL_ACTION_STOP):
+			stopped_vm = self._resource_manager.stop_vm(vm['name'])
+			vms.extend(stopped_vm)
+		    elif (action == self.OPERATIONAL_ACTION_RESTART):
+			restarted_vm = self._resource_manager.restart_vm(vm['name'])	
+			vms.extend(restarted_vm)
+		    else:
+			raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
+	    elif (self.urn_type(urn) == 'sliver'):
+		if (action == self.OPERATIONAL_ACTION_START):
+                    vm = self._resource_manager.start_vm(urn)
+                    vms.extend(vm)
+                elif (action == self.OPERATIONAL_ACTION_STOP):
+                    vm = self._resource_manager.stop_vm(urn)
+                    vms.extend(vm)
+                elif (action == self.OPERATIONAL_ACTION_RESTART):
+                    vm = self._resource_manager.restart_vm(vm['name'])
+                    vms.extend(vm)
+                else:
+                    raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
+            else:
+                raise geni_ex.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given in this aggregate')
+        # assemble return values
+        sliver_list = [self._get_sliver_status_hash(vm, True, True) for lease in leases]
+        return sliver_list
+
+
+
     def delete(self, urns, client_cert, credentials, best_effort):
 	#first we check that the urns in the list are valid urns
 	for urn in urns:
@@ -276,13 +345,19 @@ class VTDelegate(GENIv3DelegateBase):
 	    if vm.has_key("error"):
 	        error = vm["error"]
 	    slivers.append(self._get_sliver_status_hash(vm, False, False, error))
-
 	return slivers
     
 
     def shutdown(self, slice_urn, client_cert, credentials):
-        """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return "Dummy delegate working! Shutdown"
+	if (self.urn_type(slice_urn) == 'slice'):
+            #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
+	    result = self._resource_manager.emergency_stop(slice_urn)
+            return result
+	else:
+	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
+
+
+
 
 
     # Some helper methods
@@ -295,7 +370,7 @@ class VTDelegate(GENIv3DelegateBase):
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['status'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
         if (include_operational_status): 
-            result['geni_operational_status'] = self.OPERATION_STATE_NOTREADY if sliver['status'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_READY
+            result['geni_operational_status'] = self.OPERATION_STATE_NOTREADY if sliver['status'] is "ongoing" or "allocated" else self.OPERATION_STATE_FAILED if error_messae else self.OPERATIONAL_STATE_READY
         if (error_message):
             result['geni_error'] = error_message
         return result

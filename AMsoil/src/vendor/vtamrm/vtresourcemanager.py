@@ -320,6 +320,22 @@ class VTResourceManager(object):
 	pass
 
 
+    def start_vm(self, vm_urn):
+	return 
+
+
+    def stop_vm(self, vm_urn):
+	return
+
+   
+    def restart_vm(self, vm_urn):
+	return
+
+
+    def emergency_stop(self, slice_urn):	
+	return False
+
+
     @worker.outsideprocess
     def expire_vm(self, params):
         vms = db_session.query(VMExpires).filter(VMExpires.expires <= datetime.utcnow()).all()
