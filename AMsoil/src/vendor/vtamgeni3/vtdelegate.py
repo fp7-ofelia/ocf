@@ -212,17 +212,18 @@ class VTDelegate(GENIv3DelegateBase):
                     	try:
                             ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
 			    expirations.append(last_expiration)
+			    vms.extend(ext_vm)
                     	except vt_ex.VTMaxVMDurationExceeded as e:
 			    if best_effort is True:
-				ext_vm['geni_error'] = "VM can not be extended that long"
+				vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
 			    else: 
+				#If best_effort is False, undo all and throw an exception
 				for vm, expiration in vms, expirations:
 				    try:
 				    	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
 				    except vt_ex.VTMaxVMDurationExceeded as e:
 					pass
                             	raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
-              	    	vms.append(ext_vm)
 		else:
 		     if best_effort is False:
 			for vm, expiration in vms, expirations:
@@ -232,21 +233,51 @@ class VTDelegate(GENIv3DelegateBase):
                                 pass
 		     	raise geni_ex.GENIv3BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
 	    elif (self.urn_type(urn) == 'sliver'):
-		#XXX: continue best_effort at this point
 		try:
 		    vm, state = self._resource_manager.verify_vm(urn)
-		    if vm:
-		    	ext_vm = self._resource_manager.extend_vm_expiration(vm, state, expiration_time)
-			vms.extend(ext_vm)
+		    ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm, state, expiration_time)
+		    expirations.extend(last_expiration)
+		    vms.extend(ext_vm)
+		except vt_ex.VTAMVMNotFound as e:
+		    if best_effort is True:
+			vms.append({'name':urn, 'expires':None, 'error':"No exist any resource with the given urn, it may have expired"})
 		    else:
-			geni_ex.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
-		except vt_ex.VTMaxVMDurationExceeded as e:
-                        raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (str(e),))
+			for vm, expiration in vms, expirations:
+                            try:
+                                ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                            except vt_ex.VTMaxVMDurationExceeded as e:
+                                pass
+		    	raise geni_ex.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
+		except vt_ex.VTAMMaxVMDurationExceeded as e:
+		    if best_effort is True:
+                    	vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
+                    else:
+                        #If best_effort is False, undo all and throw an exception
+                        for vm, expiration in vms, expirations:
+                            try:
+                            	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                            except vt_ex.VTMaxVMDurationExceeded as e:
+                            	pass
+                        raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
             else:
-                raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
-
-        return [self._get_sliver_status_hash(vm, True, True) for vm in vms]
-
+		if best_effort is True:
+                    vms.append({'name':urn, 'expires':e.time, 'error':"Malformed URN, it doesn't belong to a Slice either a Sliver, only this types of URN are accepted"})
+                else:
+                    #If best_effort is False, undo all and throw an exception
+                    for vm, expiration in vms, expirations:
+                    	try:
+                            ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                        except vt_ex.VTMaxVMDurationExceeded as e:
+                            pass
+            	raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
+	slivers = list()
+	for vm in vms:
+	    if vm.has_key('error'):
+	        sliver = self._get_sliver_status_hash(vm, True, True, vm['error'])
+	    else:
+		sliver = self._get_sliver_status_hash(vm, True, True)
+	    slivers.append(sliver)
+	return slivers
 
  
     def provision(self, urns, client_cert, credentials, best_effort, end_time, geni_users):

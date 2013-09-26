@@ -40,8 +40,8 @@ class VTAMServerNotFound(VTAMException):
 	super(VTAMServerNotFound, self).__init__("Server not found (%s)" % (server,))
 
 class VTMaxVMDurationExceeded(VTAMException):
-    def __init__(self, vm):
-	super(VTMaxVMDurationExceeded, self).__init__("Max reservation duration exceeded (%s)" % (vm,))
+    def __init__(self, vm, time=None):
+	super(VTMaxVMDurationExceeded, self).__init__("Max reservation duration exceeded (%s %s)" % (vm, time))
 
 class VTAMMalformedUrn(VTAMException):
     def __init__(self, urn):
@@ -50,3 +50,7 @@ class VTAMMalformedUrn(VTAMException):
 class VTAMNoVMsInSlice(VTAMException):
     def __init__(self, urn):
 	super(VTAMNoSliversInSlice, self).__init__("The given slice don't have any vm (%s)" % (urn,))
+
+class VTAMVMNotFound(VTAMException):
+    def __init__(self, urn):
+	super(VTAMVMNotFound, self).__init__("The given urn doesn't correspond to any vm (%s)" % (urn,))

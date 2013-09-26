@@ -112,7 +112,7 @@ class VTResourceManager(object):
 	    if vm:
 		return vm_name, "provisioned"
 	    else:
-		return None, None
+		raise vt_ex.VTAMVMNotFound(vm_urn)
 	
 
     def extend_vm_expiration(self, vm_urn, status, expiration_time):
@@ -120,28 +120,25 @@ class VTResourceManager(object):
         vm_name = get_leaf(vm_hrn)
 	max_duration = self.RESERVATION_TIMEOUT
         max_end_time = datetime.utcnow() + timedelta(0, max_duration)
-	if (expiration_time > max_end_time):
-	    raise VTMaxVMDurationExceeded(vm_name)
 	if (status == "allocated"):
-	    vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
-	    vm.expires = expiration_time
-	    vm_hrn = vm.projectId + '.' + vm.sliceName + '.' + vm.name
-            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
- 	    db_session.add(vm)
-            db_session.commit()
-            db_session.expunge(vm)
-	    return {'name':vm_urn, 'expires':expiration_time, 'status':"allocated"}
+	    vm_expires = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
+	    vm_state = "allocated"
 	else:
 	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).first()
+	    vm_state = vm.state
+	    db_session.expunge(vm)
 	    vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
-            vm_expires.expires = expiration_time
-            vm_hrn = vm.projectName + '.' + vm.sliceName + '.' + vm.name
-            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-            db_session.add(vm_expires)
-            db_session.commit()
-	    db_session.expunge(vm_expires)
-            db_session.expunge(vm)
-            return {'name':vm_urn, 'expires':expiration_time, 'status':vm.state}
+	if (expiration_time > max_end_time):
+	    db_sesion.expunge_all()
+            raise VTMaxVMDurationExceeded(vm_name, vm_expires.expires)
+	last_expiration = vm_expires.expires
+        vm_expires.expires = expiration_time
+        vm_hrn = vm.projectName + '.' + vm.sliceName + '.' + vm.name
+        vm_urn = hrn_to_urn(vm_hrn, 'sliver')
+        db_session.add(vm_expires)
+        db_session.commit()
+	db_session.expunge(vm_expires)
+        return {'name':vm_urn, 'expires':expiration_time, 'status':vm_state}, last_expiration
 
 
     def reserve_vms(self, vms, slice_urn, end_time):
