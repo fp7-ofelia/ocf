@@ -19,6 +19,11 @@ from ranges.macrange import MacRange
 
 import utils.vtexceptions as vt_exception
 from utils.xrn import hrn_to_urn, urn_to_hrn, get_leaf, get_authority
+from utils.action import Action
+from utils.vmmanager import VMManager
+
+from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
+from controller.drivers.vtdriver import VTDriver
 
 
 '''@author: SergioVidiella'''
@@ -292,29 +297,39 @@ class VTResourceManager(object):
 
 
     def create_allocated_vms(self, slice_urn):
-	allocated_vms = db_session.query(VMAllocated).filter(VMAllocated.sliceId == slice_urn).all()
-	
+	allocated_vms = db_session.query(VMAllocated).filter(VMAllocated.sliceId == slice_urn).all()	
 	for allocated_vm in allocated_vms:
 	    params = dict()
-	    #TODO:take params in the corresponding format
+	    params['name'] = allocated_vm.name
+            params['uuid'] = None #generate UUID?
+            params['state'] = "creating"
+            params['project-id'] = allocated_vm.projectId
+            params['project-name'] = None #include projectName?
+            params['slice-id'] = allocated_vm.sliceId
+            params['slice-name'] = allocated_vm.sliceName
+            params['operating-system-type'] = allocated_vm.operatingSystemType
+            params['operating-system-version'] = allocated_vm.operatingSystemVersion
+            params['operating-system-distribution'] = allocated_vm.operatingSystemDistribution
+            params['virtualization-type'] = allocated_vm.virtualizationType
+            params['server-id'] = allocated_vm.serverId
+            params['hd-setup-type'] = allocated_vm.hdSetupType
+            params['hd-origin-path'] = allocated_vm.hdOriginPath
+            params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
+            params['memory-mb'] = allocated_vm.memory
 	    self._create_vm(params)
 	    db_session.delete(allocated_vm)
 	    db_session.commit()
 	db_session.expunge_all()
 	#TODO: Wait untill all "ongoing" are received
 	#TODO: Return "success" or "error"
+	return
 	
 
-    def create_vms(self, vm_params):
+    def _create_vm(self, vm_params):
         #TODO:Modify properly this code
 	provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
         for provisioningRSpec in provisioningRSpecs:
 	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM')
-
-
-    def _create_vm(self, vm):
-	#TODO: Generate the properly xml from the vm data and call the Provisioning Dispatcher
-	pass
 
 
     def start_vm(self, vm_urn):

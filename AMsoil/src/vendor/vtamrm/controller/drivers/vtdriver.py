@@ -99,7 +99,7 @@ class VTDriver():
                 db_session = scoped_session(db_session_factory)
 
 		try:
-			return db_session.query(VTServer)filter(VTServer.id==id).first().getChildObject()
+			return db_session.query(VTServer).filter(VTServer.id==id).first().getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 		
@@ -237,7 +237,7 @@ class VTDriver():
                 db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
                 db_session = scoped_session(db_session_factory)
 
-		vm = db_session.query(VirtualMachine).filter(VirtualMachine.id=vm_id).getChildObject()
+		vm = db_session.query(VirtualMachine).filter(VirtualMachine.id==vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
 		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)

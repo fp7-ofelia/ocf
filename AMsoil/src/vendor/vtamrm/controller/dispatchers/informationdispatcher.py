@@ -1,5 +1,5 @@
 from controller.actions.actioncontroller import ActionController
-from controller.drivers.VTDriver import VTDriver
+from controller.drivers.vtdriver import VTDriver
 import xmlrpclib, threading, logging, copy
 from utils.xmlhelper import XmlHelper
 from resources.resourceshash import ResourcesHash
