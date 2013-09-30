@@ -1,5 +1,9 @@
 """
-Loads plugin settings in Expedient environment.
+Loads plugin settings in Expedient.
+This is done dynamically, after the normal settings have been loaded
+in expedient.clearinghouse.settings -- and thus implicitly added to 
+the django.conf.settings abstraction. The latter contains inmmutable 
+settings, which are overwritten in this loop with the plug-ins values.
 
 @date: Feb 20, 2013
 @author: CarolinaFernandez, lbergesio
@@ -10,16 +14,13 @@ import sys
 config = __import__('django.conf')
 settings = config.conf.settings
 
-#print sys.path
-#print os.environ['DJANGO_SETTINGS_MODULE']
-
 #XXX lbergesio:This is ugly and prints before say sys.path and environment are right.
 #XXX Try to remove this lines.
 
 # Enable imports under this folder
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 # Import Django environment variables to be used inside PluginLoader class
-os.environ['DJANGO_SETTINGS_MODULE'] = "expedient.clearinghouse.settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = "settings"
 
 
 # Set path for plugins (set at 'expedient/common/utils/plugins/pluginloader.py')
