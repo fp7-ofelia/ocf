@@ -1,3 +1,4 @@
+import time
 import amsoil.core.pluginmanager as pm
 
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
@@ -24,6 +25,7 @@ from utils.vmmanager import VMManager
 
 from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
 from controller.drivers.vtdriver import VTDriver
+
 
 
 '''@author: SergioVidiella'''
@@ -296,15 +298,24 @@ class VTResourceManager(object):
 	return server.name, vm_urn
 
 
-    def create_allocated_vms(self, slice_urn):
+    def create_allocated_vms(self, slice_urn, end_time):
+	import uuid
+	max_duration = self.RESERVATION_TIMEOUT
+        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
+        if end_time == None:
+            end_time = max_end_time
+        if (end_time > max_end_time):
+            raise VTMaxVMDurationExceeded(vm_name)
+        if (end_time < datetime.utcnow()):
+            end_time = max_end_time
 	allocated_vms = db_session.query(VMAllocated).filter(VMAllocated.sliceId == slice_urn).all()	
+	vms_params = list()
 	for allocated_vm in allocated_vms:
 	    params = dict()
 	    params['name'] = allocated_vm.name
-            params['uuid'] = None #generate UUID?
+            params['uuid'] = uuid.uuid4()
             params['state'] = "creating"
             params['project-id'] = allocated_vm.projectId
-            params['project-name'] = None #include projectName?
             params['slice-id'] = allocated_vm.sliceId
             params['slice-name'] = allocated_vm.sliceName
             params['operating-system-type'] = allocated_vm.operatingSystemType
@@ -316,20 +327,40 @@ class VTResourceManager(object):
             params['hd-origin-path'] = allocated_vm.hdOriginPath
             params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
             params['memory-mb'] = allocated_vm.memory
-	    self._create_vm(params)
-	    db_session.delete(allocated_vm)
-	    db_session.commit()
+	    vms_params.append(params)
 	db_session.expunge_all()
-	#TODO: Wait untill all "ongoing" are received
-	#TODO: Return "success" or "error"
-	return
+	if vms_params:
+	    created_vms = self._create_vm(vms_params, slice_urn, allocated_vms[0]['project-id'])
+	else:
+	    raise vt_ex.VTAMNoVMsInSlice(slice_urn)
+	for created_vm in created_vms:
+	    vm = db_session.query(VMAllocated).filter(VMAllocated.name == created_vm['name']).all()
+	    db_session.delete(vm)
+	    db_session.commit()
+	    vm_expires = VMExpires()
+	    vm_expires.expires = end_time
+	    created_vm['expires'] = end_time 
+	db_session.expunge_all()
+	return created_vms
 	
 
-    def _create_vm(self, vm_params):
-        #TODO:Modify properly this code
-	provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
-        for provisioningRSpec in provisioningRSpecs:
+    def _create_vms(self, vm_params, slice_urn, project_name):
+	created_vms = list()
+	slice_hrn, urn_type = urn_to_hrn(slice_urn)
+        slice_name = get_leaf(slice_hrn)
+	provisioningRSpecs, actions = VMManager.getActionInstance(vm_params,project_name,slice_name)
+	vm_results = list()
+        for provisioningRSpec, action in provisioningRSpecs, actions:
 	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM')
+	    time.sleep(10)
+    	    response = XmlHelper.parseXmlString(xmlFileToString('/opt/ofelia/AMsoil/src/vendors/vtamrm/tests/xml/failresponse.xml'))
+    	    response.response.provisioning.action[0].id=action
+    	    response.response.provisioning.action[0].status="ONGOING"
+    	    sendAsync(XmlHelper.craftXmlClass(response))
+	    vm_hrn = provisioningRSpec['project-id'] + '.' + provisioningRSpec['slice-name'] + '.' + provisioningRSpec['name']
+            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
+	    vm_results.append({'name':vm_urn, 'status':'created'})
+	return vm_results
 
 
     def start_vm(self, vm_urn):

@@ -20,6 +20,7 @@ class VMManager:
     @staticmethod
     def getActionInstance(servers_slivers,projectName,sliceName):
 	provisioningRSpecs = list()
+	action_list = list()
 	rspec = XmlHelper.getSimpleActionQuery()
 	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
@@ -31,6 +32,7 @@ class VMManager:
 	        VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
 		actionClass = copy.deepcopy(actionClassEmpty)
                 actionClass.id = uuid.uuid4()
+		action_list.append(actionClass.id)
                 Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
 		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
@@ -38,7 +40,7 @@ class VMManager:
                 rspec.query.provisioning.action.append(actionClass)
 		provisioningRSpecs.append(rspec.query.provisioning)
 
-	return provisioningRSpecs
+	return provisioningRSpecs, action_list
 
     @staticmethod
     def setDefaultVMParameters(vm,server,projectName,sliceName):

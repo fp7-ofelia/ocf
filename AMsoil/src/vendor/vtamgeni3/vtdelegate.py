@@ -19,7 +19,7 @@ class VTDelegate(GENIv3DelegateBase):
 	A Delegate for the VT AM 
     """
 
-    URN_PREFIX = 'urn:DHCP_AM'
+    URN_PREFIX = 'urn:VT_AM'
 
     def __init__(self):
         super(VTDelegate, self).__init__()
@@ -284,11 +284,13 @@ class VTDelegate(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
         {geni_users} is not relevant here."""
 	#TODO: honor best_effort
+	provisioned_vms = list()
 	for urn in urns:
 	    #first we check the type of the urn
 	    name, urn_type = urn_to_hrn(urn)
 	    if urn_type is "slice":
-		self._resource_manager.create_allocated_vm_from_slice(urn)
+		vms = self._resource_manager.create_allocated_vms(urn)
+		
 	    elif urn_type is "sliver":
 	 	provisioned_vm = self._resource_manager.create_allocated_vm(name)
 	    else:

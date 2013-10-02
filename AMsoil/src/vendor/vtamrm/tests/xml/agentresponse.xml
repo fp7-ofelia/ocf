@@ -1,0 +1,11 @@
+<rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
+    <response>
+        <provisioning>
+            <action id="f6a1f8c9-c054-4eff-a49d-227d0d87b8388888888">
+                <status>FAILED</status>
+                <description></description>
+            </action>
+        </provisioning>
+    </response>
+</rspec>
+
