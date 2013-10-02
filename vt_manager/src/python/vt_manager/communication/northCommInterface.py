@@ -12,7 +12,7 @@ from vt_manager.common.rpc4django import *
 from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
 
 #XXX: Sync Thread for VTPlanner
-from vt_manager.utils import SyncThread
+from vt_manager.utils.SyncThread import *
 
 import copy
 from threading import Thread
@@ -34,16 +34,16 @@ def send(callBackUrl, xml):
 
 
 @rpcmethod(url_name="plugin")
-def send_sync(callBackUrl, xml):
-    try:
-		logging.debug("XML RECEIVED: \n%s" % xml)
-		rspec = XmlHelper.parseXmlString(xml)
-    except Exception as e:
-		logging.error("sendSync() could not parse \n")
-		logging.error(e)
-		return
-    thread = SyncThread(DispatcherLauncher.processXmlQuerySync, rspec, url = callBackUrl)
-    thread.join()
+def send_sync(xml):
+#    try:
+#		logging.debug("XML RECEIVED: \n%s" % xml)
+#		rspec = XmlHelper.parseXmlString(xml)
+ #   except Exception as e:
+#		logging.error("sendSync() could not parse \n")
+#		logging.error(e)
+#		return
+    rspec = ""
+    SyncThread.startMethodAndJoin(DispatcherLauncher.processXmlQuerySync, rspec)
     return
 
 

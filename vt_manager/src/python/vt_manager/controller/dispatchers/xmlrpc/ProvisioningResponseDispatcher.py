@@ -83,6 +83,79 @@ class ProvisioningResponseDispatcher():
 				except Exception as e:
 					logging.error(e)
 					return
+
+	@staticmethod
+	def processresponseSync(rspec):
+                logging.debug("PROCESSING RESPONSE proocessResponse() STARTED...")
+                for action in rspec.response.provisioning.action:
+
+                        try:
+                                actionModel = ActionController.getAction(action.id)
+                        except Exception as e:
+                                logging.error("No action in DB with the incoming uuid\n%s", e)
+                                return
+
+                        '''
+                        If the response is for an action only in QUEUED or ONGOING status, SUCCESS or FAILED actions are finished
+                        '''
+                        #if str(actionModel.callBackUrl) == str(SfaCommunicator.SFAUrl): #Avoiding unicodes
+                        #       event = pull(str(action.id))
+                        #       event.send('continue')
+                        #       return
+
+                        if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
+                                logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
+                                actionModel.status = action.status
+                                actionModel.description = action.description
+                                actionModel.save()
+				 #Complete information required for the Plugin: action type and VM
+                                ActionController.completeActionRspec(action, actionModel)
+
+                                #XXX:Implement this method or some other doing this job
+                                vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
+                                controller=VTDriver.getDriver(vm.Server.get().getVirtTech())
+                                failedOnCreate = 0
+                                if actionModel.getStatus() == Action.SUCCESS_STATUS:
+                                        ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm)
+
+                                elif actionModel.getStatus() == Action.ONGOING_STATUS:
+                                        ProvisioningResponseDispatcher.__updateVMafterONGOING(actionModel, vm)
+
+                                elif actionModel.getStatus() == Action.FAILED_STATUS:
+                                        failedOnCreate = ProvisioningResponseDispatcher.__updateVMafterFAILED(actionModel, vm)
+
+                                else:
+                                        vm.setState(VirtualMachine.UNKNOWN_STATE)
+
+
+                                try:
+                                        logging.debug("Sending response to Plugin in sendAsync")
+                                        if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+                                            if failedOnCreate:
+                                                expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
+                                                if len(expirning_slices)  == 1:
+						    expiring_slices[0].delete()
+                                            return
+                                        XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendSync", XmlHelper.craftXmlClass(rspec))
+                                        if failedOnCreate == 1:
+                                                controller.deleteVM(vm)
+                                except Exception as e:
+                                        logging.error("Could not connect to Plugin in sendAsync\n%s",e)
+                                        return
+
+                        #If response is for a finished action
+
+                        else:
+                                try:
+                                        #XXX: What should be done if this happen?
+                                        logging.error("Received response for an action in wrong state\n")
+                                        XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
+                                except Exception as e:
+                                        logging.error(e)
+                                        return
+
+
+
 	@staticmethod
 	def __updateVMafterSUCCESS(actionModel, vm):
 		if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:

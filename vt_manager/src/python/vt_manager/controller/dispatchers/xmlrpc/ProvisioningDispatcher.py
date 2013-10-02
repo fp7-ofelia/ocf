@@ -1,3 +1,5 @@
+import time
+
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.models.Action import Action
 from django.db import transaction
@@ -100,6 +102,10 @@ class ProvisioningDispatcher():
 				else:
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send_sync", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
+				while(1):
+				    time.sleep(10)
+				    if actionModel.getAction(action.id).status == actionModel.SUCCESS_STATUS or actionModel.getAction(action.id).status == actionModel.FAILED_STATUS:
+					return 
 				return
 			except Exception as e:
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
