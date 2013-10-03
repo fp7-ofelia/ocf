@@ -34,7 +34,7 @@ def send(callBackUrl, xml):
 
 
 @rpcmethod(url_name="plugin")
-def send_sync(xml):
+def send_sync(callBackUrl, xml):
     try:
 		logging.debug("XML RECEIVED: \n%s" % xml)
 		rspec = XmlHelper.parseXmlString(xml)
@@ -42,7 +42,7 @@ def send_sync(xml):
 		logging.error("sendSync() could not parse \n")
 		logging.error(e)
 		return
-    SyncThread.startMethodAndJoin(DispatcherLauncher.processXmlQuerySync, rspec)
+    SyncThread.startMethodAndJoin(DispatcherLauncher.processXmlQuerySync, rspec, url = callBackUrl)
     return
 
 
