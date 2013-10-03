@@ -28,7 +28,7 @@ class DispatcherLauncher():
                 if not rspec.response.provisioning == None:
                         SyncThread.startMethodAndJoin(ProvisioningResponseDispatcher.processResponseSync, rspec)
                 if not rspec.response.monitoring == None:
-                        SyncThread.startMethodAndJoin(MonitoringResponseDispatcher.processResponseSync, rspec)
+                        SyncThread.startMethodAndJoin(MonitoringResponseDispatcher.processResponse, rspec)
 
 
 	@staticmethod

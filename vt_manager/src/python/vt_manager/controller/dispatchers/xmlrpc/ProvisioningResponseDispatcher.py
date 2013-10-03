@@ -140,7 +140,7 @@ class ProvisioningResponseDispatcher():
                                         if failedOnCreate == 1:
                                                 controller.deleteVM(vm)
                                 except Exception as e:
-                                        logging.error("Could not connect to Plugin in sendAsync\n%s",e)
+                                        logging.error("Could not connect to Plugin in sendSync\n%s",e)
                                         return
 
                         #If response is for a finished action
@@ -149,7 +149,7 @@ class ProvisioningResponseDispatcher():
                                 try:
                                         #XXX: What should be done if this happen?
                                         logging.error("Received response for an action in wrong state\n")
-                                        XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
+                                        XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendSync", XmlHelper.getProcessingResponse(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
                                 except Exception as e:
                                         logging.error(e)
                                         return
