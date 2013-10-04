@@ -131,7 +131,7 @@ def add_opt_in(request):
     if (profile.is_net_admin):
         
         # find all experiments that the admin can opt into them.
-        all_exps = Experiment.objects.all()
+        all_exps = Experiment.objects.all().order_by('project_name','slice_name')
         admin_fs = AdminFlowSpace.objects.filter(user=request.user)
         exps = []
 
@@ -264,7 +264,7 @@ def add_opt_in(request):
     else: 
         
         #find all the experiemnts that have intersection with this user
-        all_exps = Experiment.objects.all()
+        all_exps = Experiment.objects.all().order_by('project_name','slice_name')
         user_fs = UserFlowSpace.objects.filter(user=request.user)
         exps = []
         for exp in all_exps:
