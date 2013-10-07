@@ -1,0 +1,53 @@
+            {% if bowl_nodes %}
+              <div class="bowl_nodes">
+                <table class="bowl_nodes">
+                  <tr>
+                    <th>
+                      Node ID
+                    </th>
+                    <th>
+                      Node name
+                    </th>
+                    <th>
+                      Description
+                    </th>
+                    <th>
+                      Available?
+                    </th>
+                    <th>
+                      Actions
+                    </th>
+                  </tr>
+
+                {% for node in bowl_nodes %}
+                          <tr id="r_tr_{{ node.id }}" class = {% cycle 'even' 'odd' %}>
+                            <td>
+                              {{ node.id }}
+                            </td>
+                            <td>
+                              {{ node.hostname }}
+                            </td>
+                            <td>
+                              Node with datapath ID {{ node.default_mac }} and IP {{ node.default_ip }}
+                            <td>
+                              {% if node.available %}
+                                Yes
+                              {% else %}
+                                Yes
+                              {% endif %}
+                            </td>
+                            <td>
+                              {% if node.available %}
+                                <a href="../../../bowl_plugin/resource/allocate/{{ slice.id }}/{{ agg.id }}/{{ node.id}}/">Add</a>
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {# Surrounding BowlResource row #}
+                {% endfor %}
+          </table>
+        </div>
+      {% else %}
+      <div class="bowl_plugin_no_nodes">
+        The aggregate manager does not contain any nodes yet, or this Expedient instance has not enough privileges to access current resources...
+      </div>
+      {% endif %}

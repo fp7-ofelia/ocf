@@ -1,0 +1,54 @@
+div.bowl_plugin_buttons {
+    clear: both;
+}
+
+div.bowl_plugin_no_nodes {
+    margin-top: 10px;
+}
+
+div.bowl_nodes {
+    margin-bottom: 15px;
+    margin-right: 10px;
+}
+
+table.bowl_nodes {
+    border: 0px;
+    border-collapse: collapse;
+    border-left: 15px solid #333;
+    border-spacing: 0px;
+    font-size: 11px;
+    width: 100%;
+}
+
+table.bowl_nodes td {
+  padding-left: 10px;
+}
+
+table.bowl_nodes th {
+    background-color: #333;
+    border: 0px;
+    color: #eee;
+    padding: 4px;
+    text-align: left;
+}
+
+table.bowl_nodes tr {
+    border: 0px;
+}
+
+table.bowl_nodes tr.even {
+    background-color: #aaa;
+}
+
+table.bowl_nodes tr.odd {
+    background-color: #ccc;
+}
+
+td ul li {
+    list-style: none;
+}
+
+/*select {
+    width: 100% !important;
+}*/
+
