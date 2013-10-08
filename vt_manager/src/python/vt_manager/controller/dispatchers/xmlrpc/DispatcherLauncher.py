@@ -10,7 +10,7 @@ from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod                                       
 from vt_manager.common.rpc4django import *                                               
 import threading                                                                             
-
+import multiprocessing
 #XXX: Sync Thread for VTPlanner
 from vt_manager.utils.SyncThread import *
 
@@ -23,13 +23,6 @@ class DispatcherLauncher():
 		if not rspec.response.monitoring == None:
 			ServiceThread.startMethodInNewThread(MonitoringResponseDispatcher.processResponse, rspec)
 
-	@staticmethod
-        def processXmlResponseSync(rspec):
-                if not rspec.response.provisioning == None:
-                        SyncThread.startMethodAndJoin(ProvisioningResponseDispatcher.processResponseSync, rspec)
-                if not rspec.response.monitoring == None:
-                        SyncThread.startMethodAndJoin(MonitoringResponseDispatcher.processResponse, rspec)
-
 
 	@staticmethod
 	def processXmlQuery(rspec):
@@ -38,10 +31,10 @@ class DispatcherLauncher():
 			ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
 	
 	@staticmethod    
-	def processXmlQuerySync(rspec):
+	def processXmlQuerySync(rspec, url):
 	    #check if provisioning / monitoring / etc
             if not rspec.query.provisioning == None :
-		SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioningSync, rspec.query.provisioning, threading.currentThread().callBackURL)
+		SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning, rspec.query.provisioning, url)
 
 
 	@staticmethod

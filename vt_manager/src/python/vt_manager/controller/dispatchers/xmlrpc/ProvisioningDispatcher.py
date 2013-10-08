@@ -67,8 +67,9 @@ class ProvisioningDispatcher():
 				#XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))
 		logging.debug("PROVISIONING FINISHED...")
  
-
+	@staticmethod
 	def processProvisioningSync(provisioning):
+		#XXX: method deprecated for now
 		logging.debug("PROVISIONING STARTED...\n")
 		for action in provisioning.action:
 			actionModel = ActionController.ActionToModel(action,"provisioning")
@@ -81,12 +82,12 @@ class ProvisioningDispatcher():
 				return None
 			try:
 				controller = VTDriver.getDriver(action.server.virtualization_type)
-                #XXX:Change this when xml schema is updated
+		                #XXX:Change this when xml schema is updated
 				server = VTDriver.getServerByUUID(action.server.uuid)
-                #if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-                #       server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
-                #else:
-                #       server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
+		                #if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
+                	#       server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
+                		#else:
+               		 #       server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
 			except Exception as e:
 				logging.error(e)
 				raise e
@@ -102,10 +103,11 @@ class ProvisioningDispatcher():
 				else:
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send_sync", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )
-				while(1):
-				    time.sleep(10)
-				    if actionModel.getAction(action.id).status == actionModel.SUCCESS_STATUS or actionModel.getAction(action.id).status == actionModel.FAILED_STATUS:
-					return 
+#				while(1):
+#		                    print "I'm going to sleeep"
+#				    time.sleep(2)
+#				    if actionModel.getAction(action.id).status == actionModel.SUCCESS_STATUS or actionModel.getAction(action.id).status == actionModel.FAILED_STATUS:
+#					        break 
 				return
 			except Exception as e:
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
@@ -125,13 +127,14 @@ class ProvisioningDispatcher():
 	@transaction.commit_on_success
 	def __createVM(controller, actionModel, action):
         
-		try:
+		try:	
 			actionModel.checkActionIsPresentAndUnique()
 			Server, VMmodel = controller.getServerAndCreateVM(action)
 			ActionController.completeConfiguratorInActionRspec(action.server.virtual_machines[0].xen_configuration)
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
+                        print actionModel.__dict__
 			#actionModel.callBackUrl = threading.currentThread().callBackURL
 			actionModel.save()
 			return VMmodel

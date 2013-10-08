@@ -29,8 +29,8 @@ class XenDriver(VTDriver):
 			Server = XenServer.objects.get(uuid = action.server.uuid )
 			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
 			return Server, VMmodel
-		except:
-			raise
+		except Exception as e:
+			raise 
 	
 	@staticmethod
 	def createOrUpdateServerFromPOST(request, instance):

@@ -10,7 +10,7 @@ class SyncThread(Thread):
     @staticmethod
     def startMethodAndJoin(servmethod, param, url=None): 
 	thread = SyncThread()
-	thread.callBackUrl = url
+	thread.callBackURL = url
         thread.startMethod(servmethod,param)
 	thread.join()
 

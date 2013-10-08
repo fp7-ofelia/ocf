@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec>
+     <query>
+         <provisioning>
+             <action type="create" id="e204decb-9add-443f-a72c-36136a8bd873">
+                 <server>
+                     <uuid>58f565eb-b289-48aa-b4ac-61bc27cf1dea</uuid>
+                     <virtualization-type>xen</virtualization-type>
+                     <virtual-machines>
+                         <name>a</name>
+                         <uuid>e304decb-9add-443f-a72c-36136a8bd873</uuid>
+                         <status>on queue</status>
+                         <project-id>2d95c8b4-c52c-417d-bc95-a22ecd4f829e</project-id>
+                         <project-name>Create-Net internal</project-name>
+                         <slice-id>1b55f6c5-15b2-4fcb-b231-9368e63efb8b</slice-id>
+                         <slice-name>Slice Test VeRTIGO</slice-name>
+                         <operating-system-type>GNU/Linux</operating-system-type>
+                         <operating-system-version>6.0</operating-system-version>
+                         <operating-system-distribution>Debian</operating-system-distribution>
+                         <server-id>58f565eb-b289-48aa-b4ac-61bc27cf1dea</server-id>
+                         <virtualization-type>xen</virtualization-type>
+                         <xen-configuration>
+                             <hd-setup-type>file-image</hd-setup-type>
+                             <hd-size-mb>8200</hd-size-mb>
+                             <hd-origin-path>default/default.tar.gz</hd-origin-path>
+                             <configurator>NONE</configurator>
+                             <virtualization-setup-type>paravirtualization</virtualization-setup-type>
+                             <memory-mb>128</memory-mb>
+                             <interfaces>
+                                 <interface ismgmt="true">
+                                    <name>NONE</name>
+                                     <mac>NONE</mac>
+                                     <ip>NONE</ip>
+                                     <mask>NONE</mask>
+                                     <gw>NONE</gw>
+                                     <dns1>NONE</dns1>
+                                     <dns2>NONE</dns2>
+                                     <switch-id>NONE</switch-id>
+                                 </interface>
+                             </interfaces>
+                         </xen-configuration>
+                     </virtual-machines>
+                 </server>
+             </action>
+         </provisioning>
+     </query>
+</rspec>
