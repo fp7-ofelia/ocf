@@ -1,29 +1,26 @@
+import time
 from django.http import *
 import os, logging
 import sys
 from vt_manager.models import *
 from vt_manager.models.Action import Action as ActionModel
 from vt_manager.controller import *
+from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
+from threading import Thread
 #TODO: Provisional import to make test with VTPlanner. Use SFA API whe stable
 from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
 
 #XXX: Sync Thread for VTPlanner
-from vt_manager.utils.SyncThread import *
 from vt_manager.utils.ServiceProcess import ServiceProcess
-import copy
-from threading import Thread
-
+from django.conf import settings
 from vt_manager.controller.drivers.VTDriver import VTDriver
-
 from threading import Timer
 from vt_manager.controller.actions.ActionController import ActionController
-import time
-import signal
 
 
 @rpcmethod(url_name="plugin")
@@ -41,40 +38,45 @@ def send(callBackUrl, xml):
 
 
 @rpcmethod(url_name="plugin")
-def send_sync(callBackUrl, xml):
+def send_sync(callBackUrl=None, xml=None):
+    callBackUrl = "https://" + settings.XMLRPC_USER + ":" + settings.XMLRPC_PASS + "@" + settings.VTAM_IP + ":" + settings.VTAM_PORT + "/xmlrpc/plugin"
     try:
-		logging.debug("XML RECEIVED: \n%s" % xml)
-		rspec = XmlHelper.parseXmlString(xml)
+        logging.debug("XML RECEIVED: \n%s" % xml)
+        rspec = XmlHelper.parseXmlString(xml)
     except Exception as e:
-		logging.error("sendSync() could not parse \n")
-		logging.error(e)
-		return
+	logging.error("sendSync() could not parse \n")
+	logging.error(e)
+	return
     #SyncThread.startMethodAndJoin(DispatcherLauncher.processXmlQuerySync, rspec, url = callBackUrl)
     #ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery ,rspec, url = callBackUrl)
-    ServiceProcess.startMethodInNewProcess(DispatcherLauncher.processXmlQuerySync ,rspec, url = callBackUrl)
-    actionModel = None
-    old_handler = signal.signal(signal.SIGALRM, timeout_handler) 
-    signal.alarm(10*60) # timeout set on 10 minutes
-    while True:
+    exception = False
+    ErrorMsg = ""
+    count = 0
+    timeout = 7*60 #timeout set at 7 minutes
+    try:
+   	ServiceProcess.startMethodInNewProcess(DispatcherLauncher.processXmlQuerySync ,[rspec, callBackUrl], None)
+    	actionModel = None
+    except Exception as e:
+        ErrorMsg = e
+        exception = True
+    while True and not exception:
         time.sleep(5)
         try:
 	    actionModel = ActionModel.objects.get(uuid=rspec.query.provisioning.action[0].id)
+            print actionModel.getStatus()
 	    if actionModel.getStatus() == "SUCCESS": 
-		signal.signal(signal.SIGALRM, old_handler)
-		signal.alarm(0)
                 return True
-	    elif actionModel.getStatus() == "FAILED":
-		signal.signal(signal.SIGALRM, old_handler)
-		signal.alarm(0)
-		raise Exception("The creation of the VM has FAILED")
+	    elif actionModel.getStatus() in ["FAILED", "UNKNOWN"]:
+		return "The creation of the VM has FAILED"
 	except Exception as e:
-	    raise Exception("An error has ocurred during the VM creation")
-	finally:
-	    signal.signal(signal.SIGALRM, old_handler)
-	    signal.alarm(0)
-    signal.alarm(0)
-    return
-
+	    return "An error has ocurred during the VM creation ", e
+	if count < timeout:
+	    count += 5
+	else:
+	    return "TIMEOUT"
+    if exception:
+    	return ErrorMsg
+	
 
 @rpcmethod(url_name="plugin")    
 def ping(challenge):

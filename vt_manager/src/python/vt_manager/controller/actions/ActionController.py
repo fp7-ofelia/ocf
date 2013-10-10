@@ -5,8 +5,8 @@ import uuid, copy
 
 class ActionController():
 	
-	@staticmethod
-	def getAction(uuid):
+    @staticmethod
+    def getAction(uuid):
 		actions = Action.objects.filter(uuid = uuid)
 		print actions
 		if actions.count() ==  1:
@@ -17,19 +17,19 @@ class ActionController():
 			raise Exception("More than one Action with uuid %s" % uuid)
 	
 	
-	@staticmethod
-	def createNewAction(aType,status,objectUUID=None,description=""):
-		return Action.constructor(aType,status,objectUUID,description)	
+    @staticmethod
+    def createNewAction(aType,status,objectUUID=None,description=""):
+        return Action.constructor(aType,status,objectUUID,description)	
 
-	@staticmethod
-	def completeActionRspec(action, actionModel):
+    @staticmethod
+    def completeActionRspec(action, actionModel):
 		action.type_ = actionModel.getType()
 		#tempVMclass = XmlHelper.getProcessingResponse('dummy', None , 'dummy').response.provisioning.action[0].server.virtual_machines[0]
 		#tempVMclass.uuid = actionModel.getObjectUUID()
 		#action.server.virtual_machines[0] = tempVMclass
 
-	@staticmethod
-	def completeConfiguratorInActionRspec(xen_configuration):
+    @staticmethod
+    def completeConfiguratorInActionRspec(xen_configuration):
 	### TODO:CHECK How to add the configurator in the xml
 		vm_path = xen_configuration.hd_origin_path
 		try:
@@ -45,8 +45,8 @@ class ActionController():
 
 	#XXX: Why are these two functions here? Do not beling to the Action, aren't they?
 
-	@staticmethod
-	def PopulateNewActionWithVM(action, vm):
+    @staticmethod
+    def PopulateNewActionWithVM(action, vm):
 		action.id = uuid.uuid4()
 		virtual_machine = action.server.virtual_machines[0]
 		virtual_machine.name = vm.getName()
@@ -57,8 +57,8 @@ class ActionController():
 		virtual_machine.slice_name = vm.getSliceName()
 		virtual_machine.xen_configuration.hd_setup_type = vm.getHdSetupType()
 
-	@staticmethod
-	def PopulateNetworkingParams(actionIfaces, vm):
+    @staticmethod
+    def PopulateNetworkingParams(actionIfaces, vm):
 		baseIface = copy.deepcopy(actionIfaces[0])
 		actionIfaces.pop()
 		#for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
@@ -77,19 +77,21 @@ class ActionController():
 			currentIface.switch_id = vmIface.serverBridge.all()[0].name
 			actionIfaces.append(currentIface)
 		
-	@staticmethod
-	def ActionToModel(action, hyperaction, save = "noSave" ):
-		actionModel = Action()
-		actionModel.hyperaction = hyperaction
-		if not action.status:
-			actionModel.status = 'QUEUED'
-		else:
-			actionModel.status = action.status
-		actionModel.type = action.type_
-		actionModel.uuid = action.id
-		if save is "save":
-			actionModel.save()
-		return actionModel						
+    @staticmethod
+    def ActionToModel(action, hyperaction, save = "noSave" ):
+        actionModel = Action()
+        actionModel.hyperaction = hyperaction
+        if not action.status:
+            actionModel.status = 'QUEUED'
+        else:
+            actionModel.status = action.status
+        actionModel.type = action.type_
+        print "**************************************************", action.id
+        actionModel.uuid = action.id
+        print "***************************************************", save
+        if save is "save":
+            actionModel.save()
+        return actionModel						
 
 
 

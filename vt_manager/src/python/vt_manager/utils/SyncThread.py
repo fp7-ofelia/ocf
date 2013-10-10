@@ -15,10 +15,12 @@ class SyncThread(Thread):
 	thread.join()
 
     def startMethod(self,servmethod,param):
-    	self.__method = servmethod
+        self.__method = servmethod
         self.__param = param
-        self.start()
+        status = self.start()
+        return status
 
     def run(self):
-        self.__method(self.__param)
+        status = self.__method(self.__param)
+        return status
 

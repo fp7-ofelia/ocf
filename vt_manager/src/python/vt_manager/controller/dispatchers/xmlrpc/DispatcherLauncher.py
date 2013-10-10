@@ -16,27 +16,29 @@ from vt_manager.utils.SyncThread import *
 
 class DispatcherLauncher():
 	
-	@staticmethod
-	def processXmlResponse(rspec):
+    @staticmethod
+    def processXmlResponse(rspec):
 		if not rspec.response.provisioning == None:
 			ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse, rspec)
 		if not rspec.response.monitoring == None:
 			ServiceThread.startMethodInNewThread(MonitoringResponseDispatcher.processResponse, rspec)
 
-
-	@staticmethod
-	def processXmlQuery(rspec):
+    @staticmethod
+    def processXmlQuery(rspec):
 		#check if provisioning / monitoring / etc
 		if not rspec.query.provisioning == None :
 			ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
 	
-	@staticmethod    
-	def processXmlQuerySync(rspec, url):
+    @staticmethod    
+    def processXmlQuerySync(rspec,url=None):
 	    #check if provisioning / monitoring / etc
-            if not rspec.query.provisioning == None :
-		SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning, rspec.query.provisioning, url)
+	if threading.currentThread().callBackURL:
+		url = threading.currentThread().callBackURL
+        if not rspec.query.provisioning == None :
+            status = SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning, rspec.query.provisioning, url)
+            return status
 
 
-	@staticmethod
-	def processInformation(remoteHashValue, projectUUID ,sliceUUID):
+    @staticmethod
+    def processInformation(remoteHashValue, projectUUID ,sliceUUID):
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)
