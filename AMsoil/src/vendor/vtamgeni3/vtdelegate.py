@@ -287,15 +287,11 @@ class VTDelegate(GENIv3DelegateBase):
 	provisioned_vms = list()
 	for urn in urns:
 	    #first we check the type of the urn
-	    name, urn_type = urn_to_hrn(urn)
-	    if urn_type is "slice":
-		vms = self._resource_manager.create_allocated_vms(urn)
-		
-	    elif urn_type is "sliver":
-	 	provisioned_vm = self._resource_manager.create_allocated_vm(name)
+            if (self.urn_type(urn) == "slice"):
+      	    	vms = self._resource_manager.create_allocated_vms(urn, end_time)	
 	    else:
-		 raise geni_ex.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))		
-	#TODO: Generate the manifest rspec and the slivers list	
+	    	raise geni_ex.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))		
+	sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
         return rspecs, slivers
 
     def status(self, urns, client_cert, credentials):

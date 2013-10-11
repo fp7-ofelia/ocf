@@ -13,12 +13,20 @@ from utils.urlutils import UrlUtils
 from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
 from controller.dispatchers.dispatcherlauncher import DispatcherLauncher
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from utils.commonbase import ENGINE
+
+
 class VMManager:
 
     '''Class to pass the VM parameters to an RSpec Instance for ProvisioningDisaptcher'''
 
     @staticmethod
     def getActionInstance(servers_slivers,projectName,sliceName):
+	db_engine = create_engine(ENGINE, pool_recycle=6000)
+        db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
+        db_session = scoped_session(db_session_factory)
 	provisioningRSpecs = list()
 	action_list = list()
 	rspec = XmlHelper.getSimpleActionQuery()
@@ -28,8 +36,8 @@ class VMManager:
         for vms in servers_slivers:
 	    server_id = vms['component_id']
 	    for vm in vms['slivers']:
-		server = VTServer.objects.get(uuid = server_id)
-	        VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
+		server = db_session.query(VTServer).filter(VTServer.uuid == server_id).first()
+	        VMManager.setDefaultVMParameters(vm,server,projectName,sliceName)
 		actionClass = copy.deepcopy(actionClassEmpty)
                 actionClass.id = uuid.uuid4()
 		action_list.append(actionClass.id)

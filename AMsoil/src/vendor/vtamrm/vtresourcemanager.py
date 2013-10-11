@@ -119,7 +119,7 @@ class VTResourceManager(object):
 	    if vm:
 		return vm_name, "provisioned"
 	    else:
-		raise vt_ex.VTAMVMNotFound(vm_urn)
+		raise vt_exception.VTAMVMNotFound(vm_urn)
 	
 
     def extend_vm_expiration(self, vm_urn, status, expiration_time):
@@ -310,29 +310,57 @@ class VTResourceManager(object):
             end_time = max_end_time
 	allocated_vms = db_session.query(VMAllocated).filter(VMAllocated.sliceId == slice_urn).all()	
 	vms_params = list()
+	servers = list()
+	project = None
 	for allocated_vm in allocated_vms:
+	    server = db_session.query(VTServer).filter(VTServer.id == allocated_vm.serverId).first()
 	    params = dict()
 	    params['name'] = allocated_vm.name
             params['uuid'] = uuid.uuid4()
             params['state'] = "creating"
             params['project-id'] = allocated_vm.projectId
+	    params['server-id'] = server.uuid
             params['slice-id'] = allocated_vm.sliceId
             params['slice-name'] = allocated_vm.sliceName
             params['operating-system-type'] = allocated_vm.operatingSystemType
             params['operating-system-version'] = allocated_vm.operatingSystemVersion
             params['operating-system-distribution'] = allocated_vm.operatingSystemDistribution
-            params['virtualization-type'] = allocated_vm.virtualizationType
-            params['server-id'] = allocated_vm.serverId
+            params['virtualization-type'] = allocated_vm.hypervisor
             params['hd-setup-type'] = allocated_vm.hdSetupType
             params['hd-origin-path'] = allocated_vm.hdOriginPath
             params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
             params['memory-mb'] = allocated_vm.memory
+	    interfaces = list()
+	    interface = dict()
+	    interface['gw'] = None
+            interface['mac'] = None
+            interface['name'] = None
+            interface['dns1'] = None
+            interface['dns2'] = None
+            interface['ip'] = None
+            interface['mask'] = None
+	    interfaces.append(interface)
+	    params['interface'] = interfaces
+	    if not project:
+		project = params['project-id']
+            if not server.uuid in servers:
+                servers.append(server.uuid)
+	   	new_server = dict()
+		new_server['component_id'] = server.uuid 
+		new_server['slivers'] = list()
+		new_server['slivers'].append(params)
+		vms_params.append(new_server)
+	    else:
+		for vm_server in vms_params:
+		    if vm_server['component_id'] is server.uuid:
+			vm_server['slivers'].append(params)
+
 	    vms_params.append(params)
 	db_session.expunge_all()
 	if vms_params:
-	    created_vms = self._create_vm(vms_params, slice_urn, allocated_vms[0]['project-id'])
+	    created_vms = self._create_vms(vms_params, slice_urn, project)
 	else:
-	    raise vt_ex.VTAMNoVMsInSlice(slice_urn)
+	    raise vt_exception.VTAMNoSliversInSlice(slice_urn)
 	for created_vm in created_vms:
 	    vm = db_session.query(VMAllocated).filter(VMAllocated.name == created_vm['name']).all()
 	    db_session.delete(vm)
@@ -359,7 +387,7 @@ class VTResourceManager(object):
     	    sendAsync(XmlHelper.craftXmlClass(response))
 	    vm_hrn = provisioningRSpec['project-id'] + '.' + provisioningRSpec['slice-name'] + '.' + provisioningRSpec['name']
             vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-	    vm_results.append({'name':vm_urn, 'status':'created'})
+	    vm_results.append({'name':vm_urn, 'status':'ongoing'})
 	return vm_results
 
 

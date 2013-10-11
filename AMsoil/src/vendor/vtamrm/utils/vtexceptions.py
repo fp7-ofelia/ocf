@@ -47,7 +47,7 @@ class VTAMMalformedUrn(VTAMException):
     def __init__(self, urn):
 	super(VTAMMalformedUrn, self).__init__("The urn hasn't the expected format (%s)" % (urn,))
 
-class VTAMNoVMsInSlice(VTAMException):
+class VTAMNoSliversInSlice(VTAMException):
     def __init__(self, urn):
 	super(VTAMNoSliversInSlice, self).__init__("The given slice don't have any vm (%s)" % (urn,))
 
