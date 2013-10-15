@@ -47,12 +47,16 @@ class VMManager:
                 actionClass.server.virtualization_type = server.getVirtTech()
                 rspec.query.provisioning.action.append(actionClass)
 		provisioningRSpecs.append(rspec.query.provisioning)
-
+    	db_session.expunge_all()
 	return provisioningRSpecs, action_list
 
     @staticmethod
     def setDefaultVMParameters(vm,server,projectName,sliceName):
-        VM = VirtualMachine.objects.filter(projectName = projectName)
+	db_engine = create_engine(ENGINE, pool_recycle=6000)
+        db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
+        db_session = scoped_session(db_session_factory)
+
+        VM = db_session.query(VirtualMachine).filter(VirtualMachine.projectName == projectName).all()
 	if VM:
 		vm['project-id'] = VM[0].projectId
 	else:
@@ -80,5 +84,5 @@ class VMManager:
         vm['operating-system-version'] = '6.0'
         vm['operating-system-distribution'] = 'Debian'
         vm['hd-origin-path'] = "default/default.tar.gz"
-
+	db_session.expunge_all()	
 	return vm

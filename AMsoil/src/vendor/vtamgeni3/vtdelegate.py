@@ -273,10 +273,9 @@ class VTDelegate(GENIv3DelegateBase):
 	slivers = list()
 	for vm in vms:
 	    if vm.has_key('error'):
-	        sliver = self._get_sliver_status_hash(vm, True, True, vm['error'])
+	        slivers.append(self._get_sliver_status_hash(vm, True, True, vm['error']))
 	    else:
-		sliver = self._get_sliver_status_hash(vm, True, True)
-	    slivers.append(sliver)
+		sliver.append(self._get_sliver_status_hash(vm, True, True))
 	return slivers
 
  
@@ -284,14 +283,20 @@ class VTDelegate(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
         {geni_users} is not relevant here."""
 	#TODO: honor best_effort
-	provisioned_vms = list()
 	for urn in urns:
 	    #first we check the type of the urn
             if (self.urn_type(urn) == "slice"):
-      	    	vms = self._resource_manager.create_allocated_vms(urn, end_time)	
+      	    	provisioned_vms = self._resource_manager.create_allocated_vms(urn, end_time)	
 	    else:
-	    	raise geni_ex.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))		
-	sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
+	    	raise geni_ex.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))	
+	rspecs = self._get_manifest_rspec(provisioned_vms)
+        slivers = list()
+        for key in provisioned_vms.keys():
+            for provisioned_vm in provisioned_vms[key]:
+		if provisioned_vm.has_key('error'):
+                    slivers.append(self._get_sliver_status_hash(provisioned_vm, True, True, provisioned_vm['error']))
+		else:
+		    slivers.append(self._get_sliver_status_hash(provisioned_vm, True, True))
         return rspecs, slivers
 
     def status(self, urns, client_cert, credentials):
@@ -346,8 +351,12 @@ class VTDelegate(GENIv3DelegateBase):
                     raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
             else:
                 raise geni_ex.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given in this aggregate')
-        # assemble return values
-        sliver_list = [self._get_sliver_status_hash(vm, True, True) for lease in leases]
+        sliver_list = list()
+	for vm in vms:
+	    if vm.has_key('error'):
+	    	silver_list.append(self._get_sliver_status_hash(vm, True, True, vm['error']))
+	    else:
+		sliver_list.append(self._get_sliver_status_hash(vm, True, True))
         return sliver_list
 
 
@@ -380,8 +389,14 @@ class VTDelegate(GENIv3DelegateBase):
     def shutdown(self, slice_urn, client_cert, credentials):
 	if (self.urn_type(slice_urn) == 'slice'):
             #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-	    result = self._resource_manager.emergency_stop(slice_urn)
-            return result
+	    results = self._resource_manager.emergency_stop(slice_urn)
+	    sliver_list = list()
+            for result in results:
+            	if result.has_key('error'):
+                    silver_list.append(self._get_sliver_status_hash(result, True, True, result['error']))
+            	else:
+                    sliver_list.append(self._get_sliver_status_hash(result, True, True))
+            return sliver_list
 	else:
 	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
 
@@ -399,9 +414,9 @@ class VTDelegate(GENIv3DelegateBase):
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['status'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
         if (include_operational_status): 
-            result['geni_operational_status'] = self.OPERATION_STATE_NOTREADY if sliver['status'] is "ongoing" or "allocated" else self.OPERATION_STATE_FAILED if error_messae else self.OPERATIONAL_STATE_READY
+            result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['status'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if error_message else self.OPERATIONAL_STATE_READY
         if (error_message):
-            result['geni_error'] = error_message
+            result['error'] = error_message
         return result
 
 
