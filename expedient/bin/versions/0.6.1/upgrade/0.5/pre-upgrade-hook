@@ -1,0 +1,60 @@
+#!/bin/bash
+
+###
+#	@author: CarolinaFernandez
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-upgrade-hook module 
+###
+
+#inform user
+printHeader "info#" "Using specific 0.6.1 pre-upgrade-hook module..."
+
+function fix_flowvisor_slices()
+{
+    print "Invoking script to stop conflictive slices in FlowVisor. This may take some time...";
+    # Call to python scripts...
+}
+
+#Before shutting down apache...
+#Fixing flowvisor slices naming where corrupted by versions 0.5 or 0.6
+while true; do
+    echo ""
+    print "It is HIGHLY important to perform a procedure that will fix the FlowVisor name for those slices and flowspaces requested between versions 0.5 and 0.6. You may perform a copy of your FlowVisor configuration file (e.g. /usr/local/etc/flowvisor/config.xml) to store the original naming for these, in case something went wrong later."
+    print "  STEP #2: stopping slices."
+    read -p "Press 'y' when you are ready (y/n): " FIX_FLOWVISOR
+    echo ""
+    case $FIX_FLOWVISOR in
+        [Yy]* ) fix_flowvisor_slices; break;;
+        [Nn]* ) warning "FlowVisor slices won't be restarted to meet the expected names. This might cause some problems in the future, however.";
+                while [[ ! $FIX_FLOWVISOR_RE =~ y|Y|n|N ]]; do
+                    read -p "Last check: do you want to run (y) or not (n) this process?: " FIX_FLOWVISOR_RE
+                    case $FIX_FLOWVISOR_RE in
+                        [Yy]* ) fix_flowvisor_slices; exit;;
+                        [Nn]* ) exit;;
+                    esac
+                done;;
+        * ) print "Please choose y/n";;
+    esac
+done
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then 
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+
