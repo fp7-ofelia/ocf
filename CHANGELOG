@@ -24,16 +24,28 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.6.1
+--------------------------------------------------
+Released: 18/10/2013
+
+Change log:
+
+[B] EXP, OPT: Slices being created in FlowVisor with an inconsistent slice ID. Issue 176
+[B] EXP: check_vms_status per slice returns the whole list of VMs. Issue 175
+[+] VTA: Call to OXAD breaking alternative (sync) protocol. Issue 174
+[B] EXP: Granted flowspaces not being shown on Expedient. Issue 173
+
+--------------------------------------------------
 v0.6
 --------------------------------------------------
 Released: 20/09/2013
 
 Change log:
 
+[+] OPT, VTA: Add SFA API for each AM. Issue 172
+[*] VTA: Improve north communication interface for VT planner. Issue 171
+[+] EXP, VTA: Support for Spirent VM templates. Issue 170
 [*] EXP: Requested flowspace for an AM showing for every other AM. Issue 161
-[+] EXP, VTA: Support for Spirent VM templates
-[*] VTA: Improved north communication interface for VT planner
-[+] OPT, VTA: Added SFA API for each AM
 
 --------------------------------------------------
 v0.5

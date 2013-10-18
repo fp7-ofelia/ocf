@@ -13,27 +13,26 @@ class XenDriver(VTDriver):
 #		self.VMclass = eval('XenVM') 
 
 
-	@staticmethod
-	def getInstance():
+    @staticmethod
+    def getInstance():
 		return XenDriver()
 
-	def deleteVM(self, vm):
+    def deleteVM(self, vm):
 		try:
 			vm.Server.get().deleteVM(vm)
 		except:
 			raise	
 
-	def getServerAndCreateVM(self,action):
-	   
-		try: 
-			Server = XenServer.objects.get(uuid = action.server.uuid )
-			VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
-			return Server, VMmodel
-		except:
-			raise
+    def getServerAndCreateVM(self,action):
+        try: 
+            Server = XenServer.objects.get(uuid = action.server.uuid )
+            VMmodel = Server.createVM(*XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
+            return Server, VMmodel
+        except Exception as e:
+            raise e
 	
-	@staticmethod
-	def createOrUpdateServerFromPOST(request, instance):
+    @staticmethod
+    def createOrUpdateServerFromPOST(request, instance):
 		#return XenServer.constructor(server.getName(),server.getOSType(),server.getOSDistribution(),server.getOSVersion(),server.getAgentURL(),save=True)
 		server = XenServer.objects.get(uuid = instance.getUUID())
 		if server:
@@ -59,7 +58,7 @@ class XenDriver(VTDriver):
 							HttpUtils.getFieldInPost(request,VTServer, "agentURL"),
 							save=True)
 	
-	def crudServerFromInstance(self,instance):
+    def crudServerFromInstance(self,instance):
 		server = XenServer.objects.filter(uuid = instance.getUUID())
 		if len(server)==1:
 			server = server[0]
@@ -89,22 +88,22 @@ class XenDriver(VTDriver):
 		else:
 			raise Exception("Trying to create a server failed")
 
-	@staticmethod
-	def xenVMtoModel(VMxmlClass, callBackURL, save):
-		name = VMxmlClass.name
-		uuid = VMxmlClass.uuid
-		projectId = VMxmlClass.project_id
-		projectName = VMxmlClass.project_name
-		sliceId = VMxmlClass.slice_id
-		sliceName = VMxmlClass.slice_name
-		osType = VMxmlClass.operating_system_type
-		osVersion = VMxmlClass.operating_system_version
-		osDist = VMxmlClass.operating_system_distribution
-		memory = VMxmlClass.xen_configuration.memory_mb
+    @staticmethod
+    def xenVMtoModel(VMxmlClass, callBackURL, save):
+        name = VMxmlClass.name
+        uuid = VMxmlClass.uuid
+        projectId = VMxmlClass.project_id
+        projectName = VMxmlClass.project_name
+        sliceId = VMxmlClass.slice_id
+        sliceName = VMxmlClass.slice_name
+        osType = VMxmlClass.operating_system_type
+        osVersion = VMxmlClass.operating_system_version
+        osDist = VMxmlClass.operating_system_distribution
+        memory = VMxmlClass.xen_configuration.memory_mb
 		# XXX
-		callBackUrl = callBackURL
-		hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
-		hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path
-		virtSetupType = VMxmlClass.xen_configuration.virtualization_setup_type
-		return name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,None,None,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save
+        callBackUrl = callBackURL
+        hdSetupType = VMxmlClass.xen_configuration.hd_setup_type
+        hdOriginPath = VMxmlClass.xen_configuration.hd_origin_path
+        virtSetupType = VMxmlClass.xen_configuration.virtualization_setup_type
+        return name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,None,None,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save
 

@@ -10,32 +10,35 @@ from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod                                       
 from vt_manager.common.rpc4django import *                                               
 import threading                                                                             
-
+import multiprocessing
 #XXX: Sync Thread for VTPlanner
-from vt_manager.utils import SyncThread
+from vt_manager.utils.SyncThread import *
 
 class DispatcherLauncher():
 	
-	@staticmethod
-	def processXmlResponse(rspec):
+    @staticmethod
+    def processXmlResponse(rspec):
 		if not rspec.response.provisioning == None:
 			ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse, rspec)
 		if not rspec.response.monitoring == None:
 			ServiceThread.startMethodInNewThread(MonitoringResponseDispatcher.processResponse, rspec)
 
-	@staticmethod
-	def processXmlQuery(rspec):
+    @staticmethod
+    def processXmlQuery(rspec):
 		#check if provisioning / monitoring / etc
 		if not rspec.query.provisioning == None :
 			ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, threading.currentThread().callBackURL)
-    
-	def processXmlQuerySync(rspec):
+	
+    @staticmethod    
+    def processXmlQuerySync(rspec,url=None):
 	    #check if provisioning / monitoring / etc
-            if not rspec.query.provisioning == None :
-		thread = SyncThread(ProvisioningDispatcher.processProvisioningSync, rspec.query.provisioning, threading.currentThread().callBackURL)
-		thread.join()
+	if threading.currentThread().callBackURL:
+		url = threading.currentThread().callBackURL
+        if not rspec.query.provisioning == None :
+            status = SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning, rspec.query.provisioning, url)
+            return status
 
 
-	@staticmethod
-	def processInformation(remoteHashValue, projectUUID ,sliceUUID):
+    @staticmethod
+    def processInformation(remoteHashValue, projectUUID ,sliceUUID):
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)

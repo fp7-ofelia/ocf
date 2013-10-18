@@ -1,0 +1,7 @@
+Subject: FOAM Pending Queue
+
+(This is an automated message from FOAM.)
+
+The following slivers at %(site)s are pending admin approval:
+
+%(pending-queue)s

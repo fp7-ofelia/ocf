@@ -1,0 +1,13 @@
+Subject: FOAM sliver expired
+
+(This is an automated message from FOAM.)
+
+A FOAM sliver at %(site)s
+has expired, and been deleted, and is not currently in the FlowVisor:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+  Expiration time: %(expiration)s -0000
+
+No further admin action is required at this time.

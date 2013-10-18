@@ -260,9 +260,9 @@ production networks, and is currently deployed in several universities.
             slice.openflowsliceinfo.controller_url
         except:
             import traceback
-            logger.info("Can't start slice  %s because controller url is not set." % self.name)
+            logger.info("Can't start slice %s because controller url is not set." % self.name)
             logger.error(traceback.format_exc())
-            raise Exception("Can't start slice  %s because controller url is not set." % slice.name)
+            raise Exception("Can't start slice %s because controller url is not set." % slice.name)
         try: 
             return self.client.proxy.create_slice(
                 self._get_slice_id(slice), slice.project.name,

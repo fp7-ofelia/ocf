@@ -1,0 +1,13 @@
+Subject: FOAM sliver renewed
+
+(This is an automated message from FOAM.)
+
+A FOAM sliver at %(site)s
+has a new expiration time:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+  New expiration time: %(expiration)s -0000
+
+No further admin action is required at this time.

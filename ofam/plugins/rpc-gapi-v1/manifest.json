@@ -1,0 +1,5 @@
+{
+  "name" : "GENI AM API v1",
+  "version" : "1.0",
+  "interfaces" : ["foam.interface.rpc"]
+}

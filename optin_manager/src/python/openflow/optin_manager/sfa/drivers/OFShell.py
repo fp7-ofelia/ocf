@@ -140,18 +140,20 @@ class OFShell:
 
         def get_raw_switches(self):
              try: 
+                 raise ""
                  fv =  FVServerProxy.objects.all()[0]
                  switches = fv.get_switches()
              except Exception as e:
-                 #switches = test_switches
-                 raise e
+                 switches = test_switches
+                 #raise e
              return switches
 
         def get_raw_links(self):
              try:
+                 raise ""
                  fv = FVServerProxy.objects.all()[0]  
                  links = fv.get_links()
              except Exception as e:
-                 #links = test_links
-                 raise e
+                 links = test_links
+                 #raise e
              return links

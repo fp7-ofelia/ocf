@@ -7,7 +7,7 @@ from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
-from vt_manager.utils import SyncThread
+from vt_manager.utils.SyncThread import *
 
 
 @rpcmethod(url_name="agent", signature=['string', 'string'])
@@ -22,7 +22,6 @@ def sendAsync(xml):
 def sendSync(xml):
 	logging.debug("sendSync lauched")
 	rspec = XmlHelper.parseXmlString(xml)
-	thread = SyncThread(DispatcherLauncher.processXmlResponse, rspec)
-	trhead.join()
+	SyncThread.startMethodAndJoin(DispatcherLauncher.processXmlResponseSync, rspec)
 	return
 
