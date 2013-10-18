@@ -10,10 +10,11 @@
 #inform user
 printHeader "info#" "Using specific 0.6.1 pre-upgrade-hook module..."
 
-function fix_flowvisor_slices()
+function standardize_flowvisor_slices()
 {
     print "Invoking script to stop conflictive slices in FlowVisor. This may take some time...";
-    # Call to python scripts...
+    # Call to Expedient's python script where the slice stopping is invoked
+    python ../src/python/expedient/clearinghouse/manage.py standardize_flowvisor_slices stop
 }
 
 #Before shutting down apache...
@@ -25,12 +26,12 @@ while true; do
     read -p "Press 'y' when you are ready (y/n): " FIX_FLOWVISOR
     echo ""
     case $FIX_FLOWVISOR in
-        [Yy]* ) fix_flowvisor_slices; break;;
+        [Yy]* ) standardize_flowvisor_slices; break;;
         [Nn]* ) warning "FlowVisor slices won't be restarted to meet the expected names. This might cause some problems in the future, however.";
                 while [[ ! $FIX_FLOWVISOR_RE =~ y|Y|n|N ]]; do
                     read -p "Last check: do you want to run (y) or not (n) this process?: " FIX_FLOWVISOR_RE
                     case $FIX_FLOWVISOR_RE in
-                        [Yy]* ) fix_flowvisor_slices; exit;;
+                        [Yy]* ) standardize_flowvisor_slices; exit;;
                         [Nn]* ) exit;;
                     esac
                 done;;
