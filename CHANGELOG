@@ -24,6 +24,18 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.6.1
+--------------------------------------------------
+Released: 18/10/2013
+
+Change log:
+
+[B] EXP, OPT: Slices being created in FlowVisor with an inconsistent slice ID. Issue 176
+[B] EXP: check_vms_status per slice returns the whole list of VMs. Issue 175
+[+] VTA: Call to OXAD breaking alternative (sync) protocol. Issue 174
+[B] EXP: Granted flowspaces not being shown on Expedient. Issue 173
+
+--------------------------------------------------
 v0.6
 --------------------------------------------------
 Released: 20/09/2013
