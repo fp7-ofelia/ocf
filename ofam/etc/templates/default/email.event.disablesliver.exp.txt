@@ -1,0 +1,16 @@
+Subject: FOAM sliver disabled
+
+(This is an automated message from FOAM.)
+
+Your FOAM sliver at %(site)s
+has been disabled, and is not currently in the FlowVisor:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+
+This sliver is now in the pending queue, and an FOAM admin will review it
+and decide whether to approve or reject it.
+
+If this is unexpected, please contact %(admin_email)s
+for further assistance.
