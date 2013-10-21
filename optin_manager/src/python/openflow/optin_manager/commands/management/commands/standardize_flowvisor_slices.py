@@ -69,8 +69,8 @@ class Command(NoArgsCommand):
                         else:
                             fs_description = "%s" % fs
             self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor")
-    except Exception as e:
-         self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m")
+        except Exception as e:
+            self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m")
 
 def get_used_fs(flow_space):
     forbidden_keys = ["id","dpid","direction","port_number_s", "port_number_e", "exp_id","_state"]
