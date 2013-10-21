@@ -79,37 +79,41 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
         errors = []
         slices = []
         slice_ids = []
-        f = open("conflictive_slice_ids","r")
-        ids = pickle.load(f)
-        f.close()
-        os.remove("conflictive_slice_ids")
-        for iden in ids:
-            slices.append(Slice.objects.get(id=iden))
-        for slice in slices:
-            aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
-            slice_id = str(settings.SITE_DOMAIN) + "_" + str(iden)
-            slice_ids.append(slice_id)
-            for agg in aggs:
-                try:
-                    agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
-                    # Starting slice at Expedient
-                    slice.started = True
-                    slice.save()
-                except Exception as e:
-                    message = """Could not fix the naming for slice with the following details:
-name:\t\t %s
+        # If 'conflictive_slice_ids' file exists, do the following.
+        # Otherwise warn and skip.
+        try:
+            f = open("conflictive_slice_ids","r")
+            ids = pickle.load(f)
+            f.close()
+            os.remove("conflictive_slice_ids")
+            for iden in ids:
+                slices.append(Slice.objects.get(id=iden))
+            for slice in slices:
+                aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
+                slice_id = str(settings.SITE_DOMAIN) + "_" + str(iden)
+                slice_ids.append(slice_id)
+                for agg in aggs:
+                    try:
+                        agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
+                        # Starting slice at Expedient
+                        slice.started = True
+                        slice.save()
+                    except Exception as e:
+                        message = """Could not fix the naming for slice with the following details: name:\t\t %s
 FlowVisor name:\t\t %s
 
 The cause of the error is: %s. Please try to fix it manually""" % (slice.name, slice_id, e)
-                    send_mail("OCF: error while standardizing Flowvisor slices", message, "OFELIA-noreply@fp7-ofelia.eu", [settings.ROOT_EMAIL])
-                    errors.append(message)
-        if errors:
-            return "\033[93mFailure while starting previously non-standard slices at FlowVisor: %s\033[0m" % str(errors)
-        else:
-            f = open("slice_ids_to_grant_fs","w")
-            pickle.dump(slice_ids, f)
-            f.close()
-            return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
+                        send_mail("OCF: error while standardizing Flowvisor slices", message, "OFELIA-noreply@fp7-ofelia.eu", [settings.ROOT_EMAIL])
+                        errors.append(message)
+            if errors:
+                return "\033[93mFailure while starting previously non-standard slices at FlowVisor: %s\033[0m" % str(errors)
+            else:
+                f = open("slice_ids_to_grant_fs","w")
+                pickle.dump(slice_ids, f)
+                f.close()
+                return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
+    except Exception as e:
+        return "\033[93mCould not access file with slice IDs. Skipping...\033[0m"
 
 def get_conflictive_slices_ids():
 

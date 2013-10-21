@@ -22,7 +22,7 @@ function standardize_flowvisor_slices()
 while true; do
     echo ""
     print "It is HIGHLY important to perform a procedure that will fix the FlowVisor name for those slices and flowspaces requested between versions 0.5 and 0.6. You may perform a copy of your FlowVisor configuration file (e.g. /usr/local/etc/flowvisor/config.xml) to store the original naming for these, in case something went wrong later."
-    print "  STEP #2: stopping slices."
+    print "  STEP #1: stopping slices."
     read -p "Press 'y' when you are ready (y/n): " FIX_FLOWVISOR
     echo ""
     case $FIX_FLOWVISOR in

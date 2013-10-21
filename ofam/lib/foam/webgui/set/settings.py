@@ -1,1 +1,0 @@
-'''Settings file for django FOAM web-gui'''

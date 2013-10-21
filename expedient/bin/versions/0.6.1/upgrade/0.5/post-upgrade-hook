@@ -20,7 +20,7 @@ function standardize_flowvisor_slices()
     # Call to Expedient's python script where the slice starting is invoked
     python ../src/python/expedient/clearinghouse/manage.py standardize_flowvisor_slices start
     # Call to Opt-in's python script where the flowspace granting is invoked
-    python ../../optin_manager/src/python/openflow/optin_manager/manage.py standardize_flowvisor
+    python ../../optin_manager/src/python/openflow/optin_manager/manage.py standardize_flowvisor_slices
 }
 
 #After bringing apache back...
