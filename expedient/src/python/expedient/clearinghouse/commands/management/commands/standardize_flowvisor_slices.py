@@ -112,8 +112,8 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
                 pickle.dump(slice_ids, f)
                 f.close()
                 return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
-    except Exception as e:
-        return "\033[93mCould not access file with slice IDs. Skipping...\033[0m"
+        except Exception as e:
+            return "\033[93mCould not access file with slice IDs. Skipping...\033[0m"
 
 def get_conflictive_slices_ids():
 
