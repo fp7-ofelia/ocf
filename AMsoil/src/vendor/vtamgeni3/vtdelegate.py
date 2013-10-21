@@ -115,57 +115,64 @@ class VTDelegate(GENIv3DelegateBase):
 	requested_vms = list()
         rspec_root = self.lxml_parse_rspec(rspec)
         for nodes in rspec_root.getchildren():
-#            if not self.lxml_elm_has_request_prefix(nodes, 'vtam'):
-#                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I dont understand (%s)." % (nodes,))
-#            if not self.lxml_elm_equals_request_tag(nodes, 'vtam', 'node'):
 	    if not nodes.tag == "node":
                 raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I dont understand (%s)." % (nodes,))
 	    
             for slivers in nodes.getchildren():
 		vm = dict()
-#		if not self.lxml_elm_equals_request_tag(slivers, 'vtam', 'sliver'):
 		if not slivers.tag == "sliver":
 		    raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I dont understand (%s)." % (slivers,))
 		for elm in slivers.getchildren():
-#		    if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'name')):
 		    if (elm.tag == "name"):
 			vm['name'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'project-id')):
 		    elif (elm.tag == "project-id"):
 			vm['project_id'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'server-name')):
 		    elif (elm.tag == "server-name"):
 			vm['server_name'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'operating-system-type')):
 		    elif (elm.tag == "operating-system-type"):
                         vm['operating_system_type'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'operating-system-version')):
 		    elif (elm.tag == "operating-system-version"):
                         vm['operating_system_version'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'operating-system-distribution')):
 		    elif (elm.tag == "operating-system-distribution"):
                         vm['operating_system_distribution'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'virtualization-type')):
 		    elif (elm.tag == "virtualization-type"):
                         vm['virtualization_type'] = elm.text.strip()
-#                    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'hd-setup-type')):
 		    elif (elm.tag == "hd-setup-type"):
                         vm['hd_setup_type'] = elm.text.strip()
-#                    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'hd-size-mb')):
 		    elif (elm.tag == "hd-size-mb"):
                         vm['hd_size_mb'] = elm.text.strip()
-#                    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'hd-origin-path')):
 		    elif (elm.tag == "hd-origin-path"):
                         vm['hd_origin_path'] = elm.text.strip()
-#		    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'hypervisor')):
 		    elif (elm.tag == "hypervisor"):
                         vm['hypervisor'] = elm.text.strip()
-#                    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'virtualization-setup-type')):
 		    elif (elm.tag == "virtualization-setup-type"):
                         vm['virtualization_setup_type'] = elm.text.strip()
-#                    elif (self.lxml_elm_equals_request_tag(elm, 'vtam', 'memory-mb')):
 		    elif (elm.tag == "memory-mb"):
                         vm['memory_mb'] = elm.text.strip()
+		    elif (elm.tag == "interfaces"):
+			vm['interfaces'] = list()
+			for interface in elm.getchildren():
+			    iface = dict()
+			    if (interface.getAttribute("ismgmt") == "true"): 
+				iface['ismgmt'] = True
+			    else:
+				iface['ismgmt'] = False
+			    for ifaceelm in interface.getchildren():
+			        if (ifaceelm.tag == "name"):
+				    iface['name'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "mac"):
+				    iface['mac'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "ip"):
+				    iface['ip'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "mask"):
+				    iface['mask'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "gw"):
+				    iface['gw'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "dns1"):
+				    iface['dns1'] = ifaceelm.text.strip()
+			    	elif (ifaceelm.tag == "dns2"):
+				    iface['dns2'] = ifaceelm.text.strip()
+			    vm['interfaces'].append(iface)
 	    	    else:
                 	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I dont understand (%s)." % (elm,))
 	        requested_vms.append(vm)
@@ -312,8 +319,10 @@ class VTDelegate(GENIv3DelegateBase):
             else:
                 raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be given to status in this aggregate')
         # assemble return values
-        sliver_list = [self._get_sliver_status_hash(vm, True, True) for lease in leases]
-        return self._get_manifest_rspec(vms), sliver_list
+        sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
+	status_vms = dict()
+	status_vms['verdager'] = vms	    
+        return self._get_manifest_rspec(status_vms), sliver_list
 
 
     def perform_operational_action(self, urns, client_cert, credentials, action, best_effort):

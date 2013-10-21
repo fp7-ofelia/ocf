@@ -68,7 +68,7 @@ class VTResourceManager(object):
 	    vms.extend(vms_created)
 	vms_reserved = self._vms_reserved_in_slice(slice_urn)
 	if vms_reserved:
-	    vms.extend(vms_created)
+	    vms.extend(vms_reserved)
 	return vms
 
 
@@ -99,7 +99,7 @@ class VTResourceManager(object):
             for vm in vms:
 		vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                vms_create.append({'name':vm_urn, 'expires':vm.expires, 'status':"allocated"})
+                vms_created.append({'name':vm_urn, 'expires':vm.expires, 'status':"allocated"})
             db_session.expunge_all()
             return vms_created
         else:
