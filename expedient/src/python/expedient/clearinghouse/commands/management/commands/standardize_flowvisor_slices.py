@@ -16,7 +16,8 @@ import subprocess
 class Command(BaseCommand):
     args = "stop | start"
     help = "Standardizes those FlowVisor slice names that have a different suffix."
-
+    path = "/opt/ofelia"
+    
     def handle(self, *args, **options):
         """
         Stops and then starts conflictive slices (with non-standard name) at
@@ -54,7 +55,7 @@ class Command(BaseCommand):
             for agg in aggs:
                 try:
                     slice_id = str(SITE_DOMAIN_DEFAULT) + "_" + str(slice.id)
-                    print "Stopping ", slice_id, " at aggregate: ", str(agg)
+                    print "Stopping", slice_id, "at aggregate", str(agg)
                     agg.as_leaf_class().client.proxy.delete_slice(slice_id)
                     # Stopping slice at Expedient
                     slice.started = False
@@ -82,18 +83,19 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
         # If 'conflictive_slice_ids' file exists, do the following.
         # Otherwise warn and skip.
         try:
-            f = open("conflictive_slice_ids","r")
+            f = open("%s/conflictive_slice_ids" % self.path,"r")
             ids = pickle.load(f)
             f.close()
-            os.remove("conflictive_slice_ids")
+            os.remove("%s/conflictive_slice_ids" % self.path)
             for iden in ids:
                 slices.append(Slice.objects.get(id=iden))
             for slice in slices:
                 aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
-                slice_id = str(settings.SITE_DOMAIN) + "_" + str(iden)
+                slice_id = str(settings.SITE_DOMAIN) + "_" + str(slice.id)
                 slice_ids.append(slice_id)
                 for agg in aggs:
                     try:
+                        print "Starting", slice_id, "at aggregate", str(agg)
                         agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
                         # Starting slice at Expedient
                         slice.started = True
@@ -108,12 +110,12 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
             if errors:
                 return "\033[93mFailure while starting previously non-standard slices at FlowVisor: %s\033[0m" % str(errors)
             else:
-                f = open("slice_ids_to_grant_fs","w")
+                f = open("%s/slice_ids_to_grant_fs" % self.path,"w")
                 pickle.dump(slice_ids, f)
                 f.close()
                 return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
         except Exception as e:
-            return "\033[93mCould not access file with slice IDs. Skipping...\033[0m"
+            return "\033[93mCould not access file with slice IDs. Skipping...\033[0m\n"
 
 def get_conflictive_slices_ids():
 
@@ -131,7 +133,7 @@ def get_conflictive_slices_ids():
         return "".join(buffer)
 
     def write_in_file(ids):
-        f = open("conflictive_slice_ids","w")
+        f = open("%s/conflictive_slice_ids" % self.path,"w")
         #ids_data = "CONFLICTIVE_SLICES = ["
         #for identifier in ids:
         #    ids_data += "%s, " % str(identifier)
@@ -148,12 +150,10 @@ def get_conflictive_slices_ids():
     if not err:
         # Adapt obtained result to a list of flowrules
         slices = slices.split("\n")
-#        print slices
         ids = list()
 #        current_site_domain = Site.objects.get_current().domain
         current_site_domain = SITE_DOMAIN_DEFAULT
         current_site_domain = current_site_domain.replace(".", "_").replace(":", "_").replace("=", "_").replace(" ", "_").replace("'","_")
-#        print current_site_domain
 #        if not SITE_DOMAIN_DEFAULT == SITE_DOMAIN_CUSTOM:
         if not SITE_DOMAIN_DEFAULT == settings.SITE_DOMAIN:
             for slice in slices:
