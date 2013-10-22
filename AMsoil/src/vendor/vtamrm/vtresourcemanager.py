@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 from interfaces.networkinterface import NetworkInterface
+from interfaces.vmallocatednetworkinterfaces import VMAllocatedNetworkInterfaces
 
 from resources.vtserver import VTServer
 from resources.virtualmachine import VirtualMachine
@@ -293,6 +294,21 @@ class VTResourceManager(object):
 
 	db_session.add(vm)
 	db_session.commit()
+	
+	for interface in requested_vm['interfaces']:
+	    allocated_interface = VMAllocatedNetworkInterfaces()
+	    allocated_interface.allocated_vm_id = vm.id
+	    allocated_interface.name = interface['name']
+	    allocated_interface.mac = interface['mac']
+	    allocated_interface.ip = interface['ip']
+	    allocated_interface.gw = interface['gw']
+	    allocated_interface.dns1 = interface['dns1']
+	    allocated_interface.dns2 = interface['dns2']
+	    allocated_interface.msk = interface['mask']
+	    allocated_interface.isMgmt = interface['ismgmt']
+	    db_session.add(allocated_interface)
+	    db_session.commit()
+	    db_session.expunge(allocated_interface)
 	db_session.expunge(vm)
 
 	vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
@@ -334,15 +350,16 @@ class VTResourceManager(object):
             params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
             params['memory-mb'] = allocated_vm.memory
 	    interfaces = list()
-	    interface = dict()
-	    interface['gw'] = None
-            interface['mac'] = None
-            interface['name'] = None
-            interface['dns1'] = None
-            interface['dns2'] = None
-            interface['ip'] = None
-            interface['mask'] = None
-	    interfaces.append(interface)
+	    for allocated_interface in allocated_vm.interfaces:
+	    	interface = dict()
+	    	interface['gw'] = allocated_interface.gw
+            	interface['mac'] = allocated_interface.mac
+            	interface['name'] = allocated_interface.name
+            	interface['dns1'] = allocated_interface.dns1
+            	interface['dns2'] = allocated_interface.dns2
+            	interface['ip'] = allocated_interface.ip
+            	interface['mask'] = allocated_interface.mask
+	    	interfaces.append(interface)
 	    params['interfaces'] = interfaces
 	    if not project:
 		project = params['project-id']

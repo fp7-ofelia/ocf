@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 from datetime import datetime, timedelta
 
@@ -29,7 +29,6 @@ class VMAllocated(Base):
     projectId = Column(String(1024), nullable=False, default="")
     sliceId = Column(String(1024), nullable=False, default="")
     sliceName = Column(String(512), nullable=False, default="")
-    #XXX:should be a ForeignKey?
     serverId = Column(Integer)
 
     '''OS parameters'''
@@ -44,7 +43,8 @@ class VMAllocated(Base):
     hypervisor = Column(String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
-    expires = Column(Date, nullable=False)  
+    expires = Column(Date, nullable=False) 
+
 
     @staticmethod
     def constructor(name,projectId,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,hdSetupType,hdOriginPath,virtSetupType,hypervisor, expires):

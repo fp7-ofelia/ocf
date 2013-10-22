@@ -153,7 +153,7 @@ class VTDelegate(GENIv3DelegateBase):
 			vm['interfaces'] = list()
 			for interface in elm.getchildren():
 			    iface = dict()
-			    if (interface.getAttribute("ismgmt") == "true"): 
+			    if (interface.get("ismgmt") == "true"): 
 				iface['ismgmt'] = True
 			    else:
 				iface['ismgmt'] = False
@@ -321,6 +321,7 @@ class VTDelegate(GENIv3DelegateBase):
         # assemble return values
         sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
 	status_vms = dict()
+	#TODO: decide change the manifest rspec or somehow return the server value
 	status_vms['verdager'] = vms	    
         return self._get_manifest_rspec(status_vms), sliver_list
 
