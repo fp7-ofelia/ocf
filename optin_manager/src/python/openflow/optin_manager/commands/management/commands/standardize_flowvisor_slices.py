@@ -14,7 +14,8 @@ import os
 
 class Command(NoArgsCommand):
     help = "Standardizes those FlowVisor slice names that have a different suffix."
-
+    path = "/opt/ofelia"
+    
     def handle_noargs(self, **options):
         """
         Grants flowspaces for previously conflictive slices at Flowvisor.
@@ -29,7 +30,7 @@ class Command(NoArgsCommand):
         # If 'slice_ids_to_grant_fs' file exists, do the following.
         # Otherwise warn and skip.
         try:
-            f = open("slice_ids_to_grant_fs","r")
+            f = open("%s/slice_ids_to_grant_fs" % self.path,"r")
             ids = pickle.load(f)
             f.close()
             os.remove("slice_ids_to_grant_fs")
@@ -44,14 +45,16 @@ class Command(NoArgsCommand):
                     if admin_opt.priority <= assigned_priority:
                         assigned_priority = admin_opt.priority - 1
                 selexp = Experiment.objects.get(slice_id = iden)
-                flow_space = ExperimentFLowSpace.objects.filter(exp=selexp.id) 
+                flow_space = ExperimentFLowSpace.objects.filter(exp=selexp.id)
+                if not flow_space:
+                    print "No matched flowspaces for slice %s" % iden
+                    continue 
                 #intersected_flowspace = multi_fs_intersect(flow_space,adminFS,FlowSpace)
                 intersected_flowspace = get_used_fs(flow_space)
                 fv_args,match_list = opt_fs_into_exp(intersected_flowspace,selexp,user,assigned_priority,True)
                 #for i in range(len(fv_args)):
                 #    for j in range(len(fv_args)):
                 #        print fv_args[i] == fv_args[j]
-                    
                 returned_ids = fv.proxy.api.changeFlowSpace(fv_args)
                 for i in range(len(match_list)):
                     match_list[i].fv_id = returned_ids[i]
@@ -68,9 +71,10 @@ class Command(NoArgsCommand):
                             fs_description = fs_description + "\n%s" % fs
                         else:
                             fs_description = "%s" % fs
-            self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor")
+                print "Flowspace for slice %s was successfully granted" % iden
+            self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor\n")
         except Exception as e:
-            self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m")
+            self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m\n")
 
 def get_used_fs(flow_space):
     forbidden_keys = ["id","dpid","direction","port_number_s", "port_number_e", "exp_id","_state"]
