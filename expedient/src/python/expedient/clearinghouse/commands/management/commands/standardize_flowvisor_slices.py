@@ -13,10 +13,12 @@ except:
 import os
 import subprocess
 
+# Temporal path to locate files for this process
+path = "/opt/ofelia"
+
 class Command(BaseCommand):
     args = "stop | start"
     help = "Standardizes those FlowVisor slice names that have a different suffix."
-    path = "/opt/ofelia"
     
     def handle(self, *args, **options):
         """
@@ -83,10 +85,10 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
         # If 'conflictive_slice_ids' file exists, do the following.
         # Otherwise warn and skip.
         try:
-            f = open("%s/conflictive_slice_ids" % self.path,"r")
+            f = open("%s/conflictive_slice_ids" % path,"r")
             ids = pickle.load(f)
             f.close()
-            os.remove("%s/conflictive_slice_ids" % self.path)
+            os.remove("%s/conflictive_slice_ids" % path)
             for iden in ids:
                 slices.append(Slice.objects.get(id=iden))
             for slice in slices:
@@ -110,7 +112,7 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
             if errors:
                 return "\033[93mFailure while starting previously non-standard slices at FlowVisor: %s\033[0m" % str(errors)
             else:
-                f = open("%s/slice_ids_to_grant_fs" % self.path,"w")
+                f = open("%s/slice_ids_to_grant_fs" % path,"w")
                 pickle.dump(slice_ids, f)
                 f.close()
                 return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
@@ -133,7 +135,7 @@ def get_conflictive_slices_ids():
         return "".join(buffer)
 
     def write_in_file(ids):
-        f = open("%s/conflictive_slice_ids" % self.path,"w")
+        f = open("%s/conflictive_slice_ids" % path,"w")
         #ids_data = "CONFLICTIVE_SLICES = ["
         #for identifier in ids:
         #    ids_data += "%s, " % str(identifier)
