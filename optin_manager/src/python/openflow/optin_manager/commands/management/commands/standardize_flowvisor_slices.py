@@ -12,9 +12,11 @@ except:
     import pickle
 import os
 
+# Temporal path to locate files for this process
+path = "/opt/ofelia"
+
 class Command(NoArgsCommand):
     help = "Standardizes those FlowVisor slice names that have a different suffix."
-    path = "/opt/ofelia"
     
     def handle_noargs(self, **options):
         """
@@ -30,10 +32,10 @@ class Command(NoArgsCommand):
         # If 'slice_ids_to_grant_fs' file exists, do the following.
         # Otherwise warn and skip.
         try:
-            f = open("%s/slice_ids_to_grant_fs" % self.path,"r")
+            f = open("%s/slice_ids_to_grant_fs" % path,"r")
             ids = pickle.load(f)
             f.close()
-            os.remove("slice_ids_to_grant_fs")
+            os.remove("%s/slice_ids_to_grant_fs" % path)
             user = User.objects.get(username=settings.ROOT_USERNAME)
             adminFS = AdminFlowSpace.objects.filter(user = user)
             profile = UserProfile.get_or_create_profile(user)
@@ -74,6 +76,7 @@ class Command(NoArgsCommand):
                 print "Flowspace for slice %s was successfully granted" % iden
             self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor\n")
         except Exception as e:
+            print e
             self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m\n")
 
 def get_used_fs(flow_space):
