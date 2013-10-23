@@ -8,6 +8,7 @@ from expedient.clearinghouse.slice.models import Slice
 from expedient.common.utils.mail import send_mail
 import time
 import signal
+import getpass
 try:
     import cpickle as pickle
 except:
@@ -156,7 +157,26 @@ def get_conflictive_slices_ids():
         pickle.dump(ids,f)
         f.close()
 
-    cmd = ['fvctl', '--passwd-file=/root/.fvpass']
+    def authenticate_fvctl():
+        print "\n**IMPORTANT** Calling to 'fvctl' command..."
+        try:
+            print "Please enter password for 'fvadmin' user:"
+            fvctl_pass = getpass.getpass()
+            f = open("%s/fvadmin_pass" % path,"w")
+            f.write(fvctl_pass)
+            f.close()
+            cmd = ['fvctl', '--passwd-file=%s/fvadmin_pass' % path]
+            cmd.append('listSlices')
+            p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            slices, err = p.communicate()
+            if err:
+                raise Exception
+        except:
+            authenticate_fvctl()
+
+    authenticate_fvctl()
+    f = open("%s/fvadmin_pass" % path, "r")
+    cmd = ['fvctl', '--passwd-file=%s/fvadmin_pass' % path]
     cmd.append('listSlices')
     p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     slices, err = p.communicate()
@@ -180,6 +200,9 @@ def get_conflictive_slices_ids():
     else:
         print "Error: %s" % str(err)
     write_in_file(ids)
+    f.close()
+    # Remove temporal file for fvadmin's pass only when fvctl command is done
+    os.remove("%s/fvadmin_pass" % path)
     return ids
 
 class Timeout():
