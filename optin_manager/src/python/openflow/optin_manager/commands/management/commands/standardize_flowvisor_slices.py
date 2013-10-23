@@ -36,7 +36,7 @@ class Command(NoArgsCommand):
             ids = pickle.load(f)
             f.close()
             os.remove("%s/slice_ids_to_grant_fs" % path)
-            user = User.objects.get(username=settings.ROOT_USERNAME)
+            user = User.objects.filter(username=settings.ROOT_USERNAME)[0]
             adminFS = AdminFlowSpace.objects.filter(user = user)
             profile = UserProfile.get_or_create_profile(user)
             fv = FVServerProxy.objects.all()[0]

@@ -15,6 +15,7 @@ import subprocess
 
 # Temporal path to locate files for this process
 path = "/opt/ofelia"
+TIMEOUT = 600 # 10 minutes
 
 class Command(BaseCommand):
     args = "stop | start"
@@ -50,7 +51,10 @@ class Command(BaseCommand):
         slices = []
         slice_id = ""
         for iden in ids:
-            slices.append(Slice.objects.get(id=iden))
+            try:
+                slices.append(Slice.objects.get(id=iden))
+            except:
+                pass
         for slice in slices:
             # We get only OpenFlow aggregates to delete their slices at FV
             aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
@@ -58,16 +62,17 @@ class Command(BaseCommand):
                 try:
                     slice_id = str(SITE_DOMAIN_DEFAULT) + "_" + str(slice.id)
                     print "Stopping", slice_id, "at aggregate", str(agg)
-                    agg.as_leaf_class().client.proxy.delete_slice(slice_id)
+                    with Timeout(TIMEOUT):
+                        agg.as_leaf_class().client.proxy.delete_slice(slice_id)
                     # Stopping slice at Expedient
                     slice.started = False
                     slice.save()
                 except Exception as e:
-                    message = """Could not fix the naming for slice with the following details:
+                    message = """Could not fix the naming in Aggreggate Manager %s for slice with the following details:
 name:\t\t %s
 FlowVisor name:\t\t %s
 
-The cause of the error is: %s. Please try to fix it manually""" % (slice.name, slice_id, e)
+The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_leaf_class()),slice.name, slice_id, e)
                     send_mail("OCF: error while standardizing Flowvisor slices", message, "OFELIA-noreply@fp7-ofelia.eu", [settings.ROOT_EMAIL])
                     errors.append(message)
         if errors:
@@ -90,7 +95,10 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
             f.close()
             os.remove("%s/conflictive_slice_ids" % path)
             for iden in ids:
-                slices.append(Slice.objects.get(id=iden))
+                try:
+                    slices.append(Slice.objects.get(id=iden))
+                except:
+                    pass
             for slice in slices:
                 aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
                 slice_id = str(settings.SITE_DOMAIN) + "_" + str(slice.id)
@@ -98,15 +106,16 @@ The cause of the error is: %s. Please try to fix it manually""" % (slice.name, s
                 for agg in aggs:
                     try:
                         print "Starting", slice_id, "at aggregate", str(agg)
-                        agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
+                        with Timeout(TIMEOUT):
+                            agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
                         # Starting slice at Expedient
                         slice.started = True
                         slice.save()
                     except Exception as e:
-                        message = """Could not fix the naming for slice with the following details: name:\t\t %s
+                        message = """Could not fix the naming in Aggregate Manager %s for slice with the following details: name:\t\t %s
 FlowVisor name:\t\t %s
 
-The cause of the error is: %s. Please try to fix it manually""" % (slice.name, slice_id, e)
+The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_leaf_class()),slice.name, slice_id, e)
                         send_mail("OCF: error while standardizing Flowvisor slices", message, "OFELIA-noreply@fp7-ofelia.eu", [settings.ROOT_EMAIL])
                         errors.append(message)
             if errors:
@@ -169,4 +178,22 @@ def get_conflictive_slices_ids():
         print "Error: %s" % str(err)
     write_in_file(ids)
     return ids
+
+class Timeout():
+    """Timeout class using ALARM signal."""
+    class Timeout(Exception):
+        pass
+
+    def __init__(self, sec):
+        self.sec = sec
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.raise_timeout)
+        signal.alarm(self.sec)
+
+    def __exit__(self, *args):
+        signal.alarm(0)    # disable alarm
+
+    def raise_timeout(self, *args):
+        raise Timeout.Timeout()
 
