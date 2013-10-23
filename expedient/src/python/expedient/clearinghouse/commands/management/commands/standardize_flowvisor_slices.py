@@ -120,12 +120,13 @@ FlowVisor name:\t\t %s
 The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_leaf_class()),slice.name, slice_id, e)
                         send_mail("OCF: error while standardizing Flowvisor slices", message, "OFELIA-noreply@fp7-ofelia.eu", [settings.ROOT_EMAIL])
                         errors.append(message)
+            # Save the slice IDs to grant flowspace nevertheless of other errors
+            f = open("%s/slice_ids_to_grant_fs" % path,"w")
+            pickle.dump(slice_ids, f)
+            f.close()
             if errors:
                 return "\033[93mFailure while starting previously non-standard slices at FlowVisor: %s\033[0m" % str(errors)
             else:
-                f = open("%s/slice_ids_to_grant_fs" % path,"w")
-                pickle.dump(slice_ids, f)
-                f.close()
                 return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
         except Exception as e:
             return "\033[93mCould not access file with slice IDs. Skipping...\033[0m\n"

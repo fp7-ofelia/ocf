@@ -16,10 +16,10 @@ print "Starting apache2..."
 
 function standardize_flowvisor_slices()
 {
-    print "Invoking script to start (previously conflictive, now renamed) slices in FlowVisor. This may take some time...";
+    print "Invoking script to start (previously conflictive, now renamed) slices in FlowVisor. This may take some time..."
     # Call to Expedient's python script where the slice starting is invoked
     python ../src/python/expedient/clearinghouse/manage.py standardize_flowvisor_slices start
-    print "Granting flowspaces for renamed slices in FlowVisor. This may take take some time...";
+    print "Granting flowspaces for renamed slices in FlowVisor. This may take take some time..."
     # Call to Opt-in's python script where the flowspace granting is invoked
     python ../../optin_manager/src/python/openflow/optin_manager/manage.py standardize_flowvisor_slices
 }
