@@ -52,7 +52,7 @@ def send_sync(callBackUrl=None, xml=None):
     exception = False
     ErrorMsg = ""
     count = 0
-    timeout = 7*60 #timeout set at 7 minutes
+    timeout = 10*60 #timeout set at 10 minutes
     try:
    	ServiceProcess.startMethodInNewProcess(DispatcherLauncher.processXmlQuerySync ,[rspec, callBackUrl], None)
     	actionModel = None
