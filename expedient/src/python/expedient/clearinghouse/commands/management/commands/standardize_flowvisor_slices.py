@@ -19,6 +19,8 @@ import subprocess
 # Temporal path to locate files for this process
 path = "/opt/ofelia"
 TIMEOUT = 600 # 10 minutes
+# Time (in seconds) to wait in order to release FlowVisor resources
+FLOWVISOR_SLEEP_TIME = 10
 
 class Command(BaseCommand):
     args = "stop | start"
@@ -67,6 +69,7 @@ class Command(BaseCommand):
                     print "Stopping", slice_id, "at aggregate", str(agg)
                     with Timeout(TIMEOUT):
                         agg.as_leaf_class().client.proxy.delete_slice(slice_id)
+                    time.sleep(FLOWVISOR_SLEEP_TIME)
                     # Stopping slice at Expedient
                     slice.started = False
                     slice.save()
@@ -111,6 +114,7 @@ The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_le
                         print "Starting", slice_id, "at aggregate", str(agg)
                         with Timeout(TIMEOUT):
                             agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
+                        time.sleep(FLOWVISOR_SLEEP_TIME)
                         # Starting slice at Expedient
                         slice.started = True
                         slice.save()
@@ -169,6 +173,7 @@ def get_conflictive_slices_ids():
             cmd.append('listSlices')
             p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             slices, err = p.communicate()
+            time.sleep(FLOWVISOR_SLEEP_TIME)
             if err:
                 raise Exception
         except:
@@ -180,6 +185,7 @@ def get_conflictive_slices_ids():
     cmd.append('listSlices')
     p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     slices, err = p.communicate()
+    time.sleep(FLOWVISOR_SLEEP_TIME)
 
     if not err:
         # Adapt obtained result to a list of flowrules

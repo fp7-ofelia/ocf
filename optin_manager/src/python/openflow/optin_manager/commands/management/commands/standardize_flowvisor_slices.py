@@ -11,9 +11,11 @@ try:
 except:
     import pickle
 import os
+import time
 
 # Temporal path to locate files for this process
 path = "/opt/ofelia"
+FLOWVISOR_SLEEP_TIME = 10
 
 class Command(NoArgsCommand):
     help = "Standardizes those FlowVisor slice names that have a different suffix."
@@ -74,6 +76,7 @@ class Command(NoArgsCommand):
                         else:
                             fs_description = "%s" % fs
                 print "Flowspace for slice %s was successfully granted" % iden
+                time.sleep(FLOWVISOR_SLEEP_TIME)
             self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor\n")
         except Exception as e:
             print e
