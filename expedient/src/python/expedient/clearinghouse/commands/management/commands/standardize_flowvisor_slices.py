@@ -6,6 +6,8 @@ from expedient.clearinghouse.defaultsettings.site import SITE_DOMAIN as SITE_DOM
 #from expedient.clearinghouse.localsettings import SITE_DOMAIN as SITE_DOMAIN_CUSTOM
 from expedient.clearinghouse.slice.models import Slice
 from expedient.common.utils.mail import send_mail
+import time
+import signal
 try:
     import cpickle as pickle
 except:
