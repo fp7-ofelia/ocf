@@ -111,29 +111,54 @@ class VTResourceManager(object):
     def verify_vm(self, vm_urn):
 	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
-        vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
+	slice_name = get_leaf(get_authority(vm_hrn))
+        vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
 	db_session.expunge(vm)
 	if vm:
-	    return vm_name, "allocated"
+	    return vm_urn, "allocated"
 	else:
-	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).first()
+	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
 	    db_session.expunge(vm)
 	    if vm:
-		return vm_name, "provisioned"
+		return vm_urn, "provisioned"
 	    else:
 		raise vt_exception.VTAMVMNotFound(vm_urn)
+
+
+    def get_vm_status(self, vm_urn, state):
+	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
+        vm_name = get_leaf(vm_hrn)
+	slice_name = get_leaf(get_authority(vm_hrn))
+	if state == 'allocated':
+            vm = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.name == vm_name).first()
+	    if vm:
+	    	server = db_session.query(VTServer).filter(VTServer.id == vm.serverId).first()
+	    	db_session.expunge(vm)
+	    	db_session.expunge(server)
+            	return {'name':vm_urn, 'expires':vm.expires, 'status':"allocated", 'server':server.name}
+	    else:
+		raise vt_exception.VTAMVMNotFound(vm_urn)
+        else:
+            vm = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.name == vm_name).first()
+            if vm:
+		expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
+                return {'name':vm_urn, 'expires':expires.expires, 'status':"provisioned", 'server':vm.xenvm.xenvm_associations.vtserver.name}
+            else:
+                raise vt_exception.VTAMVMNotFound(vm_urn)
+
 	
 
     def extend_vm_expiration(self, vm_urn, status, expiration_time):
 	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
+	slice_name = get_leaf(get_authority(vm_hrn))
 	max_duration = self.RESERVATION_TIMEOUT
         max_end_time = datetime.utcnow() + timedelta(0, max_duration)
 	if (status == "allocated"):
-	    vm_expires = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
+	    vm_expires = db_session.query(VMAllocated).filter(VMAllocated.sliceNaem == slice_name).filter(VMAllocated.name == vm_name).first()
 	    vm_state = "allocated"
 	else:
-	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).first()
+	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.name == vm_name).first()
 	    vm_state = vm.state
 	    db_session.expunge(vm)
 	    vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
@@ -294,21 +319,21 @@ class VTResourceManager(object):
 
 	db_session.add(vm)
 	db_session.commit()
-	
-	for interface in requested_vm['interfaces']:
-	    allocated_interface = VMAllocatedNetworkInterfaces()
-	    allocated_interface.allocated_vm_id = vm.id
-	    allocated_interface.name = interface['name']
-	    allocated_interface.mac = interface['mac']
-	    allocated_interface.ip = interface['ip']
-	    allocated_interface.gw = interface['gw']
-	    allocated_interface.dns1 = interface['dns1']
-	    allocated_interface.dns2 = interface['dns2']
-	    allocated_interface.msk = interface['mask']
-	    allocated_interface.isMgmt = interface['ismgmt']
-	    db_session.add(allocated_interface)
-	    db_session.commit()
-	    db_session.expunge(allocated_interface)
+	#XXX: Currently, allocating interfaces is not allowed	
+#	for interface in requested_vm['interfaces']:
+#	    allocated_interface = VMAllocatedNetworkInterfaces()
+#	    allocated_interface.allocated_vm_id = vm.id
+#	    allocated_interface.name = interface['name']
+#	    allocated_interface.mac = interface['mac']
+#	    allocated_interface.ip = interface['ip']
+#	    allocated_interface.gw = interface['gw']
+#	    allocated_interface.dns1 = interface['dns1']
+#	    allocated_interface.dns2 = interface['dns2']
+#	    allocated_interface.msk = interface['mask']
+#	    allocated_interface.isMgmt = interface['ismgmt']
+#	    db_session.add(allocated_interface)
+#	    db_session.commit()
+#	    db_session.expunge(allocated_interface)
 	db_session.expunge(vm)
 
 	vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
@@ -349,6 +374,7 @@ class VTResourceManager(object):
             params['hd-origin-path'] = allocated_vm.hdOriginPath
             params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
             params['memory-mb'] = allocated_vm.memory
+	    #XXX: Currently, this is always an empty list, interfaces are not allowed
 	    interfaces = list()
 	    for allocated_interface in allocated_vm.interfaces:
 	    	interface = dict()

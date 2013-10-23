@@ -149,30 +149,31 @@ class VTDelegate(GENIv3DelegateBase):
                         vm['virtualization_setup_type'] = elm.text.strip()
 		    elif (elm.tag == "memory-mb"):
                         vm['memory_mb'] = elm.text.strip()
-		    elif (elm.tag == "interfaces"):
-			vm['interfaces'] = list()
-			for interface in elm.getchildren():
-			    iface = dict()
-			    if (interface.get("ismgmt") == "true"): 
-				iface['ismgmt'] = True
-			    else:
-				iface['ismgmt'] = False
-			    for ifaceelm in interface.getchildren():
-			        if (ifaceelm.tag == "name"):
-				    iface['name'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "mac"):
-				    iface['mac'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "ip"):
-				    iface['ip'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "mask"):
-				    iface['mask'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "gw"):
-				    iface['gw'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "dns1"):
-				    iface['dns1'] = ifaceelm.text.strip()
-			    	elif (ifaceelm.tag == "dns2"):
-				    iface['dns2'] = ifaceelm.text.strip()
-			    vm['interfaces'].append(iface)
+		    #XXX: Currently, interfaces is not allowed
+#		    elif (elm.tag == "interfaces"):
+#			vm['interfaces'] = list()
+#			for interface in elm.getchildren():
+#			    iface = dict()
+#			    if (interface.get("ismgmt") == "true"): 
+#				iface['ismgmt'] = True
+#			    else:
+#				iface['ismgmt'] = False
+#			    for ifaceelm in interface.getchildren():
+#			        if (ifaceelm.tag == "name"):
+#				    iface['name'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "mac"):
+#				    iface['mac'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "ip"):
+#				    iface['ip'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "mask"):
+#				    iface['mask'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "gw"):
+#				    iface['gw'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "dns1"):
+#				    iface['dns1'] = ifaceelm.text.strip()
+#			    	elif (ifaceelm.tag == "dns2"):
+#				    iface['dns2'] = ifaceelm.text.strip()
+#			    vm['interfaces'].append(iface)
 	    	    else:
                 	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I dont understand (%s)." % (elm,))
 	        requested_vms.append(vm)
@@ -186,8 +187,6 @@ class VTDelegate(GENIv3DelegateBase):
 	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs are admited in this AM')
 	except vt_ex.VTMaxVMDurationExceeded as e:
 	    raise geni_ex.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-	#TODO: maybe it should return only the allocated VMs, not all the VMs
-	#rspecs is a RSpec GeniV3 (manifest) of newly allocated slivers 
 	rspecs = self._get_manifest_rspec(allocated_vms_nodes)
 	slivers = list()
 	for key in allocated_vms_nodes.keys():
@@ -315,14 +314,26 @@ class VTDelegate(GENIv3DelegateBase):
 		slice_vms = self._resource_manager.vms_in_slice(urn)
 		if not slice_vms:
 	            raise geni_ex.GENIv3SearchFailedError("There are no resources in the given slice(s)")
-                vms.extend(slice_vms)
+		for vm in slice_vms:
+		    vm_status = self._resource_manager.get_vm_status(vm['name'], vm['status'])
+		    vms.append(vm_status)
+	    elif (self.urn_type(urn) == 'sliver'):
+		try:
+		    vm, status = self._resource_manager.verify_vm(urn)
+		    vm_status = self._resource_manager.get_vm_status(vm, status)
+		    vms.append(vm_status)	
+		except vt_ex.VTAMVMNotFound as e:
+		    raise geni_ex.GENIv3SearchFailedError("The desired VM urn(s) cloud not be found (%s)." % (vm,))
             else:
-                raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be given to status in this aggregate')
-        # assemble return values
+                raise geni_ex.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate')
         sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
 	status_vms = dict()
-	#TODO: decide change the manifest rspec or somehow return the server value
-	status_vms['verdager'] = vms	    
+	for vm in vms:
+	    if status_vms.has_key(vm['server']):
+		status_vms[vm['server']].append(vm)
+	    else:    
+		status_vms[vm['server']] = list()
+		status_vms[vm['server']].append(vm)
         return self._get_manifest_rspec(status_vms), sliver_list
 
 
@@ -348,6 +359,7 @@ class VTDelegate(GENIv3DelegateBase):
 		    else:
 			raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
 	    elif (self.urn_type(urn) == 'sliver'):
+		
 		if (action == self.OPERATIONAL_ACTION_START):
                     vm = self._resource_manager.start_vm(urn)
                     vms.extend(vm)
@@ -372,10 +384,11 @@ class VTDelegate(GENIv3DelegateBase):
 
 
     def delete(self, urns, client_cert, credentials, best_effort):
+	#TODO: honor best_effort
 	#first we check that the urns in the list are valid urns
 	for urn in urns:
             if (self.urn_type(urn) != "slice") and (self.urn_type(urn) != "sliver"):
-		raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be deleted in this aggregate') 
+		raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be deleted in this aggregate') 
 	#once we know the input is a list of urns
 	vms = list()
         for urn in urns:
