@@ -53,13 +53,8 @@ class Command(BaseCommand):
         """
         ids = get_conflictive_slices_ids()
         errors = []
-        slices = []
         slice_id = ""
-        for iden in ids:
-            try:
-                slices.append(Slice.objects.get(id=iden))
-            except:
-                pass
+        slices = filter_own_slices(ids)
         for slice in slices:
             # We get only OpenFlow aggregates to delete their slices at FV
             aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
@@ -67,9 +62,9 @@ class Command(BaseCommand):
                 try:
                     slice_id = str(SITE_DOMAIN_DEFAULT) + "_" + str(slice.id)
                     print "Stopping", slice_id, "at aggregate", str(agg)
+                    time.sleep(FLOWVISOR_SLEEP_TIME)
                     with Timeout(TIMEOUT):
                         agg.as_leaf_class().client.proxy.delete_slice(slice_id)
-                    time.sleep(FLOWVISOR_SLEEP_TIME)
                     # Stopping slice at Expedient
                     slice.started = False
                     slice.save()
@@ -91,7 +86,6 @@ The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_le
         Second step: start previously conflictive (non-standard) slices at FlowVisor.
         """
         errors = []
-        slices = []
         slice_ids = []
         # If 'conflictive_slice_ids' file exists, do the following.
         # Otherwise warn and skip.
@@ -100,21 +94,17 @@ The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_le
             ids = pickle.load(f)
             f.close()
             os.remove("%s/conflictive_slice_ids" % path)
-            for iden in ids:
-                try:
-                    slices.append(Slice.objects.get(id=iden))
-                except:
-                    pass
-            for slice in slices:
+            slices = filter_own_slices(ids)
+            for (counter, slice) in enumerate(slices):
                 aggs = slice.aggregates.filter(leaf_name="OpenFlowAggregate")
                 slice_id = str(settings.SITE_DOMAIN) + "_" + str(slice.id)
-                slice_ids.append(slice_id)
+                slice_ids.append({"id":slice_id, "keywords":ids[counter]['keywords']})
                 for agg in aggs:
                     try:
                         print "Starting", slice_id, "at aggregate", str(agg)
+                        time.sleep(FLOWVISOR_SLEEP_TIME)
                         with Timeout(TIMEOUT):
                             agg.as_leaf_class().client.proxy.create_slice(slice_id, slice.project.name,slice.project.description,slice.name, slice.description, slice.openflowsliceinfo.controller_url, slice.owner.email, slice.openflowsliceinfo.password, agg.as_leaf_class()._get_slivers(slice))
-                        time.sleep(FLOWVISOR_SLEEP_TIME)
                         # Starting slice at Expedient
                         slice.started = True
                         slice.save()
@@ -134,7 +124,27 @@ The cause of the error is: %s. Please try to fix it manually""" % (str(agg.as_le
             else:
                 return "\033[92mSuccessfully started previously non-standard slices at FlowVisor\033[0m"
         except Exception as e:
+            print e
             return "\033[93mCould not access file with slice IDs. Skipping...\033[0m\n"
+
+def filter_own_slices(slice_ids):
+    slices = []
+    for slice_id in slice_ids:
+        try:
+            # Check that slice contains the keywords
+            # to verify it was CREATED at our island.
+            # Otherwise, leave
+            filtered_slice = Slice.objects.get(id=slice_id['id'])
+            filter_ok = True
+            for keyword in slice_id['keywords']:
+                if keyword not in filtered_slice.name:
+                     filter_ok = False
+                     break
+            if filter_ok:
+                slices.append(filtered_slice)
+        except:
+            pass
+    return slices
 
 def get_conflictive_slices_ids():
 
@@ -151,13 +161,11 @@ def get_conflictive_slices_ids():
             i -= 1
         return "".join(buffer)
 
+    def get_keywords(slice_id):
+        return str(slice_id).split(":")[1].split("ID")[0].strip().split("_")
+
     def write_in_file(ids):
         f = open("%s/conflictive_slice_ids" % path,"w")
-        #ids_data = "CONFLICTIVE_SLICES = ["
-        #for identifier in ids:
-        #    ids_data += "%s, " % str(identifier)
-        #ids_data += "]"
-        #f.write(ids_data)
         pickle.dump(ids,f)
         f.close()
 
@@ -172,8 +180,8 @@ def get_conflictive_slices_ids():
             cmd = ['fvctl', '--passwd-file=%s/fvadmin_pass' % path]
             cmd.append('listSlices')
             p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-            slices, err = p.communicate()
             time.sleep(FLOWVISOR_SLEEP_TIME)
+            slices, err = p.communicate()
             if err:
                 raise Exception
         except:
@@ -184,13 +192,13 @@ def get_conflictive_slices_ids():
     cmd = ['fvctl', '--passwd-file=%s/fvadmin_pass' % path]
     cmd.append('listSlices')
     p = subprocess.Popen(cmd, shell = False, stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    slices, err = p.communicate()
     time.sleep(FLOWVISOR_SLEEP_TIME)
+    slices, err = p.communicate()
 
     if not err:
         # Adapt obtained result to a list of flowrules
         slices = slices.split("\n")
-        ids = list()
+        ids_keywords = list()
 #        current_site_domain = Site.objects.get_current().domain
         current_site_domain = SITE_DOMAIN_DEFAULT
         current_site_domain = current_site_domain.replace(".", "_").replace(":", "_").replace("=", "_").replace(" ", "_").replace("'","_")
@@ -201,15 +209,16 @@ def get_conflictive_slices_ids():
 #               if str(current_site_domain) not in str(slice):
                 if str(current_site_domain) in str(slice):
                     id = get_id(slice)
+                    keywords = get_keywords(slice)
                     if id:
-                        ids.append(id)
+                        ids_keywords.append({"id":id, "keywords":keywords})
     else:
         print "Error: %s" % str(err)
-    write_in_file(ids)
+    write_in_file(ids_keywords)
     f.close()
     # Remove temporal file for fvadmin's pass only when fvctl command is done
     os.remove("%s/fvadmin_pass" % path)
-    return ids
+    return ids_keywords
 
 class Timeout():
     """Timeout class using ALARM signal."""
@@ -228,4 +237,3 @@ class Timeout():
 
     def raise_timeout(self, *args):
         raise Timeout.Timeout()
-

@@ -48,10 +48,11 @@ class Command(NoArgsCommand):
                 for admin_opt in all_this_admin_opts:
                     if admin_opt.priority <= assigned_priority:
                         assigned_priority = admin_opt.priority - 1
-                selexp = Experiment.objects.get(slice_id = iden)
+                # Filter by slice "keywords" (name), same as in the previous steps
+                selexp = filter_own_experiment(iden)
                 flow_space = ExperimentFLowSpace.objects.filter(exp=selexp.id)
                 if not flow_space:
-                    print "No matched flowspaces for slice %s" % iden
+                    print "No matched flowspaces for slice %s" % iden['id']
                     continue 
                 #intersected_flowspace = multi_fs_intersect(flow_space,adminFS,FlowSpace)
                 intersected_flowspace = get_used_fs(flow_space)
@@ -75,12 +76,27 @@ class Command(NoArgsCommand):
                             fs_description = fs_description + "\n%s" % fs
                         else:
                             fs_description = "%s" % fs
-                print "Flowspace for slice %s was successfully granted" % iden
+                print "Flowspace for slice %s was successfully granted" % iden['id']
                 time.sleep(FLOWVISOR_SLEEP_TIME)
             self.stdout.write("\033[92m%s\033[0m\n" % "Successfully granted flowspaces at FlowVisor\n")
         except Exception as e:
             print e
             self.stdout.write("\033[93mCould not access file with slice IDs. Skipping...\033[0m\n")
+
+def filter_own_experiment(slice_iden):
+    filtered_exp = None
+    try:
+        # Check that experiment contains the keywords
+        # to verify it was CREATED at our island.
+        # Otherwise, leave
+        filtered_exp = Experiment.objects.get(slice_id = slice_iden['id'])
+        for keyword in slice_iden['keywords']:
+            if keyword not in filtered_exp.slice_name:
+                 filtered_exp = None   # If this does not exist, ignore
+                 break
+    except Exception as e:
+        print "Could not find opted experiment %s. Details: %s" % (str(slice_iden['id']), str(e))
+    return filtered_exp
 
 def get_used_fs(flow_space):
     forbidden_keys = ["id","dpid","direction","port_number_s", "port_number_e", "exp_id","_state"]
