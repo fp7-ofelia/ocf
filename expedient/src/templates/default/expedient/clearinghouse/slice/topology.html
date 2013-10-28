@@ -386,7 +386,7 @@ var links = data.links;
 var force = d3.layout.force()
     .gravity(0)
     .distance(100)
-    .charge(-500)
+    .charge(-600)
     .friction(0.6)
     .size([width, height])
     .nodes(nodes)
@@ -525,9 +525,9 @@ var grav = 0.008 * nx * ny;
 
 force.on("tick", function(e){
     var k = grav * e.alpha;
-    var node_groups = {}
+    var node_groups = {};
 
-    // Adjust K colliding factor
+    //Adjust K colliding factor
     $.each(data.nodes, function(i, n){
         if (node_groups[n.group] == undefined) {
             node_groups[n.group] = 1;
@@ -540,22 +540,27 @@ force.on("tick", function(e){
 	var fact = 1;
         // Dumb hack: limit expansion through #nodes
         if (node_groups[o.group] >= 10) {
-            fact = Math.floor(node_groups[o.group]/10);
+            fact = fact * Math.floor(node_groups[o.group]/10);
         } else {
+	    //fact = fact * (node_groups[o.group] + o.group);
             fact = o.group+1;
         }
 	/*
 	Carolina: when there are few nodes, avoid them to stay too far away from the center
 	AND when there are so many nodes avoid them to stay too near each others
 	*/
-	if(qNodes[o.group] < 5){
-	    fact = fact * 2;
+	var xFact = fact;
+	var yFact = fact;
+	if(qNodes[o.group] < 10){
+	    xFact = xFact * Math.floor((10 - qNodes[o.group]) / 2);
+	    yFact = yFact * (10 - qNodes[o.group]);
 	} else {
-	    fact = fact / 2;
+	    xFact = Math.floor(fact / 2);
+	    yFact = Math.floor(fact / 2);
 	}
         try {
-	    o.y += k * fact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
-	    o.x += k * fact * qNodes[o.group] * ((dataislands[o.group].cx) - o.x);
+	    o.y += k * yFact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
+	    o.x += k * xFact * qNodes[o.group] * ((dataislands[o.group].cx) - o.x);
         } catch (err) {
         }
     });
