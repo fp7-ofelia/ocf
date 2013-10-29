@@ -1,0 +1,13 @@
+Subject: FOAM sliver rejected
+
+(This is an automated message from FOAM.)
+
+A FOAM sliver at %(site)s
+has been rejected (either automatically when the sliver was created, or
+manually by a FOAM admin), and is not currently in the FlowVisor:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+
+No further admin action is required at this time.

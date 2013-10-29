@@ -1,0 +1,832 @@
+#!/usr/bin/env python
+# Copyright (c) 2011-2012  The Board of Trustees of The Leland Stanford Junior University
+# Copyright (c) 2012  Barnstormer Softworks Ltd.
+
+import sys
+sys.path.append("/opt/ofelia/ofam/local/lib")
+
+from optparse import OptionParser
+import foam.core.htpasswd as htpasswd
+import getpass
+import socket
+import os
+import urllib
+import urllib2
+import json
+import pprint
+import base64
+import xml.dom.minidom
+import functools
+
+def pa_setPassword (args):
+  parser = OptionParser()
+  parser.add_option("--foam-admin-passwd-file", dest="foamadminpasswd", default=None)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_setPassword (opts):
+  if opts.foamadminpasswd:
+    f = open(opts.foamadminpasswd, "r")
+    admin_passwd = f.read()
+    admin_passwd.strip()
+  else:
+    admin_passwd = getpass.getpass("FOAM Admin Password: ")
+
+  ht = htpasswd.HtpasswdFile("/opt/ofelia/ofam/local/etc/admin.htpasswd", True)
+  ht.update("foamadmin", admin_passwd)
+  ht.save()
+
+def certs_parse_args (args):
+  return {}
+
+def do_bundleCerts (opts):
+  bundle = file("/opt/ofelia/ofam/local/etc/nginx-ca-certs.pem", "w+")
+  for f in os.listdir("/opt/ofelia/ofam/local/etc/gcf-ca-certs"):
+    bundle.write(file("/opt/ofelia/ofam/local/etc/gcf-ca-certs/%s" % f, "r").read())
+
+def pa_listSlivers (args):
+  parser = OptionParser()
+  parser.add_option("--deleted", dest="deleted", action="store_true", default=False)
+  parser.add_option("--status", dest="status", default=None)
+  addCommonOpts(parser)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_listSlivers (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "list-slivers")
+  obj = {"deleted" : opts.deleted}
+  if opts.status is not None:
+    obj["status"] = opts.status
+
+  data = connect(url, opts.C_user, passwd, obj)
+  print "Tip: use the --status flag with value pending or approved for showing pending or approved slivers, if the --deleted flag to show deleted ones"
+  outputJSON(data)
+
+def pa_approveSliver (args):
+  parser = OptionParser()
+  parser.add_option("-u", "--urn", dest="urn", default=None)
+  parser.add_option("-p", "--priority", dest="priority", type="int", default=100)
+  addCommonOpts(parser)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_approveSliver (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "approve-sliver")
+  obj = {"sliver_urn" : opts.urn, "priority" : opts.priority}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_setConfig (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-k", "--key", dest="key")
+  parser.add_option("-v", "--value", dest="value")
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_setConfig (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-config")
+  obj = {"key" : opts.key, "value" : opts.value}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_getConfig (args):
+  parser = OptionParser()
+  parser.add_option("-k", "--key", dest="key")
+  addCommonOpts(parser)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_getConfig (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "get-config")
+  obj = {"key" : opts.key}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_setSliverExpiration (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn", default=None)
+  parser.add_option("-d", "--date", type="int", dest="date", help="Defined in epoch seconds", default=None)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_setSliverExpiration (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-sliver-expiration")
+  obj = {"datetime" : opts.date, "urn" : opts.urn}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+  
+def pa_showSliver (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn", default=None)
+  parser.add_option("-f", "--flowspace", dest="flowspace", action="store_true", default=False)
+  parser.add_option("-s", "--flowspec", dest="flowspec", action="store_true", default=False)
+  parser.add_option("-r", "--rspec", dest="rspec", action="store_true", default=False)
+
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_showSliver (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "show-sliver")
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  print "Use the --flowspace or --flowspec or --rspec flags for more info"
+  print "results:"
+  obj = {"sliver_urn" : opts.urn}
+  if opts.flowspace:
+    obj["flowspace"] = True
+  if opts.flowspec:
+    obj["flowspec"] = True
+  if opts.rspec:
+    obj["rspec"] = True
+
+  data = connect(url, opts.C_user, passwd, obj)
+  j = json.loads(data)
+
+  if j["retcode"] != 0:
+    outputJSON(data)
+
+  j = j["value"]
+
+  rspec = None
+  if j.has_key("rspec"):
+    rspec = j["rspec"]
+    del j["rspec"]
+  json.dump(j, sys.stdout, indent=1)
+  print
+  if rspec:
+    print "RSpec:"
+    print rspec
+
+def pa_disableSliver (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_disableSliver (opts):
+  passwd = getPassword(opts)
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  url = URL % (opts.host, "disable-sliver")
+  obj = {"sliver_urn" : opts.urn}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_rejectSliver (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_rejectSliver (opts):
+  passwd = getPassword(opts)
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  url = URL % (opts.host, "reject-sliver")
+  obj = {"sliver_urn" : opts.urn}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_deleteSliver (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_deleteSliver (opts):
+  passwd = getPassword(opts)
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  url = URL % (opts.host, "delete-sliver")
+  obj = {"sliver_urn" : opts.urn}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def do_getVersion (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "get-version")
+  
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def pa_URN (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-u", "--urn", dest="urn")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_geniApprovalAddUser (opts):
+  passwd = getPassword(opts)
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  url = GENI_URL % (opts.host, "approval/add-user-urn")
+  obj = {"urn" : opts.urn}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def do_geniApprovalRemoveUser (opts):
+  passwd = getPassword(opts)
+  if opts.urn is None:
+    exit("You must supply a urn with -u/--urn")
+  url = GENI_URL % (opts.host, "approval/remove-user-urn")
+  obj = {"urn" : opts.urn}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def do_geniApprovalListUserURNs (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/list-user-urns")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalRebuildDB (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/rebuild-db")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalGetMacs (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/get-macs")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalGetEthertypes (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/get-ethertypes")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalGetSubnets (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/get-subnets")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalPGCreate (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/create-port-group")
+
+  print "Port Group Configuration"
+  name = raw_input("Name: ")
+  desc = raw_input("Description: ")
+
+  data = connect(url, opts.C_user, passwd, {"name" : name, "desc" : desc})
+  outputJSON(data)
+
+def pa_portgroup (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-p", "--pgid", dest="pgid")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_geniApprovalPGAddPort (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/add-port")
+
+  print "Add Port"
+  dpid = raw_input("Datapath ID: ")
+  port = int(raw_input("Port Num: "))
+
+  data = connect(url, opts.C_user, passwd, {"group-id" : opts.pgid, "dpid"  : dpid, "port-num" : port })
+  outputJSON(data)
+
+def do_geniApprovalPGRemovePort (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/remove-port")
+
+  print "Remove Port from group %s" % (opts.pgid)
+  dpid = raw_input("Datapath ID: ")
+  port = int(raw_input("Port Num: "))
+
+  data = connect(url, opts.C_user, passwd, {"group-id" : opts.pgid, "dpid"  : dpid, "port-num" : port })
+  outputJSON(data)
+
+def do_geniApprovalPGList (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/list-port-groups")
+
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+
+def do_geniApprovalPGShow (opts):
+  passwd = getPassword(opts)
+  url = GENI_URL % (opts.host, "approval/show-port-group")
+
+  data = connect(url, opts.C_user, passwd, {"group-id" : opts.pgid})
+  outputJSON(data)
+
+def pa_addDatapath (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-d", "--dpid", dest="dpid")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_addDatapath (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "add-datapath")
+  if opts.dpid is None:
+    exit("You must supply a datapath")
+  obj = {"dpid" : opts.dpid}
+  
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_removeDatapath (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-d", "--dpid", dest="dpid")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_removeDatapath (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "remove-datapath")
+  if opts.dpid is None:
+    exit("You must supply a datapath")
+  obj = {"dpid" : opts.dpid}
+  
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def do_GETDebug (cmd, opts):
+  passwd = getPassword(opts)
+  url = DEBUG_URL % (opts.host, cmd)
+  data = connect(url, opts.C_user, passwd)
+  outputJSON(data)
+  
+def pa_authSetAdminPasswd (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_authSetAdminPasswd (opts):
+  passwd = getPassword(opts)
+  new_passwd = getpass.getpass("New foamadmin password: ")
+  new_passwd_again = getpass.getpass("Enter new password again: ")
+
+  if new_passwd != new_passwd_again:
+    print "Passwords do not match."
+    sys.exit(1)
+
+  url = AUTH_URL % (opts.host, "set-admin-passwd")
+  obj = {"passwd" : new_passwd}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_enableDefaults (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  # Don't get too confused here - it does the right thing.. :-)
+  parser.add_option("--disable", default="true", dest="enable", action="store_false")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def pa_approvalMode (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("--mode", default="never", dest="mode")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_setApprovalMode (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-config")
+  mode = opts.mode.lower()
+  if mode == "never":
+    mode = 0
+  elif mode == "always":
+    mode = 1
+  elif mode == "analysis" or mode == "rules":
+    mode = 2
+
+  obj = {"key" : "geni.approval.approve-on-creation", "value" : mode}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+  
+def do_enableAnalysisEngine (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-config")
+  obj = {"key" : "geni.openflow.analysis-engine", "value" : opts.enable}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def do_configSetAutoApprove (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-config")
+  obj = {"key" : "geni.approval.approve-everything", "value" : opts.enable}
+
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_configSetFVInfo (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_configSetFVInfo (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "set-flowvisor-info")
+
+  fv_host = raw_input("FlowVisor Hostname: ")
+  if not fv_host:
+    print "You must supply a flowvisor hostname."
+
+  fv_xmlrpc = raw_input("FlowVisor XMLRPC Port [8080]: ")
+  if fv_xmlrpc:
+    fv_xmlrpc = int(fv_xmlrpc)
+  else:
+    fv_xmlrpc = 8080
+
+  fv_jsonrpc = raw_input("FlowVisor JSON RPC Port [8081]: ")
+  if fv_jsonrpc:
+    fv_jsonrpc = int(fv_jsonrpc)
+  else:
+    fv_jsonrpc = 8081
+
+  fv_passwd = getpass.getpass("fvadmin user password: ")
+
+  url = URL % (opts.host, "set-config")
+  data = connect(url, opts.C_user, passwd, {"key" : "flowvisor.hostname", "value" : fv_host})
+  url = URL % (opts.host, "set-config")
+  data = connect(url, opts.C_user, passwd, {"key" : "flowvisor.json-port", "value" : fv_jsonrpc})
+  url = URL % (opts.host, "set-config")
+  data = connect(url, opts.C_user, passwd, {"key" : "flowvisor.xmlrpc-port", "value" : fv_xmlrpc})
+  url = URL % (opts.host, "set-config")
+  data = connect(url, opts.C_user, passwd, {"key" : "flowvisor.passwd", "value" : fv_passwd})
+  url = URL % (opts.host, "set-config")
+
+  outputJSON(data)
+
+def pa_defaults (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def pa_setupEmail (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("-a", "--admin", dest="admin_email")
+  parser.add_option("-s", "--server", dest="server")
+  parser.add_option("-f", "--from", dest="mail_from")
+  parser.add_option("-r", "--reply-to", dest="reply_to")
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_setupEmail (opts):
+  passwd = getPassword(opts)
+
+  if opts.admin_email:
+    admin_email = opts.admin_email
+  else:
+    admin_email = raw_input("Admin email: ")
+
+  if opts.server:
+    server = opts.server
+  else:
+    server = raw_input("SMTP Server: ")
+
+  if opts.mail_from:
+    mail_from = opts.mail_from
+  else:
+    mail_from = raw_input("From: ")
+
+  if opts.reply_to or opts.reply_to == '':
+    reply_to = opts.reply_to
+  else:
+    reply_to = raw_input("Reply-To: ")
+
+  url = URL % (opts.host, "set-config")
+
+  obj = { "key" : "email.admin-addr", "value" : admin_email }
+  data = connect(url, opts.C_user, passwd, obj)
+
+  obj = { "key" : "email.smtp-server", "value" : server }
+  data = connect(url, opts.C_user, passwd, obj)
+
+  obj = { "key" : "email.from", "value" : mail_from }
+  data = connect(url, opts.C_user, passwd, obj)
+
+  obj = { "key" : "email.reply-to", "value" : reply_to }
+  data = connect(url, opts.C_user, passwd, obj)
+
+#Vasileios: VLAN handling (see admin.py for source code) start
+def pa_listVlans (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_listVlans (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "list-vlans")
+  obj = None
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_listAllocVlans (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_listAllocVlans (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "list-allocated-vlans")
+  obj = None
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data) 
+
+def pa_listAllocVlansSorted (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_listAllocVlansSorted (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "list-allocated-vlans-sorted")
+  obj = None
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_offerVlanTags (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("--vlanset", dest="vlan_set", type="int", default=0)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_offerVlanTags (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "offer-vlan-tags")
+  obj = {"vlan_set" : opts.vlan_set}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data, False)
+  print "Use the --vlanset <vlan set> flag if you want the first" + " vlan set " + " vlans to be presented"
+  sys.exit(1)
+
+def pa_stampFsWithVlan (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  parser.add_option("--urn", dest="urn", type="str", default=None)
+  parser.add_option("--vlanstampstart", dest="vlan_stamp_start", type="int", default=0)
+  parser.add_option("--vlanstampend", dest="vlan_stamp_end", type="int", default=0)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_stampFsWithVlan (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "expedient-stamp-fs-with-vlan")
+  if (opts.urn is None) or (opts.vlan_stamp_start == 0) or (opts.vlan_stamp_end == 0):
+    exit("Usage: foamctl ofelia:vlans:stamp-fs-with-vlan --urn <sliver urn> --vlanstampstart <vlan stamp start> --vlanstampend <vlan stamp end>") 
+  obj = {"urn" : opts.urn, "vlan_stamp_start" : opts.vlan_stamp_start, "vlan_stamp_end" : opts.vlan_stamp_end}
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_enableVlanAuto (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_enableVlanAuto (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "enable-vlan-assignment-automation")
+  obj = None
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+
+def pa_disableVlanAuto (args):
+  parser = OptionParser()
+  addCommonOpts(parser)
+  (options, args) = parser.parse_args(args)
+  return options
+
+def do_disableVlanAuto (opts):
+  passwd = getPassword(opts)
+  url = URL % (opts.host, "disable-vlan-assignment-automation")
+  obj = None
+  data = connect(url, opts.C_user, passwd, obj)
+  outputJSON(data)
+  
+#Vasileios: VLAN handling (see admin.py for source code) end
+
+def connect (url, user, passwd, data = None):
+  try:
+    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    passman.add_password(None, url, user, passwd)
+    authhandler = urllib2.HTTPBasicAuthHandler(passman)
+    opener = urllib2.build_opener(authhandler)
+
+    if data is not None:
+      data = json.dumps(data)
+
+      h = {"Content-Type" : "application/json"}
+      req = urllib2.Request(url, data, h)
+      ph = opener.open(req)
+      return ph.read()
+    else:
+      req = urllib2.Request(url)
+      ph = opener.open(req)
+      return ph.read()
+
+  except urllib2.HTTPError, e:
+    if e.code == 401:
+      print "Basic auth failed: invalid password"
+      sys.exit(1)
+    elif e.code == 504:
+      print "HTTP Error 504: Gateway Time-out"
+      sys.exit(1)
+    else:
+      print e
+  except RuntimeError, e:
+    print e
+
+def getPassword (opts):
+  if opts.C_passwdfile is None:
+    passwd = getpass.getpass("Password: ")
+  else:
+    passwd = open(opts.C_passwdfile, "r").read().strip()
+  return passwd
+
+def exit (message):
+  print message
+  sys.exit()
+
+def addCommonOpts (parser):
+  parser.add_option("-n", "--name", dest="host", default="localhost")
+  parser.add_option("--user", dest="C_user", default="foamadmin")
+  parser.add_option("--passwd-file", dest="C_passwdfile", default=None)
+
+def outputJSON (data, exit=True):
+  j = json.loads(data)
+  try:
+    if j["retcode"] != 0:
+      print j["msg"]
+      if j["value"].has_key("missing"):
+        print "Missing: %s" % (j["value"]["missing"])
+        print "Incorrect Type: %s" % (j["value"]["wrong-type"])
+      if exit:
+        sys.exit(1)
+      return
+  except Exception:
+    pass
+
+  if j["value"] is None:
+    sys.exit()
+
+  json.dump(j["value"], sys.stdout, indent=1)
+  print
+  if exit:
+    sys.exit()
+
+BASEURL = "https://%s:3626/%s"
+URL = "https://%s:3626/core/admin/%s"
+DEBUG_URL = "https://%s:3626/core/debug/%s"
+AUTH_URL = "https://%s:3626/core/auth/%s"
+GENI_URL = "https://%s:3626/geni/%s"
+
+CMDS = {
+    'admin:bundle-certs': (certs_parse_args, do_bundleCerts),
+    'admin:get-version' : (pa_defaults, do_getVersion),
+    'admin:add-datapath' : (pa_addDatapath, do_addDatapath),
+    'admin:remove-datapath' : (pa_removeDatapath, do_removeDatapath),
+    'auth:set-admin-passwd' : (pa_authSetAdminPasswd, do_authSetAdminPasswd),
+    'config:set-value' : (pa_setConfig, do_setConfig),
+    'config:get-value': (pa_getConfig, do_getConfig),
+    'config:set-flowvisor-info' : (pa_configSetFVInfo, do_configSetFVInfo),
+    'config:setup-email' : (pa_setupEmail, do_setupEmail),
+    'debug:start-coverage' : (pa_defaults, functools.partial(do_GETDebug, "start-coverage")),
+    'debug:stop-coverage' : (pa_defaults, functools.partial(do_GETDebug, "stop-coverage")),
+    'debug:start-trace' : (pa_defaults, functools.partial(do_GETDebug, "start-trace")),
+    'debug:stop-trace' : (pa_defaults, functools.partial(do_GETDebug, "stop-trace")),
+    'geni:list-slivers': (pa_listSlivers, do_listSlivers),
+    'geni:approve-sliver' : (pa_approveSliver, do_approveSliver),
+    'geni:show-sliver' : (pa_showSliver, do_showSliver),
+    'geni:disable-sliver' : (pa_disableSliver, do_disableSliver),
+    'geni:reject-sliver' : (pa_rejectSliver, do_rejectSliver),
+    'geni:delete-sliver' : (pa_deleteSliver, do_deleteSliver),
+    'geni:set-sliver-expiration' : (pa_setSliverExpiration, do_setSliverExpiration),
+    'geni:openflow:enable-analysis-engine' : (pa_enableDefaults, do_enableAnalysisEngine),
+    'geni:overlap:rebuild-db' : (pa_defaults, do_geniApprovalRebuildDB),
+    'geni:overlap:get-macs' : (pa_defaults, do_geniApprovalGetMacs),
+    'geni:overlap:get-ethertypes' : (pa_defaults, do_geniApprovalGetEthertypes),
+    'geni:overlap:get-subnets' : (pa_defaults, do_geniApprovalGetSubnets),
+    'geni:approval:approve-everything' : (pa_enableDefaults, do_configSetAutoApprove),
+    'geni:approval:set-mode' : (pa_approvalMode, do_setApprovalMode),
+    'geni:approval:add-user-urn' : (pa_URN, do_geniApprovalAddUser),
+    'geni:approval:remove-user-urn' : (pa_URN, do_geniApprovalRemoveUser),
+    'geni:approval:list-user-urns' : (pa_defaults, do_geniApprovalListUserURNs),
+    'geni:approval:create-port-group' : (pa_defaults, do_geniApprovalPGCreate),
+    'geni:approval:add-port' : (pa_portgroup, do_geniApprovalPGAddPort),
+    'geni:approval:remove-port' : (pa_portgroup, do_geniApprovalPGRemovePort),
+    'geni:approval:list-port-groups' : (pa_defaults, do_geniApprovalPGList),
+    'geni:approval:show-port-group' : (pa_portgroup, do_geniApprovalPGShow),
+    'ofelia:vlans:list-all-vlans' : (pa_listVlans, do_listVlans),
+    'ofelia:vlans:list-allocated-vlans' : (pa_listAllocVlans, do_listAllocVlans),
+    'ofelia:vlans:list-allocated-vlans-sorted' : (pa_listAllocVlansSorted, do_listAllocVlansSorted),
+    'ofelia:vlans:offer-vlan-tags' : (pa_offerVlanTags, do_offerVlanTags),
+    'ofelia:vlans:stamp-slice-fs-with-vlan-range': (pa_stampFsWithVlan, do_stampFsWithVlan),
+    'ofelia:vlans:enable-full-vlan-assignment-automation' : (pa_enableVlanAuto, do_enableVlanAuto),
+    'ofelia:vlans:disable-full-vlan-assignment-automation' : (pa_disableVlanAuto, do_disableVlanAuto),
+}
+
+# Extra structure to set the list of arguments per command
+ARGS = {
+    'admin:bundle-certs': '',
+    'admin:get-version' : '',
+    'admin:add-datapath' : '--dpid=<dpid>',
+    'admin:remove-datapath' : '--dpid=<dpid>',
+    'auth:set-admin-passwd' : '[--passwd-file=<foam-admin-passwd-file>]',
+    'config:set-value' : '--key=<key> --value=<value>',
+    'config:get-value': '--key=<key>',
+    'config:set-flowvisor-info' : '',
+    'config:setup-email' : '[--admin=<admin_email>] [--server=<server>] [--from=<mail_from>] [--reply-to=<reply_to>]',
+    'debug:start-coverage' : '',
+    'debug:stop-coverage' : '',
+    'debug:start-trace' : '',
+    'debug:stop-trace' : '',
+    'geni:list-slivers': '[--deleted] [--status=<status>]',
+    'geni:approve-sliver' : '-u|--urn=<sliver_urn> [-p|--priority <priority_numeric_value]',
+    'geni:show-sliver' : '--urn=<sliver_urn> [--flowspace=<boolean>] [--flowspec=<boolean>] [--rspec=<boolean>]',
+    'geni:disable-sliver' : '--urn=<sliver_urn>',
+    'geni:reject-sliver' : '--urn=<sliver_urn>',
+    'geni:delete-sliver' : '--urn=<sliver_urn>',
+    'geni:set-sliver-expiration' : '--urn <sliver_urn> --date <date>',
+    'geni:openflow:enable-analysis-engine' : '[--disable <boolean>]',
+    'geni:overlap:rebuild-db' : '',
+    'geni:overlap:get-macs' : '',
+    'geni:overlap:get-ethertypes' : '',
+    'geni:overlap:get-subnets' : '',
+    'geni:approval:approve-everything' : '[--disable <boolean>]',
+    'geni:approval:set-mode' : '--mode=<mode>',
+    'geni:approval:add-user-urn' : '--urn=<user_urn>',
+    'geni:approval:remove-user-urn' : '--urn=<user_urn>',
+    'geni:approval:list-user-urns' : '',
+    'geni:approval:create-port-group' : '--pgid=<pgid>',
+    'geni:approval:add-port' : '',
+    'geni:approval:remove-port' : '',
+    'geni:approval:list-port-groups' : '',
+    'geni:approval:show-port-group' : '--pgid=<pgid>',
+    'ofelia:vlans:list-all-vlans' : '',
+    'ofelia:vlans:list-allocated-vlans' : '',
+    'ofelia:vlans:list-allocated-vlans-sorted' : '',
+    'ofelia:vlans:offer-vlan-tags' : '--vlanset=<max_number_of_vlans_to_return>',
+    'ofelia:vlans:stamp-slice-fs-with-vlan-range': '--urn=<sliver_urn> --vlanstampstart=<vlanstampstart> --vlanstampend=<vlanstampend>',
+    'ofelia:vlans:enable-full-vlan-assignment-automation' : '',
+    'ofelia:vlans:disable-full-vlan-assignment-automation' : '',
+}
+
+if __name__ == '__main__':
+  try:
+    if sys.argv[1] == "--help":
+      raise IndexError
+    (parse_args, do_func) = CMDS[sys.argv[1]][0:]
+    opts = parse_args(sys.argv[1:])
+    do_func(opts)
+  except KeyError, e:
+    print "'%s' is not a valid command" % (sys.argv[1])
+  except IndexError, e:
+    print "Valid commands are:"
+    cmds = [ (x, ARGS[x]) for x in CMDS.iterkeys() ]
+    cmds.sort()
+    for x in cmds:
+      print "\n\t%s %s" % (x[0], x[1])

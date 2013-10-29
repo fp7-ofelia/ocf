@@ -1,0 +1,40 @@
+#!/bin/bash
+
+###
+#       @author: msune, CarolinaFernandez
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-install module
+###
+
+#Inform user
+printHeader "info#" "Using default post-install-hook module..."
+
+#Restarting nginx
+print "Restarting nginx..."
+/usr/sbin/service nginx restart
+#Restarting foam
+print "Restarting foam..."
+/usr/sbin/service foam restart
+
+#Configuring
+print "Setting FlowVisor information within FOAM..."
+/usr/local/bin/foamctl config:set-flowvisor-info
+
+print "Setting SITE_DOMAIN for geni.site-tag..."
+SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN")
+/usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN
+
+# Configuring e-mail
+while true; do
+    read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
+    case $foam_configure_email in
+        [Yy]* ) print "Note that you don't have to set a value for Reply-To: unless you want it to be different from the From: address for some reason";
+                /usr/local/bin/foamctl config:setup-email; break;;
+        [Nn]* ) break;;
+            * ) echo "Please answer 'y' or 'n'.";;
+    esac
+done
+
+printHeader "info#" "Make sure port 3626 is reachable by experimenters (i.e. isn't blocked by network firewalls, iptables, etc). In case of problems, first check the log files under $SRC_DIR/local/log, especially the foam.log. If needed, rerunning the installation script (after pulling the latest git bug-fixes) will fix most major issues (and no other steps are required from your side)."
+

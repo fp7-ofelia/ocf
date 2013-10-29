@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" attributeFormDefault="unqualified"
+  targetNamespace="http://www.geni.net/resources/rspec/ext/flowvisor/1" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:rspec="http://www.geni.net/resources/rspec/3"
+  xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/4"
+  xmlns:flowvisor="http://www.geni.net/resources/rspec/ext/flowvisor/1"> 
+
+	<xs:import schemaLocation="request.xsd" namespace="http://www.geni.net/resources/rspec/3"/>
+  <xs:import schemaLocation="of-resv-4.xsd" namespace="http://www.geni.net/resources/rspec/ext/openflow/4"/>
+
+  <xs:simpleType name="EtherAddr">
+    <xs:restriction base="xs:token">
+      <xs:maxLength value="17" />
+      <xs:pattern value="([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EtherAddrSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2})(,[\s]*(([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2}))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EtherTypeSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(0x([A-Fa-f0-9]{1,4}))(,[\s]*(0x([A-Fa-f0-9]{1,4})))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IPv4Sequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(((25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(/(3[012]|[12]\d|\d)))(,[\s]*((25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(/(3[012]|[12]\d|\d)))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IPProtoSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,[\s]*(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TPPortSequenceRange">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="((6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d\d\d|[1-9]\d\d\d|[1-9]\d\d|[1-9]\d|[1-9])(-(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d\d\d|[1-9]\d\d\d|[1-9]\d\d|[1-9]\d|[1-9]))?)(,((6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d\d\d|[1-9]\d\d\d|[1-9]\d\d|[1-9]\d|[1-9])(-(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d\d\d|[1-9]\d\d\d|[1-9]\d\d|[1-9]\d|[1-9]))?))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="VLANSequenceRange">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="((409[0-5]|40[0-8]\d|[1-9]\d\d|[1-9]\d|[1-9])(-(409[0-5]|40[0-8]\d|[1-9]\d\d|[1-9]\d|[1-9]))?)(,((409[0-5]|40[0-8]\d|[1-9]\d\d|[1-9]\d|[1-9])(-(409[0-5]|40[0-8]\d|[1-9]\d\d|[1-9]\d|[1-9]))?))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EmailAddress">
+    <xs:restriction base="xs:token">
+<!--      <xs:pattern value="[a-z0-9!#$%&amp;'*+/=?^_`\{|\}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`\{|\}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" /> -->
+<!--      <xs:pattern value="[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[a-zA-Z]{2,4}"/> -->
+      <xs:pattern value="[^@]+@[^\.]+\..+"/> 
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="sliver">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="group" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="datapath" minOccurs="0" maxOccurs="unbounded" type="openflow:Datapath"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:token" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="match" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="use-group" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:token" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="datapath" minOccurs="0" maxOccurs="unbounded" type="openflow:Datapath"/>
+              <xs:element name="packet" minOccurs="1">
+                <xs:complexType>
+                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="dl_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:EtherAddrSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:EtherAddrSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_type" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:EtherTypeSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_vlan" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="xs:token" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:IPv4Sequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:IPv4Sequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_proto" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:IPProtoSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="tp_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:TPPortSequenceRange" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="tp_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="flowvisor:TPPortSequenceRange" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="description" type="xs:token" use="optional" />
+      <xs:attribute name="email" type="flowvisor:EmailAddress" use="optional" />
+      <xs:attribute name="ref" type="xs:token" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

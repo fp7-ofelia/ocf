@@ -1,0 +1,14 @@
+Source: foam
+Section: misc
+Priority: optional
+Maintainer: Nick Bastin <nick.bastin@gmail.com>
+Build-Depends: cdbs (>= 0.4.49), debhelper (>= 7.0.50~), python (>= 2.6), python-support
+XB-Python-Version: ${python:Versions}
+Standards-Version: 3.9.1
+Homepage: http://openflow.stanford.edu/display/FOAM/Home
+
+Package: foam
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}, python-pip, nginx, xmlsec1, python-dateutil, m2crypto, python-dev, ssl-cert, libxml2-dev, libxslt1-dev, libssl-dev
+Description: Flowvisor Openflow Aggregate Manager
+ GENI Aggregate Manager for Openflow resources.

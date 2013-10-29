@@ -1,0 +1,13 @@
+Subject: FOAM sliver approved
+
+(This is an automated message from FOAM.)
+
+Your FOAM sliver at %(site)s
+has been approved, and is now in the FlowVisor:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+
+If this is unexpected, please contact %(admin_email)s
+for further assistance.

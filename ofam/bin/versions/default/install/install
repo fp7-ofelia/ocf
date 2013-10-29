@@ -1,0 +1,76 @@
+#!/bin/bash
+
+###
+#       @author: msune, CarolinaFernandez
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: install module 
+###
+
+#Constants
+SRC_DIR=/opt/ofelia/ofam/
+APACHE_USER="www-data"
+TMP_PATH=$PWD
+
+#Inform user
+printHeader "info#" "Using default install module..."
+
+##Main routing
+
+#Install dependencies
+printHeader ">" "Installing dependencies through apt-get..."
+
+source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies file" $NO_RESCUE
+/usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
+/usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
+
+
+#apt-get start nginx => stop it
+/usr/sbin/service nginx stop
+
+printHeader ">" "Installing remaining dependencies through easy_install..."
+
+/usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
+
+printHeader ">" "Installing FOAM..."
+
+# Create OFAM files on-the-fly
+cd $SRC_DIR/src
+python install.py
+
+printHeader ">" "Configuring FOAM..."
+
+# Download the needed certificates
+if [ -f $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem ]; then
+    wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem -O $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem
+fi
+
+# Rebuild the nginx CA cert bundle
+/usr/local/bin/foamctl admin:bundle-certs
+
+# Nginx's sites-enabled is renamed using the timestamp.
+# This is done in order to avoid conflicts with FOAM config file
+if [ -f /etc/nginx/sites-enabled/default ]; then
+    backup_nginx_conf=/etc/nginx/sites-enabled/default.bak-`date +"%d_%m_%y-%R"`
+    print "Backing nginx config file up: /etc/nginx/sites-enabled/default => $backup_nginx_conf ..."
+    mv /etc/nginx/sites-enabled/default $backup_nginx_conf || error "Could not backup default configuration file for '/etc/nginx/sites-enabled/default'"
+fi
+
+cd $TMP_PATH
+
+#Build ssl certs
+source $CURRENT_DIRECTORY/lib/ssl
+
+#Symlink application folder for error log (so we can access normally)
+ln -s $SRC_DIR/local/log /var/log/apache2/ofam
+
+#Django settings 
+source $CURRENT_DIRECTORY/lib/django-settings
+
+# After the previous, 'localsettings.py' will be created.
+# We need to import this from OFVER, so we make a symlink (untracked in GIT)
+ln -sf $SRC_DIR/src/src/foam/ofeliasettings/localsettings.py localsettings.py
+
+##Django database
+#source $CURRENT_DIRECTORY/lib/django-db
+

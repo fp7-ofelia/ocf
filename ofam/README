@@ -1,0 +1,49 @@
+========
+OVERVIEW
+========
+
+TBA
+
+
+==============
+INSTALLING FOAM
+==============
+
+1. Requirements
+---------------
+
+* One (or more) GNU/Linux Debian-like* system.
+
+Note: for none Debian-like OSs you will have to manually install components since
+OCF ofver-based [http://code.google.com/p/pypelib/] installation scripts only
+support Debian-like OSs currently.
+
+cd ./ofam --> check info-code inside
+
+
+2. Installation of FOAM
+---------------------------------------------------
+
+https://github.com/fp7-ofelia/ocf/wiki/ofam-configuration (second part of webpage)
+
+
+3. Upgrade instructions
+-----------------------
+
+https://github.com/fp7-ofelia/ocf/wiki/ofam-configuration (second part of webpage)
+
+
+4. Additional notes
+-------------------
+
+Integration with ofelia.stable pending (almost ready), but OFAM fully functional and 
+capable of interacting with legacy Expedient.
+
+
+===============
+FURTHER READING
+===============
+
+For more information about configuration, troubleshooting, contribution and
+more please visit: https://github.com/fp7-ofelia/ocf/wiki/ofam-configuration
+
