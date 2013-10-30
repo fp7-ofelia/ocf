@@ -16,4 +16,4 @@ print "Shutting down foam..."
 
 #shutdown nginx
 print "Shutting down nginx..."
-/usr/bin/service nginx stop
+/usr/sbin/service nginx stop

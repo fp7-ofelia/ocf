@@ -27,10 +27,6 @@ source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies 
 #apt-get start nginx => stop it
 /usr/sbin/service nginx stop
 
-printHeader ">" "Installing remaining dependencies through easy_install..."
-
-/usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
-
 printHeader ">" "Installing FOAM..."
 
 # Create OFAM files on-the-fly
