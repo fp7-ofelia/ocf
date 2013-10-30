@@ -12,14 +12,14 @@ if [ -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ];then
 	if [ "$FORCE" == "1" ]; then
 		confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
 		if [ $? == 0 ]; then			
-			cp $SRC_DIR/local/lib/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+			cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
 		fi 
 	else
 		print "Skipping copy (will not be overwritten)"
 	fi
 else
-	print "$SRC_DIR/local/lib/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
-	cp $SRC_DIR/local/lib/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+	print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
+	cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
 fi
 
 #Choose editor
