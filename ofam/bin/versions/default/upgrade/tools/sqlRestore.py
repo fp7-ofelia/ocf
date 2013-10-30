@@ -1,1 +1,0 @@
-/opt/ofelia/expedient/bin/versions/default/upgrade/tools/sqlRestore.py
