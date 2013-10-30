@@ -64,7 +64,7 @@ source $CURRENT_DIRECTORY/lib/django-settings
 
 # After the previous, 'localsettings.py' will be created.
 # We need to import this from OFVER, so we make a symlink (untracked in GIT)
-ln -sf $SRC_DIR/src/src/foam/ofeliasettings/localsettings.py localsettings.py
+ln -sf $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py localsettings.py
 
 ##Django database
 #source $CURRENT_DIRECTORY/lib/django-db
