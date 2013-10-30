@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###
-#       @author: msune
+#       @author: msune, SergioVidiella
 #	@organization: i2CAT
 #	@project: Ofelia FP7
 #	@description: Version checkings 
@@ -10,20 +10,14 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-SRC_DIR=/opt/ofelia/optin_manager/
+SRC_DIR=/opt/ofelia/ofam/
+TMP_PATH=$PWD
 
+printHeader ">" "Upgrading FOAM to the latest version..."
 
-local TMP_PATH=$PWD
-
-cd $SRC_DIR/src/python/openflow/optin_manager/ || error "Target directory does not exist anymore?"
-
-#Syncing DB
-printHeader ">" "Syncing Database..."
-python manage.py syncdb || error "Could not synchronize database using manage.py..."
-
-#Evolving
-printHeader ">" "Evolving Database schema..."
-python manage.py evolve --hint -x || error "Could not evolve database..."
+# Let the FOAM script upgrade itself
+cd $SRC_DIR/src
+python install.py
 
 cd $TMP_PATH
 

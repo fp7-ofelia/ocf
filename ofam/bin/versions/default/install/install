@@ -9,7 +9,6 @@
 
 #Constants
 SRC_DIR=/opt/ofelia/ofam/
-APACHE_USER="www-data"
 TMP_PATH=$PWD
 
 #Inform user
