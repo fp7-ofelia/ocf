@@ -786,7 +786,7 @@ ARGS = {
     'debug:stop-trace' : '',
     'geni:list-slivers': '[--deleted] [--status=<status>]',
     'geni:approve-sliver' : '-u|--urn=<sliver_urn> [-p|--priority <priority_numeric_value]',
-    'geni:show-sliver' : '--urn=<sliver_urn> [--flowspace=<boolean>] [--flowspec=<boolean>] [--rspec=<boolean>]',
+    'geni:show-sliver' : '--urn=<sliver_urn> [--flowspace] [--flowspec] [--rspec]',
     'geni:disable-sliver' : '--urn=<sliver_urn>',
     'geni:reject-sliver' : '--urn=<sliver_urn>',
     'geni:delete-sliver' : '--urn=<sliver_urn>',
