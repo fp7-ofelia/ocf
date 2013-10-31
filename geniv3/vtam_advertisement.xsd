@@ -1,0 +1,96 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="rspec" type="rspec:RSpecContents"/>
+    <xs:complexType name="RSpecContents">
+    	<xs:sequence>
+            <xs:element name="network" type="NetworkContents"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="rspec-type">
+	<xs:attribute type="xs:string" name="vtam"/>
+    </xs:complexType>
+   
+    <xs:complexType name="NetworkContents">
+	<xs:sequence>
+	    <xs:element name="node" type="NodeContents" maxOccurs="unbounded" minOccurs="0"/>
+	</xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NodeContents">
+    	<xs:sequence>
+            <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="os-type-type" name="operating_system_type"/>
+            <xs:element type="os-distro-type" name="operating_system_distribution"/>
+            <xs:element type="xs:float" name="operating_system_version"/>
+            <xs:element type="virtualization-type" name="virtualization_technology"/>
+            <xs:element type="xs:integer" name="cpus_number"/>
+            <xs:element type="xs:float" name="cpu_frequency"/>
+            <xs:element type="xs:integer" name="memory"/>
+            <xs:element type="xs:float" name="hdd_space_GB"/>
+            <xs:element type="xs:string" name="agent_url"/>
+            <xs:element name="service" type="ServiceContents" maxOccurs="unbounded" minOccurs="0"/>
+	</xs:sequence>
+	<xs:attribute type="xs:string" name="server-uuid"/>
+    </xs:complexType>
+
+    <xs:complexType name="ServiceContents">
+	<xs:sequence>
+            <xs:element type="service-type" name="type" minOccurs="0"/>
+            <xs:element type="xs:string" name="name" minOccurs="0"/>
+            <xs:element type="xs:string" name="start_value" minOccurs="0"/>
+            <xs:element type="xs:string" name="end_value" minOccurs="0"/>
+            <xs:element type="xs:string" name="server_interface_name" minOccurs="0"/>
+            <xs:element type="xs:boolean" name="isMgmt" minOccurs="0"/>
+            <xs:element type="xs:string" name="interface_switch_id" minOccurs="0"/>
+	    <xs:element type="xs:integer" name="interface_port" minOccurs="0"/>
+	</xs:sequence>
+        <xs:attribute type="xs:string" name="type" use="optional"/>
+    </xs:complexType>
+
+    <xs:simpleType name="service-type">
+	<xs:restriction base="xs:string">
+	    <xs:enumeration value="Range"/>
+	    <xs:enumeration value="Network"/>
+	    <!-- Add Other types here -->
+	</xs:retriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="rspec-type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="advertisement"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="os-type-type">
+    	<xs:restriction base="xs:string">
+            <xs:enumeration value="GNU/Linux" />
+            <xs:enumeration value="BSD" />
+            <xs:enumeration value="Windows" />
+            <!-- Add Other types here -->
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="os-distro-type">
+    	<xs:restriction base="xs:string">
+            <!-- Linux -->
+            <xs:enumeration value="Debian" />
+            <xs:enumeration value="Red Hat" />
+            <xs:enumeration value="Slackware" />
+            <xs:enumeration value="OpenSUSE" />
+            <!-- BSD -->
+            <xs:enumeration value="FreeBSD" />
+            <xs:enumeration value="OpenBSD" />
+            <xs:enumeration value="NetBSD" />
+            <!-- Add Other types here -->
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="virtualization-type">
+    	<xs:restriction base="xs:string">
+            <xs:enumeration value="xen" />
+            <xs:enumeration value="kvm" />
+            <xs:enumeration value="vserver" />
+            <xs:enumeration value="openvz" />
+            <!-- Add Other types here -->
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,33 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="rspec" type="rspec:RSpecContents"/>
+
+    <xs:complexType name="RSpecContents">
+    	<xs:sequence>
+            <xs:element name="node" type="NodeContents"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="rspec-type">
+	<xs:attribute type="xs:string" name="vtam"/>
+    </xs:complexType>
+   
+    <xs:complexType name="NodeContents">
+	<xs:sequence>
+	    <xs:element name="sliver" type="SliverContents"/>
+	</xs:sequence>
+    	<xs:attribute type="xs:string" name="server"/>
+    <xs:complexType>
+
+    <xs:complexType name="SliverContents">
+    	<xs:sequence>
+            <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
+	    <xs:element type="xs:dateTime" name="expires" use="optional"/>
+            <xs:element type="xs:dateTime" name="generated" use="optional"/>
+	</xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="rspec-type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="manifest"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
