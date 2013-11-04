@@ -8,7 +8,7 @@
 ###
 
 #Constants
-SRC_DIR=/opt/ofelia/ofam/
+SRC_DIR=/opt/ofelia/ofam
 TMP_PATH=$PWD
 
 #Inform user
