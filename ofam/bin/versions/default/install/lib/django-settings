@@ -24,6 +24,7 @@ if [ -f $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example ] && [ -f $SR
 	else
 		print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
 		cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+	fi
 fi
 
 #Choose editor
