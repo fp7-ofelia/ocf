@@ -6,20 +6,24 @@ EDITORS="vi vim emacs nano pico"
 #Copy from template
 printHeader ">" "Copying django settings file from template..."
 
-if [ -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ];then
-	warning "Localsettings file already exists."
-
-	if [ "$FORCE" == "1" ]; then
-		confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
-		if [ $? == 0 ]; then			
-			cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
-		fi 
+# Localsettings file will always exist, because the installation process (prior to this step) COPIES that file in the place
+if [ -f $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example ] && [ -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ]; then
+	# So we check the difference between the tracked and the untracked file.
+	# Since the file should be changed, a difference should also exist; therefore the file 'already existed'
+	difference=$(diff $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example  $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py)
+	if [ "$difference" != "" ]; then
+		warning "Localsettings file already exists."
+		if [ "$FORCE" == "1" ]; then
+			confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
+			if [ $? == 0 ]; then			
+				cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+			fi 
+		else
+			print "Skipping copy (will not be overwritten)"
+		fi
 	else
-		print "Skipping copy (will not be overwritten)"
-	fi
-else
-	print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
-	cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+		print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
+		cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
 fi
 
 #Choose editor
