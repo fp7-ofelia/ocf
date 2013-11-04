@@ -20,22 +20,20 @@ print "Restarting foam..."
 /usr/sbin/service foam restart
 
 #Configuring
-print ""
-print "Setting FlowVisor information within FOAM..."
-/usr/local/bin/foamctl config:set-flowvisor-info
+printHeader ">" "Setting FlowVisor information within FOAM..."
+/usr/local/bin/foamctl config:set-flowvisor-info || error "Could not configure FlowVisor information for FOAM" $NO_RESCUE
 
-print ""
-print "Setting SITE_DOMAIN for geni.site-tag..."
-SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN")
-/usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN
+printHeader ">" "Setting SITE_DOMAIN for geni.site-tag..."
+SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN") || error "Could not obtain SITE_DOMAIN from localsettings.py" $NO_RESCUE
+/usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN || error "Could not configure genit.site-tag for FOAM" $NO_RESCUE
 
 # Configuring e-mail
-print ""
+printHeader ">" "Configuring e-mail in FOAM..."
 while true; do
     read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
     case $foam_configure_email in
         [Yy]* ) print "Note that you don't have to set a value for Reply-To: unless you want it to be different from the From: address for some reason";
-                /usr/local/bin/foamctl config:setup-email; break;;
+                /usr/local/bin/foamctl config:setup-email || error "Could not configure e-mail sending for FOAM" $NO_RESCUE; break;;
         [Nn]* ) break;;
             * ) echo "Please answer 'y' or 'n'.";;
     esac

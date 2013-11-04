@@ -30,28 +30,28 @@ source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies 
 printHeader ">" "Installing FOAM..."
 
 # Create OFAM files on-the-fly
-cd $SRC_DIR/src
-python install.py
+cd $SRC_DIR/src || error "Could not install FOAM wrapper" $NO_RESCUE
+python install.py || error "Could not install FOAM wrapper" $NO_RESCUE
 
-printHeader ">" "Configuring FOAM..."
+printHeader ">" "Downloading certificates for nginx..."
 
 # Download the needed certificates
 if [ -f $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem ]; then
-    wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem -O $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem
+    wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem -O $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem || error "Could not download certificates for nginx" $NO_RESCUE
 fi
 
 # Rebuild the nginx CA cert bundle
-print ""
-print "Bundling certificates for nginx..."
+printHeader ">" "Bundling certificates for nginx..."
 /usr/local/bin/foamctl admin:bundle-certs
 
 
 # In order to avoid conflicts with FOAM config file...
+printHeader ">" "Taking care of default configuration for nginx sites-enabled..."
 
 # Symlink to sites-available (normal case) => remove symlink
 #if [ -s /etc/nginx/sites-enabled/default ] && [ -f /etc/nginx/sites-available/default ]; then
 if [ -s /etc/nginx/sites-enabled/default ]; then
-    rm /etc/nginx/sites-enabled/default
+    rm /etc/nginx/sites-enabled/default || error "Could not remove '/etc/nginx/sites-enabled/default'"
 fi
 # File with single copy => rename using timestamp and move
 if [ -f /etc/nginx/sites-enabled/default ]; then
@@ -66,14 +66,14 @@ cd $TMP_PATH
 source $CURRENT_DIRECTORY/lib/ssl
 
 #Symlink application folder for error log (so we can access normally)
-ln -s $SRC_DIR/local/log /var/log/apache2/ofam
+ln -s $SRC_DIR/local/log /var/log/apache2/ofam || error "Cannot create symbolic link: /var/log/apache2/ofam -> $SRC_DIR/local/log" $NO_RESCUE
 
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
 
 # After the previous, 'localsettings.py' will be created.
 # We need to import this from OFVER, so we make a symlink (untracked in GIT)
-ln -sf $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py localsettings.py
+ln -sf $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py localsettings.py || error "Cannot create symbolic link: localsettings.py -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py" $NO_RESCUE
 
 ##Django database
 #source $CURRENT_DIRECTORY/lib/django-db

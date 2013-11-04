@@ -16,18 +16,16 @@ TMP_PATH=$PWD
 printHeader ">" "Upgrading FOAM to the latest version..."
 
 # Let the FOAM script upgrade itself
-cd $SRC_DIR/src
-python install.py
-
-
-printHeader ">" "Configuring FOAM..."
+cd $SRC_DIR/src || error "Could not install FOAM wrapper" $NO_RESCUE
+python install.py || error "Could not install FOAM wrapper" $NO_RESCUE
 
 # In order to avoid conflicts with FOAM config file...
+printHeader ">" "Taking care of default configuration for nginx sites-enabled..."
 
 # Symlink to sites-available (normal case) => remove symlink
 #if [ -s /etc/nginx/sites-enabled/default ] && [ -f /etc/nginx/sites-available/default ]; then
 if [ -s /etc/nginx/sites-enabled/default ]; then
-    rm /etc/nginx/sites-enabled/default
+    rm /etc/nginx/sites-enabled/default || error "Could not remove '/etc/nginx/sites-enabled/default'"
 fi
 # File with single copy => rename using timestamp and move
 if [ -f /etc/nginx/sites-enabled/default ]; then
