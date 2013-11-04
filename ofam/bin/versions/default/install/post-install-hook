@@ -11,21 +11,26 @@
 printHeader "info#" "Using default post-install-hook module..."
 
 #Restarting nginx
+print ""
 print "Restarting nginx..."
 /usr/sbin/service nginx restart
 #Restarting foam
+print ""
 print "Restarting foam..."
 /usr/sbin/service foam restart
 
 #Configuring
+print ""
 print "Setting FlowVisor information within FOAM..."
 /usr/local/bin/foamctl config:set-flowvisor-info
 
+print ""
 print "Setting SITE_DOMAIN for geni.site-tag..."
 SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN")
 /usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN
 
 # Configuring e-mail
+print ""
 while true; do
     read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
     case $foam_configure_email in

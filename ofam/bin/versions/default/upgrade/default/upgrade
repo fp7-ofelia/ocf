@@ -10,7 +10,7 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-SRC_DIR=/opt/ofelia/ofam/
+SRC_DIR=/opt/ofelia/ofam
 TMP_PATH=$PWD
 
 printHeader ">" "Upgrading FOAM to the latest version..."
@@ -19,12 +19,19 @@ printHeader ">" "Upgrading FOAM to the latest version..."
 cd $SRC_DIR/src
 python install.py
 
-# Nginx's sites-enabled is renamed using the timestamp.
-# This is done in order to avoid conflicts with FOAM config file
+
+# In order to avoid conflicts with FOAM config file...
+
+# Symlink to sites-available (normal case) => remove symlink
+#if [ -s /etc/nginx/sites-enabled/default ] && [ -f /etc/nginx/sites-available/default ]; then
+if [ -s /etc/nginx/sites-enabled/default ]; then
+    rm /etc/nginx/sites-enabled/default
+fi
+# File with single copy => rename using timestamp and move
 if [ -f /etc/nginx/sites-enabled/default ]; then
-    backup_nginx_conf=/etc/nginx/sites-enabled/default.bak-`date +"%d_%m_%y-%R"`
-    print "Backing nginx config file up: /etc/nginx/sites-enabled/default => $backup_nginx_conf ..."
-    mv /etc/nginx/sites-enabled/default $backup_nginx_conf || error "Could not backup default configuration file for '/etc/nginx/sites-enabled/default'"
+    backup_nginx_conf=default.bak-`date +"%d_%m_%y-%R"`
+    print "Backing nginx config file up: /etc/nginx/sites-enabled/default => /etc/nginx/sites-available/$backup_nginx_conf ..."
+    mv /etc/nginx/sites-enabled/default /etc/nginx/sites-available/$backup_nginx_conf || error "Could not backup default configuration file for '/etc/nginx/sites-enabled/default'"
 fi
 
 cd $TMP_PATH
