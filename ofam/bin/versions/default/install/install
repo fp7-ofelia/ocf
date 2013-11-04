@@ -7,12 +7,12 @@
 #	@description: install module 
 ###
 
+#Inform user
+printHeader "info#" "Using default install module..."
+
 #Constants
 SRC_DIR=/opt/ofelia/ofam
 TMP_PATH=$PWD
-
-#Inform user
-printHeader "info#" "Using default install module..."
 
 ##Main routing
 
@@ -41,6 +41,8 @@ if [ -f $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem ]; then
 fi
 
 # Rebuild the nginx CA cert bundle
+print ""
+print "Bundling certificates for nginx..."
 /usr/local/bin/foamctl admin:bundle-certs
 
 

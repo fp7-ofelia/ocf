@@ -20,6 +20,8 @@ cd $SRC_DIR/src
 python install.py
 
 
+printHeader ">" "Configuring FOAM..."
+
 # In order to avoid conflicts with FOAM config file...
 
 # Symlink to sites-available (normal case) => remove symlink
@@ -35,4 +37,7 @@ if [ -f /etc/nginx/sites-enabled/default ]; then
 fi
 
 cd $TMP_PATH
+
+#Django settings 
+source $CURRENT_DIRECTORY/lib/django-settings
 
