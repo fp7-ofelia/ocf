@@ -36,9 +36,7 @@ python install.py || error "Could not install FOAM wrapper" $NO_RESCUE
 printHeader ">" "Downloading certificates for nginx..."
 
 # Download the needed certificates
-#if [ -f $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem ]; then
 wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem -O $SRC_DIR/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem || error "Could not download certificates for nginx" $NO_RESCUE
-#fi
 
 # Rebuild the nginx CA cert bundle
 printHeader ">" "Bundling certificates for nginx..."
