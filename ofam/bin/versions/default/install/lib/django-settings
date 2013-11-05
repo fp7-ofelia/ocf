@@ -6,11 +6,14 @@ EDITORS="vi vim emacs nano pico"
 #Copy from template
 printHeader ">" "Copying django settings file from template..."
 
-# Localsettings file will always exist, because the installation process (prior to this step) COPIES that file in the place
-if [ -f $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example ] && [ -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ]; then
-	# So we check the difference between the tracked and the untracked file.
-	# Since the file should be changed, a difference should also exist; therefore the file 'already existed'
-	difference=$(diff $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example  $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py)
+if [ ! -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ]; then
+	# INSTALL: settings file copied under /opt/ofelia/ofam/local in order to be modified
+	print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
+	cp -p $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Could not copy to localsettings.py" $NO_RESCUE
+else
+	# UPGRADE: check difference between tracked (src) and untracked (local) file
+	# File supposed to be modified through install by the Island Manager
+	difference=$(diff $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py)
 	if [ "$difference" != "" ]; then
 		warning "Localsettings file already exists."
 		if [ "$FORCE" == "1" ]; then
@@ -21,9 +24,6 @@ if [ -f $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example ] && [ -f $SR
 		else
 			print "Skipping copy (will not be overwritten)"
 		fi
-	else
-		print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
-		cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
 	fi
 fi
 
@@ -42,14 +42,14 @@ do
 done
 
 #Edit file
-printHeader ">" "Editing localsettings file..."
+printHeader ">" "Editing localsettings.py file..."
 while :	
 do
-	print "Now you are going to edit the file $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+	print "You are about to edit the file $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
 	pause ""
 	eval $EDITOR $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py 
 	print ""
-	pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
+	pause "The contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
 	less $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py
 	
 	confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
