@@ -23,7 +23,7 @@ print "Restarting foam..."
 printHeader ">" "Setting FlowVisor information within FOAM..."
 print "Some help to fill it up..."
 print " "
-print $'\tPassword: \t\tpassword for FOAM (user \'foamadmin\'; default password: \'admin\')'
+print $'\tPassword: \t\t\tpassword for FOAM (user \'foamadmin\'; default password: \'admin\')'
 print $'\tFlowVisor Hostname: \t\t\'hostname\' of the machine where FlowVisor runs (e.g. '`hostname`')'
 print $'\tFlowVisor XMLRPC Port [8080]: \tIncoming port for XMLRPC requests in FlowVisor (< v1.0)'
 print $'\tFlowVisor JSON RPC Port [8081]: Incoming port for JSON requests in FlowVisor (>= v1.0)'
