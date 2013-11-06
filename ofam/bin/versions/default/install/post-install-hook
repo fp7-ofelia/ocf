@@ -23,11 +23,11 @@ print "Restarting foam..."
 printHeader ">" "Setting FlowVisor information within FOAM..."
 print "Some help to fill it up..."
 print " "
-print $'\tPassword: \t\t\tpassword for Flowvisor'
+print $'\tPassword: \t\tpassword for FOAM (user \'foamadmin\'; default password: \'admin\')'
 print $'\tFlowVisor Hostname: \t\t\'hostname\' of the machine where FlowVisor runs (e.g. '`hostname`')'
 print $'\tFlowVisor XMLRPC Port [8080]: \tIncoming port for XMLRPC requests in FlowVisor (< v1.0)'
 print $'\tFlowVisor JSON RPC Port [8081]: Incoming port for JSON requests in FlowVisor (>= v1.0)'
-print $'\tfvadmin user password: \t\tpassword for FOAM (user \'fvadmin\'; default password: \'admin\')'
+print $'\tfvadmin user password: \t\tpassword for Flowvisor'
 print " "
 /usr/local/bin/foamctl config:set-flowvisor-info || error "Could not configure FlowVisor information for FOAM" $NO_RESCUE
 
@@ -42,12 +42,12 @@ while true; do
     read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
     case $foam_configure_email in
         [Yy]* ) print "Note that you don't have to set a value for Reply-To: unless you want it to be different from the From: address for some reason";
-                print "Hint: enter password for FOAM (user 'fvadmin'; default password: 'admin')";
+                print "Hint: enter password for FOAM (user 'foamadmin'; default password: 'admin')";
                 /usr/local/bin/foamctl config:setup-email || error "Could not configure e-mail sending for FOAM" $NO_RESCUE; break;;
         [Nn]* ) break;;
             * ) echo "Please answer 'y' or 'n'.";;
     esac
 done
 
-printHeader "info#" "Make sure port 3626 is reachable by experimenters (i.e. isn't blocked by network firewalls, iptables, etc). In case of problems, first check the log files under $SRC_DIR/local/log, especially the foam.log. If needed, rerunning the installation script (after pulling the latest git bug-fixes) will fix most major issues (and no other steps are required from your side)."
+printHeader "info#" "Make sure port 3626 is reachable by expedient (i.e. isn't blocked by network firewalls, iptables, etc). In case of problems, first check the log files under $SRC_DIR/local/log, especially the foam.log. If needed, rerunning the installation script (after pulling the latest git bug-fixes) will fix most major issues (and no other steps are required from your side)."
 
