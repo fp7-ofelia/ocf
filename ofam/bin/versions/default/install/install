@@ -40,6 +40,7 @@ wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem -O $SRC_DI
 
 # Rebuild the nginx CA cert bundle
 printHeader ">" "Bundling certificates for nginx..."
+print "Hint: enter password for FOAM (user 'fvadmin'; default password: 'admin')"
 /usr/local/bin/foamctl admin:bundle-certs
 
 
