@@ -32,7 +32,7 @@ print " "
 /usr/local/bin/foamctl config:set-flowvisor-info || error "Could not configure FlowVisor information for FOAM" $NO_RESCUE
 
 printHeader ">" "Setting SITE_DOMAIN for geni.site-tag..."
-print "Hint: enter password for FOAM (user 'fvadmin'; default password: 'admin')"
+print "Hint: enter password for FOAM (user 'foamadmin'; default password: 'admin')"
 SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN") || error "Could not obtain SITE_DOMAIN from localsettings.py" $NO_RESCUE
 /usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN || error "Could not configure genit.site-tag for FOAM" $NO_RESCUE
 
