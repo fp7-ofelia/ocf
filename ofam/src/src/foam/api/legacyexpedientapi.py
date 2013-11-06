@@ -479,6 +479,9 @@ class AMLegExpAPI(foam.api.xmlrpc.Dispatcher):
     @return: switches and links that have caused errors
     @rtype: dict
     '''
+    slice_id   = slice_id.replace(":","_")
+    slice_id   = slice_id.replace("name_","nam__")
+    slice_name = slice_name.replace(":","_") 
     
 #    self._actionLog.info("Legacy Expedient API: create_slice got the following:")
 #    self._actionLog.info("    slice_id: %s" % slice_id)
@@ -603,7 +606,8 @@ class AMLegExpAPI(foam.api.xmlrpc.Dispatcher):
         if using x509 certs then the domain name.
     @return error message if there are any errors or "" otherwise.
     '''
-    
+    slice_id   = slice_id.replace(":","_")
+    slice_id   = slice_id.replace("name_","nam__")
     #legacy deletion (just for compatibility)
     '''  
     try:
@@ -640,6 +644,8 @@ class AMLegExpAPI(foam.api.xmlrpc.Dispatcher):
   #@check_user
   #@rpcmethod(signature=['string', 'string', 'array'])
   def pub_change_slice_controller(self, slice_id, controller_url, **kwargs):
+    slice_id   = slice_id.replace(":","_")
+    slice_id   = slice_id.replace("name_","nam__")
     '''
     Changes the slice controller url.
     '''
@@ -870,6 +876,8 @@ class AMLegExpAPI(foam.api.xmlrpc.Dispatcher):
     '''
     Return FlowVisor Rules for the slice.
     '''
+    slice_id   = slice_id.replace(":","_")
+    slice_id   = slice_id.replace("name_","nam__")
     def parse_granted_flowspaces(gfs):
       gfs_list=[] 
       for fs in gfs:
