@@ -1,4 +1,4 @@
-from openflow.optin_manager.sfa.vm_utils.expiration_manager import ExpirationManager
+from openflow.optin_manager.sfa.openflow_utils.expiration_manager import ExpirationManager
 import threading
 import time
 
