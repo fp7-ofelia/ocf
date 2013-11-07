@@ -44,9 +44,9 @@
 	</div>
 	
 	<div class="mgmt_actions">
-		<h2>Management Actions:</h2>
-    	<p><a href="{% url project_update project.id %}">Edit</a> basic information.</p>
-    	<p><a href="{% url project_delete project.id %}">Delete</a> project.</p>
+		<!--<h2>Management Actions:</h2>-->
+    	<p><a href="{% url project_update project.id %}">Edit</a> basic information</p>
+    	<p><a href="{% url project_delete project.id %}">Delete</a> project</p>
     </div>
 	
     <div class="proj_description">
@@ -62,19 +62,20 @@
 					<th class="roles">Roles</th>
 					<th class="actions">Actions</th>
 				</tr>
-				{% for member, data in member_roles.items %}
+				{% for member in project.members_as_permittees.all %}
 				<tr class="body">
-					<td class="username">{{ member }}</td>
+					<td class="username">{{ member.object.username }}</td>
 					<td class="roles">
-						{% for role in data.roles %}
-							<div class="role_desc val">{{ role.name }}</div>
-							<div class="role_desc description">{{ role.description }}</div>
-							{% if not forloop.last %}, {% endif %}
+						{% for role in member.projectrole_set.all %}
+						{% if role.project == project %}
+						<div class="role_desc val">{{ role.name }}</div>
+						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
+						{% endif %}
 						{% endfor %}
 					</td>
 					<td class="actions">
-                        <a href="{% url project_member_remove project.id data.id %}">remove</a>,
-                        <a href="{% url project_member_update project.id data.id %}">update</a>
+						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>,
+						<a href="{% url project_member_update project.id member.object_id %}">update</a>
 					</td>
 				</tr>
 				{% endfor %}
@@ -169,14 +170,14 @@
 	
 	<div class="role_requests">
 		<table class="fulltable" id="role_request_table">
-			<tr>
+			<tr class="head">
 				<th>Requester</th>
 				<th>Requested Role</th>
 				<th>Message</th>
 				<th>Actions</th>
 			</tr>
 			{% for req in role_requests %}
-			<tr>
+			<tr class="body">
 				<td>
 					{% with req.requester as user %}
 					<span class="req_user val">{{ user.username }}</span>

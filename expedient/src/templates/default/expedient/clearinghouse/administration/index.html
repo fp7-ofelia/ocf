@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{% url css_media 'aggregate.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'permission.css' %}" />
+{% endblock %}
+{% block messages %}{% endblock %}
+
+{% block content %}
+<div class="main">
+
+	<!-- Aggregates expandable tooltip -->
+	<div class="tooltip" id="expandableHelpAggregates" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminAggregates" class="expandableTooltipable expandableCtl" ref="#/">
+			Island Aggregate Managers
+			<span class="opened">&#x25B2;</span>
+		</a>
+	</h2>
+
+	<div id="adminAggregatesContainer" class="expandable_admin close">
+		<h2>Manage aggregates</h2>
+		<p>
+			You may add, edit or delete aggregates to Expedient.
+		</p>
+
+		<!-- <div id="aggregates_list" class="aggregates"></div> -->
+		<div class="aggregates_list" class="aggregates">
+			<iframe class="dynsized" name="aggregates" src="{% url aggregate_all %}" scrolling="no" frameborder="no" width="100%">
+				<p>Your browser does not support iframes.</p>
+			</iframe>
+		</div>
+
+		<h2>Management panels</h2>
+
+		<h4><a href="https://{{ request.META.SERVER_NAME }}:8443/" target="_new">Openflow</a></h4>
+		<div>
+			Click on the link to access the management panel for Openflow resources: approve/deny FlowSpaces, set FlowVisor credentials, etc.
+		</div>
+
+		<h4><a href="https://{{ request.META.SERVER_NAME }}:8445/" target="_new">Virtualization</a></h4>
+		<p>
+			Click on the link to access the management panel for Virtualization resources: manage VMs and ranges of IPs and MACs, configure servers, etc.
+		</p>
+	</div>
+
+	<!-- Users and Permissions expandable tooltip -->
+	<div class="tooltip" id="expandableHelpUsers" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminUsersPermissions" class="expandableTooltipable expandableCtl" ref="#/">
+			Users & Permissions
+			<span class="opened">&#x25B2;</span>
+		</a>
+	</h2>
+
+	<div id="adminUsersPermissionsContainer" class="expandable_admin close">
+		<h2>Manage permissions</h2>
+		<p>
+			When an Expedient user needs permission to do something, and she does
+			not have that permission, she might be able to request that permission
+			from someone who can give it to her. Below is a list of permissions
+			other users have requested from you. You can approve or deny the
+			requests. If you approve a request, you can also delegate the
+			permission so that the object getting the permission can approve
+			requests for others. BE CAREFUL,
+			however. Once you grant a permission you cannot revoke it.
+		</p>
+		<p>
+			Expedient permissions are per object, and permissions can be given
+			to objects other than users (for example to a slice or a project).
+			Users can request permissions on behalf of other objects.
+		</p>
+		<div id="permissions_list" class="permissions permission_requests"></div>
+		<!--<div class="permissions_list" class="permissions permission_requests">
+			<iframe class="dynsized" name="permissions" src="{% url permissionmgmt_dashboard %}" scrolling="no" frameborder="no" width="100%">
+				<p>Your browser does not support iframes.</p>
+			</iframe>
+		</div>-->
+
+		<h2><a href="{% url users_home %}">Manage users</a></h2>
+		<div id="users_list" class="users"></div>
+
+		<p>
+			Click on the link to manage users on Expedient. You will need to have
+			the "can_manage_users" permission to be able to access this
+			functionality.
+		</p>
+	</div>
+
+	<!-- Monitoring expandable tooltip -->
+	<div class="tooltip" id="expandableHelpMonitoring" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminMonitoring" class="expandableTooltipable expandableCtl" ref="#/">
+			Monitoring
+			<span class="opened">&#x25B2;</span>
+		</a>
+	</h2>
+
+	<div id="adminMonitoringContainer" class="expandable_admin close">
+		<h3>Logs</h3>
+
+		<p>
+			Click on <strong>view</strong> to check every module's log on a new tab.
+		</p>
+		<p>
+			Click on <strong>remove</strong> to clear the contents of any log. This cannot be undone
+		</p>
+
+		<table class="fulltable" id="logs_actions_table">
+			<tbody>
+				<tr>
+					<th>Log</th>
+					<th>Actions</th>
+				</tr>
+				<tr>
+					<td>
+						Expedient
+					</td>
+					<td>
+						<a href="{% url administration_view_log 'expedient' %}" target="_new">View</a> |
+						<a href="#" onclick="handleLogAction('expedient'); return false;">Remove</a>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						OF AM
+					</td>
+					<td>
+						<a href="{% url administration_view_log 'openflow' %}" target="_new">View</a> |
+						<a href="#" onclick="handleLogAction('openflow'); return false;">Remove</a>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						VT AM
+					</td>
+					<td>
+						<a href="{% url administration_view_log 'virtualization' %}" target="_new">View</a> |
+						<a href="#" onclick="handleLogAction('virtualization'); return false;">Remove</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Plug-ins expandable tooltip -->
+	<div class="tooltip" id="expandableHelpPlugins" style="font-size:normal"> Click to expand/collapse</div>
+	<h2 class="resources_aggregate">
+		<a id="adminPlugins" class="expandableTooltipable expandableCtl" ref="#/">
+			Plug-ins
+			<span class="opened">&#x25B2;</span>
+		</a>
+	</h2>
+
+	<div id="adminPluginsContainer" class="expandable_admin close">
+		{% for plugin_administration_data in plugin_administration_methods %}
+			{% with plugin_administration_data.0 as plugin_name %}
+			{% with plugin_administration_data.1 as plugin_administration_method %}
+				<div class="tooltip" id="expandableHelp{{ plugin_name }}" style="font-size:normal"> Click to expand/collapse</div>
+				<h3 class="resources_aggregate">
+					<a id="admin{{ plugin_name }}" class="expandableTooltipable expandableCtl resources" ref="#/">
+						{{ plugin_name }}
+						<span class="opened">&#x25B2;</span>
+					</a>
+				</h3>
+				<div id="admin{{ plugin_name }}Container" class="aggregateManager expandable_admin close">
+					<iframe class="dynsized" name="plugin_{{ plugin_name }}" src="..{{ plugin_administration_method }}" scrolling="no" frameborder="no" width="100%">
+						<p>Your browser does not support iframes.</p>
+					</iframe>
+				</div>
+			{% endwith %}
+			{% endwith %}
+		{% endfor %}
+	</div>
+
+</div>
+
+<script>
+	/* Asynchronous calls to insert data into different layers */
+	$.get("{% url aggregate_all %}", function(data) {
+		$("#aggregates_list").html(data);
+	});
+	$.get("{% url permissionmgmt_dashboard %}", function(data) {
+		$("#permissions_list").html(data);
+	});
+
+	function handleLogAction(module_name) {
+        if (!confirm("Removing the log cannot be undone. Are you sure you want to clear it?")) {
+            return;
+		} else {
+			if (confirm("Do you want to backup it before?")) {
+				switch (module_name) {
+					case "openflow": $.getJSON("{% url administration_remove_log 'openflow' 'preserve' %}"); break;
+					case "virtualization": $.getJSON("{% url administration_remove_log 'virtualization' 'preserve' %}"); break;
+					case "expedient": 
+					default: $.getJSON("{% url administration_remove_log 'expedient' 'preserve' %}"); break;
+				}
+			} else {
+				switch (module_name) {
+					case "openflow": $.getJSON("{% url administration_remove_log 'openflow' 'clear' %}"); break;
+					case "virtualization": $.getJSON("{% url administration_remove_log 'virtualization' 'clear' %}"); break;
+					case "expedient": 
+					default: $.getJSON("{% url administration_remove_log 'expedient' 'clear' %}"); break;
+				}
+			}
+		}
+    }
+    $(document).ready(function() {
+                //jQuery(".expandable").hide();
+                $(".expandableCtl").click(function()
+                {
+                        elementName = "#"+$(this).attr('id')+"Container";
+                        $("#"+$(this).attr('id')+"Container").slideToggle(250);
+                        if($("span", this).attr("class") == "closed"){
+                                $("span", this).html(" &#x25B2;");
+                                $('html, body').animate({scrollTop: $(elementName).offset().top-150}, 200);
+                        }else{
+                                $("span", this).html(" &#x25BC;");
+                        }
+                        $("span", this).toggleClass("opened closed");
+                });
+        });
+</script>
+{% endblock content %}

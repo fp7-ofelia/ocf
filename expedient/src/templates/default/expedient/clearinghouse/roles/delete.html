@@ -26,7 +26,8 @@
 	<form action="" method="POST">{% csrf_token %}
 		<div class="center">
 			<input type="submit" value="Yes, delete the role" />
-			<a href="{% before_last_link breadcrumbs %}">No, cancel</a>
+			<!--<a href="{% before_last_link breadcrumbs %}">No, cancel</a>-->
+			<input type="button" value="No, cancel" onclick="document.location='{% before_last_link breadcrumbs %}'"/>
 		</div>
 	</form>
 </div>

@@ -1,23 +1,19 @@
 {% load ch_extras %}
 {% load permissions %}
 <!-- stolen from aggregate list_table.html -->
-
 <script>
 function checkAggStatus(agg_ids,agg_ids_length){
 	i=0;
-	
 	for (i = 0; i < agg_ids_length; i++){
 		url = "/aggregate/status/"+agg_ids[i]+"/";
 		get_status(agg_ids[i], url);
 	}
-
 }
 </script>
 
-
 <div class="table_div">
 	<table class="fulltable" id="aggregates_table">
-		<tr>
+		<tr class="head">
 			<th class="logo">Logo</th>
             <th class="name">Name</th>
             <th class="type">Type</th>
@@ -35,7 +31,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 		{% if highlight_id and generic_am.id == highlight_id %}
 		<tr class=highlight>
 		{% else %}
-		<tr>
+		<tr class="body">
         {% endif %}
 			<td class="logo">{{ am.get_logo_url }}</td>
 			<td class="name">{{ am.name }}</td>
@@ -77,21 +73,15 @@ function checkAggStatus(agg_ids,agg_ids_length){
 	</table>
 </div>
 
-<script type="text/javascript" src="{% url js_media 'agg_status.js' %}"></script>
+<script src="{% url js_media 'agg_status.js' %}"></script>
 <script>
-
 	var i = 0;
 	var array_aggIDs = new Array();
-
 	{% for generic_am in aggregate_list %}
-
-	get_status({{ generic_am.id }}, "{% url aggregate_status_img generic_am.id %}");
-	array_aggIDs[i] = {{generic_am.id}};	
-	i = i+1;
-	
+		get_status({{ generic_am.id }}, "{% url aggregate_status_img generic_am.id %}");
+		array_aggIDs[i] = {{generic_am.id}};
+		i = i+1;
 	{% endfor %}
-
 	setInterval("checkAggStatus(array_aggIDs, i)",5000);
-	
 </script>
 

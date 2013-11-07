@@ -44,12 +44,15 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'expedient.clearinghouse.views.home', name='home'),
-    url(r'^help/$',
-        direct_to_template,
-        {'template': 'help/index.html'},
-        name='help'),
 
-#    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),    
+#    url(r'^help/$',
+#        direct_to_template,
+#        {'template': 'help/index.html'},
+#        name='help'),
+
+#    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),
+
+    (r'^administration/', include('expedient.clearinghouse.administration.urls')),         
     (r'^users/', include('expedient.clearinghouse.users.urls')),
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
     (r'^project/', include('expedient.clearinghouse.project.urls')),
@@ -61,7 +64,7 @@ urlpatterns = patterns('',
     (r'^permissionmgmt/', include('expedient.clearinghouse.permissionmgmt.urls')),
     (r'^messagecenter/',include('expedient.clearinghouse.messagecenter.urls')),
     (r'^admin/', include(admin.site.urls)),
-
+    (r'^help/',include('expedient.clearinghouse.help.urls')),
 )
 
 # Password reset url

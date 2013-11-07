@@ -45,6 +45,7 @@ body {
 #content {
 	font-size: 1.2em;
 	border-style: none;
+	/*min-height: 180px !important;*/
 	}
 
 .widecolumn .entry p {
@@ -168,7 +169,7 @@ h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar
 	font: 1em 'Lucida Grande', Verdana, Arial, Sans-Serif;
 	}
 
-small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, strike {
+small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, del {
 	color: #777;
 	}
 
@@ -176,7 +177,7 @@ code {
 	font: 1.1em 'Courier New', Courier, Fixed;
 	}
 
-acronym, abbr, span.caps
+abbr, span.caps
 {
 	font-size: 0.9em;
 	letter-spacing: .07em;
@@ -221,9 +222,9 @@ body {
 #page {
 	background-color: #FFFFFF;	
 	padding: 10px 0 0 0;
-	width: 800px;
+/*	width: 800px;*/
 	margin: auto;
-	border: 1px solid #959596;
+	/*border: 1px solid #959596;*/
 	}
 
 #header {
@@ -608,11 +609,11 @@ select {
 
 
 /* Begin Various Tags & Classes */
-acronym, abbr, span.caps {
+abbr, span.caps {
 	cursor: help;
 	}
 
-acronym, abbr {
+abbr {
 	border-bottom: 1px dashed #999;
 	}
 
@@ -800,30 +801,30 @@ table.formtable_noborder tbody td ,tbody th {
 /* Full Table */
 
 table.fulltable {
-	border-collapse: collapse;
-	border: 1px solid #CCC;
-	margin-bottom:10px;
-	margin-top:0px;
+	border-collapse: collapse !important;
+	border: 1px solid #CCC !important;
+	margin-bottom:10px !important;
+	margin-top:0px !important;
 }
 table.fulltable thead {
-	white-space: nowrap;
-	background: #E0E8FF;
-	font-weight: bold;
-	padding: 3px;
+	white-space: nowrap !important;
+	background: #E0E8FF !important;
+	font-weight: bold !important;
+	padding: 3px !important;
 }
 table.fulltable thead td {
-    padding: 5px 10px;
+    padding: 5px 10px !important;
 }
 table.fulltable tbody td ,tbody th {
-	padding: 5px 10px;
-	background: #fff;
-	color: #000;
+	padding: 5px 10px !important;
+	background: #fff !important;
+	color: #000 !important;
 }
 table.fulltable tbody th {
-	color: #005;
-	font-weight: normal;
-	font-variant: normal;
-	font-size: 1em;
+	color: #005 !important;
+	font-weight: bold !important;
+	font-variant: normal !important;
+	font-size: 1em !important;
 }
 
 table.msg_table {
@@ -831,7 +832,7 @@ table.msg_table {
     border: 0px;
     margin: 0px 0px;
     padding: 0px;
-    width: 730px;
+    width: 100%; /*730px;*/
 }
 
 table.msg_table td {

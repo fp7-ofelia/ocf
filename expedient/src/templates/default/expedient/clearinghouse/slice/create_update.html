@@ -18,8 +18,10 @@
 		<table class="formtable">
 			{{ form.as_table }}
 		</table>
-		<input type="submit" value="Save" />
-		<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>
+		<div class="center">
+			<input type="submit" value="Save" />
+			<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>
+		</div>
 	</form>
 </div>
 {% endblock content %}
