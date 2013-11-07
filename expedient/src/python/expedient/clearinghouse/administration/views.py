@@ -17,8 +17,8 @@ import subprocess
 
 TEMPLATE_PATH = "administration"#"templates/default"
 # Indicates the Nth last lines to be read from any log.
-# Same as 'tail -LOG_N_LAST_LINES <log_file>'
-LOG_N_LAST_LINES = 250
+# Size of of the buffer (in bytes) to return as a log'
+LOG_N_BYTES_SIZE = 15000
 # Color for the log headers (e.g. date, type of message, ip)
 LOG_HEADER_COLOR = "#444"
 
@@ -89,7 +89,7 @@ def view_log(request, module_name):
 	module_log_path = get_module_log_path(module_name)
 	try:
 		# Reads the Nth last lines from the log file
-		module_log = open(module_log_path).read().splitlines()[-LOG_N_LAST_LINES:]
+		module_log = get_log_chunk(open(module_log_path), LOG_N_BYTES_SIZE)  #open(module_log_path).read().splitlines()[-LOG_N_LAST_LINES:]
 		for i, line in enumerate(module_log):
 			while re.search("\[(.*?)\]", line):
 				found_group = re.search("\[(.*?)\]", line).group(0)
@@ -142,3 +142,7 @@ def remove_log(request, module_name, option):
 
 	return HttpResponseRedirect(reverse("administration_home"))
 
+def get_log_chunk(file_object, chunk_size=20000):
+    file_object.seek(-chunk_size,2) #get the last chunk_size bytes starting from the end 
+    return file_object.read(-chunk_size).splitlines()[1:] #avoid show truncated lines cused by the seek pointer
+    
