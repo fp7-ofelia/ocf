@@ -320,6 +320,12 @@ a img {
 div.contact {
     width: 275px;
 }
+div.aggregate_list_text {
+    padding-left: 10px;
+    margin-bottom: 10px;
+    color: #999;
+    font-style: italic;
+}
 
 div.geni_info {
     width: 400px;
@@ -433,7 +439,7 @@ div.form_error_msgs {
 }
 
 div.messages {
-	border: 1px solid #E0E8FF;
+        border: 1px solid #bed6f0;
 	width: 100%;
 	position: relative;
 	top: -15px;
@@ -671,8 +677,9 @@ header img {
 	text-decoration: none;
 }
 #top_menu_options li a:hover {
-	border-bottom: .25em solid rgb(197, 152, 36);
-	color: rgb(197, 152, 36);
+	border-bottom: .25em solid  rgb(102, 102, 102);
+	color: rgb(102, 102, 102);
+        font-weight: bold;
 	margin-bottom: -5px;
 }
 #top_menu_options li a.selected,
