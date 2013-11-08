@@ -5,10 +5,8 @@
 
 {% block content %}
 <h1>{% trans "Registration" %}</h1>
-<form method="post" action=".">{% csrf_token %}
-	<table class="formtable">
-		{{ form.as_table }}
-	</table>
+<form class="form" method="post" action=".">{% csrf_token %}
+	{{ form.as_p }}
 	<input type="submit" class="centered" value="{% trans 'Submit' %}" />
 </form>
 {% endblock %}

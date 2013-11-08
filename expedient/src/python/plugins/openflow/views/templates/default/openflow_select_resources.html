@@ -2,7 +2,7 @@
 {% load ch_extras %}
 
 {% block head %}
-
+<link rel="stylesheet" href="/static/media/default/css/slice.topology.css">
 <style>
     table.openflow,table.planetlab {
         width: 100%;
@@ -42,25 +42,6 @@
     td.port_num {
         width: 45px;
     }
-    div#select_buttons_div {
-        background: #f4f4f4;
-        border: 1px solid #ccc;
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        display: inline;
-        margin-right: 20px;
-        padding-bottom: 3px;
-        padding-left: 5px;
-        padding-top: 3px;
-    }
-    div#select_buttons_div input {
-        box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        -moz-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        padding-bottom: 1px;
-        padding-top: 1px;
-        -webkit-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        width: 60px;
-    }
 
     div.mode_selector {
         background-color:#EEE;
@@ -72,7 +53,7 @@
         width:600px;
         vertical-align:middle;
         padding:10px;
-	height:70px;
+		height:70px;
     }
     div.mode_explanation {
         margin-bottom:10px;
@@ -82,7 +63,7 @@
         -webkit-border-radius: 0px 25px 25px 25px;
         border-radius:  0px 25px 25px 25px;
         float:right;
-	text-align:left;
+		text-align:left;
         display:none;
         width:400px;
         vertical-align:middle;
@@ -92,7 +73,7 @@
         margin-top:0px;
         margin-bottom:10px;
         margin-left: auto; 
-	margin-right: auto;
+		margin-right: auto;
         background-color:#EEE;
         border: 1px solid #CCC;
         -moz-border-radius: 0px 0px 25px 25px;
@@ -102,6 +83,25 @@
         vertical-align:middle;
         padding:10px;
     }
+	div#select_topology_nodes_buttons_div {
+		background: #f4f4f4;
+		border: 1px solid #ccc;
+		border-top-left-radius: 4px;
+		border-bottom-left-radius: 4px;
+		display: inline;
+		margin-right: 20px;
+		padding-bottom: 3px;
+		padding: 9px !important;
+	}
+	div#select_topology_nodes_buttons_div input {
+		box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		height: 29px;
+		-moz-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		padding-bottom: 1px;
+		padding-top: 1px;
+		-webkit-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		width: 60px;
+	}
 </style>
 
 <script type="text/javascript">
@@ -208,7 +208,7 @@ $(document).ready(function(){
     });
 
     $("input#select_button").click(function (){
-        $("div#select_buttons_div").toggle();
+        $("div#select_topology_nodes_buttons_div").toggle();
     });
     $("input#select_none_button").click(function (){
         $(":checked:not(:disabled)").click();
@@ -467,7 +467,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
   {% if openflow_aggs or planetlab_aggs %}
   <input type="submit" id="next_button" name="next_button" value="Next" />
   <input type="button" id="select_button" name="select_button" value="Select..." />
-  <div id="select_buttons_div" style="display: none">
+  <div id="select_topology_nodes_buttons_div" style="display: none">
     <input type="button" id="select_none_button" name="select_none_button" value="None" />
     <input type="button" id="select_tree_button" name="select_tree_button" value="Tree" />
     <input type="button" id="select_all_button" name="select_all_button" value="All" />

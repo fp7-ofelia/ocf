@@ -273,7 +273,7 @@ Type:
   <td>
     <div id="create_server" style="clear:both;">
       Create a new virtual machine in server:
-      <select name = "selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}">
+      <select name="selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}" style="width: 35%; display: inline;">
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
         {% if rsc.leaf_name == 'VTServer' %}

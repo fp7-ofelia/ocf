@@ -8,10 +8,8 @@
 <h1>Log in</h1>
 
 <div class="login">
-	<form method="post" action=".">{% csrf_token %}
-		<table id="login_table" class="formtable">
-			{{ form.as_table }}
-		</table>
+	<form class="form" method="post" action=".">{% csrf_token %}
+		{{ form.as_p }}
 		<div>
 			<input type="submit" class="centered" value="Log in" />
 		</div>
@@ -19,7 +17,7 @@
 	</form>
 </div>
 
-<table class="centered" style="margin-top: 10px !important;">
+<table class="centered" style="margin-top: 1em !important;">
 	<tr>
 	   <td>{% trans "Forgot your password" %}?</td>
 	   <td><a href="{% url my_password_reset %}">{% trans "Reset it" %}</a>!</td>

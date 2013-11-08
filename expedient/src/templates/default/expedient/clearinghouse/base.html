@@ -12,6 +12,7 @@
 
 		<link rel="stylesheet" href="{% url css_media 'ocf.css' %}" />
 		<link rel="stylesheet" href="{% url css_media 'tooltip.css' %}" />
+		<link rel="stylesheet" href="{% url css_media 'notifications.css' %}" />
 
 		<script src="{% url js_media 'jquery.min.js' %}"></script>
 		<script src="{% url js_media 'jquery.tools.min.js' %}"></script>
@@ -110,14 +111,12 @@
                 </nav>
 				{% block messages %}
 					{% if messages %}
-						<div id="messages" class="messages" style="margin-top: 20px;">
-							<table class="msg_table">
-								{% for msg in messages %}
-								<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
-									<td>{{ msg.msg_text }}</td>
-								</tr>
-								{% endfor %}
-							</table>
+						<div id="messages" class="message_notification_center_snippet">
+							{% for msg in messages %}
+							<p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
+								{{ msg.msg_text }}
+							</p>
+							{% endfor %}
 						</div>
 					{% endif %}
 				{% endblock %}

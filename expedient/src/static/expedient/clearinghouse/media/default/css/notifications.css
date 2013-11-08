@@ -1,3 +1,18 @@
+.message_notification_center_snippet {
+	background-color: #f2f7fa;
+	border: 1px solid #7e9fc0;
+	color: #259 !important;
+	font-size: 1em;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	overflow: hidden;
+	padding-left: 10px;
+	padding-right: 10px;
+	position: relative;
+	top: -15px;
+	width: 100%;
+}
+
 div#messages_list {
     font-size: 0.9em !important;
 }

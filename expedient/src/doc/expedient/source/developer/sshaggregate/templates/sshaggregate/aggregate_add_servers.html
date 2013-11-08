@@ -13,15 +13,13 @@
     here. You can click save to get more rows once you fill the existing
     ones.</div>
 	
-	<form method="post" action="">{% csrf_token %}
+	<form class="form" method="post" action="">{% csrf_token %}
     	{{ formset.management_form }}
 		{% for form in formset.forms %}
 			{% for hidden in form.hidden_fields %}
 				{{ hidden }}
 			{% endfor %}
-		<table class="formtable">
-			{{ form.as_table }}
-	    </table>
+		{{ form.as_p }}
 	    {% endfor %}
 		<div class="center">
 			<input type="submit" value="Save" /> | 

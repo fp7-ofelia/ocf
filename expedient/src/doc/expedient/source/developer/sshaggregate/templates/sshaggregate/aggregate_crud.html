@@ -12,10 +12,8 @@
 	{% else %}
 	<h1>Add aggregate</h1>
 	{% endif %}
-	<form method="post" action="">{% csrf_token %}
-		<table class="formtable_noborder">
-		{{ form.as_table }}
-	    </table>
+	<form class="form" method="post" action="">{% csrf_token %}
+		{{ form.as_p }}
 		<div class="center">
 			<input type="submit" value="Next" /> | 
 			{% if aggregate %}

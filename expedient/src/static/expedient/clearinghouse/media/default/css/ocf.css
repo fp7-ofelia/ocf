@@ -432,14 +432,14 @@ div.form_error_msgs {
 	text-align:left;
 }
 
-div.messages {
+/*div.messages {
 	border: 1px solid #E0E8FF;
 	width: 100%;
 	position: relative;
 	top: -15px;
 	overflow: hidden;
 	font-size: smaller;
-}
+}*/
 
 div.messages_more {
 	text-align:right;
@@ -646,7 +646,8 @@ header img {
 	display: block;
 	border-bottom: 1px solid;
 	float: right;
-	height: 6.5em;
+	font-size: 1.3em;
+	height: 6.4em;
 	width: 50em;
 }
 #top_menu_options ul {
@@ -771,44 +772,62 @@ input[type=button],
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9) ) left center no-repeat;
 	background:-moz-linear-gradient( center top, #f9f9f9 5%, #e9e9e9 100% ) left center no-repeat;
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e9e9e9');
-	background-color:#f9f9f9;
+	background-color: #f9f9f9;
 	/*-moz-border-radius:6px;
 	-webkit-border-radius:6px;
 	border-radius:6px;*/
 	border: 1px solid #bbb;
 	display: inline-block;
 	color: #394f66;
-	font-family:arial;
-	font-size:12px;
-	font-weight:bold;
-	padding:3px 10px;
-	text-decoration:none;
-	text-shadow:1px 1px 0px #fff;
-	margin-bottom:5px;
-	max-width: 250px;
+	font-family: arial;
+	font-size: 14px;
+	padding: 7px;
+	text-decoration: none;
+	text-shadow: 1px 1px 0px #fff;
+	margin-bottom: 5px;
 }
 input,
 select,
 textarea {
 	outline: 0px none transparent !important;
 }
+input[type=text],
+input[type=password],
+textarea {
+	width: 97%;
+}
+select {
+	width: 100%;
+}
+/* Inside OpenFlow form */
+select.wide {
+	width: 90%; /*51em*/
+}
 input[type=text]:disabled,
 input[type=password]:disabled,
 select:disabled,
 textarea:disabled {
 	background: #f9f9f9;
-	padding: 3px 5px;
+	padding: .6em;
 }
 input[type=text],
 input[type=password],
 select,
 textarea {
 	background: #f5fefe; /*#fbfefe;*/
-	padding: 3px 5px;
+	display: block;
+	padding: .6em;
 }
+/* Input for text only */
 input[type=text]:focus, 
 input[type=password]:focus {
 	background: rgb(236, 253, 253);
+}
+/* Buttons only */
+input[type=submit],
+input[type=button] {
+	padding: .6em;
+	max-width: 18em;
 }
 /* Border on focus for every element */
 input[type=text]:focus, 
@@ -839,7 +858,7 @@ input[type=button]:active,
 input[type=submit],
 input[type=button],
 .button a:hover {
-	text-decoration:none;
+	text-decoration: none;
 }
 select option {
 	background: #eee;
@@ -850,15 +869,32 @@ select option {
 
 /* FORMS */
 
-form *,
+form,
+.form,
 div.form * {
 	margin-left: auto;
 	margin-right: auto;
 }
-div.form {
+div.form * {
 	border: 1px solid #bed6f0;
+}
+.form {
+	/*border: 1px solid #7e9fc0;
+	background-color: #ebf5ff;*/
+	min-width: 55%;
+	padding: 20px;
+	width: 55%;
+}
+.form label {
+	font-size: 1.1em;
+	font-weight: bold;
+}
+.form span.helptext {
+	display: block;
+	font-style: italic;
+}
+div.form {
 	margin: 10px;
-	padding: 10px;
 	text-align: center;
 }
 /* Generic table for forms */
@@ -868,7 +904,7 @@ table.formtable {
 	margin-bottom: 10px;
 	margin-top: 5px;
 	padding: 5px;
-	/*width: 85%;*/
+	width: 65%;
 }
 table.formtable_noborder {
 	/*border-collapse: collapse;*/
@@ -911,6 +947,7 @@ table.fulltable>thead {
 	background: #E0E8FF;
 	font-weight: bold;
 	padding: 3px;
+	text-align: center;
 }
 table.fulltable tbody td {
 	padding-bottom: 5px !important;

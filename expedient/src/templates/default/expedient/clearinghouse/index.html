@@ -12,15 +12,13 @@
 	{% if messages %}
 	<h2>Messages & Logs</h2>
 	<div style="margin-top: 20px;">
-		<div class="messages">
-			<table class="msg_table">
-				{% for msg in messages %}
-				<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
-					<td> {%if msg.get_type_display == 'From User'%}From user<strong> {{msg.sender}}: </strong> {%endif%} {{ msg.msg_text }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
+		<table class="message_notification_center_snippet">
+			{% for msg in messages %}
+			<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
+				<td> {%if msg.get_type_display == 'From User'%}From user<strong> {{msg.sender}}: </strong> {%endif%} {{ msg.msg_text }}</td>
+			</tr>
+			{% endfor %}
+		</table>
 	</div>
 	{% endif %}
     

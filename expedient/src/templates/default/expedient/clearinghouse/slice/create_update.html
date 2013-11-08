@@ -14,10 +14,8 @@
 </div>
 
 <div class="slice_edit">
-	<form action="" method="POST">{% csrf_token %}
-		<table class="formtable">
-			{{ form.as_table }}
-		</table>
+	<form class="form" action="" method="POST">{% csrf_token %}
+		{{ form.as_p }}
 		<div class="center">
 			<input type="submit" value="Save" />
 			<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>

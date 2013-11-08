@@ -18,9 +18,6 @@ table.fulltable input[type=text] {
 span.next_link {
     font-weight: bold;
 }
-select.wide {
-    width: 600px;
-}
 div.errors {
     color: #a70000;
     font-weight: bold;
@@ -72,7 +69,7 @@ div.steps {
 	and additional empty tables will be displayed.</p>
 	</div>
 
-    <form class="form" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
+    <form class="form" style="width: auto !important;" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
 		{% for form in fsformset.forms %}
 			{% for hidden in form.hidden_fields %}
