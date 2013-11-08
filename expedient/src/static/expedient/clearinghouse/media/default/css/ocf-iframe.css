@@ -845,8 +845,9 @@ table.msg_table thead td {
 	font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;	
 }
 
-table.msg_table tr th {
+table.msg_table th {
 	border-bottom: 1px solid #000;
+        background: #000000 !important;
 }
 
 table.msg_table tr td {
@@ -893,6 +894,83 @@ table.msg_table .success {
 .errdate {
 }
 
+table.msg_center_table {
+    white-space: nowrap !important;
+    background: #E0E8FF !important;
+    border-spacing: 0px;
+    border: 0px;
+    margin: 0px 0px;
+    padding: 0px;
+    font-weight: bold !important;
+    width: 100%; /*730px;*/
+}
+table.msg_center_table thead th {
+    background: #E0E8FF;
+}
+table.msg_center_table td {
+    vertical-align: top;
+    /*font-family:courier, "courier new", monospace;*/
+    padding:2px 4px 2px 4px;
+}
+
+table.msg_center_table thead td {
+        font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;
+        font-weight: bold !important;
+}
+
+table.msg_center_table tr th {
+        border-bottom: 1px solid #000;
+}
+table.msg_center_table tr td {
+        border-bottom: 1px solid #CCC;
+        background: #ebf5ff !important;
+        font-size:11px;
+}
+
+th.msg_center_table {
+        background: #E0E8FF !important; 
+}
+
+table.msg_center_table .select_checkbox {
+    width:10px;
+}
+
+table.msg_center_table .type {
+    width:80px;
+}
+
+table.msg_center_table .date {
+    width:80px;
+}
+
+table.msg_center_table .time {
+    width:60px;
+}
+
+table.msg_center_table td.msg_text {
+    text-align:left;
+}
+table.msg_tcenter_able .error,.warning {
+        color:orange;
+}
+
+table.msg_center_table .error {
+    font-weight:bold;
+}
+
+table.msg_center_table .success {
+    color:green;
+}
+
+.errtime {
+    color: #00A;
+}
+
+.errdate {
+}
+
+
+
 table.flowspacetable select {
     width: 70px;
 }
@@ -914,7 +992,11 @@ table.fulltable tbody td.logocol {
 }
 
 div.aggregate_list .fulltable {
-	width:100%;
+    width:100%;
+    padding-left: 30px;
+    margin-bottom: 45px;
+    color: #999;
+    font-style: italic;
 }
 
 div.project_list .fulltable {
