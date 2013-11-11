@@ -100,13 +100,13 @@
 
         <div class="aggregate_list">
                 {% with project.aggregates.all as aggregate_list %}
-                {% if aggregate_list.count %}
-                        {% include "project/project_simple_agg_list.html" %}
-                {% else %}
-                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
-                        This project has no aggregates added to it. To be able to
+                {% include "project/project_simple_agg_list.html" %}
+                {% if not aggregate_list.count %}
+                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->             
+                        <div class="aggregate_list_text">This project has no aggregates added to it. To be able to
             create slices that can reserve resources on aggregates, you will
             need to add aggregates to the project.
+                        </div>
                 {% endif %}
                 {% endwith %}
                       <div class="center">

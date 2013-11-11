@@ -105,9 +105,11 @@
 
 		<div id="page">
 			<div id="content">
+                {% if request.user.username %} 
                 <nav style="background-image: url({% url img_media 'navigation.png' %});">
                     {% breadcrumbs %}
                 </nav>
+                {% endif %}
 				{% block messages %}
 					{% if messages %}
 						<div id="messages" class="messages" style="margin-top: 20px;">

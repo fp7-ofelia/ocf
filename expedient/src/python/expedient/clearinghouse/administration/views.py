@@ -21,6 +21,10 @@ TEMPLATE_PATH = "administration"#"templates/default"
 LOG_N_BYTES_SIZE = 15000
 # Color for the log headers (e.g. date, type of message, ip)
 LOG_HEADER_COLOR = "#444"
+LOGS_LOCATION = { "expedient": "/var/log/apache2/expedient/clearinghouse/error_log",
+                  "vtam": "/var/log/apache2/vt_manager/error_log",
+                  "ofam": "/var/log/apache2/openflow/optin_manager/error_log"}
+
 
 def home(request):
 	"""
@@ -50,6 +54,7 @@ def home(request):
 				("Administration", reverse("administration_home")),
 			),
 			"plugin_administration_methods": plugin_administration_methods,
+                        "logs_location":LOGS_LOCATION,
 		},
 	)
 
@@ -63,11 +68,11 @@ def get_module_log_path(module_name):
 	module_log_path = ""
 	try:
 		if module_name == "expedient":
-			module_log_path = "/var/log/apache2/expedient/clearinghouse/error_log"
+			module_log_path = LOGS_LOCATION["expedient"]#"/var/log/apache2/expedient/clearinghouse/error_log"
 		elif module_name == "openflow":
-			module_log_path = "/var/log/apache2/openflow/optin_manager/error_log"
+			module_log_path = LOGS_LOCATION["ofam"] #"/var/log/apache2/openflow/optin_manager/error_log"
 		elif module_name == "virtualization":
-			module_log_path = "/var/log/apache2/vt_manager/error_log"
+			module_log_path = LOGS_LOCATION["vtam"] #"/var/log/apache2/vt_manager/error_log"
 	except Exception as e:
 		pass
                 

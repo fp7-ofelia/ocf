@@ -45,6 +45,7 @@ body {
 #content {
 	font-size: 1.2em;
 	border-style: none;
+        padding:0px !important;
 	/*min-height: 180px !important;*/
 	}
 
@@ -847,7 +848,6 @@ table.msg_table thead td {
 
 table.msg_table th {
 	border-bottom: 1px solid #000;
-        background: #000000 !important;
 }
 
 table.msg_table tr td {
@@ -898,10 +898,11 @@ table.msg_center_table {
     white-space: nowrap !important;
     background: #E0E8FF !important;
     border-spacing: 0px;
-    border: 0px;
+    border-collapse: collapse !important;
+    border: 1px solid #7e9fc0 !important;
     margin: 0px 0px;
     padding: 0px;
-    font-weight: bold !important;
+    /*font-weight: bold !important;*/
     width: 100%; /*730px;*/
 }
 table.msg_center_table thead th {
@@ -919,16 +920,16 @@ table.msg_center_table thead td {
 }
 
 table.msg_center_table tr th {
-        border-bottom: 1px solid #000;
+        border-bottom: 1px solid #7e9fc0;
 }
 table.msg_center_table tr td {
-        border-bottom: 1px solid #CCC;
+        border-bottom: 1px solid #7e9fc0;
         background: #ebf5ff !important;
         font-size:11px;
 }
 
-th.msg_center_table {
-        background: #E0E8FF !important; 
+table.msg_center_table th {
+        background: #9cf !important; 
 }
 
 table.msg_center_table .select_checkbox {
@@ -937,6 +938,7 @@ table.msg_center_table .select_checkbox {
 
 table.msg_center_table .type {
     width:80px;
+    font-weight: bold !important;
 }
 
 table.msg_center_table .date {
@@ -955,7 +957,8 @@ table.msg_tcenter_able .error,.warning {
 }
 
 table.msg_center_table .error {
-    font-weight:bold;
+    font-weight: bold;
+    color: red !important;
 }
 
 table.msg_center_table .success {
@@ -991,14 +994,42 @@ table.fulltable tbody td.logocol {
     padding: 0px;
 }
 
+div.permission_mgmt{
+
+    padding-top: 0px !important;
+    margin-bottom: 0px !important;
+
+}
 div.aggregate_list .fulltable {
     width:100%;
-    padding-left: 30px;
-    margin-bottom: 45px;
+    padding: 0px !important;
+    margin-bottom: 0px !important;
     color: #999;
-    font-style: italic;
+}
+div.aggregate_list .fulltable .thead th {
+    background: #E0E8FF !important;
+    font: 12px 'Lucida Grande',Verdana,Arial,Sans-Serif !important;
+    font-weight: bold !important;
 }
 
+div.aggregate_list .fulltable .tbody td,tr {
+    background: #FFFFFF !important; /*#ebf5ff !important; */
+    font: 12px 'Lucida Grande',Verdana,Arial,Sans-Serif;
+    border-top:1px  solid #EEE !important;
+}
+div.aggregate_list {
+    background-color:#3d5266;
+    color:#FFFFFF;
+    margin:0px !important;
+    border:1px !important;
+    padding:0px !important;
+    text-align: center;
+}
+div.links {
+    margin-bottom:0px;
+    padding:0px;
+    background-color:#3d5266;
+}
 div.project_list .fulltable {
 	width:100%;
 }
