@@ -421,12 +421,6 @@ div.create_msg {
     right:0px;
 }
 
-#send_msg_button {
-    position:absolute;
-    bottom:0;
-    right:0;
-}
-
 div.form_error_msgs {
 	position:relative;
 	text-align:left;
@@ -779,7 +773,6 @@ input[type=button],
 	display: inline-block;
 	color: #394f66;
 	font-family:arial;
-	font-size:12px;
 	font-weight:bold;
 	padding:3px 10px;
 	text-decoration:none;

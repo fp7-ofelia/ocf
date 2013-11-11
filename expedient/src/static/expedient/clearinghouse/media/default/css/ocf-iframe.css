@@ -925,7 +925,6 @@ table.msg_center_table tr th {
 table.msg_center_table tr td {
     background: #ebf5ff;
     border-bottom: 1px solid #7e9fc0;
-    font-size: 11px;
 	padding: 5px;
 }
 /* Careful with the syntax...
@@ -1013,13 +1012,13 @@ div.aggregate_list .fulltable {
 }
 div.aggregate_list .fulltable .thead th {
     background: #E0E8FF !important;
-    font: 12px 'Lucida Grande',Verdana,Arial,Sans-Serif !important;
+    font: 1em 'Lucida Grande',Verdana,Arial,Sans-Serif !important;
     font-weight: bold !important;
 }
 
 div.aggregate_list .fulltable .tbody td,tr {
     background: #FFFFFF !important; /*#ebf5ff !important; */
-    font: 12px 'Lucida Grande',Verdana,Arial,Sans-Serif;
+    font: 1em 'Lucida Grande',Verdana,Arial,Sans-Serif;
     border-top:1px  solid #EEE !important;
 }
 div.aggregate_list {
@@ -1076,12 +1075,6 @@ div.create_msg {
 	clear:both;
 }
 
-#send_msg_button {
-    position:absolute;
-    bottom:0;
-    right:0;
-}
-
 div.form_error_msgs {
 	position:relative;
 	text-align:left;
@@ -1108,52 +1101,90 @@ table.openflow_create #id_description {
 table.openflow_create input[type='checkbox'] {
 	
 }
+
 input,
 select,
 textarea,
 input[type=submit],
 input[type=button],
-.button{
-	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	box-shadow:inset 0px 1px 0px 0px #ffffff;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9) );
-	background:-moz-linear-gradient( center top, #f9f9f9 5%, #e9e9e9 100% );
+.button {
+	-moz-box-shadow:inset 0px 1px 0px 0px #fff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #fff;
+	box-shadow:inset 0px 1px 0px 0px #fff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9) ) left center no-repeat;
+	background:-moz-linear-gradient( center top, #f9f9f9 5%, #e9e9e9 100% ) left center no-repeat;
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e9e9e9');
-	background-color:#f9f9f9;
-	-moz-border-radius:6px;
+	background-color: #f9f9f9;
+	/*-moz-border-radius:6px;
 	-webkit-border-radius:6px;
-	border-radius:6px;
-	border:1px solid #dcdcdc;
-	display:inline-block;
-	color:#333;
-	font-family:arial;
-	font-size:12px;
-	font-weight:bold;
-	padding:3px 10px;
-	text-decoration:none;
-	text-shadow:1px 1px 0px #ffffff;
-	margin-bottom:5px;
+	border-radius:6px;*/
+	border: 1px solid #bbb;
+	display: inline-block;
+	color: #394f66;
+	font-family: arial;
+	font-size: 14px;
+	padding: 7px;
+	text-decoration: none;
+	text-shadow: 1px 1px 0px #fff;
+	margin-bottom: 5px;
+}
+input,
+select,
+textarea {
+	outline: 0px none transparent !important;
+}
+input[type=text],
+input[type=password],
+textarea {
+	width: 97%;
+}
+select {
+	width: 100%;
+}
+/* Inside OpenFlow form */
+select.wide {
+	width: 90%; /*51em*/
+}
+input[type=text]:disabled,
+input[type=password]:disabled,
+select:disabled,
+textarea:disabled {
+	background: #f9f9f9;
+	padding: .6em;
 }
 input[type=text],
 input[type=password],
 select,
-textarea{
-	background:#f9f9f9!important;
-	
+textarea {
+	background: #f5fefe; /*#fbfefe;*/
+	display: block;
+	padding: .6em;
 }
-select option {
-	background: #EEE;
-	color: #444;
-	text-decoration: none!important;
-	text-shadow: none;
+/* Input for text only */
+input[type=text]:focus, 
+input[type=password]:focus {
+	background: rgb(236, 253, 253);
 }
-
+/* Buttons only */
+input[type=submit],
+input[type=button] {
+	padding: .6em;
+	max-width: 18em;
+}
+/* Border on focus for every element */
+input[type=text]:focus, 
+input[type=password]:focus,
+select:focus,
+textarea:focus,
+input[type=submit]:focus,
+input[type=button]:focus {
+	border: 1px solid #9cddf9;
+}
 input[type=submit]:hover,
 input[type=button]:hover,
 .button:hover {
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9) );
-	background:-moz-linear-gradient( center top, #e9e9e9 5%, #f9f9f9 100% );
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9) ) left center no-repeat;
+	background:-moz-linear-gradient( center top, #e9e9e9 5%, #f9f9f9 100% ) left center no-repeat;
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e9e9e9', endColorstr='#f9f9f9');
 	background-color:#e9e9e9;
 }
@@ -1163,12 +1194,23 @@ input[type=button]:active,
 	position:relative;
 	top:1px;
 }
-.button a{
+.button a {
 	color: #333;
 }
 input[type=submit],
 input[type=button],
 .button a:hover {
-	text-decoration:none;
+	text-decoration: none;
 }
+select option {
+	background: #eee;
+	color: #444;
+	text-decoration: none !important;
+	text-shadow: none;
+}
+
+.button a{
+	color: #333;
+}
+
 

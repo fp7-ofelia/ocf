@@ -2,6 +2,7 @@
 @author: jnaous
 '''
 from django.views.generic import date_based, create_update
+from expedient.common.utils.views import generic_crud
 from models import DatedMessage
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed
 from django.core.urlresolvers import reverse
@@ -63,13 +64,20 @@ def create(request):
     else:
         message_class = MessageFormNoIM
     
-    return create_message(
-        request,
+    # Original
+#    return create_message(
+#        request,
+#        form_class=message_class,
+#        template_name="expedient/common/messaging/create.html",
+#        post_save_redirect=reverse("messaging_created"),
+#    )
+    
+    return generic_crud(
+        request, None, None,"expedient/common/messaging/create.html",
+        redirect=lambda instance:reverse("messaging_center"),
         form_class=message_class,
-        template_name="expedient/common/messaging/create.html",
-        post_save_redirect=reverse("messaging_created"),
+        success_msg = lambda instance: "Successfully sent message.",
     )
-
 
 def create_message(request, model=None, template_name=None,
         template_loader=loader, extra_context=None, post_save_redirect=None,
@@ -115,3 +123,9 @@ def create_message(request, model=None, template_name=None,
     }, context_processors)
     create_update.apply_extra_context(extra_context, c)
     return HttpResponse(t.render(c))
+    
+#    DatedMessage.objects.post_message_to_user(
+#    "%s" % str(c),
+#    request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+#    return HttpResponseRedirect(reverse('messaging_latest'))
+

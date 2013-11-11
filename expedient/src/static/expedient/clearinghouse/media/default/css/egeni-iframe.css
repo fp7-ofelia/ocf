@@ -954,12 +954,6 @@ div.create_msg {
     right:0px;
 }
 
-#send_msg_button {
-    position:absolute;
-    bottom:0;
-    right:0;
-}
-
 div.form_error_msgs {
 	position:relative;
 	text-align:left;
