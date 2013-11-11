@@ -28,7 +28,8 @@ def list_msgs(request, number=None):
     if request.method == "GET":
         qs = DatedMessage.objects.get_messages_for_user(request.user)
         
-        if number == None: number = qs.count()
+        if number == None:
+			number = qs.count()
             
         return date_based.archive_index(
             request,

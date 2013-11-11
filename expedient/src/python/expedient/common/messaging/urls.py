@@ -9,7 +9,7 @@ from django.conf import settings
 
 urlpatterns = patterns('expedient.common.messaging.views',
     url(r'^list/$', 'list_msgs', {'number': settings.NUM_LATEST_MSGS}, name='messaging_latest'),
-    url(r'^list/$', 'list_msgs', name='messaging_all'),
+    url(r'^list/all/$', 'list_msgs', name='messaging_all'),
     url(r'^list/(?P<number>\d+)/$', 'list_msgs', name='messaging_subset'),
     url(r'^create/$', 'create', name="messaging_create"),
 )

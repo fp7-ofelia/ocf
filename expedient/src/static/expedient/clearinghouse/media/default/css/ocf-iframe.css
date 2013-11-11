@@ -895,7 +895,7 @@ table.msg_table .success {
 }
 
 table.msg_center_table {
-    white-space: nowrap !important;
+    /*white-space: nowrap !important;*/
     background: #E0E8FF !important;
     border-spacing: 0px;
     border-collapse: collapse !important;
@@ -915,45 +915,50 @@ table.msg_center_table td {
 }
 
 table.msg_center_table thead td {
-        font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;
-        font-weight: bold !important;
+    font: 1.1em 'Lucida Grande',Verdana,Arial,Sans-Serif;
+    font-weight: bold !important;
 }
-
 table.msg_center_table tr th {
-        border-bottom: 1px solid #7e9fc0;
+    border-top: 1px solid #7e9fc0;
+    border-bottom: 1px solid #7e9fc0;
 }
 table.msg_center_table tr td {
-        border-bottom: 1px solid #7e9fc0;
-        background: #ebf5ff !important;
-        font-size:11px;
+    background: #ebf5ff;
+    border-bottom: 1px solid #7e9fc0;
+    font-size: 11px;
+	padding: 5px;
 }
-
+/* Careful with the syntax...
+'table.msg_center_table tr:hover' does not work*/
+table.msg_center_table tr:hover td {
+	background: #dce9f5;
+}
 table.msg_center_table th {
-        background: #9cf !important; 
+    background: #9cf !important; 
 }
 
 table.msg_center_table .select_checkbox {
-    width:10px;
+    width: 2%;
 }
 
 table.msg_center_table .type {
-    width:80px;
+    width: 5%;
     font-weight: bold !important;
 }
 
 table.msg_center_table .date {
-    width:80px;
+    width: 7%;
 }
 
 table.msg_center_table .time {
-    width:60px;
+    width: 7%;
 }
 
 table.msg_center_table td.msg_text {
-    text-align:left;
+    text-align: left;
 }
 table.msg_tcenter_able .error,.warning {
-        color:orange;
+    color:orange;
 }
 
 table.msg_center_table .error {
