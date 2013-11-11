@@ -1204,7 +1204,7 @@ div#aggregate_add_to_slice {
 }
 /* Layer with data below a submit/button */
 div.data_below_submit {
-	padding-top: 10px;
+	padding-top:10px;
 	text-align: center;
 }
 /* Management actions for project/slice */

@@ -27,8 +27,8 @@
 <div id="messages_div">
 	<form method="post" action="">{% csrf_token %}
 	    {% if latest %}
-		<table class="msg_table" id="messages">
-		    <tr>
+		<table class="msg_center_table" id="messages">
+		    <tr class "msg_center_table">
 		        <th class="select_checkbox"><input type="checkbox" id="selectall" value="selectall" onclick={toggle_all();} /></th>
 		        <th class="type">Type</th>
 		        <th class="date">Date</th>

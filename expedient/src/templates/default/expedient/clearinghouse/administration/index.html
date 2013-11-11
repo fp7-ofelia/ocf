@@ -103,19 +103,22 @@
 			Click on <strong>view</strong> to check every module's log on a new tab.
 		</p>
 		<p>
-			Click on <strong>remove</strong> to clear the contents of any log. This cannot be undone
+			Click on <strong>remove</strong> to clear the contents of any log. <strong>This operation cannot be undone</strong>
 		</p>
-
+                <div class="aggregate_list"> 
 		<table class="fulltable" id="logs_actions_table">
-			<tbody>
-				<tr>
+				<tr class="thead">
 					<th>Log</th>
+                                        <th>Path</th>
 					<th>Actions</th>
 				</tr>
-				<tr>
+				<tr class="tbody">
 					<td>
 						Expedient
 					</td>
+                                        <td>
+                                                {{ logs_location.expedient }}
+                                        </td>
 					<td>
 						<a href="{% url administration_view_log 'expedient' %}" target="_new">View</a> |
 						<a href="#" onclick="handleLogAction('expedient'); return false;">Remove</a>
@@ -125,6 +128,9 @@
 					<td>
 						OF AM
 					</td>
+                                        <td>
+                                                {{ logs_location.ofam }}
+                                        </td>
 					<td>
 						<a href="{% url administration_view_log 'openflow' %}" target="_new">View</a> |
 						<a href="#" onclick="handleLogAction('openflow'); return false;">Remove</a>
@@ -134,13 +140,16 @@
 					<td>
 						VT AM
 					</td>
+                                        <td>
+                                                {{ logs_location.vtam }}
+                                        </td>
 					<td>
 						<a href="{% url administration_view_log 'virtualization' %}" target="_new">View</a> |
 						<a href="#" onclick="handleLogAction('virtualization'); return false;">Remove</a>
 					</td>
 				</tr>
-			</tbody>
 		</table>
+               </div>
 	</div>
 
 	<!-- Plug-ins expandable tooltip -->
