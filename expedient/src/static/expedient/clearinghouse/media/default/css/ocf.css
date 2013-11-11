@@ -384,6 +384,17 @@ table.flowspacetable tr td {
 table.fulltable tbody td.logocol {
     padding: 0px;
 }
+table.fulltable tr.accordion {
+	height: auto !important;	/* Avoid big heights without need */
+}
+
+table.project_slice_list {
+	background-color: #fff;
+}
+table.project_slice_list td {
+	border-bottom: 1px solid #eaedef;
+	text-align: center;
+}
 
 /* iframes */
 iframe {
