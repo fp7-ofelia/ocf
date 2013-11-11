@@ -4,7 +4,7 @@ def contextSettingsInTemplate(request):
 
 	#vf = open('../../../../../.currentVersion','r')
 	vf = open(join(dirname(__file__), '../../../../../.currentVersion'),'r')
-	softwareVersion = vf.read()
+	softwareVersion = vf.read().strip()
 	vf.close()
 
 	extraSettings =  {'islandName':settings.ISLAND_NAME,
