@@ -448,9 +448,19 @@ div.messages_more {
 	margin:0px;
 	
 }
+div.messages p {
+        background-repeat: no-repeat;
+}
 
 table.detail_management_table {
 	width: 100%;
+}
+/* pp */
+p  {
+        background-repeat: no-repeat !important;
+        padding-left: 25px !important;
+        padding-top:1.5px;
+
 }
 
 /*  UI add ons */
@@ -568,11 +578,11 @@ table.aggregate_create #id_description {
 
 /* Success, error font styles */
 .success {
-        color: green;
+        /*color: green;*/
 }
 
 .error {
-        color: #9a1b1b;
+        /*color: #9a1b1b;*/
 }
 
 div.mode_selector {
@@ -749,8 +759,9 @@ footer {
 	padding: 10px;
 }
 footer p {
+        background-repeat: no-repeat;
 	margin: 0;
-	padding: 20px 0;
+	padding: 10px 0;
 	text-align: center;
 }
 
@@ -1228,17 +1239,15 @@ div.slicemgmt_actions {
     opacity: 0.6;
 }
 .error {
-    font-weight: bold;
-    font-size: 11px;
-    color: #9a1b1b;
+    font-weight: normal;
+    color: black;
 }
 .warning {
-    font-weight: bold;
-    font-size: 11px;
-    color: #ffbf00;
+    font-weight: normal;
+    color: black;
 }
 .success {
-    color: green;
+    color: black;
 }
 
 /* Expandable stuff */

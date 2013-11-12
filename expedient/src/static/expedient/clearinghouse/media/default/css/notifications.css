@@ -1,7 +1,7 @@
 .message_notification_center_snippet {
 	background-color: #f2f7fa;
 	border: 1px solid #7e9fc0;
-	color: #259 !important;
+	color: #7e9fc0 !important;
 	font-size: 1em;
 	margin-top: 20px;
 	margin-bottom: 10px;
@@ -63,11 +63,11 @@ table.msg_table td.msg_text {
 }
 
 table.msg_table .error, .errorlist {
-	color: #9a1b1b;
+    color: #7e9fc0 !important;
 }
 
 table.msg_table .warning {
-    color: #FFBF00;
+    color: black !important;
 }
 
 table.msg_table .error {
@@ -75,7 +75,7 @@ table.msg_table .error {
 }
 
 table.msg_table .success {
-    color: green;
+    color: #7e9fc0 !important;
 }
 
 div.messages table.msg_table td {
