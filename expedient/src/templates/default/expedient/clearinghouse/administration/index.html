@@ -133,12 +133,16 @@
 			Click on <strong>remove</strong> to clear the contents of any log. <strong>This operation cannot be undone</strong>
 		</p>
                 <div class="table_list"> 
-		<table class="fulltable" id="logs_actions_table">
+
+		<table class="fulltableLogs" id="logs_actions_table">
+                                <thead>
 				<tr class="thead">
 					<th>Log</th>
                                         <th>Path</th>
 					<th>Actions</th>
 				</tr>
+                                </thead>
+                                <tbody>
 				<tr class="tbody">
 					<td>
 						Expedient
@@ -175,6 +179,7 @@
 						<a href="#" onclick="handleLogAction('virtualization'); return false;">Remove</a>
 					</td>
 				</tr>
+                </tbody>
 		</table>
                </div>
 	</div>

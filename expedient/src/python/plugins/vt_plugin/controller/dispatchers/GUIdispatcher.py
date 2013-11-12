@@ -62,25 +62,39 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     try:
         if request.method == "POST":
+            import pprint
+            pprint.pprint(request.POST)
+            
+            print "--------------------------------------1"
             if 'create_new_vms' in request.POST:
+                print "----------------------------------2"
                 # "Done" pressed ==> send xml to AM
 #                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
                 form = VMModelForm(request.POST)
-#                if formset.is_valid():
+                print "----------------------------------3"
+#               if formset.is_valid():
+                print form.errors
                 if form.is_valid():
+                    print "------------------------------------4"
                     instance = form.save(commit=False)
+                    print "------------------------------------5"
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instance, serv.uuid, slice, request.user)
-#                    VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
+                    print "------------------------------------6" 
+#                   VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
                     return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
+                    print "-------------------------------------7" 
                     if "VM already exists" in form.errors[0]:
+                        print "----------------------------------8"
                         raise ValidationError("It already exists a VM with the same name in the same slice. Please choose another name", code="invalid",)
+                    print "-----------------------------------10" 
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
+            print "----------------------------------------9"
             form = VMModelForm()
 
     except ValidationError as e:

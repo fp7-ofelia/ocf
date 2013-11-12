@@ -1007,6 +1007,67 @@ table.fulltable>tbody>tr>th {
 	font-variant: normal;
 	padding: 5px;
 }
+
+
+table.fulltableLogs {
+        border-collapse: collapse;
+        border: 1px solid #7e9fc0;
+        font-size: 1.1em;
+        margin-bottom:10px;
+        margin-top:0px;
+        width: 100%
+}
+table.fulltableLogs>tbody,
+table.fulltableLogs>tbody>td,
+table.fulltableLogs>tbody>th {
+        text-align: center;
+}
+table.fulltableLogs>thead {
+        white-space: nowrap;
+        background: #E0E8FF;
+        font-weight: bold;
+        padding: 3px;
+        text-align: center;
+}
+table.fulltableLogs tbody td {
+        padding-bottom: 5px !important;
+        background-color:#FFF !important;
+        border-top:1px solid #EEE !important
+}
+table.fulltableLogs tbody tr.head {
+        background-color: #9cf;
+        border-bottom: 1px solid #7e9fc0;
+}
+table.fulltableLogs tbody tr.body {
+        background-color: #ebf5ff;
+        border-left: 1px solid #7e9fc0;
+        border-right: 1px solid #7e9fc0;
+        border-top: 1px solid #dae8f7;
+}
+/* Hack that loads help text and hides it at the label */
+table.fulltableLogs>tbody>tr>td label {
+    display: none;
+}
+table.fulltableLogs tbody tr td ul.fulltable_tooltip_list,
+table.fulltableLogs>tbody>tr>td>div>ul.fulltable_tooltip_list {
+    margin: 2px;
+    padding-left: 20px;
+}
+table.fulltableLogs>tbody>tr>td,
+/*table.fulltable>tbody>tr>th*/ {
+        padding: 2px 4px;
+        background: #fff !important;
+        color: #000;*/
+}
+table.fulltableLogs>tbody>tr>th {
+        /*color: #005;*/
+        font-weight: bold;
+        font-variant: normal;
+        padding: 5px;
+}
+
+
+
 /* Centered table */
 table.centered {
 	display: table !important;
