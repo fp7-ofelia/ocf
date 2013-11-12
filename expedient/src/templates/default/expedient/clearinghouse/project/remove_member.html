@@ -11,8 +11,8 @@
 	<div class="member_form">
 		<form action="." method="post">{% csrf_token %}
 			<div class="center">
-				<input type="submit" value="Yes, I am sure" />
-				<a href="{{ breadcrumbs.1.1 }}">No, go back</a>
+				<input type="submit" value="Yes" />
+				<input type="button" value="No" onclick="document.location='{{ breadcrumbs.1.1 }}'" />
 			</div>
 		</form>
 	</div>

@@ -793,7 +793,7 @@ input[type=button],
 	display: inline-block;
 	color: #394f66;
 	font-family: arial;
-	font-size: 14px;
+	font-size: 1em;
 	padding: 7px;
 	text-decoration: none;
 	text-shadow: 1px 1px 0px #fff;
@@ -963,13 +963,15 @@ table.fulltable>thead {
 	text-align: center;
 }
 table.fulltable tbody td {
-	padding-bottom: 5px !important;
+	padding-bottom: 7px !important;
+	padding-top: 7px;
 }
 table.fulltable tbody tr.head {
 	background-color: #9cf;
 	border-bottom: 1px solid #7e9fc0;
 }
-table.fulltable tbody tr.body {
+table.fulltable tbody tr.body,
+table.fulltable tbody tr.accordion {
 	background-color: #ebf5ff;
 	border-left: 1px solid #7e9fc0;
 	border-right: 1px solid #7e9fc0;

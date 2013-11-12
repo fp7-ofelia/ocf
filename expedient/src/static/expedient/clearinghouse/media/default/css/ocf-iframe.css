@@ -1122,7 +1122,7 @@ input[type=button],
 	display: inline-block;
 	color: #394f66;
 	font-family: arial;
-	font-size: 14px;
+	font-size: 1em;
 	padding: 7px;
 	text-decoration: none;
 	text-shadow: 1px 1px 0px #fff;

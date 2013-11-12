@@ -20,10 +20,10 @@ function checkAggStatus(agg_ids,agg_ids_length){
 
 <div class="table_div">
 	<table class="fulltable" id="aggregates_table">
-		<tr class="thead">
+		<tr class="head">
 			<!--<th class="logo">Logo</th>-->
-	                <th class="name">Name</th>
-                        <th class="type">Type</th>
+	        <th class="name">Name</th>
+            <th class="type">Type</th>
 			<th class="location">Location</th>
 			{% if not condensed %}
 			<th class="description">Description</th>
@@ -38,7 +38,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 		{% if highlight_id and generic_am.id == highlight_id %}
 		<tr class=highlight>
 		{% else %}
-		<tr class="tbody">
+		<tr class="body">
         {% endif %}
 			<!--<td class="logo">{{ am.get_logo_url }}</td>-->
 			<td class="name">{{ am.name }}</td>
