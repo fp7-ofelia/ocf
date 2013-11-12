@@ -162,21 +162,21 @@ def check_vms_status(request, slice_id):
                     vmsStatus[str(vm.id)]= vm.state
                     if vm.state == "running":
                         actionsHtmlCode =\
-                        "<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
+                        "<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'stop\')\" value=\"Stop\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'reboot\')\" value=\"Reboot\" />\
                         </div>"
                     elif  vm.state == "created (stopped)" :
                         actionsHtmlCode =\
-						"<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
+			"<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\" value=\"Start\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\" value=\"Delete\" />\
                         </div>"
                     elif vm.state == "stopped" :
                         actionsHtmlCode =\
-                        "<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
+			"<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\" value=\"Start\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\" value=\"Delete\" />\
                         </div>"
                     else:
                         actionsHtmlCode = "<div><img src='/static/media/default/img/loading.gif' align=\"absmiddle\"></div>"

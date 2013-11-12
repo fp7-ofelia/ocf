@@ -59,20 +59,20 @@
                        </div>
                     </td>
               <td id = td_vm_actions{{vm.id}} style="text-align:center">
-                    <div>
+                    <div class="vm_actions">
                     {% if vm.state == "running" %}
-                        <a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'stop')">Stop</a> |
-                        <a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'reboot')">Reboot</a>
+                        <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'stop')" value="Stop" />
+                        <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'reboot')" value="Reboot" />
                     {% endif %}
                     {% if  vm.state == "created (stopped)"%}
-						<a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')">Start</a> |
-                        <a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete')">Delete</a>
+			<input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')" value="Start" />
+                        <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete')" value="Delete" />
                     {% endif %}
                     {% if vm.state == "stopped"%}
-						<a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')">Start</a> |
-                        <a href="#/" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete',{{vm.name}})">Delete</a>
+			<input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')" value="Start" />
+                        <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete',{{vm.name}})" value="Delete" />
                     {% endif %}
-					{% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+			{% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
                         <img src={% url img_media 'loading.gif'%} align="absmiddle"> 
                     {% endif %}
 

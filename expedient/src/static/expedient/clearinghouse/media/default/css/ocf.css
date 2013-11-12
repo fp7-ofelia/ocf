@@ -1084,10 +1084,10 @@ table.flowspaceHeader {
 	width: 100%;
 }
 table.requestedFlowspaceHeader {
-	background-color: #FF9966;
+	background-color: #BBB;
 }
 table.grantedFlowspaceHeader {
-	background-color: #44AAAA;
+	background-color: #8DE;
 }
 table.flowspaceHeader th {
 	text-align:left;
@@ -1199,11 +1199,17 @@ table.vms td.ssh_vm_details_common {
 table.vms tr {
 }
 table.vms tr.even {
-    background-color: #DDD;
+    background-color: #f5faff;
     border: 0px!important;
 }
 table.vms tr.odd {
-    background-color: #CCC;
+    background-color: #dce9f7;
+}
+/* Layer with buttons for the VM actions */
+.vm_actions input {
+	padding: 5px;
+	margin: 0px;
+	font-weight: normal;
 }
 
 /* SELECTS */
