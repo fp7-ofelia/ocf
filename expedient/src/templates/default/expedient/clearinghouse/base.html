@@ -125,9 +125,15 @@
                                                                 {% ifequal msg.type  "warning" %}
                                                                     url({% url img_media 'warning.png' %});
                                                                 {% endifequal %}
-                                                                {% if not msg.type in '["error" , "success" , "warning"]' %}
+                                                                {% ifequal msg.type  "announcement" %}
+                                                                    url({% url img_media 'msg_announcement.png' %});
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "info" %}
                                                                     url({% url img_media 'msg_info.png' %});
-                                                                {% endif %}'>
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "user2user" %}
+                                                                    url({% url img_media 'msg_user2user.png' %});
+                                                                {% endifequal %}'>
 								{{ msg.msg_text }}
 
 							</p>
