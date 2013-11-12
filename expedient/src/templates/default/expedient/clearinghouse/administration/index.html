@@ -97,12 +97,12 @@
 			to objects other than users (for example to a slice or a project).
 			Users can request permissions on behalf of other objects.
 		</p>
-		<div id="permissions_list" class="permissions permission_requests"></div>
-		<!--<div class="permissions_list" class="permissions permission_requests">
+		<!--<div id="permissions_list" class="permissions permission_requests"></div>--!>
+		<div class="permissions_list" class="permissions permission_requests">
 			<iframe class="dynsized" name="permissions" src="{% url permissionmgmt_dashboard %}" scrolling="no" frameborder="no" width="100%">
 				<p>Your browser does not support iframes.</p>
 			</iframe>
-		</div>-->
+		</div>
 
 		<h2><a href="{% url users_home %}">Manage users</a></h2>
 		<div id="users_list" class="users"></div>
@@ -132,7 +132,7 @@
 		<p>
 			Click on <strong>remove</strong> to clear the contents of any log. <strong>This operation cannot be undone</strong>
 		</p>
-                <div class="aggregate_list"> 
+                <div class="table_list"> 
 		<table class="fulltable" id="logs_actions_table">
 				<tr class="thead">
 					<th>Log</th>
@@ -213,12 +213,12 @@
 
 <script>
 	/* Asynchronous calls to insert data into different layers */
-	$.get("{% url aggregate_all %}", function(data) {
+	/*$.get("{% url aggregate_all %}", function(data) {
 		$("#aggregates_list").html(data);
 	});
 	$.get("{% url permissionmgmt_dashboard %}", function(data) {
 		$("#permissions_list").html(data);
-	});
+	});*/
 
 	function handleLogAction(module_name) {
         if (!confirm("Removing the log cannot be undone. Are you sure you want to clear it?")) {
