@@ -115,8 +115,27 @@
 					{% if messages %}
 						<div id="messages" class="message_notification_center_snippet">
 							{% for msg in messages %}
-							<p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
+							<p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}" style='background-image:
+								{% ifequal msg.type "error" %}
+								    url({% url img_media 'msg_error.png' %});
+                                                                {% endifequal %}	
+                                                                {% ifequal msg.type "success" %}
+                                                                    url({% url img_media 'msg_success.png' %});
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "warning" %}
+                                                                    url({% url img_media 'warning.png' %});
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "announcement" %}
+                                                                    url({% url img_media 'msg_announcement.png' %});
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "info" %}
+                                                                    url({% url img_media 'msg_info.png' %});
+                                                                {% endifequal %}
+                                                                {% ifequal msg.type  "user2user" %}
+                                                                    url({% url img_media 'msg_user2user.png' %});
+                                                                {% endifequal %}'>
 								{{ msg.msg_text }}
+
 							</p>
 							{% endfor %}
 						</div>

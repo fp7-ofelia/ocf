@@ -9,6 +9,33 @@
 {% block content %}
 <div class="main">
 
+{% if messages %}
+            <div id="messages" class="message_notification_center_snippet">
+                {% for msg in messages %}
+                    <p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}" style='background-image:
+                        {% ifequal msg.type "error" %}
+                            url({% url img_media 'msg_error.png' %});
+                        {% endifequal %}        
+                        {% ifequal msg.type "success" %}
+                            url({% url img_media 'msg_success.png' %});
+                        {% endifequal %}
+                        {% ifequal msg.type  "warning" %}
+                            url({% url img_media 'warning.png' %});
+                        {% endifequal %}
+                        {% ifequal msg.type  "announcement" %}
+                            url({% url img_media 'msg_announcement.png' %});
+                        {% endifequal %}
+                        {% ifequal msg.type  "info" %}
+                            url({% url img_media 'msg_info.png' %});
+                        {% endifequal %}
+                        {% ifequal msg.type  "user2user" %}
+                            url({% url img_media 'msg_user2user.png' %});
+                        {% endifequal %}'>
+                        {{ msg.msg_text }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
 	<!-- Aggregates expandable tooltip -->
 	<div class="tooltip" id="expandableHelpAggregates" style="font-size:normal"> Click to expand/collapse</div>
 	<h2 class="resources_aggregate">
@@ -70,12 +97,12 @@
 			to objects other than users (for example to a slice or a project).
 			Users can request permissions on behalf of other objects.
 		</p>
-		<div id="permissions_list" class="permissions permission_requests"></div>
-		<!--<div class="permissions_list" class="permissions permission_requests">
+		<!--<div id="permissions_list" class="permissions permission_requests"></div>--!>
+		<div class="permissions_list" class="permissions permission_requests">
 			<iframe class="dynsized" name="permissions" src="{% url permissionmgmt_dashboard %}" scrolling="no" frameborder="no" width="100%">
 				<p>Your browser does not support iframes.</p>
 			</iframe>
-		</div>-->
+		</div>
 
 		<h2><a href="{% url users_home %}">Manage users</a></h2>
 		<div id="users_list" class="users"></div>
@@ -105,7 +132,7 @@
 		<p>
 			Click on <strong>remove</strong> to clear the contents of any log. <strong>This operation cannot be undone</strong>
 		</p>
-                <div class="aggregate_list"> 
+                <div class="table_list"> 
 		<table class="fulltable" id="logs_actions_table">
 				<tr class="thead">
 					<th>Log</th>
@@ -186,12 +213,12 @@
 
 <script>
 	/* Asynchronous calls to insert data into different layers */
-	$.get("{% url aggregate_all %}", function(data) {
+	/*$.get("{% url aggregate_all %}", function(data) {
 		$("#aggregates_list").html(data);
 	});
 	$.get("{% url permissionmgmt_dashboard %}", function(data) {
 		$("#permissions_list").html(data);
-	});
+	});*/
 
 	function handleLogAction(module_name) {
         if (!confirm("Removing the log cannot be undone. Are you sure you want to clear it?")) {
