@@ -2,256 +2,15 @@
 {% load ch_extras %}
 
 {% block head %}
-<!--<link rel="stylesheet" href="{% url css_media 'jquery-ui.css' %}" />-->
-<style type="text/css">
-.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {
--moz-border-radius-bottomright: 4px/*{cornerRadius}*/;
--webkit-border-bottom-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-bottom-right-radius: 4px/*{cornerRadius}*/;
-border-bottom-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {
--moz-border-radius-bottomleft: 4px/*{cornerRadius}*/;
--webkit-border-bottom-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-bottom-left-radius: 4px/*{cornerRadius}*/;
-border-bottom-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
--moz-border-radius-topright: 4px/*{cornerRadius}*/;
--webkit-border-top-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-right-radius: 4px/*{cornerRadius}*/;
-border-top-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
--moz-border-radius-topleft: 4px/*{cornerRadius}*/;
--webkit-border-top-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-left-radius: 4px/*{cornerRadius}*/;
-border-top-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-widget-content {
-border: 1px solid #aaaaaa/*{borderColorContent}*/;
-background: #ffffff/*{bgColorContent}*/ url(images/ui-bg_flat_75_ffffff_40x100.png)/*{bgImgUrlContent}*/ 50%/*{bgContentXPos}*/ 50%/*{bgContentYPos}*/ repeat-x/*{bgContentRepeat}*/;
-color: #222222/*{fcContent}*/;
-}
-.ui-widget {
-font-family: Verdana,Arial,sans-serif/*{ffDefault}*/;
-font-size: 1.1em/*{fsDefault}*/;
-}
-.ui-tabs {
-position: relative;
-padding: .2em;
-zoom: 1;
-}
-.ui-tabs .ui-tabs-nav {
-margin: 0;
-padding: .2em .2em 0;
-}
-.ui-tabs .ui-tabs-panel {
-/*border-width: 0;*/
-background: none;
-border: 2px solid #d3d3d3;
-display: block;
-margin-top: 1.6em;
-padding: 1em 1.4em;
-}
-.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {
--moz-border-radius-bottomright: 4px/*{cornerRadius}*/;
--webkit-border-bottom-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-bottom-right-radius: 4px/*{cornerRadius}*/;
-border-bottom-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {
--moz-border-radius-bottomleft: 4px/*{cornerRadius}*/;
--webkit-border-bottom-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-bottom-left-radius: 4px/*{cornerRadius}*/;
-border-bottom-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
--moz-border-radius-topright: 4px/*{cornerRadius}*/;
--webkit-border-top-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-right-radius: 4px/*{cornerRadius}*/;
-border-top-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
--moz-border-radius-topleft: 4px/*{cornerRadius}*/;
--webkit-border-top-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-left-radius: 4px/*{cornerRadius}*/;
-border-top-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-widget-header {
-border: 1px solid #aaaaaa/*{borderColorHeader}*/;
-background: #cccccc/*{bgColorHeader}*/ url(images/ui-bg_highlight-soft_75_cccccc_1x100.png)/*{bgImgUrlHeader}*/ 50%/*{bgHeaderXPos}*/ 50%/*{bgHeaderYPos}*/ repeat-x/*{bgHeaderRepeat}*/;
-color: #222222/*{fcHeader}*/;
-font-weight: bold;
-}
-.ui-helper-clearfix {
-zoom: 1;
-}
-.ui-helper-reset {
-margin: 0;
-padding: 0;
-border: 0;
-outline: 0;
-line-height: 1.3;
-text-decoration: none;
-font-size: 100%;
-list-style: none;
-}
-.ui-widget-content {
-color: #222222/*{fcContent}*/;
-}
-.ui-widget {
-font-size: .9em;
-}
-.ui-tabs .ui-tabs-nav li {
-list-style: none;
-float: left;
-position: relative;
-top: 1px;
-margin: 0 .2em 1px 0;
-border-bottom: 0 !important;
-padding: 0;
-white-space: nowrap;
-}
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
-border: 1px solid #aaaaaa/*{borderColorActive}*/;
-background: #ffffff/*{bgColorActive}*/ url(images/ui-bg_glass_65_ffffff_1x400.png)/*{bgImgUrlActive}*/ 50%/*{bgActiveXPos}*/ 50%/*{bgActiveYPos}*/ repeat-x/*{bgActiveRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcActive}*/;
-}
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
-border: 1px solid #aaaaaa/*{borderColorActive}*/;
-background: #ffffff/*{bgColorActive}*/ url(images/ui-bg_glass_65_ffffff_1x400.png)/*{bgImgUrlActive}*/ 50%/*{bgActiveXPos}*/ 50%/*{bgActiveYPos}*/ repeat-x/*{bgActiveRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcActive}*/;
-}
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-border: 1px solid #999999/*{borderColorHover}*/;
-background: #dadada/*{bgColorHover}*/ url(images/ui-bg_glass_75_dadada_1x400.png)/*{bgImgUrlHover}*/ 50%/*{bgHoverXPos}*/ 50%/*{bgHoverYPos}*/ repeat-x/*{bgHoverRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcHover}*/;
-}
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-border: 1px solid #999999/*{borderColorHover}*/;
-background: #dadada/*{bgColorHover}*/ url(images/ui-bg_glass_75_dadada_1x400.png)/*{bgImgUrlHover}*/ 50%/*{bgHoverXPos}*/ 50%/*{bgHoverYPos}*/ repeat-x/*{bgHoverRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcHover}*/;
-}
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-border: 1px solid #d3d3d3/*{borderColorDefault}*/;
-background: #e6e6e6/*{bgColorDefault}*/ url(images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #555555/*{fcDefault}*/;
-}
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-border: 1px solid #d3d3d3/*{borderColorDefault}*/;
-background: #e6e6e6/*{bgColorDefault}*/ url(images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #555555/*{fcDefault}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
--moz-border-radius-topright: 4px/*{cornerRadius}*/;
--webkit-border-top-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-right-radius: 4px/*{cornerRadius}*/;
-border-top-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
--moz-border-radius-topleft: 4px/*{cornerRadius}*/;
--webkit-border-top-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-left-radius: 4px/*{cornerRadius}*/;
-border-top-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
-border: 1px solid #aaaaaa/*{borderColorActive}*/;
-background: #ffffff/*{bgColorActive}*/ url(images/ui-bg_glass_65_ffffff_1x400.png)/*{bgImgUrlActive}*/ 50%/*{bgActiveXPos}*/ 50%/*{bgActiveYPos}*/ repeat-x/*{bgActiveRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcActive}*/;
-}
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-border: 1px solid #999999/*{borderColorHover}*/;
-background: #dadada/*{bgColorHover}*/ url(images/ui-bg_glass_75_dadada_1x400.png)/*{bgImgUrlHover}*/ 50%/*{bgHoverXPos}*/ 50%/*{bgHoverYPos}*/ repeat-x/*{bgHoverRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #212121/*{fcHover}*/;
-}
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-border: 1px solid #d3d3d3/*{borderColorDefault}*/;
-background: #e6e6e6/*{bgColorDefault}*/ url(images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #555555/*{fcDefault}*/;
-}
-.ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a {
-cursor: pointer;
-}
-.ui-tabs .ui-tabs-nav li a {
-float: left;
-padding: .2em .6em;
-text-decoration: none;
-}
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
-color: #212121/*{fcActive}*/;
-text-decoration: none;
-}
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
-color: #212121/*{fcActive}*/;
-text-decoration: none;
-}
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
-color: #555555/*{fcDefault}*/;
-text-decoration: none;
-}
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
-color: #555555/*{fcDefault}*/;
-text-decoration: none;
-}
-.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
-color: #212121/*{fcActive}*/;
-text-decoration: none;
-}
-.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
-color: #555555/*{fcDefault}*/;
-text-decoration: none;
-}
-.ui-widget-header a {
-color: #222222/*{fcHeader}*/;
-}
-.ui-widget-content a {
-color: #222222/*{fcContent}*/;
-}
-.ui-tabs .ui-tabs-nav li {
-list-style: none;
-float: left;
-position: relative;
-top: 1px;
-margin: 0 .2em 1px 0;
-border-bottom: 0 !important;
-padding: 0;
-white-space: nowrap;
-}
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-background: #e6e6e6/*{bgColorDefault}*/ url(images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #555555/*{fcDefault}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
--moz-border-radius-topright: 4px/*{cornerRadius}*/;
--webkit-border-top-right-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-right-radius: 4px/*{cornerRadius}*/;
-border-top-right-radius: 4px/*{cornerRadius}*/;
-}
-.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
--moz-border-radius-topleft: 4px/*{cornerRadius}*/;
--webkit-border-top-left-radius: 4px/*{cornerRadius}*/;
--khtml-border-top-left-radius: 4px/*{cornerRadius}*/;
-border-top-left-radius: 4px/*{cornerRadius}*/;
-}
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-border: 1px solid #d3d3d3/*{borderColorDefault}*/;
-background: #e6e6e6/*{bgColorDefault}*/ url(images/ui-bg_glass_75_e6e6e6_1x400.png)/*{bgImgUrlDefault}*/ 50%/*{bgDefaultXPos}*/ 50%/*{bgDefaultYPos}*/ repeat-x/*{bgDefaultRepeat}*/;
-font-weight: normal/*{fwDefault}*/;
-color: #555555/*{fcDefault}*/;
-}
-user agent stylesheetli {
-</style>
+<link rel="stylesheet" href="{% url css_media 'project.css' %}" />
+<!--<style type="text/css">
+	table#projects_table tr.body td.name {
+		background: url({% url img_media 'expand.png' %}) .5em center no-repeat;
+	}
+	table#projects_table tr.body td.name:hover {
+		background: #dce9f5 url({% url img_media 'expand.png' %}) .5em center no-repeat;
+	}
+</style>-->
 <script src="{% url js_media 'jquery-ui.min.js' %}" /></script>
 <script>
 	$(document).ready(function() {
@@ -262,15 +21,35 @@ user agent stylesheetli {
 			addTooltipToSummary("ownersgrp_"+index);
 			addTooltipToSummary("membersgrp_"+index);
 		});
-		/* Allow to expand projects with information */
-		$(function() {
+		// Allow to expand projects with information
+		/*$('table#projects_table td.details').click(
+			function() {
+				var current_unfolded = $($(this).parent("tr")).next();
+				current_unfolded.toggle();
+				// Hide the rest of them
+				$('table#projects_table tr.accordion').not(current_unfolded).hide();
+			}
+		)*/
+		$('table#projects_table tr.body').click(
+			function(event) {
+				// Expand only when cell (TD) is clicked
+				if (event.target.nodeName.toLowerCase() == "td") {
+					var current_unfolded = $(this).next();
+					current_unfolded.toggle();
+					// Hide the rest of them
+					$('table#projects_table tr.accordion').not(current_unfolded).hide();
+				}
+			}
+		)
+		// Original accordion
+		/*$(function() {
 			$("table#projects_table").accordion({
-				active: false,	/* Initially expanded */
+				active: false,	// Initially expanded
 				collapsible: true,
 				header: 'tr.body'
 			});
-		});
-		/* Fills tab struct with information */
+		});*/
+		// Fills tab struct with information
 		$(function() {
 			$(".tabs").tabs();
 		});
@@ -283,7 +62,7 @@ user agent stylesheetli {
 	<div class="table_div">
 		<table class="fulltable" id="projects_table">
 			<tr class="head">
-				<!-- Make it match for Accordion (?) -->
+				<!-- Add a new cell to match jQuery UI's accordion (?) -->
 				<th></th>
 				<th class="name">Name</th>
                 <th class="owners">Owners</th>
@@ -292,7 +71,11 @@ user agent stylesheetli {
                 <th class="actions">Actions</th>
 			</tr>
 			{% for project in project_list %}
+			<!--<tr class="body accordion">-->
 			<tr class="body">
+				<td class="expand" title="Click to expand">
+					<img src="{% url img_media 'expand.png' %}" />
+				</td>
 				<td class="name">
 					<div class="val project_name"><a href="{% url project_detail project.id %}" onClick='document.location="{% url project_detail project.id %}"'>{{ project.name }}</a></div>
 					<div class="description project_name">{{ project.description }}</div>
@@ -335,65 +118,105 @@ user agent stylesheetli {
 			<!-- Accordion -->
 			<tr class="accordion">
 				<td colspan="6">
+				<!--<td colspan="7">-->
 					<!--<table class="project_slice_list" width="100%" align="right">
-						{% for slice in project.slice_set.all %}
+						{#{% for slice in project.slice_set.all %}#}
 							<tr>
 								<td width="63%"></td>
 								<td width="430px">
-									{{ slice.name }}
+									{#{{ slice.name }}#}
 								</td>
 								<td width="100px"></td>
 								<td width="450px">
-									<a href="{% url slice_detail slice.id %}">details</a>,
-									<a href="{% url slice_delete slice.id %}">delete</a>
+									<a href="{#{% url slice_detail slice.id %}#}">details</a>,
+									<a href="{#{% url slice_delete slice.id %}#}">delete</a>
 								</td>
 							</tr>
-						{% endfor %}
+						{#{% endfor %}#}
 					</table>
 				</td>-->
 				<div class="tabs">
 				  <ul>
+					<li><a href="#tab-project-{{ project.id }}">Project</a></li>
 					{% if project.slice_set.all %}
 						<li><a href="#tab-slice-{{ project.id }}">Slices</a></li>
 					{% endif %}
 				    {% if project.owners.all or project.members.all  %}
 						<li><a href="#tab-users-{{ project.id }}">Users</a></li>
 					{% endif %}
-					<li><a href="#tab-actions-{{ project.id }}">Actions</a></li>
 				  </ul>
 				  {% if project.slice_set.all %}
 					  <div id="tab-slice-{{ project.id }}">
-						{% for slice in project.slice_set.all %}
-							<p>
-								{{ slice.name }}:
-								<a href="{% url slice_detail slice.id %}">details</a>,
-								<a href="{% url slice_delete slice.id %}">delete</a>
-							</p>
-						{% endfor %}
+							<!-- Slices -->
+							<table class="fulltable">
+								<thead>
+									<td>Slice</td>
+									<td>Description</td>
+									<td>Actions</td>
+								</thead>
+								{% for slice in project.slice_set.all %}
+								<tbody>
+									<td>{{ slice.name }}</td>
+									<td>{{ slice.description }}</td>
+									<td><a href="{% url slice_detail slice.id %}">details</a>,
+										<a href="{% url slice_delete slice.id %}">delete</a></td>
+								</tbody>
+								{% endfor %}
+							</table>
 					  </div>
 				  {% endif %}
-				  {% if project.owners.all or project.members.all  %}
-					  <div id="tab-users-{{ project.id }}">
-						<h3>Owners</h3>
-						{% with project.owners.all as users %}
-							{% for user in users %}
-								{{ user }}
-							{% endfor %}
-						{% endwith %}
-						<h3>Members</h3>
-						{% with project.members.all as users %}
-							{% for user in users %}
-								{{ user }}
-							{% endfor %}
-						{% endwith %}
-					  </div>
-				  {% endif %}
-				  <div id="tab-actions-{{ project.id }}">
-					<p>
-						<a href="{% url project_detail project.id %}">details</a>,
-						<a href="{% url project_delete project.id %}">delete</a>
-					</p>
+				  <div id="tab-project-{{ project.id }}">
+					<!-- Project -->
+					<table class="fulltable">
+						<thead>
+							<td>Description</td>
+							<td>Actions</td>
+						</thead>
+						<tbody>
+							<td>{{ project.description }}</td>
+							<td><a href="{% url project_detail project.id %}">details</a>,
+								<a href="{% url project_delete project.id %}">delete</a></td>
+						</tbody>
+					</table>
 				  </div>
+				  {% if project.members.all  %}
+					  <div id="tab-users-{{ project.id }}">
+						<table class="fulltable" align="center">
+							<thead>
+								<td>User</td>
+								<td>Affiliation</td>
+								<td>User name</td>
+								<td>E-mail</td>
+								<td>Roles</td>
+								<td>Actions</td>
+							</thead>
+							{% for user in project.members.all %}
+							<tbody>
+								<td>{{ user }}</td>
+								<td>{{ user.get_profile.affiliation }}</td>
+								<td>{{ user.first_name }} {{ user.last_name }}</td>
+								<td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+								<td>
+									{% for member in project.members_as_permittees.all %}
+										{% if member.object_id == user.id %}
+											{% for role in member.projectrole_set.all %}
+												{% if role.project == project %}
+		                    						{{ role.name }}
+													{% if not forloop.last %},{% endif %}
+												{% endif %}
+											{% endfor %}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>
+									<a href="{% url project_member_update project.id user.id %}">update</a>,
+									<a href="{% url project_member_remove project.id user.id %}">remove</a>
+								</td>
+							</tbody>
+							{% endfor %}
+						</table>
+					  </div>
+				  {% endif %}
 				</div>
 				</td>
 			</tr>

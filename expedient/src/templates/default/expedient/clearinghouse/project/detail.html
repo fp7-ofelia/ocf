@@ -74,8 +74,8 @@
 						{% endfor %}
 					</td>
 					<td class="actions">
-						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>,
-						<a href="{% url project_member_update project.id member.object_id %}">update</a>
+						<a href="{% url project_member_update project.id member.object_id %}">update</a>,
+						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>
 					</td>
 				</tr>
 				{% endfor %}
