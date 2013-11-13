@@ -141,7 +141,7 @@
 			        </td>
 					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
 					<td class="actions">
-						<a href="{% url slice_detail slice.id %}">details</a>,
+						<a href="{% url slice_detail slice.id %}">view</a>,
 						<a href="{% url slice_delete slice.id %}">delete</a>
 					</td>
 				</tr>

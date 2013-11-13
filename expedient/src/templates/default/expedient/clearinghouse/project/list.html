@@ -111,7 +111,7 @@
 					{% endfor %}
                 </td>
 				<td class="actions">
-					<a href="{% url project_detail project.id %}">details</a>,
+					<a href="{% url project_detail project.id %}">view</a>,
 					<a href="{% url project_delete project.id %}">delete</a>
 				</td>
 			</tr>
@@ -128,7 +128,7 @@
 								</td>
 								<td width="100px"></td>
 								<td width="450px">
-									<a href="{#{% url slice_detail slice.id %}#}">details</a>,
+									<a href="{#{% url slice_detail slice.id %}#}">view</a>,
 									<a href="{#{% url slice_delete slice.id %}#}">delete</a>
 								</td>
 							</tr>
@@ -158,7 +158,7 @@
 								<tbody>
 									<td>{{ slice.name }}</td>
 									<td>{{ slice.description }}</td>
-									<td><a href="{% url slice_detail slice.id %}">details</a>,
+									<td><a href="{% url slice_detail slice.id %}">view</a>,
 										<a href="{% url slice_delete slice.id %}">delete</a></td>
 								</tbody>
 								{% endfor %}
@@ -174,7 +174,7 @@
 						</thead>
 						<tbody>
 							<td>{{ project.description }}</td>
-							<td><a href="{% url project_detail project.id %}">details</a>,
+							<td><a href="{% url project_detail project.id %}">view</a>,
 								<a href="{% url project_delete project.id %}">delete</a></td>
 						</tbody>
 					</table>
