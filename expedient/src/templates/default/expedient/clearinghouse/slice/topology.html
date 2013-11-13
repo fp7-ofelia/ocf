@@ -480,10 +480,21 @@ for (ki = 0; ki < links.length; ki ++) {
     console.log("link [target] #" + ki + " '" + links[ki].target.nodeName + "': " + links[ki].target.index);
 }*/
 
-var force = d3.layout.force()
+// Original version (Sergio)
+/*var force = d3.layout.force()
     .gravity(0)
     .distance(100)
     .charge(-500)
+    .friction(0.6)
+    .size([width, height])
+    .nodes(nodes)
+    .links(links)
+    .start();*/
+
+// Modified version (Carolina)
+var force = d3.layout.force()
+    .gravity(1/(2*nIslands))
+    .distance(200/nIslands)
     .friction(0.6)
     .size([width, height])
     .nodes(nodes)
