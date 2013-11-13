@@ -54,7 +54,7 @@ def home(request):
 				("Administration", reverse("administration_home")),
 			),
 			"plugin_administration_methods": plugin_administration_methods,
-                        "logs_location":LOGS_LOCATION,
+			"logs_location":LOGS_LOCATION,
 		},
 	)
 
