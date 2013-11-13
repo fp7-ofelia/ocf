@@ -1087,7 +1087,7 @@ table.requestedFlowspaceHeader {
 	background-color: #BBB;
 }
 table.grantedFlowspaceHeader {
-	background-color: #8DE;
+	background-color: #C2E594;
 }
 table.flowspaceHeader th {
 	text-align:left;
@@ -1112,18 +1112,18 @@ table.flowspace_r th {
     border: 0px;
 }
 table.flowspace_r tr.odd { 
-    background-color: #fb8;
+    background-color: #DDD !important;
     border: 0px;
 }
 table.flowspace_r tr.even {
-    background-color: #fda;
+    background-color: #EEE !important;
     border: 0px;
 }
 table.flowspace tr.odd {
-    background-color: #6cd3c2 ;
+    background-color: #D3EEAF;
 }
 table.flowspace tr.even {
-    background-color: #cae9d8;
+    background-color: #E2F8CB;
 }
 /* Servers and VMs */
 table.servers {
