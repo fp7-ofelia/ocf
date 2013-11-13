@@ -1,0 +1,13 @@
+Requires:
+
+Python 2.6.x
+SQLAlchemy 0.7.x
+Flask 0.7.2
+Flask-XML-RPC
+ElementTree 1.2.7
+flup 1.0.3
+Blinker 1.1
+
+Target Platforms:
+
+Linux, 32/64-bit

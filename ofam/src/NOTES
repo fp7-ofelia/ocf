@@ -1,0 +1,126 @@
+=== 0.8.2 ===
+* FOAM-306: sliverstatus should report pend_reason
+* FOAM-304: package publishing isn't dialect aware
+* FOAM-303: FOAM init.d script returns exit value 1 even when it succeeds
+
+=== 0.8.1 ===
+* FOAM-299: Collection of performance data should be configurable
+* FOAM-291: ConfigItem references an invalid log handle
+* FOAM-289: Need to log timing information on the duration of flowvisor calls
+* FOAM-287: Allow foam-db-convert.py to run multiple times
+* FOAM-286: Can't find old log entries
+* FOAM-285: foam-db-convert.py doesn't import slivers with invalid rspecs
+* FOAM-284: Can't show rspecs of deleted slivers
+
+=== 0.8.0 ===
+* FOAM-283: Expiration of FOAM 0.6 slivers converted to FOAM 0.8, timezone issues
+* FOAM-282: All times should have timezones
+* FOAM-279: ListResources returns a key error
+* FOAM-278: Port groups with multiple DPIDs don't seem to work
+* FOAM-277: A sliver that just requests a port from a port group is auto-approved
+* FOAM-270: Renewed slivers don't get expiration notifications
+* FOAM-268: Sliver with ports in one DPID is pended even though it doesn't have any ports in the DPID with port groups
+* FOAM-266: FOAM should store sliver creation time and provide that information on demand
+* FOAM-262: Auto-approval doesn't catch rspecs with no datapaths
+* FOAM-261: email-slivers doesn't work
+* FOAM-257: geni.openflow.analysis-engine = False plus geni.approval.approve-on-creation = 2 should be an invalid combination
+* FOAM-256: Remove geni.approval.approve-everything
+* FOAM-254: All exceptions need to inherit from foam.core.exception.CoreException
+* FOAM-252: Config change should trigger generic event
+* FOAM-250: rspecs without e-mail addresses don't work
+* FOAM-242: You can (easily) break the database by setting geni.max-lease with foamctl
+* FOAM-227: admin list-slivers API locks the database for preposterous amounts of time
+* FOAM-221: Allow general topology information to be encoded in advertisement
+* FOAM-211: Auto-pend based on port request
+* FOAM-210: Auto-approve whitelist of user URNs
+* FOAM-204: Multi-user admin support in foam
+* FOAM-190: Core tracer provider should log timestamps
+* FOAM-181: install.py doesn't satisfy package dependencies
+* FOAM-166: Allow more granular control of e-mail notifications to admins
+* FOAM-161: There are two slice expiration date storage locations, this will be very sad some day
+
+=== 0.7.17 ===
+* FOAM-177: GENI-specific flowspace-overlap auto-approval engine
+
+=== 0.7.12 ===
+* FOAM-251: expire-emails still fails to send email
+* FOAM-247: disable-sliver and reject-sliver don't work
+* FOAM-245: Allow sites to change their site ID
+* FOAM-216: Allow for additional site information in gapi GetVersion 
+
+=== 0.7.8 ===
+* FOAM-248: expire-emails fails to send email
+* FOAM-246: approve-sliver fails
+* FOAM-244: foamctl show-sliver doesn't work with -s or -f
+* FOAM-243: Setting geni.max-lease breaks everything
+
+=== 0.7.7 ===
+* FOAM-241: 'foamctl show-sliver' doesn't work
+* FOAM-240: E-mail template files have the wrong names
+* FOAM-239: CreateSliver throws an error, but succeeds
+* FOAM-238: foamctl auth:set-admin-passwd doesn't prompt for confirmation
+
+=== 0.7.6 ===
+* FOAM-235: No way to set admin password
+
+=== 0.7.5 ===
+* FOAM-233: DeleteSliver doesn't actually delete slivers
+* FOAM-232: /opt/ofelia/ofam/local/etc isn't writeable by FOAM
+* FOAM-231: Log sooner on startup
+
+=== 0.7.4 ===
+* FOAM-219: init-db fails with "cannot import name ONFS"
+* FOAM-208: Called xmlrpc plugin methods which raise AttributeError are marked as not found 
+
+=== 0.7.3 ===
+* FOAM-229: Move geni to package, and out of core
+* FOAM-228: Log gapi actions into a file instead of the database
+* FOAM-220: Separate Sliver and Datapath classes from their rspec factories 
+* FOAM-197: Find some way to stop someone from calling init-db when there is an active database
+* FOAM-57: foamctl init-db only works interactively
+* FOAM-3: Cert tracking causes the DB to grow (relatively) quickly
+* FOAM-1: foamctl actions=init_db doesn't actually clear the database if it already exists
+
+=== 0.7.2 ===
+* FOAM-215: Optionally allow FOAM version to be reported in gapi GetVersion
+* FOAM-212: All FOAM exceptions should have __str__ methods
+* FOAM-208: Called xmlrpc plugin methods which raise AttributeError are marked as not found
+* FOAM-196: Need easy way to change flowvisor info in FOAM
+* FOAM-187: FOAM doesn't require an owner e-mail address
+* FOAM-186: Get owner e-mail address from slice credential
+
+=== 0.7.1 ===
+* FOAM-207: FOAM calls FV.ListDevices twice for listResources in some environments
+* FOAM-202: Suppress logging of expected / handled exceptions
+* FOAM-200: Better flowvisor package logging
+* FOAM-195: Make component_manager_id optional in rspecs
+* FOAM-126: Schema does not validate some fields
+* Added config:set-auto-approve command to foamctl
+
+=== 0.7.0 ===
+* FOAM-174: json validation fails if the type match is a tuple
+* FOAM-173: Support for code coverage
+
+=== 0.6.3 ===
+* FOAM-183: set-config validator is filtering valid dictionary types (like email info)
+* FOAM-180: Installing FOAM from scratch fails to create db
+* Added proper libssl-dev dependency in the debian package
+
+=== 0.6.2 ===
+* Fixed URN format to have 'datapath+' instead of 'datapath:'
+* Updated source copyright dates
+* Fixed manifest header to pass AM acceptance tests
+* No longer allow multi-AM rspecs (temporary change until corner cases can be ironed out)
+* Advertisement no longer contains <Node> elements
+* Usability enhancements to install and package scripts
+* FOAM-171: foamctl set-config doesn't work for max_lease
+* FOAM-170: RenewSliver has some funky behaviour
+* FOAM-169: Admin API to set sliver expiration
+
+=== 0.6.1 ===
+* FOAM-163: Daily queue reminder mail doesn't work
+* FOAM-155: Calling get-config generates a non-sensical error if the key doesn't exist
+* FOAM-154: Fake datapaths are indicated as being available in advertisements
+* FOAM-138: GetVersion should include options describing supported RSpec schemas
+* FOAM-127: Need to make install script for source
+* Installation improvements to make it more difficult to provide bad values for key parameters

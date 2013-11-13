@@ -56,6 +56,11 @@ expedient/bin/log/*
 expedient/bin/.upgradeReg
 expedient/bin/.ofverLock
 expedient/bin/rescue/*
+ofam/.currentVersion
+ofam/local/*
+ofam/bin/log/*
+ofam/bin/.upgradeReg
+ofam/rescue/*
 optin_manager/.currentVersion
 optin_manager/bin/log/*
 optin_manager/bin/.upgradeReg

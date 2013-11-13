@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#Constants
+EDITORS="vi vim emacs nano pico"
+
+#Copy from template
+printHeader ">" "Copying django settings file from template..."
+
+if [ ! -f $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py ]; then
+	# INSTALL: settings file copied under /opt/ofelia/ofam/local in order to be modified
+	print "$SRC_DIR/src/src/foam/ofeliasettings/localsettings-example -> $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py "
+	cp -p $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Could not copy to localsettings.py" $NO_RESCUE
+else
+	# UPGRADE: check difference between tracked (src) and untracked (local) file
+	# File supposed to be modified through install by the Island Manager
+	difference=$(diff $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py)
+	if [ "$difference" != "" ]; then
+		warning "Localsettings file already exists."
+		if [ "$FORCE" == "1" ]; then
+			confirm "Overwrite currently installed localsettings.py." $DONT_ABORT
+			if [ $? == 0 ]; then			
+				cp $SRC_DIR/src/src/foam/ofeliasettings/localsettings-example $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py || error "Cannot copy localsettings.py"
+			fi 
+		else
+			print "Skipping copy (will not be overwritten)"
+		fi
+	fi
+fi
+
+#Choose editor
+printHeader ">" "Choosing the editor..."
+select editor in $EDITORS;
+do
+	if [ -z $editor ]; then
+		print "Invalid option $editor"
+		continue
+	fi
+	print ""
+	EDITOR=$editor
+	print "Your are going to use $EDITOR for file manipulation..."
+	break;
+done
+
+#Edit file
+printHeader ">" "Editing localsettings.py file..."
+while :	
+do
+	print "You are about to edit the file $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+	pause ""
+	eval $EDITOR $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py 
+	print ""
+	pause "The contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
+	less $SRC_DIR/local/lib/foam/ofeliasettings/localsettings.py
+	
+	confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
+
+	if [ $? == 0 ]; then
+		break
+	fi	
+done
+

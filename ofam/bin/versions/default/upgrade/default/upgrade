@@ -1,0 +1,44 @@
+#!/bin/bash
+
+###
+#       @author: msune, SergioVidiella
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: Version checkings 
+###
+
+#inform user
+printHeader "info#" "Using default upgrade module..."
+
+SRC_DIR=/opt/ofelia/ofam
+TMP_PATH=$PWD
+
+printHeader ">" "Upgrading FOAM to the latest version..."
+
+# Let the FOAM script upgrade itself
+cd $SRC_DIR/src || error "Could not install FOAM wrapper" $NO_RESCUE
+python install.py || error "Could not install FOAM wrapper" $NO_RESCUE
+
+# In order to avoid conflicts with FOAM config file...
+printHeader ">" "Taking care of default configuration for nginx sites-enabled..."
+
+# Symlink to sites-available (normal case) => remove symlink
+#if [ -s /etc/nginx/sites-enabled/default ] && [ -f /etc/nginx/sites-available/default ]; then
+if [ -s /etc/nginx/sites-enabled/default ]; then
+    rm /etc/nginx/sites-enabled/default || error "Could not remove '/etc/nginx/sites-enabled/default'"
+fi
+# File with single copy => rename using timestamp and move
+if [ -f /etc/nginx/sites-enabled/default ]; then
+    backup_nginx_conf=default.bak-`date +"%d_%m_%y-%R"`
+    print "Backing nginx config file up: /etc/nginx/sites-enabled/default => /etc/nginx/sites-available/$backup_nginx_conf ..."
+    mv /etc/nginx/sites-enabled/default /etc/nginx/sites-available/$backup_nginx_conf || error "Could not backup default configuration file for '/etc/nginx/sites-enabled/default'"
+fi
+
+#Symlink application folder for error log (so we can access normally)
+ln -s $SRC_DIR/local/log /var/log/apache2/ofam || error "Cannot create symbolic link: /var/log/apache2/ofam -> $SRC_DIR/local/log" $NO_RESCUE
+
+cd $TMP_PATH
+
+#Django settings 
+source $CURRENT_DIRECTORY/lib/django-settings
+

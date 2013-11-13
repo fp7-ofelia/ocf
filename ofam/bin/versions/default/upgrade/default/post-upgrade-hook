@@ -1,0 +1,19 @@
+#!/bin/bash
+
+###
+#       @author: msune, SergioVidiella
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: post-upgrade-hook module 
+###
+
+#inform user
+printHeader "info#" "Using default post-upgrade-hook module..."
+
+#Restarting nginx
+print "Restarting nginx..."
+/usr/sbin/service nginx restart
+#Restarting foam
+print "Restarting foam..."
+/usr/sbin/service foam restart
+

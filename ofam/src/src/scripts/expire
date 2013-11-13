@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# Copyright (c) 2011-2012  The Board of Trustees of The Leland Stanford Junior University
+
+import sys
+sys.path.append("/opt/ofelia/ofam/local/lib")
+
+import foam.task
+import subprocess
+
+if __name__ == '__main__':
+  p = subprocess.Popen("python %s expire-slivers" % (foam.task.CMD), shell=True)

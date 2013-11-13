@@ -1,0 +1,23 @@
+# Copyright (c) 2011-2012  The Board of Trustees of The Leland Stanford Junior University
+
+class Event(object):
+  APPROVE_SLIVER = 1
+  DELETE_SLIVER = 2
+  CREATE_SLIVER = 3
+  GET_SLIVER_STATUS = 4
+  RENEW_SLIVER = 5
+  GET_VERSION = 6
+  LIST_RESOURCES = 7
+  SHUTDOWN_SLIVER = 8
+  REJECT_SLIVER = 9
+  DISABLE_SLIVER = 10
+  SET_CONFIG = 11
+  SET_LOCATION = 12
+  ADD_DATAPATH = 13
+  REMOVE_DATAPATH = 14
+  AUTO_APPROVE_SLIVER = 15
+  EXPIRE_SLIVER = 16
+
+class Type(object):
+  EMAIL = 1
+  CALLBACK = 2
