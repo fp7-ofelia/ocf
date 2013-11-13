@@ -8,7 +8,7 @@
 	<div class="title">
 		<h1>Add an Aggregate for Slice {{ slice.name }}</h1>
 	</div>
-	<div class="aggregate_list">
+	<div class="aggregate_list center">
 		{% if aggregate_list.count %}
 			{% with "project/agg_add_actions.html" as action_template %}
 				{% include "aggregate/list_table.html" %}
