@@ -828,6 +828,11 @@ table.fulltable tbody th {
 	font-size: 1em !important;
 }
 
+table.fulltable tbody tr.head {
+        background-color: #9cf !important;
+        border-bottom: 1px solid #7e9fc0;
+}
+
 table.msg_table {
     border-spacing: 0px;
     border: 0px;

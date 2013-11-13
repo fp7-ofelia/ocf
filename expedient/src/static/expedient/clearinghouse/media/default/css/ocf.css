@@ -365,6 +365,10 @@ div.geni_info {
 .errdate {
 }
 
+thead.project {
+    background-color: #9cf !important;
+}
+
 table.flowspacetable select {
     width: 70px;
 }

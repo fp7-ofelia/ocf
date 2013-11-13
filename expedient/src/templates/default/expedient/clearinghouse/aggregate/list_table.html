@@ -20,6 +20,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 
 <div class="table_div">
 	<table class="fulltable" id="aggregates_table">
+                <thead>
 		<tr class="thead">
 			<!--<th class="logo">Logo</th>-->
 	        <th class="name">Name</th>
@@ -33,6 +34,8 @@ function checkAggStatus(agg_ids,agg_ids_length){
 			<th class="status">Status</th>
 			<th class="actions">Actions</th>
 		</tr>
+                </thead>
+                <tbody>
 		{% for generic_am in aggregate_list %}
 		{% with generic_am.as_leaf_class as am %}
 		{% if highlight_id and generic_am.id == highlight_id %}
@@ -73,6 +76,7 @@ function checkAggStatus(agg_ids,agg_ids_length){
 		</tr>
 		{% endwith %}
 		{% endfor %}
+                </tbody>
 	</table>
 </div>
 <script src="{% url js_media 'agg_status.js' %}"></script>
