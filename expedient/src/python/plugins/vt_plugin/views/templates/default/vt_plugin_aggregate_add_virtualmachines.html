@@ -19,6 +19,12 @@
 				$("#id_memory").val("128");
 				$("#id_hdSetupType").prop("disabled","disabled");
 				$("#id_virtualizationSetupType").prop("disabled","disabled");
+			} else if ($("#id_disc_image").val() == "irati") {
+				$("#id_hdSetupType").val("file-image");
+				$("#id_virtualizationSetupType").val("paravirtualization");
+				$("#id_memory").val("256");
+				$("#id_hdSetupType").prop("disabled","disabled");
+				$("#id_virtualizationSetupType").prop("disabled","disabled");
 			} else {
 				$("#id_hdSetupType").prop("disabled","");
 				$("#id_virtualizationSetupType").prop("disabled","");

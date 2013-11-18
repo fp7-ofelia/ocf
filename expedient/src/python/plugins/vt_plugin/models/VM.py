@@ -7,6 +7,7 @@ from vt_plugin.utils.validators import *
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
                         ('spirent','Spirent'),
+                        ('irati','IRATI'),
                         #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (

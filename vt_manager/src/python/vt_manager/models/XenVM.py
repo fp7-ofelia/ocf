@@ -28,6 +28,7 @@ VIRTUALIZATION_SETUP_TYPE = (
 
 IMAGE_CONFIGURATORS = {
 			'default/default.tar.gz':'',
+			'irati/irati.tar.gz':'',
 			'spirent/spirentSTCVM.img':'SpirentCentOSVMConfigurator',
 			}
 	

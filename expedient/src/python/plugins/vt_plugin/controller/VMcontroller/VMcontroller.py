@@ -47,6 +47,12 @@ class VMcontroller():
             instance.operatingSystemDistribution = 'Debian'
             instance.hdOriginPath = "default/default.tar.gz"
             instance.virtualization_setup_type = "paravirtualization"
+        if instance.disc_image == 'irati':
+            instance.operatingSystemType = 'GNU/Linux'
+            instance.operatingSystemVersion = '6.0'
+            instance.operatingSystemDistribution = 'Debian'
+            instance.hdOriginPath = "irati/irati.tar.gz"
+            instance.virtualization_setup_type = "paravirtualization"
         if instance.disc_image == 'spirent':
             instance.operatingSystemType = 'GNU/Linux'
             instance.operatingSystemVersion = '6.2'
