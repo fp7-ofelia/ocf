@@ -16,7 +16,7 @@ from utils import validators
 class VMAllocated(Base):
     """Virtual Machines allocated for GeniV3 calls."""
 
-    __tablename__ = 'vt_manager_virtualmachine_allocated'
+    __tablename__ = 'amsoil_vt_manager_virtualmachine_allocated'
 
     '''General parameters'''
     id = Column(Integer, autoincrement=True, primary_key=True)
