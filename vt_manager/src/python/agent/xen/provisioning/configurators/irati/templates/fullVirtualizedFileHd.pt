@@ -1,0 +1,50 @@
+{% block body %}
+
+# Configuration file template for Ofelia CF XEN agent
+
+#
+#  Kernel + memory size
+#
+kernel      = 'hvmloader'
+builder     = 'hvm'
+
+memory      = '{{ vm.xen_configuration.memory_mb }}'
+
+#CPUS
+vcpus = 1
+
+#
+#  Disk device(s).
+#
+#root        = '/dev/xvda1 ro'
+disk        = [
+                  'file:{{ hdFilePath }},xvda,w',
+              ]
+device_model = '/usr/lib/xen-4.0/bin/qemu-dm'
+
+#
+#  Hostname
+#
+name        = '{{vm.name}}'
+
+#UUID
+uuid = '{{ vm.uuid }}'
+
+#
+#  Networking
+#
+#dhcp        = 'dhcp'
+dhcp='off'
+##Interfaces 
+
+vif = [{% for interface in vm.xen_configuration.interfaces.interface %}'mac={{ interface.mac }}, bridge={{interface.switch_id}}',{% endfor %}]
+
+#
+#  Behaviour
+#
+on_poweroff = 'destroy'
+on_reboot   = 'restart'
+on_crash    = 'restart'
+
+{% endblock %}
+

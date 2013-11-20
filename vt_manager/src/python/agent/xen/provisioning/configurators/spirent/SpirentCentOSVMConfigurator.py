@@ -172,7 +172,7 @@ class SpirentCentOSVMConfigurator:
 		template_dirs = []
 		template_dirs.append(os.path.join(os.path.dirname(__file__),'templates/'))
 		env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dirs))
-		if vm.xen_configuration.hd_setup_type == "file-full-image" and vm.xen_configuration.virtualization_setup_type == "hvm" :
+		if vm.xen_configuration.hd_setup_type == "full-file-image" and vm.xen_configuration.virtualization_setup_type == "hvm" :
 			SpirentCentOSVMConfigurator.__createConfigFile(vm,env)
 		else:
 			raise Exception("type of file or type of virtualization not supported for the creation of xen vm configuration file")	

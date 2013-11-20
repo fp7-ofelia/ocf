@@ -215,7 +215,8 @@ class FileFullHdManager(object):
 			os.makedirs(path)		
 	
 		vm_path=FileFullHdManager.getHdPath(vm)
-		FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
+		FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=44040192 '+str(vm_path)+" "+str(path))	
+		#FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
 	
 		return path
 

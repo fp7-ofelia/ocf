@@ -1,4 +1,5 @@
 from xen.provisioning.configurators.ofelia.OfeliaDebianVMConfigurator import OfeliaDebianVMConfigurator
+from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
 from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
 from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
 from utils.Logger import Logger
@@ -20,6 +21,8 @@ class VMConfigurator():
 		if configurator and configurator != "":
 			if configurator == MediacatVMConfigurator.getIdentifier():
 				return MediacatVMConfigurator;
+			elif configurator == IratiDebianVMConfigurator.getIdentifier():
+				return IratiDebianVMConfigurator;
 			elif configurator == SpirentCentOSVMConfigurator.getIdentifier():
 				return SpirentCentOSVMConfigurator;
 	

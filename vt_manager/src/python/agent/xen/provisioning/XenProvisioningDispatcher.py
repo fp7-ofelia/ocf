@@ -23,6 +23,10 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 		pathToMountPoint = ""	
 		XenProvisioningDispatcher.logger.info("Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id)
 		try:
+			#Synthesize config file
+			VMConfigurator.createVmConfigurationFile(vm)
+			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
+			
 			#Clone HD
 			HdManager.clone(vm)
 			XenProvisioningDispatcher.logger.debug("HD cloned successfully...")
@@ -35,10 +39,6 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Configure VM OS
 			VMConfigurator.configureVmDisk(vm,pathToMountPoint)
 
-			#Synthesize config file
-			VMConfigurator.createVmConfigurationFile(vm)
-			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
-			
 			#Umount copy
 			HdManager.umount(vm,pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD unmounted successfully...")
