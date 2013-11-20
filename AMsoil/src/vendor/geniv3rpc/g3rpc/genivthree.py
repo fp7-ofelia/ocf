@@ -108,6 +108,7 @@ class GENIv3Handler(xmlrpc.Dispatcher):
         # TODO check the end_time against the duration of the credential
         try:
             # delegate
+            # self._checkRSpecVersion(options['geni_rspec_version']) # omni does not send this option
             result_rspec, result_sliver_list = self._delegate.allocate(slice_urn, self.requestCertificate(), credentials, rspec, geni_end_time)
             # change datetime's to strings
             result = { 'geni_rspec' : result_rspec, 'geni_slivers' : self._convertExpiresDate(result_sliver_list) }
@@ -478,14 +479,9 @@ class GENIv3DelegateBase(object):
         # get the cert_root
         config = pm.getService("config")
         cert_root = expand_amsoil_path(config.get("geniv3rpc.cert_root"))
-        
+
         if client_cert == None:
-            # work around if the certificate could not be acquired due to the shortcommings of the werkzeug library
-            if config.get("flask.debug"):
-                import ext.sfa.trust.credential as cred
-                client_cert = cred.Credential(string=geni_credentials[0]).gidCaller.save_to_string(save_parents=True)
-            else:
-                raise GENIv3ForbiddenError("Could not determine the client SSL certificate")
+            raise GENIv3ForbiddenError("Could not determine the client SSL certificate")
         # test the credential
         try:
             cred_verifier = ext.geni.CredentialVerifier(cert_root)

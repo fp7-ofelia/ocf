@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 
 from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 from interfaces.networkinterface import NetworkInterface
-from interfaces.vmallocatednetworkinterfaces import VMAllocatedNetworkInterfaces
 
 from resources.vtserver import VTServer
 from resources.virtualmachine import VirtualMachine
@@ -226,7 +225,7 @@ class VTResourceManager(object):
 	for vm in vms:
 	    vm_hrn = 'geni.gpo.gcf.' + slice_name + '.' + vm.name
 	    vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-	    deleted_vm = self.delete_vm(vm_urn, get_leaf(urn_to_hrn(slice_urn)))
+	    deleted_vm = self.delete_vm(vm_urn, slice_name)
 	    deleted_vms.append(deleted_vm)
 	db_session.expunge_all()
 	return deleted_vms
@@ -376,16 +375,16 @@ class VTResourceManager(object):
             params['memory-mb'] = allocated_vm.memory
 	    #XXX: Currently, this is always an empty list, interfaces are not allowed
 	    interfaces = list()
-	    for allocated_interface in allocated_vm.interfaces:
-	    	interface = dict()
-	    	interface['gw'] = allocated_interface.gw
-            	interface['mac'] = allocated_interface.mac
-            	interface['name'] = allocated_interface.name
-            	interface['dns1'] = allocated_interface.dns1
-            	interface['dns2'] = allocated_interface.dns2
-            	interface['ip'] = allocated_interface.ip
-            	interface['mask'] = allocated_interface.mask
-	    	interfaces.append(interface)
+	    #for allocated_interface in allocated_vm.interfaces:
+	    #	interface = dict()
+	    #	interface['gw'] = allocated_interface.gw
+            #	interface['mac'] = allocated_interface.mac
+            #	interface['name'] = allocated_interface.name
+            #	interface['dns1'] = allocated_interface.dns1
+            #	interface['dns2'] = allocated_interface.dns2
+            #	interface['ip'] = allocated_interface.ip
+            #	interface['mask'] = allocated_interface.mask
+	    #	interfaces.append(interface)
 	    params['interfaces'] = interfaces
 	    if not project:
 		project = params['project-id']
@@ -412,11 +411,23 @@ class VTResourceManager(object):
 	    	vm_name = get_leaf(vm_hrn)
 	    	slice_name = get_leaf(get_authority(vm_hrn))
 	    	vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
-	    	db_session.delete(vm)
-	    	db_session.commit()
-	    	vm_expires = VMExpires()
-	    	vm_expires.expires = end_time
-	    	created_vm['expires'] = end_time 
+		current_vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
+		#XXX: Very ugly, improve this
+		if not current_vm:
+		    time.sleep(6)
+		    current_vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
+		if current_vm:
+		    db_session.delete(vm)
+		    db_session.commit()
+	    	    vm_expires = VMExpires()
+	    	    vm_expires.expires = end_time
+	            vm_expires.vm_id = vm_created.id
+	    	    created_vm['expires'] = end_time 
+		    db_session.add(vm_expires)
+		    db_session.commit()
+		else:
+		    created_vm['expires'] = vm.expires
+		    created_vm['error'] = 'VM cannot be created'
 		db_session.expunge_all()
 	return created_vms
 	

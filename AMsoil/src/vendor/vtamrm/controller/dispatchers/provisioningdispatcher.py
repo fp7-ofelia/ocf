@@ -1,4 +1,4 @@
-import xmlrpclib, threading, logging, copy
+import xmlrpclib, threading, copy
 
 from utils.action import Action
 from utils.xmlhelper import XmlHelper
@@ -9,6 +9,10 @@ from communication.xmlrpcclient import XmlRpcClient
 from controller.actions.actioncontroller import ActionController
 from controller.policies.ruletablemanager import RuleTableManager
 from controller.drivers.vtdriver import VTDriver
+import amsoil.core.log 
+
+logging=amsoil.core.log.getLogger('ProvisioningDispatcher')
+
 
 class ProvisioningDispatcher():
   
@@ -21,8 +25,11 @@ class ProvisioningDispatcher():
 			logging.debug("ACTION type: %s with id: %s" % (actionModel.type, actionModel.uuid))
 
 			try:
+				logging.debug("************************** 1")
 				RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
+				logging.debug("************************** 2")
 			except Exception as e:
+				logging.debug("************************** 3" + str(e))
 				a = str(e)
 				if len(a)>200:
 					a = a[0:199]
@@ -44,15 +51,18 @@ class ProvisioningDispatcher():
 				raise e
 		
 			try:	
+				logging.debug("******************************* A")
 				#PROVISIONING CREATE
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					try:
+						logging.debug("*********************************** B")
 						vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
 					except:
 						vm = None
 						raise
 				#PROVISIONING DELETE, START, STOP, REBOOT
 				else :
+					logging.debug("***************************** C")
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
 
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
@@ -74,11 +84,16 @@ class ProvisioningDispatcher():
 	def __createVM(controller, actionModel, action):
         
 		try:
+			logging.debug("**************************** OK - 1")
 			actionModel.checkActionIsPresentAndUnique()
+			logging.debug("**************************** OK - 2")
 			Server, VMmodel = controller.getServerAndCreateVM(action)
+			logging.debug("**************************** OK - 3")
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
+			logging.debug("**************************** OK - 4")
 			#XXX:Change action Model
 			actionModel.objectUUID = VMmodel.getUUID()
+			logging.debug("**************************** OK - 5")
 			return VMmodel
 		except:
 			raise

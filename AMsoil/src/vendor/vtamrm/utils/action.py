@@ -1,10 +1,12 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import validates
 
-import logging
 import uuid
+import logging 
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
+import amsoil.core.log
+logging=amsoil.core.log.getLogger('Action')
 
 
 '''@author: SergioVidiella'''
@@ -92,9 +94,11 @@ class Action(Base):
         self.delete()
 
     def checkActionIsPresentAndUnique(self):
-    	if Action.objects.filter (uuid = self.uuid).count() != 0:
+    	if len(DB_SESSION.query(Action).filter(Action.uuid == self.uuid).all()) != 0:
+	    DB_SESSION.expunge_all()
             logging.error("Action with the same uuid already exists")
             raise Exception("Action with the same uuid already exists")
+	DB_SESSION.expunge_all()
 
     '''Validators'''
     @validates('type')

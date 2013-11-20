@@ -60,7 +60,7 @@ def set_key(server, key, old_value, new_value):
         server.ChangeConfig(key, new_value)
         print "Changed."
 
-DEFAULT_HOST_AND_PORT='127.0.0.1:8002'
+DEFAULT_HOST_AND_PORT='127.0.0.1:8005'
 #DEFAULT_HOST_AND_PORT='127.0.0.1:8001'
 
 if __name__ == '__main__':

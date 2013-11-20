@@ -33,6 +33,7 @@ class FlaskXMLRPC(object):
         {unique_service_name} just has to be a unique name (dont ask why).
         The {instance} is an object (an {Dispatcher} instance) providing the methods which get called via the XMLRPC enpoint.
         {endpoint} is the mounting point for the XML RPC interface (e.g. '/geni' )."""
+        # TODO only set the ClientCert Handler if configured
         handler = XMLRPCHandler(unique_service_name)
         handler.connect(self._flaskapp.app, endpoint)
         handler.register_instance(instance)

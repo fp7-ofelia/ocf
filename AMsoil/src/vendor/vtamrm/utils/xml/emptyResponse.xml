@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rspec xmlns="http://www.fp7-ofelia.eu/CF/vt_am/rspec">
+<response>
+	<provisioning>
+		<action type ="create" id="testid">
+			<status>FAILED</status>
+			<description>NONE</description>
+			<server>
+				<uuid>testuuid</uuid>
+ 	            <virtual-machines>
+ 	           	    <uuid>NONE</uuid>
+ 	            </virtual-machines>
+			</server>
+		</action>
+	</provisioning>
+</response>
+</rspec>

@@ -6,6 +6,10 @@ from utils.policylogger import PolicyLogger
 #CBA
 import uuid
 
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('VTResourceManager')
+
 
 '''
         @author: lbergesio, omoya, CarolinaFernandez
@@ -32,7 +36,7 @@ class RuleTableManager():
 	#RuleTable default atributes
 	#All rules created, moved or updated will be in a RuleTable with the atributes below
 	_defaultName = 'provisioning'
-	_defaultPersistence = 'Django'
+	_defaultPersistence = 'SQLAlchemy'
 	_defaultParser = 'RegexParser'
 	_persistenceFlag = True
 	_policyType = True #True: Accept; False:Deny
@@ -51,16 +55,24 @@ class RuleTableManager():
 
 	@staticmethod
 	def getInstance(name=None):
+		logging.debug("************************** 1a")
 		if not name:
+			logging.debug("************************** 1b")
 			name = RuleTableManager._defaultName
+		logging.debug("************************** 1c " + str(name))
 		mapps = dict()
                 mapps.update(RuleTableManager.getConditionMappings())
                 mapps.update(RuleTableManager.getActionMappings())
 		sorted(mapps.iterkeys())
+		for key in mapps.keys():
+			logging.debug("************************** 1" + str(key) + ' ' + str(mapps[key]))
 		
 		with RuleTableManager._mutex:
+		    try:
 			RuleTableManager._instance = RuleTable.loadOrGenerate(name, mapps, RuleTableManager._defaultParser, RuleTableManager._defaultPersistence, RuleTableManager._persistenceFlag, RuleTableManager._policyType, uuid.uuid4().hex)
-				
+			logging.debug("**************************** 1d " + str(RuleTableManager._instance))	
+		    except Exception as e:
+			logging.debug("**************************** 1e " + str(e))
 		return RuleTableManager._instance
 
         '''
@@ -148,9 +160,15 @@ class RuleTableManager():
 
 	@staticmethod
 	def Evaluate(metaObj, tableName=None):
+		logging.debug("************************** a")
 		try:
-			RuleTableManager.getInstance(tableName).evaluate(metaObj)
+		#	RuleTableManager.getInstance(tableName).evaluate(metaObj)
+			instance = RuleTableManager.getInstance(tableName)
+			logging.debug("*********************** b" + str(instance))
+			instance.evaluate(metaObj)
+			logging.debug("*********************** c")
 		except Exception as e:
+			logging.debug("************************** c" + str(e))
 			RuleTableManager.logger.error("Denied policy: %s" %(e))
 			#if isinstance(e, MultiplePolicyObjectsReturned):
 			# Policy denial raises Exception to avoid VM resources allocation

@@ -115,7 +115,7 @@ class VTDriver():
                 	db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
                 	db_session = scoped_session(db_session_factory)
 
-			return db_session.query(VTServer).filter(VTServer.uuid==uuid).getChildObject()
+			return db_session.query(VTServer).filter(VTServer.uuid == uuid)#.getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 

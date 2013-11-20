@@ -2,11 +2,13 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from sqlalchemy.orm import validates, relationship, backref
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 
 from resources.xenservervms import XenServerVMs
+from resources.xenvm import XenVM
+from resources.virtualmachine import VirtualMachine
 
 
 '''@author: SergioVidiella'''
@@ -42,13 +44,13 @@ class XenServer(Base):
     def constructor(name, osType, osDistribution, osVersion, agentUrl, agentPassword):
     	self = XenServer()
         try:
-            self.setName(name)
-            self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.setOSType(osType)
-            self.setOSDistribution(osDistribution)
-            self.setOSVersion(osVersion)
-            self.setAgentURL(agentUrl)
-            self.setAgentPassword(agentPassword)
+            self.vtserver.setName(name)
+            self.vtserver.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.vtserver.setOSType(osType)
+            self.vtserver.setOSDistribution(osDistribution)
+            self.vtserver.setOSVersion(osVersion)
+            self.vtserver.setAgentURL(agentUrl)
+            self.vtserver.setAgentPassword(agentPassword)
             return self
 	except Exception as e:
             print e
@@ -58,13 +60,13 @@ class XenServer(Base):
     '''Updater'''
     def updateServer(self,name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
     	try:
-            self.setName(name)
-            self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.setOSType(osType)
-            self.setOSDistribution(osDistribution)
-            self.setOSVersion(osVersion)
-            self.setAgentURL(agentUrl)
-            self.setAgentPassword(agentPassword)
+            self.vtserver.setName(name)
+            self.vtserver.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.vtserver.setOSType(osType)
+            self.vtserver.setOSDistribution(osDistribution)
+            self.vtserver.setOSVersion(osVersion)
+            self.vtserver.setAgentURL(agentUrl)
+            self.vtserver.setAgentPassword(agentPassword)
    	    return self
    	except Exception as e:
             print e
@@ -88,7 +90,7 @@ class XenServer(Base):
 
     def createVM(self, name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType):
 	with MutexStore.getObjectLock(self.getLockIdentifier()):
-            if XenVM.objects.filter(uuid=uuid).count() > 0:
+            if len(DB_SESSION.query(VirtualMachine).filter(VirtualMachine.uuid == uuid).all()) > 0:
     		raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
             #Allocate interfaces for the VM
             interfaces = self.createEnslavedVMInterfaces()

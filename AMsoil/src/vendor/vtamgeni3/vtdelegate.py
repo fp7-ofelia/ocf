@@ -19,7 +19,7 @@ class VTDelegate(GENIv3DelegateBase):
 	A Delegate for the VT AM 
     """
 
-    URN_PREFIX = 'urn:VT_AM'
+    URN_PREFIX = 'urn:publicid:IDN+geni:gpo:gcf'
 
     def __init__(self):
         super(VTDelegate, self).__init__()
@@ -300,7 +300,7 @@ class VTDelegate(GENIv3DelegateBase):
         for key in provisioned_vms.keys():
             for provisioned_vm in provisioned_vms[key]:
 		if provisioned_vm.has_key('error'):
-                    slivers.append(self._get_sliver_status_hash(provisioned_vm, True, True, provisioned_vm['error']))
+                    slivers.append(self._get_sliver_status_hash(provisioned_vm, False, False, provisioned_vm['error']))
 		else:
 		    slivers.append(self._get_sliver_status_hash(provisioned_vm, True, True))
         return rspecs, slivers

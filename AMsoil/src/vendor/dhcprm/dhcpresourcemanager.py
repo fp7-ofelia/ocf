@@ -33,7 +33,7 @@ class DHCPResourceManager(object):
     
     def get_all_leases(self):
         leases = []
-        for ip in IP([192,168,1,1]).upto(IP([192,168,1,20])): # for the sake of simplicity, we set the ip range statically (should be a config option)    
+        for ip in IP([192,168,1,1]).upto(IP([192,168,1,20])): # for the sake of simplicity, we set the ip range statically (should be a config option)
             lease = db_session.query(DHCPLease).filter(DHCPLease.ip_str == str(ip)).first()
             if lease == None: # there is no lease currently, so we return a blank object with just the ip set
                 leases.append(DHCPLease(ip_str=str(ip)))
@@ -48,7 +48,7 @@ class DHCPResourceManager(object):
             raise DHCPLeaseAlreadyTaken(ip_str)
 
         # change database entry
-        lease = DHCPLease(ip_str=ip_str, slice_name=slice_name, owner_uuid=owner_uuid, owner_email=owner_email)
+        lease = DHCPLease(ip_str=ip_str, slice_name=slice_name, owner_uuid=str(owner_uuid), owner_email=owner_email)
         lease.set_end_time_with_max(end_time, self.RESERVATION_TIMEOUT)
         db_session.add(lease)
         db_session.commit()
@@ -118,7 +118,7 @@ class DHCPLease(Base):
     """Please see the Database wiki page."""
     __tablename__ = 'leases'
     id = Column(Integer, primary_key=True)
-    ip_str = Column(String(19))
+    ip_str = Column(String(20))
     slice_name = Column(String(255))
     owner_uuid = Column(String(100)) # could also be limited to 37, 42 or 46
     owner_email = Column(String(255)) # could also be limited to 254

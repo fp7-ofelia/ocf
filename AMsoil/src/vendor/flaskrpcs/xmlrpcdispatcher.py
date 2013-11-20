@@ -16,12 +16,11 @@ class XMLRPCDispatcher(object):
 
     @serviceinterface
     def requestCertificate(self):
-        """Retrieve the certificate which the client has sent. If using the development server, the certificate can not be determined (werkzeug is stupid in that sense)."""
+        """Retrieve the certificate which the client has sent."""
         # get it from the request's environment
         if request.environ.has_key('CLIENT_RAW_CERT'):
             return request.environ['CLIENT_RAW_CERT']
         return None
-        
 
     def _dispatch(self, method, params):
         self._log.info("Called: <%s>" % (method))

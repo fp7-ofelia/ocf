@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
+from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
 from sqlalchemy.orm import validates, relationship, backref
 
 import uuid
@@ -43,7 +43,7 @@ class VTServer(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     available = Column(TINYINT(1), nullable=False, default=1)
     enabled = Column(TINYINT(1), nullable=False, default=1)
-    name = Column(String(511), nullable=False, default="")
+    name = Column(VARCHAR(length=511), nullable=False, default="")
     uuid = Column(String(1024), nullable=False, default=uuid.uuid4())
 
     '''OS'''

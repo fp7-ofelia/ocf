@@ -54,3 +54,7 @@ class VTAMNoSliversInSlice(VTAMException):
 class VTAMVMNotFound(VTAMException):
     def __init__(self, urn):
 	super(VTAMVMNotFound, self).__init__("The given urn doesn't correspond to any vm (%s)" % (urn,))
+
+class VTAMNoVMsInSlice(VTAMException):
+    def __init__(self, urn):
+	super(VTAMNoVMsInSlice, self).__init__("The given slice doesn't contain any vm (%s)" %(urn,))
