@@ -23,10 +23,6 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 		pathToMountPoint = ""	
 		XenProvisioningDispatcher.logger.info("Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id)
 		try:
-			#Synthesize config file
-			VMConfigurator.createVmConfigurationFile(vm)
-			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
-			
 			#Clone HD
 			HdManager.clone(vm)
 			XenProvisioningDispatcher.logger.debug("HD cloned successfully...")
@@ -43,6 +39,10 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			HdManager.umount(vm,pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD unmounted successfully...")
 	
+			#Synthesize config file
+			VMConfigurator.createVmConfigurationFile(vm)
+			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
+			
 			XenProvisioningDispatcher.logger.info("Creation of VM "+vm.name+" has been successful!!")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
