@@ -8,7 +8,7 @@
 	$(document).ready(function() {
 		$("#id_disc_image").change(function() {
            	if ($("#id_disc_image").val() == "spirent") {
-				$("#id_hdSetupType").val("file-full-image");
+				$("#id_hdSetupType").val("full-file-image");
 				$("#id_virtualizationSetupType").val("hvm");
 				$("#id_memory").val("1024");
 				$("#id_hdSetupType").prop("disabled","disabled");	/* XXX: use .prop instead of .attr for jQuery 1.6+) */
@@ -20,8 +20,8 @@
 				$("#id_hdSetupType").prop("disabled","disabled");
 				$("#id_virtualizationSetupType").prop("disabled","disabled");
 			} else if ($("#id_disc_image").val() == "irati") {
-				$("#id_hdSetupType").val("file-image");
-				$("#id_virtualizationSetupType").val("paravirtualization");
+				$("#id_hdSetupType").val("full-file-image");
+				$("#id_virtualizationSetupType").val("hvm");
 				$("#id_memory").val("256");
 				$("#id_hdSetupType").prop("disabled","disabled");
 				$("#id_virtualizationSetupType").prop("disabled","disabled");
