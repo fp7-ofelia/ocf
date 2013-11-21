@@ -10,13 +10,11 @@
 </div>
 
 <div class="project_edit">
-	<form action="" method="POST">{% csrf_token %}
-		<table class="formtable_noborder">
-			{{ form.as_table }}
-		</table>
+	<form class="form" action="" method="POST">{% csrf_token %}
+		{{ form.as_p }}
 		<div class="center">
 			<input type="submit" id="form_create_project" value="Save" />
-                        <input type="button" onclick="javascipt:document.location='{% before_last_link breadcrumbs %}'" value="Cancel" />
+            <input type="button" onclick="javascipt:document.location='{% before_last_link breadcrumbs %}'" value="Cancel" />
 		</div>
 	</form>
 </div>

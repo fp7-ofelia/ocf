@@ -2,9 +2,9 @@
 
 {% block head %}
 
-<link rel="stylesheet" type="text/css" href="{% url css_media 'jquery-ui.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% url css_media 'themes/redmond/jquery.ui.theme.css' %}" />
-<script type="text/javascript" src="{% url js_media 'jquery-ui.min.js' %}"></script>
+<link rel="stylesheet" href="{% url css_media 'jquery-ui.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'themes/redmond/jquery.ui.theme.css' %}" />
+<script src="{% url js_media 'jquery-ui.min.js' %}"></script>
 
 <style>
 img.perm_help {
@@ -51,36 +51,37 @@ img.perm_help {
                 the form with appropriate information and click the "Request" button.
         </div>
         <br />
-    <form action="" method="post">{% csrf_token %}
-		<table class="formtable_noborder">
-			{% for field in form %}
-			    <!-- Show project form only when current permission allows to create it -->
-			    {% if perm_name != obj_perm.permission.name or field.name != "permission_owner" %}
-				<tr><th colspan="2">{{ field.errors }}</th></tr>
-				<tr><th>{{ field.label_tag }}
-	        	            {% if obj_perm.permission.name == "can_create_project"%}
-                                        {% if field.name == "name" or field.name == "organization" or field.name == "message" %}
-                                            <img id="perm_{{field.name}}_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-                                            <div class="tooltip perm_help" id="perm_{{field.name}}_help">
+    <form class="form" action="" method="post">{% csrf_token %}
+		{% for field in form %}
+		    <!-- Show project form only when current permission allows to create it -->
+		    {% if perm_name != obj_perm.permission.name or field.name != "permission_owner" %}
+				<p>
+					{{ field.errors }}
+				</p>
+				<p>
+				{{ field.label_tag }}:
+	       		{% if obj_perm.permission.name == "can_create_project"%}
+                   	{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
+                       	<img id="perm_{{field.name}}_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+                        <div class="tooltip perm_help" id="perm_{{field.name}}_help">
+                   		{% if field.name == "name" %}
+           	        		Provide a descriptive name for the project.
+           	        	{% endif %}
+           	        	{% if field.name == "organization" %}
+   	                	 	Make sure you set your affiliation.
+   	                	{% endif %}
+	                	{% if field.name == "message" %}
+                    	    Provide a short description for the project.
+                    	{% endif %}
+						{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
+				    	</div>
+						{% endif %}
 					{% endif %}
-                                        {% if field.name == "name" %}
-                                              Provide a descriptive name for the project.
-                                        {% endif %}
-                                        {% if field.name == "organization" %}
-                                              Make sure you set your affiliation.
-                                        {% endif %}
-                                        {% if field.name == "message" %}
-                                              Provide a short description for the project.
-                                        {% endif %}
-					{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
-					    </div>
-					{% endif %}
-				    {% endif %}
-				: </th><td>{{ field }}</td>
-				</tr>
 				{% endif %}
-			{% endfor %}
-		</table>
+				{{ field }}
+			{% endif %}
+			</p>
+		{% endfor %}
 	    <div>
 		    <input type="submit" value="Request" />
 		    <input type="button" onclick="javascript:document.location='{% url home %}'" value="Cancel" />

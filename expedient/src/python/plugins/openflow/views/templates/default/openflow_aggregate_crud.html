@@ -4,67 +4,28 @@
 
 {% block content %}
 <div class="main">
-	<form enctype="multipart/form-data" method="post" action="">{% csrf_token %}
-	<table class="formtable_noborder aggregate_create">
+	<form class="form" enctype="multipart/form-data" method="post" action="">{% csrf_token %}
+	<p>{{ agg_form.non_field_errors }}</p>
+	{{ agg_form.as_p }}
 
-	{# {{ agg_form.non_field_errors }} #}
-	{# {{ agg_form.as_table }} #}
-
-        {# Aggregate Manager information #}
-        {% if agg_form.non_field_errors %}
-            <tr><td></td><td>{{ agg_form.non_field_errors }}</td></tr>
-        {% endif %}
-        {% for field in agg_form %}
-            {% if field.errors %}
-                <tr><td></td><td>{{ field.errors }}</td></tr>
-            {% endif %}
-            <tr>
-                <th> {{ field.label_tag }}:</th>
-                <td>
-                    {% if field.name == 'location' %}
-                        <ul id="warninglist_id_location" class="warning" style="list-style-image: url('{% url img_media 'warning.png' %}');">
-                            <li>
-                                {{ field.help_text }}
-                            </li>
-                        </ul>
-                    {% endif %}
-                    {{ field }} {{ field.help_text }}
-                </td>
-            </tr>
-        {% endfor %}
-
-        {# Client information #}
-	{% if client_form.non_field_errors %}
-	    <tr><td></td><td>{{ client_form.non_field_errors }}</td></tr>
-        {% endif %}
-        {% for field in client_form %}
-            {% if field.name == 'url' %}
-                {% if errors %}
-                    <tr><td></td><td><ul id="errorlist_err_url" class="error"><li>{{ errors }}</li></ul></td></tr>
-                {% endif %}
-            {% else %}
-                {% if field.errors %}
-                    <tr><td></td><td>{{ field.errors }}</td></tr>
-                {% endif %}
-            {% endif %}
-            <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
-        {% endfor %}
+	<p>{{ client_form.non_field_errors }}</p>
+	{{ client_form.as_p }}
 
 	{% if not create %}
-	<tr>
-		<th>Current status:</th>
-		<td class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
-	</tr>
+	<p>
+		<label for="status">Current status:</label>
+		<span class="status">{% if available %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</span>
+	</p>
 	{% endif %}
-    </table>
+
 	<div class="center">
-	    {% if create %}
-		<input type="submit" id="form_create_AM" value="Create" />
+		{% if create %}
+			<input type="submit" id="form_create_AM" value="Create" />
 		{% else %}
-		<input type="submit" id="form_update_AM" value="Update" />
-		<input type="button" id="form_delete_AM" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
+			<input type="submit" id="form_update_AM" value="Update" />
+			<input type="button" id="form_delete_AM" value="Delete" onclick="document.location='{% url aggregate_delete aggregate.pk %}'"/>
 		{% endif %}
-		<input type="button" id="form_cancel_AM" value="Cancel" onclick="document.location='{% url home %}'"/>
+		<input type="button" id="form_cancel_AM" value="Cancel" onclick="document.location='{% url administration_home %}'"/>
 	</div>
 	</form>
 </div>

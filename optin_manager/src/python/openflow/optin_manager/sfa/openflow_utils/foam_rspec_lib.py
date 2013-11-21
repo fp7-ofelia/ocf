@@ -52,6 +52,8 @@ def getAdvertisement (nodes):
   if links:    
     for link in links:
       addAdLink(rspec, link)
+    for link in links:
+      addGeniLink(rspec,link)
 #getLinks END 
 
   xml = StringIO()
@@ -91,6 +93,23 @@ def addAdLink (rspec, link):
   od.attrib["dstDPID"] = link['dst']['dpid']#link["dstDPID"]
   od.attrib["dstPort"] = link['dst']['port']#link["dstPort"]
 
+def addGeniLink(rspec, link):
+  def add_dpid(od, dpid):
+    dpids = ET.SubElement(od, "{%s}datapath" %(OFNSv3))
+    dpids.attrib["component_id"] = "urn:publicid:IDN+foam+authority+datapath+%s" % dpid
+    dpids.attrib["component_manager"] = "urn:publicid:IDN+foam+authority"
+    dpids.attrib["dpid"] = dpid
+  def add_port(od, port):
+    ps = ET.SubElement(od, "{%s}port" %(OFNSv3))
+    ps.attrib["port_num"] = link['src']['port']
+
+  od = ET.SubElement(rspec, "{%s}link" % (OFNSv3))
+  od.attrib["component_id"] = "urn:publicid:IDN+foam+authority+link+%s_%s_%s_%s" %(link['src']['dpid'], link['src']['port'],link['dst']['dpid'],link['dst']['port'])
+  add_dpid(od, link['src']['dpid'])
+  add_port(od, link['src']['port'])
+  add_dpid(od,link['dst']['dpid'])
+  add_dpid(od,link['dst']['port']) 
+  
 
 def generateSwitchComponentID (dpid, tag = None):
   if tag is None:

@@ -1,4 +1,4 @@
-from openflow.optin_manager.sfa.vm_util.expiration_manager import ExpirationManager
+from openflow.optin_manager.sfa.openflow_utils.expiration_manager import ExpirationManager
 import threading
 import time
 
@@ -6,10 +6,10 @@ class BackgroundExpirationMonitoring(threading.Thread):
       
     period = 3600*6  #seconds
    
-    def __init__(self)
+    def __init__(self):
         threading.Thread.__init__(self)
         
-    def monitor()
+    def monitor():
         self.start()
      
     def run():

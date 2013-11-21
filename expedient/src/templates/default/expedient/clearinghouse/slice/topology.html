@@ -1,21 +1,17 @@
-<h2>
+<!--<h2>
 	<a id="topology" class="expandableTooltipable expandableCtl" ref="#/">
-		Topology <span class="opened"> &#x25B2;</span>
-	</a>
-</h2>
+        Topology <span class="opened"> &#x25B2;</span>
+    </a>
+</h2>-->
+<h2>Topology</h2>
 
-
-<script src="{% url js_media 'tooltip.topology.js' %}"></script>
-<script src="{% url js_media 'd3.v2.min.js' %}"></script>
-<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.topology.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
-
+<link rel="stylesheet" href="{% url css_media 'tooltip.topology.css' %}" />
+<link rel="stylesheet" href="{% url css_media 'tooltip.css' %}" />
 <style>
   .link {
     stroke: #ccc;
     stroke-width:1px;
   }
-  
   .node {
     stroke-width:2px;
   }
@@ -24,14 +20,16 @@
     font: 10px sans-serif;
   }
 </style>
+<script src="{% url js_media 'tooltip.topology.js' %}"></script>
+<script src="{% url js_media 'd3.v2.min.js' %}"></script>
 
 {#Render#}
-<div id="topologyContainer" class="expandable" style="border:1px solid #CCCCCC;padding:0px;overflow:hidden;margin-bottom:20px;">
-  <div id="selected_node_info" style="height:14px;background-color:#DDDDDD;">
+<div id="topologyContainer" class="expandable">
+  <div id="selected_node_info">
     Tip: Move cursor over the icons to get extra information...
   </div>
   {%if not d3_nodes %}
-  <a href="#addAggregate">
+  <a href="#aggregate_add_to_slice">
     <div style="position:relative; top:200px; left:200px; width:450px;color=black;">
       Nothing to show yet. Add Aggregates to the slice.
     </div>
@@ -39,8 +37,13 @@
   {% endif %}
   <div id="target">
   </div>
-  <div style="width:100%;text-align:right;padding-top:2px;margin-top:2px;background-color: #333333">
+  <div id="topology_options_menu">
     
+    <!--
+<a href="#" onClick="return showAllInfo()"/>
+Show
+</a>
+&nbsp;-->
   <a href="javascript: regroup()">
     <img alt="Group" title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle" />
   </a>
@@ -53,18 +56,26 @@
     <img alt="Zoom out" title="Zoom out"src="{% url img_media 'zoomout.png' %}" style="height:16px;" />
   </a>
   &nbsp;
-  <a id="link_zoom_reset" href="javascript: zoomReset()">
+  <a id="link_zoom_out" href="javascript: zoomReset()">
     <img alt="Zoom reset" title="Zoom reset" src="{% url img_media 'zoom.png' %}" style="height:16px;" />
   </a>
   &nbsp;
 </div>
 </div>
 
-<script type="text/javascript">
+<!--
+<script>
+    var nIslands = {{ n_islands }};
+    //FIXME: problematic because of "'" (&#38;)
+    //var d3_nodes = {{ d3_nodes }};
+</script>
+<script src="{% url js_media 'topology.js' %}"></script>
+-->
+<script>
 /* d3 data */
-var nIslands = {{ n_islands }},
+var nIslands = {{ n_islands}},
     pad = 5,
-    width = 740,
+    width = parseInt($("#topologyContainer").css("width")), /* Obtain width from container */
     height = 400
 
 //Islands area generation
@@ -105,6 +116,7 @@ function pEllipse(set){
         d = 2;
 
         try {
+            //alert("pEllipse => x0: " + set.x0 + ", x1: " + set.x1 + "; y0: " + set.y0 + ", y1: " + set.y1);
 	    cx = (set.x1 + set.x0)/2;
 	    rx = ((set.x1 - set.x0)/2 + (set.y1 - set.y0)/2)/2;
 	    cy = (set.y1 + set.y0)/2;
@@ -120,34 +132,113 @@ function pEllipse(set){
 	return p;
 }
 
+
+/* Code used for calculating groups/islands within frontend */
+/*
+var assigned_groups = [];
+
+function adequate_group(node_aggregate) {
+    var node_group = 0;
+    for(var group in assigned_groups) {
+        // If some other type was assigned the same group, increment group for current type
+        if (node_aggregate == assigned_groups[group].aggregate) {
+            node_group = assigned_groups[group].group;
+        } else {
+            node_group = assigned_groups[assigned_groups.length-1].group+1;
+        }
+    }
+    // List of sublists: [aggregate, group]
+    assigned_groups[node_group] = {group: node_group, aggregate: node_aggregate};
+    return node_group;
+}
+
+function get_group_from_aggregate(aggregate) {
+    obtained_group = -1;
+    for(var group in assigned_groups) {
+        if (assigned_groups[group].aggregate == aggregate) {
+            obtained_group = assigned_groups[group].group;
+        }
+    }
+    return obtained_group;
+}
+*/
+
 var epoints= [
                 {% for node in d3_nodes %}
                         points = pEllipse(foci[{{node.group}}]),
                 {% endfor %}
         ]
+/* XXX: test */
+/*{% for link in d3_links %}
+    console.log("link.source: " + {{ link.source }});
+    console.log("link.target: " + {{ link.target }});
+{% endfor %}*/
+
+// GET D3 INDEX FROM RESOURCE ID
+/*function get_d3index_from_resourceid(node_value) {
+    obtained_index = 0;
+    for (var node in data.nodes) {
+        if (node.nodeValue == node_value) {
+            obtained_index = node.index;
+        }
+    }
+    return obtained_index;
+}*/
 
 var data = {
     nodes: [
         {% for node in d3_nodes %}
         {
             nodeValue: "{{ node.value }}", nodeName: "{{ node.name }}", image: "{{ node.image }}", color: "",
-            group: {{ node.group }}, location: "{{ node.location }}", type: "{{ node.type }}",
+            /* Code used for calculating groups/islands within frontend */
+            /*group: adequate_group({{ node.aggregate }}),*/
+            group: {{ node.group }}, /*aggregate: {{ node.aggregate }},*/
+            location: "{{ node.location }}", type: "{{ node.type }}",
             description: "{{ node.description }}", fixed: false, radius: 10, available: "{{ node.available }}",
         }
         {% if not forloop.last %},{% endif %}
         {% endfor %}
     ], 
-    /* Carolina: should have only index'es inside "source" and "target" and then access "nodes"
-       to save space (2 objects per link); but there are some problems when adding links to the
-       force topology in D3.js*/
+    /* Carolina: should have only index'es inside "source" and "target" and then access "nodes" to save
+    space (2 objects per link); but there are some problems when adding links to the force topology in D3.js*/
     links: [
         {% for link in d3_links %}
             { source: {{ link.source }}, target: {{ link.target }}, value: "{{ link.value }}" }
+            /*{ source: get_d3index_from_resourceid({{ link.source }}),
+              target: get_d3index_from_resourceid({{ link.target }}), value: "{{ link.value }}" }*/
+            /*{ source: 7, target: 8, value: "{{ link.value }}" }*/
             {% if not forloop.last %},{% endif %}
         {% endfor %}
 	
     ],
 }
+
+// GET D3 INDEX FROM RESOURCE ID
+/*function get_d3index_from_resourceid(node_value) {
+    obtained_index = 0;
+    for (var node in data.nodes) {
+        if (node.nodeValue == node_value) {
+            obtained_index = node.index;
+        }
+    }
+    return obtained_index;
+}
+
+for (li = 0; li < data.links.length; li++) {
+    console.log("bleeergh: " + data.links[li]);
+    console.log("checking ids (source: " + data.links[li].source + "), (target: " + data.links[li].target + ")");
+    data.links[li].source = get_d3index_from_resourceid(data.links[li].source);
+    data.links[li].target = get_d3index_from_resourceid(data.links[li].target);
+}*/
+
+/* Code used for calculating groups/islands within frontend */
+/*
+var epoints= [
+                {% for node in d3_nodes %}
+                        points = pEllipse(foci[get_group_from_aggregate({{ node.aggregate }})]),
+                {% endfor %}
+        ]
+*/
 
 /* Useful functions*/
 
@@ -383,10 +474,27 @@ nodes.forEach(function(d) {
 
 var links = data.links;
 
-var force = d3.layout.force()
+/*console.log("before FORCE: ");
+for (ki = 0; ki < links.length; ki ++) {
+    console.log("link [source] #" + ki + " '" + links[ki].source.nodeName + "': " + links[ki].source.index);
+    console.log("link [target] #" + ki + " '" + links[ki].target.nodeName + "': " + links[ki].target.index);
+}*/
+
+// Original version (Sergio)
+/*var force = d3.layout.force()
     .gravity(0)
     .distance(100)
     .charge(-500)
+    .friction(0.6)
+    .size([width, height])
+    .nodes(nodes)
+    .links(links)
+    .start();*/
+
+// Modified version (Carolina)
+var force = d3.layout.force()
+    .gravity(1/(2*nIslands))
+    .distance(200/nIslands)
     .friction(0.6)
     .size([width, height])
     .nodes(nodes)
@@ -504,7 +612,7 @@ node.on("mouseover", function (d, i){
 	}
 	)
 	.on("mouseout", function() {
-			$("#selected_node_info").css("background-color", "#DDDDDD");
+			$("#selected_node_info").css("background-color", "#ebf5ff");
 			//$("#selected_node_info").hide()
                         tooltip.hide();
                 })
@@ -544,14 +652,12 @@ force.on("tick", function(e){
         } else {
             fact = o.group+1;
         }
-	/*
-	Carolina: when there are few nodes, avoid them to stay too far away from the center
-	AND when there are so many nodes avoid them to stay too near each others
-	*/
+	// Carolina: when there are few nodes, avoid them to stay too far away from the center
+        // AND when there are so many nodes avoid them to stay too near each others 
 	if(qNodes[o.group] < 5){
 	    fact = fact * 2;
 	} else {
-	    fact = fact / 2;
+	    fact = fact/2;
 	}
         try {
 	    o.y += k * fact * qNodes[o.group] * ((dataislands[o.group].cy) - o.y);
@@ -667,4 +773,3 @@ $("#link_zoom_out").click(function(){
 });
 
 </script>
-

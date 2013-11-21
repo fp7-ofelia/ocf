@@ -21,7 +21,7 @@ class ExpirationManager:
         expired_components = list()
         for slice in slices:
             expiration_date = int(datetime_to_epoch(utcparse(slice.expires)))
-            if expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow())))
+            if expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow()))):
                 try:
                     VTSfaDriver().crud_slice(slice.slice,slice.authority, 'delete_slice')
                 except:

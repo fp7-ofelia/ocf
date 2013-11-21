@@ -1,0 +1,51 @@
+#topologyContainer {
+	background: #fff !important; /* Overwrites settings from .expandable */
+	border: 1px solid #7e9fc0 !important;
+	margin-bottom: 20px;
+	overflow: hidden;
+	padding: 0px !important;
+}
+#topologyAddAggregate {
+	left: 25em;
+	position: relative;
+	top: 15em;
+	width: 450px;
+}
+#target svg {
+	width: 100% !important;
+}
+
+/* Buttons within lower menu */
+#topology_options_menu {
+	background-color: #3d5266;
+	margin-top: 2px;
+	padding-top: 2px;
+	text-align: right;
+	width: 100%;
+}
+#link_group img, #link_zoom_out img {
+	height: 16px;
+	text-align: middle;
+}
+#link_zoom_in img, #link_zoom_out img {
+	height:16px;
+}
+
+/* Links and nodes */
+.link {
+	stroke: #ccc;
+	stroke-width:1px;
+}
+.node {
+	stroke-width:2px;
+}
+.node text {
+	pointer-events: none;
+	font: 10px sans-serif;
+}
+#selected_node_info {
+	background-color: #ebf5ff;
+	height: 14px;
+	text-shadow: #eee -3px 2px 4px;
+}
+

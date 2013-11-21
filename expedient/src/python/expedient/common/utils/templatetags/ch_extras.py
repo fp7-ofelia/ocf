@@ -1,7 +1,23 @@
 from django import template
 from django.utils.safestring import mark_safe
+from expedient.common.permissions.shortcuts import has_permission
+from django.contrib.auth.models import User
 
 register = template.Library()
+
+@register.filter
+def is_super_user(user):
+    """
+    Checks if the given user is superuser.
+
+        @param user User object
+        @return boolean True or False depending on permissions for user
+    """
+    isSuperUser = False
+    if (has_permission(user, User, "can_manage_users")):
+        return True
+    else:
+        return False
 
 @register.filter
 def cat(obj1, obj2):

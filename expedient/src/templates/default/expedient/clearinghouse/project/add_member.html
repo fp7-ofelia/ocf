@@ -17,13 +17,11 @@
 		<h1>Add a Member to Project {{ project.name }}</h1>
 	</div>
 	<div class="member_form">
-		<form action="." method="post">{% csrf_token %}
-			<table class="formtable_noborder">
-				{{ form.as_table }}
-			</table>
+		<form class="form" action="." method="post">{% csrf_token %}
+				{{ form.as_p }}
 			<div class="center">
 				<input type="submit" value="Add" />
-				<a href="{{ breadcrumbs.1.1 }}">Cancel</a>
+				<input type="button" value="Cancel" onclick="document.location='{{ breadcrumbs.1.1 }}'" />
 			</div>
 		</form>
 	</div>

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "FIBRE Virtualization Manager Registration" %}</h1>
+<form method="post" action=".">{% csrf_token %}
+  {{ form.as_p }}
+
+  <input type="submit" value="{% trans 'Submit' %}" />
+</form>
+{% endblock %}

@@ -7,6 +7,10 @@ import re
 from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE,OXA_FILEHD_NICE_PRIORITY,OXA_FILEHD_CREATE_SPARSE_DISK,OXA_FILEHD_IONICE_CLASS, OXA_FILEHD_IONICE_PRIORITY,OXA_FILEHD_DD_BS_KB, OXA_DEFAULT_SWAP_SIZE_MB
 from utils.AgentExceptions import *
 from utils.Logger import Logger
+from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
+from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
+from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
+from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
 
 '''
 	@author: msune
@@ -215,7 +219,10 @@ class FileFullHdManager(object):
 			os.makedirs(path)		
 	
 		vm_path=FileFullHdManager.getHdPath(vm)
-		FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
+		if vm.xen_configuration.configurator == IratiDebianVMConfigurator.getIdentifier():
+			FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=44040192 '+str(vm_path)+" "+str(path))	
+		else:
+			FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
 	
 		return path
 

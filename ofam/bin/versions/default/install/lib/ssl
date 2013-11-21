@@ -1,0 +1,89 @@
+#!/bin/bash
+
+#SSL routines. Installing SSL certificates in apache2 (according to vhost configurations of the apps)
+
+
+
+function installSSLCertificates(){
+
+	local DAYS=3650
+
+	mkdir /etc/apache2/ssl.crt/ /etc/apache2/ssl.crt/ca_clients/ /etc/apache2/ssl.key/ /etc/apache2/ssl.crl || warning "Could not mkdir ssl directories under /etc/apache2 (maybe already there?). Proceeding with installation..."
+	touch /etc/apache2/ssl.crt/ca_clients.crt || warning "Could not touch ca_clients file under /etc/apache2/ssl.crt (maybe already there?). Proceeding with installation..."
+
+	print ""
+	print "Generating CA certificate..."
+	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	warning "You are creating the CA (Certificate Authority) certificate. Do NOT use the same Common Name (CN) for the CA certificate and the Apache (next step certificate, or apache will issue a 'sec_error_bad_signature'. Since CN must be correct in the next step, just use a different CN (even if it is not valid) for the CA's certificate CN"
+	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	print ""
+
+	#CA key
+	openssl genrsa  -passout pass:donotcare -des3 -out /etc/apache2/ssl.crt/ca.key 4096  || error "Could not generate CA certificate."
+
+	print ""
+	print "Generating CA Request certificate..."
+	warning "You will be promted for several information. Please make sure CommonName (CN) is correct (correct IP or domain name). Do not enter extra information as it seems apache2/openssl is buggy?¿)"
+	print ""
+
+
+	#Request
+	openssl req  -passin pass:donotcare -new -x509 -days $DAYS -key /etc/apache2/ssl.crt/ca.key -out /etc/apache2/ssl.crt/ca.crt || error "Could not generate Request certificate."
+
+	print ""
+	print "Generating private key..."
+	print ""
+
+	#Key
+	openssl genrsa -passout pass:donotcare -des3 -out /etc/apache2/ssl.key/server.key 4096 || error "Could not generate Key."
+
+	print ""
+	print "Generating Request..."
+	warning "Make sure this time CN is correct!!"
+	print ""
+
+	#sign request
+	openssl req  -passin pass:donotcare -new -key /etc/apache2/ssl.key/server.key -out /etc/apache2/ssl.key/server.csr || error "Could not sign request."
+
+	print ""
+	print "Generating CA-signed SSL certificate..."
+	print ""
+
+	#Generate certificate
+	openssl x509 -req  -passin pass:donotcare -days $DAYS -in /etc/apache2/ssl.key/server.csr -CA /etc/apache2/ssl.crt/ca.crt -CAkey /etc/apache2/ssl.crt/ca.key -set_serial 01 -out /etc/apache2/ssl.key/server.crt -passin pass:donotcare || error "Could not generate certificate."
+	
+	print ""
+	print "Moving keys and cleaning the house..."
+	print ""
+
+	#Move keys
+	openssl rsa -passin pass:donotcare -in /etc/apache2/ssl.key/server.key -out /etc/apache2/ssl.key/server.key.insecure || error "Could not regenerate Key."
+	mv /etc/apache2/ssl.key/server.key /etc/apache2/ssl.key/server.key.secure || error "Could not move keys."
+	mv /etc/apache2/ssl.key/server.key.insecure /etc/apache2/ssl.key/server.key|| error "Could not move keys."
+	mv /etc/apache2/ssl.key/server.crt /etc/apache2/ssl.crt/|| error "Could not move server certificate."
+	
+}
+
+#Routine
+
+printHeader ">" "Building SSL certificates..."
+print ""
+
+if [ ! -f /etc/apache2/ssl.key/server.key  ] || [ ! -f /etc/apache2/ssl.crt/server.crt   ]; then
+	installSSLCertificates
+
+else
+	if [ "$FORCE" == 0 ]; then 
+		print ""
+		warning "SSL certificates exist; this is not a problem if they were previously installed correctly. If you experience problems with SSL certificates, consider using force flag (-f) to overwrite current SSL certificates. "
+		print ""
+	else
+		confirm "SSL certificates seem to be installed in apache's folder. Do you want to overwrite them." $DONT_ABORT $NO_RESCUE
+
+		if [ $? == 0 ]; then
+			installSSLCertificates
+		fi
+
+	fi
+
+fi

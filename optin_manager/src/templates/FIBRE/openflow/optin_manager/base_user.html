@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+        <link rel="stylesheet" type="text/css" href="{% url css_media 'ocf.css' %}" />
+	<link rel="icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
+        <link rel="shortcut icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
+
+		<title>
+			FIBRE Opt-In Manager - {% block title %}Opt-In Manager{% endblock %}
+		</title>
+
+	<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+	<script type="text/javascript">
+	
+	$(document).ready(function(){
+    	$(".menuimg,.submenuimg")
+        	.mouseover(function() { 
+	            var src = $(this).attr("src").replace("dark", "light");
+    	        $(this).attr("src", src);
+        	})
+        	.mouseout(function() {
+            	var src = $(this).attr("src").replace("light", "dark");
+            	$(this).attr("src", src);
+       	 	});
+	});
+
+	$(document).ready(function(){
+		$(".manage_fs_sub_menu").hide();
+		$("#manage_fs")
+			.click(function() {
+				$(".manage_fs_sub_menu").toggle('normal');
+				$(".experiments_sub_menu").hide();
+				$(".profile_sub_menu").hide();
+			});
+	});
+		
+	$(document).ready(function(){
+		$(".experiments_sub_menu").hide();
+		$("#experiments")
+			.click(function() {
+				$(".manage_fs_sub_menu").hide();
+				$(".experiments_sub_menu").toggle('normal');
+				$(".profile_sub_menu").hide();
+			});
+	});
+	
+	$(document).ready(function(){
+		$(".profile_sub_menu").hide();
+		$("#profile")
+			.click(function() {
+				$(".manage_fs_sub_menu").hide();
+				$(".experiments_sub_menu").hide();
+				$(".profile_sub_menu").toggle('normal');
+			});
+	});
+	
+	</script>
+
+		{% block scripts %}{% endblock %} 
+	</head>
+	
+	
+	<body>
+            <br/>
+            <table width="800" border="0" align="center" cellpadding="3" cellspacing="0">
+            <tr>
+		<td align="left">
+                    <img src="{% url img_media 'genilogo.png' %}" />
+		</td>
+		<td>
+                    <div align="right" style="position: relative; top: 19px;">
+
+                    </div>
+		</td>
+            </tr>
+            </table>
+            
+
+  <div id="page">
+    
+    	
+		<div id="content">
+		
+		{% block pagehead %}{% endblock %}
+		
+    	<table align="right" class="menutable">
+    	<tr class="manage_fs_main_menu">
+    		<td>
+    		<img src="{% url img_media 'manage_fs_dark.png' %}" class="menuimg" id="manage_fs" />
+    		</td>
+    	</tr>
+    		<tr class="manage_fs_sub_menu">
+    			<td>
+    			<a href="/opts/opt_in">
+    			<img src="{% url img_media 'optin_dark.png' %}"  class="submenuimg"/>
+    			</a>
+    			</td>
+    		</tr>
+    		<tr class="manage_fs_sub_menu">
+    			<td>
+    			<a href="/opts/opt_out">
+    			<img src="{% url img_media 'optout_dark.png' %}"  class="submenuimg"/>
+    			</a>
+    			</td>
+    		</tr>
+    		<tr class="manage_fs_sub_menu">
+    			<td>
+    			<a href="/opts/view_opt_in">
+    			<img src="{% url img_media 'set_priority_dark.png' %}" class="submenuimg" />
+    			</a>
+    			</td>
+    		</tr>
+    		<tr class="manage_fs_sub_menu">
+    			<td>
+    			<a href="/admin_manager/user_reg_fs">
+    			<img src="{% url img_media 'request_fs_dark.png' %}" class="submenuimg" />
+    			</a>
+    			</td>
+    		</tr>
+    		<tr class="manage_fs_sub_menu">
+    			<td>
+    			<a href="/admin_manager/user_unreg_fs">
+    			<img src="{% url img_media 'give_up_fs_dark.png' %}" class="submenuimg"/>
+    			</a>
+    			</td>
+    		</tr>
+    		
+    	<tr class="exp_main_menu">
+    		<td>
+    		<img src="{% url img_media 'experiments_dark.png' %}" class="menuimg" id="experiments"/>
+    		</td>
+    	</tr>
+    		<tr class="experiments_sub_menu">
+    			<td>
+    			<a href="/opts/experiments">
+    			<img src="{% url img_media 'view_exp_dark.png' %}" class="submenuimg" />
+    			</a>
+    			</td>
+    		</tr>
+    		
+    		
+    	<tr class="profile_main_menu">
+    		<td>
+    		<img src="{% url img_media 'profile_dark.png' %}" class="menuimg" id="profile"/>
+    		</td>
+    	</tr>
+    		<tr class="profile_sub_menu">
+    			<td>
+    			<a href="/change_profile">
+    			<img src="{% url img_media 'edit_profile_dark.png' %}" class="submenuimg" />
+    			</a>
+    			</td>
+    		</tr>
+    		<tr class="profile_sub_menu">
+    			<td>
+    			<a href="/admin_manager/promote_to_admin">
+    			<img src="{% url img_media 'promote_to_admin_dark.png' %}" class="submenuimg"/>
+    			</a>
+    			</td>
+    		</tr>
+    	<tr class="dashboard_main_menu">
+    		<td>
+    		<a href="/dashboard">
+    		<img src="{% url img_media 'dashboard_dark.png' %}" class="menuimg"/>
+    		</a>
+    		</td>
+    	</tr>	
+    		
+    	<tr class="logout_main_menu">
+    		<td>
+    		<a href="/accounts/logout">
+    		<img src="{% url img_media 'logout_dark.png' %}" class="menuimg"/>
+    		</a>
+    		</td>
+    	</tr>
+    	</table>
+    	{% block content %}{% endblock %}
+    	</div>
+   
+  </div>
+
+	{% include 'footer.html' %}
+</body>
+</html>

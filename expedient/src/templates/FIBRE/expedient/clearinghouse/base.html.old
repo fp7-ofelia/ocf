@@ -1,0 +1,148 @@
+{% load breadcrumbs %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'ocf.css' %}" />
+		<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+		<link rel="icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
+		<link rel="shortcut icon" href="{% url img_media 'favicon.ico' %}" type="image/x-icon">
+
+		<title>
+			FIBRE Expedient - {% block title %}Expedient{% endblock %}
+		</title>
+		<script src="{% url js_media 'jquery.min.js' %}"></script>
+		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+		<script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+		<script src="{% url js_media 'iframe.js' %}"></script>
+		<!-- simple frame busting -->
+		<script type="text/javascript">
+			if(top.location != document.location) {
+				top.location = document.location;
+			}
+			/**
+			 * Move the help text in formtable classes to a new separate column.
+			 */
+			$(document).ready(function() {
+				/* add a column at the beginning for the help icons */
+				$("table.formtable_noborder>tbody>tr," +
+				"table.formtable>tbody>tr")
+					.prepend("<td />");
+				$("table.formtable_noborder>thead>tr," +
+				"table.formtable>thead>tr")
+					.prepend("<td />");
+
+				/* find help text and replace with image and tooltip */
+                		$("table.formtable_noborder>tbody>tr>td:nth-child(2)")
+				    {% include "fixformtable.js" %};
+
+                		$("table.formtable>tbody>tr>td:nth-child(2)")
+				    {% include "fixformtable.js" %};
+
+                		$("table.formtable_noborder>tbody>tr>td:nth-child(3)")
+				    {% include "fixformtable.js" %};
+
+                		$("table.formtable>tbody>tr>td:nth-child(3)")
+				    {% include "fixformtable.js" %};
+
+                                /* For FlowSpace editing only */
+                                if (document.URL.indexOf("flowspace") > -1) {
+                                    var numRows = Math.floor($("table.formtable>tbody>tr:nth-child>td:nth-child(3)").size()/2);
+                                    for (index=1; index<=numRows; index++) {
+                                        var labels = $("table.formtable>tbody>tr:nth-child(" + index + ")>td").find('label');
+                                        var text = "";
+                                        if (labels[0] != undefined && labels[1] != undefined) {
+                                            text = labels[0].textContent;
+                                            if (labels[0].textContent != labels[1].textContent) {
+                                                text = "<ul class=\"fulltable_tooltip_list\"><li>" + text + "</li>";
+                                                text = text + "<li>" + labels[1].textContent + "</li></ul>";
+                                            }
+                                        }
+                                        if (text.length > 1) {
+                                            $("table.formtable>tbody>tr:nth-child(" + index + ")>td")
+                                                .closest("tr")
+                                                .find("td:first-child>div#[id^='tooltip_help']")
+                                                .html(text);
+                                        } else {
+                                            // No text --> remove question icon
+                                            $("table.formtable>tbody>tr:nth-child(" + index + ")>td")
+                                                .closest("tr")
+                                                .find("td:first-child")
+                                                .html("");
+                                        }
+                                    }
+                                }
+
+				$("img#notifications_help_base").tooltip({
+                        		tip: "div#notifications_help_base",
+            				position: "top center",
+            				cancelDefault: true,
+            				relative: false,
+            				offset: [-10,110]
+                			});
+				});
+			</script>
+
+		{% block head %}{% endblock %}
+	</head>
+	<body>
+		<br/>
+		<table width="800" border="0" align="center" cellpadding="3" cellspacing="0">
+			<tr>
+				<td align="left">
+					<a href="{% url home %}" title="Dashboard"><img src="{% url img_media 'logo_expedient.png' %}" /></a>
+					<div>Software Version <strong>{{softwareVersion}}</strong></div>
+				</td>
+				<td>
+					{% if request.user %}
+					<div style="margin-top:55px;">
+					<div class="small" align="right" style="position: relative; top: 12px;">
+						{% if request.user.username %}
+						logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong>'s island
+						{% else %}
+						you are in <strong>{{islandName}} </strong>'s island
+						{% endif %}
+					</div>
+					{% endif %}
+					<div align="right" style="position: relative; top: 19px; right: -4px;">
+ 						<a href="{% url home %}"><img src="{% url img_media 'dashboard.png' %}" alt="Dashboard" border="0" /></a><a 
+							href={%if ldapUser %}"{{ ofregURL }}"{% else %}"{% url users_my_detail %}"{% endif %}><img src="{% url img_media 'account.png' %}" alt="Account Settings" border="0" /></a><a 
+							href="{% url help %}"><img src="{% url img_media 'help.png' %}" alt="Help" border="0" /></a><a 
+							href="{% url auth_logout %}"><img src="{% url img_media 'logout.png' %}" alt="Logout" border="0" /></a>
+					</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div id="page">
+			<div id="content">
+				{% block messages %}
+				{% if messages %}
+				<div class="tooltip" id="notifications_help_base">Click here to go to the Message Center and see the history of notifications and messages.</div>
+				<div style="position: relative; top: -20px;">
+				<a href="{% url messaging_center %}"><img id="notifications_help_base" src="{% url img_media 'notification_16x16.png' %}" align="right" style="vertical-align:middle"></img></a>
+				</div>
+				<div id="messages" class="messages">
+					<table class="msg_table">
+						{% for msg in messages %}
+						<tr class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}">
+							<td>{{ msg.msg_text }}</td>
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+				{% endif %}
+				{% endblock %}
+				<div class="breadcrumbs">{% breadcrumbs %}</div>
+				{% block content %}{% endblock %}
+			</div>
+		</div>
+		<div id="footer">
+			&copy; 2011-2013 <a href="http://www.fp7-ofelia.eu/" target="_blank">FP7 OFELIA project</a>, <a href="http://www.fibre-ict.eu/" target="_blank">FP7 FIBRE project</a> &amp; Stanford University. <br/>
+			 OFELIA and FIBRE projects are funded by the European Comission (EC) in the 7th framework programme and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
+			Development of the OFELIA Control Framework is led by <a href="http://www.i2cat.net/">i2CAT foundation</a><br/>
+			Expedient was adapted from <a href="http://yuba.stanford.edu/~jnaous/expedient/" target="_blank">software</a> gracefully provided by Stanford University.<br/><br/>
+		</div>
+		<!-- Validation in the end waits for the forms to be loaded -->
+		<script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+	</body>
+</html>

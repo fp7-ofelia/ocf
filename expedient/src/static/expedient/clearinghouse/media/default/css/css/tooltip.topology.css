@@ -1,0 +1,48 @@
+#tt {
+ position:absolute;
+ display:block;
+ //background:url(images/tt_left.gif) top left no-repeat;
+ }
+#tttop {
+ display:block;
+ height:5px;
+ margin-left:5px;
+ //background:url(images/tt_top.gif) top right no-repeat;
+ overflow:hidden;
+ }
+
+
+#ttcont {
+ 	background-color:#111111;
+	border:0px;
+	padding:10px 10px;
+	width:200px;
+	color:#fff;
+	text-align:left;
+	font-size:10px;
+	/* outline radius for mozilla/firefox only */
+	-moz-box-shadow:0 0 10px #000;
+	-webkit-box-shadow:0 0 2px #000;
+	-moz-border-radius: 15px 15px 15px 0px;
+    	-webkit-border-radius: 15px 15px 15px 0px;
+     	border-radius:  10px 10px 10px 4px;
+	opacity:0.85;
+	/* IE 8 */
+  	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
+  	/* IE 5-7 */
+  	filter: alpha(opacity=85);
+	/* Netscape */
+  	-moz-opacity: 0.85;
+  	/* Safari 1.x */
+  	-khtml-opacity: 0.85;
+
+
+
+}
+#ttbot {
+display:block;
+height:5px;
+margin-left:5px;
+//background:url(images/tt_bottom.gif) top right no-repeat;
+overflow:hidden;
+}

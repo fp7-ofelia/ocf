@@ -24,9 +24,8 @@ table#permission_request_table {
 	-webkit-box-shadow:0 0 10px #000;
 }
 </style>
-<!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>-->
 <script src="{% url js_media 'jquery.min.js' %}"></script>
-<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+<script src="{% url js_media 'jquery.tools.min.js' %}"></script>
 <script>
 	$(document).ready(function(){
 		/* code to toggle deny approve checkboxes like radio buttons */
@@ -72,10 +71,10 @@ table#permission_request_table {
 
 {% block content %}
 <div class="permission_mgmt">
-	<div class="permission_requests">
+	<div class="aggregate_list">
 		<form name="permission_form" method="post" action="">{% csrf_token %}
 			<table class="fulltable" id="permission_request_table">
-				<tr>
+				<tr class="thead">
 					<th><img height="15px" src="{% url img_media 'active.png' %}" title="Approve" /></th>
 					<th><img height="15px" src="{% url img_media 'inactive.png' %}" title="Deny" /></th>
 					<!--<th>Delegate</th>-->

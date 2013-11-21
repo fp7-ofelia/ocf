@@ -32,13 +32,11 @@
 </div>
 <div class="new user">
     <h2> Create a new user: </h2>
-    <form class="newuserform" method="post" action=".">{% csrf_token %}
-        <table class="formtable newuserform">
-         {{ pwd_form.as_table }}
-         {{ user_form.as_table }}
-         {{ userprofile_form.as_table }}
-        </table>
-        <input type="submit" value="Create User">
+    <form class="form" method="post" action=".">{% csrf_token %}
+         {{ pwd_form.as_p }}
+         {{ user_form.as_p }}
+         {{ userprofile_form.as_p }}
+        <input type="submit" class="centered" value="Create user">
     </form>
 </div>
 {% endblock %}

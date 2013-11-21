@@ -5,21 +5,19 @@
 
 {% block content %}
 
-<h2>Welcome to Expedient!</h2>
+<h1>Log in</h1>
 
 <div class="login">
-	<form method="post" action=".">{% csrf_token %}
-		<table id="login_table">
-			{{ form.as_table }}
-		</table>
+	<form class="form" method="post" action=".">{% csrf_token %}
+		{{ form.as_p }}
 		<div>
-			<input type="submit" value="Log in" />
+			<input type="submit" class="centered" value="Log in" />
 		</div>
 		<input type="hidden" name="next" value="{{ next }}" />
 	</form>
 </div>
 
-<table class="login_password_control">
+<table class="centered" style="margin-top: 1em !important;">
 	<tr>
 	   <td>{% trans "Forgot your password" %}?</td>
 	   <td><a href="{% url my_password_reset %}">{% trans "Reset it" %}</a>!</td>

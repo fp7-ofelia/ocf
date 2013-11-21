@@ -1,0 +1,28 @@
+#!/bin/bash
+
+###
+#       @author: msune, CarolinaFernandez
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-install module 
+###
+
+#inform user
+printHeader "info#" "Using default pre-install-hook module..."
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+

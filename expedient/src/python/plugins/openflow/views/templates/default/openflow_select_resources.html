@@ -2,7 +2,7 @@
 {% load ch_extras %}
 
 {% block head %}
-
+<link rel="stylesheet" href="/static/media/default/css/slice.topology.css">
 <style>
     table.openflow,table.planetlab {
         width: 100%;
@@ -17,6 +17,10 @@
     table.connections_table {
         border-width: 0px;
         width: 100%;
+    }
+    table.openflow tr.header {
+        background-color: #3d5266;
+	color: #f5faff;
     } 
     table.openflow td {
         border-spacing: 0px;
@@ -30,10 +34,10 @@
         width: 440px;
     }
     tr.even {
-        background-color: #dfd7f4;
+        background-color: #dce9f7;
     }
     tr.odd {
-        background-color: #ecf4d7;
+        background-color: #ebf5ff;
     }
     td.connected {
         font-weight: bold;
@@ -42,29 +46,10 @@
     td.port_num {
         width: 45px;
     }
-    div#select_buttons_div {
-        background: #f4f4f4;
-        border: 1px solid #ccc;
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        display: inline;
-        margin-right: 20px;
-        padding-bottom: 3px;
-        padding-left: 5px;
-        padding-top: 3px;
-    }
-    div#select_buttons_div input {
-        box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        -moz-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        padding-bottom: 1px;
-        padding-top: 1px;
-        -webkit-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
-        width: 60px;
-    }
 
     div.mode_selector {
-        background-color:#EEE;
-        border: 1px solid #CCC;
+        background-color:#ebf5ff;
+        border: 1px solid #7e9fc0;
         -moz-border-radius: 0px 25px 25px 25px;
         -webkit-border-radius: 0px 25px 25px 25px;
         border-radius:  0px 25px 25px 25px;
@@ -72,17 +57,17 @@
         width:600px;
         vertical-align:middle;
         padding:10px;
-	height:70px;
+		height:70px;
     }
     div.mode_explanation {
         margin-bottom:10px;
-        background-color:#FFF;
+        background-color: #f5faff;
         border: 1px solid #CCC;
         -moz-border-radius: 0px 25px 25px 25px;
         -webkit-border-radius: 0px 25px 25px 25px;
         border-radius:  0px 25px 25px 25px;
         float:right;
-	text-align:left;
+		text-align:left;
         display:none;
         width:400px;
         vertical-align:middle;
@@ -93,7 +78,7 @@
         margin-bottom:10px;
         margin-left: auto; 
 	margin-right: auto;
-        background-color:#EEE;
+        background-color: #ebf5ff;
         border: 1px solid #CCC;
         -moz-border-radius: 0px 0px 25px 25px;
         -webkit-border-radius: 0px 0px 25px 25px;
@@ -102,6 +87,25 @@
         vertical-align:middle;
         padding:10px;
     }
+    div#select_topology_nodes_buttons_div {
+		background: #f4f4f4;
+		border: 1px solid #ccc;
+		border-top-left-radius: 4px;
+		border-bottom-left-radius: 4px;
+		display: inline;
+		margin-right: 20px;
+		padding-bottom: 3px;
+		padding: 9px !important;
+	}
+	div#select_topology_nodes_buttons_div input {
+		box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		height: 29px;
+		-moz-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		padding-bottom: 1px;
+		padding-top: 1px;
+		-webkit-box-shadow: inset 2px 0px 1px rgba(255, 255, 255, 1), inset 0 0px 3px rgba(120, 120, 120, 0.6);
+		width: 60px;
+	}
 </style>
 
 <script type="text/javascript">
@@ -208,7 +212,7 @@ $(document).ready(function(){
     });
 
     $("input#select_button").click(function (){
-        $("div#select_buttons_div").toggle();
+        $("div#select_topology_nodes_buttons_div").toggle();
     });
     $("input#select_none_button").click(function (){
         $(":checked:not(:disabled)").click();
@@ -292,15 +296,15 @@ $(document).ready(function(){
 {% endif %}
 
 {% for agg in planetlab_aggs %}
-<h2>
+<h2 class="resources">
 	<a id="ofam_{{agg.id}}" class="expandableTooltipable expandableCtl" ref="#/">
 	&bull; PlanetLab Aggregate {{ agg.name }}<span class="opened"> &#x25B2;</span>
 	</a>
 </h2>
-<div id="am_location">
-	Aggregate physical location: <b>{{ agg.location }}.</b>
-</div>
-<div id="plam_{{agg.id}}Container" class="aggregateManager expandable">
+<div id="plam_{{agg.id}}Container" class="aggregateManager expandable" style="width: 98.4%;">
+  <div id="am_location">
+        Aggregate physical location: <b>{{ agg.location }}.</b>
+  </div>
   <table class="planetlab">
     <tr class="header">
       <th class="select_checkbox"></th>
@@ -369,16 +373,16 @@ $(document).ready(function(){
 {% endif %}
 
 {% for agg in openflow_aggs %}
-<h2>
+<h2 class="resources">
 	<a id="ofam_{{agg.id}}"class="expandableTooltipable expandableCtl" ref="#/">
 	&bull; OpenFlow Aggregate {{ agg.name }}<span class="opened"> &#x25B2;</span>
 	</a>
 </h2>
 
-<div id="am_location">
-Aggregate physical location: <b>{{ agg.location }}.</b>
-</div >
-<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable">
+<div id="ofam_{{agg.id}}Container" class="aggregateManager expandable" style="width: 98.4%;">
+  <div id="am_location">
+    Aggregate physical location: <b>{{ agg.location }}.</b>
+  </div >
   <table class="openflow">
     <tr class="header">
       <th class="dpid">Datapath ID</th>
@@ -412,9 +416,11 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
 			{% if conn.switch ==  switch.datapath_id  and conn.port|safe == iface.port_num|safe %}
         <tr>
           <td class="neighbor neighbor_{{ iface.id }} server_node_{{node.value}}" value="{{iface.id}}">
-            Connected to VMs hosted at<a href="#">
+            <label for = "rsc_id_{{ iface.id }}">
+              Connected to VMs hosted at<a href="#">
               {{ node.name }}</a> to the VM's interface  <a href="#">
               {{ conn.name }}</a>
+            </label>
           </td>
         </tr>
 			<script>list_connected("P{{ iface.id }}","{{ node.value }}{{ conn.name }}");</script>
@@ -429,8 +435,10 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
         {% for cnxn in iface.nonopenflow_connections.all %}
         <tr>
           <td class="neighbor neighbor_rsc_{{ cnxn.resource.id }}">
-            Connected to <a href="#rsc_{{ cnxn.resource.id }}">
+            <label for = "rsc_id_{{ iface.id }}">
+              Connected to <a href="#rsc_{{ cnxn.resource.id }}">
               {{ cnxn.resource.as_leaf_class }}</a>.
+            </label>
           </td>
         </tr>
 	<script>list_connected("P{{ iface.id }}","R{{ cnxn.resource.id }}");</script>
@@ -438,10 +446,12 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
         {% for neighbor in iface.ingress_neighbors.all %}
         <tr>
           <td class="neighbor neighbor_{{ neighbor.id }}">
+            <label for = "rsc_id_{{ iface.id }}">
             Connected to datapath <a href="#switch_{{ neighbor.switch.id }}">
               {{ neighbor.switch.datapath_id }}</a>
             at port <a href="#iface_{{ neighbor.id }}">
               {{ neighbor.port_num }}</a>.
+            </label>
           </td>
 	  <script>list_connected("P{{ iface.id }}","P{{ neighbor.id }}");</script>
         </tr>
@@ -467,7 +477,7 @@ Aggregate physical location: <b>{{ agg.location }}.</b>
   {% if openflow_aggs or planetlab_aggs %}
   <input type="submit" id="next_button" name="next_button" value="Next" />
   <input type="button" id="select_button" name="select_button" value="Select..." />
-  <div id="select_buttons_div" style="display: none">
+  <div id="select_topology_nodes_buttons_div" style="display: none">
     <input type="button" id="select_none_button" name="select_none_button" value="None" />
     <input type="button" id="select_tree_button" name="select_tree_button" value="Tree" />
     <input type="button" id="select_all_button" name="select_all_button" value="All" />

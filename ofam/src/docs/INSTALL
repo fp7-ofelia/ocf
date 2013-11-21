@@ -1,0 +1,54 @@
+ * Install the following packages with apt:
+
+sudo apt-get install nginx python-pip xmlsec1
+
+ * Update pip
+
+sudo pip install -U pip
+
+ * Get a new shell (pip caches $PATH lookups)
+
+ * Install the following python libraries:
+
+sudo pip install sqlalchemy Flask Flask-XML-RPC ElementTree flup blinker
+
+ * Create /opt/ofelia/ofam/local and make it writeable by www-data
+
+ * cd to the FOAM clone
+
+ * Copy src/foam.conf to /etc/nginx/sites-enabled/
+   - You may want to delete the symlink to the default site if you weren't already using nginx
+     as it will cause a server to be run on port 80
+
+
+ * Install FOAM using setup.py:
+
+sudo python setup.py install
+
+ * Initialize the FOAM runtime environment
+
+sudo -u www-data foamctl --action=setup
+
+ * Initialize your database as the user that runs nginx:
+
+sudo -u www-data foamctl --action=init_db
+
+ * Get Trusted Root Certs:
+
+sudo -u www-data wget http://www.pgeni.gpolab.bbn.com/ca-cert/pgeni.gpolab.bbn.com.pem \
+       -O /opt/ofelia/ofam/local/etc/gcf-ca-certs/pgeni.gpolab.bbn.com.pem
+...any other certs you want to trust...
+
+sudo -u www-data sh -c 'cat /opt/ofelia/ofam/local/etc/gcf-ca-certs/* > /opt/ofelia/ofam/local/etc/nginx-ca-certs.pem'
+
+ * Make an htpasswd file for both admin users and general API users
+   - /opt/ofelia/ofam/local/etc/admin.htpasswd and json.htpasswd
+   - {foam}/contrib/htpasswd.py will allow you to make them if you don't have apache installed
+
+ * Run the FOAM FastCGI module as the same user that runs nginx:
+
+sudo -u www-data python /opt/ofelia/ofam/local/sbin/foam.fcgi &
+
+ * Start nginx:
+
+/etc/init.d/nginx start

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<h2>Welcome to the FIBRE Virtualization Manager!</h2>
+<table class="formtable">
+<tr>
+	<td>
+		<form method="post" action=".">{% csrf_token %}
+		  {{ form.as_p }}
+		
+		  <input type="submit" value="Log in" />
+		  <input type="hidden" name="next" value="{{ next }}" />
+		</form>
+		<table class="login_password_control">
+			<tr><td>{% trans "Forgot your password" %}?</td> <td><a href="{% url auth_password_reset %}">{% trans "Reset it" %}</a>!</td></tr>
+			<tr><td>{% trans "Not a member" %}?</td> <td><a href="{% url registration_register %}">{% trans "Register" %}</a>!</td></tr>
+		</table>
+
+
+	</td>
+</tr>
+</table>
+
+{% endblock %}

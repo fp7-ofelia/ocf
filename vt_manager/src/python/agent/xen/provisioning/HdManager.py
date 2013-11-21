@@ -22,7 +22,7 @@ class HdManager(object):
 
 		if hdtype == "file-image": 
 			return FileHdManager
-		elif hdtype == "file-full-image":
+		elif hdtype == "full-file-image":
 			return FileFullHdManager
 		elif hdtype == "logical-volume-image":
 			return LVMHdManager

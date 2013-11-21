@@ -62,25 +62,39 @@ def virtualmachine_crud(request, slice_id, server_id):
 
     try:
         if request.method == "POST":
+            import pprint
+            pprint.pprint(request.POST)
+            
+            print "--------------------------------------1"
             if 'create_new_vms' in request.POST:
+                print "----------------------------------2"
                 # "Done" pressed ==> send xml to AM
 #                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
                 form = VMModelForm(request.POST)
-#                if formset.is_valid():
+                print "----------------------------------3"
+#               if formset.is_valid():
+                print form.errors
                 if form.is_valid():
+                    print "------------------------------------4"
                     instance = form.save(commit=False)
+                    print "------------------------------------5"
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instance, serv.uuid, slice, request.user)
-#                    VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
+                    print "------------------------------------6" 
+#                   VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
                     return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
+                    print "-------------------------------------7" 
                     if "VM already exists" in form.errors[0]:
+                        print "----------------------------------8"
                         raise ValidationError("It already exists a VM with the same name in the same slice. Please choose another name", code="invalid",)
+                    print "-----------------------------------10" 
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
+            print "----------------------------------------9"
             form = VMModelForm()
 
     except ValidationError as e:
@@ -148,21 +162,21 @@ def check_vms_status(request, slice_id):
                     vmsStatus[str(vm.id)]= vm.state
                     if vm.state == "running":
                         actionsHtmlCode =\
-                        "<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'stop\')\">Stop</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'reboot\')\">Reboot</a>\
+                        "<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'stop\')\" value=\"Stop\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'reboot\')\" value=\"Reboot\" />\
                         </div>"
                     elif  vm.state == "created (stopped)" :
                         actionsHtmlCode =\
-						"<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
+			"<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\" value=\"Start\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\" value=\"Delete\" />\
                         </div>"
                     elif vm.state == "stopped" :
                         actionsHtmlCode =\
-                        "<div>\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\">Start</a> |\
-                        <a href=\"#/\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\">Delete</a>\
+			"<div class=\"vm_actions\">\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'start\')\" value=\"Start\" />\
+                        <input type=\"button\" onclick=\"handleVMaction("+str(slice.id)+","+str(vm.id)+",\'delete\',\'"+str(vm.name)+"\')\" value=\"Delete\" />\
                         </div>"
                     else:
                         actionsHtmlCode = "<div><img src='/static/media/default/img/loading.gif' align=\"absmiddle\"></div>"
@@ -325,3 +339,79 @@ def get_ui_data(slice):
         print "[ERROR] Problem loading UI data for plugin 'vt_plugin'. Details: %s" % str(e)
     return ui_context
 
+def remove_vm(request, vm_id):
+    """
+    Communicates with vt_plugin in order to delete a VM, given its ID.
+
+    @param request HTTP request
+    @param int Expedient identifier for VM
+    @raise exception if VM could not be removed
+    @return redirect to administration home
+    """
+    message_center_notification = "VM could not be removed"
+    try:
+        p = subprocess.Popen(["python","%s/vt_plugin/tests/deleteVM.py" % str(settings.PLUGINS_PATH),str(vm_id)], 
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err:
+            message_center_notification = str(err.split("\n")[-2])
+            raise Exception
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Administration info for vt_plugin: VM with id %s removed successfully" % str(vm_id),
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Administration error for vt_plugin: %s" % message_center_notification,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+    return HttpResponseRedirect(reverse("administration_home"))
+
+def remove_all_vms(request):
+    """
+    Communicates with vt_plugin in order to delete all the VMs.
+
+    @param request HTTP request
+    @return redirect to administration home
+    """
+    message_center_notification = "could not delete every VM"
+    try:
+        p = subprocess.Popen(["python","%s/vt_plugin/tests/deleteAllVMs.py" % str(settings.PLUGINS_PATH)], 
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err:
+            message_center_notification = str(err.split("\n")[-2])
+            raise Exception
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Administration info for vt_plugin: all VMs have been successfully deleted",
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS)
+    except:
+        DatedMessage.objects.post_message_to_user(
+            "Administration error for vt_plugin: %s" % message_center_notification,
+            request.user, msg_type=DatedMessage.TYPE_ERROR)
+    return HttpResponseRedirect(reverse("administration_home"))
+
+def get_administration_data(request):
+    """
+    Shows the administration panel for the plugin.
+
+    @param request HTTP request
+    @return string template data to shows administration features for this plugin
+    """
+    from vt_plugin.forms.remove_vm import RemoveVM
+
+    if request.method == "POST":
+        form_vm = RemoveVM(request.POST)
+        if form_vm.is_valid():
+            vm_id = form_vm.cleaned_data["vm_id"]
+            return HttpResponseRedirect(reverse("remove_vm", args=[vm_id]))
+    else:
+        form_vm = RemoveVM()
+
+    return simple.direct_to_template(
+        request,
+        template="vt_plugin_administration.html",
+        extra_context={
+            "form_stalled_vms": form_vm,
+        },
+    )

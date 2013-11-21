@@ -44,9 +44,9 @@
 	</div>
 	
 	<div class="mgmt_actions">
-		<h2>Management Actions:</h2>
-    	<p><a href="{% url project_update project.id %}">Edit</a> basic information.</p>
-    	<p><a href="{% url project_delete project.id %}">Delete</a> project.</p>
+		<!--<h2>Management Actions:</h2>-->
+    	<p><a href="{% url project_update project.id %}">Edit</a> basic information</p>
+    	<p><a href="{% url project_delete project.id %}">Delete</a> project</p>
     </div>
 	
     <div class="proj_description">
@@ -62,19 +62,20 @@
 					<th class="roles">Roles</th>
 					<th class="actions">Actions</th>
 				</tr>
-				{% for member, data in member_roles.items %}
+				{% for member in project.members_as_permittees.all %}
 				<tr class="body">
-					<td class="username">{{ member }}</td>
+					<td class="username">{{ member.object.username }}</td>
 					<td class="roles">
-						{% for role in data.roles %}
-							<div class="role_desc val">{{ role.name }}</div>
-							<div class="role_desc description">{{ role.description }}</div>
-							{% if not forloop.last %}, {% endif %}
+						{% for role in member.projectrole_set.all %}
+						{% if role.project == project %}
+						<div class="role_desc val">{{ role.name }}</div>
+						<div class="role_desc description">{{ role.description }}</div>{% if not forloop.last %},{% endif %}
+						{% endif %}
 						{% endfor %}
 					</td>
 					<td class="actions">
-                        <a href="{% url project_member_remove project.id data.id %}">remove</a>,
-                        <a href="{% url project_member_update project.id data.id %}">update</a>
+						<a href="{% url project_member_update project.id member.object_id %}">update</a>,
+						<a href="{% url project_member_remove project.id member.object_id %}">remove</a>
 					</td>
 				</tr>
 				{% endfor %}
@@ -99,13 +100,13 @@
 
         <div class="aggregate_list">
                 {% with project.aggregates.all as aggregate_list %}
-                {% if aggregate_list.count %}
-                        {% include "project/project_simple_agg_list.html" %}
-                {% else %}
-                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->
-                        This project has no aggregates added to it. To be able to
+                {% include "project/project_simple_agg_list.html" %}
+                {% if not aggregate_list.count %}
+                        <!--This system does not provide any aggregates. Please contact the island manager to inquire about the island status.-->             
+                        <div class="aggregate_list_text">This project has no aggregates added to it. To be able to
             create slices that can reserve resources on aggregates, you will
             need to add aggregates to the project.
+                        </div>
                 {% endif %}
                 {% endwith %}
                       <div class="center">
@@ -140,7 +141,7 @@
 			        </td>
 					<td class="status">{% if slice.started and not slice.modified %}<img src="{% url img_media 'active.png' %}">{% else %}<img src="{% url img_media 'inactive.png' %}">{% endif %}</td>
 					<td class="actions">
-						<a href="{% url slice_detail slice.id %}">details</a>,
+						<a href="{% url slice_detail slice.id %}">view</a>,
 						<a href="{% url slice_delete slice.id %}">delete</a>
 					</td>
 				</tr>
@@ -169,14 +170,14 @@
 	
 	<div class="role_requests">
 		<table class="fulltable" id="role_request_table">
-			<tr>
+			<tr class="head">
 				<th>Requester</th>
 				<th>Requested Role</th>
 				<th>Message</th>
 				<th>Actions</th>
 			</tr>
 			{% for req in role_requests %}
-			<tr>
+			<tr class="body">
 				<td>
 					{% with req.requester as user %}
 					<span class="req_user val">{{ user.username }}</span>

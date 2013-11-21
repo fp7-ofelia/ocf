@@ -24,6 +24,17 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.7
+--------------------------------------------------
+Released: XX/XX/2013
+
+Change log:
+
+[+] OPT, OFVER: Integrate FOAM. Issue 178
+[*] EXP: Expedient GUI redesign. Issue 179
+[+] EXP, VTA, OPT: FIBRE Theme files. Issue 180
+[+] EXP, VTA, AGN: Support for IRATI VMs. Issue 181 
+--------------------------------------------------
 v0.6.1
 --------------------------------------------------
 Released: 24/10/2013

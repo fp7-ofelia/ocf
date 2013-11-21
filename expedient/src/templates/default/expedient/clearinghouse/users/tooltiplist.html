@@ -1,3 +1,4 @@
+{% if users  %}
 	<div class="{{ tooltip_class }} summarytext">{{ users.all.count }} user{% if users.all.count > 1 %}s{% endif %}</div>
 	<div class="{{ tooltip_class }} summarytooltip">
 {% for user in users %}
@@ -5,3 +6,6 @@
 		<div class="{{ tooltip_class }} description">{% include "users/tooltipdesc.html" %}</div>{% if not forloop.last %} | {% endif %}
 {% endfor %}
 	</div>
+{% else %}
+	<div class="summarytext">no users</div>
+{% endif %}

@@ -26,7 +26,7 @@
         width: 440px;
     }
     tr.odd {
-        background-color: #ecf4d7;
+        background-color: #ebf5ff;
     }
     td.connected {
         font-weight: bold;
@@ -78,7 +78,7 @@
             }
            );
         });
-                $('#messages').load("../../../vt_plugin/update_messages/");
+        $('#messages').load("../../../vt_plugin/update_messages/");
     }
     
     var timer = setInterval(function(){
@@ -273,7 +273,7 @@ Type:
   <td>
     <div id="create_server" style="clear:both;">
       Create a new virtual machine in server:
-      <select name = "selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}">
+      <select name="selected_server_{{agg.id}}" id="server_id_agg_{{agg.id}}" style="width: 35%; display: inline;">
         {% for rsc in agg.resource_set.all %}
         {% with rsc.as_leaf_class as server %}
         {% if rsc.leaf_name == 'VTServer' %}

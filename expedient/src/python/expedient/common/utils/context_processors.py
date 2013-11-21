@@ -4,7 +4,7 @@ def contextSettingsInTemplate(request):
 	from django.core.urlresolvers import reverse
 
 	vf = open(join(dirname(__file__), '../../../../../.currentVersion'),'r')
-	softwareVersion = vf.read()
+	softwareVersion = vf.read().strip()
 
 	if not request.user.is_anonymous() and request.user.password == '!':
 		ldapUser = True

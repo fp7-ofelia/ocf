@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+        <link rel="stylesheet" type="text/css" href="{% url css_media 'ocf.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+
+		<title>
+			{% block title %}FIBRE Virtualization Manager{% endblock %}
+		</title>
+		    <script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+    <script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+        
+		{% block scripts %}{% endblock %} 
+	</head>
+	<body>
+            <div id="logo" style="margin:auto;width:1000px">
+                <table bgcolor="#8CCDF8" width="100%" border="0" margin="0" align="center" cellpadding="0" cellspacing="0">
+                <tr>
+					<td align="left" class="cellspacing:0px;cellpadding:0px;padding:0px;margin:0px;">
+                        <a href="{% url dashboard %}" title="Dashboard"><img src="{% url img_media 'logo_vm_manager.png' %}" /></a>
+                        <div>Software Version <strong>{{softwareVersion}}</strong></div>
+                    </td>                   <td>
+                        <div class="small" align="right" style="position: relative; top: 12px;margin-top:87px">
+                        {% if request.user.username %}
+                        logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong>'s island
+                        {% else %}
+                        you are in <strong>{{islandName}} </strong>'s island
+                        {% endif %}
+					</td>
+                </tr>
+                </table>
+                </div>
+ 
+            <div id="page"> 
+		<div id="content">
+					
+                    {% block content %}{% endblock %}
+		</div>
+            </div>
+
+	{% include 'footer.html' %}
+	</body>
+</html>

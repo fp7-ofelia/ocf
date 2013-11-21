@@ -18,13 +18,11 @@
 	you would like users with this role to have, select a unique name
 	for the role in the project, add a description, and save.
 	
-	<form action="" method="POST">{% csrf_token %}
-		<table class="formtable_noborder">
-			{{ form.as_table }}
-		</table>
+	<form class="form" action="" method="POST">{% csrf_token %}
+		{{ form.as_p }}
 		<div class="center">
 			<input type="submit" value="Create" />
-			<a href="{% before_last_link breadcrumbs %}">Cancel</a>
+			<input type="button" value="Cancel" onclick="document.location='{% before_last_link breadcrumbs %}'"/>
 		</div>
 	</form>
 </div>

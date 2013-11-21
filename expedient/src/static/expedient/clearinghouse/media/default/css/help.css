@@ -1,0 +1,8 @@
+li p {
+	margin-bottom: 5px;
+}
+li p.help_description {
+	color: #444;
+	padding-left: 1.5em;
+}
+

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" attributeFormDefault="unqualified"
+  targetNamespace="http://www.geni.net/resources/rspec/ext/openflow/3" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:rspec="http://www.geni.net/resources/rspec/3"
+  xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/3"> 
+
+	<xs:import schemaLocation="request.xsd" namespace="http://www.geni.net/resources/rspec/3"/>
+
+  <xs:simpleType name="ControllerType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="primary"/>
+      <xs:enumeration value="backup"/>
+      <xs:enumeration value="monitor"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DatapathID">
+    <xs:restriction base="xs:token">
+      <xs:maxLength value="23"/>
+      <xs:pattern value="([0-9a-fA-F]{2}[:]{0,1}){7}[0-9a-fA-F]{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="VirtualLinkHop">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="([0-9a-fA-F]{2}[:]){7}[0-9a-fA-F]{2}[/][0-9]{1,}[-]{1}([0-9a-fA-F]{2}[:]){7}[0-9a-fA-F]{2}[/][0-9]{1,}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EtherAddr">
+    <xs:restriction base="xs:token">
+      <xs:maxLength value="17" />
+      <xs:pattern value="([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EtherAddrSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2})(,[\s]*(([0-9a-fA-F]{2}[:-]{0,1}){5}[0-9a-fA-F]{2}))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EtherTypeSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(0x([A-Fa-f0-9]{1,4}))(,[\s]*(0x([A-Fa-f0-9]{1,4})))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="URN">
+    <xs:restriction base="xs:anyURI">
+      <xs:pattern value="urn:[a-zA-Z0-9][a-zA-Z0-9-]{1,31}:([a-zA-Z0-9()+,.:=@;$_!*'-]|%[0-9A-Fa-f]{2})+" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IPv4Sequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(((25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(/(3[012]|[12]\d|\d)))(,[\s]*((25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(/(3[012]|[12]\d|\d)))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IPProtoSequence">
+    <xs:restriction base="xs:token">
+      <xs:pattern value="(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,[\s]*(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d))*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="sliver">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="controller" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="url" type="xs:token" use="required" />
+            <xs:attribute name="type" type="openflow:ControllerType" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="group" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="datapath" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="port" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="num" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="name" type="xs:token" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="component_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="component_manager_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="dpid" type="openflow:DatapathID" use="optional" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:token" use="required" />
+          </xs:complexType>
+        </xs:element>     
+        
+        <xs:element name="vlink" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="use-group" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:token" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="datapath" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="port" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="num" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="name" type="xs:token" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="component_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="component_manager_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="dpid" type="openflow:DatapathID" use="optional" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="hops" minOccurs="1">
+                <xs:complexType>
+                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="hop" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                      	<xs:attribute name="index" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="link" type="openflow:VirtualLinkHop" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        
+        <xs:element name="match" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="use-group" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:token" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="datapath" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="port" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="num" type="xs:unsignedInt" use="required" />
+                        <xs:attribute name="name" type="xs:token" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="component_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="component_manager_id" type="openflow:URN" use="required" />
+                  <xs:attribute name="dpid" type="openflow:DatapathID" use="optional" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="packet" minOccurs="1">
+                <xs:complexType>
+                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="dl_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:EtherAddrSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:EtherAddrSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_type" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:EtherTypeSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="dl_vlan" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="xs:token" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:IPv4Sequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:IPv4Sequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="nw_proto" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="openflow:IPProtoSequence" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="tp_src" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="xs:token" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="tp_dst" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="value" type="xs:token" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="description" type="xs:token" use="optional" />
+      <xs:attribute name="email" type="xs:token" use="optional" />
+      <xs:attribute name="ref" type="xs:token" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

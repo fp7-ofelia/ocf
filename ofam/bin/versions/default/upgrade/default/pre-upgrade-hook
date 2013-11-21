@@ -1,0 +1,19 @@
+#!/bin/bash
+
+###
+#       @author: msune, SergioVidiella
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-upgrade-module 
+###
+
+#inform user
+printHeader "info#" "Using default pre-upgrade-hook module..."
+
+#shutdown foam
+print "Shutting down foam..."
+/usr/sbin/service foam stop
+
+#shutdown nginx
+print "Shutting down nginx..."
+/usr/sbin/service nginx stop

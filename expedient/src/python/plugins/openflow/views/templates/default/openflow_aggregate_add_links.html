@@ -24,7 +24,7 @@
 	{% if existing_links_form %}
 	<div class="section current_links">
 		<h2>Delete existing links:</h2>
-		<form action="" method="post">{% csrf_token %}
+		<form class="form" action="" method="post">{% csrf_token %}
 			<table class="formtable">
 				{{ existing_links_form }}
 			</table>
@@ -33,11 +33,11 @@
 	</div>
 	{% endif %}
 
-	<div class="section form_div">
+	<div class="section center">
 		<h2>Add new static links between OpenFlow Aggregates:</h2>
 		These links could be static tunnels for example that are not discovered
 		by the FlowVisor.
-		<form action="" method="POST">{% csrf_token %}
+		<form class="form" action="" method="POST">{% csrf_token %}
 			<table class="formtable">
 			{{ new_connection_form }}
 			</table>
@@ -47,14 +47,14 @@
 		<h2>Add new static links to other resources:</h2>
 		Here you can add links to other resources that do not have
 		OpenFlow-controlled interfaces.
-		<form action="" method="POST">{% csrf_token %}
+		<form class="form" action="" method="POST">{% csrf_token %}
 			<table class="formtable">
 			{{ new_other_connection_form }}
 			</table>
 			<input type="submit" name="add_other_links" value="Add Link" />
-			<!-- <input type="button" value="Done" onclick="document.location='{% url home %}'"/>-->
-			<a href="{% url home %}">Done</a>
 		</form>
+
+		<input type="button" value="Done" onclick="document.location='{% url home %}';"/>
 	</div>
 </div>
 {% endblock content %}

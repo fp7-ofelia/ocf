@@ -9,13 +9,12 @@
 	below, and a user to make the request to. You should also include
 	a message with information to help the recipient decide whether
 	or not to grant you the role.
-	<form action="." method="POST">{% csrf_token %}
-		<table class="formtable_noborder" id="request_role_table">
-			{{ form.as_table }}
-		</table>
+	<form class="form" action="." method="POST">{% csrf_token %}
+		{{ form.as_p }}
 		<div class="center">
 	    	<input type="submit" value="Request" />
-	    	<a href="{{ cancel_url }}">Cancel</a>
+	    	<!--<a href="{{ cancel_url }}">Cancel</a>-->
+			<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>
     	</div>
     </form>
 </div>

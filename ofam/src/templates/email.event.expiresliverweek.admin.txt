@@ -1,0 +1,13 @@
+Subject: FOAM sliver expiring within a week
+
+(This is an automated message from FOAM.)
+
+A FOAM sliver at %(site)s
+will expire within about a week:
+
+  Sliver URN: %(sliver_urn)s
+  Owner URN: %(user)s
+  Owner e-mail: %(email)s
+  Expiration time: %(expiration)s -0000
+
+No further admin action is required at this time.

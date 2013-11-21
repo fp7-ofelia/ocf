@@ -1,14 +1,14 @@
 {% extends "iframebase.html" %}
 {% load ch_extras %}
 
-{% block title %}List Aggregates{% endblock title %}
+{% block title %}List aggregates{% endblock title %}
 
 
 {% block content %}
 <div class="aggregate_list">
-{% with "expedient/clearinghouse/aggregate/list_actions.html" as action_template %}
+{% with "aggregate/list_actions.html" as action_template %}
 {% with "True" as condensed %}
-{% include "expedient/clearinghouse/aggregate/list_table.html" %}
+{% include "aggregate/list_table.html" %}
 {% endwith %}
 {% endwith %}
     <div class="links">

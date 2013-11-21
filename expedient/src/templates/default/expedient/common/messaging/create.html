@@ -1,39 +1,15 @@
-{% extends "iframebase.html" %}
+{% extends "base.html" %}
 
-{% block title %}Create Message{% endblock title %}
+{% block title %}Create message{% endblock title %}
 
 {% block content %}
-<form method="post" action="">{% csrf_token %}
-    <div class="form_error_msgs">
-        {% for field in form.visible_fields %}
-        {% if field.errors %}
-        <div class="form_field_error_msg">
-            Field <strong>{{ field.label }}</strong> has the following errors:
-            {{ field.errors }}
-        </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-    <div class="create_msg_div">
-	    <div class="create_msg">
-	        <div id="type_users_div">
-				<table class="messages" id="type_users_table">
-	                <tr><th style ="text-align:left;">{{ form.type.label_tag }}:</th><td>{{ form.type }}</td></tr>
-	                <tr><th style ="text-align:left;">{{ form.users.label_tag }}:</th><td>{{ form.users }}</td></tr>
-				</table>
-			</div>
-			<div id="message_div">
-                <table class="messages" id="message_table">
-                    <tr><th style ="text-align:left;">{{ form.msg_text.label_tag }}:</th><td>{{ form.msg_text }}</td></tr>
-                </table>
-			</div>
-	        <div class="iframe_button" id="send_msg_button">
-	            <input type="submit" value="Send Message" />
-	        </div>
-		</div>
-    </div>
-    {% for field in form.hidden_fields %} 
-    {{ field }}
-    {% endfor %}
+<h1>Create message</h1>
+<form class="form" method="post" action="">{% csrf_token %}
+	<p>{{ form.non_field_errors }}</p>
+	{{ form.as_p }}
+	<div class="center">
+		<input type="submit" value="Send" />
+		<input type="button" onClick='document.location="{% url messaging_center %}"' value="Cancel" />
+	</div>
 </form>
 {% endblock content %}

@@ -18,16 +18,13 @@ table.fulltable input[type=text] {
 span.next_link {
     font-weight: bold;
 }
-select.wide {
-    width: 600px;
-}
 div.errors {
     color: #a70000;
     font-weight: bold;
 }
 
 div.steps {
-    background-color: #EEE;
+    background-color: #ebf5ff;
     border: 1px solid #CCC;
     border-radius: 0px 0px 25px 25px;
     margin-bottom: 10px;
@@ -72,7 +69,7 @@ div.steps {
 	and additional empty tables will be displayed.</p>
 	</div>
 
-    <form class="form" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
+    <form class="form" style="width: auto !important;" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
 		{% for form in fsformset.forms %}
 			{% for hidden in form.hidden_fields %}
@@ -228,11 +225,11 @@ div.steps {
 		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace.");'
 		{% endif%}/>
 			<span class="next_link">
-				| <a href="{% url flowspace slice.id %}">Clear</a> | 
+				<input type="button" value="Clear" onclick="document.location='{% url flowspace slice.id %}';"/>
 				{% if done %}
-				<a href="{% url slice_detail slice.id %}" onClick='return confirm("Flowspace must be saved before exiting. Are you sure you are done?");'>Done</a>
+				<input type="button" value="Done" onclick="javascript: if (confirm('Flowspace must be saved before exiting. Are you sure you are done?')) { return document.location='{% url slice_detail slice.id %}'; } else { return false; }"/>
 				{% else %}
-				<a href="{% url gcf_sshkeys slice.id %}">Next</a>
+				<input type="button" value="Next" onclick="document.location='{% url gcf_sshkeys slice.id %}';"/>
 				{% endif %}
 			</span>
         </div>

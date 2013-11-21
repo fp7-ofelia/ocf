@@ -2,13 +2,56 @@
 {% load ch_extras %}
 
 {% block head %}
+<link rel="stylesheet" href="{% url css_media 'project.css' %}" />
+<!--<style type="text/css">
+	table#projects_table tr.body td.name {
+		background: url({% url img_media 'expand.png' %}) .5em center no-repeat;
+	}
+	table#projects_table tr.body td.name:hover {
+		background: #dce9f5 url({% url img_media 'expand.png' %}) .5em center no-repeat;
+	}
+</style>-->
+<script src="{% url js_media 'jquery-ui.min.js' %}" /></script>
 <script>
 	$(document).ready(function() {
+		/* Previous */
 		addTooltipToClass("slicecontinue");
 		addTooltipToClass("project_name");
 		$(".project_list tr.body").each(function(index) {
 			addTooltipToSummary("ownersgrp_"+index);
 			addTooltipToSummary("membersgrp_"+index);
+		});
+		// Allow to expand projects with information
+		/*$('table#projects_table td.details').click(
+			function() {
+				var current_unfolded = $($(this).parent("tr")).next();
+				current_unfolded.toggle();
+				// Hide the rest of them
+				$('table#projects_table tr.accordion').not(current_unfolded).hide();
+			}
+		)*/
+		$('table#projects_table tr.body').click(
+			function(event) {
+				// Expand only when cell (TD) is clicked
+				if (event.target.nodeName.toLowerCase() == "td") {
+					var current_unfolded = $(this).next();
+					current_unfolded.toggle();
+					// Hide the rest of them
+					$('table#projects_table tr.accordion').not(current_unfolded).hide();
+				}
+			}
+		)
+		// Original accordion
+		/*$(function() {
+			$("table#projects_table").accordion({
+				active: false,	// Initially expanded
+				collapsible: true,
+				header: 'tr.body'
+			});
+		});*/
+		// Fills tab struct with information
+		$(function() {
+			$(".tabs").tabs();
 		});
 	});
 </script>
@@ -19,6 +62,8 @@
 	<div class="table_div">
 		<table class="fulltable" id="projects_table">
 			<tr class="head">
+				<!-- Add a new cell to match jQuery UI's accordion (?) -->
+				<th></th>
 				<th class="name">Name</th>
                 <th class="owners">Owners</th>
                 <th class="members">Members</th>
@@ -26,7 +71,11 @@
                 <th class="actions">Actions</th>
 			</tr>
 			{% for project in project_list %}
+			<!--<tr class="body accordion">-->
 			<tr class="body">
+				<td class="expand" title="Click to expand">
+					<img src="{% url img_media 'expand.png' %}" />
+				</td>
 				<td class="name">
 					<div class="val project_name"><a href="{% url project_detail project.id %}" onClick='document.location="{% url project_detail project.id %}"'>{{ project.name }}</a></div>
 					<div class="description project_name">{{ project.description }}</div>
@@ -62,8 +111,113 @@
 					{% endfor %}
                 </td>
 				<td class="actions">
-					<a href="{% url project_detail project.id %}">details</a>,
+					<a href="{% url project_detail project.id %}">view</a>,
 					<a href="{% url project_delete project.id %}">delete</a>
+				</td>
+			</tr>
+			<!-- Accordion -->
+			<tr class="accordion">
+				<td colspan="6">
+				<!--<td colspan="7">-->
+					<!--<table class="project_slice_list" width="100%" align="right">
+						{#{% for slice in project.slice_set.all %}#}
+							<tr>
+								<td width="63%"></td>
+								<td width="430px">
+									{#{{ slice.name }}#}
+								</td>
+								<td width="100px"></td>
+								<td width="450px">
+									<a href="{#{% url slice_detail slice.id %}#}">view</a>,
+									<a href="{#{% url slice_delete slice.id %}#}">delete</a>
+								</td>
+							</tr>
+						{#{% endfor %}#}
+					</table>
+				</td>-->
+				<div class="tabs">
+				  <ul>
+					<li><a href="#tab-project-{{ project.id }}">Project</a></li>
+					{% if project.slice_set.all %}
+						<li><a href="#tab-slice-{{ project.id }}">Slices</a></li>
+					{% endif %}
+				    {% if project.owners.all or project.members.all  %}
+						<li><a href="#tab-users-{{ project.id }}">Users</a></li>
+					{% endif %}
+				  </ul>
+				  {% if project.slice_set.all %}
+					  <div id="tab-slice-{{ project.id }}">
+							<!-- Slices -->
+							<table class="fulltable">
+								<thead>
+									<td>Slice</td>
+									<td>Description</td>
+									<td>Actions</td>
+								</thead>
+								{% for slice in project.slice_set.all %}
+								<tbody>
+									<td>{{ slice.name }}</td>
+									<td>{{ slice.description }}</td>
+									<td><a href="{% url slice_detail slice.id %}">view</a>,
+										<a href="{% url slice_delete slice.id %}">delete</a></td>
+								</tbody>
+								{% endfor %}
+							</table>
+					  </div>
+				  {% endif %}
+				  <div id="tab-project-{{ project.id }}">
+					<!-- Project -->
+					<table class="fulltable">
+						<thead>
+							<td>Description</td>
+							<td>Actions</td>
+						</thead>
+						<tbody>
+							<td>{{ project.description }}</td>
+							<td><a href="{% url project_detail project.id %}">view</a>,
+								<a href="{% url project_delete project.id %}">delete</a></td>
+						</tbody>
+					</table>
+				  </div>
+				  {% if project.members.all  %}
+					  <div id="tab-users-{{ project.id }}">
+						<table class="fulltable" align="center">
+							<thead>
+								<td>User</td>
+								<td>Affiliation</td>
+								<td>User name</td>
+								<td>E-mail</td>
+								<td>Roles</td>
+								<td>Actions</td>
+							</thead>
+							{% for user in project.members.all %}
+							<tbody>
+								<td>{{ user }}</td>
+								<td>{{ user.get_profile.affiliation }}</td>
+								<td>{{ user.first_name }} {{ user.last_name }}</td>
+								<td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+								<td>
+									{% for member in project.members_as_permittees.all %}
+										{% if member.object_id == user.id %}
+											{% for role in member.projectrole_set.all %}
+												{% if role.project == project %}
+		                    						{{ role.name }}
+													{% if not forloop.last %},{% endif %}
+												{% endif %}
+											{% endfor %}
+										{% endif %}
+									{% endfor %}
+								</td>
+								<td>
+									<a href="{% url project_member_update project.id user.id %}">update</a>,
+									<a href="{% url project_member_remove project.id user.id %}">remove</a>
+								</td>
+							</tbody>
+							{% endfor %}
+						</table>
+					  </div>
+				  {% endif %}
+				</div>
 				</td>
 			</tr>
 			{% endfor %}

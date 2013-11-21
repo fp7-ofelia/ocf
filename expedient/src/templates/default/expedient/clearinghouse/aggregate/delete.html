@@ -5,13 +5,13 @@
 
 {% block content %}
 <div class="main">
-    <form action="" method="post">{% csrf_token %}
-    <div class="iframe_button">
-	    <input type="hidden" name="post" value="yes" />
-	    <div class="delete_msg">Are you sure you want to delete the Aggregate "{{ object.name }}"?</div>
-	    <input type="submit" value="Yes, I'm sure" />
-	    <input type="button" value="No, cancel" onclick="document.location='{{ next }}';"/>
-    </div>
+    <form class="form center" action="" method="post">{% csrf_token %}
+    	<div class="iframe_button">
+		    <input type="hidden" name="post" value="yes" />
+		    <p>Are you sure you want to delete the aggregate "{{ object.name }}"?</p>
+		    <input type="submit" value="Yes" />
+		    <input type="button" value="No" onclick="document.location='{{ next }}';"/>
+    	</div>
     </form>
 </div>
 {% endblock %}

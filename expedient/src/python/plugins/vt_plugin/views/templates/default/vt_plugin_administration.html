@@ -1,0 +1,62 @@
+{% extends "iframebase.html" %}
+{% load ch_extras %}
+
+{% block head %}
+<style type="text/css">
+body {
+	text-align: left;
+}
+table.fulltable {
+	margin-left: auto;
+	margin-right: auto;
+}
+h2 {
+	margin: 0px;
+}
+</style>
+{% endblock head %}
+
+{% block content %}
+
+<h3 style="margin-top: 0px !important;">Remove VMs</h3>
+<p>
+	Deletes VMs from Expedient side. Fill the field with the VM ID (see slice detail page) and press "Delete".
+</p>
+
+<table class="fulltable">
+	<tbody>
+		<tr>
+			<td>
+				<form method="post" action="">{% csrf_token %}
+					<table style="margin: 0 auto;">
+						<tbody>
+							<tr>
+								{% if delete_vm_exception %}
+									<td colspan="2">{{ delete_vm_exception }}</td>
+								{% endif %}
+								{% for field in form_stalled_vms %}
+								<th>
+									{{ field.label_tag }}
+								</th>
+								<td>
+									{{ field }}
+								</td>
+								{% endfor %}
+								<td>
+									<input type="submit" value="Delete VM" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</td>
+			<td>
+				<form method="post" action="{% url remove_all_vms %}">{% csrf_token %}
+					<input type="submit" value="Delete all VMs" />
+				</form>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+{% endblock content %}

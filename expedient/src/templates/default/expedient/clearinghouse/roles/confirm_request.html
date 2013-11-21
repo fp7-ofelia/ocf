@@ -11,21 +11,23 @@
 {% block content %}
 <div class="main">
 	<h2>Are you sure you want to proceed?</h2>
-	{% with role_req.requester as user %}
-    If you proceed you will <strong>
-    {% if allow %} approve {% else %} deny {% endif %}</strong>
-    user <span class="val info">{{ user.username }}</span>'s
-    <div class="description info">{% include "users/tooltipdesc.html" %}</div>
-    request for role <span class="val info">{{ role_req.requested_role.name }}</span>
-    <div class="description info">{{ role_req.requested_role.description }}</div>.
-    {% if delegate %}Further, you will be giving the user the ability to give
-    the role to other users.{% endif %}
-    {% endwith %}
-    <br /><br />
+	<p>
+		{% with role_req.requester as user %}
+	    If you proceed you will <strong>
+	    {% if allow %} approve {% else %} deny {% endif %}</strong>
+	    user <span class="val info">{{ user.username }}</span>'s
+	    <div class="description info">{% include "users/tooltipdesc.html" %}</div>
+	    request for role <span class="val info">{{ role_req.requested_role.name }}</span>
+	    <div class="description info">{{ role_req.requested_role.description }}</div>.
+	    {% if delegate %}Further, you will be giving the user the ability to give
+	    the role to other users.{% endif %}
+	    {% endwith %}
+	</p>
     <form action="." method="POST">{% csrf_token %}
     	<div class="center">
-	    	<input type="submit" value="Yes, I am sure" />
-	    	<a href="{% url project_detail project.id %}">No, cancel</a>
+	    	<input type="submit" value="Yes, sure" />
+	    	<!--<a href="{% url project_detail project.id %}">No, cancel</a>-->
+			<input type="button" value="No, cancel" onclick="document.location='{% url project_detail project.id %}'"/>
 	    </div>
     </form>
 </div>

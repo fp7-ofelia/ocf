@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+				<link rel="stylesheet" type="text/css" href="{% url css_media 'egeni.css' %}" />
+		
+		<title>
+			OFELIA OpenFlow Aggregate Manager - {% block title %}OpenFlow Aggregate Manager{% endblock %}
+		</title>
+			<link rel="stylesheet" type="text/css" href="{% url css_media 'tooltip.css' %}" />
+		
+		<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+    <script type="text/javascript" src="{% url js_media 'tooltip.funcs.js' %}"></script>
+	{% block scripts %}{% endblock %} 
+	</head>
+	
+	<body>
+		<br/>
+		
+		<table width="800" border="0" align="center" cellpadding="3" cellspacing="0">
+			<tr>
+				<td align="left">
+					<img src="{% url img_media 'ofelialogo.png' %}" />
+					<div>Software Version <strong>{{softwareVersion}}</strong></div>
+				</td>
+				<td>
+					<div align="right" style="position: relative; top: 19px;">
+						<div class="small" align="right" style="position: relative; top: 12px;margin-top:52px;">
+							{% if request.user.username %}
+							logged in as <strong>{{ request.user.username }}</strong> in <strong>{{islandName}} </strong>'s island
+							{% else %}
+							you are in <strong>{{islandName}} </strong>'s island
+							{% endif %}
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		
+		<div id="page">
+			<div id="content">
+				{% block content %}{% endblock %}
+			</div>
+		</div>
+		
+		<div id="footer">
+			&copy; 2011 <a href="http://www.fp7-ofelia.eu/" target="_blank">OFELIA FP7-Project</a> &amp; Stanford University. <br/>                          
+			OFELIA is funded by the EU in the 7th framework program and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
+			OpenFlow Aggregate Manager was adapted from <a href="https://openflow.stanford.edu/display/FOAM/Home" target="_blank">FOAM software</a> gracefully provided by Nick Bastin.<br/><br/>
+		</div>
+	</body>
+</html>
+		
+		

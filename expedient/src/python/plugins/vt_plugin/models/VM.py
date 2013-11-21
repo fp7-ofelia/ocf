@@ -7,12 +7,13 @@ from vt_plugin.utils.validators import *
 DISC_IMAGE_CHOICES = (
                         ('default','Default'),
                         ('spirent','Spirent'),
+                        ('irati','IRATI'),
                         #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (
                         ('file-image','File Image'),
                         #('logical-volume-image','Logical Volume'),
-                        ('file-full-image','File Image with Partitions'),
+                        ('full-file-image','File Image with Partitions'),
                       )
 VIRTUALIZATION_SETUP_TYPE_CHOICES = (
                         ('paravirtualization','Paravirtualization'),

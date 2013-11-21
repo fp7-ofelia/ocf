@@ -1,0 +1,7 @@
+opt/foam/db
+opt/foam/etc/gcf-ca-certs
+opt/foam/log
+opt/foam/log/tasks
+opt/foam/tasks/queue
+opt/foam/tasks/completed
+opt/foam/etc/templates/custom

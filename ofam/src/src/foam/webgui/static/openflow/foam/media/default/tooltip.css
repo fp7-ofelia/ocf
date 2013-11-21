@@ -1,0 +1,31 @@
+.tooltip {
+	display:none;
+	background-color:#003366;
+	border:1px solid #fff;
+	padding:10px 10px;
+	width:200px;
+	color:#fff;
+	text-align:left;
+	font-size:10px;
+
+	/* outline radius for mozilla/firefox only */
+	-moz-box-shadow:0 0 10px #000;
+    -webkit-box-shadow:0 0 10px #000;
+    -moz-border-radius: 15px 15px 15px 0px;                                   
+    -webkit-border-radius: 15px 15px 15px 0px;                                
+     border-radius:  15px 15px 15px 0px;
+}
+.tooltiptable {
+	border: none;
+	border-collapse: collapse;
+    background-color:#003366	
+}
+.tooltiptable tbody td, tbody th{
+	background-color:"transparent";
+	border: none;
+	border-collapse: collapse;
+	color: "white";
+}
+.tooltip a {
+	color: #ADD8E6;
+}

@@ -40,11 +40,13 @@ class OSVersionClass():
 	OS_VERSION_TYPE_50 = "5.0"
 	OS_VERSION_TYPE_60 = "6.0"
 	OS_VERSION_TYPE_62 = "6.2"
+	OS_VERSION_TYPE_70 = "7.0"
 	
 	OS_VERSION_CHOICES = (
 		(OS_VERSION_TYPE_50, '5.0'),
 		(OS_VERSION_TYPE_60, '6.0'),
 		(OS_VERSION_TYPE_62, '6.2'),
+		(OS_VERSION_TYPE_70, '7.0'),
 	)
 	@staticmethod
 	def validateOSVersion(value):

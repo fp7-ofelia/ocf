@@ -3,16 +3,13 @@
 
 {% block content %}
 <div class="main">
-    <p>
-        <h2>Are you sure you want to delete the slice 
-        "{{ object.name }}"?</h2>
-    </p>
-    <form action="" method="post">{% csrf_token %}
-    <div>
+    <form class="form center" action="" method="post">{% csrf_token %}
+	    <p>
+	        <h2>Are you sure you want to delete the slice "{{ object.name }}"?</h2>
+	    </p>
         <input type="hidden" name="post" value="yes" />
-        <input type="submit" value="Yes, I'm sure" />
-        <input type="button" value="Cancel" onclick="document.location='{% last_link breadcrumbs %}'" />
-    </div>
+        <input type="submit" value="Yes" />
+        <input type="button" value="No" onclick="document.location='{% last_link breadcrumbs %}'" />
     </form>
 </div>
 {% endblock %}
