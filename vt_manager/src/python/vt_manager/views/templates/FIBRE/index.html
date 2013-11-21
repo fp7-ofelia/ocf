@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main">
+	<h1>Welcome to the FIBRE Virtualization Manager!</h1>
+        {% if request.user.is_authenticated(): %}
+        <h2> You are authenticated </h2>
+        {% else %}
+        <h2> please log in first </h2>
+	
+</div>
+{% endblock content %}
+

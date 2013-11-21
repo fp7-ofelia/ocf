@@ -1,0 +1,1367 @@
+/*
+Theme Name: OpenFlow
+Theme URI: http://openflowswitch.org
+Description: Styling for the OpenFlow site
+Version: 1.0
+Author: Billy Ray and Guido Appenzeller
+Author URI: http://guido.appenzeller.net
+Tags: openflow
+
+  OpenFlow theme for the OpenFlow Web site
+  (c) by Guido Appenzeller and Stanford University
+
+*/
+
+/* Fix for IE6 */
+
+img, div { behavior: url(/media/js/iepngfix.htc) }
+
+/* Begin Typography & Colors */
+
+body {
+	/*font-size: 62.5%;*/ /* Resets 1em to 10px */
+	font-size: 70% !important;
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+	color: #333;
+	text-align: center !important;
+	margin: 0px !important;
+	padding: 0px !important;
+}
+
+#header {
+	background-color: #CCDDDD;
+}
+
+#top_island {
+    float: right;
+    margin-top: -37px;
+    /*clear: both;*/
+}
+
+.widecolumn .entry p {
+	font-size: 1.05em;
+	}
+
+.narrowcolumn .entry, .widecolumn .entry {
+	line-height: 1.4em;
+	}
+
+.widecolumn {
+	line-height: 1.6em;
+	}
+
+.narrowcolumn .postmetadata {
+	text-align: left;
+	font-size: 0.9em;
+	}
+
+.alt {
+	background-color: #f8f8f8;
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+	}
+
+small {
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 0.9em;
+	line-height: 1.5em;
+	}
+
+h1, h2, h3 {
+	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;	
+	color: #005;	
+	font-weight:bold;
+	}
+
+h1 {
+	font-size: 1.5em;
+	text-align: left;
+	}
+
+#headerimg .description {
+	font-size: 1.2em;
+	text-align: center;
+	}
+
+h2 {
+	font-size: 1.2em;
+	}
+
+h2.pagetitle {
+	font-size: 1.3em;
+	}
+
+#sidebar h2 {
+	font-family: 'Lucida Grande', Verdana, Sans-Serif;
+	font-size: 1.2em;
+	}
+
+h3 {
+	font-size: 1em;
+	}
+
+h1, h1 a, h1 a:hover, h1 a:visited, #headerimg .description {
+	text-decoration: none;
+	}
+
+h2, h2 a, h2 a:visited, h3, h3 a, h3 a:visited {
+	color: #000055;
+	}
+
+h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar h2, #wp-calendar caption, cite {
+	text-decoration: none;
+	}
+
+code {
+	font: 1.1em 'Courier New', Courier, Fixed;
+	}
+
+abbr, span.caps
+{
+	font-size: 0.9em;
+	letter-spacing: .07em;
+	}
+
+a, h2 a:hover, h3 a:hover {
+	color: #259;
+	text-decoration: none;
+	}
+
+a:hover {
+	color: #36A;
+	text-decoration: underline;
+	}
+/* End Typography & Colors */
+
+
+
+/* Begin Structure */
+body {	
+	padding: 0;
+	}
+
+#header {
+	
+	margin: 0 0 0 1px;
+	padding: 0;	
+	width: 85%;
+	background-color: #CCDDCC;
+	}
+
+#headerimg {
+	margin: 0;	
+	width: 100%;
+	background-color: #eee;
+	}
+/* End Structure */
+
+
+
+/*	Begin Headers */
+h1 {
+	padding-top: 0px;
+	margin: 0px 0px 25px 0px;
+	border-width: 0px 0px 1px 0px;
+	border-style: solid;
+	border-color: #CCC;
+	}
+.highlight{
+	color: #225599;	
+}
+h2, h3 {
+	margin: 15px 0 0px;
+	border-width: 0px 0px 1px 0px;
+}
+
+.expandable_header {
+	border-bottom: 1px solid #ddd;
+	color: #666;
+	font-size: 15px;
+	font-style: italic;
+	margin-top: 28px;
+	text-align: right;
+}
+a.expandable_header {
+        cursor: pointer;
+}
+h2.pagetitle {
+	margin-top: 30px;
+	text-align: center;
+}
+
+#sidebar h2 {
+	margin: 5px 0 0;
+	padding: 0;
+	}
+
+/* End Headers */
+
+
+
+/* Begin Images */
+p img {
+	padding: 0;
+	max-width: 100%;
+	}
+
+/*	Using 'class="alignright"' on an image will (who would've
+	thought?!) align the image to the right. And using 'class="centered',
+	will of course center the image. This is much better than using
+	align="center", being much more futureproof (and valid) */
+
+img.centered {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	}
+
+img.alignright {
+	padding: 4px;
+	margin: 0 0 2px 7px;
+	display: inline;
+	}
+
+img.alignleft {
+	padding: 4px;
+	margin: 0 7px 2px 0;
+	display: inline;
+	}
+
+.alignright {
+	float: right;
+	}
+
+.alignleft {
+	float: left
+	}
+/* End Images */
+
+
+
+/* Begin Lists
+
+	Special stylized non-IE bullets
+	Do not work in Internet Explorer, which merely default to normal bullets. */
+
+html>body .entry ul {
+	margin-left: 0px;
+	padding: 0 0 0 30px;
+	list-style: none;
+	padding-left: 10px;
+	text-indent: -10px;
+	}
+
+html>body .entry li {
+	margin: 7px 0 8px 10px;
+	}
+
+ol li, #sidebar ul ol li {
+	list-style: decimal outside;
+	}
+/* End Entry Lists */
+
+
+
+/* Begin Form Elements */
+.entry form { /* This is mainly for password protected posts, makes them look better. */
+	text-align:center;
+	}
+
+select {
+	width: 130px;
+	}
+/* End Form Elements */
+
+/* Begin Various Tags & Classes */
+abbr, span.caps {
+	cursor: help;
+	}
+
+abbr {
+	border-bottom: 1px dashed #999;
+	}
+
+blockquote {
+	margin: 15px 30px 0 10px;
+	padding-left: 20px;
+	border-left: 5px solid #ddd;
+	}
+
+blockquote cite {
+	margin: 5px 0 0;
+	display: block;
+	}
+
+.center {
+	text-align: center;
+	}
+
+.hidden {
+	display: none;
+	}
+
+hr {
+	display: none;
+	}
+
+a img {
+	border: none;
+	}
+
+.navigation {
+	display: block;
+	text-align: center;
+	margin-top: 10px;
+	margin-bottom: 60px;
+	}
+/* End Various Tags & Classes*/
+
+/* GENI Specific stuff */
+div.contact {
+    width: 275px;
+}
+div.aggregate_list_text {
+    padding-left: 10px;
+    margin-bottom: 10px;
+    color: #999;
+    font-style: italic;
+}
+
+div.geni_info {
+    width: 400px;
+    float: right;
+}
+/* 
+    Table Styles
+*/
+
+.errorlist, ul[id^="errorlist"] {
+        background: #AA2B2B;
+        border-radius: 7px;
+        color: #fff !important;
+	list-style-type: none;
+        margin-bottom: 5px;
+	padding-bottom: 5px;
+	padding-left: 7px;
+        padding-top: 5px;
+	padding-right: 7px;
+}
+.warninglist, ul[id^="warninglist"] {
+    border-radius: 7px;
+    color: #382885 !important;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    padding-left: 30px;
+    padding-top: 5px;
+    padding-right: 7px;
+}
+
+.errtime {
+    color: #00A;
+}
+
+.errdate {
+}
+
+thead.project {
+    background-color: #9cf !important;
+}
+
+table.flowspacetable select {
+    width: 70px;
+}
+
+table.flowspacetable input {
+    width: 55px;
+}
+
+table.flowspacetable tr th {
+    padding: 2px 5px;
+}
+
+table.flowspacetable tr td {
+    padding: 1px 1px;
+}
+
+table.fulltable tbody td.logocol {
+    padding: 0px;
+}
+table.fulltable tr.accordion {
+	height: auto !important;	/* Avoid big heights without need */
+}
+
+table.project_slice_list {
+	background-color: #fff;
+}
+table.project_slice_list td {
+	border-bottom: 1px solid #eaedef;
+	text-align: center;
+}
+
+/* iframes */
+iframe {
+	/*height: auto !important;*/
+	margin: 0px;
+	padding: 0px;
+}
+
+div.proj_description {
+	height: auto;
+}
+div.slice_description {
+	height: auto;
+}
+
+div.breadcrumbs {
+	margin-bottom: 10px;
+}
+
+/* creating message */
+div.create_msg_div {
+	position:relative;
+}
+
+div.create_msg {
+	position:relative;
+    top:0;
+    left:0;
+    height:122px;
+}
+
+#type_users_div {
+	position:absolute;
+	top:0;
+	left:0px;
+}
+
+#message_div {
+    position:absolute;
+    top:0;
+    right:0px;
+}
+
+div.form_error_msgs {
+	position:relative;
+	text-align:left;
+}
+
+div.messages {
+    border: 1px solid #bed6f0; /* #E0E8FF */
+
+	width: 100%;
+	position: relative;
+	top: -15px;
+	overflow: hidden;
+	font-size: smaller;
+}
+
+div.messages_more {
+	text-align:right;
+	font-size:12px;
+	margin:0px;
+	
+}
+div.messages p {
+        background-repeat: no-repeat;
+}
+
+table.detail_management_table {
+	width: 100%;
+}
+/* pp */
+p  {
+        background-repeat: no-repeat !important;
+        padding-left: 25px !important;
+        padding-top:1.5px;
+
+}
+
+/*  UI add ons */
+.separator-table{
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+.separator{
+    color:#666;
+    margin:0px;
+    padding:0px;
+    border-bottom: 1px solid #999;
+}
+
+#indented-div{
+    width:100%;
+    padding-left:40px;
+}
+
+table.flowspace{
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    border: 0px 
+    margin-left:auto;
+    margin-right:auto;
+}
+
+table.flowspace td {
+    padding : 2px;
+    border:0px!important;
+}
+
+table.flowspace th {
+    padding : 2px;
+    background-color: #FFCC00;
+}
+
+#am_location{
+    color: #999;
+    font-size: .9em;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+#create_server{
+    color: #000;
+    font-size:12px;
+}
+#no_servers{
+    padding-left: 30px;
+    margin-bottom: 45px;
+    color:#999;
+    font-size:12px;
+    font-style:italic;
+}
+
+/* New slice mgmt actions*/
+#slicemgmt_table{
+	margin:0px;
+	padding:0px;
+}
+#slicemgmt_table th{
+	margin:0px;
+	padding:0px;
+}
+#slicemgmt_table th h2{
+	padding:2px;
+	margin:0px;
+}
+#slicemgmt_table td{
+	margin:0px;
+	padding:0px 3px 0px 3px;
+	vertical-align: middle!important;
+	text-align:left;
+}
+
+/* Other */
+.openflow{
+	margin-bottom:20px;
+}
+.planetlab{
+	margin-bottom:20px;
+}
+
+/* Aggregate Manager add/create */
+table.aggregate_create {
+        width:70%;
+        margin-left:15%;
+        margin-right:15%;
+}
+table.aggregate_create th {
+        text-align:right;
+}
+table.aggregate_create tr {
+        text-align:left;
+}
+table.aggregate_create input[type='textarea'],
+table.aggregate_create input[type='text'] {
+        width:335px;
+}
+table.aggregate_create #id_description {
+        height:75px;
+}
+
+/* Loading blockUI */
+.blockUI h1{
+	text-decoration:none;
+	border:0px!important;
+	color: #fff;
+	text-align:center;
+	margin:auto;	
+}
+
+/* Success, error font styles */
+.success {
+        /*color: green;*/
+}
+
+.error {
+        /*color: #9a1b1b;*/
+}
+
+div.mode_selector {
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        display:inline-block;
+        width:600px;
+        vertical-align:middle;
+        padding:10px;
+	height:70px;
+}
+
+div.mode_explanation {
+        margin-bottom:10px;
+        background-color:#FFF;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 25px 25px 25px;
+        -webkit-border-radius: 0px 25px 25px 25px;
+        border-radius:  0px 25px 25px 25px;
+        float:right;
+	text-align:left;
+        display:none;
+        width:400px;
+        vertical-align:middle;
+        padding:10px;
+}
+
+div.steps {
+        margin-top:0px;
+        margin-bottom:10px;
+        margin-left: auto; 
+	margin-right: auto;
+        background-color:#EEE;
+        border: 1px solid #CCC;
+        -moz-border-radius: 0px 0px 25px 25px;
+        -webkit-border-radius: 0px 0px 25px 25px;
+        border-radius:  0px 0px 25px 25px;
+        width:400px;
+        vertical-align:middle;
+        padding:10px;
+    }
+
+/* ============== NEW -- CHECK THIS OUT =================== */
+
+/* HTML */
+
+/* For sticky footer */
+html,
+body {
+  height: 100%;
+}
+
+/* HEADER */
+
+header {
+	background-color: #75A6fd;
+	box-shadow: 0px 2px 10px rgb(49, 136, 129);
+	height: 100px;
+    margin: 0 auto;
+	-moz-box-shadow: 0px 2px 10px rgb(49, 136, 129);
+    width: 100%;
+}
+header img {
+	height: 80px;
+	margin-top: 10px;
+}
+/* Menu navigation list within header */
+#top_menu_options {
+	display: block;
+	border-bottom: 1px solid;
+	float: right;
+	font-size: 1.3em;
+	height: 6.4em;
+	width: 50em;
+}
+#top_menu_options ul {
+	display: inline-block;
+	height: 60px;
+	padding-right: 25px;
+    text-align: right;
+}
+#top_menu_options ul {
+	margin-top: 3.5em;
+}
+#top_menu_options li {
+	display: block;
+	float: left;
+	margin-right: 2em;
+}
+#top_menu_options li a {
+	color: #353535;
+	display: block;
+	font-weight: normal;
+	padding: 20px 0 5px;
+	text-decoration: none;
+}
+#top_menu_options li a:hover {
+	border-bottom: .25em solid  rgb(102, 102, 102);
+	color: rgb(102, 102, 102);
+        font-weight: bold;
+	margin-bottom: -5px;
+}
+#top_menu_options li a.selected,
+#top_menu_options li a.selected:hover {
+	color: #353535;
+	font-weight: bold;
+	border-bottom: .25em #666 solid;
+}
+
+/* PAGE CONTENT */
+
+#page {
+	/* Equal to (minus) footer height */
+	margin-bottom: -70px;
+	margin-top: 20px;
+	min-height: 100%;
+}
+/* Sticky footer */
+#page:after {
+	content: "";
+	display: block;
+}
+#page:after {
+  /* Equal to footer height */
+  height: 70px; 
+}
+#content {
+    background-color: #fff;
+    padding: 10px 0 0 0;
+    width: 85% !important;
+    margin: auto;
+	text-align: left;
+	font-size: 1.2em;
+	padding-top: 20px;
+	padding-left:30px;
+	padding-right:30px;
+	padding-bottom:30px;
+}
+
+/* HTML5 TAGS */
+
+/* Navigation links (breadcrumbs) */
+nav {
+	background-repeat: no-repeat;
+	color: #7371a8;
+	border-bottom: 1px dotted #ccc;
+	font-style: italic;
+	font-weight: bold;
+	margin-bottom: 40px;
+	padding-left: 25px;
+	padding-bottom: 5px;
+}
+nav a {
+	color: #6987A7;
+}
+nav a:hover {
+	color: #94a4b4;
+	text-decoration: none;
+	text-shadow: #fff 0px -1px 0, #000 0 -1px 0;
+	/*text-shadow: #94a4b4 0px 0px 0, #94a4b4 0 1px 0;*/
+}
+
+/* FOOTER */
+
+footer {
+	background-color: #c7edff; /*#bee2fc;*/
+	box-shadow: 0px -1px 2px rgb(49, 136, 129);
+	height: 70px;
+	margin: 5px auto 10px;
+	-moz-box-shadow: 0px -1px 2px rgb(49, 136, 129);
+	padding: 10px;
+}
+footer p {
+        background-repeat: no-repeat;
+	margin: 0;
+	padding: 10px 0;
+	text-align: center;
+}
+
+/* LINKS */
+
+a {
+	outline: none;	/* Removes dotted lines around elements */
+}
+
+/* BUTTONS, INPUTS, ETC */
+
+input,
+select,
+textarea,
+input[type=submit],
+input[type=button],
+.button {
+	-moz-box-shadow:inset 0px 1px 0px 0px #fff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #fff;
+	box-shadow:inset 0px 1px 0px 0px #fff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9) ) left center no-repeat;
+	background:-moz-linear-gradient( center top, #f9f9f9 5%, #e9e9e9 100% ) left center no-repeat;
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e9e9e9');
+	background-color: #f9f9f9;
+	/*-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;*/
+	border: 1px solid #bbb;
+	display: inline-block;
+	color: #394f66;
+	font-family: arial;
+	font-size: 1em;
+	padding: 7px;
+	text-decoration: none;
+	text-shadow: 1px 1px 0px #fff;
+	margin-bottom: 5px;
+}
+input,
+select,
+textarea {
+	outline: 0px none transparent !important;
+}
+input[type=text],
+input[type=password],
+textarea {
+	width: 97%;
+}
+select {
+	width: 100%;
+}
+/* Inside OpenFlow form */
+select.wide {
+	width: 90%; /*51em*/
+}
+input[type=text]:disabled,
+input[type=password]:disabled,
+select:disabled,
+textarea:disabled {
+	background: #f9f9f9;
+	padding: .6em;
+}
+input[type=text],
+input[type=password],
+select,
+textarea {
+	background: #f5fefe; /*#fbfefe;*/
+	display: block;
+	padding: .6em;
+}
+/* Input for text only */
+input[type=text]:focus, 
+input[type=password]:focus {
+	background: rgb(236, 253, 253);
+}
+/* Buttons only */
+input[type=submit],
+input[type=button] {
+	padding: .6em;
+	max-width: 18em;
+}
+/* Border on focus for every element */
+input[type=text]:focus, 
+input[type=password]:focus,
+select:focus,
+textarea:focus,
+input[type=submit]:focus,
+input[type=button]:focus {
+	border: 1px solid #9cddf9;
+}
+input[type=submit]:hover,
+input[type=button]:hover,
+.button:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9) ) left center no-repeat;
+	background:-moz-linear-gradient( center top, #e9e9e9 5%, #f9f9f9 100% ) left center no-repeat;
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e9e9e9', endColorstr='#f9f9f9');
+	background-color:#e9e9e9;
+}
+input[type=submit]:active,
+input[type=button]:active,
+.button:active {
+	position:relative;
+	top:1px;
+}
+.button a {
+	color: #333;
+}
+input[type=submit],
+input[type=button],
+.button a:hover {
+	text-decoration: none;
+}
+select option {
+	background: #eee;
+	color: #444;
+	text-decoration: none !important;
+	text-shadow: none;
+}
+
+/* FORMS */
+
+form,
+.form,
+div.form * {
+	margin-left: auto;
+	margin-right: auto;
+}
+div.form * {
+	border: 1px solid #bed6f0;
+}
+.form {
+	/*border: 1px solid #7e9fc0;
+	background-color: #ebf5ff;*/
+	min-width: 55%;
+	padding: 20px;
+	width: 55%;
+}
+.form label {
+	font-size: 1.1em;
+	font-weight: bold;
+}
+.form span.helptext {
+	display: block;
+	font-style: italic;
+}
+div.form {
+	margin: 10px;
+	text-align: center;
+}
+/* Generic table for forms */
+table.formtable {
+	/*border-collapse: collapse;*/
+	border: 1px solid #bed6f0;
+	margin-bottom: 10px;
+	margin-top: 5px;
+	padding: 5px;
+	width: 65%;
+}
+table.formtable_noborder {
+	/*border-collapse: collapse;*/
+	border-width: 0px;
+	margin-bottom: 10px;
+	margin-top: 5px;
+	padding: 5px;
+}
+table.formtable>tbody>td,
+table.formtable>tbody>th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+table.formtable_noborder>tbody>td,
+table.formtable_noborder>tbody>th {
+	padding: 5px 10px;
+	background: #fff;
+	color: #000;
+}
+
+/* TABLES */
+
+/* Generic table */
+table.fulltable {
+	border-collapse: collapse;
+	border: 1px solid #7e9fc0;
+	font-size: 1.1em;
+	margin-bottom:10px;
+	margin-top:0px;
+	width: 100%
+}
+table.fulltable>tbody,
+table.fulltable>tbody>td,
+table.fulltable>tbody>th {
+	text-align: center;
+}
+table.fulltable>thead {
+	white-space: nowrap;
+	background: #E0E8FF;
+	font-weight: bold;
+	padding: 3px;
+	text-align: center;
+}
+table.fulltable tbody td {
+	padding-bottom: 7px !important;
+	padding-top: 7px;
+}
+table.fulltable tbody tr.head {
+	background-color: #9cf;
+	border-bottom: 1px solid #7e9fc0;
+}
+table.fulltable tbody tr.body,
+table.fulltable tbody tr.accordion {
+	background-color: #ebf5ff;
+	border-left: 1px solid #7e9fc0;
+	border-right: 1px solid #7e9fc0;
+	border-top: 1px solid #dae8f7;
+}
+/* Hack that loads help text and hides it at the label */
+table.fulltable>tbody>tr>td label {
+    display: none;
+}
+table.fulltable tbody tr td ul.fulltable_tooltip_list, 
+table.fulltable>tbody>tr>td>div>ul.fulltable_tooltip_list {
+    margin: 2px;
+    padding-left: 20px;
+}
+table.fulltable>tbody>tr>td,
+/*table.fulltable>tbody>tr>th*/ {
+	padding: 2px 4px;
+	/*background: #fff;
+	color: #000;*/
+}
+table.fulltable>tbody>tr>th {
+	/*color: #005;*/
+	font-weight: bold;
+	font-variant: normal;
+	padding: 5px;
+}
+
+
+table.fulltableLogs {
+        border-collapse: collapse;
+        border: 1px solid #7e9fc0;
+        font-size: 1.1em;
+        margin-bottom:10px;
+        margin-top:0px;
+        width: 100%
+}
+table.fulltableLogs>tbody,
+table.fulltableLogs>tbody>td,
+table.fulltableLogs>tbody>th {
+        text-align: center;
+}
+table.fulltableLogs>thead {
+        white-space: nowrap;
+        background: #E0E8FF;
+        font-weight: bold;
+        padding: 3px;
+        text-align: center;
+}
+table.fulltableLogs tbody td {
+        padding-bottom: 5px !important;
+        background-color:#FFF !important;
+        border-top:1px solid #EEE !important
+}
+table.fulltableLogs tbody tr.head {
+        background-color: #9cf;
+        border-bottom: 1px solid #7e9fc0;
+}
+table.fulltableLogs tbody tr.body {
+        background-color: #ebf5ff;
+        border-left: 1px solid #7e9fc0;
+        border-right: 1px solid #7e9fc0;
+        border-top: 1px solid #dae8f7;
+}
+/* Hack that loads help text and hides it at the label */
+table.fulltableLogs>tbody>tr>td label {
+    display: none;
+}
+table.fulltableLogs tbody tr td ul.fulltable_tooltip_list,
+table.fulltableLogs>tbody>tr>td>div>ul.fulltable_tooltip_list {
+    margin: 2px;
+    padding-left: 20px;
+}
+table.fulltableLogs>tbody>tr>td,
+/*table.fulltable>tbody>tr>th*/ {
+        padding: 2px 4px;
+        background: #fff !important;
+        color: #000;*/
+}
+table.fulltableLogs>tbody>tr>th {
+        /*color: #005;*/
+        font-weight: bold;
+        font-variant: normal;
+        padding: 5px;
+}
+
+
+
+/* Centered table */
+table.centered {
+	display: table !important;
+	margin: auto;
+}
+/* Flowspaces */
+table.flowspaceHeader {
+	border: 0px;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	font-size: 1em;
+	width: 100%;
+}
+table.requestedFlowspaceHeader {
+	background-color: #BBB;
+}
+table.grantedFlowspaceHeader {
+	background-color: #C2E594;
+}
+table.flowspaceHeader th {
+	text-align:left;
+}
+table.flowspace {
+	border-collapse: collapse;
+	border-spacing: 0px;
+	font-size: 1em;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+table.flowspace td {
+    border: 0px!important;
+    padding : 2px;
+}
+table.flowspace_r td {
+    border: 0px !important;
+}
+table.flowspace_r th {
+    background-color: #fb8;
+    border: 0px;
+}
+table.flowspace_r tr.odd { 
+    background-color: #DDD !important;
+    border: 0px;
+}
+table.flowspace_r tr.even {
+    background-color: #EEE !important;
+    border: 0px;
+}
+table.flowspace tr.odd {
+    background-color: #D3EEAF;
+}
+table.flowspace tr.even {
+    background-color: #E2F8CB;
+}
+/* Servers and VMs */
+table.servers {
+    width: 100%;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    font-size: 1em;
+    border: 0px;
+    border-left: 15px solid #3d5266;
+}
+table.servers tr {
+	border: 0px!important;
+	border-bottom: 1px solid red;
+}
+table.servers td {
+    padding : 4px;
+    border: 0px!important;
+    color: #000;
+}
+table.servers th {
+    background-color: #3d5266;
+    border: 0px;
+    color: #eee;
+	padding: 4px;
+    text-align: left;
+}
+table.servers tr.even {
+    background-color: #aaa;
+    border: 0px!important;
+}
+table.servers tr.odd {
+    background-color: #b7c6d4;
+    border:0px!important;
+}
+table.vms {
+    border-collapse: collapse;
+    border-left: 15px solid #3d5266 !important;
+    border-spacing: 0px;
+    font-size: 1em;
+    text-align: left;
+    width: 100%;
+}
+table.vms th {
+    background-color: #9cf;
+    border: 0px;
+    color: #fff;
+    padding : 4px;
+    text-align: left;
+}
+table.vms td {
+    border:0px !important;
+    color: #000;
+    padding: 4px;
+    text-align:left;
+}
+table.vms td.ssh_vm_details {
+    font-style: italic;
+    padding-bottom: 0px;
+    padding-left: 25px;
+    padding-top: 0px;
+    text-align: right !important;
+}
+table.vms tr.even td.ssh_vm_details,
+table.vms tr.odd td.ssh_vm_details {
+    color: #888;
+}
+table.vms td.ssh_vm_details_common {
+    background: #9cf;
+    color: #444;
+    font-style: italic;
+    text-align: center !important;
+}
+table.vms tr {
+}
+table.vms tr.even {
+    background-color: #f5faff;
+    border: 0px!important;
+}
+table.vms tr.odd {
+    background-color: #dce9f7;
+}
+/* Layer with buttons for the VM actions */
+.vm_actions input {
+	padding: 5px;
+	margin: 0px;
+	font-weight: normal;
+}
+
+/* SELECTS */
+#select_messaging_number_logs {
+	background: none !important;
+	width: 50px !important;
+}
+
+/* PARAGRAHS */
+
+p.requested_flowspace_warning {
+	font-size: .9em;
+}
+/* Slice detail page: warning shown when no AM has been added yet */
+p#aggregate_none_on_slice {
+	text-align: center;
+	font-size: 1em;
+	margin-bottom: 65px;
+	width: 400px;
+}
+
+/* HEADINGS */
+
+/* ... */
+
+/* SPANS */
+
+span.opened,
+span.closed {
+	float: right;
+}
+
+/* LAYERS */
+
+/* Slice detail page: aggregate manager's 
+collapsable sections (inside div.expandable) */
+div.aggregateManager {
+	background-color: #f5faff !important; /* Overwrites .expandable settings */
+	margin-top: 0px;
+	margin-bottom: 10px;
+   	border: 1px solid #CCC;
+   	border-radius: 3px;
+   	-moz-border-radius: 3px;
+   	-webkit-border-radius: 3px;
+	display: inline-block;
+	padding: 10px;
+	padding-top: 0;
+	text-align: center;
+	vertical-align: middle;
+	width: 97.5%;
+}
+div.aggregateManager a.noMouseOver:hover {
+	text-decoration: none !important;
+}
+div.aggregateManager table.aggregateManagerDetail {
+	margin: 5px;
+	margin-right: 10;
+	width: 100%;
+}
+div.aggregateManager table.aggregateManagerDetail td {
+	text-align: left;
+	vertical-align: middle;
+}
+div.aggregateManager table.aggregateManagerDetail .label {
+	font-size: 1.1em;
+	padding-top: 2px;
+	vertical-align: top !important;
+	width: 150px;
+}
+/* Slice detail page: button added when no AM has been added yet */
+div#aggregate_add_to_slice {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 350px;
+	text-align: center;
+}
+/* Layer with data below a submit/button */
+div.data_below_submit {
+	padding-top:10px;
+	text-align: center;
+}
+/* Management actions for project/slice */
+div.mgmt_actions {
+	float: right;
+	margin-top: -35px;
+}
+div.mgmt_actions p {
+	border: 1px solid #7e9fc0;
+	background-color: #ebf5ff;
+	display: inline;
+	padding: 7px;
+}
+div.slicemgmt_actions {
+	border: 1px solid #7e9fc0;
+	background-color: #ebf5ff;
+	margin-top: 10px;
+}
+
+/* GENERIC CLASSES */
+
+/* Colors for MessageCenter */
+.old_message {
+    opacity: 0.4;
+}
+.not_that_old_message {
+    opacity: 0.6;
+}
+.error {
+    font-weight: normal;
+    color: black;
+}
+.warning {
+    font-weight: normal;
+    color: black;
+}
+.success {
+    color: black;
+}
+
+/* Expandable stuff */
+div.expandable,
+div.expandable_admin {
+	background-color: #ebf5ff;
+	padding: 5px;
+	padding-left: 10px !important;
+}
+div.expandable_admin {
+	margin-top: -5px;
+}
+.expandableCtl {
+	cursor: pointer;
+	display: block;	/* Allows to click on every part of the link to collapse (100% width) */
+}
+
+/* Expandable resources, e.g. slice detail page */
+h2.resources {
+	background-color: #9cf;
+	padding: 3px;
+}
+h2.resources_aggregate {
+	background-color: #b8dbff;
+	padding: 3px;
+}
+/* Any centered class */
+.centered {
+	display: block !important;
+	margin: auto !important;
+}
+
