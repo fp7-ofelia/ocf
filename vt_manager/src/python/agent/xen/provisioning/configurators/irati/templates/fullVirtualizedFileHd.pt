@@ -7,6 +7,14 @@
 #
 kernel      = 'hvmloader'
 builder     = 'hvm'
+pae=1
+acpi=1
+apic=1
+xen_platform_pci=1
+sdl=0
+serial='pty'
+stdvga=0
+tsc_mode=0
 
 memory      = '{{ vm.xen_configuration.memory_mb }}'
 
@@ -37,7 +45,8 @@ uuid = '{{ vm.uuid }}'
 dhcp='off'
 ##Interfaces 
 
-vif = [{% for interface in vm.xen_configuration.interfaces.interface %}'mac={{ interface.mac }}, bridge={{interface.switch_id}}',{% endfor %}]
+vif = [{% for interface in vm.xen_configuration.interfaces.interface %}'mac={{
+	interface.mac }}, bridge={{interface.switch_id}}, model=virtio',{% endfor %}]
 
 #
 #  Behaviour
