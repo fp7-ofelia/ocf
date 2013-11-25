@@ -11,5 +11,4 @@
 #/usr/bin/git pull 
 #echo /usr/bin/git pull
 
-#git pull||| error "Could not upgrade ofver code"
-git pull origin integration|| error "Could not upgrade ofver code"
+git pull || error "Could not upgrade ofver code"
