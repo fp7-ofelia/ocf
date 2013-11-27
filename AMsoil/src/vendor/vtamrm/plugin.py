@@ -15,4 +15,7 @@ def setup():
     rm = VTResourceManager()
     pm.registerService('vtresourcemanager', rm)
     pm.registerService('vtexceptions', exceptions_package)
-    
+
+    from vtadminresourcemanager import VTAdminResourceManager
+    rm_admin = VTAdminResourceManager()
+    pm.registerService('vtadminresourcemanager', rm_admin)

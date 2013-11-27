@@ -24,6 +24,7 @@ class VTDelegate(GENIv3DelegateBase):
     def __init__(self):
         super(VTDelegate, self).__init__()
         self._resource_manager = pm.getService("vtresourcemanager")
+	self._admin_resource_manager = pm.getService("vtadminresourcemanager")
 
     #TODO: set the location of the schemas
     #TODO: redo the schemas according to the fields needed
