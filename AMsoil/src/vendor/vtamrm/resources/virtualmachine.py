@@ -1,16 +1,17 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.orm import validates, relationship, backref
 
 import inspect
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
 from utils import validators
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 
+from interfaces.networkinterface import NetworkInterface
 from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
 
-from resources.xenvm import XenVM
+#from resources.xenvm import XenVM
 
 
 '''@author: SergioVidiella'''
@@ -25,7 +26,7 @@ class VirtualMachine(Base):
     	'XenVM',
     )
 
-    xenvm = relationship("XenVM", backref="vm")
+ #   xenvm = relationship("XenVM", backref="vm")
 
     ''' General parameters '''
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -226,6 +227,6 @@ class VirtualMachine(Base):
         return self.callBackURL
 
     def getNetworkInterfaces(self):
-        return self.networkInterfaces.all().order_by('-isMgmt','id')
+	return DB_SESSION.query(NetworkInterface).join(NetworkInterface.vm_associations, aliased=True).filter(VMNetworkInterfaces.virtualmachine_id == self.id).order_by(NetworkInterface.isMgmt.desc(), NetworkInterface.id).all()
 
 

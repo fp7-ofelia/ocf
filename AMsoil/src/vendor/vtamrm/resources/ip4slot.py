@@ -71,7 +71,7 @@ class Ip4Slot(Base):
     ''' Factories '''
     @staticmethod
     def ipFactory(ipRange, ip):
-        return IpSlot.constructor(ipRange, ip, False, "")
+        return Ip4Slot.constructor(ipRange, ip, False, "")
 
     @staticmethod
     def excludedIpFactory(ipRange, ip, comment):

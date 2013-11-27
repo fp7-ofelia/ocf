@@ -2,10 +2,18 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates, relationship
 
-from utils.commonbase import Base
+import inspect
+
+from utils.commonbase import Base, DB_SESSION
 from utils.ip4utils import IP4Utils
 from resources.ip4slot import Ip4Slot
 from ranges.ip4rangeips import Ip4RangeIps
+from utils.mutexstore import MutexStore
+
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('Ip4Range')
+
 
 
 '''@author: SergioVidiella'''
@@ -144,7 +152,7 @@ class Ip4Range(Base):
         self.netMask = value
 
     def __isIpAvailable(self,ip):
-        return  self.ips.filter(ip=ip).count() == 0
+        return  DB_SESSION.query(Ip4RangeIps).filter(Ip4RangeIps.ip4range_id == self.id).join(Ip4RangeIps.ip4slot, aliased=True).filter(Ip4Slot.ip == ip).count() == 0
 
     '''Public methods'''
     def getLockIdentifier(self):
@@ -194,21 +202,39 @@ class Ip4Range(Base):
         Allocates an IP address of the range    
         '''
         with MutexStore.getObjectLock(self.getLockIdentifier()):                        
-	#Implements first fit algorithm
+	    logging.debug("******************************************* RANGEIP 1")
+	    #Implements first fit algorithm
             if self.nextAvailableIp == None:                                
+		logging.debug("******************************************* RANGEIP ERROR 1")
 		raise Exception("Could not allocate any IP")
+	    logging.debug("******************************************* RANGEIP 2")
 	    newIp = Ip4Slot.ipFactory(self,self.nextAvailableIp)
-            self.ips.add(newIp)
+	    logging.debug("******************************************* RANGEIP 3")
+	    DB_SESSION.add(newIp)
+            DB_SESSION.commit()
+            newIpRangeIp = Ip4RangeIps()
+            newIpRangeIp.ip4range_id = self.id
+            newIpRangeIp.ip4slot_id = newIp.id
+            DB_SESSION.add(newIpRangeIp)
+            DB_SESSION.commit()
+	    logging.debug("******************************************* RANGEIP 4")
 	    #Try to find new slot
             try:
+		logging.debug("******************************************* RANGEIP 5")
             	it= IP4Utils.getIpIterator(self.nextAvailableIp,self.endIp,self.netMask)
+		logging.debug("******************************************* RANGEIP 6")
                 while True:
                     ip = it.getNextIp()
+		    logging.debug("******************************************* RANGEIP 7 " + str(ip))
                     if self.__isIpAvailable(ip):
+			logging.debug("******************************************* RANGEIP 9")
                     	break
                     self.nextAvailableIp = ip
+		    logging.debug("******************************************* RANGEIP 8")
             except Exception as e:
+		logging.debug("******************************************* RANGEIP ERROR 2 " + str(e))
             	self.nextAvailableIp = None
+	    logging.debug("******************************************* RANGEIP 10")
 	    return newIp                                                                             
 
     def addExcludedIp(self,ipStr,comment):
@@ -223,7 +249,13 @@ class Ip4Range(Base):
     	    if not IP4Utils.isIpInRange(ipStr,self.startIp,self.endIp):
                 raise Exception("Ip is not in range")
             newIp = Ip4Slot.excludedIpFactory(self,ipStr,comment)
-            self.ips.add(newIp)
+	    DB_SESSION.add(newIp)
+            DB_SESSION.commit()
+            newIpRangeIp = Ip4RangeIps()
+            newIpRangeIp.ip4range_id = self.id
+            newIpRangeIp.ip4slot_id = newIp.id
+            DB_SESSION.add(newIpRangeIp)
+            DB_SESSION.commit()
 	    #if was nextSlot shift
             if self.nextAvailableIp == ipStr:
             	try:

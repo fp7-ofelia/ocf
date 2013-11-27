@@ -16,5 +16,5 @@ class MacRangeMacs(Base):
     macslot_id = Column(Integer, ForeignKey('vt_manager_macslot.id'))
     macrange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
 
-    macslot = relationship("MacSlot")
+    macslot = relationship("MacSlot", backref="macrange")
 

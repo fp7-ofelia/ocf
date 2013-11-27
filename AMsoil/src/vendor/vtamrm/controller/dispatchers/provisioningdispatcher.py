@@ -64,9 +64,11 @@ class ProvisioningDispatcher():
 				else :
 					logging.debug("***************************** C")
 					ProvisioningDispatcher.__deleteStartStopRebootVM(controller, actionModel, action)
-
+				logging.debug("********************************* D")
 				XmlRpcClient.callRPCMethod(server.getAgentURL() ,"send", UrlUtils.getOwnCallbackURL(), 1, server.getAgentPassword(),XmlHelper.craftXmlClass(XmlHelper.getSimpleActionQuery(action)) )	
+				logging.debug("********************************* E")
 			except Exception as e:
+				logging.debug("********************************* ERROR " + str(e) + ' ' +  str(server))
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					# If the VM creation was interrupted in the network
 					# configuration, the created VM won't be returned

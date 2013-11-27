@@ -375,6 +375,16 @@ class VTResourceManager(object):
             params['memory-mb'] = allocated_vm.memory
 	    #XXX: Currently, this is always an empty list, interfaces are not allowed
 	    interfaces = list()
+	    interface = dict()
+	    interface['gw'] = None
+            interface['mac'] = None
+            interface['name'] = None
+            interface['dns1'] = None
+            interface['dns2'] = None
+            interface['ip'] = None
+            interface['mask'] = None
+            interfaces.append(interface)
+ 
 	    #for allocated_interface in allocated_vm.interfaces:
 	    #	interface = dict()
 	    #	interface['gw'] = allocated_interface.gw
@@ -412,16 +422,17 @@ class VTResourceManager(object):
 	    	slice_name = get_leaf(get_authority(vm_hrn))
 	    	vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
 		current_vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
+		time.sleep(10)
 		#XXX: Very ugly, improve this
 		if not current_vm:
-		    time.sleep(6)
+		    time.sleep(10)
 		    current_vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
 		if current_vm:
 		    db_session.delete(vm)
 		    db_session.commit()
 	    	    vm_expires = VMExpires()
 	    	    vm_expires.expires = end_time
-	            vm_expires.vm_id = vm_created.id
+	            vm_expires.vm_id = current_vm.id
 	    	    created_vm['expires'] = end_time 
 		    db_session.add(vm_expires)
 		    db_session.commit()

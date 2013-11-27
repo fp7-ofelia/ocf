@@ -9,6 +9,12 @@ from utils.mutexstore import MutexStore
 from resources.xenservervms import XenServerVMs
 from resources.xenvm import XenVM
 from resources.virtualmachine import VirtualMachine
+from resources.vtserver import VTServer
+
+
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('XenServer')
 
 
 '''@author: SergioVidiella'''
@@ -17,7 +23,7 @@ from resources.virtualmachine import VirtualMachine
 def validateAgentURLwrapper():
         VTServer.validateAgentURL()
 
-class XenServer(Base):
+class XenServer(VTServer):
     """Virtualization Server Class."""
         
     __tablename__ = 'vt_manager_xenserver'
@@ -44,13 +50,15 @@ class XenServer(Base):
     def constructor(name, osType, osDistribution, osVersion, agentUrl, agentPassword):
     	self = XenServer()
         try:
-            self.vtserver.setName(name)
-            self.vtserver.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.vtserver.setOSType(osType)
-            self.vtserver.setOSDistribution(osDistribution)
-            self.vtserver.setOSVersion(osVersion)
-            self.vtserver.setAgentURL(agentUrl)
-            self.vtserver.setAgentPassword(agentPassword)
+            self.setName(name)
+            self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.setOSType(osType)
+            self.setOSDistribution(osDistribution)
+            self.setOSVersion(osVersion)
+            self.setAgentURL(agentUrl)
+            self.setAgentPassword(agentPassword)
+	    DB_SESSION.add(self)
+	    DB_SESSION.commit()
             return self
 	except Exception as e:
             print e
@@ -60,13 +68,15 @@ class XenServer(Base):
     '''Updater'''
     def updateServer(self,name,osType,osDistribution,osVersion,agentUrl,agentPassword,save=True):
     	try:
-            self.vtserver.setName(name)
-            self.vtserver.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.vtserver.setOSType(osType)
-            self.vtserver.setOSDistribution(osDistribution)
-            self.vtserver.setOSVersion(osVersion)
-            self.vtserver.setAgentURL(agentUrl)
-            self.vtserver.setAgentPassword(agentPassword)
+            self.setName(name)
+            self.setVirtTech(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.setOSType(osType)
+            self.setOSDistribution(osDistribution)
+            self.setOSVersion(osVersion)
+            self.setAgentURL(agentUrl)
+            self.setAgentPassword(agentPassword)
+	    DB_SESSION.add(self)
+	    DB_SESSION.commit()
    	    return self
    	except Exception as e:
             print e
@@ -88,21 +98,33 @@ class XenServer(Base):
     def getVM(self,**kwargs):
         return self.vms.get(kwargs)
 
-    def createVM(self, name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType):
+    def createVM(self, name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType,save):
+	logging.debug("**************************** Server 1")
 	with MutexStore.getObjectLock(self.getLockIdentifier()):
+	    logging.debug("******************************* Server 2")
             if len(DB_SESSION.query(VirtualMachine).filter(VirtualMachine.uuid == uuid).all()) > 0:
+		logging.debug("*************************** Server FAIL")
     		raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
             #Allocate interfaces for the VM
+	    logging.debug("*************************** Server 3")
             interfaces = self.createEnslavedVMInterfaces()
-            #Call factory
-            vm = XenVM.create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType)
-            self.vms.add(vm)
+            #Call factory	
+	    logging.debug("**************************** Server 4")
+            vm = XenVM.create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save=True)
+	    logging.debug("**************************** Server 5")
+            xen_vms = XenServerVMs()
+	    xen_vms.xenserver_id = self.id
+	    xen_vms.xenvm_id = vm.id
+	    DB_SESSION.add(xen_vms)
+	    DB_SESSION.commit() 
+	    logging.debug("**************************** Server 6")
             return vm
 
     def deleteVM(self,vm):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):
             if vm not in self.vms.all():
             	raise Exception("Cannot delete a VM from pool if it is not already in")
-            self.vms.remove(vm)
+            DB_SESSION.delete(vm)
+	    DB_SESSION.commit()
             vm.destroy()
 

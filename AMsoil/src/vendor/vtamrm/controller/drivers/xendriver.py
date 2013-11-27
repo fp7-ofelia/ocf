@@ -32,10 +32,18 @@ class XenDriver(VTDriver):
        
 		try: 
 			logging.debug("*************************** GO 1")
-			Server = DB_SESSION.query(VTServer).filter(VTServer.uuid == action.server.uuid).one().xenserver
-			logging.debug("*************************** GO 2")
-			VMmodel = Server.createVM(XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
+			Server = DB_SESSION.query(XenServer).filter(XenServer.uuid == action.server.uuid).one()
+			logging.debug("*************************** GO 2" + str(Server))
+			name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType, save = XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True)
 			logging.debug("*************************** GO 3")
+			try:
+				VMmodel = Server.createVM(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,hdSetupType,hdOriginPath,virtSetupType,save)
+			except Exception as e:
+				logging.debug("*************************** GO FAIL " + str(e))
+#			VMmodel = Server.createVM(XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
+			
+			
+			logging.debug("*************************** GO 4")
 			return Server, VMmodel
 		except:
 			raise

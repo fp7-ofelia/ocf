@@ -5,7 +5,7 @@ from sqlalchemy.orm import validates, relationship, backref
 import uuid
 import inspect
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
 from utils import validators
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
@@ -18,7 +18,10 @@ from ranges.serveriprange import VTServerIpRange
 from ranges.macrange import MacRange
 from ranges.ip4range import Ip4Range 
 
-from resources.xenserver import XenServer
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('VTServer')
+
 
 
 '''@author: SergioVidiella'''
@@ -37,7 +40,7 @@ class VTServer(Base):
     'XenServer',
        )
     
-    xenserver = relationship("XenServer", backref="vtserver")
+#    xenserver = relationship("XenServer", backref="vtserver", cascade="all, delete-orphan", lazy='dynamic', passive_deletes=True)
 
     '''General attributes'''
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -69,8 +72,8 @@ class VTServer(Base):
     networkInterfaces = relationship("VTServerNetworkInterfaces", backref="vtserver")
 
     '''Other networking parameters'''
-    subscribedMacRanges = relationship("VTServerMacRange", backref="vtserver")
-    subscribedIp4Ranges = relationship("VTServerIpRange", backref="vtserver")
+    subscribedMacRanges = relationship("VTServerMacRange", backref="vtserver", lazy='dynamic')
+    subscribedIp4Ranges = relationship("VTServerIpRange", backref="vtserver", lazy='dynamic')
 
     ''' Mutex over the instance '''
     mutex = None
@@ -254,14 +257,14 @@ class VTServer(Base):
         self.subscribedMacRanges.remove(oRange)
 
     def getSubscribedMacRangesNoGlobal(self):
-        return self.subscribedMacRanges.all()
+        return DB_SESSION.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
 
     def getSubscribedMacRanges(self):
-        if self.subscribedMacRanges.all().count() > 0:
-            return self.subscribedMacRanges.all()
+        if self.subscribedMacRanges.count() > 0:
+            return DB_SESSION.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
         else:
             #Return global (all) ranges
-            return MacRange.objects.filter(isGlobal=True)
+            return DB_SESSION.query(MacRange).filter(MacRange.isGlobal == True).all()
 
     def subscribeToIp4Range(self,newRange):
         if not isinstance(newRange,Ip4Range):
@@ -276,72 +279,109 @@ class VTServer(Base):
 	self.subscribedIp4Ranges.remove(oRange)
 
     def getSubscribedIp4RangesNoGlobal(self):
-        return self.subscribedIp4Ranges.all()
+        return DB_SESSION.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
 
     def getSubscribedIp4Ranges(self):
-        if self.subscribedIp4Ranges.all().count() > 0:
-            return self.subscribedIp4Ranges.all()
+        if self.subscribedIp4Ranges.count() > 0:
+            return DB_SESSION.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
         else:
             #Return global (all) ranges
-            return Ip4Range.objects.filter(isGlobal=True)
+            return DB_SESSION.query(Ip4Range).filter(Ip4Range.isGlobal == True).all()
 
     def __allocateMacFromSubscribedRanges(self):
+	logging.debug("************************* MAC 1")
         macObj = None
         #Allocate Mac
         for macRange in self.getSubscribedMacRanges():
+	    logging.debug("*********************** MAC 2")
             try:
         	macObj = macRange.allocateMac()
             except Exception as e:
+		logging.debug("******************** MAC ERROR 1 " + str(e))
                 continue
             break
 	if macObj == None:
+	    logging.debug("********************* MAC ERROR 2 " + str(e))
             raise Exception("Could not allocate Mac address for the VM over subscribed ranges")
+	logging.debug("*************************** MAC 3")
 	return macObj
 
     def __allocateIpFromSubscribedRanges(self):
+	logging.debug("*********************** IP 1")
     	ipObj = None
         #Allocate Ip
         for ipRange in self.getSubscribedIp4Ranges():
+	    logging.debug("*********************** IP 2 " + str(ipRange))
             try:
+		logging.debug("*********************** IP 3")
     	        ipObj = ipRange.allocateIp()
             except Exception as e:
+		logging.debug("*********************** IP ERROR " + str(e))
            	continue
             break
+	logging.debug("*********************** IP 4")
      	if ipObj == None:
+	    logging.debug("*********************** IP ERROR 2")
             raise Exception("Could not allocate Ip4 address for the VM over subscribed ranges")
+	logging.debug("*********************** IP 5")
 	return ipObj
 
     ''' VM interfaces and VM creation methods '''
     def __createEnslavedDataVMNetworkInterface(self,serverInterface):
-    	#Obtain 
+    	#Obtain
+	logging.debug("******************** A1") 
         macObj = self.__allocateMacFromSubscribedRanges()
+	logging.debug("******************** A2")
         interface = NetworkInterface.createVMDataInterface(serverInterface.getName()+"-slave",macObj)
         #Enslave it     
+	logging.debug("******************* A3")
         serverInterface.attachInterfaceToBridge(interface)
+	logging.debug("********************* A4")
         return interface
 
     def __createEnslavedMgmtVMNetworkInterface(self,serverInterface):
         #Obtain 
+	logging.debug("*********************** A1")
         macObj = self.__allocateMacFromSubscribedRanges()
+	logging.debug("*********************** A2")
         ipObj = self.__allocateIpFromSubscribedRanges()
+	logging.debug("*********************** A3")
         interface = NetworkInterface.createVMMgmtInterface(serverInterface.getName()+"-slave",macObj,ipObj)
         #Enslave it     
+	logging.debug("*********************** A4")
         serverInterface.attachInterfaceToBridge(interface)
+	logging.debug("*********************** A5")
         return interface
 
     def createEnslavedVMInterfaces(self):
+	self = DB_SESSION.query(VTServer).filter(VTServer.id == self.id).first()
+	logging.debug("********************** A")
 	vmInterfaces = set()
+	logging.debug("********************** B")
         try:
-             #Allocate one interface for each Server's interface 
-             for serverInterface in self.networkInterfaces.all():
-             	if serverInterface.isMgmt:
-                    vmInterfaces.add(self.__createEnslavedMgmtVMNetworkInterface(serverInterface))
+             #Allocate one interface for each Server's interface
+	     #Bound self to the session
+             for serverInterface in self.networkInterfaces:
+	        logging.debug("********************** C " + str(serverInterface))
+             	if serverInterface.networkinterface.isMgmt:
+		    logging.debug("*********************** D1 - 1")
+		    try:
+		    	created_interface = self.__createEnslavedMgmtVMNetworkInterface(serverInterface.networkinterface)
+			logging.debug("********************* D1 - 2")
+		    	vmInterfaces.add(created_interface)
+			logging.debug("********************* D1 - 3 " + str(created_interface) + ' ' + str(vmInterfaces))
+#                    vmInterfaces.add(self.__createEnslavedMgmtVMNetworkInterface(serverInterface.networkinterface))
+		    except Exception as e:
+			logging.debug("********************* CREATION FAIL " + str(e))
                 else:
-                    vmInterfaces.add(self.__createEnslavedDataVMNetworkInterface(serverInterface))
+		    logging.debug("*********************** D2")
+                    vmInterfaces.add(self.__createEnslavedDataVMNetworkInterface(serverInterface.networkinterface))
      	except Exception as e:
+	    logging.debug("**************************** VTServer FAIL " + str(e))
             for interface in vmInterfaces:
             	interface.destroy()
             raise e
+	logging.debug("*************************** E")
      	return vmInterfaces
 
     ''' Server interfaces '''

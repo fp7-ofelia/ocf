@@ -2,15 +2,23 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from sqlalchemy.orm import validates
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
 from utils.choices import HDSetupTypeClass, VirtTypeClass
 from utils.mutexstore import MutexStore
+
+from resources.virtualmachine import VirtualMachine
+
+from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
+
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('XenVM')
 
 
 '''@author: SergioVidiella'''
 
 
-class XenVM(Base):
+class XenVM(VirtualMachine):
     """XEN VM data model class"""
 
     __tablename__ = 'vt_manager_xenvm'
@@ -23,31 +31,45 @@ class XenVM(Base):
     virtualizationSetupType = Column(String(1024), nullable=False, default="")
 
     @staticmethod
-    def constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType):
+    def constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save=False):
+        logging.debug("************************************* XENVM 2")
 	self =  XenVM()
 	try:
 	    #Set common fields
-            self.vm.setName(name)
-            self.vm.setUUID(uuid)
-            self.vm.setProjectId(projectId)
-	    self.vm.setProjectName(projectName)
-            self.vm.setSliceId(sliceId)
-            self.vm.setSliceName(sliceName)
-            self.vm.setOSType(osType)
-            self.vm.setOSVersion(osVersion)
-            self.vm.setOSDistribution(osDist)
-            self.vm.setMemory(memory)
-            self.vm.setDiscSpaceGB(discSpaceGB)
-            self.vm.setNumberOfCPUs(numberOfCPUs)
-            self.vm.setCallBackURL(callBackUrl)
-            self.vm.setState(self.UNKNOWN_STATE)
-            for interface in interfaces:
-            	self.vm.networkInterfaces.add(interface)
+            self.setName(name)
+	    logging.debug("******************************** XENVM OK")
+            self.setUUID(uuid)
+            self.setProjectId(projectId)
+	    self.setProjectName(projectName)
+            self.setSliceId(sliceId)
+            self.setSliceName(sliceName)
+            self.setOSType(osType)
+            self.setOSVersion(osVersion)
+            self.setOSDistribution(osDist)
+            self.setMemory(memory)
+            self.setDiscSpaceGB(discSpaceGB)
+            self.setNumberOfCPUs(numberOfCPUs)
+            self.setCallBackURL(callBackUrl)
+            self.setState(self.UNKNOWN_STATE)
+            logging.debug("************************************* XENVM 3")
             #Xen parameters
+            logging.debug("************************************* XENVM 5")
             self.hdSetupType = hdSetupType
             self.hdOriginPath = hdOriginPath
             self.virtualizationSetupType = virtSetupType
+	    if save is True:
+	        logging.debug("************************************* XENVM 6")
+		DB_SESSION.add(self)
+		DB_SESSION.commit()
+            for interface in interfaces:
+                logging.debug("************************************* XENVM 4")
+		vm_iface = VMNetworkInterfaces()
+		vm_iface.virtualmachine_id = self.id
+		vm_iface.networkinterface_id = interface.id
+                DB_SESSION.add(vm_iface)
+		DB_SESSION.commit()
 	except Exception as e:
+            logging.debug("************************************* XENVM ERROR - 1 " + str(e))
             self.destroy()
             print e
             raise e
@@ -59,7 +81,8 @@ class XenVM(Base):
             #destroy interfaces
             for inter in self.networkInterfaces.all():
             	inter.destroy()
-            self.delete()
+            DB_SESSION.delete(self)
+	    DB_SESSION.commit()
 
     '''Validators'''
     @validates('hdSetupType')
@@ -101,6 +124,7 @@ class XenVM(Base):
 
     ''' Factories '''
     @staticmethod
-    def create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType):
+    def create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save):
+	logging.debug("************************************* XENVM 1")
     	return XenVM.constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save)
 

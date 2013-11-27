@@ -4,10 +4,16 @@ from sqlalchemy.orm import validates, relationship
 
 import inspect
 
-from utils.commonbase import Base
+from utils.commonbase import Base, DB_SESSION
 from utils.ethernetutils import EthernetUtils
+from utils.mutexstore import MutexStore
 from resources.macslot import MacSlot
 from ranges.macrangemacs import MacRangeMacs
+
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('MacRange')
+
 
 
 '''@author: SergioVidiella'''
@@ -28,7 +34,7 @@ class MacRange(Base):
     startMac = Column(String(17), nullable=False)
     endMac = Column(String(17), nullable=False)
 
-    #Pool of ips both assigned and excluded (particular case of assignment)
+    #Pool of macs both assigned and excluded (particular case of assignment)
     macs = relationship("MacRangeMacs")
     nextAvailableMac = Column(String(17))
 
@@ -91,8 +97,8 @@ class MacRange(Base):
         EthernetUtils.checkValidMac(value)
         self.endMac = value.upper()
 
-    def __isMacAvailable(self,ip):
-        return  self.macs.filter(mac=mac).count() == 0
+    def __isMacAvailable(self, mac):
+	return DB_SESSION.query(MacRangeMacs).filter(MacRangeMacs.macrange_id == self.id).join(MacRangeMacs.macslot, aliased=True).filter(MacSlot.mac == mac).count() == 0
 
     '''Public methods'''
     def getLockIdentifier(self):
@@ -122,7 +128,7 @@ class MacRange(Base):
 
     def getPercentageRangeUsage(self):
         if not self.numberOfSlots == -1:
-            return float((self.macs.all().count()/self.numberOfSlots)*100)
+            return float((len(self.macs)/self.numberOfSlots)*100)
         return -1
 
     def allocateMac(self):
@@ -130,21 +136,35 @@ class MacRange(Base):
         Allocates a MAC address of the range    
         '''
         with MutexStore.getObjectLock(self.getLockIdentifier()):                        
-	#Implements first fit algorithm
-            if self.nextAvailableIp == None:                                
+	    logging.debug("************************ RANGE 1")
+	    #Implements first fit algorithm
+            if self.nextAvailableMac == None:                                
 		raise Exception("Could not allocate any MAC")
+	    logging.debug("********************* RANGE 2")
 	    newMac = MacSlot.macFactory(self,self.nextAvailableMac)
-            self.macs.add(newMac)
+	    DB_SESSION.add(newMac)
+	    DB_SESSION.commit()
+	    newMacRangeMac = MacRangeMacs()
+	    newMacRangeMac.macrange_id = self.id
+	    newMacRangeMac.macslot_id = newMac.id
+	    DB_SESSION.add(newMacRangeMac)
+	    DB_SESSION.commit()
 	    #Try to find new slot
             try:
+		logging.debug("********************** RANGE 3")
             	it= EthernetUtils.getMacIterator(self.nextAvailableMac,self.endMac)
+		logging.debug("********************** RANGE 4")
                 while True:
                     mac = it.getNextMac()
+		    logging.debug("***************** RANGE 5 " + str(mac))
                     if self.__isMacAvailable(mac):
+			logging.debug("******************* RANGE 6")
                     	break
                     self.nextAvailableMac = mac
             except Exception as e:
+		logging.debug("************************ ERROR RANGE " + str(e))
             	self.nextAvailableMac = None
+	    logging.debug("*************************** RANGE 7")
 	    return newMac                                                                             
 
     def addExcludedMac(self,macStr,comment=""):
@@ -153,13 +173,19 @@ class MacRange(Base):
         '''
         with MutexStore.getObjectLock(self.getLockIdentifier()):
             #Check is not already allocated
-            if not  self.__isMacAvailable(ipStr):
+            if not  self.__isMacAvailable(macStr):
             	raise Exception("Mac already allocated or marked as excluded")
             #then forbidd
     	    if not EthernetUtils.isMacInRange(macStr,self.startMac,self.endMac):
                 raise Exception("Mac is not in range")
             newMac = MacSlot.excludedMacFactory(self,macStr,comment)
-            self.macs.add(newMac)
+	    DB_SESSION.add(newMac)
+            DB_SESSION.commit()
+            newMacRangeMac = MacRangeMacs()
+            newMacRangeMac.macrange_id = self.id
+            newMacRangeMac.macslot_id = newMac.id
+            DB_SESSION.add(newMacRangeMac)
+            DB_SESSION.commit()
 	    #if was nextSlot shift
             if self.nextAvailableMac == macStr:
             	try:

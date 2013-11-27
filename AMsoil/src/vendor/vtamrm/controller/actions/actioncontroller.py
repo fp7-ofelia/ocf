@@ -5,6 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from utils.commonbase import ENGINE
 
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('ActionController')
+
 
 class ActionController():
 
@@ -52,22 +56,34 @@ class ActionController():
 
 	@staticmethod
 	def PopulateNetworkingParams(actionIfaces, vm):
+		logging.debug("********************************* 1")
 		baseIface = copy.deepcopy(actionIfaces[0])
+	        logging.debug("********************************* 2")
 		actionIfaces.pop()
+		logging.debug("********************************* 3")
 		#for index, vmIface in enumerate(vm.networkInterfaces.all().order_by('-isMgmt','id')):
 		for index, vmIface in enumerate(vm.getNetworkInterfaces()):
+			logging.debug("********************************* 4 " + str(index) + ' ' + str(vmIface))
 			currentIface = copy.deepcopy(baseIface)
+			logging.debug("********************************* 5")
 			currentIface.ismgmt = vmIface.isMgmt
+			logging.debug("********************************* 6")
 			currentIface.name = "eth"+str(index)
+			logging.debug("********************************* 7")
 			currentIface.mac = vmIface.mac.mac
+			logging.debug("********************************* 8")
 			#XXX: ip4s are many, but xml only accepts one
-			if vmIface.ip4s.all():
-				currentIface.ip = vmIface.ip4s.all()[0].ip
-				currentIface.mask = vmIface.ip4s.all()[0].Ip4Range.get().netMask
-				currentIface.gw = vmIface.ip4s.all()[0].Ip4Range.get().gw
-				currentIface.dns1 = vmIface.ip4s.all()[0].Ip4Range.get().dns1
-				currentIface.dns2 = vmIface.ip4s.all()[0].Ip4Range.get().dns2
-			currentIface.switch_id = vmIface.serverBridge.all()[0].name
+			if vmIface.ip4s:
+				logging.debug("********************************* 9 - 1")
+				currentIface.ip = vmIface.ip4s[0].ip4slot.ip
+				currentIface.mask = vmIface.ip4s[0].ip4slot.Ip4Range.get().netMask
+				currentIface.gw = vmIface.ip4s[0].ip4slot.Ip4Range.get().gw
+				currentIface.dns1 = vmIface.ip4s[0].ip4slot.Ip4Range.get().dns1
+				currentIface.dns2 = vmIface.ip4s[0].ip4slot.Ip4Range.get().dns2
+			logging.debug("********************************* 9 - 2")
+#			currentIface.switch_id = vmIface.serverBridge.all()[0].name
+			currentIface.switch_id = vmIface.switchID
+			logging.debug("********************************* 10")
 			actionIfaces.append(currentIface)
 		
 	@staticmethod
