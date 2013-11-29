@@ -70,6 +70,15 @@ def list(request):
         template_object_name="project",
     )
 
+def list_details(request, proj_id):
+	'''Obtain details (description, slices, users) for a given project'''
+ 	project = get_object_or_404(Project, id=proj_id)
+	return simple.direct_to_template(
+		request,
+		template=TEMPLATE_PATH+"/list_details.html",
+		extra_context={"project": project},
+	)
+
 @require_objs_permissions_for_view(
     perm_names=["can_delete_slices"],
     permittee_func=get_user_from_req,
