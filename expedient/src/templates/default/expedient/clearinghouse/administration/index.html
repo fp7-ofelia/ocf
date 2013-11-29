@@ -135,53 +135,27 @@
                 <div class="table_list"> 
 
 		<table class="fulltableLogs" id="logs_actions_table">
-                                <thead>
+            <thead>
 				<tr class="thead">
 					<th>Log</th>
-                                        <th>Path</th>
+                    <th>Path</th>
 					<th>Actions</th>
 				</tr>
-                                </thead>
-                                <tbody>
-				<tr class="tbody">
-					<td>
-						Expedient
-					</td>
-                                        <td>
-                                                {{ logs_location.expedient }}
-                                        </td>
-					<td>
-						<a href="{% url administration_view_log 'expedient' %}" target="_new">View</a> |
-						<a href="#" onclick="handleLogAction('expedient'); return false;">Remove</a>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						OF AM
-					</td>
-                                        <td>
-                                                {{ logs_location.ofam }}
-                                        </td>
-					<td>
-						<a href="{% url administration_view_log 'openflow' %}" target="_new">View</a> |
-						<a href="#" onclick="handleLogAction('openflow'); return false;">Remove</a>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						VT AM
-					</td>
-                                        <td>
-                                                {{ logs_location.vtam }}
-                                        </td>
-					<td>
-						<a href="{% url administration_view_log 'virtualization' %}" target="_new">View</a> |
-						<a href="#" onclick="handleLogAction('virtualization'); return false;">Remove</a>
-					</td>
-				</tr>
-                </tbody>
-		</table>
-               </div>
+            </thead>
+            <tbody>
+				{% for key, value in logs_location.items %}
+					<tr class="tbody">
+						<td>{{ key }}</td>
+						<td>{{ value }}</td>
+						<td>
+							<a href="{% url administration_view_log key %}" target="_new">View</a> |
+                        	<a href="#" onclick="handleLogAction('{{ key }}'); return false;">Remove</a>
+						</td>
+					</tr>
+				{% endfor %}
+            </tbody>
+		    </table>
+        </div>
 	</div>
 
 	<!-- Plug-ins expandable tooltip -->
@@ -231,15 +205,17 @@
 		} else {
 			if (confirm("Do you want to backup it before?")) {
 				switch (module_name) {
-					case "openflow": $.getJSON("{% url administration_remove_log 'openflow' 'preserve' %}"); break;
-					case "virtualization": $.getJSON("{% url administration_remove_log 'virtualization' 'preserve' %}"); break;
+					case "ofam": $.getJSON("{% url administration_remove_log 'ofam' 'preserve' %}"); break;
+					case "foam": $.getJSON("{% url administration_remove_log 'foam' 'preserve' %}"); break;
+					case "vtam": $.getJSON("{% url administration_remove_log 'vtam' 'preserve' %}"); break;
 					case "expedient": 
 					default: $.getJSON("{% url administration_remove_log 'expedient' 'preserve' %}"); break;
 				}
 			} else {
 				switch (module_name) {
-					case "openflow": $.getJSON("{% url administration_remove_log 'openflow' 'clear' %}"); break;
-					case "virtualization": $.getJSON("{% url administration_remove_log 'virtualization' 'clear' %}"); break;
+					case "ofam": $.getJSON("{% url administration_remove_log 'ofam' 'clear' %}"); break;
+					case "foam": $.getJSON("{% url administration_remove_log 'foam' 'clear' %}"); break;
+					case "vtam": $.getJSON("{% url administration_remove_log 'vtam' 'clear' %}"); break;
 					case "expedient": 
 					default: $.getJSON("{% url administration_remove_log 'expedient' 'clear' %}"); break;
 				}

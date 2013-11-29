@@ -22,8 +22,9 @@ LOG_N_BYTES_SIZE = 15000
 # Color for the log headers (e.g. date, type of message, ip)
 LOG_HEADER_COLOR = "#444"
 LOGS_LOCATION = { "expedient": "/var/log/apache2/expedient/clearinghouse/error_log",
-                  "vtam": "/var/log/apache2/vt_manager/error_log",
-                  "ofam": "/var/log/apache2/openflow/optin_manager/error_log"}
+				  "vtam": "/var/log/apache2/vt_manager/error_log",
+				  "ofam": "/var/log/apache2/openflow/optin_manager/error_log",
+				  "foam": "/var/log/apache2/ofam/foam.log"}
 
 
 def home(request):
@@ -67,15 +68,9 @@ def get_module_log_path(module_name):
 	"""
 	module_log_path = ""
 	try:
-		if module_name == "expedient":
-			module_log_path = LOGS_LOCATION["expedient"]#"/var/log/apache2/expedient/clearinghouse/error_log"
-		elif module_name == "openflow":
-			module_log_path = LOGS_LOCATION["ofam"] #"/var/log/apache2/openflow/optin_manager/error_log"
-		elif module_name == "virtualization":
-			module_log_path = LOGS_LOCATION["vtam"] #"/var/log/apache2/vt_manager/error_log"
+		module_log_path = LOGS_LOCATION[module_name]
 	except Exception as e:
 		pass
-                
 	return module_log_path
 
 def view_log(request, module_name):
@@ -86,7 +81,7 @@ def view_log(request, module_name):
 	@param string name of module
 	@return string log contents for a given module
 	"""
-        
+		
 	must_have_permission(request.user, User, "can_manage_users")
 
 	log_content = ""
@@ -120,7 +115,7 @@ def remove_log(request, module_name, option):
 	@param string name of module
 	@return redirection back to the administration home
 	"""
-        
+		
 	must_have_permission(request.user, User, "can_manage_users")
 
 	module_log_path = get_module_log_path(module_name)
@@ -148,6 +143,9 @@ def remove_log(request, module_name, option):
 	return HttpResponseRedirect(reverse("administration_home"))
 
 def get_log_chunk(file_object, chunk_size=20000):
-    file_object.seek(-chunk_size,2) #get the last chunk_size bytes starting from the end 
-    return file_object.read(-chunk_size).splitlines()[1:] #avoid show truncated lines cused by the seek pointer
-    
+	"""
+	Retrieve partial contents from a log.
+	"""
+	file_object.seek(-chunk_size,2) # Get the last chunk_size bytes starting from the end 
+	return file_object.read(-chunk_size).splitlines()[1:] # Avoid showing truncated lines used by the seek pointer
+
