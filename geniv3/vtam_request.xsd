@@ -19,7 +19,7 @@
     <xs:complexType name="SliverContents">
     	<xs:sequence>
             <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
-	    <xs:element type="xs:string" name="project-name" minOccurs="0"/>
+	    <xs:element type="xs:string" name="project-name"/>
 	    <xs:element type="xs:string" name="server-name" minOccurs="0"/>
             <xs:element type="os-type-type" name="operating-system-type"/>
 	    <xs:element type="xs:string" name="server-name" minOccurs="0"/>
