@@ -5,7 +5,7 @@ from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
 
 from utils import validators
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 
 from resources.macslot import MacSlot
 from resources.ip4slot import Ip4Slot
@@ -30,12 +30,15 @@ class NetworkInterface(Base):
     name = Column(String(128), nullable=False)
     mac_id = Column(Integer, ForeignKey('vt_manager_macslot.id'))
     mac = relationship("MacSlot", backref='networkinterface_macs')
-    ip4s = relationship("NetworkInterfaceIp4s", primaryjoin="NetworkInterfaceIp4s.networkinterface_id==NetworkInterface.id", backref="networkinterface_ips")
+    ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
     isMgmt = Column(TINYINT(1), nullable=False, default=0)
     isBridge = Column(TINYINT(1), nullable=False, default=0)
 
     '''Interfaces connectivy'''
-    connectedTo = relationship("NetworkInterfaceConnectedTo", primaryjoin="NetworkInterfaceConnectedTo.from_networkinterface_id==NetworkInterface.id", backref="from_networkinterface")
+    vtserver = association_proxy("vtserver_assocation", "vtserver")
+    vm = association_proxy("vm_associations", "vm")
+    connectedTo = association_proxy("to_networkinterface", "to_networkinterface")
+    connectedFrom = association_proxy("from_networkinterface", "from_networkinterface")
 
     '''Physical connection details for bridged interfaces''' 
     switchID = Column(String(23))
@@ -69,8 +72,8 @@ class NetworkInterface(Base):
             	self.isBridge = isBridge
                 self.switchID = switchID
                 self.port = port
-	    DB_SESSION.add(self)
-            DB_SESSION.commit()
+	    db_session.add(self)
+            db_session.commit()
             logging.debug("******************************* I7 " + str(self.mac))
             if not ip4Obj == None:
 		logging.debug("******************************* I7 - 2")
@@ -142,8 +145,8 @@ class NetworkInterface(Base):
 	connection = NetworkInterfaceConnectedTo()
 	connection.from_networkinterface_id = self.id
 	connection.to_networkinterface_id = interface.id
-	DB_SESSION.add(connection)
-	DB_SESSION.commit()
+	db_session.add(connection)
+	db_session.commit()
 	logging.debug("*********************************** BRIDGE 3 " + str(interface.from_networkinterface))
 
 

@@ -5,7 +5,7 @@ from resources.vtserver import VTServer
 from utils.httputils import HttpUtils
 import threading
 
-from utils.commonbase import DB_SESSION
+from utils.commonbase import db_session
 import amsoil.core.log
 
 logging=amsoil.core.log.getLogger('XenDriver')
@@ -32,7 +32,7 @@ class XenDriver(VTDriver):
        
 		try: 
 			logging.debug("*************************** GO 1")
-			Server = DB_SESSION.query(XenServer).filter(XenServer.uuid == action.server.uuid).one()
+			Server = db_session.query(XenServer).filter(XenServer.uuid == action.server.uuid).one()
 			logging.debug("*************************** GO 2" + str(Server))
 			name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType, save = XenDriver.xenVMtoModel(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True)
 			logging.debug("*************************** GO 3")

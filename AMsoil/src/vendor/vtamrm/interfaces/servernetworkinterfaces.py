@@ -16,6 +16,7 @@ class VTServerNetworkInterfaces(Base):
     vtserver_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'))
     networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
 
+    vtserver = relationship("VTServer", backref="vtserver_networkinterface")
     networkinterface = relationship("NetworkInterface", backref="vtserver_assocation")
 
 

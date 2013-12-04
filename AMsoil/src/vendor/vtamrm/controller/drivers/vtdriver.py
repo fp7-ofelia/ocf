@@ -7,6 +7,10 @@ from utils.httputils import HttpUtils
 from resources.virtualmachine import VirtualMachine
 from controller.actions.actioncontroller import ActionController
 
+from utils.commonbase import db_session
+import amsoil.core.log
+#amsoil logger
+logging=amsoil.core.log.getLogger('VTDriver')
 
 class VTDriver():
 
@@ -32,25 +36,22 @@ class VTDriver():
 	@staticmethod
 	def getAllServers():
 		from resources.vtserver import VTServer
-		from sqlalchemy import create_engine
-	 	from sqlalchemy.orm import scoped_session, sessionmaker
-		from utils.commonbase import ENGINE
-
-		db_engine = create_engine(ENGINE, pool_recycle=6000)
-		db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-		db_session = scoped_session(db_session_factory)
 
 		servers = db_session.query(VTServer).all()
+		logging.debug("***********************************************" + str(servers))
 		serversChild = []
 		for server in servers:
-			server = server.getChildObject()
-			serversChild.append(server)
+			logging.debug("*****************************************" + str(server))
+			child_server = server.getChildObject()
+			logging.debug("*****************************************" + str(child_server))
+			serversChild.append(child_server)
 		return serversChild
 
 	
 	@staticmethod
 	def createServerFromPOST(request, instance):
 		from resources.vtserver import VTServer
+
 		controller = VTDriver.getDriver(HttpUtils.getFieldInPost(request,VTServer,"virtTech"))
 		return controller.createOrUpdateServerFromPOST(request, instance)		
 
@@ -90,13 +91,6 @@ class VTDriver():
 	@staticmethod
 	def getServerById(id):
 		from resources.vtserver import VTServer
-		from sqlalchemy import create_engine
-                from sqlalchemy.orm import scoped_session, sessionmaker
-                from utils.commonbase import ENGINE
-
-                db_engine = create_engine(ENGINE, pool_recycle=6000)
-                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-                db_session = scoped_session(db_session_factory)
 
 		try:
 			return db_session.query(VTServer).filter(VTServer.id==id).first().getChildObject()
@@ -105,22 +99,16 @@ class VTDriver():
 		
 	@staticmethod
 	def getServerByUUID(uuid):
+		from resources.vtserver import VTServer
+
 		try:
-			from resources.vtserver import VTServer
-			from sqlalchemy import create_engine
-	                from sqlalchemy.orm import scoped_session, sessionmaker
-        	        from utils.commonbase import ENGINE
-
-                	db_engine = create_engine(ENGINE, pool_recycle=6000)
-                	db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-                	db_session = scoped_session(db_session_factory)
-
-			return db_session.query(VTServer).filter(VTServer.uuid == uuid).one()#.getChildObject()
+			return db_session.query(VTServer).filter(VTServer.uuid == uuid).one().getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 
 	@staticmethod
 	def getVMsInServer(server):
+		from resources.vtserver import VTServer
 		try:
 			return server.vms
 		except:
@@ -227,16 +215,6 @@ class VTDriver():
 
 	@staticmethod
 	def PropagateActionToProvisioningDispatcher(vm_id, serverUUID, action):
-		from utils.xmlhelper import XmlHelper
-		from controller.dispatchers.dispatcherlauncher import DispatcherLauncher
-		from sqlalchemy import create_engine
-                from sqlalchemy.orm import scoped_session, sessionmaker
-                from utils.commonbase import ENGINE
-
-		db_engine = create_engine(ENGINE, pool_recycle=6000)
-                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-                db_session = scoped_session(db_session_factory)
-
 		vm = db_session.query(VirtualMachine).filter(VirtualMachine.id==vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)

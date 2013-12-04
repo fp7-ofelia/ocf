@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 
@@ -30,9 +31,10 @@ class XenServer(VTServer):
     __table_args__ = {'extend_existing':True}
 
     vtserver_ptr_id = Column(Integer, ForeignKey('vt_manager_vtserver.id'), primary_key=True)
+    vtserver = relationship("VTServer", backref="xenserver")
 
     '''VMs array'''
-    vms = relationship("XenServerVMs")
+    vms = association_proxy("xenserver_vms", "xenvm")
 
     '''Private methods'''
     def __tupleContainsKey(tu,key):
@@ -57,8 +59,8 @@ class XenServer(VTServer):
             self.setOSVersion(osVersion)
             self.setAgentURL(agentUrl)
             self.setAgentPassword(agentPassword)
-	    DB_SESSION.add(self)
-	    DB_SESSION.commit()
+	    db_session.add(self)
+	    db_session.commit()
             return self
 	except Exception as e:
             print e
@@ -75,8 +77,8 @@ class XenServer(VTServer):
             self.setOSVersion(osVersion)
             self.setAgentURL(agentUrl)
             self.setAgentPassword(agentPassword)
-	    DB_SESSION.add(self)
-	    DB_SESSION.commit()
+	    db_session.add(self)
+	    db_session.commit()
    	    return self
    	except Exception as e:
             print e
@@ -102,7 +104,7 @@ class XenServer(VTServer):
 	logging.debug("**************************** Server 1")
 	with MutexStore.getObjectLock(self.getLockIdentifier()):
 	    logging.debug("******************************* Server 2")
-            if len(DB_SESSION.query(VirtualMachine).filter(VirtualMachine.uuid == uuid).all()) > 0:
+            if len(db_session.query(VirtualMachine).filter(VirtualMachine.uuid == uuid).all()) > 0:
 		logging.debug("*************************** Server FAIL")
     		raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
             #Allocate interfaces for the VM
@@ -115,8 +117,8 @@ class XenServer(VTServer):
             xen_vms = XenServerVMs()
 	    xen_vms.xenserver_id = self.id
 	    xen_vms.xenvm_id = vm.id
-	    DB_SESSION.add(xen_vms)
-	    DB_SESSION.commit() 
+	    db_session.add(xen_vms)
+	    db_session.commit() 
 	    logging.debug("**************************** Server 6")
             return vm
 
@@ -124,7 +126,7 @@ class XenServer(VTServer):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):
             if vm not in self.vms.all():
             	raise Exception("Cannot delete a VM from pool if it is not already in")
-            DB_SESSION.delete(vm)
-	    DB_SESSION.commit()
+            db_session.delete(vm)
+	    db_session.commit()
             vm.destroy()
 

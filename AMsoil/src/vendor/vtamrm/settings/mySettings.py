@@ -9,17 +9,6 @@ Ofelia VT AM User settings file
 #
 
 ### Section 1: VT AM settings
-#
-# User settings for Virtual Machine Aggregate Manager.
-#
-
-#
-# User management for the Graphical User Interface.
-#
-ROOT_USERNAME  = "expedient"
-ROOT_PASSWORD  = "expedient"
-ROOT_EMAIL     = "i2catopenflow@gmail.com"
-
 # 
 # XMLRPC access. Set user and password to access the XMLRPC
 # methods from Expedient.

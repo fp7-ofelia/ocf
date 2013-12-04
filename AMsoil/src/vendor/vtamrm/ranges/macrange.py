@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 
 import inspect
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils.ethernetutils import EthernetUtils
 from utils.mutexstore import MutexStore
 from resources.macslot import MacSlot
@@ -35,7 +36,7 @@ class MacRange(Base):
     endMac = Column(String(17), nullable=False)
 
     #Pool of macs both assigned and excluded (particular case of assignment)
-    macs = relationship("MacRangeMacs")
+    macs = association_proxy("macrange_macslot", "macslot")
     nextAvailableMac = Column(String(17))
 
     #Statistics
@@ -98,7 +99,7 @@ class MacRange(Base):
         self.endMac = value.upper()
 
     def __isMacAvailable(self, mac):
-	return DB_SESSION.query(MacRangeMacs).filter(MacRangeMacs.macrange_id == self.id).join(MacRangeMacs.macslot, aliased=True).filter(MacSlot.mac == mac).count() == 0
+	return db_session.query(MacRangeMacs).filter(MacRangeMacs.macrange_id == self.id).join(MacRangeMacs.macslot, aliased=True).filter(MacSlot.mac == mac).count() == 0
 
     '''Public methods'''
     def getLockIdentifier(self):
@@ -142,13 +143,13 @@ class MacRange(Base):
 		raise Exception("Could not allocate any MAC")
 	    logging.debug("********************* RANGE 2")
 	    newMac = MacSlot.macFactory(self,self.nextAvailableMac)
-	    DB_SESSION.add(newMac)
-	    DB_SESSION.commit()
+	    db_session.add(newMac)
+	    db_session.commit()
 	    newMacRangeMac = MacRangeMacs()
 	    newMacRangeMac.macrange_id = self.id
 	    newMacRangeMac.macslot_id = newMac.id
-	    DB_SESSION.add(newMacRangeMac)
-	    DB_SESSION.commit()
+	    db_session.add(newMacRangeMac)
+	    db_session.commit()
 	    #Try to find new slot
             try:
 		logging.debug("********************** RANGE 3")
@@ -179,13 +180,13 @@ class MacRange(Base):
     	    if not EthernetUtils.isMacInRange(macStr,self.startMac,self.endMac):
                 raise Exception("Mac is not in range")
             newMac = MacSlot.excludedMacFactory(self,macStr,comment)
-	    DB_SESSION.add(newMac)
-            DB_SESSION.commit()
+	    db_session.add(newMac)
+            db_session.commit()
             newMacRangeMac = MacRangeMacs()
             newMacRangeMac.macrange_id = self.id
             newMacRangeMac.macslot_id = newMac.id
-            DB_SESSION.add(newMacRangeMac)
-            DB_SESSION.commit()
+            db_session.add(newMacRangeMac)
+            db_session.commit()
 	    #if was nextSlot shift
             if self.nextAvailableMac == macStr:
             	try:

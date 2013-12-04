@@ -5,27 +5,25 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from datetime import datetime, timedelta
 
-from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
-from interfaces.networkinterface import NetworkInterface
-
 from resources.vtserver import VTServer
+from resources.xenserver import XenServer
 from resources.virtualmachine import VirtualMachine
 from resources.vmexpires import VMExpires
 from resources.vmallocated import VMAllocated
 
-from ranges.serveriprange import VTServerIpRange
-from ranges.servermacrange import VTServerMacRange
-from ranges.ip4range import Ip4Range
-from ranges.macrange import MacRange
-
 import utils.vtexceptions as vt_exception
-from utils.xrn import hrn_to_urn, urn_to_hrn, get_leaf, get_authority
+from utils.xrn import *
 from utils.action import Action
 from utils.vmmanager import VMManager
 from utils.servicethread import ServiceThread
+from utils.commonbase import db_session
 
 from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
 from controller.drivers.vtdriver import VTDriver
+
+import amsoil.core.log
+#amsoil logger
+logging=amsoil.core.log.getLogger('VTResourceManager')
 
 
 
@@ -47,20 +45,63 @@ class VTResourceManager(object):
         self.worker.addAsReccurring("vtresourcemanager", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
         self.worker.addAsReccurring("vtresourcemanager", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
 
-
+    '''Server functions'''
+    #Get server by uuid. 
+    #If no uuid given, return all servers
     def get_servers(self, uuid=None):
-        servers = db_session.query(VTServer).all()
+        servers = VTDriver.getAllServers()
+	logging.debug("**************************************" + str(servers))
         if uuid:
             for server in servers:
                 if str(server.uuid) == str(uuid):
-                    db_session.expunge_all()
                     return server
-            db_session.expunge_all()
             return None
         else:
             return servers
 
 
+    '''VM functions'''
+    #Verify if the VM exists and return the status with the required params
+    def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
+        vm_hrn, hrn_type = urn_to_hrn(vm_urn)
+        vm_name = get_leaf(vm_hrn)
+	vm_status = dict()
+	vm_status['name'] = vm_urn
+	if not slice_name:
+            slice_name = get_leaf(get_authority(vm_hrn))
+	if not project_name:
+	    project_name = get_leaf(get_authority(get_authority(vm_hrn)))
+        vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == project_name).first()
+        if vm:
+	    server = db_session.query(VTServer).filter(VTServer.id == vm.serverId).first()
+	    db_session.expunge(vm)
+	    if allocation_status:
+		vm_status['allocation_status'] = "allocated"
+	    if expiration_time:
+		vm_status['expires'] = vm.expires
+	    if server_name:
+		vm_status['server'] = server.name
+	    db_session.expunge(server)
+        else:
+            vm = db_session.query(XenVM).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
+            if vm:
+		server = vm.xenserver_associations.xenserver.name
+		vm_expies = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
+		if server_name:
+		    vm_status['server'] = vm.xenser_associations.xenserver.name
+		if allocation_status:
+		    vm_status['allocation_status'] = "provisioned"
+		if operational_status:
+		    vm_status['operational_status'] = vm.status
+		if expiration_time and vm_expires:
+		    vm_status['expires'] = vm_expires.expires
+		db_session.expunge(vm)
+		db_session.expunge(vm_expires)
+            else:
+                raise vt_exception.VTAMVMNotFound(urn)
+	return vm_status
+
+    #get all vms in slice
     def vms_in_slice(self, slice_urn):
 	vms = list()
 	vms_created = self._vms_created_in_slice(slice_urn)
@@ -71,16 +112,17 @@ class VTResourceManager(object):
 	    vms.extend(vms_reserved)
 	return vms
 
-
+    #get all the vms created in a given slice
     def _vms_created_in_slice(self, slice_urn):
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
 	slice_name = get_leaf(slice_hrn)
-	vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
+	project_name = get_leaf(get_authority(slice_hrn))
+	vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.projectName == project_name).all()
 	if vms:
 	    vms_created = list()
 	    for vm in vms:
 		vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
-		vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
+		vm_hrn = get_authority(get_authority(slice_urn)) + '.' + vm.projectName + '.' + vm.sliceName + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
 		vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm_expires.expires})
 	    db_session.expunge_all()
@@ -89,15 +131,16 @@ class VTResourceManager(object):
 	    db_session.expunge_all()
 	    return None
 
-
+    #get all the vms allocated in a given slice
     def _vms_reserved_in_slice(self, slice_urn):
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
-	vms = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).all()
+	project_name = get_leaf(get_authority(slice_hrn))
+	vms = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == project_name).all()
 	if vms:
             vms_created = list()
             for vm in vms:
-		vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
+		vm_hrn = get_authority(get_authority(slice_hrn)) + '.' + vm.projectName + '.' + vm.sliceName + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
                 vms_created.append({'name':vm_urn, 'expires':vm.expires, 'status':"allocated"})
             db_session.expunge_all()
@@ -107,105 +150,47 @@ class VTResourceManager(object):
             return None
 
 
-    def verify_vm(self, vm_urn):
-	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
-        vm_name = get_leaf(vm_hrn)
-	slice_name = get_leaf(get_authority(vm_hrn))
-        vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
-	db_session.expunge(vm)
-	if vm:
-	    return vm_urn, "allocated"
-	else:
-	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
-	    db_session.expunge(vm)
-	    if vm:
-		return vm_urn, "provisioned"
-	    else:
-		raise vt_exception.VTAMVMNotFound(vm_urn)
+    #allocate a vm in the given slice
+    def reserve_vm(self, vm, slice_urn, end_time):
+	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
+        slice_name = get_leaf(slice_hrn)
+        #check if the VM name already exists, as a created VM or an allocated VM
+        if db_session.query(VirtualMachine).filter(VirtualMachine.name == vm['name']).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.projectName == vm['project_name']).first() != None or db_session.query(VMAllocated).filter(VMAllocated.name == vm['name']).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == vm['project_name']).first() != None:
+      	    raise vt_exception.VTAMVmNameAlreadyTaken(vm['name'])
+   	#check if the server is one of the given servers
+        if db_session.query(VTServer).filter(VTServer.name == vm['server_name']).first() == None:
+            raise vt_exception.VTAMServerNotFound(vm['server_name'])
+        expiration_time = self._check_reservation_time(end_time)
+	#once we know all the VMs could be created, we start reserving them
+        return self._vm_dict_to_class(vm, slice_urn, slice_name, end_time)
 
 
-    def get_vm_status(self, vm_urn, state):
-	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
+    #XXX: continue from this point
+    def extend_vm_expiration(self, vm_urn, status, expiration_time):
+        vm_hrn, hrn_type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
-	slice_name = get_leaf(get_authority(vm_hrn))
-	if state == 'allocated':
-            vm = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.name == vm_name).first()
-	    if vm:
-	    	server = db_session.query(VTServer).filter(VTServer.id == vm.serverId).first()
-	    	db_session.expunge(vm)
-	    	db_session.expunge(server)
-            	return {'name':vm_urn, 'expires':vm.expires, 'status':"allocated", 'server':server.name}
-	    else:
-		raise vt_exception.VTAMVMNotFound(vm_urn)
+        slice_name = get_leaf(get_authority(vm_hrn))
+        max_duration = self.RESERVATION_TIMEOUT
+        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
+        if (status == "allocated"):
+            vm_expires = db_session.query(VMAllocated).filter(VMAllocated.sliceNaem == slice_name).filter(VMAllocated.name == vm_name).first()
+            vm_state = "allocated"
         else:
             vm = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.name == vm_name).first()
-            if vm:
-		expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
-                return {'name':vm_urn, 'expires':expires.expires, 'status':"provisioned", 'server':vm.xenvm.xenvm_associations.vtserver.name}
-            else:
-                raise vt_exception.VTAMVMNotFound(vm_urn)
-
-	
-
-    def extend_vm_expiration(self, vm_urn, status, expiration_time):
-	vm_hrn, hrn_type = urn_to_hrn(vm_urn)
-        vm_name = get_leaf(vm_hrn)
-	slice_name = get_leaf(get_authority(vm_hrn))
-	max_duration = self.RESERVATION_TIMEOUT
-        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
-	if (status == "allocated"):
-	    vm_expires = db_session.query(VMAllocated).filter(VMAllocated.sliceNaem == slice_name).filter(VMAllocated.name == vm_name).first()
-	    vm_state = "allocated"
-	else:
-	    vm = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.name == vm_name).first()
-	    vm_state = vm.state
-	    db_session.expunge(vm)
-	    vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
-	if (expiration_time > max_end_time):
-	    db_sesion.expunge_all()
+            vm_state = vm.state
+            db_session.expunge(vm)
+            vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
+        if (expiration_time > max_end_time):
+            db_sesion.expunge_all()
             raise VTMaxVMDurationExceeded(vm_name, vm_expires.expires)
-	last_expiration = vm_expires.expires
+        last_expiration = vm_expires.expires
         vm_expires.expires = expiration_time
         vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
         vm_urn = hrn_to_urn(vm_hrn, 'sliver')
         db_session.add(vm_expires)
         db_session.commit()
-	db_session.expunge(vm_expires)
+        db_session.expunge(vm_expires)
         return {'name':vm_urn, 'expires':expiration_time, 'status':vm_state}, last_expiration
-
-
-    def reserve_vms(self, vms, slice_urn, end_time):
-	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        if hrn_type != 'slice' or slice_hrn == None:
-            raise vt_exception.VTAMMalformedUrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-	for vm in vms:
-	    #check if the vm name already exists
-	    if db_session.query(VirtualMachine).filter(VirtualMachine.name == vm['name']).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.projectId == vm['project_id']).first() != None or db_session.query(VMAllocated).filter(VMAllocated.name == vm['name']).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectId == vm['project_id']).first() != None:
-		raise vt_exception.VTAMVmNameAlreadyTaken(vm['name'])
-	    #check if the server is one of the given servers
-	    if db_session.query(VTServer).filter(VTServer.name == vm['server_name']).first() == None:
-		raise vt_exception.VTAMServerNotFound(vm['server_name'])
-	    db_session.expunge_all()
-	max_duration = self.RESERVATION_TIMEOUT
-	max_end_time = datetime.utcnow() + timedelta(0, max_duration)
-        if end_time == None:
-            end_time = max_end_time
-        if (end_time > max_end_time):
-            raise VTMaxVMDurationExceeded(vm_name)
-	if (end_time < datetime.utcnow()):
-	    end_time = max_end_time
-	#once we know all the VMs could be created, we start reserving them
-	servers = dict()
-	for vm in vms:
-	    server, vm_urn = self._allocate_vm(vm, slice_urn, slice_name, end_time)
-	    vm_name, hrn_type = urn_to_hrn(vm['name'])
-	    if servers.has_key(server):
-	    	servers[server].append({'name':vm_urn, 'expires':end_time, 'status':'allocated'})
-	    else:
-		servers[server] = list()
-		servers[server].append({'name':vm_urn, 'expires':end_time, 'status':'allocated'})
-	return servers
 
 
     def delete_vms_in_slice(self, slice_urn):
@@ -295,13 +280,14 @@ class VTResourceManager(object):
         except Exception as e:
             return "error" 
     
-
-    def _allocate_vm(self, requested_vm, slice_urn, slice_name, end_time):
+    #XXX: should go anywhere else... maybe another class
+    #TODO: Make it a more general method. Check Oscar code
+    def _vm_dict_to_class(self, requested_vm, slice_urn, slice_name, end_time):
 	vm = VMAllocated()
 	vm.name = requested_vm['name']
 	vm.memory = int(requested_vm['memory_mb'])
 	vm.discSpaceGB = float(requested_vm['hd_size_mb'])/1024
-	vm.projectId = requested_vm['project_id']
+	vm.projectName = requested_vm['project_name']
 	vm.sliceId = slice_urn
 	vm.sliceName = slice_name
 	vm.operatingSystemType = requested_vm['operating_system_type'] 
@@ -338,7 +324,7 @@ class VTResourceManager(object):
 	vm_hrn = 'geni.gpo.gcf.' + vm.sliceName + '.' + vm.name
 	vm_urn = hrn_to_urn(vm_hrn, 'sliver')
 
-	return server.name, vm_urn
+	return vm_urn
 
 
     def create_allocated_vms(self, slice_urn, end_time):
@@ -532,6 +518,17 @@ class VTResourceManager(object):
 	return stopped_vms
 
 
+    def _check_reservation_time(self, end_time):
+	max_duration = self.RESERVATION_TIMEOUT
+        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
+        if end_time == None or end_time < datetime.utcnow():
+            return max_end_time
+        elif (end_time > max_end_time):
+            raise VTMaxVMDurationExceeded(vm_name)
+        else:
+            return end_time
+
+
     @worker.outsideprocess
     def expire_vm(self, params):
         vms = db_session.query(VMExpires).filter(VMExpires.expires <= datetime.utcnow()).all()
@@ -548,21 +545,3 @@ class VTResourceManager(object):
 	     self._unnallocate_vm(vm.id)
 	db_session.expunge_all()
 	return
-
-
-# ----------------------------------------------------
-# ------------------ database stuff ------------------
-# ----------------------------------------------------
-from sqlalchemy import DateTime, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import exists
-
-# initialize sqlalchemy
-VTAMDB_ENGINE = pm.getService('config').get('vtamrm.dbpath')
-
-db_engine = create_engine(VTAMDB_ENGINE, pool_recycle=6000)
-db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False) # the class which can create sessions (factory pattern)
-db_session = scoped_session(db_session_factory) # still a session creator, but it will create _one_ session per thread and delegate all method calls to it
-

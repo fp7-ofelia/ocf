@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, String, desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
 import inspect
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils import validators
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 
@@ -51,7 +52,7 @@ class VirtualMachine(Base):
     operatingSystemDistribution = Column(String(512), nullable=False, default="")
 
     '''Networking'''
-    networkInterfaces = relationship("VMNetworkInterfaces")
+    networkInterfaces = association_proxy("vm_networkinterfaces", "networkinterface")
 
     '''Other'''
     callBackURL = Column(String(200))
@@ -227,6 +228,6 @@ class VirtualMachine(Base):
         return self.callBackURL
 
     def getNetworkInterfaces(self):
-	return DB_SESSION.query(NetworkInterface).join(NetworkInterface.vm_associations, aliased=True).filter(VMNetworkInterfaces.virtualmachine_id == self.id).order_by(NetworkInterface.isMgmt.desc(), NetworkInterface.id).all()
+	return db_session.query(NetworkInterface).join(NetworkInterface.vm_associations, aliased=True).filter(VMNetworkInterfaces.virtualmachine_id == self.id).order_by(NetworkInterface.isMgmt.desc(), NetworkInterface.id).all()
 
 

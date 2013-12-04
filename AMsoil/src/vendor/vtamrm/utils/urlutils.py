@@ -1,15 +1,16 @@
 #from vt_manager.settings.settingsLoader import settings.ROOT_USERNAME,settings.ROOT_PASSWORD,settings.VTAM_IP,settings.VTAM_PORT
-from django.conf import settings
+#from django.conf import settings
 
-#XXX: Necessary? Make it Django indepedent in this case...
+import amsoil.core.pluginmanager as pm
+
 
 class UrlUtils():
 	
 	@staticmethod
 	def addPathToOwnURL(path):
-
+		config = pm.getService("config")
 		path = str(path)
-		return "https://"+settings.ROOT_USERNAME+":"+settings.ROOT_PASSWORD+"@"+settings.VTAM_IP+":"+settings.VTAM_PORT+path
+		return "https://"+config.get("vtamrm.callback_root_username")+":"+config.get("vtamrm.callback_root_password")+"@"+config.get("vtamrm.callback_ip")+":"+config.get("vtamrm.callback_port")+path
 	
 	@staticmethod
 	def getOwnCallbackURL():

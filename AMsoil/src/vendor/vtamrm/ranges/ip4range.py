@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 
 import inspect
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils.ip4utils import IP4Utils
 from resources.ip4slot import Ip4Slot
 from ranges.ip4rangeips import Ip4RangeIps
@@ -45,7 +46,7 @@ class Ip4Range(Base):
     
     #Pool of ips both assigned and excluded (particular case of assignment)
     nextAvailableIp = Column(String(15))
-    ip4s = relationship("Ip4RangeIps")
+    ip4s = association_proxy("ip4range_ip4s", "ip4slot")
 
     @staticmethod
     def constructor(name, startIp, endIp, netmask, gw, dns1, dns2, isGlobal=True):
@@ -152,7 +153,7 @@ class Ip4Range(Base):
         self.netMask = value
 
     def __isIpAvailable(self,ip):
-        return  DB_SESSION.query(Ip4RangeIps).filter(Ip4RangeIps.ip4range_id == self.id).join(Ip4RangeIps.ip4slot, aliased=True).filter(Ip4Slot.ip == ip).count() == 0
+        return  db_session.query(Ip4RangeIps).filter(Ip4RangeIps.ip4range_id == self.id).join(Ip4RangeIps.ip4slot, aliased=True).filter(Ip4Slot.ip == ip).count() == 0
 
     '''Public methods'''
     def getLockIdentifier(self):
@@ -210,13 +211,13 @@ class Ip4Range(Base):
 	    logging.debug("******************************************* RANGEIP 2")
 	    newIp = Ip4Slot.ipFactory(self,self.nextAvailableIp)
 	    logging.debug("******************************************* RANGEIP 3")
-	    DB_SESSION.add(newIp)
-            DB_SESSION.commit()
+	    db_session.add(newIp)
+            db_session.commit()
             newIpRangeIp = Ip4RangeIps()
             newIpRangeIp.ip4range_id = self.id
             newIpRangeIp.ip4slot_id = newIp.id
-            DB_SESSION.add(newIpRangeIp)
-            DB_SESSION.commit()
+            db_session.add(newIpRangeIp)
+            db_session.commit()
 	    logging.debug("******************************************* RANGEIP 4")
 	    #Try to find new slot
             try:
@@ -249,13 +250,13 @@ class Ip4Range(Base):
     	    if not IP4Utils.isIpInRange(ipStr,self.startIp,self.endIp):
                 raise Exception("Ip is not in range")
             newIp = Ip4Slot.excludedIpFactory(self,ipStr,comment)
-	    DB_SESSION.add(newIp)
-            DB_SESSION.commit()
+	    db_session.add(newIp)
+            db_session.commit()
             newIpRangeIp = Ip4RangeIps()
             newIpRangeIp.ip4range_id = self.id
             newIpRangeIp.ip4slot_id = newIp.id
-            DB_SESSION.add(newIpRangeIp)
-            DB_SESSION.commit()
+            db_session.add(newIpRangeIp)
+            db_session.commit()
 	    #if was nextSlot shift
             if self.nextAvailableIp == ipStr:
             	try:

@@ -16,5 +16,6 @@ class NetworkInterfaceIp4s(Base):
     networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
     ip4slot_id = Column(Integer, ForeignKey('vt_manager_ip4slot.id'))
 
+    networkinterface = relationship("NetworkInterface", backref="networkinterface_ip4s")
     ip4slot = relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref="networkinterface_associations_ips")
 

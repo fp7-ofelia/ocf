@@ -6,7 +6,7 @@ from utils.commonbase import Base
 
 '''@author: SergioVidiella'''
 
-
+#XXX: this relationship should be direct between XenServer and XenVM
 class XenServerVMs(Base):
     """Relation between Xen Virtual Machines and Xen Virtualization Server"""
 
@@ -16,6 +16,7 @@ class XenServerVMs(Base):
     xenserver_id = Column(Integer, ForeignKey('vt_manager_xenserver.vtserver_ptr_id'))
     xenvm_id = Column(Integer, ForeignKey('vt_manager_xenvm.virtualmachine_ptr_id'))
 
+    xenserver = relationship("XenServer", backref="xenserver_vms")
     xenvm = relationship("XenVM", backref="xenserver_associations")
 
 

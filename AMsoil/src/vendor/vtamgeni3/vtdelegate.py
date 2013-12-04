@@ -6,6 +6,10 @@ import xml.etree.ElementTree as ET
 
 from util.xrn import *
 
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('VTDelegate')
+
 
 '''@author: SergioVidiella'''
 
@@ -57,7 +61,8 @@ class VTDelegate(GENIv3DelegateBase):
         servers = self._resource_manager.get_servers()
 	r = E.network()
 	for server in servers:
-	    if int(server.available) is 0 and geni_available: continue
+	    if int(server.available) is 0 and geni_available: 
+		continue
 	    else:
 	        n = E.node()
             	n.append(E.name(server.name))
@@ -71,37 +76,33 @@ class VTDelegate(GENIv3DelegateBase):
 	    	n.append(E.memory("0" if not server.memory else server.memory))
 	    	n.append(E.hdd_space_GB("0" if not server.discSpaceGB else server.discSpaceGB))
 	    	n.append(E.agent_url(server.agentURL))
-	    
 		if server.subscribedIp4Ranges: 
 		    for ips in server.subscribedIp4Ranges:
 		    	ip = E.service(type='Range')
 		    	ip.append(E.type("IpRange"))
 		    	ip.append(E.name("IpRange"))
-		    	ip.append(E.start_value(ips.subscribed_ip4_range.startIp))
-		    	ip.append(E.end_value(ips.subscribed_ip4_range.endIp))
+		    	ip.append(E.start_value(ips.startIp))
+		    	ip.append(E.end_value(ips.endIp))
 		    	n.append(ip)
-
 		if server.subscribedMacRanges:
 		    for macs in server.subscribedMacRanges:
 		    	mac = E.service(type="Range")
 		    	mac.append(E.type("MacRange"))
 		    	mac.append(E.name("MacRange"))
-		    	mac.append(E.start_value(macs.subscribed_mac_range.startMac))
-		    	mac.append(E.end_value(macs.subscribed_mac_range.endMac))
+		    	mac.append(E.start_value(macs.startMac))
+		    	mac.append(E.end_value(macs.endMac))
 		    	n.append(mac)
-
     		if server.networkInterfaces:
 		    for network_interface in server.networkInterfaces:
 		    	interface = E.service(type="Network")
 		        interface.append(E.type("Interface"))
-		        interface.append(E.server_interface_name(network_interface.networkinterface.name))
-	            	interface.append(E.isMgmt(str(network_interface.networkinterface.isMgmt)))
-		        if network_interface.networkinterface.switchID:
-		    	    interface.append(E.interface_switch_id(network_interface.networkinterface.switchID))
-		        if network_interface.networkinterface.port:
-		    	    interface.append(E.interface_port(str(network_interface.networkinterface.port))) 
+		        interface.append(E.server_interface_name(network_interface.name))
+	            	interface.append(E.isMgmt(str(network_interface.isMgmt)))
+		        if network_interface.switchID:
+		    	    interface.append(E.interface_switch_id(network_interface.switchID))
+		        if network_interface.port:
+		    	    interface.append(E.interface_port(str(network_interface.port))) 
 		        n.append(interface)		
-
 	        r.append(n)
 	root_node.append(r)
 	return self.lxml_to_string(root_node)
@@ -126,8 +127,8 @@ class VTDelegate(GENIv3DelegateBase):
 		for elm in slivers.getchildren():
 		    if (elm.tag == "name"):
 			vm['name'] = elm.text.strip()
-		    elif (elm.tag == "project-id"):
-			vm['project_id'] = elm.text.strip()
+		    elif (elm.tag == "project-name"):
+			vm['project_name'] = elm.text.strip()
 		    elif (elm.tag == "server-name"):
 			vm['server_name'] = elm.text.strip()
 		    elif (elm.tag == "operating-system-type"):
@@ -178,21 +179,31 @@ class VTDelegate(GENIv3DelegateBase):
 	    	    else:
                 	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I dont understand (%s)." % (elm,))
 	        requested_vms.append(vm)
-	try:
-	    allocated_vms_nodes = self._resource_manager.reserve_vms(requested_vms, slice_urn, end_time)
-	except vt_ex.VTAMVmNameAlreadyTaken as e:
-	    raise geni_ex.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
-	except vt_ex.VTAMServerNotFound as e:
-	    raise geni_ex.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
-	except vt_ex.VTAMMalformedUrn as e:
-	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs are admited in this AM')
-	except vt_ex.VTMaxVMDurationExceeded as e:
-	    raise geni_ex.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-	rspecs = self._get_manifest_rspec(allocated_vms_nodes)
+	#TODO: check if this function is correct...
+	if True:
+	#if self.urn_type(slice_urn) is 'slice': 
+	    try:
+	    	allocated_vms = list()
+	     	for requested_vm in requested_vms:
+		    allocated_vm = self._resource_manager.reserve_vm(requested_vm, slice_urn, end_time)
+		    allocated_vms.append(allocated_vm)
+	    except vt_ex.VTAMVmNameAlreadyTaken as e:
+	    	self.undoo_action("reserve", allocated_vms)	    
+	    	raise geni_ex.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
+	    except vt_ex.VTAMServerNotFound as e:
+            	self.undoo_action("reserve", allocated_vms)
+	    	raise geni_ex.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
+	    except vt_ex.VTMaxVMDurationExceeded as e:
+            	self.undoo_action("reserve", allocated_vms)
+	    	raise geni_ex.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
+	else:
+	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
+	rspecs = self._get_manifest_rspec(allocated_vms)
+	#TODO: change this...
 	slivers = list()
-	for key in allocated_vms_nodes.keys():
-	    for allocated_vm in allocated_vms_nodes[key]:
-	  	slivers.append(self._get_sliver_status_hash(allocated_vm, True))
+	#for key in allocated_vms.keys():
+	#    for allocated_vm_node in allocated_vms[key]:
+	#  	slivers.append(self._get_sliver_status_hash(allocated_vm_node, True))
 	return rspecs, slivers
 		
 
@@ -460,3 +471,12 @@ class VTDelegate(GENIv3DelegateBase):
             manifest.append(server)
         return self.lxml_to_string(manifest)
 
+
+    def undoo_action(self, action, params):
+	if action is "reserve":
+	    for param in params:
+		self._resource_manager.delete_vm(param, "allocated")
+	elif action is "create":
+	    for param in params:
+		self._resource_manager.delete_vm(param, "provisioned")
+		

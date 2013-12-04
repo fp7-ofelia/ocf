@@ -16,5 +16,6 @@ class VMNetworkInterfaces(Base):
     virtualmachine_id = Column(Integer, ForeignKey('vt_manager_virtualmachine.id'))
     networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
 
+    vm = relationship("VirtualMachine", backref="vm_networkinterfaces")
     networkinterface = relationship("NetworkInterface", backref="vm_associations")
 

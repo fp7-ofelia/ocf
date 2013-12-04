@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils.choices import HDSetupTypeClass, VirtTypeClass
 from utils.mutexstore import MutexStore
 
@@ -29,6 +30,9 @@ class XenVM(VirtualMachine):
     hdSetupType = Column(String(1024), nullable=False, default="")
     hdOriginPath = Column(String(1024), nullable=False, default="")
     virtualizationSetupType = Column(String(1024), nullable=False, default="")
+
+    vm = relationship("VirtualMachine", backref="xenvm")
+    xenserver = association_proxy("xenserver_associations", "xenserver")
 
     @staticmethod
     def constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save=False):
@@ -59,15 +63,15 @@ class XenVM(VirtualMachine):
             self.virtualizationSetupType = virtSetupType
 	    if save is True:
 	        logging.debug("************************************* XENVM 6")
-		DB_SESSION.add(self)
-		DB_SESSION.commit()
+		db_session.add(self)
+		db_session.commit()
             for interface in interfaces:
                 logging.debug("************************************* XENVM 4")
 		vm_iface = VMNetworkInterfaces()
 		vm_iface.virtualmachine_id = self.id
 		vm_iface.networkinterface_id = interface.id
-                DB_SESSION.add(vm_iface)
-		DB_SESSION.commit()
+                db_session.add(vm_iface)
+		db_session.commit()
 	except Exception as e:
             logging.debug("************************************* XENVM ERROR - 1 " + str(e))
             self.destroy()
@@ -81,8 +85,8 @@ class XenVM(VirtualMachine):
             #destroy interfaces
             for inter in self.networkInterfaces.all():
             	inter.destroy()
-            DB_SESSION.delete(self)
-	    DB_SESSION.commit()
+            db_session.delete(self)
+	    db_session.commit()
 
     '''Validators'''
     @validates('hdSetupType')

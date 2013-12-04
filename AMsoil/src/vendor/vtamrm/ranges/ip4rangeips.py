@@ -16,5 +16,6 @@ class Ip4RangeIps(Base):
     ip4slot_id = Column(Integer, ForeignKey('vt_manager_ip4slot.id'))
     ip4range_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
 
+    ip4range = relationship("Ip4Range", backref="ip4range_ip4s")
     ip4slot = relationship("Ip4Slot")
 

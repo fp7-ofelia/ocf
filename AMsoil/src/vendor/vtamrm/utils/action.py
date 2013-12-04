@@ -4,7 +4,7 @@ from sqlalchemy.orm import validates
 import uuid
 import logging 
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 import amsoil.core.log
 logging=amsoil.core.log.getLogger('Action')
 
@@ -94,11 +94,11 @@ class Action(Base):
         self.delete()
 
     def checkActionIsPresentAndUnique(self):
-    	if len(DB_SESSION.query(Action).filter(Action.uuid == self.uuid).all()) != 0:
-	    DB_SESSION.expunge_all()
+    	if len(db_session.query(Action).filter(Action.uuid == self.uuid).all()) != 0:
+	    db_session.expunge_all()
             logging.error("Action with the same uuid already exists")
             raise Exception("Action with the same uuid already exists")
-	DB_SESSION.expunge_all()
+	db_session.expunge_all()
 
     '''Validators'''
     @validates('type')

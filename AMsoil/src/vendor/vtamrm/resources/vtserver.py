@@ -1,21 +1,24 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
 from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
 import uuid
 import inspect
 
-from utils.commonbase import Base, DB_SESSION
+from utils.commonbase import Base, db_session
 from utils import validators
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 
-from interfaces.networkinterface import NetworkInterface
 from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
+from interfaces.networkinterface import NetworkInterface
 
 from ranges.servermacrange import VTServerMacRange
-from ranges.serveriprange import VTServerIpRange
+from ranges.macrangemacs import MacRangeMacs
 from ranges.macrange import MacRange
+from ranges.serveriprange import VTServerIpRange
+from ranges.ip4rangeips import Ip4RangeIps
 from ranges.ip4range import Ip4Range 
 
 import amsoil.core.log
@@ -69,11 +72,11 @@ class VTServer(Base):
     url = Column(String(200))
 
     '''Network interfaces'''
-    networkInterfaces = relationship("VTServerNetworkInterfaces", backref="vtserver")
+    networkInterfaces = association_proxy("vtserver_networkinterface", "networkinterface")
 
     '''Other networking parameters'''
-    subscribedMacRanges = relationship("VTServerMacRange", backref="vtserver", lazy='dynamic')
-    subscribedIp4Ranges = relationship("VTServerIpRange", backref="vtserver", lazy='dynamic')
+    subscribedMacRanges = association_proxy("vtserver_mac_range", "subscribed_mac_range")
+    subscribedIp4Ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range")
 
     ''' Mutex over the instance '''
     mutex = None
@@ -137,11 +140,16 @@ class VTServer(Base):
 
     '''Private methods'''
     def getChildObject(self):
+	logging.debug("*******************************************" + str(self.__childClasses))
    	for childClass in self.__childClasses:
             try:
+		logging.debug("***********************************" + str(childClass))
+		logging.debug("***********************************" + str(childClass.lower()))
+		logging.debug("***********************************" + str(self.__getattribute__(childClass.lower())[0]))
             	return self.__getattribute__(childClass.lower())[0]
-            except Exception:
-                pass
+            except Exception as e:
+		logging.debug("*************************************" + str(e))
+                raise e
             
     def __tupleContainsKey(tu,key):
    	for val in tu:
@@ -160,8 +168,10 @@ class VTServer(Base):
 	    #Delete associated interfaces
             for interface in self.networkInterfaces.all():
             	interface.destroy()
-		#Delete instance
-                self.delete()
+	    #Delete instance
+	    db_session.delete(self)
+	    db_session.commit()
+               
 
     '''Getters and Setters'''
     def setName(self, name):
@@ -257,14 +267,14 @@ class VTServer(Base):
         self.subscribedMacRanges.remove(oRange)
 
     def getSubscribedMacRangesNoGlobal(self):
-        return DB_SESSION.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
+        return db_session.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
 
     def getSubscribedMacRanges(self):
         if self.subscribedMacRanges.count() > 0:
-            return DB_SESSION.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
+            return db_session.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
         else:
             #Return global (all) ranges
-            return DB_SESSION.query(MacRange).filter(MacRange.isGlobal == True).all()
+            return db_session.query(MacRange).filter(MacRange.isGlobal == True).all()
 
     def subscribeToIp4Range(self,newRange):
         if not isinstance(newRange,Ip4Range):
@@ -279,14 +289,14 @@ class VTServer(Base):
 	self.subscribedIp4Ranges.remove(oRange)
 
     def getSubscribedIp4RangesNoGlobal(self):
-        return DB_SESSION.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
+        return db_session.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
 
     def getSubscribedIp4Ranges(self):
         if self.subscribedIp4Ranges.count() > 0:
-            return DB_SESSION.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
+            return db_session.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
         else:
             #Return global (all) ranges
-            return DB_SESSION.query(Ip4Range).filter(Ip4Range.isGlobal == True).all()
+            return db_session.query(Ip4Range).filter(Ip4Range.isGlobal == True).all()
 
     def __allocateMacFromSubscribedRanges(self):
 	logging.debug("************************* MAC 1")
@@ -354,7 +364,7 @@ class VTServer(Base):
         return interface
 
     def createEnslavedVMInterfaces(self):
-	self = DB_SESSION.query(VTServer).filter(VTServer.id == self.id).first()
+	self = db_session.query(VTServer).filter(VTServer.id == self.id).first()
 	logging.debug("********************** A")
 	vmInterfaces = set()
 	logging.debug("********************** B")

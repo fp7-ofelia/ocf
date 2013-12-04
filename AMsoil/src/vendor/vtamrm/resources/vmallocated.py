@@ -26,7 +26,7 @@ class VMAllocated(Base):
     discSpaceGB = Column(DOUBLE)
 
     '''Property parameters'''
-    projectId = Column(String(1024), nullable=False, default="")
+    projectName = Column(String(1024), nullable=False, default="")
     sliceId = Column(String(1024), nullable=False, default="")
     sliceName = Column(String(512), nullable=False, default="")
     serverId = Column(Integer)
