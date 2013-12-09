@@ -2,6 +2,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{% url css_media 'project.css' %}" />
+<script src="{% url js_media 'jquery.blockUI.js' %}"></script>
 {% endblock %}
 
 {% block messages %}{% endblock %}
@@ -10,40 +11,65 @@
 <div class="main">
 
 	{% if messages %}
-            <div id="messages" class="message_notification_center_snippet">
-                {% for msg in messages %}
-                    <p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}" style='background-image:
-                        {% ifequal msg.type "error" %}
-                            url({% url img_media 'msg_error.png' %});
-                        {% endifequal %}        
-                        {% ifequal msg.type "success" %}
-                            url({% url img_media 'msg_success.png' %});
-                        {% endifequal %}
-                        {% ifequal msg.type  "warning" %}
-                            url({% url img_media 'warning.png' %});
-                        {% endifequal %}
-                        {% ifequal msg.type  "announcement" %}
-                            url({% url img_media 'msg_announcement.png' %});
-                        {% endifequal %}
-                        {% ifequal msg.type  "info" %}
-                            url({% url img_media 'msg_info.png' %});
-                        {% endifequal %}
-                        {% ifequal msg.type  "user2user" %}
-                            url({% url img_media 'msg_user2user.png' %});
-                        {% endifequal %}'>
-                        {{ msg.msg_text }}</p>
-                {% endfor %}
-            </div>
+			<div id="messages" class="message_notification_center_snippet">
+				{% for msg in messages %}
+					<p class="{{ msg.type }} {% if forloop.first %}new_message {% else %}{% if forloop.counter == 2 %}not_that_old_message{% else %}old_message{% endif %}{% endif %}" style='background-image:
+						{% ifequal msg.type "error" %}
+							url({% url img_media 'msg_error.png' %});
+						{% endifequal %}		
+						{% ifequal msg.type "success" %}
+							url({% url img_media 'msg_success.png' %});
+						{% endifequal %}
+						{% ifequal msg.type  "warning" %}
+							url({% url img_media 'warning.png' %});
+						{% endifequal %}
+						{% ifequal msg.type  "announcement" %}
+							url({% url img_media 'msg_announcement.png' %});
+						{% endifequal %}
+						{% ifequal msg.type  "info" %}
+							url({% url img_media 'msg_info.png' %});
+						{% endifequal %}
+						{% ifequal msg.type  "user2user" %}
+							url({% url img_media 'msg_user2user.png' %});
+						{% endifequal %}'>
+						{{ msg.msg_text }}</p>
+				{% endfor %}
+			</div>
 	{% endif %}
-    
-    <h2>Projects</h2>
-    <div id="projects_list" class="ajax_div projects_div"></div>
+	
+	<h2>Projects</h2>
+	<div id="projects_list" class="ajax_div projects_div"></div>
 </div>
 
 <script>
 	/* Asynchronous calls to insert data into different layers */
-	$.get("{% url project_list %}", function(data) {
-		$("#projects_list").html(data);
+	$(document).ready(function () {
+			var loader = $('#projects_list'), timer;
+	        loader.ajaxStart(function (event) {
+		        timer && clearTimeout(timer);
+				/* Add timeout to show message only when AJAX call takes some time */
+		        timer = setTimeout(function() {
+					/* Show blocking layer while loading */
+	            	$.blockUI({
+						message: '<h1>Please wait...</h1>Projects are being loaded',
+						css: {
+	            	    border: 'none',
+	            	    padding: '15px',
+	            	    backgroundColor: '#000',
+	            	        '-webkit-border-radius': '10px',
+	            	        '-moz-border-radius': '10px',
+	            	        opacity: .5,
+	            	    color: '#fff'
+	            	} });
+		        	},
+		        100);
+	        }).ajaxStop(function () {
+				clearTimeout(timer);
+				$(".blockUI").hide()
+	        });
+	    $.get("{% url project_list %}", function(data) {
+	        $("#projects_list").html(data);
+	    });
 	});
 </script>
 {% endblock content %}
