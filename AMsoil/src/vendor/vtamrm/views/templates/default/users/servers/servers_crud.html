@@ -1,0 +1,223 @@
+{% extends "servers/servers_base.html" %}
+{% block pagehead %}<h1>Add/Update virtualized server:</h1>{% endblock pagehead %}
+
+
+{% block head %}
+
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+        //To be able to use django tags in the static js files, use this approach:
+        //First create a js variable with your django tag
+        //Use this variable in your js.
+        url_img_question = "{% url img_media 'question_mark_15x15.png'%}";
+</script>
+<script type="text/javascript" src="{% url js_media 'formtable.tooltip.js' %}"></script>
+<script src = {% url js_media 'jquery.formset.min.js'%}></script>
+<script src = {% url fancybox 'jquery.fancybox-1.3.4.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.easing-1.3.pack.js'%}></script>
+<script src = {% url fancybox 'jquery.mousewheel-3.0.4.pack.js'%}></script>
+
+
+<script type="text/javascript">
+
+      $(function() {
+        $('#ifacetable tbody').formset({
+          prefix: '{{ ifaceformset.prefix }}',
+          addText: 'Add Bridge',
+          deleteText: '',
+          added: adding,
+          addCssClass: 'buttoncss',
+	  onClickFunction: 'confirmInput(this)',
+        });
+      });
+</script>
+<script>
+    $(document).ready(function() {
+        /* add tooltip to question mark */
+	    $("img#mgmt_bridge").tooltip({
+            tip: "div#mgmt_bridge_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+        $("img#data_bridges").tooltip({
+            tip: "div#data_bridges_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+    });
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+   	{%if server%} 
+            $("#submacbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});
+            });
+            /*
+            $("#submacbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeEthernetRanges server.id %}'});   
+            });
+            */
+   
+            $("#subipbutton").click(function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});
+            });
+            /*
+            $("#subipbutton").live('click',function() {
+                $.fancybox({'href': '{% url subscribeIp4Ranges server.id %}'});   
+            });
+            */
+	{% endif%}
+
+});
+</script>
+
+<script language="javascript">
+
+function adding(row){
+    $(row).find('#rowDelete').remove();
+}
+</script>
+
+<script>
+    function updateVMstatus() {
+        {% if server.id != NaN %}
+            $("#vms").load("../../" + {{server.id}} + "/list_vms/", function(response, status, xhr) {
+                if (status != "error") {
+                    $("#vms").html(response);
+                }
+            });
+        {% endif %}
+        return;
+    }
+</script>
+<script>
+    var timer = setInterval(function() {
+    	updateVMstatus();
+    },3000);
+</script>
+<script>
+    function handleVMaction(serverId,vmId,action){
+        $.getJSON("../../"+serverId+"/virtual_machines/"+vmId+"/"+action+"/");  
+        updateVMstatus();                                                     
+    }
+</script>
+
+
+{% endblock %}
+{% block content %}
+
+
+<div class="main">
+	{% if exception %}
+		<div>
+			<table>
+				<tr><th colspan ="2" class="fielderror">{{exception}}</th></tr>
+			</table>
+		<div/>
+	{% endif %}
+    <form id="serverAndIfaceForms" method="post" action="" autocomplete="off">{% csrf_token %}
+
+        <div>
+			<h2>General parameters</h2>
+			<h3>Parameters</h3>
+                <table class="formtable">
+                    {% if serverForm.non_field_errors %}
+                        <tr><td class="fielderror">{{serverForm.non_field_errors}}</td></tr>
+                    {% endif %}
+                    <tr><td style="text-align:center;font-weight:bold">UUID:</td><td>{{ server.uuid }}</td></tr>
+                    {% for field in serverForm %}
+                        {% if field.errors %}
+                            <tr><td colspan="3">{{field.errors}}</td></tr>
+                        {% endif %}
+                        <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text">{{ field.help_text }}</td></tr>
+                    {% endfor %}
+                </table>	
+        </div>
+	
+        <div>
+            <h2>Networking parameters</h2>
+            <h3>Management Bridge parameters <img id="mgmt_bridge" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+            <div class="tooltip" id="mgmt_bridge_help">
+                Management bridge connecting the control interface of the server and the VMs. MAC address is optional.
+            </div>
+            <table id="mgmtifacetable" class="formtable">
+            {% for field in mgmtIfaceForm %}
+                {% if field.errors %}
+                    <tr><td colspan="3">{{field.errors}}</td></tr>
+                {% endif %}
+                   <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td><td class="help_text" >{{field.help_text}}</td></tr>
+            {% endfor %}
+            </table>
+        </div>
+
+		{% include "servers/servers_dataIfaces.html" %}
+
+
+		{% if server %}
+		<div>
+            <h3>Suscribed Ethernet Ranges</h3>
+			<table class="formtable">
+				{%if server.getSubscribedMacRangesNoGlobal %}
+				<tr>
+				<td style="width: 200px;">Range Name:</td>
+				<td>
+					{% for macRange in server.getSubscribedMacRanges %}
+						<a href="{% url showMacRange macRange.id %}">{{macRange.name}}</a>
+						{% if not forloop.last %},{% endif%}
+					{%endfor%}
+						<input id="submacbutton" type="button" value="Subscribe" >
+				</td>
+				{% else %}
+				<tr><td colspan=2>Click on <input id="submacbutton" type="button" value="Subscribe"> to add a new Ethernet range. Otherwise a global range will be used</td></tr>
+				{% endif %}
+            </table>
+		</div>
+		<div>
+            <h3>Suscribed IPv4 Ranges</h3>
+			<table class="formtable">
+                {%if server.getSubscribedIp4RangesNoGlobal %}
+                <tr>
+				<td style="width: 200px;">Range/s Name/s:</td>
+				<td>
+					{% for ipRange in server.getSubscribedIp4Ranges %}
+						<a href="{% url showIp4Range ipRange.id %}">{{ipRange.name}}</a>
+						{% if not forloop.last %},{% endif%}
+					{%endfor%}
+						<input id="subipbutton" type="button" value="Subscribe">
+				</td>
+                {% else %}
+                <tr><td colspan=2>Click on <input id="subipbutton" type="button" value="Subscribe"> to add a new IPv4 range. Otherwise a global range will be used</td></tr>
+                {% endif %}
+            </table>
+		</div>
+		{% endif %}
+
+        <div class="center" style="margin-top : 30px;">
+            <input type="submit" id="form_create_server" value="Save" /> |
+            {% if server %}
+            <a href="{% url delete_server server.id %}">Delete</a> |
+            {% endif %}
+            <a href="{% url dashboard %}">Dashboard</a>
+        </div>
+    </form>
+
+
+	<div id="vms">
+		{% include "servers/servers_list_vms.html" %} 
+	</div>
+
+</div>
+
+        <!-- Validation in the end waits for the forms to be loaded -->
+        <script type="text/javascript" src="{% url js_media 'validation.js' %}"></script>
+
+{% endblock content %}
+

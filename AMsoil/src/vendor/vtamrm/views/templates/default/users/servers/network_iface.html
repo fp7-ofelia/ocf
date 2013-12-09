@@ -1,0 +1,31 @@
+            <tbody class="datainterfaces">
+            {% if ifaceforms|length > 0 %}
+            <tr><td/><td/><td/><td/><td/><td/><td>Delete</td></tr>
+            {% else %}
+            <tr> All the Server Data Interfaces has been deleted, add the convenient ones </tr>
+            {% endif %}
+           {% for ifaceform in ifaceforms%}
+                <tr>
+                {{ ifaceform.fields_hidden}}
+                {% for field in ifaceform %}
+                    {%if field.name == "idForm" %}
+                        {{field.as_hidden }}
+                    {% endif %}
+                    {%if field.name == "port" %} 
+                    <th> {{ field.label_tag }}:</th><td> {{ field }}</td><td><input type="checkbox" name="delIface" value={{ifaceform.instance.id}}></td>
+                    {% endif%}
+                    {% if field.name != "idForm" and field.name != "port" %}
+                    <th> {{ field.label_tag }}:</th><td> {{ field }}</td>
+                    {% endif %}
+                {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            </br>
+            <div align="right">
+            <INPUT type="button" value="Add Interface" onclick="addInterface()"/>
+            </div>
+           </div>
+                                                                                                                                                     34,17         Bot
+

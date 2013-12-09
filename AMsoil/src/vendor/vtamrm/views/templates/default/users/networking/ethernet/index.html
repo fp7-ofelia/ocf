@@ -1,0 +1,54 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Ethernet Range management</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div>
+	{% if errors %}
+	<div class="fielderror">{{ errors }}</div>
+	{% endif %}
+
+	{% if ranges %}
+    	<table class ="blue">
+		
+		<tr>
+			<th>Name</th>
+			<th>Global</th>
+			<th>Start Mac Addr.</th>
+			<th>End Mac Addr.</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</tr>
+		{% for range in ranges %}
+            	<tr class="{% cycle 'odd' 'even' %}">
+			<td> <a href="{% url showMacRange range.id %}">{{range.name}}</a></td>
+			<td> {{range.isGlobal}}</td>
+			<td> {{range.startMac}}</td>
+			<td> {{range.endMac}} </td>
+			<td> <span id="status{{range.id}}"></span></td>
+			<script>
+				createProgressBar("#status{{range.id}}",{{range.macs.all.count}},{{range.getNumberOfSlots}},false)	
+			</script>	
+		
+			<form action="{% url manageMacRange "delete" range.id %}" method="POST">
+				{% csrf_token %}
+					<td><input type="submit" value="Remove" onClick="return confirmSubmit('Are you sure you want to delete range {{range.name}}?')"></td>
+			</form>	
+	
+		</tr>
+		{% endfor %}
+	</table>
+	{% else %}
+		No ranges defined yet..
+	{% endif %}
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url createMacRange "add" %}">Create range</a> |
+		<a href="{% url networkingDashboard  %}">Networking dashboard</a>
+	</div>
+</div>
+{% endblock content %}
+

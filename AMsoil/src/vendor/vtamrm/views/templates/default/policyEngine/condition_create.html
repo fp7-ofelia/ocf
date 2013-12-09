@@ -1,0 +1,332 @@
+{% extends "fancybase.html" %}
+{% block scripts %}
+<script type="text/javascript">
+	var t1= new Array();
+	var errorList = new Array();	
+
+	function createHidden(condition){
+		var i = document.getElementById("conditionID").value;
+		t1[i]=document.createElement('input');
+		t1[i].type='text';
+		t1[i].name=i;
+		t1[i].value = i; //condition;
+		t1[i].size = 10;
+		
+		document.forms[0].appendChild(t1[i]);
+		sum = parseInt(document.getElementById("conditionID").value) + 1;
+		document.getElementById("conditionID").value = sum;
+	};
+        $(document).ready(function() {
+	            
+	      var rangO = '[';
+	      var rangC = ']';
+
+	      document.getElementById("leftOP").textContent = document.getElementById("mappings").value;
+	      document.getElementById("oper").textContent = document.getElementById("operators").value;
+
+	      $("#negate").change(function() {
+			if (document.getElementById("negate").checked){
+                        	document.getElementById("notOP").textContent =  "not ";
+			} else {
+				document.getElementById("notOP").textContent =  "";
+			}
+        });
+
+	      $("#mappings").change(function() {
+                        document.getElementById("leftOP").textContent =  document.getElementById("mappings").value;
+        });
+	      $("#insertCondition").change(function() {
+                        document.getElementById("area").value +=  document.getElementById("cond").value + " ";
+        });
+	      $("#insertValue").change(function() {
+                        document.getElementById("area").value +=  document.getElementById("value").value + " ";
+        });
+
+	      $("#range").change(function() {
+			
+                        if (document.getElementById("strict").checked){
+				document.getElementById("area").value += "in range {" + document.getElementById("lower").value + "," + document.getElementById("upper").value +"} ";
+			} else {
+				document.getElementById("area").value += "in range [" + document.getElementById("lower").value + "," + document.getElementById("upper").value +"] ";
+			}
+        });	     
+	      $("#collection").change(function() {
+			
+			var a = document.getElementById("list").value;
+			if (a[a.length-1] == ","){
+				a = a.slice(0,(a.length-1));
+			}
+                        document.getElementById("area").value += "in collection {" + a + "} ";
+        });
+	      $("#backSpace").change(function() {
+		       	
+			var n = 0;
+			var a = document.getElementById("area").value;
+			var i = a.length;
+                        while (i >= 0) {
+				if ((a[i] == "{") || (a[i] == "[") || (a[i]==',') || (a[i]==']') || (a[i]=='}')){
+					n = -1;
+				}
+				if (a[i] == " "){
+					n += 1;
+				}
+				if (n >= 2){
+					document.getElementById("area").value = a.slice(0,(i+1));
+					break;
+				}
+				i -= 1;
+			}
+	 });
+	      $("#erase").change(function() {
+                        document.getElementById("area").value = " ";
+        });
+	      $("#operators").change(function() {
+	      		if (document.getElementById("operators").value == "in"){
+				document.getElementById("in").style.display = "";
+				document.getElementById("normal").style.display = "none";
+				document.getElementById("rightOP").textContent = "";
+                                document.getElementById("auxOP").textContent = "";
+				document.getElementById("oper").textContent = document.getElementById("operators").value;
+				switch($('input:radio[name=inGroup]:checked').val()){
+					case 'collection':
+						$("#inGroupCollection").change();
+						break;
+					case 'range':
+						$("#inGroupRange").change();
+						break;
+				}
+
+			} else {
+				document.getElementById("in").style.display = "none";
+				document.getElementById("range").style.display = "none";
+                                document.getElementById("collection").style.display = "none";
+                                document.getElementById("normal").style.display = "";
+				document.getElementById("rightOP").textContent = document.getElementById("rightOperandText").value;
+				document.getElementById("auxOP").textContent = "";
+				document.getElementById("oper").textContent = document.getElementById("operators").value;
+
+			}
+	});
+	      $("#inGroupCollection").change(function() {
+				document.getElementById("range").style.display = "none";
+				document.getElementById("collection").style.display = "";
+				document.getElementById("oper").textContent = "in " + document.getElementById("inGroupCollection").value;
+				document.getElementById("rightOP").textContent = "{" + document.getElementById("list").value + "}";
+				document.getElementById("auxOP").textContent = "";
+	});
+	      $("#inGroupRange").change(function() {
+                                document.getElementById("range").style.display = "";
+                                document.getElementById("collection").style.display = "none";
+				document.getElementById("oper").textContent = "in " + document.getElementById("inGroupRange").value;
+				document.getElementById("rightOP").textContent = "[" + document.getElementById("lower").value;
+                                document.getElementById("auxOP").textContent = " ," + document.getElementById("upper").value + "]";
+        });
+	      $("#rightOperandText").keyup(function() {
+				document.getElementById("rightOP").textContent = document.getElementById("rightOperandText").value;
+	});
+	      $("#list").keyup(function() {
+                                document.getElementById("rightOP").textContent = "{" + document.getElementById("list").value + "}";
+        });
+	      
+	      $("#lower").keyup(function() {
+                                document.getElementById("rightOP").textContent = rangO + document.getElementById("lower").value;
+        });		
+	      $("#upper").keyup(function() {
+				document.getElementById("auxOP").textContent = "," +  document.getElementById("upper").value + rangC;
+	     
+        });
+	      $("#strict").change(function() {
+				if (document.getElementById("strict").checked){
+					rangO  = '{';
+              				rangC = '}';
+					document.getElementById("rightOP").textContent = "{" + document.getElementById("lower").value;
+	                                document.getElementById("auxOP").textContent ="," + document.getElementById("upper").value + "}";
+
+				} else {
+					document.getElementById("rightOP").textContent = "[" + document.getElementById("lower").value;
+	                                document.getElementById("auxOP").textContent = "," + document.getElementById("upper").value + "]";
+ 				}
+	});
+
+	      $("#Create").click(function() {
+				var areErrors = "false";
+				var myList = document.getElementById("errors");
+				$("#errors").empty();
+				if (document.getElementById("leftOP").textContent == ""){
+					var new_element = document.createElement('li');
+					new_element.innerHTML = "<p style='color: red;'>Left operand missing</p>";
+					myList.insertBefore(new_element, myList.firstChild);
+					areErrors = "true";
+				};
+				if (document.getElementById("oper").textContent == ""){
+                                        var new_element = document.createElement('li');
+                                        new_element.innerHTML = "<p style='color: red;'>Operator missing</p>";
+                                        myList.insertBefore(new_element, myList.firstChild);
+					areErrors = "true";
+				};
+				if (document.getElementById("oper").textContent != 'in range' && document.getElementById("rightOP").textContent ==""){
+                                        var new_element = document.createElement('li');
+                                        new_element.innerHTML = "<p style='color: red;'>Right operand missing</p>";
+                                        myList.insertBefore(new_element, myList.firstChild);
+					areErrors = "true";
+				};
+				if (document.getElementById("oper").textContent == 'in range' && (document.getElementById("rightOP").textContent =="" || document.getElementById("rightOP").textContent =="[")){
+                                        var new_element = document.createElement('li');
+                                        new_element.innerHTML = "<p style='color: red;'>Lower limit missing</p>";
+                                        myList.insertBefore(new_element, myList.firstChild);
+                                        areErrors = "true";
+                                };
+				if (document.getElementById("oper").textContent == 'in range' && (document.getElementById("auxOP").textContent =="" || document.getElementById("auxOP").textContent ==",]")){
+                                        var new_element = document.createElement('li');
+                                        new_element.innerHTML = "<p style='color: red;'>Upper limit missing</p>";
+                                        myList.insertBefore(new_element, myList.firstChild);
+					areErrors = "true";
+                                };
+				if (areErrors == "true"){
+					return;
+				};
+				newCond = document.getElementById("notOP").textContent + document.getElementById("leftOP").textContent  + " " + document.getElementById("oper").textContent + " " + document.getElementById("rightOP").textContent + document.getElementById("auxOP").textContent;
+				createList(newCond);
+				var cond = document.createElement('div');
+				var trow = document.getElementById('cond_row')
+				var tcells = trow.getElementsByTagName('td');
+				var ident = "operandc" + Math.floor(Math.random()*10000).toString()
+		                cond.setAttribute('id',ident);
+              			cond.className= "drag operand";
+                		cond.innerHTML = '<div class="xcloser"><a href="javascript:elem_delete(\''+ident+'\')">&#10006;</a></div>' + newCond;
+				trow.insertCell(0).setAttribute("class", "single condcell blankCell");
+				trow.insertCell(1).setAttribute("class", "single condcell blankCell");
+				tcells[1].appendChild(cond);
+				tcells[1].setAttribute("class", "single condcell");
+                		REDIPS.drag.init();
+
+				if (!checkMaxWidth()){
+					elem_delete(ident);
+					document.getElementById('exceptions').textContent = "WARNING. The condition you are trying to create is too large.";
+				}
+				else {
+					document.getElementById('exceptions').textContent = "";
+				}
+
+				$.fancybox.close();
+				change_width();
+				cond_assign();
+	});
+
+	function createList (condition){
+		document.getElementById("conditionID").value += condition + '*' ;
+	};
+
+	/* Simulate form */
+	$("#rightOperandText").keypress(function(e) {
+	    if(e.which == 13) {
+	        $("#Create").click();
+	    }
+	});
+});
+        
+</script>
+{% endblock %}
+{% block pagehead %}
+{% endblock pagehead %}
+{% block content %}
+	<div class="main">
+                <h1>Create a new Condition</h1>
+        </div>
+	<ul id="errors">
+	</ul>
+	<table class="formtable">
+		<td><b>Negate</b></td>
+		<td><b>Left Operand:</b></td>
+		<td><b> Operator:</b></td>
+		<td></td>
+		<td><b>Right Operand:</b></td>
+		<td></td>
+		<td></td>
+		<tr valign="top">
+		<td><input type="checkbox" id="negate"></td>	
+		<td><select id="mappings" name="maps">
+                	{% for key in mappings.keys %}
+                        	<option id="{{ key }}" value ="{{ key }}">{{ key }}</option>
+                	{% endfor %}
+                </select></td>
+		<td><select id="operators" name="ops">
+			<option value="="> = </option>
+			<option value="!="> != </option>
+			<option value="<"> < </option>
+			<option value=">"> > </option>	
+			<option value="<="> <= </option>	
+			<option value=">="> >= </option>
+			<option value="in"> in </option>
+		</td>	
+		<td>	
+			
+			<div id="in" style="display:none;" >
+				<input type="radio" name="inGroup" id="inGroupRange" value="range"> Range<br>
+				<input type="radio" name="inGroup" id="inGroupCollection" value="collection"> Collection<br>
+			</div>
+		</td>
+		<td colspan="3">
+                        <div id = "normal">
+                                <input type="text" name="value" id="rightOperandText">
+                        </div>
+			<div id="range" style="display:none;">
+				<table>
+				<tr><td>
+                                strict 
+                                </td>
+				<td>
+				<input type="checkbox" name="strict" id="strict" value="strict">
+				</td></tr>
+				<tr><td>
+				lower Limit:
+				</td>
+				<td>
+				<input type="text" name="lowerlimit" id="lower" size="4">
+	                  	</td></tr>
+				<tr><td>
+				Upper Limit:
+				</td>
+				<td>
+				<input type="text" name="upperlimit" id="upper" size="4">
+				</td></tr>
+				</table>
+			</div>
+			
+			 
+			<div id="collection" style="display:none;">
+				List:<input type="text" name="list" id="list" size=16>
+			</div>
+		</td>
+		</td>
+	</table>
+	<br>	
+	<table class="formtable">
+		<tr>
+	                <td colspan=5 align=left><b>Condition:</b></td>
+		</tr>
+		<tr>
+			<td><label id ="notOP" name="not"></label></td>
+			<td><label id ="leftOP" name="leftOP" ></label></td>
+			<td><label id ="oper" name="oper" ></label></td>
+			<td><label id ="rightOP" name = "rightOP" ></label></td>
+			<td><label id = "auxOP" name ="auxOP"></label></td>
+
+			<input type="hidden" name="table" id="RuleTableName" value="{{ tableName }}">
+			<input type="hidden" id="condition" name="condition">
+		</tr>
+			
+	</table>
+		<br>
+		<input type="button" id="Create" value="Create Condition">
+	</form>
+        <br/>
+        <div class="center">
+       		<a href="{% url rule_table_view %}">Policy Manager</a> |
+        	<a href="{% url dashboard  %}">Dashboard</a>
+	</div>
+
+		
+{% endblock content %}
+
+	

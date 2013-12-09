@@ -1,0 +1,66 @@
+<script>
+function confirmInput(inputElement){
+	if(inputElement.type == "checkbox"){
+		if (inputElement.checked == true){
+			var agree=confirm("VMs already created will not be reconfigured. Are you sure you want to delete the brige?");
+			if(agree){
+				return true;
+			}
+			else{ 
+				inputElement.checked=false;
+				return false;
+			} 
+		}
+	}
+	else{
+	//	return confirm("VMs already created will not be reconfigured. Are you sure you want to add a new brige?");
+		alert("VMs already created will not be reconfigured. Are you sure you want to add a new brige?\nLeave it blank if you do not want to create the new bridge");
+	}
+}
+</script>
+
+        <div>
+            <h3>Data Bridges parameters <img id="data_bridges" src= "{% url img_media 'question_mark_15x15.png'  %}"></h3>
+			<div class="tooltip" id="data_bridges_help">
+        	Set the bridges used by the VMs to connect with the phisycal interfaces of the servers. Switch ID and Port correspond with the datapath ID and the port the server's interface is connected to.
+		    </div>
+
+			{{ ifaceformset.management_form}}
+			{% if ifaceformset.errors %}
+                <table>
+                    {%for form in ifaceformset.forms %}
+                    {%for field in form %}
+                        {% if field.errors %}
+                        <tr><th colspan ="2" class="fielderror">{{field.errors}}</th></tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </table>
+            {% endif %}
+            <table id="ifacetable" class="formtable">
+                {% for form in ifaceformset.forms %}
+                    <tbody>
+                        <tr>
+                        <!--{{form.as_table}}-->
+                        {% for field in form %}
+                            {% if forloop.first %}
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            {% endif %}
+                            {% if field.errors %}
+                                <th class="fielderror"> {{ field.label_tag }}:</th><td class="fielderror"> {{ field }}</td>
+                            {% else %}
+                            {% if field.name != 'id' %}
+                                <th> {{ field.label_tag }}:</th><td {% if form.initial%}{%if field.name == "name" %}class="readonly"{%endif%}{%endif%}>{{ field }}</td>
+                            {%endif%}
+                            {%endif%}
+                        {% endfor %}
+                        <th id='rowDelete'> Delete: <input type="checkbox" onClick="confirmInput(this)" name="DELETE" value ={{form.initial.id}} ></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+            </table>
+            </br>
+        </div>
+        </tr>

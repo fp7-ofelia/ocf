@@ -1,0 +1,11 @@
+<rspec>
+<query>
+        <monitoring>
+                <action type="listActiveVMs" id="changeme">
+                        <server>
+                                <virtualization-type>changeMe</virtualization-type>
+                        </server>
+                </action>
+        </monitoring>
+</query>
+</rspec>

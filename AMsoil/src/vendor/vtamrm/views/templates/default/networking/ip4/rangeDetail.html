@@ -1,0 +1,114 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Ethernet Range: {{range.name}}</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div>
+	{% if errors %}
+	<div class="fielderror">{{ errors }}</div>
+	{% endif %}
+
+	<h3>Range information</h3>
+	 <table class="formtable">
+		<tr>
+		<td>Range name: </td><td><b>{{range.name}}</b></td><td></td><td></td>
+		</tr>
+		<tr>
+			<td>Is global: </td><td><b>{{range.isGlobal}}</b></td><td></td><td></td>		
+		</tr>
+		<tr>
+			<td>Start Ip4 address: </td><td><b>{{range.startIp}}</b></td><td>Gateway: </td><td><b>{{range.gw}}</b></td>		
+		</tr>
+		<tr>
+			<td>End Ip4 address: </td><td><b>{{range.endIp}}</b></td><td>Dns1: </td><td><b>{{range.dns1}}</b></td>		
+		</tr>
+		<tr>
+			<td>Netmask: </td><td><b>{{range.netMask}}</b></td><td>Dns2: </td><td><b>{{range.dns2}}</b></td>		
+		</tr>
+		<tr>	
+			<td>Status: </td><td><span id="status" style="padding-right:15px"></span></td>	
+			<script>
+				createProgressBar("#status",{{range.ips.all.count}},{{range.getNumberOfSlots}},true)	
+			</script>	
+	
+			<td>Next available Ip4 address: </td><td><i>{{range.nextAvailableIp}}</i></td>
+		</tr>
+         </table>
+	<br>
+	<br>
+	<br>
+	<h3>Excluded IPs<br/><br/></h3>
+	<!-- Excluded IPs -->
+    	<table class ="red" style="margin-bottom:20px;width:600px">
+		<tr>
+			<th width="200px">Excluded Address</th><th style="text-align:left" width="300px">Comment</th><th width="80px">Actions</th>
+		</tr>
+	{% if range.getExcludedIps.count > 0 %}
+		{% for ip in range.getExcludedIps %}
+			<tr class="{% cycle 'odd' 'even' %}">
+				<form action="{% url manageIp4RangeExcluded "removeExcluded" range.id ip.id %}" method="POST">
+				{% csrf_token %}
+				<td>{{ip.ip}}</td><td>{{ip.comment}}</td><td><input type="submit" value="Remove" onClick="return confirmSubmit('Are you sure you want to remove {{ip.ip}} from the list of excluded Ips?')"  ></td>
+				</form>
+			</tr>
+		{%endfor%}
+	{% else %}
+		<tr class="{% cycle 'odd' 'even' %}">
+			<td colspan="3"> There are no excluded IPs at the moment...</td>
+		</tr>
+	{% endif %}
+		<form action="{% url manageIp4Range "addExcluded" range.id %}" method="POST">
+				{% csrf_token %}
+				<tr class="{% cycle 'odd' 'even' %}">
+					<td><input type="text" name="ip"></td><td><input type="text" name="comment"></td><td> <input type="submit" value="Add new entry"></td>
+				</tr>
+		</form>	
+	</table>
+
+	<!-- Assigned IPs -->
+	<h3>Assigned IPs<br/><br/></h3>
+    	<table class ="blue" style="margin-bottom:20px;width:600px">
+		<tr>
+			<th width="300px">Allocated Address</th>
+			<th style="text-align:left" width="200px">Server</th><!--<th width="80px">Actions</th>-->
+			<th style="text-align:left" width="200px">VM</th><!--<th width="80px">Actions</th>-->
+			<th style="text-align:left" width="150px">VM Iface</th>
+			<th style="text-align:left" width="200px">Project</th>
+			<th style="text-align:left" width="200px">Slice</th>
+		</tr>
+	{% if range.getAllocatedIps.count > 0 %}
+		{% for ip in range.getAllocatedIps %}
+			<tr class="{% cycle 'odd' 'even' %}">
+				<td>{{ip.ip}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.getChildObject.Server.all.0.name}}</td>
+				<td>{{ip.Interface.all.0.vm.all.0.name}}</td>
+				<td>{{ip.Interface.all.0.name}}</td>
+				<td><span title = "uuid: {{ip.Interface.all.0.vm.all.0.getProjectId}}">{{ip.Interface.all.0.vm.all.0.projectName}}</span></td>
+				<td><span title = "uuid: {{ip.Interface.all.0.vm.all.0.getProjectId}}">{{ip.Interface.all.0.vm.all.0.sliceName}}</span></td>
+			</tr>
+		{%endfor%}
+	{% else %}
+		<tr class="{% cycle 'odd' 'even' %}" >
+			<td colspan="6"> There are no IPs assigned at the moment...</td>
+		</tr>
+	{% endif %}
+	</table>
+	
+	
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url createIp4Range "add" %}">Create range</a> |			<form action="{% url manageIp4Range "delete" range.id %}" method="POST" name="deleteForm">
+				{% csrf_token %}
+				<a href="#" onClick="if(confirmSubmit('Are you sure you want to delete range {{range.name}}?')){document.forms['deleteForm'].submit();}">Delete</a> |
+		</form>
+	
+		<a href="{% url ip4Ranges %}">Back</a>
+	</div>
+</div>
+
+{% endblock content %}
+
+
