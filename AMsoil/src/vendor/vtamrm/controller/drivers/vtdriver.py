@@ -120,31 +120,15 @@ class VTDriver():
 	
 	@staticmethod	
 	def getVMbyUUID(uuid):
-        	from sqlalchemy import create_engine
-                from sqlalchemy.orm import scoped_session, sessionmaker
-                from utils.commonbase import ENGINE
-
-                db_engine = create_engine(ENGINE, pool_recycle=6000)
-                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-                db_session = scoped_session(db_session_factory)
-
 		try:
-			return db_session.query(VirtualMachine).filter(VirtualMachine.uuid==uuid).getChildObject()
+			return db_session.query(VirtualMachine).filter(VirtualMachine.uuid==uuid).one().getChildObject()
 		except:
 			raise Exception("VM does not exist or uuid not unique")
 
 	@staticmethod
 	def getVMbyId(id):
-		from sqlalchemy import create_engine
-                from sqlalchemy.orm import scoped_session, sessionmaker
-                from utils.commonbase import ENGINE
-
-                db_engine = create_engine(ENGINE, pool_recycle=6000)
-                db_session_factory = sessionmaker(autoflush=True, bind=db_engine, expire_on_commit=False)
-                db_session = scoped_session(db_session_factory)
-
 		try:
-			return db_session.query(VirtualMachine).filter(VirtualMachine.id==id).getChildObject()
+			return db_session.query(VirtualMachine).filter(VirtualMachine.id==id).one().getChildObject()
 		except:
 			raise Exception("Server does not exist or id not unique")
 
@@ -157,7 +141,7 @@ class VTDriver():
 
 	def getServers(self):
 		#XXX: Same as getAllServers()?
-		return self.ServerClass.objects.all()
+		return self.getAllServers()
 
 	@staticmethod
 	def deleteServer(server):	

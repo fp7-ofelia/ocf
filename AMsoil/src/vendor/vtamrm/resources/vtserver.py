@@ -257,9 +257,9 @@ class VTServer(Base):
     def subscribeToMacRange(self,newRange):
 	if not isinstance(newRange,MacRange):
             raise Exception("Invalid instance type on subscribeToMacRange; must be MacRange")
-        if newRange in self.subscribedMacRanges.all():
+        if newRange in self.subscribedMacRanges:
             raise Exception("Server is already subscribed to this range")
-        self.subscribedMacRanges.add(newRange)
+        self.subscribedMacRanges.append(newRange)
 
     def unsubscribeToMacRange(self,oRange):
         if not isinstance(oRange,MacRange):
@@ -267,11 +267,11 @@ class VTServer(Base):
         self.subscribedMacRanges.remove(oRange)
 
     def getSubscribedMacRangesNoGlobal(self):
-        return db_session.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
+	return self.subscribedMacRanges
 
     def getSubscribedMacRanges(self):
-        if self.subscribedMacRanges.count() > 0:
-            return db_session.query(MacRange).join(MacRange.vtserver_association, aliased=True).filter(VTServerMacRange.vtserver_id == self.id).all()
+        if len(self.subscribedMacRanges) > 0:
+            return self.subscribedMacRanges
         else:
             #Return global (all) ranges
             return db_session.query(MacRange).filter(MacRange.isGlobal == True).all()
@@ -279,9 +279,9 @@ class VTServer(Base):
     def subscribeToIp4Range(self,newRange):
         if not isinstance(newRange,Ip4Range):
             raise Exception("Invalid instance type on subscribeToIpRange; must be Ip4Range")
-        if newRange in self.subscribedIp4Ranges.all():
+        if newRange in self.subscribedIp4Ranges:
             raise Exception("Server is already subscribed to this range")
-	self.subscribedIp4Ranges.add(newRange)
+	self.subscribedIp4Ranges.append(newRange)
 
     def unsubscribeToIp4Range(self,oRange):
         if not isinstance(oRange,Ip4Range):
@@ -289,11 +289,11 @@ class VTServer(Base):
 	self.subscribedIp4Ranges.remove(oRange)
 
     def getSubscribedIp4RangesNoGlobal(self):
-        return db_session.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
+	return self.subscribedIp4Ranges
 
     def getSubscribedIp4Ranges(self):
-        if self.subscribedIp4Ranges.count() > 0:
-            return db_session.query(Ip4Range).join(Ip4Range.vtserver_association, aliased=True).filter(VTServerIpRange.vtserver_id == self.id).all()
+        if len(self.subscribedIp4Ranges) > 0:
+	    return self.subscribedIp4Ranges
         else:
             #Return global (all) ranges
             return db_session.query(Ip4Range).filter(Ip4Range.isGlobal == True).all()
@@ -364,7 +364,7 @@ class VTServer(Base):
         return interface
 
     def createEnslavedVMInterfaces(self):
-	self = db_session.query(VTServer).filter(VTServer.id == self.id).first()
+	self = db_session.query(VTServer).filter(VTServer.id == self.id).one()
 	logging.debug("********************** A")
 	vmInterfaces = set()
 	logging.debug("********************** B")
@@ -373,10 +373,10 @@ class VTServer(Base):
 	     #Bound self to the session
              for serverInterface in self.networkInterfaces:
 	        logging.debug("********************** C " + str(serverInterface))
-             	if serverInterface.networkinterface.isMgmt:
+             	if serverInterface.isMgmt:
 		    logging.debug("*********************** D1 - 1")
 		    try:
-		    	created_interface = self.__createEnslavedMgmtVMNetworkInterface(serverInterface.networkinterface)
+		    	created_interface = self.__createEnslavedMgmtVMNetworkInterface(serverInterface)
 			logging.debug("********************* D1 - 2")
 		    	vmInterfaces.add(created_interface)
 			logging.debug("********************* D1 - 3 " + str(created_interface) + ' ' + str(vmInterfaces))
@@ -385,7 +385,7 @@ class VTServer(Base):
 			logging.debug("********************* CREATION FAIL " + str(e))
                 else:
 		    logging.debug("*********************** D2")
-                    vmInterfaces.add(self.__createEnslavedDataVMNetworkInterface(serverInterface.networkinterface))
+                    vmInterfaces.add(self.__createEnslavedDataVMNetworkInterface(serverInterface))
      	except Exception as e:
 	    logging.debug("**************************** VTServer FAIL " + str(e))
             for interface in vmInterfaces:
@@ -405,7 +405,7 @@ class VTServer(Base):
                 mgmt.setMacStr(macStr)
 	    elif nInter.count() == 0:
                 mgmt = NetworkInterface.createServerMgmtBridge(name,macStr)
-                self.networkInterfaces.add(mgmt)
+                self.networkInterfaces.append(mgmt)
             else:
                 raise Exception("Unexpected length of managment NetworkInterface query")
 
@@ -415,7 +415,7 @@ class VTServer(Base):
    	    if self.networkInterfaces.filter(name=name, isBridge=True).count()> 0:
              	raise Exception("Another data bridge with the same name already exists in this Server")
 	    netInt = NetworkInterface.createServerDataBridge(name,macStr,switchId,port)
-            self.networkInterfaces.add(netInt)
+            self.networkInterfaces.append(netInt)
 
     def updateDataBridge(self,interface):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):

@@ -4,7 +4,7 @@ from sqlalchemy.orm import validates, relationship, backref
 
 import inspect
 
-from utils.commonbase import Base
+from utils.commonbase import Base, db_session
 from utils.ip4utils import IP4Utils
 
 
@@ -32,6 +32,8 @@ class Ip4Slot(Base):
             self.isExcluded = excluded
             self.ipRange = ipRange
             self.comment = comment
+	    db_session.add(self)
+	    db_session.commit()
 	except Exception as e:
 	    raise e
         return self

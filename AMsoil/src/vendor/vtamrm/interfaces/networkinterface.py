@@ -29,7 +29,6 @@ class NetworkInterface(Base):
     id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
     name = Column(String(128), nullable=False)
     mac_id = Column(Integer, ForeignKey('vt_manager_macslot.id'))
-    mac = relationship("MacSlot", backref='networkinterface_macs')
     ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
     isMgmt = Column(TINYINT(1), nullable=False, default=0)
     isBridge = Column(TINYINT(1), nullable=False, default=0)
@@ -51,7 +50,7 @@ class NetworkInterface(Base):
 	logging.debug("******************************* I1")
 	self = NetworkInterface()
 	try:
-	    logging.debug("******************************* I2 " + name)
+	    logging.debug("******************************* I2 " + name + str(macObj) + ' ' + str(self.mac))
             self.name = name
 	    if macObj == None:
 		logging.debug("******************************* I3 - 1")
@@ -61,9 +60,17 @@ class NetworkInterface(Base):
             	if not isinstance(macObj,MacSlot):
 		    logging.debug("******************************* I - ERROR - 1")
                     raise Exception("Cannot construct NetworkInterface with a non MacSlot object as parameter")
-		logging.debug("******************************* I4")
-            	self.mac_id = macObj.id
-	    logging.debug("******************************* I5 " + str(macObj.id))
+		logging.debug("******************************* I4 " + str(macObj) + ' ' + str(type(macObj)))
+		self.mac_id = macObj.id
+		db_session.add(self)
+		db_session.commit()
+		logging.debug("************************************ YEAH")
+		macObj.networkInterface = [self,]
+		logging.debug("************************************ YEAH")
+		db_session.add(macObj)
+		db_session.commit()
+            	#self.mac = macObj
+	    logging.debug("******************************* I5 " + str(self.mac))
             self.isMgmt = isMgmt
 	    logging.debug("******************************* I6")	    
             '''Connectivity'''
@@ -82,9 +89,9 @@ class NetworkInterface(Base):
                     raise Exception("Cannot construct NetworkInterface with a non Ip4Slot object as parameter")
 		else:
 		    logging.debug("******************************* I7 - 3")
-		    network_ip4s = NetworkInterfaceIp4s()
-                    network_ip4s.ip4slot_id = ip4Obj.id
-		    network_ip4s.networkinterface_id = self.id
+		    self.ip4s.append(ip4Obj)
+		    db_session.add(self)
+		    db_session.commit()
 		    logging.debug("****************************** I7 - 4 " + str(ip4Obj.id) + ' ' + str(self.id))
 	except Exception as e:
 	    logging.debug("******************************* I - ERROR - 3")
@@ -142,12 +149,10 @@ class NetworkInterface(Base):
 	    logging.debug("*********************************** BRIDGE ERROR - 2")
             raise Exception("Cannot attach interface; object type unknown -> Must be NetworkInterface instance")
 	logging.debug("*********************************** BRIDGE 2 " + str(interface.id) + ' ' + str(self.id))
-	connection = NetworkInterfaceConnectedTo()
-	connection.from_networkinterface_id = self.id
-	connection.to_networkinterface_id = interface.id
-	db_session.add(connection)
+	self.connectedTo.append(interface)
+	db_session.add(self)
 	db_session.commit()
-	logging.debug("*********************************** BRIDGE 3 " + str(interface.from_networkinterface))
+	logging.debug("*********************************** BRIDGE 3 " + str(interface.connectedFrom))
 
 
     def detachInterfaceToBridge(self,interface):
