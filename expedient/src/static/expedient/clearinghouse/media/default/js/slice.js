@@ -29,13 +29,15 @@ function getLoadingMsg(action, slice_started) {
 
 function showLoadingMsg(message){
 	//TODO:Show message
-	 $.blockUI({ css: { 
-	            border: 'none', 
-	            padding: '15px', 
+	 $.blockUI({
+			/*message: message,*/
+			css: { 
+            border: 'none', 
+            padding: '15px', 
 		    backgroundColor: '#000', 
         	 	'-webkit-border-radius': '10px', 
         		'-moz-border-radius': '10px', 
-       	            opacity: .5, 
+       	    opacity: .5, 
  		    color: '#fff' 
 		} });
 }
