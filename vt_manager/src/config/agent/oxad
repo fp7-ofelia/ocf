@@ -64,7 +64,7 @@ do_stop()
 	start-stop-daemon --stop --signal 2 --retry 5 --quiet --pidfile $PIDFILE 
 	RETVAL="$?"
 	if [ "${PID}" != "" ]; then
-		kill ${PID}
+		kill ${PID} > /dev/null 2> /dev/null &
 	fi
         rm -f ${PIDFILE}
 	[ "$RETVAL" = 2 ] && return 2
