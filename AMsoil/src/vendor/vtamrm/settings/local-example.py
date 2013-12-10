@@ -8,47 +8,56 @@ Ofelia VT AM User settings file
 # Based upon the Apache server configuration files.
 #
 
-### Section 1: VT AM settings
+### Section 1: VT RM settings
 #
-# User settings for Virtual Machine Aggregate Manager.
+# Reservation time configuration
 #
+# MAX_RESERVATION_DURATION: Maximum duration a VTAM resource (VM) can be held allocated (not provisioned)
+# ALLOCATED_VM_CHECK_INTERVAL: Time between consecutive checks of the allocated expire time
+# CREATED_VM_CHECK_INTERVAL: Time between consecutive checks of the vm expire time
+# MAX_VM_DURATION: Maximum duration a VTAM VM can be provisioned
+#
+MAX_RESERVATION_DURATION = 4*60*60
+ALLOCATED_VM_CHECK_INTERVAL = 10*60
+CREATED_VM_CHECK_INTERVAL = 24*60*60
+MAX_VM_DURATION = 7*24*60*60
 
 #
-# User management for the Graphical User Interface.
+# User and password to access the XMLRPC methods from Expedient.
 #
-ROOT_USERNAME  = "expedient"
-ROOT_PASSWORD  = "expedient"
-ROOT_EMAIL     = "i2catopenflow@gmail.com"
-
-# 
-# XMLRPC access. Set user and password to access the XMLRPC
-# methods from Expedient.
-#
-XMLRPC_USER    = "changeMe"
-XMLRPC_PASS    = "changeMe"
-
-#
-# Database parameters.
-# DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
-#
-DATABASE_NAME = "vtm"
-DATABASE_USER = "expedient"
-DATABASE_PASSWORD = "expedient"
-DATABASE_HOST = "127.0.0.1"
-
-#
-# Name for the island that is to be set on your host.
-#
-ISLAND_NAME    = "i2cat"
+CALLBACK_GUI_USER = "changeMe"
+CALLBACK_GUI_PASSWORD = "changeMe"
 
 #
 # IP and port used to receive the Agent response.
 #
 # WARNING: set a correct address here -- otherwise you will not be
 # able to see the allocated virtualization resources.
+CALLBACK_VTAM_IP = "192.168.254.193"
+CALLBACK_VTAM_PORT = "8445"
+
 #
-VTAM_IP = "192.168.254.193"
-VTAM_PORT = "8445"
+# Agent monitoring interval in seconds. That is, seconds until it
+# asks for the current status of the servers and virtual machines.
+# MONITORING_INTERVAL: default is 45.
+#
+##MONITORING_INTERVAL = 45
+
+#
+# Database parameters.
+# DATABASE_ENGINE: mysql, prostgresql, sqlite...
+# DATABASE_HOST: where the database is allocated. Usually 'localhost' (or 127.0.0.1)
+#
+DATABASE_ENGINE = "mysql"
+DATABASE_HOST = "127.0.0.1"
+DATABASE_NAME = "vtm"
+DATABASE_USER = "expedient"
+DATABASE_PASSWORD = "expedient"
+
+#
+# Name for the island that is to be set on your host.
+#
+ISLAND_NAME = "i2cat"
 
 #
 # Agent monitoring interval in seconds. That is, seconds until it
@@ -113,4 +122,4 @@ DEFAULT_FROM_EMAIL = 'changeMe'
 #
 # Subject (a prefix of it) for the e-mail.
 #
-EMAIL_SUBJECT_PREFIX = 'changeMe'
+EMAIL_SUBJECT_PREFIX = '[OFELIA CF] '

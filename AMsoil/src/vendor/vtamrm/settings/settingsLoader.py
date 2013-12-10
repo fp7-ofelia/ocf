@@ -5,10 +5,10 @@
 '''
 
 #Import static settings
-from vt_manager.settings.staticSettings import *
+from vt_manager.settings.static import *
 
 #Import user settings
-from vt_manager.mySettings import *
+from vt_manager.local import *
 
 #Must be here 
 

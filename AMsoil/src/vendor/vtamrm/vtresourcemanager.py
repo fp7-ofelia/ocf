@@ -33,11 +33,11 @@ class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService('worker')
 
-    RESERVATION_TIMEOUT = config.get("vtam.max_reservation_duration") # sec in the allocated state
-    MAX_VM_DURATION = config.get("vtam.max_vm_duration") # sec in the provisioned state (you can always call renew)
+    RESERVATION_TIMEOUT = config.get("vtamrm.MAX_RESERVATION_DURATION") # sec in the allocated state
+    MAX_VM_DURATION = config.get("vtamrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
 
-    EXPIRY_ALLOCATED_CHECK_INTERVAL = config.get("vtam.allocated_vm_check_interval") 
-    EXPIRY_CHECK_INTERVAL = config.get("vtam.created_vm_check_interval")
+    EXPIRY_ALLOCATED_CHECK_INTERVAL = config.get("vtamrm.ALLOCATED_VM_CHECK_INTERVAL") 
+    EXPIRY_CHECK_INTERVAL = config.get("vtamrm.CREATED_VM_CHECK_INTERVAL")
 
     def __init__(self):
 	super(VTResourceManager, self).__init__()
@@ -151,7 +151,7 @@ class VTResourceManager(object):
 
 
     #allocate a vm in the given slice
-    def reserve_vm(self, vm, slice_urn, end_time):
+    def allocate_vm(self, vm, slice_urn, end_time):
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
         #check if the VM name already exists, as a created VM or an allocated VM

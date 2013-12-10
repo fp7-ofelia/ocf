@@ -118,12 +118,12 @@ class VTDelegate(GENIv3DelegateBase):
         rspec_root = self.lxml_parse_rspec(rspec)
         for nodes in rspec_root.getchildren():
 	    if not nodes.tag == "node":
-                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I dont understand (%s)." % (nodes,))
+                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))
 	    
             for slivers in nodes.getchildren():
 		vm = dict()
 		if not slivers.tag == "sliver":
-		    raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I dont understand (%s)." % (slivers,))
+		    raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
 		for elm in slivers.getchildren():
 		    if (elm.tag == "name"):
 			vm['name'] = elm.text.strip()
@@ -177,7 +177,7 @@ class VTDelegate(GENIv3DelegateBase):
 #				    iface['dns2'] = ifaceelm.text.strip()
 #			    vm['interfaces'].append(iface)
 	    	    else:
-                	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I dont understand (%s)." % (elm,))
+                	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
 	        requested_vms.append(vm)
 	#TODO: check if this function is correct...
 	if True:
@@ -185,7 +185,7 @@ class VTDelegate(GENIv3DelegateBase):
 	    try:
 	    	allocated_vms = list()
 	     	for requested_vm in requested_vms:
-		    allocated_vm = self._resource_manager.reserve_vm(requested_vm, slice_urn, end_time)
+		    allocated_vm = self._resource_manager.allocate_vm(requested_vm, slice_urn, end_time)
 		    allocated_vms.append(allocated_vm)
 	    except vt_ex.VTAMVmNameAlreadyTaken as e:
 	    	self.undoo_action("reserve", allocated_vms)	    
