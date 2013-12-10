@@ -62,7 +62,8 @@ table.msg_table td.msg_text {
     text-align: left;
 }
 
-table.msg_table .error, .errorlist {
+table.msg_table .error
+/*, .errorlist*/ {
     color: #7e9fc0 !important;
 }
 
