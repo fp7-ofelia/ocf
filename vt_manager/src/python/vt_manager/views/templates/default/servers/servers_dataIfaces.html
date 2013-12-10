@@ -1,20 +1,26 @@
 <script>
-function confirmInput(inputElement){
-	if(inputElement.type == "checkbox"){
-		if (inputElement.checked == true){
-			var agree=confirm("VMs already created will not be reconfigured. Are you sure you want to delete the brige?");
-			if(agree){
+function confirmInput(inputElement) {
+	/* Show warning when admin creates bridge in a server that already contains VMs */
+	var warningBridgesInVMs = "";
+	{% if server %}
+        	{% with server.getChildObject as server %}
+                	{% if server.vms.all %}
+				warningBridgesInVMs = "VMs already created will not be reconfigured.\n";
+			{% endif %}
+        	{% endwith %}
+	{% endif %}
+	if (inputElement.type == "checkbox") {
+		if (inputElement.checked == true) {
+			var agree = confirm(warningBridgesInVMs + "Are you sure you want to delete the brige?");
+			if (agree) {
 				return true;
-			}
-			else{ 
-				inputElement.checked=false;
+			} else {
+				inputElement.checked = false;
 				return false;
 			} 
 		}
-	}
-	else{
-	//	return confirm("VMs already created will not be reconfigured. Are you sure you want to add a new brige?");
-		alert("VMs already created will not be reconfigured. Are you sure you want to add a new brige?\nLeave it blank if you do not want to create the new bridge");
+	} else {
+		alert(warningBridgesInVMs + "Are you sure you want to add a new bridge?\nLeave it blank if you do not want to create it.");
 	}
 }
 </script>
