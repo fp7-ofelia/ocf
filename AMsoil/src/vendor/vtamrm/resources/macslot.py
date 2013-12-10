@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.orm import validates, relationship
+from sqlalchemy.orm import validates, relationship, backref
 
 import inspect
 
-from utils.commonbase import Base
+from utils.commonbase import Base, db_session
 from utils.ethernetutils import EthernetUtils
 
 '''@author: SergioVidiella'''
@@ -17,7 +17,8 @@ class MacSlot(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     mac = Column(String(17), nullable=False)
     macRange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
-    macRange = relationship("MacRange")
+    macRange = relationship("MacRange", backref="macslot")
+    networkInterface = relationship("NetworkInterface", backref="mac", lazy='joined')
     isExcluded = Column(TINYINT(1))
     comment = Column(String(1024))
 
@@ -33,6 +34,8 @@ class MacSlot(Base):
         self.isExcluded = excluded
         self.macRange = macRange
         self.comment = comment
+	db_session.add(self)
+	db_session.commit()
 
         return self
 

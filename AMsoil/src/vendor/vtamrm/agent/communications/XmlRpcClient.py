@@ -89,7 +89,7 @@ class XmlRpcClient:
                 serverInfo = server_type()
                 serverInfo.virtualization_type = 'xen'
 		#Trying to craft VM Manager URL
-		server = xmlrpclib.Server('https://%s:%s@%s:%s/xmlrpc/agent'%(XMLRPC_USER,XMLRPC_PASS,VTAM_IP,VTAM_PORT))	
+		server = xmlrpclib.Server('https://%s:%s@%s:%s/xmlrpc/agent' % (CALLBACK_GUI_USER, CALLBACK_GUI_PASSWORD, CALLBACK_VTAM_IP, CALLBACK_VTAM_PORT))	
 		#XXX:This direction works
 		#server = xmlrpclib.Server('https://xml:rpc@10.216.140.11:8445/xmlrpc/agent')
 		server.sendAsync(XmlRpcClient.__craftMonitoringActiveVMsInfoResponseXml(actionId,status,vms,serverInfo,VmStatus))

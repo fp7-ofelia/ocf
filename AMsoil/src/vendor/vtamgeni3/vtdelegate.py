@@ -114,6 +114,8 @@ class VTDelegate(GENIv3DelegateBase):
 
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
+	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
+        slice_name = get_leaf(slice_hrn)
 	requested_vms = list()
         rspec_root = self.lxml_parse_rspec(rspec)
         for nodes in rspec_root.getchildren():
@@ -183,27 +185,30 @@ class VTDelegate(GENIv3DelegateBase):
 	if True:
 	#if self.urn_type(slice_urn) is 'slice': 
 	    try:
-	    	allocated_vms = list()
+	    	allocated_vms = dict()
 	     	for requested_vm in requested_vms:
-		    allocated_vm = self._resource_manager.allocate_vm(requested_vm, slice_urn, end_time)
-		    allocated_vms.append(allocated_vm)
+		    allocated_vm, server = self._resource_manager.allocate_vm(requested_vm, slice_name, end_time)
+		    if server.name not in allocated_vms:
+			allocated_vms[server.name] = list()
+		    allocated_vms[server.name].append(allocated_vm)
 	    except vt_ex.VTAMVmNameAlreadyTaken as e:
-	    	self.undoo_action("reserve", allocated_vms)	    
+	    	self.undoo_action("allocate", allocated_vms)	    
 	    	raise geni_ex.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
 	    except vt_ex.VTAMServerNotFound as e:
-            	self.undoo_action("reserve", allocated_vms)
+            	self.undoo_action("allocate", allocated_vms)
 	    	raise geni_ex.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
 	    except vt_ex.VTMaxVMDurationExceeded as e:
-            	self.undoo_action("reserve", allocated_vms)
+            	self.undoo_action("allocate", allocated_vms)
 	    	raise geni_ex.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
 	else:
 	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
-	rspecs = self._get_manifest_rspec(allocated_vms)
-	#TODO: change this...
+	rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
 	slivers = list()
-	#for key in allocated_vms.keys():
-	#    for allocated_vm_node in allocated_vms[key]:
-	#  	slivers.append(self._get_sliver_status_hash(allocated_vm_node, True))
+	for key in allocated_vms.keys():
+	    for allocated_vm in allocated_vms[key]:
+	    	vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.projectName + '.' + allocated_vm.sliceName + '.' + allocated_vm.name
+	        vm_urn = hrn_to_urn(vm_hrn, 'sliver')
+	        slivers.append(self._get_sliver_status_hash({'name':vm_urn, 'expires':allocated_vm.expires, 'status':"allocated"}, True))
 	return rspecs, slivers
 		
 
@@ -455,7 +460,7 @@ class VTDelegate(GENIv3DelegateBase):
         return result
 
 
-    def _get_manifest_rspec(self, nodes):
+    def _get_manifest_rspec(self, nodes, slice_urn):
         E = self.lxml_manifest_element_maker('vtam')
         manifest = self.lxml_manifest_root()
 	#XXX: Add more information about the AM? 
@@ -466,14 +471,14 @@ class VTDelegate(GENIv3DelegateBase):
 	    #server.append(component_id = node['server_urn'])
 	    for sliver in nodes[key]:
 	    	vm = E.sliver(type = 'VM')
-		vm.append(E.name(sliver['name']))
+		vm.append(E.name(hrn_to_urn(get_authority(get_authority(slice_urn)) + '.' + sliver.projectName + '.' + sliver.sliceName + '.' + sliver.name, 'sliver')))
 	        server.append(vm)
             manifest.append(server)
         return self.lxml_to_string(manifest)
 
 
     def undoo_action(self, action, params):
-	if action is "reserve":
+	if action is "allocate":
 	    for param in params:
 		self._resource_manager.delete_vm(param, "allocated")
 	elif action is "create":
