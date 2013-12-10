@@ -44,28 +44,28 @@
 <script>
 	/* Asynchronous calls to insert data into different layers */
 	$(document).ready(function () {
-			var loader = $('#projects_list'), timer;
-	        loader.ajaxStart(function (event) {
-		        timer && clearTimeout(timer);
-				/* Add timeout to show message only when AJAX call takes some time */
-		        timer = setTimeout(function() {
-					/* Show blocking layer while loading */
-	            	$.blockUI({
-						message: '<h1>Please wait...</h1>Projects are being loaded',
-						css: {
-	            	    border: 'none',
-	            	    padding: '15px',
-	            	    backgroundColor: '#000',
-	            	        '-webkit-border-radius': '10px',
-	            	        '-moz-border-radius': '10px',
-	            	        opacity: .5,
-	            	    color: '#fff'
-	            	} });
-		        	},
-		        100);
+		var loader = $('#projects_list'), timer;
+		loader.ajaxStart(function (event) {
+		timer && clearTimeout(timer);
+		/* Add timeout to show message only when AJAX call takes some time */
+		timer = setTimeout(function() {
+			/* Show blocking layer while loading */
+		        $.blockUI({
+				message: '<h1>Please wait...</h1>Projects are being loaded',
+				css: {
+		        	    border: 'none',
+		        	    padding: '15px',
+		        	    backgroundColor: '#000',
+		        	        '-webkit-border-radius': '10px',
+		        	        '-moz-border-radius': '10px',
+		        	    opacity: .5,
+		        	    color: '#fff'
+		         	} });
+			},
+			200);
 	        }).ajaxStop(function () {
-				clearTimeout(timer);
-				$(".blockUI").hide()
+			clearTimeout(timer);
+			$.unblockUI();
 	        });
 	    $.get("{% url project_list %}", function(data) {
 	        $("#projects_list").html(data);
