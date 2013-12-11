@@ -6,11 +6,9 @@ def setup():
     
     # Read settings
     from settings import local
-    print "Loading settings...."
     for setting in local.__dict__:
         # Retrieve user-defined settings (avoid internal ones - '__')
         if not setting.startswith("__"):
-            print "%s => %s" % (setting, local.__dict__[setting])
             config.install("vtamrm.%s" % setting, local.__dict__[setting], "")
 
     from vtresourcemanager import VTResourceManager

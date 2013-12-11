@@ -11,12 +11,12 @@ from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import Dispatch
 
 @rpcmethod(url_name="agent", signature=['string', 'string'])
 def sendAsync(xml):
-	logging.debug("sendAsync lauched")
+	logging.debug("sendAsync launched")
 	rspec = XmlHelper.parseXmlString(xml)
-	print "RSPEC"
-	print "------------------------------------------------"
-	print xml
-	print "------------------------------------------------"
+	logging.debug("RSPEC")
+	logging.debug("------------------------------------------------")
+	logging.debug(xml)
+	logging.debug("------------------------------------------------")
 	ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlResponse ,rspec)
 	#ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse , rspec)
 	return

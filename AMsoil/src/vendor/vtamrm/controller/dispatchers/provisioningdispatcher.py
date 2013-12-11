@@ -84,7 +84,6 @@ class ProvisioningDispatcher():
 
 	@staticmethod
 	def __createVM(controller, actionModel, action):
-        
 		try:
 			logging.debug("**************************** OK - 1")
 			actionModel.checkActionIsPresentAndUnique()
@@ -94,7 +93,7 @@ class ProvisioningDispatcher():
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
 			logging.debug("**************************** OK - 4")
 			#XXX:Change action Model
-			actionModel.objectUUID = VMmodel.getUUID()
+			actionModel.setObjectUUID(VMmodel.getUUID())
 			logging.debug("**************************** OK - 5")
 			return VMmodel
 		except:
@@ -102,7 +101,6 @@ class ProvisioningDispatcher():
 
 	@staticmethod
 	def __deleteStartStopRebootVM(controller, actionModel, action):
-
 		try:
 			actionModel.checkActionIsPresentAndUnique()
 			VMmodel =  controller.getVMbyUUID(action.server.virtual_machines[0].uuid)

@@ -4,13 +4,10 @@ import xmlrpclib, threading, logging, copy
 from utils.xmlhelper import XmlHelper
 from resources.resourceshash import ResourcesHash
 
-
 class InformationDispatcher():
-
 
 	@staticmethod
 	def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
-
 		logging.debug("Enter listResources")
 		infoRspec = XmlHelper.getSimpleInformation()
 		servers = VTDriver.getAllServers()
@@ -27,7 +24,6 @@ class InformationDispatcher():
 				if(sIndex != 0):
 					newServer = copy.deepcopy(baseServer)
 					infoRspec.response.information.resources.server.append(newServer)
-	
 				InformationDispatcher.__ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
 				if (projectUUID is not 'None'):
 					vms = server.getVMs(projectId = projectUUID)
@@ -47,7 +43,6 @@ class InformationDispatcher():
 						newVM = copy.deepcopy(baseVM)
 						infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
 					InformationDispatcher.__VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
-	
 			resourcesString =   XmlHelper.craftXmlClass(infoRspec)
 			localHashValue = str(hash(resourcesString))
 		try:
@@ -57,15 +52,11 @@ class InformationDispatcher():
 		except:
 			rHashObject = resourcesHash(hashValue = localHashValue, projectUUID= projectUUID, sliceUUID = sliceUUID)
 			rHashObject.save()
-	
 		if remoteHashValue == rHashObject.hashValue:
 			return localHashValue, ''
 		else:
 			return localHashValue, resourcesString
 	
-
-
-             
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):
 		sClass.name = sModel.getName()
@@ -88,10 +79,9 @@ class InformationDispatcher():
 			sClass.interfaces.interface[ifaceIndex].name = iface.name   
 			sClass.interfaces.interface[ifaceIndex].switch_id= iface.switchID   
 			sClass.interfaces.interface[ifaceIndex].switch_port = iface.port  
- 
+
 	@staticmethod
 	def __VMmodelToClass(VMmodel, VMxmlClass):
-
 		VMxmlClass.name = VMmodel.getName()
 		VMxmlClass.uuid = VMmodel.getUUID()
 		VMxmlClass.status = VMmodel.getState()
@@ -108,5 +98,4 @@ class InformationDispatcher():
 		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHdOriginPath()
 		VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
 		VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-
 		ActionController.PopulateNetworkingParams(VMxmlClass.xen_configuration.interfaces.interface, VMmodel)

@@ -30,9 +30,7 @@ def send(callBackUrl, xml):
 def ping(challenge):
 	return challenge
 
-
 @rpcmethod(url_name="plugin")
 def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
-	
-	v,s = getattr (DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
+	v,s = getattr(DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
 	return v,s
