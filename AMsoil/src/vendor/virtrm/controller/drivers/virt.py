@@ -5,7 +5,7 @@ from utils.servicethread import *
 from utils.xmlhelper import XmlHelper
 from utils.httputils import HttpUtils
 from resources.virtualmachine import VirtualMachine
-from controller.actions.actioncontroller import ActionController
+from controller.actions.action import ActionController
 
 from utils.commonbase import db_session
 import amsoil.core.log
@@ -20,13 +20,13 @@ class VTDriver():
 
 	@staticmethod
 	def getDriver(virtType):
-		from controller.drivers.xendriver import XenDriver
+		from controller.drivers.xen import XenDriver
 		if virtType == VTDriver.CONTROLLER_TYPE_XEN:
 			return XenDriver.getInstance()
 
 	@staticmethod
 	def getAllDrivers():
-		from controller.drivers.xendriver import XenDriver
+		from controller.drivers.xen import XenDriver
 
 		drivers = []	
 		for vt in VTDriver.__possibleVirtTechs:
@@ -145,7 +145,7 @@ class VTDriver():
 #			rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 #			#MARC XXX
 #			#Translator.PopulateNewAction(rspec.query.provisioning.action[0], VTDriver.getVMbyId(vmId))
-#			ProvisioningDispatcher.processProvisioning(rspec.query.provisioning)
+#			ProvisioningDispatcher.process(rspec.query.provisioning)
 #		except Exception as e:
 #			logging.error(e)
 			
@@ -191,4 +191,4 @@ class VTDriver():
 		vm = db_session.query(VirtualMachine).filter(VirtualMachine.id==vm_id).getChildObject()
 		rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
 		ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
-		ServiceThread.startMethodInNewThread(DispatcherLauncher.processXmlQuery, rspec)
+		ServiceThread.startMethodInNewThread(DispatcherLauncher.process_query, rspec)

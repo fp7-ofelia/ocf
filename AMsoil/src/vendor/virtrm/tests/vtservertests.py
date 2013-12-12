@@ -4,7 +4,7 @@ sys.path.append('/opt/ofelia/AMsoil/vtamrm')
 
 from utils.commonbase import db_session
 from resources.xenserver import VTServer
-from controller.drivers.vtdriver import VTDriver
+from controller.drivers.virt import VTDriver
 
 #print VTServer.__subclass__()
 

@@ -10,8 +10,8 @@ from utils.translator import Translator
 from utils.servicethread import ServiceThread
 from utils.urlutils import UrlUtils
 
-from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
-from controller.dispatchers.dispatcherlauncher import DispatcherLauncher
+from controller.dispatchers.provisioning.query import ProvisioningDispatcher
+from controller.dispatchers.launcher import DispatcherLauncher
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -23,56 +23,56 @@ class VMManager:
     '''Class to pass the VM parameters to an RSpec Instance for ProvisioningDisaptcher'''
 
     @staticmethod
-    def getActionInstance(servers_slivers,projectName,sliceName):
+    def getActionInstance(servers_slivers,project_name,slice_name):
 	db_engine = create_engine(ENGINE, pool_recycle=6000)
         db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
         db_session = scoped_session(db_session_factory)
-	provisioningRSpecs = list()
+	provisioning_rspecs = list()
 	action_list = list()
 	rspec = XmlHelper.getSimpleActionQuery()
-	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
-        actionClassEmpty.type_ = "create"
+	action_class_empty = copy.deepcopy(rspec.query.provisioning.action[0])
+        action_class_empty.type_ = "create"
         rspec.query.provisioning.action.pop()
         for vms in servers_slivers:
 	    server_id = vms['component_id']
 	    for vm in vms['slivers']:
 		server = db_session.query(VTServer).filter(VTServer.uuid == server_id).first()
-	        VMManager.setDefaultVMParameters(vm,server,projectName,sliceName)
-		actionClass = copy.deepcopy(actionClassEmpty)
-                actionClass.id = uuid.uuid4()
-		action_list.append(actionClass.id)
-                Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
-		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
-                actionClass.server.uuid = server_id
-                actionClass.server.virtualization_type = server.getVirtTech()
-                rspec.query.provisioning.action.append(actionClass)
-		provisioningRSpecs.append(rspec.query.provisioning)
+	        VMManager.setDefaultVMParameters(vm,server,project_name,slice_name)
+		action_class = copy.deepcopy(action_class_empty)
+                action_class.id = uuid.uuid4()
+		action_list.append(action_class.id)
+                Translator.VMdictToClass(vm, action_class.server.virtual_machines[0])
+		Translator.VMdicIfacesToClass(vm['interfaces'],action_class.server.virtual_machines[0].xen_configuration.interfaces)
+                action_class.server.uuid = server_id
+                action_class.server.virtualization_type = server.getVirtTech()
+                rspec.query.provisioning.action.append(action_class)
+		provisioning_rspecs.append(rspec.query.provisioning)
     	db_session.expunge_all()
-	return provisioningRSpecs, action_list
+	return provisioning_rspecs, action_list
 
     @staticmethod
-    def setDefaultVMParameters(vm,server,projectName,sliceName):
+    def setDefaultVMParameters(vm,server,project_name,slice_name):
 	db_engine = create_engine(ENGINE, pool_recycle=6000)
         db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
         db_session = scoped_session(db_session_factory)
 
-        VM = db_session.query(VirtualMachine).filter(VirtualMachine.projectName == projectName).all()
+        VM = db_session.query(VirtualMachine).filter(VirtualMachine.project_name == project_name).all()
 	if VM:
 		vm['project-id'] = VM[0].projectId
 	else:
 		vm['project-id'] = str(uuid.uuid4())	
 
-	vm['project-name'] = projectName
+	vm['project-name'] = project_name
 
 	vm['slice-id'] = None
 	for virmach in VM:
-		if virmach.sliceName == sliceName:
+		if virmach.slice_name == slice_name:
 			vm['slice-id'] = virmach.sliceId
 
 	if not vm['slice-id']:
 		vm['slice-id'] = str(uuid.uuid4()) 
 
-	vm['slice-name']= sliceName	 
+	vm['slice-name']= slice_name	 
 	vm['uuid'] = str(uuid.uuid4())
         vm['state'] = "on queue"
         #assign same virt technology as the server where vm created

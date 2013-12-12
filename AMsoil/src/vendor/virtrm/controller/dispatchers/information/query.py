@@ -1,61 +1,61 @@
-from controller.actions.actioncontroller import ActionController
-from controller.drivers.vtdriver import VTDriver
-import xmlrpclib, threading, logging, copy
-from utils.xmlhelper import XmlHelper
+from controller.actions.action import ActionController
+from controller.drivers.virt import VTDriver
 from resources.resourceshash import ResourcesHash
+from utils.xmlhelper import XmlHelper
+import xmlrpclib, threading, logging, copy
 
 class InformationDispatcher():
 
 	@staticmethod
 	def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 		logging.debug("Enter listResources")
-		infoRspec = XmlHelper.getSimpleInformation()
+		info_rspec = XmlHelper.getSimpleInformation()
 		servers = VTDriver.getAllServers()
-		baseVM = copy.deepcopy(infoRspec.response.information.resources.server[0].virtual_machine[0])
+		base_vm = copy.deepcopy(info_rspec.response.information.resources.server[0].virtual_machine[0])
 		if not servers:
 			logging.debug("No VTServers available")
-			infoRspec.response.information.resources.server.pop()
-			resourcesString = XmlHelper.craftXmlClass(infoRspec)
-			localHashValue = str(hash(resourcesString))
+			info_rspec.response.information.resources.server.pop()
+			resources_string = XmlHelper.craftXmlClass(info_rspec)
+			local_hash_value = str(hash(resources_string))
 		else:
-			for sIndex, server in enumerate(servers):
-				if(sIndex == 0):
-					baseServer = copy.deepcopy(infoRspec.response.information.resources.server[0])
-				if(sIndex != 0):
-					newServer = copy.deepcopy(baseServer)
-					infoRspec.response.information.resources.server.append(newServer)
-				InformationDispatcher.__ServerModelToClass(server, infoRspec.response.information.resources.server[sIndex] )
+			for s_index, server in enumerate(servers):
+				if(s_index == 0):
+					baseServer = copy.deepcopy(info_rspec.response.information.resources.server[0])
+				if(s_index != 0):
+					new_server = copy.deepcopy(baseServer)
+					info_rspec.response.information.resources.server.append(new_server)
+				InformationDispatcher.__ServerModelToClass(server, info_rspec.response.information.resources.server[s_index] )
 				if (projectUUID is not 'None'):
 					vms = server.getVMs(projectId = projectUUID)
 				else:
 					vms = server.getVMs()
 				if not vms:
 					logging.debug("No VMs available")
-					if infoRspec.response.information.resources.server[sIndex].virtual_machine:
-						infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+					if info_rspec.response.information.resources.server[s_index].virtual_machine:
+						info_rspec.response.information.resources.server[s_index].virtual_machine.pop()
 				elif (sliceUUID is not 'None'):
 					vms = vms.filter(sliceId = sliceUUID)
 					if not vms:
 						logging.error("No VMs available")
-						infoRspec.response.information.resources.server[sIndex].virtual_machine.pop()
+						info_rspec.response.information.resources.server[s_index].virtual_machine.pop()
 				for vIndex, vm in enumerate(vms):
 					if (vIndex != 0):
-						newVM = copy.deepcopy(baseVM)
-						infoRspec.response.information.resources.server[sIndex].virtual_machine.append(newVM)
-					InformationDispatcher.__VMmodelToClass(vm, infoRspec.response.information.resources.server[sIndex].virtual_machine[vIndex])
-			resourcesString =   XmlHelper.craftXmlClass(infoRspec)
-			localHashValue = str(hash(resourcesString))
+						newVM = copy.deepcopy(base_vm)
+						info_rspec.response.information.resources.server[s_index].virtual_machine.append(newVM)
+					InformationDispatcher.__VMmodelToClass(vm, info_rspec.response.information.resources.server[s_index].virtual_machine[vIndex])
+			resources_string = XmlHelper.craftXmlClass(info_rspec)
+			local_hash_value = str(hash(resources_string))
 		try:
-			rHashObject =  resourcesHash.objects.get(projectUUID = projectUUID, sliceUUID = sliceUUID)
-			rHashObject.hashValue = localHashValue
-			rHashObject.save()
+			r_hash_object = resourcesHash.objects.get(projectUUID = projectUUID, sliceUUID = sliceUUID)
+			r_hash_object.hashValue = local_hash_value
+			r_hash_object.save()
 		except:
-			rHashObject = resourcesHash(hashValue = localHashValue, projectUUID= projectUUID, sliceUUID = sliceUUID)
-			rHashObject.save()
-		if remoteHashValue == rHashObject.hashValue:
-			return localHashValue, ''
+			r_hash_object = resourcesHash(hashValue = local_hash_value, projectUUID= projectUUID, sliceUUID = sliceUUID)
+			r_hash_object.save()
+		if remoteHashValue == r_hash_object.hashValue:
+			return local_hash_value, ''
 		else:
-			return localHashValue, resourcesString
+			return local_hash_value, resources_string
 	
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):

@@ -1,29 +1,25 @@
-from vt_manager.models.VTServer import VTServer
-import uuid
-from vt_manager.controller.monitoring.AgentMonitoringThread import AgentMonitoringThread
-from vt_manager.controller.monitoring.SessionMonitoringThread import SessionMonitoringThread
-import time
-import threading
-#from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
 from django.conf import settings
+from vt_manager.controller.monitoring.agent import AgentMonitoringThread
+from vt_manager.controller.monitoring.session import SessionMonitoringThread
+from vt_manager.models.VTServer import VTServer
+import threading
+import time
+import uuid
+#from vt_manager.settings.settingsLoader import MONITORING_INTERVAL 
 
 '''
 author:msune
 Monitoring thread implementation
 '''
 
-
 SESSION_MULTIPLIER = 5
 
-
 class BackgroundMonitor():
-    
-    '''
+    """
     Updates server status
-    '''
+    """
     @staticmethod
     def __monitorServers():
-
         for server in VTServer.objects.all():
             AgentMonitoringThread.monitorAgentInNewThread(server)
         #Wait for threads

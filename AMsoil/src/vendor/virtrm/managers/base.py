@@ -18,8 +18,8 @@ from utils.vmmanager import VMManager
 from utils.servicethread import ServiceThread
 from utils.commonbase import db_session
 
-from controller.dispatchers.provisioningdispatcher import ProvisioningDispatcher
-from controller.drivers.vtdriver import VTDriver
+from controller.dispatchers.provisioning.query import ProvisioningDispatcher
+from controller.drivers.virt import VTDriver
 
 import amsoil.core.log
 #amsoil logger
@@ -418,11 +418,11 @@ class VTResourceManager(object):
 	created_vms = list()
 	slice_hrn, urn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
-	provisioningRSpecs, actions = VMManager.getActionInstance(vm_params,project_name,slice_name)
+	provisioning_rspecs, actions = VMManager.getActionInstance(vm_params,project_name,slice_name)
 	vm_results = dict()
-        for provisioningRSpec, action in zip(provisioningRSpecs, actions):
-	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM')
-	    vm = provisioningRSpec.action[0].server.virtual_machines[0]
+        for provisioning_rspec, action in zip(provisioning_rspecs, actions):
+	    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.process, provisioning_rspec, 'SFA.OCF.VTM')
+	    vm = provisioning_rspec.action[0].server.virtual_machines[0]
 	    vm_hrn = 'geni.gpo.gcf.' + vm.slice_name + '.' + vm.name
             vm_urn = hrn_to_urn(vm_hrn, 'sliver')
 	    server = db_session.query(VTServer).filter(VTServer.uuid == vm.server_id).first()

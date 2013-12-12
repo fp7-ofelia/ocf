@@ -1,4 +1,4 @@
-from controller.drivers.vtdriver import VTDriver
+from controller.drivers.virt import VTDriver
 from resources.xenserver import XenServer
 from resources.xenvm import XenVM
 from resources.vtserver import VTServer

@@ -1,15 +1,14 @@
-from utils.xmlhelper import XmlHelper
 from utils.action import Action
-
+from utils.xmlhelper import XmlHelper
 import logging
 
 class MonitoringResponseDispatcher():
-	'''
+	"""
 	Handles the Agent responses when action status changes
-	'''
+	"""
 
 	@staticmethod
-	def processResponse(rspec):
+	def process(rspec):
 		logging.debug("-------------------> Monitoring!!!!!")
 		for action in rspec.response.monitoring.action:
 			logging.debug(action)
@@ -18,11 +17,13 @@ class MonitoringResponseDispatcher():
 			try:
 				if action.id == "callback":
 					logging.debug('---------------------->Libvirt Monitoring!!!')
-					from controller.monitoring.vmmonitor import VMMonitor
+					from controller.monitoring.vm import VMMonitor
 					from resources.vtserver import VTServer
-                                        print '------>UUID',action.server.virtual_machines[0].uuid
+					print '------>UUID',action.server.virtual_machines[0].uuid
 					logging.debug('------>STATUS',action.server.virtual_machines[0].status)
-					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status,rspec)
+					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,
+																action.server.virtual_machines[0].status,
+																rspec)
 					logging.debug('---------------------->LibvirtMonitoring Finished!!!')
 					return
 				else:
@@ -30,16 +31,14 @@ class MonitoringResponseDispatcher():
 			except Exception as e:
 				logging.error("No action in DB with the incoming uuid\n%s", e)
 				return
-
 			if action.status == "ONGOING":
 				logging.debug("----------------------->ONGOING")
-				#ONGOING
+				# ONGOING
 				actionModel.setStatus(Action.ONGOING_STATUS)
 				return
 			elif action.status == "SUCCESS":
 				from vt_manager.models.VTServer import VTServer
-				from vt_manager.controller.monitoring.VMMonitor import VMMonitor
-
+				from vt_manager.controller.monitoring.vm import VMMonitor
 				logging.debug("----------------------->SUCCESS")
 				server = VTServer.objects.get(uuid=actionModel.getObjectUUID())
 				logging.debug("----------------------->SUCCESS2")

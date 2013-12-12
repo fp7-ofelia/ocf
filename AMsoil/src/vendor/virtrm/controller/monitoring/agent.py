@@ -1,8 +1,10 @@
 from threading import Thread
 import random 
+# XXX Do something
 from vt_manager.models.VTServer import VTServer
-from vt_manager.communication.XmlRpcClient import XmlRpcClient
-from vt_manager.controller.monitoring.VMMonitor import VMMonitor
+from communication.client.xmlrpc import XmlRpcClient
+from controller.monitoring.vm import VMMonitor
+
 '''
 	author:msune
 	Agent monitoring thread
@@ -29,18 +31,17 @@ class AgentMonitoringThread(Thread):
 	def __updateAgentStatus(self, server):
 		try:
 			print "Pinging Agent on server %s" % server.name
-			XmlRpcClient.callRPCMethod(server.getAgentURL(),"ping", "hola")
-			#Server is up
+			XmlRpcClient.call_method(server.getAgentURL(), "ping", "hello")
+			# Server is up
  			print "Ping Agent on server %s was SUCCESSFUL!" % server.name
 			if self.periodicRefresh() or server.available == False:
 				#Call it 
 				VMMonitor.sendUpdateVMs(server)
-			
 				if server.available == False:
 					server.setAvailable(True)
 					server.save()
 		except Exception as e:
-			#If fails for some reason mark as unreachable
+			# If fails for some reason mark as unreachable
 			print "Could not reach server %s. Will be set as unavailable "
 			print e
 			server.setAvailable(False)
