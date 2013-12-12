@@ -4,6 +4,6 @@
   "author-email" : "sergio.vidiella@i2cat.net",
   "version" : 1,
   "implements" : [],
-  "loads-after" : ["geniv3handler", "geniv3delegatebase", "geniv3exceptions", "vtresourcemanager", "vtadminresourcemanager", "vtexceptions", "config"],
+  "loads-after" : ["geniv3handler", "geniv3delegatebase", "geniv3exceptions", "virtrm", "virtadminrm", "virtexceptions", "config"],
   "requires" : []
 }

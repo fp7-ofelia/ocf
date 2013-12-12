@@ -60,5 +60,5 @@ class VMMonitor():
 		else:
 			VM.setState(VirtualMachine.UNKNOWN_STATE)
 		
-		#XXX: Maybe there better palces to send to expedient this update state...	
+		#XXX: Maybe there better places to send to expedient this update state...	
 		XmlRpcClient.callRPCMethod(VM.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))				

@@ -1,5 +1,5 @@
 import amsoil.core.pluginmanager as pm
-import utils.vtexceptions as vt_exception
+#import utils.exceptions as virt_exception
 
 '''@author: SergioVidiella'''
 
@@ -21,7 +21,6 @@ class VTAdminResourceManager(object):
 	    print e
 	    raise e
 
-
     def get_server_slices(self, server_id):
 	vmSlices = {}
 	try:
@@ -34,11 +33,9 @@ class VTAdminResourceManager(object):
             print e
             raise e
 
-
     def servers_crud(self, server_id, params):
 	#XXX: add/update a server from the params
 	pass
-
 
     def delete_server(self, server_id):
 	try:
@@ -48,28 +45,19 @@ class VTAdminResourceManager(object):
             print e
 	    return False
 
-
     def action_vm(self, request, server_id, vm_id, action):
 	#XXX: perform an action over the vm
 	pass
 
-
     def subscribeEthernetRanges(request, server_id):
 	pass
-
 
     def subscribeIp4Ranges(request, server_id):
 	pass
 
-
     def manageEthernet(request,rangeId=None,action=None,macId=None):
 	pass
-
 
     def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 	pass
 
-
-    
-	
-     

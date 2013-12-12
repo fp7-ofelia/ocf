@@ -11,7 +11,7 @@ from resources.virtualmachine import VirtualMachine
 from resources.vmexpires import VMExpires
 from resources.vmallocated import VMAllocated
 
-import utils.vtexceptions as vt_exception
+import utils.exceptions as virt_exception
 from utils.xrn import *
 from utils.action import Action
 from utils.vmmanager import VMManager
@@ -33,24 +33,24 @@ class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService('worker')
 
-    RESERVATION_TIMEOUT = config.get("vtamrm.MAX_RESERVATION_DURATION") # sec in the allocated state
-    MAX_VM_DURATION = config.get("vtamrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
+    RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION") # sec in the allocated state
+    MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
 
-    EXPIRY_ALLOCATED_CHECK_INTERVAL = config.get("vtamrm.ALLOCATED_VM_CHECK_INTERVAL") 
-    EXPIRY_CHECK_INTERVAL = config.get("vtamrm.CREATED_VM_CHECK_INTERVAL")
+    EXPIRY_ALLOCATED_CHECK_INTERVAL = config.get("virtrm.ALLOCATED_VM_CHECK_INTERVAL") 
+    EXPIRY_CHECK_INTERVAL = config.get("virtrm.CREATED_VM_CHECK_INTERVAL")
 
     def __init__(self):
 	super(VTResourceManager, self).__init__()
         # register callback for regular updates
-        self.worker.addAsReccurring("vtresourcemanager", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
-        self.worker.addAsReccurring("vtresourcemanager", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
+        self.worker.addAsReccurring("virtrm", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
+        self.worker.addAsReccurring("virtrm", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
 
     '''Server functions'''
     #Get server by uuid. 
     #If no uuid given, return all servers
     def get_servers(self, uuid=None):
         servers = VTDriver.getAllServers()
-	logging.debug("**************************************" + str(servers))
+        logging.debug("**************************************" + str(servers))
         if uuid:
             for server in servers:
                 if str(server.uuid) == str(uuid):
@@ -98,7 +98,7 @@ class VTResourceManager(object):
 		db_session.expunge(vm)
 		db_session.expunge(vm_expires)
             else:
-                raise vt_exception.VTAMVMNotFound(urn)
+                raise virt_exception.VTAMVMNotFound(urn)
 	return vm_status
 
     #get all vms in slice
@@ -154,10 +154,10 @@ class VTResourceManager(object):
     def allocate_vm(self, vm, slice_name, end_time):
         #check if the VM name already exists, as a created VM or an allocated VM
         if db_session.query(VirtualMachine).filter(VirtualMachine.name == vm['name']).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.projectName == vm['project_name']).first() != None or db_session.query(VMAllocated).filter(VMAllocated.name == vm['name']).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == vm['project_name']).first() != None:
-      	    raise vt_exception.VTAMVmNameAlreadyTaken(vm['name'])
+      	    raise virt_exception.VTAMVmNameAlreadyTaken(vm['name'])
    	#check if the server is one of the given servers
         if db_session.query(VTServer).filter(VTServer.name == vm['server_name']).first() == None:
-            raise vt_exception.VTAMServerNotFound(vm['server_name'])
+            raise virt_exception.VTAMServerNotFound(vm['server_name'])
 	try:
             expiration_time = self._check_reservation_time(end_time)
 	except Exception as e:
@@ -169,8 +169,6 @@ class VTResourceManager(object):
 	server = VTDriver.getServerById(vmAllocatedModel.serverId)
 	return vmAllocatedModel, server
 	
-
-
     #XXX: continue from this point
     def extend_vm_expiration(self, vm_urn, status, expiration_time):
         vm_hrn, hrn_type = urn_to_hrn(vm_urn)
@@ -198,8 +196,7 @@ class VTResourceManager(object):
         db_session.commit()
         db_session.expunge(vm_expires)
         return {'name':vm_urn, 'expires':expiration_time, 'status':vm_state}, last_expiration
-
-
+    
     def delete_vms_in_slice(self, slice_urn):
 	slice_hrn, urn_type = urn_to_hrn(slice_urn)
 	slice_name = get_leaf(slice_hrn)
@@ -212,7 +209,7 @@ class VTResourceManager(object):
 	if vms_allocated:
 	    vms.extend(vms_allocated)
 	if not vms:
-	    raise vt_exception.VTAMNoVMsInSlice(slice_name)
+	    raise virt_exception.VTAMNoVMsInSlice(slice_name)
 	deleted_vms = list()	
 	for vm in vms:
 	    vm_hrn = 'geni.gpo.gcf.' + slice_name + '.' + vm.name
@@ -221,8 +218,7 @@ class VTResourceManager(object):
 	    deleted_vms.append(deleted_vm)
 	db_session.expunge_all()
 	return deleted_vms
-
-
+    
     def delete_vm(self, vm_urn, slice_name=None):
 	vm_hrn, urn_type = urn_to_hrn(vm_urn)
 	if not slice_name:
@@ -249,8 +245,7 @@ class VTResourceManager(object):
 		deleted_vm['expires'] = None
 		deleted_vm['error'] = "The requested VM doesn't exists, it may have expired"
 	return deleted_vm
-
-
+    
     def _unnallocate_vm(self, vm_id):
 	#Delete the entry in the table of allocated vm's
 	vm = db_session.query(VMAllocated).filter(VMAllocated.id == vm_id).first()
@@ -261,8 +256,7 @@ class VTResourceManager(object):
 	db_session.commit()
 	db_session.expunge(vm)
 	return deleted_vm	
-
-
+    
     def _destroy_vm_with_expiration(self, vm_id):
 	vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm_id).first()
 	if vm_expires != None:
@@ -277,9 +271,7 @@ class VTResourceManager(object):
 	    return deleted_vm
 	else:
 	    return None
-
-
-
+    
     def _destroy_vm(self, vm_id, server_uuid):
 	try:
             VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_DELETE_TYPE)
@@ -320,8 +312,7 @@ class VTResourceManager(object):
 #	    db_session.commit()
 #	    db_session.expunge(allocated_interface)
 	return vm
-
-
+    
     def create_allocated_vms(self, slice_urn, end_time):
 	import uuid
 	max_duration = self.RESERVATION_TIMEOUT
@@ -395,7 +386,7 @@ class VTResourceManager(object):
 	if vms_params:
 	    created_vms = self._create_vms(vms_params, slice_urn, project)
 	else:
-	    raise vt_exception.VTAMNoSliversInSlice(slice_urn)
+	    raise virt_exception.VTAMNoSliversInSlice(slice_urn)
 	for key in created_vms.keys():
 	    for created_vm in created_vms[key]:
 	    	vm_hrn, urn_type = urn_to_hrn(created_vm['name'])
@@ -423,7 +414,6 @@ class VTResourceManager(object):
 		db_session.expunge_all()
 	return created_vms
 	
-
     def _create_vms(self, vm_params, slice_urn, project_name):
 	created_vms = list()
 	slice_hrn, urn_type = urn_to_hrn(slice_urn)
@@ -441,8 +431,7 @@ class VTResourceManager(object):
 	    vm_results[server.name].append({'name':vm_urn, 'status':'ongoing'})
 	    db_session.expunge_all()
 	return vm_results
-
-
+    
     def start_vm(self, vm_urn):
 	vm_hrn, type = urn_to_hrn(vm_urn)
 	vm_name = get_leaf(vm_hrn)
@@ -460,8 +449,7 @@ class VTResourceManager(object):
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Start the VM'}
-
-
+    
     def stop_vm(self, vm_urn=None, vm_name=None, slice_name=None):
 	if vm_urn:
 	    vm_hrn, type = urn_to_hrn(vm_urn)
@@ -481,8 +469,7 @@ class VTResourceManager(object):
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Stop the VM'}
-
-   
+    
     def restart_vm(self, vm_urn):
         vm_hrn, type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
@@ -501,8 +488,7 @@ class VTResourceManager(object):
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Restart the VM'}
-
-
+    
     def emergency_stop(self, slice_urn):	
 	slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
 	vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
@@ -511,8 +497,7 @@ class VTResourceManager(object):
 	    stopped_vms.append(self.stop_vm(None, vm.name, vm.sliceName))
 	db_session.expunge_all()
 	return stopped_vms
-
-
+    
     def _check_reservation_time(self, end_time):
 	max_duration = self.RESERVATION_TIMEOUT
         max_end_time = datetime.utcnow() + timedelta(0, max_duration)
@@ -522,8 +507,7 @@ class VTResourceManager(object):
             raise VTMaxVMDurationExceeded(vm_name)
         else:
             return end_time
-
-
+    
     @worker.outsideprocess
     def expire_vm(self, params):
         vms = db_session.query(VMExpires).filter(VMExpires.expires <= datetime.utcnow()).all()

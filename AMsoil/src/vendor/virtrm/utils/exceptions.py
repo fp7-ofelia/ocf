@@ -8,11 +8,11 @@ class VTAMException(CoreException):
 
 class VTAMIpNotFound(VTAMException):
     def __init__(self, ip):
-        super(VTAMIpNotFound, self).__init__("Ip not found (%s)" % (ip,))
+        super(VTAMIpNotFound, self).__init__("IP not found (%s)" % (ip,))
 
 class VTAMIpAlreadyTaken(VTAMException):
     def __init__(self, ip):
-        super(VTAMIpAlreadyTaken, self).__init__("Ip is already taken (%s)" % (ip,))
+        super(VTAMIpAlreadyTaken, self).__init__("IP already taken (%s)" % (ip,))
 
 class VTAMMaxVmDurationExceeded(VTAMException):
     def __init__(self, vm):
@@ -20,16 +20,16 @@ class VTAMMaxVmDurationExceeded(VTAMException):
 
 class VTAMMacNotFound(VTAMException):
     def __init__(self, mac):
-	super(VTAMMacNotFound, self).__init__("Mac not found (%s)" % (mac,))
+	super(VTAMMacNotFound, self).__init__("MAC not found (%s)" % (mac,))
 
 class VTAMMacAlreadyTaken(VTAMException):
     def __init__(self, mac):
-	super(VTAMMacAlreadyTaken, self).__init__("Mac is already taken (%s)" % (mac,))
+	super(VTAMMacAlreadyTaken, self).__init__("MAC already taken (%s)" % (mac,))
 
 class VTAMVmNameAlreadyTaken(VTAMException):
     def __init__(self, vm):
 	vm_name = vm
-	super(VTAMVmNameAlreadyTaken, self).__init__("VM name is already taken (%s)" % (vm,)) 
+	super(VTAMVmNameAlreadyTaken, self).__init__("VM name already taken (%s)" % (vm,)) 
 
 class VTAMInterfaceNotFound(VTAMException):
     def __init__(self, interface):
@@ -45,16 +45,16 @@ class VTMaxVMDurationExceeded(VTAMException):
 
 class VTAMMalformedUrn(VTAMException):
     def __init__(self, urn):
-	super(VTAMMalformedUrn, self).__init__("The urn hasn't the expected format (%s)" % (urn,))
+	super(VTAMMalformedUrn, self).__init__("The URN has not the expected format (%s)" % (urn,))
 
 class VTAMNoSliversInSlice(VTAMException):
     def __init__(self, urn):
-	super(VTAMNoSliversInSlice, self).__init__("The given slice don't have any vm (%s)" % (urn,))
+	super(VTAMNoSliversInSlice, self).__init__("The given slice does not have any VM (%s)" % (urn,))
 
 class VTAMVMNotFound(VTAMException):
     def __init__(self, urn):
-	super(VTAMVMNotFound, self).__init__("The given urn doesn't correspond to any vm (%s)" % (urn,))
+	super(VTAMVMNotFound, self).__init__("The given URN does not correspond to any VM (%s)" % (urn,))
 
 class VTAMNoVMsInSlice(VTAMException):
     def __init__(self, urn):
-	super(VTAMNoVMsInSlice, self).__init__("The given slice doesn't contain any vm (%s)" %(urn,))
+	super(VTAMNoVMsInSlice, self).__init__("The given slice does not contain any VM (%s)" %(urn,))

@@ -15,8 +15,8 @@ logging=amsoil.core.log.getLogger('VTDelegate')
 
 
 GENIv3DelegateBase = pm.getService('geniv3delegatebase')
-geni_ex = pm.getService('geniv3exceptions')
-vt_ex = pm.getService('vtexceptions')
+geniv3_exception = pm.getService('geniv3exceptions')
+virt_exception = pm.getService('virtexceptions')
 
 class VTDelegate(GENIv3DelegateBase):
     """
@@ -27,8 +27,8 @@ class VTDelegate(GENIv3DelegateBase):
 
     def __init__(self):
         super(VTDelegate, self).__init__()
-        self._resource_manager = pm.getService("vtresourcemanager")
-	self._admin_resource_manager = pm.getService("vtadminresourcemanager")
+        self._resource_manager = pm.getService("virtrm")
+	self._admin_resource_manager = pm.getService("virtadminrm")
 
     #TODO: set the location of the schemas
     #TODO: redo the schemas according to the fields needed
@@ -120,12 +120,12 @@ class VTDelegate(GENIv3DelegateBase):
         rspec_root = self.lxml_parse_rspec(rspec)
         for nodes in rspec_root.getchildren():
 	    if not nodes.tag == "node":
-                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))
+                raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))
 	    
             for slivers in nodes.getchildren():
 		vm = dict()
 		if not slivers.tag == "sliver":
-		    raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
+		    raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
 		for elm in slivers.getchildren():
 		    if (elm.tag == "name"):
 			vm['name'] = elm.text.strip()
@@ -179,7 +179,7 @@ class VTDelegate(GENIv3DelegateBase):
 #				    iface['dns2'] = ifaceelm.text.strip()
 #			    vm['interfaces'].append(iface)
 	    	    else:
-                	raise geni_ex.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
+                	raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
 	        requested_vms.append(vm)
 	#TODO: check if this function is correct...
 	if True:
@@ -191,17 +191,17 @@ class VTDelegate(GENIv3DelegateBase):
 		    if server.name not in allocated_vms:
 			allocated_vms[server.name] = list()
 		    allocated_vms[server.name].append(allocated_vm)
-	    except vt_ex.VTAMVmNameAlreadyTaken as e:
+	    except virt_exception.VTAMVmNameAlreadyTaken as e:
 	    	self.undoo_action("allocate", allocated_vms)	    
-	    	raise geni_ex.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
-	    except vt_ex.VTAMServerNotFound as e:
+	    	raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
+	    except virt_exception.VTAMServerNotFound as e:
             	self.undoo_action("allocate", allocated_vms)
-	    	raise geni_ex.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
-	    except vt_ex.VTMaxVMDurationExceeded as e:
+	    	raise geniv3_exception.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
+	    except virt_exception.VTMaxVMDurationExceeded as e:
             	self.undoo_action("allocate", allocated_vms)
-	    	raise geni_ex.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
+	    	raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
 	else:
-	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
+	    raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
 	rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
 	slivers = list()
 	for key in allocated_vms.keys():
@@ -221,9 +221,9 @@ class VTDelegate(GENIv3DelegateBase):
 		if self.urn_type(urn) is 'slice' or 'sliver':
 		    ex_flag = False
 	   if ex_flag is True:
-		raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
+		raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
 	if self._resource_manager.check_expiration_time(expiration_time) is False:
-	    raise geni_ex.GENIv3BadArgsError("VMs can not be extended that long")
+	    raise geniv3_exception.GENIv3BadArgsError("VMs can not be extended that long")
 	vms = list()
 	expirations = list()
         for urn in urns:
@@ -236,7 +236,7 @@ class VTDelegate(GENIv3DelegateBase):
                             ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
 			    expirations.append(last_expiration)
 			    vms.extend(ext_vm)
-                    	except vt_ex.VTMaxVMDurationExceeded as e:
+                    	except virt_exception.VTMaxVMDurationExceeded as e:
 			    if best_effort is True:
 				vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
 			    else: 
@@ -244,34 +244,34 @@ class VTDelegate(GENIv3DelegateBase):
 				for vm, expiration in vms, expirations:
 				    try:
 				    	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-				    except vt_ex.VTMaxVMDurationExceeded as e:
+				    except virt_exception.VTMaxVMDurationExceeded as e:
 					pass
-                            	raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
+                            	raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
 		else:
 		     if best_effort is False:
 			for vm, expiration in vms, expirations:
                             try:
                             	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-                            except vt_ex.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
-		     	raise geni_ex.GENIv3BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
+		     	raise geniv3_exception.GENIv3BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
 	    elif (self.urn_type(urn) == 'sliver'):
 		try:
 		    vm, state = self._resource_manager.verify_vm(urn)
 		    ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm, state, expiration_time)
 		    expirations.extend(last_expiration)
 		    vms.extend(ext_vm)
-		except vt_ex.VTAMVMNotFound as e:
+		except virt_exception.VTAMVMNotFound as e:
 		    if best_effort is True:
 			vms.append({'name':urn, 'expires':None, 'error':"No exist any resource with the given urn, it may have expired"})
 		    else:
 			for vm, expiration in vms, expirations:
                             try:
                                 ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-                            except vt_ex.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
-		    	raise geni_ex.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
-		except vt_ex.VTAMMaxVMDurationExceeded as e:
+		    	raise geniv3_exception.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
+		except virt_exception.VTAMMaxVMDurationExceeded as e:
 		    if best_effort is True:
                     	vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
                     else:
@@ -279,9 +279,9 @@ class VTDelegate(GENIv3DelegateBase):
                         for vm, expiration in vms, expirations:
                             try:
                             	ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-                            except vt_ex.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VTMaxVMDurationExceeded as e:
                             	pass
-                        raise geni_ex.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
+                        raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
             else:
 		if best_effort is True:
                     vms.append({'name':urn, 'expires':e.time, 'error':"Malformed URN, it doesn't belong to a Slice either a Sliver, only this types of URN are accepted"})
@@ -290,9 +290,9 @@ class VTDelegate(GENIv3DelegateBase):
                     for vm, expiration in vms, expirations:
                     	try:
                             ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-                        except vt_ex.VTMaxVMDurationExceeded as e:
+                        except virt_exception.VTMaxVMDurationExceeded as e:
                             pass
-            	raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
+            	raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
 	slivers = list()
 	for vm in vms:
 	    if vm.has_key('error'):
@@ -311,7 +311,7 @@ class VTDelegate(GENIv3DelegateBase):
             if (self.urn_type(urn) == "slice"):
       	    	provisioned_vms = self._resource_manager.create_allocated_vms(urn, end_time)	
 	    else:
-	    	raise geni_ex.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))	
+	    	raise geniv3_exception.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))	
 	rspecs = self._get_manifest_rspec(provisioned_vms)
         slivers = list()
         for key in provisioned_vms.keys():
@@ -330,7 +330,7 @@ class VTDelegate(GENIv3DelegateBase):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
 		slice_vms = self._resource_manager.vms_in_slice(urn)
 		if not slice_vms:
-	            raise geni_ex.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+	            raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
 		for vm in slice_vms:
 		    vm_status = self._resource_manager.get_vm_status(vm['name'], vm['status'])
 		    vms.append(vm_status)
@@ -339,10 +339,10 @@ class VTDelegate(GENIv3DelegateBase):
 		    vm, status = self._resource_manager.verify_vm(urn)
 		    vm_status = self._resource_manager.get_vm_status(vm, status)
 		    vms.append(vm_status)	
-		except vt_ex.VTAMVMNotFound as e:
-		    raise geni_ex.GENIv3SearchFailedError("The desired VM urn(s) cloud not be found (%s)." % (vm,))
+		except virt_exception.VTAMVMNotFound as e:
+		    raise geniv3_exception.GENIv3SearchFailedError("The desired VM urn(s) cloud not be found (%s)." % (vm,))
             else:
-                raise geni_ex.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate')
+                raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate')
         sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
 	status_vms = dict()
 	for vm in vms:
@@ -362,7 +362,7 @@ class VTDelegate(GENIv3DelegateBase):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
                 slice_vms = self._resource_manager.vms_in_slice(urn)
                 if not slice_vms:
-                    raise geni_ex.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+                    raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
 		for vm in slice_vms:
 		    if (action == self.OPERATIONAL_ACTION_START):
                     	started_vm = self._resource_manager.start_vm(vm['name'])
@@ -374,7 +374,7 @@ class VTDelegate(GENIv3DelegateBase):
 			restarted_vm = self._resource_manager.restart_vm(vm['name'])	
 			vms.extend(restarted_vm)
 		    else:
-			raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
+			raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
 	    elif (self.urn_type(urn) == 'sliver'):
 		
 		if (action == self.OPERATIONAL_ACTION_START):
@@ -387,9 +387,9 @@ class VTDelegate(GENIv3DelegateBase):
                     vm = self._resource_manager.restart_vm(vm['name'])
                     vms.extend(vm)
                 else:
-                    raise geni_ex.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
+                    raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
             else:
-                raise geni_ex.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given in this aggregate')
+                raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given in this aggregate')
         sliver_list = list()
 	for vm in vms:
 	    if vm.has_key('error'):
@@ -405,7 +405,7 @@ class VTDelegate(GENIv3DelegateBase):
 	#first we check that the urns in the list are valid urns
 	for urn in urns:
             if (self.urn_type(urn) != "slice") and (self.urn_type(urn) != "sliver"):
-		raise geni_ex.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be deleted in this aggregate') 
+		raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be deleted in this aggregate') 
 	#once we know the input is a list of urns
 	vms = list()
         for urn in urns:
@@ -438,7 +438,7 @@ class VTDelegate(GENIv3DelegateBase):
                     sliver_list.append(self._get_sliver_status_hash(result, True, True))
             return sliver_list
 	else:
-	    raise geni_ex.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
+	    raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
 
 
 
@@ -449,7 +449,7 @@ class VTDelegate(GENIv3DelegateBase):
     def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False, error_message=None):
         """Helper method to create the sliver_status return values of allocate and other calls."""
         result = {'geni_sliver_urn' : sliver['name'],
-                  'geni_expires'    : sliver['expires'],
+                  'geniv3_exceptionpires'    : sliver['expires'],
                   'geni_allocation_status' : self.ALLOCATION_STATE_UNALLOCATED}
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['status'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED

@@ -51,10 +51,8 @@ class VTDriver():
 	@staticmethod
 	def createServerFromPOST(request, instance):
 		from resources.vtserver import VTServer
-
 		controller = VTDriver.getDriver(HttpUtils.getFieldInPost(request,VTServer,"virtTech"))
 		return controller.createOrUpdateServerFromPOST(request, instance)		
-
 
 	@staticmethod
 	def crudServerFromInstance(instance):
@@ -91,7 +89,6 @@ class VTDriver():
 	@staticmethod
 	def getServerById(id):
 		from resources.vtserver import VTServer
-
 		try:
 			return db_session.query(VTServer).filter(VTServer.id==id).first().getChildObject()
 		except:
@@ -100,7 +97,6 @@ class VTDriver():
 	@staticmethod
 	def getServerByUUID(uuid):
 		from resources.vtserver import VTServer
-
 		try:
 			return db_session.query(VTServer).filter(VTServer.uuid == uuid).one().getChildObject()
 		except:
@@ -137,11 +133,6 @@ class VTDriver():
 
 	def getServerAndCreateVM(): 
 		raise Exception("Method not callable for Driver Class")
-	
-
-	def getServers(self):
-		#XXX: Same as getAllServers()?
-		return self.getAllServers()
 
 	@staticmethod
 	def deleteServer(server):	
@@ -160,7 +151,6 @@ class VTDriver():
 			
 	@staticmethod
 	def manageEthernetRanges(request, server, totalMacRanges):
-
 		justUnsubscribed = []
 		for macRange in server.getSubscribedMacRangesNoGlobal():
 			try:
@@ -179,7 +169,6 @@ class VTDriver():
 
 	@staticmethod
 	def manageIp4Ranges(request, server, totalIpRanges):
-
 		justUnsubscribed = []
 		for ipRange in server.getSubscribedIp4RangesNoGlobal():
 			#if not ipRange.getIsGlobal():

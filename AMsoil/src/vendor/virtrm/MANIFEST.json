@@ -3,7 +3,7 @@
   "author" : "Sergio Vidiella",
   "author-email" : "sergio.vidiella@i2cat.net",
   "version" : 1,
-  "implements" : ["vtresourcemanager", "vtadminresourcemanager", "vtexceptions"],
+  "implements" : ["virtrm", "virtadminrm", "virtexceptions"],
   "loads-after" : ["config", "worker"],
   "requires" : []
 }
