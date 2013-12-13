@@ -449,7 +449,7 @@ class VTDelegate(GENIv3DelegateBase):
     def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False, error_message=None):
         """Helper method to create the sliver_status return values of allocate and other calls."""
         result = {'geni_sliver_urn' : sliver['name'],
-                  'geniv3_exceptionpires'    : sliver['expires'],
+                  'geni_expires'    : sliver['expires'],
                   'geni_allocation_status' : self.ALLOCATION_STATE_UNALLOCATED}
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['status'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED

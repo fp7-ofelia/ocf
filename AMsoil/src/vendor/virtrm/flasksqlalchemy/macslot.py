@@ -1,25 +1,24 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.orm import validates
 
 import inspect
 
-from utils.commonbase import Base, db_session
 from utils.ethernetutils import EthernetUtils
+from base import db
 
 '''@author: SergioVidiella'''
 
-class MacSlot(Base):
+class MacSlot(db.Model):
     """MacSlot Class."""
 
     __tablename__ = 'vt_manager_macslot'
 
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    mac = Column(String(17), nullable=False)
-    macRange_id = Column(Integer, ForeignKey('vt_manager_macrange.id'))
-    macRange = relationship("MacRange", backref="macslot")
-    isExcluded = Column(TINYINT(1))
-    comment = Column(String(1024))
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    mac = db.Column(db.String(17), nullable=False)
+    macRange_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macrange.id'))
+    macRange = db.relationship("MacRange", backref="macslot", lazy="dynamic")
+    isExcluded = db.Column(TINYINT(1))
+    comment = db.Column(db.String(1024))
 
     @staticmethod
     def constructor(macRange, mac, excluded, comment=""):

@@ -13,10 +13,7 @@ from utils.urlutils import UrlUtils
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.dispatchers.launcher import DispatcherLauncher
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from utils.commonbase import ENGINE
-
+from utils.commonbase import db_session
 
 class VMManager:
 
@@ -24,9 +21,6 @@ class VMManager:
 
     @staticmethod
     def getActionInstance(servers_slivers,project_name,slice_name):
-	db_engine = create_engine(ENGINE, pool_recycle=6000)
-        db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
-        db_session = scoped_session(db_session_factory)
 	provisioning_rspecs = list()
 	action_list = list()
 	rspec = XmlHelper.getSimpleActionQuery()
@@ -52,11 +46,7 @@ class VMManager:
 
     @staticmethod
     def setDefaultVMParameters(vm,server,project_name,slice_name):
-	db_engine = create_engine(ENGINE, pool_recycle=6000)
-        db_session_factory = sessionmaker(autoflush=True, autocommit=True, bind=db_engine, expire_on_commit=False)
-        db_session = scoped_session(db_session_factory)
-
-        VM = db_session.query(VirtualMachine).filter(VirtualMachine.project_name == project_name).all()
+        VM = db_session.query(VirtualMachine).filter(VirtualMachine.projectName == project_name).all()
 	if VM:
 		vm['project-id'] = VM[0].projectId
 	else:

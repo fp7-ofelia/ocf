@@ -5,45 +5,47 @@ from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
 
 from utils import validators
-from utils.commonbase import Base, db_session
+#from utils.commonbase import Base, db_session
 
-from resources.macslot import MacSlot
-from resources.ip4slot import Ip4Slot
-from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
-from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
+from macslot import MacSlot
+#from resources.ip4slot import Ip4Slot
+#from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
+#from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
+from tests.flaskbase import db
 
-import amsoil.core.log
+#import amsoil.core.log
+import logging
 
-logging=amsoil.core.log.getLogger('NetworkInterface')
+#logging=amsoil.core.log.getLogger('NetworkInterface')
 
 
 '''@author: SergioVidiella'''
 
 
-class NetworkInterface(Base):
+class NetworkInterface(db.Model):
     """Network interface model."""
 
     __tablename__ = 'vt_manager_networkinterface'
 
     '''Generic parameters'''
-    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    name = Column(String(128), nullable=False)
-    mac_id = Column(Integer, ForeignKey('vt_manager_macslot.id'))
-    mac = relationship("MacSlot", backref="networkInterface", uselist=False, lazy="dynamic")
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    mac_id = db.Column(db.Integer, ForeignKey('vt_manager_macslot.id'))
+    mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
-    isMgmt = Column(TINYINT(1), nullable=False, default=0)
-    isBridge = Column(TINYINT(1), nullable=False, default=0)
+    isMgmt = db.Column(TINYINT(1), nullable=False, default=0)
+    isBridge = db.Column(TINYINT(1), nullable=False, default=0)
 
     '''Interfaces connectivy'''
-    vtserver = association_proxy("vtserver_assocation", "vtserver")
-    vm = association_proxy("vm_associations", "vm")
-    connectedTo = association_proxy("to_networkinterface", "to_networkinterface")
-    connectedFrom = association_proxy("from_networkinterface", "from_networkinterface")
+  #  vtserver = association_proxy("vtserver_assocation", "vtserver")
+   # vm = association_proxy("vm_associations", "vm")
+   # connectedTo = association_proxy("to_networkinterface", "to_networkinterface")
+   # connectedFrom = association_proxy("from_networkinterface", "from_networkinterface")
 
     '''Physical connection details for bridged interfaces''' 
-    switchID = Column(String(23))
-    port = Column(Integer)
-    idForm = Column(Integer)
+    switchID = db.Column(db.String(23))
+    port = db.Column(db.Integer)
+    idForm = db.Column(db.Integer)
 
     '''Interface constructor '''
     @staticmethod
@@ -51,7 +53,7 @@ class NetworkInterface(Base):
 	logging.debug("******************************* I1")
 	self = NetworkInterface()
 	try:
-	    logging.debug("******************************* I2 " + name + str(macObj) + ' ' + str(self.mac.all()))
+	    logging.debug("******************************* I2 " + name + str(macObj) + ' ' + str(self.mac))
             self.name = name
 	    if macObj == None:
 		logging.debug("******************************* I3 - 1")
@@ -62,14 +64,16 @@ class NetworkInterface(Base):
 		    logging.debug("******************************* I - ERROR - 1")
                     raise Exception("Cannot construct NetworkInterface with a non MacSlot object as parameter")
 		logging.debug("******************************* I4 " + str(macObj) + ' ' + str(type(macObj)))
-#		self.mac_id = macObj.id
-		logging.debug("************************************ YEAH")
-#		macObj.networkInterface = [self,]
-		logging.debug("************************************ YEAH")
-            	self.mac.append(macObj)
+		self.mac_id = macObj.id
 		db_session.add(self)
 		db_session.commit()
-	    logging.debug("******************************* I5 " + str(self.mac.all()) + ' ' + str(self.mac_id))
+		logging.debug("************************************ YEAH")
+		macObj.networkInterface = [self,]
+		logging.debug("************************************ YEAH")
+		db_session.add(macObj)
+		db_session.commit()
+            	#self.mac = macObj
+	    logging.debug("******************************* I5 " + str(self.mac))
             self.isMgmt = isMgmt
 	    logging.debug("******************************* I6")	    
             '''Connectivity'''
@@ -194,6 +198,14 @@ class NetworkInterface(Base):
 	    return name
 	except Exception as e:
             raise e
+
+    @validates('mac')
+    def validate_mac(self, key, mac):
+	try:
+	    validators.mac_validator(mac)
+	    return mac
+	except Exception as e:
+	    raise e
 
     @validates('switchID')
     def validate_switchID(self, key, switchID):
