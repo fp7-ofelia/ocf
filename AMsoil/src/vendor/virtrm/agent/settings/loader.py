@@ -5,11 +5,11 @@
 '''
 
 # Import static settings
-from settings.staticSettings import *
+from static import *
 
 # Import Spirent template VM settings
-from spirentSettings import *
+from spirent import *
 
 # Import user settings
-from mySettings import *
+from local import *
 

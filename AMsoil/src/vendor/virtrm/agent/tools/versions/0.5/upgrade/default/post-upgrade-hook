@@ -3,7 +3,7 @@
 #inform user
 printHeader "info#" "Using specific (0.5) post-upgrade-hook module..."
 
-OXA_SETTINGS_FILE=$EXECPATH/../mySettings.py
+OXA_SETTINGS_FILE=$EXECPATH/../settings/local.py
 TEXT_EDITORS="vi vim nano pico"
 TEXT_EDITOR="vi"
 FIRST_ADDED_VAR=""
@@ -22,7 +22,7 @@ if [[ -f $OXA_SETTINGS_FILE ]]; then
 # Settings for virtualization AM server, to which the agent connects
 # VTAM_PORT: it is usually '8445'
 #
-# WARNING: *same* settings as in vt_manager's 'mySettings.py' file
+# WARNING: *same* settings as in vt_manager's 'local.py' file
 #" >> $OXA_SETTINGS_FILE
         fi
 
@@ -77,7 +77,7 @@ if [[ -f $OXA_SETTINGS_FILE ]]; then
         done
 
         # Edit file
-        printHeader ">" "Editing mySettings file..."
+        printHeader ">" "Editing local file..."
         while :
         do
             print "Now you are going to edit the file $OXA_SETTINGS_FILE using $TEXT_EDITOR. Save the modifications and do NOT exit using Ctrl+C..."

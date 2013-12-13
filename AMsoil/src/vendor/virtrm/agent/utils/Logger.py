@@ -9,7 +9,7 @@ import threading
 '''
 
 #Get log level
-from settings.settingsLoader import LOG_LEVEL 
+from settings.loader import LOG_LEVEL 
 
 #Configure logger
 log_level= ""

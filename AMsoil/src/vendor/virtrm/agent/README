@@ -69,7 +69,7 @@ support Debian-like OSs currently.
     * Build Certificates (see Note 1)
     * Configure Apache
     * Set file permissions
-    * Modify the localsettings.py or mySettings.py depending on the 
+    * Modify the localsettings.py or local.py depending on the 
       component being installed
     * Populate database
     * When installation starts, ofver will ask if it is an OFELIA

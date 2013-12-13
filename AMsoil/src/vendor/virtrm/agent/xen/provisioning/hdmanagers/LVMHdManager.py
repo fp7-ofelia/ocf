@@ -1,9 +1,11 @@
+from settings.loader import OXA_FILEHD_CACHE_VMS, OXA_FILEHD_REMOTE_VMS, OXA_FILEHD_CACHE_TEMPLATES,
+							OXA_FILEHD_REMOTE_TEMPLATES, OXA_FILEHD_USE_CACHE
+
 import os
-import sys
-import shutil
-import string
+#import sys
+#import shutil
+#import string
 import subprocess
-from settings.settingsLoader import OXA_FILEHD_CACHE_VMS,OXA_FILEHD_REMOTE_VMS,OXA_FILEHD_CACHE_TEMPLATES,OXA_FILEHD_REMOTE_TEMPLATES,OXA_FILEHD_USE_CACHE
 
 '''
 	@author: luismi-borja

@@ -16,7 +16,7 @@ Ofelia XEN Agent user settings file.
 # Settings for virtualization AM server, to which the agent connects
 # VTAM_PORT: it is usually '8445'
 #
-# WARNING: *same* settings as in vt_manager's 'mySettings.py' file
+# WARNING: *same* settings as in vt_manager's 'local.py' file
 #
 VTAM_IP = "192.168.254.193"
 VTAM_PORT = "8445"
@@ -36,7 +36,7 @@ XMLRPC_SERVER_PASSWORD = "changeMe"
 # Optional settings for the Agent.
 # 
 # WARNING: default values are commented. Uncomment and modify to override
-# the static settings (file at 'settings/staticSettings.py').
+# the static settings (file at 'settings/static.py').
 
 #
 # Network parameters.

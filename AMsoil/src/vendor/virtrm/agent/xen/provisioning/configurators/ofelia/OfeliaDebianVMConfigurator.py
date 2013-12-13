@@ -1,14 +1,15 @@
-import shutil
+from settings.loader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, 
+							OXA_DEBIAN_INTERFACES_FILE_LOCATION, OXA_DEBIAN_UDEV_FILE_LOCATION, 
+							OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
+from utils.Logger import Logger
+from xen.provisioning.HdManager import HdManager
+
+import jinja2
 import os
-import jinja2 
+import re
+import shutil
 import string
 import subprocess
-import re
-
-from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD,OXA_DEBIAN_INTERFACES_FILE_LOCATION,OXA_DEBIAN_UDEV_FILE_LOCATION, OXA_DEBIAN_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION
-from utils.Logger import Logger
-
 
 class OfeliaDebianVMConfigurator:
 	

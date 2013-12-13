@@ -3,7 +3,7 @@ import threading
 from utils.xml.vtRspecInterface import rspec, server_type, virtual_machine_type
 from utils.XmlUtils import *
 from utils.Logger import Logger
-from mySettings import *
+from settings.local import *
 
 class XmlRpcClient:
 

@@ -1,16 +1,16 @@
-import shutil
-import os
-import jinja2 
-import string
-import subprocess
-import re
-
-from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION,OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, OXA_SPIRENT_NPORTS_PER_GROUP, OXA_SPIRENT_NTPSERVER, OXA_SPIRENT_NPORTGROUPS, OXA_SPIRENT_LSERVER
-
+from settings.loader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION,
+							OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, 
+							OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, OXA_SPIRENT_NPORTS_PER_GROUP, 
+							OXA_SPIRENT_NTPSERVER, OXA_SPIRENT_NPORTGROUPS, OXA_SPIRENT_LSERVER
 from utils.Logger import Logger
+from xen.provisioning.HdManager import HdManager
 
-
+import jinja2
+import os
+import re
+#import shutil
+#import subprocess
+#import string
 
 class SpirentCentOSVMConfigurator:
 	
