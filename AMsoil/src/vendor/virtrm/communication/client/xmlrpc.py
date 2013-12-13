@@ -30,7 +30,7 @@ class XmlRpcClient(Client):
 			server = xmlrpclib.Server(url)
 			getattr(server,methodName)(*params)
 		except Exception as e:
-						turl=url.split('@')
+			turl=url.split('@')
 			if len(turl) > 1:
 				url = turl[0].split('//')[0] + '//' + turl[-1]
 			te = str(e)

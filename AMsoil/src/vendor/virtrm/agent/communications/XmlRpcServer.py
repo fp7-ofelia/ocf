@@ -88,7 +88,7 @@ class XmlRpcServer():
 	logger = Logger.getLogger()
 
 	@staticmethod
-	def createInstanceAndEngage(callBackFunction,HandlerClass = SecureXMLRpcRequestHandler,ServerClass = SecureXMLRPCServer):
+	def createInstanceAndEngage(callBackFunction, HandlerClass = SecureXMLRpcRequestHandler, ServerClass = SecureXMLRPCServer):
             """Test xml rpc over https server"""
             class xmlrpc_wrappers:
                 def __init__(self):
