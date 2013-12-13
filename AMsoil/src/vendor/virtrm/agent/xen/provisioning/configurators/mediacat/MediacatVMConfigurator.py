@@ -1,4 +1,4 @@
-from settings.loader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, 
+from settings.loader import OXA_XEN_SERVER_KERNEL, OXA_XEN_SERVER_INITRD, \
 							OXA_DEBIAN_INTERFACES_FILE_LOCATION, OXA_DEBIAN_UDEV_FILE_LOCATION
 from xen.provisioning.HdManager import HdManager
 from xen.provisioning.hdmanagers.LVMHdManager import LVMHdManager

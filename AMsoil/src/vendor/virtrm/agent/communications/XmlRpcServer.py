@@ -15,7 +15,7 @@ import socket, os
 from OpenSSL import SSL
 from utils.Logger import Logger
 
-from settings.loader import XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT, 
+from settings.loader import XMLRPC_SERVER_LISTEN_HOST, XMLRPC_SERVER_LISTEN_PORT, \
 							XMLRPC_SERVER_KEYFILE, XMLRPC_SERVER_CERTFILE, XMLRPC_SERVER_PASSWORD
 
 
