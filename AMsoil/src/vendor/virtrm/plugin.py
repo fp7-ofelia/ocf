@@ -8,7 +8,16 @@ def setup():
     for setting in local.__dict__:
         # Retrieve user-defined settings (avoid internal ones - '__')
         if not setting.startswith("__"):
-            config.install("virtrm.%s" % setting, local.__dict__[setting], "")
+	    try:
+		# First we try to set the value on an existing key
+		# If the key does not exist an Exception will be launched
+		print "before -> %s = %s" % (setting, local.__dict__[setting])
+		config.set("virtrm.%s" % setting, local.__dict__[setting])
+	    except Exception:
+		# If the key does not exist, generate it
+            	config.install("virtrm.%s" % setting, local.__dict__[setting], "")
+	    print "after -> virtrm.%s = %s" % (setting, config.get("virtrm.%s" % setting))
+
     # Register Virtualisation RM as a service
     from managers.base import VTResourceManager
     import utils.exceptions as exceptions_package
