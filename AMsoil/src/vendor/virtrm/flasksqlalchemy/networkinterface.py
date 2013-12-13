@@ -11,7 +11,7 @@ from macslot import MacSlot
 #from resources.ip4slot import Ip4Slot
 #from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
 #from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
-from tests.flaskbase import db
+from base import db
 
 #import amsoil.core.log
 import logging
