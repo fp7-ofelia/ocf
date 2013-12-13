@@ -17,10 +17,13 @@ class HdManager(object):
 
 		#Import of Dispatchers must go here to avoid import circular dependecy 		
 		from xen.provisioning.hdmanagers.FileHdManager import FileHdManager
+		from xen.provisioning.hdmanagers.FileFullHdManager import FileFullHdManager
 		from xen.provisioning.hdmanagers.LVMHdManager import LVMHdManager
 
 		if hdtype == "file-image": 
 			return FileHdManager
+		elif hdtype == "full-file-image":
+			return FileFullHdManager
 		elif hdtype == "logical-volume-image":
 			return LVMHdManager
 		else:

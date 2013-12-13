@@ -1,0 +1,103 @@
+#!/bin/bash
+
+#inform user
+printHeader "info#" "Using specific (0.5) post-upgrade-hook module..."
+
+OXA_SETTINGS_FILE=$EXECPATH/../mySettings.py
+TEXT_EDITORS="vi vim nano pico"
+TEXT_EDITOR="vi"
+FIRST_ADDED_VAR=""
+EDITOR_STARTING_LINE=1
+
+if [[ -f $OXA_SETTINGS_FILE ]]; then
+
+    if [[ `grep -v '^#' $OXA_SETTINGS_FILE | grep -v '^$' | grep -E "VTAM_IP|VTAM_PORT|XMLRPC_USER|XMLRPC_PASS" -c` -lt 4 ]]; then
+
+        # Add explanation for settings if none existed yet
+        if [[ `awk "/# Settings for virtualization AM server, to which the agent connects/,/# VTAM_PORT: it is usually '8445'/" $OXA_SETTINGS_FILE` == "" ]]; then
+
+            echo "
+
+#
+# Settings for virtualization AM server, to which the agent connects
+# VTAM_PORT: it is usually '8445'
+#
+# WARNING: *same* settings as in vt_manager's 'mySettings.py' file
+#" >> $OXA_SETTINGS_FILE
+        fi
+
+        # Add every setting that is not present
+        if [[ `grep -v '^#' $OXA_SETTINGS_FILE | grep -v '^$' | grep -E "VTAM_IP"` == "" ]]; then
+            echo "VTAM_IP = \"192.168.254.193\"" >> $OXA_SETTINGS_FILE
+            if [[ $FIRST_ADDED_VAR == "" ]]; then
+                FIRST_ADDED_VAR="VTAM_IP"
+            fi
+        fi
+
+        if [[ `grep -v '^#' $OXA_SETTINGS_FILE | grep -v '^$' | grep -E "VTAM_PORT"` == "" ]]; then
+            echo "VTAM_PORT = \"8445\"" >> $OXA_SETTINGS_FILE
+            if [[ $FIRST_ADDED_VAR == "" ]]; then
+                FIRST_ADDED_VAR="VTAM_PORT"
+            fi
+        fi
+
+        if [[ `grep -v '^#' $OXA_SETTINGS_FILE | grep -v '^$' | grep -E "XMLRPC_USER"` == "" ]]; then
+            echo "XMLRPC_USER = \"changeMe\"" >> $OXA_SETTINGS_FILE
+            if [[ $FIRST_ADDED_VAR == "" ]]; then
+                FIRST_ADDED_VAR="XMLRPC_USER"
+            fi
+        fi
+
+        if [[ `grep -v '^#' $OXA_SETTINGS_FILE | grep -v '^$' | grep -E "XMLRPC_PASS"` == "" ]]; then
+            echo "XMLRPC_PASS = \"changeMe\"" >> $OXA_SETTINGS_FILE
+            if [[ $FIRST_ADDED_VAR == "" ]]; then
+                FIRST_ADDED_VAR="XMLRPC_PASS"
+            fi
+        fi
+
+        # Getting the line for the first setting
+        EDITOR_STARTING_LINE=`grep -n -E $FIRST_ADDED_VAR $OXA_SETTINGS_FILE | grep -v "#$FIRST_ADDED_VAR" | grep -v "# $FIRST_ADDED_VAR" | cut -d : -f 1 | head -1`
+
+        printHeader ">" "Updating agent settings..."
+        warning "Your agent configuration file lacked some required settings. Please set these now."
+        print "You will be given a choice of editors, then you shall use the SAME values for these new settings as the ones you have in the VT manager"
+
+        # Choose editor
+        printHeader ">" "Choosing the editor..."
+        select editor in $TEXT_EDITORS;
+        do
+            if [ -z $editor ]; then
+                print "Invalid option $editor"
+                continue
+            fi
+            print ""
+            TEXT_EDITOR=$editor
+            print "You are going to use $TEXT_EDITOR for file manipulation..."
+            break;
+        done
+
+        # Edit file
+        printHeader ">" "Editing mySettings file..."
+        while :
+        do
+            print "Now you are going to edit the file $OXA_SETTINGS_FILE using $TEXT_EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+            pause ""
+            eval $TEXT_EDITOR +$EDITOR_STARTING_LINE $OXA_SETTINGS_FILE
+            print ""
+            pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
+            less $OXA_SETTINGS_FILE
+
+            confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
+
+            if [ $? == 0 ]; then
+                break
+            fi
+        done
+
+    fi
+fi
+
+# Restarting agent 
+print "Starting oxad..."
+/usr/sbin/service oxad restart
+

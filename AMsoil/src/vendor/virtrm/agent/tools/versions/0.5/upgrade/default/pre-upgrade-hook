@@ -1,1 +1,97 @@
-/opt/ofelia/oxa/repository/expedient/bin/versions/0.5/upgrade/default/pre-upgrade-hook
+#!/bin/bash
+
+###
+#       @author: CarolinaFernandez
+#       @organization: i2CAT
+#       @project: Ofelia FP7
+#       @description: pre-upgrade-hook module  
+###
+
+#inform user
+printHeader "info#" "Using specific 0.5 pre-upgrade-hook module..."
+
+#Check for OFELIA installation
+OFELIA="none"
+GITHUB_READY=1
+# Move original plugin folders inside temp folder
+if [ ! -d /opt/tmp/ ]; then
+	mkdir -p /opt/tmp/
+fi
+TMP_DIR=/opt/tmp/ofeliatmp$EXECPID
+TMP_PATH=$PWD
+
+# Determine OFELIA directory to perform migration for data in repository
+OFELIA_DIR="/opt/ofelia/oxa/repository"
+
+# SSH keys by default
+git_remote_url="git@github.com:fp7-ofelia/ocf.git"
+git_authentication_method="y"
+git_username=""
+
+# Backup current OCF data
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an official OFELIA island installation (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not a valid option. Please answer yes/no"
+        fi
+    done
+
+
+if [[ `git config --get-regexp origin "fp7-ofelia/ocf.git"` == "" ]]; then
+	GITHUB_READY=0
+fi
+
+if [[ $GITHUB_READY == 0 ]]; then
+	print "Generating current repository backup.."
+	mv $OFELIA_DIR $TMP_DIR || error "Could not backup OCF data from '$SRC_DIR' to '$TMP_DIR'"
+
+	# Clone new Github repository (authentication depends on $OFELIA={0,1})
+	if [[ $OFELIA == "1" ]]; then
+	    while true; do
+	        read -p "> How do you prefer to authenticate against the repository? SSH keys (y) or via HTTPS (n): " git_authentication_method
+	        case $git_authentication_method in
+	            [Yy]* ) break;;
+	            [Nn]* ) read -p "> You may set your GitHub username now, if you wish: " git_username;
+	                    if [[ $git_username != "" ]]; then
+	                        git_username=$git_username"@";
+	                    fi
+	                    git_remote_url="https://${git_username}github.com/fp7-ofelia/ocf.git"; break;;
+	                * ) echo "Please answer 'y' or 'n' to use SSH keys or HTTP respectively.";;
+	        esac
+	    done
+	    # Read/write access (SSH keys or HTTPS, depends on user's choice)
+	    git clone $git_remote_url $OFELIA_DIR || error "Could not retrieve data from GitHub repository"
+	else
+	    # Read access
+	    git clone git://github.com/fp7-ofelia/ocf.git $OFELIA_DIR || error "Could not retrieve data from GitHub repository"
+	fi
+
+	cd $OFELIA_DIR
+	git checkout ofelia.stable || error "Could not switch to stable branch"
+	# Synchronizes repositories: old data from private repository with new data from GitHub repository
+	rsync -aPp --exclude=.git $TMP_DIR/* ./
+fi
+
+# Removes old plugin folders before restarting Apache
+print "Removing old plugin folders..."
+
+# Moving basic plugins from old directory to new location to avoid loading their *.pyc files
+if [ -d $OFELIA_DIR/expedient/src/python/vt_plugin ]; then
+	rm -r $OFELIA_DIR/expedient/src/python/vt_plugin || error "Could not remove old plugin 'vt_plugin'"
+fi
+
+if [ -d $OFELIA_DIR/expedient/src/python/openflow ]; then
+        rm -r $OFELIA_DIR/expedient/src/python/openflow || error "Could not remove old plugin 'openflow'"
+fi
+
+cd $TMP_PATH 
+

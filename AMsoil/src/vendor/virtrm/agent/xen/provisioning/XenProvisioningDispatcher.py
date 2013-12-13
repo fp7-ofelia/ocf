@@ -35,14 +35,14 @@ class XenProvisioningDispatcher(ProvisioningDispatcher):
 			#Configure VM OS
 			VMConfigurator.configureVmDisk(vm,pathToMountPoint)
 
-			#Synthesize config file
-			VMConfigurator.createVmConfigurationFile(vm)
-			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
-			
 			#Umount copy
 			HdManager.umount(vm,pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD unmounted successfully...")
 	
+			#Synthesize config file
+			VMConfigurator.createVmConfigurationFile(vm)
+			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
+			
 			XenProvisioningDispatcher.logger.info("Creation of VM "+vm.name+" has been successful!!")
 			#Send async notification
 			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")

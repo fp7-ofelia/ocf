@@ -4,10 +4,12 @@
 	Ofelia XEN Agent settings loader 
 '''
 
-#Import static settings
+# Import static settings
 from settings.staticSettings import *
 
-#Import user settings
-from mySettings import *
+# Import Spirent template VM settings
+from spirentSettings import *
 
+# Import user settings
+from mySettings import *
 
