@@ -5,10 +5,16 @@
 #
 #  Kernel + memory size
 #
-kernel      = '{{ kernelImg }}'
-ramdisk     = '{{ initrdImg }}'
-
-extra = 'console=hvc0 xencons=tty'
+kernel      = 'hvmloader'
+builder     = 'hvm'
+pae=1
+acpi=1
+apic=1
+xen_platform_pci=1
+sdl=0
+serial='pty'
+stdvga=0
+tsc_mode=0
 
 memory      = '{{ vm.xen_configuration.memory_mb }}'
 
@@ -18,12 +24,11 @@ vcpus = 1
 #
 #  Disk device(s).
 #
-root        = '/dev/xvda1 ro'
+#root        = '/dev/xvda1 ro'
 disk        = [
-                  'file:{{ hdFilePath }},xvda1,w',
-                  'file:{{ swapFilePath }},xvda2,w',
+                  'file:{{ hdFilePath }},xvda,w',
               ]
-
+device_model = '/usr/lib/xen-4.0/bin/qemu-dm'
 
 #
 #  Hostname
@@ -40,7 +45,8 @@ uuid = '{{ vm.uuid }}'
 dhcp='off'
 ##Interfaces 
 
-vif = [{% for interface in vm.xen_configuration.interfaces.interface %}' mac={{ interface.mac }}, bridge={%if interface.ismgmt%}eth2{%else%}eth1{%endif%} ',{% endfor %}]
+vif = [{% for interface in vm.xen_configuration.interfaces.interface %}'mac={{
+	interface.mac }}, bridge={{interface.switch_id}}, model=virtio',{% endfor %}]
 
 #
 #  Behaviour
