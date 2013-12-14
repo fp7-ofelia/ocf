@@ -20,44 +20,44 @@ class Ip4Slot(db.Model):
     ip_range = db.relationship('Ip4Range')
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
+
     '''Defines soft or hard state of the interface'''
-    do_save = True
-   
+    do_save = True   
     
     @staticmethod
     def constructor(ip_range, ip, excluded, comment="", save=True):
-    	self = Ip4Slot()
-	try:
-	    # Check IP
-	    IP4Utils.check_valid_ip(ip)
+        self = Ip4Slot()
+        try:
+            # Check IP
+            IP4Utils.check_valid_ip(ip)
             self.ip = ip
             self.is_excluded = excluded
             self.ip_range = ip_range
             self.comment = comment
-	    self.do_save = save
-	    if save:
-	    	db.session.add(self)
-	    	db.session.commit()
-	except Exception as e:
-	    raise e
+            self.do_save = save
+            if save:
+                db.session.add(self)
+                db.session.commit()
+        except Exception as e:
+            raise e
         return self
-
+    
     '''Getters'''
     def isExcludedIp(self):
-    	return self.isExcluded
+        return self.isExcluded
 
     def get_lock_identifier(self):
-    	#Uniquely identifies object by a key
+        # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
-
-    def getIp(self):
-	return self.ip
     
+    def getIp(self):
+        return self.ip
+     
     def getNetmask(self):
-   	return self.ipRange.getNetmask()
+        return self.ipRange.getNetmask()
         
     def getGatewayIp(self):
- 	return self.ipRange.getGatewayIp()
+        return self.ipRange.getGatewayIp()
     
     def getDNS1(self):
         return self.ipRange.getDNS1()
@@ -73,13 +73,12 @@ class Ip4Slot(db.Model):
             return ip
         except Exception as e:
             raise e
-
+    
     ''' Factories '''
     @staticmethod
     def ipFactory(ipRange, ip, save=True):
         return Ip4Slot.constructor(ipRange, ip, False, "", save)
-
+    
     @staticmethod
     def excludedIpFactory(ipRange, ip, comment, save=True):
         return MacSlot.constructor(ipRange, ip, True, comment, save)
-
