@@ -1,17 +1,15 @@
-from sqlalchemy import Column, Integer, String
-
-from utils.commonbase import Base
+from base import db
 
 
 '''@author: SergioVidiella'''
 
 
-class ResourcesHash(Base):
+class ResourcesHash(db.Model):
     """Class to store resources hash"""
 
     __tablename__ = 'vt_manager_resourceshash'
 
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    hashValue = Column(String(1024), nullable=False)
-    projectUUID = Column(String(1024), nullable=False)
-    sliceUUID = Column(String(1024), nullable=False)
+    id = Column(db.Integer, autoincrement=True, primary_key=True)
+    hash_value = db.Column("hashValue",db.String(1024), nullable=False)
+    project_uuid = db.Column("projectUUID", db.String(1024), nullable=False)
+    slice_uuid = db.Column("slice_uuid", db.String(1024), nullable=False)

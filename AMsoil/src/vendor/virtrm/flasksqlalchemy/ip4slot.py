@@ -76,10 +76,10 @@ class Ip4Slot(db.Model):
 
     ''' Factories '''
     @staticmethod
-    def ipFactory(ipRange, ip):
-        return Ip4Slot.constructor(ipRange, ip, False, "")
+    def ipFactory(ipRange, ip, save=True):
+        return Ip4Slot.constructor(ipRange, ip, False, "", save)
 
     @staticmethod
-    def excludedIpFactory(ipRange, ip, comment):
-        return MacSlot.constructor(ipRange, ip, True, comment)
+    def excludedIpFactory(ipRange, ip, comment, save=True):
+        return MacSlot.constructor(ipRange, ip, True, comment, save)
 

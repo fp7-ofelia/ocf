@@ -47,7 +47,7 @@ class Ip4Range(db.Model):
     do_save = True
 
     @staticmethod
-    def constructor(name, start_ip, end_ip, netmask, gw, dns1, dns2, is_global=True):
+    def constructor(name, start_ip, end_ip, netmask, gw, dns1, dns2, is_global=True, save=True):
         self = Ip4Range()
         try:
             # Default constructor

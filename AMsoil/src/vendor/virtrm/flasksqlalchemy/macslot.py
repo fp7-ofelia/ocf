@@ -82,10 +82,10 @@ class MacSlot(db.Model):
 
     ''' Factories '''
     @staticmethod
-    def mac_factory(mac_range, mac):
-        return MacSlot.constructor(mac_range, mac, False, "")
+    def mac_factory(mac_range, mac, save=True):
+        return MacSlot.constructor(mac_range, mac, False, "", save)
 
     @staticmethod
-    def excluded_mac_factory(macRange, mac, comment):
-        return MacSlot.constructor(mac_range, mac, True, comment)
+    def excluded_mac_factory(macRange, mac, comment, save=True):
+        return MacSlot.constructor(mac_range, mac, True, comment, save)
 
