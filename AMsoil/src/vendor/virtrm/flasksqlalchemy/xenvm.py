@@ -1,15 +1,14 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
-from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.orm import validates
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from utils.commonbase import Base, db_session
+from base import db
+
 from utils.choices import HDSetupTypeClass, VirtTypeClass
 from utils.mutexstore import MutexStore
 
-from resources.virtualmachine import VirtualMachine
-
-from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
+from virtualmachine import VirtualMachine
+from vmnetworkinterfaces import VMNetworkInterfaces
 
 import amsoil.core.log
 
@@ -26,109 +25,104 @@ class XenVM(VirtualMachine):
     __table_args__ = {'extend_existing':True}
 
     '''General Attributes'''
-    virtualmachine_ptr_id = Column(Integer, ForeignKey('vt_manager_virtualmachine.id'), primary_key=True)
-    hdSetupType = Column(String(1024), nullable=False, default="")
-    hdOriginPath = Column(String(1024), nullable=False, default="")
-    virtualizationSetupType = Column(String(1024), nullable=False, default="")
-
-    vm = relationship("VirtualMachine", backref="xenvm")
+    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey('vt_manager_virtualmachine.id'), primary_key=True)
+    hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
+    hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
+    virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")
+    vm = db.relationship("VirtualMachine", backref="xenvm")
     xenserver = association_proxy("xenserver_associations", "xenserver")
 
     @staticmethod
-    def constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save=False):
+    def constructor(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save=True):
         logging.debug("************************************* XENVM 2")
 	self =  XenVM()
 	try:
-	    #Set common fields
-            self.setName(name)
+	    # Set common fields
+            self.set_name(name)
 	    logging.debug("******************************** XENVM OK")
-            self.setUUID(uuid)
-            self.setProjectId(projectId)
-	    self.setProjectName(projectName)
-            self.setSliceId(sliceId)
-            self.setSliceName(sliceName)
-            self.setOSType(osType)
-            self.setOSVersion(osVersion)
-            self.setOSDistribution(osDist)
-            self.setMemory(memory)
-            self.setDiscSpaceGB(discSpaceGB)
-            self.setNumberOfCPUs(numberOfCPUs)
-            self.setCallBackURL(callBackUrl)
-            self.setState(self.UNKNOWN_STATE)
+            self.set_uuid(uuid)
+            self.set_project_id(project_id)
+	    self.set_project_name(project_name)
+            self.set_slice_id(slice_id)
+            self.set_slice_name(slice_name)
+            self.set_os_type(os_type)
+            self.set_os_version(os_version)
+            self.set_os_distribution(os_dist)
+            self.set_memory(memory)
+            self.set_disc_space_gb(disc_space_gb)
+            self.set_number_of_cpus(number_of_cpus)
+            self.set_callback_url(callback_url)
+            self.set_state(self.UNKNOWN_STATE)
             logging.debug("************************************* XENVM 3")
-            #Xen parameters
-            logging.debug("************************************* XENVM 5")
-            self.hdSetupType = hdSetupType
-            self.hdOriginPath = hdOriginPath
-            self.virtualizationSetupType = virtSetupType
-	    if save is True:
-	        logging.debug("************************************* XENVM 6")
-		db_session.add(self)
-		db_session.commit()
             for interface in interfaces:
                 logging.debug("************************************* XENVM 4")
-		vm_iface = VMNetworkInterfaces()
-		vm_iface.virtualmachine_id = self.id
-		vm_iface.networkinterface_id = interface.id
-                db_session.add(vm_iface)
-		db_session.commit()
+		self.network_interfaces.append(interface)
+	    # Xen parameters
+            self.hd_setup_type = hd_setup_type
+            self.hd_origin_path = hd_origin_path
+            self.virtualization_setup_type = virt_setup_type
+            self.do_save = save
+            if save:
+		db.session.add(self)
+		db.session.commit()
 	except Exception as e:
             logging.debug("************************************* XENVM ERROR - 1 " + str(e))
-            self.destroy()
             print e
             raise e
 	return self
-
+    
     '''Destructor'''
     def destroy(self):
-    	with MutexStore.getObjectLock(self.getLockIdentifier()):
-            #destroy interfaces
-            for inter in self.networkInterfaces.all():
+    	with MutexStore.getObject_ock(self.getLockIdentifier()):
+            # Destroy interfaces
+            for inter in self.network_interfaces.all():
             	inter.destroy()
-            db_session.delete(self)
-	    db_session.commit()
-
+            db.session.delete(self)
+	    db.session.commit()
+    
     '''Validators'''
-    @validates('hdSetupType')
+    @validates('hd_setup_type')
     def validate_hd_setup_type(self, key, hd_setup_type):
 	try:
 	    HDSetupTypeClass.validate_hd_setup_type(hd_setup_type)
 	    return hd_setup_type
 	except Exception as e:
 	    raise e
-
-    @validates('virtualizationSetupType')
+    
+    @validates('virtualization_setup_type')
     def validate_virtualization_setup_type(self, key, virt_type):
 	try:
 	    VirtTypeClass.validate_virt_type(virt_type)
 	    return virt_type
 	except Exception as e:
 	    raise e
-
+    
     ''' Getters and setters '''
-    def getHdSetupType(self):
-        return  self.hdSetupType
-
-    def setHdSetupType(self,hdType):
-        HDSetupTypeClass.validate_hd_setup_type(hdType)
-        self.hdSetupType = hdType
-
-    def getHdOriginPath(self):
-        return  self.hdSetupType
-
-    def setHdOriginPath(self,path):
-        self.hdOriginPath = path
+    def get_hd_setup_type(self):
+        return self.hd_setup_type
+    
+    def set_hd_setup_type(self, hd_type):
+        HDSetupTypeClass.validate_hd_setup_type(hd_type)
+        self.hd_setup_type = hd_type
+	self.auto_save()
+    
+    def get_hd_origin_path(self):
+        return  self.hd_setup_type
+    
+    def set_hd_origin_path(self, path):
+        self.hd_origin_path = path
+	self.auto_save()
         
-    def getVirtualizationSetupType(self):
-        return  self.virtualizationSetupType
-
-    def setVirtualizationSetupType(self,vType):
-        VirtTypeClass.validate_virt_type(vType)
-        self.virtualizationSetupType = vType
-
+    def get_virtualization_setup_type(self):
+        return self.virtualization_setup_type
+    
+    def set_virtualization_setup_type(self,v_type):
+        VirtTypeClass.validate_virt_type(v_type)
+        self.virtualization_setup_type = v_type
+	self.auto_save()
+    
     ''' Factories '''
     @staticmethod
-    def create(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save):
+    def create(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save):
 	logging.debug("************************************* XENVM 1")
-    	return XenVM.constructor(name,uuid,projectId,projectName,sliceId,sliceName,osType,osVersion,osDist,memory,discSpaceGB,numberOfCPUs,callBackUrl,interfaces,hdSetupType,hdOriginPath,virtSetupType,save)
-
+    	return XenVM.constructor(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
