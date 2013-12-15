@@ -103,64 +103,53 @@ class XendManager(object):
 	def startDomain(vm):
 		#Getting connection
 		conn = XendManager.__getConnection()
-
 		with open(HdManager.getConfigFilePath(vm),'r') as openConfig: 
 			xmlConf = conn.domainXMLFromNative('xen-xm', openConfig.read(), 0) 
-
 		#con = libvirt.open('xen:///')
 		#dom = con.createLinux(xmlConf,0)
-				
-
-		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
-			#Duplicated name; trying to find an Alias
+		# If another VM is running with the same name...
+		if XendManager.isVmRunning(vm.name) and not XendManager.isVmRunningByUUID(vm.uuid):
+			## Try to find an Alias
 			newVmName = XendManager.__findAliasForDuplicatedVmName(vm)
 			subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
 		else:	
 			try:
 				#Try first using libvirt call
 				#XendManager.logger.warning('creating vm using python-libvirt methods')
-                                #XendManager.logger.warning(xmlConf)
+                #XendManager.logger.warning(xmlConf)
 				#conn.createXML(xmlConf,0)
 				#XendManager.logger.warning(XendManager.sanitize_arg(HdManager.getConfigFilePath(vm)))
-                                #XendManager.logger.warning('created vm?')
-				raise Exception("Skip") #otherwise stop is ridicously slow
-			except Exception as e:
+                #XendManager.logger.warning('created vm?')
+				raise Exception("Skip") #otherwise stop is ridiculously slow
+			except:
 				#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
 				subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
-
 		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
-
 		if not XendManager.isVmRunningByUUID(vm.uuid):
 			#TODO: add more info to exception
 			raise Exception("Could not start VM")
-
+	
 	@staticmethod
 	def stopDomain(vm):
 		#If is not running skip
 		if not XendManager.isVmRunningByUUID(vm.uuid):
 			return	
-
 		#dom = XendManager.__getDomainByVmName(XendManager.__getConnection(),vm.name)
 		dom = XendManager.__getDomainByVmUUID(XendManager.__getConnection(),vm.uuid)
-		
 		#Attemp to be smart and let S.O. halt himself
-		dom.shutdown()	
-		
+		dom.shutdown()
 		waitTime=0
 		while ( waitTime < OXA_XEN_STOP_MAX_SECONDS ) :
 			if not XendManager.isVmRunningByUUID(vm.uuid):
 				return	
 			waitTime +=OXA_XEN_STOP_STEP_SECONDS
 			time.sleep(OXA_XEN_STOP_STEP_SECONDS)
-
-		#Let's behave impatiently
+		#Let us behave impatiently
 		dom.destroy()
-		
 		time.sleep(OXA_XEN_REBOOT_WAIT_TIME)
-	
 		if XendManager.isVmRunningByUUID(vm.uuid):
 			raise Exception("Could not stop domain")
-
+	
 	@staticmethod
 	def rebootDomain(vm):
 		#dom = XendManager.__getDomainByVmName(XendManager.__getConnection(),vm.name)

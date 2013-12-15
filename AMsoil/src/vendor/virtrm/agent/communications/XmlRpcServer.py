@@ -29,11 +29,9 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
         It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
         """
         self.logRequests = logRequests
-
         SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
         SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
-
         ctx.use_privatekey_file (XMLRPC_SERVER_KEYFILE)
         ctx.use_certificate_file(XMLRPC_SERVER_CERTFILE)
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
@@ -56,7 +54,6 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 
         It was copied out from SimpleXMLRPCServer.py and modified to shutdown the socket cleanly.
         """
-
         try:
             # get arguments
             data = self.rfile.read(int(self.headers["content-length"]))
@@ -79,7 +76,6 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             self.send_header("Content-length", str(len(response)))
             self.end_headers()
             self.wfile.write(response)
-
             # shut down the connection
             self.wfile.flush()
             self.connection.shutdown() # Modified here!

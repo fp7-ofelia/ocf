@@ -1,23 +1,21 @@
 #!/usr/bin/python
 
 import sys,os
-import pprint
 from provisioning.ProvisioningDispatcher import ProvisioningDispatcher 
 from monitoring.MonitoringDispatcher import MonitoringDispatcher
 from monitoring.LibvirtMonitoring import LibvirtMonitor 
 from communications.XmlRpcServer import XmlRpcServer
 from utils.ServiceThread import ServiceThread
 from utils.XmlUtils import *
-from utils.xml.vtRspecInterface import rspec
+#from utils.xml.vtRspecInterface import rspec
 from settings.loader import OXA_LOG
 from utils.Logger import Logger
 
-'''
+"""
 	@author: msune
 
 	OXA: Ofelia XEN Agent. 
-
-'''
+"""
 
 logger = Logger.getLogger()
 
@@ -83,9 +81,9 @@ def process_query(notificationCallBackUrl,xml):
 	# For each type of action call appropriate method in a new thread,
 	# necessary in order to get the callback from it to return results
 	if rspec_value.query.provisioning != None:
-		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec_value.query.provisioning,notificationCallBackUrl)
+		ServiceThread.startMethodInNewThread(ProvisioningDispatcher.process, rspec_value.query.provisioning, notificationCallBackUrl)
 	if rspec_value.query.monitoring != None:
-		ServiceThread.startMethodInNewThread(MonitoringDispatcher.processMonitoring,rspec_value.query.monitoring,notificationCallBackUrl)
+		ServiceThread.startMethodInNewThread(MonitoringDispatcher.process, rspec_value.query.monitoring, notificationCallBackUrl)
 
 def main():
 	"""

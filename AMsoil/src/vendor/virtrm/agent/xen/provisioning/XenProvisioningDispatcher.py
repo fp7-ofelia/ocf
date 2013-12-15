@@ -1,154 +1,139 @@
-import sys
-from xen.provisioning.HdManager import HdManager
-from xen.XendManager import XendManager
-from xen.provisioning.VMConfigurator import VMConfigurator
-from provisioning.ProvisioningDispatcher import ProvisioningDispatcher
 from communications.XmlRpcClient import XmlRpcClient
-from utils.Logger import Logger
+from provisioning.ProvisioningDispatcher import ProvisioningDispatcher
 from utils.AgentExceptions import *
+from utils.Logger import Logger
+from xen.provisioning.HdManager import HdManager
+from xen.provisioning.VMConfigurator import VMConfigurator
+from xen.XendManager import XendManager
+import sys
 
-'''
+"""
 	@author: msune
 
 	XenProvisioningDispatcher routines
-'''
+"""
 
 class XenProvisioningDispatcher(ProvisioningDispatcher):
 
 	logger = Logger.getLogger()
-
-	##Inventory routines
+	
 	@staticmethod
-	def createVMfromImage(id,vm):
-		pathToMountPoint = ""	
+	def __on_success(message = None):
+		"""
+		Perform operations on success
+		"""
+		if message:
+			XenProvisioningDispatcher.logger.info(str(message))
+		# Send asynchronous notification on success
+		XmlRpcClient.sendAsyncProvisioningActionStatus(id, "SUCCESS", "")
+	
+	@staticmethod
+	def __on_error(message = None):
+		"""
+		Perform operations on error
+		"""
+		if message:
+			XenProvisioningDispatcher.logger.error(str(message))
+		# Send asynchronous notification on error
+		XmlRpcClient.sendAsyncProvisioningActionStatus(id, "FAILED", str(message))
+	
+	# Inventory routines
+	@staticmethod
+	def create_vm(id,vm):
+		"""
+		Create VM from image
+		"""
+		pathToMountPoint = ""
 		XenProvisioningDispatcher.logger.info("Initiating creation process for VM: "+vm.name+" under project: "+vm.project_id+" and slice: "+vm.slice_id)
 		try:
-			#Clone HD
+			# Clone HD
 			HdManager.clone(vm)
 			XenProvisioningDispatcher.logger.debug("HD cloned successfully...")
-			
-			#Mount copy
-			pathToMountPoint=HdManager.mount(vm)
+			# Mount copy
+			pathToMountPoint = HdManager.mount(vm)
 			XenProvisioningDispatcher.logger.debug("Mounting at:"+pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD mounted successfully...")
-			
-			#Configure VM OS
+			# Configure VM OS
 			VMConfigurator.configureVmDisk(vm,pathToMountPoint)
-
-			#Umount copy
+			# Umount copy
 			HdManager.umount(vm,pathToMountPoint)
 			XenProvisioningDispatcher.logger.debug("HD unmounted successfully...")
-	
-			#Synthesize config file
+			# Synthesize config file
 			VMConfigurator.createVmConfigurationFile(vm)
 			XenProvisioningDispatcher.logger.debug("XEN configuration file created successfully...")
-			
-			XenProvisioningDispatcher.logger.info("Creation of VM "+vm.name+" has been successful!!")
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
+			XenProvisioningDispatcher.__on_success("VM named %s has been created." % vm.name)
 		except Exception as e:
 			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
+			# Send async notification
 			try:
 				HdManager.umount(vm,pathToMountPoint)
 			except:
 				pass
 			try:
-				#Delete VM disc and conf file if the error is not due because
-				#the VM already exists
+				# Delete VM disc and conf file if the error is not due because
+				# the VM already exists
 				if not isinstance(e,VMalreadyExists):
-					XenProvisioningDispatcher.deleteVM(id,vm)
+					XenProvisioningDispatcher.delete_vm(id,vm)
 			except:
 				pass
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
+			XenProvisioningDispatcher.__on_error(e)
 			return
 
 	@staticmethod
-	def modifyVM(id,vm):
-		#Check existance of VM
+	def modify_vm(id,vm):
+		# Check existence of VM
 		raise Exception("Not implemented")
-
+	
 	@staticmethod
-	def deleteVM(id,vm):
+	def delete_vm(id,vm):
 		try:
 			try:
-				#if it wasn't stopped, do it
+				# If it wasn't stopped, stop it
 				XendManager.stopDomain(vm)	
 			except Exception as e:
 				pass
-			
-			#Trigger Hd Deletion in Remote	
-			HdManager.delete(vm)	
-
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
+			# Trigger HD deletion in remote	
+			HdManager.delete(vm)
+			XenProvisioningDispatcher.__on_success()
 		except Exception as e:
-			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
+			XenProvisioningDispatcher.__on_error(e)
 			return
 	
-	##Scheduling routines
+	# Scheduling routines
 	@staticmethod
-	def startVM(id,vm):
+	def start_vm(id,vm):
 		try:
-			#Trigger	
+			# Trigger	
 			HdManager.startHook(vm)	
 			XendManager.startDomain(vm)
-	
-			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been started.")
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
+			XenProvisioningDispatcher.__on_success("VM named %s has been started." % vm.name)
 		except Exception as e:
-			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
+			XenProvisioningDispatcher.__on_error(e)
 			return
-
+	
 	@staticmethod
-	def rebootVM(id,vm):
+	def reboot_vm(id,vm):
 		try:
-			#Just try to reboot
+			# Just try to reboot
 			HdManager.rebootHook(vm)
 			XendManager.rebootDomain(vm)
-	
-			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been rebooted.")
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
+			XenProvisioningDispatcher.__on_success("VM named %s has been rebooted." % vm.name)
 		except Exception as e:
-			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
+			XenProvisioningDispatcher.__on_error(e)
 			return
-
+	
 	@staticmethod
-	def stopVM(id,vm):
+	def stop_vm(id, vm, hard_stop = None):
 		try:
-			#Just try to stop
+			# Try to stop domain
 			XendManager.stopDomain(vm)
+			if hard_stop:
+				HdManager.stopHook(vm)
+			XenProvisioningDispatcher.__on_success("VM named %s has been stopped." % vm.name)
+		except Exception as e:
+			XenProvisioningDispatcher.__on_error(e)
+			return
 	
-			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been stopped.")
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
-		except Exception as e:
-			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			return
-
 	@staticmethod
-	def hardStopVM(id,vm):
-		try:
-			#First stop domain
-			XendManager.stopDomain(vm)	
-			HdManager.stopHook(vm)	
-		
-			XenProvisioningDispatcher.logger.info("VM named "+vm.name+" has been stopped.")
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"SUCCESS","")
-		except Exception as e:
-			XenProvisioningDispatcher.logger.error(str(e))
-			#Send async notification
-			XmlRpcClient.sendAsyncProvisioningActionStatus(id,"FAILED",str(e))
-			return
-
+	def hardstop_vm(id, vm):
+		return stop_vm(id, vm, "hard_stop")

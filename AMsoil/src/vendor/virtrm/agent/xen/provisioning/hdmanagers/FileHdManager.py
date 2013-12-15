@@ -33,27 +33,39 @@ class FileHdManager(object):
 	@staticmethod
 	def subprocessCall(command, priority=OXA_FILEHD_NICE_PRIORITY, ioPriority=OXA_FILEHD_IONICE_PRIORITY, ioClass=OXA_FILEHD_IONICE_CLASS, stdout=None):
 		try:
-			wrappedCmd = "/usr/bin/nice -n "+str(priority)+" /usr/bin/ionice -c "+str(ioClass)+" -n "+str(ioPriority)+" "+command
+			wrappedCmd = "/usr/bin/nice -n %s /usr/bin/ionice -c %s -n %s %s" % (str(priority), str(ioClass), str(ioPriority), command)
 			FileHdManager.logger.debug("Executing: "+wrappedCmd) 
 			subprocess.check_call(wrappedCmd, shell=True, stdout=stdout)
 		except Exception as e:
 			FileHdManager.logger.error("Unable to execute command: "+command)
 			raise e
 
-
-
-
 	#Debug string 
 	@staticmethod
 	def debugVM(vm):
 		return " project:"+vm.project_id+", slice:"+vm.slice_id+", name:"+vm.name
 	
-
-	#Paths
-	''' Returns the container directory for the VM in remote FS'''
+	# Paths
+	@staticmethod
+	def get_remote_hd_project_directory(vm):
+		"""
+		Returns the project's container directory for the VM in remote FS
+		"""
+		return OXA_FILEHD_REMOTE_VMS + vm.project_id + "/"
+	
 	@staticmethod
 	def getRemoteHdDirectory(vm):
-		return  OXA_FILEHD_REMOTE_VMS+vm.project_id+"/"+vm.slice_id+"/"
+		"""
+		Returns the container directory for the VM in remote FS
+		"""
+		return OXA_FILEHD_REMOTE_VMS + vm.project_id + "/" + vm.slice_id + "/"
+	
+	@staticmethod
+	def get_hd_project_directory(vm):
+		"""
+		Returns the project's container directory for the VM in remote Cache
+		"""
+		return OXA_FILEHD_CACHE_VMS + vm.project_id + "/"
 	
 	''' Returns the container directory for the VM in remote Cache, if used'''
 	@staticmethod
@@ -61,7 +73,7 @@ class FileHdManager(object):
 		if FileHdManager.__useCache: 
 			return  OXA_FILEHD_CACHE_VMS+vm.project_id+"/"+vm.slice_id+"/"
 		else:
-			return  OXA_FILEHD_REMOTE_VMS+vm.project_id+"/"+vm.slice_id+"/"
+			return OXA_FILEHD_REMOTE_VMS+vm.project_id+"/"+vm.slice_id+"/"
 	
 	''' Returns the path of the hd file in Cache, if used'''
 	@staticmethod
@@ -115,8 +127,6 @@ class FileHdManager(object):
 		else:
 			return  OXA_FILEHD_REMOTE_TEMPLATES
 
-
-
 	##Hooks
 	'''Pre-start Hook'''
 	@staticmethod
@@ -135,29 +145,23 @@ class FileHdManager(object):
 		if FileHdManager.isVMinCacheFS(vm):
 			FileHdManager.moveVMToRemoteFS(vm)
 
-
-
-	##Hd management routines
-
+	# HD management routines
 	@staticmethod
 	def __fileTemplateExistsOrImportFromRemote(filepath):
-		
-		#if Cache is not used skip
+		# If Cache is not used skip
 		if not FileHdManager.__useCache:
 			return True	
-	
-		#Check cache
+		# Check cache
 		if os.path.exists(OXA_FILEHD_CACHE_TEMPLATES+filepath):
 			return True
 		path = os.path.dirname(filepath)
-
-		#Check remote	
+		# Check remote	
 		if os.path.exists(OXA_FILEHD_REMOTE_TEMPLATES+path):
-			#import from remote to cache
+			# Import from remote to cache
 			FileHdManager.logger.info("Importing image to cache directory:"+OXA_FILEHD_REMOTE_TEMPLATES+path+"->"+OXA_FILEHD_CACHE_TEMPLATES+path)
 			try:
-				#Copy all 
-				FileHdManager.subprocessCall("/bin/cp "+ str(OXA_FILEHD_REMOTE_TEMPLATES+path)+" "+str(OXA_FILEHD_CACHE_TEMPLATES+path))
+				# Copy all 
+				FileHdManager.subprocessCall("/bin/cp %s %s" % (str(OXA_FILEHD_REMOTE_TEMPLATES+path), str(OXA_FILEHD_CACHE_TEMPLATES+path)))
 			except Exception as e:
 				return False
 			return True
@@ -166,14 +170,13 @@ class FileHdManager(object):
 	
 	@staticmethod
 	def clone(vm):
-
-		##Check file existance in CACHE		
-		#FileHdManager.logger.debug("Checking:"+FileHdManager.getHdPath(vm))
+		# Check file existence in CACHE		
+		# FileHdManager.logger.debug("Checking:"+FileHdManager.getHdPath(vm))
 		if os.path.exists(FileHdManager.getHdPath(vm)):
 			raise VMalreadyExists("Another VM with the same name exists in the same project and slice:"+FileHdManager.debugVM(vm))
 
 		#FileHdManager.logger.debug("Checking:"+FileHdManager.getRemoteHdPath(vm))
-		##Check file existance in REMOTE 
+		##Check file existence in REMOTE 
 		if os.path.exists(FileHdManager.getRemoteHdPath(vm)):
 			raise VMalreadyExists("Another VM with the same name exists in the same project and slice:"+FileHdManager.debugVM(vm))
 
@@ -185,42 +188,35 @@ class FileHdManager(object):
 				template_swap_path=FileHdManager.getTemplatesPath(vm)+vm.xen_configuration.hd_origin_path+"_swap"
 				vm_path=FileHdManager.getHdPath(vm)
 				swap_path=FileHdManager.getSwapPath(vm)
-
 				FileHdManager.logger.debug("Trying to clone from:"+template_path+"->>"+vm_path)
-
 				if not os.path.exists(os.path.dirname(vm_path)):	
 					os.makedirs(os.path.dirname(vm_path))
-				
 				count = (vm.xen_configuration.hd_size_mb*1024)/OXA_FILEHD_DD_BS_KB
-				if (vm.xen_configuration.hd_size_mb*1024)/OXA_FILEHD_DD_BS_KB > 0:
+				if count > 0:
 					FileHdManager.logger.warning("HD size will be normalized")
-				count =int(count) 	
-				
-				#Create HD
+				count = int(count) 	
+				# Create HD
 				FileHdManager.logger.info("Creating disks...")
 				if OXA_FILEHD_CREATE_SPARSE_DISK:
 					FileHdManager.logger.info("Main disk will be created as Sparse disk...")
-					FileHdManager.subprocessCall("/bin/dd if=/dev/zero of="+str(vm_path)+" bs="+str(OXA_FILEHD_DD_BS_KB)+"k count=1 seek="+str(count))
+					FileHdManager.subprocessCall("/bin/dd if=/dev/zero of=%s bs=%sk count=1 seek=%s" % (str(vm_path), str(OXA_FILEHD_DD_BS_KB), str(count)))
 				else:
-					FileHdManager.subprocessCall("/bin/dd if=/dev/zero of="+str(vm_path)+" bs="+str(OXA_FILEHD_DD_BS_KB)+"k count="+str(count))
-				
-				#Create Swap and mkswap
+					FileHdManager.subprocessCall("/bin/dd if=/dev/zero of=%s bs=%sk count=%s" % (str(vm_path), str(OXA_FILEHD_DD_BS_KB), str(count)))
+				# Create Swap and mkswap
 				FileHdManager.logger.info("Creating swap disk...")
 				swapCount=int((OXA_DEFAULT_SWAP_SIZE_MB*1024)/OXA_FILEHD_DD_BS_KB)
-				FileHdManager.subprocessCall("/bin/dd if=/dev/zero of="+str(swap_path)+" bs="+str(OXA_FILEHD_DD_BS_KB)+"k count="+str(swapCount))
+				FileHdManager.subprocessCall("/bin/dd if=/dev/zero of=%s bs=%sk count=%s" % (str(swap_path), str(OXA_FILEHD_DD_BS_KB), str(swapCount)))
 				FileHdManager.logger.info("Creating swap filesystem...")
-				FileHdManager.subprocessCall("/sbin/mkswap "+str(swap_path))
-					
-				#Format 
+				FileHdManager.subprocessCall("/sbin/mkswap %s" % str(swap_path))
+				# Format 
 				FileHdManager.logger.info("Creating EXT3 fs...")
-				FileHdManager.subprocessCall("/sbin/mkfs.ext3 -F -q "+str(vm_path))
-					
-				#Untar disk contents
+				FileHdManager.subprocessCall("/sbin/mkfs.ext3 -F -q %s" % str(vm_path))
+				# Untar disk contents
 				FileHdManager.logger.info("Uncompressing disk contents...")
-				path = FileHdManager.mount(vm) #mount
+                # Mount
+				path = FileHdManager.mount(vm)
 				with open(os.devnull, 'w') as opendev:
-					FileHdManager.subprocessCall("/bin/tar -xvf "+str(template_path)+" -C "+str(path),stdout=opendev)
-					
+					FileHdManager.subprocessCall("/bin/tar -xvf %s -C %s" % (str(template_path), +str(path)),stdout=opendev)
 			except Exception as e:
 				FileHdManager.logger.error("Could not clone image to working directory: "+str(e)) 
 				raise Exception("Could not clone image to working directory"+FileHdManager.debugVM(vm))
@@ -235,23 +231,47 @@ class FileHdManager(object):
 
 	@staticmethod
 	def delete(vm):
+		"""
+		Moves VM from Cache to Remote before deleting these
+		"""
 		if not FileHdManager.isVMinRemoteFS(vm):
 			FileHdManager.moveVMToRemoteFS(vm)
 		os.remove(FileHdManager.getRemoteHdPath(vm)) 
 		os.remove(FileHdManager.getRemoteSwapPath(vm)) 
-		os.remove(FileHdManager.getRemoteConfigFilePath(vm)) 
-			
+		os.remove(FileHdManager.getRemoteConfigFilePath(vm))
+		# XXX NEW - Clear containing folders if no VM is inside anymore
+		FileHdManager.delete_containing_folders(FileHdManager.get_remote_hd_project_directory(vm))
+		
+	@staticmethod
+	def delete_containing_folders(folder):
+		"""
+		Removes containing folders when possible.
+		Only empty folders will be removed.
+		"""
+		if os.path.isdir(folder):
+			list_dir = os.listdir(folder)
+			if list_dir:
+				for dir in list_dir:
+					delete_containing_folders(os.path.join(folder,dir))
+			else:
+				# EAFP style: easier to ask for forgiveness than for permission
+				try:
+					os.removedirs(folder)
+				# Non empty folders will not be removed
+				except:
+					pass
+		# Do not remove files
+		else:
+			pass
+	
 	#Mount/umount routines
 	@staticmethod
 	def mount(vm):
 		path = FileHdManager.getTmpMountedHdPath(vm)
-
 		if not os.path.isdir(path):
 			os.makedirs(path)		
-	
 		vm_path=FileHdManager.getHdPath(vm)
 		FileHdManager.subprocessCall('/bin/mount -o loop '+str(vm_path)+" "+str(path))	
-	
 		return path
 
 	@staticmethod
@@ -259,8 +279,7 @@ class FileHdManager(object):
 		FileHdManager.subprocessCall('/bin/umount -d '+str(path))
 		#remove dir
 		os.removedirs(path)	
-		
-
+	
 	#Cache-Remote warehouse methods 
 	@staticmethod
 	def isVMinRemoteFS(vm):
@@ -272,47 +291,38 @@ class FileHdManager(object):
 		
 	@staticmethod
 	def moveVMToRemoteFS(vm):
-	
-		#if Cache is not used skip
+		# If Cache is not used, skip
 		if not FileHdManager.__useCache:
-			return	
-	
+			return
 		if FileHdManager.isVMinCacheFS(vm): 
-			#create dirs if do not exist already
+			# Create dirs if do not exist already
 			try:
 				os.makedirs(FileHdManager.getRemoteHdDirectory(vm))
-			except Exception as e:
+			except:
 				pass
-			#Move all files
-			shutil.move(FileHdManager.getHdPath(vm),FileHdManager.getRemoteHdPath(vm)) 
-			shutil.move(FileHdManager.getSwapPath(vm),FileHdManager.getRemoteSwapPath(vm))
-			shutil.move(FileHdManager.getConfigFilePath(vm),FileHdManager.getRemoteConfigFilePath(vm)) 
+			# Move all files
+			shutil.move(FileHdManager.getHdPath(vm), FileHdManager.getRemoteHdPath(vm)) 
+			shutil.move(FileHdManager.getSwapPath(vm), FileHdManager.getRemoteSwapPath(vm))
+			shutil.move(FileHdManager.getConfigFilePath(vm), FileHdManager.getRemoteConfigFilePath(vm)) 
 		else:
-			raise Exception("Cannot find VM in CACHE FS"+FileHdManager.debugVM(vm) )	
+			raise Exception("Cannot find VM in CACHE FS %s" % FileHdManager.debugVM(vm))	
 	
 	@staticmethod
 	def moveVMToCacheFS(vm):
-		#if Cache is not used skip
+		# If Cache is not used, skip
 		if not FileHdManager.__useCache:
 			return	
-	
 		if FileHdManager.isVMinRemoteFS(vm): 
-
 			if FileHdManager.isVMinCacheFS(vm): 
 				raise Exception("Machine is already in Cache FS"+FileHdManager.debugVM(vm))
-				
-			#create dirs if do not exist already
+			# Create dirs if do not exist already
 			try:
 				os.makedirs(FileHdManager.getHdDirectory(vm))
 			except Exception as e:
 				pass
-	
-			#Move all files
+			# Move all files
 			shutil.move(FileHdManager.getRemoteHdPath(vm),FileHdManager.getHdPath(vm)) 
 			shutil.move(FileHdManager.getRemoteSwapPath(vm),FileHdManager.getSwapPath(vm))
 			shutil.move(FileHdManager.getRemoteConfigFilePath(vm),FileHdManager.getConfigFilePath(vm))
-			
 		else:
 			raise Exception("Cannot find VM in REMOTE FS"+FileHdManager.debugVM(vm))
-	
-
