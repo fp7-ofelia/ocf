@@ -58,8 +58,7 @@ class VTResourceManager(object):
             return None
         else:
             return servers
-
-
+    
     '''VM functions'''
     #Verify if the VM exists and return the status with the required params
     def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
@@ -148,8 +147,7 @@ class VTResourceManager(object):
         else:
             db_session.expunge_all()
             return None
-
-
+    
     #allocate a vm in the given slice
     def allocate_vm(self, vm, slice_name, end_time):
         #check if the VM name already exists, as a created VM or an allocated VM
