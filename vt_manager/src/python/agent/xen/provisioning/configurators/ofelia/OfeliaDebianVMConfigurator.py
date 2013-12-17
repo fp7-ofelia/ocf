@@ -20,7 +20,7 @@ class OfeliaDebianVMConfigurator:
 		#Loopback
 		iFile.write("auto lo\niface lo inet loopback\n\n")
 		#Interfaces
-		for inter in vm.xen_configuration.interfaces.interface  :
+		for inter in vm.xen_configuration.interfaces :
 			if inter.ismgmt:
 				#is a mgmt interface
 				interfaceString = "auto "+inter.name+"\n"+\
