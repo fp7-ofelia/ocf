@@ -25,13 +25,14 @@ import amsoil.core.log
 #amsoil logger
 logging=amsoil.core.log.getLogger('VTResourceManager')
 
-
-
 '''@author: SergioVidiella'''
 
 class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService('worker')
+	# XXX: loading virtualisation RM in memory. Is this as expected?
+	virtrm = pm.getService("virtrm")
+	from virtrm.controller.drivers.virt import VTDriver
 
     RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION") # sec in the allocated state
     MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
@@ -45,10 +46,12 @@ class VTResourceManager(object):
         self.worker.addAsReccurring("virtrm", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
         self.worker.addAsReccurring("virtrm", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
 
-    '''Server functions'''
-    #Get server by uuid. 
-    #If no uuid given, return all servers
+    # Server functions
     def get_servers(self, uuid=None):
+    	"""
+		Get server by uuid. 
+    	If no uuid provided, return all servers.
+		"""
         servers = VTDriver.getAllServers()
         logging.debug("**************************************" + str(servers))
         if uuid:
@@ -59,9 +62,11 @@ class VTResourceManager(object):
         else:
             return servers
     
-    '''VM functions'''
-    #Verify if the VM exists and return the status with the required params
+    # VM functions
     def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
+    	"""
+		Verify if the VM exists and return the status with the required params.
+		"""
         vm_hrn, hrn_type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
 	vm_status = dict()
@@ -100,8 +105,10 @@ class VTResourceManager(object):
                 raise virt_exception.VTAMVMNotFound(urn)
 	return vm_status
 
-    #get all vms in slice
     def vms_in_slice(self, slice_urn):
+    """
+	Get all vms in slice.
+	"""
 	vms = list()
 	vms_created = self._vms_created_in_slice(slice_urn)
 	if vms_created:
@@ -111,8 +118,10 @@ class VTResourceManager(object):
 	    vms.extend(vms_reserved)
 	return vms
 
-    #get all the vms created in a given slice
     def _vms_created_in_slice(self, slice_urn):
+	    """
+		Get all the vms created in a given slice.
+		"""
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
 	slice_name = get_leaf(slice_hrn)
 	project_name = get_leaf(get_authority(slice_hrn))
@@ -130,8 +139,10 @@ class VTResourceManager(object):
 	    db_session.expunge_all()
 	    return None
 
-    #get all the vms allocated in a given slice
     def _vms_reserved_in_slice(self, slice_urn):
+	    """
+		Get all the vms allocated in a given slice.
+		"""
 	slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
 	project_name = get_leaf(get_authority(slice_hrn))
@@ -148,12 +159,14 @@ class VTResourceManager(object):
             db_session.expunge_all()
             return None
     
-    #allocate a vm in the given slice
     def allocate_vm(self, vm, slice_name, end_time):
-        #check if the VM name already exists, as a created VM or an allocated VM
+    	"""
+		Allocate a VM in the given slice.
+		"""
+        # Check if the VM name already exists, as a created VM or an allocated VM
         if db_session.query(VirtualMachine).filter(VirtualMachine.name == vm['name']).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.projectName == vm['project_name']).first() != None or db_session.query(VMAllocated).filter(VMAllocated.name == vm['name']).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == vm['project_name']).first() != None:
       	    raise virt_exception.VTAMVmNameAlreadyTaken(vm['name'])
-   	#check if the server is one of the given servers
+   		# Check if the server is one of the given servers
         if db_session.query(VTServer).filter(VTServer.name == vm['server_name']).first() == None:
             raise virt_exception.VTAMServerNotFound(vm['server_name'])
 	try:
@@ -230,7 +243,7 @@ class VTResourceManager(object):
 	     vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
 	     if vm != None:
 		db_session.expunge(vm)
-		deleted_vm = self._unnallocate_vm(vm.id)
+		deleted_vm = self._unallocate_vm(vm.id)
 		if not deleted_vm:
 		    deleted_vm = dict()
 		    deleted_vm = dict()
@@ -244,8 +257,10 @@ class VTResourceManager(object):
 		deleted_vm['error'] = "The requested VM doesn't exists, it may have expired"
 	return deleted_vm
     
-    def _unnallocate_vm(self, vm_id):
-	#Delete the entry in the table of allocated vm's
+    def _unallocate_vm(self, vm_id):
+		"""
+		Delete the entry in the table of allocated VMs.
+		"""
 	vm = db_session.query(VMAllocated).filter(VMAllocated.id == vm_id).first()
 	deleted_vm = dict()
 	deleted_vm['name'] = vm.name
@@ -519,6 +534,6 @@ class VTResourceManager(object):
 	vms = db_session.query(VMAllocated).filter(VMAllocated.expires <= datetime.utcnow()).all()
 	for vm in vms:
 	     db_session.expunge(vm)
-	     self._unnallocate_vm(vm.id)
+	     self._unallocate_vm(vm.id)
 	db_session.expunge_all()
 	return
