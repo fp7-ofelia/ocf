@@ -1,39 +1,43 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.orm import validates, relationship, backref
+from sqlalchemy.orm import validates
 
 import inspect
 
-from utils.commonbase import Base, db_session
+from base import db
 from utils.ip4utils import IP4Utils
 
 
 '''@author: SergioVidiella'''
 
-class Ip4Slot(Base):
+class Ip4Slot(db.Model):
     """Ip4Slot Class."""
 
     __tablename__ = 'vt_manager_ip4slot'
 
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    ip = Column(String(15), nullable=False)
-    ipRange_id = Column(Integer, ForeignKey('vt_manager_ip4range.id'))
-    ipRange = relationship('Ip4Range')
-    isExcluded = Column(TINYINT(1))
-    comment = Column(String(1024))
-
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    ip = db.Column(db.String(15), nullable=False)
+    ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey('vt_manager_ip4range.id'))
+    ip_range = db.relationship('Ip4Range')
+    is_excluded = db.Column("isExcluded", TINYINT(1))
+    comment = db.Column(db.String(1024))
+    '''Defines soft or hard state of the interface'''
+    do_save = True
+   
+    
     @staticmethod
-    def constructor(ipRange, ip, excluded, comment=""):
+    def constructor(ip_range, ip, excluded, comment="", save=True):
     	self = Ip4Slot()
 	try:
-	    #check IP
-	    IP4Utils.checkValidIp(ip)
+	    # Check IP
+	    IP4Utils.check_valid_ip(ip)
             self.ip = ip
-            self.isExcluded = excluded
-            self.ipRange = ipRange
+            self.is_excluded = excluded
+            self.ip_range = ip_range
             self.comment = comment
-	    db_session.add(self)
-	    db_session.commit()
+	    self.do_save = save
+	    if save:
+	    	db.session.add(self)
+	    	db.session.commit()
 	except Exception as e:
 	    raise e
         return self
@@ -42,7 +46,7 @@ class Ip4Slot(Base):
     def isExcludedIp(self):
     	return self.isExcluded
 
-    def getLockIdentifier(self):
+    def get_lock_identifier(self):
     	#Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
 
@@ -65,17 +69,17 @@ class Ip4Slot(Base):
     @validates('ip')
     def validate_ip(self, key, ip):
         try:
-            IP4Utils.checkValidIp(ip)
+            IP4Utils.check_valid_ip(ip)
             return ip
         except Exception as e:
             raise e
 
     ''' Factories '''
     @staticmethod
-    def ipFactory(ipRange, ip):
-        return Ip4Slot.constructor(ipRange, ip, False, "")
+    def ipFactory(ipRange, ip, save=True):
+        return Ip4Slot.constructor(ipRange, ip, False, "", save)
 
     @staticmethod
-    def excludedIpFactory(ipRange, ip, comment):
-        return MacSlot.constructor(ipRange, ip, True, comment)
+    def excludedIpFactory(ipRange, ip, comment, save=True):
+        return MacSlot.constructor(ipRange, ip, True, comment, save)
 

@@ -15,49 +15,77 @@ class MacSlot(db.Model):
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     mac = db.Column(db.String(17), nullable=False)
-    macRange_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macrange.id'))
-    macRange = db.relationship("MacRange", backref="macslot", lazy="dynamic")
-    isExcluded = db.Column(TINYINT(1))
+    mac_range_id = db.Column("macRange_id", db.Integer, db.ForeignKey('vt_manager_macrange.id'))
+    mac_range = db.relationship("MacRange", backref="macslot", lazy="dynamic")
+    is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
+    
+    '''Defines soft or hard state of the interface'''
+    do_save = True
+    
+    # Private methods
+    def auto_save(self):
+    	if self.do_save:
+            db.session.add(self)
+	    db.session.commit()
+    
+    def get_lock_identifier(self):
+    	# Uniquely identifies object by a key
+     	return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
 
     @staticmethod
-    def constructor(macRange, mac, excluded, comment=""):
+    def constructor(mac_range, mac, excluded, comment="", save=True):
     	self = MacSlot()
 	#Check MAC
         if not mac == "":
-            EthernetUtils.checkValidMac(mac)
+            EthernetUtils.check_valid_mac(mac)
         self.mac = mac
-        self.isExcluded = excluded
-        self.macRange = macRange
+        self.is_excluded = excluded
+        self.mac_range = mac_range
         self.comment = comment
-	db_session.add(self)
-	db_session.commit()
-
+	self.do_save = save
+	if save:
+	    db.session.add(self)
+	    db.session.commit()
         return self
+    
+    def destroy(self):
+	if self.mac_range != None:
+	    if self.is_excluded:
+            	self.mac_range.remove_excluded_mac(self)
+            else:
+            	self.mac_range.release_mac(self)
+        db.session.delete(self)
+	db.session.commit()
 
-    '''Getters'''
-    def getLockIdentifier(self):
-    	#Uniquely identifies object by a key
-        return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
-
-    def getAssociatedVM(self):
+    def get_associated_vm(self):
     	return self.interface.vm.name
+    
+    def get_mac(self):
+   	return self.mac
+    
+    def is_excluded_mac(self):
+    	return self.is_excluded
+    
+    def set_mac(self, mac)
+	self.mac = mac
+	self.auto_save()
 
     '''Validators'''
     @validates('mac')
     def validate_mac(self, key, mac):
         try:
-            EthernetUtils.checkValidMac(mac)
+            EthernetUtils.check_valid_mac(mac)
             return mac
         except Exception as e:
             raise e
 
     ''' Factories '''
     @staticmethod
-    def macFactory(macRange, mac):
-        return MacSlot.constructor(macRange, mac, False, "")
+    def mac_factory(mac_range, mac, save=True):
+        return MacSlot.constructor(mac_range, mac, False, "", save)
 
     @staticmethod
-    def excludedMacFactory(macRange, mac, comment):
-        return MacSlot.constructor(macRange, mac, True, comment)
+    def excluded_mac_factory(macRange, mac, comment, save=True):
+        return MacSlot.constructor(mac_range, mac, True, comment, save)
 

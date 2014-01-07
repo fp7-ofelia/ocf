@@ -5,18 +5,17 @@ from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
 
 from utils import validators
-#from utils.commonbase import Base, db_session
 
 from macslot import MacSlot
-#from resources.ip4slot import Ip4Slot
-#from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
-#from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
-from tests.flaskbase import db
+from ipslot import Ip4Slot
+from networkinterfaceips import NetworkInterfaceIp4s
+from networkinterfaceconnectedto import NetworkInterfaceConnectedTo
+from base import db
 
-#import amsoil.core.log
+import amsoil.core.log
 import logging
 
-#logging=amsoil.core.log.getLogger('NetworkInterface')
+logging=amsoil.core.log.getLogger('NetworkInterface')
 
 
 '''@author: SergioVidiella'''
@@ -32,163 +31,174 @@ class NetworkInterface(db.Model):
     name = db.Column(db.String(128), nullable=False)
     mac_id = db.Column(db.Integer, ForeignKey('vt_manager_macslot.id'))
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
-    ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
-    isMgmt = db.Column(TINYINT(1), nullable=False, default=0)
-    isBridge = db.Column(TINYINT(1), nullable=False, default=0)
-
+    ips = association_proxy("networkinterface_ips", "ipslot")
+    is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)
+    is_bridge = db.Column("isBridge", TINYINT(1), nullable=False, default=0)
     '''Interfaces connectivy'''
-  #  vtserver = association_proxy("vtserver_assocation", "vtserver")
-   # vm = association_proxy("vm_associations", "vm")
-   # connectedTo = association_proxy("to_networkinterface", "to_networkinterface")
-   # connectedFrom = association_proxy("from_networkinterface", "from_networkinterface")
-
+    vtserver = association_proxy("vtserver_assocation", "vtserver")
+    vm = association_proxy("vm_associations", "vm")
+    connected_to = association_proxy("to_networkinterface", "to_networkinterface")
+    connected_from = association_proxy("from_networkinterface", "from_networkinterface")
     '''Physical connection details for bridged interfaces''' 
-    switchID = db.Column(db.String(23))
+    switch_id = db.Column("switchID", db.String(23))
     port = db.Column(db.Integer)
-    idForm = db.Column(db.Integer)
+    id_form = db.Column("idForm", db.Integer)
+    '''Defines soft or hard state of the VM'''
+    do_save = True
+
 
     '''Interface constructor '''
     @staticmethod
-    def constructor(name, macStr, macObj, switchID, port, ip4Obj, isMgmt=False, isBridge=False):
+    def constructor(name,mac_str,mac_obj,switch_id,port,ip4_obj,is_mgmt=False,is_bridge=False,save=True):
 	logging.debug("******************************* I1")
 	self = NetworkInterface()
 	try:
-	    logging.debug("******************************* I2 " + name + str(macObj) + ' ' + str(self.mac))
+	    logging.debug("******************************* I2 " + name + str(mac_obj) + ' ' + str(self.mac))
             self.name = name
-	    if macObj == None:
+	    if mac_obj == None:
 		logging.debug("******************************* I3 - 1")
-            	self.mac = MacSlot.macFactory(None,macStr)
+            	self.mac = MacSlot.mac_factory(None,mac_str)
             else:
 		logging.debug("******************************* I3 - 2")
-            	if not isinstance(macObj,MacSlot):
+            	if not isinstance(mac_obj,MacSlot):
 		    logging.debug("******************************* I - ERROR - 1")
                     raise Exception("Cannot construct NetworkInterface with a non MacSlot object as parameter")
-		logging.debug("******************************* I4 " + str(macObj) + ' ' + str(type(macObj)))
-		self.mac_id = macObj.id
-		db_session.add(self)
-		db_session.commit()
+		logging.debug("******************************* I4 " + str(mac_obj) + ' ' + str(type(mac_obj)))
 		logging.debug("************************************ YEAH")
-		macObj.networkInterface = [self,]
 		logging.debug("************************************ YEAH")
-		db_session.add(macObj)
-		db_session.commit()
-            	#self.mac = macObj
+            	self.mac.append(mac_obj)
 	    logging.debug("******************************* I5 " + str(self.mac))
-            self.isMgmt = isMgmt
+            self.is_mgmt = is_mgmt
 	    logging.debug("******************************* I6")	    
             '''Connectivity'''
-            if isBridge:
+            if is_bridge:
 		logging.debug("******************************* I7 - 1")
-            	self.isBridge = isBridge
-                self.switchID = switchID
+            	self.is_bridge = is_bridge
+                self.switch_id = switch_id
                 self.port = port
-	    db_session.add(self)
-            db_session.commit()
             logging.debug("******************************* I7 " + str(self.mac))
-            if not ip4Obj == None:
+            if not ip4_obj == None:
 		logging.debug("******************************* I7 - 2")
-                if not isinstance(ip4Obj,Ip4Slot):
+                if not isinstance(ip4_obj,Ip4Slot):
 		    logging.debug("******************************* I - ERROR - 2")
                     raise Exception("Cannot construct NetworkInterface with a non Ip4Slot object as parameter")
 		else:
 		    logging.debug("******************************* I7 - 3")
-		    self.ip4s.append(ip4Obj)
-		    db_session.add(self)
-		    db_session.commit()
-		    logging.debug("****************************** I7 - 4 " + str(ip4Obj.id) + ' ' + str(self.id))
+		    db.session.add(self)
+		    db.session.commit()
+		    self.ips.append(ip4_obj)
+		    logging.debug("****************************** I7 - 4 " + str(ip4_obj.id) + ' ' + str(self.id))
+		self.do_save = save
+		if save:
+		    db.session.add(self)
+		    db.session.commit()
 	except Exception as e:
 	    logging.debug("******************************* I - ERROR - 3")
             raise e
 	logging.debug("******************************* I8")
 	return self
-
-    def update(self, name, macStr, switchID, port):
+    
+    def update(self, name, mac_str, switch_id, port):
     	try:
             self.name = name
-            self.setMacStr(macStr)
-            self.switchID = switchID
+            self.set_mac_str(mac_str)
+            self.switch_id = switch_id
             self.port = port
+	    if save:
+		self.auto_save()
         except Exception as e:
             raise e
-
+    
+    ##Private methods
+    def auto_save(self):
+    	if self.do_save:
+	    db.session.add(self)
+	    db.session.commit()
+    
     ##Public methods
-    def getLockIdentifier(self):
+    def get_lock_identifier(self):
     	#Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
-
-    def getName(self):
+    
+    def get_name(self):
         return self.name
-
-    def setName(self,name):
+    
+    def set_name(self,name):
         self.name=name
-
-    def getMacStr(self):
-        return self.mac.mac
-
-    def setMacStr(self,macStr):
-        self.mac.setMac(macStr)
-
-    def setPort(self,port):
+	self.auto_save()
+    
+    def get_mac_str(self):
+        return self.mac.first().mac
+    
+    def set_mac_str(self,mac_str):
+        self.mac.first().set_mac(mac_str)
+	self.autosave()
+    
+    def set_port(self,port):
         self.port = port
-
-    def getPort(self):
+	self.auto_save()
+    
+    def get_port(self):
         return self.port
 
-    def setSwitchID(self, switchID):
-        self.switchID = switchID
-
-    def getSwitchID(self):
-        return self.switchID
-
-    def getNumberOfConnections(self):
-        return self.connectedTo.all().count()
-
-    def attachInterfaceToBridge(self,interface):
+    def set_switch_id(self, switch_id):
+        self.switch_id = switch_id
+	self.auto_save()
+    
+    def get_switch_id(self):
+        return self.switch_id
+    
+    def get_number_of_connections(self):
+        return len(self.connected_to.all())
+    
+    def attach_interface_to_bridge(self,interface):
 	logging.debug("*********************************** BRIDGE 1")
-        if not self.isBridge:
+        if not self.is_bridge:
 	    logging.debug("*********************************** BRIDGE ERROR - 1")
             raise Exception("Cannot attach interface to a non-bridged interface")
         if not isinstance(interface,NetworkInterface):
 	    logging.debug("*********************************** BRIDGE ERROR - 2")
             raise Exception("Cannot attach interface; object type unknown -> Must be NetworkInterface instance")
 	logging.debug("*********************************** BRIDGE 2 " + str(interface.id) + ' ' + str(self.id))
-	self.connectedTo.append(interface)
-	db_session.add(self)
-	db_session.commit()
-	logging.debug("*********************************** BRIDGE 3 " + str(interface.connectedFrom))
-
-
-    def detachInterfaceToBridge(self,interface):
-  	if not self.isBridge:
+	self.connected_to.append(interface)
+	self.auto_save()
+	logging.debug("*********************************** BRIDGE 3 " + str(interface.connected_from))
+    
+    def detach_interface_to_bridge(self,interface):
+  	if not self.is_bridge:
             raise Exception("Cannot detach interface from a non-bridged interface")
         if not isinstance(interface,NetworkInterface):
             raise Exception("Cannot detach interface; object type unknown -> Must be NetworkInterface instance")
-        self.connectedTo.remove(interface)
-
-    def addIp4ToInterface(self,ip4):
-        if not self.isMgmt:
+        self.connected_to.remove(interface)
+	self.auto_save()
+    
+    def add_ip4_to_interface(self,ip4):
+        if not self.is_mgmt:
             raise Exception("Cannot add IP4 to a non mgmt interface")
         if not isinstance(ip4,Ip4Slot):
             raise Exception("Cannot add IP4 to interface; object type unknown -> Must be IP4Slot instance")
-        self.ip4s.add(ip4)
-
-    def removeIp4FromInterface(self,ip4):
+        self.ips.append(ip4)
+	self.auto_save()
+    
+    def remove_ip4_from_interface(self,ip4):
         if not isinstance(ip4,Ip4Slot):
             raise Exception("Cannot remove IP4 to interface; object type unknown -> Must be IP4Slot instance")
-        if not self.isMgmt:
+        if not self.is_mgmt:
             raise Exception("Cannot add IP4 to a non mgmt interface")
-        self.ip4s.remove(ip4)
-
+        self.ips.remove(ip4)
+	self.auto_save()
+    
     def destroy(self):
-        with MutexStore.getObjectLock(self.getLockIdentifier()):
-            if self.getNumberOfConnections():
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if self.get_number_of_connections():
            	raise Exception("Cannot destroy a bridge which has enslaved interfaces")
-            for ip in self.ip4s.all():
+            for ip in self.ips.all():
             	ip.destroy()
+	    for mac in self.mac.all():
                 self.mac.destroy()
-                self.delete()
-
-
+	    db.session.delete(self)
+	    db.session.commit()
+    
     '''Validators'''
     @validates('name')
     def validate_name(self, key, name):
@@ -198,23 +208,15 @@ class NetworkInterface(db.Model):
 	    return name
 	except Exception as e:
             raise e
-
-    @validates('mac')
-    def validate_mac(self, key, mac):
+    
+    @validates('switch_id')
+    def validate_switch_id(self, key, switch_id):
 	try:
-	    validators.mac_validator(mac)
-	    return mac
+	    validators.datapath_validator(switch_id)
+	    return switch_id
 	except Exception as e:
 	    raise e
-
-    @validates('switchID')
-    def validate_switchID(self, key, switchID):
-	try:
-	    validators.datapath_validator(switchID)
-	    return switchID
-	except Exception as e:
-	    raise e
-
+    
     @validates('port')
     def validate_port(self, key, port):
 	try:
@@ -225,23 +227,23 @@ class NetworkInterface(db.Model):
     
     '''Server interface factories'''
     @staticmethod
-    def createServerDataBridge(name, macStr, switchID, port):
-        return NetworkInterface.constructor(name, macStr, None, switchID, port, None, False, True)
-
+    def create_server_data_bridge(name, mac_str, switch_id, port, save=True):
+        return NetworkInterface.constructor(name, mac_str, None, switch_id, port, None, False, True, save)
+    
     @staticmethod
-    def updateServerDataBridge(name, macStr, switchID, port):
-        return NetworkInterface.update(name, macStr, switchID, port)
-
+    def update_server_data_bridge(name, mac_str, switch_id, port, save=True):
+        return NetworkInterface.update(name, mac_str, switch_id, port, save)
+    
     @staticmethod
-    def createServerMgmtBridge(name, macStr):
-        return NetworkInterface.constructor(name, macStr, None, None, None, None, True, True)
-
+    def create_server_mgmt_bridge(name, mac_str, save=True):
+        return NetworkInterface.constructor(name, mac_str, None, None, None, None, True, True, save)
+    
     '''VM interface factories'''
     @staticmethod
-    def createVMDataInterface(name, macObj):
-        return NetworkInterface.constructor(name, None, macObj, None, None, None, False, False)
-
+    def create_vm_data_interface(name, mac_obj, save=True):
+        return NetworkInterface.constructor(name, None, mac_obj, None, None, None, False, False, save)
+    
     @staticmethod
-    def createVMMgmtInterface(name, macObj, ip4):
-        return NetworkInterface.constructor(name, None, macObj, None, None, ip4, True, False)
+    def create_vm_mgmt_interface(name, mac_obj, ip4, save=True):
+        return NetworkInterface.constructor(name, None, mac_obj, None, None, ip4, True, False, save)
     

@@ -19,7 +19,7 @@ logging=amsoil.core.log.getLogger('MacRange')
 '''@author: SergioVidiella'''
 
 
-class MacRange(Base):
+class MacRange(db.Model):
     """MacRange."""
 
     __tablename__ = 'vt_manager_macrange'
