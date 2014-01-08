@@ -192,13 +192,13 @@ class VTDelegate(GENIv3DelegateBase):
 			allocated_vms[server.name] = list()
 		    allocated_vms[server.name].append(allocated_vm)
 	    except virt_exception.VTAMVmNameAlreadyTaken as e:
-	    	self.undoo_action("allocate", allocated_vms)	    
+	    	self.undo_action("allocate", allocated_vms)	    
 	    	raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
 	    except virt_exception.VTAMServerNotFound as e:
-            	self.undoo_action("allocate", allocated_vms)
+            	self.undo_action("allocate", allocated_vms)
 	    	raise geniv3_exception.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
 	    except virt_exception.VTMaxVMDurationExceeded as e:
-            	self.undoo_action("allocate", allocated_vms)
+            	self.undo_action("allocate", allocated_vms)
 	    	raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
 	else:
 	    raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
@@ -477,7 +477,7 @@ class VTDelegate(GENIv3DelegateBase):
         return self.lxml_to_string(manifest)
 
 
-    def undoo_action(self, action, params):
+    def undo_action(self, action, params):
 	if action is "allocate":
 	    for param in params:
 		self._resource_manager.delete_vm(param, "allocated")
