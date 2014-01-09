@@ -25,9 +25,7 @@ import amsoil.core.log
 logging=amsoil.core.log.getLogger('VTServer')
 
 
-
 '''@author: SergioVidiella'''
-
 
 
 def validate_agent_url_wrapper(url):

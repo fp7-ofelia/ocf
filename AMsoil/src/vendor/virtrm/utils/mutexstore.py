@@ -15,43 +15,45 @@ _locks={}
 
 
 class MutexStore():
-        @staticmethod
-        def __getKey(vm):
-                return vm.project_id+vm.slice_id+vm.name
-	@staticmethod
-	def __getLockByKey(key):
-		 #This localExclusion is to prevent problems if never resources (dictionary entry) are freed in unlock method
-		#print key
-                localmutex.acquire()
-                if not _locks.has_key(key):
-                        #create Mutex for the VM
-                        _locks[key] = Lock()
-                #release local mutex
-                localmutex.release()
-             	return _locks[key] 
-	@staticmethod
-	def getObjectLock(key):	
-		return MutexStore.__getLockByKey(key)
-
-        @staticmethod
-        def lock(key):
-                #print "Trying to lock>>>"+key
-		lock = MutexStore.__getLockByKey(key)
-                #Acquire specific VM lock
-                #print "trying to acquire lock>>>"+key
-                lock.acquire()
-                #print "Lock acquired>>>"+key
-                return
-
-        @staticmethod
-        def unlock(key):
-                localmutex.acquire()
-                #release specific VM lock
-                #TODO: release resources in dict?
-		lock = MutexStore.__getLockByKey(key)
-                lock.release()
-                #print "Lock released>>>"+MutexStore.__getKey(vm)
-		localmutex.release()
+    @staticmethod
+    def __get_key(vm):
+        return vm.project_id+vm.slice_id+vm.name
+    
+    @staticmethod
+    def __get_lock_by_key(key):
+        # This localExclusion is to prevent problems if never resources (dictionary entry) are freed in unlock method
+        #print key
+        localmutex.acquire()
+        if not _locks.has_key(key):
+            # Create Mutex for the VM
+            _locks[key] = Lock()
+        # Release local mutex
+        localmutex.release()
+        return _locks[key] 
+            
+    @staticmethod
+    def get_object_lock(key):        
+        return MutexStore.__get_lock_by_key(key)
+    
+    @staticmethod
+    def lock(key):
+        #print "Trying to lock>>>"+key
+        lock = MutexStore.__get_lock_by_key(key)
+        # Acquire specific VM lock
+        #print "trying to acquire lock>>>"+key
+        lock.acquire()
+        #print "Lock acquired>>>"+key
+        return
+    
+    @staticmethod
+    def unlock(key):
+        localmutex.acquire()
+        # Release specific VM lock
+        # TODO: release resources in dict?
+        lock = MutexStore.__get_lock_by_key(key)
+        lock.release()
+        #print "Lock released>>>"+MutexStore.__getKey(vm)
+        localmutex.release()
 
 #print "Hola"
 #l = MutexStore.getObjectLock("hola")
