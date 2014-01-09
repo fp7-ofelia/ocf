@@ -43,7 +43,7 @@ class RuleTableManager():
  	
 	#Main methods 
 #	@staticmethod
-#        def getInstance(name = None):
+#        def get_instance(name = None):
 #		if not name:
 #			name = RuleTableManager._tableName
 #		if CreatedRuledTables.objects.filter(name=name):
@@ -54,7 +54,7 @@ class RuleTableManager():
 #			return RuleTableManager.load(name)
 
 	@staticmethod
-	def getInstance(name=None):
+	def get_instance(name=None):
 		logging.debug("************************** 1a")
 		if not name:
 			logging.debug("************************** 1b")
@@ -102,15 +102,15 @@ class RuleTableManager():
 	#RuleTableMethods
 	@staticmethod
 	def AddRule(string,enabled=True,pos=None,parser=None,pBackend=None,persist=True, tableName=None):
-		return RuleTableManager.getInstance(tableName).addRule(string,enabled,pos,parser,pBackend,persist)
+		return RuleTableManager.get_instance(tableName).addRule(string,enabled,pos,parser,pBackend,persist)
 
 	@staticmethod
 	def RemoveRule(rule=None, index=None,tableName=None):
-		return RuleTableManager.getInstance(tableName).removeRule(rule, index)
+		return RuleTableManager.get_instance(tableName).removeRule(rule, index)
 	
 	@staticmethod
 	def MoveRule(newIndex,rule=None,oldIndex=None,tableName=None):
-		return RuleTableManager.getInstance(tableName).moveRule(newIndex,rule,oldIndex)
+		return RuleTableManager.get_instance(tableName).moveRule(newIndex,rule,oldIndex)
 
 	@staticmethod
 	def EnableOrDisableRule(ruleUUID,tableName=None):
@@ -122,7 +122,7 @@ class RuleTableManager():
         	else:
                 	RuleTableManager.EnableRule(None,index,tableName)
 
-		return RuleTableManager.getInstance(tableName)
+		return RuleTableManager.get_instance(tableName)
 
 	@staticmethod
 	def editRule(rule,enable,priority,PreviousPriority,tableName):
@@ -145,25 +145,25 @@ class RuleTableManager():
 
 	@staticmethod
 	def EnableRule(rule=None,index=None,tableName=None):
-		ruleTable = RuleTableManager.getInstance(tableName)
+		ruleTable = RuleTableManager.get_instance(tableName)
 		return ruleTable.enableRule(rule,index)
 
 	@staticmethod
         def DisableRule(rule=None,index=None,tableName=None):
-               	ruleTable = RuleTableManager.getInstance(tableName)
+               	ruleTable = RuleTableManager.get_instance(tableName)
 		return ruleTable.disableRule(rule,index)
 		
 
 	@staticmethod
 	def SetPolicy(policy,tableName=None):
-                return RuleTableManager.getInstance(tableName).setPolicy(policy)
+                return RuleTableManager.get_instance(tableName).setPolicy(policy)
 
 	@staticmethod
 	def Evaluate(metaObj, tableName=None):
 		logging.debug("************************** a")
 		try:
-		#	RuleTableManager.getInstance(tableName).evaluate(metaObj)
-			instance = RuleTableManager.getInstance(tableName)
+		#	RuleTableManager.get_instance(tableName).evaluate(metaObj)
+			instance = RuleTableManager.get_instance(tableName)
 			logging.debug("*********************** b" + str(instance))
 			instance.evaluate(metaObj)
 			logging.debug("*********************** c")
@@ -180,31 +180,31 @@ class RuleTableManager():
 	#getters
 	@staticmethod
 	def GetRuleSet(tableName = None):
-                return RuleTableManager.getInstance(tableName).getRuleSet()
+                return RuleTableManager.get_instance(tableName).getRuleSet()
 	
 	@staticmethod
         def GetName(tableName = None):
-                return RuleTableManager.getInstance(tableName).getName()
+                return RuleTableManager.get_instance(tableName).getName()
 
 	@staticmethod
         def GetPolicyType(tableName = None):
-                return RuleTableManager.getInstance(tableName).getPolicyType()
+                return RuleTableManager.get_instance(tableName).getPolicyType()
 
 	@staticmethod
         def GetPersistence(tableName = None):
-                return RuleTableManager.getInstance(tableName).getPersistence()
+                return RuleTableManager.get_instance(tableName).getPersistence()
 
 	@staticmethod
         def GetParser(tableName = None):
-                return RuleTableManager.getInstance(tableName).getParser()
+                return RuleTableManager.get_instance(tableName).getParser()
 
 	@staticmethod
         def GetResolverMappings(tableName = None):
-                return sorted(RuleTableManager.getInstance(tableName).getResolverMappings().iterkeys())
+                return sorted(RuleTableManager.get_instance(tableName).getResolverMappings().iterkeys())
 
 	@staticmethod
         def GetPersistenceFlag(tableName = None):
-                return RuleTableManager.getInstance(tableName).getPersistenceFlag()
+                return RuleTableManager.get_instance(tableName).getPersistenceFlag()
 
 
 	#@staticmethod
@@ -249,7 +249,7 @@ class RuleTableManager():
                 if Mode not in ['Rule','Index','Enabled']:
                         raise Exception ('Unrecognized Mode. Only three modes are allowed: Rule, Index and Enabled')
 		
-		ruleList = RuleTableManager.getInstance(tableName).getRuleSet()
+		ruleList = RuleTableManager.get_instance(tableName).getRuleSet()
                 for rule in ruleList:
                         if str(rule.rule.getUUID()) == str(ruleID):
                                 if Mode == 'Rule':
@@ -262,7 +262,7 @@ class RuleTableManager():
 
 	@staticmethod
         def getPriorityList(name = None):
-                RuleSetLength = len(RuleTableManager.getInstance(name)._ruleSet)
+                RuleSetLength = len(RuleTableManager.get_instance(name)._ruleSet)
                 i = 0
                 out = []
                 while i < RuleSetLength:
@@ -327,7 +327,7 @@ class RuleTableManager():
 #	@staticmethod
 #	def setDefaultRule(RAM,NVMS,name=None):
 #
-#		RuleTableManager.getInstance()
+#		RuleTableManager.get_instance()
 #
 #		if not RuleTableManager.getRuleSet():
 

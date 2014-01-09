@@ -342,7 +342,7 @@ class VTServer(Base):
 	logging.debug("******************** A1") 
         macObj = self.__allocateMacFromSubscribedRanges()
 	logging.debug("******************** A2")
-        interface = NetworkInterface.createVMDataInterface(serverInterface.getName()+"-slave",macObj)
+        interface = NetworkInterface.create_vm_data_interface(serverInterface.getName()+"-slave",macObj)
         #Enslave it     
 	logging.debug("******************* A3")
         serverInterface.attachInterfaceToBridge(interface)
@@ -356,7 +356,7 @@ class VTServer(Base):
 	logging.debug("*********************** A2")
         ipObj = self.__allocateIpFromSubscribedRanges()
 	logging.debug("*********************** A3")
-        interface = NetworkInterface.createVMMgmtInterface(serverInterface.getName()+"-slave",macObj,ipObj)
+        interface = NetworkInterface.create_vm_management_interface(serverInterface.getName()+"-slave",macObj,ipObj)
         #Enslave it     
 	logging.debug("*********************** A4")
         serverInterface.attachInterfaceToBridge(interface)
@@ -396,7 +396,7 @@ class VTServer(Base):
 
     ''' Server interfaces '''
     #Network mgmt bridges
-    def setMgmtBridge(self,name,macStr):
+    def set_management_bridge(self,name,macStr):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):
             nInter = self.networkInterfaces.filter(isMgmt=True,isBridge=True)
             if nInter.count() == 1:

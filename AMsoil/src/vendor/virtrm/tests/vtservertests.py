@@ -16,6 +16,6 @@ xenserver = server.getChildObject()
 
 print xenserver
 
-servers = VTDriver.getAllServers()
+servers = VTDriver.get_all_servers()
 
 print servers

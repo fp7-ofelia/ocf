@@ -94,13 +94,13 @@ class XenServer(VTServer):
                 self.delete()
 
     ''' Public interface methods '''
-    def getVMs(self,**kwargs):
+    def get_vms(self,**kwargs):
         return self.vms.filter(**kwargs)
         
-    def getVM(self,**kwargs):
+    def get_vm(self,**kwargs):
         return self.vms.get(kwargs)
 
-    def createVM(self, name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType,save):
+    def create_vm(self, name, uuid, projectId, projectName, sliceId, sliceName, osType, osVersion, osDist, memory, discSpaceGB, numberOfCPUs, callBackUrl, hdSetupType, hdOriginPath, virtSetupType,save):
 	logging.debug("**************************** Server 1")
 	with MutexStore.getObjectLock(self.getLockIdentifier()):
 	    logging.debug("******************************* Server 2")
@@ -122,7 +122,7 @@ class XenServer(VTServer):
 	    logging.debug("**************************** Server 6")
             return vm
 
-    def deleteVM(self,vm):
+    def delete_vm(self,vm):
     	with MutexStore.getObjectLock(self.getLockIdentifier()):
             if vm not in self.vms.all():
             	raise Exception("Cannot delete a VM from pool if it is not already in")

@@ -52,7 +52,7 @@ class VTResourceManager(object):
             Get server by uuid. 
             If no uuid provided, return all servers.
         """
-        servers = VTDriver.getAllServers()
+        servers = VTDriver.get_all_servers()
         logging.debug("**************************************" + str(servers))
         if uuid:
             for server in servers:
@@ -177,7 +177,7 @@ class VTResourceManager(object):
         vmAllocatedModel = self._vm_dict_to_class(vm, slice_name, expiration_time)
         db_session.add(vmAllocatedModel)
         db_session.commit()
-        server = VTDriver.getServerById(vmAllocatedModel.serverId)
+        server = VTDriver.get_server_by_id(vmAllocatedModel.serverId)
         return vmAllocatedModel, server
         
     #XXX: continue from this point
@@ -287,7 +287,7 @@ class VTResourceManager(object):
     
     def _destroy_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_DELETE_TYPE)
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_DELETE_TYPE)
             return "success"
         except Exception as e:
             return "error" 
@@ -458,7 +458,7 @@ class VTResourceManager(object):
         server_uuid = server.uuid
         db_session.expunge_all()
         try:
-            VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Start the VM'}
@@ -478,7 +478,7 @@ class VTResourceManager(object):
         server_uuid = server.uuid
         db_session.expunge_all()
         try:
-            VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Stop the VM'}
@@ -497,7 +497,7 @@ class VTResourceManager(object):
         server_uuid = server.uuid
         db_session.expunge_all()
         try:
-            VTDriver.PropagateActionToProvisioningDispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
             return {'name':vm_urn, 'status':status, 'expires':expiration}
         except Exception as e:
             return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Restart the VM'}

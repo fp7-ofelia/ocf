@@ -15,7 +15,7 @@ class VTAdminResourceManager(object):
     def get_server_projects(self, server_id):
         vmProjects = {}
         try:
-            for vm in VTDriver.getVMsInServer(VTDriver.getServerById(server_id)):
+            for vm in VTDriver.get_vms_in_server(VTDriver.get_server_by_id(server_id)):
                 if vm.xenvm.projectName not in vmProjects:
                     vmProjects[vm.xenvm.projectName] = vm.xenvm.projectId
             return vmProjects
@@ -27,7 +27,7 @@ class VTAdminResourceManager(object):
     def get_server_slices(self, server_id):
         vmSlices = {}
         try:
-            for vm in VTDriver.getVMsInServer(VTDriver.getServerById(server_id)):
+            for vm in VTDriver.get_vms_in_server(VTDriver.get_server_by_id(server_id)):
                 if vm.xenvm.sliceName not in vmSlices:
                     vmSlices[vm.xenvm.sliceName] = vm.xenvm.sliceId
             return vmSlices
@@ -42,7 +42,7 @@ class VTAdminResourceManager(object):
         
     def delete_server(self, server_id):
         try:
-            VTDriver.deleteServer(VTDriver.getServerById(server_id))
+            VTDriver.delete_server(VTDriver.get_server_by_id(server_id))
             return True
         except Exception as e:
             print e

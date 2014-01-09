@@ -226,10 +226,10 @@ class NetworkInterface(Base):
 
     '''VM interface factories'''
     @staticmethod
-    def createVMDataInterface(name, macObj):
+    def create_vm_data_interface(name, macObj):
         return NetworkInterface.constructor(name, None, macObj, None, None, None, False, False)
 
     @staticmethod
-    def createVMMgmtInterface(name, macObj, ip4):
+    def create_vm_management_interface(name, macObj, ip4):
         return NetworkInterface.constructor(name, None, macObj, None, None, ip4, True, False)
     

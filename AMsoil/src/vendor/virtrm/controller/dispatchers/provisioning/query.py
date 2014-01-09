@@ -38,13 +38,13 @@ class ProvisioningDispatcher():
 										)
 				return None
 			try:
-				controller = VTDriver.getDriver(action.server.virtualization_type)
+				controller = VTDriver.get_driver(action.server.virtualization_type)
 				# XXX:Change this when xml schema is updated
-				server = VTDriver.getServerByUUID(action.server.uuid)
+				server = VTDriver.get_server_by_uuid(action.server.uuid)
 				#if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
-				#	server = VTDriver.getServerByUUID(action.virtual_machine.server_id)
+				#	server = VTDriver.get_server_by_uuid(action.virtual_machine.server_id)
 				#else:
-				#	server = VTDriver.getVMbyUUID(action.virtual_machine.uuid).Server.get()
+				#	server = VTDriver.get_vm_by_uuid(action.virtual_machine.uuid).Server.get()
 			except Exception as e:
 				logging.error(e)
 				raise e
@@ -54,7 +54,7 @@ class ProvisioningDispatcher():
 				if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
 					try:
 						logging.debug("*********************************** B")
-						vm = ProvisioningDispatcher.__createVM(controller, actionModel, action)
+						vm = ProvisioningDispatcher.__create_vm(controller, actionModel, action)
 					except:
 						vm = None
 						raise
@@ -76,8 +76,8 @@ class ProvisioningDispatcher():
 					# configuration, the created VM won't be returned
 					try:
 						if not vm:
-							vm = controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
-						controller.deleteVM(vm)
+							vm = controller.get_vm_by_uuid(action.server.virtual_machines[0].uuid)
+						controller.delete_vm(vm)
 					except Exception as e:
 						print "Could not delete VM. Exception: %s" % str(e)
 				XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", 
@@ -89,12 +89,12 @@ class ProvisioningDispatcher():
 		logging.debug("PROVISIONING FINISHED...")
 	
 	@staticmethod
-	def __createVM(controller, actionModel, action):
+	def __create_vm(controller, actionModel, action):
 		try:
 			logging.debug("**************************** OK - 1")
 			actionModel.checkActionIsPresentAndUnique()
 			logging.debug("**************************** OK - 2")
-			Server, VMmodel = controller.getServerAndCreateVM(action)
+			Server, VMmodel = controller.get_server_and_create_vm(action)
 			logging.debug("**************************** OK - 3")
 			ActionController.PopulateNetworkingParams(action.server.virtual_machines[0].xen_configuration.
 														interfaces.interface, VMmodel)
@@ -110,7 +110,7 @@ class ProvisioningDispatcher():
 	def __deleteStartStopRebootVM(controller, actionModel, action):
 		try:
 			actionModel.checkActionIsPresentAndUnique()
-			VMmodel =  controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
+			VMmodel =  controller.get_vm_by_uuid(action.server.virtual_machines[0].uuid)
 			if not VMmodel:
 				logging.error("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
 				raise Exception("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)

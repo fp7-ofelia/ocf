@@ -33,15 +33,15 @@ class ProvisioningResponseDispatcher():
 				# Complete information required for the Plugin: action type and VM
 				ActionController.completeActionRspec(action, action_model)
 				# XXX: Implement this method or some other doing this job
-				vm = VTDriver.getVMbyUUID(action_model.getObjectUUID())
-				controller=VTDriver.getDriver(vm.vtserver.getVirtTech())
+				vm = VTDriver.get_vm_by_uuid(action_model.getObjectUUID())
+				controller=VTDriver.get_driver(vm.vtserver.getVirtTech())
 				# Update VM after obtaining a response code
 				fail_on_create_vm = ProvisioningResponseDispatcher.__update_vm_after_response(action_model, vm)
 				try:
 					logging.debug("Sending response to Plugin in sendAsync")
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if fail_on_create_vm:
-						controller.deleteVM(vm)
+						controller.delete_vm(vm)
 				except Exception as e:
 					logging.error("Could not connect to Plugin in sendAsync\n%s",e)
 					return
@@ -82,8 +82,8 @@ class ProvisioningResponseDispatcher():
 		elif action_type == Action.PROVISIONING_VM_STOP_TYPE:
 			vm.setState(VirtualMachine.STOPPED_STATE)
 		elif action_type == Action.PROVISIONING_VM_DELETE_TYPE:
-			controller = VTDriver.getDriver(vm.vtserver.getVirtTech())
-			controller.deleteVM(vm)
+			controller = VTDriver.get_driver(vm.vtserver.getVirtTech())
+			controller.delete_vm(vm)
 	
 	@staticmethod
 	def update_vm_after_ONGOING(action_model, vm):

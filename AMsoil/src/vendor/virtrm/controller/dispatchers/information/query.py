@@ -10,7 +10,7 @@ class InformationDispatcher():
 	def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 		logging.debug("Enter listResources")
 		info_rspec = XmlHelper.getSimpleInformation()
-		servers = VTDriver.getAllServers()
+		servers = VTDriver.get_all_servers()
 		base_vm = copy.deepcopy(info_rspec.response.information.resources.server[0].virtual_machine[0])
 		if not servers:
 			logging.debug("No VTServers available")
@@ -26,9 +26,9 @@ class InformationDispatcher():
 					info_rspec.response.information.resources.server.append(new_server)
 				InformationDispatcher.__ServerModelToClass(server, info_rspec.response.information.resources.server[s_index] )
 				if (projectUUID is not 'None'):
-					vms = server.getVMs(projectId = projectUUID)
+					vms = server.get_vms(projectId = projectUUID)
 				else:
-					vms = server.getVMs()
+					vms = server.get_vms()
 				if not vms:
 					logging.debug("No VMs available")
 					if info_rspec.response.information.resources.server[s_index].virtual_machine:
