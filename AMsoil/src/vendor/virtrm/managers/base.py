@@ -385,7 +385,7 @@ class VTResourceManager(object):
                 project = params['project-id']
             if not server.uuid in servers:
                 servers.append(server.uuid)
-                   new_server = dict()
+                new_server = dict()
                 new_server['component_id'] = server.uuid 
                 new_server['slivers'] = list()
                 new_server['slivers'].append(params)
@@ -402,10 +402,10 @@ class VTResourceManager(object):
             raise virt_exception.VTAMNoSliversInSlice(slice_urn)
         for key in created_vms.keys():
             for created_vm in created_vms[key]:
-                    vm_hrn, urn_type = urn_to_hrn(created_vm['name'])
-                    vm_name = get_leaf(vm_hrn)
-                    slice_name = get_leaf(get_authority(vm_hrn))
-                    vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
+                vm_hrn, urn_type = urn_to_hrn(created_vm['name'])
+                vm_name = get_leaf(vm_hrn)
+                slice_name = get_leaf(get_authority(vm_hrn))
+                vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).first()
                 current_vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
                 time.sleep(10)
                 #XXX: Very ugly, improve this
@@ -415,10 +415,10 @@ class VTResourceManager(object):
                 if current_vm:
                     db_session.delete(vm)
                     db_session.commit()
-                        vm_expires = VMExpires()
-                        vm_expires.expires = end_time
+                    vm_expires = VMExpires()
+                    vm_expires.expires = end_time
                     vm_expires.vm_id = current_vm.id
-                        created_vm['expires'] = end_time 
+                    created_vm['expires'] = end_time 
                     db_session.add(vm_expires)
                     db_session.commit()
                 else:
