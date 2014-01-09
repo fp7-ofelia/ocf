@@ -167,6 +167,7 @@ class GENIv2Handler(xmlrpc.Dispatcher):
     # ---- helper methods
     def _datetime2str(self, dt):
         return dt.strftime(self.RFC3339_FORMAT_STRING)
+
     def _str2datetime(self, strval):
         """Parses the given date string and converts the timestamp to utc and the date unaware of timezones."""
         result = dateparser.parse(strval)
@@ -185,8 +186,8 @@ class GENIv2Handler(xmlrpc.Dispatcher):
         return sliver_list
 
     def _checkRSpecVersion(self, rspec_version_option):
-        if (int(rspec_version_option['version']) != 3) or (rspec_version_option['type'].lower() != 'geni'):
-            raise GENIv2BadArgsError("Only RSpec 3 supported.")
+        if (int(rspec_version_option['version']) != 2) or (rspec_version_option['type'].lower() != 'geni'):
+            raise GENIv2BadArgsError("Only RSpec 2 supported.")
         
     def _errorReturn(self, e):
         """Assembles a GENI compliant return result for faulty methods."""
@@ -195,18 +196,18 @@ class GENIv2Handler(xmlrpc.Dispatcher):
         # do some logging
         logger.error(e)
         logger.error(traceback.format_exc())
-        return { 'geni_api' : 3, 'code' : { 'geni_code' : e.code }, 'output' : str(e) }
+        return { 'geni_api' : 2, 'code' : { 'geni_code' : e.code }, 'output' : str(e) }
         
     def _successReturn(self, result):
         """Assembles a GENI compliant return result for successful methods."""
-        return { 'geni_api' : 3, 'code' : { 'geni_code' : 0 }, 'value' : result, 'output' : None }
+        return { 'geni_api' : 2, 'code' : { 'geni_code' : 0 }, 'value' : result, 'output' : None }
 
 
 
 class GENIv2DelegateBase(object):
     """
     TODO document
-    The GENIv2 handler assumes that this class uses RSpec version 3 when interacting with the client.
+    The GENIv2 handler assumes that this class uses RSpec version 2 when interacting with the client.
     
     General parameters:
     {client_cert} The client's certificate. See [flaskrpcs]XMLRPCDispatcher.requestCertificate(). Also see http://groups.geni.net/geni/wiki/GeniApiCertificates
@@ -251,6 +252,7 @@ class GENIv2DelegateBase(object):
     def get_request_extensions_list(self):
         """Not to overwrite by AM developer. Should retrun a list of request extensions (XSD schemas) to be sent back by GetVersion."""
         return [uri for prefix, uri in self.get_request_extensions_mapping().items()]
+
     def get_request_extensions_mapping(self):
         """Overwrite by AM developer. Should return a dict of namespace names and request extensions (XSD schema's URLs as string).
         Format: {xml_namespace_prefix : namespace_uri, ...}
@@ -266,6 +268,7 @@ class GENIv2DelegateBase(object):
     def get_ad_extensions_list(self):
         """Not to overwrite by AM developer. Should retrun a list of request extensions (XSD schemas) to be sent back by GetVersion."""
         return [uri for prefix, uri in self.get_ad_extensions_mapping().items()]
+
     def get_ad_extensions_mapping(self):
         """Overwrite by AM developer. Should return a dict of namespace names and advertisement extensions (XSD schema URLs as string) to be sent back by GetVersion.
         Format: {xml_namespace_prefix : namespace_uri, ...}
@@ -284,7 +287,7 @@ class GENIv2DelegateBase(object):
         return 'geni_single'
 
     def list_resources(self, client_cert, credentials, geni_available):
-        """Overwrite by AM developer. Shall return an RSpec version 3 (advertisement) or raise an GENIv2...Error.
+        """Overwrite by AM developer. Shall return an RSpec version 2 (advertisement) or raise an GENIv2...Error.
         If {geni_available} is set, only return availabe resources.
         For full description see http://groups.geni.net/geni/wiki/GAPI_AM_API_V2#ListResources"""
         raise GENIv2GeneralError("Method not implemented yet")
@@ -292,7 +295,7 @@ class GENIv2DelegateBase(object):
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Overwrite by AM developer. 
         Shall return the two following values or raise an GENIv2...Error.
-        - a RSpec version 3 (manifest) of newly allocated slivers 
+        - a RSpec version 2 (manifest) of newly allocated slivers 
         - a list of slivers of the format:
             [{'geni_sliver_urn' : String,
               'geni_expires'    : Python-Date,
@@ -329,7 +332,7 @@ class GENIv2DelegateBase(object):
     def provision(self, slice_urn, client_cert, credentials, best_effort, end_time, geni_users):
         """Overwrite by AM developer. 
         Shall return the two following values or raise an GENIv2...Error.
-        - a RSpec version 3 (manifest) of slivers 
+        - a RSpec version 2 (manifest) of slivers 
         - a sliver of the format:
             {'geni_sliver_urn'         : String,
               'geni_allocation_status'  : one of the ALLOCATION_STATE_xxx,

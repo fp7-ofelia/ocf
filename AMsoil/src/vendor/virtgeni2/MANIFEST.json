@@ -1,0 +1,9 @@
+{
+  "name" : "VT AM delegate for GENI AM API v2",
+  "author" : "Sergio Vidiella",
+  "author-email" : "sergio.vidiella@i2cat.net",
+  "version" : 1,
+  "implements" : [],
+  "loads-after" : ["geniv2handler", "geniv2delegatebase", "geniv2exceptions", "virtrm", "virtadminrm", "virtexceptions", "config"],
+  "requires" : []
+}
