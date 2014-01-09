@@ -79,7 +79,6 @@ class VTDelegate(GENIv3DelegateBase):
                 if server.subscribedIp4Ranges: 
                     for ips in server.subscribedIp4Ranges:
                         ip = E.service(type='Range')
-                        ip.append(E.type("IpRange"))
                         ip.append(E.name("IpRange"))
                         ip.append(E.start_value(ips.startIp))
                         ip.append(E.end_value(ips.endIp))
@@ -87,7 +86,6 @@ class VTDelegate(GENIv3DelegateBase):
                 if server.subscribedMacRanges:
                     for macs in server.subscribedMacRanges:
                         mac = E.service(type="Range")
-                        mac.append(E.type("MacRange"))
                         mac.append(E.name("MacRange"))
                         mac.append(E.start_value(macs.startMac))
                         mac.append(E.end_value(macs.endMac))
