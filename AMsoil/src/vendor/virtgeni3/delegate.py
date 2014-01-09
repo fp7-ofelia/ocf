@@ -207,17 +207,17 @@ class VTDelegate(GENIv3DelegateBase):
                             ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
                             expirations.append(last_expiration)
                             vms.extend(ext_vm)
-                            except virt_exception.VTMaxVMDurationExceeded as e:
-                                if best_effort is True:
-                                    vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
-                                else: 
-                                    #If best_effort is False, undo all and throw an exception
-                                    for vm, expiration in vms, expirations:
-                                        try:
-                                            ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
-                                        except virt_exception.VTMaxVMDurationExceeded as e:
-                                            pass
-                                raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
+                        except virt_exception.VTMaxVMDurationExceeded as e:
+                            if best_effort is True:
+                                vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
+                            else: 
+                                #If best_effort is False, undo all and throw an exception
+                                for vm, expiration in vms, expirations:
+                                    try:
+                                        ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                                    except virt_exception.VTMaxVMDurationExceeded as e:
+                                        pass
+                        raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
                 else:
                      if best_effort is False:
                         for vm, expiration in vms, expirations:
@@ -244,7 +244,7 @@ class VTDelegate(GENIv3DelegateBase):
                     raise geniv3_exception.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
                 except virt_exception.VTAMMaxVMDurationExceeded as e:
                     if best_effort is True:
-                            vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
+                        vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
                     else:
                         # If best_effort is False, undo all and throw an exception
                         for vm, expiration in vms, expirations:

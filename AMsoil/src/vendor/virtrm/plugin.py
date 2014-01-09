@@ -19,10 +19,14 @@ def setup():
             print "after -> virtrm.%s = %s" % (setting, config.get("virtrm.%s" % setting))
 
     # Register Virtualisation RM as a service
+    print "before from..."
     from managers.base import VTResourceManager
-    import utils.exceptions as exceptions_package
+    print "after from...."
     rm = VTResourceManager()
+    print "before registering..."
     pm.registerService('virtrm', rm)
+    print "after registering...."
+    import utils.exceptions as exceptions_package
     pm.registerService('virtexceptions', exceptions_package)
     # Register Virtualisation Admin RM as a service
     from managers.admin import VTAdminResourceManager

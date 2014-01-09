@@ -30,9 +30,9 @@ logging=amsoil.core.log.getLogger('VTResourceManager')
 class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService('worker')
-    # XXX: loading virtualisation RM in memory. Is this as expected?
-    virtrm = pm.getService("virtrm")
-    from virtrm.controller.drivers.virt import VTDriver
+    # FIXME or REMOVE: circular dependency
+    #virtrm = pm.getService("virtrm")
+    #from virtrm.controller.drivers.virt import VTDriver
 
     RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION") # sec in the allocated state
     MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)

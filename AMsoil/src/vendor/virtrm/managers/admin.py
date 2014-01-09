@@ -5,9 +5,9 @@ import amsoil.core.pluginmanager as pm
 
 class VTAdminResourceManager(object):
     config = pm.getService("config")
-    # XXX: loading virtualisation RM in memory. Is this as expected?
-    virtrm = pm.getService("virtrm")
-    from virtrm.controller.drivers.virt import VTDriver
+    # FIXME or REMOVE: circular dependency
+    #virtrm = pm.getService("virtrm")
+    #from virtrm.controller.drivers.virt import VTDriver
         
     def __init__(self):
         super(VTAdminResourceManager, self).__init__()
