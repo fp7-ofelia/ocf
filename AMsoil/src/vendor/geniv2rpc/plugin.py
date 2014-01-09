@@ -1,5 +1,5 @@
 import amsoil.core.pluginmanager as pm
-from g2rpc.genivthree import GENIv2Handler, GENIv2DelegateBase
+from g2rpc.genivtwo import GENIv2Handler, GENIv2DelegateBase
 from g2rpc import exceptions as geni_exceptions
 
 def setup():
@@ -12,6 +12,6 @@ def setup():
     xmlrpc = pm.getService('xmlrpc')
     geni_handler = GENIv2Handler()
     pm.registerService('geniv2handler', geni_handler)
-    pm.registerService('geniv2delegatebase', GENIv3DelegateBase)
+    pm.registerService('geniv2delegatebase', GENIv2DelegateBase)
     pm.registerService('geniv2exceptions', geni_exceptions)
     xmlrpc.registerXMLRPC('geni2', geni_handler, '/geni2') # name, handlerObj, endpoint
