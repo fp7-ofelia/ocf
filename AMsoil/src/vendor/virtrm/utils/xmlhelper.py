@@ -25,7 +25,7 @@ class XMLParsingException(Exception):
 class XmlParser(object):
 
     @staticmethod
-    def parseXML(rawXML):
+    def parse_xml(rawXML):
         print "Parsing XML..."
         try:
             object = vtRspecInterface.parseString(rawXML)
@@ -41,9 +41,8 @@ class XmlParser(object):
     XML Query Crafter class 
 '''
 class XmlCrafter(object):
-
     @staticmethod
-    def craftXML(XMLclass):
+    def craft_xml(XMLclass):
         print "Crafting Model..."
         try:
             xml = StringIO()
@@ -58,87 +57,81 @@ class XmlCrafter(object):
             print >> sys.stderr, e
             raise XMLParsingException("Could not craft Model; traceback\n")
 
-def xmlFileToString(file):
+def xml_file_to_string(file):
     try:        
         f = open(file, 'r')
         xml =  f.read()
-	f.close()
+        f.close()
         #print xml
         return xml
     except Exception:
         print "Oops!  File not found"
 
-
 class XmlHelper(object):
-
     #TODO: improve this by creating a proper constructor    
-
     @staticmethod
-    def getSimpleActionSpecificQuery(type, serverUUID):
-        
-	with open(os.path.dirname(__file__)+'/xml/queryProvisioning.xml','r') as openProv:
-	         simpleRspec =  XmlHelper.parseXmlString(openProv.read())
-	if type == 'stop': type = 'hardStop'
-	simpleRspec.query.provisioning.action[0].type_ = type
-	simpleRspec.query.provisioning.action[0].server.uuid = serverUUID
-	return simpleRspec
+    def get_simple_action_specific_query(type, server_uuid):
+        with open(os.path.dirname(__file__)+'/xml/queryprovisioning.xml','r') as open_prov:
+            simple_rspec =  XmlHelper.parse_xml_string(open_prov.read())
+        if type == 'stop': type = 'hardStop'
+        simple_rspec.query.provisioning.action[0].type_ = type
+        simple_rspec.query.provisioning.action[0].server.uuid = server_uuid
+        return simple_rspec
 #        if type == 'start':
-#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
+#            simple_rspec =  XmlHelper.parse_xml_string(open(os.path.dirname(__file__)+'/xml/queryStart.xml','r').read())
 #        if type == 'delete':
-#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryDelete.xml','r').read())            
+#            simple_rspec =  XmlHelper.parse_xml_string(open(os.path.dirname(__file__)+'/xml/queryDelete.xml','r').read())            
 #        if type == 'stop':
-#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryStop.xml','r').read())
+#            simple_rspec =  XmlHelper.parse_xml_string(open(os.path.dirname(__file__)+'/xml/queryStop.xml','r').read())
 #        if type == 'reboot':
-#            simpleRspec =  XmlHelper.parseXmlString(open(os.path.dirname(__file__)+'/xml/queryReboot.xml','r').read())
-#        return simpleRspec
-
+#            simple_rspec =  XmlHelper.parse_xml_string(open(os.path.dirname(__file__)+'/xml/queryReboot.xml','r').read())
+#        return simple_rspec
+    
     @staticmethod
-    def getProcessingResponse(status, action,  description, ):
-	with open(os.path.dirname(__file__)+'/xml/emptyResponse.xml','r') as openResp:
-        	simpleRspec =  XmlHelper.parseXmlString(openResp.read())
-        simpleRspec.response.provisioning.action[0].status = status
-        simpleRspec.response.provisioning.action[0].description = description
+    def get_processing_response(status, action,  description, ):
+        with open(os.path.dirname(__file__)+'/xml/emptyresponse.xml','r') as open_resp:
+            simple_rspec =  XmlHelper.parse_xml_string(open_resp.read())
+        simple_rspec.response.provisioning.action[0].status = status
+        simple_rspec.response.provisioning.action[0].description = description
         #XXX:This is because the ActionController sends a dummy, None, dummy request
         if action != None: 
-            simpleRspec.response.provisioning.action[0].id = action.id
-            simpleRspec.response.provisioning.action[0].server.uuid = action.server.uuid
-        return simpleRspec
-
+            simple_rspec.response.provisioning.action[0].id = action.id
+            simple_rspec.response.provisioning.action[0].server.uuid = action.server.uuid
+        return simple_rspec
+    
     @staticmethod
-    def getSimpleActionQuery(action=None):
-	with open(os.path.dirname(__file__)+'/xml/simpleActionQuery.xml','r') as openAction:
-	        simpleRspec =  XmlHelper.parseXmlString(openAction.read())
+    def get_simple_action_query(action=None):
+        with open(os.path.dirname(__file__)+'/xml/simpleactionquery.xml','r') as open_action:
+            simple_rspec =  XmlHelper.parse_xml_string(open_action.read())
         if action:
-            simpleRspec.query.provisioning.action[0] = action
-        return simpleRspec
-
+            simple_rspec.query.provisioning.action[0] = action
+        return simple_rspec
+    
     @staticmethod
-    def getSimpleInformation():
-	with open(os.path.dirname(__file__)+'/xml/simpleListResources.xml','r') as openResources:
-	        simpleRspec =  XmlHelper.parseXmlString(openResources.read())
-        return simpleRspec
-
+    def get_simple_information():
+        with open(os.path.dirname(__file__)+'/xml/simplelistresources.xml','r') as open_resources:
+            simple_rspec =  XmlHelper.parse_xml_string(open_resources.read())
+        return simple_rspec
+    
     @staticmethod
-    def getListActiveVMsQuery():
-	with open(os.path.dirname(__file__)+'/xml/listActiveVMsQuery.xml','r') as openVMs:
-	        simpleRspec =  XmlHelper.parseXmlString(openVMs.read())
-        return simpleRspec
-
-
-
+    def get_list_active_vms_query():
+        with open(os.path.dirname(__file__)+'/xml/listactivevmsquery.xml','r') as open_vms:
+            simple_rspec =  XmlHelper.parse_xml_string(open_vms.read())
+        return simple_rspec
+    
     @staticmethod
-    def craftSimpleActionQuery(SimpleRspec, status, description):
-        SimpleRspec.query.provisioning.action[0].status = status
-        SimpleRspec.query.provisioning.action[0].description = description
-        return craiftXmlClass(SimpleRspec)
-
+    def craft_simple_action_query(simple_rspec, status, description):
+        simple_rspec.query.provisioning.action[0].status = status
+        simple_rspec.query.provisioning.action[0].description = description
+        return craft_xml_class(simple_rspec)
+    
     @staticmethod
-    def parseXmlString(xml):
-        return XmlParser.parseXML(xml)
-
-    #def parseXmlStringResponse(xml):
-    #    return XmlResponseParser.parseXML(xml)
-
+    def parse_xml_string(xml):
+        return XmlParser.parse_xml(xml)
+    
+    #def parse_xml_stringResponse(xml):
+    #    return XmlResponseParser.parse_xml(xml)
+    
     @staticmethod
-    def craftXmlClass(xmlClass):
-        return XmlCrafter.craftXML(xmlClass)
+    def craft_xml_class(xml_class):
+        return XmlCrafter.craft_xml(xml_class)
