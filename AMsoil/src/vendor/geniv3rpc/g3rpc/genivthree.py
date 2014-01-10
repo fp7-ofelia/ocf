@@ -28,12 +28,10 @@ class GENIv3Handler(xmlrpc.Dispatcher):
     def __init__(self):
         super(GENIv3Handler, self).__init__(logger)
         self._delegate = None
-        logger.info("SETTING GENIv3 DELEGATE: None")
     
     @serviceinterface
     def setDelegate(self, geniv3delegate):
         self._delegate = geniv3delegate
-        logger.info("SETTING GENIv3 DELEGATE: %s" % geniv3delegate)
     
     @serviceinterface
     def getDelegate(self):
