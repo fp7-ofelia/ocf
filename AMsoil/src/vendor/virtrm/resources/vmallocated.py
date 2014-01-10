@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.orm import validates
-from utils.import validators
+from utils import validators
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
@@ -158,7 +158,7 @@ class VMAllocated(db.Model):
     def get_name(self):
         return self.name
     
-   def set_project_id(self,projectId):
+    def set_project_id(self,projectId):
         if not isinstance(project_id,str):
             project_id = str(project_id)
         self.project_id = project_id

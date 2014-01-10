@@ -107,7 +107,7 @@ class Action(db.Model):
 
     @validates('status')
     def validate_status(self, key, status):
-            if status not in self.__possible_status:
+        if status not in self.__possible_status:
             raise Exception("Status not valid")
         return status
 

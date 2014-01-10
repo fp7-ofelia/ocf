@@ -1,5 +1,4 @@
 from interfaces.networkinterface import NetworkInterface
-from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
 from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -40,7 +39,7 @@ class VirtualMachine(db.Model):
     '''OS parameters'''
     operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
     operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False, default="")
-    operating_system_distribution = Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
+    operating_system_distribution = db.Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
 
     '''Networking'''
     network_interfaces = association_proxy("vm_networkinterfaces", "networkinterface")
