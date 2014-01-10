@@ -1,19 +1,16 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, backref
-
-from utils.commonbase import Base
+from utils.base import db
 
 '''@author: svidiella'''
 
-class NetworkInterfaceConnectedTo(Base):
+class NetworkInterfaceConnectedTo(db.Model):
     """Connections between Network interfaces"""
 
     __tablename__ = 'vt_manager_networkinterface_connectedTo'
 
-    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    from_networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
-    to_networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    from_networkinterface_id = db.Column(db.Integer, db.ForeignKey('vt_manager_networkinterface.id'))
+    to_networkinterface_id = db.Column(Integer, db.ForeignKey('vt_manager_networkinterface.id'))
 
-    to_networkinterface = relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="from_networkinterface")
-    from_networkinterface = relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref="to_network_interface")
+    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="from_networkinterface")
+    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref="to_network_interface")
 

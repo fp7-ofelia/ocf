@@ -1,21 +1,18 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, backref
-
-from utils.commonbase import Base
-
+from interfaces.networkinterface import NetworkInterface
+from resources.virtualmachine import VirtualMachine
+from utils.base import db
 
 '''@author: SergioVidiella'''
 
-
-class VMNetworkInterfaces(Base):
+class VMNetworkInterfaces(db.Model):
     """Network interfaces related to a Virtual Machine"""
 
     __tablename__ = 'vt_manager_virtualmachine_networkInterfaces'
 
-    id = Column(Integer, nullable=False, autoincrement=True, primary_key=True)
-    virtualmachine_id = Column(Integer, ForeignKey('vt_manager_virtualmachine.id'))
-    networkinterface_id = Column(Integer, ForeignKey('vt_manager_networkinterface.id'))
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    virtualmachine_id = db.Column(db.Integer, db.ForeignKey('vt_manager_virtualmachine.id'))
+    networkinterface_id = db.Column(db.Integer, db.ForeignKey('vt_manager_networkinterface.id'))
 
-    vm = relationship("VirtualMachine", backref="vm_networkinterfaces")
-    networkinterface = relationship("NetworkInterface", backref="vm_associations")
+    vm = db.relationship("VirtualMachine", backref="vm_networkinterfaces")
+    networkinterface = db.relationship("NetworkInterface", backref="vm_associations")
 

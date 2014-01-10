@@ -1,175 +1,183 @@
-from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import validates
-
+from utils.base import db
+import amsoil.core.log
 import uuid
 import logging 
 
-from utils.commonbase import Base, db_session
-import amsoil.core.log
 logging=amsoil.core.log.getLogger('Action')
 
 
 '''@author: SergioVidiella'''
 
 
-class Action(Base):
+class Action(db.Model):
     """Class to store actions"""
-
+    
     __tablename__ = 'vt_manager_action'
-
+    
     '''Action status Types'''
     QUEUED_STATUS = "QUEUED"
     ONGOING_STATUS= "ONGOING"
     SUCCESS_STATUS  = "SUCCESS"
     FAILED_STATUS   = "FAILED"
-
-    __possibleStatus = (QUEUED_STATUS, ONGOING_STATUS, SUCCESS_STATUS, FAILED_STATUS)
-
+    
+    __possible_status = (QUEUED_STATUS, ONGOING_STATUS, SUCCESS_STATUS, FAILED_STATUS)
+    
     '''Action type Types'''
-    ##Monitoring
-    #Servers
+    ## Monitoring
+    # Servers
     MONITORING_SERVER_VMS_TYPE="listActiveVMs"
 
-    __monitoringTypes = (
-    	#Server
-    	MONITORING_SERVER_VMS_TYPE,
+    __monitoring_types = (
+        # Server
+        MONITORING_SERVER_VMS_TYPE,
     )
 
-    #VMs
-    ##Provisioning 
-    #VM provisioning actions        
+    # VMs
+    ## Provisioning 
+    # VM provisioning actions        
     PROVISIONING_VM_CREATE_TYPE = "create"
     PROVISIONING_VM_START_TYPE = "start"
     PROVISIONING_VM_DELETE_TYPE = "delete"
     PROVISIONING_VM_STOP_TYPE = "hardStop"
     PROVISIONING_VM_REBOOT_TYPE = "reboot"
 
-    __provisioningTypes = (
-    	#VM
+    __provisioning_types = (
+        # VM
         PROVISIONING_VM_CREATE_TYPE,
         PROVISIONING_VM_START_TYPE,
         PROVISIONING_VM_DELETE_TYPE,
         PROVISIONING_VM_STOP_TYPE,
         PROVISIONING_VM_REBOOT_TYPE,
     )
-
+    
     '''All possible types '''
-    __possibleTypes = (
-    	#Monitoring
-        #Server
+    __possible_types = (
+        # Monitoring
+        # Server
         MONITORING_SERVER_VMS_TYPE,
 
-        ##Provisioning
-        #VM
+        ## Provisioning
+        # VM
         PROVISIONING_VM_CREATE_TYPE,
         PROVISIONING_VM_START_TYPE,
         PROVISIONING_VM_DELETE_TYPE,
         PROVISIONING_VM_STOP_TYPE,
         PROVISIONING_VM_REBOOT_TYPE,
     )
-
+    
     '''General parameters'''
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    type = Column(String(16), nullable=False, default="")
-    uuid = Column(String(512), nullable=False, default="")
-    callBackUrl = Column(String(200), nullable=False)
-    status = Column(String(16), nullable=False, default="")
-    description = Column(String(2048), default="")
-    objectUUID = Column(String(512), default="")
-
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    type = db.Column(db.String(16), nullable=False, default="")
+    uuid = db.Column(db.String(512), nullable=False, default="")
+    callback_url = db.Column("callBackUrl", db.String(200), nullable=False)
+    status = db.Column(db.String(16), nullable=False, default="")
+    description = db.Column(db.String(2048), default="")
+    object_uuid = db.Column("objectUUID", db.String(512), default="")
+    
     '''Public methods'''
     @staticmethod
-    def constructor(aType,status,objectUUID=None,description=""):
-    	self = Action()
-        self.setType(aType)
-        self.setStatus(status)
-        self.setUUID(uuid.uuid4())
-        if not objectUUID == None:
-            self.setObjectUUID(objectUUID)
+    def constructor(a_type,status,object_uuid=None,description=""):
+        self = Action()
+        self.set_type(a_type)
+        self.set_status(status)
+        self.set_uuid(uuid.uuid4())
+        if not object_uuid == None:
+            self.set_object_uuid(object_uuid)
         if not description == "":
             self.setDescription(description)
         return self
-
+    
     def destroy(self):
-        self.delete()
-
-    def checkActionIsPresentAndUnique(self):
-    	if len(db_session.query(Action).filter(Action.uuid == self.uuid).all()) != 0:
-	    db_session.expunge_all()
+        db.session.delete(self)
+        db.session.commit()
+    
+    def check_action_is_present_and_unique(self):
+        if len(Action.query.filter_by(uuid = self.uuid).all()) != 0:
             logging.error("Action with the same uuid already exists")
             raise Exception("Action with the same uuid already exists")
-	db_session.expunge_all()
-
+    
     '''Validators'''
     @validates('type')
     def validate_type(self, key, type):
-        if type not in self.__possibleTypes:
+        if type not in self.__possible_types:
             raise Exception("Action type not valid")
         return type
 
 
     @validates('status')
     def validate_status(self, key, status):
-    	if status not in self.__possibleStatus:
+            if status not in self.__possible_status:
             raise Exception("Status not valid")
         return status
 
     '''Getters and setters'''
     @staticmethod
-    def getAndCheckActionByUUID(uuid):
-    	actions = Action.objects.filter (uuid = uuid)
-        if actions.count() ==  1:
+    def get_and_check_action_by_uuid(uuid):
+        actions = Action.query.filter_by(uuid = uuid).all()
+        if len(actions) ==  1:
             return actions[0]
-        elif actions.count() == 0:
+        elif len(actions) == 0:
             logging.error("Action with uuid %s does not exist" % uuid)
             raise Exception("Action with uuid %s does not exist" % uuid)
-        elif actions.count() > 1:
+        elif len(actions) > 1:
             logging.error("Action with uuid %s does not exist" % uuid)
             raise Exception("More than one Action with uuid %s" % uuid)
-
-    def setStatus(self, status):
-    	if status not in self.__possibleStatus:
+    
+    def set_status(self, status):
+        if status not in self.__possible_status:
             raise Exception("Status not valid")
         self.status = status
-
-    def getStatus(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def get_status(self):
         return self.status
 
-    def setType(self, type):
-    	if type not in self.__possibleTypes:
+    def set_type(self, type):
+        if type not in self.__possibleTypes:
             raise Exception("Action type not valid")
         self.type = type
-
-    def getType(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def get_type(self):
         return self.type
-
-    def isProvisioningType(self):
-	return self.type in self.__provisioningTypes
- 
-    def isMonitoringType(self):
-	return self.type in self.__monitoringTypes
-
-    def setDescription(self, description):
+    
+    def is_provisioning_type(self):
+        return self.type in self.__provisioning_types
+    
+    def is_monitoring_type(self):
+        return self.type in self.__monitoring_types
+    
+    def set_description(self, description):
         self.description = description
-
-    def getDescription(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def get_description(self):
         return self.descripion
-
-    def setUUID(self, uuid):
+    
+    def set_uuid(self, uuid):
         self.uuid = uuid
-
-    def getUUID(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def get_uuid(self):
         return self.uuid
-
-    def setCallBackUrl(self, url):
-        self.uuid = url
-
-    def getCallBackUrl(self):
+    
+    def set_callback_url(self, url):
+        self.url = url
+        db.session.add(self)
+        db.session.commit()
+    
+    def get_callback_url(self):
         return self.url
-
-    def setObjectUUID(self, objUUID):
-        self.objectUUID = objUUID
+    
+    def set_object_uuid(self, obj_uuid):
+        self.object_uuid = obj_uuid
+        db.session.add(self)
+        db.session.commit()
         
-    def getObjectUUID(self):
-        return self.objectUUID
-
+    def get_object_uuid(self):
+        return self.object_uuid

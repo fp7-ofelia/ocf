@@ -1,62 +1,53 @@
-from sqlalchemy import Column, Integer, String, desc
-from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.orm import validates, relationship, backref
-from sqlalchemy.ext.associationproxy import association_proxy
-
-import inspect
-
-from utils.commonbase import Base, db_session
-from utils import validators
-from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
-
 from interfaces.networkinterface import NetworkInterface
 from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
-
-#from resources.xenvm import XenVM
-
+from sqlalchemy import desc
+from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
+from utils.validators
+from utils.base import db
+from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
+import inspect
 
 '''@author: SergioVidiella'''
 
-
-class VirtualMachine(Base):
+class VirtualMachine(db.Model):
     """VirtualMachine Class."""
 
     __tablename__ = 'vt_manager_virtualmachine'
 
-    __childClasses = (
-    	'XenVM',
+    __child_classes = (
+            'XenVM',
     )
 
- #   xenvm = relationship("XenVM", backref="vm")
-
     ''' General parameters '''
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(512), nullable=False, default="")
-    uuid = Column(String(1024), nullable=False, default="")
-    memory = Column(Integer)
-    numberOfCPUs = Column(Integer)
-    discSpaceGB = Column(DOUBLE)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(512), nullable=False, default="")
+    uuid = db.Column(db.String(1024), nullable=False, default="")
+    memory = db.Column(db.Integer)
+    number_of_cpus = db.Column("numberOfCPUs", db.Integer)
+    disc_space_gb = db.Column("discSpaceGB", DOUBLE)
 
     '''Property parameters'''
-    projectId = Column(String(1024), nullable=False, default="")
-    projectName = Column(String(1024), nullable=False, default="")
-    sliceId = Column(String(1024), nullable=False, default="")
-    sliceName = Column(String(1024), nullable=False, default="")
-    guiUserName = Column(String(1024), nullable=False, default="")
-    guiUserUUID = Column(String(1024), nullable=False, default="")
-    expedientId = Column(Integer)
+    project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
+    project_name = db.Column("projectName", db.String(1024), nullable=False, default="")
+    slice_id = db.Column("sliceId", db.String(1024), nullable=False, default="")
+    slice_name = db.Column("sliceName", db.String(1024), nullable=False, default="")
+    gui_user_name = db.Column("guiUserName", db.String(1024), nullable=False, default="")
+    gui_user_uuid = db.Column("guiUserUUID", db.String(1024), nullable=False, default="")
+    expedient_id = db.Column("expedientId", db.Integer)
 
     '''OS parameters'''
-    operatingSystemType = Column(String(512), nullable=False, default="")
-    operatingSystemVersion = Column(String(512), nullable=False, default="")
-    operatingSystemDistribution = Column(String(512), nullable=False, default="")
+    operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
+    operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False, default="")
+    operating_system_distribution = Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
 
     '''Networking'''
-    networkInterfaces = association_proxy("vm_networkinterfaces", "networkinterface")
+    network_interfaces = association_proxy("vm_networkinterfaces", "networkinterface")
 
     '''Other'''
-    callBackURL = Column(String(200))
-    state = Column(String(24))
+    callback_url = db.Column("callBackURL", db.String(200))
+    state = db.Column(db.String(24))
 
     '''Possible states'''
     RUNNING_STATE = 'running'
@@ -71,163 +62,184 @@ class VirtualMachine(Base):
     DELETING_STATE = 'deleting...'
     REBOOTING_STATE = 'rebooting...'
 
-    __possibleStates = (RUNNING_STATE,CREATED_STATE,STOPPED_STATE,UNKNOWN_STATE,FAILED_STATE,ONQUEUE_STATE,STARTING_STATE,STOPPING_STATE,CREATING_STATE,DELETING_STATE,REBOOTING_STATE)
+    __possible_states = (RUNNING_STATE,CREATED_STATE,STOPPED_STATE,UNKNOWN_STATE,FAILED_STATE,ONQUEUE_STATE,STARTING_STATE,STOPPING_STATE,CREATING_STATE,DELETING_STATE,REBOOTING_STATE)
 
     ''' Mutex over the instance '''
     mutex = None
 
+    '''Defines soft or hard state of the VM'''
+    do_save = True
+
     '''Validators'''
     @validates('name')
     def validate_name(self, key, name):
-    	try:
+        try:
             validators.vm_name_validator(name)
             return name
         except Exception as e:
             raise e
-
-    @validates('operatingSystemType')
+    
+    @validates('operating_system_type')
     def validate_operatingsystemtype(self, key, os_type):
         try:
-            OSTypeClass.validateOSType(os_type)
+            OSTypeClass.validate_os_type(os_type)
             return os_type
         except Exception as e:
             raise e
-
-    @validates('operatingSystemDistribution')
+    
+    @validates('operating_system_distribution')
     def validate_operatingsystemdistribution(self, key, os_distribution):
         try:
-            OSDistClass.validateOSDist(os_distribution)
+            OSDistClass.validate_os_dist(os_distribution)
             return os_distribution
         except Exception as e:
             raise e
-
-    @validates('operatingSystemVersion')
+    
+    @validates('operating_system_version')
     def validate_operatingsystemversion(self, key, os_version):
         try:
-            OSVersionClass.validateOSVersion(os_version)
+            OSVersionClass.validate_os_version(os_version)
             return os_version
         except Exception as e:
             raise e
-
-    ''' Getters and setters'''
-    def getLockIdentifier(self):
-  	#Uniquely identifies object by a key
-        return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
-
-    def getChildObject(self):
-    	for childClass in self.__childClasses:
+    
+    def auto_save(self):
+        if self.do_save:
+            db.session.add(self)
+            db.session.commit()
+    
+    ''' Public methods '''
+    def get_child_object(self):
+        for child_class in self.__child_classes:
             try:
-            	return self.__getattribute__(childClass.lower())
-            except eval(childClass).DoesNotExist:
-            	return self
-
-    def setName(self, name):
-    	try:
-       	     validators.vm_name_validator(name)
-             self.name = name
+                return self.__getattribute__(child_class.lower())
+            except eval(child_class).DoesNotExist:
+                return self
+    
+    def get_lock_identifier(self):
+        # Uniquely identifies object by a key
+        return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
+    
+    def set_name(self, name):
+        try:
+            validators.vm_name_validator(name)
+            self.name = name
+            self.auto_save()
         except Exception as e:
-             raise e
+            raise e
         
-    def getName(self):
+    def get_name(self):
         return self.name
-
-    def setUUID(self, uuid):
+    
+    def set_uuid(self, uuid):
         self.uuid = uuid
+        self.auto_save()
         
-    def getUUID(self):
+    def get_uuid(self):
         return self.uuid
-
-    def setProjectId(self,projectId):
-    	if not isinstance(projectId,str):
-            projectId = str(projectId)
-        self.projectId = projectId
+    
+    def set_project_id(self,projectId):
+        if not isinstance(project_id,str):
+            project_id = str(project_id)
+        self.project_id = project_id
+        self.auto_save()
         
-    def getProjectId(self):
-        return self.projectId
-
-    def setProjectName(self,projectName):
-        if not isinstance(projectName,str):
-            projectName = str(projectName)
-        self.projectName = projectName
+    def get_project_id(self):
+        return self.project_id
+    
+    def set_project_name(self,project_name):
+        if not isinstance(project_name,str):
+            project_name = str(project_name)
+        self.project_name = project_name
+        self.auto_save()
         
-    def getProjectName(self):
-        return self.projectName
-
-    def setSliceId(self, value):
-        self.sliceId = value
+    def get_project_name(self):
+        return self.project_name
+    
+    def set_slice_id(self, value):
+        self.slice_id = value
+        self.auto_save()
+         
+    def get_slice_id(self):
+        return self.slice_id
+    
+    def set_slice_name(self, value):
+        self.slice_name = value
+        self.auto_save()
+    
+    def get_slice_name(self):
+        return self.slice_name
+    
+    def set_uuid(self,expedient_id):
+        if not isinstance(expedient_id,int):
+            expedient_id = int(expedient_id)
+        self.expedient_id = expedient_id
+        self.auto_save()
         
-    def getSliceId(self):
-        return self.sliceId
-
-    def setSliceName(self, value):
-        self.sliceName = value
-
-    def getSliceName(self):
-        return self.sliceName
-
-    def setUIId(self,expedientId):
-        if not isinstance(expedientId,int):
-            expedientId = int(expedientId)
-        self.expedientId = expedientId
-        
-    def getUIId(self):
-        return self.expedientId
-
-    def setState(self,state):
-        if state not in self.__possibleStates:
+    def get_uuid(self):
+        return self.expedient_id
+    
+    def set_state(self,state):
+        if state not in self.__possible_states:
             raise KeyError, "Unknown state"
         else:
             self.state = state
+            self.auto_save()
         
-    def getState(self):
+    def get_state(self):
         return self.state
-
-    def setMemory(self,memory):
-                self.memory = memory
-
-    def getMemory(self):
+    
+    def set_memory(self,memory):
+        self.memory = memory
+        self.auto_save()
+    
+    def get_memory(self):
         return self.memory
-
-    def setNumberOfCPUs(self,num):
-        self.numberOfCPUs=num
+    
+    def set_number_of_cpus(self,num):
+        self.number_of_cpus = num
+        self.auto_save()
         
-    def getNumberOfCPUs(self):
-        return self.numberOfCPUs
-
-    def setDiscSpaceGB(self,num):
-        self.discSpaceGB=num
+    def get_number_of_cpus(self):
+        return self.number_of_cpus
+    
+    def set_disc_space_gb(self,num):
+        self.disc_space_gb = num
+        self.auto_save()
+         
+    def get_disc_space_gb(self):
+        return self.disc_space_gb
+    
+    def set_os_type(self, type):
+        OSTypeClass.validate_os_type(type)
+        self.operating_system_type = type
+        self.auto_save()
         
-    def getDiscSpaceGB(self):
-        return self.discSpaceGB
-
-    def setOSType(self, type):
-        OSTypeClass.validateOSType(type)
-        self.operatingSystemType = type
+    def get_os_type(self):
+        return self.operating_system_type
+    
+    def set_os_version(self, version):
+        OSVersionClass.validate_os_version(version)
+        self.operating_system_version = version
+        self.auto_save()
         
-    def getOSType(self):
-        return self.operatingSystemType
-
-    def setOSVersion(self, version):
-    	OSVersionClass.validateOSVersion(version)
-        self.operatingSystemVersion = version
+    def get_os_version(self):
+        return self.operating_system_version
+    
+    def set_os_distribution(self, dist):
+        OSDistClass.validate_os_dist(dist)
+        self.operating_system_distribution = dist
+        self.auto_save()
         
-    def getOSVersion(self):
-        return self.operatingSystemVersion
-
-    def setOSDistribution(self, dist):
-        OSDistClass.validateOSDist(dist)
-        self.operatingSystemDistribution = dist
+    def get_os_distribution(self):
+        return self.operating_system_distribution
+    
+    def set_callback_url(self, url):
+        self.callback_url = url
+        self.auto_save()
         
-    def getOSDistribution(self):
-        return self.operatingSystemDistribution
-
-    def setCallBackURL(self, url):
-        self.callBackURL = url
-        
-    def getCallBackURL(self):
-        return self.callBackURL
-
-    def getNetworkInterfaces(self):
-	return db_session.query(NetworkInterface).join(NetworkInterface.vm_associations, aliased=True).filter(VMNetworkInterfaces.virtualmachine_id == self.id).order_by(NetworkInterface.isMgmt.desc(), NetworkInterface.id).all()
-
-
+    def get_callback_url(self):
+        return self.callback_url
+    
+    def get_network_interfaces(self):
+        return self.network_interfaces.order_by('-isMgmt','id').all()
