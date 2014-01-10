@@ -4,7 +4,6 @@ import sys
 from utils.servicethread import *
 from utils.xmlhelper import XmlHelper
 from utils.httputils import HttpUtils
-from resources.virtualmachine import VirtualMachine
 from controller.actions.action import ActionController
 
 from utils.commonbase import db_session
@@ -15,36 +14,34 @@ logging=amsoil.core.log.getLogger('VTDriver')
 class VTDriver():
 
     CONTROLLER_TYPE_XEN = "xen"
-    __possibleVirtTechs = [CONTROLLER_TYPE_XEN]
-
-
+    __possible_virt_techs = [CONTROLLER_TYPE_XEN]
+    
     @staticmethod
     def get_driver(virtType):
         from controller.drivers.xen import XenDriver
         if virtType == VTDriver.CONTROLLER_TYPE_XEN:
             return XenDriver.get_instance()
-
+    
     @staticmethod
     def get_all_drivers():
         from controller.drivers.xen import XenDriver
         drivers = []    
-        for vt in VTDriver.__possibleVirtTechs:
+        for vt in VTDriver.__possible_virt_techs:
             drivers.append(VTDriver.get_driver(vt))
         return drivers
-
+    
     @staticmethod
     def get_all_servers():
         from resources.vtserver import VTServer
-        servers = db_session.query(VTServer).all()
+        servers = VTServer.query.all()
         logging.debug("***********************************************" + str(servers))
-        serversChild = []
+        servers_child = []
         for server in servers:
             logging.debug("*****************************************" + str(server))
             child_server = server.getChildObject()
             logging.debug("*****************************************" + str(child_server))
-            serversChild.append(child_server)
-        return serversChild
-
+            servers_child.append(child_server)
+        return servers_child
     
     @staticmethod
     def create_server_from_post(request, instance):
@@ -60,7 +57,7 @@ class VTDriver():
             s.pingAuth("ping",instance.agentPassword)
         except:
             raise forms.ValidationError("Could not connect to server: password mismatch")
-        controller = VTDriver.get_driver(instance.getVirtTech())
+        controller = VTDriver.get_driver(instance.get_virt_tech())
         return controller.crud_server_from_instance(instance)
 
     @staticmethod
@@ -88,7 +85,7 @@ class VTDriver():
     def get_server_by_id(id):
         from resources.vtserver import VTServer
         try:
-            return db_session.query(VTServer).filter(VTServer.id==id).first().getChildObject()
+            return VTServer.query.filter_by(id=id).one().get_child_object()
         except:
             raise Exception("Server does not exist or id not unique")
     
@@ -96,13 +93,12 @@ class VTDriver():
     def get_server_by_uuid(uuid):
         from resources.vtserver import VTServer
         try:
-            return db_session.query(VTServer).filter(VTServer.uuid == uuid).one().getChildObject()
+            return VTServer.query.filter_by(uuid=uuid).one().get_child_object()
         except:
             raise Exception("Server does not exist or id not unique")
-
+    
     @staticmethod
     def get_vms_in_server(server):
-        from resources.vtserver import VTServer
         try:
             return server.vms
         except:
@@ -114,28 +110,30 @@ class VTDriver():
     
     @staticmethod    
     def get_vm_by_uuid(uuid):
+        from resources.virtualmachine import VirtualMachine
         try:
-            return db_session.query(VirtualMachine).filter(VirtualMachine.uuid==uuid).one().getChildObject()
+            return VirtualMachine.query.filter_by(uuid=uuid).one().get_child_object()
         except:
             raise Exception("VM does not exist or uuid not unique")
-
+    
     @staticmethod
     def get_vm_by_id(id):
+        from resources.virtualmachine import VirtualMachine
         try:
-            return db_session.query(VirtualMachine).filter(VirtualMachine.id==id).one().getChildObject()
+            return VirtualMachine.query.get(id).get_child_object()
         except:
             raise Exception("Server does not exist or id not unique")
-
+    
     def delete_vm():
         raise Exception("Method not callable for Driver Class")
-
+    
     def get_server_and_create_vm(): 
         raise Exception("Method not callable for Driver Class")
-
+    
     @staticmethod
     def delete_server(server):    
         server.destroy()
-
+    
 #    @staticmethod
 #    def propagateAction(vmId, serverUUID, action):
 #        try:
@@ -174,7 +172,6 @@ class VTDriver():
             except:
                 server.unsubscribeToIp4Range(ipRange)
                 justUnsubscribed.append(ipRange)
-
         for ipRange in totalIpRanges:
             if ipRange not in (server.getSubscribedIp4RangesNoGlobal() or justUnsubscribed):
                 try:
@@ -184,8 +181,9 @@ class VTDriver():
                     pass
 
     @staticmethod
-    def propagate_action_to_provisioning_dispatcher(vm_id, serverUUID, action):
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.id==vm_id).getChildObject()
-        rspec = XmlHelper.getSimpleActionSpecificQuery(action, serverUUID)
-        ActionController.PopulateNewActionWithVM(rspec.query.provisioning.action[0], vm)
-        ServiceThread.startMethodInNewThread(DispatcherLauncher.process_query, rspec)
+    def propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, action):
+        from resources.virtualmachine import VirtualMachine
+        vm = VirtualMachine.query.get(vm_id).get_child_object()
+        rspec = XmlHelper.get_simple_action_specific_query(action, server_uuid)
+        ActionController.populate_new_action_with_vm(rspec.query.provisioning.action[0], vm)
+        ServiceThread.start_method_in_new_thread(DispatcherLauncher.process_query, rspec)

@@ -1,439 +1,442 @@
-from sqlalchemy import Column, Integer, String
+from interfaces.networkinterface import NetworkInterface
+from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
+from ranges.ip4range import Ip4Range
+from ranges.ip4rangeips import Ip4RangeIps
+from ranges.macrange import MacRange
+from ranges.macrangemacs import MacRangeMacs
+from ranges.serveriprange import VTServerIpRange
+from ranges.servermacrange import VTServerMacRange
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
-from sqlalchemy.orm import validates, relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
-
-import uuid
-import inspect
-
-from utils.commonbase import Base, db_session
+from sqlalchemy.orm import validates
 from utils import validators
+from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
-
-from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
-from interfaces.networkinterface import NetworkInterface
-
-from ranges.servermacrange import VTServerMacRange
-from ranges.macrangemacs import MacRangeMacs
-from ranges.macrange import MacRange
-from ranges.serveriprange import VTServerIpRange
-from ranges.ip4rangeips import Ip4RangeIps
-from ranges.ip4range import Ip4Range 
-
 import amsoil.core.log
+import inspect
+import uuid
 
 logging=amsoil.core.log.getLogger('VTServer')
 
-
-
 '''@author: SergioVidiella'''
 
+def validate_agent_url_wrapper(url):
+        VTServer.validate_agent_url(url)
 
-
-def validateAgentURLwrapper(url):
-        VTServer.validateAgentURL(url)
-
-class VTServer(Base):
+class VTServer(db.Model):
     """Virtualization Server Class."""
 
     __tablename__ = 'vt_manager_vtserver'
 
-    __childClasses = (
+    __child_classes = (
     'XenServer',
        )
     
-#    xenserver = relationship("XenServer", backref="vtserver", cascade="all, delete-orphan", lazy='dynamic', passive_deletes=True)
-
     '''General attributes'''
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    available = Column(TINYINT(1), nullable=False, default=1)
-    enabled = Column(TINYINT(1), nullable=False, default=1)
-    name = Column(VARCHAR(length=511), nullable=False, default="")
-    uuid = Column(String(1024), nullable=False, default=uuid.uuid4())
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    available = db.Column(TINYINT(1), nullable=False, default=1)
+    enabled = db.Column(TINYINT(1), nullable=False, default=1)
+    name = db.Column(VARCHAR(length=511), nullable=False, default="")
+    uuid = db.Column(db.String(1024), nullable=False, default=uuid.uuid4())
 
     '''OS'''
-    operatingSystemType = Column(String(512), nullable=False)
-    operatingSystemDistribution = Column(String(512), nullable=False)
-    operatingSystemVersion = Column(String(512), nullable=False)
+    operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False)
+    operating_system_distribution = db.Column("operatingSystemDistribution", db.String(512), nullable=False)
+    operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False)
 
     '''Virtualization Technology'''
-    virtTech = Column(String(512), nullable=False)
+    virt_tech = db.Column("virtTech", db.String(512), nullable=False)
 
     ''' Hardware '''
-    numberOfCPUs = Column(Integer)
-    CPUFrequency = Column(Integer)
-    memory = Column(Integer)
-    discSpaceGB = Column(DOUBLE)
+    number_of_cpus = db.Column("numberOfCPUs", db.Integer)
+    cpu_frequency = db.Column("CPUFrequency", db.Integer)
+    memory = db.Column(db.Integer)
+    disc_space_gb = db.Column("discSpaceGB", DOUBLE)
 
     '''Agent Fields'''
-    agentURL = Column(String(200))
-    agentPassword = Column(String(128))
-    url = Column(String(200))
+    agent_url = db.Column("agentURL", db.String(200))
+    agent_password = db.Column("agentPassword", db.String(128))
+    url = db.Column(db.String(200))
 
     '''Network interfaces'''
-    networkInterfaces = association_proxy("vtserver_networkinterface", "networkinterface")
+    network_interfaces = association_proxy("vtserver_networkinterface", "networkinterface")
 
     '''Other networking parameters'''
-    subscribedMacRanges = association_proxy("vtserver_mac_range", "subscribed_mac_range")
-    subscribedIp4Ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range")
+    subscribed_mac_ranges = association_proxy("vtserver_mac_range", "subscribed_mac_range")
+    subscribed_ip4_ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range")
 
     ''' Mutex over the instance '''
     mutex = None
-
+    
+    '''Defines soft or hard state of the Server'''
+    do_save = True
+    
     '''Validators'''
     @validates('name')
     def validate_name(self, key, name):
         try:
-	    validators.resource_name_validator(name)
+            validators.resource_name_validator(name)
             return name
         except Exception as e:
             raise e
-
-    @validates('operatingSystemType')
+    
+    @validates('operating_system_type')
     def validate_operatingsystemtype(self, key, os_type):
         try:
-	    OSTypeClass.validateOSType(os_type)
+            OSTypeClass.validate_os_type(os_type)
             return os_type
         except Exception as e:
             raise e
-
-    @validates('operatingSystemDistribution')
+    
+    @validates('operating_system_distribution')
     def validate_operatingsystemdistribution(self, key, os_distribution):
         try:
-            OSDistClass.validateOSDist(os_distribution)
+            OSDistClass.validate_os_dist(os_distribution)
             return os_distribution
         except Exception as e:
             raise e
-
-    @validates('operatingSystemVersion')
+    
+    @validates('operating_system_version')
     def validate_operatingsystemversion(self, key, os_version):
         try:
-	    OSVersionClass.validateOSVersion(os_version)
+            OSVersionClass.validate_os_version(os_version)
             return os_version
         except Exception as e:
             raise e
-
-    @validates('virtTech')
+    
+    @validates('virt_tech')
     def validate_virttech(self, key, virt_tech):
         try:
-            VirtTechClass.validateVirtTech(virt_tech)
+            VirtTechClass.validate_virt_tech(virt_tech)
             return virt_tech
         except Exception as e:
             raise e
-
-    @validates('agentURL')
+    
+    @validates('agent_url')
     def validate_agenturl(self, key, agent_url):
         try:
-            validateAgentURLwrapper(agent_url)
+            validate_agent_url_wrapper(agent_url)
             return agent_url
         except Exception as e:
             raise e
-
-    @validates('agentPassword')
+    
+    @validates('agent_password')
     def validate_agentpassword(self, key, agent_password):
         try:
             validators.resource_name_validator(agent_password)
             return agent_password
         except Exception as e:
             raise e
-
+    
     '''Private methods'''
-    def getChildObject(self):
-	logging.debug("*******************************************" + str(self.__childClasses))
-   	for childClass in self.__childClasses:
+    def get_child_object(self):
+        logging.debug("*******************************************" + str(self.__child_classes))
+        for child_class in self.__child_classes:
             try:
-		logging.debug("***********************************" + str(childClass))
-		logging.debug("***********************************" + str(childClass.lower()))
-		logging.debug("***********************************" + str(self.__getattribute__(childClass.lower())[0]))
-            	return self.__getattribute__(childClass.lower())[0]
+                logging.debug("***********************************" + str(child_class))
+                logging.debug("***********************************" + str(child_class.lower()))
+                logging.debug("***********************************" + str(self.__getattribute__(child_class.lower())[0]))
+                return self.__getattribute__(child_class.lower())[0]
             except Exception as e:
-		logging.debug("*************************************" + str(e))
+                logging.debug("*************************************" + str(e))
                 raise e
             
     def __tupleContainsKey(tu,key):
-   	for val in tu:
+        for val in tu:
             if val[0] == key:
-             	return True
-            return False
-
-    def getLockIdentifier(self):
-    	#Uniquely identifies object by a key
+                return True
+        return False
+    
+    def auto_save(self):
+        db.session.add(self)
+        db.session.commit()   
+    
+    def get_lock_identifier(self):
+        # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
-
+    
     def destroy(self):
-    	with MutexStore.getObjectLock(self.getLockIdentifier()):
-	    if self.vms.all().count()>0:
-            	raise Exception("Cannot destroy a server which hosts VMs. Delete VMs first")
-	    #Delete associated interfaces
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if len(self.vms.all())>0:
+                raise Exception("Cannot destroy a server which hosts VMs. Delete VMs first")
+            # Delete associated interfaces
             for interface in self.networkInterfaces.all():
-            	interface.destroy()
-	    #Delete instance
-	    db_session.delete(self)
-	    db_session.commit()
-               
-
+                interface.destroy()
+            # Delete instance
+            db.session.delete(self)
+            db.session.commit()
+    
     '''Getters and Setters'''
-    def setName(self, name):
-	validators.resource_name_validator(name)
+    def set_name(self, name):
         self.name = name
-
+        self.auto_save()
+    
     def getName(self):
-    	return self.name
+        return self.name
         
-    def setUUID(self, uuid):
-    	self.uuid = uuid
+    def set_uuid(self, uuid):
+        self.uuid = uuid
+        self.auto_save()
         
-    def getUUID(self):
+    def get_uuid(self):
         return self.uuid
     
-    def setMemory(self,memory):
+    def set_memory(self,memory):
         self.memory = memory
-
-    def getMemory(self):
+        self.auto_save()
+    
+    def get_memory(self):
         return self.memory
-
-    def setAgentURL(self, url):
-        with MutexStore.getObjectLock(self.getLockIdentifier()):
-   	    VTServer.validateAgentURL(url)
-            self.agentURL = url
-        
-    def getAgentURL(self):
-        return self.agentURL
+    
+    def set_agent_url(self, url):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            VTServer.validate_agent_url(url)
+            self.agent_url = url
+            self.auto_save()
+         
+    def get_agent_url(self):
+        return self.agent_url
        
-    def setURL(self, url):
+    def set_url(self, url):
         self.url = url
+        self.auto_save()
       
-    def getURL(self):
-   	return self.url
+    def get_url(self):
+        return self.url
         
-    def setVirtTech(self, virtTech):
-        VirtTechClass.validateVirtTech(virtTech)
-        self.virtTech = virtTech
+    def set_virt_tech(self, virtTech):
+        self.virt_tech = virt_tech
+        self.auto_save()
         
-    def getVirtTech(self):
-        return self.virtTech
+    def get_virt_tech(self):
+        return self.virt_tech
     
-    def setOSType(self, osType):
-        OSTypeClass.validateOSType(osType)
-        self.operatingSystemType = osType
+    def set_os_type(self, os_type):
+        self.operating_system_type = os_type
+        self.auto_save()
         
-    def getOSType(self):
-        return self.operatingSystemType
+    def get_os_type(self):
+        return self.operating_system_type
 
-    def setOSVersion(self, version):
-        OSVersionClass.validateOSVersion(version)
-        self.operatingSystemVersion = version
+    def set_os_version(self, version):
+        self.operating_system_version = version
+        self.auto_save()
         
-    def getOSVersion(self):
-        return self.operatingSystemVersion
+    def get_os_version(self):
+        return self.operating_system_version
        
-    def setOSDistribution(self, dist):
-        OSDistClass.validateOSDist(dist)
-        self.operatingSystemDistribution = dist
+    def set_os_distribution(self, dist):
+        self.operating_system_distribution = dist
+        self.auto_save()
         
-    def getOSDistribution(self):
-        return self.operatingSystemDistribution
+    def get_os_distribution(self):
+        return self.operating_system_distribution
     
-    def setAvailable(self,av):
+    def set_available(self,av):
         self.available = av
+        self.auto_save()
         
-    def getAvailable(self):
+    def get_available(self):
         return self.available
     
-    def setEnabled(self,en):
+    def set_enabled(self,en):
         self.enabled = en
+        self.auto_save()
         
-    def getEnabled(self):
+    def get_enabled(self):
         return self.enabled
     
-    def getAgentPassword(self):
-        return self.agentPassword
- 
-    def setAgentPassword(self, password):
-        self.agentPassword = password
-
+    def get_agent_password(self):
+        return self.agent_password
+    
+    def set_agent_password(self, password):
+        self.agent_password = password
+        self.auto_save()
+    
     ''' Ranges '''
-    def subscribeToMacRange(self,newRange):
-	if not isinstance(newRange,MacRange):
+    def subscribe_to_mac_range(self,new_range):
+        if not isinstance(new_range,MacRange):
             raise Exception("Invalid instance type on subscribeToMacRange; must be MacRange")
-        if newRange in self.subscribedMacRanges:
+        if new_range in self.subscribed_mac_ranges.all():
             raise Exception("Server is already subscribed to this range")
-        self.subscribedMacRanges.append(newRange)
-
-    def unsubscribeToMacRange(self,oRange):
-        if not isinstance(oRange,MacRange):
+        self.subscribed_mac_ranges.append(new_range)
+        self.auto_save()
+    
+    def unsubscribe_to_mac_range(self,o_range):
+        if not isinstance(o_range,MacRange):
             raise Exception("Invalid instance type on unsubscribeToMacRange; must be MacRange")
-        self.subscribedMacRanges.remove(oRange)
-
-    def getSubscribedMacRangesNoGlobal(self):
-	return self.subscribedMacRanges
-
-    def getSubscribedMacRanges(self):
-        if len(self.subscribedMacRanges) > 0:
-            return self.subscribedMacRanges
+        self.subscribed_mac_ranges.remove(o_range)
+        self.auto_save()
+    
+    def get_subscribed_mac_ranges_no_global(self):
+        return self.subscribed_mac_ranges.all()
+    
+    def get_subscribed_mac_ranges(self):
+        if len(self.subscribed_mac_ranges.all()) > 0:
+            return self.subscribed_mac_ranges.all()
         else:
-            #Return global (all) ranges
-            return db_session.query(MacRange).filter(MacRange.isGlobal == True).all()
-
-    def subscribeToIp4Range(self,newRange):
-        if not isinstance(newRange,Ip4Range):
+            # Return global (all) ranges
+            return MacRange.query.filter_by(is_global=True).all()
+    
+    def subscribe_to_ip4_range(self,new_range):
+        if not isinstance(new_range,Ip4Range):
             raise Exception("Invalid instance type on subscribeToIpRange; must be Ip4Range")
-        if newRange in self.subscribedIp4Ranges:
+        if new_range in self.subscribed_ip4_ranges:
             raise Exception("Server is already subscribed to this range")
-	self.subscribedIp4Ranges.append(newRange)
-
-    def unsubscribeToIp4Range(self,oRange):
-        if not isinstance(oRange,Ip4Range):
+        self.subscribed_ip4_ranges.append(new_range)
+        self.auto_save()
+    
+    def unsubscribe_to_ip4_range(self,o_range):
+        if not isinstance(o_range,Ip4Range):
             raise Exception("Invalid instance type on unsubscribeToIpRange; must be Ip4Range")
-	self.subscribedIp4Ranges.remove(oRange)
-
-    def getSubscribedIp4RangesNoGlobal(self):
-	return self.subscribedIp4Ranges
-
-    def getSubscribedIp4Ranges(self):
-        if len(self.subscribedIp4Ranges) > 0:
-	    return self.subscribedIp4Ranges
+        self.subscribed_ip4_ranges.remove(o_range)
+        self.auto_save()
+    
+    def get_subscribed_ip4_ranges_no_global(self):
+        return self.subscribed_ip4_ranges.all()
+    
+    def get_subscribed_ip4_ranges(self):
+        if len(self.subscribed_ip4_ranges.all()) > 0:
+            return self.subscribed_ip4_ranges.all()
         else:
-            #Return global (all) ranges
-            return db_session.query(Ip4Range).filter(Ip4Range.isGlobal == True).all()
-
-    def __allocateMacFromSubscribedRanges(self):
-	logging.debug("************************* MAC 1")
-        macObj = None
-        #Allocate Mac
-        for macRange in self.getSubscribedMacRanges():
-	    logging.debug("*********************** MAC 2")
+            # Return global (all) ranges
+            return Ip4Range.query.filter_by(is_global=True).all()
+    
+    def __allocate_mac_from_subscribed_ranges(self):
+        logging.debug("************************* MAC 1")
+        mac_obj = None
+        # Allocate Mac
+        for mac_range in self.get_subscribed_mac_ranges():
+            logging.debug("*********************** MAC 2")
             try:
-        	macObj = macRange.allocateMac()
+                mac_obj = mac_range.allocate_mac()
             except Exception as e:
-		logging.debug("******************** MAC ERROR 1 " + str(e))
+                logging.debug("******************** MAC ERROR 1 " + str(e))
                 continue
             break
-	if macObj == None:
-	    logging.debug("********************* MAC ERROR 2 " + str(e))
+        if mac_obj == None:
+            logging.debug("********************* MAC ERROR 2 " + str(e))
             raise Exception("Could not allocate Mac address for the VM over subscribed ranges")
-	logging.debug("*************************** MAC 3")
-	return macObj
+        logging.debug("*************************** MAC 3")
+        return mac_obj
 
-    def __allocateIpFromSubscribedRanges(self):
-	logging.debug("*********************** IP 1")
-    	ipObj = None
-        #Allocate Ip
-        for ipRange in self.getSubscribedIp4Ranges():
-	    logging.debug("*********************** IP 2 " + str(ipRange))
+    def __allocate_ip_from_subscribed_ranges(self):
+        logging.debug("*********************** IP 1")
+        ip_obj = None
+        # Allocate Ip
+        for ip_range in self.get_subscribed_ip4_ranges():
+            logging.debug("*********************** IP 2 " + str(ip_range))
             try:
-		logging.debug("*********************** IP 3")
-    	        ipObj = ipRange.allocateIp()
+                logging.debug("*********************** IP 3")
+                ip_obj = ip_range.allocate_ip()
             except Exception as e:
-		logging.debug("*********************** IP ERROR " + str(e))
-           	continue
+                logging.debug("*********************** IP ERROR " + str(e))
+                continue
             break
-	logging.debug("*********************** IP 4")
-     	if ipObj == None:
-	    logging.debug("*********************** IP ERROR 2")
+        logging.debug("*********************** IP 4")
+        if ip_obj == None:
+            logging.debug("*********************** IP ERROR 2")
             raise Exception("Could not allocate Ip4 address for the VM over subscribed ranges")
-	logging.debug("*********************** IP 5")
-	return ipObj
-
+        logging.debug("*********************** IP 5")
+        return ip_obj
+    
     ''' VM interfaces and VM creation methods '''
-    def __createEnslavedDataVMNetworkInterface(self,serverInterface):
-    	#Obtain
-	logging.debug("******************** A1") 
-        macObj = self.__allocateMacFromSubscribedRanges()
-	logging.debug("******************** A2")
-        interface = NetworkInterface.create_vm_data_interface(serverInterface.getName()+"-slave",macObj)
-        #Enslave it     
-	logging.debug("******************* A3")
-        serverInterface.attachInterfaceToBridge(interface)
-	logging.debug("********************* A4")
+    def __create_enslaved_data_vm_network_interface(self, server_interface):
+        # Obtain
+        logging.debug("******************** A1") 
+        mac_obj = self.__allocate_mac_from_subscribed_ranges()
+        logging.debug("******************** A2")
+        interface = NetworkInterface.create_vm_data_interface(server_interface.get_name()+"-slave",mac_obj)
+        # Enslave it     
+        logging.debug("******************* A3")
+        server_interface.attach_interface_to_bridge(interface)
+        logging.debug("********************* A4")
         return interface
-
-    def __createEnslavedMgmtVMNetworkInterface(self,serverInterface):
-        #Obtain 
-	logging.debug("*********************** A1")
-        macObj = self.__allocateMacFromSubscribedRanges()
-	logging.debug("*********************** A2")
-        ipObj = self.__allocateIpFromSubscribedRanges()
-	logging.debug("*********************** A3")
-        interface = NetworkInterface.create_vm_management_interface(serverInterface.getName()+"-slave",macObj,ipObj)
-        #Enslave it     
-	logging.debug("*********************** A4")
-        serverInterface.attachInterfaceToBridge(interface)
-	logging.debug("*********************** A5")
+    
+    def __create_enslaved_mgmt_vm_network_interface(self, server_interface):
+        # Obtain 
+        logging.debug("*********************** A1")
+        mac_obj = self.__allocate_mac_from_subscribed_ranges()
+        logging.debug("*********************** A2")
+        ip_obj = self.__allocate_ip_from_subscribed_ranges()
+        logging.debug("*********************** A3")
+        interface = NetworkInterface.create_vm_mgmt_interface(server_interface.get_name()+"-slave", mac_obj, ip_obj)
+        # Enslave it     
+        logging.debug("*********************** A4")
+        server_interface.attach_interface_to_bridge(interface)
+        logging.debug("*********************** A5")
         return interface
-
-    def createEnslavedVMInterfaces(self):
-	self = db_session.query(VTServer).filter(VTServer.id == self.id).one()
-	logging.debug("********************** A")
-	vmInterfaces = set()
-	logging.debug("********************** B")
+    
+    def create_enslaved_vm_interfaces(self):
+        logging.debug("********************** A")
+        vm_interfaces = set()
+        logging.debug("********************** B")
         try:
-             #Allocate one interface for each Server's interface
-	     #Bound self to the session
-             for serverInterface in self.networkInterfaces:
-	        logging.debug("********************** C " + str(serverInterface))
-             	if serverInterface.isMgmt:
-		    logging.debug("*********************** D1 - 1")
-		    try:
-		    	created_interface = self.__createEnslavedMgmtVMNetworkInterface(serverInterface)
-			logging.debug("********************* D1 - 2")
-		    	vmInterfaces.add(created_interface)
-			logging.debug("********************* D1 - 3 " + str(created_interface) + ' ' + str(vmInterfaces))
-#                    vmInterfaces.add(self.__createEnslavedMgmtVMNetworkInterface(serverInterface.networkinterface))
-		    except Exception as e:
-			logging.debug("********************* CREATION FAIL " + str(e))
+            # Allocate one interface for each Server's interface
+            for server_interface in self.network_interfaces:
+                logging.debug("********************** C " + str(server_interface))
+                if server_interface.is_mgmt:
+                    logging.debug("*********************** D1 - 1")
+                    try:
+                        created_interface = self.__create_enslaved_mgmt_vm_network_interface(server_interface)
+                        logging.debug("********************* D1 - 2")
+                        vm_interfaces.add(created_interface)
+                        logging.debug("********************* D1 - 3 " + str(created_interface) + ' ' + str(vmInterfaces))
+                    except Exception as e:
+                        logging.debug("********************* CREATION FAIL " + str(e))
                 else:
-		    logging.debug("*********************** D2")
-                    vmInterfaces.add(self.__createEnslavedDataVMNetworkInterface(serverInterface))
-     	except Exception as e:
-	    logging.debug("**************************** VTServer FAIL " + str(e))
-            for interface in vmInterfaces:
-            	interface.destroy()
+                    logging.debug("*********************** D2")
+                    vm_interfaces.add(self.__create_enslaved_data_vm_network_interface(server_interface))
+        except Exception as e:
+            logging.debug("**************************** VTServer FAIL " + str(e))
+            for interface in vm_interfaces:
+                interface.destroy()
             raise e
-	logging.debug("*************************** E")
-     	return vmInterfaces
-
+        logging.debug("*************************** E")
+        return vm_interfaces
+    
     ''' Server interfaces '''
-    #Network mgmt bridges
-    def set_management_bridge(self,name,macStr):
-    	with MutexStore.getObjectLock(self.getLockIdentifier()):
-            nInter = self.networkInterfaces.filter(isMgmt=True,isBridge=True)
-            if nInter.count() == 1:
-            	mgmt = nInter.get()
-                mgmt.setName(name)
-                mgmt.setMacStr(macStr)
-	    elif nInter.count() == 0:
-                mgmt = NetworkInterface.createServerMgmtBridge(name,macStr)
-                self.networkInterfaces.append(mgmt)
+    # Network mgmt bridges
+    def set_mgmt_bridge(self,name,mac_str):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            n_inter = self.network_interfaces.filter_by(is_mgmt=True,is_bridge=True).all()
+            if len(nInter) == 1:
+                mgmt = n_inter.get()
+                mgmt.set_name(name)
+                mgmt.set_mac_str(macStr)
+            elif len(n_inter) == 0:
+                mgmt = NetworkInterface.create_server_mgmt_bridge(name,mac_str)
+                self.network_interfaces.append(mgmt)
             else:
                 raise Exception("Unexpected length of managment NetworkInterface query")
-
-    #Network data bridges
-    def addDataBridge(self,name,macStr,switchId,port):
-   	with MutexStore.getObjectLock(self.getLockIdentifier()):
-   	    if self.networkInterfaces.filter(name=name, isBridge=True).count()> 0:
-             	raise Exception("Another data bridge with the same name already exists in this Server")
-	    netInt = NetworkInterface.createServerDataBridge(name,macStr,switchId,port)
-            self.networkInterfaces.append(netInt)
-
-    def updateDataBridge(self,interface):
-    	with MutexStore.getObjectLock(self.getLockIdentifier()):
-            if self.networkInterfaces.filter(id = interface.id).count()!= 1:
-            	raise Exception("Can not update bridge interface because it does not exist or id is duplicated")
-	    NetworkInterface.updateServerDataBridge(interface.id,interface.getName(),interface.getMacStr(),interface.getSwitchID(),interface.getPort())
-
-    def deleteDataBridge(self,netInt):
-    	with MutexStore.getObjectLock(self.getLockIdentifier()):
-            if not isinstance(netInt,NetworkInterface):
-            	raise Exception("Can only delete Data Bridge that are instances of NetworkInterace")
-	    #TODO: delete interfaces from VMs, for the moment forbid
-            if netInt.getNumberOfConnections() > 0:
-            	raise Exception("Cannot delete a Data bridge from a server if this bridge has VM's interfaces ensalved.")
-	    self.networkInterfaces.remove(netInt)
+            self.auto_save()
+    
+    # Network data bridges
+    def addDataBridge(self,name,mac_str,switch_id,port):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if len(self.networkInterfaces.filter_by(name=name).filter_by(isBridge=True).all())> 0:
+                raise Exception("Another data bridge with the same name already exists in this Server")
+            net_int = NetworkInterface.create_server_data_bridge(name,mac_str,switch_id,port)
+            self.network_interfaces.append(netInt)
+            self.auto_save()
+    
+    def update_data_bridge(self,interface):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if len(self.networkInterfaces.filter_by(id = interface.id).all)!= 1:
+                raise Exception("Can not update bridge interface because it does not exist or id is duplicated")
+            NetworkInterface.update_server_data_bridge(interface.id,interface.get_name(),interface.get_mac_str(),interface.get_switch_id(),interface.get_port())
+    
+    def delete_data_bridge(self,net_int):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if not isinstance(net_int,NetworkInterface):
+                raise Exception("Can only delete Data Bridge that are instances of NetworkInterace")
+            # TODO: delete interfaces from VMs, for the moment forbid
+            if net_int.get_number_of_connections() > 0:
+                raise Exception("Cannot delete a Data bridge from a server if this bridge has VM's interfaces ensalved.")
+            self.networkInterfaces.remove(netInt)
             netInt.destroy()
-
-    def getNetworkInterfaces(self):
-    	return self.networkInterfaces.all().order_by('-isMgmt','id')
-
-                                                                                
+            self.auto_save()
+    
+    def get_network_interfaces(self):
+        return self.network_interfaces.order_by('-isMgmt','id').all()                                                                        
