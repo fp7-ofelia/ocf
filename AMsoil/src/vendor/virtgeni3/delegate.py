@@ -112,12 +112,34 @@ class VTDelegate(GENIv3DelegateBase):
         rspec, sliver_list = self.status(urns, client_cert, credentials)
         return rspec
     
+    # XXX: improve
+    def __extract_node_from_rspec(self, rspec_node):
+        node = dict()
+        for elm in rspec_node.getchildren():
+            node[elm.replace("vtam:","")] = elm.text.strip()
+        return node
+    
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
         requested_vms = list()
         rspec_root = self.lxml_parse_rspec(rspec)
+
+        # XXX Start. Adapted from dhcpgeni3 --> test and remove
+        vms = []
+        # parse RSpec -> requested_ips
+        rspec_root2 = self.lxml_parse_rspec(rspec)
+        for elm in rspec_root2.getchildren():
+            if not self.lxml_elm_has_request_prefix(elm, 'vtam'):
+                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (elm,))
+            if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'node')):
+                vms.append(self.__extract_node_from_rspec(elm))
+                # raise geni_ex.GENIv3GeneralError('IP ranges in RSpecs are not supported yet.') # TODO
+            else:
+                raise geni_ex.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
+        # XXX End
+
         for nodes in rspec_root.getchildren():
             if not nodes.tag == "node":
                 raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))        
