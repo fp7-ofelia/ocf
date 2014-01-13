@@ -241,7 +241,7 @@ class VTDelegate(GENIv2DelegateBase):
                                 ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
-                    raise geniv2_exception.GENIv2BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
+                    raise geniv2_exception.GENIv2BadArgsError("The urn does not contain any resource (%s)" % (str(urn),))
                 except virt_exception.VTAMMaxVMDurationExceeded as e:
                     if best_effort is True:
                         vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
@@ -252,7 +252,7 @@ class VTDelegate(GENIv2DelegateBase):
                                 ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
-                    raise geniv2_exception.GENIv2BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
+                    raise geniv2_exception.GENIv2BadArgsError("VM cannot be extended that long (%s)" % (ext_vm['name'],))
             else:
                 if best_effort is True:
                     vms.append({'name':urn, 'expires':e.time, 'error':"Malformed URN, it doesn't belong to a Slice either a Sliver, only this types of URN are accepted"})
