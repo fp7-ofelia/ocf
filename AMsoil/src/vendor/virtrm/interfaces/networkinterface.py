@@ -1,5 +1,5 @@
 from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
-from interfaces.networkinterfaceips import NetworkInterfaceIp4s
+from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
 from resources.ip4slot import Ip4Slot
 from resources.macslot import MacSlot
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
@@ -23,7 +23,7 @@ class NetworkInterface(db.Model):
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    mac_id = db.Column(db.Integer, ForeignKey('vt_manager_macslot.id'))
+    mac_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macslot.id'))
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ips", "ipslot")
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)

@@ -6,7 +6,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from utils.base import db
 from utils.ethernetutils import EthernetUtils
 from utils.mutexstore import MutexStore
-from amsoil.core.log
+import amsoil.core.log
 import inspect
 
 logging=amsoil.core.log.getLogger('MacRange')
@@ -224,7 +224,7 @@ class MacRange(db.Model):
         '''
         with MutexStore.get_object_lock(self.get_lock_identifier()):
             mac_str = mac_obj.get_mac()
-            if (not self.macs.filter_by(mac=mac_str)first().is_excluded_mac()):
+            if (not self.macs.filter_by(mac=mac_str).first().is_excluded_mac()):
                 raise Exception("Cannot release Mac. Reason may be is unallocated or is not excluded Mac")
             self.macs.remove(mac_obj)
             # Determine new available Mac

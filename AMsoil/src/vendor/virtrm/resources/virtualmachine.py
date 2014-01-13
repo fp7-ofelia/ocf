@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
-from utils.validators
+from utils import validators
 from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 import inspect

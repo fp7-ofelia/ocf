@@ -32,7 +32,7 @@ class Ip4Range(db.Model):
     dns1 = db.Column(db.String(15))
     dns2 = db.Column(db.String(15))
     # Statistics
-    number_slots = Column("numberOfSlots", BIGINT(20))
+    number_slots = db.Column("numberOfSlots", BIGINT(20))
     # Pool of ips both assigned and excluded (particular case of assignment)
     next_available_ip = db.Column("nextAvailableIp", db.String(15))
     ips = association_proxy("ip4range_ips", "ipslot")

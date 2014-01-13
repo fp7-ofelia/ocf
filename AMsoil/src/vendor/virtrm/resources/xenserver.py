@@ -118,7 +118,7 @@ class XenServer(VTServer):
             return vm
 
     def delete_vm(self,vm):
-            with MutexStore.get_object_lock(self.get_lock_identifier()):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
             if vm not in self.vms.all():
                 raise Exception("Cannot delete a VM from pool if it is not already in")
             db_session.delete(vm)

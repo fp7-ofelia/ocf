@@ -65,7 +65,7 @@ class MacSlot(db.Model):
     def is_excluded_mac(self):
         return self.is_excluded
     
-    def set_mac(self, mac)
+    def set_mac(self, mac):
         self.mac = mac
         self.auto_save()
     
