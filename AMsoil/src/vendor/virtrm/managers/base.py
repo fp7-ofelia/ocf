@@ -1,27 +1,21 @@
-import time
-import amsoil.core.pluginmanager as pm
-
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-
-from datetime import datetime, timedelta
-
-from resources.vtserver import VTServer
-from resources.xenserver import XenServer
-from resources.virtualmachine import VirtualMachine
-from resources.vmexpires import VMExpires
-from resources.vmallocated import VMAllocated
-
-import utils.exceptions as virt_exception
-from utils.xrn import *
-from utils.action import Action
-from utils.vmmanager import VMManager
-from utils.servicethread import ServiceThread
-from utils.commonbase import db_session
-
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
-
+from datetime import datetime, timedelta
+from resources.vmallocated import VMAllocated
+from resources.vmexpires import VMExpires
+from resources.vtserver import VTServer
+from resources.virtualmachine import VirtualMachine
+from resources.xenserver import XenServer
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from utils.action import Action
+from utils.base import db
+from utils.servicethread import ServiceThread
+from utils.vmmanager import VMManager
+from utils.xrn import *
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
+import time
+import utils.exceptions as virt_exception
 
 logging=amsoil.core.log.getLogger('VTResourceManager')
 
@@ -76,22 +70,20 @@ class VTResourceManager(object):
             slice_name = get_leaf(get_authority(vm_hrn))
         if not project_name:
             project_name = get_leaf(get_authority(get_authority(vm_hrn)))
-        vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.projectName == project_name).first()
+        vm = VMAllocated.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).filter_by(project_name=project_name).first()
         if vm:
-            server = db_session.query(VTServer).filter(VTServer.id == vm.serverId).first()
-            db_session.expunge(vm)
+            server = VTServer.query.get(vm.server_id).first()
             if allocation_status:
                 vm_status['allocation_status'] = "allocated"
             if expiration_time:
                 vm_status['expires'] = vm.expires
             if server_name:
                 vm_status['server'] = server.name
-            db_session.expunge(server)
         else:
-            vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).filter(VirutalMachine.projectName == project_name).first().getChildObject()
+            vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).filter_by(project_name=project_name).first().get_child_object()
             if vm:
                 server = vm.xenserver
-                vm_expies = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
+                vm_expies = VMExpires.query.get(vm_id=vm.id).first()
                 if server_name:
                     vm_status['server'] = server.name
                 if allocation_status:
@@ -100,8 +92,6 @@ class VTResourceManager(object):
                     vm_status['operational_status'] = vm.status
                 if expiration_time and vm_expires:
                     vm_status['expires'] = vm_expires.expires
-                db_session.expunge(vm)
-                db_session.expunge(vm_expires)
             else:
                 raise virt_exception.VTAMVMNotFound(urn)
         return vm_status
