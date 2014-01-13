@@ -90,6 +90,10 @@ class VTDriver():
             raise Exception("Server does not exist or id not unique")
     
     @staticmethod
+    def get_server_uuid_by_vm_id(vm_id):
+        raise Exception("Server UUID is dependent on driver")
+    
+    @staticmethod
     def get_server_by_uuid(uuid):
         from resources.vtserver import VTServer
         try:

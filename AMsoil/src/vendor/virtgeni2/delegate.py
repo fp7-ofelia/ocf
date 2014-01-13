@@ -394,7 +394,7 @@ class VTDelegate(GENIv2DelegateBase):
     def shutdown(self, slice_urn, client_cert, credentials):
         if (self.urn_type(slice_urn) == 'slice'):
             #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-            results = self._resource_manager.emergency_stop(slice_urn)
+            results = self._resource_manager.stop_vms_in_slice(slice_urn)
             sliver_list = list()
             for result in results:
                 if result.has_key('error'):
