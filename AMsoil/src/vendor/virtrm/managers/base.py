@@ -244,6 +244,7 @@ class VTResourceManager(object):
         else:
             return None
     
+    # FIXME: use Translator.{VMdictToClass, VMdicIfacesToClass} for this!
     def _vm_dict_to_class(self, requested_vm, slice_name, end_time):
         vm = VMAllocated()
         vm.name = requested_vm['name']
