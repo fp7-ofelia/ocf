@@ -43,8 +43,9 @@ class VTResourceManager(object):
     def __init__(self):
         super(VTResourceManager, self).__init__()
         # Register callback for regular updates
-        self.worker.addAsReccurring("virtrm", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
-        self.worker.addAsReccurring("virtrm", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
+        # FIXME: set workers back
+        #self.worker.addAsReccurring("virtrm", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
+        #self.worker.addAsReccurring("virtrm", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
 
     # Server functions
     def get_servers(self, uuid=None):
