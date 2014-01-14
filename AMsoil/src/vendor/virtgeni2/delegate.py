@@ -200,7 +200,7 @@ class VTDelegate(GENIv2DelegateBase):
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('renewsliver',)) # authenticate for each given slice
-                slice_vms = self._resource_manager.vms_in_slice(urn)
+                slice_vms = self._resource_manager.get_vms_in_slice(urn)
                 if slice_vms:
                     for vm in slice_vms: # extend the vm expiration time, so we have a longer timeout.
                         try:
@@ -298,7 +298,7 @@ class VTDelegate(GENIv2DelegateBase):
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-                slice_vms = self._resource_manager.vms_in_slice(urn)
+                slice_vms = self._resource_manager.get_vms_in_slice(urn)
                 if not slice_vms:
                     raise geniv2_exception.GENIv2SearchFailedError("There are no resources in the given slice(s)")
                 for vm in slice_vms:
@@ -329,7 +329,7 @@ class VTDelegate(GENIv2DelegateBase):
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
                 #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-                slice_vms = self._resource_manager.vms_in_slice(urn)
+                slice_vms = self._resource_manager.get_vms_in_slice(urn)
                 if not slice_vms:
                     raise geniv2_exception.GENIv2SearchFailedError("There are no resources in the given slice(s)")
                 for vm in slice_vms:
