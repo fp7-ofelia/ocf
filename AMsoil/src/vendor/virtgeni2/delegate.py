@@ -58,7 +58,7 @@ class VTDelegate(GENIv2DelegateBase):
         #self.auth(client_cert, credentials, None, ('listslices',))
         root_node = self.lxml_ad_root()
         E = self.lxml_ad_element_maker('vtam')
-        servers = self._resource_manager.get_servers()
+        servers = self._resource_manager.get_servers_list()
         r = E.network()
         for server in servers:
             if int(server.available) is 0 and geni_available: 
@@ -204,7 +204,7 @@ class VTDelegate(GENIv2DelegateBase):
                 if slice_vms:
                     for vm in slice_vms: # extend the vm expiration time, so we have a longer timeout.
                         try:
-                            ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration_time)
+                            ext_vm, last_expiration = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration_time)
                             expirations.append(last_expiration)
                             vms.extend(ext_vm)
                         except virt_exception.VTMaxVMDurationExceeded as e:
@@ -214,7 +214,7 @@ class VTDelegate(GENIv2DelegateBase):
                                 #If best_effort is False, undo all and throw an exception
                                 for vm, expiration in vms, expirations:
                                     try:
-                                        ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                                        ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                                     except virt_exception.VTMaxVMDurationExceeded as e:
                                         pass
                         raise geniv2_exception.GENIv2BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
@@ -222,14 +222,14 @@ class VTDelegate(GENIv2DelegateBase):
                      if best_effort is False:
                         for vm, expiration in vms, expirations:
                             try:
-                                ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                                ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
                         raise geniv2_exception.GENIv2BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
             elif (self.urn_type(urn) == 'sliver'):
                 try:
                     vm, state = self._resource_manager.verify_vm(urn)
-                    ext_vm, last_expiration = self._resource_manager.extend_vm_expiration(vm, state, expiration_time)
+                    ext_vm, last_expiration = self._resource_manager.set_vm_expiration(vm, state, expiration_time)
                     expirations.extend(last_expiration)
                     vms.extend(ext_vm)
                 except virt_exception.VTAMVMNotFound as e:
@@ -238,7 +238,7 @@ class VTDelegate(GENIv2DelegateBase):
                     else:
                         for vm, expiration in vms, expirations:
                             try:
-                                ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                                ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
                     raise geniv2_exception.GENIv2BadArgsError("The urn does not contain any resource (%s)" % (str(urn),))
@@ -249,7 +249,7 @@ class VTDelegate(GENIv2DelegateBase):
                         # If best_effort is False, undo all and throw an exception
                         for vm, expiration in vms, expirations:
                             try:
-                                ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                                ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
                     raise geniv2_exception.GENIv2BadArgsError("VM cannot be extended that long (%s)" % (ext_vm['name'],))
@@ -260,7 +260,7 @@ class VTDelegate(GENIv2DelegateBase):
                     # If best_effort is False, undo all and throw an exception
                     for vm, expiration in vms, expirations:
                         try:
-                            ext_vm = self._resource_manager.extend_vm_expiration(vm['name'], vm['status'], expiration)
+                            ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                         except virt_exception.VTMaxVMDurationExceeded as e:
                             pass
                 raise geniv2_exception.GENIv2OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
@@ -279,7 +279,7 @@ class VTDelegate(GENIv2DelegateBase):
         for urn in urns:
             # First we check the type of the urn
             if (self.urn_type(urn) == "slice"):
-                provisioned_vms = self._resource_manager.create_allocated_vms(urn, end_time)        
+                provisioned_vms = self._resource_manager.provision_allocated_vms(urn, end_time)        
             else:
                 raise geniv2_exception.GENIv2BadArgsError("Urn has a type unable to create" % (urn,))        
         rspecs = self._get_manifest_rspec(provisioned_vms)
