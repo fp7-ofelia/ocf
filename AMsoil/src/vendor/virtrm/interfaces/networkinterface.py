@@ -145,6 +145,13 @@ class NetworkInterface(db.Model):
     def get_switch_id(self):
         return self.switch_id
     
+    def set_is_mgmt(self, is_mgmt):
+        self.is_mgmt = is_mgmt
+        self.auto_save()
+    
+    def get_is_mgmt(self):
+        return self.is_mgmt
+    
     def get_number_of_connections(self):
         return len(self.connected_to.all())
     

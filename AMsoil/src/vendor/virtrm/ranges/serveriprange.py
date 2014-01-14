@@ -12,6 +12,6 @@ class VTServerIpRange(db.Model):
     vtserver_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
     ip4range_id = db.Column(db.Integer, db.ForeignKey('vt_manager_ip4range.id'))
 
-    vtserver = db.relationship("VTServer", backref="vtserver_ip4_range", lazy="dynamic")
-    subscribed_ip4_range = db.relationship("Ip4Range", backref="vtserver_association", lazy="dynamic")
+    vtserver = db.relationship("VTServer", backref="vtserver_ip4_range")
+    subscribed_ip4_range = db.relationship("Ip4Range", backref="vtserver_association")
 

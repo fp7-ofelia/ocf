@@ -12,6 +12,6 @@ class Ip4RangeIps(db.Model):
     ip4slot_id = db.Column(db.Integer, db.ForeignKey('vt_manager_ip4slot.id'))
     ip4range_id = db.Column(db.Integer, db.ForeignKey('vt_manager_ip4range.id'))
 
-    ip4range = db.relationship("Ip4Range", backref="ip4range_ip4s", lazy="dynamic")
-    ip4slot = db.relationship("Ip4Slot", lazy="dynamic")
+    ip4range = db.relationship("Ip4Range", backref="ip4range_ip4s")
+    ip4slot = db.relationship("Ip4Slot")
 

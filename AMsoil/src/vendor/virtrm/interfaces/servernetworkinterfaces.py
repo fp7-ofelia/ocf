@@ -12,7 +12,7 @@ class VTServerNetworkInterfaces(db.Model):
     vtserver_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
     networkinterface_id = db.Column(db.Integer, db.ForeignKey('vt_manager_networkinterface.id'))
 
-    vtserver = db.relationship("VTServer", backref="vtserver_networkinterface", lazy="dynamic")
-    networkinterface = db.relationship("NetworkInterface", backref="vtserver_assocation", lazy="dynamic")
+    vtserver = db.relationship("VTServer", backref="vtserver_networkinterface")
+    networkinterface = db.relationship("NetworkInterface", backref="vtserver_assocation")
 
 

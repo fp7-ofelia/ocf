@@ -6,6 +6,7 @@ from ranges.macrange import MacRange
 from ranges.macrangemacs import MacRangeMacs
 from ranges.serveriprange import VTServerIpRange
 from ranges.servermacrange import VTServerMacRange
+from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
@@ -172,7 +173,7 @@ class VTServer(db.Model):
         self.name = name
         self.auto_save()
     
-    def getName(self):
+    def get_name(self):
         return self.name
         
     def set_uuid(self, uuid):
@@ -247,6 +248,27 @@ class VTServer(db.Model):
     def get_enabled(self):
         return self.enabled
     
+    def set_number_of_cpus(self, num):
+        self.number_of_cpus = num
+        self.auto_save()
+    
+    def get_number_of_cpus(self):
+        return self.number_of_cpus
+    
+    def set_cpu_frequency(self, frequency):
+        self.cpu_frequency = frequency
+        self.auto_save()
+    
+    def get_cpu_frequency(self):
+        return self.cpu_frequency
+    
+    def set_disc_space_gb(self, disc_space):
+        self.disc_space_gb = disc_space
+        self.auto_save()
+    
+    def get_disc_space_gb(self):
+        return self.disc_space_gb
+    
     def get_agent_password(self):
         return self.agent_password
     
@@ -270,11 +292,11 @@ class VTServer(db.Model):
         self.auto_save()
     
     def get_subscribed_mac_ranges_no_global(self):
-        return self.subscribed_mac_ranges.all()
+        return self.subscribed_mac_ranges
     
     def get_subscribed_mac_ranges(self):
-        if len(self.subscribed_mac_ranges.all()) > 0:
-            return self.subscribed_mac_ranges.all()
+        if len(self.subscribed_mac_ranges()) > 0:
+            return self.subscribed_mac_ranges()
         else:
             # Return global (all) ranges
             return MacRange.query.filter_by(is_global=True).all()
@@ -294,11 +316,11 @@ class VTServer(db.Model):
         self.auto_save()
     
     def get_subscribed_ip4_ranges_no_global(self):
-        return self.subscribed_ip4_ranges.all()
+        return self.subscribed_ip4_ranges
     
     def get_subscribed_ip4_ranges(self):
-        if len(self.subscribed_ip4_ranges.all()) > 0:
-            return self.subscribed_ip4_ranges.all()
+        if len(self.subscribed_ip4_ranges) > 0:
+            return self.subscribed_ip4_ranges
         else:
             # Return global (all) ranges
             return Ip4Range.query.filter_by(is_global=True).all()
@@ -413,17 +435,17 @@ class VTServer(db.Model):
             self.auto_save()
     
     # Network data bridges
-    def addDataBridge(self,name,mac_str,switch_id,port):
+    def add_data_bridge(self,name,mac_str,switch_id,port):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
-            if len(self.networkInterfaces.filter_by(name=name).filter_by(isBridge=True).all())> 0:
+            if len(self.network_interfaces.filter_by(name=name).filter_by(isBridge=True).all())> 0:
                 raise Exception("Another data bridge with the same name already exists in this Server")
             net_int = NetworkInterface.create_server_data_bridge(name,mac_str,switch_id,port)
-            self.network_interfaces.append(netInt)
+            self.network_interfaces.append(net_int)
             self.auto_save()
     
     def update_data_bridge(self,interface):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
-            if len(self.networkInterfaces.filter_by(id = interface.id).all)!= 1:
+            if len(self.network_interfaces.filter_by(id = interface.id).all)!= 1:
                 raise Exception("Can not update bridge interface because it does not exist or id is duplicated")
             NetworkInterface.update_server_data_bridge(interface.id,interface.get_name(),interface.get_mac_str(),interface.get_switch_id(),interface.get_port())
     
@@ -434,9 +456,9 @@ class VTServer(db.Model):
             # TODO: delete interfaces from VMs, for the moment forbid
             if net_int.get_number_of_connections() > 0:
                 raise Exception("Cannot delete a Data bridge from a server if this bridge has VM's interfaces ensalved.")
-            self.networkInterfaces.remove(netInt)
+            self.network_interfaces.remove(net_int)
             netInt.destroy()
             self.auto_save()
     
     def get_network_interfaces(self):
-        return self.network_interfaces.order_by('-isMgmt','id').all()                                                                        
+        return self.network_interfaces

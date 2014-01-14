@@ -12,6 +12,5 @@ class VTServerMacRange(db.Model):
     vtserver_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
     macrange_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macrange.id'))
 
-    vtserver = db.relationship("VTServer", backref="vtserver_mac_range", lazy="dynamic")
-    subscribed_mac_range = db.relationship("MacRange", backref="vtserver_association", lazy="dynamic")
-
+    vtserver = db.relationship("VTServer", backref="vtserver_mac_range")
+    subscribed_mac_range = db.relationship("MacRange", backref="vtserver_association")
