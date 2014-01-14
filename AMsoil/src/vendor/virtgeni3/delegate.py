@@ -67,24 +67,24 @@ class VTDelegate(GENIv3DelegateBase):
                 n = E.node()
                 n.append(E.name(server.name))
                 n.append(E.available("True" if int(server.available) is 1 else "False"))
-                n.append(E.operating_system_type(server.operatingSystemType))
-                n.append(E.operating_system_distribution(server.operatingSystemDistribution))
-                n.append(E.operating_system_version(server.operatingSystemVersion))
-                n.append(E.virtualization_technology(server.virtTech))
-                n.append(E.cpus_number("0" if not server.numberOfCPUs else server.numberOfCPUs))
-                n.append(E.cpu_frequency("0" if not server.CPUFrequency else server.CPUFrequency))
+                n.append(E.operating_system_type(server.operating_system_type))
+                n.append(E.operating_system_distribution(server.operating_system_distribution))
+                n.append(E.operating_system_version(server.operating_system_version))
+                n.append(E.virtualization_technology(server.virt_tech))
+                n.append(E.cpus_number("0" if not server.number_of_cpus else server.number_of_cpus))
+                n.append(E.cpu_frequency("0" if not server.cpu_frequency else server.cpu_frequency))
                 n.append(E.memory("0" if not server.memory else server.memory))
-                n.append(E.hdd_space_GB("0" if not server.discSpaceGB else server.discSpaceGB))
-                n.append(E.agent_url(server.agentURL))
-                if server.subscribedIp4Ranges: 
-                    for ips in server.subscribedIp4Ranges:
+                n.append(E.hdd_space_GB("0" if not server.disc_space_gb else server.disc_space_gb))
+                n.append(E.agent_url(server.agent_url))
+                if server.subscribed_ip4_ranges: 
+                    for ips in server.subscribed_ip4_ranges:
                         ip = E.service(type='Range')
                         ip.append(E.name("IpRange"))
-                        ip.append(E.start_value(ips.startIp))
-                        ip.append(E.end_value(ips.endIp))
+                        ip.append(E.start_value(ips.start_ip))
+                        ip.append(E.end_value(ips.end_ip))
                         n.append(ip)
-                if server.subscribedMacRanges:
-                    for macs in server.subscribedMacRanges:
+                if server.subscribed_mac_ranges:
+                    for macs in server.subscribed_mac_ranges:
                         mac = E.service(type="Range")
                         mac.append(E.name("MacRange"))
                         mac.append(E.start_value(macs.startMac))

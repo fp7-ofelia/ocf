@@ -38,7 +38,7 @@ class VTDriver():
         servers_child = []
         for server in servers:
             logging.debug("*****************************************" + str(server))
-            child_server = server.getChildObject()
+            child_server = server.get_child_object()
             logging.debug("*****************************************" + str(child_server))
             servers_child.append(child_server)
         return servers_child
