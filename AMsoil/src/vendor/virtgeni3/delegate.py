@@ -76,14 +76,14 @@ class VTDelegate(GENIv3DelegateBase):
                 n.append(E.memory("0" if not server.get_memory() else server.get_memory()))
                 n.append(E.hdd_space_GB("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
                 n.append(E.agent_url(server.get_agent_url()))
-                if server.subscribed_ip4_ranges: 
+                if server.get_subscribed_ip4_ranges_no_global(): 
                     for ips in server.get_subscribed_ip4_ranges_no_global():
                         ip = E.service(type='Range')
                         ip.append(E.name("IpRange"))
                         ip.append(E.start_value(ips.get_start_ip()))
                         ip.append(E.end_value(ips.get_end_ip()))
                         n.append(ip)
-                if server.subscribed_mac_ranges:
+                if server.get_subscribed_mac_ranges_no_global():
                     for macs in server.get_subscribed_mac_ranges_no_global():
                         mac = E.service(type="Range")
                         mac.append(E.name("MacRange"))

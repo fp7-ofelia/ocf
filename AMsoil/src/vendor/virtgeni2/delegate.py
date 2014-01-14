@@ -61,47 +61,47 @@ class VTDelegate(GENIv2DelegateBase):
         servers = self._resource_manager.get_servers()
         r = E.network()
         for server in servers:
-            if int(server.available) is 0 and geni_available: 
+            if int(server.get_available()) is 0 and geni_available: 
                 continue
             else:
                 n = E.node()
-                n.append(E.name(server.name))
-                n.append(E.available("True" if int(server.available) is 1 else "False"))
-                n.append(E.operating_system_type(server.operatingSystemType))
-                n.append(E.operating_system_distribution(server.operatingSystemDistribution))
-                n.append(E.operating_system_version(server.operatingSystemVersion))
-                n.append(E.virtualization_technology(server.virtTech))
-                n.append(E.cpus_number("0" if not server.numberOfCPUs else server.numberOfCPUs))
-                n.append(E.cpu_frequency("0" if not server.CPUFrequency else server.CPUFrequency))
-                n.append(E.memory("0" if not server.memory else server.memory))
-                n.append(E.hdd_space_GB("0" if not server.discSpaceGB else server.discSpaceGB))
-                n.append(E.agent_url(server.agentURL))
-                if server.subscribedIp4Ranges: 
-                    for ips in server.subscribedIp4Ranges:
+                n.append(E.name(server.get_name()))
+                n.append(E.available("True" if int(server.get_available()) is 1 else "False"))
+                n.append(E.operating_system_type(server.get_os_type()))
+                n.append(E.operating_system_distribution(server.get_os_distribution()))
+                n.append(E.operating_system_version(server.get_os_version()))
+                n.append(E.virtualization_technology(server.get_virt_tech()))
+                n.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_ofcpus()))
+                n.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
+                n.append(E.memory("0" if not server.get_memory() else server.get_memory()))
+                n.append(E.hdd_space_GB("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
+                n.append(E.agent_url(server.get_agent_url()))
+                if server.get_subscribed_ip4_ranges_no_global(): 
+                    for ips in server.get_subscribed_ip4_ranges_no_global():
                         ip = E.service(type='Range')
                         ip.append(E.type("IpRange"))
                         ip.append(E.name("IpRange"))
-                        ip.append(E.start_value(ips.startIp))
-                        ip.append(E.end_value(ips.endIp))
+                        ip.append(E.start_value(ips.get_start_ip()))
+                        ip.append(E.end_value(ips.get_end_ip()))
                         n.append(ip)
-                if server.subscribedMacRanges:
-                    for macs in server.subscribedMacRanges:
+                if server.get_subscribed_mac_ranges_no_global():
+                    for macs in server.get_subscribed_mac_ranges_no_global():
                         mac = E.service(type="Range")
                         mac.append(E.type("MacRange"))
                         mac.append(E.name("MacRange"))
-                        mac.append(E.start_value(macs.startMac))
-                        mac.append(E.end_value(macs.endMac))
+                        mac.append(E.start_value(macs.get_start_mac()))
+                        mac.append(E.end_value(macs.get_end_mac()))
                         n.append(mac)
-                if server.networkInterfaces:
-                    for network_interface in server.networkInterfaces:
+                if server.get_network_interfaces():
+                    for network_interface in server.get_network_interfaces():
                         interface = E.service(type="Network")
                         interface.append(E.type("Interface"))
-                        interface.append(E.server_interface_name(network_interface.name))
-                        interface.append(E.isMgmt(str(network_interface.isMgmt)))
-                        if network_interface.switchID:
-                            interface.append(E.interface_switch_id(network_interface.switchID))
-                        if network_interface.port:
-                            interface.append(E.interface_port(str(network_interface.port))) 
+                        interface.append(E.server_interface_name(network_interface.get_name()))
+                        interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
+                        if network_interface.get_switch_id():
+                            interface.append(E.interface_switch_id(network_interface.get_switch_id()))
+                        if network_interface.get_port():
+                            interface.append(E.interface_port(str(network_interface.get_port()))) 
                         n.append(interface)                
                 r.append(n)
         root_node.append(r)
