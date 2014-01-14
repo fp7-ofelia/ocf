@@ -1,14 +1,11 @@
+from controller.actions.action import ActionController
+from utils.httputils import HttpUtils
+from utils.servicethread import *
+from utils.xmlhelper import XmlHelper
+import amsoil.core.log
 import os
 import sys
 
-from utils.servicethread import *
-from utils.xmlhelper import XmlHelper
-from utils.httputils import HttpUtils
-from controller.actions.action import ActionController
-
-from utils.commonbase import db_session
-import amsoil.core.log
-#amsoil logger
 logging=amsoil.core.log.getLogger('VTDriver')
 
 class VTDriver():
@@ -17,9 +14,9 @@ class VTDriver():
     __possible_virt_techs = [CONTROLLER_TYPE_XEN]
     
     @staticmethod
-    def get_driver(virtType):
+    def get_driver(virt_type):
         from controller.drivers.xen import XenDriver
-        if virtType == VTDriver.CONTROLLER_TYPE_XEN:
+        if virt_type == VTDriver.CONTROLLER_TYPE_XEN:
             return XenDriver.get_instance()
     
     @staticmethod
@@ -38,7 +35,7 @@ class VTDriver():
         servers_child = []
         for server in servers:
             logging.debug("*****************************************" + str(server))
-            child_server = server.getChildObject()
+            child_server = server.get_child_object()
             logging.debug("*****************************************" + str(child_server))
             servers_child.append(child_server)
         return servers_child
@@ -67,17 +64,17 @@ class VTDriver():
         server.set_management_bridge(name, mac)
 
     @staticmethod
-    def crud_data_bridge_from_instance(server,ifaces, ifacesToDelete):
-        serverIfaces = server.getNetworkInterfaces().filter(isMgmt = False)
-        for newIface in ifaces:
-            if newIface.id == None:# or not serverIfaces.filter(id = newIface.id):
-                server.addDataBridge(newIface.getName(),"",newIface.getSwitchID(),newIface.getPort())
+    def crud_data_bridge_from_instance(server, ifaces, ifaces_to_delete):
+        server_ifaces = server.get_network_interfaces().filter_by(is_mgmt = False).all()
+        for new_iface in ifaces:
+            if new_iface.id == None:# or not serverIfaces.filter(id = newIface.id):
+                server.add_data_bridge(new_iface.get_name(),"",new_iface.get_switch_id(),new_iface.get_port())
             else:
-                server.updateDataBridge(newIface)
-        for id in ifacesToDelete:
+                server.update_data_bridge(new_iface)
+        for id in ifaces_to_delete:
             if id != '':
                 try:
-                    server.deleteDataBridge(serverIfaces.get(id=id))
+                    server.delete_data_bridge(server_ifaces.get(id=id))
                 except Exception as e:
                     raise ValidationError(str(e))
 
@@ -85,7 +82,7 @@ class VTDriver():
     def get_server_by_id(id):
         from resources.vtserver import VTServer
         try:
-            return VTServer.query.filter_by(id=id).one().get_child_object()
+            return VTServer.query.get(id).get_child_object()
         except:
             raise Exception("Server does not exist or id not unique")
     
@@ -150,40 +147,40 @@ class VTDriver():
 #            logging.error(e)
             
     @staticmethod
-    def manage_ethernet_ranges(request, server, totalMacRanges):
-        justUnsubscribed = []
-        for macRange in server.getSubscribedMacRangesNoGlobal():
+    def manage_ethernet_ranges(request, server, total_mac_ranges):
+        just_unsubscribed = []
+        for mac_range in server.get_subscribed_mac_ranges_no_global():
             try:
-                request.POST['subscribe_'+str(macRange.id)]
+                request.POST['subscribe_'+str(mac_range.id)]
             except:
-                server.unsubscribeToMacRange(macRange)
-                justUnsubscribed.append(macRange)
-        for macRange in totalMacRanges:
-            if macRange not in (server.getSubscribedMacRangesNoGlobal() or justUnsubscribed):
+                server.unsubscribe_to_mac_range(mac_range)
+                just_unsubscribed.append(mac_range)
+        for mac_range in total_rac_ranges:
+            if mac_range not in (server.get_subscribed_mac_ranges_no_global() or just_unsubscribed):
                 try:
-                    request.POST['subscribe_'+str(macRange.id)]
-                    server.subscribeToMacRange(macRange)
+                    request.POST['subscribe_'+str(mac_range.id)]
+                    server.subscribe_ro_mac_range(mac_range)
                 except:
                     pass
-
+    
     @staticmethod
-    def manage_ip4_ranges(request, server, totalIpRanges):
-        justUnsubscribed = []
-        for ipRange in server.getSubscribedIp4RangesNoGlobal():
+    def manage_ip4_ranges(request, server, total_ip_ranges):
+        just_unsubscribed = []
+        for ip_range in server.get_subscribed_ip4_ranges_no_global():
             #if not ipRange.getIsGlobal():
             try:
-                request.POST['subscribe_'+str(ipRange.id)]
+                request.POST['subscribe_'+str(ip_range.id)]
             except:
-                server.unsubscribeToIp4Range(ipRange)
-                justUnsubscribed.append(ipRange)
-        for ipRange in totalIpRanges:
-            if ipRange not in (server.getSubscribedIp4RangesNoGlobal() or justUnsubscribed):
+                server.unsubscribe_to_ip4_range(ip_range)
+                just_unsubscribed.append(ip_range)
+        for ip_range in total_ip_ranges:
+            if ip_range not in (server.get_subscribed_ip4_ranges_no_global() or just_unsubscribed):
                 try:
-                    request.POST['subscribe_'+str(ipRange.id)]
-                    server.subscribeToIp4Range(ipRange)
+                    request.POST['subscribe_'+str(ip_range.id)]
+                    server.subscribe_to_ip4_range(ip_range)
                 except Exception as e:
                     pass
-
+    
     @staticmethod
     def propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, action):
         from resources.virtualmachine import VirtualMachine
