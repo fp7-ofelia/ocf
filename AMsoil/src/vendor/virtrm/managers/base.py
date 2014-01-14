@@ -60,6 +60,7 @@ class VTResourceManager(object):
         """
         Get server with a given UUID.
         """
+        servers = VTDriver.get_all_servers()
         logging.debug("......................................." + str(servers))
         for server in servers:
             if str(server.uuid) == str(uuid):

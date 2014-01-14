@@ -58,7 +58,7 @@ class VTDelegate(GENIv3DelegateBase):
         #self.auth(client_cert, credentials, None, ('listslices',))
         root_node = self.lxml_ad_root()
         E = self.lxml_ad_element_maker('vtam')
-        servers = self._resource_manager.get_servers_list()
+        servers = self._resource_manager.get_servers()
         r = E.network()
         for server in servers:
             if int(server.available) is 0 and geni_available: 
