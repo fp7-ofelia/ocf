@@ -245,8 +245,9 @@ Type:
           </tr>
           </table>
           <div id = "vms_table">
-            {% if server.vms.all%}
-            {% include "vt_plugin_list_resources.html" %}
+            {% load servers %} {# Loads Jinja filters for servers - in order to check #VMs #}
+            {% if server|number_vms_inside_server_for_slice:slice.uuid > 0 %} {# If some VM exists, show message #}
+                {% include "vt_plugin_list_resources.html" %}
             {% endif %}
           </div>
       </div>
