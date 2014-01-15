@@ -16,5 +16,5 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s" % (
 db.init_app(app)
 
 def set_up():
-    with app.app_context()
+    with app.app_context():
         db.create_all()
