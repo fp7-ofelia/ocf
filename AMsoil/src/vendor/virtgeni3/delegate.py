@@ -127,15 +127,15 @@ class VTDelegate(GENIv3DelegateBase):
         # XXX Start. Adapted from dhcpgeni3 --> test and remove
         vms = []
         # parse RSpec -> requested_ips
-        rspec_root2 = self.lxml_parse_rspec(rspec)
-        for elm in rspec_root2.getchildren():
-            if not self.lxml_elm_has_request_prefix(elm, 'vtam'):
-                raise geni_ex.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (elm,))
-            if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'node')):
-                vms.append(self.__extract_node_from_rspec(elm))
+        #rspec_root2 = self.lxml_parse_rspec(rspec)
+        #for elm in rspec_root2.getchildren():
+        #    if not self.lxml_elm_has_request_prefix(elm, 'vtam'):
+        #        raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (elm,))
+        #    if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'node')):
+       #         vms.append(self.__extract_node_from_rspec(elm))
                 # raise geni_ex.GENIv3GeneralError('IP ranges in RSpecs are not supported yet.') # TODO
-            else:
-                raise geni_ex.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
+        #    else:
+         #       raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
         # XXX End
 
         for nodes in rspec_root.getchildren():
@@ -175,7 +175,7 @@ class VTDelegate(GENIv3DelegateBase):
                     else:
                         raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
                 requested_vms.append(vm)
-        if self.urn_type(slice_urn) is 'slice': 
+        if self.urn_type(slice_urn) == 'slice': 
             try:
                 allocated_vms = dict()
                 for requested_vm in requested_vms:
@@ -198,7 +198,7 @@ class VTDelegate(GENIv3DelegateBase):
         slivers = list()
         for key in allocated_vms.keys():
             for allocated_vm in allocated_vms[key]:
-                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.projectName + '.' + allocated_vm.sliceName + '.' + allocated_vm.name
+                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.project_name + '.' + allocated_vm.slice_name + '.' + allocated_vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
                 slivers.append(self._get_sliver_status_hash({'name':vm_urn, 'expires':allocated_vm.expires, 'status':"allocated"}, True))
         return rspecs, slivers
@@ -450,7 +450,7 @@ class VTDelegate(GENIv3DelegateBase):
             #server.append(component_id = node['server_urn'])
             for sliver in nodes[key]:
                 vm = E.sliver(type = 'VM')
-                vm.append(E.name(hrn_to_urn(get_authority(get_authority(slice_urn)) + '.' + sliver.projectName + '.' + sliver.sliceName + '.' + sliver.name, 'sliver')))
+                vm.append(E.name(hrn_to_urn(get_authority(get_authority(slice_urn)) + '.' + sliver.project_name + '.' + sliver.slice_name + '.' + sliver.name, 'sliver')))
                 server.append(vm)
             manifest.append(server)
         return self.lxml_to_string(manifest)

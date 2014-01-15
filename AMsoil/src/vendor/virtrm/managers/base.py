@@ -139,7 +139,7 @@ class VTResourceManager(object):
             vms_created = list()
             for vm in vms:
                 vm_expires = VMExpires.query.filter_by(vm_id=vm.id).one()
-                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + vm.projectName + '.' + vm.sliceName + '.' + vm.name
+                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
                 vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm_expires.expires})
             return vms_created
@@ -157,7 +157,7 @@ class VTResourceManager(object):
         if vms:
             vms_created = list()
             for vm in vms:
-                vm_hrn = get_authority(get_authority(slice_hrn)) + '.' + vm.projectName + '.' + vm.sliceName + '.' + vm.name
+                vm_hrn = get_authority(get_authority(slice_hrn)) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
                 vms_created.append({'name':vm_urn, 'expires':vm.expires, 'status':"allocated"})
             return vms_created
@@ -190,34 +190,19 @@ class VTResourceManager(object):
         vm = VMAllocated()
         vm.name = requested_vm['name']
         vm.memory = int(requested_vm['memory_mb'])
-        vm.discSpaceGB = float(requested_vm['hd_size_mb'])/1024
-        vm.projectName = requested_vm['project_name']
-        vm.sliceId = 0 #necessary?
-        vm.sliceName = slice_name
-        vm.operatingSystemType = requested_vm['operating_system_type'] 
-        vm.operatingSystemVersion = requested_vm['operating_system_version']
-        vm.operatingSystemDistribution = requested_vm['operating_system_distribution']
+        vm.disc_space_gb = float(requested_vm['hd_size_mb'])/1024
+        vm.project_name = requested_vm['project_name']
+        vm.slice_id = 0 #necessary?
+        vm.slice_name = slice_name
+        vm.operating_system_type = requested_vm['operating_system_type'] 
+        vm.operating_system_version = requested_vm['operating_system_version']
+        vm.operating_system_distribution = requested_vm['operating_system_distribution']
         vm.hypervisor = requested_vm['hypervisor']
-        vm.hdSetupType = requested_vm['hd_setup_type']
-        vm.hdOriginPath = requested_vm['hd_origin_path']
-        vm.virtualizationSetupType = requested_vm['virtualization_setup_type']
+        vm.hd_setup_type = requested_vm['hd_setup_type']
+        vm.hd_origin_path = requested_vm['hd_origin_path']
+        vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
         vm.expires = end_time 
-        vm.serverId = db_session.query(VTServer).filter(VTServer.name == requested_vm['server_name']).first().id
-        #XXX: Currently, allocating interfaces is not allowed        
-#        for interface in requested_vm['interfaces']:
-#            allocated_interface = VMAllocatedNetworkInterfaces()
-#            allocated_interface.allocated_vm_id = vm.id
-#            allocated_interface.name = interface['name']
-#            allocated_interface.mac = interface['mac']
-#            allocated_interface.ip = interface['ip']
-#            allocated_interface.gw = interface['gw']
-#            allocated_interface.dns1 = interface['dns1']
-#            allocated_interface.dns2 = interface['dns2']
-#            allocated_interface.msk = interface['mask']
-#            allocated_interface.isMgmt = interface['ismgmt']
-#            db_session.add(allocated_interface)
-#            db_session.commit()
-#            db_session.expunge(allocated_interface)
+        vm.server_id = VTServer.query.filter_by(name=requested_vm['server_name']).one().id
         return vm
     
     def provision_allocated_vms(self, slice_urn, end_time):
@@ -246,7 +231,7 @@ class VTResourceManager(object):
             params['project-id'] = None
             params['server-id'] = server.uuid
             params['slice-id'] = allocated_vm.sliceId
-            params['slice-name'] = allocated_vm.sliceName
+            params['slice-name'] = allocated_vm.slice_name
             params['operating-system-type'] = allocated_vm.operatingSystemType
             params['operating-system-version'] = allocated_vm.operatingSystemVersion
             params['operating-system-distribution'] = allocated_vm.operatingSystemDistribution
@@ -373,46 +358,32 @@ class VTResourceManager(object):
             vm_hrn, type = urn_to_hrn(vm_urn)
             vm_name = get_leaf(vm_hrn)
             slice_name = get_leaf(get_authority(vm_hrn))
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).first()
-        expiration = db_session.query(VMExpires).filter(VMExpires.id == vm.id).first().expires
-        vm_id = vm.id
-        status = vm.status
-        xen_vm = db_session.query(XenVM).filter(XenVM.virtualmachine_ptr_id == vm_id).first()
-        server = xen_vm.xenserver_associations
-        server_uuid = server.uuid
-        db_session.expunge_all()
+            vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
+            expiration = VMExpires.query.get(vm.id).one().expires
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
-            return {'name':vm_urn, 'status':status, 'expires':expiration}
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_STOP_TYPE)
+            return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not stop the VM'}
+            return {'name':vm_urn, 'status':vm.status, 'expires':expiration, 'error': 'Could not stop the VM'}
     
     def restart_vm(self, vm_urn):
         vm_hrn, type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
         slice_name = get_leaf(get_authority(vm_hrn))
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).first()
-        expiration = db_session.query(VMExpires).filter(VMExpires.id == vm.id).first().expires
-        vm_id = vm.id
-        status = vm.status
-        xen_vm = db_session.query(XenVM).filter(XenVM.virtualmachine_ptr_id == vm_id).first()
-        server = xen_vm.xenserver_associations
-        server_uuid = server.uuid
-        db_session.expunge_all()
+        vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
+        expiration = VMExpires.query.get(vm.id).one().expires
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
-            return {'name':vm_urn, 'status':status, 'expires':expiration}
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
+            return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not Restart the VM'}
+            return {'name':vm_urn, 'status':vm.status, 'expires':expiration, 'error': 'Could not Restart the VM'}
     
     def delete_vm(self, vm_urn, slice_name=None):
         vm_hrn, hrn_type = urn_to_hrn(vm_urn)
         if not slice_name:
             slice_name = get_leaf(get_authority(vm_hrn))
         vm_name = get_leaf(vm_hrn)
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.sliceName == slice_name).first()
+        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.slice_name == slice_name).first()
         if vm != None:
              db_session.expunge(vm)
              deleted_vm = self._destroy_vm_with_expiration(vm.id)
@@ -450,29 +421,29 @@ class VTResourceManager(object):
     # XXX Check
     def start_vms_in_slice(self, slice_urn):
         slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
+        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
         started_vms = list()
         for vm in vms:
-            started_vms.append(self.start_vm(None, vm.name, vm.sliceName))
+            started_vms.append(self.start_vm(None, vm.name, vm.slice_name))
         db_session.expunge_all()
         return started_vms
     
     def stop_vms_in_slice(self, slice_urn):
         slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
+        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
         stopped_vms = list()
         for vm in vms:
-            stopped_vms.append(self.stop_vm(None, vm.name, vm.sliceName))
+            stopped_vms.append(self.stop_vm(None, vm.name, vm.slice_name))
         db_session.expunge_all()
         return stopped_vms
     
     # XXX Check
     def restart_vms_in_slice(self, slice_urn):
         slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
+        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
         restarted_vms = list()
         for vm in vms:
-            restarted_vms.append(self.restart_vm(None, vm.name, vm.sliceName))
+            restarted_vms.append(self.restart_vm(None, vm.name, vm.slice_name))
         db_session.expunge_all()
         return restarted_vms
     
@@ -481,10 +452,10 @@ class VTResourceManager(object):
         slice_name = get_leaf(slice_hrn)
         # get all the vms from the given slice and delete them
         vms = list()
-        vms_created = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).all()
+        vms_created = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
         if vms_created:
             vms.extend(vms_created)
-        vms_allocated = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).all()
+        vms_allocated = db_session.query(VMAllocated).filter(VMAllocated.slice_name == slice_name).all()
         if vms_allocated:
             vms.extend(vms_allocated)
         if not vms:
@@ -514,7 +485,7 @@ class VTResourceManager(object):
         Allocate a VM in the given slice.
         """
         # Check if the VM name already exists, as a created VM or an allocated VM
-        if VirtualMachine.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first().get_child_object() != None or VMAllocated.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None:
+        if VirtualMachine.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None or VMAllocated.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None:
             raise virt_exception.VTAMVmNameAlreadyTaken(vm['name'])
         # Check if the server is one of the given servers
         # FIXME: Filter should be done by UUID, not by name
@@ -540,10 +511,10 @@ class VTResourceManager(object):
         max_duration = self.RESERVATION_TIMEOUT
         max_end_time = datetime.utcnow() + timedelta(0, max_duration)
         if (status == "allocated"):
-            vm_expires = db_session.query(VMAllocated).filter(VMAllocated.sliceName == slice_name).filter(VMAllocated.name == vm_name).filter(VMAllocated.projectName == project_name).one()
+            vm_expires = db_session.query(VMAllocated).filter(VMAllocated.slice_name == slice_name).filter(VMAllocated.name == vm_name).filter(VMAllocated.project_name == project_name).one()
             vm_state = "allocated"
         else:
-            vm = db_session.query(VirtualMachine).filter(VirtualMachine.sliceName == slice_name).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.projectName == project_name).one()
+            vm = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.project_name == project_name).one()
             vm_state = vm.state
             db_session.expunge(vm)
             vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
@@ -552,7 +523,7 @@ class VTResourceManager(object):
             raise VTMaxVMDurationExceeded(vm_name, vm_expires.expires)
         last_expiration = vm_expires.expires
         vm_expires.expires = expiration_time
-        vm_hrn = get_leaf(get_authority(get_authority(get_authority(vm_hrn)))) + '.' + vm.projectName + '.' + vm.sliceName + '.' + vm.name
+        vm_hrn = get_leaf(get_authority(get_authority(get_authority(vm_hrn)))) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
         vm_urn = hrn_to_urn(vm_hrn, 'sliver')
         db_session.add(vm_expires)
         db_session.commit()

@@ -55,17 +55,29 @@ class OSTypeClass():
         raise Exception("OS Type not valid")
 
 class HDSetupTypeClass():
+    HD_SETUP_TYPE_FILE_IMAGE = "file-image"
+    HD_SETUP_TYPE_LV = "logical-volume-image"
+    HD_SETUP_TYPE_CHOICES = (
+        (HD_SETUP_TYPE_FILE_IMAGE, 'File image'),
+        (HD_SETUP_TYPE_LV, 'Logical Volume Image'),
+    )
     @staticmethod
     def validate_hd_setup_type(value):
-        for tuple in settings.HD_SETUP_TYPE_CHOICES:
+        for tuple in HDSetupTypeClass.HD_SETUP_TYPE_CHOICES:
             if value in tuple:
                 return  
         raise Exception("HD Setup Type not valid")
 
 class VirtTypeClass():
+    VIRTUALIZATION_SETUP_TYPE_PARAVIRTUALIZATION= "paravirtualization"
+    VIRTUALIZATION_SETUP_TYPE_HAV = "hardware-assisted-virtualization"
+    VIRTUALIZATION_SETUP_TYPE = (
+        (VIRTUALIZATION_SETUP_TYPE_PARAVIRTUALIZATION, 'Paravirtualization'),
+        (VIRTUALIZATION_SETUP_TYPE_HAV, 'Hardware-assisted virtualization'),
+    )
     @staticmethod
     def validate_virt_type(value):
-        for tuple in settings.VIRTUALIZATION_SETUP_TYPE_CHOICES:
+        for tuple in VirtTypeClass.VIRTUALIZATION_SETUP_TYPE:
             if value in tuple:
                 return  
         raise Exception("Virtualization Type not valid")
