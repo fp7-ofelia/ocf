@@ -225,7 +225,7 @@ class VTDelegate(GENIv2DelegateBase):
                                 ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
                             except virt_exception.VTMaxVMDurationExceeded as e:
                                 pass
-                        raise geniv2_exception.GENIv2BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
+                        raise geniv2_exception.GENIv2BadArgsError("The urn does not contain any resource (%s)" % (str(urn),))
             elif (self.urn_type(urn) == 'sliver'):
                 try:
                     vm, state = self._resource_manager.verify_vm(urn)
@@ -234,7 +234,7 @@ class VTDelegate(GENIv2DelegateBase):
                     vms.extend(ext_vm)
                 except virt_exception.VTAMVMNotFound as e:
                     if best_effort is True:
-                        vms.append({'name':urn, 'expires':None, 'error':"No exist any resource with the given urn, it may have expired"})
+                        vms.append({'name':urn, 'expires':None, 'error':"There is no resource with the given urn (it may have expired)"})
                     else:
                         for vm, expiration in vms, expirations:
                             try:
