@@ -40,7 +40,9 @@ class VMAllocated(db.Model):
     hypervisor = db.Column(db.String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
-    expires = db.Column(db.Date, nullable=False) 
+    expires = db.Column(db.Date, nullable=False)
+    #XXX: This should be the expires, uncomment when table is changed
+#    expires = association_proxy("vm_expiration", "expires")
 
     ''' Mutex over the instance '''
     # Mutex

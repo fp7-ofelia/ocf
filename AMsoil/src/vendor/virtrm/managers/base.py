@@ -2,13 +2,13 @@ from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
 from resources.vmallocated import VMAllocated
-from resources.vmexpires import VMExpires
 from resources.vtserver import VTServer
 from resources.virtualmachine import VirtualMachine
 from resources.xenserver import XenServer
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from utils.action import Action
 from utils.base import db
+from utils.expires import Expires
 from utils.servicethread import ServiceThread
 from utils.vmmanager import VMManager
 from utils.xrn import *
@@ -101,7 +101,7 @@ class VTResourceManager(object):
             vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).filter_by(project_name=project_name).first().get_child_object()
             if vm:
                 server = vm.xenserver
-                vm_expies = VMExpires.query.get(vm_id=vm.id).first()
+                vm_expies = Expires.query.get(vm_id=vm.id).first()
                 if server_name:
                     vm_status['server'] = server.name
                 if allocation_status:
@@ -138,7 +138,7 @@ class VTResourceManager(object):
         if vms:
             vms_created = list()
             for vm in vms:
-                vm_expires = VMExpires.query.filter_by(vm_id=vm.id).one()
+                vm_expires = Expires.query.filter_by(vm_id=vm.id).one()
                 vm_hrn = get_authority(get_authority(slice_urn)) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
                 vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm_expires.expires})
@@ -174,7 +174,7 @@ class VTResourceManager(object):
             return "error" 
     
     def _destroy_vm_with_expiration(self, vm_id, server_uuid=None):
-        vm_expires = VMExpires.query.filter_by(vm_id=vm_id).first()
+        vm_expires = Expires.query.filter_by(vm_id=vm_id).first()
         if vm_expires != None:
             db.session.delete(vm_expires)
             db.session.commit()
@@ -294,7 +294,7 @@ class VTResourceManager(object):
                 if current_vm:
                     db.session.delete(vm)
                     db.session.commit()
-                    vm_expires = VMExpires()
+                    vm_expires = Expires()
                     vm_expires.expires = end_time
                     vm_expires.vm_id = current_vm.id
                     created_vm['expires'] = end_time 
@@ -331,7 +331,7 @@ class VTResourceManager(object):
         vm_name = get_leaf(vm_hrn)
         slice_name = get_leaf(get_authority(vm_hrn))
         vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first().get_child_object()
-        expiration = VMExpires.query.get(vm.id).expires
+        expiration = Expires.query.get(vm.id).expires
         vm_id = vm.id
         status = vm.status
         #FIXME: This should not be done that way
@@ -359,7 +359,7 @@ class VTResourceManager(object):
             vm_name = get_leaf(vm_hrn)
             slice_name = get_leaf(get_authority(vm_hrn))
             vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-            expiration = VMExpires.query.get(vm.id).one().expires
+            expiration = Expires.query.get(vm.id).one().expires
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_STOP_TYPE)
             return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
@@ -371,7 +371,7 @@ class VTResourceManager(object):
         vm_name = get_leaf(vm_hrn)
         slice_name = get_leaf(get_authority(vm_hrn))
         vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-        expiration = VMExpires.query.get(vm.id).one().expires
+        expiration = Expires.query.get(vm.id).one().expires
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
             return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
@@ -517,7 +517,7 @@ class VTResourceManager(object):
             vm = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.project_name == project_name).one()
             vm_state = vm.state
             db_session.expunge(vm)
-            vm_expires = db_session.query(VMExpires).filter(VMExpires.vm_id == vm.id).first()
+            vm_expires = db_session.query(Expires).filter(Expires.vm_id == vm.id).first()
         if (expiration_time > max_end_time):
             db_sesion.expunge_all()
             raise VTMaxVMDurationExceeded(vm_name, vm_expires.expires)
@@ -563,7 +563,7 @@ class VTResourceManager(object):
     
     @worker.outsideprocess
     def expire_vm(self, params):
-        vms = VMExpires.query.filter_by(expires <= datetime.utcnow()).all()
+        vms = Expires.query.filter_by(expires <= datetime.utcnow()).all()
         for vm in vms:
             self._destroy_vm_with_expiration(vm.vm_id)
         return
