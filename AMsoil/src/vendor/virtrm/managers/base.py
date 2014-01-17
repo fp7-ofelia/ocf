@@ -520,8 +520,7 @@ class VTResourceManager(object):
         deleted_vm = dict()
         deleted_vm['name'] = vm.name
         deleted_vm['expires'] = vm.expires
-        db.session.delete(vm)
-        db.session.commit()
+        vm.destroy()
         return deleted_vm
     
     # Authority methods
@@ -549,10 +548,15 @@ class VTResourceManager(object):
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
-        vms = VMAllocated.query.filter_by(expires <= datetime.utcnow()).all()
-        for vm in vms:
-            self._unallocate_vm(vm.id)
-            self._destroy_vm_with_expiration(vm.vm_id)
+        expirations = Expires.query.filter_by(expires <= datetime.utcnow()).all()
+        for expiration in expiration:
+            if isinstance(expiration.get_vm(), VMAllocated):
+                self._unallocate_vm(expiration.get_vm().id)
+            elif isinstance(expiration.get_vm(), VirtualMachine):
+                self._destroy_vm_with_expiration(expiration.get_vm()._id)
+            else:
+                db.session.delete(expiration)
+                db.session.commit()
         return
     
     # Backup & migration methods

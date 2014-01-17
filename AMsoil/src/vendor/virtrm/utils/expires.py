@@ -40,6 +40,9 @@ class Expires(db.Model):
     
     def get_expiration(self):
         return self.expires
+    
+    def get_vm(self):
+        return self.expires_vm.vm
 
     def destroy(self):
         db.session.delete(self)

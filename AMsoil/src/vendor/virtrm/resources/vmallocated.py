@@ -88,6 +88,8 @@ class VMAllocated(db.Model):
     '''Destructor'''
     def destroy(self):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
+            if self.expires:
+                self.expires.destroy()
             db.session.delete(self)
             db.session.commit()
     

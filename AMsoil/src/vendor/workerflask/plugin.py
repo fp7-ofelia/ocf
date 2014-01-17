@@ -6,5 +6,6 @@ def setup():
     config = pm.getService("config")
     config.install("workerflask.dbpath", "deploy/worker.db", "Path to the worker's database (if relative, AMsoil's root will be assumed).")
     
-    import workers as worker_package
+    import workersflask as worker_package
+    print "******************************", worker_package
     pm.registerService('workerflask', worker_package)
