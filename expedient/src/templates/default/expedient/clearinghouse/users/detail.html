@@ -9,49 +9,53 @@
 <script>
     function togglePwd() {
         if(document.getElementById("id_password1")) {
-	        document.getElementById("id_password1").disabled = !document.getElementById("id_password1").disabled;
-	        document.getElementById("id_password2").disabled = !document.getElementById("id_password2").disabled;
-	    }
+            document.getElementById("id_password1").disabled = !document.getElementById("id_password1").disabled;
+            document.getElementById("id_password2").disabled = !document.getElementById("id_password2").disabled;
+        }
         if(document.getElementById("id_old_password")) {
-	        document.getElementById("id_new_password1").disabled = !document.getElementById("id_new_password1").disabled;
-	        document.getElementById("id_new_password2").disabled = !document.getElementById("id_new_password2").disabled;
-	        document.getElementById("id_old_password").disabled = !document.getElementById("id_old_password").disabled;
+            document.getElementById("id_new_password1").disabled = !document.getElementById("id_new_password1").disabled;
+            document.getElementById("id_new_password2").disabled = !document.getElementById("id_new_password2").disabled;
+            document.getElementById("id_old_password").disabled = !document.getElementById("id_old_password").disabled;
         }
     }
-	$(document).ready(function() {
-		/* add tooltips */
-		$("a#geni_user_cert_link").tooltip({
-			tip: "div#cert_mgmt_help"
-		});
-	});
+    $(document).ready(function() {
+        /* add tooltips */
+        $("a#geni_user_cert_link").tooltip({
+            tip: "div#cert_mgmt_help"
+        });
+    });
 </script>
 <div class="main">
     <h1>User {{ curr_user.username }}</h1>
     <div>
         <h2>User Info:</h2>
         <form class="form" method="post" action="">{% csrf_token %}
-			<p>
-				<label for="change_pwd">Change password?</label>
-				<input type="checkbox" id="change_pwd" name="change_pwd" value="change_pwd" onChange="togglePwd()" />
-			</p>
+            <p>
+                <label for="change_pwd">Change password?</label>
+                <input type="checkbox" id="change_pwd" name="change_pwd" value="change_pwd" onChange="togglePwd()" />
+            </p>
             {{ pwd_form.as_p }}
             {{ user_form.as_p }}
             {{ userprofile_form.as_p }}
-			
+            
             <input type="submit" class="centered" value="Save info">
-			<div class="centered data_below_submit">
-        	    <a href="{% url users_delete curr_user.pk %}">Delete</a> |
-				<a id="geni_user_cert_link" href="{% url gcf_cert_manage curr_user.pk %}">Certificates</a> |
-				<a href="{% url users_home %}">Manage Users</a>
-				<div class="tooltip" id="cert_mgmt_help">
-					Click to manage the user's GENI Control Framework certificate.
-					<br /><br />
-					This certificate can be used to log into Expedient without
-					typing a password and for creating slices through interfaces
-					other than Expedient's Web interface. This includes the
-					PlanetLab interface and GPO's omni client.
-				</div>
-			</div>
+            {# Loads Jinja filters for ch_extras - in order to check superuser #}
+            {% load ch_extras %}
+            {% if curr_user|is_super_user %}
+                <div class="centered data_below_submit">
+                    <a href="{% url users_delete curr_user.pk %}">Delete</a> |
+                    <a id="geni_user_cert_link" href="{% url gcf_cert_manage curr_user.pk %}">Certificates</a> |
+                    <a href="{% url users_home %}">Manage Users</a>
+                    <div class="tooltip" id="cert_mgmt_help">
+                        Click to manage the user's GENI Control Framework certificate.
+                        <br /><br />
+                        This certificate can be used to log into Expedient without
+                        typing a password and for creating slices through interfaces
+                        other than Expedient's Web interface. This includes the
+                        PlanetLab interface and GPO's omni client.
+                    </div>
+                </div>
+            {% endif %}
         </form>
     </div>
 </div>
