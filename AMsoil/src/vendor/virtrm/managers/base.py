@@ -25,7 +25,7 @@ logging=amsoil.core.log.getLogger('VTResourceManager')
 
 class VTResourceManager(object):
     config = pm.getService("config")
-    worker = pm.getService("workerflask")
+    worker = pm.getService("worker")
     # FIXME or REMOVE: circular dependency
     #virtrm = pm.getService("virtrm")
     #from virtrm.controller.drivers.virt import VTDriver

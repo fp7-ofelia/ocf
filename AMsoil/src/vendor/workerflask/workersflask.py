@@ -8,7 +8,7 @@ from amsoil.core.exception import CoreException
 import amsoil.core.log
 logger=amsoil.core.log.getLogger('workerflask')
 
-import workerdb
+import workerflaskdb as workerdb
 
 class WorkerServer(object):
     SLEEP_BETWEEN_CHECKS = 1 # sec

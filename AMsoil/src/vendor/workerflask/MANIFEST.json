@@ -3,7 +3,7 @@
   "author" : "Carolina Fernandez",
   "author-email" : "carolina.fernandez@i2cat.net",
   "version" : 1,
-  "implements" : ["workerflask"],
+  "implements" : ["worker"],
   "loads-after" : ["config"],
   "requires" : []
 }
