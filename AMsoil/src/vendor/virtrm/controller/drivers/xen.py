@@ -27,11 +27,8 @@ class XenDriver(VTDriver):
             raise    
     
     def get_server_uuid_by_vm_id(vm_id):
-        vm = db_session.query(XenVM).filter(XenVM.virtualmachine_ptr_id == vm_id).first()
-        server = vm.xenserver_associations
-        server_uuid = server.uuid
-        db_session.expunge(vm)
-        return server_uuid
+        server = XenVM.query.get(vm_id).get_server()
+        return server.uuid
     
     def get_server_and_create_vm(self,action):
         try: 

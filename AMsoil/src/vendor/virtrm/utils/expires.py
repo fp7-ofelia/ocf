@@ -13,7 +13,7 @@ class Expires(db.Model):
     do_save = True
     
     @staticmethod
-    def consctructor(vm_id, expiration, save=True):
+    def constructor(vm_id, expiration, save=True):
         self = VMExpires()
         try:
             self.vm_id = vm_id
@@ -40,3 +40,7 @@ class Expires(db.Model):
     
     def get_expiration(self):
         return self.expires
+
+    def destroy(self):
+        db.session.delete(self)
+        db.session.commit()
