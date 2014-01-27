@@ -17,6 +17,7 @@
     <xs:complexType name="NodeContents">
     	<xs:sequence>
             <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="xs:string" name="uuid" minOccurs="1" maxOccurs="1"/>
             <xs:element type="os-type-type" name="operating_system_type"/>
             <xs:element type="os-distro-type" name="operating_system_distribution"/>
             <xs:element type="xs:float" name="operating_system_version"/>
@@ -28,7 +29,6 @@
             <xs:element type="xs:string" name="agent_url"/>
             <xs:element name="service" type="ServiceContents" maxOccurs="unbounded" minOccurs="0"/>
 	</xs:sequence>
-	<xs:attribute type="xs:string" name="server-uuid"/>
     </xs:complexType>
 
     <xs:complexType name="ServiceContents">
