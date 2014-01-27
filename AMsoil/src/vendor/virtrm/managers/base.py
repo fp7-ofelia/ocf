@@ -30,10 +30,15 @@ class VTResourceManager(object):
     #virtrm = pm.getService("virtrm")
     #from virtrm.controller.drivers.virt import VTDriver
 
-    RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION") # sec in the allocated state
-    MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
-
+    # Sec in the allocated state
+    RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION")
+    # Sec in the provisioned state (you can always call renew)
+    MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION")
+    
     EXPIRY_CHECK_INTERVAL = config.get("virtrm.EXPIRATION_VM_CHECK_INTERVAL") 
+    
+    ALLOCATION_STATE_ALLOCATED = "allocated"
+    ALLOCATION_STATE_PROVISIONED = "provisioned"
     
     def __init__(self):
         super(VTResourceManager, self).__init__()
@@ -87,28 +92,21 @@ class VTResourceManager(object):
             project_name = get_leaf(get_authority(get_authority(vm_hrn)))
         vm = VMAllocated.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).filter_by(project_name=project_name).first()
         if vm:
-            server = VTServer.query.get(vm.server_id).first()
             if allocation_status:
-                vm_status['allocation_status'] = "allocated"
-            if expiration_time:
-                vm_status['expires'] = vm.expires
-            if server_name:
-                vm_status['server'] = server.name
+                vm_status['allocation_status'] = self.ALLOCATION_STATE_ALLOCATED
         else:
             vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).filter_by(project_name=project_name).first().get_child_object()
             if vm:
-                server = vm.xenserver
-                vm_expies = Expires.query.get(vm_id=vm.id).first()
-                if server_name:
-                    vm_status['server'] = server.name
                 if allocation_status:
-                    vm_status['allocation_status'] = "provisioned"
+                    vm_status['allocation_status'] = self.ALLOCATION_STATE_PROVISIONED
                 if operational_status:
                     vm_status['operational_status'] = vm.status
-                if expiration_time and vm_expires:
-                    vm_status['expires'] = vm_expires.expires
             else:
                 raise virt_exception.VTAMVMNotFound(urn)
+        if expiration_time:
+            vm_status['expires'] = vm.expires.expires
+        if server_name:
+            vm_status['server'] = vm.get_server().name
         return vm_status
 
     def get_vms_in_slice(self, slice_urn):
@@ -135,10 +133,9 @@ class VTResourceManager(object):
         if vms:
             vms_created = list()
             for vm in vms:
-                vm_expires = Expires.query.filter_by(vm_id=vm.id).one()
-                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
+                vm_hrn = get_authority(get_authority(slice_urn))+'.'+vm.project_name+'.'+vm.slice_name+'.'+ vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm_expires.expires})
+                vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm.expires.expires})
             return vms_created
         else:
             return None
@@ -154,9 +151,9 @@ class VTResourceManager(object):
         if vms:
             vms_created = list()
             for vm in vms:
-                vm_hrn = get_authority(get_authority(slice_hrn)) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
+                vm_hrn = get_authority(get_authority(slice_hrn))+'.'+vm.project_name+'.'+vm.slice_name+'.'+ vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                vms_created.append({'name':vm_urn, 'expires':vm.expires, 'status':"allocated"})
+                vms_created.append({'name':vm_urn, 'expires':vm.expires.expires, 'status':self.ALLOCATION_STATUS_ALLOCATED})
             return vms_created
         else:
             return None
@@ -169,18 +166,6 @@ class VTResourceManager(object):
             return "success"
         except Exception as e:
             return "error" 
-    
-    def _destroy_vm_with_expiration(self, vm_id, server_uuid=None):
-        vm_expires = Expires.query.filter_by(vm_id=vm_id).first()
-        if vm_expires != None:
-            db.session.delete(vm_expires)
-            db.session.commit()
-            if not server_uuid:
-                server_uuid = XenDriver.get_server_uuid_by_vm_id(vm_id)
-            deleted_vm = self._destroy_vm(vm_id, server_uuid)
-            return deleted_vm
-        else:
-            return None
     
     # FIXME: use Translator.{VMdictToClass, VMdicIfacesToClass} for this!
     def _vm_dict_to_class(self, requested_vm, slice_name, end_time):

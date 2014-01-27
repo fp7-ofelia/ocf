@@ -66,6 +66,9 @@ class VTServer(db.Model):
     '''Other networking parameters'''
     subscribed_mac_ranges = association_proxy("vtserver_mac_range", "subscribed_mac_range")
     subscribed_ip4_ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range")
+    
+    '''Virtual Machines allocated'''
+    vms_allocated = association_proxy("vtserver_vms", "allocated_vm")
 
     ''' Mutex over the instance '''
     mutex = None

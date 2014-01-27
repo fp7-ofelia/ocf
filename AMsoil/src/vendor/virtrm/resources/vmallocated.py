@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
@@ -22,27 +23,26 @@ class VMAllocated(db.Model):
     disc_space_gb = db.Column("discSpaceGB", DOUBLE)
 
     '''Property parameters'''
+    project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
     project_name = db.Column("projectName", db.String(1024), nullable=False, default="")
     slice_id = db.Column("sliceId", db.String(1024), nullable=False, default="")
     slice_name = db.Column("sliceName", db.String(512), nullable=False, default="")
-    #XXX: Should be a ForeignKey, the relationship between servers the allocated vms
-    server_id = db.Column("serverId", db.Integer)
-
+    server_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
+    server = db.relationship("VTServer")
+        
     '''OS parameters'''
     operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
     operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False, default="")
     operating_system_distribution = db.Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
-
+    
     '''Virtualization parameteres'''
-    virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")
+    virtualization_setup_type = db.Column("virtualizationSetupType",db.String(1024),nullable=False,default="")
     hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     hypervisor = db.Column(db.String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
-    expires = db.Column(db.Date, nullable=False)
-    #XXX: This should be the expires, uncomment when table is changed
-#    expires = association_proxy("vm_expiration", "expires")
+    expires = association_proxy("vm_expiration", "expires")
 
     ''' Mutex over the instance '''
     # Mutex
@@ -51,20 +51,15 @@ class VMAllocated(db.Model):
     '''Defines soft or hard state of the VM'''
     do_save = True
 
-    '''Possible virtualization technologies'''
-    XEN = "xen"
-
-    __possible_virt_technologies = (XEN)
-
     @staticmethod
-    def constructor(name,project_id,slice_id,slice_name,server_id,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,hd_setup_type,hd_origin_path,virt_setup_type,hypervisor,expires,save=True):
+    def constructor(name,project_id,slice_id,slice_name,projectname,server,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,hd_setup_type,hd_origin_path,virt_setup_type,hypervisor,expires,save=True):
         self = VMAllocated()
         try:
             self.name = name 
             self.project_id = project_id
             self.slice_id = slice_id
             self.slice_name = slice_name
-            self.server_id = server_id
+            self.project_name = project_name
             self.operating_system_type = os_type
             self.operating_system_version = os_version
             self.operating_system_distribution = os_dist
@@ -76,6 +71,7 @@ class VMAllocated(db.Model):
             self.virtualization_setup_type = virt_setup_type
             self.hypervisor = hypervisor
             self.expires = expires
+            self.server = server
             self.do_save = save
             if save:
                 db.session.add(self)
@@ -144,18 +140,22 @@ class VMAllocated(db.Model):
         except Exception as e:
             raise e
     
+    @validates('hypervisor')
+    def validate_hypervisor(self, key, virt_tech):
+        try:
+            VirtTechClass.validate_virt_tech(virt_tech)
+            return virt_tech
+        except Exception as e:
+            raise e        
+    
     '''Getters and Setters'''
     def get_lock_identifier(self):
         # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
     
     def set_name(self, name):
-        try:
-             validators.vm_name_validator(name)
-             self.name = name
-             self.auto_save()
-        except Exception as e:
-             raise e
+        self.name = name
+        self.auto_save()
     
     def get_name(self):
         return self.name
@@ -266,4 +266,7 @@ class VMAllocated(db.Model):
             self.auto_save()
     
     def get_hypervisor(self):
-        return self.hypervisor    
+        return self.hypervisor   
+    
+    def get_server(self): 
+        return self.server

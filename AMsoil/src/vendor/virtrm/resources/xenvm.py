@@ -71,6 +71,8 @@ class XenVM(VirtualMachine):
             # Destroy interfaces
             for inter in self.network_interfaces.all():
                 inter.destroy()
+            if expires:
+                expires.destroy()
             db.session.delete(self)
             db.session.commit()
     
@@ -114,6 +116,9 @@ class XenVM(VirtualMachine):
         VirtTypeClass.validate_virt_type(v_type)
         self.virtualization_setup_type = v_type
         self.auto_save()
+    
+    def get_server(self):
+        return self.xenserver[0]
     
     ''' Factories '''
     @staticmethod
