@@ -1,0 +1,53 @@
+{% extends "networking/base.html" %}
+
+
+{% block pagehead %}<h1>Ip4 Range management</h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div>
+	{% if errors %}
+	<div class="fielderror">{{ errors }}</div>
+	{% endif %}
+
+	{% if ranges %}
+    	<table class ="blue">
+		
+		<tr>
+			<th>Name</th>
+			<th>Global</th>
+			<th>Start Ip4 Addr.</th>
+			<th>End Ip4 Addr.</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</tr>
+		{% for range in ranges %}
+            	<tr class="{% cycle 'odd' 'even' %}">
+			<td> <a href="{% url showIp4Range range.id %}">{{range.name}}</a></td>
+			<td> {{range.isGlobal}}</td>
+			<td> {{range.startIp}}</td>
+			<td> {{range.endIp}} </td>
+			<td> <span id="status{{range.id}}"></span></td>
+			<script>
+				createProgressBar("#status{{range.id}}",{{range.ips.all.count}},{{range.getNumberOfSlots}},false)	
+			</script>	
+		
+			<form action="{% url manageIp4Range "delete" range.id %}" method="POST">
+				{% csrf_token %}
+					<td><input type="submit" value="Remove" onClick="return confirmSubmit('Are you sure you want to delete range {{range.name}}?')"></td>
+			</form>	
+		</tr>
+		{% endfor %}
+	</table>
+	{% else %}
+		No ranges defined yet..
+	{% endif %}
+	<div class="center" style="padding-top:40px;">
+        	<a href="{% url createIp4Range "add" %}">Create range</a> |
+		<a href="{% url networkingDashboard  %}">Networking dashboard</a>
+	</div>
+</div>
+{% endblock content %}
+

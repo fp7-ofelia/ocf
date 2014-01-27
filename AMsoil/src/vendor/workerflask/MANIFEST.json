@@ -1,0 +1,9 @@
+{
+  "name" : "Worker client and server wrapper",
+  "author" : "Carolina Fernandez",
+  "author-email" : "carolina.fernandez@i2cat.net",
+  "version" : 1,
+  "implements" : ["workerflask"],
+  "loads-after" : ["config"],
+  "requires" : []
+}

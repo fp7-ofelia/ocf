@@ -1,0 +1,60 @@
+{% extends "servers/servers_base.html" %}
+
+{% block pagehead %}<h1> VM : {{ vm.name }} <i>({{vm.state }})</i></h1>{% endblock pagehead %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="main">
+
+    <table class="separator-table">
+    </table>
+	
+	<div>
+		<h3>General Parameters</h3>
+    <table class="formtable">
+
+        <tr><th> Name:</th><td>{{ vm.name }}</td></tr>
+        <tr><th> State:</th><td>{{ vm.state }}</td></tr>
+        <tr><th> UUID:</th><td>{{ vm.uuid }}</td></tr>
+        <tr><th> Project</th><td> {{vm.projectName }}  <font title ="UUID" style="color:#999;">({{vm.projectId}})</font></td>
+        <tr><th> Project</th><td> {{vm.sliceName }}  <font title="UUID" style="color:#999;">({{vm.sliceId}})</font></td>
+        <tr><th> Memory :</th><td> {{vm.memory}}</td>
+        <tr><th> OS Type :</th><td> {{vm.operatingSystemType }}</td>
+        <tr><th> OS Version :</th><td> {{vm.operatingSystemVersion }}</td>
+        <tr><th> OS Dist :</th><td> {{vm.operatingSystemDistribution }}</td>
+    </table>
+	</div>
+
+        <div>
+            <h3>Virtualization parameters</h3>
+        <table class="formtable">
+        <tr><th> Virtualization Setup Type :</th><td> {{vm.virtualizationSetupType }}</td>
+        <tr><th> HD Setup Type :</th><td> {{vm.hdSetupType }}</td>
+        <tr><th> HD Origin Path :</th><td> {{vm.hdOriginPath }}</td>
+        </table>
+		</div>
+
+
+        <div>
+            <h3>Interfaces</h3>
+        <table class="formtable">
+        {% for iface in vm.networkInterfaces.all %}
+            <tr><th> Interface name :</th><td> {{iface.name }}</td> {% if iface.isMgmt == 1 %}<th style="color:#999">Management</th> {% endif%}</tr>
+            {% if iface.ip4s.all %}
+				{% for ip4 in iface.ip4s.all %}
+	                <tr><th> IP :</th><td> {{ ip4.ip}}</td></tr>
+				{% endfor %}
+            {% endif %}
+            <tr><th> MAC :</th><td> {{iface.mac.mac }}</td></tr>
+        {% endfor %}
+        </table>
+     	</div>
+</div>
+
+<div class="center" style="padding-top:40px;"> 
+    <a href="{% url dashboard  %}">Dashboard</a> | <a href="{% url edit_server server_id %}">Back</a>
+</div>
+{% endblock content %}
+

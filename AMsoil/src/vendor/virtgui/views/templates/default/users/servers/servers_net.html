@@ -1,0 +1,33 @@
+{% extends "servers/servers_base.html" %}
+{% load accessDict %}
+{% block pagehead %}<h1>Add/edit Networking Parameters:</h1>{% endblock pagehead %}
+
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class="main">
+
+    <form method="post" action="">{% csrf_token %} 
+        <div class = "center">
+        <table class="separator-table">
+        {% for field in form %}
+           <tr><th colspan ="2">{{field.errors}}</th></tr>
+            <tr><th> {{ field.label_tag }}:</th><td> {{ field }}</td></tr>
+        {% endfor %}
+        </table>    
+        </div>
+        <div class="center">
+            <input type="submit" value="Save" /> | 
+            <a href="{% url dashboard %}">Cancel</a>
+        </div>
+    </form> 
+
+</div>
+{% endblock content %}
+

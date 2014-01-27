@@ -1,0 +1,9 @@
+{
+  "name" : "VT graphical user interface",
+  "author" : "Carolina Fernandez",
+  "author-email" : "carolina.fernandez@i2cat.net",
+  "version" : 1,
+  "implements" : [],
+  "loads-after" : ["virtguihandler", "virtrm", "virtadminrm", "virtexceptions", "workerflask", "config"],
+  "requires" : []
+}

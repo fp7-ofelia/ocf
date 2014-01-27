@@ -1,0 +1,82 @@
+{% extends "base_admin.html" %}
+
+{% block pagehead %}
+<div class="main">
+        <h1>Create a Rule Table</h1>
+</div>
+{% endblock pagehead %}
+
+{% block content %}
+<div class="main">
+
+    <div> <h3>Generate a new table</h3> </div>
+    <br/>
+<!-- Error List-->
+    {% if errors %}
+        <ul>
+           {% for error in errors %}
+           <p style="color: red;">{{error}}</p>
+           {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div style="width:730px">
+        <table class="formtable">
+
+<!--rule generation Form Table-->
+        <form action ="{% url rule_table_create %}" method="post">{% csrf_token %}
+        <tr>
+        <td>Table Name:</td>
+        <td><textarea name="tableName" rows=1 cols=65 ></textarea></td>
+        </tr>
+        <tr>
+        <td>Type:</td>
+        <td><textarea name="tableType" rows=1 cols=65 ></textarea></td>
+        </tr>
+        <tr>
+        <td>Persistence Driver:</td>
+        <td><select name="Persistence">
+                <option value="Django">Django</option>
+        </select></td>
+        </tr>
+        <tr>
+        <td>Parser Driver:</td>
+        <td><select name="Parser"  >
+                        <option value="RegexParser">Regex Parser</option>
+        </select></td>
+        </tr>
+        <tr>
+        <td>Mappings:</th>
+        <td><textarea name="mappings" rows=1 cols=65></textarea></td>
+        <tr>
+        </tr>
+        <td>Rule Set:</td>
+        <td><textarea name="rule_set" rows=1 cols=65></textarea></td>
+        </tr>
+        <tr>
+        <td>Do Persistence?</td>
+       <td><input type="checkbox" name="persistence_flag" value="do_persistence"></td>
+        </table>
+        <br>
+                <input type="hidden" name="uuid" value="">
+        {% if edit %}
+                <input type="submit" value="Save Changes">
+                <input type="hidden" name="editing" value="1">
+        {% else %}
+                <input type="submit" value="Generate RuleTable">
+                <input type="hidden" name="editing" value="0">
+		<input type="hidden" name"save" value="1">
+        {% endif %}
+        </form>
+	<div class="center">
+        <a href="{% url policy %}">Policy</a> |
+        <a href="{% url dashboard  %}">Dashboard</a>
+    	</div>
+	</div>
+
+
+
+{% endblock content %}
+
+                                                                                                                                                                                                                           1,31          Top
+

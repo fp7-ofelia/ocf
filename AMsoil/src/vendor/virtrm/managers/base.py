@@ -25,7 +25,7 @@ logging=amsoil.core.log.getLogger('VTResourceManager')
 
 class VTResourceManager(object):
     config = pm.getService("config")
-    worker = pm.getService('worker')
+    worker = pm.getService("workerflask")
     # FIXME or REMOVE: circular dependency
     #virtrm = pm.getService("virtrm")
     #from virtrm.controller.drivers.virt import VTDriver
@@ -33,16 +33,13 @@ class VTResourceManager(object):
     RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION") # sec in the allocated state
     MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION") # sec in the provisioned state (you can always call renew)
 
-    EXPIRY_ALLOCATED_CHECK_INTERVAL = config.get("virtrm.ALLOCATED_VM_CHECK_INTERVAL") 
-    EXPIRY_CHECK_INTERVAL = config.get("virtrm.CREATED_VM_CHECK_INTERVAL")
-
+    EXPIRY_CHECK_INTERVAL = config.get("virtrm.EXPIRATION_VM_CHECK_INTERVAL") 
+    
     def __init__(self):
         super(VTResourceManager, self).__init__()
         # Register callback for regular updates
-        # FIXME: set workers back
-        #self.worker.addAsReccurring("virtrm", "expire_vm", None, self.EXPIRY_CHECK_INTERVAL)
-        #self.worker.addAsReccurring("virtrm", "expire_allocated_vm", None, self.EXPIRY_ALLOCATED_CHECK_INTERVAL)
-
+        self.worker.addAsReccurring("virtrm", "check_expiration_vm", None, self.EXPIRY_CHECK_INTERVAL)
+    
     # Server methods
     def get_servers(self, uuid=None):
         """
@@ -562,17 +559,15 @@ class VTResourceManager(object):
         pass
     
     @worker.outsideprocess
-    def expire_vm(self, params):
-        vms = Expires.query.filter_by(expires <= datetime.utcnow()).all()
-        for vm in vms:
-            self._destroy_vm_with_expiration(vm.vm_id)
-        return
-
-    @worker.outsideprocess
-    def expire_allocated_vm(self, params):
+    def check_expiration_vm(self, params):
+        """
+        Checks expiration for both allocated and provisioned VMs
+        and deletes accordingly, either from DB or disk.
+        """
         vms = VMAllocated.query.filter_by(expires <= datetime.utcnow()).all()
         for vm in vms:
-             self._unallocate_vm(vm.id)
+            self._unallocate_vm(vm.id)
+            self._destroy_vm_with_expiration(vm.vm_id)
         return
     
     # Backup & migration methods

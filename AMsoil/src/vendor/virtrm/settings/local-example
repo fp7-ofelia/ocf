@@ -13,13 +13,11 @@ Ofelia VT AM User settings file
 # Reservation time configuration
 #
 # MAX_RESERVATION_DURATION: Maximum duration a VTAM resource (VM) can be held allocated (not provisioned)
-# ALLOCATED_VM_CHECK_INTERVAL: Time between consecutive checks of the allocated expire time
-# CREATED_VM_CHECK_INTERVAL: Time between consecutive checks of the vm expire time
+# EXPIRATION_VM_CHECK_INTERVAL: Time between checks of expire time for both allocated and provisioned VM
 # MAX_VM_DURATION: Maximum duration a VTAM VM can be provisioned
 #
 MAX_RESERVATION_DURATION = 4*60*60
-ALLOCATED_VM_CHECK_INTERVAL = 10*60
-CREATED_VM_CHECK_INTERVAL = 24*60*60
+EXPIRATION_VM_CHECK_INTERVAL = 10*60
 MAX_VM_DURATION = 7*24*60*60
 
 #

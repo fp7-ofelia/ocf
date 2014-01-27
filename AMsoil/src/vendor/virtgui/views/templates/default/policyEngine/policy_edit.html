@@ -1,0 +1,100 @@
+{% extends "base_admin.html" %}
+{% block scripts %}
+<style type="text/css">
+    .header th {
+        text-align: center !important;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $("img#enable_question").tooltip({
+            tip: "div#enable_help",
+            position: "top center",
+            cancelDefault: true,
+            relative: true,
+            offset: [0,110]
+        });
+    });
+</script>
+<script type="text/javascript">
+    /**
+     * Allows the deletion of a PolicyTable object when there are
+     * N > 2 elements (rows of the table). Alert user otherwise.
+     */
+    function deletePolicyTable(event, tableName, tableID, redirectURL) {
+        doDelete = true;
+        if ($(event.target).closest('table').find('tr').length > 2) {
+            if (confirm("Are you sure you want to delete policy table '" + tableName + "' (id = " + tableID + ") from the database?")) {
+            }
+        } else {
+            if (!confirm("Are you sure you want to delete policy table '" + tableName + "' and ALL its associated rules?")) {
+                doDelete = false;
+            }
+        }
+        if (!doDelete) {
+            event.preventDefault();
+        }
+        return doDelete;
+    }
+</script>
+{% endblock %}
+{% block pagehead %}
+<div class="main">
+        <h1>Delete existing Policy Tables</h1>
+</div>
+{% endblock pagehead %}
+
+{% block content %}
+<div class="main">
+
+        <div>
+                <p>
+   			<h3>
+				General policy tables parameters
+                        	<img id="enable_question" src= "{% url img_media 'question_mark_15x15.png'  %}">
+			</h3>
+                        <div class="tooltip" id="enable_help">
+                                A Policy Table contains the Policy Rules defined in the Policy Manager. You shall have tables with unique name only.
+                        </div>
+                </p>
+        </div>
+	<div class="wrapper">
+	    <p style="margin-top: 0px; padding-bottom: 25px; text-align: left;">
+	    	<strong>Warning</strong>: there are mulitiple Policy Tables with the same name in your installation. <u>You shall <strong>delete all but one</strong> before proceeding to the Policy Manager</u> itself.
+	    </p>
+	    <table id="policyRuleTableDeletion" class="ruleTable">
+	        <tr class="header">
+		    <th>ID</th>
+	            <th>Name</th>
+	            <th>Default parser</th>
+	            <th>Default persistence</th>
+	            <th>Active persistence</th>
+	            <th>Actions</th>
+	        </tr>
+	        {% for table in CurrentTable %}
+	        <tr class="{% cycle 'odd' 'even' %}">
+	            <td align="center">{{ table.id }}</td>
+	            <td align="center">{{ table.name }}</td>
+	            <td align="center">{{ table.defaultParser }}</td>
+	            <td align="center">{{ table.defaultPersistence }}</td>
+	            <td align="center">{{ table.defaultPersistenceFlag }}</td>
+	            <td align="center">
+		        <form action ="{% url policy_delete table.id %}" method="post">{% csrf_token %}
+			    <input type="submit" id="buttonDeletePolicyTable" onclick="return deletePolicyTable(event, '{{ table.name }}', '{{ table.id }}', '{% url policy_delete table.id %}');" value="Delete" />
+		        </form>
+		    </td>
+	        </tr>
+	        {% endfor %}
+	    </table>
+	</div>
+
+	<div class="center">
+	    <p>
+	        <a href="{% url rule_table_view %}">Policy Manager</a> |
+        	<a href="{% url dashboard  %}">Dashboard</a>
+	    </p>
+	</div>
+</div>
+
+{% endblock content %}
+
