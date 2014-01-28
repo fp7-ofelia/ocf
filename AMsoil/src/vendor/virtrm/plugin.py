@@ -28,3 +28,7 @@ def setup():
     from managers.admin import VTAdminResourceManager
     rm_admin = VTAdminResourceManager()
     pm.registerService('virtadminrm', rm_admin)
+    
+    # Generate the metadata if it does not exist
+    from utils.base import set_up
+    set_up()

@@ -70,8 +70,8 @@ class VMAllocated(db.Model):
             self.hd_origin_path = hd_origin_path
             self.virtualization_setup_type = virt_setup_type
             self.hypervisor = hypervisor
-            self.expires = expires
             self.server = server
+            self.expires.append(expires)
             self.do_save = save
             if save:
                 db.session.add(self)
@@ -254,11 +254,11 @@ class VMAllocated(db.Model):
         self.auto_save()
     
     def set_expiration(self, expires):
-        self.expires = expires
-        self.auto_save()
+        self.expires.append(expires)
+        sel.auto_save()
     
     def get_expiration(self):
-        return self.expires
+        return self.expires.first().expires
     
     def set_hypervisor(self, hypervisor):
         if hypervisor not in __possible_virt_technologies:

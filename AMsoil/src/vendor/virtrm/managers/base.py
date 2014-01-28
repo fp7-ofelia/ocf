@@ -1,9 +1,11 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
-from resources.vmallocated import VMAllocated
-from resources.vtserver import VTServer
 from resources.virtualmachine import VirtualMachine
+from resources.vmallocated import VMAllocated
+from resources.vmallocatedexpires import VMAllocatedExpires
+from resources.vmexpires import VMExpires
+from resources.vtserver import VTServer
 from resources.xenserver import XenServer
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from utils.action import Action
@@ -183,8 +185,7 @@ class VTResourceManager(object):
         vm.hd_setup_type = requested_vm['hd_setup_type']
         vm.hd_origin_path = requested_vm['hd_origin_path']
         vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
-        vm.expires = end_time 
-        vm.server_id = VTServer.query.filter_by(name=requested_vm['server_name']).one().id
+        vm.server = VTServer.query.filter_by(name=requested_vm['server_name']).one()
         return vm
     
     def provision_allocated_vms(self, slice_urn, end_time):
@@ -481,6 +482,10 @@ class VTResourceManager(object):
         vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
         db.session.add(vm_allocated_model)
         db.session.commit()
+        expires = Expires.constructor(end_time)
+        vm_allocated_model.expires = [expires,]
+        db.session.add(vm_allocated_model)
+        db.session.commit()
         server = VTDriver.get_server_by_id(vm_allocated_model.server_id)
         return vm_allocated_model, server
         
@@ -548,12 +553,16 @@ class VTResourceManager(object):
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
-        expirations = Expires.query.filter_by(expires <= datetime.utcnow()).all()
-        for expiration in expiration:
-            if isinstance(expiration.get_vm(), VMAllocated):
-                self._unallocate_vm(expiration.get_vm().id)
-            elif isinstance(expiration.get_vm(), VirtualMachine):
-                self._destroy_vm_with_expiration(expiration.get_vm()._id)
+        expirations = Expires.query.filter(Expires.expires < datetime.utcnow()).all()
+        for expiration in expirations:
+            if expiration.get_vm():
+                if isinstance(expiration.get_vm(), VMAllocated):
+                    self._unallocate_vm(expiration.get_vm().id)
+                elif isinstance(expiration.get_vm(), VirtualMachine):
+                    self._destroy_vm_with_expiration(expiration.get_vm()._id)
+                else:
+                    db.session.delete(expiration)
+                    db.session.commit()
             else:
                 db.session.delete(expiration)
                 db.session.commit()

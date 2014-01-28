@@ -11,5 +11,5 @@ class VMAllocatedExpires(db.Model):
     vm_id = db.Column(db.Integer, db.ForeignKey('amsoil_vt_manager_virtualmachine_allocated.id'))
     expires_id = db.Column(db.Integer, db.ForeignKey('amsoil_vt_manager_expires.id'))
     
-    vm = db.relationship("VMAllocated", backref="vm_expiration")
-    expires = db.relationship("Expires", backref="expires_vm")
+    vm = db.relationship("VMAllocated", backref="vm_expiration", lazy='dynamic')
+    expires = db.relationship("Expires", backref="expires_allocated_vm", lazy='dynamic')

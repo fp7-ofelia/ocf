@@ -9,14 +9,13 @@ class Expires(db.Model):
     __tablename__ = 'amsoil_vt_manager_expires'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    expires = db.Column(db.Date)
+    expires = db.Column(db.DateTime)
     do_save = True
     
     @staticmethod
-    def constructor(vm_id, expiration, save=True):
-        self = VMExpires()
+    def constructor(expiration, save=True):
+        self = Expires()
         try:
-            self.vm_id = vm_id
             self.expires = expiration
             do_save = save
             if save:
@@ -42,7 +41,12 @@ class Expires(db.Model):
         return self.expires
     
     def get_vm(self):
-        return self.expires_vm.vm
+        if self.expires_vm:
+            return self.expires_vm[0].vm
+        elif self.expires_allocated_vm:
+            return self.expires_allocated_vm[0].vm
+        else:
+            return None
 
     def destroy(self):
         db.session.delete(self)
