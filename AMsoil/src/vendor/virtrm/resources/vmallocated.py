@@ -5,6 +5,7 @@ from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
+from utils.expires import Expires
 from utils.mutexstore import MutexStore
 import inspect
 
@@ -27,8 +28,8 @@ class VMAllocated(db.Model):
     project_name = db.Column("projectName", db.String(1024), nullable=False, default="")
     slice_id = db.Column("sliceId", db.String(1024), nullable=False, default="")
     slice_name = db.Column("sliceName", db.String(512), nullable=False, default="")
-    server_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
-    server = db.relationship("VTServer")
+    server_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'), nullable=False)
+    server = db.relationship("VTServer", backref='allocated_vms')
         
     '''OS parameters'''
     operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
@@ -42,7 +43,8 @@ class VMAllocated(db.Model):
     hypervisor = db.Column(db.String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
-    expires = association_proxy("vm_expiration", "expires")
+    expires_id = db.Column(db.Integer, db.ForeignKey('amsoil_vt_manager_expires.id'), nullable=False)
+    expires = db.relationship("Expires", backref='allocated_vm')
 
     ''' Mutex over the instance '''
     # Mutex

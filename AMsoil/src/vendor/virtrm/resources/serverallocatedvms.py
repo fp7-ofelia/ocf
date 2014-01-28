@@ -1,4 +1,5 @@
 from utils.base import db
+from sqlalchemy.orm import backref
 
 '''@author: SergioVidiella'''
 

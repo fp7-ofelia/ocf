@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from utils.base import db
+import amsoil.core.log
+
+logging=amsoil.core.log.getLogger('Expires')
+
 
 '''@author: SergioVidiella'''
 
@@ -8,7 +12,7 @@ class Expires(db.Model):
     """Expiration time of the Virtual Machine (only GeniV3)."""
     __tablename__ = 'amsoil_vt_manager_expires'
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     expires = db.Column(db.DateTime)
     do_save = True
     
@@ -16,13 +20,15 @@ class Expires(db.Model):
     def constructor(expiration, save=True):
         self = Expires()
         try:
+            logging.debug("********************************" + str(expiration))
             self.expires = expiration
+            logging.debug("********************************" + str(self.expires))
             do_save = save
             if save:
                 db.session.add(self)
                 db.session.commit()
         except Exception as e:
-            print e
+            logging.debug("*********************************" + str(e))
             raise e
         return self
     
@@ -44,7 +50,7 @@ class Expires(db.Model):
         if self.expires_vm:
             return self.expires_vm[0].vm
         elif self.expires_allocated_vm:
-            return self.expires_allocated_vm[0].vm
+            return self.expires_allocated_vm[0].allocated_vm
         else:
             return None
 

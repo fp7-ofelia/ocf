@@ -1,9 +1,9 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
+from resources.serverallocatedvms import ServerAllocatedVMs
 from resources.virtualmachine import VirtualMachine
 from resources.vmallocated import VMAllocated
-from resources.vmallocatedexpires import VMAllocatedExpires
 from resources.vmexpires import VMExpires
 from resources.vtserver import VTServer
 from resources.xenserver import XenServer
@@ -186,6 +186,7 @@ class VTResourceManager(object):
         vm.hd_origin_path = requested_vm['hd_origin_path']
         vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
         vm.server = VTServer.query.filter_by(name=requested_vm['server_name']).one()
+        logging.debug("********************************* OK OK")
         return vm
     
     def provision_allocated_vms(self, slice_urn, end_time):
@@ -479,14 +480,15 @@ class VTResourceManager(object):
         except Exception as e:
             raise e
         # Once we know all the VMs could be created, we start reserving them
+        expires = Expires.constructor(expiration_time, False)
+        logging.debug("**************************************** OK")
         vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
-        db.session.add(vm_allocated_model)
-        db.session.commit()
-        expires = Expires.constructor(end_time)
-        vm_allocated_model.expires = [expires,]
+        logging.debug("***********************************" + str(expires.id))
+        vm_allocated_model.expires = expires
         db.session.add(vm_allocated_model)
         db.session.commit()
         server = VTDriver.get_server_by_id(vm_allocated_model.server_id)
+        logging.debug("********************************" +  str(server.allocated_vms))
         return vm_allocated_model, server
         
     #XXX: continue from this point
