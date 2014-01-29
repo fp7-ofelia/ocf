@@ -83,7 +83,12 @@ def install_deps ():
   #ver = res.split()[1]
   #if ver != "1.0.2":
   call("pip install -U pip")
-  call("pip -q install sqlalchemy Flask Flask-XML-RPC ElementTree flup blinker lxml pyOpenSSL")
+  # Initial arrangements in order to be able to install packages
+  #call("pip -q install setuptools --no-use-wheel --upgrade")
+  call("pip -q install ElementTree --allow-unverified ElementTree --allow-external ElementTree")
+  pip_dependencies = ["python-dateutil", "swig", "M2Crypto", "SQLAlchemy", "Flask", "Flask-XML-RPC", "flup", "blinker", "lxml", "pyOpenSSL"]
+  for dependency in pip_dependencies:
+    call("pip -q install %s" % str(dependency))
 
 def postinst (opts):
   call("/usr/sbin/make-ssl-cert generate-default-snakeoil")
