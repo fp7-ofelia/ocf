@@ -68,6 +68,9 @@ gapi2_apih = gapi2.setup(app) #Vasileios: get the returned api handlers
 from foam.api import legacyexpedientapi #Vasileios: get the returned api handlers
 legacyexpedientapi_apih = legacyexpedientapi.setup(app) #Vasileios: get the returned api handlers
 
+from foam.api import sfaapi
+sfaapi_apih = sfaapi.setup(app)
+
 ConfigDB.commit()
 GeniDB.commit()
 
