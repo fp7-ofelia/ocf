@@ -20,15 +20,12 @@ class Expires(db.Model):
     def constructor(expiration, save=True):
         self = Expires()
         try:
-            logging.debug("********************************" + str(expiration))
             self.expires = expiration
-            logging.debug("********************************" + str(self.expires))
             do_save = save
             if save:
                 db.session.add(self)
                 db.session.commit()
         except Exception as e:
-            logging.debug("*********************************" + str(e))
             raise e
         return self
     
@@ -49,8 +46,8 @@ class Expires(db.Model):
     def get_vm(self):
         if self.expires_vm:
             return self.expires_vm[0].vm
-        elif self.expires_allocated_vm:
-            return self.expires_allocated_vm[0].allocated_vm
+        elif self.allocated_vm:
+            return self.allocated_vm
         else:
             return None
 
