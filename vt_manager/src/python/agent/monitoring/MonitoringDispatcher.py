@@ -50,6 +50,12 @@ class MonitoringDispatcher:
 				MonitoringDispatcher.__dispatchAction(dispatcher,action,server)	
 			except Exception as e:
 				MonitoringDispatcher.logger.error(str(e))	
+				try:
+					if "No route to host" in str(e):
+						from settings.settingsLoader import VTAM_IP, VTAM_PORT, XMLRPC_USER, XMLRPC_PASS
+						MonitoringDispatcher.logger.error("Agent cannot reach the VT AM server. Please check that the following settings are correct: https://%s:%s@%s:%s" % (XMLRPC_USER, XMLRPC_PASS, VTAM_IP, VTAM_PORT))
+				except:
+					pass
 				raise e
 
 

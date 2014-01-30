@@ -102,6 +102,34 @@ class XmlRpcServer():
                     callBackFunction(callBackUrl,xml)
                     return ""
 
+                # FIXME Internally works well, but cannot return *dictionary* - server hangs
+                def list_templates(self, password):
+                    if password != XMLRPC_SERVER_PASSWORD:
+                        raise Exception("Password mismatch")
+                    try:
+                        import os, ConfigParser, StringIO#, cPickle
+                        config = ConfigParser.ConfigParser()
+                        templates_path = "/opt/ofelia/oxa/cache/templates"
+                        templates_dict = dict()
+                        templates_list = os.walk(templates_path).next()[1]
+                        for template in templates_list:
+                            try:
+                                params_cfg = "[main]\n"
+                                params_cfg += open("%s/%s/params.cfg" % (templates_path, template)).read()
+                                params_fp = StringIO.StringIO(params_cfg)
+                                config = ConfigParser.RawConfigParser()
+                                config.readfp(params_fp)
+                                templates_dict[template] = dict(config.items("main"))
+                            except Exception as e:
+                                XmlRpcServer.logger.warning("Could not read info from template '%s'" % template)
+                        # FIXME return the whole dictionary
+#                        return templates_dict
+                        return list(templates_dict)
+#                        return cPickle.dumps(templates_dict)
+                    except Exception as e:
+                        XmlRpcServer.logger.error("OXA list_templates returned an error: %s" % str(e))
+                        return {}
+
                 def pingAuth(self, challenge, password):
                     if password != XMLRPC_SERVER_PASSWORD:
                         raise Exception("Password mismatch")
