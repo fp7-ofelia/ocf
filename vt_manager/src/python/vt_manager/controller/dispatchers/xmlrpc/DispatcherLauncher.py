@@ -38,7 +38,11 @@ class DispatcherLauncher():
             status = SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning, rspec.query.provisioning, url)
             return status
 
-
     @staticmethod
     def processInformation(remoteHashValue, projectUUID ,sliceUUID):
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)
+
+    @staticmethod
+    def processTemplateList(serverUUID):
+		return InformationDispatcher.listTemplates(serverUUID)
+
