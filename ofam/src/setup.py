@@ -59,7 +59,9 @@ def main ():
               ('/opt/ofelia/ofam/local/schemas', ['schemas/ad.xsd', 'schemas/request.xsd', 'schemas/of-resv-3.xsd',
                                      'schemas/any-extension-schema.xsd', 'schemas/request-common.xsd',
                                      'schemas/of-resv-4.xsd']),
-              ('/etc/nginx/sites-available/', ['src/foam.conf'])]
+              ('/etc/nginx/sites-available/', ['src/foam.conf']),
+              ('/etc/nginx/', ['src/trusted']]
+              
   data_files.extend(generatePluginFiles())
   data_files.extend(generateDataFiles('src/foamext/', "*.py", newroot='/opt/ofelia/ofam/local/lib/foamext'))
   data_files.extend(generateDataFiles('src/ext/', "*.py", newroot='/opt/ofelia/ofam/local/lib'))
