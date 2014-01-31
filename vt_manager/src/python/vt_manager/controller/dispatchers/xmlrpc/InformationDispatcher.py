@@ -4,13 +4,10 @@ import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.resourcesHash import resourcesHash
 
-
 class InformationDispatcher():
-
 
 	@staticmethod
 	def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
-
 		logging.debug("Enter listResources")
 		infoRspec = XmlHelper.getSimpleInformation()
 		servers = VTDriver.getAllServers()
@@ -62,10 +59,15 @@ class InformationDispatcher():
 			return localHashValue, ''
 		else:
 			return localHashValue, resourcesString
-	
 
+	@staticmethod
+	def listTemplates(serverUUID):
+		logging.debug("Enter listTemplates")
+		server = VTDriver.getServerByUUID(serverUUID)
+		xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
+		templates_info = xmlrpc_server.list_templates(server.getAgentPassword())
+		return templates_info or None
 
-             
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):
 		sClass.name = sModel.getName()

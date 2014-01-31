@@ -83,6 +83,11 @@ def ping(challenge):
 	return challenge
 
 
+@rpcmethod(url_name="plugin")    
+def list_templates(server_uuid):
+	v,s = getattr(DispatcherLauncher,"processTemplateList")(server_uuid)
+	return v,s
+
 @rpcmethod(url_name="plugin")
 def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 	
