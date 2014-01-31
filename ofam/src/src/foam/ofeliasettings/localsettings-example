@@ -9,4 +9,9 @@ UNALLOWED_VLANS = [1,2,3,4,5]
 # 
 SITE_DOMAIN = "ocf.mydomain.net"
 
-SITE_IP_ADDR = "SITE_DOMAIN_IP:OFAM_PORT" #Site IP address and PORT to EXPOSE the SFA API
+#
+# Site IP and port to expose the SFA API
+# warning: default FOAM port is 3626. If
+# you change it, update it here as well
+# 
+SITE_IP_ADDR = "SITE_IP:3626"
