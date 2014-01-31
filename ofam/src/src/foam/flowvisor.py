@@ -110,7 +110,7 @@ class _Connection(object):
     self.log.debug("XMLRPC:getDeviceInfo (%s)" % (dpid))
     
     pinfoall = []
-    if "vertigo" in self.fvversion:
+    if "vertigo" in self.getFVVersion():
       pinfoall = self.xmlcall("getVTPlannerPortInfo", dpid, "all")
       
     portlist = []
