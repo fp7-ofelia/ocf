@@ -102,8 +102,9 @@ class XmlRpcServer():
                     callBackFunction(callBackUrl,xml)
                     return ""
 
-                # FIXME Internally works well, but cannot return *dictionary* - server hangs
-                def list_templates(self, password):
+                # FIXME Internally works well, but cannot return "too much" data - server hangs
+                def list_vm_templates(self, password):
+                #def list_vm_templates(self, callback_url, password):
                     if password != XMLRPC_SERVER_PASSWORD:
                         raise Exception("Password mismatch")
                     try:
@@ -123,9 +124,13 @@ class XmlRpcServer():
                             except Exception as e:
                                 XmlRpcServer.logger.warning("Could not read info from template '%s'" % template)
                         # FIXME return the whole dictionary
-#                        return templates_dict
+                        #return templates_dict
                         return list(templates_dict)
-#                        return cPickle.dumps(templates_dict)
+                        #return cPickle.dumps(templates_dict)
+                        
+                        #callBackFunction(callback_url, list(templates_dict)) 
+			# INFO: callBackFunction = processXmlQuery => result should be in XML (not working anyway)
+                        #return ""
                     except Exception as e:
                         XmlRpcServer.logger.error("OXA list_templates returned an error: %s" % str(e))
                         return {}
