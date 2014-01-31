@@ -61,12 +61,14 @@ class InformationDispatcher():
 			return localHashValue, resourcesString
 
 	@staticmethod
-	def listTemplates(serverUUID):
-		logging.debug("Enter listTemplates")
+	def listVMTemplatesInfo(serverUUID):
+	#def listVMTemplatesInfo(serverUUID, callbackURL):
+		logging.debug("Enter listVMTemplatesInfo")
 		server = VTDriver.getServerByUUID(serverUUID)
 		xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
-		templates_info = xmlrpc_server.list_templates(server.getAgentPassword())
-		return templates_info or None
+		templates_info = xmlrpc_server.list_vm_templates(server.getAgentPassword())
+		#templates_info = xmlrpc_server.list_vm_templates(callbackURL, server.getAgentPassword())
+		return str(templates_info)
 
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):
