@@ -42,7 +42,7 @@ SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAI
 # Configuring e-mail
 printHeader ">" "Configuring e-mail in FOAM..."
 while true; do
-    read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
+    read -p "> Do you want to configure FOAM for sending e-mails? (Y/N): " foam_configure_email
     case $foam_configure_email in
         [Yy]* ) print "Some help to fill it up...";
                 print " ";
