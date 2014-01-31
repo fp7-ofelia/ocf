@@ -8,3 +8,5 @@ UNALLOWED_VLANS = [1,2,3,4,5]
 # Warning: do NOT use ":" here
 # 
 SITE_DOMAIN = "ocf.mydomain.net"
+
+SITE_IP_ADDR = "SITE_DOMAIN_IP:OFAM_PORT" #Site IP address and PORT to EXPOSE the SFA API
