@@ -60,7 +60,7 @@ def main ():
                                      'schemas/any-extension-schema.xsd', 'schemas/request-common.xsd',
                                      'schemas/of-resv-4.xsd']),
               ('/etc/nginx/sites-available/', ['src/foam.conf']),
-              ('/etc/nginx/', ['src/trusted']]
+              ('/etc/nginx/', ['src/trusted'])]
               
   data_files.extend(generatePluginFiles())
   data_files.extend(generateDataFiles('src/foamext/', "*.py", newroot='/opt/ofelia/ofam/local/lib/foamext'))

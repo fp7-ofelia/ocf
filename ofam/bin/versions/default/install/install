@@ -46,6 +46,16 @@ print $'\tPassword: \t\t\tpassword for FOAM (user \'foamadmin\'; default passwor
 print " "
 /usr/local/bin/foamctl admin:bundle-certs
 
+# Add at least one trusted certificate for FOAM, if none present
+# This is done in order to be able to start Nginx
+if [ -f /etc/nginx/trusted ]; then
+    if [[ $(cat /etc/nginx/trusted) == "" ]]; then
+        if [ -f /etc/nginx/sites-available/foam.conf ]; then
+            server_ssl_certificate=$(cat /etc/nginx/sites-available/foam.conf | grep "[^#]ssl_certificate " | cut -d ";" -f 1 | sed -e "s/ssl_certificate//g" | sed -e "s/ //g")
+            cat $server_ssl_certificate >> /etc/nginx/trusted
+        fi
+    fi
+fi
 
 # In order to avoid conflicts with FOAM config file...
 printHeader ">" "Taking care of default configuration for nginx sites-enabled..."
