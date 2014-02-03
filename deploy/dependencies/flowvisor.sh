@@ -58,3 +58,5 @@ sed -i -e "s/^log4j.rootCategory=WARN, system/#log4j.rootCategory=WARN, system\n
 
 # Start FlowVisor
 /etc/init.d/flowvisor restart
+
+echo "FlowVisor successfully installed"
