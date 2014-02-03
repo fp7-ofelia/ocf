@@ -10,6 +10,11 @@
 
 FLOWVISOR_RELEASE="1.4.0-1"
 
+if [ $(dpkg -l | grep flowvisor | cut -d " " -f3) != $FLOWVISOR_RELEASE ]; then
+  echo "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
+  exit 1
+fi
+
 # Obtain public repository key, install it, remove it
 wget http://updates.onlab.us/GPG-KEY-ONLAB
 apt-key add GPG-KEY-ONLAB
