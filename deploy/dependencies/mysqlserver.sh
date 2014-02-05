@@ -16,8 +16,8 @@ fi
 
 #ocf_modules=("expedient" "optin_manager" "vt_manager")
 ocf_modules=$@
-# Replace all "[", "]", "," by a space
-ocf_modules=${ocf_modules//[\[\]\,]/ }
+# Replace all "[", "]", ",", "'" by a space
+ocf_modules=${ocf_modules//[\[\]\,\']/ }
 # Create array from list
 ocf_modules=($ocf_modules)
 # TODO fix and call method 'list_to_array'
@@ -57,6 +57,7 @@ fi
 for module in "${ocf_modules[@]}"
     do
         mysql -u $user_root -p$password_root --execute="CREATE DATABASE IF NOT EXISTS $prefix_database$module;"
+        echo "CREATE DATABASE IF NOT EXISTS $prefix_database$module;"
         mysql -u $user_root -p$password_root --execute="GRANT ALL ON $prefix_database$module.* to $user@$host IDENTIFIED BY '$password';"
         echo "Granting privileges on $prefix_database$module.* to $user@$host"
 done
