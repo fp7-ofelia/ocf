@@ -25,6 +25,7 @@ INSTALLING OCF
 ---------------
 
 * One (or more) GNU/Linux Debian-based distros
+  * Developed and ensured to work under Debian 6.0 (Squeeze)
 * One (or more) GNU/Linux Debian-based distros to be virtualized by XEN
 (Virtualization Manager installations only)
 * The following packages:

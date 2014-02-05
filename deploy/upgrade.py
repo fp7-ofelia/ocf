@@ -23,4 +23,5 @@ ocf_modules_upgrade = utils.invoke_splash_screen("upgrade", ocf_modules_to_upgra
 
 ## Perform upgrade of already installed modules
 for ocf_module in ocf_modules_upgrade:
+    utils.invoke_info_screen("upgrade", ocf_module)
     utils.upgrade_module(utils.ocf_path, ocf_module)
