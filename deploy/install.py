@@ -1,5 +1,5 @@
 import os
-import utils
+from utils import utils
 
 """
 @author: CarolinaFernandez
@@ -7,21 +7,16 @@ import utils
 Installs OCF modules and external libraries/dependencies.
 """
 
-ocf_path = "/opt/ofelia"
-dependencies_path = os.path.join(ocf_path, "deploy", "dependencies")
-
 ## Obtain OCF modules
-ocf_modules = os.walk(ocf_path).next()[1]
-ocf_modules.remove("deploy")
-ocf_modules.remove(".git")
+ocf_modules = utils.get_modules()
 
 ## Show choice screen for OCF modules
 ocf_modules_install = utils.invoke_splash_screen("install", ocf_modules)
 
 ## Perform installation of external libraries, dependencies and modules
-ocf_dependencies = [ f for f in os.listdir(dependencies_path) ]
+ocf_dependencies = [ f for f in os.listdir(utils.dependencies_path) ]
 for ocf_dependency in ocf_dependencies:
-    utils.install_dependency(ocf_path, ocf_dependency)
+    utils.install_dependency(utils.ocf_path, ocf_dependency, ocf_modules_install)
 
 for ocf_module in ocf_modules_install:
-    utils.install_module(ocf_path, ocf_module)
+    utils.install_module(utils.ocf_path, ocf_module)

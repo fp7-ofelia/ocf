@@ -7,7 +7,6 @@
 #    @description: script to install MySQL-server and create the databases
 ###
 
-
 if [[ $(dpkg -l | grep mysql-server) != "" ]]; then
     echo "MySQL server already installed. Skipping..."
 #    exit 1
@@ -15,7 +14,16 @@ else
     apt-get install mysql-server
 fi
 
-ocf_modules=("expedient" "optin_manager" "vt_manager")
+#ocf_modules=("expedient" "optin_manager" "vt_manager")
+ocf_modules=$@
+# Replace all "[", "]", "," by a space
+ocf_modules=${ocf_modules//[\[\]\,]/ }
+# Create array from list
+ocf_modules=($ocf_modules)
+# TODO fix and call method 'list_to_array'
+#source ../utils/utils.sh
+#ocf_modules=$(list_to_array "$ocf_modules")
+
 prefix_database="ocf__"
 host="localhost"
 

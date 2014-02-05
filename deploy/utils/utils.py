@@ -7,11 +7,20 @@ import subprocess
 Utils for the installation of OCF modules.
 """
 
+ocf_path = "/opt/ofelia"
+dependencies_path = os.path.join(ocf_path, "deploy", "dependencies")
+
 def print_header(text):
     print "\033[94m%s\033[0m" % str(text)
 
 def print_error(text):
     print "\033[91m%s\033[0m" % str(text)
+
+def get_modules():
+    ocf_modules = os.walk(ocf_path).next()[1]
+    ocf_modules.remove("deploy")
+    ocf_modules.remove(".git")
+    return ocf_modules
 
 def list_modules(modules):
     print_header("\nInput all the modules you want to install: ")
@@ -64,12 +73,21 @@ def install_module(ocf_path, ocf_module):
     except Exception as e:
         print_error(e)
 
-def install_dependency(ocf_path, ocf_dependency):
+def install_dependency(ocf_path, ocf_dependency, ocf_modules):
     try:
         current_dir = os.getcwd()
         os.chdir(os.path.join(ocf_path, "deploy", "dependencies"))
         print_header(">> Invoking %s\n\n" % str(ocf_dependency))
-        return_code = execute_command(["./%s" % ocf_dependency])
+        return_code = execute_command(["./%s" % ocf_dependency, "%s" % ocf_modules])
+        os.chdir(current_dir)
+    except Exception as e:
+        print_error(e)
+
+def remove_module(ocf_path, ocf_module):
+    try:
+        current_dir = os.getcwd()
+        os.chdir(os.path.join(ocf_path, ocf_module))
+        os.remove(".currentVersion")
         os.chdir(current_dir)
     except Exception as e:
         print_error(e)

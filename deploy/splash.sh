@@ -16,6 +16,9 @@ num_whiptail_args=$#
 whiptail_args=${whiptail_args//[\[\]\,]/ }
 # Create array from list
 whiptail_args=($whiptail_args)
+# TODO fix and call method 'list_to_array'
+#source ../utils/utils.sh
+#ocf_modules=$(list_to_array "$whiptail_args")
 
 ## Return code
 confirm_deploy=0
@@ -33,8 +36,13 @@ case $action_arg in
         whiptail_message_title="Upgrade stopped";
         whiptail_message_description="You have stopped or cancelled the upgrade";
         ;;
+    remove )
+        whiptail_checklist_title="OCF removal";
+        whiptail_message_title="Removal stopped";
+        whiptail_message_description="You have stopped or cancelled the removal";
+        ;;
     *)
-        echo "Usage: ./splash [install | upgrade | update]";
+        echo "Usage: ./splash [install | upgrade | update | remove]";
         exit 1;
         ;;
 esac
@@ -84,7 +92,7 @@ function main()
             ocf_modules_deploy_confirmed="$ocf_modules_deploy_confirmed *${i//[\"]/ }\n"
         done
         
-        whiptail --yesno "You are going to install the following modules:\n\n$ocf_modules_deploy_confirmed" $(($(($num_ocf_modules_deploy_confirmed_set+4))*2)) $whiptail_width
+        whiptail --yesno "You are going to $action_arg the following modules:\n\n$ocf_modules_deploy_confirmed" $(($(($num_ocf_modules_deploy_confirmed_set+4))*2)) $whiptail_width
         confirm_deploy=$?
         # Negate exit code (whiptail --yesno => yes: 1, no: 0)
         confirm_deploy=$((! $confirm_deploy ))
