@@ -7,6 +7,21 @@
 #	@description: pre-install module 
 ###
 
+
+# Deprecation warning
+accept_deprecation_warning=0
+while [[ ! $accept_deprecation_warning =~ ^[y|Y|n|N]$ ]]
+    do
+        printHeader "This module has been ${txtred}DEPRECATED${txtgreen} and you are advised to NOT INSTALL it since it is no longer supported and may interfere with FlowVisor >= 0.8. Do you still wish to install it? [y/N]"
+        read accept_deprecation_warning
+        if [[ ! $accept_deprecation_warning =~ ^[y|Y|n|N]$ ]]; then
+            warning "Please accept (\"y\") or reject (\"n\") the installation"
+        fi
+        if [[ $accept_deprecation_warning =~ ^[n|N]$ ]]; then
+            error "Installation aborted by user" $NO_RESCUE
+        fi
+    done
+
 #inform user
 printHeader "info#" "Using default pre-install-hook module..."
 

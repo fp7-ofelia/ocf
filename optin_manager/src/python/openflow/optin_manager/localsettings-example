@@ -38,9 +38,10 @@ MANAGERS = ADMINS
 
 #
 # Database parameters.
+# DATABASE_NAME: default is "ocf__optin_manager"
 # DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
 #
-DATABASE_NAME = "changeMe"
+DATABASE_NAME = "ocf__optin_manager"
 DATABASE_USER = "changeMe"
 DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
@@ -79,4 +80,4 @@ UNALLOWED_VLANS = []
 # Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration
 # for further information on how to install new themes for OCF.
 #
-THEME = 'default'
+THEME = "default"

@@ -43,6 +43,14 @@ class DispatcherLauncher():
 		return InformationDispatcher.listResources(remoteHashValue, projectUUID, sliceUUID)
 
     @staticmethod
-    def processTemplateList(serverUUID):
-		return InformationDispatcher.listTemplates(serverUUID)
+    def processVMTemplatesInfo(serverUUID):
+    #def processVMTemplatesInfo(serverUUID, callbackURL):
+        #ServiceThread.startMethodInNewThread(InformationDispatcher.listVMTemplatesInfo, [serverUUID, callbackURL])
+        
+        #if not callbackURL and threading.currentThread().callBackURL:
+        #    callbackURL = threading.currentThread().callBackURL
+        #vm_templates = SyncThread.startMethodAndJoin(InformationDispatcher.listVMTemplatesInfo, serverUUID, callbackURL)
+        #return vm_templates
+        
+        return InformationDispatcher.listVMTemplatesInfo(serverUUID)
 
