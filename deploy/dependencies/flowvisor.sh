@@ -12,8 +12,8 @@ FLOWVISOR_RELEASE="1.4.0-1"
 
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
-  echo "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
-  exit 1
+    echo "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
+    exit 1
 fi
 
 # Obtain public repository key, install it, remove it
