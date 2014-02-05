@@ -2,6 +2,7 @@ from xen.provisioning.configurators.ofelia.OfeliaDebianVMConfigurator import Ofe
 from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
 from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
 from xen.provisioning.configurators.mediacat.MediacatVMConfigurator import MediacatVMConfigurator
+from xen.provisioning.configurators.debian7.DebianWheezyVMConfigurator import DebianWheezyVMConfigurator
 from utils.Logger import Logger
 
 '''
@@ -25,6 +26,8 @@ class VMConfigurator():
 				return IratiDebianVMConfigurator;
 			elif configurator == SpirentCentOSVMConfigurator.getIdentifier():
 				return SpirentCentOSVMConfigurator;
+                        elif configurator == DebianWheezyVMConfigurator.getIdentifier():
+                                return DebianWheezyVMConfigurator
 	
 		else:
 			if os.lower() == "debian" or os.lower() == "ubuntu":
