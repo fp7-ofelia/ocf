@@ -31,6 +31,9 @@ def execute_command(arg_list):
     return_code = subprocess.call(arg_list)
     return return_code
 
+def invoke_info_screen(deploy_action, arg):
+    execute_command(["./info_step.sh"] + [deploy_action] + [arg])
+
 def invoke_splash_screen(deploy_action, arg_list):
     #os.system("./splash.sh %s" % str(ocf_modules))
     

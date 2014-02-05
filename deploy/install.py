@@ -19,4 +19,5 @@ for ocf_dependency in ocf_dependencies:
     utils.install_dependency(utils.ocf_path, ocf_dependency, ocf_modules_install)
 
 for ocf_module in ocf_modules_install:
+    utils.invoke_info_screen("install", ocf_module)
     utils.install_module(utils.ocf_path, ocf_module)

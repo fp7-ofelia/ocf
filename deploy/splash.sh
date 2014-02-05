@@ -4,7 +4,7 @@
 #   @author: CarolinaFernandez
 #   @organization: i2CAT
 #   @project: OFELIA FP7
-#   @description: Common entry point for installation and upgrade.
+#   @description: Common entry point for installation, upgrade and removal.
 ###
 
 ## Arguments
