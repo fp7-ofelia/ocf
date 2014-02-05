@@ -11,7 +11,7 @@ if [[ $(dpkg -l | grep mysql-server) != "" ]]; then
     echo "MySQL server already installed. Skipping..."
 #    exit 1
 else
-    apt-get install mysql-server
+    apt-get -y install mysql-server
 fi
 
 #ocf_modules=("expedient" "optin_manager" "vt_manager")
