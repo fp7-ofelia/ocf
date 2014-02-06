@@ -41,7 +41,7 @@ class XenServer(VTServer):
 	@staticmethod
 	def constructor(name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True):
 		self = XenServer()
-		self.updateServer(name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True)
+		return self.updateServer(name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True)
 
 	'''Updater'''
 	def updateServer(self,name,osType,osDistribution,osVersion,nCPUs,CPUfreq,memory,size,agentUrl,agentPassword,save=True):
@@ -57,7 +57,6 @@ class XenServer(VTServer):
 			self.setDiscSpaceGB(size)
 			self.setAgentURL(agentUrl)
 			self.setAgentPassword(agentPassword)
-			
 			self.doSave = save
 			if save:
 				self.save()
