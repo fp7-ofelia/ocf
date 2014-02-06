@@ -6,11 +6,8 @@ from utils import utils
 Removes OCF modules and external libraries/dependencies.
 """
 
-ocf_modules = utils.get_modules()
+# Show choice screen for OCF modules installed (available for removal)
+ocf_modules_remove = utils.invoke_splash_screen("remove", utils.get_installed_modules())
 
-## Show choice screen for OCF modules
-ocf_modules_remove = utils.invoke_splash_screen("remove", ocf_modules)
-
-for ocf_module in ocf_modules_remove:
-    utils.invoke_info_screen("remove", ocf_module)
-    utils.remove_module(utils.ocf_path, ocf_module)
+if ocf_modules_remove:
+    utils.remove_modules(ocf_modules_remove)
