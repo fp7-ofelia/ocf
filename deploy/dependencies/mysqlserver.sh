@@ -7,9 +7,12 @@
 #    @description: script to install MySQL-server and create the databases
 ###
 
+
+# XXX: Move somewhere else
+source ../utils/utils.sh
+
 if [[ $(dpkg -l | grep mysql-server) != "" ]]; then
-    echo "MySQL server already installed. Skipping..."
-#    exit 1
+    warning "MySQL server already installed. Skipping..."
 else
     apt-get -y install mysql-server
 fi
@@ -31,7 +34,7 @@ host="localhost"
 while [[ $user_root == "" ]]
     do
         echo ""
-        echo "Provide your MySQL root credentials in order to create the OCF databases"
+        print "Provide your MySQL root credentials in order to create the OCF databases"
         read -p "MySQL root user: " user_root
         #user=${user:-root}
         echo -n Password: 
@@ -41,7 +44,7 @@ done
 while [[ $user == "" ]]
     do
         echo ""
-        echo "Credentials for the user with access the OCF databases (if doubtful use the previous ones)"
+        print "Credentials for the user with access the OCF databases (if doubtful use the previous ones)"
         read -p "User: " user
         echo -n Password: 
         read -s password
@@ -62,4 +65,4 @@ for module in "${ocf_modules[@]}"
         echo "Granting privileges on $prefix_database$module.* to $user@$host"
 done
 
-echo "MySQL databases successfully created"
+success "MySQL databases successfully created"

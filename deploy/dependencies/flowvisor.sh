@@ -8,13 +8,32 @@
 ###
 
 
+# XXX: Move somewhere else
+source ../utils/utils.sh
+
 FLOWVISOR_RELEASE="1.4.0-1"
 
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
-    echo "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
-    exit 1
+    warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
+#    exit 1
 fi
+
+# Otherwise, ask for confirmation on the installation of FlowVisor
+# and warn about compatibility issues
+accept_deploy_flowvisor=0
+while [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]
+    do
+        print_header "Do you wish to install FlowVisor? Notice that you *must* use FOAM with this. \n > If you want to keep using Opt-in please press \"n\" [y/N]"
+        read accept_deploy_flowvisor
+        if [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]; then
+            print "Please accept (\"y\") or reject (\"n\") the installation"
+        fi
+        if [[ $accept_deploy_flowvisor =~ ^[n|N]$ ]]; then
+            warning "FlowVisor installation aborted by user"
+            exit 1
+        fi
+    done
 
 # Obtain public repository key, install it, remove it
 wget http://updates.onlab.us/GPG-KEY-ONLAB
@@ -60,4 +79,4 @@ sed -i -e "s/^log4j.rootCategory=WARN, system/#log4j.rootCategory=WARN, system\n
 # Start FlowVisor
 /etc/init.d/flowvisor restart
 
-echo "FlowVisor successfully installed"
+success "FlowVisor successfully installed"

@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+# XXX: Move somewhere else
+source ../utils/utils.sh
+
 accept_generate_certificates=0
 if [[ ! -f /etc/apache2/ssl.crt/server.crt ]] && [[ ! -f /etc/apache2/ssl.crt/server.key ]]; then
     accept_generate_certificates="y"
@@ -19,4 +22,6 @@ while [[ ! $accept_generate_certificates =~ ^[y|Y|n|N]$ ]]
         fi
     done
 
-# Perform generation of GIDs
+# XXX: Perform generation of GIDs
+
+success "Certificates successfully generated"
