@@ -8,6 +8,7 @@ Utils for the installation of OCF modules.
 """
 
 ocf_path = "/opt/ofelia"
+common_path = os.path.join(ocf_path, "deploy", "common")
 dependencies_path = os.path.join(ocf_path, "deploy", "dependencies")
 
 def print_header(text):
@@ -76,10 +77,10 @@ def install_module(ocf_path, ocf_module):
     except Exception as e:
         print_error(e)
 
-def install_dependency(ocf_path, ocf_dependency, ocf_modules):
+def install_dependency(dependencies_path, ocf_dependency, ocf_modules):
     try:
         current_dir = os.getcwd()
-        os.chdir(os.path.join(ocf_path, "deploy", "dependencies"))
+        os.chdir(dependencies_path)
         print_header(">> Invoking %s\n\n" % str(ocf_dependency))
         return_code = execute_command(["./%s" % ocf_dependency, "%s" % ocf_modules])
         os.chdir(current_dir)
