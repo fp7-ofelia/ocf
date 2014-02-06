@@ -17,6 +17,7 @@
     <xs:complexType name="NodeContents">
     	<xs:sequence>
             <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="xs:string" name="uuid" minOccurs="1" maxOccurs="1"/>
             <xs:element type="os-type-type" name="operating_system_type"/>
             <xs:element type="os-distro-type" name="operating_system_distribution"/>
             <xs:element type="xs:float" name="operating_system_version"/>
@@ -25,10 +26,9 @@
             <xs:element type="xs:float" name="cpu_frequency"/>
             <xs:element type="xs:integer" name="memory"/>
             <xs:element type="xs:float" name="hdd_space_GB"/>
-            <xs:element type="xs:string" name="agent_url"/>
             <xs:element name="service" type="ServiceContents" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element name="disc-image" type="DiscImageTemplate" maxOccurs="unbounded" minOccurs="0"/>
 	</xs:sequence>
-	<xs:attribute type="xs:string" name="server-uuid"/>
     </xs:complexType>
 
     <xs:complexType name="ServiceContents">
@@ -43,6 +43,19 @@
 	    <xs:element type="xs:integer" name="interface_port" minOccurs="0"/>
 	</xs:sequence>
         <xs:attribute type="xs:string" name="type" use="optional"/>
+    </xs:complexType>
+    
+    <xs:complexType name="DiscImageTemplate">
+    	<xs:sequence>
+    		<xs:element type="xs:string" name="name"/>
+    		<xs:element type="os-type-type" name="operating-system-type"/>
+    		<xs:element type="xs:float" name="operating-system-version"/>
+    		<xs:element type="os-distro-type" name="operating-system-distribution"/>
+    		<xs:element type="xs:string" name="hard-disc-origin-path"/>
+    		<xs:element type="xs:string" name="hard-disc-setup-type"/>
+    		<xs:element type="xs:string" name="virtualization-setup-type"/>
+    		<xs:element type="xs:string" name="minimum-memory"/>
+    	</xs:sequence>
     </xs:complexType>
 
     <xs:simpleType name="service-type">
