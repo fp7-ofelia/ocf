@@ -20,6 +20,9 @@ whiptail_args=($whiptail_args)
 #source ../utils/utils.sh
 #ocf_modules=$(list_to_array "$whiptail_args")
 
+## Paths
+gui_path="./deploy/gui"
+
 ## Return code
 confirm_deploy=0
 
@@ -42,7 +45,7 @@ case $action_arg in
         whiptail_message_description="You have stopped or cancelled the removal";
         ;;
     *)
-        echo "Usage: ./splash [install | upgrade | update | remove]";
+        echo "Usage: ./splash {install | upgrade | update | remove} <modules>";
         exit 1;
         ;;
 esac
@@ -52,7 +55,7 @@ whiptail_checklist_options=""
 function exit_on_null_arg()
 {
     if [[ $1 == "" ]]; then
-        whiptail --title "$whiptail_message_title" --msgbox "$whiptail_message_description" 8 $whiptail_width
+        .${gui_path}/info.sh "$whiptail_message_title" "$whiptail_message_description" "8" "$whiptail_width"
         confirm_deploy=1
         exit $confirm_deploy
     fi
@@ -67,7 +70,8 @@ function main()
     
     ocf_modules_deploy=""
     while [ $confirm_deploy -eq 0 ]; do
-        ocf_modules_deploy=$(whiptail --checklist "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --title "$whiptail_checklist_title" 3>&1 1>&2 2>&3)
+        #./${gui_path}/checklist.sh "$whiptail_checklist_title" "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options
+        ocf_modules_deploy=$(whiptail --checklist "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --backtitle "OFELIA Control Framework" --title "$whiptail_checklist_title" 3>&1 1>&2 2>&3)
         #ocf_modules_deploy=$?
         # Saving the return code (0/1)
         exit_on_null_arg $ocf_modules_deploy
@@ -92,7 +96,7 @@ function main()
             ocf_modules_deploy_confirmed="$ocf_modules_deploy_confirmed *${i//[\"]/ }\n"
         done
         
-        whiptail --yesno "You are going to $action_arg the following modules:\n\n$ocf_modules_deploy_confirmed" $(($(($num_ocf_modules_deploy_confirmed_set+4))*2)) $whiptail_width
+        .${gui_path}/yesno.sh "You are going to $action_arg the following modules:\n\n$ocf_modules_deploy_confirmed" $(($(($num_ocf_modules_deploy_confirmed_set+4))*2)) $whiptail_width
         confirm_deploy=$?
         # Negate exit code (whiptail --yesno => yes: 1, no: 0)
         confirm_deploy=$((! $confirm_deploy ))
