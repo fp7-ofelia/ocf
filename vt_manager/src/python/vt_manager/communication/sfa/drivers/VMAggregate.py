@@ -1,6 +1,8 @@
 from vt_manager.communication.sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
 from vt_manager.communication.sfa.util.sfatime import utcparse, datetime_to_string
 
+from vt_manager.communication.sfa.sfa_config import config
+
 from vt_manager.communication.sfa.rspecs.rspec import RSpec
 from vt_manager.communication.sfa.rspecs.elements.node import Node
 from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
@@ -65,9 +67,9 @@ class VMAggregate:
 		    
 	            rspec_node = Node()
 	            site=self.get_testbed_info()
-	            rspec_node['component_id'] = hrn_to_urn('ocf.i2cat.vt_manager'+'.'+str(node.name),'node')
-	            rspec_node['component_name'] = node.name#node['hostname']
-	            rspec_node['component_manager_id'] = hrn_to_urn('ocf.i2cat.vt_manager','authority')
+	            rspec_node['component_id'] = hrn_to_urn(config.HRN+'.'+str(node.name),'node')
+	            rspec_node['component_name'] = node.name
+	            rspec_node['component_manager_id'] = "urn:publicid:IDN+" + config.OCF_ISLAND_AUTHORITY + ":" + config.OCF_AM_TYPE + "+cm"
 		    rspec_node['hostname'] = str(node.name).lower() + '.ctx.i2cat.net'
 	            rspec_node['exclusive'] = 'false'
 	            rspec_node['hardware_types'] = [OcfVtServer({'name':str(node.name),

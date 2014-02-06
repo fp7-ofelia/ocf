@@ -96,6 +96,6 @@ class VTShell:
 
         def convert_to_uuid(self,requested_attributes):
                 for slivers in requested_attributes:
-                        servers = VTServer.objects.filter(name=get_leaf(slivers['component_id']))
+                        servers = VTServer.objects.filter(uuid=get_leaf(slivers['component_id']))
 		        slivers['component_id'] = servers[0].uuid
                 return requested_attributes
