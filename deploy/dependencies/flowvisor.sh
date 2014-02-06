@@ -16,7 +16,7 @@ FLOWVISOR_RELEASE="1.4.0-1"
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
     warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
-#    exit 1
+    exit 1
 fi
 
 # Otherwise, ask for confirmation on the installation of FlowVisor
@@ -24,7 +24,11 @@ fi
 accept_deploy_flowvisor=0
 while [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]
     do
-        print_header "Do you wish to install FlowVisor? Notice that you *must* use FOAM with this. \n > If you want to keep using Opt-in please press \"n\" [y/N]"
+        print_header "Do you wish to install FlowVisor $FLOWVISOR_RELEASE?"
+        warning " Notice that you *must* use FOAM with this."
+        warning " Notice that if you already installed a FlowVisor non-versioned in the Debian package system, you should consider backing up and transferring your current flowspaces, if any."
+        print " > If you want to keep using Opt-in please press \"n\"\n > If you want to keep the flowspaces at your current FlowVisor and are not able to backup these, please press \"n\""
+        print "[y/N]"
         read accept_deploy_flowvisor
         if [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]; then
             print "Please accept (\"y\") or reject (\"n\") the installation"
