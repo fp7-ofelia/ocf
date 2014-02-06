@@ -6,7 +6,7 @@ from sqlalchemy.orm import backref
 class ServerAllocatedVMs(db.Model):
     """Relation between Allocated Virtual Machines and Virtualization Server"""
 
-    __tablename__ = 'amsoil_vt_manager_vtserver_allocated_vms'
+    __tablename__ = 'vt_manager_vtserver_allocated_vms'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     vtserver_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))

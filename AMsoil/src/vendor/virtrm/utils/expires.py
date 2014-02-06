@@ -10,10 +10,11 @@ logging=amsoil.core.log.getLogger('Expires')
 
 class Expires(db.Model):
     """Expiration time of the Virtual Machine (only GeniV3)."""
-    __tablename__ = 'amsoil_vt_manager_expires'
+
+    __tablename__ = 'vt_manager_expires'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    expires = db.Column(db.DateTime)
+    expires = db.Column(db.DateTime, nullable=False)
     do_save = True
     
     @staticmethod

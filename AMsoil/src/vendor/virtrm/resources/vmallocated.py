@@ -14,7 +14,7 @@ import inspect
 class VMAllocated(db.Model):
     """Virtual Machines allocated for GeniV3 calls."""
 
-    __tablename__ = 'amsoil_vt_manager_virtualmachine_allocated'
+    __tablename__ = 'vt_manager_virtualmachine_allocated'
 
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)

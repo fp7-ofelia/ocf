@@ -480,7 +480,7 @@ class VTResourceManager(object):
         except Exception as e:
             raise e
         # Once we know all the VMs could be created, we start reserving them
-        expires = Expires.constructor(expiration_time, False)
+        expires = Expires.constructor(expiration_time)
         logging.debug("**************************************** OK")
         vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
         logging.debug("***********************************" + str(expires.id))
