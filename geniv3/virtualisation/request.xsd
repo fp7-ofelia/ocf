@@ -1,89 +1,34 @@
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"  xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <xs:element name="rspec" type="rspec:RSpecContents"/>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-    <xs:complexType name="RSpecContents">
-    	<xs:sequence>
-            <xs:element name="node" type="NodeContents"/>
+    <xs:element name="rspec" type="RSpecVirtualisation"/>
+
+    <xs:complexType name="RSpecVirtualisation">
+        <xs:sequence>
+            <xs:element name="node" type="Slice"/>
         </xs:sequence>
-        <xs:attribute name="type" type="rspec-type">
-	<xs:attribute type="xs:string" name="vtam"/>
-    </xs:complexType>
-   
-    <xs:complexType name="NodeContents">
-	<xs:sequence>
-	    <xs:element name="sliver" type="SliverContents"/>
-	</xs:sequence>
-    <xs:complexType>
-
-    <xs:complexType name="SliverContents">
-    	<xs:sequence>
-            <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
-	    <xs:element type="xs:string" name="server-uuid" minOccurs="0" maxOccurs="1"/>
-            <xs:element type="os-type-type" name="operating-system-type"/>
-            <xs:element type="os-distro-type" name="operating-system-distribution"/>
-            <xs:element type="xs:float" name="operating-system-version"/>
-            <xs:element type="xen-virtualization-setup-type" name="virtualization-setup-type"/>
-	    <xs:element type="xen-hd-setup-type" name="hd-setup-type"/>
-            <xs:element type="xs:integer" name="memory-mb"/>
-            <xs:element type="xs:integer" name="hd-size-mb"/>
-            <xs:element type="virt-tech" name="virtualization-technology"/>
-	</xs:sequence>
+        <xs:attribute name="type" type="RspecType">
+        <xs:attribute type="xs:string" name="virtualisation"/>
     </xs:complexType>
 
-    <xs:simpleType name="rspec-type">
+    <xs:simpleType name="RspecType">
         <xs:restriction base="xs:string">
             <xs:enumeration value="request"/>
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="os-type-type">
-    	<xs:restriction base="xs:string">
-            <xs:enumeration value="GNU/Linux" />
-            <xs:enumeration value="BSD" />
-            <xs:enumeration value="Windows" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
+    <xs:complexType name="Slice">
+        <xs:sequence>
+            <xs:element name="sliver" type="VM"/>
+        </xs:sequence>
+    <xs:complexType>
 
-    <xs:simpleType name="os-distro-type">
-    	<xs:restriction base="xs:string">
-            <!-- Linux -->
-            <xs:enumeration value="Debian" />
-            <xs:enumeration value="Red Hat" />
-            <xs:enumeration value="Slackware" />
-            <xs:enumeration value="OpenSUSE" />
-            <!-- BSD -->
-            <xs:enumeration value="FreeBSD" />
-            <xs:enumeration value="OpenBSD" />
-            <xs:enumeration value="NetBSD" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
-
-    <xs:simpleType name="virt-tech">
-    	<xs:restriction base="xs:string">
-            <xs:enumeration value="xen" />
-            <xs:enumeration value="kvm" />
-            <xs:enumeration value="vserver" />
-            <xs:enumeration value="openvz" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
-
-    <xs:simpleType name="xen-virtualization-setup-type">
-	<xs:restriction base="xs:string">
-	    <xs:enumeration value="paravirtualization" />
-	    <xs:enumeration value="hardware-assisted-virtualization" />
-	    <!-- Add Other types here -->
-	</xs:restriction>
-    </xs:simpleType>
-
-    <xs:simpleType name="xen-hd-setup-type">
-   	<xs:restriction base="xs:string">
-            <xs:enumeration value="file-image" />
-            <xs:enumeration value="logical-volume-image" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
+    <xs:complexType name="VM">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name" use="required"/>
+            <xs:element type="xs:integer" name="memory_mb" use="required"/>
+            <xs:element type="xs:string" name="server_uuid" use="required"/>
+            <xs:element type="xs:string" name="template_name" use="optional"/>
+        </xs:sequence>
+    </xs:complexType>
 
 </xs:schema>

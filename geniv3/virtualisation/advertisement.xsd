@@ -1,109 +1,83 @@
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"  xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <xs:element name="rspec" type="rspec:RSpecContents"/>
-    <xs:complexType name="RSpecContents">
-    	<xs:sequence>
-            <xs:element name="network" type="NetworkContents"/>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="rspec" type="RSpecVirtualisation"/>
+
+    <xs:complexType name="RSpecVirtualisation">
+        <xs:sequence>
+            <xs:element name="network" type="Servers"/>
         </xs:sequence>
-        <xs:attribute name="type" type="rspec-type">
-	<xs:attribute type="xs:string" name="vtam"/>
-    </xs:complexType>
-   
-    <xs:complexType name="NetworkContents">
-	<xs:sequence>
-	    <xs:element name="node" type="NodeContents" maxOccurs="unbounded" minOccurs="0"/>
-	</xs:sequence>
+        <xs:attribute name="type" type="RSpecType">
+        <xs:attribute type="xs:string" name="virtualisation"/>
     </xs:complexType>
 
-    <xs:complexType name="NodeContents">
-    	<xs:sequence>
-            <xs:element type="xs:string" name="name" minOccurs="1" maxOccurs="1"/>
-            <xs:element type="xs:string" name="uuid" minOccurs="1" maxOccurs="1"/>
-            <xs:element type="os-type-type" name="operating_system_type"/>
-            <xs:element type="os-distro-type" name="operating_system_distribution"/>
-            <xs:element type="xs:float" name="operating_system_version"/>
-            <xs:element type="virtualization-type" name="virtualization_technology"/>
-            <xs:element type="xs:integer" name="cpus_number"/>
-            <xs:element type="xs:float" name="cpu_frequency"/>
-            <xs:element type="xs:integer" name="memory"/>
-            <xs:element type="xs:float" name="hdd_space_GB"/>
-            <xs:element name="service" type="ServiceContents" maxOccurs="unbounded" minOccurs="0"/>
-            <xs:element name="disc-image" type="DiscImageTemplate" maxOccurs="unbounded" minOccurs="0"/>
-	</xs:sequence>
-    </xs:complexType>
-
-    <xs:complexType name="ServiceContents">
-	<xs:sequence>
-            <xs:element type="service-type" name="type" minOccurs="0"/>
-            <xs:element type="xs:string" name="name" minOccurs="0"/>
-            <xs:element type="xs:string" name="start_value" minOccurs="0"/>
-            <xs:element type="xs:string" name="end_value" minOccurs="0"/>
-            <xs:element type="xs:string" name="server_interface_name" minOccurs="0"/>
-            <xs:element type="xs:boolean" name="isMgmt" minOccurs="0"/>
-            <xs:element type="xs:string" name="interface_switch_id" minOccurs="0"/>
-	    <xs:element type="xs:integer" name="interface_port" minOccurs="0"/>
-	</xs:sequence>
-        <xs:attribute type="xs:string" name="type" use="optional"/>
-    </xs:complexType>
-    
-    <xs:complexType name="DiscImageTemplate">
-    	<xs:sequence>
-    		<xs:element type="xs:string" name="name"/>
-    		<xs:element type="os-type-type" name="operating-system-type"/>
-    		<xs:element type="xs:float" name="operating-system-version"/>
-    		<xs:element type="os-distro-type" name="operating-system-distribution"/>
-    		<xs:element type="xs:string" name="hard-disc-origin-path"/>
-    		<xs:element type="xs:string" name="hard-disc-setup-type"/>
-    		<xs:element type="xs:string" name="virtualization-setup-type"/>
-    		<xs:element type="xs:string" name="minimum-memory"/>
-    	</xs:sequence>
-    </xs:complexType>
-
-    <xs:simpleType name="service-type">
-	<xs:restriction base="xs:string">
-	    <xs:enumeration value="Range"/>
-	    <xs:enumeration value="Network"/>
-	    <!-- Add Other types here -->
-	</xs:retriction>
-    </xs:simpleType>
-
-    <xs:simpleType name="rspec-type">
+    <xs:simpleType name="RSpecType">
         <xs:restriction base="xs:string">
             <xs:enumeration value="advertisement"/>
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="os-type-type">
-    	<xs:restriction base="xs:string">
-            <xs:enumeration value="GNU/Linux" />
-            <xs:enumeration value="BSD" />
-            <xs:enumeration value="Windows" />
-            <!-- Add Other types here -->
-        </xs:restriction>
+    <xs:complexType name="Servers">
+        <xs:sequence>
+            <xs:element name="sliver" type=“Server” maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Server">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name" use="required"/>
+            <xs:element type="xs:string" name="uuid" use="required"/>
+            <xs:element type="xs:integer" name="cpus_number" use="optional"/>
+            <xs:element type="xs:float" name="cpu_frequency" use="optional"/>
+            <xs:element type="xs:integer" name="virtual_memory_mb" use="optional"/>
+            <xs:element type="xs:float" name="hard_disk_space_gb" use="optional"/>
+            <xs:element name="network_interfaces" type="NetworkInterfaces" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="disc_image_templates" type="DiscImageTemplates" use="optional"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NetworkInterfaces">
+        <xs:sequence>
+            <xs:element name="network_interface" type="NetworkInterface"/>
+        </xs:sequence>
+    <xs:complexType>
+
+    <xs:complexType name="NetworkInterface">
+        <xs:attribute type="xs:string" name="type" use="optional"/>
+        <xs:sequence>
+            <xs:element type="NetworkInterfaceType" name="type" minOccurs="0"/>
+            <xs:element type="xs:string" name="name" minOccurs="0"/>
+            <xs:element type="xs:boolean" name="is_management_bridge" minOccurs="0"/>
+            <xs:element type="xs:string" name="switch_id" minOccurs="0"/>
+            <xs:element type="xs:integer" name="switch_port" minOccurs="0"/>
+            <xs:element type="xs:string" name="start_value" minOccurs="0"/>
+            <xs:element type="xs:string" name="end_value" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="NetworkInterfaceType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Range"/>
+            <xs:enumeration value="Network"/>
+            <!-- Add types as needed -->
+        </xs:retriction>
     </xs:simpleType>
 
-    <xs:simpleType name="os-distro-type">
-    	<xs:restriction base="xs:string">
-            <!-- Linux -->
-            <xs:enumeration value="Debian" />
-            <xs:enumeration value="Red Hat" />
-            <xs:enumeration value="Slackware" />
-            <xs:enumeration value="OpenSUSE" />
-            <!-- BSD -->
-            <xs:enumeration value="FreeBSD" />
-            <xs:enumeration value="OpenBSD" />
-            <xs:enumeration value="NetBSD" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
+    <xs:complexType name="DiscImageTemplates">
+        <xs:sequence>
+            <xs:element name="disc_image_template" type="DiscImageTemplate"/>
+        </xs:sequence>
+    <xs:complexType>
 
-    <xs:simpleType name="virtualization-type">
-    	<xs:restriction base="xs:string">
-            <xs:enumeration value="xen" />
-            <xs:enumeration value="kvm" />
-            <xs:enumeration value="vserver" />
-            <xs:enumeration value="openvz" />
-            <!-- Add Other types here -->
-        </xs:restriction>
-    </xs:simpleType>
+    <xs:complexType name="DiscImageTemplate">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name" use="required"/>
+            <xs:element type="xs:integer" name="minimum_memory" use="optional"/>
+            <xs:element type="xs:string" name="operating_system_type" use="required"/>
+            <xs:element type="xs:float" name="operating_system_version" use="required"/>
+            <xs:element type="xs:string" name="operating_system_distribution" use="required"/>
+            <xs:element type="xs:string" name="hard_disk_setup_type" use="required"/>
+            <xs:element type="xs:string" name="virtualisation_setup_type" use="required"/>
+        </xs:sequence>
+    </xs:complexType>
 
 </xs:schema>
