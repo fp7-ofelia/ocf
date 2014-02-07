@@ -2,6 +2,7 @@ from sqlalchemy.orm import validates
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
+import common
 import inspect
 
 '''@author: SergioVidiella'''
@@ -14,7 +15,7 @@ class Template(db.Model):
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
-    memory = db.Column(db.Integer, nullable=False)
+    minimum_memory = db.Column(db.Integer, nullable=False)
 
     '''OS parameters'''
     operating_system_type = db.Column(db.String(512), nullable=False, default="")
@@ -23,8 +24,8 @@ class Template(db.Model):
 
     '''Virtualization parameteres'''
     virtualization_setup_type = db.Column(db.String(1024),nullable=False,default="")
-    hard_disc_setup_type = db.Column(db.String(1024), nullable=False, default="")
-    hard_disc_path = db.Column(db.String(1024), nullable=False, default="")
+    hard_disk_setup_type = db.Column(db.String(1024), nullable=False, default="")
+    hard_disk_path = db.Column(db.String(1024), nullable=False, default="")
 
     ''' Mutex over the instance '''
     mutex = None
@@ -33,17 +34,18 @@ class Template(db.Model):
     do_save = True
 
     @staticmethod
-    def constructor(name,memory,os_type,os_version,os_distro,virt_setup_type,hd_setup_type,hd_path,save=True):
+    def constructor(name,minimum_memory,os_type,os_version,os_distro,virt_setup_type,hd_setup_type,hd_path,save=True):
         self = Template()
         try:
             self.name = name
-            self.memory = memory
+            # If no minimum memory given for template, set default one
+            self.minimum_memory = minimum_memory or common.default_minimum_memory
             self.operating_system_type = os_type
             self.operating_system_version = os_version
             self.operating_system_distribution = os_distro
             self.virtualization_setup_type = virt_setup_type
-            self.hard_disc_setup_type = hd_setup_type
-            self.hard_disc_path = hd_path
+            self.hard_disk_setup_type = hd_setup_type
+            self.hard_disk_path = hd_path
             self.do_save = save
             if save:
                 db.session.add(self)
@@ -62,10 +64,10 @@ class Template(db.Model):
         db.session.commit()
 
     '''Validators'''
-    @validates('hard_disc_setup_type')
-    def validate_hd_setup_type(self, key, hd_setup_type):
+    @validates('hard_disk_setup_type')
+    def validate_hard_disk_setup_type(self, key, hd_setup_type):
         try:
-            HDSetupTypeClass.validate_hd_setup_type(hd_setup_type)
+            HDSetupTypeClass.validate_hard_disk_setup_type(hd_setup_type)
             return hd_setup_type
         except Exception as e:
             raise e
@@ -161,18 +163,18 @@ class Template(db.Model):
     def get_os_distribution(self):
         return self.operating_system_distribution
 
-    def get_hd_setup_type(self):
+    def get_hard_disk_setup_type(self):
         return self.hd_setup_type
 
-    def set_hd_setup_type(self, hd_type):
-        HDSetupTypeClass.validate_hd_setup_type(hd_type)
+    def set_hard_disk_setup_type(self, hd_type):
+        HDSetupTypeClass.validate_hard_disk_setup_type(hd_type)
         self.hd_setup_type = hd_type
         self.auto_save()
 
-    def get_hd_origin_path(self):
+    def get_hard_disk_origin_path(self):
         return  self.hd_setup_type
 
-    def set_hd_origin_path(self, path):
+    def set_hard_disk_origin_path(self, path):
         self.hd_origin_path = path
         self.auto_save()
 
