@@ -1,9 +1,6 @@
 import time 
-
 import amsoil.core.pluginmanager as pm
-
 import xml.etree.ElementTree as ET
-
 from util.xrn import *
 
 import amsoil.core.log
