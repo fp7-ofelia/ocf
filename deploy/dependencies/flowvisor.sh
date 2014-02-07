@@ -8,13 +8,38 @@
 ###
 
 
+# XXX: Move somewhere else
+source ../utils/utils.sh
+
 FLOWVISOR_RELEASE="1.4.0-1"
+flowvisor_path="/etc/flowvisor"
+flowvisor_config_file="$flowvisor_path/config.json"
 
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
-    echo "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
+    warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
     exit 1
 fi
+
+# Otherwise, ask for confirmation on the installation of FlowVisor
+# and warn about compatibility issues
+accept_deploy_flowvisor=0
+while [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]
+    do
+        print_header "Do you wish to install FlowVisor $FLOWVISOR_RELEASE?"
+        warning " Notice that you *must* use FOAM with this."
+        warning " Notice that if you already installed a FlowVisor non-versioned in the Debian package system, you should consider $(print_bold backing up) and transferring your current flowspaces, if any, to the newly installed FlowVisor and finally $(print_bold removing) your old version."
+        print " > If you want to keep using Opt-in please press \"n\"\n > If you want to keep the flowspaces at your current FlowVisor and are not able to backup these, please press \"n\""
+        print "[y/N]"
+        read accept_deploy_flowvisor
+        if [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]; then
+            print "Please accept (\"y\") or reject (\"n\") the installation"
+        fi
+        if [[ $accept_deploy_flowvisor =~ ^[n|N]$ ]]; then
+            warning "FlowVisor installation aborted by user"
+            exit 1
+        fi
+    done
 
 # Obtain public repository key, install it, remove it
 wget http://updates.onlab.us/GPG-KEY-ONLAB
@@ -44,20 +69,23 @@ apt-get -y install sudo
 apt-get -y install flowvisor=$FLOWVISOR_RELEASE
 
 # Generate new configuration and load it
-if [[ ! -f /etc/flowvisor/config.json ]]; then
-    fvconfig generate /etc/flowvisor/config.json
+if [[ ! -f $flowvisor_config_file ]]; then
+    fvconfig generate $flowvisor_config_file
 fi
-fvconfig load /etc/flowvisor/config.json
+# Change configuration to show topology links
+sed -i "s/\"run_topology_server\": false/\"run_topology_server\": true/g" $flowvisor_config_file
+# Load configuration in database
+fvconfig load $flowvisor_path/config.json
 
 # Modify to meet our requirements
 # Correct permissions in order to be able to pass this point and write to the DB
 chown flowvisor:flowvisor /usr/share/db/flowvisor -R
-chown flowvisor:flowvisor /etc/flowvisor -R
+chown flowvisor:flowvisor $flowvisor_path -R
 chmod 755 /usr/share/db/flowvisor/derby.log
 # Modify log configuration to avoid writing on stdout
-sed -i -e "s/^log4j.rootCategory=WARN, system/#log4j.rootCategory=WARN, system\nlog4j.rootCategory=WARN/" /etc/flowvisor/fvlog.config
+sed -i -e "s/^log4j.rootCategory=WARN, system/#log4j.rootCategory=WARN, system\nlog4j.rootCategory=WARN/" $flowvisor_path/fvlog.config
 
 # Start FlowVisor
 /etc/init.d/flowvisor restart
 
-echo "FlowVisor successfully installed"
+success "FlowVisor successfully installed"

@@ -8,9 +8,12 @@
 ###
 
 
+# XXX: Move somewhere else
+source ../utils/utils.sh
+
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep "apache2") != "" ]]; then
-    echo "Apache2 already installed. Skipping..."
+    warning "Apache2 already installed. Skipping..."
     exit 1
 else
     apt-get -y install apache2
@@ -19,4 +22,4 @@ fi
 # TODO: set certificates generation here instead per AM
 # Copy from <am_path>/bin/versions/default/install/lib/ssl
 
-echo "Apache2 successfully installed"
+success "Apache2 successfully installed"
