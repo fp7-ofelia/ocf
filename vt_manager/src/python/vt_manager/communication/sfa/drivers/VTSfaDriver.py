@@ -67,8 +67,8 @@ class VTSfaDriver:
 				#node = self.shell.GetNodes(uuid=vm['server-id'])
 				if not node in nodes:
 					nodes.append(node)
-                                ip = self.shell.get_ip_from_vm(vm_name=vm['name'],slice_name=vm['slice-name'],project=authority)
-				created_vms.append({'vm-name':vm['name'],'vm-ip':ip,'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
+                                #ip = self.shell.get_ip_from_vm(vm_name=vm['name'],slice_name=vm['slice-name'],project=authority)
+				#created_vms.append({'vm-name':vm['name'],'vm-ip':ip,'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
 		
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms,new_nodes=nodes)
 	

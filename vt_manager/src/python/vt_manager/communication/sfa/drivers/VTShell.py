@@ -9,6 +9,7 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 from vt_manager.utils.ServiceThread import ServiceThread
+from vt_manager.utils.SyncThread import SyncThread
 
 import threading
 import time
@@ -85,7 +86,7 @@ class VTShell:
 		    #processes.append(process)
 		    #process.start()
                     with threading.Lock():
-                        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
+                        SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
                     if expiration:
                         ExpiringComponents.objects.create(slice=sliceName, authority=projectName, expires=expiration).save()
                          
@@ -98,7 +99,7 @@ class VTShell:
 
         def convert_to_uuid(self,requested_attributes):
                 for slivers in requested_attributes:
-                        servers = VTServer.objects.filter(uuid=get_leaf(slivers['component_id']))
+                        servers = VTServer.objects.filter(name=get_leaf(slivers['component_id']))
 		        slivers['component_id'] = servers[0].uuid
                 return requested_attributes
       
