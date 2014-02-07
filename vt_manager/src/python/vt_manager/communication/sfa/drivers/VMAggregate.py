@@ -112,7 +112,6 @@ class VMAggregate:
 		    cVMs = dict()
 		    if slice_leaf:
 			slices = (self.shell.GetSlice(slice_leaf,projectName))
-			
 		    	slices['vms'].extend(VMAggregate.FilterList({'slice-name':slice_leaf,'node-name':node.name},created_vms))
 			#cVMs['vms'] = createdVMs
 		    slivers = list() 
@@ -121,6 +120,7 @@ class VMAggregate:
 			    if vm['node-name'] == node.name:
 		    	    	slivers.append(VM({'name':vm['vm-name'],
 			        	           'state':vm['vm-state'],
+                                                   'ip':vm['vm-ip'],
 						  }))
 			rspec_node['slivers'] = slivers
 		
