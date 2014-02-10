@@ -64,7 +64,7 @@ class OFSfaDriver:
 		result = self.shell.SliverStatus(slice_urn)
 		return result
 
-        def get_expiration_date(slice_hrn, creds):
+        def get_expiration_date(self,slice_hrn, creds):
         	for cred in creds:
                 	credential = Credential(string=cred)
                     	if credential.get_gid_caller().get_hrn() == slice_hrn:
