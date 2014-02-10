@@ -4,7 +4,7 @@ import amsoil.core.pluginmanager as pm
 '''@author: SergioVidiella'''
 
 class VTServerNetworkInterfaces(db.Model):
-    """Network interfaces related to a VTServer."""
+    """Network interfaces related to a VTServer"""
 
     config = pm.getService("config")
     table_prefix = config.get("virtrm.DATABASE_PREFIX")

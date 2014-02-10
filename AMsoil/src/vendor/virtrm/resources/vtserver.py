@@ -21,7 +21,7 @@ import uuid
 
 logging=amsoil.core.log.getLogger('VTServer')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 def validate_agent_url_wrapper(url):
         VTServer.validate_agent_url(url)

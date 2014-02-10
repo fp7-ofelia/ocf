@@ -13,7 +13,7 @@ import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('XenServer')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 def validate_agent_url_wrapper():
     VTServer.validate_agent_url()

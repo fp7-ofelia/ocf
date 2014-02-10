@@ -1,7 +1,7 @@
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 
 class ResourcesHash(db.Model):

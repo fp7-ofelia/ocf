@@ -11,7 +11,7 @@ import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('XenVM')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class XenVM(VirtualMachine):
     """XEN VM data model class"""

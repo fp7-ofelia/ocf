@@ -11,7 +11,7 @@ import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('NetworkInterface')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class NetworkInterface(db.Model):
     """Network interface model."""

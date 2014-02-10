@@ -2,6 +2,9 @@ from sqlalchemy.orm import validates
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
+#from resources.vtserver import VTServer
+#from resources.virtualmachine import VirtualMachine
+#from resources.vmallocated import VMAllocated
 import common
 import amsoil.core.pluginmanager as pm
 import inspect
@@ -35,6 +38,10 @@ class Template(db.Model):
 
     '''Defines soft or hard state of the Template'''
     do_save = True
+
+#    servers = association_proxy("vt_manager_vtserver", "vtserver")
+#    allocated_vms = association_proxy("vt_manager_virtualmachine_allocated", "vmallocated")
+#    vms = association_proxy("vt_manager_virtualmachine", "virtualmachine")
 
     @staticmethod
     def constructor(name,minimum_memory,os_type,os_version,os_distro,virt_setup_type,hd_setup_type,hd_path,save=True):

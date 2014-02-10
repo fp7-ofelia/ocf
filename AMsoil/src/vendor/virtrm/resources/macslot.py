@@ -5,7 +5,7 @@ from utils.ethernetutils import EthernetUtils
 import amsoil.core.pluginmanager as pm
 import inspect
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class MacSlot(db.Model):
     """MacSlot Class."""

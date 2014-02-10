@@ -9,7 +9,7 @@ from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClas
 import amsoil.core.pluginmanager as pm
 import inspect
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class VirtualMachine(db.Model):
     """VirtualMachine Class."""

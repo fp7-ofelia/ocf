@@ -12,7 +12,7 @@ import inspect
 
 logging=amsoil.core.log.getLogger('MacRange')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class MacRange(db.Model):
     """MacRange."""

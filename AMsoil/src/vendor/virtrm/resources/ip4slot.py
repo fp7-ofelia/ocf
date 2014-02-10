@@ -5,7 +5,7 @@ from utils.ip4utils import IP4Utils
 import amsoil.core.pluginmanager as pm
 import inspect
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class Ip4Slot(db.Model):
     """Ip4Slot Class."""
