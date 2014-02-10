@@ -3,6 +3,7 @@ from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 import common
+import amsoil.core.pluginmanager as pm
 import inspect
 
 '''@author: SergioVidiella'''
@@ -10,11 +11,13 @@ import inspect
 class Template(db.Model):
     """Templates for the VMs disc images supported."""
 
-    __tablename__ = 'vt_manager_template'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'template'
 
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
+    uuid = db.Column(db.String(1024), nullable=False)
     minimum_memory = db.Column(db.Integer, nullable=False)
 
     '''OS parameters'''

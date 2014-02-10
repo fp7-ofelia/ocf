@@ -45,7 +45,9 @@ CALLBACK_VTAM_PORT = "8445"
 # Database parameters.
 # DATABASE_ENGINE: mysql, prostgresql, sqlite...
 # DATABASE_HOST: where the database is allocated. Usually 'localhost' (or 127.0.0.1)
+# DATABASE_PREFIX: WARNING! Only change this for new installations.
 #
+DATABASE_PREFIX = "vt_manager_"
 DATABASE_ENGINE = "mysql"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_NAME = "vtm"

@@ -1,5 +1,5 @@
 from utils.base import db
-
+import amsoil.core.pluginmanager as pm
 
 '''@author: SergioVidiella'''
 
@@ -7,7 +7,8 @@ from utils.base import db
 class ResourcesHash(db.Model):
     """Class to store resources hash"""
 
-    __tablename__ = 'vt_manager_resourceshash'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'resourceshash'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     hash_value = db.Column("hashValue",db.String(1024), nullable=False)

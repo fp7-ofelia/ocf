@@ -9,6 +9,7 @@ from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('XenServer')
 
@@ -20,10 +21,11 @@ def validate_agent_url_wrapper():
 class XenServer(VTServer):
     """Virtualization Server Class."""
          
-    __tablename__ = 'vt_manager_xenserver'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'xenserver'
     __table_args__ = {'extend_existing':True}
     
-    vtserver_ptr_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'), primary_key=True)
+    vtserver_ptr_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), primary_key=True)
     vtserver = db.relationship("VTServer", backref="xenserver")
     
     '''VMs array'''

@@ -1,16 +1,17 @@
 from utils.base import db
+import amsoil.core.pluginmanager as pm
 
 '''@author: SergioVidiella'''
-
 
 class VTServerMacRange(db.Model):
     """Subscribed Mac ranges to the VTServer's."""
 
-    __tablename__ = 'vt_manager_vtserver_subscribedMacRanges'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'vtserver_subscribedMacRanges'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'))
-    macrange_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macrange.id'))
+    vtserver_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
+    macrange_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'macrange.id'), nullable=False)
 
     vtserver = db.relationship("VTServer", backref="vtserver_mac_range")
     subscribed_mac_range = db.relationship("MacRange", backref="vtserver_association")

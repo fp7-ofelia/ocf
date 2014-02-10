@@ -15,6 +15,7 @@ from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 import inspect
 import uuid
 
@@ -28,7 +29,8 @@ def validate_agent_url_wrapper(url):
 class VTServer(db.Model):
     """Virtualization Server Class."""
 
-    __tablename__ = 'vt_manager_vtserver'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'vtserver'
 
     __child_classes = (
     'XenServer',

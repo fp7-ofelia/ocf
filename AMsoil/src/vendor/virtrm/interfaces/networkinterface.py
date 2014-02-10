@@ -8,22 +8,22 @@ from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('NetworkInterface')
 
-
 '''@author: SergioVidiella'''
-
 
 class NetworkInterface(db.Model):
     """Network interface model."""
 
-    __tablename__ = 'vt_manager_networkinterface'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'networkinterface'
 
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    mac_id = db.Column(db.Integer, db.ForeignKey('vt_manager_macslot.id'))
+    mac_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'macslot.id'), nullable=False)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ips", "ipslot")
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)

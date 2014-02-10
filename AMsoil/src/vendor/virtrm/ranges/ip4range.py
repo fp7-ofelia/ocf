@@ -8,16 +8,17 @@ from utils.ip4utils import IP4Utils
 from utils.mutexstore import MutexStore
 import amsoil.core.log
 import inspect
+import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('Ip4Range')
-
 
 '''@author: SergioVidiella'''
 
 class Ip4Range(db.Model):
     """Ip4Range."""
 
-    __tablename__ = 'vt_manager_ip4range'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'ip4range'
 
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
     # Range name

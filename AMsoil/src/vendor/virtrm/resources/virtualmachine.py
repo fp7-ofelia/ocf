@@ -6,6 +6,7 @@ from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
+import amsoil.core.pluginmanager as pm
 import inspect
 
 '''@author: SergioVidiella'''
@@ -13,7 +14,8 @@ import inspect
 class VirtualMachine(db.Model):
     """VirtualMachine Class."""
 
-    __tablename__ = 'vt_manager_virtualmachine'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine'
 
     __child_classes = (
             'XenVM',

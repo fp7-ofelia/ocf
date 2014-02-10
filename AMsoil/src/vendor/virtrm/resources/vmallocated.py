@@ -7,6 +7,7 @@ from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.expires import Expires
 from utils.mutexstore import MutexStore
+import amsoil.core.pluginmanager as pm
 import inspect
 
 '''@author: SergioVidiella'''
@@ -14,7 +15,8 @@ import inspect
 class VMAllocated(db.Model):
     """Virtual Machines allocated for GeniV3 calls."""
 
-    __tablename__ = 'vt_manager_virtualmachine_allocated'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine_allocated'
 
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -28,7 +30,7 @@ class VMAllocated(db.Model):
     project_name = db.Column("projectName", db.String(1024), nullable=False, default="")
     slice_id = db.Column("sliceId", db.String(1024), nullable=False, default="")
     slice_name = db.Column("sliceName", db.String(512), nullable=False, default="")
-    server_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'), nullable=False)
+    server_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
     server = db.relationship("VTServer", backref='allocated_vms')
         
     '''OS parameters'''
@@ -43,7 +45,7 @@ class VMAllocated(db.Model):
     hypervisor = db.Column(db.String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
-    expires_id = db.Column(db.Integer, db.ForeignKey('amsoil_vt_manager_expires.id'), nullable=False)
+    expires_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'expires.id'), nullable=False)
     expires = db.relationship("Expires", backref='allocated_vm')
 
     ''' Mutex over the instance '''

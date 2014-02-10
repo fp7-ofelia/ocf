@@ -7,17 +7,18 @@ from utils.base import db
 from utils.ethernetutils import EthernetUtils
 from utils.mutexstore import MutexStore
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 import inspect
 
 logging=amsoil.core.log.getLogger('MacRange')
-
 
 '''@author: SergioVidiella'''
 
 class MacRange(db.Model):
     """MacRange."""
-
-    __tablename__ = 'vt_manager_macrange'
+   
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'macrange'
 
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
     # Range name

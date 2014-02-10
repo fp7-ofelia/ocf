@@ -1,19 +1,19 @@
 from sqlalchemy.orm import validates
 from utils.base import db
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 import uuid
 import logging 
 
 logging=amsoil.core.log.getLogger('Action')
 
-
 '''@author: SergioVidiella'''
-
 
 class Action(db.Model):
     """Class to store actions"""
     
-    __tablename__ = 'vt_manager_action'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'action'
     
     '''Action status Types'''
     QUEUED_STATUS = "QUEUED"

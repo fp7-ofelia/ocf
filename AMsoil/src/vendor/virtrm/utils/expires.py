@@ -2,16 +2,17 @@ from datetime import datetime, timedelta
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from utils.base import db
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('Expires')
-
 
 '''@author: SergioVidiella'''
 
 class Expires(db.Model):
     """Expiration time of the Virtual Machine (only GeniV3)."""
 
-    __tablename__ = 'vt_manager_expires'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'expires'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     expires = db.Column(db.DateTime, nullable=False)

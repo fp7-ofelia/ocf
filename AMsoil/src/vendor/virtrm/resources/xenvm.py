@@ -7,6 +7,7 @@ from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass
 from utils.mutexstore import MutexStore
 import amsoil.core.log
+import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('XenVM')
 
@@ -15,11 +16,12 @@ logging=amsoil.core.log.getLogger('XenVM')
 class XenVM(VirtualMachine):
     """XEN VM data model class"""
     
-    __tablename__ = 'vt_manager_xenvm'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'xenvm'
     __table_args__ = {'extend_existing':True}
     
     '''General Attributes'''
-    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey('vt_manager_virtualmachine.id'), primary_key=True)
+    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine.id'), primary_key=True)
     hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")

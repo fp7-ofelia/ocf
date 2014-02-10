@@ -2,19 +2,20 @@ from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import validates
 from utils.base import db
 from utils.ip4utils import IP4Utils
+import amsoil.core.pluginmanager as pm
 import inspect
-
 
 '''@author: SergioVidiella'''
 
 class Ip4Slot(db.Model):
     """Ip4Slot Class."""
 
-    __tablename__ = 'vt_manager_ip4slot'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'ip4slot'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     ip = db.Column(db.String(15), nullable=False)
-    ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey('vt_manager_ip4range.id'))
+    ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'ip4range.id'), nullable=False)
     ip_range = db.relationship('Ip4Range')
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))

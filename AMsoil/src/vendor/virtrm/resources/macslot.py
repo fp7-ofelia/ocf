@@ -2,6 +2,7 @@ from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import validates
 from utils.base import db
 from utils.ethernetutils import EthernetUtils
+import amsoil.core.pluginmanager as pm
 import inspect
 
 '''@author: SergioVidiella'''
@@ -9,11 +10,12 @@ import inspect
 class MacSlot(db.Model):
     """MacSlot Class."""
 
-    __tablename__ = 'vt_manager_macslot'
+    config = pm.getService("config")
+    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'macslot'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     mac = db.Column(db.String(17), nullable=False)
-    mac_range_id = db.Column("macRange_id", db.Integer, db.ForeignKey('vt_manager_macrange.id'))
+    mac_range_id = db.Column("macRange_id", db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'macrange.id'), nullable=False)
     mac_range = db.relationship("MacRange", backref="macslot", lazy="dynamic")
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
