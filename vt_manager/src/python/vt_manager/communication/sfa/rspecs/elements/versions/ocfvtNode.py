@@ -46,7 +46,7 @@ class OcfVtNode:
             node_elems.append(node_elem)
             # set component name
             if node.get('component_id'):
-                component_name = xrn_to_hostname(node['component_id'])
+                component_name = node['component_id']
                 node_elem.set('component_name', component_name)
 	    if node.get('hostname'):
                         simple_elem = node_elem.add_element('hostname')

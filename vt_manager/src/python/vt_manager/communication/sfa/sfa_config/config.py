@@ -1,4 +1,10 @@
 from django.conf import settings
+################
+#Aggregate, Authority and Componet urns
+################
+OCF_ISLAND_AUTHORITY = "i2cat"
+OCF_AM_TYPE = "vtam"
+HRN = OCF_ISLAND_AUTHORITY + "." + OCF_AM_TYPE
 
 #################
 #Credential stuff
@@ -13,9 +19,8 @@ SFA_CREDENTIAL_SCHEMA = "/opt/ofelia/vt_manager/src/python/vt_manager/communicat
 #Get Version Params
 ###################
 #Main params
-URN = 'urn:publicid:IDN+ocf:vtam+authority+sa' 
+URN = 'urn:publicid:IDN+' + OCF_ISLAND_AUTHORITY + '+' + OCF_AM_TYPE  + '+authority+sa' 
 HOSTNAME = settings.SITE_DOMAIN
-HRN = 'ocf.vtam'
 TESTBED = 'Ofelia Control Framework'
 #Geni API
 GENI_API_VERSION = 2
