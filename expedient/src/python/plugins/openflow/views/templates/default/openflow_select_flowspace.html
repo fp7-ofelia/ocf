@@ -55,19 +55,26 @@ div.steps {
 </div>
 
 	<div class="help_text">
-	<p>Each table below describes a class of traffic you would like your
-	controller to receive. Each field is specified as
-	a range. Empty cells mean any value. The tables are OR'ed together
-	to produce a rule.</p>
+	<p>Each table below describes a class of traffic to be received by
+	your controller. Each field is specified as a range. Empty cells mean any value.
+	The tables are OR'ed together to produce a rule.</p>
 
-	<p>For example, if you want to receive all incoming and
+	<p><em>For example, if you want to receive all incoming and
 	outgoing port 80 traffic, then you will need two tables. In the first, you
 	would set the "TCP/UDP Destination" field to 80. In the second,
-	you would set the "TCP/UDP Source" field to 80.</p>
+	you would set the "TCP/UDP Source" field to 80.</em></p>
 
-	<p>Empty tables are unused. If you need more space, you can click "Save",
-	and additional empty tables will be displayed.</p>
+	<p>If you need to define more FlowSpaces, click "Define another FlowSpace"
+	and an additional empty table will be displayed.</p>
 	</div>
+
+    <script>
+    // Dynamycally change the form action depending on the pressed button
+    function changeFlowSpaceFormActionURL(url) {
+        form = $("#flowspace_formset")[0];
+        form.action = url;
+    }
+    </script>
 
     <form class="form" style="width: auto !important;" id='flowspace_formset' method="POST" action="{% url flowspace slice.id %}">{% csrf_token %}
     	{{ fsformset.management_form }}
@@ -77,10 +84,10 @@ div.steps {
 			{% endfor %}
 		{% endfor %}
 		<div class="center">
-	   		{% for form in fsformset.forms %}
+	   	{% for form in fsformset.forms %}
 			<h2>Flowspace {{ forloop.counter }} ({% if form.initial %}saved{% else %}unsaved{% endif %})</h2>
 			<div class="errors">{{ form.non_field_errors }}</div>
-	    	<table class="fulltable formtable {% if form.initial %}saved{% endif %}">
+	 	   	<table class="fulltable formtable {% if form.initial %}saved{% endif %}">
 	    		<thead>
 	    			<tr><th>Field</th><th>From</th><th>To</th></tr>
 	    		</thead>
@@ -218,16 +225,15 @@ div.steps {
 					</tr>
 		        </tbody>
 	        </table>
-			<br/>
 	        {% endfor %}
-            <input id='submit' type="submit" value="Save" 
-		{%if slice.started %}onClick='return confirm("Once you save the new FlowSpace a new request will be generated, until it is granted, your old FlowSpace, if any, will be deleted. Are you sure you want to save a new FlowSpace?");'
-		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace.");'
+                <input id='submit' type="submit" value="Define another FlowSpace"
+		{%if slice.started %}onClick='return confirm("Once you save the current FlowSpace(s) a new request will be generated. Until it is granted, your old FlowSpace(s) will be deleted. Are you sure you want to save the current FlowSpace(s)?");'
+		{%else %}onClick='return confirm("Your slice is stopped at the moment. Remember to start it to request the saved FlowSpace(s).");'
 		{% endif%}/>
 			<span class="next_link">
 				<input type="button" value="Clear" onclick="document.location='{% url flowspace slice.id %}';"/>
 				{% if done %}
-				<input type="button" value="Done" onclick="javascript: if (confirm('Flowspace must be saved before exiting. Are you sure you are done?')) { return document.location='{% url slice_detail slice.id %}'; } else { return false; }"/>
+				<input type="submit" value="Save and exit" onclick="javascript: if (confirm('Flowspace(s) will be saved before exiting. Are you ready?')) { changeFlowSpaceFormActionURL('{% url save_flowspace slice.id %}'); return true; } else { return false; }"/>
 				{% else %}
 				<input type="button" value="Next" onclick="document.location='{% url gcf_sshkeys slice.id %}';"/>
 				{% endif %}

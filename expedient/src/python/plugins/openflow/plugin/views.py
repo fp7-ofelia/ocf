@@ -431,7 +431,8 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         model=FlowSpaceRule,
         formfield_callback=formfield_callback,
         can_delete=True,
-        extra=2,
+        extra=0, # No extra forms apart from the one being shown
+#        extra=2,
     )
 
     if request.method == "POST":
@@ -441,6 +442,9 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
+        if formset.is_valid():
+            formset.save()
+
         if fsmode == 'advanced':
             formset = FSFormSet(
                 request.POST,
@@ -485,11 +489,31 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             else:
                 return HttpResponseRedirect(request.path)
 
-
     elif request.method == "GET":
+        flowspace_form_contents = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct()
+        flowspace_form_number = 1
+
+        # When coming from the OpenFlow switches topology selection page...
+        if "HTTP_REFERER" in request.META:
+            # Checks if the referer page is the topology selcetion
+            if reverse("book_openflow", args=[slice_id]) in request.META['HTTP_REFERER']:
+                # If no flowspace has been selected yet, show an extra form to allow user to choose at least one
+                if not flowspace_form_contents:
+                    flowspace_form_number = 1 # Show an extra (1) form besides the already selected one
+                # Otherwise, when there is some already requested flowspace, show only the requested ones (no extra forms)
+                else:
+                    flowspace_form_number = 0 # No extra forms apart from the one(s) being shown
+        
+        # Redefine formset to handle all flowspaces
+        # Extra: field that determines how many extra flowspaces there are
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=flowspace_form_number, # Show numbe of forms according to origin path request and so on
+        )
         formset = FSFormSet(
-            queryset=FlowSpaceRule.objects.filter(
-                slivers__slice=slice).distinct(),
+            queryset=flowspace_form_contents,
         )
 
     else:
@@ -513,6 +537,48 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             ),
         },
     )
+
+def save_flowspace(request, slice_id):
+    """
+    Saves flowspace and gets back to slice detail page.
+    """
+    if request.method == "POST":
+        slice = get_object_or_404(Slice, id=slice_id)
+        
+        class SliverMultipleChoiceField(forms.ModelMultipleChoiceField):
+            def label_from_instance(self, obj):
+                return "%s" % obj.resource.as_leaf_class()
+            
+            def widget_attrs(self, widget):
+                return {"class": "wide"}
+            
+        def formfield_callback(f):
+            if f.name == "slivers":
+                return SliverMultipleChoiceField(
+                    queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+            else:
+                return f.formfield()
+        
+        # create a formset to handle all flowspaces
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=0, # No extra forms apart from the one being shown
+        )
+        
+        formset = FSFormSet(
+            request.POST,
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
+        )
+        if formset.is_valid():
+            formset.save()
+        
+        return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+    else:
+        return HttpResponseNotAllowed("POST")
+
 
 '''
 Update resources
