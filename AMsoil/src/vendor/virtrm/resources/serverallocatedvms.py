@@ -1,3 +1,5 @@
+from resources.vtserver import VTServer
+from resources.vmallocated import VMAllocated
 from utils.base import db
 from sqlalchemy.orm import backref
 import amsoil.core.pluginmanager as pm

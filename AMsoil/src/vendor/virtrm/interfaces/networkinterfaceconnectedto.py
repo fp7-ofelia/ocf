@@ -1,3 +1,4 @@
+from interfaces.networkinterface import NetworkInterface
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 

@@ -1,4 +1,3 @@
-from interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
 from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
 from resources.ip4slot import Ip4Slot
 from resources.macslot import MacSlot
