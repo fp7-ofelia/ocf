@@ -37,7 +37,7 @@ CALLBACK_VTAM_PORT = "8445"
 #
 # Agent monitoring interval in seconds. That is, seconds until it
 # asks for the current status of the servers and virtual machines.
-# MONITORING_INTERVAL: default is 45.
+# MONITORING_INTERVAL: default is 45
 #
 ##MONITORING_INTERVAL = 45
 
@@ -45,14 +45,14 @@ CALLBACK_VTAM_PORT = "8445"
 # Database parameters.
 # DATABASE_ENGINE: mysql, prostgresql, sqlite...
 # DATABASE_HOST: where the database is allocated. Usually 'localhost' (or 127.0.0.1)
-# DATABASE_PREFIX: WARNING! Only change this for new installations.
+# DATABASE_PREFIX: prefix for the tables in the db. WARNING: *only* change for new installations
 #
-DATABASE_PREFIX = "vt_manager_"
 DATABASE_ENGINE = "mysql"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_NAME = "vtm"
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"
+DATABASE_PREFIX = "vt_manager_"
 
 #
 # Name for the island that is to be set on your host.
@@ -62,7 +62,7 @@ ISLAND_NAME = "i2cat"
 #
 # Agent monitoring interval in seconds. That is, seconds until it
 # asks for the current status of the servers and virtual machines.
-# MONITORING_INTERVAL: default is 45.
+# MONITORING_INTERVAL: default is 45
 #
 ##MONITORING_INTERVAL = 45
 
