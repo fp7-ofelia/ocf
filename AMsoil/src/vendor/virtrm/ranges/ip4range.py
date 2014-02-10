@@ -1,4 +1,3 @@
-from ranges.ip4rangeips import Ip4RangeIps
 from resources.ip4slot import Ip4Slot
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
@@ -12,7 +11,7 @@ import amsoil.core.pluginmanager as pm
 
 logging=amsoil.core.log.getLogger('Ip4Range')
 
-'''@author: SergioVidiella'''
+'''@author: msune, SergioVidiella'''
 
 class Ip4Range(db.Model):
     """Ip4Range."""

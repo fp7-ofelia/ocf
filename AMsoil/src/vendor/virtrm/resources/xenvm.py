@@ -17,11 +17,12 @@ class XenVM(VirtualMachine):
     """XEN VM data model class"""
     
     config = pm.getService("config")
-    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'xenvm'
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'xenvm'
     __table_args__ = {'extend_existing':True}
     
     '''General Attributes'''
-    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine.id'), primary_key=True)
+    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.id'), primary_key=True)
     hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")

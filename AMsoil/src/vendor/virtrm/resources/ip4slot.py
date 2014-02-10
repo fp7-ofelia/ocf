@@ -11,11 +11,12 @@ class Ip4Slot(db.Model):
     """Ip4Slot Class."""
 
     config = pm.getService("config")
-    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'ip4slot'
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'ip4slot'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     ip = db.Column(db.String(15), nullable=False)
-    ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'ip4range.id'), nullable=False)
+    ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
     ip_range = db.relationship('Ip4Range')
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))

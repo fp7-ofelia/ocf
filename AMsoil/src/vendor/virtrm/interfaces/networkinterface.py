@@ -23,7 +23,7 @@ class NetworkInterface(db.Model):
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    mac_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'macslot.id'), nullable=False)
+    mac_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ips", "ipslot")
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)

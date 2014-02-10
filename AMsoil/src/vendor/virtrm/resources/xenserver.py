@@ -22,10 +22,11 @@ class XenServer(VTServer):
     """Virtualization Server Class."""
          
     config = pm.getService("config")
-    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'xenserver'
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'xenserver'
     __table_args__ = {'extend_existing':True}
     
-    vtserver_ptr_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), primary_key=True)
+    vtserver_ptr_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'vtserver.id'), primary_key=True)
     vtserver = db.relationship("VTServer", backref="xenserver")
     
     '''VMs array'''

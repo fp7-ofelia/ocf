@@ -9,11 +9,12 @@ class VMNetworkInterfaces(db.Model):
     """Network interfaces related to a Virtual Machine"""
 
     config = pm.getService("config")
-    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine_networkInterfaces'
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_networkInterfaces'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    virtualmachine_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine.id'), nullable=False)
-    networkinterface_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'networkinterface.id'), nullable=False)
+    virtualmachine_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.id'), nullable=False)
+    networkinterface_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
     vm = db.relationship("VirtualMachine", backref="vm_networkinterfaces")
     networkinterface = db.relationship("NetworkInterface", backref="vm_associations")
