@@ -1,4 +1,3 @@
-from interfaces.networkinterface import NetworkInterface
 from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy

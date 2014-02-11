@@ -1,4 +1,3 @@
-from resources.xenservervms import XenServerVMs
 from resources.xenvm import XenVM
 from resources.virtualmachine import VirtualMachine
 from resources.vtserver import VTServer

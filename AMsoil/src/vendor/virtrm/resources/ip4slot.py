@@ -17,7 +17,6 @@ class Ip4Slot(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     ip = db.Column(db.String(15), nullable=False)
     ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
-    ip_range = db.relationship('Ip4Range')
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
 

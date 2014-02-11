@@ -1,4 +1,3 @@
-from interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
 from resources.ip4slot import Ip4Slot
 from resources.macslot import MacSlot
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
@@ -17,14 +16,15 @@ class NetworkInterface(db.Model):
     """Network interface model."""
 
     config = pm.getService("config")
-    __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'networkinterface'
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'networkinterface'
 
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     mac_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
-    ip4s = association_proxy("networkinterface_ips", "ipslot")
+    ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)
     is_bridge = db.Column("isBridge", TINYINT(1), nullable=False, default=0)
 

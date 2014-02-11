@@ -1,3 +1,5 @@
+from ranges.macrange import MacRange
+from resources.macslot import MacSlot
 from sqlalchemy.orm import backref
 from utils.base import db
 import amsoil.core.pluginmanager as pm

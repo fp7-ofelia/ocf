@@ -17,7 +17,6 @@ class MacSlot(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     mac = db.Column(db.String(17), nullable=False)
     mac_range_id = db.Column("macRange_id", db.Integer, db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
-    mac_range = db.relationship("MacRange", backref="macslot", lazy="dynamic")
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
     

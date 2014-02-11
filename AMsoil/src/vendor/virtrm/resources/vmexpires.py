@@ -1,4 +1,6 @@
+from resources.virtualmachine import VirtualMachine
 from utils.base import db
+from utils.expires import Expires
 import amsoil.core.pluginmanager as pm
 
 '''@author: SergioVidiella'''

@@ -1,4 +1,3 @@
-from interfaces.vmnetworkinterfaces import VMNetworkInterfaces
 from resources.virtualmachine import VirtualMachine
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy

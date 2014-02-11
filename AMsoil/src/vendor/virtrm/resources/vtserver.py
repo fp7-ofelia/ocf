@@ -1,11 +1,6 @@
 from interfaces.networkinterface import NetworkInterface
-from interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
 from ranges.ip4range import Ip4Range
-from ranges.ip4rangeips import Ip4RangeIps
 from ranges.macrange import MacRange
-from ranges.macrangemacs import MacRangeMacs
-from ranges.serveriprange import VTServerIpRange
-from ranges.servermacrange import VTServerMacRange
 from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
 from sqlalchemy.ext.associationproxy import association_proxy

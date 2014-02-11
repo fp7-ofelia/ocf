@@ -1,4 +1,3 @@
-from ranges.macrangemacs import MacRangeMacs
 from resources.macslot import MacSlot
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
