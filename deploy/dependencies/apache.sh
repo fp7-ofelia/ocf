@@ -19,7 +19,4 @@ else
     apt-get -y install apache2
 fi
 
-# TODO: set certificates generation here instead per AM
-# Copy from <am_path>/bin/versions/default/install/lib/ssl
-
 success "Apache2 successfully installed"

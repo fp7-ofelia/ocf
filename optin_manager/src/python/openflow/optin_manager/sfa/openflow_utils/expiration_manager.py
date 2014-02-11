@@ -2,7 +2,7 @@
 from datetime import datetime
 from openflow.optin_manager.sfa.util.sfatime import utcparse, datetime_to_epoch
 from openflow.optin_manager.sfa.models import ExpiringComponents
-from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver
+#from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver
 
 class ExpirationManager:
 
@@ -18,11 +18,15 @@ class ExpirationManager:
 
     @staticmethod
     def find_expired_slices():
+        try:
+            from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver #Avoiding circular Deps
+        except:
+            pass
         slices = ExpiringComponets.objects.all()
         expired_components = list()
         for slice in slices:
             expiration_date = int(datetime_to_epoch(utcparse(slice.expires)))
-            if expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow())))
+            if expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow()))):
                 try:
                     OFSfaDriver().crud_slice(slice.slice,slice.authority, 'delete_slice')
                 except:

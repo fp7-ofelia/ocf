@@ -13,9 +13,11 @@ SFA_CREDENTIAL_SCHEMA = "/opt/ofelia/optin_manager/src/python/openflow/optin_man
 #Get Version Params
 ###################
 #Main params
-URN = 'urn:publicid:IDN+ocf:ofam+authority+sa' 
+
+HRN = 'i2cat.ofam'
+HRN_URN = HRN.replace(".",":")
+URN = 'urn:publicid:IDN+openflow:%s+cm' % HRN_URN
 HOSTNAME = settings.SITE_DOMAIN
-HRN = 'ocf.ofam'
 TESTBED = 'Ofelia Control Framework'
 #Geni API
 GENI_API_VERSION = 2

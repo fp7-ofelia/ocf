@@ -53,7 +53,10 @@ class VTShell:
 			vms = child_server.getVMs(sliceName=name, projectName = authority)
 			for vm in vms:
                                 ip = self.get_ip_from_vm(vm)
-				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'vm-ip':ip, 'node-id':server.uuid, 'node-name':server.name})
+                                state = vm.state
+                                if str(vm.state) == "unknown":
+                                    state = "ongoing"
+				List.append({'vm-name':vm.name,'vm-state':state,'vm-id':vm.id, 'vm-ip':ip, 'node-id':server.uuid, 'node-name':server.name})
 			        	
 		slices['vms'] = List
 		return slices	

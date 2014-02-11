@@ -12,6 +12,7 @@ from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVS
 #from expedient.common.utils.mail import send_mail
 from django.conf import settings 
 from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
+from openflow.optin_manager.sfa.models import ExpiringComponents
 
 #XXX TEST
 from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
@@ -113,8 +114,9 @@ class OFShell:
                     if not self.check_req_switches(switch_slivers):
                         raise Exception("The Requested OF Switches on the RSpec do not match with the available OF switches of this island. Please check the datapath IDs of your Request RSpec.")
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
-                    #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
-                    ExpirationComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
+                    if expiration:
+                        #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
+                        ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
 		return 1
 
         def SliverStatus(self, slice_urn):
@@ -140,7 +142,7 @@ class OFShell:
 
         def get_raw_switches(self):
              try: 
-                 raise ""
+                 #raise ""
                  fv =  FVServerProxy.objects.all()[0]
                  switches = fv.get_switches()
              except Exception as e:
@@ -150,7 +152,7 @@ class OFShell:
 
         def get_raw_links(self):
              try:
-                 raise ""
+                 #raise ""
                  fv = FVServerProxy.objects.all()[0]  
                  links = fv.get_links()
              except Exception as e:
