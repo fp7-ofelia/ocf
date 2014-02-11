@@ -27,7 +27,16 @@
             <xs:element type="xs:string" name="name" use="required"/>
             <xs:element type="xs:integer" name="memory_mb" use="required"/>
             <xs:element type="xs:string" name="server_uuid" use="required"/>
+            <!-- The following cases should be mutually exclusive -->
+            <!-- Case A: send only template name, fill in Virtualisation AM -->
             <xs:element type="xs:string" name="template_name" use="optional"/>
+            <!-- Case B: legacy. Send configuration parameters directly -->
+            <xs:element type="xs:string" name="operating_system_type" use="optional"/>
+            <xs:element type="xs:string" name="operating_system_distribution" use="optional"/>
+            <xs:element type="xs:float" name="operating_system_version" use="optional"/>
+            <xs:element type="xs:integer" name="hard_disk_size_mb" use="optional"/>
+            <xs:element type="xs:string" name="hard_disk_setup_type" use="optional"/>
+            <xs:element type="xs:string" name="virtualisation_setup_type" use="optional"/>
         </xs:sequence>
     </xs:complexType>
 
