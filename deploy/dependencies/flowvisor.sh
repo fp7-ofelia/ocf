@@ -15,10 +15,29 @@ FLOWVISOR_RELEASE="1.4.0-1"
 flowvisor_path="/etc/flowvisor"
 flowvisor_config_file="$flowvisor_path/config.json"
 
+# Folders
+flowvisor_etc_folder="/etc/flowvisor"
+flowvisor_db_folder="/usr/share/db/flowvisor"
+flowvisor_log_folder="/var/log/flowvisor"
+
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
     warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
     exit 1
+fi
+
+# Create backup if folders already exist. This is done to avoid problems in installation
+if [[ -d $flowvisor_etc_folder ]]; then
+    warning "Folder '$flowvisor_etc_folder' present: backup to '$flowvisor_etc_folder.bak'"
+    mv $flowvisor_etc_folder $flowvisor_etc_folder.bak
+fi
+if [[ -d $flowvisor_db_folder ]]; then
+    warning "Folder '$flowvisor_db_folder' present: backup to '$flowvisor_db_folder.bak'"
+    mv $flowvisor_db_folder $flowvisor_db_folder.bak
+fi
+if [[ -d $flowvisor_log_folder ]]; then
+    warning "Folder '$flowvisor_log_folder' present: backup to '$flowvisor_log_folder.bak'"
+    mv $flowvisor_log_folder $flowvisor_log_folder.bak
 fi
 
 # Otherwise, ask for confirmation on the installation of FlowVisor
