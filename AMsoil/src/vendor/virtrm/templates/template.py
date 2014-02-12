@@ -1,12 +1,14 @@
 from sqlalchemy.orm import validates
 from utils.base import db
 from utils.mutexstore import MutexStore
-from resources.virtualmachine import VirtualMachine
-from resources.vmallocated import VMAllocated
-from resources.vtserver import VTServer
+from models.resources.virtualmachine import VirtualMachine
+from models.resources.vmallocated import VMAllocated
+from models.resources.vtserver import VTServer
 import common
 import amsoil.core.pluginmanager as pm
 import inspect
+from sqlalchemy.ext.associationproxy import association_proxy
+
 
 '''
    @author: SergioVidiella
@@ -37,7 +39,7 @@ class Template(db.Model):
     hard_disk_path = db.Column(db.String(1024), nullable=False, default="")
     
     '''Metadata'''
-    metadata = db.Column(db.String(4096), nullable=True)
+    extended_data = db.Column(db.String(4096), nullable=True)
 
     '''Deployment procedures'''
     img_file_url = db.Column(db.String(1024), nullable=True)
@@ -53,7 +55,7 @@ class Template(db.Model):
     vms = association_proxy("virtualmachine_template", "virtualmachine")
     
 
-    def __init__(name="",description="",os_type="",os_version="",os_distro="",virt_setup_type="",hd_setup_type="",hd_path="",metadata=None,img_url="", save=True):
+    def __init__(self, name="",description="",os_type="",os_version="",os_distro="",virt_setup_type="",hd_setup_type="",hd_path="",extended_data=None,img_url="", save=False):
         self.name = name
         self.description = description
         self.operating_system_type = os_type
@@ -61,8 +63,8 @@ class Template(db.Model):
         self.operating_system_distribution = os_distro
         self.virtualization_setup_type = virt_setup_type
         self.hard_disk_setup_type = hd_setup_type
-        self.hard_disk_path = hd_path
-        self.metadata = metadata
+        self.hard_disk_origin_path = hd_path
+        self.extended_data = extended_data
         self.img_file_url = img_url
         self.do_save = save
         if self.do_save:
@@ -74,7 +76,7 @@ class Template(db.Model):
             db.session.commit()
 
     def auto_save(self):
-        if self.do_save():
+        if self.do_save:
             db.session.add(self)
             db.session.commit()
 
@@ -88,7 +90,7 @@ class Template(db.Model):
     def get_do_save(self):
         return self.do_save
 
-    def get_lock_identifier(self):
+    def __get_lock_identifier(self):
         # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
 
@@ -106,39 +108,39 @@ class Template(db.Model):
     def get_description(self):
         return self.description
 
-    def set_os_type(self, type):
+    def set_operating_system_type(self, type):
         self.operating_system_type = type
         self.auto_save()
 
-    def get_os_type(self):
+    def get_operating_system_type(self):
         return self.operating_system_type
 
-    def set_os_version(self, version):
+    def set_operating_system_version(self, version):
         self.operating_system_version = version
         self.auto_save()
 
-    def get_os_version(self):
+    def get_operating_system_version(self):
         return self.operating_system_version
 
-    def set_os_distribution(self, dist):
+    def set_operating_system_distribution(self, dist):
         self.operating_system_distribution = dist
         self.auto_save()
 
-    def get_os_distribution(self):
+    def get_operating_system_distribution(self):
         return self.operating_system_distribution
 
     def get_hard_disk_setup_type(self):
-        return self.hd_setup_type
+        return self.hard_disk_setup_type
 
     def set_hard_disk_setup_type(self, hd_type):
-        self.hd_setup_type = hd_type
+        self.hard_disk_setup_type = hd_type
         self.auto_save()
 
     def get_hard_disk_origin_path(self):
-        return  self.hd_setup_type
+        return  self.hard_disk_origin_path
 
     def set_hard_disk_origin_path(self, path):
-        self.hd_origin_path = path
+        self.hard_disk_origin_path = path
         self.auto_save()
 
     def get_virtualization_setup_type(self):
@@ -155,11 +157,11 @@ class Template(db.Model):
     def get_virtualization_technology(self):
         return self.virtualization_technology
     
-    def get_raw_metadata(self):
-        return self.metadata
+    def get_extended_data(self):
+        return self.extended_data
 
-    def set_metadata(self, metadata):
-        self.metadata = metadata
+    def set_extended_data(self, extended_data):
+        self.extended_data = extended_data
         self.auto_save()
 
     def get_img_file_url(self):

@@ -9,6 +9,8 @@ from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDist
 from utils.mutexstore import MutexStore
 import amsoil.core.pluginmanager as pm
 import inspect
+from models.resources.vtserver import VTServer
+
 
 '''@author: SergioVidiella'''
 
