@@ -1,6 +1,5 @@
 from sqlalchemy.orm import validates
 from utils.base import db
-from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
 from resources.virtualmachine import VirtualMachine
 from resources.vmallocated import VMAllocated
@@ -9,7 +8,10 @@ import common
 import amsoil.core.pluginmanager as pm
 import inspect
 
-'''@author: SergioVidiella'''
+'''
+   @author: SergioVidiella
+   @author: OscarMoya
+'''
 
 class Template(db.Model):
     """Templates for the VMs disc images supported."""
@@ -22,7 +24,7 @@ class Template(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False)
-    minimum_memory = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.String(1024), nullable=True)
 
     '''OS parameters'''
     operating_system_type = db.Column(db.String(512), nullable=False, default="")
@@ -33,6 +35,12 @@ class Template(db.Model):
     virtualization_setup_type = db.Column(db.String(1024),nullable=False,default="")
     hard_disk_setup_type = db.Column(db.String(1024), nullable=False, default="")
     hard_disk_path = db.Column(db.String(1024), nullable=False, default="")
+    
+    '''Metadata'''
+    metadata = db.Column(db.String(4096), nullable=True)
+
+    '''Deployment procedures'''
+    img_file_url = db.Column(db.String(1024), nullable=True)
 
     ''' Mutex over the instance '''
     mutex = None
@@ -43,27 +51,22 @@ class Template(db.Model):
     servers = association_proxy("vtserver_templates", "vtserver")
     allocated_vms = association_proxy("virtualmachine_allocated_template", "vmallocated")
     vms = association_proxy("virtualmachine_template", "virtualmachine")
+    
 
-    @staticmethod
-    def constructor(name,minimum_memory,os_type,os_version,os_distro,virt_setup_type,hd_setup_type,hd_path,save=True):
-        self = Template()
-        try:
-            self.name = name
-            # If no minimum memory given for template, set default one
-            self.minimum_memory = minimum_memory or common.default_minimum_memory
-            self.operating_system_type = os_type
-            self.operating_system_version = os_version
-            self.operating_system_distribution = os_distro
-            self.virtualization_setup_type = virt_setup_type
-            self.hard_disk_setup_type = hd_setup_type
-            self.hard_disk_path = hd_path
-            self.do_save = save
-            if save:
-                db.session.add(self)
-                db.session.commit()
-        except Exception as e:
-            raise e
-        return self
+    def __init__(name="",description="",os_type="",os_version="",os_distro="",virt_setup_type="",hd_setup_type="",hd_path="",metadata=None,img_url="", save=True):
+        self.name = name
+        self.description = description
+        self.operating_system_type = os_type
+        self.operating_system_version = os_version
+        self.operating_system_distribution = os_distro
+        self.virtualization_setup_type = virt_setup_type
+        self.hard_disk_setup_type = hd_setup_type
+        self.hard_disk_path = hd_path
+        self.metadata = metadata
+        self.img_file_url = img_url
+        self.do_save = save
+        if self.do_save:
+            self.auto_save()
 
     def destroy(self):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
@@ -71,67 +74,20 @@ class Template(db.Model):
             db.session.commit()
 
     def auto_save(self):
-        db.session.add(self)
-        db.session.commit()
+        if self.do_save():
+            db.session.add(self)
+            db.session.commit()
 
-    '''Validators'''
-    @validates('hard_disk_setup_type')
-    def validate_hard_disk_setup_type(self, key, hd_setup_type):
-        try:
-            HDSetupTypeClass.validate_hard_disk_setup_type(hd_setup_type)
-            return hd_setup_type
-        except Exception as e:
-            raise e
-
-    @validates('virtualization_setup_type')
-    def validate_virtualization_setup_type(self, key, virt_type):
-        try:
-            VirtTypeClass.validate_virt_type(virt_type)
-            return virt_type
-        except Exception as e:
-            raise e
-
-    @validates('name')
-    def validate_name(self, key, name):
-        try:
-            validators.vm_name_validator(name)
-            return name
-        except Exception as e:
-            raise e
-
-    @validates('operating_system_type')
-    def validate_operatingsystemtype(self, key, os_type):
-        try:
-            OSTypeClass.validate_os_type(os_type)
-            return os_type
-        except Exception as e:
-            raise e
-
-    @validates('operating_system_distribution')
-    def validate_operatingsystemdistribution(self, key, os_distribution):
-        try:
-            OSDistClass.validate_os_dist(os_distribution)
-            return os_distribution
-        except Exception as e:
-            raise e
-
-    @validates('operating_system_version')
-    def validate_operatingsystemversion(self, key, os_version):
-        try:
-            OSVersionClass.validate_os_version(os_version)
-            return os_version
-        except Exception as e:
-            raise e
-
-    @validates('virtualization_technology')
-    def validate_hypervisor(self, key, virt_tech):
-        try:
-            VirtTechClass.validate_virt_tech(virt_tech)
-            return virt_tech
-        except Exception as e:
-            raise e
        
     '''Getters and Setters'''
+    
+    def set_do_save(self, boolean):
+        self.do_save = boolean
+        self.auto_save
+
+    def get_do_save(self):
+        return self.do_save
+
     def get_lock_identifier(self):
         # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
@@ -143,15 +99,14 @@ class Template(db.Model):
     def get_name(self):
         return self.name
 
-    def set_memory(self,memory):
-        self.memory = memory
+    def set_description(self, desc):
+        self.description = desc
         self.auto_save()
 
-    def get_memory(self):
-        return self.memory
+    def get_description(self):
+        return self.description
 
     def set_os_type(self, type):
-        OSTypeClass.validate_os_type(type)
         self.operating_system_type = type
         self.auto_save()
 
@@ -159,7 +114,6 @@ class Template(db.Model):
         return self.operating_system_type
 
     def set_os_version(self, version):
-        OSVersionClass.validate_os_version(version)
         self.operating_system_version = version
         self.auto_save()
 
@@ -167,7 +121,6 @@ class Template(db.Model):
         return self.operating_system_version
 
     def set_os_distribution(self, dist):
-        OSDistClass.validate_os_dist(dist)
         self.operating_system_distribution = dist
         self.auto_save()
 
@@ -178,7 +131,6 @@ class Template(db.Model):
         return self.hd_setup_type
 
     def set_hard_disk_setup_type(self, hd_type):
-        HDSetupTypeClass.validate_hard_disk_setup_type(hd_type)
         self.hd_setup_type = hd_type
         self.auto_save()
 
@@ -193,14 +145,27 @@ class Template(db.Model):
         return self.virtualization_setup_type
 
     def set_virtualization_setup_type(self,v_type):
-        VirtTypeClass.validate_virt_type(v_type)
         self.virtualization_setup_type = v_type
         self.auto_save()
 
     def set_virtualization_technology(self, virt_tech):
-        VirtTechClass.validate_virt_tech(virt_tech)
         self.virtualization_technology = virt_tech
         self.auto_save()
 
     def get_virtualization_technology(self):
         return self.virtualization_technology
+    
+    def get_raw_metadata(self):
+        return self.metadata
+
+    def set_metadata(self, metadata):
+        self.metadata = metadata
+        self.auto_save()
+
+    def get_img_file_url(self):
+        return self.img_file_url
+  
+    def set_img_file_url(self, url):
+        self.img_file_url = url
+        self.auto_save()
+
