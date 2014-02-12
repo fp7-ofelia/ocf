@@ -1,4 +1,4 @@
-from resources.macslot import MacSlot
+from models.resources.macslot import MacSlot
 from sqlalchemy.dialects.mysql import TINYINT, BIGINT
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.associationproxy import association_proxy

@@ -27,8 +27,6 @@ class VTDelegate(GENIv3DelegateBase):
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
 
-    #TODO: set the location of the schemas
-    #TODO: redo the schemas according to the fields needed
     def get_request_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         return {'vtam' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /request.xsd
@@ -39,7 +37,7 @@ class VTDelegate(GENIv3DelegateBase):
 
     def get_ad_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'vtam' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd'} # /ad.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd'} # /ad.xsd
 
     def is_single_allocatioNetworkInterfaceConnectedTon(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
@@ -54,51 +52,51 @@ class VTDelegate(GENIv3DelegateBase):
         #XXX: Check if the certificate and credentials are correct for this method
         #self.auth(client_cert, credentials, None, ('listslices',))
         root_node = self.lxml_ad_root()
-        E = self.lxml_ad_element_maker('vtam')
+        E = self.lxml_ad_element_maker('virtrm')
         servers = self._resource_manager.get_servers()
         r = E.network()
         for server in servers:
+            #TODO: Get templates associated to each server
             if int(server.get_available()) is 0 and geni_available: 
                 continue
             else:
-                n = E.node()
-                n.append(E.name(server.get_name()))
-                n.append(E.available("True" if int(server.get_available()) is 1 else "False"))
-                n.append(E.operating_system_type(server.get_os_type()))
-                n.append(E.operating_system_distribution(server.get_os_distribution()))
-                n.append(E.operating_system_version(server.get_os_version()))
-                n.append(E.virtualization_technology(server.get_virt_tech()))
-                n.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_of_cpus()))
-                n.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
-                n.append(E.memory("0" if not server.get_memory() else server.get_memory()))
-                n.append(E.hdd_space_GB("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
-                n.append(E.agent_url(server.get_agent_url()))
-                if server.get_subscribed_ip4_ranges_no_global(): 
-                    for ips in server.get_subscribed_ip4_ranges_no_global():
-                        ip = E.service(type='Range')
-                        ip.append(E.name("IpRange"))
-                        ip.append(E.start_value(ips.get_start_ip()))
-                        ip.append(E.end_value(ips.get_end_ip()))
-                        n.append(ip)
-                if server.get_subscribed_mac_ranges_no_global():
-                    for macs in server.get_subscribed_mac_ranges_no_global():
-                        mac = E.service(type="Range")
-                        mac.append(E.name("MacRange"))
-                        mac.append(E.start_value(macs.get_start_mac()))
-                        mac.append(E.end_value(macs.get_end_mac()))
-                        n.append(mac)
-                if server.get_network_interfaces():
-                    for network_interface in server.get_network_interfaces():
-                        interface = E.service(type="Network")
-                        interface.append(E.type("Interface"))
-                        interface.append(E.server_interface_name(network_interface.get_name()))
-                        interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
-                        if network_interface.get_switch_id():
-                            interface.append(E.interface_switch_id(network_interface.get_switch_id))
-                        if network_interface.get_port():
-                            interface.append(E.interface_port(str(network_interface.get_port()))) 
-                        n.append(interface)                
-                r.append(n)
+                s = E.sliver()
+                s.append(E.name(server.get_name()))
+                s.append(E.uuid(server.get_uuid()))
+                s.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_of_cpus()))
+                s.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
+                s.append(E.virtual_memory_mb("0" if not server.get_memory() else server.get_memory()))
+                s.append(E.hard_disc_space_gb("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
+                if server.get_subscribed_ip4_ranges_no_global() or server.get_subscribed_mac_ranges_no_global() or server.get_network_interfaces():
+                    n = E.network_interfaces()   
+                    if server.get_subscribed_ip4_ranges_no_global(): 
+                        for ips in server.get_subscribed_ip4_ranges_no_global():
+                            ip = E.network_interface(type='Range')
+                            ip.append(E.name("IpRange"))
+                            ip.append(E.start_value(ips.get_start_ip()))
+                            ip.append(E.end_value(ips.get_end_ip()))
+                            n.append(ip)
+                    if server.get_subscribed_mac_ranges_no_global():
+                        for macs in server.get_subscribed_mac_ranges_no_global():
+                            mac = E.network_interface(type="Range")
+                            mac.append(E.name("MacRange"))
+                            mac.append(E.start_value(macs.get_start_mac()))
+                            mac.append(E.end_value(macs.get_end_mac()))
+                            n.append(mac)
+                    if server.get_network_interfaces():
+                        for network_interface in server.get_network_interfaces():
+                            interface = E.network_interface(type="Network")
+                            interface.append(E.type("Interface"))
+                            interface.append(E.server_interface_name(network_interface.get_name()))
+                            interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
+                            if network_interface.get_switch_id():
+                                interface.append(E.interface_switch_id(network_interface.get_switch_id))
+                            if network_interface.get_port():
+                                interface.append(E.interface_port(str(network_interface.get_port()))) 
+                            n.append(interface)                
+                    s.append(n) 
+                #TODO: Add here the Templates info
+                r.append(s)
         root_node.append(r)
         return self.lxml_to_string(root_node)
     

@@ -1,7 +1,7 @@
 from controller.drivers.virt import VTDriver
-from resources.xenserver import XenServer
-from resources.xenvm import XenVM
-from resources.vtserver import VTServer
+from models.resources.xenserver import XenServer
+from models.resources.xenvm import XenVM
+from models.resources.vtserver import VTServer
 from utils.httputils import HttpUtils
 import threading
 

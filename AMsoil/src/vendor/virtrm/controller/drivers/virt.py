@@ -29,7 +29,7 @@ class VTDriver():
     
     @staticmethod
     def get_all_servers():
-        from resources.vtserver import VTServer
+        from models.resources.vtserver import VTServer
         servers = VTServer.query.all()
         logging.debug("***********************************************" + str(servers))
         servers_child = []
@@ -42,7 +42,7 @@ class VTDriver():
     
     @staticmethod
     def create_server_from_post(request, instance):
-        from resources.vtserver import VTServer
+        from models.resources.vtserver import VTServer
         controller = VTDriver.get_driver(HttpUtils.getFieldInPost(request,VTServer,"virtTech"))
         return controller.create_or_update_server_from_post(request, instance)        
 
@@ -80,7 +80,7 @@ class VTDriver():
 
     @staticmethod
     def get_server_by_id(id):
-        from resources.vtserver import VTServer
+        from models.resources.vtserver import VTServer
         try:
             return VTServer.query.get(id).get_child_object()
         except:
@@ -92,7 +92,7 @@ class VTDriver():
     
     @staticmethod
     def get_server_by_uuid(uuid):
-        from resources.vtserver import VTServer
+        from models.resources.vtserver import VTServer
         try:
             return VTServer.query.filter_by(uuid=uuid).one().get_child_object()
         except:
@@ -111,7 +111,7 @@ class VTDriver():
     
     @staticmethod    
     def get_vm_by_uuid(uuid):
-        from resources.virtualmachine import VirtualMachine
+        from models.resources.virtualmachine import VirtualMachine
         try:
             return VirtualMachine.query.filter_by(uuid=uuid).one().get_child_object()
         except:
@@ -119,7 +119,7 @@ class VTDriver():
     
     @staticmethod
     def get_vm_by_id(id):
-        from resources.virtualmachine import VirtualMachine
+        from models.resources.virtualmachine import VirtualMachine
         try:
             return VirtualMachine.query.get(id).get_child_object()
         except:
@@ -183,7 +183,7 @@ class VTDriver():
     
     @staticmethod
     def propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, action):
-        from resources.virtualmachine import VirtualMachine
+        from models.resources.virtualmachine import VirtualMachine
         vm = VirtualMachine.query.get(vm_id).get_child_object()
         rspec = XmlHelper.get_simple_action_specific_query(action, server_uuid)
         ActionController.populate_new_action_with_vm(rspec.query.provisioning.action[0], vm)

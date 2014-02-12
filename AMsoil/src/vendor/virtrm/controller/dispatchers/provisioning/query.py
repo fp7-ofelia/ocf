@@ -2,7 +2,7 @@ from communication.client.xmlrpc import XmlRpcClient
 from controller.actions.action import ActionController
 from controller.drivers.virt import VTDriver
 from controller.policies.ruletablemanager import RuleTableManager
-from utils.action import Action
+from models.common.action import Action
 from utils.base import db
 from utils.urlutils import UrlUtils
 from utils.xmlhelper import XmlHelper

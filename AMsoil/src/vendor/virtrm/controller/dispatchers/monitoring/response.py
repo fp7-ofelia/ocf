@@ -1,4 +1,4 @@
-from utils.action import Action
+from models.common.action import Action
 from utils.xmlhelper import XmlHelper
 import logging
 
@@ -17,7 +17,7 @@ class MonitoringResponseDispatcher():
                 if action.id == "callback":
                     logging.debug('---------------------->Libvirt Monitoring!!!')
                     from controller.monitoring.vm import VMMonitor
-                    from resources.vtserver import VTServer
+                    from models.resources.vtserver import VTServer
                     print '------>UUID',action.server.virtual_machines[0].uuid
                     logging.debug('------>STATUS',action.server.virtual_machines[0].status)
                     VMMonitor.process_update_vms_list_from_callback(action.server.virtual_machines[0].uuid, action.server.virtual_machines[0].status, rspec)
@@ -34,7 +34,7 @@ class MonitoringResponseDispatcher():
                 action_model.set_status(Action.ONGOING_STATUS)
                 return
             elif action.status == "SUCCESS":
-                from resources.vtserver import VTServer
+                from models.resources.vtserver import VTServer
                 from controller.monitoring.vm import VMMonitor
                 logging.debug("----------------------->SUCCESS")
                 server = VTServer.query.filter_by(uuid=action_model.get_object_uuid())

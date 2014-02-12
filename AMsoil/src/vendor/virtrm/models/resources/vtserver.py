@@ -1,6 +1,6 @@
-from interfaces.networkinterface import NetworkInterface
-from ranges.ip4range import Ip4Range
-from ranges.macrange import MacRange
+from models.interfaces.networkinterface import NetworkInterface
+from models.ranges.ip4range import Ip4Range
+from models.ranges.macrange import MacRange
 from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import TINYINT, DOUBLE, VARCHAR
 from sqlalchemy.ext.associationproxy import association_proxy

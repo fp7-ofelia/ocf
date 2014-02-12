@@ -1,6 +1,6 @@
 from controller.actions.action import ActionController
 from controller.drivers.virt import VTDriver
-from resources.resourceshash import ResourcesHash
+from models.resources.resourceshash import ResourcesHash
 from utils.base import db
 from utils.xmlhelper import XmlHelper
 import xmlrpclib, threading, logging, copy

@@ -1,5 +1,5 @@
-from ranges.macrange import MacRange
-from resources.vtserver import VTServer
+from models.ranges.macrange import MacRange
+from models.resources.vtserver import VTServer
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 

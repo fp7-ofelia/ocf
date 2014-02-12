@@ -1,5 +1,5 @@
-from resources.xenserver import Xenserver
-from resources.xenvm import XenVM
+from models.resources.xenserver import XenServer
+from models.resources.xenvm import XenVM
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 

@@ -1,4 +1,4 @@
-from utils.action import Action
+from models.common.action import Action
 from utils.base import db
 from utils.xmlhelper import XmlHelper
 import uuid, copy
@@ -46,7 +46,7 @@ class ActionController():
     
     @staticmethod
     def populate_networking_params(action_ifaces, vm):
-        from interfaces.networkinterface import NetworkInterface
+        from models.interfaces.networkinterface import NetworkInterface
         from sqlalchemy import desc
         logging.debug("********************************* 1")
         base_iface = copy.deepcopy(action_ifaces[0])

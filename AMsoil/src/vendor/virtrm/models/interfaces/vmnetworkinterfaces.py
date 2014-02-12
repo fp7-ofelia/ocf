@@ -1,5 +1,5 @@
-from interfaces.networkinterface import NetworkInterface
-from resources.virtualmachine import VirtualMachine
+from models.interfaces.networkinterface import NetworkInterface
+from models.resources.virtualmachine import VirtualMachine
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 

@@ -1,5 +1,5 @@
-from ranges.ip4range import Ip4Range
-from resources.ip4slot import Ip4Slot
+from models.ranges.ip4range import Ip4Range
+from models.resources.ip4slot import Ip4Slot
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 

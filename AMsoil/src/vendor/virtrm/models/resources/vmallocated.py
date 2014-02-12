@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
+from models.common.expires import Expires
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
-from utils.expires import Expires
 from utils.mutexstore import MutexStore
 import amsoil.core.pluginmanager as pm
 import inspect
@@ -33,16 +33,8 @@ class VMAllocated(db.Model):
     server_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
     server = db.relationship("VTServer", backref='allocated_vms')
         
-    '''OS parameters'''
-    operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
-    operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False, default="")
-    operating_system_distribution = db.Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
-    
     '''Virtualization parameteres'''
-    virtualization_setup_type = db.Column("virtualizationSetupType",db.String(1024),nullable=False,default="")
-    hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
-    hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
-    hypervisor = db.Column(db.String(512), nullable=False, default="xen")
+    virtualization_technology = db.Column(db.String(512), nullable=False, default="xen")
 
     '''Allocation expiration time'''
     expires_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'expires.id'), nullable=False)
@@ -56,7 +48,7 @@ class VMAllocated(db.Model):
     do_save = True
 
     @staticmethod
-    def constructor(name,project_id,slice_id,slice_name,projectname,server,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,hd_setup_type,hd_origin_path,virt_setup_type,hypervisor,expires,save=True):
+    def constructor(name,project_id,slice_id,slice_name,project_name,server,memory,disc_space_gb,number_of_cpus,virt_tech,expires,save=True):
         self = VMAllocated()
         try:
             self.name = name 
@@ -64,16 +56,10 @@ class VMAllocated(db.Model):
             self.slice_id = slice_id
             self.slice_name = slice_name
             self.project_name = project_name
-            self.operating_system_type = os_type
-            self.operating_system_version = os_version
-            self.operating_system_distribution = os_dist
             self.memory = memory
             self.disc_space_gb = disc_space_gb
             self.number_of_cpus = number_of_cpus
-            self.hd_setup_type = hd_setup_type
-            self.hd_origin_path = hd_origin_path
-            self.virtualization_setup_type = virt_setup_type
-            self.hypervisor = hypervisor
+            self.virtualization_technology = virt_tech
             self.server = server
             self.expires.append(expires)
             self.do_save = save
@@ -97,23 +83,6 @@ class VMAllocated(db.Model):
             db.session.delete(self)
             db.session.commit()
     
-    '''Validators'''
-    @validates('hd_setup_type')
-    def validate_hd_setup_type(self, key, hd_setup_type):
-        try:
-            HDSetupTypeClass.validate_hd_setup_type(hd_setup_type)
-            return hd_setup_type
-        except Exception as e:
-            raise e
-    
-    @validates('virtualization_setup_type')
-    def validate_virtualization_setup_type(self, key, virt_type):
-        try:
-            VirtTypeClass.validate_virt_type(virt_type)
-            return virt_type
-        except Exception as e:
-            raise e
-    
     @validates('name')
     def validate_name(self, key, name):
         try:
@@ -122,32 +91,8 @@ class VMAllocated(db.Model):
         except Exception as e:
             raise e
     
-    @validates('operating_system_type')
-    def validate_operatingsystemtype(self, key, os_type):
-        try:
-            OSTypeClass.validate_os_type(os_type)
-            return os_type
-        except Exception as e:
-            raise e
-    
-    @validates('operating_system_distribution')
-    def validate_operatingsystemdistribution(self, key, os_distribution):
-        try:
-            OSDistClass.validate_os_dist(os_distribution)
-            return os_distribution
-        except Exception as e:
-            raise e
-    
-    @validates('operating_system_version')
-    def validate_operatingsystemversion(self, key, os_version):
-        try:
-            OSVersionClass.validate_os_version(os_version)
-            return os_version
-        except Exception as e:
-            raise e
-    
-    @validates('hypervisor')
-    def validate_hypervisor(self, key, virt_tech):
+    @validates('virtualization_technology')
+    def validate_virtualization_technology(self, key, virt_tech):
         try:
             VirtTechClass.validate_virt_tech(virt_tech)
             return virt_tech
@@ -210,53 +155,6 @@ class VMAllocated(db.Model):
     def get_disc_space_gb(self):
         return self.disc_space_gb
     
-    def set_os_type(self, type):
-        OSTypeClass.validate_os_type(type)
-        self.operating_system_type = type
-        self.auto_save()
-    
-    def get_os_type(self):
-        return self.operating_system_type
-    
-    def set_os_version(self, version):
-        OSVersionClass.validate_os_version(version)
-        self.operating_system_version = version
-        self.auto_save()
-    
-    def get_os_version(self):
-        return self.operating_system_version
-    
-    def set_os_distribution(self, dist):
-        OSDistClass.validate_os_dist(dist)
-        self.operating_system_distribution = dist
-        self.auto_save()
-    
-    def get_os_distribution(self):
-        return self.operating_system_distribution
-    
-    def get_hd_setup_type(self):
-        return self.hd_setup_type
-    
-    def set_hd_setup_type(self, hd_type):
-        HDSetupTypeClass.validate_hd_setup_type(hd_type)
-        self.hd_setup_type = hd_type
-        self.auto_save()
-    
-    def get_hd_origin_path(self):
-        return  self.hd_setup_type
-    
-    def set_hd_origin_path(self, path):
-        self.hd_origin_path = path
-        self.auto_save()
-    
-    def get_virtualization_setup_type(self):
-        return self.virtualization_setup_type
-    
-    def set_virtualization_setup_type(self,v_type):
-        VirtTypeClass.validate_virt_type(v_type)
-        self.virtualization_setup_type = v_type
-        self.auto_save()
-    
     def set_expiration(self, expires):
         self.expires.append(expires)
         sel.auto_save()
@@ -264,15 +162,15 @@ class VMAllocated(db.Model):
     def get_expiration(self):
         return self.expires.first().expires
     
-    def set_hypervisor(self, hypervisor):
-        if hypervisor not in __possible_virt_technologies:
+    def set_virt_tech(self, virt_tech):
+        if virt_tech not in __possible_virt_technologies:
             raise KeyError, "Invalid virtualization technology"
         else:
-            self.hypervisor = hypervisor
+            self.virtualization_technology = virt_tech
             self.auto_save()
     
-    def get_hypervisor(self):
-        return self.hypervisor   
+    def get_virt_tech(self):
+        return self.virtualization_technology
     
     def get_server(self): 
         return self.server

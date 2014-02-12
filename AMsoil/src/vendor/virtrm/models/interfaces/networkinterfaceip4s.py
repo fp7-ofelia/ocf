@@ -1,5 +1,5 @@
-from interfaces.networkinterface import NetworkInterface
-from resources.ip4slot import Ip4Slot
+from models.interfaces.networkinterface import NetworkInterface
+from models.resources.ip4slot import Ip4Slot
 from utils.base import db
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm

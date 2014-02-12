@@ -1,5 +1,5 @@
-from ranges.ip4range import Ip4Range
-from resources.vtserver import VTServer
+from models.ranges.ip4range import Ip4Range
+from models.resources.vtserver import VTServer
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 
@@ -13,7 +13,7 @@ class VTServerIpRange(db.Model):
     __tablename__ = table_prefix + 'vtserver_subscribedIp4Ranges'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'vtserver.id'), nulable=False)
+    vtserver_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
     ip4range_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
 
     vtserver = db.relationship("VTServer", backref="vtserver_ip4_range")

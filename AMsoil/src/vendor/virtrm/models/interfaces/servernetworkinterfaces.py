@@ -1,5 +1,5 @@
-from interfaces.networkinterface import NetworkInterface
-from resources.vtserver import VTServer
+from models.interfaces.networkinterface import NetworkInterface
+from models.resources.vtserver import VTServer
 from utils.base import db
 import amsoil.core.pluginmanager as pm
 
