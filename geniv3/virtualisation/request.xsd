@@ -1,3 +1,4 @@
+<!-- XML schema validator: http://schneegans.de/sv/ -->
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:element name="rspec" type="RSpecVirtualisation"/>
@@ -6,7 +7,7 @@
         <xs:sequence>
             <xs:element name="node" type="Slice"/>
         </xs:sequence>
-        <xs:attribute name="type" type="RspecType">
+        <xs:attribute name="type" type="RspecType"/>
         <xs:attribute type="xs:string" name="virtualisation"/>
     </xs:complexType>
 
@@ -20,24 +21,38 @@
         <xs:sequence>
             <xs:element name="sliver" type="VM"/>
         </xs:sequence>
-    <xs:complexType>
+    </xs:complexType>
 
     <xs:complexType name="VM">
-        <xs:sequence>
-            <xs:element type="xs:string" name="name" use="required"/>
-            <xs:element type="xs:integer" name="memory_mb" use="required"/>
-            <xs:element type="xs:string" name="server_uuid" use="required"/>
-            <!-- The following cases should be mutually exclusive -->
+        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
+        <xs:all>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:integer" name="memory_mb"/>
+            <xs:element type="xs:string" name="server_uuid"/>
+            <xs:element name="template_definition" type="TemplateDefinition"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="TemplateDefinition">
+        <!-- Following cases are mutually exclusive -->
+        <xs:choice>
             <!-- Case A: send only template name, fill in Virtualisation AM -->
-            <xs:element type="xs:string" name="template_name" use="optional"/>
-            <!-- Case B: legacy. Send configuration parameters directly -->
-            <xs:element type="xs:string" name="operating_system_type" use="optional"/>
-            <xs:element type="xs:string" name="operating_system_distribution" use="optional"/>
-            <xs:element type="xs:float" name="operating_system_version" use="optional"/>
-            <xs:element type="xs:integer" name="hard_disk_size_mb" use="optional"/>
-            <xs:element type="xs:string" name="hard_disk_setup_type" use="optional"/>
-            <xs:element type="xs:string" name="virtualisation_setup_type" use="optional"/>
-        </xs:sequence>
+            <xs:element type="xs:string" name="template_name" minOccurs="0"/>
+            <!-- Case B: legacy. Send template parameters directly -->
+            <xs:element name="template_parameters" type="TemplateParameters"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="TemplateParameters">
+        <xs:all>
+            <xs:element type="xs:string" name="operating_system_type" minOccurs="0"/>
+            <xs:element type="xs:string" name="operating_system_distribution" minOccurs="0"/>
+            <xs:element type="xs:float" name="operating_system_version" minOccurs="0"/>
+            <xs:element type="xs:integer" name="hard_disk_size_mb" minOccurs="0"/>
+            <xs:element type="xs:string" name="hard_disk_setup_type" minOccurs="0"/>
+            <xs:element type="xs:string" name="virtualisation_setup_type" minOccurs="0"/>
+        </xs:all>
     </xs:complexType>
 
 </xs:schema>
