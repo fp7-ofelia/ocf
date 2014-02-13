@@ -1,3 +1,4 @@
+<!-- XML schema validator: http://schneegans.de/sv/ -->
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:element name="rspec" type="RSpecVirtualisation"/>
@@ -6,7 +7,7 @@
         <xs:sequence>
             <xs:element name="node" type="Slice"/>
         </xs:sequence>
-        <xs:attribute name="type" type="RSpecType">
+        <xs:attribute name="type" type="RSpecType"/>
         <xs:attribute type="xs:string" name="virtualisation"/>
     </xs:complexType>
 
@@ -20,31 +21,35 @@
         <xs:sequence>
             <xs:element name="sliver" type="VM"/>
         </xs:sequence>
-    <xs:complexType>
+    </xs:complexType>
 
     <xs:complexType name="VM">
-        <xs:sequence>
-            <xs:element type="xs:string" name="name" use="required"/>
-            <xs:element type="xs:integer" name="memory_mb" use="required"/>
-            <xs:element type="xs:string" name="server_name" use="required"/>
-            <xs:element type="xs:string" name="server_uuid" use="required"/>
-            <xs:element type="xs:dateTime" name="expiration_date" use="optional"/>
-            <xs:element type="xs:dateTime" name="generation_date" use="optional"/>
-            <xs:element type="xs:string" name="virtualisation_technology" use="required"/>
-            <xs:element name="disc_image" type="DiscImageTemplate" use="required"/>
-        </xs:sequence>
+        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
+        <xs:all>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:integer" name="memory_mb"/>
+            <xs:element type="xs:string" name="server_name"/>
+            <xs:element type="xs:string" name="server_uuid"/>
+            <xs:element type="xs:dateTime" name="expiration_date" minOccurs="0"/>
+            <xs:element type="xs:dateTime" name="generation_date" minOccurs="0"/>
+            <xs:element type="xs:string" name="virtualisation_technology"/>
+            <xs:element name="disc_image" type="DiscImageTemplate"/>
+        </xs:all>
     </xs:complexType>
 
     <xs:complexType name="DiscImageTemplate">
-        <xs:sequence>
-            <xs:element type="xs:string" name="name" use="required"/>
-            <xs:element type="xs:integer" name="minimum_memory" use="optional"/>
-            <xs:element type="xs:string" name="operating_system_type" use="required"/>
-            <xs:element type="xs:float" name="operating_system_version" use="required"/>
-            <xs:element type="xs:string" name="operating_system_distribution" use="required"/>
-            <xs:element type="xs:string" name="hard_disk_setup_type" use="required"/>
-            <xs:element type="xs:string" name="virtualisation_setup_type" use="required"/>
-        </xs:sequence>
+        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
+        <xs:all>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:integer" name="minimum_memory" minOccurs="0"/>
+            <xs:element type="xs:string" name="operating_system_type"/>
+            <xs:element type="xs:float" name="operating_system_version"/>
+            <xs:element type="xs:string" name="operating_system_distribution"/>
+            <xs:element type="xs:string" name="hard_disk_setup_type"/>
+            <xs:element type="xs:string" name="virtualisation_setup_type"/>
+        </xs:all>
     </xs:complexType>
 
 </xs:schema>
