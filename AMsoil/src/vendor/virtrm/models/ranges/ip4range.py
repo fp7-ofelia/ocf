@@ -18,6 +18,7 @@ class Ip4Range(db.Model):
 
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'ip4range'
+    __table_args__ = {'extend_existing':True}
 
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
     # Range name

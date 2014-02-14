@@ -1,6 +1,9 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
+import amsoil.core.log
 import amsoil.core.pluginmanager as pm
+
+logging=amsoil.core.log.getLogger('Base')
 
 config = pm.getService("config")
 # Create  the Flask app
@@ -20,4 +23,13 @@ def set_up():
         db.create_all()
 
 def import_models():
-    from models import *
+    import pkgutil
+    import models as package
+
+    for importer, modname, ispkg in pkgutil.walk_packages(path=package.__path__, 
+                                                          prefix=package.__name__+'.', 
+                                                          onerror=lambda x:None
+                                                         ):
+        if not ispkg:
+            __import__(modname)
+            logging.debug("************** imported **************" + modname)

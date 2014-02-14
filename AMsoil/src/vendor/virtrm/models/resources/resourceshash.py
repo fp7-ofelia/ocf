@@ -9,6 +9,7 @@ class ResourcesHash(db.Model):
 
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'resourceshash'
+    __table_args__ = {'extend_existing':True}
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     hash_value = db.Column("hashValue",db.String(1024), nullable=False)

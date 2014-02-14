@@ -15,6 +15,7 @@ class VirtualMachine(db.Model):
 
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine'
+    __table_args__ = {'extend_existing':True}
 
     __child_classes = (
             'XenVM',
