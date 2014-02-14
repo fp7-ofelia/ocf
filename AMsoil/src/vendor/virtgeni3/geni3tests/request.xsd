@@ -1,0 +1,59 @@
+<!-- XSD and XML validator: http://www.utilities-online.info/xsdvalidation/ -->
+<!-- XSD validator: http://schneegans.de/sv/ -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="rspec" type="RSpecVirtualisation"/>
+
+    <xs:complexType name="RSpecVirtualisation">
+        <xs:sequence>
+            <xs:element name="node" type="Slice"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="RspecType"/>
+        <xs:attribute name="virtualisation" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:simpleType name="RspecType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="request"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Slice">
+        <xs:sequence>
+            <xs:element name="sliver" type="VM" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VM">
+        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
+        <xs:all>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:integer" name="memory_mb"/>
+            <xs:element type="xs:string" name="server_uuid"/>
+            <xs:element name="template_definition" type="TemplateDefinition"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="TemplateDefinition">
+        <!-- Following cases are mutually exclusive -->
+        <xs:choice>
+            <!-- Case A: send only template name, fill in Virtualisation AM -->
+            <xs:element type="xs:string" name="template_name" minOccurs="0"/>
+            <!-- Case B: legacy. Send template parameters directly -->
+            <xs:element name="template_parameters" type="TemplateParameters"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="TemplateParameters">
+        <xs:all>
+            <xs:element type="xs:string" name="operating_system_type" minOccurs="0"/>
+            <xs:element type="xs:string" name="operating_system_distribution" minOccurs="0"/>
+            <xs:element type="xs:float" name="operating_system_version" minOccurs="0"/>
+            <xs:element type="xs:integer" name="hard_disk_size_mb" minOccurs="0"/>
+            <xs:element type="xs:string" name="hard_disk_setup_type" minOccurs="0"/>
+            <xs:element type="xs:string" name="virtualisation_setup_type" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+</xs:schema>

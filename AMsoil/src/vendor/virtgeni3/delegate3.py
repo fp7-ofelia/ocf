@@ -1,29 +1,31 @@
 import time 
 import amsoil.core.pluginmanager as pm
 import xml.etree.ElementTree as ET
-from util.xrn import *
+from geni3util.translator import Translator
+from geni3util.xrn import *
 
 import amsoil.core.log
 
-logging=amsoil.core.log.getLogger('VTDelegate')
+logging=amsoil.core.log.getLogger('VTDelegate3')
 
 
-'''@author: SergioVidiella'''
+'''@author: SergioVidiella, CarolinaFernandez'''
 
 
 GENIv3DelegateBase = pm.getService('geniv3delegatebase')
 geniv3_exception = pm.getService('geniv3exceptions')
 virt_exception = pm.getService('virtexceptions')
 
-class VTDelegate(GENIv3DelegateBase):
+class VTDelegate3(GENIv3DelegateBase):
     """
         A Delegate for the VT AM 
     """
 
     URN_PREFIX = 'urn:publicid:IDN+geni:gpo:gcf'
+    ACCEPTED_TAGS_REQUEST = ["name", "project-name", "server-name", "operating-system-type", "operating-system-version", "operating-system-distribution", "virtualization-type", "hd-setup-type", "hd-size-mb", "hd-origin-path", "hypervisor", "virtualization-setup-type", "memory-mb"]
 
     def __init__(self):
-        super(VTDelegate, self).__init__()
+        super(VTDelegate3, self).__init__()
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
 
@@ -116,6 +118,52 @@ class VTDelegate(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
+        dictionary = Translator.xml2json(rspec)
+        # TODO CONTINUE FROM HERE
+        logging.debug("RSpec dictionary: %s" % str(dictionary))
+        vms = []
+        # Retrieve VMs from allocation request
+        requested_vms = list()
+        slivers = dictionary["rspec"]["node"]
+        for vm in slivers.values():
+            # TODO GET THE AUTHORITY FROM SOMEWHERE
+            #vm["project_name"] = get_authority(slice_urn)
+            requested_vms.append(vm)
+        logging.debug("Requested VMs: %s" % str(requested_vms))
+        
+        if self.urn_type(slice_urn) == 'slice': 
+            try:
+                allocated_vms = dict()
+                for requested_vm in requested_vms:
+                    # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
+                    allocated_vm, server = self._resource_manager.allocate_vm(requested_vm, slice_name, end_time)
+                    if server.name not in allocated_vms:
+                        allocated_vms[server.name] = list()
+                    allocated_vms[server.name].append(allocated_vm)
+            except virt_exception.VTAMVmNameAlreadyTaken as e:
+                self.undo_action("allocate", allocated_vms)            
+                raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
+            except virt_exception.VTAMServerNotFound as e:
+                self.undo_action("allocate", allocated_vms)
+                raise geniv3_exception.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
+            except virt_exception.VTMaxVMDurationExceeded as e:
+                self.undo_action("allocate", allocated_vms)
+                raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
+        else:
+            raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
+        rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
+        slivers = list()
+        for key in allocated_vms.keys():
+            for allocated_vm in allocated_vms[key]:
+                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.project_name + '.' + allocated_vm.slice_name + '.' + allocated_vm.name
+                vm_urn = hrn_to_urn(vm_hrn, 'sliver')
+                slivers.append(self._get_sliver_status_hash({'name':vm_urn, 'expires':allocated_vm["expires"], 'status':"allocated"}, True))
+        return rspecs, slivers
+
+    def allocate_old(self, slice_urn, client_cert, credentials, rspec, end_time=None):
+        """Documentation see [geniv3rpc] GENIv3DelegateBase."""
+        slice_hrn, hrn_type = urn_to_hrn(slice_urn)
+        slice_name = get_leaf(slice_hrn)
         requested_vms = list()
         rspec_root = self.lxml_parse_rspec(rspec)
 
@@ -127,12 +175,24 @@ class VTDelegate(GENIv3DelegateBase):
         #    if not self.lxml_elm_has_request_prefix(elm, 'vtam'):
         #        raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (elm,))
         #    if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'node')):
-       #         vms.append(self.__extract_node_from_rspec(elm))
-                # raise geni_ex.GENIv3GeneralError('IP ranges in RSpecs are not supported yet.') # TODO
+        #        vms.append(self.__extract_node_from_rspec(elm))
+        #        raise geni_ex.GENIv3GeneralError('IP ranges in RSpecs are not supported yet.') # TODO
         #    else:
-         #       raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
+        #        raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
         # XXX End
 
+        # XXX TODO -> USE LXML.FIND
+        slivers = rspec_root.xpath("//rspec//node//sliver")
+        if not slivers:
+            raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (rspec_root,))
+        # PARSER
+        vm = dict()
+        for elm in slivers.getchildren():
+            if elm.tag not in self.ACCEPTED_TAGS_REQUEST:
+                raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
+            vm[elm.tag] = elm.text.strip()
+        # END TEST
+        
         for nodes in rspec_root.getchildren():
             if not nodes.tag == "node":
                 raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))        

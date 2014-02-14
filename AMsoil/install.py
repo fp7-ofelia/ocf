@@ -12,3 +12,5 @@ from base import set_up
 
 print set_up
 #set_up()
+
+pip install xmltodict
