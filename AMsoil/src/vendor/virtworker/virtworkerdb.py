@@ -8,11 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import amsoil.core.pluginmanager as pm
 import amsoil.core.log
-logger=amsoil.core.log.getLogger('workerflask')
+logger=amsoil.core.log.getLogger('virtworker')
 
 from amsoil.config import expand_amsoil_path
 
-WORKERDB_PATH = expand_amsoil_path(pm.getService('config').get('workerflask.dbpath'))
+WORKERDB_PATH = expand_amsoil_path(pm.getService('config').get('virtworker.dbpath'))
 WORKERDB_ENGINE = "sqlite:///%s" % (WORKERDB_PATH,)
 
 # initialize sqlalchemy

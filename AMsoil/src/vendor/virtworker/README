@@ -1,0 +1,7 @@
+Replaces "worker" plugin to extend object 'db_session' object with an attribute needed for Flask
+
+Files modified: virtworkerdb.py
+Lines modified: 22-23
+Content added:
+    # NEW: adding "_model_changes" to be able to use flask-sqlalchemy models
+    db_session_factory._model_changes = {}
