@@ -1,0 +1,9 @@
+{
+  "name" : "Configuration Provider wrapper",
+  "author" : ["Tom Rothe", "Carolina Fernandez"],
+  "author-email" : ["tom.rothe@eict.de", "carolina.fernandez@i2cat.net"],
+  "version" : 1,
+  "implements" : ["config", "configexceptions"],
+  "loads-after" : [],
+  "requires" : []
+}

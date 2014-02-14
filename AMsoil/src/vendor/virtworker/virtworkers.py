@@ -6,9 +6,9 @@ from amsoil.core import pluginmanager as pm
 from amsoil.core import serviceinterface
 from amsoil.core.exception import CoreException
 import amsoil.core.log
-logger=amsoil.core.log.getLogger('workerflask')
+logger=amsoil.core.log.getLogger('virtworker')
 
-import workerflaskdb as workerdb
+import virtworkerdb as workerdb
 
 class WorkerServer(object):
     SLEEP_BETWEEN_CHECKS = 1 # sec

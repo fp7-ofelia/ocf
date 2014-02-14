@@ -4,6 +4,6 @@
   "author-email" : "carolina.fernandez@i2cat.net",
   "version" : 1,
   "implements" : [],
-  "loads-after" : ["virtguihandler", "virtrm", "virtadminrm", "virtexceptions", "workerflask", "config"],
+  "loads-after" : ["virtguihandler", "virtrm", "virtadminrm", "virtexceptions", "virtworker", "config"],
   "requires" : []
 }

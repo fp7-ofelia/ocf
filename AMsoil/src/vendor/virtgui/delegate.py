@@ -24,7 +24,7 @@ logging=amsoil.core.log.getLogger('virtguihandler')
 
 class VirtGUI(object):
     config = pm.getService("config")
-    #worker = pm.getService("workerflask")
+    #worker = pm.getService("virtworker")
     # FIXME or REMOVE: circular dependency
     #virtrm = pm.getService("virtrm")
     #from virtrm.controller.drivers.virt import VTDriver
