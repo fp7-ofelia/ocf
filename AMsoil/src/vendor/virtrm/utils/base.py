@@ -42,3 +42,7 @@ def import_models():
             except:
                 __import__(modname)
                 logging.debug("************** imported **************" + modname)
+
+def drop_table():
+    with app.app_context():
+        db.drop_all()

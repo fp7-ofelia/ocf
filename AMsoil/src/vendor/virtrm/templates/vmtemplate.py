@@ -1,4 +1,4 @@
-from resources.virtualmachine import VirtualMachine
+from models.resources.virtualmachine import VirtualMachine
 from templates.template import Template
 from utils.base import db
 import amsoil.core.pluginmanager as pm
