@@ -9,7 +9,7 @@ pm.registerService("config", amconfigdb.ConfigDB())
 pm.registerService("configexceptions", amconfigdbexceptions)
 from templates.template import Template
 import unittest
-
+from utils.base import db
 
 class TemplateGettersTest(unittest.TestCase):
 
@@ -77,11 +77,11 @@ class TemplateGettersTest(unittest.TestCase):
         template.operating_system_version = param
         self.assertEquals(param, template.get_operating_system_version())
 
-    def test_get_virtualization_setup_type(self):
+    def test_get_virtualization_type(self):
         template = self.given_this_template()
-        param = "get_virtualization_setup_type"
-        template.virtualization_setup_type = param
-        self.assertEquals(param, template.get_virtualization_setup_type())
+        param = "get_virtualization_type"
+        template.virtualization_type = param
+        self.assertEquals(param, template.get_virtualization_type())
 
     def test_get_virtualization_technology(self):
         template = self.given_this_template()

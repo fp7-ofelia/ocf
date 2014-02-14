@@ -8,11 +8,12 @@ class TemplateManager():
     #
     # Direct operations over templates
     #
+
     def list_template_info(self, template_uuid):
         return db.session.query(Template).filter(uuid=template_uuid)
     
     def create_template(self, template_dictionary):
-        db.session.query(Template).filter(uuid=template_uuid).constructor(template_dictionary)
+        return Template(**template_dictionary)
     
     def edit_template(self, template_dictionary):
         if template_dictionary['uuid']:

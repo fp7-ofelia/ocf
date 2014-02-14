@@ -1,4 +1,4 @@
-from resources.vmallocated import VMAllocated
+from models.resources.vmallocated import VMAllocated
 from templates.template import Template
 from utils.base import db
 import amsoil.core.pluginmanager as pm

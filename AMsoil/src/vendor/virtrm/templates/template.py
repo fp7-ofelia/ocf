@@ -9,6 +9,7 @@ import amsoil.core.pluginmanager as pm
 import inspect
 from sqlalchemy.ext.associationproxy import association_proxy
 from templates.extendeddata import ExtendedData
+import uuid
 
 '''
    @author: SergioVidiella
@@ -34,9 +35,12 @@ class Template(db.Model):
     operating_system_distribution = db.Column(db.String(512), nullable=False, default="")
 
     '''Virtualization parameteres'''
-    virtualization_setup_type = db.Column(db.String(1024),nullable=False,default="")
+    virtualization_type = db.Column(db.String(128),nullable=False,default="")
+    virtualization_technology = db.Column(db.String(128),nullable=False,default="")
+    
+    ''' HD '''
     hard_disk_setup_type = db.Column(db.String(1024), nullable=False, default="")
-    hard_disk_path = db.Column(db.String(1024), nullable=False, default="")
+    hard_disk_origin_path = db.Column(db.String(1024), nullable=False, default="")
     
     '''Metadata'''
     extended_data = db.Column(db.String(4096), nullable=True)
@@ -55,25 +59,26 @@ class Template(db.Model):
     vms = association_proxy("virtualmachine_template", "virtualmachine")
     
 
-    def __init__(self, name="",description="",os_type="",os_version="",os_distro="",virt_setup_type="",hd_setup_type="",hd_path="",extended_data=None,img_url="", save=False):
+    def __init__(self,name="",description="",os_type="",os_version="",os_distro="",virt_type="",hd_setup_type="",hd_path="",extended_data=None,img_url="",virt_tech="" ,save=False):
         self.name = name
         self.description = description
         self.operating_system_type = os_type
         self.operating_system_version = os_version
         self.operating_system_distribution = os_distro
-        self.virtualization_setup_type = virt_setup_type
+        self.virtualization_type = virt_type
         self.hard_disk_setup_type = hd_setup_type
         self.hard_disk_origin_path = hd_path
         self.extended_data = extended_data
         self.img_file_url = img_url
+        self.virtualization_technology = virt_tech
         self.do_save = save
+        self.uuid = str(uuid.uuid4())
         self.extended_data_manager = ExtendedData()
         if extended_data:
            try:
                self.extended_data_manager = self.extended_data_manager.deserialize(extended_data)
            except:
                pass
-  
         if self.do_save:
             self.auto_save()
 
@@ -102,6 +107,9 @@ class Template(db.Model):
             self.auto_save()
        
     '''Getters and Setters'''
+
+    def get_uuid(self):
+        return self.uuid
     
     def set_do_save(self, boolean):
         self.do_save = boolean
@@ -163,11 +171,11 @@ class Template(db.Model):
         self.hard_disk_origin_path = path
         self.auto_save()
 
-    def get_virtualization_setup_type(self):
-        return self.virtualization_setup_type
+    def get_virtualization_type(self):
+        return self.virtualization_type
 
-    def set_virtualization_setup_type(self,v_type):
-        self.virtualization_setup_type = v_type
+    def set_virtualization_type(self,v_type):
+        self.virtualization_type = v_type
         self.auto_save()
 
     def set_virtualization_technology(self, virt_tech):
@@ -195,3 +203,11 @@ class Template(db.Model):
         self.img_file_url = url
         self.auto_save()
 
+    def __eq__(self,obj):
+        attrs = dir(self)
+        for attr in attrs:
+            if attr.startswith("get_"):
+                if not getattr(self, attr) == getattr(obj, attr):
+                    return False
+        return True 
+            

@@ -77,11 +77,11 @@ class TemplateSettersTest(unittest.TestCase):
         template.set_operating_system_version(param)
         self.assertEquals(param, template.operating_system_version)
 
-    def test_set_virtualization_setup_type(self):
+    def test_set_virtualization_type(self):
         template = self.given_this_template()
-        param = "set_virtualization_setup_type"
-        template.set_virtualization_setup_type(param)
-        self.assertEquals(param, template.virtualization_setup_type)
+        param = "set_virtualization_type"
+        template.set_virtualization_type(param)
+        self.assertEquals(param, template.virtualization_type)
 
     def test_set_virtualization_technology(self):
         template = self.given_this_template()

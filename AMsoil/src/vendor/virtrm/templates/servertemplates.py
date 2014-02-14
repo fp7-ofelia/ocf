@@ -1,4 +1,4 @@
-from resources.vtserver import VTServer
+from models.resources.vtserver import VTServer
 from templates.template import Template
 from utils.base import db
 import amsoil.core.pluginmanager as pm
