@@ -1,29 +1,16 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
-from models.common.action import Action
 from models.common.expires import Expires
 from models.interfaces.networkinterface import NetworkInterface
-from models.interfaces.networkinterfaceconnectedto import NetworkInterfaceConnectedTo
-from models.interfaces.networkinterfaceip4s import NetworkInterfaceIp4s
-from models.interfaces.servernetworkinterfaces import VTServerNetworkInterfaces
-from models.interfaces.vmnetworkinterfaces import VMNetworkInterfaces
 from models.ranges.ip4range import Ip4Range
-from models.ranges.ip4rangeips import Ip4RangeIps
 from models.ranges.macrange import MacRange
-from models.ranges.macrangemacs import MacRangeMacs
-from models.ranges.serveriprange import VTServerIpRange
-from models.ranges.servermacrange import VTServerMacRange
 from models.resources.ip4slot import Ip4Slot
 from models.resources.macslot import MacSlot
-from models.resources.resourceshash import ResourcesHash
-from models.resources.serverallocatedvms import ServerAllocatedVMs
 from models.resources.virtualmachine import VirtualMachine
 from models.resources.vmallocated import VMAllocated
-from models.resources.vmexpires import VMExpires
 from models.resources.vtserver import VTServer
 from models.resources.xenserver import XenServer
-from models.resources.xenservervms import XenServerVMs
 from models.resources.xenvm import XenVM
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from utils.base import db
@@ -34,8 +21,13 @@ import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import time
 import utils.exceptions as virt_exception
+from utils.base import set_up
+
+set_up()
 
 logging=amsoil.core.log.getLogger('VTResourceManager')
+
+logging.debug("************************* config db_session *****************" + str(pm.getService('config')))
 
 '''
 @author: SergioVidiella, CarolinaFernandez

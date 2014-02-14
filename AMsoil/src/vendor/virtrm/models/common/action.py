@@ -14,6 +14,7 @@ class Action(db.Model):
     
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'action'
+    __table_args__ = {'extend_existing':True}
     
     '''Action status Types'''
     QUEUED_STATUS = "QUEUED"

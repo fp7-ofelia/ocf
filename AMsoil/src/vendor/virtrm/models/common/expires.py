@@ -13,6 +13,7 @@ class Expires(db.Model):
 
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'expires'
+    __table_args__ = {'extend_existing':True}
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     expires = db.Column(db.DateTime, nullable=False)
