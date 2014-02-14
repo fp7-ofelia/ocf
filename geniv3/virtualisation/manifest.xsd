@@ -1,4 +1,5 @@
-<!-- XML schema validator: http://schneegans.de/sv/ -->
+<!-- XSD and XML validator: http://www.utilities-online.info/xsdvalidation/ -->
+<!-- XSD validator: http://schneegans.de/sv/ -->
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:element name="rspec" type="RSpecVirtualisation"/>
@@ -8,7 +9,7 @@
             <xs:element name="node" type="Slice"/>
         </xs:sequence>
         <xs:attribute name="type" type="RSpecType"/>
-        <xs:attribute type="xs:string" name="virtualisation"/>
+        <xs:attribute name="virtualisation" type="xs:string"/>
     </xs:complexType>
 
     <xs:simpleType name="RSpecType">
@@ -19,7 +20,7 @@
 
     <xs:complexType name="Slice">
         <xs:sequence>
-            <xs:element name="sliver" type="VM"/>
+            <xs:element name="sliver" type="VM" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

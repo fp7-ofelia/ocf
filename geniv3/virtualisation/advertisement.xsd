@@ -1,4 +1,5 @@
-<!-- XML schema validator: http://schneegans.de/sv/ -->
+<!-- XSD and XML validator: http://www.utilities-online.info/xsdvalidation/ -->
+<!-- XSD validator: http://schneegans.de/sv/ -->
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:element name="rspec" type="RSpecVirtualisation"/>
@@ -8,7 +9,7 @@
             <xs:element name="network" type="Servers"/>
         </xs:sequence>
         <xs:attribute name="type" type="RSpecType"/>
-        <xs:attribute type="xs:string" name="virtualisation"/>
+        <xs:attribute name="virtualisation" type="xs:string"/>
     </xs:complexType>
 
     <xs:simpleType name="RSpecType">
@@ -18,13 +19,14 @@
     </xs:simpleType>
 
     <xs:complexType name="Servers">
+        <!-- *sequence :: default values: minOccurs=1, maxOccurs=1 -->
         <xs:sequence>
             <xs:element name="sliver" type="Server" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="Server">
-        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- *all :: child elements can appear in any order & element must occur only once -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
             <xs:element type="xs:string" name="name"/>
@@ -51,7 +53,6 @@
     </xs:complexType>
 
     <xs:complexType name="NetworkInterfaceData">
-        <!--all = child elements can appear in any order & element must occur only once -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
             <xs:element type="NetworkInterfaceType" name="type" minOccurs="0"/>
@@ -79,7 +80,6 @@
     </xs:complexType>
 
     <xs:complexType name="DiscImageTemplate">
-        <!--all = child elements can appear in any order & element must occur only once -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
             <xs:element type="xs:string" name="name"/>
