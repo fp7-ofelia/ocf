@@ -8,7 +8,7 @@ import common
 import amsoil.core.pluginmanager as pm
 import inspect
 from sqlalchemy.ext.associationproxy import association_proxy
-
+from templates.extendeddata import ExtendedData
 
 '''
    @author: SergioVidiella
@@ -67,6 +67,13 @@ class Template(db.Model):
         self.extended_data = extended_data
         self.img_file_url = img_url
         self.do_save = save
+        self.extended_data_manager = ExtendedData()
+        if extended_data:
+           try:
+               self.extended_data_manager = self.extended_data_manager.deserialize(extended_data)
+           except:
+               pass
+  
         if self.do_save:
             self.auto_save()
 
@@ -80,6 +87,19 @@ class Template(db.Model):
             db.session.add(self)
             db.session.commit()
 
+    def add_extension(self, name, value):
+        self.extended_data_manager.add_extension(name,value)
+        if self.get_do_save():
+            serialized_extensions = self.extended_data_manager.serialize()
+            self.extended_data = serialized_extensions
+            self.auto_save()
+
+    def remove_extension(self, name):
+        self.extended_data_manager.remove_extension(name)
+        if self.get_do_save():
+            serialized_extensions = self.extended_data_manager.serialize()
+            self.extended_data = serialized_extensions
+            self.auto_save()
        
     '''Getters and Setters'''
     
@@ -158,7 +178,11 @@ class Template(db.Model):
         return self.virtualization_technology
     
     def get_extended_data(self):
-        return self.extended_data
+        try:
+            ed = self.extended_data_manager.deserialize(self.extended_data)
+            return ed.dump()
+        except:
+            return self.extended_data
 
     def set_extended_data(self, extended_data):
         self.extended_data = extended_data
