@@ -27,8 +27,6 @@ set_up()
 
 logging=amsoil.core.log.getLogger('VTResourceManager')
 
-logging.debug("************************* config db_session *****************" + str(pm.getService('config')))
-
 '''
 @author: SergioVidiella, CarolinaFernandez
 '''
