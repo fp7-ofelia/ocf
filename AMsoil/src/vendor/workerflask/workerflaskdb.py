@@ -46,16 +46,13 @@ def getAllJobs():
 def addJob(job_db_entry):
     """Creates a config item, if it does not exist. If it already exists this function does not change anything."""
     job_db_entry.id = None
-    db_session._model_changes = {}
     db_session.add(job_db_entry)
     db_session.commit()
 
 def commit():
     """Commits the changes to objects in the session (e.g. a changed attribute in an object)."""
-    db_session._model_changes = {}
     db_session.commit()
     
 def delJob(job_db_entry):
-    db_session._model_changes = {}
     db_session.delete(job_db_entry)
     db_session.commit()
