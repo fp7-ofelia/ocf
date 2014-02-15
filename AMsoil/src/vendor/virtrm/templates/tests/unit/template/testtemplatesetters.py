@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/opt/ofelia/AMsoil/src/plugins/configdb/")
+sys.path.append("/opt/ofelia/AMsoil/src/plugins/virtconfigdb/")
 sys.path.append("/opt/ofelia/AMsoil/src/")
 sys.path.append("/opt/ofelia/AMsoil/src/vendor/virtrm")
 import amconfigdb
@@ -9,7 +9,6 @@ pm.registerService("config", amconfigdb.ConfigDB())
 pm.registerService("configexceptions", amconfigdbexceptions)
 from templates.template import Template
 import unittest
-
 
 class TemplateSettersTest(unittest.TestCase):
 

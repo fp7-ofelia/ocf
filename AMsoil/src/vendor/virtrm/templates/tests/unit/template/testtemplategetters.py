@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/opt/ofelia/AMsoil/src/plugins/configdb/")
+sys.path.append("/opt/ofelia/AMsoil/src/plugins/virtconfigdb/")
 sys.path.append("/opt/ofelia/AMsoil/src/")
 sys.path.append("/opt/ofelia/AMsoil/src/vendor/virtrm")
 import amconfigdb
@@ -88,6 +88,12 @@ class TemplateGettersTest(unittest.TestCase):
         param = "get_virtualization_technology"
         template.virtualization_technology = param
         self.assertEquals(param, template.get_virtualization_technology())
+
+    def test_should_be_eqauals(self):
+        template = self.given_this_template()
+        template2 = self.given_this_template()
+        template2.uuid = template.get_uuid()
+        self.assertEquals(template, template)
 
 if __name__ == '__main__':
     unittest.main()
