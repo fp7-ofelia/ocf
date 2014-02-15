@@ -23,24 +23,21 @@ class VMAllocated(db.Model):
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
+    uuid = db.Column(db.String(1024), nullable=False, default="")
     memory = db.Column(db.Integer)
-    number_of_cpus = db.Column("numberOfCPUs", db.Integer)
-    disc_space_gb = db.Column("discSpaceGB", DOUBLE)
+    number_of_cpus = db.Column(db.Integer, nullable=True)
+    disc_space_gb = db.Column(DOUBLE, nullable=True)
 
     '''Property parameters'''
-    project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
-    project_name = db.Column("projectName", db.String(1024), nullable=False, default="")
-    slice_id = db.Column("sliceId", db.String(1024), nullable=False, default="")
-    slice_name = db.Column("sliceName", db.String(512), nullable=False, default="")
-    server_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
+    project_id = db.Column(db.String(1024), nullable=False, default="")
+    project_name = db.Column(db.String(1024), nullable=False, default="")
+    slice_id = db.Column(db.String(1024), nullable=False, default="")
+    slice_name = db.Column(db.String(512), nullable=False, default="")
+    server_id = db.Column(db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
     server = db.relationship("VTServer", backref='allocated_vms')
         
     '''Virtualization parameteres'''
     virtualization_technology = db.Column(db.String(512), nullable=False, default="xen")
-
-    '''Allocation expiration time'''
-    expires_id = db.Column(db.Integer, db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'expires.id'), nullable=False)
-    expires = db.relationship("Expires", backref='allocated_vm')
 
     ''' Mutex over the instance '''
     # Mutex
@@ -50,48 +47,39 @@ class VMAllocated(db.Model):
     do_save = True
 
     @staticmethod
-    def constructor(name,project_id,slice_id,slice_name,project_name,server,memory,disc_space_gb,number_of_cpus,virt_tech,expires,save=True):
-        self = VMAllocated()
+    def __init__(self,name="",project_id="",slice_id="",slice_name="",project_name="",server=None,memory=0,disc_space_gb=None,number_of_cpus=None,virt_tech="xen",expires=None,save=False):
+        self.name = name 
+        self.project_id = project_id
+        self.slice_id = slice_id
+        self.slice_name = slice_name
+        self.project_name = project_name
+        self.memory = memory
+        self.disc_space_gb = disc_space_gb
+        self.number_of_cpus = number_of_cpus
+        self.virtualization_technology = virt_tech
         try:
-            self.name = name 
-            self.project_id = project_id
-            self.slice_id = slice_id
-            self.slice_name = slice_name
-            self.project_name = project_name
-            self.memory = memory
-            self.disc_space_gb = disc_space_gb
-            self.number_of_cpus = number_of_cpus
-            self.virtualization_technology = virt_tech
             self.server = server
+        except:
+            pass
+        try:
             self.expires.append(expires)
-            self.do_save = save
-            if save:
-                db.session.add(self)
-                db.session.commit()
-        except Exception as e:
-            self.destroy()
-            raise e
-        return self
+        except:
+            pass
+        self.do_save = save
+        if save:
+            db.session.add(self)
+            db.session.commit()
     
     def auto_save(self):
-        db.session.add(self)
-        db.session.commit()
+        if self.do_save is True:
+            db.session.add(self)
+            db.session.commit()
     
     '''Destructor'''
     def destroy(self):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
-            if self.expires:
-                self.expires.destroy()
             db.session.delete(self)
             db.session.commit()
-    
-    @validates('name')
-    def validate_name(self, key, name):
-        try:
-            validators.vm_name_validator(name)
-            return name
-        except Exception as e:
-            raise e
     
     @validates('virtualization_technology')
     def validate_virtualization_technology(self, key, virt_tech):
@@ -113,7 +101,7 @@ class VMAllocated(db.Model):
     def get_name(self):
         return self.name
     
-    def set_project_id(self,projectId):
+    def set_project_id(self,project_id):
         if not isinstance(project_id,str):
             project_id = str(project_id)
         self.project_id = project_id
@@ -121,6 +109,13 @@ class VMAllocated(db.Model):
     
     def get_project_id(self):
         return self.project_id
+
+    def set_project_name(self, project_name):
+        self.project_name = project_name
+        self.auto_save()
+
+    def get_project_name(self):
+        return self.project_name
     
     def set_slice_id(self, value):
         self.slice_id = value
@@ -157,22 +152,32 @@ class VMAllocated(db.Model):
     def get_disc_space_gb(self):
         return self.disc_space_gb
     
-    def set_expiration(self, expires):
+    def set_expires(self, expires):
         self.expires.append(expires)
         sel.auto_save()
     
-    def get_expiration(self):
+    def get_expires(self):
         return self.expires.first().expires
     
-    def set_virt_tech(self, virt_tech):
-        if virt_tech not in __possible_virt_technologies:
-            raise KeyError, "Invalid virtualization technology"
-        else:
-            self.virtualization_technology = virt_tech
-            self.auto_save()
+    def set_virtualization_technology(self, virt_tech):
+        self.virtualization_technology = virt_tech
+        self.auto_save()
     
-    def get_virt_tech(self):
+    def get_virtualization_technology(self):
         return self.virtualization_technology
+    
+    def set_server(self, server):
+        try:
+            self.server = server
+        except:
+            pass
+        self.auto_save()
     
     def get_server(self): 
         return self.server
+
+    def set_do_save(self, save):
+        self.do_save = save
+    
+    def get_do_save(self):
+        return self.do_save
