@@ -116,21 +116,23 @@ class VTDelegate3(GENIv3DelegateBase):
     
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
+        logging.debug("slice_urn: %s" % str(slice_urn))
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
+        logging.debug("slice_name: %s" % str(slice_name))
+        authority = get_authority(get_authority(slice_urn))
+        logging.debug("authority: %s" % str(authority))
         dictionary = Translator.xml2json(rspec)
-        # TODO CONTINUE FROM HERE
-        logging.debug("RSpec dictionary: %s" % str(dictionary))
         vms = []
         # Retrieve VMs from allocation request
         requested_vms = list()
-        slivers = dictionary["rspec"]["node"]
-        for vm in slivers.values():
-            # TODO GET THE AUTHORITY FROM SOMEWHERE
-            #vm["project_name"] = get_authority(slice_urn)
+#        slivers = dictionary["rspec"]["node"]
+        slivers = dictionary["rspec"]["node"]["sliver"]
+#        for vm in slivers.values():
+        for vm in slivers:
+            vm["slice_name"] = slice_name
+            vm["project_name"] = authority
             requested_vms.append(vm)
-        logging.debug("Requested VMs: %s" % str(requested_vms))
-        
         if self.urn_type(slice_urn) == 'slice': 
             try:
                 allocated_vms = dict()
@@ -145,7 +147,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
             except virt_exception.VTAMServerNotFound as e:
                 self.undo_action("allocate", allocated_vms)
-                raise geniv3_exception.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
+                raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vms[0]['server_uuid'],))
             except virt_exception.VTMaxVMDurationExceeded as e:
                 self.undo_action("allocate", allocated_vms)
                 raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))

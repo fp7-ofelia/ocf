@@ -3,7 +3,7 @@
     <sliver>
       <name>VMtest</name>
       <memory_mb>1024</memory_mb>
-      <server_uuid>2ffeed60-5263-4c36-8995-6ab8959990da</server_uuid>
+      <server_uuid>eaaf6c7c-70b6-49aa-ab7f-a8bb09c33434</server_uuid>
       <template_definition>
         <!-- The following cases should be mutually exclusive -->
         <!-- Case A: send only template name, fill in Virtualisation AM -->
