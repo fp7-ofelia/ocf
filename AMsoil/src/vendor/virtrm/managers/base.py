@@ -27,8 +27,6 @@ set_up()
 
 logging=amsoil.core.log.getLogger('VTResourceManager')
 
-logging.debug("************************* config db_session *****************" + str(pm.getService('config')))
-
 '''
 @author: SergioVidiella, CarolinaFernandez
 '''
@@ -477,12 +475,31 @@ class VTResourceManager(object):
         Allocate a VM in the given slice.
         """
         # Check if the VM name already exists, as a created VM or an allocated VM
-        if VirtualMachine.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None or VMAllocated.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None:
-            raise virt_exception.VTAMVmNameAlreadyTaken(vm['name'])
+        logging.debug("** delegate.vm: %s" % str(vm))
+        logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
+        logging.debug("** delegate.slice_name: %s" % str(vm["slice_name"]))
+        logging.debug("** delegate.project_name: %s" % str(vm["project_name"]))
+        try:
+#            if VirtualMachine.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None or VMAllocated.query.filter_by(name=vm['name']).filter_by(slice_name=slice_name).filter_by(project_name=vm['project_name']).first() != None:
+            logging.debug("VirtualMachine.query.filter_by(name=vm['name'], slice_name=slice_name, project_name=vm['project_name']): %s" % str(VirtualMachine.query.filter_by(name=vm["name"]).filter_by(slice_name=slice_name, project_name=vm["project_name"].first())))
+            logging.debug("VMAllocated.query.filter_by(name=vm['name'], slice_name=slice_name, project_name=vm['project_name']): %s" % str(VMAllocated.query.filter_by(name=vm["name"], slice_name=slice_name, project_name=vm["project_name"].first())))
+            try:
+                provisioned_vm = VirtualMachine.query.filter_by(name=vm["name"], slice_name=slice_name, project_name=vm["project_name"]).first()
+            except:
+                provisioned_vm = None
+            try:
+                allocated_vm = VMAllocated.query.filter_by(name=vm["name"], slice_name=slice_name, project_name=vm["project_name"]).first()
+            except:
+                allocated_vm = None
+            # If VM already exists either on allocated or in provisioned, return error
+            if provisioned_vm or allocated_vm:
+                raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
+        # Otherwise we assume that no VM with this same data exists and carry on
+        except:
+            pass
         # Check if the server is one of the given servers
-        # FIXME: Filter should be done by UUID, not by name
-        if VTServer.query.filter_by(name=vm['server_name']).first() == None:
-            raise virt_exception.VTAMServerNotFound(vm['server_name'])
+        if VTServer.query.filter_by(uuid=vm["server_uuid"]).first() == None:
+            raise virt_exception.VTAMServerNotFound(vm["server_uuid"])
         try:
             expiration_time = self._check_reservation_time(end_time)
         except Exception as e:

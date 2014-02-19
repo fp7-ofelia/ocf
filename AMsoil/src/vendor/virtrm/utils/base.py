@@ -23,6 +23,7 @@ def set_up():
         db.create_all()
 
 def import_models():
+    import os
     import pkgutil
     import models as package
 
@@ -31,8 +32,16 @@ def import_models():
                                                           onerror=lambda x:None
                                                          ):
         if not ispkg:
-            __import__(modname)
-            logging.debug("************** imported **************" + modname)
+            path = os.path.join(str(package.__path__[0]), "/".join(modname.split(".")[1:-1]))
+            py_file = "%s.py" % str(modname.split(".")[-1])
+            pyc_file = "%sc" % py_file
+            try:
+                # When possible, try to remove .pyc files (to avoid left garbage)
+                if os.path.isfile("%s/%s" % (str(path), pyc_file)):
+                    os.remove("%s/%s" % (path, pyc_file))
+            except:
+                __import__(modname)
+                logging.debug("************** imported **************" + modname)
 
 def drop_table():
     with app.app_context():

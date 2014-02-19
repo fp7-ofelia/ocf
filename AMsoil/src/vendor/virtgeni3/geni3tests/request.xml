@@ -1,0 +1,42 @@
+<rspec type="request" virtualisation="">
+  <node>
+    <sliver>
+      <name>VMtest</name>
+      <memory_mb>1024</memory_mb>
+      <server_uuid>eaaf6c7c-70b6-49aa-ab7f-a8bb09c33434</server_uuid>
+      <template_definition>
+        <!-- The following cases should be mutually exclusive -->
+        <!-- Case A: send only template name, fill in Virtualisation AM -->
+        <template_name>irati</template_name>
+        <!-- Case B: legacy. Send configuration parameters directly -->
+        <template_parameters>
+          <operating_system_type>Debian</operating_system_type>
+          <operating_system_distribution>Wheezy</operating_system_distribution>
+          <operating_system_version>7.0</operating_system_version>
+          <hard_disk_size_mb>8200</hard_disk_size_mb>
+          <hard_disk_setup_type>full-file-image</hard_disk_setup_type>
+          <virtualisation_setup_type>hvm</virtualisation_setup_type>
+        </template_parameters>
+      </template_definition>
+    </sliver>
+    <sliver>
+      <name>VMtest2</name>
+      <memory_mb>1024</memory_mb>
+      <server_uuid>2ffeed60-5263-4c36-8995-6ab8959990da</server_uuid>
+      <template_definition>
+        <!-- The following cases should be mutually exclusive -->
+        <!-- Case A: send only template name, fill in Virtualisation AM -->
+        <template_name>irati</template_name>
+        <!-- Case B: legacy. Send configuration parameters directly -->
+        <template_parameters>
+          <operating_system_type>Debian</operating_system_type>
+          <operating_system_distribution>Wheezy</operating_system_distribution>
+          <operating_system_version>7.0</operating_system_version>
+          <hard_disk_size_mb>8200</hard_disk_size_mb>
+          <hard_disk_setup_type>full-file-image</hard_disk_setup_type>
+          <virtualisation_setup_type>hvm</virtualisation_setup_type>
+        </template_parameters>
+      </template_definition>
+    </sliver>
+  </node>
+</rspec>
