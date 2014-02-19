@@ -181,7 +181,7 @@ class VTResourceManager(object):
 #    def _vm_dict_to_class(self, requested_vm, slice_name, end_time):
     def _vm_dict_to_class(self, requested_vm):
         requested_vm["server"] = VTServer.query.filter_by(uuid=requested_vm["server_uuid"]).one()
-        retrieved_class = self.translator.dict2existing_class(VMAllocated, requested_vm)
+        retrieved_class = self.translator.dict2existing_class(requested_vm, VMAllocated)
         logging.debug("FINAL CLASS FOR ALLOCATED VM: %s" % str(requested_vm))
         return retrieved_class
 #        vm = VMAllocated()
