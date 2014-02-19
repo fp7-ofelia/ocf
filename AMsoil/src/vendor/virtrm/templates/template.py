@@ -203,11 +203,45 @@ class Template(db.Model):
         self.img_file_url = url
         self.auto_save()
 
+    def __repr__(self):
+        return "<Template: %s with uuid: %s>" %(self.get_name(),self.get_uuid())
+
     def __eq__(self,obj):
-        attrs = dir(self)
-        for attr in attrs:
-            if attr.startswith("get_"):
-                if not getattr(self, attr) == getattr(obj, attr):
-                    return False
+        if not isinstance(obj, Template):
+            print 1
+            return False
+        if not self.get_uuid() == obj.get_uuid():
+            print 2
+            return False
+        if not self.get_name() == obj.get_name():
+            print 3
+            return False
+        if not self.get_description() == obj.get_description():
+            print 4
+            return False
+        if not self.get_operating_system_type() == obj.get_operating_system_type():
+            print 5
+            return False
+        if not self.get_operating_system_distribution() == obj.get_operating_system_distribution():
+            print 6
+            return False
+        if not self.get_operating_system_version() == obj.get_operating_system_version():
+            print 7
+            return False
+        if not self.get_hard_disk_setup_type() == obj.get_hard_disk_setup_type():
+            print 8
+            return False
+        if not self.get_hard_disk_origin_path() == obj.get_hard_disk_origin_path():
+            print 9
+            return False
+        if not self.get_virtualization_type() == obj.get_virtualization_type():
+            print 10
+            return False
+        if not self.get_virtualization_technology() == obj.get_virtualization_technology():
+            print 11
+            return False
+        if not self.get_img_file_url() == obj.get_img_file_url():
+            print 12
+            return False
         return True 
-            
+        
