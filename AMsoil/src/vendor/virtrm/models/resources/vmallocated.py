@@ -7,10 +7,12 @@ from utils import validators
 from utils.base import db
 from utils.choices import HDSetupTypeClass, VirtTypeClass, VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
 from utils.mutexstore import MutexStore
+import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import inspect
 from models.resources.vtserver import VTServer
 
+logging=amsoil.core.log.getLogger('VMAllocated')
 
 '''@author: SergioVidiella'''
 
@@ -24,17 +26,18 @@ class VMAllocated(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False, default="")
-    memory = db.Column(db.Integer)
+    memory_mb = db.Column(db.Integer)
     number_of_cpus = db.Column(db.Integer, nullable=True)
-    disc_space_gb = db.Column(DOUBLE, nullable=True)
+    hd_size_mb = db.Column(DOUBLE, nullable=True)
 
     '''Property parameters'''
-    project_id = db.Column(db.String(1024), nullable=False, default="")
+    project_uuid = db.Column(db.String(1024), nullable=False, default="")
     project_name = db.Column(db.String(1024), nullable=False, default="")
-    slice_id = db.Column(db.String(1024), nullable=False, default="")
+    slice_uuid = db.Column(db.String(1024), nullable=False, default="")
     slice_name = db.Column(db.String(512), nullable=False, default="")
-    server_id = db.Column(db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + 'vtserver.id'), nullable=False)
-    server = db.relationship("VTServer", backref='allocated_vms')
+    server_uuid = db.Column(db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + "vtserver.uuid"), nullable=False)
+    # Need to have unique name w.r.t. the rest of attributes, in order to be accessible later
+    server = db.relationship("VTServer", doc="server", backref='allocated_vms')
         
     '''Virtualization parameteres'''
     virtualization_technology = db.Column(db.String(512), nullable=False, default="xen")
@@ -47,26 +50,58 @@ class VMAllocated(db.Model):
     do_save = True
 
     @staticmethod
-    def __init__(self,name="",project_id="",slice_id="",slice_name="",project_name="",server=None,memory=0,disc_space_gb=None,number_of_cpus=None,virt_tech="xen",expires=None,save=False):
-        self.name = name 
-        self.project_id = project_id
-        self.slice_id = slice_id
-        self.slice_name = slice_name
-        self.project_name = project_name
-        self.memory = memory
-        self.disc_space_gb = disc_space_gb
-        self.number_of_cpus = number_of_cpus
-        self.virtualization_technology = virt_tech
+#    def __init__(self,name="",project_id="",slice_id="",slice_name="",project_name="",server=None,memory=0,disc_space_gb=None,number_of_cpus=None,virt_tech="xen",expires=None,save=False):
+    def __init__(self, params_dict):
+#        logging.debug("......... self.__dict__ = %s" % str(self.__dict__))
+        logging.debug("......... self.__dict__ = %s" % str(self.__table__.columns))
+        logging.debug("......... params_dict = %s" % str(params_dict))
+        # Looks for common attributes between the class' inner dictionary and the one passed through arguments
+#        common_attributes = set(params_dict.keys()) & set(self.__dict__.keys())
+        # Remove prefix with the name of the table
+        table_columns = self.__table__.columns._data.keys()
+        logging.debug("......... table = %s" % str(self.__table__.__dict__))
+        logging.debug("......... columns = %s" % str(table_columns))
+        logging.debug("......... foreign keys 1 = %s" % str(self.__table__.foreign_keys))
+        table_foreign_keys = [ (key.name, str(key)) for key in self.__table__.foreign_keys ]
+        logging.debug("......... foreign keys 1+ = %s" % str(table_foreign_keys))
+        table_foreign_keys = [ str(key._get_colspec()) for key in self.__table__.foreign_keys ]
+        logging.debug("......... foreign keys 2 = %s" % str(table_foreign_keys))
+        common_attributes = set(params_dict.keys()) & (set(table_columns) | set(table_foreign_keys))
+        logging.debug("......... common attributes = %s" % str(common_attributes))
+        common_dictionary = dict()
+        for attribute in common_attributes:
+            common_dictionary[attribute] = params_dict[attribute]
+#            getattr(self, "set_%s" % str(attribute))(params_dict[attribute])
+#            setattr(self, str(attribute), params_dict[attribute])
+        # Then updates the class' inner dictionary with the one retrieved after the intersection of their keys
+        self.__dict__.update(**common_dictionary)
+         
+#        self.name = name 
+#        self.project_id = project_id
+#        self.slice_id = slice_id
+#        self.slice_name = slice_name
+#        self.project_name = project_name
+#        self.memory = memory
+#        self.disc_space_gb = disc_space_gb
+#        self.number_of_cpus = number_of_cpus
+#        self.virtualization_technology = virt_tech
         try:
-            self.server = server
+            # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
+            self.server = params_dict["server"]
         except:
             pass
         try:
             self.expires.append(expires)
         except:
             pass
-        self.do_save = save
-        if save:
+#        self.do_save = save
+        try:
+            self.do_save
+        except:
+            # If 'do_save' does not exist, set to False
+            self.do_save = False
+#        if save:
+        if self.do_save:
             db.session.add(self)
             db.session.commit()
     

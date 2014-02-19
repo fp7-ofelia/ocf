@@ -34,6 +34,8 @@ logging=amsoil.core.log.getLogger('VTResourceManager')
 class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService("worker")
+    translator = pm.getService("translator")
+    
     # FIXME or REMOVE: circular dependency
     #virtrm = pm.getService("virtrm")
     #from virtrm.controller.drivers.virt import VTDriver
@@ -176,24 +178,29 @@ class VTResourceManager(object):
             return "error" 
     
     # FIXME: use Translator.{VMdictToClass, VMdicIfacesToClass} for this!
-    def _vm_dict_to_class(self, requested_vm, slice_name, end_time):
-        vm = VMAllocated()
-        vm.name = requested_vm['name']
-        vm.memory = int(requested_vm['memory_mb'])
-        vm.disc_space_gb = float(requested_vm['hd_size_mb'])/1024
-        vm.project_name = requested_vm['project_name']
-        vm.slice_id = 0 #necessary?
-        vm.slice_name = slice_name
-        vm.operating_system_type = requested_vm['operating_system_type'] 
-        vm.operating_system_version = requested_vm['operating_system_version']
-        vm.operating_system_distribution = requested_vm['operating_system_distribution']
-        vm.hypervisor = requested_vm['hypervisor']
-        vm.hd_setup_type = requested_vm['hd_setup_type']
-        vm.hd_origin_path = requested_vm['hd_origin_path']
-        vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
-        vm.server = VTServer.query.filter_by(name=requested_vm['server_name']).one()
-        logging.debug("********************************* OK OK")
-        return vm
+#    def _vm_dict_to_class(self, requested_vm, slice_name, end_time):
+    def _vm_dict_to_class(self, requested_vm):
+        requested_vm["server"] = VTServer.query.filter_by(uuid=requested_vm["server_uuid"]).one()
+        retrieved_class = self.translator.dict2existing_class(VMAllocated, requested_vm)
+        logging.debug("FINAL CLASS FOR ALLOCATED VM: %s" % str(requested_vm))
+        return retrieved_class
+#        vm = VMAllocated()
+#        vm.name = requested_vm['name']
+#        vm.memory = int(requested_vm['memory_mb'])
+#        vm.hd_size_mb = float(requested_vm['hd_size_mb'])/1024
+#        vm.project_name = requested_vm['project_name']
+#        vm.slice_id = 0 #necessary?
+#        vm.slice_name = slice_name
+#        vm.operating_system_type = requested_vm['operating_system_type'] 
+#        vm.operating_system_version = requested_vm['operating_system_version']
+#        vm.operating_system_distribution = requested_vm['operating_system_distribution']
+#        vm.hypervisor = requested_vm['hypervisor']
+#        vm.hd_setup_type = requested_vm['hd_setup_type']
+#        vm.hd_origin_path = requested_vm['hd_origin_path']
+#        vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
+#        vm.server = VTServer.query.filter_by(name=requested_vm['server_name']).one()
+#        logging.debug("********************************* OK OK")
+#        return vm
     
     def provision_allocated_vms(self, slice_urn, end_time):
         """
@@ -507,7 +514,8 @@ class VTResourceManager(object):
         # Once we know all the VMs could be created, we start reserving them
         expires = Expires.constructor(expiration_time)
         logging.debug("**************************************** OK")
-        vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
+#        vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
+        vm_allocated_model = self._vm_dict_to_class(vm)
         logging.debug("***********************************" + str(expires.id))
         vm_allocated_model.expires = expires
         db.session.add(vm_allocated_model)

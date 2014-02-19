@@ -1,7 +1,6 @@
 import time 
 import amsoil.core.pluginmanager as pm
 import xml.etree.ElementTree as ET
-from geni3util.translator import Translator
 from geni3util.xrn import *
 
 import amsoil.core.log
@@ -28,6 +27,7 @@ class VTDelegate3(GENIv3DelegateBase):
         super(VTDelegate3, self).__init__()
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
+        self._translator = pm.getService("translator")
 
     def get_request_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
@@ -122,7 +122,7 @@ class VTDelegate3(GENIv3DelegateBase):
         logging.debug("slice_name: %s" % str(slice_name))
         authority = get_authority(get_authority(slice_urn))
         logging.debug("authority: %s" % str(authority))
-        dictionary = Translator.xml2json(rspec)
+        dictionary = self._translator.xml2json(rspec)
         vms = []
         # Retrieve VMs from allocation request
         requested_vms = list()
