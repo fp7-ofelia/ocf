@@ -39,6 +39,8 @@ def import_models():
                 # When possible, try to remove .pyc files (to avoid left garbage)
                 if os.path.isfile("%s/%s" % (str(path), pyc_file)):
                     os.remove("%s/%s" % (path, pyc_file))
+                __import__(modname)
+                logging.debug("************** imported **************" + modname)
             except:
                 __import__(modname)
                 logging.debug("************** imported **************" + modname)
