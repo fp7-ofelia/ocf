@@ -1,22 +1,25 @@
 from datetime import datetime
+from sqlalchemy.ext.associationproxy import association_proxy
 from utils.base import db
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 
-logging=amsoil.core.log.getLogger('Expires')
+logging=amsoil.core.log.getLogger('Expiration')
 
 '''@author: SergioVidiella'''
 
 class Expiration(db.Model):
-    """Expiration time of the Virtual Machine (only GeniV3)."""
+    """Expiration time of the Virtual Machine (only GENI)."""
 
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'expiration'
     __table_args__ = {'extend_existing':True}
-
+    # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     expiration = db.Column(db.DateTime, nullable=False, default=datetime.now())
     do_save = True
+    # Resource relationships
+    
 
     @staticmethod    
     def __init__(self,expiration=None,save=False):

@@ -23,13 +23,31 @@ class ExpirationManagerCheckValidExpirationTest(unittest.TestCase):
         self.assertEquals(param, manager.check_valid_reservation_time(param))
 
     def test_should_return_max_expiration_time_given_none_expiration(self):
+        # A microsecond error is acceptable due to the execution time
         manager = self.given_this_expiration_manager()
-        self.assertAlmostEquals(datetime.now() + timedelta(0, manager.RESERVATION_TIMEOUT), manager.check_valid_reservation_time(), delta=1)
+        datetime_values = ['year', 'month', 'day', 'hour', 'minute', 'second']
+        value = manager.check_valid_reservation_time()
+        param = datetime.now() + timedelta(0, manager.RESERVATION_TIMEOUT)
+        expected_value = 0.0
+        returned_value = 0.0
+        for key in datetime_values:
+            expected_value += getattr(param, key)
+            returned_value += getattr(value, key)
+        self.assertAlmostEquals(expected_value, returned_value, 10)
     
     def test_should_return_max_expiration_time_given_less_than_current_time(self):
+        # A microsecond error is acceptable due to the execution time
         manager = self.given_this_expiration_manager()
         param = datetime.now() - timedelta(0, 10)
-        self.assertAlmostEquals(datetime.now() + timedelta(0, manager.RESERVATION_TIMEOUT), manager.check_valid_reservation_time(param), 1)
+        datetime_values = ['year', 'month', 'day', 'hour', 'minute', 'second']
+        value = manager.check_valid_reservation_time()
+        param_expected = datetime.now() + timedelta(0, manager.RESERVATION_TIMEOUT)
+        expected_value = 0.0
+        returned_value = 0.0
+        for key in datetime_values:
+            expected_value += getattr(param_expected, key)
+            returned_value += getattr(value, key)
+        self.assertAlmostEquals(expected_value, returned_value, 10)
 
     def test_should_raise_exception_given_invalid_expiration_time(self):
         manager = self.given_this_expiration_manager()

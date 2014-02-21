@@ -116,12 +116,28 @@ class VTDriver():
             return VirtualMachine.query.filter_by(uuid=uuid).one().get_child_object()
         except:
             raise Exception("VM does not exist or uuid not unique")
-    
+
     @staticmethod
     def get_vm_by_id(id):
         from models.resources.virtualmachine import VirtualMachine
         try:
             return VirtualMachine.query.get(id).get_child_object()
+        except:
+            raise Exception("Server does not exist or id not unique")
+
+    @staticmethod
+    def get_vm_allocated_by_uuid(uuid):
+        from models.resources.vmallocated import VMAllocated
+        try:
+            return VMAllocated.query.filter_by(uuid=uuid).one()
+        except:
+            raise Exception("VM does not exist or uuid not unique")
+
+    @staticmethod
+    def get_vm_allocated_by_id(id):
+        from models.resources.vmallocated import VMAllocated
+        try:
+            return VMAllocated.query.get(id)
         except:
             raise Exception("Server does not exist or id not unique")
     

@@ -53,6 +53,8 @@ class VTDelegate3(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         #XXX: Check if the certificate and credentials are correct for this method
         #self.auth(client_cert, credentials, None, ('listslices',))
+        for credential in credentials:
+            logging.debug("************************* credential ********************" + str(credential))
         root_node = self.lxml_ad_root()
         E = self.lxml_ad_element_maker('virtrm')
         servers = self._resource_manager.get_servers()
@@ -116,6 +118,9 @@ class VTDelegate3(GENIv3DelegateBase):
     
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
+        for credential in credentials:
+            logging.debug("************************* credential ********************" + str(credential))
+        logging.debug("***************************** client_cert *********************" + str(client_cert))
         logging.debug("slice_urn: %s" % str(slice_urn))
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)

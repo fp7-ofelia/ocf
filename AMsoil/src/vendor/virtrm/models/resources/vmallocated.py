@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from models.common.expires import Expires
+from models.resources.vtserver import VTServer
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
@@ -10,7 +10,6 @@ from utils.mutexstore import MutexStore
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import inspect
-from models.resources.vtserver import VTServer
 
 logging=amsoil.core.log.getLogger('VMAllocated')
 

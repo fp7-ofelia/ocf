@@ -1,7 +1,7 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
-from models.common.expires import Expires
+from models.common.expiration import Expiration
 from models.interfaces.networkinterface import NetworkInterface
 from models.ranges.ip4range import Ip4Range
 from models.ranges.macrange import MacRange
@@ -114,7 +114,7 @@ class VTResourceManager(object):
             else:
                 raise virt_exception.VTAMVMNotFound(urn)
         if expiration_time:
-            vm_status['expires'] = vm.expires.expires
+            vm_status['expiration'] = vm.expiration.expiration
         if server_name:
             vm_status['server'] = vm.get_server().name
         return vm_status
@@ -145,7 +145,7 @@ class VTResourceManager(object):
             for vm in vms:
                 vm_hrn = get_authority(get_authority(slice_urn))+'.'+vm.project_name+'.'+vm.slice_name+'.'+ vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                vms_created.append({'name':vm_urn, 'status':vm.status, 'expires':vm.expires.expires})
+                vms_created.append({'name':vm_urn, 'status':vm.status, 'expiration':vm.expiration.expiration})
             return vms_created
         else:
             return None
@@ -163,7 +163,7 @@ class VTResourceManager(object):
             for vm in vms:
                 vm_hrn = get_authority(get_authority(slice_hrn))+'.'+vm.project_name+'.'+vm.slice_name+'.'+ vm.name
                 vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                vms_created.append({'name':vm_urn, 'expires':vm.expires.expires, 'status':self.ALLOCATION_STATUS_ALLOCATED})
+                vms_created.append({'name':vm_urn, 'expiration':vm.expiration.expiration, 'status':self.ALLOCATION_STATUS_ALLOCATED})
             return vms_created
         else:
             return None
@@ -291,14 +291,14 @@ class VTResourceManager(object):
                 if current_vm:
                     db.session.delete(vm)
                     db.session.commit()
-                    vm_expires = Expires()
-                    vm_expires.expires = end_time
-                    vm_expires.vm_id = current_vm.id
-                    created_vm['expires'] = end_time 
-                    db.session.add(vm_expires)
+                    vm_expiration = Expiration()
+                    vm_expiration.expiration = end_time
+                    vm_expiration.vm_id = current_vm.id
+                    created_vm['expiration'] = end_time 
+                    db.session.add(vm_expiration)
                     db.session.commit()
                 else:
-                    created_vm['expires'] = vm.expires
+                    created_vm['expiration'] = vm.expiration
                     created_vm['error'] = 'VM cannot be created'
         return created_vms
         
@@ -328,7 +328,7 @@ class VTResourceManager(object):
         vm_name = get_leaf(vm_hrn)
         slice_name = get_leaf(get_authority(vm_hrn))
         vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first().get_child_object()
-        expiration = Expires.query.get(vm.id).expires
+        expiration = Expiration.query.get(vm.id).expiration
         vm_id = vm.id
         status = vm.status
         #FIXME: This should not be done that way
@@ -338,9 +338,9 @@ class VTResourceManager(object):
         db_session.expunge_all()
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
-            return {'name':vm_urn, 'status':status, 'expires':expiration}
+            return {'name':vm_urn, 'status':status, 'expiration':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':status, 'expires':expiration, 'error': 'Could not start the VM'}
+            return {'name':vm_urn, 'status':status, 'expiration':expiration, 'error': 'Could not start the VM'}
     
     def pause_vm(self, vm_urn):
         """
@@ -356,24 +356,24 @@ class VTResourceManager(object):
             vm_name = get_leaf(vm_hrn)
             slice_name = get_leaf(get_authority(vm_hrn))
             vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-            expiration = Expires.query.get(vm.id).one().expires
+            expiration = Expiration.query.get(vm.id).one().expiration
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_STOP_TYPE)
-            return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
+            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':vm.status, 'expires':expiration, 'error': 'Could not stop the VM'}
+            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration, 'error': 'Could not stop the VM'}
     
     def restart_vm(self, vm_urn):
         vm_hrn, type = urn_to_hrn(vm_urn)
         vm_name = get_leaf(vm_hrn)
         slice_name = get_leaf(get_authority(vm_hrn))
         vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-        expiration = Expires.query.get(vm.id).one().expires
+        expiration = Expiration.query.get(vm.id).one().expiration
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
-            return {'name':vm_urn, 'status':vm.status, 'expires':expiration}
+            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':vm.status, 'expires':expiration, 'error': 'Could not Restart the VM'}
+            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration, 'error': 'Could not Restart the VM'}
     
     def delete_vm(self, vm_urn, slice_name=None):
         vm_hrn, hrn_type = urn_to_hrn(vm_urn)
@@ -393,12 +393,12 @@ class VTResourceManager(object):
                     deleted_vm = dict()
                     deleted_vm = dict()
                     deleted_vm['name'] = vm_urn
-                    deleted_vm['expires'] = None
+                    deleted_vm['expiration'] = None
                     deleted_vm['error'] = "The requested VM does not exist, it may have expired"
              else:
                 deleted_vm = dict()
                 deleted_vm['name'] = vm_urn
-                deleted_vm['expires'] = None
+                deleted_vm['expiration'] = None
                 deleted_vm['error'] = "The requested VM does not exist, it may have expired"
         return deleted_vm
     
@@ -512,12 +512,12 @@ class VTResourceManager(object):
         except Exception as e:
             raise e
         # Once we know all the VMs could be created, we start reserving them
-        expires = Expires.constructor(expiration_time)
+        expiration = Expiration.constructor(expiration_time)
         logging.debug("**************************************** OK")
 #        vm_allocated_model = self._vm_dict_to_class(vm, slice_name, expiration_time)
         vm_allocated_model = self._vm_dict_to_class(vm)
-        logging.debug("***********************************" + str(expires.id))
-        vm_allocated_model.expires = expires
+        logging.debug("***********************************" + str(expiration.id))
+        vm_allocated_model.expiration = expiration
         db.session.add(vm_allocated_model)
         db.session.commit()
         server = VTDriver.get_server_by_id(vm_allocated_model.server_id)
@@ -533,24 +533,24 @@ class VTResourceManager(object):
         max_duration = self.RESERVATION_TIMEOUT
         max_end_time = datetime.utcnow() + timedelta(0, max_duration)
         if (status == "allocated"):
-            vm_expires = db_session.query(VMAllocated).filter(VMAllocated.slice_name == slice_name).filter(VMAllocated.name == vm_name).filter(VMAllocated.project_name == project_name).one()
+            vm_expiration = db_session.query(VMAllocated).filter(VMAllocated.slice_name == slice_name).filter(VMAllocated.name == vm_name).filter(VMAllocated.project_name == project_name).one()
             vm_state = "allocated"
         else:
             vm = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.project_name == project_name).one()
             vm_state = vm.state
             db_session.expunge(vm)
-            vm_expires = db_session.query(Expires).filter(Expires.vm_id == vm.id).first()
+            vm_expiration = db_session.query(Expiration).filter(Expiration.vm_id == vm.id).first()
         if (expiration_time > max_end_time):
             db_sesion.expunge_all()
-            raise VTMaxVMDurationExceeded(vm_name, vm_expires.expires)
-        last_expiration = vm_expires.expires
-        vm_expires.expires = expiration_time
+            raise VTMaxVMDurationExceeded(vm_name, vm_expiration.expiration)
+        last_expiration = vm_expiration.expiration
+        vm_expiration.expiration = expiration_time
         vm_hrn = get_leaf(get_authority(get_authority(get_authority(vm_hrn)))) + '.' + vm.project_name + '.' + vm.slice_name + '.' + vm.name
         vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-        db_session.add(vm_expires)
+        db_session.add(vm_expiration)
         db_session.commit()
-        db_session.expunge(vm_expires)
-        return {'name':vm_urn, 'expires':expiration_time, 'status':vm_state}, last_expiration
+        db_session.expunge(vm_expiration)
+        return {'name':vm_urn, 'expiration':expiration_time, 'status':vm_state}, last_expiration
     
     def _unallocate_vm(self, vm_id):
         """
@@ -559,7 +559,7 @@ class VTResourceManager(object):
         vm = VMAllocated.query.get(vm_id)
         deleted_vm = dict()
         deleted_vm['name'] = vm.name
-        deleted_vm['expires'] = vm.expires
+        deleted_vm['expiration'] = vm.expiration
         vm.destroy()
         return deleted_vm
     
@@ -588,7 +588,7 @@ class VTResourceManager(object):
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
-        expirations = Expires.query.filter(Expires.expires < datetime.utcnow()).all()
+        expirations = Expiration.query.filter(Expiration.expiration < datetime.utcnow()).all()
         for expiration in expirations:
             if expiration.get_vm():
                 if isinstance(expiration.get_vm(), VMAllocated):
