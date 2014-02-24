@@ -39,8 +39,8 @@ class ExpirationManager():
         Check if the desired expiration time is valid
         or return the maximum expiration time if None time is given
         """
-        self.max_expiration_time = datetime.now() + timedelta(0, max_duration)
-        if expiration_time == None or expiration_time < datetime.now():
+        self.max_expiration_time = datetime.utcnow() + timedelta(0, max_duration)
+        if expiration_time == None or expiration_time < datetime.utcnow():
             return self.max_expiration_time
         elif (expiration_time > self.max_expiration_time):
             raise Exception
@@ -63,8 +63,41 @@ class ExpirationManager():
             raise e
         return expiration
 
-    def add_expiration_to_provisioned_vm(vm_uuid, expiration_time):
+    def get_expiration_by_vm_uuid(self, vm_uuid):
         pass
 
-    def add_expiration_to_allocated_vm(vm_uuid, expiration_time):
+    def get_expired_vms(self):
+        expired_provisioned_vms = []
+        expired_allocated_vms = []
+        expirations = Expiration.query.filter(Expiration.expiration < datetime.utcnow()).all()
+        for expiration in expirations:
+            if expiration.is_allocation_vm_expiration():
+                # Get the expired allocated VM
+                vm = expiration.get_virtualmachine_allocated()
+                expired_allocated_vms.extend(vm)
+            elif expiration.is_provisioned_vm_expiration():
+                # If the expiration is not related to an allocated VM, get the related expired provisioned VM
+                vm = expiration.get_virtualmachine()
+                expired_provisioned_vms.extend(vm)
+            else:
+                # The Expiration is not associated to any resource, remove from the database
+                expiration.destroy()
+        return expired_provisioned_vms, expired_allocated_vms
+
+    def add_expiration_to_provisioned_vm(self, vm_uuid, expiration_time):
+        pass
+
+    def add_expiration_to_allocated_vm(self, vm_uuid, expiration_time):
+        pass
+
+    def remove_expiration_to_provisioned_vm(self, vm_uuid):
+        pass
+
+    def remove_expiration_to_allocated_vm(self, vm_uuid):
+        pass
+
+    def update_expiration_to_provisioned_vm(self, vm_uuid, expiration_time):
+        pass
+
+    def update_expiration_to_provisioned_vm(self, vm_uuid, expiration_time):
         pass 

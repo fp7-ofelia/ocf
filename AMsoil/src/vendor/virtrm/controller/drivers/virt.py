@@ -139,7 +139,7 @@ class VTDriver():
         try:
             return VMAllocated.query.get(id)
         except:
-            raise Exception("Server does not exist or id not unique")
+            raise Exception("VM does not exist or id not unique")
     
     def delete_vm():
         raise Exception("Method not callable for Driver Class")

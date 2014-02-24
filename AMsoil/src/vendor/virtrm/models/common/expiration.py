@@ -1,3 +1,5 @@
+from models.resources.virtualmachine import VirtualMachine
+from models.resources.vmallocated import VMAllocated
 from datetime import datetime
 from sqlalchemy.ext.associationproxy import association_proxy
 from utils.base import db
@@ -16,10 +18,11 @@ class Expiration(db.Model):
     __table_args__ = {'extend_existing':True}
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    expiration = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    expiration = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     do_save = True
     # Resource relationships
-    
+    virtualmachine = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
+    virtualmachine_allocated = association_proxy('expiration_vm_allocated', 'vm_allocated', creator=lambda vm:VMAllocatedExpiration(vm_allocated=vm))
 
     @staticmethod    
     def __init__(self,expiration=None,save=False):
@@ -38,6 +41,36 @@ class Expiration(db.Model):
             db.session.add(self)
             db.session.commit()
     
+    def is_provisioned_vm_expiration(self):
+        if self.virtualmachine and not self.virtualmachine_allocated:
+            return True
+        else:
+            return False
+
+    def is_allocated_vm_expiration(self):
+        if self.virtualmachine_allocated and not self.virtualmachine:
+            return True
+        else:
+            return False
+
+    def remove_virtualmachine(self, vm=None):
+        if not vm:
+            vm = self.virtualmachine[0]
+        try:
+            self.virtualmachine.remove(vm)
+        except:
+            raise Exception
+        self.auto_save()
+
+    def remove_virtualmachine_allocated(self, vm=None):
+        if not vm:
+            vm = self.virtualmachine_allocated[0]
+        try:
+            self.virtualmachine.remove(vm)
+        except:
+            raise Exception
+        self.auto_save()
+
     '''Getters and Setters'''
     def set_expiration(self, expiration):
         self.expiration = expiration
@@ -51,3 +84,53 @@ class Expiration(db.Model):
     
     def get_do_save(self):
         return self.do_save
+
+    def set_virtualmachine(self, vm):
+        if self.virtualmachine_allocated:
+           raise Exception
+        self.virtualmachine.append(vm)
+        self.auto_save()
+
+    def get_virtualmachine(self):
+        return self.virtualmachine[0]
+
+    def set_virtualmachine_allocated(self, vm):
+        if self.virtualmachine:
+            raise Exception
+        self.virtualmachine_allocated.append(vm)
+        self.auto_save()
+
+    def get_virtualmachine_allocated(self):
+        return self.virtualmachine_allocated 
+
+class VMExpiration(db.Model):
+    """Relation between VirtualMachines and their expiration time (only GENI)"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_expiration'
+    __table_args__ = {'extend_existing':True}
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
+    expiration_id = db.Column(db.ForeignKey(table_prefix + 'expiration.id'), nullable=False)
+    # Defines hard or soft status of the table
+    do_save = False
+    # Relationships
+    vm = db.relationship("VirtualMachine")
+    vm_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMExpiration.expiration_id", backref=db.backref("expiration_vm", cascade = "all, delete-orphan"))
+
+class VMAllocatedExpiration(db.Model):
+    """Relation between Allocated VirtualMachines and their expiration time (only GENIv3)"""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_allocated_expiration'
+    __table_args__ = {'extend_existing':True}
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
+    expiration_id = db.Column(db.ForeignKey(table_prefix + 'expiration.id'), nullable=False)
+    # Relationships
+    vm_allocated = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==VMAllocatedExpiration.vm_uuid")
+    vm_allocated_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMAllocatedExpiration.expiration_id", backref=db.backref("expiration_vm_allocated", cascade="all, delete-orphan"))
+
