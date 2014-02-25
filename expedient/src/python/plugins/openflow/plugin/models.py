@@ -33,13 +33,13 @@ def as_is_slugify(value):
     return value
 
 #cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]):(?P<port>\d+)$")
-cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)")# J.F. Mingorance-Puga, March 28, 2011
+cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)$")# J.F. Mingorance-Puga, March 28, 2011
 def validate_controller_url(value):
     def error():
         raise ValidationError(
             u"Invalid controller URL. The format is "
-            "tcp:<hostname>:<port> or ssl:<hostname>:<port>. Port must "
-            "be less than %s" % (2**16),
+            "tcp:<hostname>:<port> or ssl:<hostname>:<port>, without spaces. "
+            "Port must be less than %s." % (2**16),
             code="invalid",
         )
 
