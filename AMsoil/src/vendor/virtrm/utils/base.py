@@ -39,11 +39,11 @@ def import_models():
                 # When possible, try to remove .pyc files (to avoid left garbage)
                 if os.path.isfile("%s/%s" % (str(path), pyc_file)):
                     os.remove("%s/%s" % (path, pyc_file))
-                __import__(modname)
-                logging.debug("************** imported **************" + modname)
             except:
-                __import__(modname)
-                logging.debug("************** imported **************" + modname)
+                # If no .pyc file was found to remove, do nothing
+                pass
+            __import__(modname)
+            logging.debug("************** imported **************" + modname)
 
 def drop_table():
     with app.app_context():
