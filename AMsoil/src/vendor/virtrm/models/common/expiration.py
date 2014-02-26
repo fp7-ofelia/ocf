@@ -138,6 +138,6 @@ class VMAllocatedExpiration(db.Model):
     def get_expiration(self):
         return self.vm_allocated_expiration
    
-    def destroy(self)
+    def destroy(self):
         db.session.delete(self)
         db.session.commit()
