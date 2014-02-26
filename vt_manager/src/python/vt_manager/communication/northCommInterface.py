@@ -7,6 +7,7 @@ from vt_manager.models.Action import Action as ActionModel
 from vt_manager.controller import *
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
+from vt_manager.controller.dispatchers.xmlrpc.InformationDispatcher import InformationDispatcher
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
@@ -111,6 +112,13 @@ def ListResourcesAndNodes(slice_urn='None'):
         print '-----------OPTIONS',options
         return AggregateManager().ListResources(options)
 
+@rpcmethod(url_name="plugin")
+def force_update_exp_vms(client_id='None', vm_id='None'):
+    if client_id != "None":
+        client_id = VTServer.objects.get(uuid = client_id).id
+    if vm_id != "None":
+        vm_id = VirtualMachine.objects.get(uuid= vm_id).id
+    return InformationDispatcher.forceListActiveVMs(client_id, vm_id)
 
 from threading import Timer
 from vt_manager.controller.actions.ActionController import ActionController

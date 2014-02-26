@@ -73,11 +73,12 @@ class InformationDispatcher():
         @staticmethod
         def forceListActiveVMs(serverID='None', vmID='None'):
 
-                if (serverID is not 'None'):
+                if serverID != 'None':
+                    print "----------->", serverID
                     server = VTDriver.getServerById(serverID)
                     vms = server.getVMs()
                 else: 
-                    if vmID is not 'None':
+                    if vmID != 'None':
                         servers = VTDriver.getAllServers()
                         vms = list()
                         for server in servers:
@@ -101,13 +102,13 @@ class InformationDispatcher():
                         if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
                             vm.delete()
                             simple_actions[vm.getUUID()] = "deleted"
-                        elif vm.getState() == 'running':
+                        elif vm.getState() in ['running', "starting...", "stopping..."] :
                             vm.setState('stopped')
                             vm.save()
                             simple_actions[vm.getUUID()] = "stopped"
                         else:
                             continue
-                return simple_actions
+                return vms_info
 
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):
