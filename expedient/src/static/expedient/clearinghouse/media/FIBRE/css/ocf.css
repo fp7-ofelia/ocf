@@ -1210,11 +1210,20 @@ table.vms tr.even {
 table.vms tr.odd {
     background-color: #dce9f7;
 }
-/* Layer with buttons for the VM actions */
-.vm_actions input {
-	padding: 5px;
-	margin: 0px;
-	font-weight: normal;
+/* Layer with buttons for the VM, server, etc. actions */
+div.server_actions input,
+div.vm_actions input {
+    font-weight: normal;
+    margin: 0px;
+    padding: 5px;
+    text-align: center;
+}
+div.server_actions input.update,
+div.vm_actions input.update {
+    background-position-x: 0%;
+    /*margin-right: -27px;*/
+    text-align: right;
+    width: 75px !important;
 }
 
 /* SELECTS */
