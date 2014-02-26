@@ -35,14 +35,19 @@ def import_models():
             path = os.path.join(str(package.__path__[0]), "/".join(modname.split(".")[1:-1]))
             py_file = "%s.py" % str(modname.split(".")[-1])
             pyc_file = "%sc" % py_file
+            # Try to remove .pyc files (to avoid left garbage)
             try:
-                # When possible, try to remove .pyc files (to avoid left garbage)
                 if os.path.isfile("%s/%s" % (str(path), pyc_file)):
                     os.remove("%s/%s" % (path, pyc_file))
+            # If no .pyc file found, do nothing
             except:
-                # If no .pyc file was found to remove, do nothing
                 pass
-            __import__(modname)
+            # Try to import .py files (to load model)
+            try:
+                __import__(modname)
+            # If no .py file found, do nothing
+            except:
+                pass
             logging.debug("************** imported **************" + modname)
 
 def drop_table():
