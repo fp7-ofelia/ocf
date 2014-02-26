@@ -22,8 +22,8 @@
             <th> Project</th>
             <th> Slice</th>
             <th> Status</th>
-            <th> Actions </th>
-            <th> Update Action</th>
+            <th><center> Actions</center> </th>
+            <th><center> Update Action</center></th>
         	</tr>
 	        {% for vm in server.vms.all %}
 	          <tr id=tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
@@ -36,7 +36,7 @@
 	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
 	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
 	            <td id = td_vm_actions{{vm.id}}>
-					<div>
+					<center><div>
 					{% if vm.state == "running" %}
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
@@ -52,11 +52,11 @@
                     {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
                         <center><img src={% url img_media 'loading.gif'%} align="absmiddle"></center>
                     {% endif %}
-					</div>
+					</div></center>
 	
 	            </td>
                     <td>
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'force_update_vm')">Update</a>
+                        <center><a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'force_update_vm')">Update</a></center>
                     </td>
 	        </tr>
 	       {% endfor %}
