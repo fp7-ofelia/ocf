@@ -1,9 +1,8 @@
 import amsoil.core.log
 import xmltodict
 import json
-#import uuid
 
-logging=amsoil.core.log.getLogger('VTDelegate3')
+logging=amsoil.core.log.getLogger('VirtUtils')
 
 class Translator:
 
