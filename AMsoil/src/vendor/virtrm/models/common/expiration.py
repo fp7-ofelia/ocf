@@ -40,18 +40,6 @@ class Expiration(db.Model):
         if self.do_save:
             db.session.add(self)
             db.session.commit()
-    
-    def is_provisioned_vm_expiration(self):
-        if self.virtualmachine and not self.virtualmachine_allocated:
-            return True
-        else:
-            return False
-
-    def is_allocated_vm_expiration(self):
-        if self.virtualmachine_allocated and not self.virtualmachine:
-            return True
-        else:
-            return False
 
     def remove_virtualmachine(self, vm=None):
         if not vm:
@@ -86,22 +74,28 @@ class Expiration(db.Model):
         return self.do_save
 
     def set_virtualmachine(self, vm):
-        if self.virtualmachine_allocated:
-           raise Exception
         self.virtualmachine.append(vm)
         self.auto_save()
 
     def get_virtualmachine(self):
-        return self.virtualmachine[0]
+        # Try to avoid an out of index Exception if the list is empty
+        try:
+            virtualmachine = self.virtualmachine[0]
+        except:
+            virtualmachine = None
+        return virtualmachine
 
     def set_virtualmachine_allocated(self, vm):
-        if self.virtualmachine:
-            raise Exception
         self.virtualmachine_allocated.append(vm)
         self.auto_save()
 
     def get_virtualmachine_allocated(self):
-        return self.virtualmachine_allocated 
+        # Try to avoid an out of index Exception if the list is empty
+        try:
+            virtualmachine_allocated = self.virtualmachine_allocated 
+        except:
+            virtualmachine_allocated = None
+        return virtualmachine_allocated
 
 class VMExpiration(db.Model):
     """Relation between VirtualMachines and their expiration time (only GENI)"""
@@ -120,6 +114,13 @@ class VMExpiration(db.Model):
     vm = db.relationship("VirtualMachine")
     vm_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMExpiration.expiration_id", backref=db.backref("expiration_vm", cascade = "all, delete-orphan"))
 
+    def get_expiration(self):
+        return self.vm_expiration
+ 
+    def destroy(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class VMAllocatedExpiration(db.Model):
     """Relation between Allocated VirtualMachines and their expiration time (only GENIv3)"""
     config = pm.getService("config")
@@ -134,3 +135,9 @@ class VMAllocatedExpiration(db.Model):
     vm_allocated = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==VMAllocatedExpiration.vm_uuid")
     vm_allocated_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMAllocatedExpiration.expiration_id", backref=db.backref("expiration_vm_allocated", cascade="all, delete-orphan"))
 
+    def get_expiration(self):
+        return self.vm_allocated_expiration
+   
+    def destroy(self)
+        db.session.delete(self)
+        db.session.commit()
