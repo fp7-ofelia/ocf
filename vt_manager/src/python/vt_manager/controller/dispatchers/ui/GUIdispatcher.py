@@ -17,6 +17,7 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.utils.HttpUtils import HttpUtils
 from vt_manager.models.NetworkInterface import NetworkInterface
 from vt_manager.models.MacRange import MacRange
+from vt_manager.controller.dispatchers.xmlrpc.InformationDispatcher import InformationDispatcher
 from vt_manager.controller.dispatchers.forms.NetworkInterfaceForm import MgmtBridgeForm
 from vt_manager.controller.dispatchers.forms.ServerForm import ServerForm
 from django.db import transaction
@@ -185,7 +186,12 @@ def action_vm(request, server_id, vm_id, action):
 				request, template="servers/list_vm.html",
 				extra_context={"vm": VM.objects.get(id = vm_id)}
 		)
+        elif(action == 'force_update_server'):
+                InformationDispatcher.forceListActiveVMs(serverID=server_id)
 
+        elif(action == 'force_update_vm'):
+                InformationDispatcher.forceListActiveVMs(vmID=vm_id)
+ 
 	else:
 		#XXX: serverUUID should be passed in a different way
 		VTDriver.PropagateActionToProvisioningDispatcher(vm_id, VTServer.objects.get(id=server_id).uuid, action)

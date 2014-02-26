@@ -102,6 +102,22 @@ class XmlRpcServer():
                     callBackFunction(callBackUrl,xml)
                     return ""
 
+                def force_list_active_vms(self, password, vm_uuid):
+                    from xen.XendManager import XendManager
+                    if password != XMLRPC_SERVER_PASSWORD:
+                        raise Exception("Password mismatch")
+                    active_vms = dict()
+                    XendManager.retrieveActiveDomainsByUUID()
+                    for vm in XendManager.retrieveActiveDomainsByUUID():
+                        if (str(vm_uuid) != 'None'):
+                            if vm[0] == vm_uuid:
+                                active_vms[vm[0]] = vm[1]
+                                break
+                            else:
+                                continue
+                        active_vms[vm[0]] = vm[1]
+                    return active_vms
+
                 # FIXME Internally works well, but cannot return "too much" data - server hangs
                 def list_vm_templates(self, password):
                 #def list_vm_templates(self, callback_url, password):

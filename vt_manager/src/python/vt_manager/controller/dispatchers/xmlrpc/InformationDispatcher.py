@@ -70,6 +70,45 @@ class InformationDispatcher():
 		#templates_info = xmlrpc_server.list_vm_templates(callbackURL, server.getAgentPassword())
 		return str(templates_info)
 
+        @staticmethod
+        def forceListActiveVMs(serverID='None', vmID='None'):
+
+                if (serverID is not 'None'):
+                    server = VTDriver.getServerById(serverID)
+                    vms = server.getVMs()
+                else: 
+                    if vmID is not 'None':
+                        servers = VTDriver.getAllServers()
+                        vms = list()
+                        for server in servers:
+                            for vm in server.getVMs():
+                                print vm.name, vm.id, int(vmID), type(vm.id), vm.id==int(vmID)  
+                            vms = server.getVMs(id=int(vmID))
+                            vmID = vms[0].getUUID()
+                            break
+                        if not vms:
+                            raise Exception("VM not Found")
+                xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
+                vms_info = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
+                updated_vms = list()
+                simple_actions = dict() 
+                for vm in vms:
+                    if vm.getUUID() in vms_info.keys():
+                        vm.setState("running")
+                        vm.save()
+                        simple_actions[vm.getUUID()] = "running"
+                    else:
+                        if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
+                            vm.delete()
+                            simple_actions[vm.getUUID()] = "deleted"
+                        elif vm.getState() == 'running':
+                            vm.setState('stopped')
+                            vm.save()
+                            simple_actions[vm.getUUID()] = "stopped"
+                        else:
+                            continue
+                return simple_actions
+
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):
 		sClass.name = sModel.getName()
@@ -112,5 +151,4 @@ class InformationDispatcher():
 		VMxmlClass.xen_configuration.hd_origin_path = VMmodel.getHdOriginPath()
 		VMxmlClass.xen_configuration.virtualization_setup_type = VMmodel.getVirtualizationSetupType()
 		VMxmlClass.xen_configuration.memory_mb = VMmodel.getMemory()
-
 		ActionController.PopulateNetworkingParams(VMxmlClass.xen_configuration.interfaces.interface, VMmodel)
