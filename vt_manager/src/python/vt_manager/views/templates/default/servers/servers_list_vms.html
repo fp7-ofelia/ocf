@@ -3,6 +3,10 @@
    		{% if server %}
 			{% with server.getChildObject as server %} 
     		<h1>VMs in {{ server.name }}</h1>
+                <div class="mgmt_actions">
+                <p><a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}}, 0 ,'force_update_server')">Update List</a></p>
+                </div>
+
 			<div id = "div_vms">
     		{% if not server.vms.all %}
         		{{ server.name }} has no VMs at the moment
@@ -19,6 +23,7 @@
             <th> Slice</th>
             <th> Status</th>
             <th> Actions </th>
+            <th> Update Action</th>
         	</tr>
 	        {% for vm in server.vms.all %}
 	          <tr id=tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
@@ -50,6 +55,9 @@
 					</div>
 	
 	            </td>
+                    <td>
+                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'force_update_vm')">Update</a>
+                    </td>
 	        </tr>
 	       {% endfor %}
 	    	 </table>   

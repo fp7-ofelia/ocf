@@ -72,9 +72,8 @@ class InformationDispatcher():
 
         @staticmethod
         def forceListActiveVMs(serverID='None', vmID='None'):
-
+                print serverID
                 if serverID != 'None':
-                    print "----------->", serverID
                     server = VTDriver.getServerById(serverID)
                     vms = server.getVMs()
                 else: 

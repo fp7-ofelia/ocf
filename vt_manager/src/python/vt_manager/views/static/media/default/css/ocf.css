@@ -361,10 +361,30 @@ table.formtable_noborder tbody td ,tbody th {
 	text-decoration:underline;
 }
 
+/* Server Fancy Div for Update Servers Functionality */
+
 #indented-div{
     width:100%;
     padding-left:40px;
 }
+
+div.mgmt_actions {
+        float: right;
+        margin-top: -35px;
+}
+div.mgmt_actions p {
+        border: 1px solid #7e9fc0;
+        background-color: #ebf5ff;
+        display: inline;
+        padding: 7px;
+}
+div.slicemgmt_actions {
+        border: 1px solid #7e9fc0;
+        background-color: #ebf5ff;
+        margin-top: 10px;
+}
+
+
 
 /* Tables */
 /* BLUE */
