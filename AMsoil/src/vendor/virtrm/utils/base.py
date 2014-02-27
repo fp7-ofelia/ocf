@@ -18,6 +18,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s" % (
 db = SQLAlchemy(app)
 
 def set_up():
+    create_db()
+    load_models()
+
+def create_db():
+    import os
+    # Prepare database creation command
+    command_db_creation = "mysql -u %s -p%s --execute=\"CREATE DATABASE IF NOT EXISTS %s;\"" % (config.get("virtrm.DATABASE_USER"), config.get("virtrm.DATABASE_PASSWORD"), config.get("virtrm.DATABASE_NAME"))
+    if not config.get("virtrm.DATABASE_PASSWORD"):
+        command_db_creation = "mysql -u %s --execute=\"CREATE DATABASE IF NOT EXISTS %s;\"" % (config.get("virtrm.DATABASE_USER"), config.get("virtrm.DATABASE_NAME"))
+    # Perform operation
+    try:
+        db_error = os.system(command_db_creation)
+    except:
+        pass
+
+def load_models():
     import os
     import pkgutil
     import models as package
