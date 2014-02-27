@@ -25,7 +25,7 @@
     </xs:complexType>
 
     <xs:complexType name="VM">
-        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- *all :: child elements can appear in any order & element must occur 0 or 1 times -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
             <xs:element type="xs:string" name="name"/>
@@ -40,7 +40,7 @@
     </xs:complexType>
 
     <xs:complexType name="DiscImageTemplate">
-        <!--all = child elements can appear in any order & element must occur only once -->
+        <!-- *all :: child elements can appear in any order & element must occur 0 or 1 times -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
             <xs:element type="xs:string" name="name"/>
