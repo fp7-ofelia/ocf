@@ -15,33 +15,9 @@ class ExpirationManager():
     # Direct operations over Expiration
     #
     config = pm.getService("config")
-    worker = pm.getService("worker")
     # Sec in the allocated state
     RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION")
     MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION")
-
-    EXPIRY_CHECK_INTERVAL = config.get("virtrm.EXPIRATION_VM_CHECK_INTERVAL")
-    
-    def __init__(self):
-        # Register callback for regular updates
-        self.worker.addAsReccurring("virtrm", "check_expiration_vm", None, self.EXPIRY_CHECK_INTERVAL)
-
-    @worker.outsideprocess
-    def check_expiration_vm(self, params):
-        """
-        Checks expiration for both allocated and provisioned VMs
-        and deletes accordingly, either from DB or disk.
-        """
-        expired_provisioned_vms, expired_allocated_vms = self.get_expired_vms()
-        for expired_allocated_vm in expired_allocated_vms:
-            vm_uuid = expired_allocated_vm.get_uuid()
-            expired_allocated_vm.destroy()
-            self.delete_expiration_by_vm_uuid(vm_uuid)
-        for expired_provisioned_vm in expired_provisioned_vms:
-            vm_uuid = expired_provisioned_vm.get_uuid()
-            #TODO: Delete Provisioned VM
-            self.delete_expiration_by_vm_uuid(vm_uuid)
-        return
 
     def check_valid_expiration_time(self, max_duration, expiration_time=None):
         """

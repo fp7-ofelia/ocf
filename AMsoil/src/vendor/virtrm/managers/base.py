@@ -14,6 +14,7 @@ from models.resources.xenserver import XenServer
 from models.resources.xenvm import XenVM
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from utils.base import db
+from utils.expirationmanager import ExpirationManager
 from utils.servicethread import ServiceThread
 from utils.vmmanager import VMManager
 from utils.xrn import *
@@ -21,10 +22,8 @@ import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import time
 import utils.exceptions as virt_exception
-from utils.base import set_up
 
-set_up()
-
+# AMsoil logger
 logging=amsoil.core.log.getLogger('VTResourceManager')
 
 '''
@@ -36,15 +35,6 @@ class VTResourceManager(object):
     worker = pm.getService("worker")
     translator = pm.getService("translator")
     
-    # FIXME or REMOVE: circular dependency
-    #virtrm = pm.getService("virtrm")
-    #from virtrm.controller.drivers.virt import VTDriver
-
-    # Sec in the allocated state
-    RESERVATION_TIMEOUT = config.get("virtrm.MAX_RESERVATION_DURATION")
-    # Sec in the provisioned state (you can always call renew)
-    MAX_VM_DURATION = config.get("virtrm.MAX_VM_DURATION")
-    
     EXPIRY_CHECK_INTERVAL = config.get("virtrm.EXPIRATION_VM_CHECK_INTERVAL") 
     
     ALLOCATION_STATE_ALLOCATED = "allocated"
@@ -53,7 +43,7 @@ class VTResourceManager(object):
     def __init__(self):
         super(VTResourceManager, self).__init__()
         # Register callback for regular updates
-        self.worker.addAsReccurring("virtrm", "check_expiration_vm", None, self.EXPIRY_CHECK_INTERVAL)
+        self.worker.addAsReccurring("virtrm", "check_vms_expiration", None, self.EXPIRY_CHECK_INTERVAL)
     
     # Server methods
     def get_servers(self, uuid=None):
@@ -62,30 +52,65 @@ class VTResourceManager(object):
         If no uuid provided, return all servers.
         """
         if uuid:
-            servers = self.get_server(uuid)
+            servers = get_server(uuid)
+        else:
+            servers = []
+            server_objs = self._get_server_objects()
+            for server_obj in server_objs:
+                server = translator.class2dict(server_obj)
+                servers.append(server)
+        return servers
+
+    def _get_server_objects(self, uuid=None):
+        """
+        Get server by uuid. 
+        If no uuid provided, return all servers.
+        """
+        if uuid:
+            servers = self._get_server_object(uuid)
         else:
             servers = VTDriver.get_all_servers()
-        logging.debug("**************************************" + str(servers))
         return servers
     
     def get_server(self, uuid):
         """
         Get server with a given UUID.
         """
-        server = VTDriver.get_server_by_uuid(uuid)
+        server_obj = self._get_server_object(uuid)
+        server = translator.class2dict(server_obj)
         return server   
+
+    def _get_server_object(self, uuid):
+        """
+        Get server with a given UUID.
+        """
+        server = VTDriver.get_server_by_uuid(uuid)
+        return server
     
     def get_server_info(self, uuid):
         """
         Retrieve info for a server with a given UUID.
         """
         pass
-    
+
     def get_vms_in_server(self, uuid):
         """
         Obtains list of VMs for a server with a given UUID.
         """
-        pass
+        vms = []
+        vm_objs = self._get_vms_object_in_server(uuid)
+        for vm_obj in vm_objs:
+            vm = translator.class2dict(vm_obj)
+            vms.append(vm)
+        return vms
+ 
+    def _get_vms_object_in_server(self, uuid):
+        """
+        Obtains list of VMs for a server with a given UUID.
+        """
+        server = self._get_server_object(uuid)
+        vms = server.get_vms()
+        return vms
     
     # VM methods
     def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
@@ -583,24 +608,20 @@ class VTResourceManager(object):
         pass
     
     @worker.outsideprocess
-    def check_expiration_vm(self, params):
+    def check_vms_expiration(self, params):
         """
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
-        expirations = Expiration.query.filter(Expiration.expiration < datetime.utcnow()).all()
-        for expiration in expirations:
-            if expiration.get_vm():
-                if isinstance(expiration.get_vm(), VMAllocated):
-                    self._unallocate_vm(expiration.get_vm().id)
-                elif isinstance(expiration.get_vm(), VirtualMachine):
-                    self._destroy_vm_with_expiration(expiration.get_vm()._id)
-                else:
-                    db.session.delete(expiration)
-                    db.session.commit()
-            else:
-                db.session.delete(expiration)
-                db.session.commit()
+        expired_provisioned_vms, expired_allocated_vms = ExpirationManager.get_expired_vms()
+        for expired_allocated_vm in expired_allocated_vms:
+            vm_uuid = expired_allocated_vm.get_uuid()
+            expired_allocated_vm.destroy()
+            ExpirationManager.delete_expiration_by_vm_uuid(vm_uuid)
+        for expired_provisioned_vm in expired_provisioned_vms:
+            vm_uuid = expired_provisioned_vm.get_uuid()
+            #TODO: Delete Provisioned VM
+            ExpirationManager.delete_expiration_by_vm_uuid(vm_uuid)
         return
     
     # Backup & migration methods
