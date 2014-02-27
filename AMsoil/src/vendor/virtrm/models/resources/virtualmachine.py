@@ -49,7 +49,6 @@ class VirtualMachine(db.Model):
     '''Other'''
     callback_url = db.Column("callBackURL", db.String(200))
     state = db.Column(db.String(24))
-    expires = association_proxy("vm_expiration", "expires")
 
     '''Possible states'''
     RUNNING_STATE = 'running'
