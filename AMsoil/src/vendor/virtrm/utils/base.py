@@ -18,11 +18,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "%s://%s:%s@%s/%s" % (
 db = SQLAlchemy(app)
 
 def set_up():
-    import_models()
-    with app.app_context():
-        db.create_all()
-
-def import_models():
     import os
     import pkgutil
     import models as package
@@ -48,6 +43,9 @@ def import_models():
             # If no .py file found, do nothing
             except:
                 pass
+            # For every model imported, generate the database table
+            with app.app_context():
+                db.create_all()
             logging.debug("************** imported **************" + modname)
 
 def drop_table():
