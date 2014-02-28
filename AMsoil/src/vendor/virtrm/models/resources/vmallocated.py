@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from models.resources.vtserver import VTServer
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
@@ -35,8 +34,6 @@ class VMAllocated(db.Model):
     slice_uuid = db.Column(db.String(1024), nullable=False, default="")
     slice_name = db.Column(db.String(512), nullable=False, default="")
     server_uuid = db.Column(db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + "vtserver.uuid"), nullable=False)
-    # Need to have unique name w.r.t. the rest of attributes, in order to be accessible later
-    server = db.relationship("VTServer", doc="server", backref='allocated_vms')
         
     '''Virtualization parameteres'''
     virtualization_technology = db.Column(db.String(512), nullable=False, default="xen")
@@ -200,16 +197,6 @@ class VMAllocated(db.Model):
     def get_virtualization_technology(self):
         return self.virtualization_technology
     
-    def set_server(self, server):
-        try:
-            self.server = server
-        except:
-            pass
-        self.auto_save()
-    
-    def get_server(self): 
-        return self.server
-
     def set_do_save(self, save):
         self.do_save = save
     

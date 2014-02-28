@@ -1,3 +1,4 @@
+from models.interfaces.networkinterface import NetworkInterface
 from sqlalchemy import desc
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -244,3 +245,18 @@ class VirtualMachine(db.Model):
     
     def get_network_interfaces(self):
         return self.network_interfaces.order_by('-isMgmt','id').all()
+
+
+class VMNetworkInterfaces(db.Model):
+    """Network interfaces related to a Virtual Machine"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_networkInterfaces'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    virtualmachine_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.id'), nullable=False)
+    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+
+    vm = db.relationship("VirtualMachine", backref="vm_networkinterfaces")
+    networkinterface = db.relationship("NetworkInterface", backref="vm_associations")

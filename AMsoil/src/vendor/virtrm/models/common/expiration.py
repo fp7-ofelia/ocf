@@ -2,6 +2,7 @@ from models.resources.virtualmachine import VirtualMachine
 from models.resources.vmallocated import VMAllocated
 from datetime import datetime
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from utils.base import db
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
@@ -19,7 +20,7 @@ class Expiration(db.Model):
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     expiration = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    do_save = True
+    _do_save = True
     # Resource relationships
     virtualmachine = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
     virtualmachine_allocated = association_proxy('expiration_vm_allocated', 'vm_allocated', creator=lambda vm:VMAllocatedExpiration(vm_allocated=vm))
@@ -27,7 +28,7 @@ class Expiration(db.Model):
     @staticmethod    
     def __init__(self,expiration=None,save=False):
         self.expiration = expiration
-        do_save = save
+        _do_save = save
         if save:
             db.session.add(self)
             db.session.commit()
@@ -37,7 +38,7 @@ class Expiration(db.Model):
         db.session.commit()
      
     def auto_save(self):
-        if self.do_save:
+        if self._do_save:
             db.session.add(self)
             db.session.commit()
 
@@ -68,10 +69,10 @@ class Expiration(db.Model):
         return self.expiration
 
     def set_do_save(self, save):
-        self.do_save = save
+        self._do_save = save
     
     def get_do_save(self):
-        return self.do_save
+        return self._do_save
 
     def set_virtualmachine(self, vm):
         self.virtualmachine.append(vm)
@@ -108,11 +109,9 @@ class VMExpiration(db.Model):
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
     expiration_id = db.Column(db.ForeignKey(table_prefix + 'expiration.id'), nullable=False)
-    # Defines hard or soft status of the table
-    do_save = False
     # Relationships
     vm = db.relationship("VirtualMachine")
-    vm_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMExpiration.expiration_id", backref=db.backref("expiration_vm", cascade = "all, delete-orphan"))
+    vm_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMExpiration.expiration_id", backref=db.backref("expiration_vm", cascade = "all, delete-orphan"), collection_class=attribute_mapped_collection('id'))
 
     def get_expiration(self):
         return self.vm_expiration
@@ -133,7 +132,7 @@ class VMAllocatedExpiration(db.Model):
     expiration_id = db.Column(db.ForeignKey(table_prefix + 'expiration.id'), nullable=False)
     # Relationships
     vm_allocated = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==VMAllocatedExpiration.vm_uuid")
-    vm_allocated_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMAllocatedExpiration.expiration_id", backref=db.backref("expiration_vm_allocated", cascade="all, delete-orphan"))
+    vm_allocated_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMAllocatedExpiration.expiration_id", backref=db.backref("expiration_vm_allocated", cascade="all, delete-orphan"), collection_class=attribute_mapped_collection('id'))
 
     def get_expiration(self):
         return self.vm_allocated_expiration

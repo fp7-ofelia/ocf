@@ -249,3 +249,34 @@ class NetworkInterface(db.Model):
     @staticmethod
     def create_vm_mgmt_interface(name, mac_obj, ip4, save=True):
         return NetworkInterface.constructor(name, None, mac_obj, None, None, ip4, True, False, save)
+
+
+class NetworkInterfaceIp4s(db.Model):
+    """Relation between Network interfaces and Ip's"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'networkinterface_ip4s'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+    ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
+
+    networkinterface = db.relationship("NetworkInterface", backref="networkinterface_ip4s")
+    ip4slot = db.relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref="networkinterface_associations_ips")
+
+
+class NetworkInterfaceConnectedTo(db.Model):
+    """Connections between Network interfaces"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'networkinterface_connectedTo'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    from_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+    to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+
+    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref="from_networkinterface")
+    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="to_network_interface")
+

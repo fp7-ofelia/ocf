@@ -127,3 +127,18 @@ class XenServer(VTServer):
             db_session.commit()
             vm.destroy()
             self.auto_save()
+
+
+class XenServerVMs(db.Model):
+    """Relation between Xen Virtual Machines and Xen Virtualization Server"""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'xenserver_vms'
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    xenserver_id = db.Column(db.ForeignKey(table_prefix + 'xenserver.vtserver_ptr_id'), nullable=False)
+    xenvm_id = db.Column(db.ForeignKey(table_prefix + 'xenvm.virtualmachine_ptr_id'), nullable=False)
+    # Relationships
+    xenserver = db.relationship("XenServer", backref="xenserver_vms", lazy="dynamic")
+    xenvm = db.relationship("XenVM", backref="xenserver_associations", lazy="dynamic")
+

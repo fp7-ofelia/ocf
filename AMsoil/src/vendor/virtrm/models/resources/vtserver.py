@@ -1,4 +1,5 @@
 from models.interfaces.networkinterface import NetworkInterface
+from models.resources.vmallocated import VMAllocated
 from models.ranges.ip4range import Ip4Range
 from models.ranges.macrange import MacRange
 from sqlalchemy import desc
@@ -44,7 +45,7 @@ class VTServer(db.Model):
     operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False)
 
     '''Virtualization Technology'''
-    virt_tech = db.Column("virtTech", db.String(512), nullable=False)
+    virtualization_technology = db.Column("virtTech", db.String(512), nullable=False)
 
     ''' Hardware '''
     number_of_cpus = db.Column("numberOfCPUs", db.Integer)
@@ -71,7 +72,7 @@ class VTServer(db.Model):
     mutex = None
     
     '''Defines soft or hard state of the Server'''
-    do_save = True
+    do_save = False
     
     '''Validators'''
     @validates('name')
@@ -83,7 +84,7 @@ class VTServer(db.Model):
             raise e
     
     @validates('operating_system_type')
-    def validate_operatingsystemtype(self, key, os_type):
+    def validate_operating_system_type(self, key, os_type):
         try:
             OSTypeClass.validate_os_type(os_type)
             return os_type
@@ -91,7 +92,7 @@ class VTServer(db.Model):
             raise e
     
     @validates('operating_system_distribution')
-    def validate_operatingsystemdistribution(self, key, os_distribution):
+    def validate_operating_system_distribution(self, key, os_distribution):
         try:
             OSDistClass.validate_os_dist(os_distribution)
             return os_distribution
@@ -99,15 +100,15 @@ class VTServer(db.Model):
             raise e
     
     @validates('operating_system_version')
-    def validate_operatingsystemversion(self, key, os_version):
+    def validate_operating_system_version(self, key, os_version):
         try:
             OSVersionClass.validate_os_version(os_version)
             return os_version
         except Exception as e:
             raise e
     
-    @validates('virt_tech')
-    def validate_virttech(self, key, virt_tech):
+    @validates('virtualization_technology')
+    def validate_virtualization_technology(self, key, virt_tech):
         try:
             VirtTechClass.validate_virt_tech(virt_tech)
             return virt_tech
@@ -115,7 +116,7 @@ class VTServer(db.Model):
             raise e
     
     @validates('agent_url')
-    def validate_agenturl(self, key, agent_url):
+    def validate_agent_url(self, key, agent_url):
         try:
             validate_agent_url_wrapper(agent_url)
             return agent_url
@@ -123,7 +124,7 @@ class VTServer(db.Model):
             raise e
     
     @validates('agent_password')
-    def validate_agentpassword(self, key, agent_password):
+    def validate_agent_password(self, key, agent_password):
         try:
             validators.resource_name_validator(agent_password)
             return agent_password
@@ -132,15 +133,10 @@ class VTServer(db.Model):
     
     '''Private methods'''
     def get_child_object(self):
-        logging.debug("*******************************************" + str(self.__child_classes))
         for child_class in self.__child_classes:
             try:
-                logging.debug("***********************************" + str(child_class))
-                logging.debug("***********************************" + str(child_class.lower()))
-                logging.debug("***********************************" + str(self.__getattribute__(child_class.lower())[0]))
                 return self.__getattribute__(child_class.lower())[0]
             except Exception as e:
-                logging.debug("*************************************" + str(e))
                 raise e
             
     def __tupleContainsKey(tu,key):
@@ -150,8 +146,9 @@ class VTServer(db.Model):
         return False
     
     def auto_save(self):
-        db.session.add(self)
-        db.session.commit()   
+        if self.do_save:
+            db.session.add(self)
+            db.session.commit()   
     
     def get_lock_identifier(self):
         # Uniquely identifies object by a key
@@ -162,7 +159,7 @@ class VTServer(db.Model):
             if len(self.vms.all())>0:
                 raise Exception("Cannot destroy a server which hosts VMs. Delete VMs first")
             # Delete associated interfaces
-            for interface in self.networkInterfaces.all():
+            for interface in self.network_interfaces.all():
                 interface.destroy()
             # Delete instance
             db.session.delete(self)
@@ -206,32 +203,32 @@ class VTServer(db.Model):
     def get_url(self):
         return self.url
         
-    def set_virt_tech(self, virtTech):
-        self.virt_tech = virt_tech
+    def set_virtualization_technology(self, virt_tech):
+        self.virtualization_technology = virt_tech
         self.auto_save()
         
-    def get_virt_tech(self):
-        return self.virt_tech
+    def get_virtualization_technology(self):
+        return self.virtualization_technology
     
-    def set_os_type(self, os_type):
+    def set_operating_system_type(self, os_type):
         self.operating_system_type = os_type
         self.auto_save()
         
-    def get_os_type(self):
+    def get_operating_system_type(self):
         return self.operating_system_type
 
-    def set_os_version(self, version):
+    def set_operating_system_version(self, version):
         self.operating_system_version = version
         self.auto_save()
         
-    def get_os_version(self):
+    def get_operating_system_version(self):
         return self.operating_system_version
        
-    def set_os_distribution(self, dist):
+    def set_operating_system_distribution(self, dist):
         self.operating_system_distribution = dist
         self.auto_save()
         
-    def get_os_distribution(self):
+    def get_operating_system_distribution(self):
         return self.operating_system_distribution
     
     def set_available(self,av):
@@ -295,8 +292,8 @@ class VTServer(db.Model):
         return self.subscribed_mac_ranges
     
     def get_subscribed_mac_ranges(self):
-        if len(self.subscribed_mac_ranges()) > 0:
-            return self.subscribed_mac_ranges()
+        if len(self.subscribed_mac_ranges) > 0:
+            return self.subscribed_mac_ranges
         else:
             # Return global (all) ranges
             return MacRange.query.filter_by(is_global=True).all()
@@ -462,3 +459,60 @@ class VTServer(db.Model):
     
     def get_network_interfaces(self):
         return self.network_interfaces
+
+
+class ServerAllocatedVMs(db.Model):
+    """Relation between Allocated Virtual Machines and Virtualization Server"""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'vtserver_allocated_vms'
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vtserver_uuid = db.Column(db.ForeignKey(table_prefix + 'vtserver.uuid'), nullable=False)
+    allocated_vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
+    # Relationships
+    vtserver = db.relationship("VTServer", primaryjoin="VTServer.uuid==ServerAllocatedVMs.vtserver_uuid", backref=db.backref("vtserver_vms", cascade = "all, delete-orphan"))
+    allocated_vm = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==ServerAllocatedVMs.allocated_vm_uuid", backref=db.backref("vtserver_associations", cascade="all, delete-orphan"))
+
+
+class VTServerNetworkInterfaces(db.Model):
+    """Network interfaces related to a VTServer"""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'vtserver_networkInterfaces'
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
+    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+    # Relationships
+    vtserver = db.relationship("VTServer", backref="vtserver_networkinterface")
+    networkinterface = db.relationship("NetworkInterface", backref="vtserver_assocation")
+
+
+class VTServerIpRange(db.Model):
+    """Subscribed IP4 ranges to the VTServer's."""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'vtserver_subscribedIp4Ranges'
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
+    ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
+    # Relationships
+    vtserver = db.relationship("VTServer", backref="vtserver_ip4_range")
+    subscribed_ip4_range = db.relationship("Ip4Range", backref="vtserver_association")
+ 
+
+class VTServerMacRange(db.Model):
+    """Subscribed Mac ranges to the VTServer's."""
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'vtserver_subscribedMacRanges'
+    # Table attributes
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
+    macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
+    # Relationships
+    vtserver = db.relationship("VTServer", backref="vtserver_mac_range")
+    subscribed_mac_range = db.relationship("MacRange", backref="vtserver_association")
+
