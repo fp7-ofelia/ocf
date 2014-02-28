@@ -630,3 +630,25 @@ def get_offered_vlans(set=None):
     from openflow.optin_manager.opts.vlans.vlanController import vlanController
     vlans =  vlanController.offer_vlan_tags(set)
     return vlans
+
+@check_fv_set
+@rpcmethod()
+def get_used_vlans(range_len=1, direct_output=False):
+    range_len = None
+    from openflow.optin_manager.opts.vlans.vlanController import vlanController
+    import random
+    vlans =  vlanController.offer_vlan_tags(range_len)
+    if not direct_output:
+        return list(set(range(4096)) - set(vlans))
+    else:
+        rnd = random.randrange(0, len(vlans))
+        return [vlans[rnd]]
+          
+@check_fv_set    
+@rpcmethod()
+def get_ocf_version():
+    sv = open('../../../../../.currentVersion','r')
+    software_version = sv.read().strip()
+    sv.close()
+    return softwareVersion
+

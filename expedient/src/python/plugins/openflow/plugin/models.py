@@ -179,8 +179,28 @@ production networks, and is currently deployed in several universities.
 
         return vlans
 
+    def get_used_vlans(self, range_len=1, direct_output=False):
+        try:
+            vlans = self.client.proxy.get_used_vlans(range_len, direct_output)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("AM %s could not return used VLANS for your slice: %s" % (self.name, e))
+        return vlans
+
+    def get_ocf_am_version():
+        try:
+          sv = self.client.proxy.get_ocf_am_version()
+          i = 1
+          result = 0
+          for num in sv.split('.').reverse():
+              result += i * num
+              i *= 10
+          return result      
+        except:
+          return  None #Equal or Below 0.7 version
+
     def get_granted_flowspace(self, slice_id):
-        
         try:
             gfs = self.client.proxy.get_granted_flowspace(slice_id)
         except:
@@ -191,7 +211,6 @@ production networks, and is currently deployed in several universities.
             #available flag of the AM.
             #raise
             return {}
-
         return gfs
         
     def _get_slice_id(self, slice):
