@@ -1,7 +1,7 @@
 import sys
-sys.path.append("/opt/ofelia/AMsoil/src/vendor/configdb/")
-sys.path.append("/opt/ofelia/AMsoil/src/")
-sys.path.append("/opt/ofelia/AMsoil/src/vendor/virtrm")
+sys.path.append("/opt/ofelia/AMsoil/src/src/vendor/configdb/")
+sys.path.append("/opt/ofelia/AMsoil/src/src/")
+sys.path.append("/opt/ofelia/AMsoil/src/src/vendor/virtrm")
 import amconfigdb
 import amconfigdbexceptions
 import amsoil.core.pluginmanager as pm
@@ -9,7 +9,6 @@ pm.registerService("config", amconfigdb.ConfigDB())
 pm.registerService("configexceptions", amconfigdbexceptions)
 from models.resources.vtserver import VTServer
 import unittest
-
 
 class VMAllocatedSettersTest(unittest.TestCase):
 

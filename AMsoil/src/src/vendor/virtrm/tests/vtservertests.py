@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/opt/ofelia/AMsoil/src')
-sys.path.append('/opt/ofelia/AMsoil/vtamrm')
+sys.path.append('/opt/ofelia/AMsoil/src/src')
+sys.path.append('/opt/ofelia/AMsoil/src/src/virtrm')
 
 from utils.commonbase import db_session
 from models.resources.xenserver import VTServer
