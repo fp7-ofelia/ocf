@@ -1,0 +1,45 @@
+#!/bin/bash
+
+###
+#       @author: msune, CarolinaFernandez
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-upgrade-module 
+###
+
+#inform user
+printHeader "info#" "Using default pre-upgrade-hook module..."
+
+#shutdown apache
+#print "Shutting down apache2..."
+#/usr/sbin/service apache2 stop
+
+#shutdown NGINX
+print "Shutting down NGINX..."
+/usr/sbin/service nginx stop
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+
+## PyPElib installation ...
+print "Downloading latest pypelib version..."
+/usr/bin/wget http://pypelib.googlecode.com/files/pypelib_latest_all.deb || error "Could not download pypelib latest version from http://pypelib.googlecode.com/files/pypelib_latest_all.deb. Do you have connectivity?"
+
+print "Installing pypelib_latest_all.deb..."
+/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+print "Removing temporary files..."
+rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
