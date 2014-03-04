@@ -4,6 +4,6 @@
   "author-email" : "carolina.fernandez@i2cat.net",
   "version" : 1,
   "implements" : ["translator"],
-  "loads-after" : [],
+  "loads-after" : ["config"],
   "requires" : []
 }
