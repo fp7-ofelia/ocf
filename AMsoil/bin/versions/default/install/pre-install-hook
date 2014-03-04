@@ -1,0 +1,34 @@
+#!/bin/bash
+
+###
+#       @author: msune, Carolina
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: pre-install module 
+###
+
+#inform user
+printHeader "info#" "Using default pre-install-hook module..."
+
+#shutdown Apache
+#print "Shutting down apache2..."
+#/usr/sbin/service apache2 stop || warning "Could not stop apache"
+#shutdown NGINX
+print "Shutting down NGINX..."
+/usr/sbin/service nginx stop || warning "Could not stop NGINX"
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done

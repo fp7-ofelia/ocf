@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#Constants
+EDITORS="vi vim emacs nano pico"
+
+#Copy from template
+printHeader ">" "Copying settings file from template..."
+
+settings_template="$SRC_DIR/src/src/vendor/virtrm/settings/local-example"
+settings_file="$SRC_DIR/src/src/vendor/virtrm/settings/local.py"
+
+if [ -f $SRC_DIR/src/src/vendor/virtrm/settings/local.py ];then
+	warning "local file already exists."
+
+	if [ "$FORCE" == "1" ]; then
+		confirm "Overwrite currently installed local.py." $DONT_ABORT
+		if [ $? == 0 ]; then			
+			cp $settings_template $settings_file -f || error "Cannot copy local.py"
+		fi 
+	else
+		print "Skipping copy (will not be overwritten)"
+	fi
+else
+	print "$settings_template -> $settings_file"
+	cp $settings_template $settings_file || error "Cannot copy local-example"
+fi
+
+#Choose editor
+printHeader ">" "Choosing the editor..."
+select editor in $EDITORS;
+do
+	if [ -z $editor ]; then
+		print "Invalid option $editor"
+		continue
+	fi
+	print ""
+	EDITOR=$editor
+	print "Your are going to use $EDITOR for file manipulation..."
+	break;
+done
+
+#Edit file
+printHeader ">" "Editing local.py file..."
+while :	
+do
+	print "Now you are going to edit the file $settings_file using $EDITOR. Save the modifications and do NOT exit using Ctrl+C..."
+	pause ""
+	eval $EDITOR $settings_file
+	print ""
+	pause "Now the contents of the file will be shown for a final review. You can scroll up/down to verify the settings. Press 'q' to continue..."
+	less $settings_file
+	
+	confirm "Everything is OK." $DONT_ABORT $NO_RESCUE
+
+	if [ $? == 0 ]; then
+		break
+	fi	
+done
+

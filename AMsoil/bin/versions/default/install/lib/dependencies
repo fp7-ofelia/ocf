@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Used to define package dependencies
+
+DEBIAN_DEPENDENCIES=""
+
+PIP_DEPENDENCIES="xmltodict SQLAlchemy==0.7.8 Flask==0.10.1 Flask-XML-RPC==0.1.2 Flask-SQLAlchemy==1.0"
+

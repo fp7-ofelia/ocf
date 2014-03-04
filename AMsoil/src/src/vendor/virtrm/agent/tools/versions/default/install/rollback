@@ -1,0 +1,13 @@
+#!/bin/bash
+
+###
+#       @author: msune
+#	@organization: i2CAT
+#	@project: Ofelia FP7
+#	@description: rollback module 
+###
+
+#Inform user
+printHeader "info#" "Using default rollback module..."
+
+print "Nothing to do..."

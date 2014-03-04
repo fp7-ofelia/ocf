@@ -1,9 +1,0 @@
-{
-  "name" : "Utils for Virt RM",
-  "author" : "Carolina Fernandez",
-  "author-email" : "carolina.fernandez@i2cat.net",
-  "version" : 1,
-  "implements" : ["translator"],
-  "loads-after" : [],
-  "requires" : []
-}
