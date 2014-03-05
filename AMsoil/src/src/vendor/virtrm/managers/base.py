@@ -55,7 +55,7 @@ class VTResourceManager(object):
             servers = get_server(uuid)
         else:
             servers = []
-            server_objs = self._get_server_objects()
+            server_objs = self.get_server_objects()
             for server_obj in server_objs:
                 # XXX: Does not convert related objects into dict
                 # TODO: Create a {model2dict} method and use it
