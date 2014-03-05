@@ -57,11 +57,13 @@ class VTResourceManager(object):
             servers = []
             server_objs = self._get_server_objects()
             for server_obj in server_objs:
-                server = translator.class2dict(server_obj)
+                # XXX: Does not convert related objects into dict
+                # TODO: Create a {model2dict} method and use it
+                server = self.translator.class2dict(server_obj)
                 servers.append(server)
         return servers
 
-    def _get_server_objects(self, uuid=None):
+    def get_server_objects(self, uuid=None):
         """
         Get server by uuid. 
         If no uuid provided, return all servers.
@@ -71,16 +73,18 @@ class VTResourceManager(object):
         else:
             servers = VTDriver.get_all_servers()
         return servers
-    
+
+    # XXX: Does not convert related objects into dict
+    # TODO: Create a {model2dict} method and use it
     def get_server(self, uuid):
         """
         Get server with a given UUID.
         """
         server_obj = self._get_server_object(uuid)
-        server = translator.class2dict(server_obj)
+        server = self.translator.class2dict(server_obj)
         return server   
 
-    def _get_server_object(self, uuid):
+    def get_server_object(self, uuid):
         """
         Get server with a given UUID.
         """
@@ -491,17 +495,7 @@ class VTResourceManager(object):
         db_session.expunge_all()
         return deleted_vms
     
-    # Allocation & expiration methods
-    def _check_reservation_time(self, end_time):
-        max_duration = self.RESERVATION_TIMEOUT
-        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
-        if end_time == None or end_time < datetime.utcnow():
-            return max_end_time
-        elif (end_time > max_end_time):
-            raise VTMaxVMDurationExceeded(vm_name)
-        else:
-            return end_time
-    
+    # Allocation methods
     def allocate_vm(self, vm, slice_name, end_time):
         """
         Allocate a VM in the given slice.
