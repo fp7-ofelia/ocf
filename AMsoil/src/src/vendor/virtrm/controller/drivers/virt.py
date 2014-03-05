@@ -31,12 +31,12 @@ class VTDriver():
     def get_all_servers():
         from models.resources.vtserver import VTServer
         servers = VTServer.query.all()
-        logging.debug("***********************************************" + str(servers))
+        logging.debug("*********************************************** get_all_servers.servers: " + str(servers))
         servers_child = []
         for server in servers:
-            logging.debug("*****************************************" + str(server))
+            logging.debug("***************************************** get_all_servers.server: " + str(server))
             child_server = server.get_child_object()
-            logging.debug("*****************************************" + str(child_server))
+            logging.debug("***************************************** get_all_servers.child_server: " + str(child_server))
             servers_child.append(child_server)
         return servers_child
     
