@@ -1,6 +1,7 @@
 import time 
 import amsoil.core.pluginmanager as pm
 import xml.etree.ElementTree as ET
+import lxml
 from geni3util.xrn import *
 
 import amsoil.core.log
@@ -56,49 +57,71 @@ class VTDelegate3(GENIv3DelegateBase):
         root_node = self.lxml_ad_root()
         E = self.lxml_ad_element_maker('virtrm')
         servers = self._resource_manager.get_servers()
+        logging.debug("SERVER (DICTIONARY): %s" % str(servers))
+        #servers = self._resource_manager._get_server_objects()
+        
         r = E.network()
+        namespace = "virtrm"
+#        from lxml import objectify
+#        r = objectify.Element("{%s}sliver" % namespace)
+        parser = lxml.etree.XMLParser(recover=True)
         for server in servers:
-            #TODO: Get templates associated to each server
-            if int(server.get_available()) is 0 and geni_available: 
-                continue
-            else:
-                s = E.sliver()
-                s.append(E.name(server.get_name()))
-                s.append(E.uuid(server.get_uuid()))
-                s.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_of_cpus()))
-                s.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
-                s.append(E.virtual_memory_mb("0" if not server.get_memory() else server.get_memory()))
-                s.append(E.hard_disc_space_gb("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
-                if server.get_subscribed_ip4_ranges_no_global() or server.get_subscribed_mac_ranges_no_global() or server.get_network_interfaces():
-                    n = E.network_interfaces()   
-                    if server.get_subscribed_ip4_ranges_no_global(): 
-                        for ips in server.get_subscribed_ip4_ranges_no_global():
-                            ip = E.network_interface(type='Range')
-                            ip.append(E.name("IpRange"))
-                            ip.append(E.start_value(ips.get_start_ip()))
-                            ip.append(E.end_value(ips.get_end_ip()))
-                            n.append(ip)
-                    if server.get_subscribed_mac_ranges_no_global():
-                        for macs in server.get_subscribed_mac_ranges_no_global():
-                            mac = E.network_interface(type="Range")
-                            mac.append(E.name("MacRange"))
-                            mac.append(E.start_value(macs.get_start_mac()))
-                            mac.append(E.end_value(macs.get_end_mac()))
-                            n.append(mac)
-                    if server.get_network_interfaces():
-                        for network_interface in server.get_network_interfaces():
-                            interface = E.network_interface(type="Network")
-                            interface.append(E.type("Interface"))
-                            interface.append(E.server_interface_name(network_interface.get_name()))
-                            interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
-                            if network_interface.get_switch_id():
-                                interface.append(E.interface_switch_id(network_interface.get_switch_id))
-                            if network_interface.get_port():
-                                interface.append(E.interface_port(str(network_interface.get_port()))) 
-                            n.append(interface)                
-                    s.append(n) 
-                #TODO: Add here the Templates info
-                r.append(s)
+            # XXX SOLVE VISUALIZATION ISSUES WITH NAMESPACES IN XML PASSED TO LXML
+#            sliver_node = "<%s:sliver>%s<%s:/sliver>" % (namespace, self._translator.json2xml(server, "", namespace), namespace)
+            # Translator JSON -> XML. Arguments: (dictionary, [initial XML], [namespace])
+            sliver_node = "<sliver>%s</sliver>" % self._translator.json2xml(server, "", namespace)
+            s = lxml.etree.fromstring(sliver_node, parser)
+#            s = E.sliver()
+            # Filter private tags/nodes from XML using a list defined by us
+            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "available", "url"]
+            for filtered_node in filtered_nodes:
+                for node in s.xpath("//%s" % filtered_node):
+                    node.getparent().remove(node)
+            logging.debug("*** Translator.list_resources => final XML: %s" % str(lxml.etree.tostring(s, pretty_print=True)))
+        r.append(s)
+
+#        for server in servers:
+#            #TODO: Get templates associated to each server
+#            if int(server.get_available()) is 0 and geni_available: 
+#                continue
+#            else:
+#                s = E.sliver()
+#                s.append(E.name(server.get_name()))
+#                s.append(E.uuid(server.get_uuid()))
+#                s.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_of_cpus()))
+#                s.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
+#                s.append(E.virtual_memory_mb("0" if not server.get_memory() else server.get_memory()))
+#                s.append(E.hard_disc_space_gb("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
+#                if server.get_subscribed_ip4_ranges_no_global() or server.get_subscribed_mac_ranges_no_global() or server.get_network_interfaces():
+#                    n = E.network_interfaces()   
+#                    if server.get_subscribed_ip4_ranges_no_global(): 
+#                        for ips in server.get_subscribed_ip4_ranges_no_global():
+#                            ip = E.network_interface(type='Range')
+#                            ip.append(E.name("IpRange"))
+#                            ip.append(E.start_value(ips.get_start_ip()))
+#                            ip.append(E.end_value(ips.get_end_ip()))
+#                            n.append(ip)
+#                    if server.get_subscribed_mac_ranges_no_global():
+#                        for macs in server.get_subscribed_mac_ranges_no_global():
+#                            mac = E.network_interface(type="Range")
+#                            mac.append(E.name("MacRange"))
+#                            mac.append(E.start_value(macs.get_start_mac()))
+#                            mac.append(E.end_value(macs.get_end_mac()))
+#                            n.append(mac)
+#                    if server.get_network_interfaces():
+#                        for network_interface in server.get_network_interfaces():
+#                            interface = E.network_interface(type="Network")
+#                            interface.append(E.type("Interface"))
+#                            interface.append(E.server_interface_name(network_interface.get_name()))
+#                            interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
+#                            if network_interface.get_switch_id():
+#                                interface.append(E.interface_switch_id(network_interface.get_switch_id))
+#                            if network_interface.get_port():
+#                                interface.append(E.interface_port(str(network_interface.get_port()))) 
+#                            n.append(interface)                
+#                    s.append(n) 
+#                #TODO: Add here the Templates info
+#                r.append(s)
         root_node.append(r)
         return self.lxml_to_string(root_node)
     

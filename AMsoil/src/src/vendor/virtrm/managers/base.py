@@ -57,7 +57,7 @@ class VTResourceManager(object):
             servers = []
             server_objs = self._get_server_objects()
             for server_obj in server_objs:
-                server = translator.class2dict(server_obj)
+                server = self.translator.class2dict(server_obj)
                 servers.append(server)
         return servers
 
