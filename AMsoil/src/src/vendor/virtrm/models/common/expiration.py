@@ -19,15 +19,17 @@ class Expiration(db.Model):
     __table_args__ = {'extend_existing':True}
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    expiration = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    end_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     _do_save = True
     # Resource relationships
     virtualmachine = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
     virtualmachine_allocated = association_proxy('expiration_vm_allocated', 'vm_allocated', creator=lambda vm:VMAllocatedExpiration(vm_allocated=vm))
 
     @staticmethod    
-    def __init__(self,expiration=None,save=False):
-        self.expiration = expiration
+    def __init__(self,start_time=None,end_time=None,save=False):
+        self.start_time = start_time
+        self.end_time = end_time
         _do_save = save
         if save:
             db.session.add(self)
@@ -61,12 +63,19 @@ class Expiration(db.Model):
         self.auto_save()
 
     '''Getters and Setters'''
-    def set_expiration(self, expiration):
-        self.expiration = expiration
+    def set_start_time(self, start_time):
+        self.start_time = start_time
         self.auto_save()
     
-    def get_expiration(self):
-        return self.expiration
+    def get_start_time(self):
+        return self.start_time
+
+    def set_end_time(self, end_time):
+        self.end_time = end_time
+        self.auto_save()
+ 
+    def get_end_time(self):
+        return self.end_time
 
     def set_do_save(self, save):
         self._do_save = save

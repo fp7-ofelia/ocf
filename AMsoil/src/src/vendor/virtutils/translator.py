@@ -98,3 +98,7 @@ class Translator:
     @staticmethod
     def class2dict(content_class):
         return dict((key, value) for key, value in content_class.__dict__.iteritems() if not callable(value) and not key.startswith('_'))
+
+    @staticmethod
+    def model2dict(content_model):
+        pass

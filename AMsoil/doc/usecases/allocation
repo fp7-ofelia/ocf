@@ -1,0 +1,8 @@
+# On the time to keep an allocated VM
+if user provides t_allocation_user:
+  if t_allocation_user < current_date:
+    return t_max
+  elif t_allocation_user > t_max:
+    return exception
+else:
+  return t_max
