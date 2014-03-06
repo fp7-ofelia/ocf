@@ -29,6 +29,8 @@ from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 
 from openflow.plugin.vlans import *
+from openflow.plugin.vlan.manager import VlanManager
+from openflow.plugin.vlan.utils import create_slice_with_vlan_range
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
@@ -39,6 +41,7 @@ from expedient.common.utils.plugins.resources.node import Node
 from expedient.common.utils.plugins.resources.link import Link
 
 logger = logging.getLogger("OpenFlow plugin views")
+MAX_ALLOWED_VLAN_RANGE = 20
 
 @require_objs_permissions_for_view(
     perm_names=["can_add_aggregate"],
@@ -368,11 +371,17 @@ def book_openflow(request, slice_id):
         slice.save()
         free_vlan = 'None'
         alertMessage = ''
+        request.method
 
         fsmode = request.POST['fsmode']
+        vlan_range = request.POST.get('selected_vlan_range')
+        if not vlan_range:
+            vlan_range = 1
         if fsmode == 'simple' and enable_simple_mode:
             try:
-                free_vlan = calculate_free_vlan(slice)
+                #free_vlan = calculate_free_vlan(slice)
+                manager = VlanManager()
+                free_vlan = manager.process(slice,int(vlan_range)) 
             except Exception as e:
                 fsmode = 'failed'
                 DatedMessage.objects.post_message_to_user(
@@ -457,7 +466,8 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         elif fsmode == 'simple':
             #create a simple flowspacerule containing only the vlans tags and the OF ports
             try:
-                create_simple_slice_vlan_based(free_vlan[0], slice)
+                #create_simple_slice_vlan_based(free_vlan[0], slice)
+                create_slice_with_vlan_range(slice, free_vlan)
                 continue_to_start_slice = True
             except:
                 #continue_to_start_slice flag will deal with this
@@ -880,6 +890,7 @@ def get_ui_data(slice):
         ui_context['planetlab_node_class'] = PlanetLabNode
         ui_context['tree_rsc_ids'] = get_tree_ports(ui_context['openflow_aggs'], ui_context['planetlab_aggs'])
         ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
+        ui_context['vlan_range'] = range(1,(MAX_ALLOWED_VLAN_RANGE + 1))
     except Exception as e:
         print "[ERROR] Problem loading UI data for plugin 'openflow'. Details: %s" % str(e)
     return ui_context
