@@ -123,7 +123,7 @@ class VTDriver():
         try:
             return VirtualMachine.query.get(id).get_child_object()
         except:
-            raise Exception("Server does not exist or id not unique")
+            raise Exception("VM does not exist or id not unique")
 
     @staticmethod
     def get_vm_allocated_by_uuid(uuid):

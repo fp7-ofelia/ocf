@@ -81,6 +81,24 @@ class Translator:
         xml_tree = lxml.etree.fromstring(xml_content, parser)
         xml_tree_string = lxml.etree.tostring(xml_tree, pretty_print=True)
         return xml_tree_string
+
+    @staticmethod
+    def dict2xml_tree(dictionary, root_node, node_generator):
+        """
+        FIXME: try to make this more generic by NOT using 'node_generator'
+        and ideally 'root_node'.
+        @root_node: initial LXML tree with namespace definition, etc.
+        @node_generator: LXML node that helps appending other nodes.
+        """
+        for key in dictionary.keys():
+            if type(dictionary[key]) is dict:
+                internal_root_node = getattr(node_generator, key)()
+                #XXX: group filters in one class and get them dynamicaly
+                internal_node = Translator.dict2xml_tree(dictionary[key], internal_root_node, node_generator)
+            else:
+                node = getattr(node_generator, key)(str(dictionary[key]))
+                root_node.append(node)
+        return root_node
     
     @staticmethod
     def dict2class(dictionary, container_class=Struct):
@@ -99,6 +117,11 @@ class Translator:
     def class2dict(content_class):
         return dict((key, value) for key, value in content_class.__dict__.iteritems() if not callable(value) and not key.startswith('_'))
 
-    @staticmethod
-    def model2dict(content_model):
-        pass
+#    @staticmethod
+#    def model2dict(content_model):
+#        dictionary = Translator.class2dict(content_model)
+#        try:
+#            relational_models = content_model.get_associations()
+#	    for relational_model in relational_models.keys():
+                 
+

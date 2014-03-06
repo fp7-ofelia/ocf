@@ -108,7 +108,7 @@ class VTResourceManager(object):
             vms.append(vm)
         return vms
  
-    def _get_vms_object_in_server(self, uuid):
+    def get_vms_object_in_server(self, uuid):
         """
         Obtains list of VMs for a server with a given UUID.
         """

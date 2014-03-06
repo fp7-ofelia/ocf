@@ -54,14 +54,14 @@ class VTDelegate3(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         #XXX: Check if the certificate and credentials are correct for this method
         #self.auth(client_cert, credentials, None, ('listslices',))
+        namespace = "virtrm"
         root_node = self.lxml_ad_root()
-        E = self.lxml_ad_element_maker('virtrm')
+        node_generator = self.lxml_ad_element_maker(namespace)
         servers = self._resource_manager.get_servers()
         logging.debug("SERVER (DICTIONARY): %s" % str(servers))
         #servers = self._resource_manager._get_server_objects()
         
-        r = E.network()
-        namespace = "virtrm"
+        r = node_generator.network()
 #        from lxml import objectify
 #        r = objectify.Element("{%s}sliver" % namespace)
         parser = lxml.etree.XMLParser(recover=True)
@@ -69,16 +69,29 @@ class VTDelegate3(GENIv3DelegateBase):
             # XXX SOLVE VISUALIZATION ISSUES WITH NAMESPACES IN XML PASSED TO LXML
 #            sliver_node = "<%s:sliver>%s<%s:/sliver>" % (namespace, self._translator.json2xml(server, "", namespace), namespace)
             # Translator JSON -> XML. Arguments: (dictionary, [initial XML], [namespace])
-            sliver_node = "<sliver>%s</sliver>" % self._translator.json2xml(server, "", namespace)
-            s = lxml.etree.fromstring(sliver_node, parser)
+            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url"]
+            for filtered_node in filtered_nodes:
+                if filtered_node in server.keys():
+                    server.pop(filtered_node)
+            sliver = node_generator.sliver()
+            logging.debug("*** Translator.list_resources => sliver: %s" % str(sliver))
+            self._translator.dict2xml_tree(server, sliver, node_generator)
+#            logging.debug("*** Translator.list_resources => sliver_node: %s" % sliver_node)
+#            sliver_node = "<sliver>%s</sliver>" % self._translator.json2xml(server, "", namespace)
+#            s = lxml.etree.fromstring(sliver_node, parser)
+#            logging.debug("**** Translator.list_resources => sliver_contents to XML: %s" % str(s))
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
-            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "available", "url"]
-            for filtered_node in filtered_nodes:
-                for node in s.xpath("//%s" % filtered_node):
-                    node.getparent().remove(node)
-            logging.debug("*** Translator.list_resources => final XML: %s" % str(lxml.etree.tostring(s, pretty_print=True)))
-        r.append(s)
+            # FIXME: xpath does not filter properly
+#            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url"]
+#            for filtered_node in filtered_nodes:
+#                for node in sliver.xpath("//%s" % filtered_node):
+#                    node.getparent().remove(node)
+#            logging.debug("*** Translator.list_resources => final XML: %s" % str(lxml.etree.tostring(s, pretty_print=True)))
+            if not geni_available:
+                r.append(sliver)
+            elif geni_available and server["available"]:
+                r.append(sliver)
 
 #        for server in servers:
 #            #TODO: Get templates associated to each server
