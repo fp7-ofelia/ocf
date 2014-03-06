@@ -25,7 +25,6 @@ from vt_manager.controller.actions.ActionController import ActionController
 
 
 @rpcmethod(url_name="plugin")
-#def send(callBackUrl, expID, xml):
 def send(callBackUrl, xml):
 	try:
 		logging.debug("XML RECEIVED: \n%s" % xml)
@@ -128,7 +127,12 @@ def check(rspec):
         if actionModel.getAction(rspec.query.provisioning.action[0]).status == actionModel.SUCCESS_STATUS or actionModel.getAction(rspec.query.provisioning.action[0]).status == actionModel.FAILED_STATUS:
 	        return True	
 
-
+@rpcmethod(url_name="plugin")
+def get_ocf_am_version():
+    sv = open('../../../../.currentVersion','r')
+    software_version = sv.read().strip()
+    sv.close()
+    return softwareVersion
 
 def timeout_handler(signum, frame):
     raise Exception("TIMEOUT")

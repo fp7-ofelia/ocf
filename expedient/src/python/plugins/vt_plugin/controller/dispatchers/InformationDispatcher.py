@@ -41,4 +41,19 @@ class InformationDispatcher:
         #TODO eval use of simple actions
         return updated_vms
 
+    @staticmethod
+    def get_ocf_am_version(client_id):
+        try:
+          server = VTServer.objects.get(id=client_id)
+          client = server.aggregate.as_leaf_class().client
+          vt_am = xmlrpclib.ServerProxy('https://'+client.username+':'+client.password+'@'+client.url[8:])
+          sv = vt_am.get_ocf_version()
+          i = 1
+          result = 0
+          for num in sv.split('.').reverse():
+              result += i * num
+              i *= 10
+          return result
+        except:
+          return  None #Equal or Below 0.7 version
 

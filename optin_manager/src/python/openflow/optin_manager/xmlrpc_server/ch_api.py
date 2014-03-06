@@ -646,7 +646,7 @@ def get_used_vlans(range_len=1, direct_output=False):
           
 @check_fv_set    
 @rpcmethod()
-def get_ocf_version():
+def get_ocf_am_version():
     sv = open('../../../../../.currentVersion','r')
     software_version = sv.read().strip()
     sv.close()
