@@ -31,6 +31,7 @@
         <xs:all>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="uuid"/>
+            <xs:element type="xs:boolean" name="available"/>
             <xs:element type="xs:integer" name="cpus_number" minOccurs="0"/>
             <xs:element type="xs:float" name="cpu_frequency" minOccurs="0"/>
             <xs:element type="xs:integer" name="virtual_memory_mb" minOccurs="0"/>
