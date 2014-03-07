@@ -169,7 +169,6 @@ production networks, and is currently deployed in several universities.
 
  
     def get_offered_vlans(self, set=None):
-
         try:
             vlans = self.client.proxy.get_offered_vlans(set)
         except:
@@ -181,6 +180,8 @@ production networks, and is currently deployed in several universities.
 
     def get_used_vlans(self, range_len=1, direct_output=False):
         try:
+            if self.get_ocf_am_version < 70:
+                raise Exception("The current version of the AM does not support this feature.")
             vlans = self.client.proxy.get_used_vlans(range_len, direct_output)
         except Exception as e:
             import traceback
