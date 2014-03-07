@@ -185,7 +185,7 @@
 		{% if gfs.0 == agg.id  and gfs.1 %}
 	    <div> 
     <table class="grantedFlowspaceHeader flowspaceHeader" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if gfs.1|length > 1%}s{%endif%} ({{ gfs.1|length}}) <img align="absmiddle" id="gr_fs_help" src="{% url img_media 'question_mark_15x15.png' %}"></th>
+    <tr><th>Granted Flowspace{%if gfs.1.0|length > 1%}s{%endif%} ({{ gfs.1.0|length}}) <img align="absmiddle" id="gr_fs_help" src="{% url img_media 'question_mark_15x15.png' %}"></th>
     <th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="grantedFlowspace{{agg.id}}">More information <span class="opened">&#x25B2;</span> </a></th></tr>
     </table>
 	</div>
@@ -195,12 +195,12 @@
 
     	     <div id="grantedFlowspace{{agg.id}}Container" class="expandable">
 		{% for fs_list in gfs.1 %}<!-- flowspace level-->
-                {% with  fs_list.0 as f %}
+                {% with  fs_list as FG %}
+                {% for f in FG %}
             <table class="flowspace">
                 <tr class="odd">
                 <td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
                 </tr>
-	
 			{% with f.flowspace as fs%}	
 			{% with f.openflow as of_list%}	
     		    <tr class = "even">
@@ -242,6 +242,7 @@
     		    </tr>
 		{% endwith %}
 		{% endwith %}
+                {% endfor %}
 		{% endwith %}
 		</table>
 		{% endfor %} <!-- gfs in gfs_lis -->

@@ -29,10 +29,8 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     fv_args = []
     match_list = []
     some_exception = False
-
     try:
         for fs in expFS:
-
             # XXX: lbergesio - This line is to force intersection 
             # between the requested fs by the user and the one granted by the IM which is already the 
             # the intesection between the adminFS (normally ALL) and the granted by the IM in the web form.
@@ -43,10 +41,11 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
             # granted by the IM.
 
             for optedfs in optedFS:
-                fs.vlan_id_e = optedfs.vlan_id_e
-                fs.vlan_id_s = optedfs.vlan_id_s
-
-            opted = multi_fs_intersect([fs],optedFS,OptsFlowSpace)
+                 
+                #fs.vlan_id_e = optedfs.vlan_id_e
+                #fs.vlan_id_s = optedfs.vlan_id_s
+                if fs.vlan_id_e == optedfs.vlan_id_e and fs.vlan_id_s == optedfs.vlan_id_s:
+                    opted = multi_fs_intersect([fs],[optedfs],OptsFlowSpace)
             if (len(opted) > 0):
                 intersected = True
                 for opt in opted:
