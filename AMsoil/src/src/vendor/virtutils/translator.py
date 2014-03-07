@@ -91,13 +91,15 @@ class Translator:
         @node_generator: LXML node that helps appending other nodes.
         """
         for key in dictionary.keys():
-            if type(dictionary[key]) is dict:
-                internal_root_node = getattr(node_generator, key)()
-                #XXX: group filters in one class and get them dynamicaly
-                internal_node = Translator.dict2xml_tree(dictionary[key], internal_root_node, node_generator)
+            if type(dictionary[key]) is list:
+                node = getattr(node_generator, key)()
+                for internal_dict in dictionary[key]:
+                    #XXX: group filters in one class and get them dynamicaly
+                    internal_node = Translator.dict2xml_tree(internal_dict, node, node_generator)
+                    node.append(internal_node)
             else:
                 node = getattr(node_generator, key)(str(dictionary[key]))
-                root_node.append(node)
+            root_node.append(node)
         return root_node
     
     @staticmethod
@@ -117,11 +119,19 @@ class Translator:
     def class2dict(content_class):
         return dict((key, value) for key, value in content_class.__dict__.iteritems() if not callable(value) and not key.startswith('_'))
 
-#    @staticmethod
-#    def model2dict(content_model):
-#        dictionary = Translator.class2dict(content_model)
-#        try:
-#            relational_models = content_model.get_associations()
-#	    for relational_model in relational_models.keys():
-                 
-
+    @staticmethod
+    def model2dict(content_model):
+        import sqlalchemy
+        dictionary = Translator.class2dict(content_model)
+        for key in dir(content_model):
+            logging.debug("************* Model %s => Attribute %s" % (str(content_model), key))
+            model_attr = getattr(content_model, key)
+            logging.debug("************* Attribute => %s" % str(model_attr))
+            if type(model_attr) is sqlalchemy.ext.associationproxy._AssociationList and model_attr: 
+                logging.debug("************ Association key %s :Object %s" % (key, str(model_attr)))
+                dictionary[key] = list()
+                for attr in model_attr:
+                    internal_model = Translator.class2dict(attr)
+                    dictionary[key].append(internal_model)
+        return dictionary
+               

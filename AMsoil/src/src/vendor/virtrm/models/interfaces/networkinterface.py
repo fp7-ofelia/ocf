@@ -40,7 +40,7 @@ class NetworkInterface(db.Model):
     id_form = db.Column("idForm", db.Integer)
 
     '''Defines soft or hard state of the VM'''
-    do_save = True
+    do_save = False
 
 
     '''Interface constructor '''
@@ -278,5 +278,5 @@ class NetworkInterfaceConnectedTo(db.Model):
     to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
     to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref="from_networkinterface")
-    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="to_network_interface")
+    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="to_networkinterface")
 

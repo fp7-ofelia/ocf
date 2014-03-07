@@ -59,14 +59,14 @@ class VTServer(db.Model):
     url = db.Column(db.String(200))
 
     '''Network interfaces'''
-    network_interfaces = association_proxy("vtserver_networkinterface", "networkinterface")
+    network_interfaces = association_proxy("vtserver_networkinterface", "networkinterface", creator=lambda iface:VTServerNetworkInterfaces(networkinterface=iface))
 
     '''Other networking parameters'''
-    subscribed_mac_ranges = association_proxy("vtserver_mac_range", "subscribed_mac_range")
-    subscribed_ip4_ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range")
+    subscribed_mac_ranges = association_proxy("vtserver_mac_range", "subscribed_mac_range", creator=lambda mac_range:VTServerMacRange(subscribed_mac_range=mac_range))
+    subscribed_ip4_ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range", creator=lambda ip4_range:VTServerIp4Range(subscribed_ip4_range=ip4_range))
     
     '''Virtual Machines allocated'''
-    vms_allocated = association_proxy("vtserver_vms", "allocated_vm")
+    vms_allocated = association_proxy("vtserver_vms", "allocated_vm", creator=lambda vm:ServerAllocatedVMs(allocated_vm=vm))
 
     ''' Mutex over the instance '''
     mutex = None
@@ -485,8 +485,8 @@ class VTServerNetworkInterfaces(db.Model):
     vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
     networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
     # Relationships
-    vtserver = db.relationship("VTServer", backref="vtserver_networkinterface")
-    networkinterface = db.relationship("NetworkInterface", backref="vtserver_assocation")
+    vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerNetworkInterfaces.vtserver_id", backref=db.backref("vtserver_networkinterface", cascade="all, delete-orphan"))
+    networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==VTServerNetworkInterfaces.networkinterface_id", backref=db.backref("vtserver_assocation", cascade="all, delete-orphan"))
 
 
 class VTServerIpRange(db.Model):
@@ -499,8 +499,8 @@ class VTServerIpRange(db.Model):
     vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
     ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
     # Relationships
-    vtserver = db.relationship("VTServer", backref="vtserver_ip4_range")
-    subscribed_ip4_range = db.relationship("Ip4Range", backref="vtserver_association")
+    vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerIpRange.vtserver_id", backref=db.backref("vtserver_ip4_range", cascade="all, delete-orphan"))
+    subscribed_ip4_range = db.relationship("Ip4Range", primaryjoin="Ip4Range.id==VTServerIpRange.ip4range_id", backref=db.backref("vtserver_association", cascade="all, delete-orphan"))
  
 
 class VTServerMacRange(db.Model):
@@ -513,6 +513,6 @@ class VTServerMacRange(db.Model):
     vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
     macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
     # Relationships
-    vtserver = db.relationship("VTServer", backref="vtserver_mac_range")
-    subscribed_mac_range = db.relationship("MacRange", backref="vtserver_association")
+    vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerMacRange.vtserver_id", backref=db.backref("vtserver_mac_range", cascade="all, delete-orphan"))
+    subscribed_mac_range = db.relationship("MacRange", primaryjoin="MacRange.id==VTServerMacRange.macrange_id", backref=db.backref("vtserver_association", cascade="all, delete-orphan"))
 

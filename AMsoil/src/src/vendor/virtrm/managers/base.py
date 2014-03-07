@@ -59,7 +59,7 @@ class VTResourceManager(object):
             for server_obj in server_objs:
                 # XXX: Does not convert related objects into dict
                 # TODO: Create a {model2dict} method and use it
-                server = self.translator.class2dict(server_obj)
+                server = self.translator.model2dict(server_obj)
                 servers.append(server)
         return servers
 
@@ -81,7 +81,7 @@ class VTResourceManager(object):
         Get server with a given UUID.
         """
         server_obj = self._get_server_object(uuid)
-        server = self.translator.class2dict(server_obj)
+        server = self.translator.model2dict(server_obj)
         return server   
 
     def get_server_object(self, uuid):

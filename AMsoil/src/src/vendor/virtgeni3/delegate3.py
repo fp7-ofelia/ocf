@@ -69,7 +69,7 @@ class VTDelegate3(GENIv3DelegateBase):
             # XXX SOLVE VISUALIZATION ISSUES WITH NAMESPACES IN XML PASSED TO LXML
 #            sliver_node = "<%s:sliver>%s<%s:/sliver>" % (namespace, self._translator.json2xml(server, "", namespace), namespace)
             # Translator JSON -> XML. Arguments: (dictionary, [initial XML], [namespace])
-            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url"]
+            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms"]
             for filtered_node in filtered_nodes:
                 if filtered_node in server.keys():
                     server.pop(filtered_node)
