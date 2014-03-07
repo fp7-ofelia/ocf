@@ -1290,7 +1290,7 @@ div.aggregateManager table.aggregateManagerDetail .label {
 	font-size: 1.1em;
 	padding-top: 2px;
 	vertical-align: top !important;
-	width: 150px;
+	width: 170px;
 }
 /* Slice detail page: button added when no AM has been added yet */
 div#aggregate_add_to_slice {

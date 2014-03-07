@@ -95,12 +95,29 @@
 	
 	<tr>
 	<td class="label">Status:</td>
-	<td>			{% if not agg.available %}
-				<img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
-				{%else%}
-				<img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em"> 
-				{% endif %}
+	<td>
+            {% if not agg.available %}
+                <img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
+            {%else%}
+                <img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em"> 
+            {% endif %}
 	</tr>
+
+        <tr>
+        <td class="label">Automatic approval:</td>
+        <td>
+            {% if agg.available %}
+                {# Automatic approval only possible when (1) agg reachable, (2) auto VLANs assignment, (3) auto fs granting #}
+                {% if agg.openflowaggregate.vlan_auto_assignment and agg.openflowaggregate.flowspace_auto_approval %}
+                    <img src="{% url img_media 'active.png' %}" title="Automatic approval" alt="Automatic approval" style="height:1.2em">
+                {%else%}
+                    <img src="{% url img_media 'inactive.png' %}" alt="Manual approval" title="Manual approval" style="height:1.2em">
+                {% endif %}
+            {% else %}
+                <img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
+            {% endif %}
+        </tr>
+
 	<tr>
 	<td class="label">Physical location:</td>
 	<td> <b>{{ agg.location }}</b></td>
@@ -283,8 +300,7 @@
     <tr>
 	<td class="label">Actions:</td>
 	<td>
-    	
-	        <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
+	    <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
     {# {% else %} #}
 		<!--<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />-->
   {# {% endif %} #}

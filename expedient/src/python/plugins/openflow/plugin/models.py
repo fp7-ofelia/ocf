@@ -83,6 +83,11 @@ production networks, and is currently deployed in several universities.
 
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
     usage_agreement = models.TextField()
+    # New fields to keep track of...
+    # Automatic assignment of VLANs
+    vlan_auto_assignment = models.BooleanField("VLANs are automatically assigned", default=False)
+    # Automatic approval of flowspaces
+    flowspace_auto_approval = models.BooleanField("FlowSpace is automatically approved", default=False)
     
     class Meta:
         verbose_name = "OpenFlow Aggregate"

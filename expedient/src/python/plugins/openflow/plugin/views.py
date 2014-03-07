@@ -92,6 +92,14 @@ def aggregate_crud(request, agg_id=None):
             aggregate.save()
             agg_form.save_m2m()
             try:
+                info = aggregate.client.proxy.get_am_info()
+                aggregate.vlan_auto_assignment = info["vlan_auto_assignment"]
+                aggregate.flowspace_auto_approval = info["flowspace_auto_approval"]
+            except Exception as e:
+#                logger.debug("Aggregate %s: could not check automatic resource assignment" % str(aggregate.name))
+                pass
+            
+            try:
                 err = ' '
                 aggregate.client.proxy.checkFlowVisor() 
                 aggregate.setup_new_aggregate(request.build_absolute_uri("/"))

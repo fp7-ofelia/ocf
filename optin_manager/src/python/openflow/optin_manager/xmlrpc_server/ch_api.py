@@ -5,7 +5,6 @@ Created on Apr 26, 2010
 '''
 from expedient.common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
-from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace, MatchStruct
@@ -18,7 +17,6 @@ from django.core.mail import send_mail
 from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 from django.contrib.sites.models import Site
 from openflow.optin_manager.opts.autofsgranter import auto_fs_granter
-
 
 @decorator
 def check_fv_set(func, *arg, **kwargs):
@@ -234,8 +232,6 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_email: %s" % owner_email
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
-    pprint(switch_slivers, indent=8)
-
     
     e = Experiment.objects.filter(slice_id=slice_id)
     
@@ -376,10 +372,8 @@ def create_slice(slice_id, project_name, project_description,
     try:
         if settings.FLOWSPACE_AUTO_APPROVAL:
             auto_fs_granter(e)
-        print "---------------------- after granting the flowspace -------------"
     except Exception as exc:
         flowspace_correctly_granted = False
-        print "Could not grant flowspace: " + str(exc)
     
     try:
         # Get project detail URL to send via e-mail
@@ -389,13 +383,15 @@ def create_slice(slice_id, project_name, project_description,
         # No "https://" check should be needed if settings are OK
         site_domain_url = "https://" + Site.objects.get_current().domain + project_detail_url
         # Tuple with the requested VLAN range
+        vlan_range = list()
         try:
-            vlan_range = "\nVLAN range: %s\n\n" % str((all_efs[0].vlan_id_s, all_efs[0].vlan_id_e))
-        except:
-            vlan_range = "\n\n"
+            if not isinstance(all_efs,list):
+                all_efs = [all_efs]
+            for efs in all_efs:
+                vlan_range.append("\nVLAN range: %s\n\n" % str((efs.vlan_id_s, efs.vlan_id_e)))
+        except Exception as e:
+            vlan_range = ["\n\n"]
 
-        print "----------- auto approval: %s -------------" % str(settings.FLOWSPACE_AUTO_APPROVAL)
-        print "----------- correctly granted: %s --------------" % str(flowspace_correctly_granted)
         # Default message: either for manual granting or any failure in automatic granting        
         flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new rule for this request at: %s" % site_domain_url
         if settings.FLOWSPACE_AUTO_APPROVAL:
@@ -567,9 +563,7 @@ def ping(data, **kwargs):
     Test method to see that everything is up.
     return a string that is "PONG: %s" % data
     '''
-    #print "Pinged!"
     return "PONG: %s" % data
-
 
 @check_user
 @check_fv_set
@@ -641,7 +635,6 @@ def get_granted_flowspace(slice_id, **kwargs):
         traceback.print_exc()
         raise Exception(parseFVexception(e))
 
-
     return gfs 
 
 #@check_user
@@ -667,11 +660,24 @@ def get_used_vlans(range_len=1, direct_output=False):
         rnd = random.randrange(0, len(vlans))
         return [vlans[rnd]]
           
-@check_fv_set    
-@rpcmethod()
-def get_ocf_am_version():
-    sv = open('../../../../../.currentVersion','r')
+@check_fv_set
+@rpcmethod(signature=['string', # return value
+                     ])
+def get_ocf_am_version(args=None):
+#    sv = open('../../../../../.currentVersion','r')
+    import os
+    sv = open(os.path.join(settings.SRC_DIR, "..", ".currentVersion"),"r")
     software_version = sv.read().strip()
     sv.close()
-    return softwareVersion
+    return software_version
+
+@check_fv_set
+@rpcmethod(signature=['struct', # return value
+                     ])
+def get_am_info(args=None):
+    info = dict()
+    info["version"] = get_ocf_am_version()
+    info["vlan_auto_assignment"] = settings.VLAN_AUTO_ASSIGNMENT
+    info["flowspace_auto_approval"] = settings.FLOWSPACE_AUTO_APPROVAL
+    return info
 

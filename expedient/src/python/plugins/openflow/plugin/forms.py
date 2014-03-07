@@ -17,7 +17,8 @@ class OpenFlowAggregateForm(forms.ModelForm):
 
     class Meta:
         model = OpenFlowAggregate
-        exclude = ['client', 'owner', 'users', "leaf_name"]
+        # "vlan_auto_assignment" and "flowspace_auto_approval" only available to set by its corresponding IM
+        exclude = ['client', 'owner', 'users', "leaf_name", "vlan_auto_assignment", "flowspace_auto_approval"]
 
 class OpenFlowSliceInfoForm(forms.ModelForm):
     class Meta:
