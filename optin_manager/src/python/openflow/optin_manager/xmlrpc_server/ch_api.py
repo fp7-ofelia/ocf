@@ -17,6 +17,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 from django.contrib.sites.models import Site
+from openflow.optin_manager.opts.autofsgranter import auto_fs_granter
+
 
 @decorator
 def check_fv_set(func, *arg, **kwargs):
@@ -369,7 +371,16 @@ def create_slice(slice_id, project_name, project_description,
                 all_opts.delete()
                 print exc
                 raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
-             
+    
+    flowspace_correctly_granted = True
+    try:
+        if settings.FLOWSPACE_AUTO_APPROVAL:
+            auto_fs_granter(e)
+        print "---------------------- after granting the flowspace -------------"
+    except Exception as exc:
+        flowspace_correctly_granted = False
+        print "Could not grant flowspace: " + str(exc)
+    
     try:
         # Get project detail URL to send via e-mail
         from openflow.optin_manager.opts import urls
@@ -382,11 +393,21 @@ def create_slice(slice_id, project_name, project_description,
             vlan_range = "\nVLAN range: %s\n\n" % str((all_efs[0].vlan_id_s, all_efs[0].vlan_id_e))
         except:
             vlan_range = "\n\n"
-        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager '"+str(project_name)+"'", "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new Rule for this request at: %s" % site_domain_url, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+
+        print "----------- auto approval: %s -------------" % str(settings.FLOWSPACE_AUTO_APPROVAL)
+        print "----------- correctly granted: %s --------------" % str(flowspace_correctly_granted)
+        # Default message: either for manual granting or any failure in automatic granting        
+        flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new rule for this request at: %s" % site_domain_url
+        if settings.FLOWSPACE_AUTO_APPROVAL:
+            if flowspace_correctly_granted:
+                flowspace_email = "Hi, Island Manager\n\nA new flowspace was automatically granted:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may check the rule for this request at: %s" % site_domain_url
+
+        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager '"+str(project_name)+"'", flowspace_email, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
     except:
         pass
-
-    transaction.commit()       
+    
+    transaction.commit()
+    
     return {
         'error_msg': "",
         'switches': [],
@@ -638,6 +659,8 @@ def get_used_vlans(range_len=1, direct_output=False):
     from openflow.optin_manager.opts.vlans.vlanController import vlanController
     import random
     vlans =  vlanController.offer_vlan_tags(range_len)
+    if not settings.VLAN_AUTO_ASSIGNMENT:
+        raise Exception("VLAN_AUTO_ASSIGNMENT setting is disabled")
     if not direct_output:
         return list(set(range(4096)) - set(vlans))
     else:
