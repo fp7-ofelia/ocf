@@ -435,23 +435,31 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         else:
             return f.formfield()
 
-    # create a formset to handle all flowspaces
-    FSFormSet = forms.models.modelformset_factory(
-        model=FlowSpaceRule,
-        formfield_callback=formfield_callback,
-        can_delete=True,
-        extra=0, # No extra forms apart from the one being shown
-#        extra=2,
-    )
-
     if request.method == "POST":
         continue_to_start_slice = False
+        
+        # No extra forms apart from the one being shown
+        flowspace_form_number = 0
+        
+        if fsmode == 'failed':
+            # If an exception was risen from the previous step, the flowspace needs to be requested here
+            flowspace_form_number = 1
+        
+        # create a formset to handle all flowspaces
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=flowspace_form_number,
+        )
+        
         # Default formset
         formset = FSFormSet(
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
         if formset.is_valid():
+            print "------------------------ saving formset --------------------"
             formset.save()
 
         if fsmode == 'advanced':
@@ -486,7 +494,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             finally:
                 if exp:
                      DatedMessage.objects.post_message_to_user(
-                         "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
+                         "Successfully set flowspace for slice %s, but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
                          request.user, msg_type=DatedMessage.TYPE_WARNING,
                      )
                 else:
@@ -520,7 +528,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             model=FlowSpaceRule,
             formfield_callback=formfield_callback,
             can_delete=True,
-            extra=flowspace_form_number, # Show numbe of forms according to origin path request and so on
+            extra=flowspace_form_number, # Show number of forms according to origin path request and so on
         )
         formset = FSFormSet(
             queryset=flowspace_form_contents,
