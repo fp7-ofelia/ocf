@@ -195,8 +195,8 @@
 
     	     <div id="grantedFlowspace{{agg.id}}Container" class="expandable">
 		{% for fs_list in gfs.1 %}<!-- flowspace level-->
-                {% with  fs_list as FG %}
-                {% for f in FG %}
+                {% with fs_list as FG %}
+                {% for f in FG reversed %}
             <table class="flowspace">
                 <tr class="odd">
                 <td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
