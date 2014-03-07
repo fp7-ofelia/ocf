@@ -64,6 +64,13 @@ SITE_IP_ADDR = "192.168.254.193"
 #
 UNALLOWED_VLANS = []
 
+#
+# Automatic assignment of VLANs and granting of flowspaces.
+# Default: True. You may set to False to manually control the requests.
+#
+VLAN_AUTO_ASSIGNMENT = True
+FLOWSPACE_AUTO_APPROVAL = True
+
 
 ##
 ## Theme Manager 
