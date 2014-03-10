@@ -1322,6 +1322,30 @@ div.slicemgmt_actions {
 	margin-top: 10px;
 }
 
+.slice_administration_details, 
+.project_administration_details {
+    background-color: #ebf5ff;
+    border: 1px solid #7e9fc0;
+    margin-top: .8em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+}
+.slice_administration_details h2,
+.project_administration_details h2 {
+    margin-bottom: 1em;
+}
+.slice_administration_details p,
+.project_administration_details p {
+    margin-bottom: 0.1em !important;
+    margin-top: 0em !important;
+    padding-left: 0em !important;
+    padding-top: 0em !important;
+}
+.slice_administration_details span.title,
+.project_administration_details span.title {
+    font-weight: bold;
+}
+
 /* GENERIC CLASSES */
 
 /* Colors for MessageCenter */
