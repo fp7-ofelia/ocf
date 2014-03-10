@@ -5,6 +5,7 @@ Created on Apr 26, 2010
 '''
 from expedient.common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
+from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace, MatchStruct
@@ -232,6 +233,7 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_email: %s" % owner_email
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
+    pprint(switch_slivers, indent=8)
     
     e = Experiment.objects.filter(slice_id=slice_id)
     
