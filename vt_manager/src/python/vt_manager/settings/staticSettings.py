@@ -41,7 +41,8 @@ DEBUG = True
 #
 # Directory for the VT manager sources.
 #
-SRC_DIR = join(dirname(__file__), '../../../')
+#SRC_DIR = join(dirname(__file__), '../../../')
+SRC_DIR = "/opt/ofelia/vt_manager/src/"
 
 #
 # Database default parameters.

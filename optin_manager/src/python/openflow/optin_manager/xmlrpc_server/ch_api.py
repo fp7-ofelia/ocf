@@ -677,6 +677,7 @@ def get_ocf_am_version(args=None):
 @rpcmethod(signature=['struct', # return value
                      ])
 def get_am_info(args=None):
+    # INFO: add as many keys as you wish
     info = dict()
     info["version"] = get_ocf_am_version()
     info["vlan_auto_assignment"] = settings.VLAN_AUTO_ASSIGNMENT

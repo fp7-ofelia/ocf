@@ -129,10 +129,19 @@ def check(rspec):
 
 @rpcmethod(url_name="plugin")
 def get_ocf_am_version():
-    sv = open('../../../../.currentVersion','r')
+#    sv = open('../../../../../.currentVersion','r')
+    import os
+    sv = open(os.path.join(settings.SRC_DIR, "..", ".currentVersion"),"r")
     software_version = sv.read().strip()
     sv.close()
-    return softwareVersion
+    return software_version
+
+@rpcmethod(url_name="plugin")
+def get_am_info(args=None):
+    # INFO: add as many keys as you wish
+    info = dict()
+    info["version"] = get_ocf_am_version()
+    return info
 
 def timeout_handler(signum, frame):
     raise Exception("TIMEOUT")
