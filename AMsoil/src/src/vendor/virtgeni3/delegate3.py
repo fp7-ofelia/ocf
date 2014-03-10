@@ -29,14 +29,15 @@ class VTDelegate3(GENIv3DelegateBase):
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
         self._translator = pm.getService("translator")
+        self._filter = pm.getService("filter")
 
     def get_request_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'vtam' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /request.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /request.xsd
 
     def get_manifest_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'vtam' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /manifest.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /manifest.xsd
 
     def get_ad_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
@@ -69,10 +70,10 @@ class VTDelegate3(GENIv3DelegateBase):
             # XXX SOLVE VISUALIZATION ISSUES WITH NAMESPACES IN XML PASSED TO LXML
 #            sliver_node = "<%s:sliver>%s<%s:/sliver>" % (namespace, self._translator.json2xml(server, "", namespace), namespace)
             # Translator JSON -> XML. Arguments: (dictionary, [initial XML], [namespace])
-            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms"]
-            for filtered_node in filtered_nodes:
-                if filtered_node in server.keys():
-                    server.pop(filtered_node)
+#            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms"]
+#            for filtered_node in filtered_nodes:
+#                if filtered_node in server.keys():
+#                    server.pop(filtered_node)
             sliver = node_generator.sliver()
             logging.debug("*** Translator.list_resources => sliver: %s" % str(sliver))
             self._translator.dict2xml_tree(server, sliver, node_generator)
@@ -82,15 +83,18 @@ class VTDelegate3(GENIv3DelegateBase):
 #            logging.debug("**** Translator.list_resources => sliver_contents to XML: %s" % str(s))
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
-            # FIXME: xpath does not filter properly
-#            filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url"]
-#            for filtered_node in filtered_nodes:
-#                for node in sliver.xpath("//%s" % filtered_node):
-#                    node.getparent().remove(node)
+            server_filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms", "virtualization_technology", "operating_system_version", "operating_system_type", "operating_system_distribution"]
+            self._filter.filter_xml_by_dict(server_filtered_nodes, sliver, "sliver", self.get_ad_extensions_mapping())
+#            nspace = self.get_ad_extensions_mapping()
+#            for filtered_node in server_filtered_nodes:
+#                for node in sliver.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=nspace):
+#                    logging.debug("*** Translator.list_resources => Node %s parent: %s" % (filtered_node, str(node.getparent().tag)))
+#                    if node.getparent().tag == "%s%s%ssliver" %("{" if namespace else "", nspace[namespace], "}" if namespace else ""):
+#                        node.getparent().remove(node)
 #            logging.debug("*** Translator.list_resources => final XML: %s" % str(lxml.etree.tostring(s, pretty_print=True)))
             if not geni_available:
                 r.append(sliver)
-            elif geni_available and server["available"]:
+            elif geni_available and server["available"] is "1":
                 r.append(sliver)
 
 #        for server in servers:

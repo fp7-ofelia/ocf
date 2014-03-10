@@ -6,7 +6,7 @@ import json
 logging=amsoil.core.log.getLogger('VirtUtils')
 
 """
-        @author: CarolinaFernandez
+        @author: CarolinaFernandez, SergioVidiella
 
         General {translator, encoder/decoder} to/from JSON, XML, etc.
 """
@@ -94,9 +94,9 @@ class Translator:
             if type(dictionary[key]) is list:
                 node = getattr(node_generator, key)()
                 for internal_dict in dictionary[key]:
-                    #XXX: group filters in one class and get them dynamicaly
-                    internal_node = Translator.dict2xml_tree(internal_dict, node, node_generator)
-                    node.append(internal_node)
+                    int_node = getattr(node_generator, key[:-1])()
+                    internal_node = Translator.dict2xml_tree(internal_dict, int_node, node_generator)
+                    node.append(int_node)
             else:
                 node = getattr(node_generator, key)(str(dictionary[key]))
             root_node.append(node)
