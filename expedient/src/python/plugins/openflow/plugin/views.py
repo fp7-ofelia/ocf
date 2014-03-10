@@ -423,6 +423,32 @@ def book_openflow(request, slice_id):
             extra_context = dict(TOPOLOGY_GENERATOR.load_ui_data(slice).items() + ui_extra_context.items()),
         )
 
+def slice_save_start(request, slice_id):
+    """
+    Sets the slice as modified, saves it and starts it.
+    """
+    slice = get_object_or_404(Slice, id=slice_id)
+    slice.modified = True
+    slice.save()
+    exp = ""
+    try:
+        if slice.started:
+            #slice.stop(request.user)
+            slice.start(request.user)
+    except Exception as e:
+        exp = str(e)
+    finally:
+        if exp:
+             DatedMessage.objects.post_message_to_user(
+                 "Successfully set flowspace for slice %s, but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
+                 request.user, msg_type=DatedMessage.TYPE_WARNING,
+             )
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully set flowspace for slice %s" % slice.name,
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS,
+            )
+
 def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
     """
     Add flowspace.
@@ -467,7 +493,6 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
                 slivers__slice=slice).distinct(),
         )
         if formset.is_valid():
-            print "------------------------ saving formset --------------------"
             formset.save()
 
         if fsmode == 'advanced':
@@ -490,26 +515,7 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
                 pass
 
         if continue_to_start_slice:
-            slice.modified = True
-            slice.save()
-            exp=""
-            try:
-                if slice.started:
-                    #slice.stop(request.user)
-                    slice.start(request.user)
-            except Exception as e:
-                exp=str(e)
-            finally:
-                if exp:
-                     DatedMessage.objects.post_message_to_user(
-                         "Successfully set flowspace for slice %s, but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
-                         request.user, msg_type=DatedMessage.TYPE_WARNING,
-                     )
-                else:
-                    DatedMessage.objects.post_message_to_user(
-                        "Successfully set flowspace for slice %s" % slice.name,
-                        request.user, msg_type=DatedMessage.TYPE_SUCCESS,
-                    )
+            slice_save_start(request, slice_id)
             if fsmode == 'simple':
                 return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
             else:
@@ -585,12 +591,14 @@ def save_flowspace(request, slice_id):
             else:
                 return f.formfield()
         
+        continue_to_start_slice = False
+        
         # create a formset to handle all flowspaces
         FSFormSet = forms.models.modelformset_factory(
             model=FlowSpaceRule,
             formfield_callback=formfield_callback,
             can_delete=True,
-            extra=0, # No extra forms apart from the one being shown
+            extra=0,
         )
         
         formset = FSFormSet(
@@ -600,6 +608,10 @@ def save_flowspace(request, slice_id):
         )
         if formset.is_valid():
             formset.save()
+            continue_to_start_slice = True
+
+        if continue_to_start_slice:
+            slice_save_start(request, slice_id)
         
         return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
     else:
