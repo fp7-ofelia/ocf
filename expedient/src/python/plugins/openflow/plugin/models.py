@@ -263,7 +263,9 @@ production networks, and is currently deployed in several universities.
                             else:
                                 fsd[f.name] = "*"
                     d['flowspace'].append(fsd)
-            sw_slivers.append(d)
+            # Carolina 2014/03/10: do not add datapath_id when no flowspace is requested for it
+            if d['flowspace']:
+                sw_slivers.append(d)
             
         return sw_slivers
 
