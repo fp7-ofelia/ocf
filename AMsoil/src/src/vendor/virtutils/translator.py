@@ -97,6 +97,10 @@ class Translator:
                     int_node = getattr(node_generator, key[:-1])()
                     internal_node = Translator.dict2xml_tree(internal_dict, int_node, node_generator)
                     node.append(int_node)
+            elif type(dictionary[key]) is dict:
+                node = getattr(node_generator, key)()
+                internal_node = Translator.dict2xml_tree(dictionary[key], node, node_generator)
+                node.append(internal_node)
             else:
                 node = getattr(node_generator, key)(str(dictionary[key]))
             root_node.append(node)

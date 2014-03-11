@@ -22,7 +22,7 @@ class VTDelegate3(GENIv3DelegateBase):
     """
 
     URN_PREFIX = 'urn:publicid:IDN+geni:gpo:gcf'
-    ACCEPTED_TAGS_REQUEST = ["name", "project-name", "server-name", "operating-system-type", "operating-system-version", "operating-system-distribution", "virtualization-type", "hd-setup-type", "hd-size-mb", "hd-origin-path", "hypervisor", "virtualization-setup-type", "memory-mb"]
+#    ACCEPTED_TAGS_REQUEST = ["name", "project-name", "server-name", "operating-system-type", "operating-system-version", "operating-system-distribution", "virtualization-type", "hd-setup-type", "hd-size-mb", "hd-origin-path", "hypervisor", "virtualization-setup-type", "memory-mb"]
 
     def __init__(self):
         super(VTDelegate3, self).__init__()
@@ -55,9 +55,9 @@ class VTDelegate3(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         #XXX: Check if the certificate and credentials are correct for this method
         #self.auth(client_cert, credentials, None, ('listslices',))
-        namespace = "virtrm"
+        namespace = self.get_ad_extensions_mapping()
         root_node = self.lxml_ad_root()
-        node_generator = self.lxml_ad_element_maker(namespace)
+        node_generator = self.lxml_ad_element_maker(namespace.keys()[0])
         servers = self._resource_manager.get_servers()
         logging.debug("SERVER (DICTIONARY): %s" % str(servers))
         #servers = self._resource_manager._get_server_objects()
@@ -65,7 +65,7 @@ class VTDelegate3(GENIv3DelegateBase):
         r = node_generator.network()
 #        from lxml import objectify
 #        r = objectify.Element("{%s}sliver" % namespace)
-        parser = lxml.etree.XMLParser(recover=True)
+#        parser = lxml.etree.XMLParser(recover=True)
         for server in servers:
             # XXX SOLVE VISUALIZATION ISSUES WITH NAMESPACES IN XML PASSED TO LXML
 #            sliver_node = "<%s:sliver>%s<%s:/sliver>" % (namespace, self._translator.json2xml(server, "", namespace), namespace)
@@ -74,7 +74,13 @@ class VTDelegate3(GENIv3DelegateBase):
 #            for filtered_node in filtered_nodes:
 #                if filtered_node in server.keys():
 #                    server.pop(filtered_node)
-            sliver = node_generator.sliver()
+            sliver = node_generator.server()
+            # Rearrange the dictionary according to the ad RSpec hierachy
+            server["networking"] = dict()
+            server["networking"]["network_interfaces"] = server.pop("network_interfaces")
+            server["networking"]["subscribed_ip4_ranges"] = server.pop("subscribed_ip4_ranges")
+            server["networking"]["subscribed_mac_ranges"] = server.pop("subscribed_mac_ranges")
+            # Translate the dictionary into a XML
             logging.debug("*** Translator.list_resources => sliver: %s" % str(sliver))
             self._translator.dict2xml_tree(server, sliver, node_generator)
 #            logging.debug("*** Translator.list_resources => sliver_node: %s" % sliver_node)
@@ -84,7 +90,7 @@ class VTDelegate3(GENIv3DelegateBase):
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
             server_filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms", "virtualization_technology", "operating_system_version", "operating_system_type", "operating_system_distribution"]
-            self._filter.filter_xml_by_dict(server_filtered_nodes, sliver, "sliver", self.get_ad_extensions_mapping())
+            self._filter.filter_xml_by_dict(server_filtered_nodes, sliver, "server", namespace)
 #            nspace = self.get_ad_extensions_mapping()
 #            for filtered_node in server_filtered_nodes:
 #                for node in sliver.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=nspace):
@@ -92,6 +98,7 @@ class VTDelegate3(GENIv3DelegateBase):
 #                    if node.getparent().tag == "%s%s%ssliver" %("{" if namespace else "", nspace[namespace], "}" if namespace else ""):
 #                        node.getparent().remove(node)
 #            logging.debug("*** Translator.list_resources => final XML: %s" % str(lxml.etree.tostring(s, pretty_print=True)))
+            # If geni_available = True, show all servers. Otherwise, show only available servers
             if not geni_available:
                 r.append(sliver)
             elif geni_available and server["available"] is "1":

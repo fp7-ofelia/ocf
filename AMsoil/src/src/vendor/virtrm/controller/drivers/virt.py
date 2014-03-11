@@ -101,7 +101,7 @@ class VTDriver():
     @staticmethod
     def get_vms_in_server(server):
         try:
-            return server.vms
+            return server.get_vms()
         except:
             raise Exception("Could not recover server VMs")
 
@@ -140,6 +140,12 @@ class VTDriver():
             return VMAllocated.query.get(id)
         except:
             raise Exception("VM does not exist or id not unique")
+
+    def get_allocated_vms_in_server(server):
+        try:
+            return server.get_allocated_vms()
+        except:
+            raise Exception("Could not recover server VMs")
     
     def delete_vm():
         raise Exception("Method not callable for Driver Class")

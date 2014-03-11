@@ -57,8 +57,6 @@ class VTResourceManager(object):
             servers = []
             server_objs = self.get_server_objects()
             for server_obj in server_objs:
-                # XXX: Does not convert related objects into dict
-                # TODO: Create a {model2dict} method and use it
                 server = self.translator.model2dict(server_obj)
                 servers.append(server)
         return servers
@@ -74,11 +72,9 @@ class VTResourceManager(object):
             servers = VTDriver.get_all_servers()
         return servers
 
-    # XXX: Does not convert related objects into dict
-    # TODO: Create a {model2dict} method and use it
     def get_server(self, uuid):
         """
-        Get server with a given UUID.
+        Get server with a given UUID as a dict.
         """
         server_obj = self._get_server_object(uuid)
         server = self.translator.model2dict(server_obj)
@@ -97,25 +93,44 @@ class VTResourceManager(object):
         """
         pass
 
-    def get_vms_in_server(self, uuid):
+    def get_provisioned_vms_in_server(self, server_uuid):
         """
-        Obtains list of VMs for a server with a given UUID.
+        Obtains list of provisioned VMs for a server with a given UUID as a dict.
         """
         vms = []
-        vm_objs = self._get_vms_object_in_server(uuid)
+        vm_objs = self.get_provisioned_vms_object_in_server(server_uuid)
         for vm_obj in vm_objs:
-            vm = translator.class2dict(vm_obj)
+            vm = translator.model2dict(vm_obj)
             vms.append(vm)
         return vms
  
-    def get_vms_object_in_server(self, uuid):
+    def get_provisioned_vms_object_in_server(self, server_uuid):
         """
-        Obtains list of VMs for a server with a given UUID.
+        Obtains list of provisioned VMs for a server with a given UUID.
         """
-        server = self._get_server_object(uuid)
-        vms = server.get_vms()
+        server = self.get_server_object(server_uuid)
+        vms = VTDriver.get_vms_in_server(server)
         return vms
     
+    def get_allocated_vms_in_server(self, server_uuid):
+        """
+        Obtains list of allocated VMs for a server with given UUID as a dict.
+        """
+        vms = []
+        vm_objs = self.get_allocated_vms_object_in_server(server_uuid)
+        for vm_obj in vm_objs:
+            vm = self.translator.model2dict(vm_obj)
+            vms.append(vm)
+        return vms
+    
+    def get_allocated_vms_object_in_server(self, server_uuid):
+        """
+        Obtains list of alloacted VMs for a server with given UUID.
+        """
+        server = self.get_server_object(server_uuid)
+        vms = get_allocated_vms_in_server(server)
+        return vms
+
     # VM methods
     def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
         """
@@ -205,31 +220,6 @@ class VTResourceManager(object):
             return "success"
         except Exception as e:
             return "error" 
-    
-    # FIXME: use Translator.{VMdictToClass, VMdicIfacesToClass} for this!
-#    def _vm_dict_to_class(self, requested_vm, slice_name, end_time):
-    def _vm_dict_to_class(self, requested_vm):
-        requested_vm["server"] = VTServer.query.filter_by(uuid=requested_vm["server_uuid"]).one()
-        retrieved_class = self.translator.dict2existing_class(requested_vm, VMAllocated)
-        logging.debug("FINAL CLASS FOR ALLOCATED VM: %s" % str(requested_vm))
-        return retrieved_class
-#        vm = VMAllocated()
-#        vm.name = requested_vm['name']
-#        vm.memory = int(requested_vm['memory_mb'])
-#        vm.hd_size_mb = float(requested_vm['hd_size_mb'])/1024
-#        vm.project_name = requested_vm['project_name']
-#        vm.slice_id = 0 #necessary?
-#        vm.slice_name = slice_name
-#        vm.operating_system_type = requested_vm['operating_system_type'] 
-#        vm.operating_system_version = requested_vm['operating_system_version']
-#        vm.operating_system_distribution = requested_vm['operating_system_distribution']
-#        vm.hypervisor = requested_vm['hypervisor']
-#        vm.hd_setup_type = requested_vm['hd_setup_type']
-#        vm.hd_origin_path = requested_vm['hd_origin_path']
-#        vm.virtualization_setup_type = requested_vm['virtualization_setup_type']
-#        vm.server = VTServer.query.filter_by(name=requested_vm['server_name']).one()
-#        logging.debug("********************************* OK OK")
-#        return vm
     
     def provision_allocated_vms(self, slice_urn, end_time):
         """
