@@ -28,8 +28,9 @@ class VTDelegate3(GENIv3DelegateBase):
         super(VTDelegate3, self).__init__()
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
-        self._translator = pm.getService("translator")
-        self._filter = pm.getService("filter")
+        logging.debug(".................. virtutils.__dict__: %s" % str(pm.getService("virtutils").__dict__))
+        self._translator = pm.getService("virtutils").Translator
+        self._filter = pm.getService("virtutils").Filter
 
     def get_request_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""

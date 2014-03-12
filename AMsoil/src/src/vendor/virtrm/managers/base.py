@@ -33,7 +33,7 @@ logging=amsoil.core.log.getLogger('VTResourceManager')
 class VTResourceManager(object):
     config = pm.getService("config")
     worker = pm.getService("worker")
-    translator = pm.getService("translator")
+    translator = pm.getService("virtutils").Translator
     
     EXPIRY_CHECK_INTERVAL = config.get("virtrm.EXPIRATION_VM_CHECK_INTERVAL") 
     
@@ -100,7 +100,7 @@ class VTResourceManager(object):
         vms = []
         vm_objs = self.get_provisioned_vms_object_in_server(server_uuid)
         for vm_obj in vm_objs:
-            vm = translator.model2dict(vm_obj)
+            vm = self.translator.model2dict(vm_obj)
             vms.append(vm)
         return vms
  
