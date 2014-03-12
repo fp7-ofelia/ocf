@@ -486,7 +486,7 @@ class VTResourceManager(object):
         return deleted_vms
     
     # Allocation methods
-    def allocate_vm(self, vm, slice_name, end_time):
+    def allocate_vm(self, vm, end_time):
         """
         Allocate a VM in the given slice.
         """
@@ -513,7 +513,9 @@ class VTResourceManager(object):
         except:
             pass
         # Check if the server is one of the given servers
-        if VTServer.query.filter_by(uuid=vm["server_uuid"]).first() == None:
+        try: 
+            VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
+        except:
             raise virt_exception.VTAMServerNotFound(vm["server_uuid"])
         # Check if the expiration time is a valid time
         try:
@@ -522,10 +524,15 @@ class VTResourceManager(object):
             raise virt_exception.VTMaxVMDurationExceeded(end_time)
         # Once we know the VM can be created, we reserve
         vm_allocated_model = self.translator.dict2class(vm, VMAllocated)
+        vm_allocated_model.save()
         # Add the expiration time to the allocated VM
         ExpirationManager.add_expiration_to_allocated_vm_by_uuid(vm_allocated_model.uuid, end_time)
+        # Generate a dictionary from the allocated VM
+        vm_allocated_dict = self.translator.model2dict(vm_allocated_model)
+        # Add the Expiration information
+        vm_allocated_dict['generation_time'] = get_start_time_by_vm_uuid(vm_allocated_dict['uuid'])
+        vm_allocated_dict['expiration_time'] = get_end_time_by_vm_uuid(vm_allocated_dict['uuid'])
         #TODO: Use TemplateManager: Add Template to VM
-        #XXX: Should return anything else?
         return vm_allocated_model
         
     def _unallocate_vm(self, vm_id):
@@ -535,6 +542,7 @@ class VTResourceManager(object):
         vm = VMAllocated.query.get(vm_id)
         deleted_vm = dict()
         deleted_vm['name'] = vm.name
+        #XXX: Should return anything else?
         deleted_vm['expiration'] = vm.expiration
         vm.destroy()
         return deleted_vm

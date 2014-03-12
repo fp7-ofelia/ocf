@@ -103,8 +103,11 @@ class VMAllocated(db.Model):
     
     def auto_save(self):
         if self.do_save is True:
-            db.session.add(self)
-            db.session.commit()
+            self.save()
+  
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
     
     '''Destructor'''
     def destroy(self):

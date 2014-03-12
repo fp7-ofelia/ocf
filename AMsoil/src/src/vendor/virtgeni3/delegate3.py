@@ -29,7 +29,6 @@ class VTDelegate3(GENIv3DelegateBase):
         super(VTDelegate3, self).__init__()
         self._resource_manager = pm.getService("virtrm")
         self._admin_resource_manager = pm.getService("virtadminrm")
-        logging.debug(".................. virtutils.__dict__: %s" % str(pm.getService("virtutils").__dict__))
         self._translator = pm.getService("virtutils").Translator
         self._filter = pm.getService("virtutils").Filter
 
@@ -58,12 +57,13 @@ class VTDelegate3(GENIv3DelegateBase):
         #XXX: Check if the certificate and credentials are correct for this method
         #self.auth(client_cert, credentials, None, ('listslices',))
         namespace = self.get_ad_extensions_mapping()
+        # Generate the XML
         root_node = self.lxml_ad_root()
         node_generator = self.lxml_ad_element_maker(namespace.keys()[0])
+        # Obtain the servers
         servers = self._resource_manager.get_servers()
         logging.debug("SERVER (DICTIONARY): %s" % str(servers))
-        #servers = self._resource_manager._get_server_objects()
-        
+        # Craft the XML
         r = node_generator.network()
 #        from lxml import objectify
 #        r = objectify.Element("{%s}sliver" % namespace)
@@ -94,6 +94,7 @@ class VTDelegate3(GENIv3DelegateBase):
             advertisment_filtered_nodes = RSPECS_FILTERED_NODES['advertisement']
             for key in advertisment_filtered_nodes.keys():
                 self._filter.filter_xml_by_dict(advertisment_filtered_nodes[key], sliver, key, namespace)
+            #TODO: Add Templates info here
 #            nspace = self.get_ad_extensions_mapping()
 #            for filtered_node in server_filtered_nodes:
 #                for node in sliver.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=nspace):
@@ -106,49 +107,6 @@ class VTDelegate3(GENIv3DelegateBase):
                 r.append(sliver)
             elif geni_available and server["available"] is "1":
                 r.append(sliver)
-
-#        for server in servers:
-#            #TODO: Get templates associated to each server
-#            if int(server.get_available()) is 0 and geni_available: 
-#                continue
-#            else:
-#                s = E.sliver()
-#                s.append(E.name(server.get_name()))
-#                s.append(E.uuid(server.get_uuid()))
-#                s.append(E.cpus_number("0" if not server.get_number_of_cpus() else server.get_number_of_cpus()))
-#                s.append(E.cpu_frequency("0" if not server.get_cpu_frequency() else server.get_cpu_frequency()))
-#                s.append(E.virtual_memory_mb("0" if not server.get_memory() else server.get_memory()))
-#                s.append(E.hard_disc_space_gb("0" if not server.get_disc_space_gb() else server.get_disc_space_gb()))
-#                if server.get_subscribed_ip4_ranges_no_global() or server.get_subscribed_mac_ranges_no_global() or server.get_network_interfaces():
-#                    n = E.network_interfaces()   
-#                    if server.get_subscribed_ip4_ranges_no_global(): 
-#                        for ips in server.get_subscribed_ip4_ranges_no_global():
-#                            ip = E.network_interface(type='Range')
-#                            ip.append(E.name("IpRange"))
-#                            ip.append(E.start_value(ips.get_start_ip()))
-#                            ip.append(E.end_value(ips.get_end_ip()))
-#                            n.append(ip)
-#                    if server.get_subscribed_mac_ranges_no_global():
-#                        for macs in server.get_subscribed_mac_ranges_no_global():
-#                            mac = E.network_interface(type="Range")
-#                            mac.append(E.name("MacRange"))
-#                            mac.append(E.start_value(macs.get_start_mac()))
-#                            mac.append(E.end_value(macs.get_end_mac()))
-#                            n.append(mac)
-#                    if server.get_network_interfaces():
-#                        for network_interface in server.get_network_interfaces():
-#                            interface = E.network_interface(type="Network")
-#                            interface.append(E.type("Interface"))
-#                            interface.append(E.server_interface_name(network_interface.get_name()))
-#                            interface.append(E.isMgmt(str(network_interface.get_is_mgmt())))
-#                            if network_interface.get_switch_id():
-#                                interface.append(E.interface_switch_id(network_interface.get_switch_id))
-#                            if network_interface.get_port():
-#                                interface.append(E.interface_port(str(network_interface.get_port()))) 
-#                            n.append(interface)                
-#                    s.append(n) 
-#                #TODO: Add here the Templates info
-#                r.append(s)
         root_node.append(r)
         return self.lxml_to_string(root_node)
     
@@ -167,6 +125,8 @@ class VTDelegate3(GENIv3DelegateBase):
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         logging.debug("slice_urn: %s" % str(slice_urn))
+        if self.urn_tpe(slice_urn) != 'slice':
+            raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
         logging.debug("slice_name: %s" % str(slice_name))
@@ -183,26 +143,22 @@ class VTDelegate3(GENIv3DelegateBase):
             vm["slice_name"] = slice_name
             vm["project_name"] = authority
             requested_vms.append(vm)
-        if self.urn_type(slice_urn) == 'slice': 
-            try:
-                allocated_vms = dict()
-                for requested_vm in requested_vms:
-                    # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
-                    allocated_vm, server = self._resource_manager.allocate_vm(requested_vm, slice_name, end_time)
-                    if server.name not in allocated_vms:
-                        allocated_vms[server.name] = list()
-                    allocated_vms[server.name].append(allocated_vm)
-            except virt_exception.VTAMVmNameAlreadyTaken as e:
-                self.undo_action("allocate", allocated_vms)            
-                raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
-            except virt_exception.VTAMServerNotFound as e:
-                self.undo_action("allocate", allocated_vms)
-                raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vms[0]['server_uuid'],))
-            except virt_exception.VTMaxVMDurationExceeded as e:
-                self.undo_action("allocate", allocated_vms)
-                raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-        else:
-            raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
+        try:
+            allocated_vms = dict()
+            for requested_vm in requested_vms:
+                # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
+                allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time)
+                
+        # If any VM fails in allocating, we unallocate all the previously allocated VMs
+        except virt_exception.VTAMVmNameAlreadyTaken as e:
+            self.undo_action("allocate", allocated_vms)            
+            raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
+        except virt_exception.VTAMServerNotFound as e:
+            self.undo_action("allocate", allocated_vms)
+            raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vms[0]['server_uuid'],))
+        except virt_exception.VTMaxVMDurationExceeded as e:
+            self.undo_action("allocate", allocated_vms)
+            raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
         rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
         slivers = list()
         for key in allocated_vms.keys():
