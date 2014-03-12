@@ -41,40 +41,52 @@
         </xs:all>
     </xs:complexType>
 
+    <xs:complexType name="Networking">
+        <xs:all>
+            <xs:element name="network_interface" type="NetworkInterfaces" minOccurs="0"/>
+            <xs:element name="subscribed_mac_ranges" type="MacRanges" minOccurs="0"/>
+            <xs:element name="subscribed_ip4_ranges" type="Ip4Ranges" minOccurs="0"/> 
+       </xs:all>
+    </xs:complexType>
+
     <xs:complexType name="NetworkInterfaces">
         <xs:sequence>
-            <xs:element name="network_interface" type="NetworkInterface" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="network_interface" type="NetworkInterface"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="NetworkInterface">
-        <xs:sequence>
-            <xs:element name="network_interface_data" type="NetworkInterfaceData"/>
-        </xs:sequence>
-        <xs:attribute type="xs:string" name="type" use="optional"/>
-    </xs:complexType>
-
-    <xs:complexType name="NetworkInterfaceData">
         <!-- *all :: child elements can appear in any order & element must occur 0 or 1 times -->
         <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
         <xs:all>
-            <xs:element type="NetworkInterfaceType" name="type" minOccurs="0"/>
             <xs:element type="xs:string" name="name" minOccurs="0"/>
             <xs:element type="xs:boolean" name="is_management_bridge" minOccurs="0"/>
             <xs:element type="xs:string" name="switch_id" minOccurs="0"/>
             <xs:element type="xs:integer" name="switch_port" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="MacRanges">
+        <xs:sequence>
+            <xs:element name="subscribed_mac_range" type="Range" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Ip4Ranges">
+        <xs:sequence>
+            <xs:element name="subscribed_ip4_range" type="Range" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Range">
+        <!-- *all :: child elements can appear in any order & element must occur 0 or 1 times -->
+        <!-- default values: minOccurs=1, maxOccurs=1 (==> use="required") -->
+        <xs:all>
+            <xs:element type="xs:string" name="name" minOccurs="0"/>
             <xs:element type="xs:string" name="start_value" minOccurs="0"/>
             <xs:element type="xs:string" name="end_value" minOccurs="0"/>
         </xs:all>
     </xs:complexType>
-
-    <xs:simpleType name="NetworkInterfaceType">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="Range"/>
-            <xs:enumeration value="Network"/>
-            <!-- Add types as needed -->
-        </xs:restriction>
-    </xs:simpleType>
 
     <xs:complexType name="DiscImageTemplates">
         <xs:sequence>
