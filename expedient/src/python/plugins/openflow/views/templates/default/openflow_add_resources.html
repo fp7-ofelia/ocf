@@ -129,16 +129,14 @@
 	<tr>
 	<td colspan="2">
 
-
 	{% if checked_ids %}
 	<div style="padding-top:20px;">
-	{# Original: shows every flowspace in the slice #}
-	{#{% if allfs %}#}
-	{% if allfs|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
+	{% if flowspace_per_aggregate|key:agg.id %} {# If FlowSpace corresponds to AM, show #}
+	{#% if flowspace_per_aggregate|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
 		<tr>
-			<th>Requested Flowspace{%if allfs|length > 1%}s{%endif%} ({{allfs|length}}) <img align="absmiddle" id="req_fs_help" src="{% url img_media 'question_mark_15x15.png' %}">	</th>	
+			<th>Requested Flowspace{%if flowspace_per_aggregate|key:agg.id|length > 1%}s{%endif%} ({{flowspace_per_aggregate|key:agg.id|length}}) <img align="absmiddle" id="req_fs_help" src="{% url img_media 'question_mark_15x15.png' %}">	</th>	
 		<th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="requestedFlowspace{{agg.id}}">More information <span class="closed">&#x25BC;</span> </a></th>
 		</tr>
 	</table>
@@ -148,7 +146,7 @@
 
 	
     <div id="requestedFlowspace{{agg.id}}Container" class="expandable" style="display:none;">
-    {% for fs in allfs %}
+    {% for fs in flowspace_per_aggregate|key:agg.id %}
 			<table class="flowspace flowspace_r">
 				<tr class="odd">
 				<td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
@@ -194,7 +192,7 @@
 					<td>{%for ofiface in fs.slivers.all %}{%if ofiface.resource.aggregate_id == agg.id%}<strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}<br/>{%endif%}{% endfor %}</td>
 		     	</tr>
 				</table>
-    {% endfor %}  <!-- for fs in allfs -->
+    {% endfor %}  <!-- for fs in flowspace_per_aggregate -->
     </div> <!-- RequestedFlowspaceContainer -->
 	<!-- SPACE TO TEST GRANTED FLOWSPACE -->
 

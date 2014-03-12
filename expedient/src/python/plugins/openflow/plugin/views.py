@@ -911,7 +911,17 @@ def get_ui_data(slice):
     try:
         ui_context['checked_ids'] = get_checked_ids(slice)
         ui_context['controller_url'] = get_controller_url(slice)
-        ui_context['allfs'] = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+#        ui_context['allfs'] = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        
+        # Craft subdictionary with the slivers ordered per aggregate
+        ui_context['flowspace_per_aggregate'] = {}
+        all_flowspaces = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        for aggregate in slice.aggregates.all():
+            if aggregate.id not in ui_context['flowspace_per_aggregate']:
+                ui_context['flowspace_per_aggregate'][aggregate.id] = []
+            for flowspace in all_flowspaces:
+                ui_context['flowspace_per_aggregate'][aggregate.id] += FlowSpaceRule.objects.filter(id=flowspace.id, slivers__resource__aggregate__id=aggregate.id).distinct().order_by("id")
+        
         ui_context['planetlab_aggs'] = get_planetlab_aggregates(slice)
         ui_context['openflow_aggs'] = get_openflow_aggregates(slice)
         ui_context['gfs_list'] = get_gfs(slice)
