@@ -465,7 +465,8 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
     def formfield_callback(f):
         if f.name == "slivers":
             return SliverMultipleChoiceField(
-                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice),
+                initial=OpenFlowInterfaceSliver.objects.filter(slice=slice))
         else:
             return f.formfield()
 
