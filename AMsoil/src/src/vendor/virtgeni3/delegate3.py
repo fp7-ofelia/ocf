@@ -2,6 +2,7 @@ import time
 import amsoil.core.pluginmanager as pm
 import xml.etree.ElementTree as ET
 import lxml
+from geni3util.filterednodes import RSPECS_FILTERED_NODES
 from geni3util.xrn import *
 
 import amsoil.core.log
@@ -90,8 +91,9 @@ class VTDelegate3(GENIv3DelegateBase):
 #            logging.debug("**** Translator.list_resources => sliver_contents to XML: %s" % str(s))
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
-            server_filtered_nodes = ["id", "vtserver_ptr_id", "agent_url", "agent_password", "enabled", "url", "vms", "virtualization_technology", "operating_system_version", "operating_system_type", "operating_system_distribution"]
-            self._filter.filter_xml_by_dict(server_filtered_nodes, sliver, "server", namespace)
+            advertisment_filtered_nodes = RSPECS_FILTERED_NODES['advertisement']
+            for key in advertisment_filtered_nodes.keys():
+                self._filter.filter_xml_by_dict(advertisment_filtered_nodes[key], sliver, key, namespace)
 #            nspace = self.get_ad_extensions_mapping()
 #            for filtered_node in server_filtered_nodes:
 #                for node in sliver.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=nspace):
