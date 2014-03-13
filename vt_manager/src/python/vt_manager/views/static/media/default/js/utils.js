@@ -18,9 +18,9 @@ function createProgressBar(div,slotsUsed,slotsAvailable,showtext){
 	//Create barImage
 	barImage = {};
 	barImage[greenLimit] =  '/static/media/default/images/progressbg_green.gif';
-	barImage[blackLimit] =  '/static/media/images/progressbg_black.gif';
-	barImage[orangeLimit] = '/static/media/images/progressbg_orange.gif';
-	barImage[redLimit] =  '/static/media/images/progressbg_red.gif';
+	barImage[blackLimit] =  '/static/media/default/images/progressbg_black.gif';
+	barImage[orangeLimit] = '/static/media/default/images/progressbg_orange.gif';
+	barImage[redLimit] =  '/static/media/default/images/progressbg_red.gif';
 
 //	alert(dump(barImage));
 
