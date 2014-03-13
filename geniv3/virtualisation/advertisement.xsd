@@ -9,7 +9,6 @@
             <xs:element name="network" type="Servers"/>
         </xs:sequence>
         <xs:attribute name="type" type="RSpecType"/>
-        <xs:attribute name="virtualisation" type="xs:string"/>
     </xs:complexType>
 
     <xs:simpleType name="RSpecType">
@@ -21,7 +20,7 @@
     <xs:complexType name="Servers">
         <!-- *sequence :: default values: minOccurs=1, maxOccurs=1 -->
         <xs:sequence>
-            <xs:element name="sliver" type="Server" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="server" type="Server" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -31,6 +30,7 @@
         <xs:all>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="uuid"/>
+            <xs:element type="xs:string" name="virtualisation_technology"/>
             <xs:element type="xs:boolean" name="available"/>
             <xs:element type="xs:integer" name="cpus_number" minOccurs="0"/>
             <xs:element type="xs:float" name="cpu_frequency" minOccurs="0"/>
