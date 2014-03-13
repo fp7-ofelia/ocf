@@ -332,10 +332,7 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 				template="networking/ip4/rangeCrud.html",
 			)
 			return 
-
 	               # return HttpResponseRedirect("/networking/ip4/")
-
-		
 		elif request.method == "POST":
 			try:
 				instance = HttpUtils.getInstanceFromForm(request,Ip4Range)

@@ -22,13 +22,13 @@ class Ip4Range(models.Model):
 	Private attributes 
 	'''
 	#Range name
-	name = models.CharField(max_length = 255, default="", verbose_name = "Range name",unique=True)
+	name = models.CharField(max_length = 255, default="", verbose_name = "Range name", unique=True)
 
-	isGlobal = models.BooleanField(verbose_name="Global range",default=1, help_text="Globa ranges will be used by servers which are not subscribed to any specific range")
+	isGlobal = models.BooleanField(verbose_name="Global range",default=1, help_text="Global ranges will be used by servers which are not subscribed to any specific range")
 
 	#Range parameters
-	startIp = models.IPAddressField(verbose_name = "Range start Ip", editable = True, validators = [IP4Utils.checkValidIp])
-	endIp = models.IPAddressField(verbose_name = "Range end Ip", editable = True, validators = [IP4Utils.checkValidIp])
+	startIp = models.IPAddressField(verbose_name = "Range start IP", editable = True, validators = [IP4Utils.checkValidIp])
+	endIp = models.IPAddressField(verbose_name = "Range end IP", editable = True, validators = [IP4Utils.checkValidIp])
 	netMask = models.IPAddressField(verbose_name = "Network mask", editable = True, validators = [IP4Utils.checkValidNetmask])
 
 	#Networking parameters associated to this range
