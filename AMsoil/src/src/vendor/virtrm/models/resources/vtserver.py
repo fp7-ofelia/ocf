@@ -45,13 +45,13 @@ class VTServer(db.Model):
     operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False)
 
     '''Virtualization Technology'''
-    virtualization_technology = db.Column("virtTech", db.String(512), nullable=False)
+    virtualisation_technology = db.Column("virtTech", db.String(512), nullable=False)
 
     ''' Hardware '''
-    number_of_cpus = db.Column("numberOfCPUs", db.Integer)
+    cpus_number = db.Column("numberOfCPUs", db.Integer)
     cpu_frequency = db.Column("CPUFrequency", db.Integer)
-    memory = db.Column(db.Integer)
-    disc_space_gb = db.Column("discSpaceGB", DOUBLE)
+    virtual_memory_mb = db.Column("memory", db.Integer)
+    hard_disk_space_gb = db.Column("discSpaceGB", DOUBLE)
 
     '''Agent Fields'''
     agent_url = db.Column("agentURL", db.String(200))
@@ -180,12 +180,12 @@ class VTServer(db.Model):
     def get_uuid(self):
         return self.uuid
     
-    def set_memory(self,memory):
-        self.memory = memory
+    def set_virtual_memory_mb(self,memory):
+        self.virtual_memory_mb = memory
         self.auto_save()
     
-    def get_memory(self):
-        return self.memory
+    def get_virtual_memory_mb(self):
+        return self.virtual_memory_mb
     
     def set_agent_url(self, url):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
@@ -203,11 +203,11 @@ class VTServer(db.Model):
     def get_url(self):
         return self.url
         
-    def set_virtualization_technology(self, virt_tech):
+    def set_virtualisation_technology(self, virt_tech):
         self.virtualization_technology = virt_tech
         self.auto_save()
         
-    def get_virtualization_technology(self):
+    def get_virtualisation_technology(self):
         return self.virtualization_technology
     
     def set_operating_system_type(self, os_type):
@@ -245,11 +245,11 @@ class VTServer(db.Model):
     def get_enabled(self):
         return self.enabled
     
-    def set_number_of_cpus(self, num):
+    def set_cpus_number(self, num):
         self.number_of_cpus = num
         self.auto_save()
     
-    def get_number_of_cpus(self):
+    def get_cpus_number(self):
         return self.number_of_cpus
     
     def set_cpu_frequency(self, frequency):
@@ -259,11 +259,11 @@ class VTServer(db.Model):
     def get_cpu_frequency(self):
         return self.cpu_frequency
     
-    def set_disc_space_gb(self, disc_space):
+    def set_hard_disk_space_gb(self, disc_space):
         self.disc_space_gb = disc_space
         self.auto_save()
     
-    def get_disc_space_gb(self):
+    def get_hard_disk_space_gb(self):
         return self.disc_space_gb
     
     def get_agent_password(self):

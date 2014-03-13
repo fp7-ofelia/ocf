@@ -48,10 +48,10 @@ class XenServer(VTServer):
         self = XenServer()
         try:
             self.set_name(name)
-            self.set_virt_tech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.set_os_type(os_type)
-            self.set_os_distribution(os_distribution)
-            self.set_os_version(os_version)
+            self.set_virtualisation_technology(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.set_operating_system_type(os_type)
+            self.set_operating_system_distribution(os_distribution)
+            self.set_operating_system_version(os_version)
             self.set_agent_url(agent_url)
             self.set_agent_password(agent_password)
             self.do_save = save
@@ -68,10 +68,10 @@ class XenServer(VTServer):
     def updateServer(self,name,os_type,os_distribution,os_version,agent_url,agent_password,save=True):
         try:
             self.set_name(name)
-            self.set_virt_tech(VirtTechClass.VIRT_TECH_TYPE_XEN)
-            self.set_os_type(os_type)
-            self.set_os_distribution(os_distribution)
-            self.set_os_version(os_version)
+            self.set_virtualisation_technology(VirtTechClass.VIRT_TECH_TYPE_XEN)
+            self.set_operating_system_type(os_type)
+            self.set_operating_system_distribution(os_distribution)
+            self.set_operating_system_version(os_version)
             self.set_agent_url(agent_url)
             self.set_agent_password(agent_password)
             self.do_save = save
