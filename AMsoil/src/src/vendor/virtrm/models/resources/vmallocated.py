@@ -24,8 +24,8 @@ class VMAllocated(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False, default="")
-    memory_mb = db.Column(db.Integer)
-    number_of_cpus = db.Column(db.Integer, nullable=True)
+    virtual_memory_mb = db.Column(db.Integer)
+    cpus_number = db.Column(db.Integer, nullable=True)
     hd_size_mb = db.Column(DOUBLE, nullable=True)
 
     '''Property parameters'''
@@ -47,7 +47,7 @@ class VMAllocated(db.Model):
 
     @staticmethod
 #    def __init__(self,name="",project_id="",slice_id="",slice_name="",project_name="",server=None,memory=0,disc_space_gb=None,number_of_cpus=None,virt_tech="xen",expires=None,save=False):
-    def __init__(self, params_dict):
+    def __init__(self, **params_dict):
 #        logging.debug("......... self.__dict__ = %s" % str(self.__dict__))
         logging.debug("......... self.__dict__ = %s" % str(self.__table__.columns))
         logging.debug("......... params_dict = %s" % str(params_dict))

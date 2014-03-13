@@ -25,8 +25,8 @@ class Translator:
         return Translator.xml2json(open(file_path, "r"))
     
     @staticmethod
-    def xml2json(xml_content):
-        dictionary = xmltodict.parse(xml_content)
+    def xml2json(xml_content, namespaces=None):
+        dictionary = xmltodict.parse(xml_content, namespaces=namespaces)
         json_content = json.loads(json.dumps(dictionary))
         return json_content
     
@@ -90,24 +90,27 @@ class Translator:
         @root_node: initial LXML tree with namespace definition, etc.
         @node_generator: LXML node that helps appending other nodes.
         """
-        for key in dictionary.keys():
-            if type(dictionary[key]) is list:
+        for key, value in dictionary.iteritems():
+            if type(value) is list:
                 node = getattr(node_generator, key)()
-                for internal_dict in dictionary[key]:
+                for internal_dict in value:
                     int_node = getattr(node_generator, key[:-1])()
                     internal_node = Translator.dict2xml_tree(internal_dict, int_node, node_generator)
                     node.append(int_node)
-            elif type(dictionary[key]) is dict:
+            elif type(value) is dict:
                 node = getattr(node_generator, key)()
-                internal_node = Translator.dict2xml_tree(dictionary[key], node, node_generator)
+                internal_node = Translator.dict2xml_tree(value, node, node_generator)
                 node.append(internal_node)
             else:
-                node = getattr(node_generator, key)(str(dictionary[key]))
+                node = getattr(node_generator, key)(str(value))
             root_node.append(node)
         return root_node
     
     @staticmethod
     def dict2class(dictionary, container_class=Struct):
+        logging.debug("***** dict2class => Container Class: %s" % str(container_class))
+        logging.debug("***** dict2class => Dictionary : %s" % str(dictionary))
+#        logging.debug("***** dict2class => Dictionary pointer : %s" % **dictionary)
         retrieved_class = container_class(**dictionary)
         return retrieved_class
     

@@ -36,17 +36,17 @@ class ExpirationManager():
         max_duration = self.MAX_VM_DURATION
         try:
             expiration = self.check_valid_expiration_time(max_duration, expiration_time)
+            return expiration
         except Exception as e:
             raise e
-        return expiration
         
     def check_valid_reservation_time(self, expiration_time=None):
         max_duration = self.RESERVATION_TIMEOUT
         try:
             expiration = self.check_valid_expiration_time(max_duration, expiration_time)
+            return expiration
         except Exception as e:
             raise e
-        return expiration
 
     def is_provisioned_vm_expiration(self, expiration):
         if expiration.get_virtualmachine() and not expiration.get_virtualmachine_allocated():

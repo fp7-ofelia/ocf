@@ -34,15 +34,15 @@ class VTDelegate3(GENIv3DelegateBase):
 
     def get_request_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /request.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/geni3/virtualisation/request.xsd'} # /request.xsd
 
     def get_manifest_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/schema.xsd'} # /manifest.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/geni3/virtualisation/manifest.xsd'} # /manifest.xsd
 
     def get_ad_extensions_mapping(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/server_schema.xsd'} # /ad.xsd
+        return {'virtrm' : 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/geni3/virtualisation/advertisement.xsd'} # /ad.xsd
 
     def is_single_allocatioNetworkInterfaceConnectedTon(self):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
@@ -92,8 +92,8 @@ class VTDelegate3(GENIv3DelegateBase):
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
             advertisment_filtered_nodes = RSPECS_FILTERED_NODES['advertisement']
-            for key in advertisment_filtered_nodes.keys():
-                self._filter.filter_xml_by_dict(advertisment_filtered_nodes[key], sliver, key, namespace)
+            for value, key in advertisment_filtered_nodes.iteritems():
+                self._filter.filter_xml_by_dict(value, sliver, key, namespace)
             #TODO: Add Templates info here
 #            nspace = self.get_ad_extensions_mapping()
 #            for filtered_node in server_filtered_nodes:
@@ -125,30 +125,40 @@ class VTDelegate3(GENIv3DelegateBase):
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         logging.debug("slice_urn: %s" % str(slice_urn))
-        if self.urn_tpe(slice_urn) != 'slice':
+        if self.urn_type(slice_urn) != 'slice':
             raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
         logging.debug("slice_name: %s" % str(slice_name))
         authority = get_authority(get_authority(slice_urn))
         logging.debug("authority: %s" % str(authority))
-        dictionary = self._translator.xml2json(rspec)
-        vms = []
+        namespace = self.get_ad_extensions_mapping().keys()[0]
+        dictionary = self._translator.xml2json(rspec, {namespace:None})
+        logging.debug("***** Translator.xml2json => First level Json.keys : %s" % str(dictionary.keys()))
+        logging.debug("***** Translator.xml2json => Second level Json.keys : %s" % str(dictionary['rspec'].keys()))
         # Retrieve VMs from allocation request
         requested_vms = list()
 #        slivers = dictionary["rspec"]["node"]
         slivers = dictionary["rspec"]["node"]["sliver"]
 #        for vm in slivers.values():
-        for vm in slivers:
-            vm["slice_name"] = slice_name
-            vm["project_name"] = authority
-            requested_vms.append(vm)
+        # If more than one VM is requested it will be a list of dictionaries.
+        if type(slivers) is list:
+            for vm in slivers:
+                logging.debug("****** Allocate => dictionary : %s" % str(dictionary))
+                logging.debug("****** Allocate => slivers.keys : %s" % str(slivers.keys()))
+                vm["slice_name"] = slice_name
+                vm["project_name"] = authority
+                requested_vms.append(vm)
+        # If the request only contains one VM, it will be a dictionary with the VM info.
+        else:
+            slivers["slice_name"] = slice_name
+            slivers["project_name"] = authority
+            requested_vms.append(slivers)
         try:
             allocated_vms = dict()
             for requested_vm in requested_vms:
                 # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
                 allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time)
-                
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except virt_exception.VTAMVmNameAlreadyTaken as e:
             self.undo_action("allocate", allocated_vms)            
@@ -159,6 +169,7 @@ class VTDelegate3(GENIv3DelegateBase):
         except virt_exception.VTMaxVMDurationExceeded as e:
             self.undo_action("allocate", allocated_vms)
             raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
+        #XXX: Improve this
         rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
         slivers = list()
         for key in allocated_vms.keys():
