@@ -33,13 +33,13 @@ class HttpUtils():
 	def processExceptionForm(e,request,modelClass):
 		form = HttpUtils.getFormFromModel(modelClass)
 		iform = form(request.POST)
-		if len(iform.errors)>0:
+		if len(iform.errors) > 0:
 			string = ""
 			for element in iform.errors: 
-				string+=iform.errors[element].as_text()
-			iform.errors['__all__'] = ErrorList(["Error: "+string])
+				string += iform.errors[element].as_text()
+			iform.errors['__all__'] = "Error: " + string
 		else:
-			iform.errors['__all__'] = ErrorList(["Error: "+str(e)])
+			iform.errors['__all__'] = "Error: " + str(e)
 		return iform
 	
 	@staticmethod
