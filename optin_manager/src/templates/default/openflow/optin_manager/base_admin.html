@@ -85,11 +85,17 @@
 				$(".website_sub_menu").toggle('normal');
 			});
 	});
-
 	</script>
-		{% block scripts %}{% endblock %} 
+
+	<script type="text/javascript">
+		//To be able to use django tags in the static js files, use this approach:
+		//First create a js variable with your django tag
+		//Use this variable in your js.
+		url_img_question = "{% url img_media 'question_mark_15x15.png'%}";
+	</script>
+
+	{% block scripts %}{% endblock %} 
 	</head>
-	
 	
 	<body>
             <br/>
