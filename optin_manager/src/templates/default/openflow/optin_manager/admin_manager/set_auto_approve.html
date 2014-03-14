@@ -9,16 +9,21 @@
 </style>
 <script type="text/javascript">
 $(document).ready(function(){
-	var disable_func = function(){
-		if ($("select option:selected").attr("value")=="Remote"){
-			$("#id_username,#id_password,#id_password2,#id_max_password_age,#id_url,#id_verify_certs").removeAttr('disabled');
-		}else{
-			$("#id_username,#id_password,#id_password2,#id_max_password_age,#id_url,#id_verify_certs").attr('disabled', 'disabled');
-		}
-	};
-	disable_func()
-	$("#script_select").
-		change(disable_func);
+    var disable_func = function(){
+        //if ($("select option:selected").attr("value") == "Remote") {
+        if ($("select option:selected" ).text().trim() == "Remote") {
+            //$("#id_username,#id_password,#id_password2,#id_max_password_age,#id_url,#id_verify_certs").removeAttr('disabled');
+            $("table.formtable input").attr('disabled','');
+            $("table.formtable").show();
+        } else {
+            //$("#id_username,#id_password,#id_password2,#id_max_password_age,#id_url,#id_verify_certs").attr('disabled', 'disabled');
+            $("table.formtable input").attr('disabled','disabled');
+            $("table.formtable").hide();
+        }
+    };
+    disable_func()
+    $("#script_select").
+        change(disable_func);
 });
 
 </script>
@@ -28,25 +33,24 @@ $(document).ready(function(){
 
 {% block content %}
 <div class="main">
-	{% for error in error_msg %}
-	<p><font color="red">{{error}}</font></p>
-	{% endfor %}
-	
-	<form name="input" action="/admin_manager/set_auto_approve" method="post">
-	{% csrf_token %}
-	<select name="script" id="script_select">
-		{% for option in user_script_options %}
-			<option {% if option == current_script %}SELECTED{% endif %} value="{{option}}">
-				{{option}}
-			</option>
-		{% endfor %}
-		<
-	</select>
-	<p> Current user approve method: <b>{{current_script}}</b> </p>
-	<table class="formtable">
-		{{ form.as_table }}
-	</table>
-	<input type="submit" value="submit" />
-	</form>
+    {% for error in error_msg %}
+    <p><font color="red">{{error}}</font></p>
+    {% endfor %}
+    
+    <form name="input" action="/admin_manager/set_auto_approve" method="post">
+    {% csrf_token %}
+    <select name="script" id="script_select">
+        {% for option in user_script_options %}
+            <option {% if option == current_script %}SELECTED{% endif %} value="{{option}}">
+                {{option}}
+            </option>
+        {% endfor %}
+    </select>
+    <p>Current user approve method: <b>{{current_script}}</b> </p>
+    <table class="formtable">
+        {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit" />
+    </form>
 </div>
 {% endblock content %}
