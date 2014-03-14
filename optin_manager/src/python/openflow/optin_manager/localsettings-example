@@ -66,10 +66,10 @@ UNALLOWED_VLANS = []
 
 #
 # Automatic assignment of VLANs and granting of flowspaces.
-# Default: True. You may set to False to manually control the requests.
+# Default: False. You may set to True to automatically assign VLANs and/or approve requests.
 #
-VLAN_AUTO_ASSIGNMENT = True
-FLOWSPACE_AUTO_APPROVAL = True
+VLAN_AUTO_ASSIGNMENT = False
+FLOWSPACE_AUTO_APPROVAL = False
 
 
 ##
