@@ -37,7 +37,7 @@
             <xs:element type="xs:integer" name="virtual_memory_mb" minOccurs="0"/>
             <xs:element type="xs:float" name="hard_disk_space_gb" minOccurs="0"/>
             <xs:element name="network_interfaces" type="NetworkInterfaces" />
-            <xs:element name="templates" type="DiscImageTemplates" />
+            <xs:element name="disc_image_templates" type="DiscImageTemplates" />
         </xs:all>
     </xs:complexType>
 
