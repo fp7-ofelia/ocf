@@ -399,7 +399,7 @@ def create_slice(slice_id, project_name, project_description,
             # Create list for e-mail
 #            add_vlan_range_email = lambda x: "VLAN range: %s" % str(x)
 #            vlan_range += map("\n".join, [map(add_vlan_range_email, vlan_range_all_efs)])[0]
-            vlan_range += "VLAN ranges: %s" % str(vlan_range_all_efs)
+            vlan_range += "VLAN ranges: %s" % str(list(vlan_range_all_efs))
         except:
             pass
         
