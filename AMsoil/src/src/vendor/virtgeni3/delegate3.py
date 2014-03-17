@@ -92,9 +92,8 @@ class VTDelegate3(GENIv3DelegateBase):
 #            s = E.sliver()
             # Filter private tags/nodes from XML using a list defined by us
             advertisment_filtered_nodes = RSPECS_FILTERED_NODES['advertisement']
-            for value, key in advertisment_filtered_nodes.iteritems():
+            for key, value in advertisment_filtered_nodes.iteritems():
                 self._filter.filter_xml_by_dict(value, sliver, key, namespace)
-            #TODO: Add Templates info here
 #            nspace = self.get_ad_extensions_mapping()
 #            for filtered_node in server_filtered_nodes:
 #                for node in sliver.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=nspace):
@@ -171,6 +170,7 @@ class VTDelegate3(GENIv3DelegateBase):
             raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
         #XXX: Improve this
         rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
+        slivers = self._get_slivers_json(allocated_vms)
         slivers = list()
         for key in allocated_vms.keys():
             for allocated_vm in allocated_vms[key]:

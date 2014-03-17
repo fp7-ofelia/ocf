@@ -1,3 +1,3 @@
 class VirtUtils:
-    from filter import Filter
+    from filterer import Filter
     from translator import Translator

@@ -61,11 +61,15 @@ class ExpirationManager():
             return False
 
     def get_expiration_by_vm_uuid(self, vm_uuid):
-        expiration_relation = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
+        try:
+            expiration_relation = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
+        except:
+            expiration_relation = None
         if not expiration_relation:
-            expiration_relation = VMAllocatedExpiration.query.filter_by(vm_uuid=vm_uuid).one()
-        if not expiration_relation:
-            return None
+            try:
+                expiration_relation = VMAllocatedExpiration.query.filter_by(vm_uuid=vm_uuid).one()
+            except:
+                return None
         expiration = expiration_relation.get_expiration()
         return expiration
 

@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
@@ -9,6 +8,7 @@ from utils.mutexstore import MutexStore
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import inspect
+import uuid
 
 logging=amsoil.core.log.getLogger('VMAllocated')
 
@@ -29,9 +29,10 @@ class VMAllocated(db.Model):
     hd_size_mb = db.Column(DOUBLE, nullable=True)
 
     '''Property parameters'''
-    project_uuid = db.Column(db.String(1024), nullable=False, default="")
+    urn = db.Column(db.String(1024), nullable=False, default="")
+    project_id = db.Column(db.String(1024), nullable=False, default="")
     project_name = db.Column(db.String(1024), nullable=False, default="")
-    slice_uuid = db.Column(db.String(1024), nullable=False, default="")
+    slice_id = db.Column(db.String(1024), nullable=False, default="")
     slice_name = db.Column(db.String(512), nullable=False, default="")
     server_uuid = db.Column(db.ForeignKey(config.get("virtrm.DATABASE_PREFIX") + "vtserver.uuid"), nullable=False)
         
@@ -67,36 +68,23 @@ class VMAllocated(db.Model):
         common_dictionary = dict()
         for attribute in common_attributes:
             common_dictionary[attribute] = params_dict[attribute]
-#            getattr(self, "set_%s" % str(attribute))(params_dict[attribute])
-#            setattr(self, str(attribute), params_dict[attribute])
         # Then updates the class' inner dictionary with the one retrieved after the intersection of their keys
         self.__dict__.update(**common_dictionary)
-         
-#        self.name = name 
-#        self.project_id = project_id
-#        self.slice_id = slice_id
-#        self.slice_name = slice_name
-#        self.project_name = project_name
-#        self.memory = memory
-#        self.disc_space_gb = disc_space_gb
-#        self.number_of_cpus = number_of_cpus
-#        self.virtualization_technology = virt_tech
         try:
             # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
             self.server = params_dict["server"]
         except:
             pass
+        # If UUID is not given, generate it
         try:
-            self.expires.append(expires)
+            common_dictionary["uuid"]
         except:
-            pass
-#        self.do_save = save
+            self.uuid = uuid.uuid4()
+        # If 'do_save' does not exist, set to False
         try:
-            self.do_save
+            common_dictionary["do_save"]
         except:
-            # If 'do_save' does not exist, set to False
             self.do_save = False
-#        if save:
         if self.do_save:
             db.session.add(self)
             db.session.commit()
@@ -205,3 +193,10 @@ class VMAllocated(db.Model):
     
     def get_do_save(self):
         return self.do_save
+
+    def set_uuid(self, uuid):
+        self.uuid = uuid 
+        self.auto_save()
+
+    def get_uuid(self):
+        return self.uuid

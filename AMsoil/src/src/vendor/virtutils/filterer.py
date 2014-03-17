@@ -14,12 +14,12 @@ logging=amsoil.core.log.getLogger('VirtUtils')
 class Filter:
 
     @staticmethod
-    def filter_xml_by_dict(dictionary, xml, tag="", namespace_dict=None):
+    def filter_xml_by_dict(filtered_nodes, xml, tag="", namespace_dict=None):
         if namespace_dict:
             namespace = namespace_dict.keys()[0]
         else:
             namespace = ""
-        for filtered_node in dictionary:
+        for filtered_node in filtered_nodes:
             for node in xml.xpath("//%s%s%s" % (namespace, ":" if namespace else "", filtered_node), namespaces=namespace_dict):
                 if not tag:
                     node.getparent().remove(node)

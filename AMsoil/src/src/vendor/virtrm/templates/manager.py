@@ -1,7 +1,6 @@
 """
 Exposes the methods to access templates.
 """
-from models.resources.vtserver import VTServer
 from templates.template import Template
 from utils.base import db
 class TemplateManager():
@@ -64,3 +63,26 @@ class TemplateManager():
         #self.delete_template_from_server(server_uuid, template_uuid)
         pass
 
+    def add_template_to_vm(self, vm_uuid, template):
+        pass
+
+    def add_template_to_allocated_vm(self, vm_uuid, template):
+        pass
+
+    def upadte_template_from_allocated_vm(self, vm_uuid):
+        pass
+
+    def get_templates_from_server(self, server_uuid):
+        from templates_hardcoded_info import TEMPLATE
+        return [TEMPLATE]
+
+    def get_template_from_vm(self, vm_uuid):
+        from templates_hardcoded_info import TEMPLATE
+        return TEMPLATE
+
+    def get_template_from_allocated_vm(self, vm_uuid):
+        from templates_hardcoded_info import TEMPLATE
+        return TEMPLATE
+
+    def check_is_valid_template(self, template_info):
+        pass

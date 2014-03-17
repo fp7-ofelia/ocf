@@ -1,18 +1,12 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
-from models.common.expiration import Expiration
-from models.interfaces.networkinterface import NetworkInterface
-from models.ranges.ip4range import Ip4Range
-from models.ranges.macrange import MacRange
-from models.resources.ip4slot import Ip4Slot
-from models.resources.macslot import MacSlot
 from models.resources.virtualmachine import VirtualMachine
 from models.resources.vmallocated import VMAllocated
 from models.resources.vtserver import VTServer
 from models.resources.xenserver import XenServer
 from models.resources.xenvm import XenVM
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from templates.manager import TemplateManager
 from utils.base import db
 from utils.expirationmanager import ExpirationManager
 from utils.servicethread import ServiceThread
@@ -22,6 +16,7 @@ import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import time
 import utils.exceptions as virt_exception
+import uuid
 
 # AMsoil logger
 logging=amsoil.core.log.getLogger('VTResourceManager')
@@ -45,6 +40,7 @@ class VTResourceManager(object):
         # Register callback for regular updates
         self.worker.addAsReccurring("virtrm", "check_vms_expiration", None, self.EXPIRY_CHECK_INTERVAL)
         self.expiration_manager = ExpirationManager()
+        self.template_manager = TemplateManager()
     
     # Server methods
     def get_servers(self, uuid=None):
@@ -59,6 +55,9 @@ class VTResourceManager(object):
             server_objs = self.get_server_objects()
             for server_obj in server_objs:
                 server = self.translator.model2dict(server_obj)
+                templates = self.template_manager.get_templates_from_server(server["uuid"])
+                if templates:
+                    server["disc_image_templates"] = templates
                 servers.append(server)
         return servers
 
@@ -79,6 +78,9 @@ class VTResourceManager(object):
         """
         server_obj = self._get_server_object(uuid)
         server = self.translator.model2dict(server_obj)
+        templates = self.template_manager.get_templates_from_server(server["uuid"])
+        if templates:
+            server["disc_image_templates"] = templates
         return server   
 
     def get_server_object(self, uuid):
@@ -133,6 +135,10 @@ class VTResourceManager(object):
         return vms
 
     # VM methods
+    def get_vm_uuid_by_vm_urn(self, vm_urn):
+        vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
+        return vm.get_uuid()
+
     def get_vm_status(self, vm_urn, slice_name=None, project_name=None, allocation_status=False, operational_status=False, server_name=False, expiration_time=False):
         """
         Verify if the VM exists and return the status with the required params.
@@ -496,19 +502,8 @@ class VTResourceManager(object):
         logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
         logging.debug("** delegate.slice_name: %s" % str(vm["slice_name"]))
         logging.debug("** delegate.project_name: %s" % str(vm["project_name"]))
-        try:
-            logging.debug("VirtualMachine.query.filter_by(name=vm['name'], slice_name=slice_name, project_name=vm['project_name']): %s" % str(VirtualMachine.query.filter_by(name=vm["name"]).filter_by(slice_name=vm["slice_name"], project_name=vm["project_name"]).first()))
-            logging.debug("VMAllocated.query.filter_by(name=vm['name'], slice_name=slice_name, project_name=vm['project_name']): %s" % str(VMAllocated.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()))
-            try:
-                provisioned_vm = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).all()
-            except:
-                provisioned_vm = None
-            try:
-                allocated_vm = VMAllocated.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).all()
-            except:
-                allocated_vm = None
-        except Exception as e:
-            pass
+        provisioned_vm = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).all()
+        allocated_vm = VMAllocated.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).all()
         # If VM already exists either on allocated or in provisioned, return error
         if provisioned_vm or allocated_vm:
             raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
@@ -523,17 +518,63 @@ class VTResourceManager(object):
             self.expiration_manager.check_valid_reservation_time(end_time)
         except:
             raise virt_exception.VTMaxVMDurationExceeded(end_time)
+        # Try to obtain the Template definition
+        try:
+            template_info = vm.pop("template_definition")
+        # Otherwhise we assume the "default" Template
+        except:
+            template_info = dict()
+            template_info["template_name"] = "Default"
+        # Check if the Template is a valid one and return it
+        try:
+            template = self.template_manager.get_template_by(template_info.values()[0])
+        except:
+            try: 
+                template = self.template_manager.get_template_by(template_info)
+            except Exception as e:
+                raise e
+        # Check if the project already exists
+        vm_in_project = VirtualMachine.query.filter_by(project_name=vm["project_name"])
+        allocated_vm_in_project = VMAllocated.query.filter_by(project_name=vm["project_name"])
+        # If exists, assign the same UUID
+        if vm_in_project.first() or allocated_vm_in_project.first():
+            try:
+                project_uuid = vm_in_project.first().get_project_id()
+            except:
+                project_uuid = allocated_vm_in_project.first().get_project_id()
+            vm["project_id"] = project_uuid
+            # Check if the slice already exists on this project
+            vm_in_slice = vm_in_project.filter_by(slice_name=vm["slice_name"]).first()
+            allocated_vm_in_slice = allocated_vm_in_project.filter_by(slice_name=vm["slice_name"]).first()
+            # If exists, assign the same UUID
+            if vm_in_slice or allocated_vm_in_slice:
+                try:
+                    slice_uuid = vm_in_slice.get_slice_id()
+                except:
+                    slice_uuid = allocated_vm_in_slice.get_slice_id()
+                vm["slice_id"] = slice_uuid
+            # Otherwhise, assign one randomly.
+            else:
+                vm["slice_id"] = uuid.uuid4()
+        # Otherwhise, assign one randomly.
+        # If the project did not exist previously, the slice will be new too.
+        else:
+            vm["project_id"] = uuid.uuid4()
+            vm["slice_id"] = uuid.uuid4()
         # Once we know the VM can be created, we reserve
         vm_allocated_model = self.translator.dict2class(vm, VMAllocated)
         vm_allocated_model.save()
         # Add the expiration time to the allocated VM
-        self.expiration_manager.add_expiration_to_allocated_vm_by_uuid(vm_allocated_model.uuid, end_time)
+        self.expiration_manager.add_expiration_to_allocated_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
+        # Add the template to the allocated VM
+        self.template_manager.add_template_to_allocated_vm(vm_allocated_model.get_uuid(), template)
         # Generate a dictionary from the allocated VM
         vm_allocated_dict = self.translator.model2dict(vm_allocated_model)
         # Add the Expiration information
-        vm_allocated_dict['generation_time'] = self.expiration_manager.get_start_time_by_vm_uuid(vm_allocated_dict['uuid'])
-        vm_allocated_dict['expiration_time'] = self.expiration_manager.get_end_time_by_vm_uuid(vm_allocated_dict['uuid'])
-        #TODO: Use TemplateManager: Add Template to VM
+        vm_allocated_dict['generation_time'] = self.expiration_manager.get_start_time_by_vm_uuid(vm_allocated_model.get_uuid())
+        vm_allocated_dict['expiration_time'] = self.expiration_manager.get_end_time_by_vm_uuid(vm_allocated_model.get_uuid())
+        # Add the Template information
+        vm_allocated_dict["disc_image"] = self.expiration_manager.get_template_from_allocated_vm(vm_allocated_model.get_uuid())
         return vm_allocated_dict
         
     def _unallocate_vm(self, vm_id):

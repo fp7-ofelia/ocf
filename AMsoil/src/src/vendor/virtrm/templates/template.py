@@ -26,7 +26,7 @@ class Template(db.Model):
     '''General parameters'''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
-    uuid = db.Column(db.String(1024), nullable=False)
+    uuid = db.Column(db.String(1024), nullable=False, default ="")
     description = db.Column(db.String(1024), nullable=True)
 
     '''OS parameters'''
@@ -54,10 +54,9 @@ class Template(db.Model):
     '''Defines soft or hard state of the Template'''
     do_save = True
 
-    servers = association_proxy("vtserver_templates", "vtserver")
-    allocated_vms = association_proxy("virtualmachine_allocated_template", "vmallocated")
-    vms = association_proxy("virtualmachine_template", "virtualmachine")
-    
+    servers = association_proxy("vtserver_templates", "vtserver", creator=lambda server:ServerTemplates(vtserver=server))
+    allocated_vms = association_proxy("virtualmachine_allocated_template", "vmallocated", creator=lambda vm:VMAllocatedTemplate(vmallocated=vm))
+    vms = association_proxy("virtualmachine_template", "virtualmachine", creator=lambda vm:VMTemplate(virtualmachine=vm))
 
     def __init__(self,name="",description="",os_type="",os_version="",os_distro="",virt_type="",hd_setup_type="",hd_path="",extended_data=None,img_url="",virt_tech="" ,save=False):
         self.name = name
@@ -244,4 +243,49 @@ class Template(db.Model):
             print 12
             return False
         return True 
-        
+       
+
+class VMAllocatedTemplate(db.Model):
+    """Relation between Servers and their supported Templates"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_allocated_template'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    virtualmachine_allocated_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
+    template_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
+
+    template = db.relationship("Template", backref=db.backref("vmallocated_template", cascade = "all, delete-orphan"))
+    vmallocated = db.relationship("VMAllocated")
+
+
+class VMTemplate(db.Model):
+    """Relation between Servers and their supported Templates"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'virtualmachine_template'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    virtualmachine_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
+    template_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
+
+    template = db.relationship("Template", backref=db.backref("virtualmachine_template", cascade = "all, delete-orphan"))
+    virtualmachine = db.relationship("VirtualMachine")
+
+
+class ServerTemplates(db.Model):
+    """Relation between Servers and their supported Templates"""
+
+    config = pm.getService("config")
+    table_prefix = config.get("virtrm.DATABASE_PREFIX")
+    __tablename__ = table_prefix + 'vtserver_templates'
+
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    vtserver_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'vtserver.uuid'), nullable=False)
+    template_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
+
+    template = db.relationship("Template", backref=db.backref("vtserver_templates", cascade = "all, delete-orphan"))
+    vtserver = db.relationship("VTServer")
+ 
