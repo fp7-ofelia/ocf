@@ -142,14 +142,7 @@
     			</a>
     			</td>
     		</tr>
-    		<tr class="fs_req_sub_menu">
-    			<td>
-    			<a href="/admin_manager/set_auto_approve">
-    			<img src="{% url img_media 'auto_approve_dark.png' %}"  class="submenuimg"/>
-    			</a>
-    			</td>
-    		</tr>
-    		
+    	
     	<tr class="admin_fs_main_menu">
     		<td>
     		<img src="{% url img_media 'admin_fs_dark.png' %}" class="menuimg" id="admin_fs"/>
@@ -245,30 +238,37 @@
     		<img src="{% url img_media 'manage_site_dark.png' %}" class="menuimg" id="website"/>
     		</td>
     	</tr>
-    		<tr class="website_sub_menu">
-    			<td>
-    			<a href="/controls/set_clearinghouse">
-    			<img src="{% url img_media 'set_ch_dark.png' %}" class="submenuimg" />
+	<tr class="website_sub_menu">
+		<td>
+			<a href="/controls/set_clearinghouse">
+			<img src="{% url img_media 'set_ch_dark.png' %}" class="submenuimg" />
     			</a>
-    			</td>
-    		</tr>
-      		<tr class="website_sub_menu">
-    			<td>
-    			<a href="/controls/set_flowvisor">
-    			<img src="{% url img_media 'set_fv_dark.png' %}" class="submenuimg" />
-    			</a>
-    			</td>
-    		</tr>
+		</td>
+	</tr>
+	<tr class="website_sub_menu">
+		<td>
+			<a href="/controls/set_flowvisor">
+			<img src="{% url img_media 'set_fv_dark.png' %}" class="submenuimg" />
+			</a>
+		</td>
+	</tr>
+	<tr class="website_sub_menu">
+		<td>
+			<a href="/admin_manager/set_auto_approve">
+			<img src="{% url img_media 'auto_approve_dark.png' %}"  class="submenuimg"/>
+			</a>
+		</td>
+	</tr>
     	{% endif %}
     		
     	<tr class="dashboard_main_menu">
-    		<td>
-    		<a href="/dashboard">
-    		<img src="{% url img_media 'dashboard_dark.png' %}" class="menuimg"/>
-    		</a>
-    		</td>
+		<td>
+			<a href="/dashboard">
+			<img src="{% url img_media 'dashboard_dark.png' %}" class="menuimg"/>
+			</a>
+		</td>
     	</tr>	
-    		
+    	
     	<tr class="logout_main_menu">
     		<td>
     		<a href="/accounts/logout">

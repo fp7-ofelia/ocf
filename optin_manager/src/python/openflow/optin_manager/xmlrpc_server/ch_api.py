@@ -7,6 +7,7 @@ from expedient.common.rpc4django import rpcmethod
 from django.contrib.auth.models import User
 from pprint import pprint
 from models import CallBackServerProxy, FVServerProxy
+from openflow.optin_manager.admin_manager.models import FlowSpaceAutoApproveScript
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace,\
     UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.flowspace.utils import dotted_ip_to_int, mac_to_int,\
@@ -236,7 +237,7 @@ def create_slice(slice_id, project_name, project_description,
     pprint(switch_slivers, indent=8)
     
     e = Experiment.objects.filter(slice_id=slice_id)
-    
+    print "----------------existing experiment: %s" % str(e)
     if (e.count()>0):
         old_e = e[0]
         old_fv_name = old_e.get_fv_slice_name()
@@ -256,6 +257,7 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_email = owner_email
     e.owner_password = owner_password
     e.save()
+    print "----------------new experiment: %s" % str(e)
        
     all_efs = [] 
     for sliver in switch_slivers:
@@ -371,10 +373,13 @@ def create_slice(slice_id, project_name, project_description,
                 raise Exception(parseFVexception(exc,"Couldn't re-opt into updated experiment. Lost all the opt-ins: "))
     
     flowspace_correctly_granted = True
+    automatic_settings = get_automatic_settings()
     try:
-        if settings.FLOWSPACE_AUTO_APPROVAL:
+        if automatic_settings["flowspace_auto_approval"]:
             auto_fs_granter(e)
+    # FIXME An exception is being raised. Investigate.
     except Exception as exc:
+        print "Exception happened when granting flowspace automatically: %s" % str(exc)
         flowspace_correctly_granted = False
     
     try:
@@ -385,22 +390,28 @@ def create_slice(slice_id, project_name, project_description,
         # No "https://" check should be needed if settings are OK
         site_domain_url = "https://" + Site.objects.get_current().domain + project_detail_url
         # Tuple with the requested VLAN range
-        vlan_range = list()
+        vlan_range = ""
         try:
             if not isinstance(all_efs,list):
                 all_efs = [all_efs]
-            for efs in all_efs:
-                vlan_range.append("\nVLAN range: %s\n\n" % str((efs.vlan_id_s, efs.vlan_id_e)))
-        except Exception as e:
-            vlan_range = ["\n\n"]
-
-        # Default message: either for manual granting or any failure in automatic granting        
-        flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new rule for this request at: %s" % site_domain_url
-        if settings.FLOWSPACE_AUTO_APPROVAL:
+            # Obtain unique ranges of VLANs
+            vlan_range_all_efs = set([ (efs.vlan_id_s, efs.vlan_id_e) for efs in all_efs ])
+            # Create list for e-mail
+#            add_vlan_range_email = lambda x: "VLAN range: %s" % str(x)
+#            vlan_range += map("\n".join, [map(add_vlan_range_email, vlan_range_all_efs)])[0]
+            vlan_range += "VLAN ranges: %s" % str(vlan_range_all_efs)
+        except:
+            pass
+        
+        # Default message: either for manual granting or any failure in automatic granting
+        flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Request: OptinManager '" + str(project_name) + "'"
+        flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + "\n" + str(vlan_range) + "\n\nYou may add a new rule for this request at: %s" % site_domain_url
+        if automatic_settings["flowspace_auto_approval"]:
             if flowspace_correctly_granted:
-                flowspace_email = "Hi, Island Manager\n\nA new flowspace was automatically granted:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may check the rule for this request at: %s" % site_domain_url
+                flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Approved: OptinManager '" + str(project_name) + "'"
+                flowspace_email = "Hi, Island Manager\n\nA new flowspace was automatically granted:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "\n\nYou may check the rule for this request at: %s" % site_domain_url
 
-        send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager '"+str(project_name)+"'", flowspace_email, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+        send_mail(flowspace_subject, flowspace_email, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
     except:
         pass
     
@@ -649,13 +660,30 @@ def get_offered_vlans(set=None):
 
 @check_fv_set
 @rpcmethod()
+def get_automatic_settings(args=None):
+    """
+    Get status of the automatic granting of VLANs and approval of Flowspaces
+    """
+    info = dict()
+    auto_approve_settings = FlowSpaceAutoApproveScript.objects.filter(admin=User.objects.filter(is_superuser=True))[0]
+    info["vlan_auto_assignment"] = getattr(auto_approve_settings, "vlan_auto_grant", False)
+#    info["vlan_auto_assignment"] = getattr(settings, "VLAN_AUTO_ASSIGNMENT", False)
+    info["flowspace_auto_approval"] = getattr(auto_approve_settings, "flowspace_auto_approval", False)
+#    info["flowspace_auto_approval"] = getattr(settings, "FLOWSPACE_AUTO_APPROVAL", False)
+    return info
+
+@check_fv_set
+@rpcmethod()
 def get_used_vlans(range_len=1, direct_output=False):
+    """
+    Returns a list with the VLANs used within this OpenFlow aggregate
+    """
     range_len = None
     from openflow.optin_manager.opts.vlans.vlanController import vlanController
     import random
     vlans =  vlanController.offer_vlan_tags(range_len)
-    if not settings.VLAN_AUTO_ASSIGNMENT:
-        raise Exception("VLAN_AUTO_ASSIGNMENT setting is disabled")
+    if get_automatic_settings()["flowspace_auto_approval"]:
+        raise Exception("VLAN automatic granting is disabled")
     if not direct_output:
         return list(set(range(4096)) - set(vlans))
     else:
@@ -663,9 +691,11 @@ def get_used_vlans(range_len=1, direct_output=False):
         return [vlans[rnd]]
           
 @check_fv_set
-@rpcmethod(signature=['string', # return value
-                     ])
+@rpcmethod()
 def get_ocf_am_version(args=None):
+    """
+    Returns the version for the current aggregate
+    """
 #    sv = open('../../../../../.currentVersion','r')
     import os
     sv = open(os.path.join(settings.SRC_DIR, "..", ".currentVersion"),"r")
@@ -674,13 +704,15 @@ def get_ocf_am_version(args=None):
     return software_version
 
 @check_fv_set
-@rpcmethod(signature=['struct', # return value
-                     ])
+@rpcmethod()
 def get_am_info(args=None):
+    """
+    Returns a set of information about the aggregate
+    """
     # INFO: add as many keys as you wish
     info = dict()
+    auto_approve_settings = FlowSpaceAutoApproveScript.objects.filter(admin=User.objects.filter(is_superuser=True))[0]
     info["version"] = get_ocf_am_version()
-    info["vlan_auto_assignment"] = settings.VLAN_AUTO_ASSIGNMENT
-    info["flowspace_auto_approval"] = settings.FLOWSPACE_AUTO_APPROVAL
+    info.update(get_automatic_settings())
     return info
 
