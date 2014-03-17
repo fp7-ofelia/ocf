@@ -403,15 +403,16 @@ def create_slice(slice_id, project_name, project_description,
         except:
             pass
         
-        # Default message: either for manual granting or any failure in automatic granting
-        flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Request: OptinManager '" + str(project_name) + "'"
-        flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + "\n" + str(vlan_range) + "\n\nYou may add a new rule for this request at: %s" % site_domain_url
-        if automatic_settings["flowspace_auto_approval"]:
-            if flowspace_correctly_granted:
-                flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Approved: OptinManager '" + str(project_name) + "'"
-                flowspace_email = "Hi, Island Manager\n\nA new flowspace was automatically granted:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "\n\nYou may check the rule for this request at: %s" % site_domain_url
+        if all_efs:
+            # Default message: either for manual granting or any failure in automatic granting
+            flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Request: OptinManager '" + str(project_name) + "'"
+            flowspace_email = "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + "\n" + str(vlan_range) + "\n\nYou may add a new rule for this request at: %s" % site_domain_url
+            if automatic_settings["flowspace_auto_approval"]:
+                if flowspace_correctly_granted:
+                    flowspace_subject = settings.EMAIL_SUBJECT_PREFIX + " Flowspace Approved: OptinManager '" + str(project_name) + "'"
+                    flowspace_email = "Hi, Island Manager\n\nA new flowspace was automatically granted:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "\n\nYou may check the rule for this request at: %s" % site_domain_url
 
-        send_mail(flowspace_subject, flowspace_email, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
+            send_mail(flowspace_subject, flowspace_email, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
     except:
         pass
     
