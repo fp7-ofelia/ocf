@@ -6,7 +6,7 @@
 
     <xs:complexType name="RSpecVirtualisation">
         <xs:sequence>
-            <xs:element name="slice" type="Slice"/>
+            <xs:element name="node" type="Slice"/>
         </xs:sequence>
         <xs:attribute name="type" type="RSpecType"/>
     </xs:complexType>
@@ -21,7 +21,6 @@
         <xs:sequence>
             <xs:element name="sliver" type="VM" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="urn" type"xs:string"/>
     </xs:complexType>
 
     <xs:complexType name="VM">
