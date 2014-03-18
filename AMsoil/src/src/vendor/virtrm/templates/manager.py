@@ -25,7 +25,8 @@ class TemplateManager():
         self.add_to_buffer(template)
 
     def get_template_by(self, my_filter=dict()):
-        return db.session.query(Template).filter_by(**my_filter)
+#        return db.session.query(Template).filter_by(**my_filter)
+        pass
 
     def edit_template(self, new_attrs,template=None, my_filter=dict()):
         if not template:
@@ -83,6 +84,3 @@ class TemplateManager():
     def get_template_from_allocated_vm(self, vm_uuid):
         from templates_hardcoded_info import TEMPLATE
         return TEMPLATE
-
-    def check_is_valid_template(self, template_info):
-        pass

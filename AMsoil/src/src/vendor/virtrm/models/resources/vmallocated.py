@@ -24,7 +24,7 @@ class VMAllocated(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False, default="")
-    virtual_memory_mb = db.Column(db.Integer)
+    memory_mb = db.Column(db.Integer, nullable=False, default=0)
     cpus_number = db.Column(db.Integer, nullable=True)
     hd_size_mb = db.Column(DOUBLE, nullable=True)
 
@@ -174,12 +174,12 @@ class VMAllocated(db.Model):
     def get_disc_space_gb(self):
         return self.disc_space_gb
     
-    def set_expires(self, expires):
-        self.expires.append(expires)
+    def set_memory_mb(self, memory):
+        self.memory_mb = memory
         sel.auto_save()
     
-    def get_expires(self):
-        return self.expires.first().expires
+    def get_memory_mb(self):
+        return self.memory_mb
     
     def set_virtualization_technology(self, virt_tech):
         self.virtualization_technology = virt_tech

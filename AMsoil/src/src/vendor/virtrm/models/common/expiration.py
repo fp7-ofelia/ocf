@@ -21,7 +21,7 @@ class Expiration(db.Model):
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     end_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    _do_save = True
+    do_save = True
     # Resource relationships
     virtualmachine = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
     virtualmachine_allocated = association_proxy('expiration_vm_allocated', 'vm_allocated', creator=lambda vm:VMAllocatedExpiration(vm_allocated=vm))
@@ -30,7 +30,7 @@ class Expiration(db.Model):
     def __init__(self,start_time=None,end_time=None,save=False):
         self.start_time = start_time
         self.end_time = end_time
-        _do_save = save
+        do_save = save
         if save:
             db.session.add(self)
             db.session.commit()
@@ -40,7 +40,7 @@ class Expiration(db.Model):
         db.session.commit()
      
     def auto_save(self):
-        if self._do_save:
+        if self.do_save:
             db.session.add(self)
             db.session.commit()
 
@@ -78,10 +78,10 @@ class Expiration(db.Model):
         return self.end_time
 
     def set_do_save(self, save):
-        self._do_save = save
+        self.do_save = save
     
     def get_do_save(self):
-        return self._do_save
+        return self.do_save
 
     def set_virtualmachine(self, vm):
         self.virtualmachine.append(vm)

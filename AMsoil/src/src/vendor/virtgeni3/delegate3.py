@@ -154,10 +154,11 @@ class VTDelegate3(GENIv3DelegateBase):
             slivers["project_name"] = authority
             requested_vms.append(slivers)
         try:
-            allocated_vms = dict()
+            allocated_vms = list()
             for requested_vm in requested_vms:
                 # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
                 allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time)
+                allocated_vms.append(allocated_vm)
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except virt_exception.VTAMVmNameAlreadyTaken as e:
             self.undo_action("allocate", allocated_vms)            
@@ -168,115 +169,17 @@ class VTDelegate3(GENIv3DelegateBase):
         except virt_exception.VTMaxVMDurationExceeded as e:
             self.undo_action("allocate", allocated_vms)
             raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-        #XXX: Improve this
-        rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
-        slivers = self._get_slivers_json(allocated_vms)
+        # Generate the Manifest RSpec
+        rspecs = self._get_manifest_rspec(allocated_vms)
+        # Generate the JSON with the VMs information
         slivers = list()
-        for key in allocated_vms.keys():
-            for allocated_vm in allocated_vms[key]:
-                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.project_name + '.' + allocated_vm.slice_name + '.' + allocated_vm.name
-                vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                slivers.append(self._get_sliver_status_hash({'name':vm_urn, 'expires':allocated_vm["expires"], 'status':"allocated"}, True))
+        for allocated_vm in allocated_vms:
+            # Add the status information here, due allocated vms does not have one
+            allocated_vm["status"] = "allocated"    
+            sliver = self._get_sliver_status_hash(allocated_vm, True)
+            slivers.append(sliver)
         return rspecs, slivers
 
-    def allocate_old(self, slice_urn, client_cert, credentials, rspec, end_time=None):
-        """Documentation see [geniv3rpc] GENIv3DelegateBase."""
-        slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-        requested_vms = list()
-        rspec_root = self.lxml_parse_rspec(rspec)
-
-        # XXX Start. Adapted from dhcpgeni3 --> test and remove
-        vms = []
-        # parse RSpec -> requested_ips
-        #rspec_root2 = self.lxml_parse_rspec(rspec)
-        #for elm in rspec_root2.getchildren():
-        #    if not self.lxml_elm_has_request_prefix(elm, 'vtam'):
-        #        raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (elm,))
-        #    if (self.lxml_elm_equals_request_tag(elm, 'vtam', 'node')):
-        #        vms.append(self.__extract_node_from_rspec(elm))
-        #        raise geni_ex.GENIv3GeneralError('IP ranges in RSpecs are not supported yet.') # TODO
-        #    else:
-        #        raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
-        # XXX End
-
-        # XXX TODO -> USE LXML.FIND
-        slivers = rspec_root.xpath("//rspec//node//sliver")
-        if not slivers:
-            raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (rspec_root,))
-        # PARSER
-        vm = dict()
-        for elm in slivers.getchildren():
-            if elm.tag not in self.ACCEPTED_TAGS_REQUEST:
-                raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
-            vm[elm.tag] = elm.text.strip()
-        # END TEST
-        
-        for nodes in rspec_root.getchildren():
-            if not nodes.tag == "node":
-                raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (nodes,))        
-            for slivers in nodes.getchildren():
-                vm = dict()
-                if not slivers.tag == "sliver":
-                    raise geniv3_exception.GENIv3BadArgsError("RSpec contains elements/namespaces I do not understand (%s)." % (slivers,))
-                for elm in slivers.getchildren():
-                    if (elm.tag == "name"):
-                        vm['name'] = elm.text.strip()
-                    elif (elm.tag == "project-name"):
-                        vm['project_name'] = elm.text.strip()
-                    elif (elm.tag == "server-name"):
-                        vm['server_name'] = elm.text.strip()
-                    elif (elm.tag == "operating-system-type"):
-                        vm['operating_system_type'] = elm.text.strip()
-                    elif (elm.tag == "operating-system-version"):
-                        vm['operating_system_version'] = elm.text.strip()
-                    elif (elm.tag == "operating-system-distribution"):
-                        vm['operating_system_distribution'] = elm.text.strip()
-                    elif (elm.tag == "virtualization-type"):
-                        vm['virtualization_type'] = elm.text.strip()
-                    elif (elm.tag == "hd-setup-type"):
-                        vm['hd_setup_type'] = elm.text.strip()
-                    elif (elm.tag == "hd-size-mb"):
-                        vm['hd_size_mb'] = elm.text.strip()
-                    elif (elm.tag == "hd-origin-path"):
-                        vm['hd_origin_path'] = elm.text.strip()
-                    elif (elm.tag == "hypervisor"):
-                        vm['hypervisor'] = elm.text.strip()
-                    elif (elm.tag == "virtualization-setup-type"):
-                        vm['virtualization_setup_type'] = elm.text.strip()
-                    elif (elm.tag == "memory-mb"):
-                        vm['memory_mb'] = elm.text.strip()
-                    else:
-                        raise geniv3_exception.GENIv3BadArgsError("RSpec contains an element I do not understand (%s)." % (elm,))
-                requested_vms.append(vm)
-        if self.urn_type(slice_urn) == 'slice': 
-            try:
-                allocated_vms = dict()
-                for requested_vm in requested_vms:
-                    allocated_vm, server = self._resource_manager.allocate_vm(requested_vm, slice_name, end_time)
-                    if server.name not in allocated_vms:
-                        allocated_vms[server.name] = list()
-                    allocated_vms[server.name].append(allocated_vm)
-            except virt_exception.VTAMVmNameAlreadyTaken as e:
-                self.undo_action("allocate", allocated_vms)            
-                raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
-            except virt_exception.VTAMServerNotFound as e:
-                self.undo_action("allocate", allocated_vms)
-                raise geniv3_exception.GENIv3SearchFailedError("The desired Server name(s) cloud no be found (%s)." % (requested_vms[0]['server_name'],))
-            except virt_exception.VTMaxVMDurationExceeded as e:
-                self.undo_action("allocate", allocated_vms)
-                raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-        else:
-            raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs are admited in this method for this AM')
-        rspecs = self._get_manifest_rspec(allocated_vms, slice_urn)
-        slivers = list()
-        for key in allocated_vms.keys():
-            for allocated_vm in allocated_vms[key]:
-                vm_hrn = get_authority(get_authority(slice_urn)) + '.' + allocated_vm.project_name + '.' + allocated_vm.slice_name + '.' + allocated_vm.name
-                vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-                slivers.append(self._get_sliver_status_hash({'name':vm_urn, 'expires':allocated_vm.expires, 'status':"allocated"}, True))
-        return rspecs, slivers
-              
     def renew(self, urns, client_cert, credentials, expiration_time, best_effort):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         # This code is similar to the provision call
@@ -502,32 +405,36 @@ class VTDelegate3(GENIv3DelegateBase):
     ''' Helper methods '''
     def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False, error_message=None):
         """Helper method to create the sliver_status return values of allocate and other calls."""
-        result = {'geni_sliver_urn' : sliver['name'],
-                  'geni_expires'    : sliver['expires'],
+        result = {'geni_sliver_urn' : sliver['urn'],
+                  'geni_expires'    : sliver['expiration_time'],
                   'geni_allocation_status' : self.ALLOCATION_STATE_UNALLOCATED}
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['status'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
         if (include_operational_status): 
             result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['status'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if error_message else self.OPERATIONAL_STATE_READY
         if (error_message):
-            result['error'] = error_message
+            result['geni_error'] = error_message
         return result
     
-    def _get_manifest_rspec(self, nodes, slice_urn):
-        E = self.lxml_manifest_element_maker('vtam')
-        manifest = self.lxml_manifest_root()
-        # XXX: Add more information about the AM? 
-        for key in nodes.keys():
-            # Assemble manifest
-            server = E.node(server = key)
-            # XXX: More information about the server? urn? id?
-            #server.append(component_id = node['server_urn'])
-            for sliver in nodes[key]:
-                vm = E.sliver(type = 'VM')
-                vm.append(E.name(hrn_to_urn(get_authority(get_authority(slice_urn)) + '.' + sliver.project_name + '.' + sliver.slice_name + '.' + sliver.name, 'sliver')))
-                server.append(vm)
-            manifest.append(server)
-        return self.lxml_to_string(manifest)
+    def _get_manifest_rspec(self, slivers):
+        namespace = self.get_manifest_extensions_mapping()
+        # Generate the RSpec root node
+        root_node = self.lxml_manifest_root()
+        # Generate the node generator with the specific namespace
+        node_generator = self.lxml_manifest_element_maker(namespace.keys()[0])
+        node = node_generator.node()
+        # Generate a node for every sliver
+        for sliver in slivers:
+            vm = node_generator.sliver()
+            self._translator.dict2xml_tree(sliver, vm, node_generator)
+            # Filter the generated node according the Manifest schema
+            manifest_filtered_nodes = RSPECS_FILTERED_NODES['manifest']
+            for key, value in manifest_filtered_nodes.iteritems():
+                self._filter.filter_xml_by_dict(value, vm, key, namespace)
+            node.append(vm)
+        root_node.append(node)
+        logging.debug("****** MANIFEST RSPEC *****" + "\n\n" + self.lxml_to_string(root_node)) 
+        return self.lxml_to_string(root_node)
     
     def undo_action(self, action, params):
         if action is "allocate":
