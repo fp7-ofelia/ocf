@@ -9,7 +9,6 @@
             <xs:element name="node" type="Slice"/>
         </xs:sequence>
         <xs:attribute name="type" type="RSpecType"/>
-        <xs:attribute name="virtualisation" type="xs:string"/>
     </xs:complexType>
 
     <xs:simpleType name="RSpecType">
