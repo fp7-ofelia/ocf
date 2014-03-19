@@ -15,6 +15,7 @@ from vt_plugin.forms.VM import VMModelForm
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_plugin.utils.Translator import Translator
 from vt_plugin.controller.dispatchers.ProvisioningDispatcher import ProvisioningDispatcher
+from vt_plugin.controller.dispatchers.InformationDispatcher import InformationDispatcher
 from vt_plugin.controller.VMcontroller.VMcontroller import VMcontroller
 from vt_plugin.utils.ServiceThread import ServiceThread
 from expedient.clearinghouse.aggregate.models import Aggregate
@@ -65,36 +66,25 @@ def virtualmachine_crud(request, slice_id, server_id):
             import pprint
             pprint.pprint(request.POST)
             
-            print "--------------------------------------1"
             if 'create_new_vms' in request.POST:
-                print "----------------------------------2"
                 # "Done" pressed ==> send xml to AM
 #                formset = VMModelFormAux(request.POST, queryset=virtualmachines)
                 form = VMModelForm(request.POST)
-                print "----------------------------------3"
 #               if formset.is_valid():
-                print form.errors
                 if form.is_valid():
-                    print "------------------------------------4"
                     instance = form.save(commit=False)
-                    print "------------------------------------5"
                     #create virtualmachines from received formulary
                     VMcontroller.processVMCreation(instance, serv.uuid, slice, request.user)
-                    print "------------------------------------6" 
 #                   VMcontroller.processVMCreation(instances, serv.uuid, slice, request.user)
                     return HttpResponseRedirect(reverse("slice_detail",
                                                 args=[slice_id]))
                 # Form not valid => raise error
                 else:
-                    print "-------------------------------------7" 
                     if "VM already exists" in form.errors[0]:
-                        print "----------------------------------8"
                         raise ValidationError("It already exists a VM with the same name in the same slice. Please choose another name", code="invalid",)
-                    print "-----------------------------------10" 
                     raise ValidationError("Invalid input: either VM name contains non-ASCII characters, underscores, whitespaces or the memory is not a number or less than 128Mb.", code="invalid",)
 
         else:
-            print "----------------------------------------9"
             form = VMModelForm()
 
     except ValidationError as e:
@@ -121,28 +111,32 @@ def virtualmachine_crud(request, slice_id, server_id):
 
 def manage_vm(request, slice_id, vm_id, action_type):
 
+    print "--------------------------------------------------------------------------------------->I am here"
     "Manages the actions executed over VMs at url manage resources."
+    if not (action_type.startswith("force")):
+        vm = VM.objects.get(id = vm_id)
+        rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
+        Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
+        ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
+        if action_type == 'start':
+            vm.state = 'starting...'
+        elif action_type == 'stop':
+            vm.state = 'stopping...'
+        elif action_type == 'reboot':
+            vm.state = 'rebooting...'
+        elif action_type == 'delete':
+            vm.state = 'deleting...'
+        elif action_type == 'create':
+            vm.state = 'creating...'
+        vm.save()
 
-    vm = VM.objects.get(id = vm_id)
-    #if action_type == 'stop' : action_type = 'hardStop'
-    rspec = XmlHelper.getSimpleActionSpecificQuery(action_type, vm.serverID)
-    Translator.PopulateNewAction(rspec.query.provisioning.action[0], vm)
-
-    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,rspec.query.provisioning, request.user)
-
-    #set temporally status
-    #vm.state = "on queue"
-    if action_type == 'start':
-        vm.state = 'starting...'
-    elif action_type == 'stop':
-        vm.state = 'stopping...'
-    elif action_type == 'reboot':
-        vm.state = 'rebooting...'
-    elif action_type == 'delete':
-        vm.state = 'deleting...'
-    elif action_type == 'create':
-        vm.state = 'creating...'
-    vm.save()
+    elif action_type == "force_update_vm":
+        InformationDispatcher.force_update_vms(vm_id=vm_id)
+    elif action_type == "force_update_server":
+        InformationDispatcher.force_update_vms(client_id=vm_id)
+    elif action_type == "force_update_all":
+        for server in VTServer.objects.all():
+             InformationDispatcher.force_update_vms(client_id=server.id) 
     #go to manage resources again
     response = HttpResponse("")
     return response

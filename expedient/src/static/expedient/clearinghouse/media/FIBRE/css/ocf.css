@@ -1210,11 +1210,20 @@ table.vms tr.even {
 table.vms tr.odd {
     background-color: #dce9f7;
 }
-/* Layer with buttons for the VM actions */
-.vm_actions input {
-	padding: 5px;
-	margin: 0px;
-	font-weight: normal;
+/* Layer with buttons for the VM, server, etc. actions */
+div.server_actions input,
+div.vm_actions input {
+    font-weight: normal;
+    margin: 0px;
+    padding: 5px;
+    text-align: center;
+}
+div.server_actions input.update,
+div.vm_actions input.update {
+    background-position-x: 0%;
+    /*margin-right: -27px;*/
+    text-align: right;
+    width: 75px !important;
 }
 
 /* SELECTS */
@@ -1282,7 +1291,7 @@ div.aggregateManager table.aggregateManagerDetail .label {
 	font-size: 1.1em;
 	padding-top: 2px;
 	vertical-align: top !important;
-	width: 150px;
+	width: 170px;
 }
 /* Slice detail page: button added when no AM has been added yet */
 div#aggregate_add_to_slice {
@@ -1313,6 +1322,31 @@ div.slicemgmt_actions {
 	background-color: #ebf5ff;
 	margin-top: 10px;
 }
+
+.slice_administration_details,
+.project_administration_details {
+    background-color: #ebf5ff;
+    border: 1px solid #7e9fc0;
+    margin-top: .8em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+}
+.slice_administration_details h2,
+.project_administration_details h2 {
+    margin-bottom: 1em;
+}
+.slice_administration_details p,
+.project_administration_details p {
+    margin-bottom: 0.1em !important;
+    margin-top: 0em !important;
+    padding-left: 0em !important;
+    padding-top: 0em !important;
+}
+.slice_administration_details span.title,
+.project_administration_details span.title {
+    font-weight: bold;
+}
+
 
 /* GENERIC CLASSES */
 

@@ -28,8 +28,8 @@ class MacRange(models.Model):
 
 
 	#Range parameters
-    	startMac = models.CharField(verbose_name="Start Mac Address",max_length = 17, default="")
-    	endMac = models.CharField(verbose_name="End Mac Address",max_length = 17, default="")
+    	startMac = models.CharField(verbose_name="Start Mac Address", max_length = 17, default="", validators=[EthernetUtils.checkValidMac])
+    	endMac = models.CharField(verbose_name="End Mac Address", max_length = 17, default="", validators=[EthernetUtils.checkValidMac])
 	
 	#Pool of macs both assigned and excluded (particular case of assignment)
 	macs = models.ManyToManyField('MacSlot', blank = True, null = True, editable = False)

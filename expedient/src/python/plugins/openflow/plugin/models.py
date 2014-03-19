@@ -33,13 +33,13 @@ def as_is_slugify(value):
     return value
 
 #cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]):(?P<port>\d+)$")
-cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)")# J.F. Mingorance-Puga, March 28, 2011
+cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)$")# J.F. Mingorance-Puga, March 28, 2011
 def validate_controller_url(value):
     def error():
         raise ValidationError(
             u"Invalid controller URL. The format is "
-            "tcp:<hostname>:<port> or ssl:<hostname>:<port>. Port must "
-            "be less than %s" % (2**16),
+            "tcp:<hostname>:<port> or ssl:<hostname>:<port>, without spaces. "
+            "Port must be less than %s." % (2**16),
             code="invalid",
         )
 
@@ -83,6 +83,11 @@ production networks, and is currently deployed in several universities.
 
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
     usage_agreement = models.TextField()
+    # New fields to keep track of...
+    # Automatic assignment of VLANs
+    vlan_auto_assignment = models.BooleanField("VLANs are automatically assigned", default=False)
+    # Automatic approval of flowspaces
+    flowspace_auto_approval = models.BooleanField("FlowSpace is automatically approved", default=False)
     
     class Meta:
         verbose_name = "OpenFlow Aggregate"
@@ -169,7 +174,6 @@ production networks, and is currently deployed in several universities.
 
  
     def get_offered_vlans(self, set=None):
-
         try:
             vlans = self.client.proxy.get_offered_vlans(set)
         except:
@@ -179,8 +183,30 @@ production networks, and is currently deployed in several universities.
 
         return vlans
 
+    def get_used_vlans(self, range_len=1, direct_output=False):
+        try:
+            if self.get_ocf_am_version < 70:
+                raise Exception("The current version of the AM does not support this feature.")
+            vlans = self.client.proxy.get_used_vlans(range_len, direct_output)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("AM %s could not return used VLANS for your slice: %s" % (self.name, e))
+        return vlans
+
+    def get_ocf_am_version():
+        try:
+          sv = self.client.proxy.get_ocf_am_version()
+          i = 1
+          result = 0
+          for num in sv.split('.').reverse():
+              result += i * num
+              i *= 10
+          return result      
+        except:
+          return  None #Equal or Below 0.7 version
+
     def get_granted_flowspace(self, slice_id):
-        
         try:
             gfs = self.client.proxy.get_granted_flowspace(slice_id)
         except:
@@ -191,7 +217,6 @@ production networks, and is currently deployed in several universities.
             #available flag of the AM.
             #raise
             return {}
-
         return gfs
         
     def _get_slice_id(self, slice):
@@ -238,7 +263,9 @@ production networks, and is currently deployed in several universities.
                             else:
                                 fsd[f.name] = "*"
                     d['flowspace'].append(fsd)
-            sw_slivers.append(d)
+            # Carolina 2014/03/10: do not add datapath_id when no flowspace is requested for it
+            if d['flowspace']:
+                sw_slivers.append(d)
             
         return sw_slivers
 

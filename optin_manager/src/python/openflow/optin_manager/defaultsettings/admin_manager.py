@@ -10,9 +10,11 @@ Created on Sep 4, 2010
 AUTO_APPROVAL_MODULES = {
     # "module display name":"module file name",
     # note: module name shouldn't be "Manual" or "Remote"
-    "Approve All Requests":"approve_all",
-    "Reject All":"reject_all",
-    "Approve Sender IP":"approve_sender_ip",             
+    "Approve All Requests": "approve_all",
+    
+    # Disabled on 2014/03/14 (probably had no use at all, anyway)
+#    "Reject All": "reject_all",
+#    "Approve Sender IP": "approve_sender_ip",             
 }
 
 # Send notification e-mail when flowspace requested being approved or rejected

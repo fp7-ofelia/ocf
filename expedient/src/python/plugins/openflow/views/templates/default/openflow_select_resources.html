@@ -151,19 +151,25 @@ function mode_selector(){
                 if ($('#fsmodesimple').attr('checked')){
                         if("{{enable_simple_mode}}" == "False"){
                             $("#mode_selector").css('display','none');
+                            $('#simpleprocsteps').css('display','none');
                             $('#procsteps').css('display','block');
+                            
 			}
                         else{
                             $("#procsteps").slideUp("slow");
                             $('#fssimple_mode_explanation').css('display','inline-block');
                             $('#fsadvanced_mode_explanation').css('display','none');
+                            $('#simpleprocsteps').slideDown("slow");
 			}
-                 }
+                }
+               
                  else{
                         //$('#procsteps').css('display','block');
+                        $("#simpleprocsteps").slideUp("slow");
 			$("#procsteps").slideDown("slow")
                         $('#fssimple_mode_explanation').css('display','none');
                         $('#fsadvanced_mode_explanation').css('display','inline-block');
+                        $("#simpleprocsteps").slideUp("slow");
                  }
         };
 
@@ -369,6 +375,21 @@ $(document).ready(function(){
     1. <a href="{% url book_openflow slice.id %} "style="font-weight: bold;">Select OpenFlow Ports</a>
     2. <a href="{% url flowspace slice.id %}" id="link_go_next">Select/Modify Flowspace</a>
 </div>
+<div id="simpleprocsteps" class="steps">
+    <div style="padding-bottom:0.25em;">
+    <b>Select the number of VLANs you want to use:</b>
+    </div>
+    <div>
+    <center>
+    <select name="selected_vlan_range" style="width: 14.5%;">
+            {% for i in vlan_range %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+    </select>
+    </div>
+    </center>
+</div>
+  
 </div>
 {% endif %}
 

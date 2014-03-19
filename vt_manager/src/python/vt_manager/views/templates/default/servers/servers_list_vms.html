@@ -3,6 +3,10 @@
    		{% if server %}
 			{% with server.getChildObject as server %} 
     		<h1>VMs in {{ server.name }}</h1>
+                <div class="mgmt_actions">
+                <p><a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}}, 0 ,'force_update_server')">Update List</a></p>
+                </div>
+
 			<div id = "div_vms">
     		{% if not server.vms.all %}
         		{{ server.name }} has no VMs at the moment
@@ -18,7 +22,8 @@
             <th> Project</th>
             <th> Slice</th>
             <th> Status</th>
-            <th> Actions </th>
+            <th><center> Actions</center> </th>
+            <th><center> Update Action</center></th>
         	</tr>
 	        {% for vm in server.vms.all %}
 	          <tr id=tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
@@ -31,7 +36,7 @@
 	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
 	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
 	            <td id = td_vm_actions{{vm.id}}>
-					<div>
+					<center><div>
 					{% if vm.state == "running" %}
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
@@ -47,9 +52,12 @@
                     {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
                         <center><img src={% url img_media 'loading.gif'%} align="absmiddle"></center>
                     {% endif %}
-					</div>
+					</div></center>
 	
 	            </td>
+                    <td>
+                        <center><a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'force_update_vm')">Update</a></center>
+                    </td>
 	        </tr>
 	       {% endfor %}
 	    	 </table>   

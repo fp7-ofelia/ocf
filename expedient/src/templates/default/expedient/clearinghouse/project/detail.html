@@ -42,16 +42,22 @@
 	<div class="title">
 		<h1>Project <font class="highlight">{{ project.name }}</font></h1>
 	</div>
-	
 	<div class="mgmt_actions">
 		<!--<h2>Management Actions:</h2>-->
-    	<!--<p><a href="{% url project_update project.id %}">Edit</a> basic information</p>-->
-    	<p><a href="{% url project_delete project.id %}">Delete</a> project</p>
-    </div>
-	
-    <div class="proj_description">
-        {{ project.description }}
-    </div>
+		<!--<p><a href="{% url project_update project.id %}">Edit</a> basic information</p>-->
+		<p><a href="{% url project_delete project.id %}">Delete</a> project</p>
+	</div>
+
+	<div class="proj_description">
+		{{ project.description }}
+	</div>
+
+	{% if request.user|is_super_user %}
+		<div class="project_administration_details">
+			<h2>Administration details</h2>
+			<p><span class="title">Project uuid:</span> {{ project.uuid }}</p>
+		</div>
+	{% endif %}
 	
 	<h2>Members</h2>
 	<div class="Members">

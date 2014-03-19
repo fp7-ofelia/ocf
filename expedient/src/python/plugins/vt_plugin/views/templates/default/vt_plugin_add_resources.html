@@ -216,9 +216,10 @@ Type:
                     <th>
                       Disc
                     </th>
+                    <th style="text-align: center; width: 8em;">
+                      Update
+                    </th>
                   </tr>
-                  
-                  
                   <tr class = "odd">
                  <td>
                    {{ server.name }}
@@ -242,6 +243,11 @@ Type:
                 {{ server.freeDiscSpace }}
                 {#{{ server.discSpaceGB }}#}
               </td>
+              <td>
+                <div class="server_actions">
+                  <input type="button" class="update" onclick="handleVMaction({{slice.id}},{{vm.id}},'force_update_vm')" style="background-image: url({% url img_media 'reload.png' %});" value="Update" />
+                </div>
+              </td>  
           </tr>
           </table>
           <div id = "vms_table">

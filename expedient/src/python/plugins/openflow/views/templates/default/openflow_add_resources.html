@@ -95,12 +95,29 @@
 	
 	<tr>
 	<td class="label">Status:</td>
-	<td>			{% if not agg.available %}
-				<img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
-				{%else%}
-				<img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em"> 
-				{% endif %}
+	<td>
+            {% if not agg.available %}
+                <img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
+            {%else%}
+                <img src="{% url img_media 'active.png' %}" title="Ready" alt="Ready" style="height:1.2em"> 
+            {% endif %}
 	</tr>
+
+        <tr>
+        <td class="label">Automatic approval:</td>
+        <td>
+            {% if agg.available %}
+                {# Automatic approval only possible when (1) agg reachable, (2) auto VLANs assignment, (3) auto fs granting #}
+                {% if agg.openflowaggregate.vlan_auto_assignment and agg.openflowaggregate.flowspace_auto_approval %}
+                    <img src="{% url img_media 'active.png' %}" title="Automatic approval" alt="Automatic approval" style="height:1.2em">
+                {%else%}
+                    <img src="{% url img_media 'inactive.png' %}" alt="Manual approval" title="Manual approval" style="height:1.2em">
+                {% endif %}
+            {% else %}
+                <img src="{% url img_media 'inactive.png' %}" alt="Temporally not reachable" title="Temporally not reachable" style="height:1.2em"> 
+            {% endif %}
+        </tr>
+
 	<tr>
 	<td class="label">Physical location:</td>
 	<td> <b>{{ agg.location }}</b></td>
@@ -112,16 +129,14 @@
 	<tr>
 	<td colspan="2">
 
-
 	{% if checked_ids %}
 	<div style="padding-top:20px;">
-	{# Original: shows every flowspace in the slice #}
-	{#{% if allfs %}#}
-	{% if allfs|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
+	{% if flowspace_per_aggregate|key:agg.id %} {# If FlowSpace corresponds to AM, show #}
+	{#% if flowspace_per_aggregate|exists_flowspace_for_aggregate:agg %} {# If FlowSpace corresponds to AM, show #}
 
 	<table class="requestedFlowspaceHeader flowspaceHeader"> 
 		<tr>
-			<th>Requested Flowspace{%if allfs|length > 1%}s{%endif%} ({{allfs|length}}) <img align="absmiddle" id="req_fs_help" src="{% url img_media 'question_mark_15x15.png' %}">	</th>	
+			<th>Requested Flowspace{%if flowspace_per_aggregate|key:agg.id|length > 1%}s{%endif%} ({{flowspace_per_aggregate|key:agg.id|length}}) <img align="absmiddle" id="req_fs_help" src="{% url img_media 'question_mark_15x15.png' %}">	</th>	
 		<th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="requestedFlowspace{{agg.id}}">More information <span class="closed">&#x25BC;</span> </a></th>
 		</tr>
 	</table>
@@ -131,7 +146,7 @@
 
 	
     <div id="requestedFlowspace{{agg.id}}Container" class="expandable" style="display:none;">
-    {% for fs in allfs %}
+    {% for fs in flowspace_per_aggregate|key:agg.id %}
 			<table class="flowspace flowspace_r">
 				<tr class="odd">
 				<td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
@@ -177,7 +192,7 @@
 					<td>{%for ofiface in fs.slivers.all %}{%if ofiface.resource.aggregate_id == agg.id%}<strong>OpenFlow Switch:</strong> {{ ofiface.resource.as_leaf_class.switch.name}} - <strong>Port</strong> {{ofiface.resource.as_leaf_class.port_num}}<br/>{%endif%}{% endfor %}</td>
 		     	</tr>
 				</table>
-    {% endfor %}  <!-- for fs in allfs -->
+    {% endfor %}  <!-- for fs in flowspace_per_aggregate -->
     </div> <!-- RequestedFlowspaceContainer -->
 	<!-- SPACE TO TEST GRANTED FLOWSPACE -->
 
@@ -185,7 +200,7 @@
 		{% if gfs.0 == agg.id  and gfs.1 %}
 	    <div> 
     <table class="grantedFlowspaceHeader flowspaceHeader" style="border-bottom:0px">
-    <tr><th>Granted Flowspace{%if gfs.1|length > 1%}s{%endif%} ({{ gfs.1|length}}) <img align="absmiddle" id="gr_fs_help" src="{% url img_media 'question_mark_15x15.png' %}"></th>
+    <tr><th>Granted Flowspace{%if gfs.1.0|length > 1%}s{%endif%} ({{ gfs.1.0|length}}) <img align="absmiddle" id="gr_fs_help" src="{% url img_media 'question_mark_15x15.png' %}"></th>
     <th style="text-align:right;"><a href="#/" class="expandableTooltipable expandableCtl" id="grantedFlowspace{{agg.id}}">More information <span class="opened">&#x25B2;</span> </a></th></tr>
     </table>
 	</div>
@@ -195,12 +210,12 @@
 
     	     <div id="grantedFlowspace{{agg.id}}Container" class="expandable">
 		{% for fs_list in gfs.1 %}<!-- flowspace level-->
-                {% with  fs_list.0 as f %}
+                {% with fs_list as FG %}
+                {% for f in FG reversed %}
             <table class="flowspace">
                 <tr class="odd">
                 <td style="width:40%;"><strong> Flowspace {{fs.id }}</strong></td><td style="width:60%;"><strong>Associated OpenFlow Interfaces</strong></td>
                 </tr>
-	
 			{% with f.flowspace as fs%}	
 			{% with f.openflow as of_list%}	
     		    <tr class = "even">
@@ -242,6 +257,7 @@
     		    </tr>
 		{% endwith %}
 		{% endwith %}
+                {% endfor %}
 		{% endwith %}
 		</table>
 		{% endfor %} <!-- gfs in gfs_lis -->
@@ -282,8 +298,7 @@
     <tr>
 	<td class="label">Actions:</td>
 	<td>
-    	
-	        <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
+	    <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
     {# {% else %} #}
 		<!--<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />-->
   {# {% endif %} #}
