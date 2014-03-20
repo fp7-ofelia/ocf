@@ -7,6 +7,19 @@ class InformationDispatcher:
 
     @staticmethod
     def force_update_vms(client_id='None', vm_id='None'):
+        """
+        Forces the update of the status of the VMs.
+        Retrieves the server from the passed arguments and invokes
+        the corresponding method on its VT AM.
+        
+        If this method fails, it means there is a
+        If the server is not passed, it 
+        
+        @param    client_id     ID of the server
+        @param    vm_id         ID of the VM
+        @return   nothing
+        """
+        raw_updates = dict()
         if client_id != 'None':
             server = VTServer.objects.get(id=client_id)
             client_id = server.getUUID()
@@ -16,7 +29,13 @@ class InformationDispatcher:
             vm_id = vm.getUUID() 
         client = server.aggregate.as_leaf_class().client
         vt_am = xmlrpclib.ServerProxy('https://'+client.username+':'+client.password+'@'+client.url[8:])
-        raw_updates = vt_am.force_update_exp_vms(client_id, vm_id)
+        # If the previous method fails, it means that the VM could not be found in
+        # the VT AM. In that case synchronize the Expedient model by deleting it.
+        try:
+            raw_updates = vt_am.force_update_exp_vms(client_id, vm_id)
+        except:
+            if vm:
+                vm.delete()
         updated_vms = InformationDispatcher.__process_updated_vms(raw_updates)
         print "Updated VMs--------->", updated_vms
 
@@ -29,7 +48,7 @@ class InformationDispatcher:
                 vm.save()
                 simple_actions[vm.getUUID()] = "running"
             else:
-                if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
+                if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown', 'undefined']:
                     vm.delete()
                     simple_actions[vm.getUUID()] = "deleted"
                 elif vm.getState() in ['running', "starting...", "stopping..."] :
