@@ -70,7 +70,6 @@ class XendManager(object):
 		except Exception as e:
 			return False
 
-
 	@staticmethod
 	def retrieveActiveDomainsByUUID():
 		conn = XendManager.__getROConnection()
@@ -114,7 +113,9 @@ class XendManager(object):
 		if XendManager.isVmRunning(vm.name) and not  XendManager.isVmRunningByUUID(vm.uuid):
 			#Duplicated name; trying to find an Alias
 			newVmName = XendManager.__findAliasForDuplicatedVmName(vm)
-			subprocess.call(['/usr/sbin/xm','create','name='+newVmName,XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+			command_list = ['/usr/sbin/xm', 'create', 'name=' + newVmName, XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))]
+			process = subprocess.Popen(command_list, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			out, err = process.communicate()
 		else:	
 			try:
 				#Try first using libvirt call
@@ -126,13 +127,18 @@ class XendManager(object):
 				raise Exception("Skip") #otherwise stop is ridicously slow
 			except Exception as e:
 				#Fallback solution; workarounds BUG that created wrong .conf files (extra spaces that libvirt cannot parse)
-				subprocess.call(['/usr/sbin/xm','create',XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))])
+				command_list = ['/usr/sbin/xm', 'create', XendManager.sanitize_arg(HdManager.getConfigFilePath(vm))]
+				process = subprocess.Popen(command_list, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				out, err = process.communicate()
 
 		time.sleep(OXA_XEN_CREATE_WAIT_TIME)
 
 		if not XendManager.isVmRunningByUUID(vm.uuid):
-			#TODO: add more info to exception
-			raise Exception("Could not start VM")
+			# Complete with other types of exceptions
+			detailed_error = ""
+			if "Not enough free memory" in err:
+				detailed_error = " because there is not enough free memory in that server. Try another."
+			raise Exception("Could not start VM%s" % detailed_error)
 
 	@staticmethod
 	def stopDomain(vm):
@@ -170,7 +176,6 @@ class XendManager(object):
 		if not XendManager.isVmRunningByUUID(vm.uuid):
 			raise Exception("Could not reboot domain (maybe rebooted before MINIMUM_RESTART_TIME?). Domain will remain in stop state")
 
-		
 
 	''' XXX: To be implemented '''	
 	@staticmethod
