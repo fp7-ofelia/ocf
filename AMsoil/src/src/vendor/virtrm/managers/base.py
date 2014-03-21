@@ -481,6 +481,9 @@ class VTResourceManager(object):
             restarted_vms.append(self.restart_vm(None, vm.name, vm.slice_name))
         db_session.expunge_all()
         return restarted_vms
+
+    def delete_vm_by_uuid(self, vm_uuid):
+        pass
     
     def delete_vms_in_slice(self, slice_urn):
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
@@ -580,7 +583,7 @@ class VTResourceManager(object):
         vm_allocated_model = self.translator.dict2class(vm, VMAllocated)
         vm_allocated_model.save()
         # Add the expiration time to the allocated VM
-        self.expiration_manager.add_expiration_to_allocated_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
+        self.expiration_manager.add_expiration_to_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
         # Add the template to the allocated VM
         self.template_manager.add_template_to_allocated_vm(vm_allocated_model.get_uuid(), template)
         # Obtain the Allocated VM information
@@ -634,14 +637,10 @@ class VTResourceManager(object):
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
-        expired_provisioned_vms, expired_allocated_vms = self.expiration_manager.get_expired_vms()
-        for expired_allocated_vm in expired_allocated_vms:
-            vm_uuid = expired_allocated_vm.get_uuid()
-            self.deallocate_vm(vm_uuid)
-            self.expiration_manager.delete_expiration_by_vm_uuid(vm_uuid)
-        for expired_provisioned_vm in expired_provisioned_vms:
-            vm_uuid = expired_provisioned_vm.get_uuid()
-            #TODO: Delete Provisioned VM
+        expired_vms = self.expiration_manager.get_expired_vms()
+        for expired_vm in expired_vms:
+            vm_uuid = expired_vm.get_uuid()
+            self.delete_vm_by_uuid(vm_uuid)
             self.expiration_manager.delete_expiration_by_vm_uuid(vm_uuid)
         return
     

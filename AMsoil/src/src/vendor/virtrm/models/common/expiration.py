@@ -23,8 +23,7 @@ class Expiration(db.Model):
     end_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     do_save = True
     # Resource relationships
-    virtualmachine = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
-    virtualmachine_allocated = association_proxy('expiration_vm_allocated', 'vm_allocated', creator=lambda vm:VMAllocatedExpiration(vm_allocated=vm))
+    vm = association_proxy('expiration_vm', 'vm', creator=lambda vm:VMExpiration(vm=vm))
 
     @staticmethod    
     def __init__(self,start_time=None,end_time=None,save=False):
@@ -46,16 +45,7 @@ class Expiration(db.Model):
 
     def remove_virtualmachine(self, vm=None):
         if not vm:
-            vm = self.virtualmachine[0]
-        try:
-            self.virtualmachine.remove(vm)
-        except:
-            raise Exception
-        self.auto_save()
-
-    def remove_virtualmachine_allocated(self, vm=None):
-        if not vm:
-            vm = self.virtualmachine_allocated[0]
+            vm = self.vm[0]
         try:
             self.virtualmachine.remove(vm)
         except:
@@ -83,29 +73,17 @@ class Expiration(db.Model):
     def get_do_save(self):
         return self.do_save
 
-    def set_virtualmachine(self, vm):
-        self.virtualmachine.append(vm)
+    def set_vm(self, vm):
+        self.vm.append(vm)
         self.auto_save()
 
-    def get_virtualmachine(self):
+    def get_vm(self):
         # Try to avoid an out of index Exception if the list is empty
         try:
-            virtualmachine = self.virtualmachine[0]
+            virtualmachine = self.vm[0]
         except:
             virtualmachine = None
         return virtualmachine
-
-    def set_virtualmachine_allocated(self, vm):
-        self.virtualmachine_allocated.append(vm)
-        self.auto_save()
-
-    def get_virtualmachine_allocated(self):
-        # Try to avoid an out of index Exception if the list is empty
-        try:
-            virtualmachine_allocated = self.virtualmachine_allocated 
-        except:
-            virtualmachine_allocated = None
-        return virtualmachine_allocated
 
 class VMExpiration(db.Model):
     """Relation between VirtualMachines and their expiration time (only GENI)"""
@@ -125,27 +103,6 @@ class VMExpiration(db.Model):
     def get_expiration(self):
         return self.vm_expiration
  
-    def destroy(self):
-        db.session.delete(self)
-        db.session.commit()
-
-class VMAllocatedExpiration(db.Model):
-    """Relation between Allocated VirtualMachines and their expiration time (only GENIv3)"""
-    config = pm.getService("config")
-    table_prefix = config.get("virtrm.DATABASE_PREFIX")
-    __tablename__ = table_prefix + 'virtualmachine_allocated_expiration'
-    __table_args__ = {'extend_existing':True}
-    # Table attributes
-    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
-    expiration_id = db.Column(db.ForeignKey(table_prefix + 'expiration.id'), nullable=False)
-    # Relationships
-    vm_allocated = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==VMAllocatedExpiration.vm_uuid")
-    vm_allocated_expiration = db.relationship("Expiration", primaryjoin="Expiration.id==VMAllocatedExpiration.expiration_id", backref=db.backref("expiration_vm_allocated", cascade="all, delete-orphan"), collection_class=attribute_mapped_collection('id'))
-
-    def get_expiration(self):
-        return self.vm_allocated_expiration
-   
     def destroy(self):
         db.session.delete(self)
         db.session.commit()
