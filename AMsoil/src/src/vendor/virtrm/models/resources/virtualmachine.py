@@ -20,6 +20,7 @@ class VirtualMachine(db.Model):
 
     __child_classes = (
             'XenVM',
+            'AllocatedVM',
     )
 
     ''' General parameters '''
@@ -29,6 +30,7 @@ class VirtualMachine(db.Model):
     memory = db.Column(db.Integer)
     number_of_cpus = db.Column("numberOfCPUs", db.Integer)
     disc_space_gb = db.Column("discSpaceGB", DOUBLE)
+    urn = db.Column(db.String(1024), nullable=True)
 
     '''Property parameters'''
     project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
@@ -115,8 +117,11 @@ class VirtualMachine(db.Model):
         for child_class in self.__child_classes:
             try:
                 return self.__getattribute__(child_class.lower())
-            except eval(child_class).DoesNotExist:
-                return self
+            except:
+                pass
+        return self
+#            except eval(child_class).DoesNotExist:
+#                return self
     
     def get_lock_identifier(self):
         # Uniquely identifies object by a key
@@ -139,6 +144,13 @@ class VirtualMachine(db.Model):
         
     def get_uuid(self):
         return self.uuid
+ 
+    def set_urn(self, urn):
+        self.urn = urn
+        self.auto_save()
+
+    def get_urn(self)
+        return self.urn
     
     def set_project_id(self,projectId):
         if not isinstance(project_id,str):
