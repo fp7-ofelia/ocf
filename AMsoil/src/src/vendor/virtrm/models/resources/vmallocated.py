@@ -103,7 +103,7 @@ class VMAllocated(db.Model):
             db.session.delete(self)
             db.session.commit()
     
-    @validates('virtualization_technology')
+    @db.validates('virtualization_technology')
     def validate_virtualization_technology(self, key, virt_tech):
         try:
             VirtTechClass.validate_virt_tech(virt_tech)

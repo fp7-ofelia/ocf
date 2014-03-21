@@ -70,8 +70,11 @@ class ExpirationManager():
                 expiration_relation = VMAllocatedExpiration.query.filter_by(vm_uuid=vm_uuid).one()
             except:
                 return None
-        expiration = expiration_relation.get_expiration()
-        return expiration
+        if expiration:
+            expiration = expiration_relation.get_expiration()
+            return expiration
+        else:
+            raise Exception
 
     def get_end_time_by_vm_uuid(self, vm_uuid):
         expiration = self.get_expiration_by_vm_uuid(vm_uuid)

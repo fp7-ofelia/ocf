@@ -1,3 +1,17 @@
+class ContainerPrefixClass:
+    CONTAINER_PREFIX_GENIV2 = "GENIv2"
+    CONTAINER_PREFIX_GENIV3 = "GENIv3"
+    CONTAINER_PREFIX_CHOICES = (
+        (CONTAINER_PREFIX_GENIV2, 'GENIv2'),
+        (CONTAINER_PREFIX_GENIV3, 'GENIv3'),
+    )
+    @staticmethod
+    def validate_prefix(value):
+        for tuple in ContainerPrefixClass.CONTAINER_PREFIX_CHOICES:
+            if value in tuple:
+                return
+        raise Exception("Container prefix not valid")
+
 class VirtTechClass: 
     VIRT_TECH_TYPE_XEN = "xen"
     VIRT_TECH_CHOICES = (

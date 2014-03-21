@@ -253,8 +253,8 @@ class VMAllocatedTemplate(db.Model):
     __tablename__ = table_prefix + 'virtualmachine_allocated_template'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    virtualmachine_allocated_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
-    template_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
+    virtualmachine_allocated_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
+    template_uuid = db.Column(db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
 
     template = db.relationship("Template", backref=db.backref("vmallocated_template", cascade = "all, delete-orphan"))
     vmallocated = db.relationship("VMAllocated")
@@ -268,8 +268,8 @@ class VMTemplate(db.Model):
     __tablename__ = table_prefix + 'virtualmachine_template'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    virtualmachine_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
-    template_uuid = db.Column(db.Integer, db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
+    virtualmachine_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
+    template_uuid = db.Column(db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
 
     template = db.relationship("Template", backref=db.backref("virtualmachine_template", cascade = "all, delete-orphan"))
     virtualmachine = db.relationship("VirtualMachine")

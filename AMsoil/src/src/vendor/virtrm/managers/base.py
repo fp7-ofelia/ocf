@@ -103,7 +103,7 @@ class VTResourceManager(object):
         vms = []
         vm_objs = self.get_provisioned_vms_object_in_server(server_uuid)
         for vm_obj in vm_objs:
-            vm = self.translator.model2dict(vm_obj)
+            vm = self.get_vm_info(vm_obj)
             vms.append(vm)
         return vms
  
@@ -122,7 +122,7 @@ class VTResourceManager(object):
         vms = []
         vm_objs = self.get_allocated_vms_object_in_server(server_uuid)
         for vm_obj in vm_objs:
-            vm = self.translator.model2dict(vm_obj)
+            vm = self.get_vm_info(vm_obj)
             vms.append(vm)
         return vms
     
@@ -136,13 +136,64 @@ class VTResourceManager(object):
 
     # VM methods
     def get_vm_uuid_by_vm_urn(self, vm_urn):
+        pass
+
+    def get_vm_urn_by_bm_uuid(self, vm_uuid):
+        pass
+
+    def get_vm_info(self, vm):
+         # Generate a dictionary from the VM
+        vm_dict = self.translator.model2dict(vm)
+        # Obtain the URN and add it to the dictionary
         try:
-            vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
-            return vm.get_uuid()
+            vm_urn = self.get_vm_urn_by_vm_uuid(vm_dict["uuid"])
+        except:
+            vm_urn = None 
+        if vm_urn:
+            vm_dict["urn"] = vm_urn
+        # Add the Expiration information
+        try:
+            generation_time = self.expiration_manager.get_start_time_by_vm_uuid(vm_dict["uuid"])
+        except:
+            generation_time = None
+        if generation_time:
+            vm_dict['generation_time'] = generation_time
+        try:
+            expiration_time = self.expiration_manager.get_end_time_by_vm_uuid(vm_dict["uuid"])
+        except:
+            expiration_time = None
+        if expiration_time:
+            vm_dict['expiration_time'] = expiration_time
+        # Add the Template information
+        template = self.template_manager.get_template_from_allocated_vm(vm_dict["uuid"])
+        vm_dict["disc_image"] = template
+        # Add server information manually
+        server = self.get_server(vm_allocated_dict["server_uuid"])
+        vm_allocated_dict["server_name"] = server["name"]
+        vm_allocated_dict["virtualisation_technology"] = server["virtualisation_technology"]
+        return vm_dict
+    
+    def get_vm(self, vm_uuid):
+        try:
+            vm = self.get_vm_object(vm_uuid)
         except Exception as e:
             raise e
+        vm_dict = self.get_vm_info(vm)
+        return vm_dict
+         
+
+    def get_vm_object(self, vm_uuid):
+        try:
+            vm = VTDriver.get_vm_by_uuid(vm_uuid)
+        except:
+            try:
+                vm = VTDriver.get_vm_allocated_by_uuid(vm_uuid)
+            except Exception as e:
+                raise e
+        return vm
 
     def get_vm_by_urn(self, vm_urn):
+        # TODO: Call other class methods for this, or make a generic method in VTDriver
         try:
             vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
             return vm
@@ -532,36 +583,30 @@ class VTResourceManager(object):
         self.expiration_manager.add_expiration_to_allocated_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
         # Add the template to the allocated VM
         self.template_manager.add_template_to_allocated_vm(vm_allocated_model.get_uuid(), template)
-        # TODO: Include this code into "get_vm_info" method and call it
-        # Generate a dictionary from the allocated VM
-        vm_allocated_dict = self.translator.model2dict(vm_allocated_model)
-        # Add the Expiration information
-        vm_allocated_dict['generation_time'] = self.expiration_manager.get_start_time_by_vm_uuid(vm_allocated_model.get_uuid())
-        vm_allocated_dict['expiration_time'] = self.expiration_manager.get_end_time_by_vm_uuid(vm_allocated_model.get_uuid())
-        # Add the Template information
-        vm_allocated_dict["disc_image"] = self.template_manager.get_template_from_allocated_vm(vm_allocated_model.get_uuid())
-        # Add server information manually
-        server = self.get_server(vm_allocated_dict["server_uuid"])
-        vm_allocated_dict["server_name"] = server["name"]
-        vm_allocated_dict["virtualisation_technology"] = server["virtualisation_technology"] 
+        # Obtain the Allocated VM information
+        vm_allocated_dict = self.get_vm(vm_allocated_model.get_uuid())
         return vm_allocated_dict
         
-    def deallocate_vm_by_uuid(self, vm_uuid):
-        pass
-
     def deallocate_vm_by_urn(self, vm_urn):
         pass
+
+    def deallocate_vm_by_uuid(self, vm_uuid):
+        vm = self.get_vm_obj(vm_uuid)
+        try:
+            deleted_vm = deallocate_vm(vm)
+        except Exception as e:
+            raise e
+        return deleted_vm
 
     def deallocate_vm(self, vm):
         """
         Delete the entry in the table of allocated VMs.
         """
-        vm = VMAllocated.query.get(vm_id)
-        deleted_vm = dict()
-        deleted_vm['name'] = vm.name
-        #XXX: Should return anything else?
-        deleted_vm['expiration'] = vm.expiration
-        vm.destroy()
+        deleted_vm = self.get_vm_info(vm)
+        try:
+            vm.destroy()
+        except Exception as e:
+            raise e
         return deleted_vm
     
     # Authority methods
@@ -592,7 +637,7 @@ class VTResourceManager(object):
         expired_provisioned_vms, expired_allocated_vms = self.expiration_manager.get_expired_vms()
         for expired_allocated_vm in expired_allocated_vms:
             vm_uuid = expired_allocated_vm.get_uuid()
-            expired_allocated_vm.destroy()
+            self.deallocate_vm(vm_uuid)
             self.expiration_manager.delete_expiration_by_vm_uuid(vm_uuid)
         for expired_provisioned_vm in expired_provisioned_vms:
             vm_uuid = expired_provisioned_vm.get_uuid()
