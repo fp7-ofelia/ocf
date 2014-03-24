@@ -27,7 +27,8 @@ LATITUDE = 41.38732694954646
 URN = 'urn:publicid:IDN+' + OCF_ISLAND_AUTHORITY + '+' + OCF_AM_TYPE  + '+authority+sa' 
 HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
-EXPERIMENT_VTAM_IP = 10.216.12.5 #Add public one here
+EXPERIMENT_VTAM_IP = "10.216.12.5" #Add public one here
+
 #Geni API
 GENI_API_VERSION = 2
 GENI_API_URL = 'https://%s:8445/xmlrpc/sfa/' % EXPERIMENT_VTAM_IP
