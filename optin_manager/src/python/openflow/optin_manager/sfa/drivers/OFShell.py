@@ -65,7 +65,7 @@ class OFShell:
                         for expfs in expfss:
                             if not expfs.dpid in nodes:
                                 nodes.append(expfs.dpid)
-                    switches = self.get_switches(flow_visor, nodes)
+                    switches = self.get_switches(nodes)
                     return {'switches':switches, 'links':[]}
 
 	#def GetSlice(self,slicename,authority):
@@ -142,7 +142,7 @@ class OFShell:
 
         def get_raw_switches(self):
              try: 
-                 #raise ""
+                 raise Exception("")
                  fv =  FVServerProxy.objects.all()[0]
                  switches = fv.get_switches()
              except Exception as e:
@@ -152,7 +152,7 @@ class OFShell:
 
         def get_raw_links(self):
              try:
-                 #raise ""
+                 raise Exception("")
                  fv = FVServerProxy.objects.all()[0]  
                  links = fv.get_links()
              except Exception as e:

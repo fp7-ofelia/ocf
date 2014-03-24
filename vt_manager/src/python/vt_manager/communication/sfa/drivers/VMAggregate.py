@@ -105,7 +105,7 @@ class VMAggregate:
 				    					        'to_network_interface_id': network_iface.switchID,
 										'to_network_interface_port':str(network_iface.port)}))
                     	if site['longitude'] and site['latitude']:
-    	                	location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
+    	                	location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'Spain'})
         	        	rspec_node['location'] = location
 		
 		    slices = list()
@@ -129,5 +129,5 @@ class VMAggregate:
 
 	def get_testbed_info(self):
 		#TODO: get True Testbed Info from the AM
-		return {'longitude':None,'latitude':None}
+		return {'longitude':config.LONGITUDE,'latitude':config.LATITUDE}
 
