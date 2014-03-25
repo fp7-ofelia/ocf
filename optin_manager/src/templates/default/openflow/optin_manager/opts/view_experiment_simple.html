@@ -26,6 +26,43 @@ h3 a:visited{
         text-decoration: none;
       }
 </style>
+
+<script type="text/javascript" src="{% url js_media 'jquery.tools.min.js' %}"></script>
+<script>
+/* Set requested VLAN or range of VLANs within the (parent) form */
+function set_requested_vlan() {
+    var parentBody = window.parent.document.body;
+    var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
+    var vlan_tag = undefined;
+    vlan_tag = $("#requested_vlan_tags [id^=vlan_tag] span.value").contents().text().trim();
+    if (numberRegex.test(vlan_tag)) {
+        $("#id_vlan_id_s", parentBody).val(vlan_tag);
+        $("#id_vlan_id_e", parentBody).val(vlan_tag);
+    } else {
+        var vlan_ranges = [];
+        $.each($("#requested_vlan_ranges [id^=vlan_range] span.value"), function(key, value) {
+            vlan_range = value.innerHTML.trim();
+            vlan_range_start = vlan_range.split(",")[0].replace("(","");
+            vlan_ranges.push(vlan_range_start.trim());
+            vlan_range_end = vlan_range.split(",")[1].replace(")","");
+            vlan_ranges.push(vlan_range_end.trim());
+        });
+        vlan_range_start = Math.min.apply(Math,vlan_ranges);
+        vlan_range_end = Math.max.apply(Math,vlan_ranges);
+        if (numberRegex.test(vlan_range_start)) {
+            $("#id_vlan_id_s", parentBody).val(vlan_range_start);
+        }
+        if (numberRegex.test(vlan_range_end)) {
+            $("#id_vlan_id_e", parentBody).val(vlan_range_end);
+        }
+    }
+}
+
+    $(document).ready(function(){
+        // Automatically set VLAN tag or range in the form
+        set_requested_vlan();
+    });
+</script>
 <body> 
 	<b>Project Name: </b>{{exp.project_name}}<br/>
 	<b>Project Description: </b>{{exp.project_desc}}<br/>
@@ -37,18 +74,32 @@ h3 a:visited{
 
 	{% if requested_vlans.ranges|length == 1 and requested_vlans.ranges.0.0 == requested_vlans.ranges.0.1 %}
 	<h3>Requested VLAN(s):</h3>
-                <div class="roundBlockContainer">
+                <div id="requested_vlan_tags" class="roundBlockContainer">
+			<p>
                         {% for value in requested_vlans.values %}
-                        <b>VLAN Tag: </b>{{value|safe}}<br/>
+                        <span id="vlan_tag_{{forloop.counter0}}">
+                            <strong>VLAN tag: </strong>
+                            <span class="value">
+                                {{value|safe}}
+                            </span>
+                        </span>
                         {% endfor %}
+			</p>
                 </div>
 
 	{% else %}
-	<h3>Requested VLAN Ranges:</h3>
-                <div class="roundBlockContainer">
+	<h3>Requested VLAN ranges:</h3>
+                <div id="requested_vlan_ranges" class="roundBlockContainer">
+		<p>
                         {% for range in requested_vlans.ranges %}
-                        <b>Range {{forloop.counter0}}: </b>{{range|safe}}<br/>
+                        <span id="vlan_range_{{forloop.counter0}}">
+                            <strong>VLAN range {{forloop.counter0}}:</strong>
+                            <span class="value">
+                                {{range|safe}}
+                            </span>
+                        </span>
                         {% endfor %}
+		</p>
                 </div>
 	{%endif%}
 </body>
