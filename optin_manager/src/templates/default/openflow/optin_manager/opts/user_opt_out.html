@@ -14,20 +14,25 @@
 		<p><font color="red">{{msg}}</font></p>
 	{% endfor %}
 	<form name="input" action="/opts/opt_out" method="post">{% csrf_token %}
-	<table class="formtable" align="center">
+	<table class="formtable" align="center" style="text-align: center;">
 	<tr><th></th><th><center>Experiment</center></th><th>Strict?</th></tr>
-	{% for opt in allopts %}
-		<tr>
-		<td><input type="checkbox" name="{{opt.id}}"/></td>
-		<td class="expname"><center>
-		{{opt.experiment.project_name}}:{{opt.experiment.slice_name}}</center></td>
-		{% if opt.nice %}
-		<td>No</td>
-		{% else %}
-		<td>Yes</td>
-		{% endif %}
-		</tr>
-	{% endfor %}
+        {% for opt in allopts %}
+                <tr>
+                        <td>
+                                <input type="checkbox" name="{{opt.id}}" id="{{opt.id}}"/>
+                        </td>
+                        <td class="expname">
+                                <label for="{{opt.id}}">
+                                        {{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
+                                </label>
+                        </td>
+                        <td>
+                                <label for="{{opt.id}}">
+                                        {% if opt.nice %}No{% else %}Yes{% endif %}
+                                </label>
+                        </td>
+                </tr>
+        {% endfor %}
 	</table>
 	<center><input type="submit" value="Opt Out"/></center>
 	</form>
