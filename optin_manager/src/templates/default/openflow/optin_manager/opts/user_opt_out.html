@@ -19,15 +19,15 @@
         {% for opt in allopts %}
                 <tr>
                         <td>
-                                <input type="checkbox" name="{{opt.id}}" id="{{opt.id}}"/>
+                                <input type="checkbox" name="{{opt.id}}" id="exp_{{opt.id}}"/>
                         </td>
                         <td class="expname">
-                                <label for="{{opt.id}}">
+                                <label for="exp_{{opt.id}}">
                                         {{opt.experiment.project_name}}:{{opt.experiment.slice_name}}
                                 </label>
                         </td>
                         <td>
-                                <label for="{{opt.id}}">
+                                <label for="exp_{{opt.id}}">
                                         {% if opt.nice %}No{% else %}Yes{% endif %}
                                 </label>
                         </td>

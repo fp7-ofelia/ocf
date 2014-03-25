@@ -15,20 +15,20 @@
 	{% for opt_info in opts_info %}
 		<tr>
 			<td>
-				<input type="checkbox" name="{{opt_info.opt.id}}" id="{{opt_info.opt.id}}"/>
+				<input type="checkbox" name="{{opt_info.opt.id}}" id="exp_{{opt_info.opt.id}}"/>
 			</td>
 			<td>
-				<label for="{{opt_info.opt.id}}">
+				<label for="exp_{{opt_info.opt.id}}">
 					{{opt_info.opt.experiment.project_name}}:{{opt_info.opt.experiment.slice_name}}
 				</label>
 			</td>
 			<td>
-				<label for="{{opt_info.opt.id}}">
+				<label for="exp_{{opt_info.opt.id}}">
 					{{opt_info.fs_description}}
 				</label>
 			</td>
 			<td>
-				<label for="{{opt_info.opt.id}}">
+				<label for="exp_{{opt_info.opt.id}}">
 					{% if opt_info.opt.nice %}No{% else %}Yes{% endif %}
 				</label>
 			</td>
