@@ -24,19 +24,15 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     
     # Slice ID defaults to its UUID, but let us check first the...
     slice_id = exp.slice_id
-    print "EXPERIMENT_____________________> %s" % str(exp.__dict__)
-    print "SLICE ID_______________________>>>>>>>>> %s" % str(slice_id)
     # Backwards compatibility: check if slice_id follows the legacy style (= not UUID)
     try:
         import uuid
         uuid.UUID('{%s}' % str(slice_id))
         is_legacy_slice = False
     except Exception as e:
-        print "--------_>UUID EXCEPTION: %s" % str(e)
         is_legacy_slice = True
     
     # If legacy, get the older way to name it 
-    print "HELPER----------_> IS LEGACY? %s" % str(is_legacy_slice)
     if is_legacy_slice:
         slice_id = exp.get_fv_slice_name()
     

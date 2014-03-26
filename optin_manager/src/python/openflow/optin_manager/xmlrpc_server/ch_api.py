@@ -246,6 +246,7 @@ def create_slice(slice_id, project_name, project_description,
     
     # Determine slice style naming: legacy (Opt-in <= 0.7) or newer (FlowVisor >= 1.0)
     is_legacy_slice = True
+    remotely_created = False
     
     # Retrieve information for current Experiment first
     try:
@@ -255,9 +256,14 @@ def create_slice(slice_id, project_name, project_description,
             raise Exception
     except:
         # New slice naming style (for FlowVisor >= 1.0) -> No legacy slice
-        e = Experiment.objects.filter(slice_id = slice_id)
-        is_legacy_slice = False
-    print "----------------existing experiment: %s" % str(e)
+        import uuid
+        try:
+            uuid.UUID('{%s}' % str(slice_id))
+            is_legacy_slice = False 
+        except:
+            remotely_created = True
+            is_legacy_slice = True
+            e = Experiment.objects.filter(slice_id = slice_id)
 
     # If Experiment already existing => this is an update
     if (e.count()>0):
@@ -283,7 +289,6 @@ def create_slice(slice_id, project_name, project_description,
     e.owner_email = owner_email
     e.owner_password = owner_password
     e.save()
-    print "----------------new experiment: %s" % str(e)
        
     all_efs = [] 
     for sliver in switch_slivers:
@@ -346,15 +351,13 @@ def create_slice(slice_id, project_name, project_description,
             
     # Create the new experiment on FV
     try:
-        print "LEGACY SLICE? %s" % str(is_legacy_slice)
 #        # Legacy slices: use combination of name and ID
-#        if is_legacy_slice:
-#            new_fv_name = e.get_fv_slice_name()
+        if remotely_created:
+            new_fv_name = e.get_fv_slice_name()
 #        # Otherwise, use UUID
-#        else:
-#            new_fv_name = slice_id
-        new_fv_name = slice_id
-        print "new_fv_name: %s" % str(new_fv_name)
+        else:
+            new_fv_name = slice_id
+        #new_fv_name = slice_id
         fv_success = fv.proxy.api.createSlice(
             "%s" % new_fv_name,
             "%s" % owner_password,
@@ -480,27 +483,25 @@ def delete_slice(slice_id, options={}, **kwargs):
     
     # Determine slice style naming: legacy (Opt-in <= 0.7) or newer (FlowVisor >= 1.0)
     is_legacy_slice = True
-
-    print "-------------options: %s" % str(options)
-    print "---------------->>>>>>>>>>>>>>>>>>> AGSHAGSHASHJAGSH"
     # Retrieve information for current Experiment first
     try:
         # Legacy slices with older slice naming (Opt-in <= 0.7)
         single_exp = Experiment.objects.get(slice_id = options["legacy_slice_id"])
-        print "----------------0 single_exp: %s" % str(single_exp)
         if not single_exp:
             raise Exception
-        print "----------------1 single_exp: %s" % str(single_exp)
     except:
         try:
+            try:
+                uuid.UUID('{%s}' % str(slice_id))
+                is_legacy_slice = False
+                single_exp = Experiment.objects.get(slice_id = slice_id)
+            except:
+                is_legacy_slice = True
+                single_exp = Experiment.objects.get(slice_id = slice_id)
             # New slice naming style (for FlowVisor >= 1.0) -> No legacy slice
             single_exp = Experiment.objects.get(slice_id = slice_id)
-            is_legacy_slice = False
-            print "----------------2 single_exp: %s" % str(single_exp)
         except Experiment.DoesNotExist:
             return "Experiment does not exist"
-    print "----------------existing experiment: %s" % str(single_exp.__dict__)
-    print "IS LEGACY? %s" % str(is_legacy_slice)
     
     fv = FVServerProxy.objects.all()[0]
     try:
@@ -510,14 +511,11 @@ def delete_slice(slice_id, options={}, **kwargs):
         # Otherwise, use UUID
         else:
             old_fv_name = single_exp.slice_id
-        print "------------------->> old_fv_name: %s" % str(old_fv_name)
         success = fv.proxy.api.deleteSlice(old_fv_name)
-        print "------------------->> success: %s" % str(success)
     except Exception,e:
         import traceback
         traceback.print_exc()
         if "slice does not exist" in str(e):
-            print "-------------- does not exist"
             success = True
         else:
             return "Could not delete slice on Flowvisor: %s" % parseFVexception(e)
