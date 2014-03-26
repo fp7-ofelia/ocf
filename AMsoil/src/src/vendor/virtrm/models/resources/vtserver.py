@@ -1,5 +1,4 @@
 from models.interfaces.networkinterface import NetworkInterface
-from models.resources.vmallocated import VMAllocated
 from models.ranges.ip4range import Ip4Range
 from models.ranges.macrange import MacRange
 from sqlalchemy import desc
@@ -64,9 +63,6 @@ class VTServer(db.Model):
     '''Other networking parameters'''
     subscribed_mac_ranges = association_proxy("vtserver_mac_range", "subscribed_mac_range", creator=lambda mac_range:VTServerMacRange(subscribed_mac_range=mac_range))
     subscribed_ip4_ranges = association_proxy("vtserver_ip4_range", "subscribed_ip4_range", creator=lambda ip4_range:VTServerIp4Range(subscribed_ip4_range=ip4_range))
-    
-    '''Virtual Machines allocated'''
-    vms_allocated = association_proxy("vtserver_vms", "allocated_vm", creator=lambda vm:ServerAllocatedVMs(allocated_vm=vm))
 
     ''' Mutex over the instance '''
     mutex = None
@@ -272,6 +268,13 @@ class VTServer(db.Model):
     def set_agent_password(self, password):
         self.agent_password = password
         self.auto_save()
+
+    def get_allocated_vms(self):
+        return self.allocated_vms
+
+    def set_allocated_vms(self, vm):
+        self.allocated_vms.append(vm)
+        self.auto_save() 
     
     ''' Ranges '''
     def subscribe_to_mac_range(self,new_range):
@@ -459,20 +462,6 @@ class VTServer(db.Model):
     
     def get_network_interfaces(self):
         return self.network_interfaces
-
-
-class ServerAllocatedVMs(db.Model):
-    """Relation between Allocated Virtual Machines and Virtualization Server"""
-    config = pm.getService("config")
-    table_prefix = config.get("virtrm.DATABASE_PREFIX")
-    __tablename__ = table_prefix + 'vtserver_allocated_vms'
-    # Table attributes
-    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_uuid = db.Column(db.ForeignKey(table_prefix + 'vtserver.uuid'), nullable=False)
-    allocated_vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
-    # Relationships
-    vtserver = db.relationship("VTServer", primaryjoin="VTServer.uuid==ServerAllocatedVMs.vtserver_uuid", backref=db.backref("vtserver_vms", cascade = "all, delete-orphan"))
-    allocated_vm = db.relationship("VMAllocated", primaryjoin="VMAllocated.uuid==ServerAllocatedVMs.allocated_vm_uuid", backref=db.backref("vtserver_associations", cascade="all, delete-orphan"))
 
 
 class VTServerNetworkInterfaces(db.Model):

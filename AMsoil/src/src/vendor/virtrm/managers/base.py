@@ -2,7 +2,7 @@ from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
 from models.resources.virtualmachine import VirtualMachine
-from models.resources.vmallocated import VMAllocated
+from models.resources.allocatedvm import AllocatedVM
 from models.resources.vtserver import VTServer
 from models.resources.xenserver import XenServer
 from models.resources.xenvm import XenVM
@@ -144,13 +144,6 @@ class VTResourceManager(object):
     def get_vm_info(self, vm):
          # Generate a dictionary from the VM
         vm_dict = self.translator.model2dict(vm)
-        # Obtain the URN and add it to the dictionary
-        try:
-            vm_urn = self.get_vm_urn_by_vm_uuid(vm_dict["uuid"])
-        except:
-            vm_urn = None 
-        if vm_urn:
-            vm_dict["urn"] = vm_urn
         # Add the Expiration information
         try:
             generation_time = self.expiration_manager.get_start_time_by_vm_uuid(vm_dict["uuid"])
@@ -167,10 +160,12 @@ class VTResourceManager(object):
         # Add the Template information
         template = self.template_manager.get_template_from_allocated_vm(vm_dict["uuid"])
         vm_dict["disc_image"] = template
-        # Add server information manually
-        server = self.get_server(vm_allocated_dict["server_uuid"])
-        vm_allocated_dict["server_name"] = server["name"]
-        vm_allocated_dict["virtualisation_technology"] = server["virtualisation_technology"]
+        # Obtain the server information
+        # TODO: Automatize this
+        server = vm.server
+        vm_dict["server_name"] = server.get_name()
+        if not vm_dict["server_uuid"]:
+            vm_dict["server_uuid"] = server.get_uuid()
         return vm_dict
     
     def get_vm(self, vm_uuid):
@@ -483,7 +478,17 @@ class VTResourceManager(object):
         return restarted_vms
 
     def delete_vm_by_uuid(self, vm_uuid):
-        pass
+        try:
+            vm = VTDriver.get_vm_by_uuid(vm_uuid)
+            if vm.state == VirtualMachine.ALLOCATED_STATE:
+                deleted_vm = self.deallocate_vm(vm)
+            else:
+                deleted_vm = self.delete_vm(vm)
+        except Exception as e:
+            raise e
+        # Once the VM has been deleted, delete the related Expiration
+         
+        return deleted_vm
     
     def delete_vms_in_slice(self, slice_urn):
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
@@ -517,14 +522,14 @@ class VTResourceManager(object):
         logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
         logging.debug("** delegate.slice_name: %s" % str(vm["slice_name"]))
         logging.debug("** delegate.project_name: %s" % str(vm["project_name"]))
-        provisioned_vm = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()
-        allocated_vm = VMAllocated.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()
-        # If VM already exists either on allocated or in provisioned, return error
-        if provisioned_vm or allocated_vm:
+        vm_already_taken = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()
+        # If VM already exists either allocated or provisioned, return error
+        if vm_already_taken:
             raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
         # Check if the server is one of the given servers
         try: 
-            VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
+            server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
+            logging.debug("*********** SERVER %s HAS ATTRIBUTES %s" % (server.name, str(server.__dict__)))
         except:
             raise virt_exception.VTAMServerNotFound(vm["server_uuid"])
         # Check if the expiration time is a valid time
@@ -547,25 +552,18 @@ class VTResourceManager(object):
                 template = self.template_manager.get_template_by(template_info)
             except Exception as e:
                 raise e
+        logging.debug("************ TEMPLATE => %s" % str(template))
         # Check if the project already exists
-        vm_in_project = VirtualMachine.query.filter_by(project_name=vm["project_name"])
-        allocated_vm_in_project = VMAllocated.query.filter_by(project_name=vm["project_name"])
+        vm_in_project = VirtualMachine.query.filter_by(project_name=vm["project_name"]).first()
         # If exists, assign the same UUID
-        if vm_in_project.first() or allocated_vm_in_project.first():
-            try:
-                project_uuid = vm_in_project.first().get_project_id()
-            except:
-                project_uuid = allocated_vm_in_project.first().get_project_id()
+        if vm_in_project:
+            project_uuid = vm_in_project.get_project_id()
             vm["project_id"] = project_uuid
             # Check if the slice already exists on this project
-            vm_in_slice = vm_in_project.filter_by(slice_name=vm["slice_name"]).first()
-            allocated_vm_in_slice = allocated_vm_in_project.filter_by(slice_name=vm["slice_name"]).first()
+            vm_in_slice = vm_in_project.query.filter_by(slice_name=vm["slice_name"]).first()
             # If exists, assign the same UUID
-            if vm_in_slice or allocated_vm_in_slice:
-                try:
-                    slice_uuid = vm_in_slice.get_slice_id()
-                except:
-                    slice_uuid = allocated_vm_in_slice.get_slice_id()
+            if vm_in_slice:
+                slice_uuid = vm_in_slice.get_slice_id()
                 vm["slice_id"] = slice_uuid
             # Otherwhise, assign one randomly.
             else:
@@ -579,28 +577,30 @@ class VTResourceManager(object):
         vm_hrn = vm["project_name"] + '.' + vm["slice_name"] + '.' + vm["name"]
         vm_urn = hrn_to_urn(vm_hrn, "sliver")
         vm["urn"] = vm_urn
-        # Once we know the VM can be created, we reserve
-        vm_allocated_model = self.translator.dict2class(vm, VMAllocated)
-        vm_allocated_model.save()
+        #XXX: Hardcoded due to the database limitations
+        # The AllocatedVM model needs some information of the Template, obtain it and add to the dictionary
+        vm["operating_system_type"] = template["operating_system_type"]
+        vm["operating_system_distribution"] = template["operating_system_distribution"]
+        vm["operating_system_version"] = template["operating_system_version"]
+        # Generate the AllocatedVM model
+        try:
+            vm_allocated_model = self.translator.dict2class(vm, AllocatedVM)
+            # Save the data into de database
+            vm_allocated_model.save()
+            logging.debug("************ RELATED SERVER IS %s WITH ATTRIBUTES %s" %(vm_allocated_model.server.name, str(vm_allocated_model.server)))
+        except Exception as e:
+            raise e
         # Add the expiration time to the allocated VM
-        self.expiration_manager.add_expiration_to_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
+        try:
+            self.expiration_manager.add_expiration_to_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
+        except Exception as e:
+            raise e
         # Add the template to the allocated VM
         self.template_manager.add_template_to_allocated_vm(vm_allocated_model.get_uuid(), template)
         # Obtain the Allocated VM information
         vm_allocated_dict = self.get_vm(vm_allocated_model.get_uuid())
         return vm_allocated_dict
         
-    def deallocate_vm_by_urn(self, vm_urn):
-        pass
-
-    def deallocate_vm_by_uuid(self, vm_uuid):
-        vm = self.get_vm_obj(vm_uuid)
-        try:
-            deleted_vm = deallocate_vm(vm)
-        except Exception as e:
-            raise e
-        return deleted_vm
-
     def deallocate_vm(self, vm):
         """
         Delete the entry in the table of allocated VMs.

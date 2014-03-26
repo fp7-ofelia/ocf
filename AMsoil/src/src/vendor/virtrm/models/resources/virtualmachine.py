@@ -6,8 +6,12 @@ from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
 from utils.choices import VirtTechClass, OSDistClass, OSVersionClass, OSTypeClass
+import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import inspect
+import uuid
+
+logging=amsoil.core.log.getLogger('VirtualMachine')
 
 '''@author: msune, SergioVidiella'''
 
@@ -26,8 +30,8 @@ class VirtualMachine(db.Model):
     ''' General parameters '''
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
-    uuid = db.Column(db.String(1024), nullable=False, default="")
-    memory = db.Column(db.Integer)
+    uuid = db.Column(db.String(1024), nullable=False, default=uuid.uuid4())
+    memory_mb = db.Column("memory_mb", db.Integer)
     number_of_cpus = db.Column("numberOfCPUs", db.Integer)
     disc_space_gb = db.Column("discSpaceGB", DOUBLE)
     urn = db.Column(db.String(1024), nullable=True)
@@ -54,6 +58,7 @@ class VirtualMachine(db.Model):
     state = db.Column(db.String(24))
 
     '''Possible states'''
+    ALLOCATED_STATE = 'allocated'
     RUNNING_STATE = 'running'
     CREATED_STATE = 'created (stopped)'
     STOPPED_STATE = 'stopped'
@@ -81,6 +86,7 @@ class VirtualMachine(db.Model):
             validators.vm_name_validator(name)
             return name
         except Exception as e:
+            logging.debug("************* VALIDATION NAME %s ERROR => %s" % (name, e))
             raise e
     
     @validates('operating_system_type')
@@ -109,15 +115,22 @@ class VirtualMachine(db.Model):
     
     def auto_save(self):
         if self.do_save:
-            db.session.add(self)
-            db.session.commit()
+            self.save()
+ 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
     
     ''' Public methods '''
     def get_child_object(self):
         for child_class in self.__child_classes:
             try:
-                return self.__getattribute__(child_class.lower())
+                logging.debug("*********** POSSIBLE CHILD CLASS %s" % child_class)
+                child =  self.__getattribute__(child_class.lower())[0]
+                logging.debug("********** %s IS CHILD CLASS %s" %(child_class, str(child.__dict__)))
+                return child
             except:
+                logging.debug("*********** %s IS NOT THE CHILD CLASS" % child_class)
                 pass
         return self
 #            except eval(child_class).DoesNotExist:
@@ -149,7 +162,7 @@ class VirtualMachine(db.Model):
         self.urn = urn
         self.auto_save()
 
-    def get_urn(self)
+    def get_urn(self):
         return self.urn
     
     def set_project_id(self,projectId):
@@ -184,14 +197,12 @@ class VirtualMachine(db.Model):
     def get_slice_name(self):
         return self.slice_name
     
-    def set_uuid(self,expedient_id):
-        if not isinstance(expedient_id,int):
-            expedient_id = int(expedient_id)
-        self.expedient_id = expedient_id
+    def set_uuid(self, uuid):
+        self.uuid = uuid
         self.auto_save()
         
     def get_uuid(self):
-        return self.expedient_id
+        return self.uuid
     
     def set_state(self,state):
         if state not in self.__possible_states:
@@ -203,12 +214,12 @@ class VirtualMachine(db.Model):
     def get_state(self):
         return self.state
     
-    def set_memory(self,memory):
-        self.memory = memory
+    def set_memory_mb(self,memory):
+        self.memory_mb = memory
         self.auto_save()
     
-    def get_memory(self):
-        return self.memory
+    def get_memory_mb(self):
+        return self.memory_mb
     
     def set_number_of_cpus(self,num):
         self.number_of_cpus = num

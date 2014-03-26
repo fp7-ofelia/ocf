@@ -125,27 +125,22 @@ class VTDriver():
         except:
             raise Exception("VM does not exist or id not unique")
 
-    @staticmethod
-    def get_vm_allocated_by_uuid(uuid):
-        from models.resources.vmallocated import VMAllocated
-        try:
-            return VMAllocated.query.filter_by(uuid=uuid).one()
-        except:
-            raise Exception("VM does not exist or uuid not unique")
-
-    @staticmethod
-    def get_vm_allocated_by_id(id):
-        from models.resources.vmallocated import VMAllocated
-        try:
-            return VMAllocated.query.get(id)
-        except:
-            raise Exception("VM does not exist or id not unique")
-
     def get_allocated_vms_in_server(server):
         try:
             return server.get_allocated_vms()
         except:
             raise Exception("Could not recover server VMs")
+
+    def get_all_vms_in_server(server):
+        vms = list()
+        try:
+            allocated_vms = self.get_allocated_vms_in_server(server)
+            vms.extend(allocated_vms)
+            provisioned_vms = self.get_vms_in_server(server)
+            vms.extend(provisioned_vms)
+        except Exception as e:
+            raise e
+        return vms
     
     def delete_vm():
         raise Exception("Method not callable for Driver Class")

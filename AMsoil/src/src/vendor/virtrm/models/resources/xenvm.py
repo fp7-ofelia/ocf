@@ -25,7 +25,7 @@ class XenVM(VirtualMachine):
     hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")
-    vm = db.relationship("VirtualMachine", backref="xenvm")
+    vm = db.relationship("VirtualMachine", uselist=False, backref=db.backref("xenvm", cascade = "all, delete-orphan"))
     xenserver = association_proxy("xenserver_associations", "xenserver")
     
     @staticmethod

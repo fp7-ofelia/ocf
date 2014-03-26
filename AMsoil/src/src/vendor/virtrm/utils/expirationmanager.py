@@ -5,9 +5,12 @@ Exposes the methods to manage resource expiration
 from datetime import datetime, timedelta
 from controller.drivers.virt import VTDriver
 from models.common.expiration import Expiration, VMExpiration
-from models.resources.allocatedvm import AllocatedVM
+from models.resources.virtualmachine import VirtualMachine
 from utils.base import db
+import amsoil.core.log
 import amsoil.core.pluginmanager as pm
+
+logging=amsoil.core.log.getLogger('ExpirationManager')
 
 '''@author: SergioVidiella'''
 
@@ -50,11 +53,11 @@ class ExpirationManager():
             raise e
 
     def get_expiration_by_vm_uuid(self, vm_uuid):
-        try
+        try:
             expiration_relation = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
         except:
             expiration_relation = None
-        if expiration:
+        if expiration_relation:
             expiration = expiration_relation.get_expiration()
             return expiration
         else:
@@ -80,32 +83,23 @@ class ExpirationManager():
         for expiration in expirations:
             vm = expiration.get_vm()
             if vm:
-                expired_vms.append(vm)
+                vm_child = vm.get_child_object()
+                expired_vms.append(vm_child)
             else:
                 # The Expiration is not associated to any resource
                 expiration.destroy()
         return expired_vms
 
-    def add_expiration_to_provisioned_vm_by_uuid(self, vm_uuid, expiration_time):
-        #TODO: Should raise two different exceptions
-        try:
-            expiration = self.check_valid_creation_time(expiration_time)
-        except Exception as e:
-            raise e
-        ExpirationManager.add_expiration_to_vm_by_uuid(self, vm_uuid, expiration)
-
-    def add_expiration_to_allocated_vm_by_uuid(self, vm_uuid, expiration_time):
-        #TODO: Should raise two different exceptions
-        try:
-            expiration = self.check_valid_creation_time(expiration_time)
-        except Exception as e:
-            raise e
-        ExpirationManager.add_expiration_to_vm_by_uuid(self, vm_uuid, expiration)
-
     def add_expiration_to_vm_by_uuid(self, vm_uuid, expiration_time):
         try:
-            vm = VTDriver.get_vm_by_uuid(vm_uuid)
-            expiration_obj = Expiration(None, expiration_time, True)
+            vm = VirtualMachine.query.filter_by(uuid=vm_uuid).one()
+            logging.debug("*********** VM %s EXISTS WITH NAME %s AND STATE %s" %(vm_uuid, vm.name, vm.state))
+            if vm.get_state() == VirtualMachine.ALLOCATED_STATE:
+                expiration = self.check_valid_reservation_time(expiration_time)
+            else:
+                expiration = self.check_valid_creation_time(expiration_time)
+            logging.debug("********** EXPIRATION FIXED IN %s" %str(expiration))
+            expiration_obj = Expiration(None, expiration, True)
             expiration_obj.set_vm(vm)
         except Exception as e:
             raise e
@@ -125,7 +119,7 @@ class ExpirationManager():
         try:
             relational_obj = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
             vm = relational_obj.get_vm()
-            if type(vm) is AllocatedVM:
+            if vm.get_state() == VirtualMachine.ALLOCATED_STATE:
                 expiration = self.check_valid_reservation_time(expiration_time)
             else:
                 expiration = self.check_valid_creation_time(expiration_time)

@@ -26,7 +26,9 @@ class TemplateManager():
 
     def get_template_by(self, my_filter=dict()):
 #        return db.session.query(Template).filter_by(**my_filter)
-        pass
+        # XXX: Return Hardcoded information
+        from templates_hardcoded_info import TEMPLATE
+        return TEMPLATE
 
     def edit_template(self, new_attrs,template=None, my_filter=dict()):
         if not template:
