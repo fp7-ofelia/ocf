@@ -707,7 +707,11 @@ def get_gfs(slice):
         for of_agg in of_aggs:
             # Checks that each OF AM is available prior to ask for granted flowspaces
             if of_agg.available:
-                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+                # New mode
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_uuid(slice))
+                # Legacy mode (using mix of ID and SITE_DOMAIN)
+                if not gfs:
+                    gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
                 gfs_list.append([of_agg.id,gfs])
     except:
         pass

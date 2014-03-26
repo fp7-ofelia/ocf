@@ -110,7 +110,7 @@ production networks, and is currently deployed in several universities.
                 return err
         except Exception as ret_exception:
             import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
             traceback.print_exc()
             return str(ret_exception)
 
@@ -224,7 +224,13 @@ production networks, and is currently deployed in several universities.
         Get a slice id to use when creating slices at the OM.
         """
         return "%s_%s" % (Site.objects.get_current().domain, slice.id)
-        
+    
+    def _get_slice_uuid(self, slice):
+        """
+        Get a slice uuid to use when creating slices at the OM.
+        """
+        return slice.uuid
+    
     def _get_slivers(self, slice):
         """
         Get the set of slivers in the slice for this aggregate in a format
@@ -290,30 +296,59 @@ production networks, and is currently deployed in several universities.
             logger.info("Can't start slice %s because controller url is not set." % self.name)
             logger.error(traceback.format_exc())
             raise Exception("Can't start slice %s because controller url is not set." % slice.name)
-        try: 
+
+        # New method. Contains extra argument with the legacy slice ID for Opt-ins <= 0.7
+        try:
+            logger.info("Trying create_slice (new)")
+            proxy_method_options = {"legacy_slice_id": self._get_slice_id(slice)}
             return self.client.proxy.create_slice(
-                self._get_slice_id(slice), slice.project.name,
+                self._get_slice_uuid(slice), slice.project.name,
                 slice.project.description,
                 slice.name, slice.description,
                 slice.openflowsliceinfo.controller_url,
                 slice.owner.email,
-                slice.openflowsliceinfo.password, sw_slivers)
-        except Exception as ret_exception:
-            import traceback
-            logger.info("XML RPC call to aggregate %s failed." % self.name)
-            logger.error(traceback.format_exc())
-            raise
-
+                slice.openflowsliceinfo.password, sw_slivers,
+                proxy_method_options)
+            logger.info("Tried create_slice (new)")
+        except Exception as e:
+            # Legacy method
+            logger.info("Exception NEW: %s" % str(e))
+            try:
+                logger.info("Trying create_slice (old)")
+                return self.client.proxy.create_slice(
+                    self._get_slice_id(slice), slice.project.name,
+                    slice.project.description,
+                    slice.name, slice.description,
+                    slice.openflowsliceinfo.controller_url,
+                    slice.owner.email,
+                    slice.openflowsliceinfo.password, sw_slivers)
+                logger.info("Tried create_slice (old)")
+            except Exception as e:
+                logger.info("Exception OLD: %s" % str(e))
+                import traceback
+                logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
+                logger.error(traceback.format_exc())
+                raise
+    
     def stop_slice(self, slice):
         super(OpenFlowAggregate, self).stop_slice(slice)
+        # New method. Contains extra argument with the legacy slice ID for Opt-ins <= 0.7
         try:
-            self.client.proxy.delete_slice(self._get_slice_id(slice))
-        except Exception as e:
-            import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
-            traceback.print_exc()
-            raise
-
+            # Backward compatibility: extra argument with the legacy ID for Opt-ins <= 0.7
+            proxy_method_options = {"legacy_slice_id": self._get_slice_id(slice)}
+            self.client.proxy.delete_slice(
+                self._get_slice_uuid(slice),
+                proxy_method_options)
+        except:
+            # Legacy method
+            try:
+                self.client.proxy.delete_slice(self._get_slice_id(slice))
+            except:
+                import traceback
+                logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
+                traceback.print_exc()
+                raise
+    
     def change_slice_controller(self,slice):
         try:
             slice.openflowsliceinfo.controller_url
@@ -329,7 +364,7 @@ production networks, and is currently deployed in several universities.
                 slice.openflowsliceinfo.controller_url,)
         except Exception as ret_exception:
             import traceback
-            logger.info("XML RPC call to aggregate %s failed." % self.name)
+            logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
             logger.error(traceback.format_exc())
             raise
 

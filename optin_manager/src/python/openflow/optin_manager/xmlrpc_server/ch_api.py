@@ -136,11 +136,12 @@ def get_direction(direction):
 @rpcmethod(signature=['struct', # return value
                       'string', 'string', 'string',
                       'string', 'string', 'string',
-                      'array', 'array'])
+                      'array', 'array', 'struct'])
+# XXX: **kwargs not allowed on XMLRPC methods
 def create_slice(slice_id, project_name, project_description,
                   slice_name, slice_description, controller_url,
                   owner_email, owner_password,
-                  switch_slivers, **kwargs):
+                  switch_slivers, options={}, **kwargs):
     '''
     Create an OpenFlow slice. 
     
@@ -214,6 +215,9 @@ def create_slice(slice_id, project_name, project_description,
     @param switch_slivers: description of the topology and flowspace for slice
     @type switch_slivers: list of dicts
     
+    @param options:  will contain additional useful information for the operation
+    @type options: dict
+
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
@@ -235,19 +239,41 @@ def create_slice(slice_id, project_name, project_description,
     print "    owner_pass: %s" % owner_password
     print "    switch_slivers"
     pprint(switch_slivers, indent=8)
+    print "    options: "
+    pprint(options, indent=8)
+#    print "    kwargs: "
+#    pprint(kwargs, indent=8)
     
-    e = Experiment.objects.filter(slice_id=slice_id)
+    # Determine slice style naming: legacy (Opt-in <= 0.7) or newer (FlowVisor >= 1.0)
+    is_legacy_slice = True
+    
+    # Retrieve information for current Experiment first
+    try:
+        # Legacy slices with older slice naming (Opt-in <= 0.7)
+        e = Experiment.objects.filter(slice_id = options["legacy_slice_id"])
+        if not e:
+            raise Exception
+    except:
+        # New slice naming style (for FlowVisor >= 1.0) -> No legacy slice
+        e = Experiment.objects.filter(slice_id = slice_id)
+        is_legacy_slice = False
     print "----------------existing experiment: %s" % str(e)
+
+    # If Experiment already existing => this is an update
     if (e.count()>0):
         old_e = e[0]
-        old_fv_name = old_e.get_fv_slice_name()
+        # Legacy slices: use combination of name and ID
+        if is_legacy_slice:
+            old_fv_name = old_e.get_fv_slice_name()
+        # Otherwise, use UUID
+        else:
+            old_fv_name = old_e.slice_id
         update_exp = True
         old_exp_fs = ExperimentFLowSpace.objects.filter(exp=old_e)
     else:
         update_exp = False
         
     e = Experiment()
-        
     e.slice_id = slice_id
     e.project_name = project_name
     e.project_desc = project_description
@@ -295,10 +321,9 @@ def create_slice(slice_id, project_name, project_description,
                     setattr(efs,om_end,from_str(fs[ch_end]))
                 all_efs.append(efs)
     
-        
     fv = FVServerProxy.objects.all()[0]  
     if (update_exp):
-        # delete previous experiment from FV
+        # Delete previous experiment from FV
         try:
             fv_success = fv.proxy.api.deleteSlice(old_fv_name)
             old_exp_fs.delete()
@@ -319,10 +344,19 @@ def create_slice(slice_id, project_name, project_description,
             e.delete()
             raise Exception("While trying to update experiment, FV returned False on the delete previous experiment step")
             
-    # create the new experiment on FV
-    try:    
+    # Create the new experiment on FV
+    try:
+        print "LEGACY SLICE? %s" % str(is_legacy_slice)
+#        # Legacy slices: use combination of name and ID
+#        if is_legacy_slice:
+#            new_fv_name = e.get_fv_slice_name()
+#        # Otherwise, use UUID
+#        else:
+#            new_fv_name = slice_id
+        new_fv_name = slice_id
+        print "new_fv_name: %s" % str(new_fv_name)
         fv_success = fv.proxy.api.createSlice(
-            "%s" % e.get_fv_slice_name(),
+            "%s" % new_fv_name,
             "%s" % owner_password,
             "%s" % controller_url,
             "%s" % owner_email,
@@ -330,7 +364,7 @@ def create_slice(slice_id, project_name, project_description,
         for fs in all_efs:
             fs.save()
         print "Created slice with %s %s %s %s" % (
-        e.get_fv_slice_name(), owner_password, controller_url, owner_email)
+        new_fv_name, owner_password, controller_url, owner_email)
     except Exception,exc:
         import traceback
         traceback.print_exc()
@@ -423,18 +457,20 @@ def create_slice(slice_id, project_name, project_description,
         'switches': [],
     }     
              
-
-
 @check_user
 @check_fv_set
-@rpcmethod(signature=['string', 'int'])
-def delete_slice(sliceid, **kwargs):
+@rpcmethod(signature=['string', # return value
+                      'int', 'struct'])
+# XXX: **kwargs not allowed on XMLRPC methods
+def delete_slice(slice_id, options={}, **kwargs):
     '''
     Delete the slice with id sliceid.
     
     @param slice_id: an int that uniquely identifies the slice at the 
         Clearinghouseclearinghouse.
-    @type sliceid: int
+    @type slice_id: int
+    @param options: will contain additional useful information for this operation.
+    @type options: dict
     @param kwargs: will contain additional useful information about the request.
         Of most use are the items in the C{kwargs['request'].META} dict. These
         include 'REMOTE_USER' which is the username of the user connecting or
@@ -442,21 +478,49 @@ def delete_slice(sliceid, **kwargs):
     @return error message if there are any errors or "" otherwise.
     '''
     
+    # Determine slice style naming: legacy (Opt-in <= 0.7) or newer (FlowVisor >= 1.0)
+    is_legacy_slice = True
+
+    print "-------------options: %s" % str(options)
+    print "---------------->>>>>>>>>>>>>>>>>>> AGSHAGSHASHJAGSH"
+    # Retrieve information for current Experiment first
     try:
-        single_exp = Experiment.objects.get(slice_id = sliceid)
-    except Experiment.DoesNotExist:
-        return "Experiment Doesnot Exist"
-     
+        # Legacy slices with older slice naming (Opt-in <= 0.7)
+        single_exp = Experiment.objects.get(slice_id = options["legacy_slice_id"])
+        print "----------------0 single_exp: %s" % str(single_exp)
+        if not single_exp:
+            raise Exception
+        print "----------------1 single_exp: %s" % str(single_exp)
+    except:
+        try:
+            # New slice naming style (for FlowVisor >= 1.0) -> No legacy slice
+            single_exp = Experiment.objects.get(slice_id = slice_id)
+            is_legacy_slice = False
+            print "----------------2 single_exp: %s" % str(single_exp)
+        except Experiment.DoesNotExist:
+            return "Experiment does not exist"
+    print "----------------existing experiment: %s" % str(single_exp.__dict__)
+    print "IS LEGACY? %s" % str(is_legacy_slice)
+    
     fv = FVServerProxy.objects.all()[0]
     try:
-        success = fv.proxy.api.deleteSlice(single_exp.get_fv_slice_name())
+        # Legacy slices: use combination of name and ID
+        if is_legacy_slice:
+            old_fv_name = single_exp.get_fv_slice_name()
+        # Otherwise, use UUID
+        else:
+            old_fv_name = single_exp.slice_id
+        print "------------------->> old_fv_name: %s" % str(old_fv_name)
+        success = fv.proxy.api.deleteSlice(old_fv_name)
+        print "------------------->> success: %s" % str(success)
     except Exception,e:
         import traceback
         traceback.print_exc()
         if "slice does not exist" in str(e):
+            print "-------------- does not exist"
             success = True
         else:
-            return "Couldn't delete slice on flowvisor: %s"%parseFVexception(e)
+            return "Could not delete slice on Flowvisor: %s" % parseFVexception(e)
      
     # get all flowspaces opted into this exp
     ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
@@ -678,17 +742,17 @@ def get_automatic_settings(args=None):
 def get_used_vlans(range_len=1, direct_output=False):
     """
     Returns a list with the VLANs used within this OpenFlow aggregate
+    @param direct_output defines if only one aggregate is present (True) or more (False)
     """
     range_len = None
     from openflow.optin_manager.opts.vlans.vlanController import vlanController
     import random
     vlans =  vlanController.offer_vlan_tags(range_len)
-    if get_automatic_settings()["flowspace_auto_approval"]:
-        raise Exception("VLAN automatic granting is disabled")
-    if not direct_output:
+    if not direct_output or range_len > 1:
         return list(set(range(4096)) - set(vlans))
     else:
         rnd = random.randrange(0, len(vlans))
+        # Return random VLAN [from 0 to len(vlans)-1] for all the available to minimise collisions
         return [vlans[rnd]]
           
 @check_fv_set
