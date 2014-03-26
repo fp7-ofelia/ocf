@@ -24,6 +24,13 @@ flowvisor_log_folder="/var/log/flowvisor"
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
     warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
     exit 1
+elif [[ $(which flowvisor) ]]; then
+    warning "FlowVisor already installed. If you want to upgrade, please do so manually.\
+
+Keep in mind to make a backup of your configuration file (either config.xml or config.json) beforehand.\
+
+More information: https://github.com/OPENNETWORKINGLAB/flowvisor/wiki/Installation-from-Source#upgrading-flowvisor"
+    exit 1
 fi
 
 # Create backup if folders already exist. This is done to avoid problems in installation
