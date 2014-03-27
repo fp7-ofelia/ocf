@@ -188,22 +188,30 @@ class VTResourceManager(object):
         return vm
 
     def get_vm_by_urn(self, vm_urn):
-        # TODO: Call other class methods for this, or make a generic method in VTDriver
+        try:
+            vm = self.get_vm_object_by_urn(vm_urn)
+            vm_info = self.get_vm_info(vm)
+        except Exception as e:
+             raise e
+        return vm_info
+
+    def get_vm_object_by_urn(self, vm_urn):
         try:
             vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
-            return vm
-        except:
-             raise Exception
+        except Exception as e:
+            raise e
+        return vm
 
-    def get_vms_in_slice(self, slice_urn):
+    def get_vms_in_container(self, container_gid, prefix):
         """
         Get all VMs in slice with given slice_urn.
         """
-        vms = list()
-        vms_created = self._get_provisioned_vms_in_slice(slice_urn)
-        vms.extend(vms_created)
-        vms_reserved = self._get_allocated_vms_in_slice(slice_urn)
-        vms.extend(vms_reserved)
+        try:
+            container = Container.query.filter_by(GID=container_gid, prefix=prefix).one()
+        except:
+            # TODO: Raise Exception of no vms in given slice
+            raise Exception
+        vms = container.vms
         return vms
     
     def get_provisioned_vms_in_slice(self, slice_urn):
@@ -408,32 +416,55 @@ class VTResourceManager(object):
         except Exception as e:
             return {'name':vm_urn, 'status':vm.status, 'expiration':expiration, 'error': 'Could not Restart the VM'}
     
-    def delete_vm(self, vm_urn, slice_name=None):
-        vm_hrn, hrn_type = urn_to_hrn(vm_urn)
-        if not slice_name:
-            slice_name = get_leaf(get_authority(vm_hrn))
-        vm_name = get_leaf(vm_hrn)
-        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.slice_name == slice_name).first()
-        if vm != None:
-             db_session.expunge(vm)
-             deleted_vm = self._destroy_vm_with_expiration(vm.id)
-        else:
-             vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
-             if vm != None:
-                db_session.expunge(vm)
-                deleted_vm = self._unallocate_vm(vm.id)
-                if not deleted_vm:
-                    deleted_vm = dict()
-                    deleted_vm = dict()
-                    deleted_vm['name'] = vm_urn
-                    deleted_vm['expiration'] = None
-                    deleted_vm['error'] = "The requested VM does not exist, it may have expired"
-             else:
-                deleted_vm = dict()
-                deleted_vm['name'] = vm_urn
-                deleted_vm['expiration'] = None
-                deleted_vm['error'] = "The requested VM does not exist, it may have expired"
+    def delete_vm_by_uuid(self, vm_uuid):
+        try:
+            vm = VTDriver.get_vm_by_uuid(vm_uuid)
+            deleted_vm = self.delete_vm(vm)
+        except Exception as e:
+            raise e
+
+    def delete_vm(self, vm):
+        expiration = get_expiration_by_vm_uuid(vm.get_uuid())
+        # template = get_template_from_vm(vm.get_uuid())
+        try:
+            if vm.state == VirtualMachine.ALLOCATED_STATE:
+                deleted_vm = self.deallocate_vm(vm)
+            else:
+                deleted_vm = self.delete_vm(vm)
+        except Exception as e:
+            raise e
+        # Once the VM has been deleted, delete the related Expiration
+        self.expiration_manager.delete_expiration(expiration)
+        #self.template_manager.remove_template_for_vm(template.id)
         return deleted_vm
+   
+ 
+#    def delete_vm(self, vm_urn, slice_name=None):
+#        vm_hrn, hrn_type = urn_to_hrn(vm_urn)
+#        if not slice_name:
+#            slice_name = get_leaf(get_authority(vm_hrn))
+#        vm_name = get_leaf(vm_hrn)
+#        vm = db_session.query(VirtualMachine).filter(VirtualMachine.name == vm_name).filter(VirtualMachine.slice_name == slice_name).first()
+#        if vm != None:
+#             db_session.expunge(vm)
+#             deleted_vm = self._destroy_vm_with_expiration(vm.id)
+#        else:
+#             vm = db_session.query(VMAllocated).filter(VMAllocated.name == vm_name).first()
+#             if vm != None:
+#                db_session.expunge(vm)
+#                deleted_vm = self._unallocate_vm(vm.id)
+#                if not deleted_vm:
+#                    deleted_vm = dict()
+#                    deleted_vm = dict()
+#                    deleted_vm['name'] = vm_urn
+#                    deleted_vm['expiration'] = None
+#                    deleted_vm['error'] = "The requested VM does not exist, it may have expired"
+#             else:
+#                deleted_vm = dict()
+#                deleted_vm['name'] = vm_urn
+#                deleted_vm['expiration'] = None
+#                deleted_vm['error'] = "The requested VM does not exist, it may have expired"
+#        return deleted_vm
     
     # Slice methods
     def add_vm_to_slice(self, slice_urn, vm_urn):
@@ -477,19 +508,7 @@ class VTResourceManager(object):
         db_session.expunge_all()
         return restarted_vms
 
-    def delete_vm_by_uuid(self, vm_uuid):
-        try:
-            vm = VTDriver.get_vm_by_uuid(vm_uuid)
-            if vm.state == VirtualMachine.ALLOCATED_STATE:
-                deleted_vm = self.deallocate_vm(vm)
-            else:
-                deleted_vm = self.delete_vm(vm)
-        except Exception as e:
-            raise e
-        # Once the VM has been deleted, delete the related Expiration
-         
-        return deleted_vm
-    
+    # XXX: Is a necessary method? 
     def delete_vms_in_slice(self, slice_urn):
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
         slice_name = get_leaf(slice_hrn)
@@ -511,21 +530,57 @@ class VTResourceManager(object):
             deleted_vms.append(deleted_vm)
         db_session.expunge_all()
         return deleted_vms
+
+    def check_project_exists(self, project_name):
+        '''
+        Check if any VM exists with the given project name and return the related UUID.
+        If the project is not asigned to any VM, generate a new UUID for it.
+        '''
+        vm_in_project = VirtualMachine.query.filter_by(project_name=project_name).first()
+        # If exists, assign the same UUID
+        if vm_in_project:
+            project_uuid = vm_in_project.get_project_id()
+        else:
+            project_uuid = uuid.uuid4()
+        return project_uuid
+
+    def check_slice_exists_in_project(self, project_name, slice_name):
+        '''
+        Check if any VM exists in the given slice and project, and return the related slice UUID.
+        If the slice is not in any project, generate a new UUID for it.
+        '''
+        vm_in_slice = VirtualMachine.query.filter_by(project_name=project_name, slice_name).first()
+        if vm_in_slice:
+            slice_uuid = vm_in_slice.get_slice_id()
+        else:
+            slice_uuid = uuid.uuid4()
+        return slice_uuid
+
     
     # Allocation methods
-    def allocate_vm(self, vm, end_time):
+    def allocate_vm(self, vm, end_time, container_gid, prefix=""):
         """
-        Allocate a VM in the given slice.
+        Allocate a VM in the given container.
         """
-        # Check if the VM name already exists, as a created VM or an allocated VM
-        logging.debug("** delegate.vm: %s" % str(vm))
-        logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
-        logging.debug("** delegate.slice_name: %s" % str(vm["slice_name"]))
-        logging.debug("** delegate.project_name: %s" % str(vm["project_name"]))
-        vm_already_taken = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()
+        # Check if the Container exists
+        container = Container.query.filter_by(GID=container_gid, prefix=prefix).first()
+        # If the Container exists, check if the VM name is already taken
+        if container:
+            try:
+                container.query.join(Container.vms).filter(VirtualMachine.name==vm["name"]).one()
+            except:
+                raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
+            # Check if the VM name already exists, as a created VM or an allocated VM
+#        logging.debug("** delegate.vm: %s" % str(vm))
+#        logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
+#        logging.debug("** delegate.slice_name: %s" % str(vm["slice_name"]))
+#        logging.debug("** delegate.project_name: %s" % str(vm["project_name"]))
+#        vm_already_taken = VirtualMachine.query.filter_by(name=vm["name"], slice_name=vm["slice_name"], project_name=vm["project_name"]).first()
         # If VM already exists either allocated or provisioned, return error
-        if vm_already_taken:
-            raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
+#        if vm_already_taken:
+        # Otherwhise, we assume the VM name is not taken, but we must generate a new Container
+        else:
+            container = Container(container_gid, prefix, None, True) 
         # Check if the server is one of the given servers
         try: 
             server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
@@ -537,6 +592,7 @@ class VTResourceManager(object):
             self.expiration_manager.check_valid_reservation_time(end_time)
         except:
             raise virt_exception.VTMaxVMDurationExceeded(end_time)
+        # XXX: This should be into the TemplateManager?
         # Try to obtain the Template definition
         try:
             template_info = vm.pop("template_definition")
@@ -553,26 +609,11 @@ class VTResourceManager(object):
             except Exception as e:
                 raise e
         logging.debug("************ TEMPLATE => %s" % str(template))
-        # Check if the project already exists
-        vm_in_project = VirtualMachine.query.filter_by(project_name=vm["project_name"]).first()
-        # If exists, assign the same UUID
-        if vm_in_project:
-            project_uuid = vm_in_project.get_project_id()
-            vm["project_id"] = project_uuid
-            # Check if the slice already exists on this project
-            vm_in_slice = vm_in_project.query.filter_by(slice_name=vm["slice_name"]).first()
-            # If exists, assign the same UUID
-            if vm_in_slice:
-                slice_uuid = vm_in_slice.get_slice_id()
-                vm["slice_id"] = slice_uuid
-            # Otherwhise, assign one randomly.
-            else:
-                vm["slice_id"] = uuid.uuid4()
-        # Otherwhise, assign one randomly.
-        # If the project did not exist previously, the slice will be new too.
-        else:
-            vm["project_id"] = uuid.uuid4()
-            vm["slice_id"] = uuid.uuid4()
+        # Check if the project and slice already exist
+        project_uuid = self.check_project_exists(vm["project_name"])
+        vm["project_id"] = project_uuid
+        slice_uuid = self.check_slice_exists_in_project(vm["project_name"], vm["slice_name"])
+        vm["slice_id"] = slice_uuid
         # Create the VM URN and assign it to the VM
         vm_hrn = vm["project_name"] + '.' + vm["slice_name"] + '.' + vm["name"]
         vm_urn = hrn_to_urn(vm_hrn, "sliver")
@@ -587,9 +628,12 @@ class VTResourceManager(object):
             vm_allocated_model = self.translator.dict2class(vm, AllocatedVM)
             # Save the data into de database
             vm_allocated_model.save()
+            # TODO: Create a NetworkInterface and asign to the VM
             logging.debug("************ RELATED SERVER IS %s WITH ATTRIBUTES %s" %(vm_allocated_model.server.name, str(vm_allocated_model.server)))
         except Exception as e:
             raise e
+        # Associate the new VM with the Container
+        container.vms.append(vm_allocated_model)
         # Add the expiration time to the allocated VM
         try:
             self.expiration_manager.add_expiration_to_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)

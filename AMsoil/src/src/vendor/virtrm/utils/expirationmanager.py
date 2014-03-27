@@ -129,3 +129,8 @@ class ExpirationManager():
         except Exception as e:
             raise e
 
+    def delete_expiration(self, expiration):
+        try:
+            expiration.destroy()
+        except Exception as e:
+            raise e

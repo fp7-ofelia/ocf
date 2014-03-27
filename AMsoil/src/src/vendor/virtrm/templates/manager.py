@@ -82,7 +82,3 @@ class TemplateManager():
     def get_template_from_vm(self, vm_uuid):
         from templates_hardcoded_info import TEMPLATE
         return TEMPLATE
-
-    def get_template_from_allocated_vm(self, vm_uuid):
-        from templates_hardcoded_info import TEMPLATE
-        return TEMPLATE

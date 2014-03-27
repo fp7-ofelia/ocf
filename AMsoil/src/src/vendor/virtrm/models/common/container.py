@@ -1,4 +1,4 @@
-from models.resources.resource import Resource
+from models.resources.virtualmachine import VirtualMachine
 from sqlalchemy.ext.associationproxy import association_proxy
 from utils.base import db
 import amsoil.core.log
@@ -21,15 +21,18 @@ class Container(db.Model):
     prefix = db.Column(db.String(512), nullable=False, default="")
 
     '''Container relations'''
-    resources = association_proxy("resources_container", "resources", creator=lambda res:ContainerResources(resources=res))
+    vms = association_proxy("vms_container", "vms", creator=lambda vm:ContainerVMs(vms=vm))
 
     '''Defines soft or hard state of the Container'''
     do_save = False
 
-    def __init__(self, GID="", prefix="", save=False):
+    def __init__(self, GID="", prefix="", uuid=None, save=False):
         self.uuid = str(uuid.uuid4())
         self.GID = GID
         self.prefix = prefix
+        if not uuid:
+            uuid = uuid.uuid4()
+        self.uuid = uuid
         self.do_save = save
         if self.do_save:
             self.auto_save()
@@ -85,18 +88,18 @@ class Container(db.Model):
             raise e
     
     
-class ContainerResources(db.Model):
+class ContainerVMs(db.Model):
     """Relation between Containers and the contained Resources"""
 
     config = pm.getService("config")
     table_prefix = config.get("virtrm.DATABASE_PREFIX")
-    __tablename__ = table_prefix + 'container_resources'
+    __tablename__ = table_prefix + 'container_virtualmachines'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     container_uuid = db.Column(db.ForeignKey(table_prefix + 'container.uuid'), nullable=False)
-    resource_id = db.Column(db.ForeignKey(table_prefix + 'resource.id'), nullable=False)
+    resource_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
 
-    container = db.relationship("Container", backref=db.backref("resources_container", cascade = "all, delete-orphan"))
-    resources = db.relationship("Resource", backref=db.backref("container_resource", cascade="all, delete-orphan"))
+    container = db.relationship("Container", backref=db.backref("vms_container", cascade="all, delete-orphan"))
+    vms = db.relationship("VirtualMachine", backref=db.backref("container_vm", cascade="all, delete-orphan"))
 
 

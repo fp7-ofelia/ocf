@@ -291,34 +291,33 @@ class VTDelegate3(GENIv3DelegateBase):
     
     def status(self, urns, client_cert, credentials):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
+         #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
         vms = list()
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
-                #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-                slice_vms = self._resource_manager.get_vms_in_slice(urn)
-                if not slice_vms:
-                    raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
-                for vm in slice_vms:
-                    vm_status = self._resource_manager.get_vm_status(vm['name'], vm['status'])
-                    vms.append(vm_status)
+                try:
+                    slice_vms = self._resource_manager.get_vms_in_container(urn)
+                except:
+                    raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
+                if slice_vms:
+                    vms.extend(slice_vms)
             elif (self.urn_type(urn) == 'sliver'):
                 try:
-                    vm, status = self._resource_manager.verify_vm(urn)
-                    vm_status = self._resource_manager.get_vm_status(vm, status)
-                    vms.append(vm_status)        
-                except virt_exception.VTAMVMNotFound as e:
-                    raise geniv3_exception.GENIv3SearchFailedError("The desired VM urn(s) cloud not be found (%s)." % (vm,))
+                    vm = self._resource_manager.get_vm_object_by_urn(urn)
+                    vms.append(vm)
+                except:
+                    raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (vm,))
             else:
-                raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate')
-        sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms]
-        status_vms = dict()
+                raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate') 
+        if not vms:
+            raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+        vms_info = list()
         for vm in vms:
-            if status_vms.has_key(vm['server']):
-                status_vms[vm['server']].append(vm)
-            else:    
-                status_vms[vm['server']] = list()
-                status_vms[vm['server']].append(vm)
-        return self._get_manifest_rspec(status_vms), sliver_list
+            vm_info = self._resource_manager.get_vm_info(vm)
+            vms_info.append(vm_info)
+        sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms_info]
+        result_rspec = self._get_manifest_rspec(vms_info)
+        return result_rspec, sliver_list
     
     def perform_operational_action(self, urns, client_cert, credentials, action, best_effort):
         # TODO: honor best_effort
