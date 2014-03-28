@@ -49,7 +49,7 @@ case $action_arg in
         exit 1;
         ;;
 esac
-whiptail_checklist_description="Choose the modules by pressing SPACE key and finally entering <Ok>"
+whiptail_checklist_description="Choose the modules by pressing SPACE key and then <Ok>"
 whiptail_checklist_options=""
 
 function exit_on_null_arg()
@@ -65,13 +65,13 @@ function main()
 {
     for i in "${whiptail_args[@]}"
     do
-        whiptail_checklist_options="$whiptail_checklist_options $i . false"
+        whiptail_checklist_options="$whiptail_checklist_options $i false"
     done
     
     ocf_modules_deploy=""
     while [ $confirm_deploy -eq 0 ]; do
         #./${gui_path}/checklist.sh "$whiptail_checklist_title" "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options
-        ocf_modules_deploy=$(whiptail --checklist "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --backtitle "OFELIA Control Framework" --title "$whiptail_checklist_title" 3>&1 1>&2 2>&3)
+        ocf_modules_deploy=$(whiptail --checklist --noitem "$whiptail_checklist_description" $(($(($num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --backtitle "OFELIA Control Framework" --title "$whiptail_checklist_title" 3>&1 1>&2 2>&3)
         #ocf_modules_deploy=$?
         # Saving the return code (0/1)
         exit_on_null_arg $ocf_modules_deploy
