@@ -21,6 +21,9 @@ class VirtualMachine(db.Model):
     config = pm.getService("config")
     __tablename__ = config.get("virtrm.DATABASE_PREFIX") + 'virtualmachine'
     __table_args__ = {'extend_existing':True}
+    __mapper_args__ = {
+        'polymorphic_on':'type'
+    }
 
     __child_classes = (
             'XenVM',
@@ -35,6 +38,7 @@ class VirtualMachine(db.Model):
     number_of_cpus = db.Column("numberOfCPUs", db.Integer)
     disc_space_gb = db.Column("discSpaceGB", DOUBLE)
     urn = db.Column(db.String(1024), nullable=True)
+    type = db.Column(db.String(1024), nullable=False, default="xen")
 
     '''Property parameters'''
     project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
@@ -51,7 +55,7 @@ class VirtualMachine(db.Model):
     operating_system_distribution = db.Column("operatingSystemDistribution", db.String(512), nullable=False, default="")
 
     '''Networking'''
-    network_interfaces = association_proxy("vm_networkinterfaces", "networkinterface")
+    network_interfaces = association_proxy("vm_networkinterfaces", "networkinterface", creator=lambda iface:VMNetworkInterfaces(networkinterface=iface))
 
     '''Other'''
     callback_url = db.Column("callBackURL", db.String(200))
@@ -281,5 +285,5 @@ class VMNetworkInterfaces(db.Model):
     virtualmachine_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.id'), nullable=False)
     networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
-    vm = db.relationship("VirtualMachine", backref="vm_networkinterfaces")
-    networkinterface = db.relationship("NetworkInterface", backref="vm_associations")
+    vm = db.relationship("VirtualMachine", primaryjoin="VirtualMachine.id==VMNetworkInterfaces.virtualmachine_id", backref=db.backref("vm_networkinterfaces", cascade="all, delete-orphan"))
+    networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==VMNetworkInterfaces.networkinterface_id", backref=db.backref("vm_associations", cascade="all, delete-orphan"))

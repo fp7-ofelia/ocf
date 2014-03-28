@@ -19,6 +19,10 @@ class AllocatedVM(VirtualMachine):
 
     '''General parameters'''
     virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity':'allocated',
+        'inherit_condition':(virtualmachine_ptr_id==VirtualMachine.id)
+    }
     server_uuid = db.Column(db.ForeignKey(table_prefix + 'vtserver.uuid'), nullable=False) 
 
     server = db.relationship("VTServer", uselist=False, backref=db.backref("allocated_vms"))
@@ -48,11 +52,12 @@ class AllocatedVM(VirtualMachine):
             self.__dict__.update(**common_dictionary)
         except Exception as e:
             raise e
-#        try:
-            # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
-#            self.server = params_dict["server"]
-#        except Exception as e:
-#            raise e
+        # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
+        for network_interface in params_dict["network_interfaces"]:
+            try:
+                self.network_interfaces.append(network_interface)
+            except:
+                pass
         # Set the state to allocated
         try:
             common_dictionary.pop("state")

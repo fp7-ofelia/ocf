@@ -109,7 +109,7 @@ class XenServer(VTServer):
                 raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
             # Allocate interfaces for the VM
             logging.debug("*************************** Server 3")
-            interfaces = self.createEnslavedVMInterfaces()
+            interfaces = self.create_enslaved_vm_interfaces()
             # Call factory        
             logging.debug("**************************** Server 4")
             vm = XenVM.create(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)

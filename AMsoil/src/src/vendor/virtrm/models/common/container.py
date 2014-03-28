@@ -1,9 +1,10 @@
 from models.resources.virtualmachine import VirtualMachine
 from sqlalchemy.ext.associationproxy import association_proxy
 from utils.base import db
+from utils.choices import ContainerPrefixClass
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
-import uuid
+import uuid as uuid_gen
 
 logging=amsoil.core.log.getLogger('Container')
 
@@ -27,11 +28,10 @@ class Container(db.Model):
     do_save = False
 
     def __init__(self, GID="", prefix="", uuid=None, save=False):
-        self.uuid = str(uuid.uuid4())
         self.GID = GID
         self.prefix = prefix
         if not uuid:
-            uuid = uuid.uuid4()
+            uuid = uuid_gen.uuid4()
         self.uuid = uuid
         self.do_save = save
         if self.do_save:
@@ -71,18 +71,21 @@ class Container(db.Model):
     @db.validates('GID')
     def validate_GID(self, key, GID):
         try:
-            Container.query.filter_by(GID=GID, prefix=self.prefix).one()
+            Container.query.filter_by(GID=GID, prefix=self.prefix).one() 
+            raise Exception("GID already in use")
+        except:
             return GID
-        except Exception as e:
-            raise e
             
     @db.validates('prefix')
     def validate_prefix(self, key, prefix):
         try:
             ContainerPrefixClass.validate_prefix(prefix)
             # If GID is given, validate that is not duplicated for given prefix
-            if self.GID:
+            try:
                 container = Container.query.filter_by(GID=self.GID, prefix=prefix).one()
+                raise Exception("Invalid prefix for given GID")
+            except:
+                pass
             return prefix
         except Exception as e:
             raise e
@@ -97,7 +100,7 @@ class ContainerVMs(db.Model):
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     container_uuid = db.Column(db.ForeignKey(table_prefix + 'container.uuid'), nullable=False)
-    resource_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
+    vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
 
     container = db.relationship("Container", backref=db.backref("vms_container", cascade="all, delete-orphan"))
     vms = db.relationship("VirtualMachine", backref=db.backref("container_vm", cascade="all, delete-orphan"))

@@ -1,6 +1,7 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
+from models.common.container import Container
 from models.resources.virtualmachine import VirtualMachine
 from models.resources.allocatedvm import AllocatedVM
 from models.resources.vtserver import VTServer
@@ -158,7 +159,7 @@ class VTResourceManager(object):
         if expiration_time:
             vm_dict['expiration_time'] = expiration_time
         # Add the Template information
-        template = self.template_manager.get_template_from_allocated_vm(vm_dict["uuid"])
+        template = self.template_manager.get_template_from_vm(vm_dict["uuid"])
         vm_dict["disc_image"] = template
         # Obtain the server information
         # TODO: Automatize this
@@ -316,7 +317,7 @@ class VTResourceManager(object):
         if vms_params:
             created_vms = self._provision_vms(vms_params, slice_urn, project)
         else:
-            raise virt_exception.VTAMNoSliversInSlice(slice_urn)
+            raise virt_exception.VirtNoSliversInSlice(slice_urn)
         for key in created_vms.keys():
             for created_vm in created_vms[key]:
                 vm_hrn, hrn_type = urn_to_hrn(created_vm['name'])
@@ -521,7 +522,7 @@ class VTResourceManager(object):
         if vms_allocated:
             vms.extend(vms_allocated)
         if not vms:
-            raise virt_exception.VTAMNoVMsInSlice(slice_name)
+            raise virt_exception.VirtNoVMsInSlice(slice_name)
         deleted_vms = list()        
         for vm in vms:
             vm_hrn = 'geni.gpo.gcf.' + slice_name + '.' + vm.name
@@ -549,7 +550,7 @@ class VTResourceManager(object):
         Check if any VM exists in the given slice and project, and return the related slice UUID.
         If the slice is not in any project, generate a new UUID for it.
         '''
-        vm_in_slice = VirtualMachine.query.filter_by(project_name=project_name, slice_name).first()
+        vm_in_slice = VirtualMachine.query.filter_by(project_name=project_name, slice_name=slice_name).first()
         if vm_in_slice:
             slice_uuid = vm_in_slice.get_slice_id()
         else:
@@ -563,13 +564,13 @@ class VTResourceManager(object):
         Allocate a VM in the given container.
         """
         # Check if the Container exists
-        container = Container.query.filter_by(GID=container_gid, prefix=prefix).first()
-        # If the Container exists, check if the VM name is already taken
-        if container:
-            try:
-                container.query.join(Container.vms).filter(VirtualMachine.name==vm["name"]).one()
-            except:
-                raise virt_exception.VTAMVmNameAlreadyTaken(vm["name"])
+        container = Container.query.filter_by(GID=container_gid, prefix=prefix).all()
+        if len(container) == 1:
+            container = container[0]
+            # If the Container exists, check if the VM name is already taken
+            vms = container.query.filter(Container.vms.any(name=vm["name"])).all()
+            if not len(vms) == 0:
+                raise virt_exception.VirtVmNameAlreadyTaken(vm["name"])
             # Check if the VM name already exists, as a created VM or an allocated VM
 #        logging.debug("** delegate.vm: %s" % str(vm))
 #        logging.debug("** delegate.vm_name: %s" % str(vm["name"]))
@@ -579,19 +580,21 @@ class VTResourceManager(object):
         # If VM already exists either allocated or provisioned, return error
 #        if vm_already_taken:
         # Otherwhise, we assume the VM name is not taken, but we must generate a new Container
-        else:
+        elif len(container) == 0:
             container = Container(container_gid, prefix, None, True) 
+        else:
+            raise virt_exception.VirtContainerDuplicated(container_gid)
         # Check if the server is one of the given servers
         try: 
             server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
             logging.debug("*********** SERVER %s HAS ATTRIBUTES %s" % (server.name, str(server.__dict__)))
         except:
-            raise virt_exception.VTAMServerNotFound(vm["server_uuid"])
+            raise virt_exception.VirtServerNotFound(vm["server_uuid"])
         # Check if the expiration time is a valid time
         try:
             self.expiration_manager.check_valid_reservation_time(end_time)
         except:
-            raise virt_exception.VTMaxVMDurationExceeded(end_time)
+            raise virt_exception.VirtMaxVMDurationExceeded(end_time)
         # XXX: This should be into the TemplateManager?
         # Try to obtain the Template definition
         try:
@@ -623,6 +626,10 @@ class VTResourceManager(object):
         vm["operating_system_type"] = template["operating_system_type"]
         vm["operating_system_distribution"] = template["operating_system_distribution"]
         vm["operating_system_version"] = template["operating_system_version"]
+        # Allocate the required NetworkInterfaces (Resource Allocation)
+        vm_allocated_interfaces = server.create_enslaved_vm_interfaces()
+        vm["network_interfaces"] = vm_allocated_interfaces
+        logging.debug("************ NETWORK_INTERFACES IS %s" % (str(vm_allocated_interfaces)))
         # Generate the AllocatedVM model
         try:
             vm_allocated_model = self.translator.dict2class(vm, AllocatedVM)

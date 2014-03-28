@@ -331,11 +331,11 @@ class VTServer(db.Model):
         # Allocate Mac
         for mac_range in self.get_subscribed_mac_ranges():
             logging.debug("*********************** MAC 2")
-            try:
-                mac_obj = mac_range.allocate_mac()
-            except Exception as e:
-                logging.debug("******************** MAC ERROR 1 " + str(e))
-                continue
+        #    try:
+            mac_obj = mac_range.allocate_mac()
+         #   except Exception as e:
+         #       logging.debug("******************** MAC ERROR 1 " + str(e))
+         #       continue
             break
         if mac_obj == None:
             logging.debug("********************* MAC ERROR 2 " + str(e))

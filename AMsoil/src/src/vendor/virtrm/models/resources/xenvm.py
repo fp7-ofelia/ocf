@@ -22,6 +22,10 @@ class XenVM(VirtualMachine):
     
     '''General Attributes'''
     virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity':'xen',
+        'inherit_condition':(virtualmachine_ptr_id==VirtualMachine.id)
+    }
     hd_setup_type = db.Column("hdSetupType", db.String(1024), nullable=False, default="")
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")

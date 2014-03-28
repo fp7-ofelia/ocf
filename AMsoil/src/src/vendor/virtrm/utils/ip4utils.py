@@ -23,17 +23,17 @@ class IP4Validator:
                 if not value&0x01 == 0x01:
                     if netmask_started:
                         raise Exception("Invalid Netmask format")        
-                    else:
-                        netmask_started = True        
-                    if j<7:
-                        value=value>>1
-                        j+=1
-                    else:         
-                        break
-                if i>0:
-                    i-=1
                 else:
+                    netmask_started = True        
+                if j<7:
+                    value=value>>1
+                    j+=1
+                else:         
                     break
+            if i>0:
+                i-=1
+            else:
+                break
     
     @staticmethod
     def __convert_to_numeric_value(ip):
@@ -151,18 +151,18 @@ class IP4Iterator:
         toreturn[3] = self._ip[3] & self._netmask[3]
         return toreturn 
     
-    def __isBroadcastIp(self):
+    def __is_broadcast_ip(self):
         self.__increment()
-        toReturn = self.__is_network_ip()
+        to_return = self.__is_network_ip()
         self.__decrement()
-        return toReturn
+        return to_return
         
     def __is_network_ip(self):
         net = self.__get_current_network_segment() 
         return net[0] == self._ip[0] and net[1] == self._ip[1] and net[2] == self._ip[2] and net[3] == self._ip[3]
                 
     def __is_broadcast_or_network_ip(self):
-        return self.__isBroadcastIp() or self.__is_network_ip()
+        return self.__is_broadcast_ip() or self.__is_network_ip()
         
     def __convert_to_numeric_value(self,value):
         return (value[0] <<24) + (value[1] <<16) +  (value[2] <<8) + (value[3])

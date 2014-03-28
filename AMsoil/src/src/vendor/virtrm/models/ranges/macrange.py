@@ -29,7 +29,7 @@ class MacRange(db.Model):
     end_mac = db.Column("endMac", db.String(17), nullable=False)
     # Pool of resources both assigned and excluded (particular case of assignment)
     # Associated MACs for this range
-    resources = association_proxy("macrange_macslot", "macslot")
+    resources = association_proxy("macrange_macslot", "macslot", creator=lambda mac:MacRangeMacs(macslot=mac))
     next_available_mac = db.Column("nextAvailableMac", db.String(17))
     # Statistics
     number_slots = db.Column("numberOfSlots", BIGINT(20))
@@ -98,7 +98,7 @@ class MacRange(db.Model):
         self.autosave()
 
     def __is_mac_available(self, mac):
-        return len(self.resources.filter_by(mac=mac).all()) == 0
+        return MacSlot.query.filter_by(mac=mac).first() not in self.resources
 
     '''Public methods'''
     def get_lock_identifier(self):
@@ -152,24 +152,24 @@ class MacRange(db.Model):
             if self.next_available_mac == None:                                
                 raise Exception("Could not allocate any MAC")
                 logging.debug("********************* RANGE 2")
-            new_mac = MacSlot.mac_factory(self,self.next_available_mac)
+            new_mac = MacSlot.mac_factory(self.id,self.next_available_mac)
             self.resources.append(new_mac)
             # Try to find new slot
             try:
                 logging.debug("********************** RANGE 3")
-                it= EthernetUtils.getMacIterator(self.next_available_mac,self.end_mac)
+                it= EthernetUtils.get_mac_iterator(self.next_available_mac,self.end_mac)
                 logging.debug("********************** RANGE 4")
                 while True:
-                    mac = it.getNextMac()
+                    mac = it.get_next_mac()
                     logging.debug("***************** RANGE 5 " + str(mac))
                     if self.__is_mac_available(mac):
-                        logging.debug("******************* RANGE 6")
+                        logging.debug("******************* RANGE 6" + str(mac) + str(self.do_save))
                         break
-                    self.next_available_mac = mac
+                self.next_available_mac = mac
             except Exception as e:
                 logging.debug("************************ ERROR RANGE " + str(e))
                 self.next_available_mac = None
-        logging.debug("*************************** RANGE 7")
+        logging.debug("*************************** RANGE 7" + str(self.next_available_mac))
         self.autosave()
         return new_mac  
     
@@ -205,7 +205,7 @@ class MacRange(db.Model):
             # Then forbidd
             if not EthernetUtils.is_mac_in_range(mac_str,self.start_mac,self.end_mac):
                 raise Exception("Mac is not in range")
-            new_mac = MacSlot.excluded_mac_factory(self,mac_str,comment)
+            new_mac = MacSlot.excluded_mac_factory(self.id,mac_str,comment)
             self.resources.append(new_mac)
             # If was nextSlot shift
             if self.next_available_mac == mac_str:
@@ -293,6 +293,6 @@ class MacRangeMacs(db.Model):
     macslot_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
     macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
 
-    macrange = db.relationship("MacRange", backref="macrange_macslot")
-    macslot = db.relationship("MacSlot", backref="macrange")
+    macrange = db.relationship("MacRange", backref=db.backref("macrange_macslot", cascade="all, delete-orphan"))
+    macslot = db.relationship("MacSlot", backref=db.backref("macslot_macrange", cascade="all, delete-orphan"))
 

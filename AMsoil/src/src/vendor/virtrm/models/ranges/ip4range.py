@@ -36,7 +36,7 @@ class Ip4Range(db.Model):
     number_slots = db.Column("numberOfSlots", BIGINT(20))
     # Pool of ips both assigned and excluded (particular case of assignment)
     next_available_ip = db.Column("nextAvailableIp", db.String(15))
-    ips = association_proxy("ip4range_ips", "ipslot")
+    ips = association_proxy("ip4range_ip4s", "ip4slot", creator=lambda ip:Ip4RangeIps(ip4slot=ip))
     # Mutex
     mutex = None
     # Defines soft or hard state of the range 
@@ -138,23 +138,23 @@ class Ip4Range(db.Model):
             raise e
 
     '''Private methods'''
-    def __setStartIp(self, value):
+    def __set_start_ip(self, value):
         IP4Utils.check_valid_ip(value)
         self.start_ip = value
         self.auto_save()
     
-    def __setEndIp(self, value):
+    def __set_end_ip(self, value):
         IP4Utils.check_valid_ip(value)
         self.end_ip = value
         self.auto_save()
     
-    def __setNetmask(self, value):
+    def __set_netmask(self, value):
         IP4Utils.check_valid_netmask(value)
         self.netmask = value
         self.auto_save()
     
-    def __isIpAvailable(self,ip):
-        return len(self.ips.filter_by(ip=ip).all()) == 0
+    def __is_ip_available(self,ip):
+        return Ip4Slot.query.filter_by(ip=ip).first() not in self.ips
     
     def auto_save(self):
         if self.do_save:
@@ -215,7 +215,7 @@ class Ip4Range(db.Model):
             db.session.delete(self)
             db.session.commit()
     
-    def allocateIp(self):
+    def allocate_ip(self):
         '''
         Allocates an IP address of the range    
         '''
@@ -226,7 +226,7 @@ class Ip4Range(db.Model):
                 logging.debug("******************************************* RANGEIP ERROR 1")
                 raise Exception("Could not allocate any IP")
             logging.debug("******************************************* RANGEIP 2")
-            new_ip = Ip4Slot.ip_factory(self,self.next_available_ip)
+            new_ip = Ip4Slot.ip_factory(self.id,self.next_available_ip)
             logging.debug("******************************************* RANGEIP 3")
             self.ips.append(new_ip)
             logging.debug("******************************************* RANGEIP 4")
@@ -241,7 +241,7 @@ class Ip4Range(db.Model):
                     if self.__is_ip_available(ip):
                         logging.debug("******************************************* RANGEIP 9")
                         break
-                    self.next_available_ip = ip
+                self.next_available_ip = ip                
                 logging.debug("******************************************* RANGEIP 8")
             except Exception as e:
                 logging.debug("******************************************* RANGEIP ERROR 2 " + str(e))
@@ -371,6 +371,6 @@ class Ip4RangeIps(db.Model):
     ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
     ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
 
-    ip4range = db.relationship("Ip4Range", backref="ip4range_ip4s")
-    ip4slot = db.relationship("Ip4Slot")
+    ip4range = db.relationship("Ip4Range", backref=db.backref("ip4range_ip4s", cascade="all, delete-orphan"))
+    ip4slot = db.relationship("Ip4Slot", backref=db.backref("ip4_ip4range", cascade="all, delete-orphan"))
 

@@ -155,7 +155,7 @@ class EthernetMacIterator:
             if not self.__is_broadcast_or_network_mac():
                 break
         # Return stringified IP
-        return self.getPointedMacAsString()
+        return self.get_pointed_mac_as_string()
         
     '''
     Public method that decrements IP and returns the next non-broadcast non-network ip of the iteration

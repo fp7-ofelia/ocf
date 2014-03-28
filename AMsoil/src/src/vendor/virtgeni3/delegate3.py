@@ -156,17 +156,17 @@ class VTDelegate3(GENIv3DelegateBase):
         try:
             allocated_vms = list()
             for requested_vm in requested_vms:
-                # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGER
-                allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time)
+                # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGE, slice_urnR
+                allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
                 allocated_vms.append(allocated_vm)
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
-        except virt_exception.VTAMVmNameAlreadyTaken as e:
+        except virt_exception.VirtVmNameAlreadyTaken as e:
             self.undo_action("allocate", allocated_vms)            
             raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vms[0]['name'],))
-        except virt_exception.VTAMServerNotFound as e:
+        except virt_exception.VirtServerNotFound as e:
             self.undo_action("allocate", allocated_vms)
             raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vms[0]['server_uuid'],))
-        except virt_exception.VTMaxVMDurationExceeded as e:
+        except virt_exception.VirtMaxVMDurationExceeded as e:
             self.undo_action("allocate", allocated_vms)
             raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
         # Generate the Manifest RSpec
@@ -204,7 +204,7 @@ class VTDelegate3(GENIv3DelegateBase):
                             ext_vm, last_expiration = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration_time)
                             expirations.append(last_expiration)
                             vms.extend(ext_vm)
-                        except virt_exception.VTMaxVMDurationExceeded as e:
+                        except virt_exception.VirtMaxVMDurationExceeded as e:
                             if best_effort is True:
                                 vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
                             else: 
@@ -212,7 +212,7 @@ class VTDelegate3(GENIv3DelegateBase):
                                 for vm, expiration in vms, expirations:
                                     try:
                                         ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
-                                    except virt_exception.VTMaxVMDurationExceeded as e:
+                                    except virt_exception.VirtMaxVMDurationExceeded as e:
                                         pass
                         raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
                 else:
@@ -220,7 +220,7 @@ class VTDelegate3(GENIv3DelegateBase):
                         for vm, expiration in vms, expirations:
                             try:
                                 ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
-                            except virt_exception.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VirtMaxVMDurationExceeded as e:
                                 pass
                         raise geniv3_exception.GENIv3BadArgsError("The urn doesn't contain any resource (%s)" % (str(urn),))
             elif (self.urn_type(urn) == 'sliver'):
@@ -229,17 +229,17 @@ class VTDelegate3(GENIv3DelegateBase):
                     ext_vm, last_expiration = self._resource_manager.set_vm_expiration(vm, state, expiration_time)
                     expirations.extend(last_expiration)
                     vms.extend(ext_vm)
-                except virt_exception.VTAMVMNotFound as e:
+                except virt_exception.VirtVMNotFound as e:
                     if best_effort is True:
                         vms.append({'name':urn, 'expires':None, 'error':"No exist any resource with the given urn, it may have expired"})
                     else:
                         for vm, expiration in vms, expirations:
                             try:
                                 ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
-                            except virt_exception.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VirtMaxVMDurationExceeded as e:
                                 pass
                     raise geniv3_exception.GENIv3BadArgsError("The urn don't contain any resource (%s)" % (str(urn),))
-                except virt_exception.VTAMMaxVMDurationExceeded as e:
+                except virt_exception.VirtMaxVMDurationExceeded as e:
                     if best_effort is True:
                         vms.append({'name':urn, 'expires':e.time, 'error':"Expiration time is exceed"})
                     else:
@@ -247,7 +247,7 @@ class VTDelegate3(GENIv3DelegateBase):
                         for vm, expiration in vms, expirations:
                             try:
                                 ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
-                            except virt_exception.VTMaxVMDurationExceeded as e:
+                            except virt_exception.VirtMaxVMDurationExceeded as e:
                                 pass
                     raise geniv3_exception.GENIv3BadArgsError("VM can not be extended that long (%s)" % (ext_vm['name'],))
             else:
@@ -258,7 +258,7 @@ class VTDelegate3(GENIv3DelegateBase):
                     for vm, expiration in vms, expirations:
                         try:
                             ext_vm = self._resource_manager.set_vm_expiration(vm['name'], vm['status'], expiration)
-                        except virt_exception.VTMaxVMDurationExceeded as e:
+                        except virt_exception.VirtMaxVMDurationExceeded as e:
                             pass
                 raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be renewed in this aggregate')
         slivers = list()

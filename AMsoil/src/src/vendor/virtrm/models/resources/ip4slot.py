@@ -1,4 +1,5 @@
 from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from utils.base import db
 from utils.ip4utils import IP4Utils
@@ -17,6 +18,7 @@ class Ip4Slot(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     ip = db.Column(db.String(15), nullable=False)
     ip_range_id = db.Column("ipRange_id", db.Integer, db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
+    ip_range = association_proxy("ip4_ip4range", "ip4range")
     is_excluded = db.Column("isExcluded", TINYINT(1))
     comment = db.Column(db.String(1024))
 
@@ -24,14 +26,14 @@ class Ip4Slot(db.Model):
     do_save = True   
     
     @staticmethod
-    def constructor(ip_range, ip, excluded, comment="", save=True):
+    def constructor(ip_range_id, ip, excluded, comment="", save=True):
         self = Ip4Slot()
         try:
             # Check IP
             IP4Utils.check_valid_ip(ip)
             self.ip = ip
             self.is_excluded = excluded
-            self.ip_range = ip_range
+            self.ip_range_id = ip_range_id
             self.comment = comment
             self.do_save = save
             if save:
@@ -42,27 +44,27 @@ class Ip4Slot(db.Model):
         return self
     
     '''Getters'''
-    def isExcludedIp(self):
-        return self.isExcluded
+    def is_excluded_ip(self):
+        return self.is_excluded
 
     def get_lock_identifier(self):
         # Uniquely identifies object by a key
         return inspect.currentframe().f_code.co_filename+str(self)+str(self.id)
     
-    def getIp(self):
+    def get_ip(self):
         return self.ip
      
-    def getNetmask(self):
-        return self.ipRange.getNetmask()
+    def get_netmask(self):
+        return self.ip_range.get_netmask()
         
-    def getGatewayIp(self):
-        return self.ipRange.getGatewayIp()
+    def get_gateway_ip(self):
+        return self.ip_range.get_gateway_ip()
     
-    def getDNS1(self):
-        return self.ipRange.getDNS1()
+    def get_dns1(self):
+        return self.ip_range.get_dns1()
         
-    def getDNS2(self):
-        return self.ipRange.getDNS2()
+    def get_dns2(self):
+        return self.ip_range.get_dns2()
 
     '''Validators'''
     @validates('ip')
@@ -75,9 +77,9 @@ class Ip4Slot(db.Model):
     
     ''' Factories '''
     @staticmethod
-    def ipFactory(ipRange, ip, save=True):
-        return Ip4Slot.constructor(ipRange, ip, False, "", save)
+    def ip_factory(ip_range, ip, save=True):
+        return Ip4Slot.constructor(ip_range, ip, False, "", save)
     
     @staticmethod
-    def excludedIpFactory(ipRange, ip, comment, save=True):
-        return MacSlot.constructor(ipRange, ip, True, comment, save)
+    def excluded_ip_factory(ip_range_id, ip, comment, save=True):
+        return Ip4Slot.constructor(ip_range_id, ip, True, comment, save)

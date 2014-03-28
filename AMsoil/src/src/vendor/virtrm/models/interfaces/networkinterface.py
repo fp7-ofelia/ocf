@@ -24,15 +24,15 @@ class NetworkInterface(db.Model):
     name = db.Column(db.String(128), nullable=False)
     mac_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
-    ip4s = association_proxy("networkinterface_ip4s", "ip4slot")
+    ip4s = association_proxy("networkinterface_ip4s", "ip4slot", creator=lambda ip:NetworkInterfaceIp4s(ip4slot=ip))
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)
     is_bridge = db.Column("isBridge", TINYINT(1), nullable=False, default=0)
 
     '''Interfaces connectivy'''
     vtserver = association_proxy("vtserver_assocation", "vtserver")
     vm = association_proxy("vm_associations", "vm")
-    connected_to = association_proxy("to_networkinterface", "to_networkinterface")
-    connected_from = association_proxy("from_networkinterface", "from_networkinterface")
+    connected_to = association_proxy("to_networkinterface", "to_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(to_networkinterface=iface))
+    connected_from = association_proxy("from_networkinterface", "from_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(from_networkinterface=iface))
 
     '''Physical connection details for bridged interfaces''' 
     switch_id = db.Column("switchID", db.String(23))
@@ -262,8 +262,8 @@ class NetworkInterfaceIp4s(db.Model):
     networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
     ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
 
-    networkinterface = db.relationship("NetworkInterface", backref="networkinterface_ip4s")
-    ip4slot = db.relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref="networkinterface_associations_ips")
+    networkinterface = db.relationship("NetworkInterface", backref=db.backref("networkinterface_ip4s", cascade="all, delete-orphan"))
+    ip4slot = db.relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref=db.backref("networkinterface_associations_ips", cascade="all, delete-orphan"))
 
 
 class NetworkInterfaceConnectedTo(db.Model):
@@ -277,6 +277,6 @@ class NetworkInterfaceConnectedTo(db.Model):
     from_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
     to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
-    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref="from_networkinterface")
-    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref="to_networkinterface")
+    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref=db.backref("from_networkinterface", cascade="all, delete-orphan"))
+    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref=db.backref("to_networkinterface", cascade="all, delete-orphan"))
 

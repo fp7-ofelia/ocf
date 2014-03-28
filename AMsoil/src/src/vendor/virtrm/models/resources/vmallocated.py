@@ -70,11 +70,12 @@ class VMAllocated(db.Model):
             common_dictionary[attribute] = params_dict[attribute]
         # Then updates the class' inner dictionary with the one retrieved after the intersection of their keys
         self.__dict__.update(**common_dictionary)
-        try:
-            # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
-            self.server = params_dict["server"]
-        except:
-            pass
+        # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
+        for network_interface in params_dict["network_interfaces"]:
+            try:
+                self.network_interfaces.append(network_interface)
+            except:
+                pass
         # If UUID is not given, generate it
         try:
             common_dictionary["uuid"]
