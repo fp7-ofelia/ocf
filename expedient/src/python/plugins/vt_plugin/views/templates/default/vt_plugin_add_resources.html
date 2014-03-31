@@ -216,9 +216,10 @@ Type:
                     <th>
                       Disc
                     </th>
+                    <th style="text-align: center; width: 8em;">
+                      Update
+                    </th>
                   </tr>
-                  
-                  
                   <tr class = "odd">
                  <td>
                    {{ server.name }}
@@ -242,11 +243,17 @@ Type:
                 {{ server.freeDiscSpace }}
                 {#{{ server.discSpaceGB }}#}
               </td>
+              <td>
+                <div class="server_actions">
+                  <input type="button" class="update" onclick="handleVMaction({{slice.id}},{{server.id}},'force_update_server')" style="background-image: url({% url img_media 'reload.png' %});" value="Update" />
+                </div>
+              </td>  
           </tr>
           </table>
           <div id = "vms_table">
-            {% if server.vms.all%}
-            {% include "vt_plugin_list_resources.html" %}
+            {% load servers %} {# Loads Jinja filters for servers - in order to check #VMs #}
+            {% if server|number_vms_inside_server_for_slice:slice.uuid > 0 %} {# If some VM exists, show message #}
+                {% include "vt_plugin_list_resources.html" %}
             {% endif %}
           </div>
       </div>

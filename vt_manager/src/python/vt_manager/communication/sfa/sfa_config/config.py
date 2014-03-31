@@ -1,4 +1,10 @@
 from django.conf import settings
+################
+#Aggregate, Authority and Componet urns
+################
+OCF_ISLAND_AUTHORITY = "i2cat"
+OCF_AM_TYPE = "vtam"
+HRN = OCF_ISLAND_AUTHORITY + "." + OCF_AM_TYPE
 
 #################
 #Credential stuff
@@ -8,18 +14,24 @@ SFA_INTERFACE_HRN ="ocf_vt"
 MY_ROOTS_DIR = "/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/my_roots/"
 TRUSTED_ROOTS_DIR = "/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/trusted_roots/"
 SFA_CREDENTIAL_SCHEMA = "/opt/ofelia/vt_manager/src/python/vt_manager/communication/sfa/schemas/credential.xsd"
+################
+#Location 
+###############
+LONGITUDE = 2.1119138633362127
+LATITUDE = 41.38732694954646
 
 ###################
 #Get Version Params
 ###################
 #Main params
-URN = 'urn:publicid:IDN+ocf:vtam+authority+sa' 
+URN = 'urn:publicid:IDN+' + OCF_ISLAND_AUTHORITY + '+' + OCF_AM_TYPE  + '+authority+sa' 
 HOSTNAME = settings.SITE_DOMAIN
-HRN = 'ocf.vtam'
 TESTBED = 'Ofelia Control Framework'
+EXPERIMENT_VTAM_IP = "10.216.12.5" #Add public one here
+
 #Geni API
 GENI_API_VERSION = 2
-GENI_API_URL = 'https://%s:8445/xmlrpc/sfa/' % settings.VTAM_IP
+GENI_API_URL = 'https://%s:8445/xmlrpc/sfa/' % EXPERIMENT_VTAM_IP
 INTERFACE = 'aggregate'
 CODE_URL = 'git://git.onelab.eu/sfa.git@sfa-2.1-24'
 CODE_TAG = '2.1-24'
@@ -36,7 +48,6 @@ REQ_RS_VERSION_NUMBER = '1'
 REQ_RS_VERSION_SCHEMA = 'http://www.geni.net/resources/rspec/3/request.xsd'
 REQ_RS_VERSION_EXTENSIONS = []
 REQ_RS_NAMESPACE = None
-
 ####################
 #F4F Required Params
 ####################

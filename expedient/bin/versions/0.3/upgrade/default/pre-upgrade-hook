@@ -139,7 +139,7 @@ print "Downloading dependencies [pyparsing]..."
 /usr/bin/apt-get -y install python-pyparsing || error "Could not install dependencies (apt-get)"
 
 print "Downloading latest pypelib version..."
-/usr/bin/wget https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb || error "Could not download pypelib latest version from https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb. Do you have connectivity?"
+/usr/bin/wget --no-check-certificate https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb || error "Could not download pypelib latest version from https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb. Do you have connectivity?"
 
 print "Installing pypelib_latest_all.deb..."
 /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"

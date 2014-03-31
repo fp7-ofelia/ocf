@@ -1,8 +1,3 @@
-<!--<h2>
-	<a id="topology" class="expandableTooltipable expandableCtl" ref="#/">
-        Topology <span class="opened"> &#x25B2;</span>
-    </a>
-</h2>-->
 <h2>Topology</h2>
 
 <link rel="stylesheet" href="{% url css_media 'tooltip.topology.css' %}" />
@@ -39,11 +34,6 @@
   </div>
   <div id="topology_options_menu">
     
-    <!--
-<a href="#" onClick="return showAllInfo()"/>
-Show
-</a>
-&nbsp;-->
   <a href="javascript: regroup()">
     <img alt="Group" title="Group" src="{% url img_media 'groupin.png' %}" style="height:16px;text-align:middle" />
   </a>
@@ -116,7 +106,6 @@ function pEllipse(set){
         d = 2;
 
         try {
-            //alert("pEllipse => x0: " + set.x0 + ", x1: " + set.x1 + "; y0: " + set.y0 + ", y1: " + set.y1);
 	    cx = (set.x1 + set.x0)/2;
 	    rx = ((set.x1 - set.x0)/2 + (set.y1 - set.y0)/2)/2;
 	    cy = (set.y1 + set.y0)/2;
@@ -168,30 +157,12 @@ var epoints= [
                         points = pEllipse(foci[{{node.group}}]),
                 {% endfor %}
         ]
-/* XXX: test */
-/*{% for link in d3_links %}
-    console.log("link.source: " + {{ link.source }});
-    console.log("link.target: " + {{ link.target }});
-{% endfor %}*/
-
-// GET D3 INDEX FROM RESOURCE ID
-/*function get_d3index_from_resourceid(node_value) {
-    obtained_index = 0;
-    for (var node in data.nodes) {
-        if (node.nodeValue == node_value) {
-            obtained_index = node.index;
-        }
-    }
-    return obtained_index;
-}*/
 
 var data = {
     nodes: [
         {% for node in d3_nodes %}
         {
             nodeValue: "{{ node.value }}", nodeName: "{{ node.name }}", image: "{{ node.image }}", color: "",
-            /* Code used for calculating groups/islands within frontend */
-            /*group: adequate_group({{ node.aggregate }}),*/
             group: {{ node.group }}, /*aggregate: {{ node.aggregate }},*/
             location: "{{ node.location }}", type: "{{ node.type }}",
             description: "{{ node.description }}", fixed: false, radius: 10, available: "{{ node.available }}",
@@ -204,41 +175,11 @@ var data = {
     links: [
         {% for link in d3_links %}
             { source: {{ link.source }}, target: {{ link.target }}, value: "{{ link.value }}" }
-            /*{ source: get_d3index_from_resourceid({{ link.source }}),
-              target: get_d3index_from_resourceid({{ link.target }}), value: "{{ link.value }}" }*/
-            /*{ source: 7, target: 8, value: "{{ link.value }}" }*/
             {% if not forloop.last %},{% endif %}
         {% endfor %}
 	
     ],
 }
-
-// GET D3 INDEX FROM RESOURCE ID
-/*function get_d3index_from_resourceid(node_value) {
-    obtained_index = 0;
-    for (var node in data.nodes) {
-        if (node.nodeValue == node_value) {
-            obtained_index = node.index;
-        }
-    }
-    return obtained_index;
-}
-
-for (li = 0; li < data.links.length; li++) {
-    console.log("bleeergh: " + data.links[li]);
-    console.log("checking ids (source: " + data.links[li].source + "), (target: " + data.links[li].target + ")");
-    data.links[li].source = get_d3index_from_resourceid(data.links[li].source);
-    data.links[li].target = get_d3index_from_resourceid(data.links[li].target);
-}*/
-
-/* Code used for calculating groups/islands within frontend */
-/*
-var epoints= [
-                {% for node in d3_nodes %}
-                        points = pEllipse(foci[get_group_from_aggregate({{ node.aggregate }})]),
-                {% endfor %}
-        ]
-*/
 
 /* Useful functions*/
 
@@ -473,12 +414,6 @@ nodes.forEach(function(d) {
 });
 
 var links = data.links;
-
-/*console.log("before FORCE: ");
-for (ki = 0; ki < links.length; ki ++) {
-    console.log("link [source] #" + ki + " '" + links[ki].source.nodeName + "': " + links[ki].source.index);
-    console.log("link [target] #" + ki + " '" + links[ki].target.nodeName + "': " + links[ki].target.index);
-}*/
 
 // Original version (Sergio)
 /*var force = d3.layout.force()

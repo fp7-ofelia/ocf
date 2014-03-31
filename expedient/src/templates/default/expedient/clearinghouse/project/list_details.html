@@ -1,0 +1,102 @@
+                <td colspan="6">
+                <!--<td colspan="7">-->
+                    <!--<table class="project_slice_list" width="100%" align="right">
+                        {#{% for slice in project.slice_set.all %}#}
+                            <tr>
+                                <td width="63%"></td>
+                                <td width="430px">
+                                    {#{{ slice.name }}#}
+                                </td>
+                                <td width="100px"></td>
+                                <td width="450px">
+                                    <a href="{#{% url slice_detail slice.id %}#}">view</a>,
+                                    <a href="{#{% url slice_delete slice.id %}#}">delete</a>
+                                </td>
+                            </tr>
+                        {#{% endfor %}#}
+                    </table>
+                </td>-->
+                <div class="tabs">
+                  <ul>
+                    <li><a href="#tab-project-{{ project.id }}">Project</a></li>
+                    {% if project.slice_set.all %}
+                        <li><a href="#tab-slice-{{ project.id }}">Slices</a></li>
+                    {% endif %}
+                    {% if project.owners.all or project.members.all  %}
+                        <li><a href="#tab-users-{{ project.id }}">Users</a></li>
+                    {% endif %}
+                  </ul>
+                  {% if project.slice_set.all %}
+                      <div id="tab-slice-{{ project.id }}">
+                            <!-- Slices -->
+                            <table class="fulltable">
+                                <thead>
+                                    <td>Slice</td>
+                                    <td>Description</td>
+                                    <td>Actions</td>
+                                </thead>
+                                {% for slice in project.slice_set.all %}
+                                <tbody>
+                                    <td>{{ slice.name }}</td>
+                                    <td>{{ slice.description }}</td>
+                                    <td><a href="{% url slice_detail slice.id %}">view</a>,
+                                        <a href="{% url slice_delete slice.id %}">delete</a></td>
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                      </div>
+                  {% endif %}
+                  <div id="tab-project-{{ project.id }}">
+                    <!-- Project -->
+                    <table class="fulltable">
+                        <thead>
+                            <td>Description</td>
+                            <td>Actions</td>
+                        </thead>
+                        <tbody>
+                            <td>{{ project.description }}</td>
+                            <td><a href="{% url project_detail project.id %}">view</a>,
+                                <a href="{% url project_delete project.id %}">delete</a></td>
+                        </tbody>
+                    </table>
+                  </div>
+                  {% if project.members.all  %}
+                      <div id="tab-users-{{ project.id }}">
+                        <table class="fulltable" align="center">
+                            <thead>
+                                <td>User</td>
+                                <td>Affiliation</td>
+                                <td>User name</td>
+                                <td>E-mail</td>
+                                <td>Roles</td>
+                                <td>Actions</td>
+                            </thead>
+                            {% for user in project.members.all %}
+                            <tbody>
+                                <td>{{ user }}</td>
+                                <td>{{ user.get_profile.affiliation }}</td>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+                                <td>
+                                    {% for member in project.members_as_permittees.all %}
+                                        {% if member.object_id == user.id %}
+                                            {% for role in member.projectrole_set.all %}
+                                                {% if role.project == project %}
+                                                    {{ role.name }}
+                                                    {% if not forloop.last %},{% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <a href="{% url project_member_update project.id user.id %}">update</a>,
+                                    <a href="{% url project_member_remove project.id user.id %}">remove</a>
+                                </td>
+                            </tbody>
+                            {% endfor %}
+                        </table>
+                      </div>
+                  {% endif %}
+                </div>
+                </td>

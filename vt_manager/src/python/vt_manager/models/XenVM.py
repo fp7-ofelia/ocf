@@ -30,6 +30,7 @@ IMAGE_CONFIGURATORS = {
 			'default/default.tar.gz':'',
 			'irati/irati.img':'IratiDebianVMConfigurator',
 			'spirent/spirentSTCVM.img':'SpirentCentOSVMConfigurator',
+                        'debian7/debian7.img': 'DebianWheezyVMConfigurator',
 			}
 	
 

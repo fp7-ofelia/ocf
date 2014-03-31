@@ -81,9 +81,9 @@ def CreateSliver(slice_xrn, creds, rspec, users, options):
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="sfa")
-def DeleteSliver(xrn, creds, options,**kwargs):
+def DeleteSliver(xrn, creds, options={},**kwargs):
     pm.check_permissions('DeleteSliver',locals())
-    flag = aggregate.DeleteSliver(xrn)
+    flag = aggregate.DeleteSliver(xrn,options)
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': flag}
     return to_return #driver.crud_slice(slice_urn,authority,credentials,action='delete_slice')
 

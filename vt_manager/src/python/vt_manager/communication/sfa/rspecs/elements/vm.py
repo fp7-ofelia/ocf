@@ -16,6 +16,7 @@ class VM(Element):
 	'hd-origin-path',
 	'virtualization-setup-type',
 	'memory-mb',
+        'ip',
 	'interfaces'
     ]
 

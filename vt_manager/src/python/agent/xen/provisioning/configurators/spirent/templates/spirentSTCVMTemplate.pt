@@ -11,6 +11,7 @@ builder = 'hvm'
 memory      = '{{ vm.xen_configuration.memory_mb }}'
 #extra = 'console=hvc0 xencons=tty'
 
+vfb = [ 'type=vnc' ]
 
 #CPUS
 vcpus = 2

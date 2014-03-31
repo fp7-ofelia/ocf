@@ -9,8 +9,7 @@ from utils.AgentExceptions import *
 from utils.Logger import Logger
 from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
 from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
-from xen.provisioning.configurators.irati.IratiDebianVMConfigurator import IratiDebianVMConfigurator
-from xen.provisioning.configurators.spirent.SpirentCentOSVMConfigurator import SpirentCentOSVMConfigurator
+from xen.provisioning.configurators.debian7.DebianWheezyVMConfigurator import DebianWheezyVMConfigurator
 
 '''
 	@author: msune
@@ -220,7 +219,10 @@ class FileFullHdManager(object):
 	
 		vm_path=FileFullHdManager.getHdPath(vm)
 		if vm.xen_configuration.configurator == IratiDebianVMConfigurator.getIdentifier():
-			FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=44040192 '+str(vm_path)+" "+str(path))	
+			FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=44040192 '+str(vm_path)+" "+str(path))
+                elif vm.xen_configuration.configurator == DebianWheezyVMConfigurator.getIdentifier():
+                        #Is exactly the same as Irati Images but The current Wheezy VMs are being tested 
+                        FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=44040192 '+str(vm_path)+" "+str(path))	
 		else:
 			FileFullHdManager.subprocessCall('/bin/mount -o loop,offset=1048576 '+str(vm_path)+" "+str(path))	
 	

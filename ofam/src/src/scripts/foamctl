@@ -465,8 +465,9 @@ def do_configSetFVInfo (opts):
   url = URL % (opts.host, "set-flowvisor-info")
 
   fv_host = raw_input("FlowVisor Hostname: ")
-  if not fv_host:
-    print "You must supply a flowvisor hostname."
+  while not fv_host:
+    print "You must supply a FlowVisor hostname."
+    fv_host = raw_input("FlowVisor Hostname: ")
 
   fv_xmlrpc = raw_input("FlowVisor XMLRPC Port [8080]: ")
   if fv_xmlrpc:

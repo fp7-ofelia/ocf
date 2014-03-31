@@ -1,0 +1,40 @@
+#!/bin/bash
+
+###
+#    @author: CarolinaFernandez
+#    @organization: i2CAT
+#    @project: Ofelia FP7
+#    @description: pre-upgrade-hook module 
+###
+
+#inform user
+printHeader "info#" "Using specific 0.8 pre-upgrade-hook module..."
+
+# Changing permissions for Apache2 logs
+for log_file in $(find /var/log/apache2 -name "*error_log")
+do
+    chmod 755 $log_file
+    chown www-data $log_file
+done
+
+#shutdown apache
+print "Shutting down apache2..."
+/usr/sbin/service apache2 stop
+
+#Check for OFELIA installation
+OFELIA="none"
+
+while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA istallation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA == yes ]; then 
+            OFELIA=1
+        elif [ $OFELIA == no ]; then
+            OFELIA=0
+        else
+            echo "Not valid option. Please say yes/no"
+        fi
+    done
+
+

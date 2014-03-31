@@ -10,16 +10,16 @@
 #Inform user
 printHeader "info#" "Using default post-install-hook module..."
 
-#Restarting nginx
+# Restarting nginx
 print ""
 print "Restarting nginx..."
 /usr/sbin/service nginx restart
-#Restarting foam
+# Restarting foam
 print ""
 print "Restarting foam..."
 /usr/sbin/service foam restart
 
-#Configuring
+# Configuring
 printHeader ">" "Setting FlowVisor information within FOAM..."
 print "Some help to fill it up..."
 print " "
@@ -39,10 +39,15 @@ print " "
 SITE_DOMAIN=$(python -c "from localsettings import SITE_DOMAIN; print SITE_DOMAIN") || error "Could not obtain SITE_DOMAIN from localsettings.py" $NO_RESCUE
 /usr/local/bin/foamctl config:set-value --key geni.site-tag --value fp7-ofelia.eu:ocf:$SITE_DOMAIN || error "Could not configure genit.site-tag for FOAM" $NO_RESCUE
 
+# Restarting foam (again, after setting the geni.site-tag)
+print ""
+print "Restarting foam..."
+/usr/sbin/service foam restart
+
 # Configuring e-mail
 printHeader ">" "Configuring e-mail in FOAM..."
 while true; do
-    read -p "> Do you want to configure FOAM for sending e-mails? (y|n): " foam_configure_email
+    read -p "> Do you want to configure FOAM for sending e-mails? (Y/N): " foam_configure_email
     case $foam_configure_email in
         [Yy]* ) print "Some help to fill it up...";
                 print " ";

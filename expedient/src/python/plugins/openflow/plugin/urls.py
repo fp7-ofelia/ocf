@@ -14,6 +14,7 @@ urlpatterns = patterns('openflow.plugin.views',
     # Book Flowspace
     url(r'^(?P<slice_id>\d+)/book/openflow/$', 'book_openflow', name='book_openflow'),
     url(r'^flowspace/(?P<slice_id>\d+)/$', 'flowspace', name='flowspace'),
+    url(r'^flowspace/(?P<slice_id>\d+)/save/$', 'save_flowspace', name='save_flowspace'),
 )
 
 urlpatterns += patterns('',

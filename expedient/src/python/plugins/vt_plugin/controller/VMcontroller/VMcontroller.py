@@ -59,7 +59,12 @@ class VMcontroller():
             instance.operatingSystemDistribution = 'CentOS'
             instance.hdOriginPath = "spirent/spirentSTCVM.img"
             instance.virtualization_setup_type = "hvm"
-
+        if instance.disc_image == 'debian7':
+            instance.operatingSystemType = 'GNU/Linux'
+            instance.operatingSystemVersion = '7.0'
+            instance.operatingSystemDistribution = 'Debian'
+            instance.hdOriginPath = "debian7/debian7.img"
+            instance.virtualization_setup_type = "hvm"
         actionClass = copy.deepcopy(actionClassEmpty)
         actionClass.id = uuid.uuid4()
         Translator.VMmodelToClass(instance, actionClass.server.virtual_machines[0])

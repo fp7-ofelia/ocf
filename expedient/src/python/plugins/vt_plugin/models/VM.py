@@ -8,6 +8,7 @@ DISC_IMAGE_CHOICES = (
                         ('default','Default'),
                         ('spirent','Spirent'),
                         ('irati','IRATI'),
+                        ('debian7','Debian Wheezy'),
                         #('test','Test'),
                       )
 HD_SETUP_TYPE_CHOICES = (

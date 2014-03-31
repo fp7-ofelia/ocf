@@ -133,7 +133,7 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
     var id = "";
     var type = "";
     var results = Array();
-    $("form table input, form table select, form table textarea").each(function(index) {
+    $("form input, form select, form textarea").each(function(index) {
         id = $(this).attr("id") || "";
         type = $(this).attr("type") || "";
         // Correct by default (ignores fields non stated in the if/else block

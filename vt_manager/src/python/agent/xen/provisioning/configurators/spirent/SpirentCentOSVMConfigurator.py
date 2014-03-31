@@ -6,7 +6,7 @@ import subprocess
 import re
 
 from xen.provisioning.HdManager import HdManager
-from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION,OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, OXA_SPIRENT_NPORTS_PER_GROUP, OXA_SPIRENT_NTPSERVER, OXA_SPIRENT_NPORTGROUPS, OXA_SPIRENT_LSERVER
+from settings.settingsLoader import OXA_XEN_SERVER_KERNEL,OXA_XEN_SERVER_INITRD, OXA_REDHAT_INTERFACES_FILE_LOCATION,OXA_REDHAT_UDEV_FILE_LOCATION, OXA_REDHAT_HOSTNAME_FILE_LOCATION, OXA_DEBIAN_SECURITY_ACCESS_FILE_LOCATION, OXA_SPIRENT_NPORTS_PER_GROUP, OXA_SPIRENT_NTPSERVER, OXA_SPIRENT_NPORTGROUPS, OXA_SPIRENT_LSERVER, OXA_SPIRENT_STCA_INI_PATH, OXA_SPIRENT_ADMIN_CONF_PATH
 
 from utils.Logger import Logger
 
@@ -22,24 +22,42 @@ class SpirentCentOSVMConfigurator:
 		#Interfaces
 		for inter in vm.xen_configuration.interfaces.interface  :
 
+			print "Processing interface:"+inter.name
 			iFile =	open(path+OXA_REDHAT_INTERFACES_FILE_LOCATION+"ifcfg-"+inter.name, "w")
 
-
-			interfaceString = "DEVICE="+inter.name+"\n"+\
-					"HWADDR="+inter.mac+"\n"+\
-					"BOOTPROTO=none\nONBOOT=yes\nUSERCTL=no\n"
-				
 			if inter.ismgmt:
+				interfaceString = "DEVICE="+inter.name+"\n"+\
+					"HWADDR="+inter.mac+"\n"+\
+					"TYPE=Ethernet\n"+\
+					"BOOTPROTO=static\n"+\
+					"ONBOOT=yes\n"+\
+					"NM_CONTROLLED=yes\n"
+	
 				#is a mgmt interface
 				interfaceString += "IPADDR="+inter.ip +"\n"+\
 				"NETMASK="+inter.mask +"\n";
 
+				if inter.dns1 != None and inter.dns1 != "":
+					interfaceString +="DNS1="+inter.dns1+"\n"
+					
+				if inter.dns2 != None and inter.dns2 != "":
+					interfaceString +="DNS2="+inter.dns2+"\n"
+				
 				if inter.gw != None and inter.gw != "":
 					interfaceString +="GATEWAY="+inter.gw+"\n"
 				interfaceString +="\n"
-
+			else:
+				interfaceString = "DEVICE="+inter.name+"\n"+\
+					"HWADDR="+inter.mac+"\n"+\
+					"TYPE=Ethernet\n"+\
+					"ONBOOT=no\n"+\
+					"NM_CONTROLLED=yes\n"+\
+					"BOOTPROTO=dhcp\n"
+				
 			iFile.write(interfaceString)			 
 			os.close(iFile)
+			
+			print "Processing interface:"+inter.name+"FINISHED"
 
 	@staticmethod
 	def __configureHostname(vm,hFile):
@@ -100,13 +118,13 @@ class SpirentCentOSVMConfigurator:
 		configString += "NETMASK="+inter.mask+"\n"
 		configString += "ADDR_MODE=static\n"
 		configString += "PORT_SPEED=1000M\n"
-		configString += "DEVICE=\n"
+		configString += "DEVICE="+inter.name+"\n"
 		if OXA_SPIRENT_NPORTGROUPS == "":
 			raise Exception("OXA_SPIRENT_NPORTGROUPS variable not set")
-		configString += "NPORTGROUPSP="+OXA_SPIRENT_NPORTGROUPS+"\n"
+		configString += "NPORTGROUPS="+OXA_SPIRENT_NPORTGROUPS+"\n"
 		if OXA_SPIRENT_LSERVER == "":
 			raise Exception("OXA_SPIRENT_LSERVER variable not set")
-		configString += "LSERVERP="+OXA_SPIRENT_NTPSERVER+"\n"
+		configString += "LSERVERP="+OXA_SPIRENT_LSERVER+"\n"
 		if inter.gw != None:
 			gwString = inter.gw
 		configString += "GATEWAY="+gwString+"\n"
@@ -126,7 +144,7 @@ class SpirentCentOSVMConfigurator:
 		try:
 			try:
 				#Remove all files under/etc/sysconfig/network-scripts/ifcfg-*
-				os.system("rm -f "+path+"/"+OXA_REDHAT_INTERFACES_FILE_LOCATION+"ifcfg-*")			 
+				os.system("rm -f "+path+"/"+OXA_REDHAT_INTERFACES_FILE_LOCATION+"ifcfg-eth*") 
 				SpirentCentOSVMConfigurator.__configureInterfacesFile(vm, path)
 			except Exception as e:
 				pass
@@ -145,7 +163,7 @@ class SpirentCentOSVMConfigurator:
 
 	@staticmethod
 	def _configureTestPorts(vm,path):
-		configPath = "/mnt/spirent/chassis/conf/stca.ini"
+		configPath = OXA_SPIRENT_STCA_INI_PATH 
 		try:
 			with open(path+configPath,'w') as configFile:
 				SpirentCentOSVMConfigurator.__configureTestPorts(vm, configFile)
@@ -156,7 +174,7 @@ class SpirentCentOSVMConfigurator:
 	
 	@staticmethod
 	def _configureAdmin(vm,path):
-		configPath = "/mnt/spirent/chassis/conf/admin.conf"
+		configPath = OXA_SPIRENT_ADMIN_CONF_PATH
 		try:
 			with open(path+configPath,'w') as configFile:
 				SpirentCentOSVMConfigurator.__configureAdmin(vm, configFile)
@@ -192,9 +210,9 @@ class SpirentCentOSVMConfigurator:
 		SpirentCentOSVMConfigurator.logger.info("Hostname configured successfully...")
 
 		#Configure Test-Ports
-		SpirentCentOSVMConfigurator._configureTestPorts(vm,path)
+		#SpirentCentOSVMConfigurator._configureTestPorts(vm,path)
 		SpirentCentOSVMConfigurator.logger.info("Test-ports configured successfully...")
 
 		#Configure Admin file
-		SpirentCentOSVMConfigurator._configureAdmin(vm,path)
+		#SpirentCentOSVMConfigurator._configureAdmin(vm,path)
 		SpirentCentOSVMConfigurator.logger.info("Admin file configured successfully...")

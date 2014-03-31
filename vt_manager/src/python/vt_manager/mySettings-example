@@ -29,9 +29,10 @@ XMLRPC_PASS    = "changeMe"
 
 #
 # Database parameters.
+# DATABASE_NAME: default is "ocf__vt_manager"
 # DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
 #
-DATABASE_NAME = "vtm"
+DATABASE_NAME = "ocf__vt_manager"
 DATABASE_USER = "expedient"
 DATABASE_PASSWORD = "expedient"
 DATABASE_HOST = "127.0.0.1"
@@ -70,7 +71,7 @@ VTAM_PORT = "8445"
 # Check https://github.com/fp7-ofelia/ocf/wiki/Theme-Manager-Configuration
 # for further information on how to install new themes for OCF.
 #
-THEME = 'default'
+THEME = "default"
 
 
 
@@ -93,12 +94,12 @@ EMAIL_PORT = 25
 #
 # User to authenticate against mailing host.
 #
-EMAIL_HOST_USER = ''
+EMAIL_HOST_USER = ""
 
 #
 # Password to authenticate against mailing host.
 #
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = ""
 
 #
 # Activate TLS (True) or SSL (False).
@@ -108,9 +109,9 @@ EMAIL_USE_TLS = True
 #
 # E-mail address used as sender.
 #
-DEFAULT_FROM_EMAIL = 'changeMe'
+DEFAULT_FROM_EMAIL = "changeMe"
 
 #
 # Subject (a prefix of it) for the e-mail.
 #
-EMAIL_SUBJECT_PREFIX = 'changeMe'
+EMAIL_SUBJECT_PREFIX = "changeMe"

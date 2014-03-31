@@ -150,11 +150,11 @@
 			&copy; 2011-2013 <a href="http://www.fp7-ofelia.eu/" target="_blank">FP7 OFELIA project</a> &amp; <a href="http://www.fibre-ict.eu/" target="_blank">FP7 FIBRE project</a>. <br/>
 			 OFELIA and FIBRE are funded by the European Comission (EC) in the 7th framework programme and supported by the <a href="http://cordis.europa.eu/fp7/ict/fire/" target="_blank">FIRE initiative</a><br/>
 		</footer>
-		<!-- Validation in the end waits for the forms to be loaded -->
-		<script src="{% url js_media 'validation.js' %}"></script>
 		<!-- Highlights selected links from top menu -->
 		<script>
 			isSelectedLink('#top_menu_options ul a', '{{request.META.PATH_INFO}}');
 		</script>
+		<!-- Validation in the end waits for the forms to be loaded -->
+		<script src="{% url js_media 'validation.js' %}"></script>
 	</body>
 </html>

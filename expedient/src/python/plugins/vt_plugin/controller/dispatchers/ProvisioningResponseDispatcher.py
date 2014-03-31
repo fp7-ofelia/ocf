@@ -21,7 +21,6 @@ class ProvisioningResponseDispatcher():
 
     @staticmethod
     def processResponse(response):
-        print "Entra en processResponse\n"
         for action in response.action:
 
             #if Action.objects.filter(uuid = action.id).exists():

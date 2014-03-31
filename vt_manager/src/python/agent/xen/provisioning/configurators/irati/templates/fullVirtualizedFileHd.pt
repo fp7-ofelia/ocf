@@ -46,7 +46,7 @@ dhcp='off'
 ##Interfaces 
 
 vif = [{% for interface in vm.xen_configuration.interfaces.interface %}'mac={{
-	interface.mac }}, bridge={{interface.switch_id}}, model=virtio',{% endfor %}]
+	interface.mac }}, bridge={{interface.switch_id}}, model=e1000',{% endfor %}]
 
 #
 #  Behaviour

@@ -99,7 +99,8 @@
 	    <div>
 		    <input type="hidden" name="post" value="yes" />
 		    <input type="submit" value="Proceed" />
-			<a href="{% url home %}">Cancel</a>
+                    <input type="button" value="Cancel"
+                        onclick="document.location='{% url home %}'" />
 	    </div>
     </form>
 </div>

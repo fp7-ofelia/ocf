@@ -29,6 +29,8 @@ from expedient.common.permissions.shortcuts import give_permission_to,\
     must_have_permission
 
 from openflow.plugin.vlans import *
+from openflow.plugin.vlan.manager import VlanManager
+from openflow.plugin.vlan.utils import create_slice_with_vlan_range
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
@@ -39,6 +41,7 @@ from expedient.common.utils.plugins.resources.node import Node
 from expedient.common.utils.plugins.resources.link import Link
 
 logger = logging.getLogger("OpenFlow plugin views")
+MAX_ALLOWED_VLAN_RANGE = 20
 
 @require_objs_permissions_for_view(
     perm_names=["can_add_aggregate"],
@@ -88,6 +91,14 @@ def aggregate_crud(request, agg_id=None):
             aggregate.client = client
             aggregate.save()
             agg_form.save_m2m()
+            try:
+                info = aggregate.client.proxy.get_am_info()
+                aggregate.vlan_auto_assignment = info["vlan_auto_assignment"]
+                aggregate.flowspace_auto_approval = info["flowspace_auto_approval"]
+            except Exception as e:
+#                logger.debug("Aggregate %s: could not check automatic resource assignment" % str(aggregate.name))
+                pass
+            
             try:
                 err = ' '
                 aggregate.client.proxy.checkFlowVisor() 
@@ -368,11 +379,17 @@ def book_openflow(request, slice_id):
         slice.save()
         free_vlan = 'None'
         alertMessage = ''
+        request.method
 
         fsmode = request.POST['fsmode']
+        vlan_range = request.POST.get('selected_vlan_range')
+        if not vlan_range:
+            vlan_range = 1
         if fsmode == 'simple' and enable_simple_mode:
             try:
-                free_vlan = calculate_free_vlan(slice)
+                #free_vlan = calculate_free_vlan(slice)
+                manager = VlanManager()
+                free_vlan = manager.process(slice,int(vlan_range)) 
             except Exception as e:
                 fsmode = 'failed'
                 DatedMessage.objects.post_message_to_user(
@@ -406,6 +423,32 @@ def book_openflow(request, slice_id):
             extra_context = dict(TOPOLOGY_GENERATOR.load_ui_data(slice).items() + ui_extra_context.items()),
         )
 
+def slice_save_start(request, slice_id):
+    """
+    Sets the slice as modified, saves it and starts it.
+    """
+    slice = get_object_or_404(Slice, id=slice_id)
+    slice.modified = True
+    slice.save()
+    exp = ""
+    try:
+        if slice.started:
+            #slice.stop(request.user)
+            slice.start(request.user)
+    except Exception as e:
+        exp = str(e)
+    finally:
+        if exp:
+             DatedMessage.objects.post_message_to_user(
+                 "Successfully set flowspace for slice %s, but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
+                 request.user, msg_type=DatedMessage.TYPE_WARNING,
+             )
+        else:
+            DatedMessage.objects.post_message_to_user(
+                "Successfully set flowspace for slice %s" % slice.name,
+                request.user, msg_type=DatedMessage.TYPE_SUCCESS,
+            )
+
 def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMessage=""):
     """
     Add flowspace.
@@ -422,25 +465,37 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
     def formfield_callback(f):
         if f.name == "slivers":
             return SliverMultipleChoiceField(
-                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+                queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice),
+                initial=OpenFlowInterfaceSliver.objects.filter(slice=slice))
         else:
             return f.formfield()
 
-    # create a formset to handle all flowspaces
-    FSFormSet = forms.models.modelformset_factory(
-        model=FlowSpaceRule,
-        formfield_callback=formfield_callback,
-        can_delete=True,
-        extra=2,
-    )
-
     if request.method == "POST":
         continue_to_start_slice = False
+        
+        # No extra forms apart from the one being shown
+        flowspace_form_number = 0
+        
+        if fsmode == 'failed':
+            # If an exception was risen from the previous step, the flowspace needs to be requested here
+            flowspace_form_number = 1
+        
+        # create a formset to handle all flowspaces
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=flowspace_form_number,
+        )
+        
         # Default formset
         formset = FSFormSet(
             queryset=FlowSpaceRule.objects.filter(
                 slivers__slice=slice).distinct(),
         )
+        if formset.is_valid():
+            formset.save()
+
         if fsmode == 'advanced':
             formset = FSFormSet(
                 request.POST,
@@ -453,43 +508,45 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
         elif fsmode == 'simple':
             #create a simple flowspacerule containing only the vlans tags and the OF ports
             try:
-                create_simple_slice_vlan_based(free_vlan[0], slice)
+                #create_simple_slice_vlan_based(free_vlan[0], slice)
+                create_slice_with_vlan_range(slice, free_vlan)
                 continue_to_start_slice = True
             except:
                 #continue_to_start_slice flag will deal with this
                 pass
 
         if continue_to_start_slice:
-            slice.modified = True
-            slice.save()
-            exp=""
-            try:
-                if slice.started:
-                    #slice.stop(request.user)
-                    slice.start(request.user)
-            except Exception as e:
-                exp=str(e)
-            finally:
-                if exp:
-                     DatedMessage.objects.post_message_to_user(
-                         "Successfully set flowspace for slice %s,  but the following warning was raised: \"%s\". You may still need to start/update your slice after solving the problem." % (slice.name, exp),
-                         request.user, msg_type=DatedMessage.TYPE_WARNING,
-                     )
-                else:
-                    DatedMessage.objects.post_message_to_user(
-                        "Successfully set flowspace for slice %s" % slice.name,
-                        request.user, msg_type=DatedMessage.TYPE_SUCCESS,
-                    )
+            slice_save_start(request, slice_id)
             if fsmode == 'simple':
                 return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
             else:
                 return HttpResponseRedirect(request.path)
 
-
     elif request.method == "GET":
+        flowspace_form_contents = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct()
+        flowspace_form_number = 1
+
+        # When coming from the OpenFlow switches topology selection page...
+        if "HTTP_REFERER" in request.META:
+            # Checks if the referer page is the topology selcetion
+            if reverse("book_openflow", args=[slice_id]) in request.META['HTTP_REFERER']:
+                # If no flowspace has been selected yet, show an extra form to allow user to choose at least one
+                if not flowspace_form_contents:
+                    flowspace_form_number = 1 # Show an extra (1) form besides the already selected one
+                # Otherwise, when there is some already requested flowspace, show only the requested ones (no extra forms)
+                else:
+                    flowspace_form_number = 0 # No extra forms apart from the one(s) being shown
+        
+        # Redefine formset to handle all flowspaces
+        # Extra: field that determines how many extra flowspaces there are
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=flowspace_form_number, # Show number of forms according to origin path request and so on
+        )
         formset = FSFormSet(
-            queryset=FlowSpaceRule.objects.filter(
-                slivers__slice=slice).distinct(),
+            queryset=flowspace_form_contents,
         )
 
     else:
@@ -513,6 +570,54 @@ def flowspace(request, slice_id, fsmode = 'advanced', free_vlan = None, alertMes
             ),
         },
     )
+
+def save_flowspace(request, slice_id):
+    """
+    Saves flowspace and gets back to slice detail page.
+    """
+    if request.method == "POST":
+        slice = get_object_or_404(Slice, id=slice_id)
+        
+        class SliverMultipleChoiceField(forms.ModelMultipleChoiceField):
+            def label_from_instance(self, obj):
+                return "%s" % obj.resource.as_leaf_class()
+            
+            def widget_attrs(self, widget):
+                return {"class": "wide"}
+            
+        def formfield_callback(f):
+            if f.name == "slivers":
+                return SliverMultipleChoiceField(
+                    queryset=OpenFlowInterfaceSliver.objects.filter(slice=slice))
+            else:
+                return f.formfield()
+        
+        continue_to_start_slice = False
+        
+        # create a formset to handle all flowspaces
+        FSFormSet = forms.models.modelformset_factory(
+            model=FlowSpaceRule,
+            formfield_callback=formfield_callback,
+            can_delete=True,
+            extra=0,
+        )
+        
+        formset = FSFormSet(
+            request.POST,
+            queryset=FlowSpaceRule.objects.filter(
+                slivers__slice=slice).distinct(),
+        )
+        if formset.is_valid():
+            formset.save()
+            continue_to_start_slice = True
+
+        if continue_to_start_slice:
+            slice_save_start(request, slice_id)
+        
+        return HttpResponseRedirect(reverse("slice_detail", args=[slice_id]))
+    else:
+        return HttpResponseNotAllowed("POST")
+
 
 '''
 Update resources
@@ -602,7 +707,11 @@ def get_gfs(slice):
         for of_agg in of_aggs:
             # Checks that each OF AM is available prior to ask for granted flowspaces
             if of_agg.available:
-                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
+                # New mode
+                gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_uuid(slice))
+                # Legacy mode (using mix of ID and SITE_DOMAIN)
+                if not gfs:
+                    gfs = of_agg.as_leaf_class().get_granted_flowspace(of_agg.as_leaf_class()._get_slice_id(slice))
                 gfs_list.append([of_agg.id,gfs])
     except:
         pass
@@ -806,7 +915,17 @@ def get_ui_data(slice):
     try:
         ui_context['checked_ids'] = get_checked_ids(slice)
         ui_context['controller_url'] = get_controller_url(slice)
-        ui_context['allfs'] = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+#        ui_context['allfs'] = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        
+        # Craft subdictionary with the slivers ordered per aggregate
+        ui_context['flowspace_per_aggregate'] = {}
+        all_flowspaces = FlowSpaceRule.objects.filter(slivers__slice=slice).distinct().order_by('id')
+        for aggregate in slice.aggregates.all():
+            if aggregate.id not in ui_context['flowspace_per_aggregate']:
+                ui_context['flowspace_per_aggregate'][aggregate.id] = []
+            for flowspace in all_flowspaces:
+                ui_context['flowspace_per_aggregate'][aggregate.id] += FlowSpaceRule.objects.filter(id=flowspace.id, slivers__resource__aggregate__id=aggregate.id).distinct().order_by("id")
+        
         ui_context['planetlab_aggs'] = get_planetlab_aggregates(slice)
         ui_context['openflow_aggs'] = get_openflow_aggregates(slice)
         ui_context['gfs_list'] = get_gfs(slice)
@@ -814,6 +933,7 @@ def get_ui_data(slice):
         ui_context['planetlab_node_class'] = PlanetLabNode
         ui_context['tree_rsc_ids'] = get_tree_ports(ui_context['openflow_aggs'], ui_context['planetlab_aggs'])
         ui_context['nodes'], ui_context['links'] = get_nodes_links(slice)
+        ui_context['vlan_range'] = range(1,(MAX_ALLOWED_VLAN_RANGE + 1))
     except Exception as e:
         print "[ERROR] Problem loading UI data for plugin 'openflow'. Details: %s" % str(e)
     return ui_context

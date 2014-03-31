@@ -17,77 +17,81 @@
 
 
      <table id ="table_vms_list" class="vms">
-            <tr id="table_vms_list_header" class="header">
-            <!--<th style="background-color: #CCC"></th>-->
-            <th>VM Name</th>
-            <th>State</th>
-            <th>Operating System</th>
-            <th>Memory</th>
-            <th>Mgmt IP</th>
-            <th style="text-align:center">Actions</th>
-            </tr>
-            {% for vm in server.vms.all %}
-            {% if server.uuid == vm.serverID and vm.sliceId == slice.uuid %}
-                <tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
-                  <td>
-		      {{ vm.name }}
-                    <!-- Old: begin SSH details -->
-                    <!--<img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="{% url img_media 'question_mark_15x15.png' %}">  {{ vm.name }}
-					<div class="tooltip" id="vm_ssh_help_{{vm.id}}">
-				        Access info:<br/><br> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %}<br/>(password: your user password)<br/><br> To access as root just use <b>su</b><br> (root password is <b>openflow</b>)
-					</div>-->
+       <tr id="table_vms_list_header" class="header">
+         <!--<th style="background-color: #CCC"></th>-->
+         <th>VM Name</th>
+         <th>State</th>
+         <th>Operating System</th>
+         <th>Memory</th>
+         <th>Mgmt IP</th>
+         <th style="text-align: center">Actions</th>
+         <th style="text-align: center; width: 8em;">Update Status</th>
+       </tr>
+       {% for vm in server.vms.all %}
+           {% if server.uuid == vm.serverID and vm.sliceId == slice.uuid %}
+             <tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
+               <td>
+	           {{ vm.name }}
+                   <!-- Old: begin SSH details -->
+                   <!--<img align="absmiddle" id="vm_ssh_help_{{vm.id}}" src="{% url img_media 'question_mark_15x15.png' %}">  {{ vm.name }}
+                     <div class="tooltip" id="vm_ssh_help_{{vm.id}}">
+		       Access info:<br/><br> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %}<br/>(password: your user password)<br/><br> To access as root just use <b>su</b><br> (root password is <b>openflow</b>)
+                     </div>-->
                   <!-- Old: end SSH details -->
-                  </td>
-                   
-                  <td id = td_vm{{vm.id}}>
-					{{ vm.state }}
-                  </td>
-                   <td>
+                </td>
+                <td id = td_vm{{vm.id}}>
+		    {{ vm.state }}
+                </td>
+                <td>
                     {{ vm.operatingSystemType }}
-                     {{vm.operatingSystemDistribution}} ({{vm.operatingSystemVersion}})
-                  </td>
-                  <td>
+                    {{vm.operatingSystemDistribution}} ({{vm.operatingSystemVersion}})
+                </td>
+                <td>
                     {{ vm.memory }}
-                  </td>
-                    <td id = td_vm_ip{{vm.id}}>
-                       <div>
-                       {% for iface in vm.ifaces.all %}
-                            {% if iface.isMgmt == 1 %}
-                                {{iface.ip}}
-                            {% endif %}
-                       {% endfor %}
-                       </div>
-                    </td>
-              <td id = td_vm_actions{{vm.id}} style="text-align:center">
+                </td>
+                <td id = td_vm_ip{{vm.id}}>
+                  <div>
+                    {% for iface in vm.ifaces.all %}
+                        {% if iface.isMgmt == 1 %}
+                            {{iface.ip}}
+                        {% endif %}
+                    {% endfor %}
+                   </div>
+                 </td>
+                 <td id = td_vm_actions{{vm.id}} style="text-align:center">
                     <div class="vm_actions">
-                    {% if vm.state == "running" %}
+                      {% if vm.state == "running" %}
                         <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'stop')" value="Stop" />
                         <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'reboot')" value="Reboot" />
-                    {% endif %}
-                    {% if  vm.state == "created (stopped)"%}
+                      {% endif %}
+                      {% if  vm.state == "created (stopped)"%}
 			<input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')" value="Start" />
                         <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete')" value="Delete" />
-                    {% endif %}
-                    {% if vm.state == "stopped"%}
+                      {% endif %}
+                      {% if vm.state == "stopped"%}
 			<input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'start')" value="Start" />
                         <input type="button" onclick="handleVMaction({{slice.id}},{{vm.id}},'delete',{{vm.name}})" value="Delete" />
-                    {% endif %}
-			{% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
+                      {% endif %}
+		      {% if vm.state|slice:"-3:" == '...'  or vm.state == 'on queue'%}
                         <img src={% url img_media 'loading.gif'%} align="absmiddle"> 
-                    {% endif %}
-
+                      {% endif %}
                     </div>
                 </td>
+                <td>
+                  <div class="vm_actions">
+                    <input type="button" class="update" onclick="handleVMaction({{slice.id}},{{vm.id}},'force_update_vm')" style="background-image: url({% url img_media 'reload.png' %});" value="Update" />
+                  </div>
+                </td>
                 </tr>
-
 		<!-- Begin VM's SSH details -->
 		<tr id = tr_vm{{vm.id}} class = "{% cycle 'odd' 'even' %}">
-		    <td id=td_vm_ssh{{vm.id}} colspan="6" class="ssh_vm_details"><div>
-                {% if vm.ifaces.all|length > 0 %} {# Show only when VM interfaces available #}
+		  <td id=td_vm_ssh{{vm.id}} colspan="7" class="ssh_vm_details">
+                    <div>
+                      {% if vm.ifaces.all|length > 0 %} {# Show only when VM interfaces available #}
                         <strong>SSH access:</strong> ~# ssh {{request.user}}@{% for iface in vm.ifaces.all %}{% if iface.isMgmt == 1 %}{{iface.ip}}{% endif %}{% endfor %} (password: your user password)
-                {% endif %}
-			</div>
-		    </td>
+                      {% endif %}
+		    </div>
+		  </td>
 		</tr>
                 <!-- End VM's SSH details -->
             {% endif %}
@@ -97,7 +101,7 @@
             {% load servers %} {# Loads Jinja filters for servers - in order to check #VMs #}
             {% if server|number_vms_inside_server_for_slice:slice.uuid > 0 %} {# If some VM exists, show message #}
             <tr>
-		<td colspan="6" class="ssh_vm_details_common">
+		<td colspan="7" class="ssh_vm_details_common">
                     <strong>SSH common details</strong>: to access as root just type <strong>su</strong> inside (password: <strong>openflow</strong>)
                  </td>
              </tr>

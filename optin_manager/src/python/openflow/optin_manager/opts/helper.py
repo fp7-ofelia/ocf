@@ -21,6 +21,21 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     @type: [list,list] first list is fv_args, second one match_struct_list
     '''
     expFS = ExperimentFLowSpace.objects.filter(exp = exp)
+    
+    # Slice ID defaults to its UUID, but let us check first the...
+    slice_id = exp.slice_id
+    # Backwards compatibility: check if slice_id follows the legacy style (= not UUID)
+    try:
+        import uuid
+        uuid.UUID('{%s}' % str(slice_id))
+        is_legacy_slice = False
+    except Exception as e:
+        is_legacy_slice = True
+    
+    # If legacy, get the older way to name it 
+    if is_legacy_slice:
+        slice_id = exp.get_fv_slice_name()
+    
     intersected = False
     # add this opt to useropts
     tmp = UserOpts(experiment=exp, user=user, priority=priority, nice=nice )
@@ -29,10 +44,9 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
     fv_args = []
     match_list = []
     some_exception = False
-
+    opted = []
     try:
         for fs in expFS:
-
             # XXX: lbergesio - This line is to force intersection 
             # between the requested fs by the user and the one granted by the IM which is already the 
             # the intesection between the adminFS (normally ALL) and the granted by the IM in the web form.
@@ -43,10 +57,11 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
             # granted by the IM.
 
             for optedfs in optedFS:
-                fs.vlan_id_e = optedfs.vlan_id_e
-                fs.vlan_id_s = optedfs.vlan_id_s
-
-            opted = multi_fs_intersect([fs],optedFS,OptsFlowSpace)
+                 
+                #fs.vlan_id_e = optedfs.vlan_id_e
+                #fs.vlan_id_s = optedfs.vlan_id_s
+                if fs.vlan_id_e == optedfs.vlan_id_e and fs.vlan_id_s == optedfs.vlan_id_s:
+                    opted = multi_fs_intersect([fs],[optedfs],OptsFlowSpace)
             if (len(opted) > 0):
                 intersected = True
                 for opt in opted:
@@ -65,7 +80,8 @@ def opt_fs_into_exp(optedFS, exp, user, priority, nice):
                         #TODO 4 is hard coded
                         fv_arg = {"operation":"ADD", "priority":"%d"%match.priority,
                                         "dpid":match.optfs.dpid,"match":match.match,
-                                        "actions":"Slice=%s:4"%match.optfs.opt.experiment.get_fv_slice_name()}
+#                                        "actions":"Slice=%s:4"%match.optfs.opt.experiment.get_fv_slice_name()}
+                                        "actions":"Slice=%s:4" % slice_id}
                         fv_args.append(fv_arg)
                             
                         # If there is any intersection, add them to FV
@@ -209,6 +225,22 @@ def update_match_struct_priority_and_get_fv_args(useropt):
     '''
     fv_args = [] 
     ofs = useropt.optsflowspace_set.all()
+    
+    # Slice ID defaults to its UUID, but let us check first the...
+    exp = ofs[0].opt.experiment
+    slice_id = exp.slice_id
+    # Backwards compatibility: check if slice_id follows the legacy style (= not UUID)
+    try:
+        import uuid
+        uuid.UUID('{%s}' % str(slice_id))
+        is_legacy_slice = False
+    except:
+        is_legacy_slice = True
+
+    # If legacy, get the older way to name it 
+    if is_legacy_slice:
+        slice_id = exp.get_fv_slice_name()
+    
     for fs in ofs:
         matches = fs.matchstruct_set.all()
         for match in matches:
@@ -217,7 +249,8 @@ def update_match_struct_priority_and_get_fv_args(useropt):
             match.save()
             fv_arg = {"operation":"CHANGE", "id":match.fv_id,
                     "priority":"%d"%match.priority, "dpid":fs.dpid, "match":match.match,
-                    "actions": "Slice=%s:4"%fs.opt.experiment.get_fv_slice_name(),
+#                    "actions": "Slice=%s:4"%fs.opt.experiment.get_fv_slice_name(),
+                    "actions": "Slice=%s:4" % slice_id,
                 }
             fv_args.append(fv_arg)
     return fv_args

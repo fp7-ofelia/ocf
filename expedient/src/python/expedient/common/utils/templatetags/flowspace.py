@@ -28,3 +28,10 @@ def exists_flowspace_for_aggregate(flowspace, aggregate):
 				break
 	return exists
 
+@register.filter
+def key(dictionary, key_name):
+    try:
+        return dictionary[key_name]
+    except:
+        return ""
+

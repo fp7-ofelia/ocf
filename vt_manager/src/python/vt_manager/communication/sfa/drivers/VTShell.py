@@ -9,6 +9,7 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.communication.sfa.vm_utils.VMSfaManager import VMSfaManager
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 from vt_manager.utils.ServiceThread import ServiceThread
+from vt_manager.utils.SyncThread import SyncThread
 
 import threading
 import time
@@ -51,7 +52,11 @@ class VTShell:
 			child_server = server.getChildObject()
 			vms = child_server.getVMs(sliceName=name, projectName = authority)
 			for vm in vms:
-				List.append({'vm-name':vm.name,'vm-state':vm.state,'vm-id':vm.id, 'node-id':server.uuid, 'node-name':server.name})
+                                ip = self.get_ip_from_vm(vm)
+                                state = vm.state
+                                if str(vm.state) == "unknown":
+                                    state = "ongoing"
+				List.append({'vm-name':vm.name,'vm-state':state,'vm-id':vm.id, 'vm-ip':ip, 'node-id':server.uuid, 'node-name':server.name})
 			        	
 		slices['vms'] = List
 		return slices	
@@ -83,7 +88,8 @@ class VTShell:
 		    #process = SfaCommunicator(provisioningRSpec.action[0].id,event,provisioningRSpec)
 		    #processes.append(process)
 		    #process.start()
-                    ServiceThread.startMethodInNewThread(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
+                    with threading.Lock():
+                        SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
                     if expiration:
                         ExpiringComponents.objects.create(slice=sliceName, authority=projectName, expires=expiration).save()
                          
@@ -99,3 +105,18 @@ class VTShell:
                         servers = VTServer.objects.filter(name=get_leaf(slivers['component_id']))
 		        slivers['component_id'] = servers[0].uuid
                 return requested_attributes
+      
+        def get_ip_from_vm(self, vm=None, vm_name=None, slice_name=None, project=None):
+                if not vm: 
+                        vms = VirtualMachine.objects.filter(name=vm_name, sliceName=slice_name, projectName=project)
+                        for vm in vms:
+                                
+                                if vm.name == vm_name:
+                                        break;
+                        return "None" 
+                ifaces = vm.getNetworkInterfaces()
+                for iface in ifaces:
+                        if iface.isMgmt:
+                            return iface.ip4s.all()[0].ip #IP
+                return "None" 
+                           

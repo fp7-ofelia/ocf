@@ -2,7 +2,7 @@
 
 #Used to define package dependencies
 
-DEBIAN_DEPENDENCIES="python-pip nginx xmlsec1 python-dateutil m2crypto python-dev ssl-cert libxml2-dev libxslt1-dev libssl-dev"
+DEBIAN_DEPENDENCIES="python-pip nginx xmlsec1 python-dateutil m2crypto python-dev ssl-cert libxml2-dev libxslt1-dev libssl-dev libmysqlclient-dev"
 
 #EASY_INSTALL_DEPENDENCIES=""
 

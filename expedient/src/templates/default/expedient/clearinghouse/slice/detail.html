@@ -17,9 +17,17 @@
 		<h1>Slice <font class="highlight">{{ slice.name }}</font> in Project <font class="highlight">{{ slice.project.name }}</font></h1>
 	</div>
 	<div class="mgmt_actions">
-		<p><a href="{% url slice_update slice.id %}">Edit</a> basic information</p>
+		<!--<p><a href="{% url slice_update slice.id %}">Edit</a> basic information</p>-->
 		<p><a href="{% url slice_delete slice.id %}">Delete</a> slice</p>
 	</div>
+	{% if request.user|is_super_user %}
+		<div class="slice_administration_details">
+			<h2>Administration details</h2>
+			<p><span class="title">Project uuid:</span> {{ slice.project.uuid }}</p>
+			<p><span class="title">Slice uuid:</span> {{ slice.uuid }}</p>
+		</div>
+	{% endif %}
+		
 		<div class="slicemgmt_actions">
 	   	<table width="100%" id="slicemgmt_table">
 			<tr>

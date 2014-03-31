@@ -7,6 +7,7 @@ from vt_manager.models.Action import Action as ActionModel
 from vt_manager.controller import *
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.dispatchers.xmlrpc.DispatcherLauncher import DispatcherLauncher
+from vt_manager.controller.dispatchers.xmlrpc.InformationDispatcher import InformationDispatcher
 from vt_manager.communication.utils.XmlHelper import *
 from vt_manager.utils.ServiceThread import *
 from vt_manager.common.rpc4django import rpcmethod
@@ -24,7 +25,6 @@ from vt_manager.controller.actions.ActionController import ActionController
 
 
 @rpcmethod(url_name="plugin")
-#def send(callBackUrl, expID, xml):
 def send(callBackUrl, xml):
 	try:
 		logging.debug("XML RECEIVED: \n%s" % xml)
@@ -83,6 +83,16 @@ def ping(challenge):
 	return challenge
 
 
+@rpcmethod(url_name="plugin")    
+def list_vm_templates(server_uuid):
+#	callback_url = "https://" + settings.XMLRPC_USER + ":" + settings.XMLRPC_PASS + "@" + settings.VTAM_IP + ":" + settings.VTAM_PORT + "/xmlrpc/plugin"
+#	try:
+#		ServiceProcess.startMethodInNewProcess(DispatcherLauncher.processTemplateList, [server_uuid, callback_url], None)
+#	except Exception as e:
+#		logging.error("Could not retrieve VM templates info: " + e)
+	v,s = getattr(DispatcherLauncher,"processVMTemplatesInfo")(server_uuid)
+	return v,s
+
 @rpcmethod(url_name="plugin")
 def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 	
@@ -101,6 +111,13 @@ def ListResourcesAndNodes(slice_urn='None'):
         print '-----------OPTIONS',options
         return AggregateManager().ListResources(options)
 
+@rpcmethod(url_name="plugin")
+def force_update_exp_vms(client_id='None', vm_id='None'):
+    if client_id != "None":
+        client_id = VTServer.objects.get(uuid = client_id).id
+    if vm_id != "None":
+        vm_id = VirtualMachine.objects.get(uuid= vm_id).id
+    return InformationDispatcher.forceListActiveVMs(client_id, vm_id)
 
 from threading import Timer
 from vt_manager.controller.actions.ActionController import ActionController
@@ -110,7 +127,21 @@ def check(rspec):
         if actionModel.getAction(rspec.query.provisioning.action[0]).status == actionModel.SUCCESS_STATUS or actionModel.getAction(rspec.query.provisioning.action[0]).status == actionModel.FAILED_STATUS:
 	        return True	
 
+@rpcmethod(url_name="plugin")
+def get_ocf_am_version():
+#    sv = open('../../../../../.currentVersion','r')
+    import os
+    sv = open(os.path.join(settings.SRC_DIR, "..", ".currentVersion"),"r")
+    software_version = sv.read().strip()
+    sv.close()
+    return software_version
 
+@rpcmethod(url_name="plugin")
+def get_am_info(args=None):
+    # INFO: add as many keys as you wish
+    info = dict()
+    info["version"] = get_ocf_am_version()
+    return info
 
 def timeout_handler(signum, frame):
     raise Exception("TIMEOUT")

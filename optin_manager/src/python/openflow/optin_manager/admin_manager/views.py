@@ -1,5 +1,6 @@
 # Create your views here.
 from openflow.optin_manager.settings import AUTO_APPROVAL_MODULES, SEND_EMAIL_WHEN_FLWOSPACE_APPROVED
+from django.conf import settings as django_settings
 from django.contrib.auth.decorators import login_required
 from django.views.generic import simple
 from django.db.models import Q
@@ -15,7 +16,8 @@ from django.http import HttpResponseRedirect
 from openflow.optin_manager.opts.models import UserFlowSpace, \
     AdminFlowSpace, UserOpts, OptsFlowSpace, MatchStruct
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
-from openflow.optin_manager.admin_manager.forms import UserRegForm, ScriptProxyForm
+from openflow.optin_manager.admin_manager.forms import UserRegForm, ScriptProxyForm,\
+    FlowSpaceAutoApproveScriptForm
 from openflow.optin_manager.flowspace.utils import dotted_ip_to_int,\
 mac_to_int, int_to_mac, int_to_dotted_ip
 from django.forms.util import ErrorList
@@ -26,6 +28,8 @@ send_approve_or_reject_email, update_fs_approver, send_admin_req_approve_or_reje
 from django.db import transaction
 import logging
 import re
+import os
+import subprocess
 
 logger = logging.getLogger("SetAutoApproveScriptViews")
 
@@ -1269,7 +1273,7 @@ def admin_unreg_fs(request):
         )
          
    
-def set_auto_approve(request):
+def set_auto_approve_original(request):
     '''
     The view function for setting  user flowspace request auto approval script.
     request.POSt should have the following kye-value pairs:
@@ -1326,8 +1330,61 @@ def set_auto_approve(request):
                     'form':form,
                     'current_script':script.script_name,
                },
-        )       
+        )
+
+def set_auto_approve(request):
+    """
+    Set automatic grant of VLANs and approval of Flowspaces
+    """
+    profile = UserProfile.get_or_create_profile(request.user)
+    if (not profile.is_net_admin):
+        return HttpResponseRedirect("/dashboard")
+
+    script_proxies = FlowSpaceAutoApproveScript.objects.filter(admin=request.user)
+    if len(script_proxies)>0:
+        script_proxy = script_proxies[0]
+    else:
+        script_proxy = FlowSpaceAutoApproveScript.objects.create(admin=request.user)
+
+    # prepare a list of script options to be set
+    user_script_options = ["Manual"] + AUTO_APPROVAL_MODULES.keys()
+    error_msg = []
+
+    if (request.method == "POST"):
+        if request.POST["script"] not in user_script_options:
+            error_msg.append("Invalid script name %s" % request.POST["script"])
+        else:
+            redirect_to_main = False
+            form = FlowSpaceAutoApproveScriptForm(request.POST,instance=script_proxy)
+            if form.is_valid():
+                # If no checkbox selected in Automatic, swich to "Manual"
+                if not script_proxy.vlan_auto_grant and not script_proxy.flowspace_auto_approval:
+                    error_msg.append("No automatic option selected")
+                    script_proxy.script_name = "Manual"
+                # Otherwise move on
+                else:
+                    redirect_to_main = True
+                    script_proxy.script_name = request.POST["script"]
+                script_proxy = form.save()
+                script_proxy.save()
+            else:
+                error_msg.append(form.errors["__all__"])
+                # If no Flowspace automatic approval checkbox selected in Automatic, skip to "Manual"
+                if script_proxy.script_name != "Manual" and form.data["script"] != "Manual":
+                    script_proxy.script_name = "Manual"
+                    script_proxy.save()
+        if redirect_to_main:
+            return HttpResponseRedirect(reverse("dashboard"))
+    else:
+        form = FlowSpaceAutoApproveScriptForm(instance=script_proxy)
     
-    
-    
-    
+    return simple.direct_to_template(request,
+            template = "openflow/optin_manager/admin_manager/set_auto_approve.html",
+            extra_context = {
+                    'user_script_options': user_script_options,
+                    'error_msg': error_msg,
+                    'form': form,
+                    'current_script': script_proxy.script_name,
+               },
+        )
+

@@ -7,24 +7,31 @@
 		<p><font color="red">{{msg}}</font></p>
 	{% endfor %}
 	<form name="input" action="/opts/opt_out" method="post">{% csrf_token %}
-	<table class="formtable" align="center">
+	<table class="formtable" align="center" style="text-align: center;">
 	<tr><th></th><th><center>Experiment</center></th>
 		<th><center>Flowspace</center></th>
 		<th>Strict?</th>
 	</tr>
 	{% for opt_info in opts_info %}
 		<tr>
-		<td><input type="checkbox" name="{{opt_info.opt.id}}"/></td>
-		<td><center>
-		{{opt_info.opt.experiment.project_name}}:{{opt_info.opt.experiment.slice_name}}</center></td>
-		<td><center>
-		{{opt_info.fs_description}}
-		</center></td>
-		{% if opt_info.opt.nice %}
-		<td>No</td>
-		{% else %}
-		<td>Yes</td>
-		{% endif %}
+			<td>
+				<input type="checkbox" name="{{opt_info.opt.id}}" id="exp_{{opt_info.opt.id}}"/>
+			</td>
+			<td>
+				<label for="exp_{{opt_info.opt.id}}">
+					{{opt_info.opt.experiment.project_name}}:{{opt_info.opt.experiment.slice_name}}
+				</label>
+			</td>
+			<td>
+				<label for="exp_{{opt_info.opt.id}}">
+					{{opt_info.fs_description}}
+				</label>
+			</td>
+			<td>
+				<label for="exp_{{opt_info.opt.id}}">
+					{% if opt_info.opt.nice %}No{% else %}Yes{% endif %}
+				</label>
+			</td>
 		</tr>
 	{% endfor %}
 	</table>

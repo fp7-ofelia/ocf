@@ -33,13 +33,13 @@ def as_is_slugify(value):
     return value
 
 #cntrlr_url_re = re.compile(r"^((tcp)|(ssl)):(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]):(?P<port>\d+)$")
-cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)")# J.F. Mingorance-Puga, March 28, 2011
+cntrlr_url_re = re.compile(r"(tcp|ssl):(?P<address>[\w\.]*):(?P<port>\d*)$")# J.F. Mingorance-Puga, March 28, 2011
 def validate_controller_url(value):
     def error():
         raise ValidationError(
             u"Invalid controller URL. The format is "
-            "tcp:<hostname>:<port> or ssl:<hostname>:<port>. Port must "
-            "be less than %s" % (2**16),
+            "tcp:<hostname>:<port> or ssl:<hostname>:<port>, without spaces. "
+            "Port must be less than %s." % (2**16),
             code="invalid",
         )
 
@@ -83,6 +83,11 @@ production networks, and is currently deployed in several universities.
 
     client = models.OneToOneField(PasswordXMLRPCServerProxy)
     usage_agreement = models.TextField()
+    # New fields to keep track of...
+    # Automatic assignment of VLANs
+    vlan_auto_assignment = models.BooleanField("VLANs are automatically assigned", default=False)
+    # Automatic approval of flowspaces
+    flowspace_auto_approval = models.BooleanField("FlowSpace is automatically approved", default=False)
     
     class Meta:
         verbose_name = "OpenFlow Aggregate"
@@ -105,7 +110,7 @@ production networks, and is currently deployed in several universities.
                 return err
         except Exception as ret_exception:
             import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
+            logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
             traceback.print_exc()
             return str(ret_exception)
 
@@ -169,7 +174,6 @@ production networks, and is currently deployed in several universities.
 
  
     def get_offered_vlans(self, set=None):
-
         try:
             vlans = self.client.proxy.get_offered_vlans(set)
         except:
@@ -179,8 +183,30 @@ production networks, and is currently deployed in several universities.
 
         return vlans
 
+    def get_used_vlans(self, range_len=1, direct_output=False):
+        try:
+            if self.get_ocf_am_version < 70:
+                raise Exception("The current version of the AM does not support this feature.")
+            vlans = self.client.proxy.get_used_vlans(range_len, direct_output)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise Exception("AM %s could not return used VLANS for your slice: %s" % (self.name, e))
+        return vlans
+
+    def get_ocf_am_version():
+        try:
+          sv = self.client.proxy.get_ocf_am_version()
+          i = 1
+          result = 0
+          for num in sv.split('.').reverse():
+              result += i * num
+              i *= 10
+          return result      
+        except:
+          return  None #Equal or Below 0.7 version
+
     def get_granted_flowspace(self, slice_id):
-        
         try:
             gfs = self.client.proxy.get_granted_flowspace(slice_id)
         except:
@@ -191,7 +217,6 @@ production networks, and is currently deployed in several universities.
             #available flag of the AM.
             #raise
             return {}
-
         return gfs
         
     def _get_slice_id(self, slice):
@@ -199,7 +224,13 @@ production networks, and is currently deployed in several universities.
         Get a slice id to use when creating slices at the OM.
         """
         return "%s_%s" % (Site.objects.get_current().domain, slice.id)
-        
+    
+    def _get_slice_uuid(self, slice):
+        """
+        Get a slice uuid to use when creating slices at the OM.
+        """
+        return slice.uuid
+    
     def _get_slivers(self, slice):
         """
         Get the set of slivers in the slice for this aggregate in a format
@@ -238,7 +269,9 @@ production networks, and is currently deployed in several universities.
                             else:
                                 fsd[f.name] = "*"
                     d['flowspace'].append(fsd)
-            sw_slivers.append(d)
+            # Carolina 2014/03/10: do not add datapath_id when no flowspace is requested for it
+            if d['flowspace']:
+                sw_slivers.append(d)
             
         return sw_slivers
 
@@ -263,30 +296,59 @@ production networks, and is currently deployed in several universities.
             logger.info("Can't start slice %s because controller url is not set." % self.name)
             logger.error(traceback.format_exc())
             raise Exception("Can't start slice %s because controller url is not set." % slice.name)
-        try: 
+
+        # New method. Contains extra argument with the legacy slice ID for Opt-ins <= 0.7
+        try:
+            logger.info("Trying create_slice (new)")
+            proxy_method_options = {"legacy_slice_id": self._get_slice_id(slice)}
             return self.client.proxy.create_slice(
-                self._get_slice_id(slice), slice.project.name,
+                self._get_slice_uuid(slice), slice.project.name,
                 slice.project.description,
                 slice.name, slice.description,
                 slice.openflowsliceinfo.controller_url,
                 slice.owner.email,
-                slice.openflowsliceinfo.password, sw_slivers)
-        except Exception as ret_exception:
-            import traceback
-            logger.info("XML RPC call to aggregate %s failed." % self.name)
-            logger.error(traceback.format_exc())
-            raise
-
+                slice.openflowsliceinfo.password, sw_slivers,
+                proxy_method_options)
+            logger.info("Tried create_slice (new)")
+        except Exception as e:
+            # Legacy method
+            logger.info("Exception NEW: %s" % str(e))
+            try:
+                logger.info("Trying create_slice (old)")
+                return self.client.proxy.create_slice(
+                    self._get_slice_id(slice), slice.project.name,
+                    slice.project.description,
+                    slice.name, slice.description,
+                    slice.openflowsliceinfo.controller_url,
+                    slice.owner.email,
+                    slice.openflowsliceinfo.password, sw_slivers)
+                logger.info("Tried create_slice (old)")
+            except Exception as e:
+                logger.info("Exception OLD: %s" % str(e))
+                import traceback
+                logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
+                logger.error(traceback.format_exc())
+                raise
+    
     def stop_slice(self, slice):
         super(OpenFlowAggregate, self).stop_slice(slice)
+        # New method. Contains extra argument with the legacy slice ID for Opt-ins <= 0.7
         try:
-            self.client.proxy.delete_slice(self._get_slice_id(slice))
-        except Exception as e:
-            import traceback
-            logger.info("XML RPC call failed to aggregate %s" % self.name)
-            traceback.print_exc()
-            raise
-
+            # Backward compatibility: extra argument with the legacy ID for Opt-ins <= 0.7
+            proxy_method_options = {"legacy_slice_id": self._get_slice_id(slice)}
+            self.client.proxy.delete_slice(
+                self._get_slice_uuid(slice),
+                proxy_method_options)
+        except:
+            # Legacy method
+            try:
+                self.client.proxy.delete_slice(self._get_slice_id(slice))
+            except:
+                import traceback
+                logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
+                traceback.print_exc()
+                raise
+    
     def change_slice_controller(self,slice):
         try:
             slice.openflowsliceinfo.controller_url
@@ -302,7 +364,7 @@ production networks, and is currently deployed in several universities.
                 slice.openflowsliceinfo.controller_url,)
         except Exception as ret_exception:
             import traceback
-            logger.info("XML RPC call to aggregate %s failed." % self.name)
+            logger.info("Failed XMLRPC call on aggregate %s at %s." % (self.name, Site.objects.get_current().domain))
             logger.error(traceback.format_exc())
             raise
 
