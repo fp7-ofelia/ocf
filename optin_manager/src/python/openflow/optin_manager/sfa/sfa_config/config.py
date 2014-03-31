@@ -21,7 +21,7 @@ HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
 #Geni API
 GENI_API_VERSION = 2
-GENI_API_URL = 'https://%s:8443/xmlrpc/sfa/' % settings.SITE_IP_ADDR
+GENI_API_URL = 'https://10.216.12.5:8443/xmlrpc/sfa/' #% settings.SITE_IP_ADDR
 INTERFACE = 'aggregate'
 CODE_URL = 'git://git.onelab.eu/sfa.git@sfa-2.1-24'
 CODE_TAG = '2.1-24'
