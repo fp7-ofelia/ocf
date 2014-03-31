@@ -54,9 +54,9 @@ while [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]
     do
         print_header "Do you wish to install FlowVisor $FLOWVISOR_RELEASE? [y/n]"
 #        warning " Notice that you *must* use FOAM with this."
-        warning " Notice that if you already installed a FlowVisor non-versioned in the Debian package system, you should $(print_bold back up) and transfer your current flowspaces, if any, to the newly installed FlowVisor and finally $(print_bold removing) your old version."
+        warning " Note: if you already installed a FlowVisor outside the Debian package system, you should $(print_bold back up) and transfer your current flowspace(s) to the newly installed FlowVisor and finally $(print_bold removing) your old version."
 #        print " > If you want to keep using Opt-in please press \"n\"\n > If you want to keep the flowspaces at your current FlowVisor and are not able to backup these, please press \"n\""
-        print " > If you have some flowspaces at your current FlowVisor and want to keep these, please press \"n\""
+        print " > If you have some flowspaces at your current FlowVisor that you want to keep, press \"n\""
         read accept_deploy_flowvisor
         if [[ ! $accept_deploy_flowvisor =~ ^[y|Y|n|N]$ ]]; then
             print "Please accept (\"y\") or reject (\"n\") the installation"
