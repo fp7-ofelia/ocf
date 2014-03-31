@@ -1,46 +1,48 @@
 #!/bin/bash
 
 # Used to install PyPElib library (after `source lib/dependencies`)
+if [[ ! $(dpkg -l | grep pypelib) ]]; then
 
-        while true; do
-            print ""
-            warning "PyPElib is going to be installed. You shall be prompted for a series of values (app_label, db_table) that will be REPLACED afterwards so as to integrate it within OCF."
-            print ""
-            read -p "Do you agree with the PyPElib warning? (Y/N): " pypelib_yn
-            case $pypelib_yn in
-                [Yy]* ) break;;
-                [Nn]* ) error "'Do you agree with the PyPElib warning?' clause not confirmed. Aborting..." $NO_RESCUE; break;;
-                    * ) echo "Please answer 'Y' or 'N'.";;
-            esac
-        done
-
-## PyPElib installation ...
-print "Downloading latest pypelib version..."
-/usr/bin/wget --no-check-certificate https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb || error "Could not download pypelib latest version from https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb. Do you have connectivity?"
-
-print "Installing pypelib_latest_all.deb..."
-/usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
-
-print "Removing temporary files..."
-rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
-
-
-## Replacement of PyPElib data (app_label, db_table) to integrate within VT manager
-## XXX: ONLY FOR INSTALLATION
-PYPELIB_DJANGO_PATH="/usr/lib/python2.6/pypelib/persistence/backends/django/"
-PYPELIB_DJANGO_FILES="RuleTableModel.py RuleModel.py"
-
-if [ -d $PYPELIB_DJANGO_PATH ]; then
-    for file in $PYPELIB_DJANGO_FILES; do
-        if [ -f $PYPELIB_DJANGO_PATH$file ]; then
-            cp -p "$PYPELIB_DJANGO_PATH$file" "$PYPELIB_DJANGO_PATH$file".bkp
-            sed -i "s/app_label".*"/app_label = \'vt_manager\'/g" $PYPELIB_DJANGO_PATH$file
-            if [ $file == "RuleModel.py" ]; then
-                sed -i "s/db_table".*"/db_table = \'pypelib_RuleModel\'/g" $PYPELIB_DJANGO_PATH$file
-            elif [ $file == "RuleTableModel.py" ]; then
-                sed -i "s/db_table".*"/db_table = \'pypelib_RuleTableModel\'/g" $PYPELIB_DJANGO_PATH$file
-            fi
-        fi
+    while true; do
+        print ""
+        warning "PyPElib is going to be installed. You shall be prompted for a series of values (app_label, db_table) that will be REPLACED afterwards so as to integrate it within OCF."
+        print ""
+        read -p "Do you agree with the PyPElib warning? (Y/N): " pypelib_yn
+        case $pypelib_yn in
+            [Yy]* ) break;;
+            [Nn]* ) error "'Do you agree with the PyPElib warning?' clause not confirmed. Aborting..." $NO_RESCUE; break;;
+                * ) echo "Please answer 'Y' or 'N'.";;
+        esac
     done
-fi
 
+    ## PyPElib installation ...
+    print "Downloading latest pypelib version..."
+    /usr/bin/wget --no-check-certificate https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb || error "Could not download pypelib latest version from https://github.com/fp7-ofelia/pypelib/raw/deb/pypelib_latest_all.deb. Do you have connectivity?"
+
+    print "Installing pypelib_latest_all.deb..."
+    /usr/bin/dpkg -i pypelib_latest_all.deb || error "Could not install pypelib latest version using /usr/bin/dpkg -i pypelib_latest_all.deb"
+
+    print "Removing temporary files..."
+    rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
+
+
+    ## Replacement of PyPElib data (app_label, db_table) to integrate within VT manager
+    ## XXX: ONLY FOR INSTALLATION
+    PYPELIB_DJANGO_PATH="/usr/lib/python2.6/pypelib/persistence/backends/django/"
+    PYPELIB_DJANGO_FILES="RuleTableModel.py RuleModel.py"
+
+    if [ -d $PYPELIB_DJANGO_PATH ]; then
+        for file in $PYPELIB_DJANGO_FILES; do
+            if [ -f $PYPELIB_DJANGO_PATH$file ]; then
+                cp -p "$PYPELIB_DJANGO_PATH$file" "$PYPELIB_DJANGO_PATH$file".bkp
+                sed -i "s/app_label".*"/app_label = \'vt_manager\'/g" $PYPELIB_DJANGO_PATH$file
+                if [ $file == "RuleModel.py" ]; then
+                    sed -i "s/db_table".*"/db_table = \'pypelib_RuleModel\'/g" $PYPELIB_DJANGO_PATH$file
+                elif [ $file == "RuleTableModel.py" ]; then
+                    sed -i "s/db_table".*"/db_table = \'pypelib_RuleTableModel\'/g" $PYPELIB_DJANGO_PATH$file
+                fi
+            fi
+        done
+    fi
+
+fi
