@@ -24,54 +24,39 @@ INSTALLING OCF
 1. Requirements
 ---------------
 
-* One (or more) GNU/Linux Debian-based distros
+* One (or more) GNU/Linux Debian-based distros (see Note #1)
   * Developed and ensured to work under Debian 6.0 (Squeeze)
 * One (or more) GNU/Linux Debian-based distros to be virtualized by XEN
 (Virtualization Manager installations only)
+* FlowVisor (Opt-in Manager installations only) (automatically installed) 
 * The following packages:
   * Python 2.6
-  * Django 1.2.3
-  * MySQL server
+  * Django 1.2.3 (automatically installed)
+  * MySQL server (automatically installed)
 
-Note: for non Debian-based distros you shall install components manually
-since the installation scripts for the OCF upgrading system (a.k.a. OFVER) 
-[http://code.google.com/p/ofver/] supports Debian-based distros only.
+Note #1: the OCF upgrading system (OFVER) [http://code.google.com/p/ofver/] 
+supports Debian-based distros only. For other distros you shall install 
+the components manually.
 
 
-2. Installation for Expedient, Optin and VM Manager
----------------------------------------------------
+2. Installing
+-------------
 
-2.1 Install MySQL server
+2.1 Clone the OCF repository under folder /opt:
 
-    apt-get install mysql-server
+    git clone https://github.com/fp7-ofelia/ocf.git /opt/ofelia
 
-2.2 For each component (e.g. expedient) create its own database.
-    Use strong passwords.
+    Alternatively you can download the tarball and uncompress it there
 
-    mysql -p
-    mysql> CREATE DATABASE expedient;
-    Query OK, 1 row affected (0.00 sec)
-    mysql> GRANT ALL ON expedient.* TO userName@127.0.0.1 IDENTIFIED BY 'password';
-    Query OK, 0 rows affected (0.00 sec)
+2.2 For Expedient, Opt-in, VT manager: choose the components to install 
+    as a root user. This will implicitly trigger OFVER:
 
-2.3 If not done already, clone the OCF repository under folder /opt:
+    cd /opt/ofelia/deploy
+    python install.py
 
-    cd /opt
-    git clone https://github.com/fp7-ofelia/ocf.git ofelia
-
-    Alternatively you can download the tarball and uncompress it to /opt
-
-2.4 Trigger OFVER installation by performing the following as a root user for
-    each component:
-
-    cd /opt/ofelia/{COMPONENT_NAME}/bin
-    ./ofver install
-
-    Where {COMPONENT_NAME} is either: expedient, optin_manager or vt_manager
-    The following actions will take place:
-
+    The following actions will take place: 
     * Install dependencies
-    * Build Certificates (see Note #1)
+    * Build Certificates (see Note #2)
     * Configure Apache
     * Set file permissions
     * Modify the localsettings.py or mySettings.py depending on the 
@@ -80,26 +65,45 @@ since the installation scripts for the OCF upgrading system (a.k.a. OFVER)
     * When installation starts, ofver will ask if it is an OFELIA
       project installation or not. Select No (N) for non OFELIA testbeds.
 
-    Note #1: When installing the component, you will need to create the
+    Note #2: When installing the component, you will need to create the
     certificates for the Certification Authority (CA) first and for the
     component later. Do not use the same Common Name (CN) for both of them,
     and make sure that the CN you use in the component later certificate
     (you can use an IP) is the same you then set in the SITE_DOMAIN field
     in the localsettings.py file.
 
+2.3 For OXAD (XEN agent for virtualization purposes):
 
-3. Upgrade instructions
------------------------
+    Create the directory and clone the repository:
+    
+    mkdir -p /opt/ofelia/oxa
+    git clone https://github.com/fp7-ofelia/ocf.git /opt/ofelia/oxa/repository
 
-The upgrade procedure is to be run by a root user and is very much the 
-same for each component.
+    The tree should look like:
+    
+    marc@foix:/opt/ofelia/oxa$ tree . -L 1
+     '-- repository
 
-For all the common components {expedient, optin_manager, vt_manager}:
+    Trigger OFVER install by performing the following as a root user (see Note #3):
 
-    cd /opt/ofelia/{COMPONENT_NAME}/bin
-    ./ofver upgrade
+    cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
+    ./ofver install
 
-or for the OXAD (XEN agent for virtualization purposes):
+    Note #3: When installation starts, ofver will ask if it is an OFELIA project 
+    installation or not, and accordingly ofver will download the VMs templates 
+    from the proper storage.
+
+
+3. Upgrading
+------------
+
+3.1 For Expedient, Opt-in, VT manager: choose the components to install as a 
+    root user. This will implicitly trigger OFVER:
+
+    cd /opt/ofelia/deploy
+    python upgrade.py
+
+3.2 For OXAD (XEN agent for virtualization purposes):
 
     cd /opt/ofelia/oxa/repository/vt_manager/src/python/agent/tools
     ./ofver upgrade

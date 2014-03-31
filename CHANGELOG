@@ -13,6 +13,7 @@ Components:
 
 EXP: Expedient
 OPT: Opt-in
+OFA: OFAM
 VTA: VT AM
 AGN: Agent
 OFR: Ofelia Registration
@@ -24,16 +25,50 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.8
+--------------------------------------------------
+Released: 31/03/2014
+
+Change log:
+
+[B] OPT: E-mails to administrators when flowspace is removed bug OFManager. Issue 216
+[*] EXP: Ports to be selected automatically for flowspace selection enhancement. Issue 215
+[B] VTA: Exception when defining IP ranges with repeated name not captured bug enhancement. Issue 214
+[*] AGN, EXP, VTA: Add Force Update Button for VMs. Issue 213
+[+] EXP, OPT: Automatic VLAN assignment for new FlowSpaces. Issue 212
+[+] EXP, OPT: Automatic FlowSpace Approval. Issue 210
+[+] EXP, OPT, VTA: Implement OCF version Tracker Engine for AMs. Issue 209
+[B] VTA: VMs cannot be created on development Branch. Issue 208
+[B] VTA, AGN: Failure on ListActiveVMs call. Issue 207
+[B] OPT: Failed import in background daemon for expiration bug OFManager. Issue 205
+[*] EXP: Simplify FlowSpace selection through Expedient OpenFlow plug-in. Issue 204
+[+] EXP, VTA, AGN: Offer Debian Wheezy VMs. Issue 202
+[-] EXP: Updating Project/Slice names in expedient cause inestabilities on OFManager and VMManager. Issue 201
+[B] EXP: JS validation not working anymore. Issue 200
+[+] OFVER: Install FlowVisor with OCF. Issue 199
+[B] OFA: Fixing dependencies in FOAM. Issue 195
+[*] EXP: Hide user admin links for local island users. Issue 193
+[*] VTA: Warnings about VMs in empty servers not being reconfigured on adding new bridges. Issue 191
+[B] VTA: Cannot create new server with bridges bug. Issue 190
+[*] EXP: Improve project list loading with a waiting message. Issue 189
+[B] EXP: Some errors are barely visible. Issue 188
+[*] AGN: OXAD init script throws warning on stop agent. Issue 187
+[*] EXP, OFA: Missing FOAM log in administration panel. Issue 186
+[*] EXP: Expedient project list/table loads very slow. Issue 182
+[B] EXP, OPT: Expedient and Optin FS mismatch. Issue 137
+[B] EXP, OPT: Flowspace visualization errors. Issue 117
+
+--------------------------------------------------
 v0.7
 --------------------------------------------------
 Released: 21/11/2013
 
 Change log:
 
-[+] OPT, OFVER: Integrate FOAM. Issue 178
-[*] EXP: Expedient GUI redesign. Issue 179
-[+] EXP, VTA, OPT: FIBRE Theme files. Issue 180
 [+] EXP, VTA, AGN: Support for IRATI VMs. Issue 181 
+[+] EXP, VTA, OPT: FIBRE Theme files. Issue 180
+[*] EXP: Expedient GUI redesign. Issue 179
+[+] OPT, OFVER: Integrate FOAM. Issue 178
 
 --------------------------------------------------
 v0.6.1
