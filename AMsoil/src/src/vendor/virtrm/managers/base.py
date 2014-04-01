@@ -202,6 +202,23 @@ class VTResourceManager(object):
         except Exception as e:
             raise e
         return vm
+ 
+    def get_vm_allocated_by_urn(self, vm_urn):
+        try:
+            vm = self.get_vm_allocated_object_by_urn
+            vm_info = self.get_vm_info(vm)
+        except Exception as e:
+            raise e
+        return vm_info
+
+    def get_vm_allocated_object_by_urn(self, vm_urn):
+        try:
+            vm = self.get_vm_object_by_urn(vm_urn)
+            if vm.get_state() != VirtualMachine.ALLOCATED_STATE:
+                raise virt_exception.VirtVMNotFound(vm_urn)
+        except Exception as e:
+            raise e
+        return vm
 
     def get_vms_in_container(self, container_gid, prefix):
         """
@@ -210,8 +227,7 @@ class VTResourceManager(object):
         try:
             container = Container.query.filter_by(GID=container_gid, prefix=prefix).one()
         except:
-            # TODO: Raise Exception of no vms in given slice
-            raise Exception
+            raise 
         vms = container.vms
         return vms
     

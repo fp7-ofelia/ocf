@@ -273,12 +273,42 @@ class VTDelegate3(GENIv3DelegateBase):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
         {geni_users} is not relevant here."""
         # TODO: honor best_effort
+        allocated_vms = list()
+        provisioned_vms = list()
         for urn in urns:
-            # First we check the type of the urn
-            if (self.urn_type(urn) == "slice"):
-                provisioned_vms = self._resource_manager.provision_allocated_vms(urn, end_time)        
-            else:
-                raise geniv3_exception.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))        
+            try:
+                # First we check the type of the urn
+                if (self.urn_type(urn) == "slice"):
+                    # If the URN is from a slice, get all the allocated
+                    try:
+                        vms = self._resource_manager.get_allocated_vm_object_in_container(urn)      
+                    # Throw the Expiration for every kind of error
+                    # TODO: Throw specific errors
+                    except:
+                        raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
+                    except:
+                        raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+                    allocated_vms.extend(vms)
+                elif (self.urn_type(urn) == "sliver"):
+                    # If the UNR is from a VM, get it
+                    try: 
+                        vm = get_allocated_vm_object_by_urn(urn)
+                    except:
+                        raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
+                    allocated_vms.append(vm)
+                else:
+                    raise geniv3_exception.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))
+            # If {best_effort = False} throw the given Exception
+            # If {best_effort = True} keep going 
+            except Exception as e:
+                if not best_effort:
+                    raise e
+                else:
+                    # TODO: Generate an entry for the sliver dictionary with the error?
+                    continue
+        # Once all the VMs are obtained, provision them
+        for allocated_vm in allocated_vms:
+            
         rspecs = self._get_manifest_rspec(provisioned_vms)
         slivers = list()
         for key in provisioned_vms.keys():
