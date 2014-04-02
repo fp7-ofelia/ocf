@@ -172,8 +172,8 @@ class VTResourceManager(object):
     def get_vm(self, vm_uuid):
         try:
             vm = self.get_vm_object(vm_uuid)
-        except Exception as e:
-            raise e
+        except:
+            raise virt_exception.VirtVMNotFound(vm_uuid)
         vm_dict = self.get_vm_info(vm)
         return vm_dict
          
@@ -184,31 +184,31 @@ class VTResourceManager(object):
         except:
             try:
                 vm = VTDriver.get_vm_allocated_by_uuid(vm_uuid)
-            except Exception as e:
-                raise e
+            except:
+                raise virt_exception.VirtVMNotFound(vm_uuid)
         return vm
 
     def get_vm_by_urn(self, vm_urn):
         try:
             vm = self.get_vm_object_by_urn(vm_urn)
             vm_info = self.get_vm_info(vm)
-        except Exception as e:
-             raise e
+        except:
+             raise virt_exception.VirtVMNotFound(vm_urn)
         return vm_info
 
     def get_vm_object_by_urn(self, vm_urn):
         try:
             vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
-        except Exception as e:
-            raise e
+        except:
+            raise virt_exception.VirtVMNotFound(vm_urn)
         return vm
  
     def get_vm_allocated_by_urn(self, vm_urn):
         try:
             vm = self.get_vm_allocated_object_by_urn
             vm_info = self.get_vm_info(vm)
-        except Exception as e:
-            raise e
+        except:
+            raise virt_exception.VirtVMNotFound(vm_urn)
         return vm_info
 
     def get_vm_allocated_object_by_urn(self, vm_urn):
@@ -220,36 +220,87 @@ class VTResourceManager(object):
             raise e
         return vm
 
-    def get_vms_in_container(self, container_gid, prefix):
+    def get_vms_in_container(self, container_gid, prefix=""):
+        vms_info = list()
+        try:
+            vms = get_vm_objects_in_container(container_gid, prefix)
+        except Exception as e:
+            raise e
+        for vm in vms:
+            vm_info = self.get_vm_info(vm)
+            vms_info.append(vm_info)
+        return vms_info
+
+    def get_vm_objects_in_container(self, container_gid, prefix=""):
         """
-        Get all VMs in slice with given slice_urn.
+        Get all VMs in container with given container_gid and prefix
         """
         try:
             container = Container.query.filter_by(GID=container_gid, prefix=prefix).one()
         except:
-            raise 
+            raise virt_exception.VirtContainerNotFound(container_gid)
         vms = container.vms
-        return vms
-    
-    def get_provisioned_vms_in_slice(self, slice_urn):
-        """
-        Get all VMs provisioned (created) in a given slice.
-        """
-        slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-        project_name = get_leaf(get_authority(slice_hrn))
-        vms = VirtualMachine.query.filter_by(slice_name=slice_name).filter_by(project_name=project_name).all()
+        if not vms:
+            raise virt_exception.VirtNoResourcesInContainer(container_gid)
         return vms
 
-    def get_allocated_vms_in_slice(self, slice_urn):
+    def get_provisioned_vms_in_containter(self, container_gid, prefix=""):
+        provisioned_vms = list()
+        try:
+            vms = self.get_provisioned_vm_objects_in_container(container_gid, prefix)
+        except Exception as e:
+            raise e
+        for vm in vms:
+            provisioned_vm = self.get_vm_info(vm)
+            provisioned_vms.append(provisioned_vm)
+        return provisioned_vms
+    
+    def get_provisioned_vm_objects_in_container(self, container_gid, prefix=""):
         """
-        Get all VMs allocated (reserved) in a given slice.
+        Get all VMs provisioned (created) in a given container.
         """
-        slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-        project_name = get_leaf(get_authority(slice_hrn))
-        vms = VMAllocated.query.filter_by(slice_name=slice_name).filter_by(project_name=project_name).all()
-        return vms
+        provisioned_vms = list()
+        try:
+            vms = self.get_vm_objects_in_container(container_gid, prefix)
+        except Exception as e:
+            raise e
+        # Filter by the VM state
+        # Done this way for a better Exception threatment
+        for vm in vms
+            if vm.get_state() != VirtualMachine.ALLOCATED_STATE:
+                provisioned_vms.append(vm)
+        if not provisioned_vms:
+            raise virt_exception.VirtNoResourcesInContainer(container_gid)
+        return provisioned_vms
+
+    def get_allocated_vms_in_containter(self, container_gid, prefix=""):
+        allocated_vms = list()
+        try:
+            vms = self.get_allocated_vm_objects_in_container(container_gid, prefix)
+        except Exception as e:
+            raise e
+        for vm in vms:
+            allocated_vm = self.get_vm_info(vm)
+            allocated_vms.append(allocated_vm)
+        return allocated_vms
+
+    def get_allocated_vm_objects_in_container(self, container_gid, prefix=""):
+        """
+        Get all VMs allocated (reserved) in a given container.
+        """
+        allocated_vms = list()
+        try:
+            vms = self.get_vm_objects_in_container(container_gid, prefix)
+        except Exception as e:
+            raise e
+        # Filter by the VM state
+        # Done this way for a better Exception threatment
+        for vm in vms
+            if vm.get_state() == VirtualMachine.ALLOCATED_STATE:
+                allocated_vms.append(vm)
+        if not allocated_vms:
+            raise virt_exception.VirtNoResourcesInContainer(container_gid)
+        return allocated_vms
     
     def _destroy_vm(self, vm_id, server_uuid):
         if not server_uuid:
@@ -259,7 +310,44 @@ class VTResourceManager(object):
             return "success"
         except Exception as e:
             return "error" 
-    
+
+    def provision_vm(self, vm_dict, end_time):
+        """
+        Provision (create) previously allocated (reserved) VM.
+        """
+        # First make sure that the requested end_time is a valid expiration time
+        try:
+            self.expiration_manager.check_valid_reservation_time(end_time)
+        except:
+            raise virt_exception.VirtMaxVMDurationExceeded(end_time)
+        # Get the Container of the VM
+        container = Container.query.filter(Container.vms.any(uuid=vm_dict['uuid'])).one()
+        container_gid = container.get_GID()
+        container_prefix = container.get_prefix()
+        # TODO: Obtain the Template and use it
+        # Generate the creation request rspec
+        # TODO: simplify this procedure
+        args = None
+        # Deallocate the current VM
+        try:
+            self.delete_vm_by_uuid(vm_dict['uuid'])
+        except Exception as e:
+            raise e
+        # Once deallocated, start the vm creation
+        try: 
+            # TODO: Add Template as part of the args?
+            provisioned_vm_model = self.create_vm(args, container_gid, prefix) 
+        except Exception as e:
+            raise e
+        # Add the expiration time to the provisioned VM
+        try:
+            self.expiration_manager.add_expiration_to_vm_by_uuid(provisioned_vm_model.get_uuid(), end_time)
+        except Exception as e:
+            raise e
+        # Obtain the resultant VM info
+        provisioned_vm = self.get_vm_info(provisioned_vm_model)
+        return provisioned_vm
+ 
     def provision_allocated_vms(self, slice_urn, end_time):
         """
         Provision (create) previously allocated (reserved) VMs.

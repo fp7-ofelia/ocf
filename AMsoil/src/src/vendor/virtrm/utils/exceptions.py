@@ -47,9 +47,9 @@ class VirtMalformedUrn(VirtException):
     def __init__(self, urn):
 	super(VirtMalformedUrn, self).__init__("The URN has not the expected format (%s)" % (urn,))
 
-class VirtNoSliversInSlice(VirtException):
+class VirtNoResourcesInContainer(VirtException):
     def __init__(self, urn):
-	super(VirtNoSliversInSlice, self).__init__("The given slice does not have any VM (%s)" % (urn,))
+	super(VirtNoResourcesInContainer, self).__init__("The given container does not have any VM (%s)" % (urn,))
 
 class VirtVMNotFound(VirtException):
     def __init__(self, urn):
@@ -57,8 +57,16 @@ class VirtVMNotFound(VirtException):
 
 class VirtNoVMsInSlice(VirtException):
     def __init__(self, urn):
-	super(VirtNoVMsInSlice, self).__init__("The given slice does not contain any VM (%s)" %(urn,))
+	super(VirtNoVMsInSlice, self).__init__("The given slice does not contain any VM (%s)" % (urn,))
 
 class VirtContainerDuplicated(VirtException):
     def __init__(self, urn):
-        super(VirtContainerDuplicated, self).__init__("The given slice is duplicated" %(urn,))
+        super(VirtContainerDuplicated, self).__init__("The given container is duplicated (%s)" % (urn,))
+
+class VirtContainerNotFound(VirtException):
+    def __init__(self, urn):
+        super(VirtContainerNotFound, self).__init__("The given container does not exist (%s)" % (urn,))
+
+class VirtVMCreationError(VirtException):
+    def __init__(self, urn):
+        super(VirtVMCreationError, self).__init__("The given VM could not be created (%s)" % (urn,))
