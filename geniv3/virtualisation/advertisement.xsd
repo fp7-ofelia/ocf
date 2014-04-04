@@ -30,7 +30,7 @@
         <xs:all>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="uuid"/>
-            <xs:element type="xs:string" name="virtualisation_technology"/>
+            <xs:element type="xs:string" name="virtualization_technology"/>
             <xs:element type="xs:boolean" name="available"/>
             <xs:element type="xs:integer" name="cpus_number" minOccurs="0"/>
             <xs:element type="xs:float" name="cpu_frequency" minOccurs="0"/>
@@ -104,7 +104,7 @@
             <xs:element type="xs:float" name="operating_system_version"/>
             <xs:element type="xs:string" name="operating_system_distribution"/>
             <xs:element type="xs:string" name="hard_disk_setup_type"/>
-            <xs:element type="xs:string" name="virtualisation_setup_type"/>
+            <xs:element type="xs:string" name="virtualization_setup_type"/>
         </xs:all>
     </xs:complexType>
 
