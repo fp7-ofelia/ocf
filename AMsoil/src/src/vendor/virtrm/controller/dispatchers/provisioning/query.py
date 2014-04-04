@@ -13,10 +13,13 @@ logging=amsoil.core.log.getLogger('ProvisioningDispatcher')
 
 class ProvisioningDispatcher():        
     @staticmethod
-    def process(provisioning):
+    def process(provisioning, callback_url=None):
         """
         Process provisioning query.
         """
+        # Assign the callBackURL this way so this method can be called without a ServiceThread
+        if not callback_url:
+            callback_url = threading.currentThread().callBackURL
         logging.debug("PROVISIONING STARTED...\n")
         for action in provisioning.action:
             action_model = ActionController.action_to_model(action, "provisioning")
@@ -30,7 +33,8 @@ class ProvisioningDispatcher():
                 a = str(e)
                 if len(a)>200:
                     a = a[0:199]
-                XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
+                XmlRpcClient.call_method(callback_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
+#                XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
                 return None
             try:
                 controller = VTDriver.get_driver(action.server.virtualization_type)
@@ -71,7 +75,8 @@ class ProvisioningDispatcher():
                         controller.delete_vm(vm)
                     except Exception as e:
                         print "Could not delete VM. Exception: %s" % str(e)
-                        XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
+                        XmlRpcClient.call_method(callback_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
+#                        XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
         logging.debug("PROVISIONING FINISHED...")
         
     @staticmethod

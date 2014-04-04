@@ -59,9 +59,9 @@ class MacSlot(db.Model):
     def destroy(self):
         if self.mac_range != None:
             if self.is_excluded:
-                self.mac_range.remove_excluded_mac(self)
+                self.mac_range[0].remove_excluded_mac(self)
             else:
-                self.mac_range.release_mac(self)
+                self.mac_range[0].release_mac(self)
         db.session.delete(self)
         db.session.commit()
     

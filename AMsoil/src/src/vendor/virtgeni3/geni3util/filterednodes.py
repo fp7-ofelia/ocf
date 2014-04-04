@@ -81,7 +81,7 @@ VM_CALLBACK_URL = "callback_url"
 VM_URN = "urn"
 VM_EXPEDIENT_ID = "expedient_id"
 VM_HD_GB = "disc_space_gb"
-VM_NETWORK_INTERFACES = "network_interfaces"
+#VM_NETWORK_INTERFACES = "network_interfaces"
 VM_ALLOCATED_VM = "allocatedvm"
 VM_XEN_VM = "xenvm"
 VM_TYPE = "type"
@@ -167,7 +167,7 @@ VIRTUAL_MACHINE_FILTERED_NODES = [
     VM_URN,
     VM_EXPEDIENT_ID,
     VM_HD_GB,
-    VM_NETWORK_INTERFACES,
+#    VM_NETWORK_INTERFACES,
     VM_ALLOCATED_VM,
     VM_XEN_VM,
     VM_TYPE,

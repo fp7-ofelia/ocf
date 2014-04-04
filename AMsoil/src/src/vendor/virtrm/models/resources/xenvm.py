@@ -73,14 +73,11 @@ class XenVM(VirtualMachine):
     
     '''Destructor'''
     def destroy(self):
-        with MutexStore.getObject_ock(self.getLockIdentifier()):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
             # Destroy interfaces
-            for inter in self.network_interfaces.all():
+            for inter in self.network_interfaces:
                 inter.destroy()
-            if expires:
-                expires.destroy()
-            db.session.delete(self)
-            db.session.commit()
+            self.save()
     
     '''Validators'''
     @validates('hd_setup_type')

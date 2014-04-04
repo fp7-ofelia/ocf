@@ -1,6 +1,7 @@
 from models.resources.virtualmachine import VirtualMachine
 from models.resources.vtserver import VTServer
 from utils.base import db
+from utils.mutexstore import MutexStore
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 import uuid
@@ -70,3 +71,12 @@ class AllocatedVM(VirtualMachine):
         except:
             self.do_save = False
         self.auto_save()
+
+
+    '''Destructor'''
+    def destroy(self):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            # Destroy interfaces
+            for inter in self.network_interfaces:
+                inter.destroy()
+            self.save()

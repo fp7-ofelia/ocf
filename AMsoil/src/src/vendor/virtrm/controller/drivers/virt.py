@@ -112,6 +112,8 @@ class VTDriver():
     @staticmethod    
     def get_vm_by_uuid(uuid):
         from models.resources.virtualmachine import VirtualMachine
+        from models.resources.xenvm import XenVM
+        from models.resources.allocatedvm import AllocatedVM
         try:
             return VirtualMachine.query.filter_by(uuid=uuid).one().get_child_object()
         except:

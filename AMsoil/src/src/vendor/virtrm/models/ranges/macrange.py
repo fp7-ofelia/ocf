@@ -82,7 +82,7 @@ class MacRange(db.Model):
             raise e
 
     '''Private methods'''
-    def autosave(self):
+    def auto_save(self):
         if self.do_save:
             db.session.add(self)
             db.session.commit()
@@ -90,12 +90,12 @@ class MacRange(db.Model):
     def __set_start_mac(self, value):
         EthernetUtils.check_valid_mac(value)
         self.start_mac = value.upper()
-        self.autosave()
+        self.auto_save()
 
     def __set_end_mac(self, value):
         EthernetUtils.check_valid_mac(value)
         self.end_mac = value.upper()
-        self.autosave()
+        self.auto_save()
 
     def __is_mac_available(self, mac):
         return MacSlot.query.filter_by(mac=mac).first() not in self.resources
@@ -170,7 +170,7 @@ class MacRange(db.Model):
                 logging.debug("************************ ERROR RANGE " + str(e))
                 self.next_available_mac = None
         logging.debug("*************************** RANGE 7" + str(self.next_available_mac))
-        self.autosave()
+        self.auto_save()
         return new_mac  
     
     def release_mac(self,mac_obj):
@@ -179,7 +179,7 @@ class MacRange(db.Model):
         '''
         with MutexStore.get_object_lock(self.get_lock_identifier()):
             mac_str = mac_obj.get_mac()
-            if not len(self.resources.filter_by(mac=mac_str).all()) > 0:
+            if MacSlot.query.filter_by(mac=mac_str).first() not in self.resources:
                 raise Exception("Cannot release Mac %s. Reason may be is unallocated or is an excluded Mac",mac_str)
             self.resources.remove(mac_obj)
             # Determine new available Mac
@@ -192,7 +192,7 @@ class MacRange(db.Model):
             else:
                 # No more gaps
                 self.next_available_mac = mac_str
-            self.autoSave()                                                                           
+            self.auto_save()                                                                           
     
     def add_excluded_mac(self,mac_str,comment=""):
         '''
@@ -217,7 +217,7 @@ class MacRange(db.Model):
                             break
                 except Exception as e:
                     self.next_available_mac = None
-            self.autosave()    
+            self.auto_save()    
      
     def removeExcludedMac(self,mac_obj):
         '''
@@ -238,7 +238,7 @@ class MacRange(db.Model):
             else:
                 # No more gaps
                 self.nextAvailableMac = mac_str
-            self.autoSave()
+            self.auto_save()
      
     '''
     Static methods

@@ -69,10 +69,7 @@ class TemplateManager():
     def add_template_to_vm(self, vm_uuid, template):
         pass
 
-    def add_template_to_allocated_vm(self, vm_uuid, template):
-        pass
-
-    def upadte_template_from_allocated_vm(self, vm_uuid):
+    def upadte_template_from_vm(self, vm_uuid):
         pass
 
     def get_templates_from_server(self, server_uuid):

@@ -113,6 +113,19 @@ class Translator:
 #        logging.debug("***** dict2class => Dictionary pointer : %s" % **dictionary)
         retrieved_class = container_class(**dictionary)
         return retrieved_class
+
+    @staticmethod
+    def dict2xml(dictionary, xml):
+        '''
+        Fill the field of a XML {xml} with a dictionary {dictionary}.
+        Only the common attributes will be filled on the XML {xml}.
+        '''
+        common_attributes = set(dictionary.keys()) & set(xml.__dict__)
+        common_dictionary = dict()
+        for attribute in common_attributes:
+            common_dictionary[attribute] = dictionary[attribute]
+        xml.__dict__.update(**common_dictionary)
+        return xml
     
     @staticmethod
     def dict2existing_class(content_dict, container_class=None):

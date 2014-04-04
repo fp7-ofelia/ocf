@@ -44,7 +44,7 @@ class VTServer(db.Model):
     operating_system_version = db.Column("operatingSystemVersion", db.String(512), nullable=False)
 
     '''Virtualization Technology'''
-    virtualisation_technology = db.Column("virtTech", db.String(512), nullable=False)
+    virtualization_technology = db.Column("virtTech", db.String(512), nullable=False)
 
     ''' Hardware '''
     cpus_number = db.Column("numberOfCPUs", db.Integer)
@@ -199,11 +199,11 @@ class VTServer(db.Model):
     def get_url(self):
         return self.url
         
-    def set_virtualisation_technology(self, virt_tech):
+    def set_virtualization_technology(self, virt_tech):
         self.virtualization_technology = virt_tech
         self.auto_save()
         
-    def get_virtualisation_technology(self):
+    def get_virtualization_technology(self):
         return self.virtualization_technology
     
     def set_operating_system_type(self, os_type):

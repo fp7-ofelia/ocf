@@ -5,8 +5,10 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from utils import validators
 from utils.base import db
+from utils.mutexstore import MutexStore
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
+import inspect
 
 logging=amsoil.core.log.getLogger('NetworkInterface')
 
@@ -152,7 +154,7 @@ class NetworkInterface(db.Model):
         return self.is_mgmt
     
     def get_number_of_connections(self):
-        return len(self.connected_to.all())
+        return len(self.connected_to)
     
     def attach_interface_to_bridge(self,interface):
         logging.debug("*********************************** BRIDGE 1")
@@ -195,10 +197,10 @@ class NetworkInterface(db.Model):
         with MutexStore.get_object_lock(self.get_lock_identifier()):
             if self.get_number_of_connections():
                 raise Exception("Cannot destroy a bridge which has enslaved interfaces")
-            for ip in self.ip4s.all():
+            for ip in self.ip4s:
                 ip.destroy()
             for mac in self.mac.all():
-                self.mac.destroy()
+                mac.destroy()
             db.session.delete(self)
             db.session.commit()
     
