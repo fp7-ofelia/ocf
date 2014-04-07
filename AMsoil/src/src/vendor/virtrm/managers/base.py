@@ -12,6 +12,7 @@ from utils.base import db
 from utils.expirationmanager import ExpirationManager
 from utils.servicethread import ServiceThread
 from utils.vmmanager import VMManager
+from utils.xmlhelper import XmlHelper
 from utils.xrn import *
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
@@ -254,7 +255,7 @@ class VTResourceManager(object):
         vms = container.vms
         logging.debug("***************** VMs OBTAINED => %s" % str(vms))
         if not vms:
-            looging.debug("**************** OPS, NO VMS ********************")
+            logging.debug("**************** OPS, NO VMS ********************")
             raise virt_exception.VirtNoResourcesInContainer(container_gid)
         # XXX: Ugly because of SQLAlchemy limitations. 
         # Association proxy is attached with the parent class.
@@ -390,7 +391,9 @@ class VTResourceManager(object):
             raise e
         # Once deallocated, start the vm creation
         try: 
-            provisioned_vm = self.create_vm(dictionary, template, container_gid, prefix, end_time) 
+            logging.debug("********** PROVISIONING...")
+            provisioned_vm = self.create_vm(dictionary, template, container_gid, container_prefix, end_time) 
+            logging.debug("********** PROVISIONED...")
         except Exception as e:
             # TODO: Raise an specific Exception
             raise e
@@ -415,7 +418,7 @@ class VTResourceManager(object):
             raise virt_exception.VirtContainerDuplicated(container_gid)
         return container
 
-    def create_vm(self, template, args_dict, container_gid, prefix="", end_time=None):
+    def create_vm(self, args_dict, template, container_gid, prefix="", end_time=None):
         """
         Create a new VM with the given information related to a Container.
         """
@@ -431,31 +434,44 @@ class VTResourceManager(object):
             # TODO: Raise an specific Exception
             raise e
         # XXX: Put this code in another function
+        logging.debug("*************** OBTAINING RSPEC...")
         provisioning_rspec = XmlHelper.get_simple_action_query()
         # Fill the action parameters
-        action_class = rspec.query.provisioning.action[0]
+        logging.debug("*************** OBTAIN ACTION...")
+        action_class = provisioning_rspec.query.provisioning.action[0]
+        logging.debug("*************** FILL PARAMS...")
         action_class.type_ = "create"
         action_class.id = uuid.uuid4()
         # Fill the server parameters
+        logging.debug("*************** OBTAIN SERVER...")
         server_dict = args_dict.pop("server")
+        logging.debug("*************** FILL PARAMS...")
         server_class = action_class.server
         self.translator.dict2xml(server_dict, server_class)
         # Fill the VirtualMachine parameters
+        logging.debug("*************** OBTAIN VM...")
         vm_dict = args_dict.pop("vm")
+        logging.debug("*************** FILL PARAMS...")
         vm_class = server_class.virtual_machines[0]
         self.translator.dict2xml(vm_dict, vm_class) 
         # Fill the XenConfiguration parameters
+        logging.debug("*************** OBTAIN XEN CONFIGURATOR...")
         xen_dict = args_dict.pop('xen_configuration')
         xen_class = vm_class.xen_configuration
+        logging.debug("*************** FILL PARAMS...")
         self.translator.dict2xml(xen_dict, xen_class)
         # Fill the Interfaces parameteres
         # XXX: Currently this information is empty
+        logging.debug("*************** OBTAIN INTERFACES...")
         interface_class = xen_class.interfaces.interface[0]
+        logging.debug("*************** FILL PARAMS...")
         interface_class.ismgmt = "False"
         # Once we have the provisioning Rspec, call the Provisioning Dispatcher
         try:
-            ProvisioningDispatcher.process(provisioning_rspec, 'SFA.OCF.VTM')
+            logging.debug("*************** CALL AGENT...")
+            ProvisioningDispatcher.process(provisioning_rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
+            logging.debug("*************** AGENT FAILED...")
             # TODO: Raise an specific Exception
             raise e
         # Make sure that the VM has been created

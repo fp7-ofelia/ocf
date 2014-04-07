@@ -66,6 +66,15 @@ class Ip4Slot(db.Model):
     def get_dns2(self):
         return self.ip_range.get_dns2()
 
+    '''Destructor'''
+    def destroy(self):
+        if self.ip_range:
+            if self.is_excluded_ip():
+                self.ip_range[0].remove_excluded_ip(self)
+            else:self.ip_range[0].release_ip(self)
+        db.session.delete(self)
+        db.session.commit()
+
     '''Validators'''
     @validates('ip')
     def validate_ip(self, key, ip):

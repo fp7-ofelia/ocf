@@ -27,7 +27,7 @@ class AllocatedVM(VirtualMachine):
     server_uuid = db.Column(db.ForeignKey(table_prefix + 'vtserver.uuid'), nullable=False) 
 
     server = db.relationship("VTServer", uselist=False, backref=db.backref("allocated_vms"))
-    vm = db.relationship("VirtualMachine", uselist=False, backref=db.backref("allocatedvm", cascade = "all, delete-orphan"))
+#    vm = db.relationship("VirtualMachine", backref=db.backref("allocatedvm"))
     
 
     @staticmethod
@@ -54,11 +54,12 @@ class AllocatedVM(VirtualMachine):
         except Exception as e:
             raise e
         # XXX COULD NOT AUTOMATE IT WITH THE FOREIGN KEYS FROM THE MODEL
-        for network_interface in params_dict["network_interfaces"]:
-            try:
-                self.network_interfaces.append(network_interface)
-            except:
-                pass
+        if "network_interfaces" in params_dict.keys():
+            for network_interface in params_dict["network_interfaces"]:
+                try:
+                    self.network_interfaces.append(network_interface)
+                except:
+                    pass
         # Set the state to allocated
         try:
             common_dictionary.pop("state")
@@ -75,8 +76,19 @@ class AllocatedVM(VirtualMachine):
 
     '''Destructor'''
     def destroy(self):
+        logging.debug("************ DESTROYING ALLOCATED VM WITH UUID %s AND TYPE %s..." % (self.uuid, str(type(self))))
         with MutexStore.get_object_lock(self.get_lock_identifier()):
+            logging.debug("**************** MUTEX OBTAINED...")
             # Destroy interfaces
             for inter in self.network_interfaces:
+                logging.debug("************* DESTROYING INTERFACE WITH ID %s..." % str(inter.id))
                 inter.destroy()
-            self.save()
+            logging.debug("*************** DESTROYING CONTAINER ASSOCIATION...")
+            # Deattach to the Container
+            logging.debug("***************** CONTAINER %s" % str(self.container_vm))
+            self.container_vm[0].destroy()
+            logging.debug("*************** INTERFACES DESTROYED...")
+            db.session.delete(self)
+            logging.debug("*************** READY TO DELETE...")
+            db.session.commit()
+            logging.debug("*************** DELETED...")

@@ -5,7 +5,7 @@ from models.resources.vtserver import VTServer
 from utils.httputils import HttpUtils
 import threading
 
-from utils.commonbase import db_session
+from utils.base import db
 import amsoil.core.log
 
 logging=amsoil.core.log.getLogger('XenDriver')

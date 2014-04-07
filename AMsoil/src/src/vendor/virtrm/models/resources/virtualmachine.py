@@ -130,7 +130,9 @@ class VirtualMachine(db.Model):
         for child_class in self.__child_classes:
             try:
                 logging.debug("*********** POSSIBLE CHILD CLASS %s" % child_class)
-                child =  self.__getattribute__(child_class.lower())[0]
+                # XXX: In SQLAlchemy the child class is directly returned
+                return self
+               # child =  self.__getattribute__(child_class.lower())[0]
                 logging.debug("********** %s IS CHILD CLASS %s" %(child_class, str(child.__dict__)))
                 return child
             except:
@@ -273,6 +275,10 @@ class VirtualMachine(db.Model):
     def get_network_interfaces(self):
         return self.network_interfaces.order_by('-isMgmt','id').all()
 
+    def destroy(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 class VMNetworkInterfaces(db.Model):
     """Network interfaces related to a Virtual Machine"""
@@ -285,5 +291,5 @@ class VMNetworkInterfaces(db.Model):
     virtualmachine_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.id'), nullable=False)
     networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
-    vm = db.relationship("VirtualMachine", primaryjoin="VirtualMachine.id==VMNetworkInterfaces.virtualmachine_id", backref=db.backref("vm_networkinterfaces", cascade="all, delete-orphan"))
+    vm = db.relationship("VirtualMachine", primaryjoin="VirtualMachine.id==VMNetworkInterfaces.virtualmachine_id", backref=db.backref("vm_networkinterfaces"))
     networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==VMNetworkInterfaces.networkinterface_id", backref=db.backref("vm_associations", cascade="all, delete-orphan"))

@@ -250,13 +250,13 @@ class Ip4Range(db.Model):
             self.auto_save()
             return new_ip   
     
-    def releaseIp(self,ip_obj):
+    def release_ip(self,ip_obj):
         '''
         Releases an IP address of the range (but it does not destroy the object!!)      
         '''
         with MutexStore.get_object_lock(self.get_lock_identifier()):
             ip_str = ip_obj.get_ip()
-            if not len(self.ips.filter_by(ip=ip_str).filter_by(is_excluded=False).all()) > 0:
+            if Ip4Slot.query.filter_by(ip=ip_str, is_excluded=False).first() not in self.ips:
                 raise Exception("Cannot release Ip %s. Reason may be is unallocated or is an excluded Ip",ip_str)
             self.ips.remove(ip_obj)
             # Determine new available Ip
@@ -271,7 +271,7 @@ class Ip4Range(db.Model):
                 self.next_available_ip = ip_str
             self.auto_save()                                                                        
 
-    def addExcludedIp(self,ip_str,comment):
+    def add_excluded_ip(self,ip_str,comment):
         '''
         Add an IP to the exclusion list 
         '''
@@ -296,7 +296,7 @@ class Ip4Range(db.Model):
                     self.next_available_ip = None
             self.auto_save()
     
-    def removeExcludedIp(self,ip_obj):
+    def remove_excluded_ip(self,ip_obj):
         '''
         Deletes an IP from the exclusion list (but it does not destroy the object!!)
         '''

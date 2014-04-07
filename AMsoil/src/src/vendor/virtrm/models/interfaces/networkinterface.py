@@ -33,8 +33,8 @@ class NetworkInterface(db.Model):
     '''Interfaces connectivy'''
     vtserver = association_proxy("vtserver_assocation", "vtserver")
     vm = association_proxy("vm_associations", "vm")
-    connected_to = association_proxy("to_networkinterface", "to_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(to_networkinterface=iface))
-    connected_from = association_proxy("from_networkinterface", "from_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(from_networkinterface=iface))
+    connected_to = association_proxy("to_network_interface", "to_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(to_networkinterface=iface))
+    connected_from = association_proxy("from_network_interface", "from_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(from_networkinterface=iface))
 
     '''Physical connection details for bridged interfaces''' 
     switch_id = db.Column("switchID", db.String(23))
@@ -154,7 +154,7 @@ class NetworkInterface(db.Model):
         return self.is_mgmt
     
     def get_number_of_connections(self):
-        return len(self.connected_to)
+        return len(self.connected_from)
     
     def attach_interface_to_bridge(self,interface):
         logging.debug("*********************************** BRIDGE 1")
@@ -165,7 +165,7 @@ class NetworkInterface(db.Model):
             logging.debug("*********************************** BRIDGE ERROR - 2")
             raise Exception("Cannot attach interface; object type unknown -> Must be NetworkInterface instance")
         logging.debug("*********************************** BRIDGE 2 " + str(interface.id) + ' ' + str(self.id))
-        self.connected_to.append(interface)
+        self.connected_from.append(interface)
         self.auto_save()
         logging.debug("*********************************** BRIDGE 3 " + str(interface.connected_from))
     
@@ -174,7 +174,7 @@ class NetworkInterface(db.Model):
             raise Exception("Cannot detach interface from a non-bridged interface")
         if not isinstance(interface,NetworkInterface):
             raise Exception("Cannot detach interface; object type unknown -> Must be NetworkInterface instance")
-        self.connected_to.remove(interface)
+        self.connected_from.remove(interface)
         self.auto_save()
     
     def add_ip4_to_interface(self,ip4):
@@ -199,8 +199,7 @@ class NetworkInterface(db.Model):
                 raise Exception("Cannot destroy a bridge which has enslaved interfaces")
             for ip in self.ip4s:
                 ip.destroy()
-            for mac in self.mac.all():
-                mac.destroy()
+            self.mac[0].destroy()
             db.session.delete(self)
             db.session.commit()
     
@@ -264,7 +263,7 @@ class NetworkInterfaceIp4s(db.Model):
     networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
     ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
 
-    networkinterface = db.relationship("NetworkInterface", backref=db.backref("networkinterface_ip4s", cascade="all, delete-orphan"))
+    networkinterface = db.relationship("NetworkInterface", backref=db.backref("networkinterface_ip4s"))
     ip4slot = db.relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref=db.backref("networkinterface_associations_ips", cascade="all, delete-orphan"))
 
 
@@ -279,6 +278,6 @@ class NetworkInterfaceConnectedTo(db.Model):
     from_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
     to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
 
-    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref=db.backref("from_networkinterface", cascade="all, delete-orphan"))
-    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref=db.backref("to_networkinterface", cascade="all, delete-orphan"))
+    to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref=db.backref("from_network_interface"))
+    from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref=db.backref("to_network_interface", cascade="all, delete-orphan"))
 

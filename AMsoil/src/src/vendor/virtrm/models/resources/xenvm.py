@@ -77,7 +77,8 @@ class XenVM(VirtualMachine):
             # Destroy interfaces
             for inter in self.network_interfaces:
                 inter.destroy()
-            self.save()
+            db.session.delete(self)
+            db.session.commit()
     
     '''Validators'''
     @validates('hd_setup_type')

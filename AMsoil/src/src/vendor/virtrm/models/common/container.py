@@ -103,6 +103,8 @@ class ContainerVMs(db.Model):
     vm_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.uuid'), nullable=False)
 
     container = db.relationship("Container", backref=db.backref("vms_container", cascade="all, delete-orphan"))
-    vms = db.relationship("VirtualMachine", backref=db.backref("container_vm", cascade="all, delete-orphan"))
+    vms = db.relationship("VirtualMachine", backref=db.backref("container_vm"))
 
-
+    def destroy(self):
+        db.session.delete(self)
+        db.session.commit()
