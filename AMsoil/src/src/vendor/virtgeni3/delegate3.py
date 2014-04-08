@@ -286,12 +286,11 @@ class VTDelegate3(GENIv3DelegateBase):
                     # If the URN is from a slice, get all the allocated
                     try:
                         vms = self._resource_manager.get_allocated_vms_in_container(urn, "GENIv3")      
-                    # Throw the Expiration for every kind of error
-                    # TODO: Throw specific errors
+                    # Throw the Exception for every kind of error
                     except virt_exception.VirtContainerNotFound:
                         raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
                     except virt_exception.VirtNoResourcesInContainer:
-                        raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)" % (urn,))
+                        raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s) (%s)" % (urn,))
                     allocated_vms.extend(vms)
                 elif (self.urn_type(urn) == "sliver"):
                     # If the UNR is from a VM, get it

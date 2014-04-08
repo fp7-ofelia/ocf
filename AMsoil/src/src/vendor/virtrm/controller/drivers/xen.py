@@ -30,22 +30,26 @@ class XenDriver(VTDriver):
         server = XenVM.query.get(vm_id).get_server()
         return server.uuid
     
-    def get_server_and_create_vm(self,action):
-        try: 
-            logging.debug("*************************** GO 1")
+    def get_server_and_create_vm(self, action, callbackurl=None):
+        try:
+            if not callbackurl: 
+                callbackurl = threading.currentThread().callBackURL
+            logging.debug("*************************** XEN PROVISIONING...")
             server = XenServer.query.filter_by(uuid=action.server.uuid).one()
-            logging.debug("*************************** GO 2" + str(server))
-            name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, discSpaceGB, numberOfCPUs, callback_url, hd_setup_type, hd_origin_path, virt_setup_type, save = XenDriver.xen_vm_to_model(action.server.virtual_machines[0],threading.currentThread().callback_url, save = True)
-            logging.debug("*************************** GO 3")
+            logging.debug("*************************** GOT XEN SERVER %s" % str(server))
+            name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, disc_space_gb, number_of_cpus, callback_url, hd_setup_type, hd_origin_path, virt_setup_type, save = XenDriver.xen_vm_to_model(action.server.virtual_machines[0], callbackurl, save = True)
+            logging.debug("*************************** XEN VM MODEL OBTAINED...")
             try:
+                logging.debug("*************************** STARTING VM CREATION WITH MODEL...")
                 vm_model = server.create_vm(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,hd_setup_type,hd_origin_path,virt_setup_type,save)
             except Exception as e:
                 logging.debug("*************************** GO FAIL " + str(e))
+                raise e
 #            vm_model = Server.create_vm(XenDriver.xen_vm_to_model(action.server.virtual_machines[0],threading.currentThread().callBackURL, save = True))
             logging.debug("*************************** GO 4")
             return server, vm_model
-        except:
-            raise
+        except Exception as e:
+            raise e
     
     @staticmethod
     def create_or_update_server_from_post(request, instance):
@@ -101,7 +105,7 @@ class XenDriver(VTDriver):
         os_version = vm_xml_class.operating_system_version
         os_dist = vm_xml_class.operating_system_distribution
         memory = vm_xml_class.xen_configuration.memory_mb
-        callback_url = callback_url
+        callback_url = callback_URL
         hd_setup_type = vm_xml_class.xen_configuration.hd_setup_type
         hd_origin_path = vm_xml_class.xen_configuration.hd_origin_path
         virt_setup_type = vm_xml_class.xen_configuration.virtualization_setup_type

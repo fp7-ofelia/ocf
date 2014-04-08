@@ -256,7 +256,7 @@ class VTResourceManager(object):
         logging.debug("***************** VMs OBTAINED => %s" % str(vms))
         if not vms:
             logging.debug("**************** OPS, NO VMS ********************")
-            raise virt_exception.VirtNoResourcesInContainer(container_gid)
+            raise virt_exception.VirtNoResourcesInContainer(str(container_gid))
         # XXX: Ugly because of SQLAlchemy limitations. 
         # Association proxy is attached with the parent class.
         # Obtain the objects directly from the DB at this point.
@@ -370,7 +370,7 @@ class VTResourceManager(object):
         dictionary = dict()
         # Add the Server information
         dictionary['server'] = dict()
-        dictionary['server']['server_id'] = vm_dict.pop('server_uuid')
+        dictionary['server']['uuid'] = vm_dict.pop('server_uuid')
         dictionary['server']['virtualization_type'] = server.get_virtualization_technology()
         # Add the VM information
         vm_dict['status'] = VirtualMachine.ONQUEUE_STATE

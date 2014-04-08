@@ -407,6 +407,7 @@ class VTServer(db.Model):
                         logging.debug("********************* D1 - 3 " + str(created_interface) + ' ' + str(vm_interfaces))
                     except Exception as e:
                         logging.debug("********************* CREATION FAIL " + str(e))
+                        raise e
                 else:
                     logging.debug("*********************** D2")
                     vm_interfaces.add(self.__create_enslaved_data_vm_network_interface(server_interface))

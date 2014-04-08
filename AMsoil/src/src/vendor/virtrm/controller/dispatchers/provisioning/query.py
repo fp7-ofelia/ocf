@@ -25,11 +25,11 @@ class ProvisioningDispatcher():
             action_model = ActionController.action_to_model(action, "provisioning")
             logging.debug("ACTION type: %s with id: %s" % (action_model.type, action_model.uuid))
             try:
-                logging.debug("************************** 1")
+                logging.debug("************************** PYPELIB...")
                 RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
-                logging.debug("************************** 2")
+                logging.debug("************************** PYPELIB END...")
             except Exception as e:
-                logging.debug("************************** 3" + str(e))
+                logging.debug("************************** PYPELIB FAIL... " + str(e))
                 a = str(e)
                 if len(a)>200:
                     a = a[0:199]
@@ -37,9 +37,13 @@ class ProvisioningDispatcher():
 #                XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
                 return None
             try:
+                logging.debug("************ OBTAIN DRIVER...")
                 controller = VTDriver.get_driver(action.server.virtualization_type)
+                logging.debug("************ DRIVER OBTAINED %s" % str(controller))
                 # XXX:Change this when xml schema is updated
+                logging.debug("************ OBTAIN SERVER...")
                 server = VTDriver.get_server_by_uuid(action.server.uuid)
+                logging.debug("************ SERVER OBTAINED %s" % str(server))
                 #if actionModel.getType() == Action.PROVISIONING_VM_CREATE_TYPE:
                 #    server = VTDriver.get_server_by_uuid(action.virtual_machine.server_id)
                 #else:
@@ -48,12 +52,13 @@ class ProvisioningDispatcher():
                 logging.error(e)
                 raise e
             try:        
-                logging.debug("******************************* A")
+                logging.debug("******************************* START PROVISIONING...")
                 # PROVISIONING CREATE
                 if action_model.get_type() == Action.PROVISIONING_VM_CREATE_TYPE:
+                    logging.debug("************ CREATE...")
                     try:
-                        logging.debug("*********************************** B")
-                        vm = ProvisioningDispatcher.__create_vm(controller, actionModel, action)
+                        logging.debug("*********************************** CREATING VM...")
+                        vm = ProvisioningDispatcher.__create_vm(controller, action_model, action, callback_url)
                     except:
                         vm = None
                         raise
@@ -80,18 +85,18 @@ class ProvisioningDispatcher():
         logging.debug("PROVISIONING FINISHED...")
         
     @staticmethod
-    def __create_vm(controller, action_model, action):
+    def __create_vm(controller, action_model, action, callbackurl=None):
         try:
-            logging.debug("**************************** OK - 1")
+            logging.debug("**************************** CREATE_VM METHOD - STARTING...")
             action_model.check_action_is_present_and_unique()
-            logging.debug("**************************** OK - 2")
-            Server, VMmodel = controller.get_server_and_create_vm(action)
-            logging.debug("**************************** OK - 3")
+            logging.debug("**************************** CREATE_VM METHOD - CHECK UNIQUE ACTION...")
+            Server, VMmodel = controller.get_server_and_create_vm(action, callbackurl)
+            logging.debug("**************************** CREATE_VM METHOD - VM CREATED IN SERVER...")
             ActionController.populate_networking_params(action.server.virtual_machines[0].xen_configuration.interfaces.interface, VMmodel)
-            logging.debug("**************************** OK - 4")
+            logging.debug("**************************** CREATE_VM METHOD - NETWORKINTERFACES POPULATED...")
             # XXX: change action Model
             action_model.set_object_uuid(VMmodel.get_uuid())
-            logging.debug("**************************** OK - 5")
+            logging.debug("**************************** CREATE_VM METHOD - VM BOUND TO ACTION")
             db.session.add(action_model)
             db.session.commit()
             return VMmodel

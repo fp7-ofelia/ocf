@@ -100,7 +100,7 @@ class XenServer(VTServer):
     def get_vm(self,**kwargs):
         return self.vms.filter_by(**kwargs).one()
     
-    def create_vm(self, name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, disc_space_gb, number_of_cpus, callback_url, hd_setup_type, hd_oorigin_path, virt_setup_type,save=True):
+    def create_vm(self, name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, disc_space_gb, number_of_cpus, callback_url, hd_setup_type, hd_origin_path, virt_setup_type,save=True):
         logging.debug("**************************** Server 1")
         with MutexStore.get_object_lock(self.get_lock_identifier()):
             logging.debug("******************************* Server 2")
