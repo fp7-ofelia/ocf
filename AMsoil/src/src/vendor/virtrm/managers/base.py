@@ -438,52 +438,25 @@ class VTResourceManager(object):
         except Exception as e:
             # TODO: Raise an specific Exception
             raise e
-        # XXX: Put this code in another function
-        logging.debug("*************** OBTAINING RSPEC...")
-        provisioning_rspec = XmlHelper.get_simple_action_query()
-        # Fill the action parameters
-        logging.debug("*************** OBTAIN ACTION...")
-        action_class = provisioning_rspec.query.provisioning.action[0]
-        logging.debug("*************** FILL PARAMS...")
-        action_class.type_ = "create"
-        action_class.id = uuid.uuid4()
-        # Fill the server parameters
-        logging.debug("*************** OBTAIN SERVER...")
-        server_dict = args_dict.pop("server")
-        logging.debug("*************** FILL PARAMS...")
-        server_class = action_class.server
-        self.translator.dict2xml(server_dict, server_class)
-        # Fill the VirtualMachine parameters
-        logging.debug("*************** OBTAIN VM...")
-        vm_dict = args_dict.pop("vm")
-        logging.debug("*************** FILL PARAMS...") 
-        logging.debug("************* OPERATING SYSTEM TYPE IS %s" % vm_dict['operating_system_type'])
-        vm_class = server_class.virtual_machines[0]
-        self.translator.dict2xml(vm_dict, vm_class)
-        logging.debug("************* OPERATING SYSTEM TYPE NOW IS %s" % vm_class.operating_system_type) 
-        # Fill the XenConfiguration parameters
-        logging.debug("*************** OBTAIN XEN CONFIGURATOR...")
-        xen_dict = args_dict.pop('xen_configuration')
-        xen_class = vm_class.xen_configuration
-        logging.debug("*************** FILL PARAMS...")
-        self.translator.dict2xml(xen_dict, xen_class)
-        # Fill the Interfaces parameteres
-        # XXX: Currently this information is empty
-        logging.debug("*************** OBTAIN INTERFACES...")
-        interface_class = xen_class.interfaces.interface[0]
-        logging.debug("*************** FILL PARAMS...")
-        interface_class.ismgmt = "False"
+        # Obtain the provisioning RSpec from the dictionary
+        provisioning_rspec = self.get_provisioning_rspec_from_dict(args_dict)
         # Once we have the provisioning Rspec, call the Provisioning Dispatcher
         try:
             logging.debug("*************** CALL AGENT...")
             ProvisioningDispatcher.process(provisioning_rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
+            # If the provisioning fails at any point, try tho destroy the created VM
+            try:
+                self.delete_vm_by_uuid(vm_class.uuid)
+            except:
+                pass
             logging.debug("*************** AGENT FAILED...")
             # TODO: Raise an specific Exception
             raise e
         # Make sure that the VM has been created
+        vm_class = provisioning_rspec.query.provisioning.action[0].server.virtual_machines[0]
         try:
-            vm = self.get_vm_object(vm_dict['uuid'])
+            vm = self.get_vm_object(vm_class.uuid)
         except Exception as e:
             # TODO: Raise an specific Exeption
             raise e
@@ -507,7 +480,45 @@ class VTResourceManager(object):
         # Once created, obtain the VM info
         created_vm = self.get_vm_info(vm)
         return created_vm
- 
+
+    # XXX: This code should not be here
+    def get_provisioning_rspec_from_dict(self, args_dict):
+        logging.debug("*************** OBTAINING RSPEC...")
+        provisioning_rspec = XmlHelper.get_simple_action_query()
+        # Fill the action parameters
+        logging.debug("*************** OBTAIN ACTION...")
+        action_class = provisioning_rspec.query.provisioning.action[0]
+        logging.debug("*************** FILL PARAMS...")
+        action_class.type_ = "create"
+        action_class.id = uuid.uuid4()
+        # Fill the server parameters
+        logging.debug("*************** OBTAIN SERVER...")
+        server_dict = args_dict.pop("server")
+        logging.debug("*************** FILL PARAMS...")
+        server_class = action_class.server
+        self.translator.dict2xml(server_dict, server_class)
+        # Fill the VirtualMachine parameters
+        logging.debug("*************** OBTAIN VM...")
+        vm_dict = args_dict.pop("vm")
+        logging.debug("*************** FILL PARAMS...")
+        logging.debug("************* OPERATING SYSTEM TYPE IS %s" % vm_dict['operating_system_type'])
+        vm_class = server_class.virtual_machines[0]
+        self.translator.dict2xml(vm_dict, vm_class)
+        logging.debug("************* OPERATING SYSTEM TYPE NOW IS %s" % vm_class.operating_system_type)
+        # Fill the XenConfiguration parameters
+        logging.debug("*************** OBTAIN XEN CONFIGURATOR...")
+        xen_dict = args_dict.pop('xen_configuration')
+        xen_class = vm_class.xen_configuration
+        logging.debug("*************** FILL PARAMS...")
+        self.translator.dict2xml(xen_dict, xen_class)
+        # Fill the Interfaces parameteres
+        # XXX: Currently this information is empty
+        logging.debug("*************** OBTAIN INTERFACES...")
+        interface_class = xen_class.interfaces.interface[0]
+        logging.debug("*************** FILL PARAMS...")
+        interface_class.ismgmt = "False"
+        return provisioning_rspec
+
     def provision_allocated_vms(self, slice_urn, end_time):
         """
         Provision (create) previously allocated (reserved) VMs.
@@ -833,7 +844,7 @@ class VTResourceManager(object):
         try:
             container = self.get_container_for_given_vm(vm["name"], container_gid, prefix)
         except Exception as e:
-            raise e
+            raise VirtVmNameAlreadyTaken(vm['name'])
         # Check if the server is one of the given servers
         try: 
             server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
@@ -855,22 +866,15 @@ class VTResourceManager(object):
             template_info["template_name"] = "Default"
         # Check if the Template is a valid one and return it
         try:
-            template = self.template_manager.get_template_by(template_info.values()[0])
+            template = self.template_manager.get_template_by(template_info.value()[0])
         except:
-            try: 
-                template = self.template_manager.get_template_by(template_info)
-            except Exception as e:
-                raise e
+            raise VirtTemplateNotFound(vm['urn'])
         logging.debug("************ TEMPLATE => %s" % str(template))
         # Check if the project and slice already exist
         project_uuid = self.check_project_exists(vm["project_name"])
         vm["project_id"] = project_uuid
         slice_uuid = self.check_slice_exists_in_project(vm["project_name"], vm["slice_name"])
         vm["slice_id"] = slice_uuid
-        # Create the VM URN and assign it to the VM
-        vm_hrn = vm["project_name"] + '.' + vm["slice_name"] + '.' + vm["name"]
-        vm_urn = hrn_to_urn(vm_hrn, "sliver")
-        vm["urn"] = vm_urn
         #XXX: Hardcoded due to the database limitations
         # The AllocatedVM model needs some information of the Template, obtain it and add to the dictionary
         vm["operating_system_type"] = template["operating_system_type"]
@@ -887,15 +891,29 @@ class VTResourceManager(object):
             vm_allocated_model.save()
             # TODO: Create a NetworkInterface and asign to the VM
             logging.debug("************ RELATED SERVER IS %s WITH ATTRIBUTES %s" %(vm_allocated_model.server.name, str(vm_allocated_model.server)))
-        except Exception as e:
-            raise e
+        except:
+            db.session.rollback()
+            # Try to destroy the allocated VM
+            try:
+                self.deallocate_vm(vm_allocated_model)
+            except:
+                 db.session.rollback()
+            # Rollback the session
+            raise VirtVMAllocationError(vm['urn'])
         # Associate the new VM with the Container
         container.vms.append(vm_allocated_model)
         # Add the expiration time to the allocated VM
         try:
             self.expiration_manager.add_expiration_to_vm_by_uuid(vm_allocated_model.get_uuid(), end_time)
         except Exception as e:
-            raise e
+            # Rollback the session
+            db.session.rollback()
+            # Destroy the related VM
+            try:
+                self.deallocate_vm(vm_allocated_model)
+            except:
+                db.session.rollback()
+            raise virt_exception.VirtMaxVMDurationExceeded(end_time)
         # Add the template to the allocated VM
         self.template_manager.add_template_to_vm(vm_allocated_model.get_uuid(), template)
         # Obtain the Allocated VM information

@@ -28,7 +28,6 @@ class VirtMacAlreadyTaken(VirtException):
 
 class VirtVmNameAlreadyTaken(VirtException):
     def __init__(self, vm):
-	vm_name = vm
 	super(VirtVmNameAlreadyTaken, self).__init__("VM name already taken (%s)" % (vm,)) 
 
 class VirtInterfaceNotFound(VirtException):
@@ -70,3 +69,11 @@ class VirtContainerNotFound(VirtException):
 class VirtVMCreationError(VirtException):
     def __init__(self, urn):
         super(VirtVMCreationError, self).__init__("The given VM could not be created (%s)" % (urn,))
+
+class VirtVMAllocationError(VirtException):
+    def __init__(self, urn):
+        super(VirtVMAllocationError, self).__init__("The given VM could not be allocated (%s)" % (urn,))
+
+class VirtTemplateNotFound(VirtException):
+    def __init__(self, urn):
+        super(VirtTemplateNotFound, self).__init__("The given Template does not exist (%s)" % (urn,))

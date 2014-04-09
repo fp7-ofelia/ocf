@@ -157,6 +157,12 @@ class VTDelegate3(GENIv3DelegateBase):
             allocated_vms = list()
             for requested_vm in requested_vms:
                 try:
+                    # Create the VM URN and assign it to the VM
+                    vm_hrn = requested_vm["project_name"] + '.' \
+                             + requeted_vm["slice_name"] + '.' \
+                             + requested_vm["name"] 
+                    vm_urn = hrn_to_urn(vm_hrn, "sliver")
+                    requested_vm["urn"] = vm_urn
                     # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGE, slice_urnR
                     allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
                     allocated_vms.append(allocated_vm)
@@ -167,6 +173,7 @@ class VTDelegate3(GENIv3DelegateBase):
                     raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vm['server_uuid'],))
                 except virt_exception.VirtMaxVMDurationExceeded as e:
                     raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
+                
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except Exception as e:
             self.undo_action("allocate", allocated_vms)

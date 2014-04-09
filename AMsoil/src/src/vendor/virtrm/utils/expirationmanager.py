@@ -102,6 +102,11 @@ class ExpirationManager():
             expiration_obj = Expiration(None, expiration, True)
             expiration_obj.set_vm(vm)
         except Exception as e:
+            db.session.rollback()
+            try:
+                expiration_obj.destroy()
+            except:
+                db.session.rollback()
             raise e
 
     def delete_expiration_by_vm_uuid(self, vm_uuid):
@@ -113,6 +118,7 @@ class ExpirationManager():
             else:
                 expiration_obj.destroy()
         except Exception as e:
+            db.session.rollback()
             raise e
   
     def update_expiration_by_vm_uuid(self, vm_uuid, expiration_time):
@@ -127,10 +133,12 @@ class ExpirationManager():
             expiration_obj.set_do_save(True)
             expiration_obj.set_end_time(expiration)
         except Exception as e:
+            db.session.rollback()
             raise e
 
     def delete_expiration(self, expiration):
         try:
             expiration.destroy()
         except Exception as e:
+            db.session.rollback()
             raise e
