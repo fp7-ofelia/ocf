@@ -71,7 +71,7 @@ class Action(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     type = db.Column(db.String(16), nullable=False, default="")
     uuid = db.Column(db.String(512), nullable=False, default="")
-    callback_url = db.Column("callBackUrl", db.String(200), nullable=False)
+    callback_url = db.Column("callBackUrl", db.String(200), nullable=False, default="")
     status = db.Column(db.String(16), nullable=False, default="")
     description = db.Column(db.String(2048), default="")
     object_uuid = db.Column("objectUUID", db.String(512), default="")

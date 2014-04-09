@@ -29,7 +29,7 @@ class XenServer(VTServer):
     vtserver = db.relationship("VTServer", backref="xenserver")
     
     '''VMs array'''
-    vms = association_proxy("xenserver_vms", "xenvm")
+    vms = association_proxy("xenserver_vms", "xenvm", creator=lambda vm:XenServerVMs(xenvm=vm))
     
     '''Private methods'''
     def __tupleContainsKey(tu,key):
@@ -112,6 +112,7 @@ class XenServer(VTServer):
             interfaces = self.create_enslaved_vm_interfaces()
             # Call factory        
             logging.debug("**************************** Server 4")
+            logging.debug("******************************** XENVM - PARAMS\nNAME => %s\nUUID => %s\nPROJECT_ID => %s\nPROJECT_NAME => %s\nSLICE_ID => %s\nSLICE_NAME => %s\nOPERATING SYSTEM TYPE => %s\nOPERATING SYSTEM VERSION => %s\nOPERATING SYSTEM DISTRIBUTION => %s\nMEMORY => %s\nDISC SPACE GB => %s\nNUMBER OF CPUS => %s\nCALLBACK URL => %s\nINTERFACES => %s\nHARD DISC SETUP TYPE => %s\nHARD DISC ORIGIN PATH => %s\nVIRTUALIZATION SETUP TYPE => %s\nSAVE => %s" % (name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,str(interfaces),hd_setup_type,hd_origin_path,virt_setup_type, save))
             vm = XenVM.create(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
             logging.debug("**************************** Server 5")
             self.vms.append(vm)        
@@ -139,6 +140,6 @@ class XenServerVMs(db.Model):
     xenserver_id = db.Column(db.ForeignKey(table_prefix + 'xenserver.vtserver_ptr_id'), nullable=False)
     xenvm_id = db.Column(db.ForeignKey(table_prefix + 'xenvm.virtualmachine_ptr_id'), nullable=False)
     # Relationships
-    xenserver = db.relationship("XenServer", backref="xenserver_vms", lazy="dynamic")
-    xenvm = db.relationship("XenVM", backref="xenserver_associations", lazy="dynamic")
+    xenserver = db.relationship("XenServer", backref=db.backref("xenserver_vms", cascade="all, delete-orphan"))
+    xenvm = db.relationship("XenVM", backref=db.backref("xenserver_associations", cascade="all, delete-orphan"))
 

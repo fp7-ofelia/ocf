@@ -30,17 +30,18 @@ class XenVM(VirtualMachine):
     hd_origin_path = db.Column("hdOriginPath", db.String(1024), nullable=False, default="")
     virtualization_setup_type = db.Column("virtualizationSetupType", db.String(1024), nullable=False, default="")
     vm = db.relationship("VirtualMachine", uselist=False, backref=db.backref("xenvm", cascade = "all, delete-orphan"))
-    xenserver = association_proxy("xenserver_associations", "xenserver")
+    server = association_proxy("xenserver_associations", "xenserver")
     
     @staticmethod
-    def constructor(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save=True):
+    def __init__(self,name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save=True):
         logging.debug("************************************* XENVM 2")
-        self =  XenVM()
         try:
+            self.do_save = False
             # Set common fields
             self.set_name(name)
-            logging.debug("******************************** XENVM OK")
+            logging.debug("******************************** XENVM - NAME IS %s" % name)
             self.set_uuid(uuid)
+            logging.debug("******************************** XENVM - UUID IS %s" % uuid)
             self.set_project_id(project_id)
             self.set_project_name(project_name)
             self.set_slice_id(slice_id)
@@ -48,11 +49,12 @@ class XenVM(VirtualMachine):
             self.set_os_type(os_type)
             self.set_os_version(os_version)
             self.set_os_distribution(os_dist)
-            self.set_memory(memory)
+            self.set_memory_mb(memory)
             self.set_disc_space_gb(disc_space_gb)
             self.set_number_of_cpus(number_of_cpus)
             self.set_callback_url(callback_url)
             self.set_state(self.UNKNOWN_STATE)
+            self.type = "xen"
             logging.debug("************************************* XENVM 3")
             for interface in interfaces:
                 logging.debug("************************************* XENVM 4")
@@ -69,7 +71,6 @@ class XenVM(VirtualMachine):
             logging.debug("************************************* XENVM ERROR - 1 " + str(e))
             print e
             raise e
-        return self
     
     '''Destructor'''
     def destroy(self):
@@ -86,14 +87,6 @@ class XenVM(VirtualMachine):
         try:
             HDSetupTypeClass.validate_hd_setup_type(hd_setup_type)
             return hd_setup_type
-        except Exception as e:
-            raise e
-    
-    @validates('virtualization_setup_type')
-    def validate_virtualization_setup_type(self, key, virt_type):
-        try:
-            VirtTypeClass.validate_virt_type(virt_type)
-            return virt_type
         except Exception as e:
             raise e
     
@@ -128,4 +121,5 @@ class XenVM(VirtualMachine):
     @staticmethod
     def create(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save):
         logging.debug("************************************* XENVM 1")
-        return XenVM.constructor(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
+        xen_vm =  XenVM(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
+        return xen_vm

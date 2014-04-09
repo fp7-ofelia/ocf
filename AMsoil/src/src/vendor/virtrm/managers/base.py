@@ -172,6 +172,11 @@ class VTResourceManager(object):
         # TODO: Automatize this
         logging.debug("*********** ADDING SERVER INFORMATION...")
         server = vm.server
+        #XXX: Very ugly, fix this
+        try:
+            server = server[0]
+        except:
+            pass
         vm_dict["server_name"] = server.get_name()
         if not "server_uuid" in vm_dict.keys():
             vm_dict["server_uuid"] = server.get_uuid()
@@ -451,9 +456,11 @@ class VTResourceManager(object):
         # Fill the VirtualMachine parameters
         logging.debug("*************** OBTAIN VM...")
         vm_dict = args_dict.pop("vm")
-        logging.debug("*************** FILL PARAMS...")
+        logging.debug("*************** FILL PARAMS...") 
+        logging.debug("************* OPERATING SYSTEM TYPE IS %s" % vm_dict['operating_system_type'])
         vm_class = server_class.virtual_machines[0]
-        self.translator.dict2xml(vm_dict, vm_class) 
+        self.translator.dict2xml(vm_dict, vm_class)
+        logging.debug("************* OPERATING SYSTEM TYPE NOW IS %s" % vm_class.operating_system_type) 
         # Fill the XenConfiguration parameters
         logging.debug("*************** OBTAIN XEN CONFIGURATOR...")
         xen_dict = args_dict.pop('xen_configuration')
@@ -476,7 +483,7 @@ class VTResourceManager(object):
             raise e
         # Make sure that the VM has been created
         try:
-            vm = self.get_vm_object(vm_dict['uuid']).one
+            vm = self.get_vm_object(vm_dict['uuid'])
         except Exception as e:
             # TODO: Raise an specific Exeption
             raise e
@@ -485,6 +492,13 @@ class VTResourceManager(object):
             self.expiration_manager.add_expiration_to_vm_by_uuid(vm.get_uuid(), end_time)
         except Exception as e:
             raise e
+        # Attach the VM to a Container
+        try:
+            container = self.get_container_for_given_vm(vm.name, container_gid, prefix)
+        except Exception as e:
+            raise e
+        container.vms.append(vm)
+        container.save()
         # Attach the Template Information to the VM
         try:
             self.template_manager.add_template_to_vm(vm.get_uuid(), template)

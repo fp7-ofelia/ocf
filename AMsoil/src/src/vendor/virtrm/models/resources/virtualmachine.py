@@ -94,24 +94,27 @@ class VirtualMachine(db.Model):
             raise e
     
     @validates('operating_system_type')
-    def validate_operatingsystemtype(self, key, os_type):
+    def validate_operating_system_type(self, key, os_type):
         try:
+            logging.debug("************* OPERATING SYSTEM TYPE IS %s" % os_type)
             OSTypeClass.validate_os_type(os_type)
             return os_type
         except Exception as e:
             raise e
     
     @validates('operating_system_distribution')
-    def validate_operatingsystemdistribution(self, key, os_distribution):
+    def validate_operating_system_distribution(self, key, os_distribution):
         try:
+            logging.debug("************* OPERATING SYSTEM DISTRIBUTION IS %s" % os_distribution)
             OSDistClass.validate_os_dist(os_distribution)
             return os_distribution
         except Exception as e:
             raise e
     
     @validates('operating_system_version')
-    def validate_operatingsystemversion(self, key, os_version):
+    def validate_operating_system_version(self, key, os_version):
         try:
+            logging.debug("************* OPERATING SYSTEM VERSION IS %s" % os_version)
             OSVersionClass.validate_os_version(os_version)
             return os_version
         except Exception as e:
@@ -171,7 +174,7 @@ class VirtualMachine(db.Model):
     def get_urn(self):
         return self.urn
     
-    def set_project_id(self,projectId):
+    def set_project_id(self,project_id):
         if not isinstance(project_id,str):
             project_id = str(project_id)
         self.project_id = project_id

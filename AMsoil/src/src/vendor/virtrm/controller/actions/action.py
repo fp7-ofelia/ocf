@@ -53,7 +53,14 @@ class ActionController():
         logging.debug("********************************* 2")
         action_ifaces.pop()
         logging.debug("********************************* 3")
-        for index, vm_iface in enumerate(vm.network_interfaces.all().order_by(NetworkInterface.is_mgmt.desc(), NetworkInterface.id)):
+        #XXX: sort the ifaces is need because we receive a list
+        ifaces = vm.network_interfaces
+        # Order by ID
+        sorted_ifaces_id = sorted(ifaces, key=lambda iface: iface.id)
+        # Then order by IS_MGMT in descending order
+        sorted_ifaces = sorted(sorted_ifaces_id, key=lambda iface: iface.is_mgmt, reverse=True)
+#        for index, vm_iface in enumerate(vm.network_interfaces.order_by(NetworkInterface.is_mgmt.desc(), NetworkInterface.id)):
+        for index, vm_iface in enumerate(sorted_ifaces):
             logging.debug("********************************* 4 " + str(index) + ' ' + str(vm_iface))
             current_iface = copy.deepcopy(base_iface)
             logging.debug("********************************* 5")
@@ -61,18 +68,23 @@ class ActionController():
             logging.debug("********************************* 6")
             current_iface.name = "eth"+str(index)
             logging.debug("********************************* 7")
-            current_iface.mac = vm_iface.mac.mac
+            current_iface.mac = vm_iface.mac.first().mac
             logging.debug("********************************* 8")
             # ip4s are many, but xml only accepts one
             if vm_iface.ip4s:
-                logging.debug("********************************* 9 - 1")
-                current_iface.ip = vm_iface.ip4s.all()[0].ip
-                current_iface.mask = vm_iface.ip4s.all()[0].Ip4Range.get().netmask
-                current_iface.gw = vm_iface.ip4s.all()[0].Ip4Range.get().gw
-                current_iface.dns1 = vm_iface.ip4s.all()[0].Ip4Range.get().dns1
-                current_iface.dns2 = vm_iface.ip4s.all()[0].Ip4Range.get().dns2
-                logging.debug("********************************* 9 - 2")
-                current_iface.switch_id = vm_iface.connected_to.all()[0].name
+                logging.debug("********************************* 9")
+                current_iface.ip = vm_iface.ip4s[0].ip
+                logging.debug("********************************* CURRENT IP => %s" % current_iface.ip)
+                current_iface.mask = vm_iface.ip4s[0].ip_range[0].netmask
+                logging.debug("********************************* CURRENT NETMASK => %s" % current_iface.mask)
+                current_iface.gw = vm_iface.ip4s[0].ip_range[0].gw
+                logging.debug("********************************* CURRENT GW => %s" % current_iface.gw)
+                current_iface.dns1 = vm_iface.ip4s[0].ip_range[0].dns1
+                logging.debug("********************************* CURRENT DNS1 => %s" % current_iface.dns1)
+                current_iface.dns2 = vm_iface.ip4s[0].ip_range[0].dns2
+                logging.debug("********************************* CURRENT DNS2 => %s" % current_iface.dns2)
+                current_iface.switch_id = vm_iface.connected_to[0].name
+                logging.debug("********************************* CURRENT NAME => %s" % current_iface.name)
                 logging.debug("********************************* 10")
                 action_ifaces.append(current_iface)
                 
