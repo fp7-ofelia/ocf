@@ -99,7 +99,9 @@ class InformationDispatcher():
                         simple_actions[vm.getUUID()] = "running"
                     else:
                         if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
-                            vm.delete()
+                            child = vm.getChildObject()
+                            server = vm.Server.get()
+                            server.deleteVM(vm)
                             simple_actions[vm.getUUID()] = "deleted"
                         elif vm.getState() in ['running', "starting...", "stopping..."] :
                             vm.setState('stopped')
