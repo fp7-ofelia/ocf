@@ -1,4 +1,5 @@
 from plugins.vt_plugin.controller.dispatchers.MonitoringResponseDispatcher import MonitoringResponseDispatcher
+from plugins.vt_plugin.models.Action import Action
 from plugins.vt_plugin.models.VTServer import VTServer
 from plugins.vt_plugin.models.VM import VM
 import xmlrpclib
@@ -6,20 +7,30 @@ import xmlrpclib
 class InformationDispatcher:
 
     @staticmethod
+    def force_delete_vm(vm):
+        # Completely delete VM
+        server = VTServer.objects.get(uuid = vm.serverID)
+        server.vms.remove(vm)
+        vm.completeDelete()
+        # Delete the associated entry in the database
+        Action.objects.all().filter(vm = vm).delete()
+    
+    @staticmethod
     def force_update_vms(client_id='None', vm_id='None'):
         """
         Forces the update of the status of the VMs.
         Retrieves the server from the passed arguments and invokes
         the corresponding method on its VT AM.
         
-        If this method fails, it means there is a
-        If the server is not passed, it 
+        If this method fails, it means there was no VM
+        If the server ('client_id') is not passed, it is obtained from the VM
         
         @param    client_id     ID of the server
         @param    vm_id         ID of the VM
         @return   nothing
         """
         raw_updates = dict()
+        vm = None
         if client_id != 'None':
             server = VTServer.objects.get(id=client_id)
             client_id = server.getUUID()
@@ -35,9 +46,9 @@ class InformationDispatcher:
             raw_updates = vt_am.force_update_exp_vms(client_id, vm_id)
         except:
             if vm:
-                vm.delete()
+                # Completely delete VM
+                InformationDispatcher.force_delete_vm(vm)
         updated_vms = InformationDispatcher.__process_updated_vms(raw_updates)
-        print "Updated VMs--------->", updated_vms
 
     @staticmethod
     def __process_updated_vms(updated_vms):
@@ -49,7 +60,8 @@ class InformationDispatcher:
                 simple_actions[vm.getUUID()] = "running"
             else:
                 if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown', 'undefined']:
-                    vm.delete()
+                    # Completely delete VM
+                    InformationDispatcher.force_delete_vm(vm)
                     simple_actions[vm.getUUID()] = "deleted"
                 elif vm.getState() in ['running', "starting...", "stopping..."] :
                     vm.setState('stopped')

@@ -59,6 +59,8 @@ class ProvisioningDispatcher():
                     try:
                         VMmodel.completeDelete()
                         Server.vms.remove(VMmodel)
+                        # Delete the associated entry in the database
+                        actionModel.delete()
                     except:
                         pass
 
