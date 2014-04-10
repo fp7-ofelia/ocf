@@ -172,11 +172,14 @@ class VTDelegate3(GENIv3DelegateBase):
                 except virt_exception.VirtServerNotFound as e:
                     raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vm['server_uuid'],))
                 except virt_exception.VirtMaxVMDurationExceeded as e:
-                    raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['name'],))
-                
+                    raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['urn'],))
+                except virt_exception.VirtTemplateNotFound as e:
+                    raise geniv3_exception.GENIv3BadArgsError("The desired Template could not be found for the given Server (%s)." % (requested_vm['server_uuid'],))
+                except virt_exception.VirtVMAllocationError as e:
+                    raise geniv3_exception.GENIv3GeneralError("The VM could not be allocated (%s)." % (requested_vm['urn'],))
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except Exception as e:
-            self.undo_action("allocate", allocated_vms)
+            self.undo_action(allocated_vms, "allocate")
             raise e
         # Generate the Manifest RSpec
         rspecs = self._get_manifest_rspec(allocated_vms)
@@ -283,6 +286,7 @@ class VTDelegate3(GENIv3DelegateBase):
         # TODO: honor best_effort
         allocated_vms = list()
         provisioned_vms = list()
+        vm_with_error = dict()
         logging.debug("************* URNs => %s" % (str(urns)))
         for urn in urns:
             try:
@@ -298,6 +302,8 @@ class VTDelegate3(GENIv3DelegateBase):
                         raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
                     except virt_exception.VirtNoResourcesInContainer:
                         raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s) (%s)" % (urn,))
+                    except Exception:
+                         raise geniv3_exception.GENIv3GeneralError("Error while provisioning (%s)." % (urn,))
                     allocated_vms.extend(vms)
                 elif (self.urn_type(urn) == "sliver"):
                     # If the UNR is from a VM, get it
@@ -314,15 +320,20 @@ class VTDelegate3(GENIv3DelegateBase):
                 if best_effort:
                     raise e
                 else:
-                    # TODO: Generate an entry for the sliver dictionary with the error?
-                    continue
+                    vm_with_error['urn'] = urn 
+                    try:
+                        vm_with_error.pop('expiration_time')
+                    except:
+                        pass
+                    vm_with_error['include_allocation_status'] = False
+                    vm_with_error['include_operational_status'] = False
+                    provisioned_vms.append(vm_with_error)
         logging.debug("***************** ALL VMS OBTAINED, PROVISION THEM")
         # Once all the VMs are obtained, provision them
         for allocated_vm in allocated_vms:
             try:
                 provisioned_vm = self._resource_manager.provision_vm(allocated_vm, end_time)
                 provisioned_vms.append(provisioned_vm)
-            # TODO: Raise an specific exception 
             except Exception as e:
                 if best_effort:
                     raise e
@@ -452,17 +463,17 @@ class VTDelegate3(GENIv3DelegateBase):
             raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
 
     ''' Helper methods '''
-    def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False, error_message=None):
+    def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False):
         """Helper method to create the sliver_status return values of allocate and other calls."""
         result = {'geni_sliver_urn' : sliver['urn'],
-                  'geni_expires'    : sliver['expiration_time'],
+                  'geni_expires'    : sliver['expiration_time'] if 'expiration_time' in sliver.keys() else None,
                   'geni_allocation_status' : self.ALLOCATION_STATE_UNALLOCATED}
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['state'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
         if (include_operational_status): 
             result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if error_message else self.OPERATIONAL_STATE_READY
-        if (error_message):
-            result['geni_error'] = error_message
+        if 'error_message' in sliver.keys():
+            result['geni_error'] = sliver['error_message']
         return result
     
     def _get_manifest_rspec(self, slivers):
@@ -485,10 +496,16 @@ class VTDelegate3(GENIv3DelegateBase):
         logging.debug("****** MANIFEST RSPEC *****" + "\n\n" + self.lxml_to_string(root_node)) 
         return self.lxml_to_string(root_node)
     
-    def undo_action(self, action, params):
-        if action is "allocate":
+    def undo_action(self, params, action):
+        if action == "allocate":
             for param in params:
-                self._resource_manager.delete_vm(param, "allocated")
-        elif action is "create":
-            for param in params:
-                self._resource_manager.delete_vm(param, "provisioned")            
+                try:
+                    self._resource_manager.delete_vm_by_uuid(param['uuid'])
+                except:
+                    continue
+        elif action == "create":
+            for param in params: 
+                try:
+                    self._resource_manager.delete_vm_by_uuid(param['uuid'])            
+                except:
+                    continue

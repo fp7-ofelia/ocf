@@ -400,7 +400,6 @@ class VTResourceManager(object):
             provisioned_vm = self.create_vm(dictionary, template, container_gid, container_prefix, end_time) 
             logging.debug("********** PROVISIONED...")
         except Exception as e:
-            # TODO: Raise an specific Exception
             raise e
         return provisioned_vm
 
@@ -436,7 +435,6 @@ class VTResourceManager(object):
         try:
             container = self.get_container_for_given_vm(args_dict["vm"]["name"], container_gid, prefix)
         except Exception as e:
-            # TODO: Raise an specific Exception
             raise e
         # Obtain the provisioning RSpec from the dictionary
         provisioning_rspec = self.get_provisioning_rspec_from_dict(args_dict)
@@ -446,13 +444,13 @@ class VTResourceManager(object):
             ProvisioningDispatcher.process(provisioning_rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
             # If the provisioning fails at any point, try tho destroy the created VM
+            db.session.rollback()
             try:
                 self.delete_vm_by_uuid(vm_class.uuid)
             except:
                 pass
             logging.debug("*************** AGENT FAILED...")
-            # TODO: Raise an specific Exception
-            raise e
+            raise virt_exception.VirtVMCreationError(args_dict['vm']['name'])
         # Make sure that the VM has been created
         vm_class = provisioning_rspec.query.provisioning.action[0].server.virtual_machines[0]
         try:
