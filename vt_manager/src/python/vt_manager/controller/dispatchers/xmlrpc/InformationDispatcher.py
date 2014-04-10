@@ -1,5 +1,7 @@
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.controller.drivers.VTDriver import VTDriver
+from vt_manager.models.Action import Action
+from vt_manager.models.VirtualMachine import VirtualMachine
 import xmlrpclib, threading, logging, copy
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.resourcesHash import resourcesHash
@@ -101,7 +103,11 @@ class InformationDispatcher():
                         if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
                             child = vm.getChildObject()
                             server = vm.Server.get()
+                            #Action.objects.all().filter(objectUUID = vm.uuid).delete()
                             server.deleteVM(vm)
+                            # Keep actions table up-to-date after each deletion
+                            vm_uuids = [ vm.uuid for vm in VirtualMachine.objects.all() ]
+                            Action.objects.all().exclude(objectUUID__in = vm_uuids).delete()
                             simple_actions[vm.getUUID()] = "deleted"
                         elif vm.getState() in ['running', "starting...", "stopping..."] :
                             vm.setState('stopped')

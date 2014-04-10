@@ -129,6 +129,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'vt_manager.common.rpc4django',
     'vt_manager.common.defaultsite',
+    'vt_manager.common.commands',
     'registration',
     'django_evolution',
     'vt_manager.models',
