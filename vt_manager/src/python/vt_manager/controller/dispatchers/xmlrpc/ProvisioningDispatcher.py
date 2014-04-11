@@ -62,6 +62,8 @@ class ProvisioningDispatcher():
 						if not vm:
 							vm = controller.getVMbyUUID(action.server.virtual_machines[0].uuid)
 						controller.deleteVM(vm)
+						# Keep actions table up-to-date after each deletion
+						actionModel.delete()
 					except Exception as e:
 						print "Could not delete VM. Exception: %s" % str(e)
 				#XmlRpcClient.callRPCMethod(threading.currentThread().callBackURL,"sendAsync",XmlHelper.craftXmlClass(XmlHelper.getProcessingResponse(Action.FAILED_STATUS, action, str(e))))

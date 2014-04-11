@@ -18,7 +18,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         # Model 'actions' from app 'vt_plugin'
         # Remove actions whose foreign keys point to non-existent objects
-        inconsistent_actions = Action.objects.all().exclude(vm__id__in = VM.objects.all())
+        inconsistent_actions = Action.objects.all().exclude(vm__in = VM.objects.all())
         length_inconsistent_actions = len(inconsistent_actions)
         inconsistent_actions.delete()
         #Action.objects.all().exclude(requestUser__in = User.objects.all())

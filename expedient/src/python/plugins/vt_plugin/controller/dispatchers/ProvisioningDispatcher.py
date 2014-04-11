@@ -170,6 +170,9 @@ class ProvisioningDispatcher():
         try:
             #super(Resource).delete()
             vm.delete()
+            # Keep actions table up-to-date after each deletion
+            print "Deleting VMs: %s" % str(Action.objects.all().exclude(vm__in = VM.objects.all()))
+            Action.objects.all().exclude(vm__in = VM.objects.all()).delete()
         except Exception as e:
             logging.error(e)
 

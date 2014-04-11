@@ -11,9 +11,11 @@ class InformationDispatcher:
         # Completely delete VM
         server = VTServer.objects.get(uuid = vm.serverID)
         server.vms.remove(vm)
-        vm.completeDelete()
         # Delete the associated entry in the database
         Action.objects.all().filter(vm = vm).delete()
+        vm.completeDelete()
+        # Keep actions table up-to-date after each deletion
+        #Action.objects.all().exclude(vm__in = VM.objects.all()).delete()
     
     @staticmethod
     def force_update_vms(client_id='None', vm_id='None'):

@@ -3,6 +3,7 @@ from django.contrib import auth
 from threading import Lock
 import inspect 
 from vt_manager.models.VTServer import VTServer
+from vt_manager.models.Action import Action
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.models.XenVM import XenVM
 from vt_manager.utils.MutexStore import MutexStore
@@ -101,6 +102,11 @@ class XenServer(VTServer):
 			if vm not in self.vms.all():
 				raise Exception("Cannot delete a VM from pool if it is not already in") 
 			self.vms.remove(vm)
+			# Delete related db entry
+			Action.objects.all().filter(objectUUID=vm.uuid).delete()
+			# Keep actions table up-to-date after each deletion
+			#vm_uuids = [ x.uuid for x in VirtualMachine.objects.all() ]
+			#Action.objects.all().exclude(objectUUID__in = vm_uuids).delete()
 			vm.destroy()	
 			self.autoSave()
 
