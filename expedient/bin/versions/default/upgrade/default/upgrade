@@ -10,8 +10,6 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-SRC_DIR=/opt/ofelia/expedient/
-
 
 local TMP_PATH=$PWD
 

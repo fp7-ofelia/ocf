@@ -9,7 +9,6 @@ Created on Apr 9, 2014
 '''
 
 from django.core.management.base import NoArgsCommand
-from django.core.management import call_command
 from vt_plugin.models import Action, VM
 #from django.contrib.auth.models import User
 
@@ -17,6 +16,7 @@ class Command(NoArgsCommand):
     help = "Cleans inconsistent data from the database"
 
     def handle_noargs(self, **options):
+        # Model 'actions' from app 'vt_plugin'
         # Remove actions whose foreign keys point to non-existent objects
         inconsistent_actions = Action.objects.all().exclude(vm__id__in = VM.objects.all())
         length_inconsistent_actions = len(inconsistent_actions)

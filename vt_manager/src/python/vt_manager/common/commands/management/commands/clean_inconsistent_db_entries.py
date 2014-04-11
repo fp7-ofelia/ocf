@@ -9,13 +9,13 @@ Created on Apr 10, 2014
 '''
 
 from django.core.management.base import NoArgsCommand
-from django.core.management import call_command
 from models import Action, VirtualMachine
 
 class Command(NoArgsCommand):
     help = "Cleans inconsistent data from the database"
 
     def handle_noargs(self, **options):
+        # Model 'action' from app 'models'
         # Remove actions whose foreign keys point to non-existent objects
         vms_uuid = [ x.uuid for x in VirtualMachine.objects.all()]
         inconsistent_actions = Action.objects.all().exclude(objectUUID__in = vms_uuid)
