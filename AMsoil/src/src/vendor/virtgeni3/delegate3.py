@@ -2,6 +2,7 @@ import time
 import amsoil.core.pluginmanager as pm
 import xml.etree.ElementTree as ET
 import lxml
+from geni3util.exceptiontranslator import ExceptionTranslator
 from geni3util.filterednodes import RSPECS_FILTERED_NODES
 from geni3util.xrn import *
 
@@ -61,7 +62,10 @@ class VTDelegate3(GENIv3DelegateBase):
         root_node = self.lxml_ad_root()
         node_generator = self.lxml_ad_element_maker(namespace.keys()[0])
         # Obtain the servers
-        servers = self._resource_manager.get_servers()
+        try:
+            servers = self._resource_manager.get_servers()
+        except Exception as e:
+            raise ExceptionTranslator.virtexception2GENIv3exception(type(e), default=None)
         logging.debug("SERVER (DICTIONARY): %s" % str(servers))
         # Craft the XML
         r = node_generator.network()
@@ -159,7 +163,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 try:
                     # Create the VM URN and assign it to the VM
                     vm_hrn = requested_vm["project_name"] + '.' \
-                             + requeted_vm["slice_name"] + '.' \
+                             + requested_vm["slice_name"] + '.' \
                              + requested_vm["name"] 
                     vm_urn = hrn_to_urn(vm_hrn, "sliver")
                     requested_vm["urn"] = vm_urn
@@ -167,19 +171,12 @@ class VTDelegate3(GENIv3DelegateBase):
                     allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
                     allocated_vms.append(allocated_vm)
                 # Translate the specific RM Exceptions into GENIv3 Exceptions
-                except virt_exception.VirtVmNameAlreadyTaken as e:
-                    raise geniv3_exception.GENIv3AlreadyExistsError("The desired VM name(s) is already taken (%s)." % (requested_vm['name'],))
-                except virt_exception.VirtServerNotFound as e:
-                    raise geniv3_exception.GENIv3SearchFailedError("The desired Server UUID(s) could no be found (%s)." % (requested_vm['server_uuid'],))
-                except virt_exception.VirtMaxVMDurationExceeded as e:
-                    raise geniv3_exception.GENIv3BadArgsError("VM allocation can not be extended that long (%s)" % (requested_vm['urn'],))
-                except virt_exception.VirtTemplateNotFound as e:
-                    raise geniv3_exception.GENIv3BadArgsError("The desired Template could not be found for the given Server (%s)." % (requested_vm['server_uuid'],))
-                except virt_exception.VirtVMAllocationError as e:
-                    raise geniv3_exception.GENIv3GeneralError("The VM could not be allocated (%s)." % (requested_vm['urn'],))
+                except Exception as e:
+                    logging.debug("********************* EXCEPTION => %s / TYPE => %s" % (str(e), str(type(e))))
+                    raise ExceptionTranslator.virtexception2GENIv3exception(type(e), name=requested_vm['name'], server=requested_vm['server_uuid'], urn=requested_vm['urn'], default=requested_vm['urn'])
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except Exception as e:
-            self.undo_action(allocated_vms, "allocate")
+            self._undo_action(allocated_vms, "allocate")
             raise e
         # Generate the Manifest RSpec
         rspecs = self._get_manifest_rspec(allocated_vms)
@@ -286,7 +283,6 @@ class VTDelegate3(GENIv3DelegateBase):
         # TODO: honor best_effort
         allocated_vms = list()
         provisioned_vms = list()
-        vm_with_error = dict()
         logging.debug("************* URNs => %s" % (str(urns)))
         for urn in urns:
             try:
@@ -298,19 +294,15 @@ class VTDelegate3(GENIv3DelegateBase):
                     try:
                         vms = self._resource_manager.get_allocated_vms_in_container(urn, "GENIv3")      
                     # Throw the Exception for every kind of error
-                    except virt_exception.VirtContainerNotFound:
-                        raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
-                    except virt_exception.VirtNoResourcesInContainer:
-                        raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s) (%s)" % (urn,))
-                    except Exception:
-                         raise geniv3_exception.GENIv3GeneralError("Error while provisioning (%s)." % (urn,))
+                    except Exception as e:
+                        raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                     allocated_vms.extend(vms)
                 elif (self.urn_type(urn) == "sliver"):
                     # If the UNR is from a VM, get it
                     try: 
                         vm = get_vm_allocated_by_urn(urn)
-                    except virt_exception.VirtVMNotFound:
-                        raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
+                    except Exception as e:
+                        raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                     allocated_vms.append(vm)
                 else:
                     raise geniv3_exception.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))
@@ -320,20 +312,18 @@ class VTDelegate3(GENIv3DelegateBase):
                 if best_effort:
                     raise e
                 else:
-                    vm_with_error['urn'] = urn 
-                    try:
-                        vm_with_error.pop('expiration_time')
-                    except:
-                        pass
-                    vm_with_error['include_allocation_status'] = False
-                    vm_with_error['include_operational_status'] = False
-                    provisioned_vms.append(vm_with_error)
+                    provisioned_vms.append(self._generate_error_entry(urn, str(e)))
         logging.debug("***************** ALL VMS OBTAINED, PROVISION THEM")
         # Once all the VMs are obtained, provision them
         for allocated_vm in allocated_vms:
+            # First catch the RM Exception and translate them into GENIv3 Exceptions.
+            # Then, apply best effort.
             try:
-                provisioned_vm = self._resource_manager.provision_vm(allocated_vm, end_time)
-                provisioned_vms.append(provisioned_vm)
+                try:
+                    provisioned_vm = self._resource_manager.provision_vm(allocated_vm, end_time)
+                    provisioned_vms.append(provisioned_vm)
+                except Exception as e:
+                    raise raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=allocated_vm['urn'], default=urn)
             except Exception as e:
                 if best_effort:
                     raise e
@@ -358,16 +348,16 @@ class VTDelegate3(GENIv3DelegateBase):
             if (self.urn_type(urn) == 'slice'):
                 try:
                     slice_vms = self._resource_manager.get_vms_in_container(urn)
-                except:
-                    raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (urn,))
+                except Exception as e:
+                    raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                 if slice_vms:
                     vms.extend(slice_vms)
             elif (self.urn_type(urn) == 'sliver'):
                 try:
                     vm = self._resource_manager.get_vm_object_by_urn(urn)
                     vms.append(vm)
-                except:
-                    raise geniv3_exception.GENIv3SearchFailedError("The desired urn(s) cloud not be found (%s)." % (vm,))
+                except Exception as e:
+                    raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
             else:
                 raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate') 
         if not vms:
@@ -471,9 +461,11 @@ class VTDelegate3(GENIv3DelegateBase):
         if (include_allocation_status):
             result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['state'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
         if (include_operational_status): 
-            result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if error_message else self.OPERATIONAL_STATE_READY
-        if 'error_message' in sliver.keys():
+            result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if 'error_message' in sliver.keys() else self.OPERATIONAL_STATE_READY
+        try:
             result['geni_error'] = sliver['error_message']
+        except:
+            pass
         return result
     
     def _get_manifest_rspec(self, slivers):
@@ -495,8 +487,12 @@ class VTDelegate3(GENIv3DelegateBase):
         root_node.append(node)
         logging.debug("****** MANIFEST RSPEC *****" + "\n\n" + self.lxml_to_string(root_node)) 
         return self.lxml_to_string(root_node)
+ 
+    def _generate_error_entry(self, urn, error_message):
+        vm_with_error = {'urn':urn, 'error_message':error_message}
+        return vm_with_error
     
-    def undo_action(self, params, action):
+    def _undo_action(self, params, action):
         if action == "allocate":
             for param in params:
                 try:

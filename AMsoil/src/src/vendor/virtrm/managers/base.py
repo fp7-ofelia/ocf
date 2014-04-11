@@ -456,18 +456,14 @@ class VTResourceManager(object):
         try:
             vm = self.get_vm_object(vm_class.uuid)
         except Exception as e:
-            # TODO: Raise an specific Exeption
-            raise e
+            db.session.rollback()
+            raise VirtVMCreationError(vm_class.uuid)
         # Attach the Expiration time to the VM
         try:
             self.expiration_manager.add_expiration_to_vm_by_uuid(vm.get_uuid(), end_time)
         except Exception as e:
             raise e
         # Attach the VM to a Container
-        try:
-            container = self.get_container_for_given_vm(vm.name, container_gid, prefix)
-        except Exception as e:
-            raise e
         container.vms.append(vm)
         container.save()
         # Attach the Template Information to the VM
@@ -842,7 +838,7 @@ class VTResourceManager(object):
         try:
             container = self.get_container_for_given_vm(vm["name"], container_gid, prefix)
         except Exception as e:
-            raise VirtVmNameAlreadyTaken(vm['name'])
+            raise virt_exception.VirtVmNameAlreadyTaken(vm['name'])
         # Check if the server is one of the given servers
         try: 
             server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
@@ -925,8 +921,9 @@ class VTResourceManager(object):
         deleted_vm = self.get_vm_info(vm)
         try:
             vm.destroy()
-        except Exception as e:
-            raise e
+        except:
+            db.session.rollback()
+            raise virt_exception.VirtDeallocateVMError(vm.urn)
         return deleted_vm
     
     # Authority methods

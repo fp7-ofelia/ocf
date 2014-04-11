@@ -77,3 +77,11 @@ class VirtVMAllocationError(VirtException):
 class VirtTemplateNotFound(VirtException):
     def __init__(self, urn):
         super(VirtTemplateNotFound, self).__init__("The given Template does not exist (%s)" % (urn,))
+
+class VirtDeallocateVMError(VirtException):
+    def __init__(self, urn):
+        super(VirtDeallocateVMError, self).__init__("The given VM could not be deallocated (%s)" % (urn,))
+
+class VirtDeleteVMError(VirtException):
+    def __init__(self, urn):
+        super(VirtDeleteVMError, self).__init__("The given VM could not be deleted (%s)" % (urn,))
