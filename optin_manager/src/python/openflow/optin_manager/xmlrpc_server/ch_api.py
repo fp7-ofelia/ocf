@@ -19,6 +19,7 @@ from django.core.mail import send_mail
 from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 from django.contrib.sites.models import Site
 from openflow.optin_manager.opts.autofsgranter import auto_fs_granter
+import uuid
 
 @decorator
 def check_fv_set(func, *arg, **kwargs):
@@ -256,7 +257,6 @@ def create_slice(slice_id, project_name, project_description,
             raise Exception
     except:
         # New slice naming style (for FlowVisor >= 1.0) -> No legacy slice
-        import uuid
         try:
             uuid.UUID('{%s}' % str(slice_id))
             is_legacy_slice = False 
