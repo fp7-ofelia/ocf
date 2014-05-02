@@ -154,16 +154,16 @@ class TemplateDownloader():
     def cache_templates_info(self):
         templates_info = self.get_templates_info()
         self.templates_info_dict = dict()
-        for template_number, template_info in enumerate(templates_info):
-            template_no = "template%d" % (template_number+1)
+        # Sequence: start at "1" rather than 0
+        for template_number, template_info in enumerate(templates_info, start=1):
+            template_no = "template%d" % (template_number)
             self.templates_info_dict[template_no] = dict()
-            self.templates_info_dict[template_no]["number"] = template_number + 1
+            self.templates_info_dict[template_no]["number"] = template_number
            
             hash_info = None
             temp_info = None
             # Differentiate between hash and template
             try:
-                print "template_info: %s" % template_info
                 if template_info[0][0].endswith(".hash"):
                     try:
                         hash_info = template_info[0]
@@ -190,12 +190,6 @@ class TemplateDownloader():
                 self.templates_info_dict[template_no]["hash"] = dict()
                 self.templates_info_dict[template_no]["hash"]["filename"] = hash_info[0]
                 self.templates_info_dict[template_no]["hash"]["size"] = hash_info[1]
-                print "++++++++++++++++++before control check+++++++++++++++++++++++++++++++++++++"
-                # Useful to define a control version for templates
-                up_to_date = self.check_template_control_version(template_number)
-                print "************** up to date: ", up_to_date
-                self.templates_info_dict[template_no]["hash"]["remote_sync"] = up_to_date
-                print "************** up to date: ", self.templates_info_dict[template_no]["hash"]["remote_sync"]
             except:
                 pass
             
@@ -205,8 +199,13 @@ class TemplateDownloader():
                 self.templates_info_dict[template_no]["template"]["size"] = temp_info[1]
             except:
                 pass
-        
-        print "!!!!!!!!!! TEMPLATES_DICT: %s" % self.templates_info_dict
+
+            # Useful to define a control version for templates
+            try:        
+                up_to_date = self.check_template_control_version(template_number)
+                self.templates_info_dict[template_no]["hash"]["remote_sync"] = up_to_date
+            except:
+                pass
 
     # Menu
     def get_indent_for_template(self, template_name):
@@ -217,28 +216,25 @@ class TemplateDownloader():
         return indent
 
     def show_menu(self, filtered_templates=None):
-        import collections
+        #from collections import OrderedDict
+        from ordered_dict import OrderedDict
+        show_dict = {}
         if isinstance(filtered_templates, list):
             if filtered_templates:
-                show_dict = { "template%s" % temp_key: self.templates_info_dict["template%s" % temp_key] for temp_key in filtered_templates }
-            else:
-                show_dict = {}
+                for temp_key in filtered_templates:
+                   show_dict["template%s" % temp_key] = self.templates_info_dict["template%s" % temp_key]
         else:
             show_dict = self.templates_info_dict
-        print "show_dict: %s" % show_dict
-        templates_info_ord = collections.OrderedDict(sorted(show_dict.items()))
+        templates_info_ord = OrderedDict(sorted(show_dict.items()))
         for template, template_data in templates_info_ord.iteritems():
-#        for t in self.templates_info_dict.keys():
             sys.stdout.write("\n")
             template_up_to_date = ""
             try:
                 # At some point, images could lack a hash file. Ignore if that happens
                 template_hash = template_data["hash"]
-                print "template_hash: ", template_hash
-                template_up_to_date = getattr(template_hash, "remote_sync", "")
-                print "up to date: %s" % str(template_up_to_date)
+                template_up_to_date = template_hash["remote_sync"]
                 if template_up_to_date:
-                    template_up_to_date = "[ %s ]" % template_up_to_date
+                    template_up_to_date = "[ state: %s ]" % template_up_to_date
             except:
                 pass
             try:
@@ -248,7 +244,7 @@ class TemplateDownloader():
                 template_filename = template_file["filename"].split(".")[0]
                 indent = self.get_indent_for_template(template_file["filename"])
 #                sys.stdout.write("[%s] %s%s%s" % (str(template_number), str(template_filename), indent, str(template_file["size"])))
-                sys.stdout.write("[%s] %s%s%s %s" % (template_number, template_filename, indent, template_file["size"]), template_up_to_date)
+                sys.stdout.write("[%s] %s%s%s %s%s" % (template_number, template_filename, indent, template_file["size"], indent, template_up_to_date))
             except:
                 pass
 
@@ -299,15 +295,10 @@ class TemplateDownloader():
             return False
 
     def check_template_control_version(self, template_dict_id):
-        print "----------------------------------"
-        print "template_dict_id: ", template_dict_id
         template_uris = self.get_template_remote_uris(template_dict_id)
-        print "template_uris: ", template_uris
         # Retrieve data from remote hash
         hash_index = [ i for i, template in enumerate(template_uris) if template.endswith(".hash") ][0]
-        print "hash_index: ", hash_index
         hash_uri = template_uris[hash_index]
-        print "hash_uri: %s", hash_uri
         remote_hash_contents = None
         local_hash_contents = None
         try:
@@ -317,7 +308,6 @@ class TemplateDownloader():
             self.wget(hash_uri, temp_location_remote_hash)
             # Retrieve remote hash contents
             remote_hash_contents = open(temp_location_remote_hash).read().rstrip()
-            print "remote_hash_contents: ", remote_hash_contents
             # Remove remote hash file
             os.remove(temp_location_remote_hash)
         except:
@@ -328,26 +318,18 @@ class TemplateDownloader():
             location_local_hash = template_paths[hash_index]
             # Retrieve local hash contents
             local_hash_contents = open(location_local_hash).read().rstrip()
-            print "local_hash_contents: ", local_hash_contents
         except:
             pass
         # Check consistence between remote and local hash. If different, templates are either corrupt or not up-to-date
-        print "remote hash: ", remote_hash_contents
-        print "local hash: ", local_hash_contents
-        print "----------------------------------"
         if remote_hash_contents == local_hash_contents:
-            print "[[ up to date ]]"
-            return "Up-to-date"
+            return "up-to-date"
         else:
             # Previously not installed
             if not local_hash_contents:
-                print "[[ not installed ]]"
-#                return "Not installed"
-                return ""
+                return "not installed"
             # Previously installed, but outdated
             else:
-                print "[[ outdated ]]"
-                return "Outdated"
+                return "outdated"
 
     def get_template_local_path(self, template_dict_id):
         template_dict_id = "template%s" % template_dict_id
@@ -364,12 +346,10 @@ class TemplateDownloader():
     def get_template_remote_uris(self, template_dict_id):
         template_dict_id = "template%s" % template_dict_id
         template_files = []
-        print "hash filename......................... ", self.templates_info_dict[template_dict_id]["hash"]["filename"]
         template_files.append(self.templates_info_dict[template_dict_id]["hash"]["filename"])
         template_files.append(self.templates_info_dict[template_dict_id]["template"]["filename"])
         template_uris = []
         for template_file in template_files:
-            print "checking get_template_remote_uris: ", template_file
             template_name = template_file.split(".")[0]
             # Construct template URI depending on if it is an OFELIA installation or not
             if self._ofelia:
@@ -404,7 +384,7 @@ class TemplateDownloader():
         # Get files per chosen template
         files_to_download = []
         for chosen_template in self._chosen_templates:
-            self.download_template_files("template%s" % chosen_template)
+            self.download_template_files(chosen_template)
 
     # Interaction with user
     def ask_for_templates_selection(self):
