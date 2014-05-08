@@ -2,7 +2,6 @@ from sqlalchemy.orm import validates
 from utils.base import db
 from utils.mutexstore import MutexStore
 from models.resources.virtualmachine import VirtualMachine
-from models.resources.vmallocated import VMAllocated
 from models.resources.vtserver import VTServer
 import common
 import amsoil.core.pluginmanager as pm
@@ -55,7 +54,6 @@ class Template(db.Model):
     do_save = True
 
     servers = association_proxy("vtserver_templates", "vtserver", creator=lambda server:ServerTemplates(vtserver=server))
-    allocated_vms = association_proxy("virtualmachine_allocated_template", "vmallocated", creator=lambda vm:VMAllocatedTemplate(vmallocated=vm))
     vms = association_proxy("virtualmachine_template", "virtualmachine", creator=lambda vm:VMTemplate(virtualmachine=vm))
 
     def __init__(self,name="",description="",os_type="",os_version="",os_distro="",virt_type="",hd_setup_type="",hd_path="",extended_data=None,img_url="",virt_tech="" ,save=False):
@@ -244,21 +242,6 @@ class Template(db.Model):
             return False
         return True 
        
-
-class VMAllocatedTemplate(db.Model):
-    """Relation between Servers and their supported Templates"""
-
-    config = pm.getService("config")
-    table_prefix = config.get("virtrm.DATABASE_PREFIX")
-    __tablename__ = table_prefix + 'virtualmachine_allocated_template'
-
-    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    virtualmachine_allocated_uuid = db.Column(db.ForeignKey(table_prefix + 'virtualmachine_allocated.uuid'), nullable=False)
-    template_uuid = db.Column(db.ForeignKey(table_prefix + 'template.uuid'), nullable=False)
-
-    template = db.relationship("Template", backref=db.backref("vmallocated_template", cascade = "all, delete-orphan"))
-    vmallocated = db.relationship("VMAllocated")
-
 
 class VMTemplate(db.Model):
     """Relation between Servers and their supported Templates"""

@@ -107,12 +107,12 @@ class ProvisioningDispatcher():
     def __delete_start_stop_reboot_vm(controller, action_model, action):
         try:
             action_model.check_action_is_present_and_unique()
-            VMmodel =  controller.get_vm_by_uuid(action.server.virtual_machines[0].uuid)
-            if not VMmodel:
+            vm_model = controller.get_vm_by_uuid(action.server.virtual_machines[0].uuid)
+            if not vm_model:
                 logging.error("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
                 raise Exception("VM with uuid %s not found\n" % action.server.virtual_machines[0].uuid)
             # XXX: change action Model
-            action_model.set_object_uuid(VMmodel.get_uuid())
+            action_model.set_object_uuid(vm_model.get_uuid())
             db.session.add(action_model)
             db.session.commit()
         except:

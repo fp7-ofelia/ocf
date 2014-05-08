@@ -1,5 +1,4 @@
 from models.resources.virtualmachine import VirtualMachine
-from models.resources.vmallocated import VMAllocated
 from datetime import datetime
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.collections import attribute_mapped_collection

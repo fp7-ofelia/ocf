@@ -1,6 +1,9 @@
 from controller.dispatchers.provisioning.query import ProvisioningDispatcher
+from controller.dispatchers.launcher import DispatcherLauncher
+from controller.actions.action import ActionController
 from controller.drivers.virt import VTDriver
 from datetime import datetime, timedelta
+from models.common.action import Action
 from models.common.container import Container
 from models.resources.virtualmachine import VirtualMachine
 from models.resources.allocatedvm import AllocatedVM
@@ -16,6 +19,7 @@ from utils.xmlhelper import XmlHelper
 from utils.xrn import *
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
+import copy
 import time
 import utils.exceptions as virt_exception
 import uuid
@@ -55,7 +59,9 @@ class VTResourceManager(object):
         else:
             servers = []
             server_objs = self.get_server_objects()
+            logging.debug("********************** SERVER OBTAINED => %s" % str(server_objs))
             for server_obj in server_objs:
+                logging.debug("******************** MODEL TO DICT")
                 server = self.translator.model2dict(server_obj)
                 templates = self.template_manager.get_templates_from_server(server["uuid"])
                 if templates:
@@ -144,7 +150,7 @@ class VTResourceManager(object):
         pass
 
     def get_vm_info(self, vm):
-        logging.debug("*********** STARTING MODEL TO DICT...")
+        logging.debug("*********** STARTING MODEL VM %s TO DICT..." % str(vm.uuid))
         # Generate a dictionary from the VM
         vm_dict = self.translator.model2dict(vm)
         logging.debug("*********** TRANSLATION COMPLETE...")
@@ -163,7 +169,7 @@ class VTResourceManager(object):
         if expiration_time:
             vm_dict['expiration_time'] = expiration_time
         logging.debug("*********** EXPIRATION INFORMATION ADDED...")
-        logging.debug("*********** ADDING TEMPLATE INFORMATION...")
+        logging.debug("*********** ADDING TEMPLATE INFORMATION TO VM %s..." % str(vm_dict['uuid']))
         # Add the Template information
         template = self.template_manager.get_template_from_vm(vm_dict["uuid"])
         vm_dict["disc_image"] = template
@@ -177,6 +183,7 @@ class VTResourceManager(object):
             server = server[0]
         except:
             pass
+        logging.debug("******************** SERVER IS => %s" % str(server))
         vm_dict["server_name"] = server.get_name()
         if not "server_uuid" in vm_dict.keys():
             vm_dict["server_uuid"] = server.get_uuid()
@@ -214,7 +221,7 @@ class VTResourceManager(object):
         try:
             vm = VirtualMachine.query.filter_by(urn=vm_urn).one()
         except:
-            raise virt_exception.VirtVMNotFound(vm_urn)
+            raise type .VirtVMNotFound(vm_urn)
         return vm
  
     def get_vm_allocated_by_urn(self, vm_urn):
@@ -237,7 +244,9 @@ class VTResourceManager(object):
     def get_vms_in_container(self, container_gid, prefix=""):
         vms_info = list()
         try:
-            vms = get_vm_objects_in_container(container_gid, prefix)
+            logging.debug("*********************** STARTING QUERY")
+            vms = self.get_vm_objects_in_container(container_gid, prefix)
+            logging.debug("*********************** ENDING QUERY")
         except Exception as e:
             raise e
         for vm in vms:
@@ -253,15 +262,17 @@ class VTResourceManager(object):
         logging.debug("*************** CONTAINER PREFIX => %s" % prefix)
         try:
             container = Container.query.filter_by(GID=container_gid, prefix=prefix).one()
+            logging.debug("******************* Model.query => %s" % (str(type(Container.query))))
+            logging.debug("******************* db.session.query(Model) => %s" % str(type(db.session.query(Container))))
             logging.debug("***************** CONTAINER OBTAINED %s => %s" % (container_gid, str(container)))
         except:
             raise virt_exception.VirtContainerNotFound(container_gid)
         logging.debug("****************** CONTAINER VMs => %s" % str(container.vms))
         vms = container.vms
         logging.debug("***************** VMs OBTAINED => %s" % str(vms))
-        if not vms:
-            logging.debug("**************** OPS, NO VMS ********************")
-            raise virt_exception.VirtNoResourcesInContainer(str(container_gid))
+#        if not vms:
+#            logging.debug("**************** OPS, NO VMS ********************")
+#            raise virt_exception.VirtNoResourcesInContainer(str(container_gid))
         # XXX: Ugly because of SQLAlchemy limitations. 
         # Association proxy is attached with the parent class.
         # Obtain the objects directly from the DB at this point.
@@ -410,12 +421,15 @@ class VTResourceManager(object):
         If no container is returned create a new one.
         """
         container = Container.query.filter_by(GID=container_gid, prefix=prefix).all()
+        logging.debug("*********** CONTAINERS => %s" % str(container))
         if len(container) == 1:
+            logging.debug("********** SOLO 1")
             container = container[0]
             # If the Container exists, check if the VM name is already taken
-            vms = container.query.filter(Container.vms.any(name=vm_name)).all()
-            if not len(vms) == 0:
-                raise virt_exception.VirtVmNameAlreadyTaken(vm_name)
+            for vm in container.vms:
+                if vm.name == vm_name:
+                    # If any contained VM has the desired name, raise an error
+                    raise virt_exception.VirtVmNameAlreadyTaken(vm_name)
         elif len(container) == 0:
             container = Container(container_gid, prefix, None, True)
         else:
@@ -431,13 +445,13 @@ class VTResourceManager(object):
             self.expiration_manager.check_valid_reservation_time(end_time)
         except:
             raise virt_exception.VirtMaxVMDurationExceeded(end_time)
-        # Make sure any VM with the gien name exists in the Container with the given GID and prefix.
+        # Make sure any VM with the given name exists in the Container with the given GID and prefix.
         try:
             container = self.get_container_for_given_vm(args_dict["vm"]["name"], container_gid, prefix)
         except Exception as e:
             raise e
         # Obtain the provisioning RSpec from the dictionary
-        provisioning_rspec = self.get_provisioning_rspec_from_dict(args_dict)
+        provisioning_rspec = self.get_provisioning_rspec_from_dict(copy.deepcopy(args_dict))
         # Once we have the provisioning Rspec, call the Provisioning Dispatcher
         try:
             logging.debug("*************** CALL AGENT...")
@@ -455,6 +469,7 @@ class VTResourceManager(object):
         vm_class = provisioning_rspec.query.provisioning.action[0].server.virtual_machines[0]
         try:
             vm = self.get_vm_object(vm_class.uuid)
+            logging.debug("************************ VM UUID => %s" % str(vm.uuid))
         except Exception as e:
             db.session.rollback()
             raise VirtVMCreationError(vm_class.uuid)
@@ -471,9 +486,22 @@ class VTResourceManager(object):
             self.template_manager.add_template_to_vm(vm.get_uuid(), template)
         except Exception as e:
             raise e
+        # Add the URN
+        logging.debug("******************* ALL OK AT THIS POINT")
+        logging.debug("******************* VM DICT => %s" % str(args_dict))
+        logging.debug("******************* URN IN DICT => %s" % str(args_dict['vm']['urn']))
+        vm.set_urn(args_dict['vm']['urn'])
         # Once created, obtain the VM info
         created_vm = self.get_vm_info(vm)
         return created_vm
+
+    def extend_vm_expiration_by_uuid(self, vm_uuid, expiration_time):
+        try:
+            self.expiration_manager.update_expiration_by_vm_uuid(vm_uuid, expiration_time)
+        except Exception as e:
+            raise e
+        vm = self.get_vm(vm_uuid)
+        return vm
 
     # XXX: This code should not be here
     def get_provisioning_rspec_from_dict(self, args_dict):
@@ -513,125 +541,25 @@ class VTResourceManager(object):
         interface_class.ismgmt = "False"
         return provisioning_rspec
 
-    def provision_allocated_vms(self, slice_urn, end_time):
-        """
-        Provision (create) previously allocated (reserved) VMs.
-        """
-        import uuid
-        max_duration = self.RESERVATION_TIMEOUT
-        max_end_time = datetime.utcnow() + timedelta(0, max_duration)
-        if end_time == None:
-            end_time = max_end_time
-        if (end_time > max_end_time):
-            raise VTMaxVMDurationExceeded(vm_name)
-        if (end_time < datetime.utcnow()):
-            end_time = max_end_time
-        allocated_vms = VMAllocated.query.filter_by(slice_name=get_leaf(slice_urn)).all()        
-        vms_params = list()
-        servers = list()
-        project = None
-        for allocated_vm in allocated_vms:
-            server = VTDriver.get_server_by_id(allocated_vm.get_server_id())
-            params = dict()
-            params['name'] = allocated_vm.name
-            params['uuid'] = uuid.uuid4()
-            params['state'] = "creating"
-            params['project-id'] = None
-            params['server-id'] = server.uuid
-            params['slice-id'] = allocated_vm.sliceId
-            params['slice-name'] = allocated_vm.slice_name
-            params['operating-system-type'] = allocated_vm.operatingSystemType
-            params['operating-system-version'] = allocated_vm.operatingSystemVersion
-            params['operating-system-distribution'] = allocated_vm.operatingSystemDistribution
-            params['virtualization-type'] = allocated_vm.hypervisor
-            params['hd-setup-type'] = allocated_vm.hdSetupType
-            params['hd-origin-path'] = allocated_vm.hdOriginPath
-            params['virtualization-setup-type'] = allocated_vm.virtualizationSetupType
-            params['memory-mb'] = allocated_vm.memory
-            #XXX: Currently, this is always an empty list, interfaces are not allowed
-            interfaces = list()
-            interface = dict()
-            interface['gw'] = None
-            interface['mac'] = None
-            interface['name'] = None
-            interface['dns1'] = None
-            interface['dns2'] = None
-            interface['ip'] = None
-            interface['mask'] = None
-            interfaces.append(interface) 
-            #for allocated_interface in allocated_vm.interfaces:
-            #        interface = dict()
-            #        interface['gw'] = allocated_interface.gw
-            #        interface['mac'] = allocated_interface.mac
-            #        interface['name'] = allocated_interface.name
-            #        interface['dns1'] = allocated_interface.dns1
-            #        interface['dns2'] = allocated_interface.dns2
-            #        interface['ip'] = allocated_interface.ip
-            #        interface['mask'] = allocated_interface.mask
-            #        interfaces.append(interface)
-            params['interfaces'] = interfaces
-            if not project:
-                project = params['project-id']
-            if not server.uuid in servers:
-                servers.append(server.uuid)
-                new_server = dict()
-                new_server['component_id'] = server.uuid 
-                new_server['slivers'] = list()
-                new_server['slivers'].append(params)
-                vms_params.append(new_server)
-            else:
-                for vm_server in vms_params:
-                    if vm_server['component_id'] is server.uuid:
-                        vm_server['slivers'].append(params)
-        if vms_params:
-            created_vms = self._provision_vms(vms_params, slice_urn, project)
-        else:
-            raise virt_exception.VirtNoSliversInSlice(slice_urn)
-        for key in created_vms.keys():
-            for created_vm in created_vms[key]:
-                vm_hrn, hrn_type = urn_to_hrn(created_vm['name'])
-                vm_name = get_leaf(vm_hrn)
-                slice_name = get_leaf(get_authority(vm_hrn))
-                vm = VMAllocated.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first()
-                current_vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first().get_child_object()
-                time.sleep(10)
-                #XXX: Very ugly, improve this
-                if not current_vm:
-                    time.sleep(10)
-                    current_vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first().get_child_object()
-                if current_vm:
-                    db.session.delete(vm)
-                    db.session.commit()
-                    vm_expiration = Expiration()
-                    vm_expiration.expiration = end_time
-                    vm_expiration.vm_id = current_vm.id
-                    created_vm['expiration'] = end_time 
-                    db.session.add(vm_expiration)
-                    db.session.commit()
-                else:
-                    created_vm['expiration'] = vm.expiration
-                    created_vm['error'] = 'VM cannot be created'
-        return created_vms
-        
-    def _provision_vms(self, vm_params, slice_urn, project_name):
-        """
-        Provision (create) VMs.
-        """
-        created_vms = list()
-        slice_hrn, urn_type = urn_to_hrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-        provisioning_rspecs, actions = VMManager.get_action_instance(vm_params,project_name,slice_name)
-        vm_results = dict()
-        for provisioning_rspec, action in zip(provisioning_rspecs, actions):
-            ServiceThread.start_method_in_new_thread(ProvisioningDispatcher.process, provisioning_rspec, 'SFA.OCF.VTM')
-            vm = provisioning_rspec.action[0].server.virtual_machines[0]
-            vm_hrn = 'geni.gpo.gcf.' + vm.slice_name + '.' + vm.name
-            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-            server = VTDriver.get_server_by_uuid(vm.server_id)
-            if server.name not in vm_results.keys():
-                vm_results[server.name] = list()
-            vm_results[server.name].append({'name':vm_urn, 'status':'ongoing'})
-        return vm_results
+#    def _provision_vms(self, vm_params, slice_urn, project_name):
+#        """
+#        Provision (create) VMs.
+#        """
+#        created_vms = list()
+#        slice_hrn, urn_type = urn_to_hrn(slice_urn)
+#        slice_name = get_leaf(slice_hrn)
+#        provisioning_rspecs, actions = VMManager.get_action_instance(vm_params,project_name,slice_name)
+#        vm_results = dict()
+#        for provisioning_rspec, action in zip(provisioning_rspecs, actions):
+#            ServiceThread.start_method_in_new_thread(ProvisioningDispatcher.process, provisioning_rspec, 'SFA.OCF.VTM')
+#            vm = provisioning_rspec.action[0].server.virtual_machines[0]
+#            vm_hrn = 'geni.gpo.gcf.' + vm.slice_name + '.' + vm.name
+#            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
+#            server = VTDriver.get_server_by_uuid(vm.server_id)
+#            if server.name not in vm_results.keys():
+#                vm_results[server.name] = list()
+#            vm_results[server.name].append({'name':vm_urn, 'status':'ongoing'})
+#        return vm_results
     
     # VM status methods
     def start_vm(self, vm_urn):
@@ -692,7 +620,10 @@ class VTResourceManager(object):
             vm = VTDriver.get_vm_by_uuid(vm_uuid)
             logging.debug("********** VM OBTAINED")
             deleted_vm = self.delete_vm(vm)
+            logging.debug("************* FINALLY DELETED => %s" % str(deleted_vm))
+            return deleted_vm
         except Exception as e:
+            logging.debug("****************** EXCEPTION => %s" % str(e))
             raise e
 
     def delete_vm(self, vm):
@@ -702,14 +633,26 @@ class VTResourceManager(object):
             if vm.state == VirtualMachine.ALLOCATED_STATE:
                 deleted_vm = self.deallocate_vm(vm)
             else:
-                deleted_vm = self.delete_vm(vm)
+                deleted_vm = self.destroy_vm(vm)
         except Exception as e:
             raise e
         # Once the VM has been deleted, delete the related Expiration
         self.expiration_manager.delete_expiration(expiration)
+        logging.debug("************* EXPIRATION DELETED")
         #self.template_manager.remove_template_for_vm(template.id)
+        # Change the VM status to deleted
+        deleted_vm['state'] = 'deleted'
         return deleted_vm
-   
+
+    def destroy_vm(self, vm):
+        deleted_vm = self.get_vm_info(vm)
+        # Send the asynchronus signal to the Agent
+        # Return a message indicating the deleting is being performed
+        action_type = Action.PROVISIONING_VM_DELETE_TYPE,
+        rspec = XmlHelper.get_simple_action_specific_query(action_type, vm.server[0].uuid)
+        ActionController.populate_new_action_with_vm(rspec.query.provisioning.action[0], vm)
+        ServiceThread.start_method_in_new_thread(DispatcherLauncher.process_query, rspec)
+        return deleted_vm
  
 #    def delete_vm(self, vm_urn, slice_name=None):
 #        vm_hrn, hrn_type = urn_to_hrn(vm_urn)
@@ -780,29 +723,6 @@ class VTResourceManager(object):
         db_session.expunge_all()
         return restarted_vms
 
-    # XXX: Is a necessary method? 
-    def delete_vms_in_slice(self, slice_urn):
-        slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        slice_name = get_leaf(slice_hrn)
-        # get all the vms from the given slice and delete them
-        vms = list()
-        vms_created = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
-        if vms_created:
-            vms.extend(vms_created)
-        vms_allocated = db_session.query(VMAllocated).filter(VMAllocated.slice_name == slice_name).all()
-        if vms_allocated:
-            vms.extend(vms_allocated)
-        if not vms:
-            raise virt_exception.VirtNoVMsInSlice(slice_name)
-        deleted_vms = list()        
-        for vm in vms:
-            vm_hrn = 'geni.gpo.gcf.' + slice_name + '.' + vm.name
-            vm_urn = hrn_to_urn(vm_hrn, 'sliver')
-            deleted_vm = self.delete_vm(vm_urn, slice_name)
-            deleted_vms.append(deleted_vm)
-        db_session.expunge_all()
-        return deleted_vms
-
     def check_project_exists(self, project_name):
         '''
         Check if any VM exists with the given project name and return the related UUID.
@@ -838,7 +758,7 @@ class VTResourceManager(object):
         try:
             container = self.get_container_for_given_vm(vm["name"], container_gid, prefix)
         except Exception as e:
-            raise virt_exception.VirtVmNameAlreadyTaken(vm['name'])
+            raise e
         # Check if the server is one of the given servers
         try: 
             server = VTServer.query.filter_by(uuid=vm["server_uuid"]).one()
@@ -860,9 +780,9 @@ class VTResourceManager(object):
             template_info["template_name"] = "Default"
         # Check if the Template is a valid one and return it
         try:
-            template = self.template_manager.get_template_by(template_info.value()[0])
+            template = self.template_manager.get_template_by(template_info.values()[0])
         except:
-            raise VirtTemplateNotFound(vm['urn'])
+            raise virt_exception.VirtTemplateNotFound(vm['urn'])
         logging.debug("************ TEMPLATE => %s" % str(template))
         # Check if the project and slice already exist
         project_uuid = self.check_project_exists(vm["project_name"])
@@ -878,6 +798,8 @@ class VTResourceManager(object):
         vm_allocated_interfaces = server.create_enslaved_vm_interfaces()
         vm["network_interfaces"] = vm_allocated_interfaces
         logging.debug("************ NETWORK_INTERFACES IS %s" % (str(vm_allocated_interfaces)))
+        # Generate an Unique IDentificator
+        vm['uuid'] = uuid.uuid4()
         # Generate the AllocatedVM model
         try:
             vm_allocated_model = self.translator.dict2class(vm, AllocatedVM)
@@ -919,11 +841,13 @@ class VTResourceManager(object):
         Delete the entry in the table of allocated VMs.
         """
         deleted_vm = self.get_vm_info(vm)
+        logging.debug("************ VM TO DELETE => %s" % str(deleted_vm))
         try:
             vm.destroy()
         except:
             db.session.rollback()
             raise virt_exception.VirtDeallocateVMError(vm.urn)
+        logging.debug("************ VM DELETED => %s" % str(deleted_vm))
         return deleted_vm
     
     # Authority methods
@@ -951,11 +875,18 @@ class VTResourceManager(object):
         Checks expiration for both allocated and provisioned VMs
         and deletes accordingly, either from DB or disk.
         """
+        # Get the expired VMs
         expired_vms = self.expiration_manager.get_expired_vms()
+        # Delete the expired VMs
         for expired_vm in expired_vms:
             vm_uuid = expired_vm.get_uuid()
             self.delete_vm_by_uuid(vm_uuid)
             self.expiration_manager.delete_expiration_by_vm_uuid(vm_uuid)
+        # Check if any Container is empty and delete it
+        containers = Container.query.all()
+        for container in containers:
+            if not container.vms:
+                container.destroy()
         return
     
     # Backup & migration methods

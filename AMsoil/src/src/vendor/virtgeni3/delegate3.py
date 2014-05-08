@@ -5,8 +5,8 @@ import lxml
 from geni3util.exceptiontranslator import ExceptionTranslator
 from geni3util.filterednodes import RSPECS_FILTERED_NODES
 from geni3util.xrn import *
-
 import amsoil.core.log
+import copy
 
 logging=amsoil.core.log.getLogger('VTDelegate3')
 
@@ -17,6 +17,12 @@ logging=amsoil.core.log.getLogger('VTDelegate3')
 GENIv3DelegateBase = pm.getService('geniv3delegatebase')
 geniv3_exception = pm.getService('geniv3exceptions')
 virt_exception = pm.getService('virtexceptions')
+
+# METHOD ACTIONS TO UNDOO
+ACTION_ALLOCATE = "allocate"
+ACTION_PROVISIONING = "provisioning"
+ACTION_RENEW = "renew"
+ACTION_DELETE = "delete"
 
 class VTDelegate3(GENIv3DelegateBase):
     """
@@ -118,13 +124,6 @@ class VTDelegate3(GENIv3DelegateBase):
         rspec, sliver_list = self.status(urns, client_cert, credentials)
         return rspec
     
-    # XXX: improve
-    def __extract_node_from_rspec(self, rspec_node):
-        node = dict()
-        for elm in rspec_node.getchildren():
-            node[elm.replace("vtam:","")] = elm.text.strip()
-        return node
-    
     def allocate(self, slice_urn, client_cert, credentials, rspec, end_time=None):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
         logging.debug("slice_urn: %s" % str(slice_urn))
@@ -176,7 +175,7 @@ class VTDelegate3(GENIv3DelegateBase):
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), name=requested_vm['name'], server=requested_vm['server_uuid'], urn=requested_vm['urn'], default=requested_vm['urn'])
         # If any VM fails in allocating, we unallocate all the previously allocated VMs
         except Exception as e:
-            self._undo_action(allocated_vms, "allocate")
+            self._undo_action(allocated_vms, ACTION_ALLOCATE)
             raise e
         # Generate the Manifest RSpec
         rspecs = self._get_manifest_rspec(allocated_vms)
@@ -184,7 +183,7 @@ class VTDelegate3(GENIv3DelegateBase):
         slivers = list()
         for allocated_vm in allocated_vms:
             # Add the status information here, due allocated vms does not have one
-            sliver = self._get_sliver_status_hash(allocated_vm, True)
+            sliver = self._get_sliver_status_hash(allocated_vm)
             slivers.append(sliver)
         return rspecs, slivers
 
@@ -218,17 +217,36 @@ class VTDelegate3(GENIv3DelegateBase):
             # If {best_effort = False} throw the given Exception
             # If {best_effort = True} keep going 
             except Exception as e:
-                if best_effort:
+                if not best_effort:
                     raise e
                 else:
                     renewed_vms.append(self._generate_error_entry(urn, str(e)))
-            # If any resource is obtained, raise an error
-            if not vms:
-                raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")
-            # TODO: Add extend_expiration method to RM
-#            for vm in vms:
-#                try:
-#                    renewed_vm = self._resource_manager.
+        # If any resource is obtained, raise an error
+        if not vms:
+            raise geniv3_exception.GENIv3SearchFailedError("There are no resources to renew. Perhaps they expired or the URN(s) is malformed.")
+        for vm in vms:
+            try:
+                renewed_vm = self._resource_manager.extend_vm_expiration_by_uuid(vm['uuid'], expiration_time)
+                renewed_vms.append(renewed_vm)
+            except Exception as e:
+                if not best_effort:
+                    self._undo_action(renewed_vms, ACTION_RENEW)
+                    raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=vm['urn'], default=vm['urn'])
+                else:
+                    # First, try to let the failed VM on the previous state
+                    self._undo_action(renewed_vm, ACTION_RENEW)
+                    # Then, generate the error entry
+                    vm['error_message'] = str(e)
+                    renewed_vms.append(vm)
+        # Once all the VMs are renewed, generate the response
+        # Generate the Manifest RSpec
+        rspecs = self._get_manifest_rspec(renewed_vms)
+        # Generate the JSON with the VMs information
+        slivers = list()
+        for renewed_vm in renewed_vms:
+            sliver = self._get_sliver_status_hash(renewed_vm)
+            slivers.append(sliver)
+        return rspecs, slivers
 
     def provision(self, urns, client_cert, credentials, best_effort, end_time, geni_users):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
@@ -245,15 +263,19 @@ class VTDelegate3(GENIv3DelegateBase):
                 if (self.urn_type(urn) == "slice"):
                     # If the URN is from a slice, get all the allocated
                     try:
+                        logging.debug("********************* TYPE SLICE")
                         vms = self._resource_manager.get_allocated_vms_in_container(urn, "GENIv3")      
+                        logging.debug("********************* VMS OBTAINED IN SLICE %s => %s" % (str(urn), str(vms)))
                     # Throw the Exception for every kind of error
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                     allocated_vms.extend(vms)
                 elif (self.urn_type(urn) == "sliver"):
+                    logging.debug("********************* TYPE SLICE")
                     # If the UNR is from a VM, get it
                     try: 
                         vm = get_vm_allocated_by_urn(urn)
+                        logging.debug("********************* VM %s OBTAINED => %s" % (str(urn), str(vm)))
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                     allocated_vms.append(vm)
@@ -262,12 +284,12 @@ class VTDelegate3(GENIv3DelegateBase):
             # If {best_effort = False} throw the given Exception
             # If {best_effort = True} keep going 
             except Exception as e:
-                if best_effort:
+                if not best_effort:
                     raise e
                 else:
                     provisioned_vms.append(self._generate_error_entry(urn, str(e)))
         # If any resource is obtained, raise an error
-        if not provisioned_vms:
+        if not allocated_vms:
             raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")   
         logging.debug("***************** ALL VMS OBTAINED, PROVISION THEM")
         # Once all the VMs are obtained, provision them
@@ -278,12 +300,12 @@ class VTDelegate3(GENIv3DelegateBase):
                 provisioned_vm = self._resource_manager.provision_vm(allocated_vm, end_time)
                 provisioned_vms.append(provisioned_vm)
             except Exception as e:
-                if best_effort:
-                    self._undo_action(allocated_vms, "provision")
+                if not best_effort:
+                    self._undo_action(allocated_vms, ACTION_PROVISIONING)
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=allocated_vm['urn'], default=urn)
                 else:
                     # First, try to let the failed VM on the previous state
-                    self._undo_action(allocated_vm, "provision")
+                    self._undo_action(allocated_vm, ACTION_PROVISIONING)
                     # Then, generate the error entry
                     allocated_vm['error_message'] = str(e)
                     provisioned_vms.append(allocated_vm)
@@ -292,8 +314,8 @@ class VTDelegate3(GENIv3DelegateBase):
         rspecs = self._get_manifest_rspec(allocated_vms)
         # Generate the JSON with the VMs information
         slivers = list()
-        for allocated_vm in allocated_vms:
-            sliver = self._get_sliver_status_hash(allocated_vm, True)
+        for provisioned_vm in provisioned_vms:
+            sliver = self._get_sliver_status_hash(provisioned_vm, True)
             slivers.append(sliver)
         return rspecs, slivers
     
@@ -304,14 +326,13 @@ class VTDelegate3(GENIv3DelegateBase):
         for urn in urns:
             if (self.urn_type(urn) == 'slice'):
                 try:
-                    slice_vms = self._resource_manager.get_vms_in_container(urn)
+                    slice_vms = self._resource_manager.get_vms_in_container(urn, "GENIv3")
+                    vms.extend(slice_vms)
                 except Exception as e:
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
-                if slice_vms:
-                    vms.extend(slice_vms)
             elif (self.urn_type(urn) == 'sliver'):
                 try:
-                    vm = self._resource_manager.get_vm_object_by_urn(urn)
+                    vm = self._resource_manager.get_vm_by_urn(urn)
                     vms.append(vm)
                 except Exception as e:
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
@@ -319,13 +340,15 @@ class VTDelegate3(GENIv3DelegateBase):
                 raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given to status in this aggregate') 
         if not vms:
             raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
-        vms_info = list()
+        # Once all the VMs are given, generate the response
+        # Generate the Manifest RSpec
+        rspecs = self._get_manifest_rspec(vms)
+        # Generate the JSON with the VMs information
+        slivers = list()
         for vm in vms:
-            vm_info = self._resource_manager.get_vm_info(vm)
-            vms_info.append(vm_info)
-        sliver_list = [self._get_sliver_status_hash(vm, True, True) for vm in vms_info]
-        result_rspec = self._get_manifest_rspec(vms_info)
-        return result_rspec, sliver_list
+            sliver = self._get_sliver_status_hash(vm, True)
+            slivers.append(sliver)
+        return rspecs, slivers
     
     def perform_operational_action(self, urns, client_cert, credentials, action, best_effort):
         # TODO: honor best_effort
@@ -383,51 +406,54 @@ class VTDelegate3(GENIv3DelegateBase):
                         vms_in_slice = self._resource_manager.get_vms_in_container(urn, "GENIv3")
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
-                    vms.extend(vms_in_slice)
+                    vms.extend(copy.deepcopy(vms_in_slice))
                 # If the urn is a resource urn, obtain the resource
                 elif (self.urn_type(urn) == 'sliver'):
                     try:
                         vm_to_delete = self._resource_manager.get_vm_by_urn(urn)
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
-                    vms.append(vm_to_delete)
+                    vms.append(copy.deepcopy(vm_to_delete))
                 # Otherwhise, the urn is invalid
                 else:
                     raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice and sliver URNs can be deleted in this aggregate')
             except Exception as e:
-                if best_effort:
+                if not best_effort:
                     raise e
                 else:
                     deleted_vms.append(self._generate_error_entry(urn, str(e)))
         # If no vms to delete, raise an Exception
-        if not vms:
-            raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")    
+        # XXX: If no VMs to delete but the Container exists return an empty list
+#        if not vms:           
+#            raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")    
+        logging.debug("***************** VMS TO DELETE => %s" % str(vms))
         # Once we know all the VMs exists, delete them
         deleted_vms = list()
         for vm in vms:
             # Honor best-effort
             try:
-                deleted_vm = self._resource_manager.delete_vm(vm['uuid'])    
+                deleted_vm = self._resource_manager.delete_vm_by_uuid(vm['uuid'])    
+                logging.debug("*************** DELETED DELEGATE VM => %s" % str(deleted_vm))
                 deleted_vms.append(deleted_vm)
             except Exception as e:
-                if best_effort:
-                    self._undo_action(allocated_vms, "delete")
+                logging.debug("*************************** EXCEPTION IS => %s" % str(e))
+                if not best_effort:
+                    self._undo_action(deleted_vms, ACTION_DELETE)
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                 else:
                     # First, try to let the failed VM on the previous state
-                    self._undo_action(vm, "delete")
+                    self._undo_action(vm, ACTION_DELETE)
                     # Then, generate the error entry
                     vm['error_message'] = str(e)
                     deleted_vms.append(vm)
         # Once all the VMs are provisioned, generate the response
-        # Generate the Manifest RSpec
-        rspecs = self._get_manifest_rspec(deleted_vms)
         # Generate the JSON with the VMs information
         slivers = list()
         for deleted_vm in deleted_vms:
-            sliver = self._get_sliver_status_hash(deleted_vm, True)
+            sliver = self._get_sliver_status_hash(deleted_vm)
             slivers.append(sliver)
-        return rspecs, slivers
+        logging.debug("******************* SLIVERS => %s" % str(slivers))
+        return slivers
  
     def shutdown(self, slice_urn, client_cert, credentials):
         if (self.urn_type(slice_urn) == 'slice'):
@@ -444,14 +470,12 @@ class VTDelegate3(GENIv3DelegateBase):
             raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice URNs can be given to shutdown in this aggregate')
 
     ''' Helper methods '''
-    def _get_sliver_status_hash(self, sliver, include_allocation_status=False, include_operational_status=False):
+    def _get_sliver_status_hash(self, sliver, include_operational_status=False):
         """Helper method to create the sliver_status return values of allocate and other calls."""
         result = {'geni_sliver_urn' : sliver['urn'],
                   'geni_expires'    : sliver['expiration_time'] if 'expiration_time' in sliver.keys() else None,
-                  'geni_allocation_status' : self.ALLOCATION_STATE_UNALLOCATED}
-        if (include_allocation_status):
-            result['geni_allocation_status'] = self.ALLOCATION_STATE_ALLOCATED if sliver['state'] is "allocated" else self.ALLOCATION_STATE_PROVISIONED
-        if (include_operational_status): 
+                  'geni_allocation_status' : self.ALLOCATION_STATE_ALLOCATED if sliver['state'] == "allocated" else self.ALLOCATION_STATE_UNALLOCATED if sliver['state'] == "deleted" else self.ALLOCATION_STATE_PROVISIONED}
+        if include_operational_status: 
             result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if 'error_message' in sliver.keys() else self.OPERATIONAL_STATE_READY
         try:
             result['geni_error'] = sliver['error_message']
@@ -484,15 +508,23 @@ class VTDelegate3(GENIv3DelegateBase):
         return vm_with_error
     
     def _undo_action(self, params, action):
-        if action == "allocate":
+        if action is ACTION_ALLOCATE:
             for param in params:
+                # For every allocated VM, try to delete it
                 try:
                     self._resource_manager.delete_vm_by_uuid(param['uuid'])
                 except:
                     continue
-        elif action == "create":
-            for param in params: 
+        elif action is ACTION_PROVISIONING:
+            for param in params:
+                # First try to delete the provisioned VMs 
                 try:
                     self._resource_manager.delete_vm_by_uuid(param['uuid'])            
+                except:
+                    continue
+                # Then, try to allocate them to the previous state
+                try:
+                    # TODO: Get the correct args
+                    self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
                 except:
                     continue

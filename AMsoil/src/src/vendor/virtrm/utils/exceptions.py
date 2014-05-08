@@ -85,3 +85,7 @@ class VirtDeallocateVMError(VirtException):
 class VirtDeleteVMError(VirtException):
     def __init__(self, urn):
         super(VirtDeleteVMError, self).__init__("The given VM could not be deleted (%s)" % (urn,))
+
+class VirtDatabaseError(VirtException):
+    def __init__(self):
+        super(VirtDatabaseError, self).__init__("There is an error accessing to the database")

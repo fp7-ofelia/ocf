@@ -45,6 +45,15 @@ class Container(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def destroy(self):
+        try:
+            for vm in container.vms:
+                vm.destroy()
+        except:
+            pass
+        db.session.delete(self)
+        db.session.commit()
+
     '''Getters and Setters'''
     def set_uuid(self, uuid):
         self.uuid = uuid

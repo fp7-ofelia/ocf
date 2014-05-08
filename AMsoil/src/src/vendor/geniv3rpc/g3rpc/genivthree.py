@@ -187,7 +187,9 @@ class GENIv3Handler(xmlrpc.Dispatcher):
         return result
 
     def _convertExpiresDate(self, sliver_list):
+        logger.debug("******************** SLIVER LIST => %s" % str(sliver_list))
         for slhash in sliver_list:
+            logger.debug("******************** SLIVER => %s" % str(slhash))
             if slhash['geni_expires'] == None:
                 continue
             if not isinstance(slhash['geni_expires'], datetime):

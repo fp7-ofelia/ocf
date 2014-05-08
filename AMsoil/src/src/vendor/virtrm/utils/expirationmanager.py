@@ -7,6 +7,7 @@ from controller.drivers.virt import VTDriver
 from models.common.expiration import Expiration, VMExpiration
 from models.resources.virtualmachine import VirtualMachine
 from utils.base import db
+import utils.exceptions as virt_exception
 import amsoil.core.log
 import amsoil.core.pluginmanager as pm
 
@@ -28,9 +29,9 @@ class ExpirationManager():
         Check if the desired expiration time is valid
         or return the maximum expiration time if None time is given
         """
-        self.max_expiration_time = datetime.utcnow() + timedelta(0, max_duration)
+        max_expiration_time = datetime.utcnow() + timedelta(0, max_duration)
         if expiration_time == None or expiration_time < datetime.utcnow():
-            return self.max_expiration_time
+            return max_expiration_time
         elif expiration_time > self.max_expiration_time:
             raise Exception
         else:
@@ -123,18 +124,22 @@ class ExpirationManager():
   
     def update_expiration_by_vm_uuid(self, vm_uuid, expiration_time):
         try:
-            relational_obj = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
-            vm = relational_obj.get_vm()
             if vm.get_state() == VirtualMachine.ALLOCATED_STATE:
                 expiration = self.check_valid_reservation_time(expiration_time)
             else:
                 expiration = self.check_valid_creation_time(expiration_time)
+        except:
+             raise virt_exception.VirtMaxVMDurationExceeded(expiration_time)
+        try:
+            relational_obj = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
+            vm = relational_obj.get_vm()
             expiration_obj = relational_obj.get_expiration()
             expiration_obj.set_do_save(True)
             expiration_obj.set_end_time(expiration)
         except Exception as e:
+            logging.debug("**************** EXCEPTION TYPE => %s" % str(type(e)))
             db.session.rollback()
-            raise e
+            raise virt_exception.VirtDatabaseError()
 
     def delete_expiration(self, expiration):
         try:
