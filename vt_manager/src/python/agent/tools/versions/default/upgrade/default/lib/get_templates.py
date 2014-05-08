@@ -1,0 +1,1 @@
+../../../install/lib/get_templates.py
