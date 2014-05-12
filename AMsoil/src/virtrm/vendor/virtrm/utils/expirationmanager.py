@@ -29,10 +29,11 @@ class ExpirationManager():
         Check if the desired expiration time is valid
         or return the maximum expiration time if None time is given
         """
+        logging.debug("************** NOW IS %s" % str(datetime.utcnow()))
         max_expiration_time = datetime.utcnow() + timedelta(0, max_duration)
-        if expiration_time == None or expiration_time < datetime.utcnow():
+        if expiration_time == None:
             return max_expiration_time
-        elif expiration_time > self.max_expiration_time:
+        elif expiration_time > max_expiration_time or expiration_time < datetime.utcnow():
             raise Exception
         else:
             return expiration_time
@@ -92,6 +93,7 @@ class ExpirationManager():
         return expired_vms
 
     def add_expiration_to_vm_by_uuid(self, vm_uuid, expiration_time):
+        vm = VTDriver.get_vm_by_uuid(vm_uuid)
         try:
             vm = VirtualMachine.query.filter_by(uuid=vm_uuid).one()
             logging.debug("*********** VM %s EXISTS WITH NAME %s AND STATE %s" %(vm_uuid, vm.name, vm.state))
@@ -123,21 +125,27 @@ class ExpirationManager():
             raise e
   
     def update_expiration_by_vm_uuid(self, vm_uuid, expiration_time):
+        vm = VTDriver.get_vm_by_uuid(vm_uuid)
+        logging.debug("******************* NEW EXPIRATION TIME => %s" % str(expiration_time))
+        logging.debug("******************* NOW IS TIME => %s" % str(datetime.utcnow()))
         try:
             if vm.get_state() == VirtualMachine.ALLOCATED_STATE:
                 expiration = self.check_valid_reservation_time(expiration_time)
             else:
                 expiration = self.check_valid_creation_time(expiration_time)
-        except:
+        except Exception as e:
+             logging.debug("******************* EXCEPTION IS => %s" % str(e))
              raise virt_exception.VirtMaxVMDurationExceeded(expiration_time)
+        logging.debug("********************* EXPIRATION TIME RETURNED => %s" % str(expiration))
         try:
             relational_obj = VMExpiration.query.filter_by(vm_uuid=vm_uuid).one()
             vm = relational_obj.get_vm()
             expiration_obj = relational_obj.get_expiration()
             expiration_obj.set_do_save(True)
             expiration_obj.set_end_time(expiration)
+            logging.debug("******************* NEW EXPIRATION TIME COMMITED => %s" % str(expiration_obj.end_time))
         except Exception as e:
-            logging.debug("**************** EXCEPTION TYPE => %s" % str(type(e)))
+            logging.debug("**************** EXCEPTION TYPE => %s" % str(e))
             db.session.rollback()
             raise virt_exception.VirtDatabaseError()
 

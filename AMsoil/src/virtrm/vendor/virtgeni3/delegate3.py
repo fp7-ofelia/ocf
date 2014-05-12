@@ -217,7 +217,7 @@ class VTDelegate3(GENIv3DelegateBase):
             # If {best_effort = False} throw the given Exception
             # If {best_effort = True} keep going 
             except Exception as e:
-                if not best_effort:
+                if best_effort:
                     raise e
                 else:
                     renewed_vms.append(self._generate_error_entry(urn, str(e)))
@@ -229,24 +229,22 @@ class VTDelegate3(GENIv3DelegateBase):
                 renewed_vm = self._resource_manager.extend_vm_expiration_by_uuid(vm['uuid'], expiration_time)
                 renewed_vms.append(renewed_vm)
             except Exception as e:
-                if not best_effort:
+                if best_effort:
                     self._undo_action(renewed_vms, ACTION_RENEW)
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=vm['urn'], default=vm['urn'])
                 else:
                     # First, try to let the failed VM on the previous state
-                    self._undo_action(renewed_vm, ACTION_RENEW)
+                    self._undo_action(vm, ACTION_RENEW)
                     # Then, generate the error entry
                     vm['error_message'] = str(e)
                     renewed_vms.append(vm)
         # Once all the VMs are renewed, generate the response
-        # Generate the Manifest RSpec
-        rspecs = self._get_manifest_rspec(renewed_vms)
         # Generate the JSON with the VMs information
         slivers = list()
         for renewed_vm in renewed_vms:
             sliver = self._get_sliver_status_hash(renewed_vm)
             slivers.append(sliver)
-        return rspecs, slivers
+        return slivers
 
     def provision(self, urns, client_cert, credentials, best_effort, end_time, geni_users):
         """Documentation see [geniv3rpc] GENIv3DelegateBase.
@@ -424,6 +422,9 @@ class VTDelegate3(GENIv3DelegateBase):
                     deleted_vms.append(self._generate_error_entry(urn, str(e)))
         # If no vms to delete, raise an Exception
         # XXX: If no VMs to delete but the Container exists return an empty list
+        # TODO: Container should have an Expiration equals to the maximum Expiration of any contained VM
+        # TODO: Worker should find expired Containers and check if any VM is contained, then destroy all
+        # TODO: Every time allocate/provision/renew is invoked Container expiration should be updated
 #        if not vms:           
 #            raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")    
         logging.debug("***************** VMS TO DELETE => %s" % str(vms))

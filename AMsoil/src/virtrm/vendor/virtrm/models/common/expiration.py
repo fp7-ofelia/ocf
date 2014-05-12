@@ -99,6 +99,9 @@ class VMExpiration(db.Model):
     vm = db.relationship("VirtualMachine")
     vm_expiration = db.relationship("Expiration", backref=db.backref("expiration_vm", cascade = "all, delete-orphan"))
 
+    def get_vm(self):
+        return self.vm
+
     def get_expiration(self):
         return self.vm_expiration
  
