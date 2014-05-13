@@ -91,7 +91,6 @@ def virtualmachine_crud(request, slice_id, server_id):
         # Django exception message handling is different to Python's...
         error_crud = ";".join(e.messages)
     except Exception as e:
-        print "normal exception here: %s" % str(e)
         DatedMessage.objects.post_message_to_user(
             "VM might have been created, but some problem ocurred: %s" % str(e),
             request.user, msg_type=DatedMessage.TYPE_ERROR)
@@ -110,8 +109,6 @@ def virtualmachine_crud(request, slice_id, server_id):
         })
 
 def manage_vm(request, slice_id, vm_id, action_type):
-
-    print "-------------------------------------------------------------------------> Managing VM: %s" % str(action_type)
     "Manages the actions executed over VMs at url manage resources."
     if not (action_type.startswith("force")):
         vm = VM.objects.get(id = vm_id)
