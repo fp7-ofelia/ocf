@@ -1,7 +1,7 @@
 import sys
-sys.path.append("/opt/ofelia/AMsoil/src/src/vendor/configdb/")
-sys.path.append("/opt/ofelia/AMsoil/src/src/")
-sys.path.append("/opt/ofelia/AMsoil/src/src/vendor/virtrm")
+sys.path.append("/opt/ofelia/AMsoil/src/virtrm/vendor/configdb/")
+sys.path.append("/opt/ofelia/AMsoil/src/virtrm/")
+sys.path.append("/opt/ofelia/AMsoil/src/virtrm/vendor/virtrm")
 import amconfigdb
 import amconfigdbexceptions
 import amsoil.core.pluginmanager as pm
