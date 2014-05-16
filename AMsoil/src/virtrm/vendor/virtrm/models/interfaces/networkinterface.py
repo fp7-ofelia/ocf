@@ -23,8 +23,8 @@ class NetworkInterface(db.Model):
 
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    mac_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
+    name = db.Column(db.String(128), nullable=False, default="")
+    mac_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ip4s", "ip4slot", creator=lambda ip:NetworkInterfaceIp4s(ip4slot=ip))
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)
@@ -37,9 +37,9 @@ class NetworkInterface(db.Model):
     connected_from = association_proxy("from_network_interface", "from_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(from_networkinterface=iface))
 
     '''Physical connection details for bridged interfaces''' 
-    switch_id = db.Column("switchID", db.String(23))
-    port = db.Column(db.Integer)
-    id_form = db.Column("idForm", db.Integer)
+    switch_id = db.Column("switchID", db.String(23), nullable=True, default="")
+    port = db.Column(db.Integer, nullable=True)
+    id_form = db.Column("idForm", db.Integer, nullable=True)
 
     '''Defines soft or hard state of the VM'''
     do_save = False

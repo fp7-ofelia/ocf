@@ -34,11 +34,11 @@ class VirtualMachine(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False, default=uuid.uuid4())
-    memory_mb = db.Column("memory_mb", db.Integer)
-    number_of_cpus = db.Column("numberOfCPUs", db.Integer)
-    disc_space_gb = db.Column("discSpaceGB", DOUBLE)
+    memory_mb = db.Column("memory_mb", db.Integer, nullable=True)
+    number_of_cpus = db.Column("numberOfCPUs", db.Integer, nullable=True)
+    disc_space_gb = db.Column("discSpaceGB", DOUBLE, nullable=True)
     urn = db.Column(db.String(1024), nullable=True)
-    type = db.Column(db.String(1024), nullable=False, default="xen")
+    type = db.Column(db.String(1024), nullable=False, server_default="xen")
 
     '''Property parameters'''
     project_id = db.Column("projectId", db.String(1024), nullable=False, default="")
@@ -47,7 +47,7 @@ class VirtualMachine(db.Model):
     slice_name = db.Column("sliceName", db.String(1024), nullable=False, default="")
     gui_user_name = db.Column("guiUserName", db.String(1024), nullable=False, default="")
     gui_user_uuid = db.Column("guiUserUUID", db.String(1024), nullable=False, default="")
-    expedient_id = db.Column("expedientId", db.Integer)
+    expedient_id = db.Column("expedientId", db.Integer, nullable=True)
 
     '''OS parameters'''
     operating_system_type = db.Column("operatingSystemType", db.String(512), nullable=False, default="")
@@ -58,8 +58,8 @@ class VirtualMachine(db.Model):
     network_interfaces = association_proxy("vm_networkinterfaces", "networkinterface", creator=lambda iface:VMNetworkInterfaces(networkinterface=iface))
 
     '''Other'''
-    callback_url = db.Column("callBackURL", db.String(200))
-    state = db.Column(db.String(24))
+    callback_url = db.Column("callBackURL", db.String(200), nullable=False, default="")
+    state = db.Column(db.String(24), nullable=False, default="")
 
     '''Possible states'''
     ALLOCATED_STATE = 'allocated'

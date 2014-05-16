@@ -19,11 +19,11 @@ class MacSlot(db.Model):
     __tablename__ = table_prefix + 'macslot'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    mac = db.Column(db.String(17), nullable=False)
-    mac_range_id = db.Column("macRange_id", db.Integer, db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
+    mac = db.Column(db.String(17), nullable=False, default="")
+    mac_range_id = db.Column("macRange_id", db.ForeignKey(table_prefix + 'macrange.id'), nullable=True)
     mac_range = association_proxy("macslot_macrange", "macrange")
-    is_excluded = db.Column("isExcluded", TINYINT(1))
-    comment = db.Column(db.String(1024))
+    is_excluded = db.Column("isExcluded", TINYINT(1), nullable=False, default=0)
+    comment = db.Column(db.String(1024), nullable=False, default="")
     
     '''Defines soft or hard state of the interface'''
     do_save = True

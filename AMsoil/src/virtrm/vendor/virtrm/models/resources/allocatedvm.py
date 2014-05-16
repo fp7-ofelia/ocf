@@ -19,7 +19,7 @@ class AllocatedVM(VirtualMachine):
     __table_args__ = {'extend_existing':True}
 
     '''General parameters'''
-    virtualmachine_ptr_id = db.Column(db.Integer, db.ForeignKey(table_prefix + 'virtualmachine.id'), primary_key=True)
+    virtualmachine_ptr_id = db.Column(db.ForeignKey(table_prefix + 'virtualmachine.id'), primary_key=True)
     __mapper_args__ = {
         'polymorphic_identity':'allocated',
         'inherit_condition':(virtualmachine_ptr_id==VirtualMachine.id)

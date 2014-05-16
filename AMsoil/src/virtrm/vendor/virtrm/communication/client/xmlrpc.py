@@ -1,6 +1,9 @@
 from base import Client
 import xmlrpclib, logging
 from urlparse import urlparse
+import amsoil.core.log
+
+logging = amsoil.core.log.getLogger('VTDelegate3')
 
 '''
 author:msune

@@ -68,13 +68,13 @@ class Action(db.Model):
     )
     
     '''General parameters'''
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
     type = db.Column(db.String(16), nullable=False, default="")
     uuid = db.Column(db.String(512), nullable=False, default="")
     callback_url = db.Column("callBackUrl", db.String(200), nullable=False, default="")
     status = db.Column(db.String(16), nullable=False, default="")
-    description = db.Column(db.String(2048), default="")
-    object_uuid = db.Column("objectUUID", db.String(512), default="")
+    description = db.Column(db.String(2048), nullable=True, default="")
+    object_uuid = db.Column("objectUUID", db.String(512), nullable=True, default="")
     
     '''Public methods'''
     @staticmethod

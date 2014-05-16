@@ -19,7 +19,7 @@ class Container(db.Model):
     '''General parameters'''
     uuid = db.Column(db.String(512), nullable=False, primary_key=True)
     GID = db.Column(db.String(1024), nullable=False, default="")
-    prefix = db.Column(db.String(512), nullable=False, default="")
+    prefix = db.Column(db.String(512), nullable=True, default="")
 
     '''Container relations'''
     vms = association_proxy("vms_container", "vms", creator=lambda vm:ContainerVMs(vms=vm))

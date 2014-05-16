@@ -23,16 +23,16 @@ class MacRange(db.Model):
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
     # Range name
     name = db.Column(db.String(255), nullable=False, unique=True)
-    is_global = db.Column("isGlobal", TINYINT(1), nullable=False)
+    is_global = db.Column("isGlobal", TINYINT(1), nullable=False, default=1)
     # Range parameters
-    start_mac = db.Column("startMac", db.String(17), nullable=False)
-    end_mac = db.Column("endMac", db.String(17), nullable=False)
+    start_mac = db.Column("startMac", db.String(17), nullable=False, default="")
+    end_mac = db.Column("endMac", db.String(17), nullable=False, default="")
     # Pool of resources both assigned and excluded (particular case of assignment)
     # Associated MACs for this range
     resources = association_proxy("macrange_macslot", "macslot", creator=lambda mac:MacRangeMacs(macslot=mac))
-    next_available_mac = db.Column("nextAvailableMac", db.String(17))
+    next_available_mac = db.Column("nextAvailableMac", db.String(17), nullable=False, default="")
     # Statistics
-    number_slots = db.Column("numberOfSlots", BIGINT(20))
+    number_slots = db.Column("numberOfSlots", BIGINT(20), nullable=True)
     # Defines soft or hard state of the range 
     do_save = True
     

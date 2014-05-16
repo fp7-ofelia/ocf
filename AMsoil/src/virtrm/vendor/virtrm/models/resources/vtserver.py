@@ -47,15 +47,15 @@ class VTServer(db.Model):
     virtualization_technology = db.Column("virtTech", db.String(512), nullable=False)
 
     ''' Hardware '''
-    cpus_number = db.Column("numberOfCPUs", db.Integer)
-    cpu_frequency = db.Column("CPUFrequency", db.Integer)
-    virtual_memory_mb = db.Column("memory", db.Integer)
-    hard_disk_space_gb = db.Column("discSpaceGB", DOUBLE)
+    cpus_number = db.Column("numberOfCPUs", db.Integer, nullable=True)
+    cpu_frequency = db.Column("CPUFrequency", db.Integer, nullable=True)
+    virtual_memory_mb = db.Column("memory", db.Integer, nullable=True)
+    hard_disk_space_gb = db.Column("discSpaceGB", DOUBLE, nullable=True)
 
     '''Agent Fields'''
-    agent_url = db.Column("agentURL", db.String(200))
-    agent_password = db.Column("agentPassword", db.String(128))
-    url = db.Column(db.String(200))
+    agent_url = db.Column("agentURL", db.String(200), nullable=False, default="")
+    agent_password = db.Column("agentPassword", db.String(128), nullable=True)
+    url = db.Column(db.String(200), nullable=False, default="")
 
     '''Network interfaces'''
     network_interfaces = association_proxy("vtserver_networkinterface", "networkinterface", creator=lambda iface:VTServerNetworkInterfaces(networkinterface=iface))

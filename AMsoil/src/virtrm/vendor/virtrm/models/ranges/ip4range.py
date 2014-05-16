@@ -23,19 +23,19 @@ class Ip4Range(db.Model):
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
     # Range name
     name = db.Column(db.String(255), nullable=False, unique=True)
-    is_global = db.Column("isGlobal", TINYINT(1), nullable=False)
+    is_global = db.Column("isGlobal", TINYINT(1), nullable=False, default=1)
     # Range parameters
-    start_ip = db.Column("startIp", db.String(15), nullable=False)
-    end_ip = db.Column("endIp", db.String(15), nullable=False)
-    netmask = db.Column("netMask", db.String(15), nullable=False)
+    start_ip = db.Column("startIp", db.String(15), nullable=False, default="")
+    end_ip = db.Column("endIp", db.String(15), nullable=False, default="")
+    netmask = db.Column("netMask", db.String(15), nullable=False, default="")
     # Networking parameters associated to this range
-    gw = db.Column(db.String(15))
-    dns1 = db.Column(db.String(15))
-    dns2 = db.Column(db.String(15))
+    gw = db.Column(db.String(15), nullable=True)
+    dns1 = db.Column(db.String(15), nullable=True)
+    dns2 = db.Column(db.String(15), nullable=True)
     # Statistics
-    number_slots = db.Column("numberOfSlots", BIGINT(20))
+    number_slots = db.Column("numberOfSlots", BIGINT(20), nullable=True)
     # Pool of ips both assigned and excluded (particular case of assignment)
-    next_available_ip = db.Column("nextAvailableIp", db.String(15))
+    next_available_ip = db.Column("nextAvailableIp", db.String(15), nullable=True, default="")
     ips = association_proxy("ip4range_ip4s", "ip4slot", creator=lambda ip:Ip4RangeIps(ip4slot=ip))
     # Mutex
     mutex = None
