@@ -472,8 +472,8 @@ class VTServerNetworkInterfaces(db.Model):
     __tablename__ = table_prefix + 'vtserver_networkInterfaces'
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
-    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False, index=True)
+    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False, index=True)
     # Relationships
     vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerNetworkInterfaces.vtserver_id", backref=db.backref("vtserver_networkinterface", cascade="all, delete-orphan"))
     networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==VTServerNetworkInterfaces.networkinterface_id", backref=db.backref("vtserver_assocation", cascade="all, delete-orphan"))
@@ -486,8 +486,8 @@ class VTServerIpRange(db.Model):
     __tablename__ = table_prefix + 'vtserver_subscribedIp4Ranges'
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
-    ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False, index=True)
+    ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False, index=True)
     # Relationships
     vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerIpRange.vtserver_id", backref=db.backref("vtserver_ip4_range", cascade="all, delete-orphan"))
     subscribed_ip4_range = db.relationship("Ip4Range", primaryjoin="Ip4Range.id==VTServerIpRange.ip4range_id", backref=db.backref("vtserver_association", cascade="all, delete-orphan"))
@@ -500,8 +500,8 @@ class VTServerMacRange(db.Model):
     __tablename__ = table_prefix + 'vtserver_subscribedMacRanges'
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False)
-    macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
+    vtserver_id = db.Column(db.ForeignKey(table_prefix + 'vtserver.id'), nullable=False, index=True)
+    macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False, index=True)
     # Relationships
     vtserver = db.relationship("VTServer", primaryjoin="VTServer.id==VTServerMacRange.vtserver_id", backref=db.backref("vtserver_mac_range", cascade="all, delete-orphan"))
     subscribed_mac_range = db.relationship("MacRange", primaryjoin="MacRange.id==VTServerMacRange.macrange_id", backref=db.backref("vtserver_association", cascade="all, delete-orphan"))

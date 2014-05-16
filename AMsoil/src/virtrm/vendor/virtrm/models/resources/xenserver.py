@@ -137,8 +137,8 @@ class XenServerVMs(db.Model):
     __tablename__ = table_prefix + 'xenserver_vms'
     # Table attributes
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    xenserver_id = db.Column(db.ForeignKey(table_prefix + 'xenserver.vtserver_ptr_id'), nullable=False)
-    xenvm_id = db.Column(db.ForeignKey(table_prefix + 'xenvm.virtualmachine_ptr_id'), nullable=False)
+    xenserver_id = db.Column(db.ForeignKey(table_prefix + 'xenserver.vtserver_ptr_id'), nullable=False, index=True)
+    xenvm_id = db.Column(db.ForeignKey(table_prefix + 'xenvm.virtualmachine_ptr_id'), nullable=False, index=True)
     # Relationships
     xenserver = db.relationship("XenServer", backref=db.backref("xenserver_vms", cascade="all, delete-orphan"))
     xenvm = db.relationship("XenVM", backref=db.backref("xenserver_associations", cascade="all, delete-orphan"))

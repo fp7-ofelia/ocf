@@ -368,8 +368,8 @@ class Ip4RangeIps(db.Model):
     __tablename__ = table_prefix + 'ip4range_ips'
 
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
-    ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
-    ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
+    ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False, index=True)
+    ip4range_id = db.Column(db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False, index=True)
 
     ip4range = db.relationship("Ip4Range", backref=db.backref("ip4range_ip4s", cascade="all, delete-orphan"))
     ip4slot = db.relationship("Ip4Slot", backref=db.backref("ip4_ip4range", cascade="all, delete-orphan"))

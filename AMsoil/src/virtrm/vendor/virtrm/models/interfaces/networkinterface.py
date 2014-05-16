@@ -24,7 +24,7 @@ class NetworkInterface(db.Model):
     '''Generic parameters'''
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     name = db.Column(db.String(128), nullable=False, default="")
-    mac_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
+    mac_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False, index=True)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
     ip4s = association_proxy("networkinterface_ip4s", "ip4slot", creator=lambda ip:NetworkInterfaceIp4s(ip4slot=ip))
     is_mgmt = db.Column("isMgmt", TINYINT(1), nullable=False, default=0)
@@ -260,8 +260,8 @@ class NetworkInterfaceIp4s(db.Model):
     __tablename__ = table_prefix + 'networkinterface_ip4s'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
-    ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False)
+    networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False, index=True)
+    ip4slot_id = db.Column(db.ForeignKey(table_prefix + 'ip4slot.id'), nullable=False, index=True)
 
     networkinterface = db.relationship("NetworkInterface", backref=db.backref("networkinterface_ip4s"))
     ip4slot = db.relationship("Ip4Slot", primaryjoin="Ip4Slot.id==NetworkInterfaceIp4s.ip4slot_id", backref=db.backref("networkinterface_associations_ips", cascade="all, delete-orphan"))

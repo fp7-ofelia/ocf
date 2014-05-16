@@ -15,9 +15,9 @@ class Ip4Slot(db.Model):
     table_prefix = config.get("virtrm.DATABASE_PREFIX")
     __tablename__ = table_prefix + 'ip4slot'
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
     ip = db.Column(db.String(15), nullable=False, default="")
-    ip_range_id = db.Column("ipRange_id", db.ForeignKey(table_prefix + 'ip4range.id'), nullable=False)
+    ip_range_id = db.Column("ipRange_id", db.ForeignKey(table_prefix + 'ip4range.id'), nullable=True, index=True)
     ip_range = association_proxy("ip4_ip4range", "ip4range")
     is_excluded = db.Column("isExcluded", TINYINT(1), nullable=False, default=0)
     comment = db.Column(db.String(1024), nullable=False, default="")

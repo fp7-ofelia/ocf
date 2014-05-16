@@ -290,8 +290,8 @@ class MacRangeMacs(db.Model):
     __tablename__ = table_prefix + 'macrange_macs'
 
     id = db.Column(db.Integer, autoincrement=True, nullable=False,primary_key=True)
-    macslot_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False)
-    macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False)
+    macslot_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False, index=True)
+    macrange_id = db.Column(db.ForeignKey(table_prefix + 'macrange.id'), nullable=False, index=True)
 
     macrange = db.relationship("MacRange", backref=db.backref("macrange_macslot", cascade="all, delete-orphan"))
     macslot = db.relationship("MacSlot", backref=db.backref("macslot_macrange", cascade="all, delete-orphan"))
