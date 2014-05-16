@@ -1,8 +1,10 @@
-import logging
 from controller import *
 from utils.xmlhelper import *
 from utils.servicethread import *
 from controller.dispatchers.launcher import DispatcherLauncher
+import amsoil.core.log
+
+logging = amsoil.core.log.getLogger('SouthCommInterface')
 
 def sendAsync(xml):
 	logging.debug("sendAsync launched")
