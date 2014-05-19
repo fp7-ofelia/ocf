@@ -18,6 +18,14 @@ GENIv3DelegateBase = pm.getService('geniv3delegatebase')
 geniv3_exception = pm.getService('geniv3exceptions')
 virt_exception = pm.getService('virtexceptions')
 
+# CONTAINER PREFIX FOR GENIv3 PLUGIN
+GENIv3_prefix = "GENIv3"
+
+# VIRTRM ACTIONS
+VIRTM_START = "start"
+VIRTRM_STOP = "stop"
+VIRTRM_RESTART = "restart"
+
 # METHOD ACTIONS TO UNDOO
 ACTION_ALLOCATE = "allocate"
 ACTION_PROVISIONING = "provisioning"
@@ -167,7 +175,7 @@ class VTDelegate3(GENIv3DelegateBase):
                     vm_urn = hrn_to_urn(vm_hrn, "sliver")
                     requested_vm["urn"] = vm_urn
                     # TODO CHECK VM DATA PROCESSING WITHIN RESOURCE MANAGE, slice_urnR
-                    allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
+                    allocated_vm = self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, GENIv3_prefix)
                     allocated_vms.append(allocated_vm)
                 # Translate the specific RM Exceptions into GENIv3 Exceptions
                 except Exception as e:
@@ -200,7 +208,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 if (self.urn_type(urn) == "slice"):
                     # If the URN is from a slice, get all the allocated
                     try:
-                        vms_in_container = self._resource_manager.get_allocated_vms_in_container(urn, "GENIv3")
+                        vms_in_container = self._resource_manager.get_allocated_vms_in_container(urn, GENIv3_prefix)
                     # Throw the Exception for every kind of error
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
@@ -222,7 +230,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 else:
                     renewed_vms.append(self._generate_error_entry(urn, str(e)))
         # If any resource is obtained, raise an error
-        if not vms:
+        if not vms and not renewed_vms:
             raise geniv3_exception.GENIv3SearchFailedError("There are no resources to renew. Perhaps they expired or the URN(s) is malformed.")
         for vm in vms:
             try:
@@ -262,7 +270,7 @@ class VTDelegate3(GENIv3DelegateBase):
                     # If the URN is from a slice, get all the allocated
                     try:
                         logging.debug("********************* TYPE SLICE")
-                        vms = self._resource_manager.get_allocated_vms_in_container(urn, "GENIv3")      
+                        vms = self._resource_manager.get_allocated_vms_in_container(urn, GENIv3_prefix)      
                         logging.debug("********************* VMS OBTAINED IN SLICE %s => %s" % (str(urn), str(vms)))
                     # Throw the Exception for every kind of error
                     except Exception as e:
@@ -287,7 +295,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 else:
                     provisioned_vms.append(self._generate_error_entry(urn, str(e)))
         # If any resource is obtained, raise an error
-        if not allocated_vms:
+        if not allocated_vms and not provisioned_vms:
             raise geniv3_exception.GENIv3SearchFailedError("There are no resources to provision. Perhaps they expired or the URN(s) is malformed.")   
         logging.debug("***************** ALL VMS OBTAINED, PROVISION THEM")
         # Once all the VMs are obtained, provision them
@@ -322,13 +330,13 @@ class VTDelegate3(GENIv3DelegateBase):
          #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
         vms = list()
         for urn in urns:
-            if (self.urn_type(urn) == 'slice'):
+            if self.urn_type(urn) == 'slice':
                 try:
-                    slice_vms = self._resource_manager.get_vms_in_container(urn, "GENIv3")
+                    slice_vms = self._resource_manager.get_vms_in_container(urn, GENIv3_prefix)
                     vms.extend(slice_vms)
                 except Exception as e:
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
-            elif (self.urn_type(urn) == 'sliver'):
+            elif self.urn_type(urn) == 'sliver':
                 try:
                     vm = self._resource_manager.get_vm_by_urn(urn)
                     vms.append(vm)
@@ -349,47 +357,66 @@ class VTDelegate3(GENIv3DelegateBase):
         return rspecs, slivers
     
     def perform_operational_action(self, urns, client_cert, credentials, action, best_effort):
-        # TODO: honor best_effort
+        provisioned_vms = list()
         vms = list()
         for urn in urns:
-            if (self.urn_type(urn) == 'slice'):
-                #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
-                slice_vms = self._resource_manager.get_vms_in_slice(urn)
-                if not slice_vms:
-                    raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
-                for vm in slice_vms:
-                    if (action == self.OPERATIONAL_ACTION_START):
-                        started_vm = self._resource_manager.start_vm(vm['name'])
-                        vms.extend(started_vm)
-                    elif (action == self.OPERATIONAL_ACTION_STOP):
-                        stopped_vm = self._resource_manager.stop_vm(vm['name'])
-                        vms.extend(stopped_vm)
-                    elif (action == self.OPERATIONAL_ACTION_RESTART):
-                        restarted_vm = self._resource_manager.restart_vm(vm['name'])        
-                        vms.extend(restarted_vm)
-                    else:
-                        raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
-            elif (self.urn_type(urn) == 'sliver'):     
-                if (action == self.OPERATIONAL_ACTION_START):
-                    vm = self._resource_manager.start_vm(urn)
-                    vms.extend(vm)
-                elif (action == self.OPERATIONAL_ACTION_STOP):
-                    vm = self._resource_manager.stop_vm(urn)
-                    vms.extend(vm)
-                elif (action == self.OPERATIONAL_ACTION_RESTART):
-                    vm = self._resource_manager.restart_vm(vm['name'])
-                    vms.extend(vm)
+            try:
+                if self.urn_type(urn) == 'slice':
+                    #client_urn, client_uuid, client_email = self.auth(client_cert, credentials, urn, ('sliverstatus',)) # authenticate for each given slice
+                    try:
+                        slice_vms = self._resource_manager.get_provisioned_vms_in_container(urn, GENIv3_prefix)
+                        provisioned_vms.extend(slice_vms)
+                    except Exception as e:
+                        raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
+                elif self.urn_type(urn) == 'sliver':
+                    try:
+                        provisioned_vm = self._resource_manager.get_vm_by_urn(urn)
+                        provisioned_vms.append(provisioned_vm)
+                    except Exception as e:
+                        raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
+                else:
+                    raise geniv3_exception.GENIv3BadArgsError("Urn has a type unable to create" % (urn,))
+            # If {best_effort = False} throw the given Exception
+            # If {best_effort = True} keep going 
+            except Exception as e:
+                if not best_effort:
+                    raise e
+                else:
+                    vms.append(self._generate_error_entry(urn, str(e)))
+        if not provisioned_vms and not vms:
+                raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
+        for provisioned_vm in provisioned_vms:
+            try:
+                if action == self.OPERATIONAL_ACTION_START:
+                    crud_action = VIRTRM_START
+                elif action == self.OPERATIONAL_ACTION_STOP:
+                    crud_action = VIRTRM_STOP
+                elif action == self.OPERATIONAL_ACTION_RESTART:
+                    crud_action = VIRTRM_RESTART
                 else:
                     raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
-            else:
-                raise geniv3_exception.GENIv3OperationUnsupportedError('Only slice or sliver URNs can be given in this aggregate')
-        sliver_list = list()
+                try:
+                    vm = self._resource_manager.crud_vm_by_urn(provisioned_vm['urn'], crud_action)
+                    vms.extend(vm)
+                except Exception as e:
+                    raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
+            except Exception as e:
+                if not best_effort:
+                    self._undo_action(vms, ACTION_PERFORM_ACTION)
+                    raise e
+                else:
+                    # First, try to let the failed VM on the previous state
+                    self._undo_action(provisioned_vm, ACTION_PERFORM_ACTION)
+                    # Then, generate the error entry
+                    provisioned_vm['error_message'] = str(e)
+                    vms.append(provisioned_vm)
+        # Once all the VMs are provisioned, generate the response
+        # Generate the JSON with the VMs information
+        slivers = list()
         for vm in vms:
-            if vm.has_key('error'):
-                silver_list.append(self._get_sliver_status_hash(vm, True, True, vm['error']))
-            else:
-                sliver_list.append(self._get_sliver_status_hash(vm, True, True))
-        return sliver_list
+            sliver = self._get_sliver_status_hash(vm, True)
+            slivers.append(sliver)
+        return slivers
     
     def delete(self, urns, client_cert, credentials, best_effort):
         """Documentation see [geniv3rpc] GENIv3DelegateBase."""
@@ -401,7 +428,7 @@ class VTDelegate3(GENIv3DelegateBase):
                 # If the urn is a slice urn, obtain all the VMs associated to it
                 if (self.urn_type(urn) == "slice"):
                     try:
-                        vms_in_slice = self._resource_manager.get_vms_in_container(urn, "GENIv3")
+                        vms_in_slice = self._resource_manager.get_vms_in_container(urn, GENIv3_prefix)
                     except Exception as e:
                         raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
                     vms.extend(copy.deepcopy(vms_in_slice))
@@ -526,6 +553,6 @@ class VTDelegate3(GENIv3DelegateBase):
                 # Then, try to allocate them to the previous state
                 try:
                     # TODO: Get the correct args
-                    self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, "GENIv3")
+                    self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, GENIv3_prefix)
                 except:
                     continue
