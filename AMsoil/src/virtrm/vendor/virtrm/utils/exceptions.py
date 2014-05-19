@@ -89,3 +89,11 @@ class VirtDeleteVMError(VirtException):
 class VirtDatabaseError(VirtException):
     def __init__(self):
         super(VirtDatabaseError, self).__init__("There is an error accessing to the database")
+
+class VirtUnsupportedAction(VirtException):
+    def __init__(self, action):
+        super(VirtUnsupportedAction, self).__init__("This action is not supported (%s)" % (action,))
+
+class VirtOperationalError(VirtException):
+    def __init__(self):
+        super(VirtOperationalError, self).__init__("An error ocurred during performing the action on the VM (%s)" % (uuid))

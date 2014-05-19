@@ -562,26 +562,41 @@ class VTResourceManager(object):
 #        return vm_results
     
     # VM status methods
-    def start_vm(self, vm_urn):
-        vm_hrn, type = urn_to_hrn(vm_urn)
-        vm_name = get_leaf(vm_hrn)
-        slice_name = get_leaf(get_authority(vm_hrn))
-        vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).first().get_child_object()
-        expiration = Expiration.query.get(vm.id).expiration
-        vm_id = vm.id
-        status = vm.status
-        #FIXME: This should not be done that way
-        xen_vm = db_session.query(XenVM).filter(XenVM.virtualmachine_ptr_id == vm_id).first()
-        server = xen_vm.xenserver_associations
-        server_uuid = server.uuid
-        db_session.expunge_all()
+    def crud_vm_by_urn(self, vm_urn):
+        try:
+            vm = self.get_vm_object_by_urn(vm_urn)
+            result_vm = self.crud_vm(vm)
+        except Exception as e:
+            raise e
+        return result_vm
+
+    def crud_vm(self, vm, action):
+        try:
+            vm_id = vm.get_id()
+            server_uuid = vm.get_server().get_uuid()
+        except Exception as e:
+            raise virt_exception.VirtDatabaseError()
+        try:
+            if action == "start":
+                self.start_vm()
+            elif action == "stop":
+                self.stop_vm()
+            elif action == "restart"
+                self.restart_vm()
+            else:
+                raise virt_exception.VirtUnsupportedAction(action)
+        except Exception as e:
+            raise e
+        result_vm = get_vm_info(vm)
+        return result_vm
+
+    def start_vm(self, vm_id, server_uuid):
         try:
             VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
-            return {'name':vm_urn, 'status':status, 'expiration':expiration}
         except Exception as e:
-            return {'name':vm_urn, 'status':status, 'expiration':expiration, 'error': 'Could not start the VM'}
+            raise virt_exception.VirtOperationalError(vm_id)
     
-    def pause_vm(self, vm_urn):
+    def pause_vm(self, vm_id, server_uuid):
         """
         Stores VM status in memory.
         Xen: xm pause <my_vm>
@@ -589,30 +604,17 @@ class VTResourceManager(object):
         """
         pass
     
-    def stop_vm(self, vm_urn=None, vm_name=None, slice_name=None):
-        if vm_urn and not (vm_name and slice_name):
-            vm_hrn, type = urn_to_hrn(vm_urn)
-            vm_name = get_leaf(vm_hrn)
-            slice_name = get_leaf(get_authority(vm_hrn))
-            vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-            expiration = Expiration.query.get(vm.id).one().expiration
+    def stop_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_STOP_TYPE)
-            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration}
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
         except Exception as e:
-            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration, 'error': 'Could not stop the VM'}
+            raise virt_exception.VirtOperationalError(vm_id)
     
-    def restart_vm(self, vm_urn):
-        vm_hrn, type = urn_to_hrn(vm_urn)
-        vm_name = get_leaf(vm_hrn)
-        slice_name = get_leaf(get_authority(vm_hrn))
-        vm = VirtualMachine.query.filter_by(name=vm_name).filter_by(slice_name=slice_name).one().get_child_object()
-        expiration = Expiration.query.get(vm.id).one().expiration
+    def restart_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm.id, vm.xenserver.uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
-            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration}
+            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
         except Exception as e:
-            return {'name':vm_urn, 'status':vm.status, 'expiration':expiration, 'error': 'Could not Restart the VM'}
+            raise virt_exception.VirtOperationalError(vm_id)
     
     def delete_vm_by_uuid(self, vm_uuid):
         logging.debug("********** DELETING VM WITH UUID %s..." % vm_uuid)
@@ -694,35 +696,6 @@ class VTResourceManager(object):
         """
         pass
     
-    # XXX Check
-    def start_vms_in_slice(self, slice_urn):
-        slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
-        started_vms = list()
-        for vm in vms:
-            started_vms.append(self.start_vm(None, vm.name, vm.slice_name))
-        db_session.expunge_all()
-        return started_vms
-    
-    def stop_vms_in_slice(self, slice_urn):
-        slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
-        stopped_vms = list()
-        for vm in vms:
-            stopped_vms.append(self.stop_vm(None, vm.name, vm.slice_name))
-        db_session.expunge_all()
-        return stopped_vms
-    
-    # XXX Check
-    def restart_vms_in_slice(self, slice_urn):
-        slice_name = get_leaf(urn_to_hrn(slice_urn)[0])
-        vms = db_session.query(VirtualMachine).filter(VirtualMachine.slice_name == slice_name).all()
-        restarted_vms = list()
-        for vm in vms:
-            restarted_vms.append(self.restart_vm(None, vm.name, vm.slice_name))
-        db_session.expunge_all()
-        return restarted_vms
-
     def check_project_exists(self, project_name):
         '''
         Check if any VM exists with the given project name and return the related UUID.
