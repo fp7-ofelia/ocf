@@ -66,7 +66,7 @@ def run_migrations_online():
                 )
     #This code will avoid the deletion of some database tables
     #XXX: Ugly, put this list in some setting
-    target_metadata.reflect(engine, only=['auth_group', 'auth_group_permissions', 'auth_message', 'auth_permission', 'auth_user', 'auth_user_groups', 'auth_user_user_permissions', 'django_admin_log', 'django_content_type', 'django_evolution', 'django_project_version', 'django_session', 'django_site', 'pypelib_RuleModel', 'pypelib_RuleTableModel', 'registration_registrationprofile'])
+    target_metadata.reflect(engine, only=['auth_group', 'auth_group_permissions', 'auth_message', 'auth_permission', 'auth_user', 'auth_user_groups', 'auth_user_user_permissions', 'django_admin_log', 'django_content_type', 'django_evolution', 'django_project_version', 'django_session', 'django_site', 'pypelib_RuleModel', 'pypelib_RuleTableModel', 'registration_registrationprofile', 'vt_manager_expiringcomponents'])
     try:
         with context.begin_transaction():
             context.run_migrations()
