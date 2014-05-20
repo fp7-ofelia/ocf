@@ -581,7 +581,7 @@ class VTResourceManager(object):
                 self.start_vm()
             elif action == "stop":
                 self.stop_vm()
-            elif action == "restart"
+            elif action == "restart":
                 self.restart_vm()
             else:
                 raise virt_exception.VirtUnsupportedAction(action)
