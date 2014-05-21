@@ -34,7 +34,7 @@ class VirtualMachine(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String(512), nullable=False, default="")
     uuid = db.Column(db.String(1024), nullable=False, default=uuid.uuid4())
-    memory_mb = db.Column("memory_mb", db.Integer, nullable=True)
+    memory_mb = db.Column("memory", db.Integer, nullable=True)
     number_of_cpus = db.Column("numberOfCPUs", db.Integer, nullable=True)
     disc_space_gb = db.Column("discSpaceGB", DOUBLE, nullable=True)
     urn = db.Column(db.String(1024), nullable=True)
